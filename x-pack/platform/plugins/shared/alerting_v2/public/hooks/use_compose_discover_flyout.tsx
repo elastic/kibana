@@ -57,7 +57,10 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
     // this synthetic draft that never gets serialised back to the server directly.
     signature_id: template.rule.metadata.signature_id ?? '',
     revision: 0,
-    source: template.rule.metadata.source ?? { type: 'internal' as const, version: 1 },
+    // Stamp template lineage so the synthetic draft reflects the actual source
+    // the create payload will carry. The rule's content version starts at 1 for
+    // a freshly-created rule regardless of the template's own version.
+    source: { type: 'template' as const, id: template.id, version: 1 },
     // Step 4.4: ownership is server-derived; a template is a create payload so it
     // carries no ownership — default to { managed: false } for this synthetic draft.
     ownership: { managed: false } as const,
@@ -324,9 +327,24 @@ export const useComposeDiscoverFlyout = ({
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
       onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
-      onCreateRule={(payload) =>
-        createRuleMutation.mutate({ payload, templateId }, { onSuccess: closeAndRedirect })
-      }
+      onCreateRule={(payload) => {
+        // Stamp the template source when the flyout was opened from a template.
+        // composeFormToCreateRequest never includes metadata.source, so the
+        // server would otherwise default the rule to { type: 'internal' }.
+        const payloadWithSource = templateId
+          ? {
+              ...payload,
+              metadata: {
+                ...payload.metadata,
+                source: { type: 'template' as const, id: templateId, version: 1 },
+              },
+            }
+          : payload;
+        createRuleMutation.mutate(
+          { payload: payloadWithSource, templateId },
+          { onSuccess: closeAndRedirect }
+        );
+      }}
       onUpdateRule={(id, payload) =>
         updateRuleMutation.mutate({ id, payload }, { onSuccess: () => hideFlyout() })
       }

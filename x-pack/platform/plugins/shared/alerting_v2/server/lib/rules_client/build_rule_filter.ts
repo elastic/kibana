@@ -13,6 +13,20 @@ import { createSoFilterBuilder } from '../build_so_filter';
 /**
  * Translates a clean API rule filter string into a saved-object KQL filter.
  *
+ * `metadata.builder_fields.*` paths are accepted via a prefix rule: any field
+ * of the form `metadata.builder_fields.<sub-field>` (where `<sub-field>` is at
+ * least one character) maps to the corresponding SO attribute path. The
+ * `flattened` mapping type supports keyword queries on any sub-path, including
+ * paths without explicit typed sub-field declarations, so this does not risk
+ * throwing a mapping error. The trade-off is that a misspelled sub-field path
+ * silently returns 0 results, the same behaviour as filtering any keyword
+ * field for a non-existent value.
+ *
+ * Ref: rule-identity.md "Storage and migration" (signature_id)
+ *      rule-source.md "Storage and migration" (source.*)
+ *      rule-ownership.md "Storage, mapping, and migration" (ownership.*)
+ *      rule-types.md "The discriminator must be indexed and filterable" (builder_type)
+ *
  * @example
  * buildRuleSoFilter('kind: signal')
  * // → 'alerting_rule.attributes.kind: signal'
@@ -34,6 +48,18 @@ export const buildRuleSoFilter = createSoFilterBuilder({
     'metadata.description': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.description`,
     'metadata.tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
     'metadata.routing_tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.routing_tags`,
+    // Phase 4 fields — all indexed in model version '10'.
+    'metadata.signature_id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.signature_id`,
+    'metadata.source.type': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.source.type`,
+    'metadata.source.id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.source.id`,
+    'metadata.source.version': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.source.version`,
+    'metadata.ownership.managed': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.managed`,
+    'metadata.ownership.solution': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.solution`,
+    'metadata.ownership.domain': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.domain`,
+    'metadata.builder_type': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.builder_type`,
+  },
+  fieldPrefixMap: {
+    'metadata.builder_fields.': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.builder_fields.`,
   },
 });
 

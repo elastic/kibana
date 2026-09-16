@@ -29,7 +29,14 @@ const baseRuleResponse: RuleResponse = {
   kind: 'alert',
   enabled: true,
   version: 1,
-  metadata: { name: 'Test Rule', signature_id: 'test-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 }, tags: ['tag1'], ownership: { managed: false } },
+  metadata: {
+    name: 'Test Rule',
+    signature_id: 'test-sig-id',
+    revision: 0,
+    source: { type: 'internal' as const, version: 1 },
+    tags: ['tag1'],
+    ownership: { managed: false },
+  },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '2m' },
   query: {
