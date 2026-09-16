@@ -215,7 +215,16 @@ describe('search_bar', () => {
       submit: jest.fn(),
       onIndexPatternSelected: jest.fn(),
       currentDatasource: undefined,
-      selectedFields: [],
+      selectedFields: [
+        {
+          name: 'field1',
+          color: 'black',
+          icon: { id: 'a', package: 'eui', label: '', prevName: '' },
+          selected: true,
+          type: 'string',
+          aggregatable: true,
+        },
+      ],
     });
 
     expect(await screen.findByTestId('graph-explore-button')).toBeDisabled();
@@ -224,6 +233,7 @@ describe('search_bar', () => {
   it('should disable the graph button when no field is configured', async () => {
     renderSearchBarComponent({
       ...defaultProps,
+      currentIndexPattern: createStubDataView({ spec: { fields: {}, name: 'Test Name' } }),
       submit: jest.fn(),
       onIndexPatternSelected: jest.fn(),
       currentDatasource: {
