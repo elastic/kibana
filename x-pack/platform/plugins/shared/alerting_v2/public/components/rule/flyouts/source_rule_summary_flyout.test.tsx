@@ -25,7 +25,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/actions/tags_overflow_badge_r
   ),
 }));
 
-jest.mock('../../rule_details/sidebar/rule_details_table', () => ({
+jest.mock('../rule_details_table', () => ({
   RuleDetailsTable: ({
     items,
   }: {
@@ -41,7 +41,7 @@ jest.mock('../../rule_details/sidebar/rule_details_table', () => ({
   ),
 }));
 
-jest.mock('./take_action_button', () => ({
+jest.mock('../../action_policy/details_flyout/take_action_button', () => ({
   TakeActionButton: ({ onClick }: { onClick: () => void }) => (
     <button data-test-subj="mockTakeActionButton" onClick={onClick}>
       Take action
@@ -143,7 +143,6 @@ describe('SourceRuleSummaryFlyout', () => {
       'href',
       '/app/management/insightsAndAlerting/triggersActions/rule/rule-1'
     );
-    expect(menuItem).toHaveAttribute('target', '_blank');
   });
 
   it('does not render View details menu item when href is null', () => {

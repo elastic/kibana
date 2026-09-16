@@ -35,8 +35,8 @@ import {
   getTagsOverflowLimits,
 } from '@kbn/alerting-v2-episodes-ui/components/actions/tags_overflow_badge_row';
 import { EMPTY_VALUE } from '@kbn/alerting-v2-episodes-ui/constants';
-import { TakeActionButton } from './take_action_button';
-import { RuleDetailsTable } from '../../rule_details/sidebar/rule_details_table';
+import { TakeActionButton } from '../../action_policy/details_flyout/take_action_button';
+import { RuleDetailsTable } from '../rule_details_table';
 
 const FLYOUT_TITLE_ID = 'sourceRuleSummaryFlyoutTitle';
 
@@ -330,7 +330,6 @@ export const SourceRuleSummaryFlyout = ({
                             key="viewDetails"
                             icon="eye"
                             href={ruleDetailsHref}
-                            target="_blank"
                             data-test-subj="sourceRuleSummaryFlyoutViewDetailsAction"
                           >
                             <FormattedMessage
