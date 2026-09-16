@@ -70,6 +70,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/test'
   - '@kbn/ui-callout'
+  - '@kbn/response-ops-alerts-apis'
 tags:
   - shared-browser
   - package

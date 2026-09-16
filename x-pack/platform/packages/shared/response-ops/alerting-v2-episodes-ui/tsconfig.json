@@ -59,6 +59,7 @@
     "@kbn/rule-registry-plugin",
     "@kbn/tooling-log",
     "@kbn/test",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/response-ops-alerts-apis"
   ]
 }

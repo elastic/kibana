@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/285223
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Improve risk scoring performance by caching entity identifiers on alerts
+description: Entity unique identifiers are now stored on alerts at enrichment time instead of being recomputed on every risk scoring aggregation, significantly reducing processing time under load.
