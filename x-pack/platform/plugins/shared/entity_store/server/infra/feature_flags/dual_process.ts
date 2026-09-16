@@ -6,7 +6,7 @@
  */
 
 import type { Subject } from 'rxjs';
-import { pairwise, concatMap, takeUntil } from 'rxjs/operators';
+import { pairwise, concatMap, takeUntil } from 'rxjs';
 import type { CoreStart, FeatureFlagsStart, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { FF_DUAL_PROCESS_ENABLED } from '../../../common';
