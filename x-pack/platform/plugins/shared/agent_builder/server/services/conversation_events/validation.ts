@@ -7,7 +7,11 @@
 
 import { createBadRequestError, isBuiltInConversationEventType } from '@kbn/agent-builder-common';
 
-import type { ConversationEventsServiceStart, ConversationEventAddInput, ValidatedConversationEventAddInput } from './types';
+import type {
+  ConversationEventsServiceStart,
+  ConversationEventAddInput,
+  ValidatedConversationEventAddInput,
+} from './types';
 
 const validateEvent =
   (registry: Pick<ConversationEventsServiceStart, 'getDefinition'>) =>

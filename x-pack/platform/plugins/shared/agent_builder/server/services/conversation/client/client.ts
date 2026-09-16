@@ -106,8 +106,11 @@ import {
   type Document,
 } from './converters';
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
-import type { ConversationEventsServiceStart, ConversationEventAddInput } from '../../conversation_events';
-import {  
+import type {
+  ConversationEventsServiceStart,
+  ConversationEventAddInput,
+} from '../../conversation_events';
+import {
   materializeConversationEvents,
   validateConversationEvents,
 } from '../../conversation_events';
@@ -144,7 +147,10 @@ export interface ConversationClient {
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  addEvents(request: { id: string; events: ConversationEventAddInput[] }): Promise<ConversationEvent[]>;
+  addEvents(request: {
+    id: string;
+    events: ConversationEventAddInput[];
+  }): Promise<ConversationEvent[]>;
   replaceRoundEvents(
     request: ReplaceRoundEventsRequest,
     options?: { access: ConversationAccess }

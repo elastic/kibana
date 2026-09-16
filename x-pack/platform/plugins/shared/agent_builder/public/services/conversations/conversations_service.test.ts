@@ -55,10 +55,9 @@ describe('ConversationsService', () => {
       events: [event],
     });
 
-    expect(post).toHaveBeenCalledWith(
-      `${publicApiPath}/conversations/conv-1/_add_events`,
-      { body: JSON.stringify({ events: [event] }) }
-    );
+    expect(post).toHaveBeenCalledWith(`${publicApiPath}/conversations/conv-1/_add_events`, {
+      body: JSON.stringify({ events: [event] }),
+    });
     expect(result).toEqual(responseBody);
   });
 

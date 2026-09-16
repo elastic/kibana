@@ -165,7 +165,9 @@ export class ConversationsService {
   async addEvents({
     conversationId,
     events,
-  }: AddConversationEventsRequestBody & { conversationId: string }): Promise<AddConversationEventsResponse> {
+  }: AddConversationEventsRequestBody & {
+    conversationId: string;
+  }): Promise<AddConversationEventsResponse> {
     return await this.http.post<AddConversationEventsResponse>(
       buildPath(`${publicApiPath}/conversations/{conversationId}/_add_events`, { conversationId }),
       { body: JSON.stringify({ events }) }

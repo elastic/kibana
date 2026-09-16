@@ -1496,7 +1496,7 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
-      conversationEvents: mockConversationEvents,
+        conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
       });
 
@@ -1574,7 +1574,7 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
-      conversationEvents: mockConversationEvents,
+        conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
       });
 
@@ -2412,7 +2412,7 @@ describe('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
-      conversationEvents: mockConversationEvents,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
@@ -2441,7 +2441,7 @@ describe('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
-      conversationEvents: mockConversationEvents,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
@@ -2472,7 +2472,7 @@ describe('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
-      conversationEvents: mockConversationEvents,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
@@ -2497,7 +2497,7 @@ describe('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
-      conversationEvents: mockConversationEvents,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
@@ -2936,7 +2936,7 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
-      conversationEvents: mockConversationEvents,
+        conversationEvents: mockConversationEvents,
         user: {
           id: 'admin-user-id',
           username: 'admin-user',
@@ -3364,15 +3364,12 @@ describe('ConversationClient', () => {
   });
 
   describe('addEvents', () => {
-
     beforeEach(() => {
       (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(exampleNoteEventType);
     });
 
     it('calls appendEvents with access converse and returns materialized events', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({ schemaVersion: 1, events: [] })
-      );
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
       const result = await client.addEvents({

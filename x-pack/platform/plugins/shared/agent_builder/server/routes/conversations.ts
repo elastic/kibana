@@ -26,7 +26,6 @@ import { createConversationPublicClient } from '../services/conversation/convers
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
-  AddConversationEventsRequestBody,
   AddConversationEventsResponse,
   GetConversationResponse,
   ListConversationsResponse,
@@ -567,15 +566,16 @@ export function registerConversationRoutes({
                 {
                   minSize: 1,
                   maxSize: MAX_EVENTS_PER_REQUEST,
-                  meta: { description: `Events to append. Between 1 and ${MAX_EVENTS_PER_REQUEST}.` },
+                  meta: {
+                    description: `Events to append. Between 1 and ${MAX_EVENTS_PER_REQUEST}.`,
+                  },
                 }
               ),
             }),
           },
         },
         options: {
-          oasOperationObject: () =>
-            path.join(__dirname, 'examples/conversations_add_events.yaml'),
+          oasOperationObject: () => path.join(__dirname, 'examples/conversations_add_events.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

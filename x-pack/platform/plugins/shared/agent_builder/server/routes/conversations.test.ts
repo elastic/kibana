@@ -789,7 +789,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
     };
     const materializedEvents = [
       {
-        id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',        
+        id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
         created_at: '2026-09-14T10:00:00.000Z',
         actor: { type: 'user', id: 'u_profile_1', username: 'alice' },
         ...testEvent,
@@ -858,7 +858,9 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
     it('accepts data with arbitrary extra keys (opaque payload)', () => {
       expect(() =>
         getBodySchema().validate({
-          events: [{ type: 'example.note', data: { text: 'test', a: 1, b: 'two', c: { nested: true } } }],
+          events: [
+            { type: 'example.note', data: { text: 'test', a: 1, b: 'two', c: { nested: true } } },
+          ],
         })
       ).not.toThrow();
     });

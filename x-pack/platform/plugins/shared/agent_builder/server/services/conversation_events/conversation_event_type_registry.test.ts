@@ -25,7 +25,7 @@ describe('createConversationEventTypeRegistry', () => {
 
     expect(registry.get('security.alert_triaged')).toBe(alertDefinition);
   });
-  
+
   it('reports registration via has', () => {
     const registry = createConversationEventTypeRegistry();
     expect(registry.has('security.alert_triaged')).toBe(false);
