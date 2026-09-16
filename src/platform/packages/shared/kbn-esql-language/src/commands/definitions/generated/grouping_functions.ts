@@ -3694,6 +3694,7 @@ const bucketDefinition: FunctionDefinition = {
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
     'FROM employees\n| STATS s1 = b1 + 1, s2 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)\n| SORT b1, b2\n| KEEP s1, b1, s2, b2',
     'FROM employees\n| STATS dates = MV_SORT(VALUES(birth_date)) BY b = BUCKET(birth_date + 1 HOUR, 1 YEAR) - 1 HOUR\n| EVAL d_count = MV_COUNT(dates)',
+    'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS count = COUNT(responseTime, bucket) BY bucket = BUCKET(responseTime, 1)\n| SORT RANGE_MIN(bucket)',
   ],
 };
 
