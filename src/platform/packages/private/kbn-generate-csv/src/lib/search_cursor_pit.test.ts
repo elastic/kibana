@@ -221,7 +221,7 @@ describe('CSV Export Search Cursor', () => {
         logger
       );
       await expect(cursor.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to get PIT for index pattern: test-index-pattern-string, no errors were thrown"`
+        `"Unable to get PIT for index pattern: [test-index-pattern-string], no errors were thrown"`
       );
     });
   });
