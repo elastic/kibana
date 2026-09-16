@@ -12,6 +12,7 @@ import path from 'node:path';
 import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
+import { z } from '@kbn/zod/v4';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -19,6 +20,23 @@ import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
+
+const mcpToolOutputSchema = z.object({
+  results: z
+    .array(
+      z.object({
+        tool_result_id: z.string(),
+        type: z.string(),
+        data: z.union([z.looseObject({}), z.array(z.unknown())]),
+      })
+    )
+    .optional()
+    .describe('Results returned by the executed Agent Builder tool.'),
+  prompt: z
+    .looseObject({})
+    .optional()
+    .describe('An interactive prompt returned instead of results, when applicable.'),
+});
 
 export function filterToolsByNamespace(
   tools: InternalToolDefinition[],
@@ -130,6 +148,7 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
               {
                 description: tool.description,
                 inputSchema: toolSchema.shape,
+                outputSchema: mcpToolOutputSchema.shape,
                 annotations: tool.annotations,
               },
               async (args: { [x: string]: any }) => {
@@ -140,6 +159,7 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
                 });
                 return {
                   content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
+                  structuredContent: { ...toolResult },
                 };
               }
             );

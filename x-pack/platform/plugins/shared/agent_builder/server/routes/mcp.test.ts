@@ -182,7 +182,9 @@ describe('MCP route — registerTool arguments', () => {
 
     const mockRegistry = {
       list: jest.fn().mockResolvedValue([annotatedTool, unannotatedTool, excludedTool]),
-      execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
+      execute: jest.fn().mockResolvedValue({
+        results: [{ tool_result_id: 'result-1', type: 'other', data: {} }],
+      }),
     };
     const getInternalServices = jest.fn().mockReturnValue({
       tools: { getRegistry: jest.fn().mockResolvedValue(mockRegistry) },
@@ -235,7 +237,26 @@ describe('MCP route — registerTool arguments', () => {
     const [, config, callback] = annotatedCall!;
     expect(config.annotations).toEqual(mockAnnotations);
     expect(config.description).toBe('Tool platform.core.list_indices');
+    expect(Object.keys(config.outputSchema)).toEqual(['results', 'prompt']);
     expect(typeof callback).toBe('function');
+  });
+
+  it('returns structured content while retaining the text response', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+
+    const annotatedCall = mockRegisterTool.mock.calls.find(
+      (call: any[]) => call[0] === 'platform_core_list_indices'
+    );
+    expect(annotatedCall).toBeDefined();
+    const [, , callback] = annotatedCall!;
+
+    const toolResult = {
+      results: [{ tool_result_id: 'result-1', type: 'other', data: {} }],
+    };
+    await expect(callback({})).resolves.toEqual({
+      content: [{ type: 'text', text: JSON.stringify(toolResult) }],
+      structuredContent: toolResult,
+    });
   });
 
   it('passes undefined annotations when tool has none', async () => {
@@ -299,6 +320,15 @@ describe('MCP route — real SDK tool registration', () => {
         {
           description: 'with annotations',
           inputSchema: {},
+          outputSchema: {
+            results: z.array(
+              z.object({
+                tool_result_id: z.string(),
+                type: z.string(),
+                data: z.union([z.looseObject({}), z.array(z.unknown())]),
+              })
+            ),
+          },
           annotations: {
             title: 'My Tool',
             readOnlyHint: true,
