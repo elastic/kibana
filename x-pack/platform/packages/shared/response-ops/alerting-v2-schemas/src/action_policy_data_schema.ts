@@ -223,10 +223,9 @@ export const updateActionPolicyDataSchema = z
       .describe('A description of the action policy.'),
     destinations: z
       .array(actionPolicyDestinationSchema)
-      .min(1, 'At least one destination must be provided')
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .optional()
-      .describe('The list of destinations. At least one is required.'),
+      .describe('The list of destinations. May be empty for a disabled action policy.'),
     matcher: z
       .string()
       .max(MAX_KQL_LENGTH)
@@ -248,15 +247,36 @@ export const updateActionPolicyDataSchema = z
       .optional()
       .nullable()
       .describe('The throttle configuration for notifications.'),
+    enabled: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether the action policy is enabled. Cannot be true without at least one destination.'
+      ),
   })
   .strict()
   .check((payload) => {
-    if (payload.value.throttle === null || payload.value.throttle === undefined) return;
-    if (payload.value.grouping_mode === undefined) {
+    if (payload.value.throttle === null || payload.value.throttle === undefined) {
+      // continue to enabled check below
+    } else if (payload.value.grouping_mode === undefined) {
       validateStrategyInterval(payload);
-      return;
+    } else {
+      validateGroupingModeAndStrategy(payload);
     }
-    validateGroupingModeAndStrategy(payload);
+
+    const destinations = payload.value.destinations;
+    if (
+      payload.value.enabled === true &&
+      destinations !== undefined &&
+      destinations.length === 0
+    ) {
+      payload.issues.push({
+        code: 'custom',
+        message: 'An action policy cannot be enabled without at least one destination',
+        path: ['enabled'],
+        input: payload.value,
+      });
+    }
   });
 
 export type UpdateActionPolicyData = z.infer<typeof updateActionPolicyDataSchema>;

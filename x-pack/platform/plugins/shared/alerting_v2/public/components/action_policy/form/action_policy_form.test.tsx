@@ -7,7 +7,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -18,12 +18,16 @@ import type { ActionPolicyFormState } from './types';
 const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
+const mockBasePathPrepend = jest.fn((path: string) => path);
 let mockWorkflowsEnabled = true;
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
       return { getUrlForApp: mockGetUrlForApp };
+    }
+    if (token === 'http') {
+      return { basePath: { prepend: mockBasePathPrepend } };
     }
     if (token === 'uiSettings') {
       return { get: () => mockWorkflowsEnabled };
@@ -53,6 +57,7 @@ const INLINE_DEFS = [
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+  getDefaultInlineActionStepDefinition: () => INLINE_DEFS[0],
   InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
     <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
   ),
@@ -92,12 +97,39 @@ jest.mock('../../../hooks/use_fetch_tags', () => ({
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
-    data: { results: [], total: 0, page: 1, size: 100 },
+    data: {
+      results: [
+        {
+          id: 'wf-1',
+          name: 'Test Workflow',
+          description: '',
+          enabled: true,
+          definition: null,
+          createdAt: '',
+          history: [],
+          valid: true,
+        },
+      ],
+      total: 1,
+      page: 1,
+      size: 100,
+    },
     isLoading: false,
   }),
 }));
 
-const renderForm = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) => {
+jest.mock('../../../hooks/use_fetch_workflow', () => ({
+  useFetchWorkflow: () => ({
+    data: undefined,
+    isLoading: false,
+    isFetching: false,
+  }),
+}));
+
+const renderForm = (
+  defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,
+  variant: 'full' | 'essential' = 'full'
+) => {
   const TestComponent = () => {
     const methods = useForm<ActionPolicyFormState>({
       mode: 'onBlur',
@@ -107,7 +139,7 @@ const renderForm = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) =
     return (
       <I18nProvider>
         <FormProvider {...methods}>
-          <ActionPolicyForm />
+          <ActionPolicyForm variant={variant} />
         </FormProvider>
       </I18nProvider>
     );
@@ -130,9 +162,69 @@ describe('ActionPolicyForm', () => {
     jest.clearAllMocks();
   });
 
-  it('renders tags input', () => {
+  it('renders name and description inputs', () => {
     renderForm();
-    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
+    expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('descriptionInput')).toBeInTheDocument();
+  });
+
+  it('renders policy scope with rule tags, live summary, and collapsed advanced matching', () => {
+    renderForm();
+
+    expect(screen.getByTestId('policyScopeSummary')).toHaveTextContent(
+      'Applies to all episodes in the space.'
+    );
+    expect(screen.getByTestId('essentialRuleTagsInput')).toBeInTheDocument();
+    const advancedMatching = screen.getByTestId('policyScopeAdvancedMatching');
+    expect(advancedMatching).toBeInTheDocument();
+    expect(within(advancedMatching).getByRole('button')).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByTestId('quickFilterTags')).not.toBeInTheDocument();
+  });
+
+  it('updates the policy scope summary when rule tags are selected', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    const tagsCombo = screen.getByTestId('essentialRuleTagsInput');
+    const comboInput = within(tagsCombo).getByRole('combobox');
+    await user.click(comboInput);
+    await user.type(comboInput, 'production');
+    await user.keyboard('{Enter}');
+
+    expect(screen.getByTestId('policyScopeSummary')).toHaveTextContent(
+      'Applies to alerts from rules with any of these tags: production.'
+    );
+  });
+
+  it('opens Advanced matching with the KQL matcher when advanced conditions exist', () => {
+    renderForm({
+      ...DEFAULT_FORM_STATE,
+      matcher: 'data.severity : "critical"',
+    });
+
+    expect(screen.getByTestId('policyScopeSummary')).toHaveTextContent(
+      'Applies to episodes that match the advanced conditions.'
+    );
+    const advancedMatching = screen.getByTestId('policyScopeAdvancedMatching');
+    expect(within(advancedMatching).getByRole('button')).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('matcherInput')).toHaveValue('data.severity : "critical"');
+  });
+
+  it('renders essential variant with name, rule tags, and workflows', () => {
+    renderForm(
+      {
+        ...DEFAULT_FORM_STATE,
+        matcher: 'rule.tags : "production"',
+      },
+      'essential'
+    );
+    expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('essentialRuleTagsInput')).toBeInTheDocument();
+    expect(screen.queryByTestId('essentialActionPolicyDefaultsCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('descriptionInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('matcherInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('groupingModeToggle')).not.toBeInTheDocument();
+    expect(screen.getByTestId('createDestinationButton')).toBeInTheDocument();
   });
 
   it('shows required errors for name on blur', async () => {
@@ -267,15 +359,35 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
   });
 
-  it('renders create workflow link when workflows are enabled', () => {
+  it('offers create destination button and create-workflow option in Destinations combo', async () => {
+    const user = userEvent.setup();
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+
     renderForm();
 
-    expect(screen.getByTestId('createWorkflowLink')).toBeInTheDocument();
-    expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute(
-      'href',
-      '/app/workflows/create'
+    expect(screen.getByTestId('createDestinationButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('createDestinationMenuButton')).not.toBeInTheDocument();
+
+    const destinationsCombo = screen.getByTestId('destinationsInput');
+    await user.click(within(destinationsCombo).getByRole('combobox'));
+    await user.click(await screen.findByRole('option', { name: 'Create a workflow' }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      '/app/workflows/create',
+      '_blank',
+      'noopener,noreferrer'
     );
-    expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute('target', '_blank');
+    openSpy.mockRestore();
+  });
+
+  it('creates an email notification draft from the create destination button', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByTestId('createDestinationButton'));
+
+    expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Email notification')).toBeInTheDocument();
   });
 
   it('renders warning callout when workflows are disabled', () => {
@@ -288,18 +400,17 @@ describe('ActionPolicyForm', () => {
     expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
   });
 
-  it('renders the simple workflow builder add buttons when workflows are enabled', () => {
+  it('renders destination create entry points when workflows are enabled', () => {
     renderForm();
 
-    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
-    expect(screen.getByTestId('simpleWorkflowAdd-email')).toBeInTheDocument();
-    expect(screen.getByTestId('simpleWorkflowAdd-slack')).toBeInTheDocument();
+    expect(screen.getByTestId('createDestinationButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('destinationCards')).not.toBeInTheDocument();
   });
 
-  it('hides the simple workflow builder when workflows are disabled', () => {
+  it('hides destination create entry points when workflows are disabled', () => {
     mockWorkflowsEnabled = false;
     renderForm();
 
-    expect(screen.queryByTestId('simpleWorkflowBuilder')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createDestinationButton')).not.toBeInTheDocument();
   });
 });

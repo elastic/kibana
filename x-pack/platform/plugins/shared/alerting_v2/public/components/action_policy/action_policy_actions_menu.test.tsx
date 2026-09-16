@@ -72,13 +72,53 @@ describe('ActionPolicyActionsMenu', () => {
 
   describe('item data-test-subj', () => {
     it('renders items with policy-scoped test subjects', () => {
-      renderMenu({ onEdit: jest.fn(), onEnable: jest.fn(), onDisable: jest.fn() });
+      renderMenu({
+        policy: createPolicy({ destinations: [{ type: 'workflow', id: 'wf-1' }] }),
+        onEdit: jest.fn(),
+        onEnable: jest.fn(),
+        onDisable: jest.fn(),
+      });
       openMenu();
       expect(screen.getByTestId('editActionPolicy-policy-1')).toBeInTheDocument();
       expect(screen.getByTestId('cloneActionPolicy-policy-1')).toBeInTheDocument();
       expect(screen.getByTestId('toggleEnabledActionPolicy-policy-1')).toBeInTheDocument();
       expect(screen.getByTestId('updateApiKeyActionPolicy-policy-1')).toBeInTheDocument();
       expect(screen.getByTestId('deleteActionPolicy-policy-1')).toBeInTheDocument();
+    });
+  });
+
+  describe('enable / disable', () => {
+    it('disables Enable when the policy has no destinations', () => {
+      renderMenu({
+        policy: createPolicy({ enabled: false, destinations: [] }),
+        onEnable: jest.fn(),
+        onDisable: jest.fn(),
+      });
+      openMenu();
+      expect(screen.getByTestId('toggleEnabledActionPolicy-policy-1')).toBeDisabled();
+    });
+
+    it('keeps Disable available when the policy is enabled without destinations', () => {
+      renderMenu({
+        policy: createPolicy({ enabled: true, destinations: [] }),
+        onEnable: jest.fn(),
+        onDisable: jest.fn(),
+      });
+      openMenu();
+      expect(screen.getByTestId('toggleEnabledActionPolicy-policy-1')).toBeEnabled();
+    });
+
+    it('allows Enable when the policy has destinations', () => {
+      renderMenu({
+        policy: createPolicy({
+          enabled: false,
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+        }),
+        onEnable: jest.fn(),
+        onDisable: jest.fn(),
+      });
+      openMenu();
+      expect(screen.getByTestId('toggleEnabledActionPolicy-policy-1')).toBeEnabled();
     });
   });
 

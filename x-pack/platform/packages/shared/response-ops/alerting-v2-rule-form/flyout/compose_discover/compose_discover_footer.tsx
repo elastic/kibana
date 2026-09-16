@@ -13,6 +13,7 @@ import type { ComposeDiscoverAction, ComposeDiscoverState, StepDefinition } from
 import { isAlertConditionStepId, isBuilderConditionStepId } from './types';
 import type { FormValues } from '../../form/types';
 import { isCommittedQueryValid } from './validation/committed_query_validation';
+import { useCreateActionPolicySecondaryFlyout } from './create_action_policy_secondary_flyout_context';
 
 const CREATE_RULE_BUTTON_LABEL = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.createButtonLabel',
@@ -80,6 +81,7 @@ export const ComposeDiscoverFooter = ({
   onFinalSubmit,
   onYamlSave,
 }: ComposeDiscoverFooterProps): React.ReactElement => {
+  const { isOpen: isCreateActionPolicyOpen } = useCreateActionPolicySecondaryFlyout();
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const watchedQuery = useWatch<FormValues, 'query'>({ name: 'query' });
   const watchedTimeField = useWatch<FormValues, 'timeField'>({ name: 'timeField' });
@@ -101,8 +103,10 @@ export const ComposeDiscoverFooter = ({
     isAlert &&
     !isCommittedQueryValid(watchedQuery, 'alert', uiState.queryCommitted);
 
+  const secondaryFlyoutOpen = (!isBuilderMode && uiState.childOpen) || isCreateActionPolicyOpen;
+
   const nextDisabled =
-    (!isBuilderMode && uiState.childOpen) ||
+    secondaryFlyoutOpen ||
     hasValidationErrors ||
     (isConditionStep && !isBuilderStep && !uiState.queryCommitted) ||
     (isBuilderStep && !isBuilderStepValid) ||
@@ -118,6 +122,7 @@ export const ComposeDiscoverFooter = ({
   };
 
   const submitDisabled =
+    isCreateActionPolicyOpen ||
     hasValidationErrors ||
     !isCommittedQueryValid(watchedQuery, isAlert ? 'alert' : 'signal', uiState.queryCommitted);
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
@@ -164,7 +169,7 @@ export const ComposeDiscoverFooter = ({
             <EuiButton
               color="text"
               iconType="chevronSingleLeft"
-              isDisabled={!isBuilderMode && uiState.childOpen}
+              isDisabled={secondaryFlyoutOpen}
               onClick={() => dispatch({ type: 'GO_BACK', isBuilderMode })}
               data-test-subj="composeDiscoverBack"
             >

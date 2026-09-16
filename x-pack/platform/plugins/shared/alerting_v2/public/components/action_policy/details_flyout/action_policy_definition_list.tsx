@@ -141,7 +141,7 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
 
   items.push({
     title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.destinations', {
-      defaultMessage: 'Destinations',
+      defaultMessage: 'Workflows',
     }),
     description:
       destinations.length === 0 ? (

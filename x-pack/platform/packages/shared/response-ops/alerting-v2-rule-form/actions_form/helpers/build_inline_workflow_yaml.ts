@@ -13,7 +13,7 @@ import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import { parse } from 'yaml';
 import { INLINE_WORKFLOW_TAG } from '../constants';
 import { getInlineActionStepDefinition } from '../registry';
-import type { InlineWorkflowActionDraft } from '../types';
+import type { InlineWorkflowActionDraft, InlineWorkflowStepDraft } from '../types';
 
 export class InvalidInlineWorkflowError extends Error {
   constructor(message: string) {
@@ -50,17 +50,33 @@ const parseParams = (params: string): Record<string, unknown> => {
   return parsed as Record<string, unknown>;
 };
 
-export const buildInlineWorkflowYaml = (action: InlineWorkflowActionDraft): string => {
-  const definition = getInlineActionStepDefinition(action.stepType);
+const buildWorkflowStep = (step: InlineWorkflowStepDraft) => {
+  const definition = getInlineActionStepDefinition(step.stepType);
   if (!definition) {
-    throw new InvalidInlineWorkflowError(`Unknown inline action step type: ${action.stepType}`);
+    throw new InvalidInlineWorkflowError(`Unknown inline action step type: ${step.stepType}`);
   }
-  if (!action.connectorId) {
-    throw new InvalidInlineWorkflowError('A connector must be selected.');
+  if (!step.connectorId) {
+    throw new InvalidInlineWorkflowError('A connector must be selected for every step.');
   }
 
+  return {
+    name: step.stepName.trim() || 'notify',
+    type: stepTypeFromConnectorType(definition.connectorTypeId, definition.connectorTypeSubAction),
+    'connector-id': step.connectorId,
+    with: parseParams(step.params),
+  };
+};
+
+export const buildInlineWorkflowYaml = (action: InlineWorkflowActionDraft): string => {
+  if (action.steps.length === 0) {
+    throw new InvalidInlineWorkflowError('At least one workflow step is required.');
+  }
+
+  const firstDefinition = getInlineActionStepDefinition(action.steps[0].stepType);
   const workflow = {
-    name: `${definition.label} notification`,
+    name:
+      action.workflowName.trim() ||
+      (firstDefinition ? `${firstDefinition.label} notification` : 'Notification'),
     enabled: true,
     tags: [INLINE_WORKFLOW_TAG],
     triggers: [
@@ -77,17 +93,7 @@ export const buildInlineWorkflowYaml = (action: InlineWorkflowActionDraft): stri
         },
       },
     ],
-    steps: [
-      {
-        name: 'notify',
-        type: stepTypeFromConnectorType(
-          definition.connectorTypeId,
-          definition.connectorTypeSubAction
-        ),
-        'connector-id': action.connectorId,
-        with: parseParams(action.params),
-      },
-    ],
+    steps: action.steps.map(buildWorkflowStep),
   };
 
   return stringifyWorkflowDefinition(workflow);

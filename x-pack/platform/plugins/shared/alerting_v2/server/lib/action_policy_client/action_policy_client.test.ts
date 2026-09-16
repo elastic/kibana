@@ -275,13 +275,14 @@ describe('ActionPolicyClient', () => {
       );
     });
 
-    it('throws 400 when data is invalid', async () => {
+    it('throws 400 when enabled without destinations', async () => {
       await expect(
         client.createActionPolicy({
           data: {
             name: 'my-policy',
             description: 'my-policy description',
             destinations: [],
+            enabled: true,
           },
         })
       ).rejects.toMatchObject({
@@ -289,6 +290,39 @@ describe('ActionPolicyClient', () => {
       });
 
       expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('creates a disabled policy when destinations are empty', async () => {
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'policy-empty-dest',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'my-policy',
+          description: 'my-policy description',
+          enabled: false,
+          destinations: [],
+        },
+        references: [],
+      });
+
+      await client.createActionPolicy({
+        data: {
+          name: 'my-policy',
+          description: 'my-policy description',
+          destinations: [],
+          enabled: false,
+        },
+        options: { id: 'policy-empty-dest' },
+      });
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          enabled: false,
+          destinations: [],
+        }),
+        expect.anything()
+      );
     });
 
     it('throws 409 conflict when id already exists', async () => {

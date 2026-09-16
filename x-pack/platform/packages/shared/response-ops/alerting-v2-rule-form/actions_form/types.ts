@@ -7,7 +7,7 @@
 
 import { parse } from 'yaml';
 
-export type InlineActionStepType = 'slack2.sendMessage' | 'email';
+export type InlineActionStepType = string;
 export type ActionSource = 'existing' | 'inline';
 
 export interface ExistingWorkflowActionDraft {
@@ -16,12 +16,22 @@ export interface ExistingWorkflowActionDraft {
   workflowId: string | null;
 }
 
+/** A single action step inside an inline (simple) workflow. */
+export interface InlineWorkflowStepDraft {
+  id: string;
+  stepType: InlineActionStepType;
+  /** Workflow step name used when the inline workflow YAML is generated. */
+  stepName: string;
+  connectorId: string | null;
+  params: string;
+}
+
 export interface InlineWorkflowActionDraft {
   id: string;
   source: 'inline';
-  stepType: InlineActionStepType;
-  connectorId: string | null;
-  params: string;
+  /** Display name of the generated workflow. */
+  workflowName: string;
+  steps: InlineWorkflowStepDraft[];
 }
 
 export type ActionDraft = ExistingWorkflowActionDraft | InlineWorkflowActionDraft;
@@ -71,7 +81,14 @@ const areInlineParamsFilled = (params: string): boolean => {
   return values.length > 0 && values.every(isFilledValue);
 };
 
+export const isInlineStepValid = (step: InlineWorkflowStepDraft): boolean =>
+  step.connectorId !== null &&
+  step.stepName.trim() !== '' &&
+  areInlineParamsFilled(step.params);
+
 export const isActionValid = (action: ActionDraft): boolean =>
   action.source === 'existing'
     ? Boolean(action.workflowId)
-    : action.connectorId !== null && areInlineParamsFilled(action.params);
+    : action.workflowName.trim() !== '' &&
+      action.steps.length > 0 &&
+      action.steps.every(isInlineStepValid);

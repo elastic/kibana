@@ -70,6 +70,8 @@ export {
   isExplicitlyLinkedToRule,
   isRuleScopedCatchAllMatcher,
   summarizeExplicitlyLinkedActionPolicies,
+  buildInlineWorkflowStepDraft,
+  inlineDraftFromWorkflowDetail,
 } from './actions_form';
 export type {
   ActionDraft,
@@ -77,6 +79,7 @@ export type {
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,
+  InlineWorkflowStepDraft,
 } from './actions_form';
 export { useMatchedActionPolicies } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';

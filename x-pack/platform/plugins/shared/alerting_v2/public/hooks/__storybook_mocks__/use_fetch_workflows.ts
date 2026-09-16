@@ -25,8 +25,8 @@ const MOCK_WORKFLOWS: WorkflowListDto = {
     },
     {
       id: 'workflow-2',
-      name: 'PagerDuty escalation workflow',
-      description: 'Escalates to PagerDuty',
+      name: 'Notify SRE team by email',
+      description: 'This workflow send an email and uses slack channel sre-critical',
       enabled: true,
       definition: null,
       createdAt: '2026-01-01T00:00:00.000Z',

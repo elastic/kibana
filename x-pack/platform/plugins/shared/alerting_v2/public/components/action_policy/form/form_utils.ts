@@ -35,6 +35,7 @@ export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormSta
     throttleInterval: response.throttle?.interval ?? '',
     destinations: response.destinations.map((d) => ({ type: d.type, id: d.id })),
     inlineActions: [],
+    enabled: response.enabled,
   };
 };
 
@@ -67,5 +68,6 @@ export const toUpdatePayload = (
     group_by: state.groupingMode === 'per_field' && state.groupBy.length > 0 ? state.groupBy : null,
     throttle: buildThrottle(state),
     destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
+    enabled: state.enabled,
   };
 };

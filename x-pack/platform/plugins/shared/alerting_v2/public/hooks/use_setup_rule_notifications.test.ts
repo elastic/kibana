@@ -33,17 +33,31 @@ const mockRule = {
 const emailAction = {
   id: 'action-email',
   source: 'inline' as const,
-  stepType: 'email' as const,
-  connectorId: 'connector-1',
-  params: '{}',
+  workflowName: 'Email notification',
+  steps: [
+    {
+      id: 'step-1',
+      stepType: 'email' as const,
+      stepName: 'notify',
+      connectorId: 'connector-1',
+      params: '{}',
+    },
+  ],
 };
 
 const slackAction = {
   id: 'action-slack',
   source: 'inline' as const,
-  stepType: 'slack2.sendMessage' as const,
-  connectorId: 'connector-2',
-  params: 'channel: "my-channel"\ntext: "Hello"',
+  workflowName: 'Slack notification',
+  steps: [
+    {
+      id: 'step-1',
+      stepType: 'slack2.sendMessage' as const,
+      stepName: 'notify',
+      connectorId: 'connector-2',
+      params: 'channel: "my-channel"\ntext: "Hello"',
+    },
+  ],
 };
 
 const existingWorkflowAction = {

@@ -88,7 +88,8 @@ export const buildCreateActionPolicyAttributes = ({
   return {
     name: data.name,
     description: data.description,
-    enabled: true,
+    enabled:
+      data.enabled !== undefined ? data.enabled : data.destinations.length > 0,
     destinations: data.destinations,
     matcher: data.matcher ?? null,
     groupBy: data.group_by ?? null,
@@ -117,11 +118,14 @@ export const buildUpdateActionPolicyAttributes = ({
   updatedBy: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
+  const destinations = update.destinations ?? existing.destinations;
+  const requestedEnabled = update.enabled ?? existing.enabled;
+
   return {
     name: update.name ?? existing.name,
     description: update.description ?? existing.description,
-    enabled: existing.enabled,
-    destinations: update.destinations ?? existing.destinations,
+    enabled: destinations.length === 0 ? false : requestedEnabled,
+    destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
     groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
     tags: resolveNextNullableField(update.tags, existing.tags),

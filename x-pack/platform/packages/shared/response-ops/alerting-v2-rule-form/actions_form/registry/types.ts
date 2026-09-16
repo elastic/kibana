@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InlineActionStepType, InlineWorkflowActionDraft } from '../types';
+import type { InlineActionStepType, InlineWorkflowStepDraft } from '../types';
 
 type Slack2SubAction = 'sendMessage';
 type ConnectorTypeSubAction = Slack2SubAction | (string & {});
@@ -19,8 +19,8 @@ export interface InlineActionStepDefinition {
   connectorTypeSubAction?: ConnectorTypeSubAction;
   paramsTemplate: string;
   CustomComponent?: React.ComponentType<{
-    value: InlineWorkflowActionDraft;
-    onChange: (value: InlineWorkflowActionDraft) => void;
+    value: InlineWorkflowStepDraft;
+    onChange: (value: InlineWorkflowStepDraft) => void;
   }>;
 }
 

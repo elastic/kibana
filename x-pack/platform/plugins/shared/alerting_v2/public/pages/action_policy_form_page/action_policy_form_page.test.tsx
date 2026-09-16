@@ -9,9 +9,11 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { I18nProvider } from '@kbn/i18n-react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { ActionPolicyFormPage } from './action_policy_form_page';
 import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { ListPageTestProviders } from '../../test_utils/test_providers';
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
@@ -85,28 +87,55 @@ const INLINE_DEFS = [
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+  getDefaultInlineActionStepDefinition: () => INLINE_DEFS[0],
   buildInlineWorkflowYaml: () => 'workflow: yaml',
   isActionValid: (action: {
     source: 'existing' | 'inline';
     workflowId?: string | null;
-    connectorId?: string | null;
-    params?: string;
+    workflowName?: string;
+    steps?: Array<{ connectorId: string | null; params: string; stepName: string }>;
   }) =>
     action.source === 'existing'
       ? Boolean(action.workflowId)
-      : action.connectorId != null && (action.params ?? '').trim() !== '',
+      : Boolean(action.workflowName?.trim()) &&
+        (action.steps?.length ?? 0) > 0 &&
+        (action.steps ?? []).every(
+          (step) =>
+            step.connectorId != null &&
+            step.stepName.trim() !== '' &&
+            (step.params ?? '').trim() !== ''
+        ),
   InlineWorkflowEditor: ({
     value,
     onChange,
   }: {
-    value: { id: string; connectorId: string | null; params: string };
-    onChange: (next: { id: string; connectorId: string | null; params: string }) => void;
+    value: {
+      id: string;
+      workflowName: string;
+      steps: Array<{
+        id: string;
+        stepType: string;
+        stepName: string;
+        connectorId: string | null;
+        params: string;
+      }>;
+    };
+    onChange: (next: typeof value) => void;
   }) => (
     <div data-test-subj={`inlineWorkflowEditor-${value.id}`}>
       <button
         type="button"
         data-test-subj={`inlineFill-${value.id}`}
-        onClick={() => onChange({ ...value, connectorId: 'connector-x', params: 'message: hi' })}
+        onClick={() =>
+          onChange({
+            ...value,
+            steps: value.steps.map((step, index) =>
+              index === 0
+                ? { ...step, connectorId: 'connector-x', params: 'message: hi', stepName: 'notify' }
+                : step
+            ),
+          })
+        }
       >
         fill
       </button>
@@ -178,6 +207,14 @@ jest.mock('../../hooks/use_fetch_workflows', () => ({
   }),
 }));
 
+jest.mock('../../hooks/use_fetch_workflow', () => ({
+  useFetchWorkflow: () => ({
+    data: undefined,
+    isLoading: false,
+    isFetching: false,
+  }),
+}));
+
 const mockUseParams = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -185,8 +222,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const TEST_SUBJ = {
-  pageTitle: 'pageTitle',
-  cancelButton: 'cancelButton',
+  pageTitle: APP_HEADER_TEST_SUBJECTS.title,
+  backButton: APP_HEADER_TEST_SUBJECTS.back,
   submitButton: 'submitButton',
   nameInput: 'nameInput',
   descriptionInput: 'descriptionInput',
@@ -219,10 +256,16 @@ const EXISTING_POLICY: ActionPolicyResponse = {
 
 const renderPage = () => {
   return render(
-    <I18nProvider>
+    <ListPageTestProviders>
       <ActionPolicyFormPage />
-    </I18nProvider>
+    </ListPageTestProviders>
   );
+};
+
+/** App menu may stash primary actions in the overflow at narrow breakpoints. */
+const findSubmitButton = async (user?: ReturnType<typeof userEvent.setup>) => {
+  await openAppMenuOverflow(user);
+  return screen.getByTestId(TEST_SUBJ.submitButton);
 };
 
 const mockUseActionPolicyAutoAttach = jest.mocked(useActionPolicyAutoAttach);
@@ -247,11 +290,37 @@ describe('ActionPolicyFormPage', () => {
       mockUseParams.mockReturnValue({});
     });
 
-    it('renders create title and save button', () => {
+    it('renders create title and save button', async () => {
       renderPage();
 
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Create action policy');
-      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
+      expect(await findSubmitButton()).toHaveTextContent('Create policy');
+    });
+
+    it('does not render the Enabled switch on create', async () => {
+      renderPage();
+
+      await openAppMenuOverflow();
+      expect(screen.queryByTestId('actionPolicyEnabledSwitch')).not.toBeInTheDocument();
+    });
+
+    it('keeps create disabled until a destination is linked', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
+      await user.tab();
+
+      expect(await findSubmitButton(user)).toBeDisabled();
+
+      const destinationsCombo = screen.getByTestId('destinationsInput');
+      const comboInput = within(destinationsCombo).getByRole('combobox');
+      await user.click(comboInput);
+      await user.click(await screen.findByRole('option', { name: 'Workflow 1' }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_SUBJ.submitButton)).toBeEnabled();
+      });
     });
 
     it('submits create payload on save', async () => {
@@ -269,7 +338,7 @@ describe('ActionPolicyFormPage', () => {
       await user.click(comboInput);
       await user.click(await screen.findByRole('option', { name: 'Workflow 1' }));
 
-      const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+      const saveButton = await findSubmitButton(user);
       await waitFor(() => expect(saveButton).toBeEnabled());
       await user.click(saveButton);
 
@@ -289,7 +358,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('creates inline workflows and merges them into destinations on submit', async () => {
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
       mockCreateInlineWorkflows.mockResolvedValue(['wf-new']);
       renderPage();
 
@@ -298,10 +367,10 @@ describe('ActionPolicyFormPage', () => {
       await user.type(screen.getByTestId(TEST_SUBJ.descriptionInput), 'desc');
       await user.tab();
 
-      await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+      await user.click(screen.getByTestId('createDestinationButton'));
       await user.click(await screen.findByTestId(/inlineFill-/));
 
-      const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+      const saveButton = await findSubmitButton(user);
       await waitFor(() => expect(saveButton).toBeEnabled());
       await user.click(saveButton);
 
@@ -309,8 +378,12 @@ describe('ActionPolicyFormPage', () => {
       expect(mockCreateInlineWorkflows).toHaveBeenCalledWith([
         expect.objectContaining({
           source: 'inline',
-          stepType: 'slack',
-          connectorId: 'connector-x',
+          steps: [
+            expect.objectContaining({
+              stepType: 'email',
+              connectorId: 'connector-x',
+            }),
+          ],
         }),
       ]);
       await waitFor(() =>
@@ -323,7 +396,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('rolls back created workflows when policy creation fails', async () => {
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
       mockCreateInlineWorkflows.mockResolvedValue(['wf-new']);
       mockCreateMutateAsync.mockRejectedValue(new Error('policy failed'));
       renderPage();
@@ -333,10 +406,10 @@ describe('ActionPolicyFormPage', () => {
       await user.type(screen.getByTestId(TEST_SUBJ.descriptionInput), 'desc');
       await user.tab();
 
-      await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+      await user.click(screen.getByTestId('createDestinationButton'));
       await user.click(await screen.findByTestId(/inlineFill-/));
 
-      const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+      const saveButton = await findSubmitButton(user);
       await waitFor(() => expect(saveButton).toBeEnabled());
       await user.click(saveButton);
 
@@ -346,11 +419,11 @@ describe('ActionPolicyFormPage', () => {
       );
     });
 
-    it('navigates to listing page on cancel', async () => {
+    it('navigates to listing page on back', async () => {
       const user = userEvent.setup({ delay: null });
       renderPage();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
+      await user.click(screen.getByTestId(TEST_SUBJ.backButton));
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
     });
@@ -367,7 +440,7 @@ describe('ActionPolicyFormPage', () => {
       mockUseParams.mockReturnValue({ id: 'policy-1' });
     });
 
-    it('renders edit title and update button when policy is loaded', () => {
+    it('renders edit title and update button when policy is loaded', async () => {
       mockUseFetchActionPolicy.mockReturnValue({
         data: EXISTING_POLICY,
         isLoading: false,
@@ -378,7 +451,23 @@ describe('ActionPolicyFormPage', () => {
       renderPage();
 
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit action policy');
-      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');
+      expect(await findSubmitButton()).toHaveTextContent('Update policy');
+    });
+
+    it('renders the Enabled switch on edit without destination gating', async () => {
+      mockUseFetchActionPolicy.mockReturnValue({
+        data: EXISTING_POLICY,
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderPage();
+
+      await openAppMenuOverflow();
+      const enabledSwitch = screen.getByTestId('actionPolicyEnabledSwitch');
+      expect(enabledSwitch).toBeInTheDocument();
+      expect(enabledSwitch).not.toBeDisabled();
     });
 
     it('shows loading state while fetching', () => {
@@ -424,7 +513,7 @@ describe('ActionPolicyFormPage', () => {
       await user.click(screen.getByTestId(TEST_SUBJ.descriptionInput));
       await user.tab();
 
-      const updateButton = screen.getByTestId(TEST_SUBJ.submitButton);
+      const updateButton = await findSubmitButton(user);
       await waitFor(() => expect(updateButton).toBeEnabled());
       await user.click(updateButton);
 
@@ -441,11 +530,12 @@ describe('ActionPolicyFormPage', () => {
           group_by: ['host.name', 'service.name'],
           throttle: { strategy: 'time_interval', interval: '5m' },
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
+          enabled: true,
         },
       });
     });
 
-    it('navigates to listing page on cancel', async () => {
+    it('navigates to listing page on back', async () => {
       const user = userEvent.setup({ delay: null });
       mockUseFetchActionPolicy.mockReturnValue({
         data: EXISTING_POLICY,
@@ -456,7 +546,7 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
+      await user.click(screen.getByTestId(TEST_SUBJ.backButton));
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
     });

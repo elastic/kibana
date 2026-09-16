@@ -12,6 +12,7 @@ import {
   parseEpisodeStatusesFromMatcher,
   parseRuleIdsFromMatcher,
   parseRuleTagsFromMatcher,
+  stripRuleTagsFromMatcher,
 } from './matcher_quick_filter_utils';
 
 describe('matcher_quick_filter_utils', () => {
@@ -188,6 +189,18 @@ describe('matcher_quick_filter_utils', () => {
 
     it('clears tags when empty array is passed', () => {
       expect(mergeRuleTagsIntoMatcher('rule.tags : "prod"', [])).toBe('');
+    });
+  });
+
+  describe('stripRuleTagsFromMatcher', () => {
+    it('returns empty string when matcher is only tags', () => {
+      expect(stripRuleTagsFromMatcher('rule.tags : "prod"')).toBe('');
+    });
+
+    it('keeps advanced clauses after removing tags', () => {
+      expect(
+        stripRuleTagsFromMatcher('rule.tags : "prod" AND data.severity : "critical"')
+      ).toBe('data.severity : "critical"');
     });
   });
 

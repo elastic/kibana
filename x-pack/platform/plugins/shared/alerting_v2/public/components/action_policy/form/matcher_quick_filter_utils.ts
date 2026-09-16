@@ -167,3 +167,7 @@ export const parseRuleTagsFromMatcher = (matcher: string): string[] =>
 
 export const mergeRuleTagsIntoMatcher = (matcher: string, tags: readonly string[]): string =>
   mergeFieldValues(matcher, 'rule.tags', tags);
+
+/** Remaining matcher after removing `rule.tags` clauses (advanced matching). */
+export const stripRuleTagsFromMatcher = (matcher: string): string =>
+  stripFieldClauses(matcher, 'rule.tags').trim();

@@ -14,6 +14,7 @@ import {
   useContentListSort,
 } from '@kbn/content-list-provider';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useBulkSelect } from '../../hooks/use_bulk_select';
@@ -26,6 +27,11 @@ import { useRunRule } from '../../hooks/use_run_rule';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
 import { useRuleChangeHistoryModal } from '../../components/rule/modals/change_history';
 import { UpdateApiKeyConfirmationModal } from '../../components/rule/modals/update_api_key_confirmation_modal';
+import {
+  BulkLinkActionPolicyModal,
+  type BulkLinkActionPolicyResult,
+  type BulkLinkRuleRow,
+} from '../../components/rule/modals/bulk_link_action_policy_modal';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
 import type { RuleContentListItem } from './rules_data_source';
@@ -61,6 +67,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+  const { toasts } = useService(CoreStart('notifications'));
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
   const { items: contentItems, totalItems, isLoading, hasActiveQuery } = useContentListItems();
@@ -101,8 +108,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [showBulkUpdateApiKeyConfirm, setShowBulkUpdateApiKeyConfirm] = useState(false);
-
-  const expandedRule = expandedRuleId ? items.find((r) => r.id === expandedRuleId) ?? null : null;
+  const [showBulkLinkActionPolicy, setShowBulkLinkActionPolicy] = useState(false);
+  /** Prototype: local tag overlays applied after bulk link (not persisted). */
+  const [tagOverrides, setTagOverrides] = useState<Record<string, string[]>>({});
 
   const deleteRuleMutation = useDeleteRule();
   const bulkDeleteMutation = useBulkDeleteRules();
@@ -128,6 +136,38 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     filter,
     search,
   });
+
+  const itemsWithTagOverrides = useMemo(
+    () =>
+      items.map((rule) => {
+        const overrideTags = tagOverrides[rule.id];
+        if (!overrideTags) {
+          return rule;
+        }
+        return {
+          ...rule,
+          metadata: {
+            ...rule.metadata,
+            tags: overrideTags,
+          },
+        };
+      }),
+    [items, tagOverrides]
+  );
+
+  const expandedRule = expandedRuleId
+    ? itemsWithTagOverrides.find((r) => r.id === expandedRuleId) ?? null
+    : null;
+
+  const selectedRulesForLink = useMemo((): BulkLinkRuleRow[] => {
+    return itemsWithTagOverrides
+      .filter((rule) => isRowSelected(rule.id))
+      .map((rule) => ({
+        id: rule.id,
+        name: rule.metadata.name,
+        tags: rule.metadata.tags ?? [],
+      }));
+  }, [itemsWithTagOverrides, isRowSelected]);
 
   const handleBulkDelete = () => {
     setShowBulkDeleteConfirm(true);
@@ -167,6 +207,38 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
 
   const handleBulkDisable = () => {
     bulkDisableMutation.mutate(getBulkParams(), { onSuccess: onClearSelection });
+  };
+
+  const handleBulkLinkActionPolicy = () => {
+    setShowBulkLinkActionPolicy(true);
+  };
+
+  const onBulkLinkActionPolicyConfirm = (result: BulkLinkActionPolicyResult) => {
+    // Prototype: apply tags locally so the list Tags column updates immediately.
+    setTagOverrides((current) => {
+      const next = { ...current };
+      for (const ruleId of result.ruleIds) {
+        const existing =
+          next[ruleId] ??
+          items.find((rule) => rule.id === ruleId)?.metadata.tags ??
+          [];
+        next[ruleId] = Array.from(new Set([...existing, ...result.tagsToAdd]));
+      }
+      return next;
+    });
+    toasts.addSuccess(
+      i18n.translate('xpack.alertingV2.bulkLinkActionPolicy.success', {
+        defaultMessage:
+          'Linked {count, plural, one {# rule} other {# rules}} to “{policy}” with tags: {tags}',
+        values: {
+          count: selectedCount,
+          policy: result.policy.name,
+          tags: result.tagsToAdd.join(', '),
+        },
+      })
+    );
+    setShowBulkLinkActionPolicy(false);
+    onClearSelection();
   };
 
   const onDeleteConfirm = () => {
@@ -210,7 +282,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   return (
     <>
       <RulesListTable
-        items={items}
+        items={itemsWithTagOverrides}
         totalItemCount={totalItems}
         page={pageIndex + 1}
         perPage={pageSize}
@@ -233,6 +305,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
         onBulkUpdateApiKey={handleBulkUpdateApiKey}
+        onBulkLinkActionPolicy={handleBulkLinkActionPolicy}
         onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
         onExpand={(r) => setExpandedRuleId(r.id)}
         onQuickEdit={(r) => onEditInFlyout(r)}
@@ -299,6 +372,14 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           onCancel={() => setShowBulkUpdateApiKeyConfirm(false)}
           onConfirm={onBulkUpdateApiKeyConfirm}
           isLoading={updateApiKeyMutation.isLoading}
+        />
+      ) : null}
+      {showBulkLinkActionPolicy ? (
+        <BulkLinkActionPolicyModal
+          rules={selectedRulesForLink}
+          ruleCount={selectedCount}
+          onCancel={() => setShowBulkLinkActionPolicy(false)}
+          onConfirm={onBulkLinkActionPolicyConfirm}
         />
       ) : null}
       {changeHistoryModal}

@@ -71,7 +71,7 @@ describe('ActionPolicyDefinitionList', () => {
     expect(screen.getByText('Matcher')).toBeDefined();
     expect(screen.getByText('Dispatch per')).toBeDefined();
     expect(screen.getByText('Frequency')).toBeDefined();
-    expect(screen.getByText('Destinations')).toBeDefined();
+    expect(screen.getByText('Workflows')).toBeDefined();
     expect(screen.getAllByTestId('mockDestinationRow')).toHaveLength(2);
   });
 

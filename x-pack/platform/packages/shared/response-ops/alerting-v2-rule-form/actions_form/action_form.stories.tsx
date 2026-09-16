@@ -48,12 +48,19 @@ export const SlackEmpty: Story = {
   args: {
     initialValue: [
       {
-        id: 's1',
-        source: 'inline',
-        stepType: 'slack2.sendMessage',
-        connectorId: null,
-        params: 'channel: "myChannel"\ntext: "Alert for {{ inputs.policyId }}"\n',
-      },
+      id: 's1',
+      source: 'inline',
+      workflowName: 'Slack notification',
+      steps: [
+        {
+          id: 's1-step',
+          stepType: 'slack2.sendMessage',
+          stepName: 'notify',
+          connectorId: null,
+          params: 'channel: "myChannel"\ntext: "Alert for {{ inputs.policyId }}"\n',
+        },
+      ],
+    },
     ],
   },
 };
@@ -62,12 +69,19 @@ export const SlackFilled: Story = {
   args: {
     initialValue: [
       {
-        id: 's2',
-        source: 'inline',
-        stepType: 'slack2.sendMessage',
-        connectorId: 'slack2-ops',
-        params: 'channel: "myChannel"\ntext: "Alert for {{ inputs.policyId }}"\n',
-      },
+      id: 's2',
+      source: 'inline',
+      workflowName: 'Slack notification',
+      steps: [
+        {
+          id: 's2-step',
+          stepType: 'slack2.sendMessage',
+          stepName: 'notify',
+          connectorId: 'slack2-ops',
+          params: 'channel: "myChannel"\ntext: "Alert for {{ inputs.policyId }}"\n',
+        },
+      ],
+    },
     ],
   },
 };
@@ -76,19 +90,33 @@ export const MultipleActions: Story = {
   args: {
     initialValue: [
       {
-        id: 'e1',
-        source: 'inline',
-        stepType: 'email',
-        connectorId: 'email-ops',
-        params: 'to: ""\nsubject: ""\nmessage: ""\n',
-      },
+      id: 'e1',
+      source: 'inline',
+      workflowName: 'Email notification',
+      steps: [
+        {
+          id: 'e1-step',
+          stepType: 'email',
+          stepName: 'notify',
+          connectorId: 'email-ops',
+          params: 'to: ""\nsubject: ""\nmessage: ""\n',
+        },
+      ],
+    },
       {
-        id: 's1',
-        source: 'inline',
-        stepType: 'slack2.sendMessage',
-        connectorId: 'slack-ops',
-        params: 'channel: "myChannel"\ntext: "Alert for {{ inputs.policyId }}"\n',
-      },
+      id: 's1',
+      source: 'inline',
+      workflowName: 'Slack notification',
+      steps: [
+        {
+          id: 's1-step',
+          stepType: 'slack2.sendMessage',
+          stepName: 'notify',
+          connectorId: 'slack-ops',
+          params: 'channel: "myChannel"\ntext: "Alert for {{ inputs.policyId }}"\n',
+        },
+      ],
+    },
       { id: 'w1', source: 'existing', workflowId: 'singlestep-1' },
     ],
   },

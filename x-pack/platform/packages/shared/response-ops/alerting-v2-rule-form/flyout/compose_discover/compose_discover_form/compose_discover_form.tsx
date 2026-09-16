@@ -27,8 +27,6 @@ import { AlertConditionStep } from './alert_condition_step';
 import { OutcomeStep } from './outcome_step';
 import { EsqlRecoveryContent } from './esql_recovery_content';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
-import { NotificationsStep } from './notifications_step';
-import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { QueryFieldRules } from './query_field_rules';
 
 interface Props {
@@ -85,24 +83,10 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   details: {
     id: 'details',
     title: i18n.translate('xpack.alertingV2.composeDiscover.details.stepTitle', {
-      defaultMessage: 'Details & Artifacts',
+      defaultMessage: 'Detail & actions',
     }),
-    render: () => <DetailsAndArtifactsStep />,
+    render: (props) => <DetailsAndArtifactsStep ruleId={props.ruleId} />,
     fields: ['metadata.name'],
-  },
-  notifications: {
-    id: 'notifications',
-    title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
-      defaultMessage: 'Actions',
-    }),
-    render: (props) => (
-      <>
-        <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        <EuiHorizontalRule margin="m" />
-        <NotificationsStep />
-      </>
-    ),
-    fields: ['notifications'],
   },
 };
 
@@ -117,6 +101,14 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
+    if (id === 'details' && !isAlert) {
+      return {
+        ...base,
+        title: i18n.translate('xpack.alertingV2.composeDiscover.details.stepTitleSignal', {
+          defaultMessage: 'Details',
+        }),
+      };
+    }
     if (id === 'builderCondition' && definition) {
       // Discard any ES|QL registry keys if the stub ever gains them.
       const {

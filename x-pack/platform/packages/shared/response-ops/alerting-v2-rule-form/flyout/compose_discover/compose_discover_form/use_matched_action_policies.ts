@@ -32,8 +32,7 @@ export const useMatchedActionPolicies = ({
   name,
   tags,
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
-  const enabled = Boolean(ruleId) || Boolean(name) || Boolean(tags?.length);
-
+  // Always fetch on mount so catch-all policies appear before the rule has a name/tags.
   const body = {
     rule: {
       ...(ruleId ? { id: ruleId } : {}),
@@ -49,13 +48,12 @@ export const useMatchedActionPolicies = ({
         '/api/alerting/v2/action_policies/_match_for_rule',
         { method: 'POST', body: JSON.stringify(body) }
       ),
-    enabled,
     keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
 
   return {
-    isLoading: enabled && isLoading,
+    isLoading,
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
     total: data?.total ?? 0,

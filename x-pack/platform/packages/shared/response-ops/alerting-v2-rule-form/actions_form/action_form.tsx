@@ -37,9 +37,16 @@ const buildActionFromTemplate = (template: ActionTemplate): ActionDraft => {
   return {
     id,
     source: 'inline',
-    stepType: definition.id,
-    connectorId: null,
-    params: definition.paramsTemplate,
+    workflowName: `${definition.label} notification`,
+    steps: [
+      {
+        id: uuidv4(),
+        stepType: definition.id,
+        stepName: 'notify',
+        connectorId: null,
+        params: definition.paramsTemplate,
+      },
+    ],
   };
 };
 

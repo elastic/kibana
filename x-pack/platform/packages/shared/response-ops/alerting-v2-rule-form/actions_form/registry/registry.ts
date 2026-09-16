@@ -21,6 +21,11 @@ const SLACK2_PARAMS_TEMPLATE = `channel: ""
 text: ""
 `;
 
+const toWorkflowStepType = (connectorTypeId: string, subAction?: string): string => {
+  const typeId = connectorTypeId.startsWith('.') ? connectorTypeId.slice(1) : connectorTypeId;
+  return subAction ? `${typeId}.${subAction}` : typeId;
+};
+
 export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [
   {
     id: 'email',
@@ -56,10 +61,32 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
   },
 ];
 
+const createFallbackDefinition = (id: InlineActionStepType): InlineActionStepDefinition => {
+  const [baseType, ...subActionParts] = id.split('.');
+  const subAction = subActionParts.length > 0 ? subActionParts.join('.') : undefined;
+  const connectorTypeId = baseType.startsWith('.') ? baseType : `.${baseType}`;
+
+  return {
+    id,
+    label: id,
+    iconType: 'plugs',
+    connectorTypeId,
+    connectorTypeSubAction: subAction,
+    paramsTemplate: '',
+  };
+};
+
 export const getInlineActionStepDefinition = (
   id: InlineActionStepType
-): InlineActionStepDefinition | undefined =>
-  INLINE_ACTION_STEP_DEFINITIONS.find((definition) => definition.id === id);
+): InlineActionStepDefinition | undefined => {
+  if (!id) {
+    return undefined;
+  }
+  return (
+    INLINE_ACTION_STEP_DEFINITIONS.find((definition) => definition.id === id) ??
+    createFallbackDefinition(id)
+  );
+};
 
 export const getDefaultInlineActionStepDefinition = (): InlineActionStepDefinition => {
   const defaultDefinition = INLINE_ACTION_STEP_DEFINITIONS[0];
@@ -67,4 +94,28 @@ export const getDefaultInlineActionStepDefinition = (): InlineActionStepDefiniti
     throw new Error('No inline action step definitions are registered.');
   }
   return defaultDefinition;
+};
+
+export const definitionFromConnectorType = ({
+  actionTypeId,
+  name,
+}: {
+  actionTypeId: string;
+  name: string;
+}): InlineActionStepDefinition => {
+  const known = INLINE_ACTION_STEP_DEFINITIONS.find(
+    (definition) => definition.connectorTypeId === actionTypeId
+  );
+  if (known) {
+    return known;
+  }
+
+  const id = toWorkflowStepType(actionTypeId);
+  return {
+    id,
+    label: name,
+    iconType: 'plugs',
+    connectorTypeId: actionTypeId,
+    paramsTemplate: '',
+  };
 };

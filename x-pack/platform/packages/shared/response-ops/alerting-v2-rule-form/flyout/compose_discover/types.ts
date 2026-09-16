@@ -19,8 +19,7 @@ export type StepId =
   | 'alertCondition'
   | 'builderCondition'
   | 'outcome'
-  | 'details'
-  | 'notifications';
+  | 'details';
 
 export const isAlertConditionStepId = (id: StepId): boolean =>
   id === 'alertCondition' || id === 'builderCondition';

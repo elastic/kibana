@@ -113,32 +113,45 @@ describe('useMatchedActionPolicies', () => {
     );
   });
 
-  it('does not fire a request when all inputs are absent', async () => {
+  it('fetches with an empty rule payload when inputs are absent', async () => {
     const http = httpServiceMock.createStartContract();
+    http.fetch.mockResolvedValueOnce({ items: [], total: 0 } as any);
 
     const { result } = renderHook(() => useMatchedActionPolicies({ http }), {
       wrapper: createWrapper(),
     });
 
-    // Give it time in case the query fires unexpectedly
-    await new Promise((r) => setTimeout(r, 50));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.items).toEqual([]);
-    expect(http.fetch).not.toHaveBeenCalled();
+    expect(http.fetch).toHaveBeenCalledWith(
+      '/api/alerting/v2/action_policies/_match_for_rule',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ rule: {} }),
+      })
+    );
   });
 
-  it('does not fire a request when name is an empty string', async () => {
+  it('fetches when name is an empty string', async () => {
     const http = httpServiceMock.createStartContract();
+    http.fetch.mockResolvedValueOnce({
+      items: [{ actionPolicy: { id: 'ap-global' }, category: 'global' }],
+      total: 1,
+    } as any);
 
     const { result } = renderHook(() => useMatchedActionPolicies({ http, name: '' }), {
       wrapper: createWrapper(),
     });
 
-    await new Promise((r) => setTimeout(r, 50));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.items).toEqual([]);
-    expect(http.fetch).not.toHaveBeenCalled();
+    expect(result.current.items).toHaveLength(1);
+    expect(http.fetch).toHaveBeenCalledWith(
+      '/api/alerting/v2/action_policies/_match_for_rule',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ rule: {} }),
+      })
+    );
   });
 });

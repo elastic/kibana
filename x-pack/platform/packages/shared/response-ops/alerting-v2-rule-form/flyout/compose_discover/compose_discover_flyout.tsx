@@ -56,6 +56,10 @@ import {
 } from './compose_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
+import {
+  CreateActionPolicySecondaryFlyoutProvider,
+  useCreateActionPolicySecondaryFlyout,
+} from './create_action_policy_secondary_flyout_context';
 import { SandboxSettingsMenu } from './sandbox_settings_menu';
 import { isAlertTabDisabled } from './compose_discover_tabs';
 import {
@@ -301,6 +305,53 @@ const EMPTY_FORM_VALUES: FormValues = {
   artifacts: [],
   runbookArtifacts: [],
   dashboardArtifacts: [],
+};
+
+/** Renders the create-action-policy secondary flyout beside QuerySandboxFlyout. */
+const CreateActionPolicySecondaryFlyoutHost = ({
+  CreateActionPolicyFlyout,
+}: {
+  CreateActionPolicyFlyout?: RuleFormServices['CreateActionPolicyFlyout'];
+}) => {
+  const { isOpen, close, notifyCreated, options } = useCreateActionPolicySecondaryFlyout();
+  if (!isOpen || !CreateActionPolicyFlyout) {
+    return null;
+  }
+  return (
+    <CreateActionPolicyFlyout
+      onClose={close}
+      onCreated={notifyCreated}
+      variant={options.variant ?? 'essential'}
+      ruleTags={options.ruleTags}
+    />
+  );
+};
+
+/**
+ * Disables interaction with the parent flyout form while the create-action-policy
+ * secondary flyout is open (closed or policy created clears the lock).
+ */
+const CreateActionPolicyFormLock = ({ children }: { children: React.ReactNode }) => {
+  const { isOpen } = useCreateActionPolicySecondaryFlyout();
+  return (
+    <div
+      data-test-subj={isOpen ? 'composeDiscoverFormLocked' : 'composeDiscoverFormInteractive'}
+      // inert is supported by Chromium; empty string is the React 18-compatible value
+      {...(isOpen ? { inert: '' } : {})}
+      aria-disabled={isOpen || undefined}
+      css={
+        isOpen
+          ? css`
+              opacity: 0.55;
+              pointer-events: none;
+              user-select: none;
+            `
+          : undefined
+      }
+    >
+      {children}
+    </div>
+  );
 };
 
 export function ComposeDiscoverFlyout({
@@ -1230,6 +1281,7 @@ export function ComposeDiscoverFlyout({
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
+        <CreateActionPolicySecondaryFlyoutProvider>
         <>
           <EuiFlyout
             key={flyoutKey}
@@ -1337,6 +1389,7 @@ export function ComposeDiscoverFlyout({
             </EuiFlyoutHeader>
 
             <EuiFlyoutBody css={uiState.yamlMode ? composeDiscoverYamlFlyoutBodyCss : undefined}>
+              <CreateActionPolicyFormLock>
               {uiState.yamlMode ? (
                 <>
                   {validationCallout}
@@ -1372,6 +1425,7 @@ export function ComposeDiscoverFlyout({
                   </BuilderStateProvider>
                 </>
               )}
+              </CreateActionPolicyFormLock>
             </EuiFlyoutBody>
 
             <ComposeDiscoverFooter
@@ -1414,11 +1468,15 @@ export function ComposeDiscoverFlyout({
                 title={getQuerySandboxTitle(isBuilderMode)}
               />
             )}
+            <CreateActionPolicySecondaryFlyoutHost
+              CreateActionPolicyFlyout={services.CreateActionPolicyFlyout}
+            />
           </EuiFlyout>
           {isConfirmCloseVisible && (
             <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
           )}
         </>
+        </CreateActionPolicySecondaryFlyoutProvider>
       </FormProvider>
     </RuleFormProvider>
   );

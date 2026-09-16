@@ -14,8 +14,8 @@ export const RuleDetailsFieldGroup = () => {
   return (
     <>
       <NameField />
-      <TagsField />
       <DescriptionField />
+      <TagsField />
     </>
   );
 };

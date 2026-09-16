@@ -18,6 +18,10 @@ import React, { useState } from 'react';
 import { formatSnoozeFullDate } from './format_snooze_date';
 import { isSnoozed } from './is_snoozed';
 import { ActionPolicySnoozeModal } from './action_policy_snooze_modal';
+import {
+  canEnableActionPolicy,
+  ENABLE_REQUIRES_DESTINATION_TOOLTIP,
+} from './enable_requires_destination';
 
 interface Props {
   policy: ActionPolicyResponse;
@@ -137,6 +141,7 @@ export const ActionPolicyActionsMenu = ({
     },
   });
   if (onEnable != null && onDisable != null) {
+    const cannotEnable = !canEnableActionPolicy(policy);
     group2.push({
       name: policy.enabled
         ? i18n.translate('xpack.alertingV2.actionPoliciesList.action.disable', {
@@ -146,7 +151,8 @@ export const ActionPolicyActionsMenu = ({
             defaultMessage: 'Enable',
           }),
       icon: policy.enabled ? 'stop' : 'play',
-      disabled: isStateLoading,
+      disabled: isStateLoading || cannotEnable,
+      toolTipContent: cannotEnable ? ENABLE_REQUIRES_DESTINATION_TOOLTIP : undefined,
       'data-test-subj': `toggleEnabledActionPolicy-${policy.id}`,
       onClick: () => {
         closePopover();

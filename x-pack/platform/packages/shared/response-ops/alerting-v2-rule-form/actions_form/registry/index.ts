@@ -10,5 +10,6 @@ export {
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,
   getDefaultInlineActionStepDefinition,
+  definitionFromConnectorType,
 } from './registry';
 export { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from './payload_variables';

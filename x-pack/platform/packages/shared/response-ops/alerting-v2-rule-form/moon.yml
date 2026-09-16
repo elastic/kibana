@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/workflows-yaml'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/core-di-browser'
+  - '@kbn/deeplinks-workflows'
   - '@kbn/core-di'
   - '@kbn/kibana-react-plugin'
   - '@kbn/dashboard-plugin'

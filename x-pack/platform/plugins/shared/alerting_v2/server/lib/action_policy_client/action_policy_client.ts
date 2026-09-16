@@ -450,6 +450,16 @@ export class ActionPolicyClient {
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
+    const { attrs } = await this.getExistingActionPolicy(id);
+    if (attrs.destinations.length === 0) {
+      throw Boom.badRequest(
+        'An action policy cannot be enabled without at least one destination',
+        {
+          code: ALERTING_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
+          details: { action_policy_id: id },
+        }
+      );
+    }
     return this.updatePolicyState(id, { enabled: true });
   }
 

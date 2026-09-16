@@ -14,12 +14,16 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   isActionValid: (action: {
     source: 'existing' | 'inline';
     workflowId?: string | null;
-    connectorId?: string | null;
-    params?: string;
+    steps?: Array<{ connectorId: string | null; params?: string; stepName?: string }>;
   }) =>
     action.source === 'existing'
       ? Boolean(action.workflowId)
-      : action.connectorId != null && (action.params ?? '').trim() !== '',
+      : Boolean(
+          action.steps?.length &&
+            action.steps.every(
+              (step) => step.connectorId != null && (step.params ?? '').trim() !== ''
+            )
+        ),
 }));
 
 const EXISTING_POLICY: ActionPolicyResponse = {
@@ -99,17 +103,45 @@ describe('useActionPolicyForm', () => {
         throttleInterval: '',
         destinations: [],
         inlineActions: [],
+        enabled: false,
       });
     });
   });
 
   describe('submit gating (isSubmitEnabled)', () => {
-    it('is disabled without a name or destination', () => {
+    it('is disabled without a name', () => {
       const { result } = renderHook(() =>
         useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
       );
 
       expect(result.current.isSubmitEnabled).toBe(false);
+    });
+
+    it('is disabled with a name and no destinations', async () => {
+      const { result } = renderHook(() =>
+        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
+      );
+
+      await act(async () => {
+        result.current.methods.setValue('name', 'No destination yet');
+      });
+
+      expect(result.current.isSubmitEnabled).toBe(false);
+      expect(result.current.hasDestination).toBe(false);
+    });
+
+    it('is enabled with a name and an existing destination', async () => {
+      const { result } = renderHook(() =>
+        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
+      );
+
+      await act(async () => {
+        result.current.methods.setValue('name', 'With destination');
+        result.current.methods.setValue('destinations', [{ type: 'workflow', id: 'wf-1' }]);
+      });
+
+      expect(result.current.isSubmitEnabled).toBe(true);
+      expect(result.current.hasDestination).toBe(true);
     });
 
     it('is enabled with only a valid inline action and no existing destinations', async () => {
@@ -123,9 +155,16 @@ describe('useActionPolicyForm', () => {
           {
             id: 'draft-1',
             source: 'inline',
-            stepType: 'slack2.sendMessage',
-            connectorId: 'connector-1',
-            params: 'message: hi',
+            workflowName: 'Slack notification',
+            steps: [
+              {
+                id: 'step-1',
+                stepType: 'slack2.sendMessage',
+                stepName: 'notify',
+                connectorId: 'connector-1',
+                params: 'message: hi',
+              },
+            ],
           },
         ]);
       });
@@ -144,9 +183,16 @@ describe('useActionPolicyForm', () => {
           {
             id: 'draft-1',
             source: 'inline',
-            stepType: 'slack2.sendMessage',
-            connectorId: null,
-            params: 'message: ""',
+            workflowName: 'Slack notification',
+            steps: [
+              {
+                id: 'step-1',
+                stepType: 'slack2.sendMessage',
+                stepName: 'notify',
+                connectorId: null,
+                params: 'message: ""',
+              },
+            ],
           },
         ]);
       });
@@ -188,6 +234,7 @@ describe('useActionPolicyForm', () => {
         throttleInterval: '5m',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
         inlineActions: [],
+        enabled: true,
       });
     });
 
@@ -237,6 +284,7 @@ describe('useActionPolicyForm', () => {
           throttleInterval: '5m',
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
           inlineActions: [],
+          enabled: true,
         },
         'WzEsMV0='
       );

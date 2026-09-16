@@ -47,10 +47,12 @@ const INLINE_DEFS = [
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+  getDefaultInlineActionStepDefinition: () => INLINE_DEFS[0],
   isActionValid: () => true,
   InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
     <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
   ),
+  buildInlineWorkflowYaml: () => 'workflow: yaml',
 }));
 
 jest.mock('../form/components/matcher_input', () => ({
@@ -106,6 +108,14 @@ jest.mock('../../../hooks/use_fetch_workflows', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_fetch_workflow', () => ({
+  useFetchWorkflow: () => ({
+    data: undefined,
+    isLoading: false,
+    isFetching: false,
+  }),
+}));
+
 const TEST_SUBJ = {
   title: 'title',
   cancelButton: 'cancelButton',
@@ -151,11 +161,25 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
+  it('renders destination create button and create-workflow option in Destinations combo', async () => {
+    const user = userEvent.setup();
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
     renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
 
-    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
+    expect(screen.getByTestId('createDestinationButton')).toBeInTheDocument();
     expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
+    expect(screen.queryByTestId('createDestinationMenuButton')).not.toBeInTheDocument();
+
+    const destinationsCombo = screen.getByTestId('destinationsInput');
+    await user.click(within(destinationsCombo).getByRole('combobox'));
+    await user.click(await screen.findByRole('option', { name: 'Create a workflow' }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      '/app/workflows/create',
+      '_blank',
+      'noopener,noreferrer'
+    );
+    openSpy.mockRestore();
   });
 
   it('forwards the raw form state (not a payload) to onSave so the host can build it', async () => {
@@ -190,11 +214,12 @@ describe('ActionPolicyFormFlyout', () => {
       throttleInterval: '',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
       inlineActions: [],
+      enabled: false,
     });
   });
 
   it('forwards inline "simple workflow" drafts to onSave instead of dropping them', async () => {
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
     const onSave = jest.fn();
 
     renderFlyout({ onClose: jest.fn(), onSave });
@@ -202,8 +227,8 @@ describe('ActionPolicyFormFlyout', () => {
     await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
     await user.tab();
 
-    // Add an inline Slack workflow draft (no existing destination selected).
-    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+    // Add an inline email notification draft (no existing destination selected).
+    await user.click(screen.getByTestId('createDestinationButton'));
 
     const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
     await waitFor(() => expect(saveButton).toBeEnabled());
@@ -213,7 +238,7 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
         destinations: [],
-        inlineActions: [expect.objectContaining({ source: 'inline', stepType: 'slack' })],
+        inlineActions: [expect.objectContaining({ source: 'inline', steps: expect.any(Array) })],
       })
     );
   });
@@ -272,6 +297,7 @@ describe('ActionPolicyFormFlyout', () => {
         throttleInterval: '5m',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
         inlineActions: [],
+        enabled: true,
       },
       'WzEsMV0='
     );

@@ -54,7 +54,7 @@ const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
 export const getTemplateForAction = (action: ActionDraft): ActionTemplate =>
   action.source === 'existing'
     ? { source: 'existing' }
-    : { source: 'inline', stepType: action.stepType };
+    : { source: 'inline', stepType: action.steps[0]?.stepType ?? 'email' };
 
 export const findActionTemplateCard = (
   template: ActionTemplate

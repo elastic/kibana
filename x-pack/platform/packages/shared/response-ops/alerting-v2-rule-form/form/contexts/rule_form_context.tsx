@@ -34,6 +34,17 @@ export interface RuleFormServices {
   dashboard?: DashboardStart;
   cps?: CPSPluginStart;
   minimumScheduleInterval?: string;
+  /**
+   * Optional flyout for creating an action policy from the rule form
+   * (e.g. “Link other action policies” → Create action policy).
+   * Provided by the alerting_v2 plugin host.
+   */
+  CreateActionPolicyFlyout?: React.ComponentType<{
+    onClose: () => void;
+    onCreated: (policy: { id: string; name: string; tags: string[] }) => void;
+    variant?: 'full' | 'essential';
+    ruleTags?: string[];
+  }>;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';

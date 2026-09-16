@@ -22,6 +22,7 @@ import {
 } from '../rule_builder/threshold/form_types';
 import { BuilderStateProvider } from '../rule_builder/builder_state_context';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
+import { CreateActionPolicySecondaryFlyoutProvider } from '../create_action_policy_secondary_flyout_context';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';
 import type { FormValues } from '../../../form/types';
 import type { ComposeDiscoverState } from '../types';
@@ -88,7 +89,9 @@ const createComposeFormWrapper = (
         <QueryClientProvider client={queryClient}>
           <FormProvider {...form}>
             <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
-              {children}
+              <CreateActionPolicySecondaryFlyoutProvider>
+                {children}
+              </CreateActionPolicySecondaryFlyoutProvider>
             </RuleFormProvider>
           </FormProvider>
         </QueryClientProvider>
@@ -270,78 +273,19 @@ describe('step validation', () => {
     });
   });
 
-  describe('notifications step validation', () => {
-    const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
-
-    it('declares notifications fields and no custom validate', () => {
-      expect(notificationsStep.fields).toEqual(['notifications']);
-      expect(notificationsStep.validate).toBeUndefined();
+  describe('steps', () => {
+    it('includes the correct steps based on isAlert', () => {
+      expect(getSteps(false).steps.map((step) => step.id)).toEqual([
+        'alertCondition',
+        'outcome',
+        'details',
+      ]);
+      expect(getSteps(true).steps.map((step) => step.id)).toEqual([
+        'alertCondition',
+        'outcome',
+        'details',
+      ]);
     });
-
-    it('delegates to methods.trigger with notifications', async () => {
-      const state = createState();
-      const methods = {
-        trigger: jest.fn().mockResolvedValue(true),
-      } as unknown as UseFormReturn<FormValues>;
-
-      const result = await validateStep(notificationsStep, methods, state);
-
-      expect(methods.trigger).toHaveBeenCalledWith(['notifications']);
-      expect(result).toBe(true);
-    });
-
-    it('returns false when trigger rejects notifications validation', async () => {
-      const state = createState();
-      const methods = {
-        trigger: jest.fn().mockResolvedValue(false),
-      } as unknown as UseFormReturn<FormValues>;
-
-      expect(await validateStep(notificationsStep, methods, state)).toBe(false);
-    });
-  });
-
-  describe('notifications.render', () => {
-    const renderNotificationsStep = (ruleId?: string) =>
-      render(
-        <ComposeDiscoverForm
-          state={createState({ step: 3 })}
-          dispatch={jest.fn()}
-          services={{ ...createMockServices(), dashboard: mockDashboard }}
-          onRecoveryTypeChange={jest.fn()}
-          onKindChange={jest.fn()}
-          isEditing={ruleId !== undefined}
-          ruleId={ruleId}
-        />,
-        { wrapper: createComposeFormWrapper() }
-      );
-
-    it('renders the simple action policy section in create mode', async () => {
-      renderNotificationsStep();
-      await waitFor(() => {
-        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
-      });
-    });
-
-    it('renders the simple action policy section in edit mode', async () => {
-      renderNotificationsStep('rule-1');
-      await waitFor(() => {
-        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
-      });
-    });
-  });
-
-  it('includes the correct steps based on isAlert', () => {
-    expect(getSteps(false).steps.map((step) => step.id)).toEqual([
-      'alertCondition',
-      'outcome',
-      'details',
-    ]);
-    expect(getSteps(true).steps.map((step) => step.id)).toEqual([
-      'alertCondition',
-      'outcome',
-      'details',
-      'notifications',
-    ]);
   });
 });
 

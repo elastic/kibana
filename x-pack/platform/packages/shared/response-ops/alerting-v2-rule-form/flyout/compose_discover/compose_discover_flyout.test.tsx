@@ -54,7 +54,7 @@ jest.mock('./compose_discover_form/notifications_step', () => ({
 }));
 
 jest.mock('./compose_discover_form/linked_action_policies_step', () => ({
-  LinkedActionPoliciesStep: () => null,
+  LinkedActionPoliciesMatchingSection: () => null,
 }));
 
 jest.mock('./compose_discover_form/esql_recovery_content', () => ({
@@ -346,17 +346,17 @@ describe('ComposeDiscoverFlyout', () => {
     });
   });
   describe('HorizontalMinimalStepper', () => {
-    it('renders the stepper with the correct aria-label for step 1 of 4', () => {
+    it('renders the stepper with the correct aria-label for step 1 of 3', () => {
       renderFlyout();
 
-      const stepper = screen.getByRole('group', { name: /Step 1 of 4: Condition/ });
+      const stepper = screen.getByRole('group', { name: /Step 1 of 3: Condition/ });
       expect(stepper).toBeInTheDocument();
     });
 
-    it('renders 4 steps when tracking is enabled (default)', () => {
+    it('renders 3 steps when tracking is enabled (default)', () => {
       renderFlyout();
 
-      expect(screen.getByText('1 / 4')).toBeInTheDocument();
+      expect(screen.getByText('1 / 3')).toBeInTheDocument();
       expect(screen.getByText('Condition')).toBeInTheDocument();
     });
 
@@ -1619,31 +1619,30 @@ describe('ComposeDiscoverFlyout', () => {
   });
 
   describe('step clamping after a YAML-edited kind change', () => {
-    it('clamps step back into range when YAML changes kind to one with fewer steps', () => {
+    it('keeps the details step when YAML changes kind to signal (same step count)', () => {
       renderFlyout({ mode: 'create' });
 
-      // Notifications (step 3) only exists for alert kind — reachable before the
-      // YAML edit below drops the rule to signal (3 steps: indices 0-2).
+      // Details (step 2) exists for both alert and signal kinds.
       act(() => {
-        getLatestFormProps().dispatch({ type: 'SET_STEP', step: 3 });
+        getLatestFormProps().dispatch({ type: 'SET_STEP', step: 2 });
       });
-      expect(getLatestFormProps().state.step).toBe(3);
+      expect(getLatestFormProps().state.step).toBe(2);
 
       // Enabling YAML mode applies the mocked parse, which returns kind: 'signal'.
       clickEditMode('yaml');
-      // Disabling re-parses the same buffer through the fix's clamp logic.
+      // Disabling re-parses the same buffer through the clamp logic.
       clickEditMode('form');
 
       expect(getLatestFormProps().state.step).toBe(2);
     });
 
-    it('still clamps when the buffer is unparseable at the moment of toggling back to Form', () => {
+    it('still keeps the details step when the buffer is unparseable at the moment of toggling back to Form', () => {
       renderFlyout({ mode: 'create' });
 
       act(() => {
-        getLatestFormProps().dispatch({ type: 'SET_STEP', step: 3 });
+        getLatestFormProps().dispatch({ type: 'SET_STEP', step: 2 });
       });
-      expect(getLatestFormProps().state.step).toBe(3);
+      expect(getLatestFormProps().state.step).toBe(2);
 
       // Enabling YAML mode's own parse succeeds and applies kind: 'signal' to RHF.
       clickEditMode('yaml');

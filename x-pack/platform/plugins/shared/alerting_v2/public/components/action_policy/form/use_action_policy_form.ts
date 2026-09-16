@@ -16,21 +16,26 @@ import type { ActionPolicyFormState } from './types';
 
 interface UseActionPolicyFormParams {
   initialValues?: ActionPolicyResponse;
+  /** Partial defaults for create mode (e.g. prefilled matcher from rule tags). */
+  defaultValues?: Partial<ActionPolicyFormState>;
   onSubmitCreate: (values: ActionPolicyFormState) => void;
   onSubmitUpdate: (id: string, values: ActionPolicyFormState, version: string) => void;
 }
 
 export const useActionPolicyForm = ({
   initialValues,
+  defaultValues: defaultValuesOverride,
   onSubmitCreate,
   onSubmitUpdate,
 }: UseActionPolicyFormParams) => {
   const isEditMode = !!initialValues;
 
-  const defaultValues = useMemo(
-    () => (initialValues ? toFormState(initialValues) : DEFAULT_FORM_STATE),
-    [initialValues]
-  );
+  const defaultValues = useMemo(() => {
+    if (initialValues) {
+      return toFormState(initialValues);
+    }
+    return { ...DEFAULT_FORM_STATE, ...defaultValuesOverride };
+  }, [initialValues, defaultValuesOverride]);
 
   const methods = useForm<ActionPolicyFormState>({
     mode: 'onBlur',
@@ -58,21 +63,26 @@ export const useActionPolicyForm = ({
     ],
   });
 
+  const hasDestination = destinations.length > 0 || inlineActions.length > 0;
+
   const isSubmitEnabled = useMemo(() => {
     const hasName = name.trim().length > 0;
-    const hasDestinations = destinations.length > 0 || inlineActions.length > 0;
     const allInlineActionsValid = inlineActions.every(isActionValid);
     const hasValidGroupBy = groupingMode === 'per_field' ? groupBy.length > 0 : true;
     const hasValidInterval =
       !needsInterval(throttleStrategy) || THROTTLE_INTERVAL_PATTERN.test(throttleInterval);
 
     return (
-      hasName && hasDestinations && allInlineActionsValid && hasValidGroupBy && hasValidInterval
+      hasName &&
+      hasDestination &&
+      allInlineActionsValid &&
+      hasValidGroupBy &&
+      hasValidInterval
     );
   }, [
-    destinations.length,
     groupBy.length,
     groupingMode,
+    hasDestination,
     inlineActions,
     name,
     throttleStrategy,
@@ -96,6 +106,7 @@ export const useActionPolicyForm = ({
     methods,
     isEditMode,
     isSubmitEnabled,
+    hasDestination,
     handleSubmit,
   };
 };

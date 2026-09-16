@@ -41,6 +41,8 @@ describe('notifications validation', () => {
               id: 'item-1',
               source: 'inline',
               stepType: 'email',
+              workflowName: 'Email notification',
+              stepName: 'notify',
               connectorId: null,
               params: '',
             },

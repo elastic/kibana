@@ -20,7 +20,7 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
-import { ActionPolicyForm } from '../form/action_policy_form';
+import { ActionPolicyForm, type ActionPolicyFormVariant } from '../form/action_policy_form';
 import type { ActionPolicyFormState } from '../form/types';
 import { useActionPolicyForm } from '../form/use_action_policy_form';
 
@@ -37,6 +37,15 @@ interface ActionPolicyFormFlyoutProps {
   onUpdate?: (id: string, values: ActionPolicyFormState, version: string) => void | Promise<void>;
   isLoading?: boolean;
   initialValues?: ActionPolicyResponse;
+  /** Create-mode defaults (ignored when editing). */
+  defaultValues?: Partial<ActionPolicyFormState>;
+  /** `essential` is the compact create-from-rule layout. */
+  variant?: ActionPolicyFormVariant;
+  /**
+   * When true, renders as a Compose Discover secondary flyout nested under a
+   * parent `session="start"` flyout (compact overlay, not fill-width).
+   */
+  asSecondaryFlyout?: boolean;
 }
 
 export const ActionPolicyFormFlyout = ({
@@ -45,17 +54,28 @@ export const ActionPolicyFormFlyout = ({
   onUpdate,
   isLoading = false,
   initialValues,
+  defaultValues,
+  variant = 'full',
+  asSecondaryFlyout = false,
 }: ActionPolicyFormFlyoutProps) => {
   const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
     initialValues,
+    defaultValues,
     onSubmitCreate: onSave ?? noop,
     onSubmitUpdate: onUpdate ?? noop,
   });
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="m" ownFocus>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={FLYOUT_TITLE_ID}
+      type="overlay"
+      size="m"
+      ownFocus={!asSecondaryFlyout}
+      data-test-subj="actionPolicyFormFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
+        <EuiTitle size={asSecondaryFlyout ? 's' : 'm'} id={FLYOUT_TITLE_ID}>
           <h2 data-test-subj="title">
             {isEditMode ? (
               <FormattedMessage
@@ -73,7 +93,7 @@ export const ActionPolicyFormFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <FormProvider {...methods}>
-          <ActionPolicyForm />
+          <ActionPolicyForm variant={variant} />
         </FormProvider>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
