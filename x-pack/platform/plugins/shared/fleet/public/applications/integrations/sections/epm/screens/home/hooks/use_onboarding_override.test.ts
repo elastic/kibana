@@ -66,7 +66,7 @@ describe('useOnboardingOverride', () => {
     beforeEach(() => mockGetBooleanValue.mockReturnValue(false));
 
     it('returns cards unchanged', () => {
-      const cards = ALL_HIDDEN_NAMES.map(makeCard);
+      const cards = ALL_HIDDEN_NAMES.map((name) => makeCard(name));
       const { result } = renderHook(() => useOnboardingOverride());
       expect(result.current.applyOnboardingOverride(cards)).toBe(cards);
     });
@@ -81,7 +81,7 @@ describe('useOnboardingOverride', () => {
     beforeEach(() => mockGetBooleanValue.mockReturnValue(true));
 
     it('filters every hidden name and replaces with single onboarding card', () => {
-      const cards = ALL_HIDDEN_NAMES.map(makeCard);
+      const cards = ALL_HIDDEN_NAMES.map((name) => makeCard(name));
       const { result } = renderHook(() => useOnboardingOverride());
       const output = result.current.applyOnboardingOverride(cards);
 
@@ -101,7 +101,7 @@ describe('useOnboardingOverride', () => {
 
     it('preserves non-AWS cards', () => {
       const nonAwsCard = makeCard('elastic_agent', 'epr:elastic_agent');
-      const cards = [...ALL_HIDDEN_NAMES.map(makeCard), nonAwsCard];
+      const cards = [...ALL_HIDDEN_NAMES.map((name) => makeCard(name)), nonAwsCard];
       const { result } = renderHook(() => useOnboardingOverride());
       const output = result.current.applyOnboardingOverride(cards);
 
