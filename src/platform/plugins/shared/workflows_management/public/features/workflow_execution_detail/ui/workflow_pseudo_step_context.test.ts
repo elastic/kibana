@@ -250,6 +250,16 @@ describe('buildTriggerStepExecutionFromContext', () => {
     expect(result?.input).toEqual(inputs);
   });
 
+  it('labels the trigger manual when stored context has inputs and no event', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      context: { inputs: { message: 'test message' } },
+    });
+    expect(result?.stepId).toBe('manual');
+    expect(result?.stepType).toBe('trigger_manual');
+    expect(result?.input).toEqual({ message: 'test message' });
+  });
+
   it('exposes manual inputs as output when both event and inputs are present', () => {
     const result = buildTriggerStepExecutionFromContext({
       ...baseExecution,

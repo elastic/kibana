@@ -11,7 +11,7 @@ import type { EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
-import { buildWorkflowContext } from '../build_workflow_context';
+import { buildWorkflowContext, buildWorkflowRenderContext } from '../build_workflow_context';
 
 jest.mock('../../utils', () => ({
   getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
@@ -642,7 +642,7 @@ describe('buildWorkflowContext', () => {
   });
 
   describe('event.inputs aliasing for manual triggers', () => {
-    it('aliases event.inputs from fully-defaulted inputs when no event is persisted', () => {
+    it('does not persist a minted event when inputs exist and no event was stored', () => {
       setInputsSchema({
         type: 'object',
         properties: { severity: { type: 'string', default: 'medium' } },
@@ -656,6 +656,25 @@ describe('buildWorkflowContext', () => {
       };
 
       const result = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(result.event).toBeUndefined();
+      expect(result.inputs).toEqual({ severity: 'high' });
+    });
+
+    it('aliases event.inputs from fully-defaulted inputs when no event is persisted', () => {
+      setInputsSchema({
+        type: 'object',
+        properties: { severity: { type: 'string', default: 'medium' } },
+        required: [],
+        additionalProperties: false,
+      });
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        spaceId: 'default',
+        context: { inputs: { severity: 'high' } },
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
 
       expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'high' });
       expect((result.event as Record<string, unknown>).spaceId).toBe('default');
@@ -673,7 +692,7 @@ describe('buildWorkflowContext', () => {
         context: { inputs: {} },
       };
 
-      const result = buildWorkflowContext(execution, undefined, dependencies);
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
 
       expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'medium' });
     });
@@ -684,7 +703,7 @@ describe('buildWorkflowContext', () => {
         context: {},
       };
 
-      const result = buildWorkflowContext(execution, undefined, dependencies);
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
 
       expect(result.event).toBeUndefined();
       expect(result.inputs).toBeUndefined();
@@ -697,7 +716,7 @@ describe('buildWorkflowContext', () => {
         context: { event: alertEvent, inputs: { ticketId: 'T-1' } },
       };
 
-      const result = buildWorkflowContext(execution, undefined, dependencies);
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
 
       expect(result.event).toEqual(alertEvent);
       expect((result.event as Record<string, unknown>).inputs).toBeUndefined();
@@ -716,7 +735,7 @@ describe('buildWorkflowContext', () => {
         context: { event: oldSynthesizedEvent, inputs: {} },
       };
 
-      const result = buildWorkflowContext(execution, undefined, dependencies);
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
 
       // event.inputs is refreshed to the defaulted value, not the stale empty object
       expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'medium' });

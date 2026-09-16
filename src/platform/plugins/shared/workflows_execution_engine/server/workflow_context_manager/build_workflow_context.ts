@@ -87,21 +87,30 @@ export function buildWorkflowContext(
   const renderContext = buildInputDefaultRenderContext(workflowExecution, coreStart, dependencies);
   const inputsWithDefaults = applyInputDefaults(renderContext.inputs, normalizedInputsSchema);
 
-  // Alias event.inputs from defaulted inputs when the run has inputs but no real
-  // event (manual / workflow.execute). Refresh leftover event.type === 'manual'
-  // rows. Leave event undefined when there is nothing to alias.
-  const rawEvent = renderContext.event as Record<string, unknown> | undefined;
+  return {
+    ...renderContext,
+    inputs: inputsWithDefaults,
+  };
+}
+
+/** Liquid render context with `event.inputs` aliased. Do not persist this object. */
+export function buildWorkflowRenderContext(
+  workflowExecution: EsWorkflowExecution,
+  coreStart?: CoreStart,
+  dependencies?: ContextDependencies
+): WorkflowContext {
+  const context = buildWorkflowContext(workflowExecution, coreStart, dependencies);
+  const rawEvent = context.event as Record<string, unknown> | undefined;
   const shouldAliasInputs =
-    rawEvent?.type === 'manual' || (!rawEvent && inputsWithDefaults !== undefined);
+    rawEvent?.type === 'manual' || (!rawEvent && context.inputs !== undefined);
   const event = (
     shouldAliasInputs
-      ? { spaceId: workflowExecution.spaceId, ...rawEvent, inputs: inputsWithDefaults }
+      ? { spaceId: workflowExecution.spaceId, ...rawEvent, inputs: context.inputs }
       : rawEvent
   ) as WorkflowContext['event'];
 
   return {
-    ...renderContext,
-    inputs: inputsWithDefaults,
+    ...context,
     event,
   };
 }
