@@ -26,7 +26,6 @@ const evaluate = async ({
     visualizationExtractor: () => visualizations,
     expectedConfigExtractor: (expected) =>
       (expected as { config?: VisualizationGoldConfig } | undefined)?.config,
-    expectedQueryExtractor: (expected) => (expected as { query?: string } | undefined)?.query ?? '',
   });
 
   return evaluator.evaluate({
