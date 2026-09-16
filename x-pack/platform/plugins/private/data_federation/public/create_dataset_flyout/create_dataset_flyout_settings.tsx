@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataFederationKibanaServices } from '../types';
@@ -102,16 +102,11 @@ const BOOLEAN_OPTIONS = (placeholder: string, enabled: string, disabled: string)
 // Top-level export
 // ---------------------------------------------------------------------------
 
-export function CreateDatasetFlyoutSettings({
+export function CreateDatasetFormatField({
   control,
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
-  const {
-    services: { docLinks },
-  } = useKibana<DataFederationKibanaServices>();
-  const dataFederationLinks = docLinks.links.dataFederation;
-
   const { field: formatField, fieldState: formatFieldState } = useController({
     name: 'settings.format',
     control,
@@ -121,40 +116,104 @@ export function CreateDatasetFlyoutSettings({
     },
   });
 
-  const format = formatField.value as DatasetFormatFormValue;
+  return (
+    <EuiFormRow
+      label={createDatasetFlyoutStrings.settingsFormatLabel()}
+      fullWidth
+      isInvalid={Boolean(formatFieldState.error)}
+      error={formatFieldState.error?.message}
+    >
+      <EuiSelect
+        options={FORMAT_OPTIONS()}
+        data-test-subj="createDatasetFlyoutSettingsFormat"
+        fullWidth
+        aria-label={createDatasetFlyoutStrings.settingsFormatLabel()}
+        value={formatField.value}
+        onChange={(e) => formatField.onChange(e.target.value)}
+        name={formatField.name}
+        inputRef={formatField.ref}
+        isInvalid={Boolean(formatFieldState.error)}
+      />
+    </EuiFormRow>
+  );
+}
+
+export function CreateDatasetPartitionDetectionField({
+  control,
+}: {
+  control: Control<CreateDatasetFormValues>;
+}) {
+  const { field: partitionDetectionField } = useController({
+    name: 'settings.partition_detection',
+    control,
+  });
+
+  return (
+    <EuiFormRow label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()} fullWidth>
+      <EuiSelect
+        options={PARTITION_DETECTION_OPTIONS()}
+        data-test-subj="createDatasetFlyoutSettingsPartitionDetection"
+        fullWidth
+        aria-label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()}
+        value={partitionDetectionField.value}
+        onChange={(e) => partitionDetectionField.onChange(e.target.value)}
+        name={partitionDetectionField.name}
+        inputRef={partitionDetectionField.ref}
+      />
+    </EuiFormRow>
+  );
+}
+
+function DatasetSettingsHelpLink() {
+  const {
+    services: { docLinks },
+  } = useKibana<DataFederationKibanaServices>();
 
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsFormatLabel()}
-        fullWidth
-        isInvalid={Boolean(formatFieldState.error)}
-        error={formatFieldState.error?.message}
-      >
-        <EuiSelect
-          options={FORMAT_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsFormat"
-          fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsFormatLabel()}
-          value={formatField.value}
-          onChange={(e) => formatField.onChange(e.target.value)}
-          name={formatField.name}
-          inputRef={formatField.ref}
-          isInvalid={Boolean(formatFieldState.error)}
-        />
-      </EuiFormRow>
-
-      <CoreFormatSettings control={control} format={format} />
-
-      <EuiSpacer size="m" />
       <EuiText size="xs" color="subdued">
-        <EuiLink href={dataFederationLinks.datasetSettings} target="_blank">
+        <EuiLink href={docLinks.links.dataFederation.datasetSettings} target="_blank">
           {createDatasetFlyoutStrings.settingsLearnMore()}
         </EuiLink>
       </EuiText>
       <EuiSpacer size="s" />
+    </>
+  );
+}
+
+export function CreateDatasetFlyoutSettings({
+  control,
+}: {
+  control: Control<CreateDatasetFormValues>;
+}) {
+  const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <CreateDatasetFormatField control={control} />
+      <CoreFormatSettings control={control} format={format} />
+      <DatasetSettingsHelpLink />
       <UniversalAdvancedSettings control={control} />
+      <FormatAdvancedSettings control={control} format={format} />
+    </>
+  );
+}
+
+/** Advanced settings without format or partition detection — used by the create-dataset wizard. */
+export function CreateDatasetAdvancedSettings({
+  control,
+}: {
+  control: Control<CreateDatasetFormValues>;
+}) {
+  const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
+
+  return (
+    <>
+      <CoreFormatSettings control={control} format={format} />
+      <DatasetSettingsHelpLink />
+      <RemainingUniversalSettings control={control} />
       <FormatAdvancedSettings control={control} format={format} />
     </>
   );
@@ -181,13 +240,15 @@ function CoreFormatSettings({
 // Universal advanced settings — shown under every format
 // ---------------------------------------------------------------------------
 
-function UniversalAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+function RemainingUniversalSettings({
+  control,
+  partitionDetection,
+}: {
+  control: Control<CreateDatasetFormValues>;
+  partitionDetection?: React.ReactNode;
+}) {
   const { field: schemaResolutionField } = useController({
     name: 'settings.schema_resolution',
-    control,
-  });
-  const { field: partitionDetectionField } = useController({
-    name: 'settings.partition_detection',
     control,
   });
   const { field: partitionPathField } = useController({
@@ -219,18 +280,7 @@ function UniversalAdvancedSettings({ control }: { control: Control<CreateDataset
           inputRef={schemaResolutionField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()} fullWidth>
-        <EuiSelect
-          options={PARTITION_DETECTION_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsPartitionDetection"
-          fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()}
-          value={partitionDetectionField.value}
-          onChange={(e) => partitionDetectionField.onChange(e.target.value)}
-          name={partitionDetectionField.name}
-          inputRef={partitionDetectionField.ref}
-        />
-      </EuiFormRow>
+      {partitionDetection}
       <EuiFormRow
         label={createDatasetFlyoutStrings.settingsPartitionPathLabel()}
         helpText={createDatasetFlyoutStrings.settingsPartitionPathHelp()}
@@ -264,6 +314,15 @@ function UniversalAdvancedSettings({ control }: { control: Control<CreateDataset
         />
       </EuiFormRow>
     </>
+  );
+}
+
+function UniversalAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  return (
+    <RemainingUniversalSettings
+      control={control}
+      partitionDetection={<CreateDatasetPartitionDetectionField control={control} />}
+    />
   );
 }
 

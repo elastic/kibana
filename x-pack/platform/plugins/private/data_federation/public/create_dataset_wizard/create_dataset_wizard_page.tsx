@@ -38,7 +38,14 @@ import type { DatasetWizardContent, DatasetWizardSection } from './types';
 const { FormWizard, FormWizardStep } = Forms;
 
 const emptyWizardValue: DatasetWizardContent = {
-  dataset: { name: '', description: '', data_source: '', resource: '' },
+  dataset: {
+    name: '',
+    description: '',
+    data_source: '',
+    resource: '',
+    format: '',
+    partition_detection: '',
+  },
   settings: emptyDatasetFlyoutFormValues().settings,
 };
 

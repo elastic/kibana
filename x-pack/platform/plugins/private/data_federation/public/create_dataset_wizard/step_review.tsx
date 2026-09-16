@@ -91,6 +91,18 @@ export function StepReview() {
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewResource">
             {displayValue(values.resource)}
           </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>
+            {createDatasetFlyoutStrings.settingsFormatLabel()}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewFormat">
+            {displayValue(values.settings.format)}
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>
+            {createDatasetFlyoutStrings.settingsPartitionDetectionLabel()}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewPartitionDetection">
+            {displayValue(values.settings.partition_detection)}
+          </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </ReviewSection>
 
@@ -103,10 +115,22 @@ export function StepReview() {
       >
         <EuiDescriptionList textStyle="reverse" compressed>
           <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.settingsFormatLabel()}
+            {createDatasetFlyoutStrings.settingsSchemaResolutionLabel()}
           </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewFormat">
-            {displayValue(values.settings.format)}
+          <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewSchemaResolution">
+            {displayValue(values.settings.schema_resolution)}
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>
+            {createDatasetFlyoutStrings.settingsPartitionPathLabel()}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewPartitionPath">
+            {displayValue(values.settings.partition_path)}
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>
+            {createDatasetFlyoutStrings.settingsHivePartitioningLabel()}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewHivePartitioning">
+            {displayValue(values.settings.hive_partitioning)}
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </ReviewSection>

@@ -59,9 +59,13 @@ describe('CreateDatasetWizardPage', () => {
   };
 
   it('walks through dataset, advanced, and confirm steps then saves', async () => {
-    const { getByTestId, history, add, loadDataSets } = renderWizard();
+    const { getByTestId, getByText, queryByTestId, history, add, loadDataSets } = renderWizard();
 
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
+    expect(getByTestId('createDatasetFlyoutResource')).toBeInTheDocument();
+    expect(
+      getByText('URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)')
+    ).toBeInTheDocument();
 
     fireEvent.change(getByTestId('createDatasetFlyoutDataSource'), {
       target: { value: 'source-1' },
@@ -72,9 +76,17 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetFlyoutResource'), {
       target: { value: 'bucket/*' },
     });
+    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+      target: { value: 'csv' },
+    });
+    fireEvent.change(getByTestId('createDatasetFlyoutSettingsPartitionDetection'), {
+      target: { value: 'hive' },
+    });
 
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
+    expect(queryByTestId('createDatasetFlyoutSettingsFormat')).toBeNull();
+    expect(queryByTestId('createDatasetFlyoutSettingsPartitionDetection')).toBeNull();
 
     fireEvent.click(getByTestId('backButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
@@ -86,14 +98,13 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(getByTestId('backButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
 
-    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
-      target: { value: 'csv' },
-    });
     fireEvent.click(getByTestId('nextButton'));
 
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     expect(getByTestId('createDatasetWizardReviewName')).toHaveTextContent('logs-dataset');
     expect(getByTestId('createDatasetWizardReviewDataSource')).toHaveTextContent('source-1');
+    expect(getByTestId('createDatasetWizardReviewFormat')).toHaveTextContent('csv');
+    expect(getByTestId('createDatasetWizardReviewPartitionDetection')).toHaveTextContent('hive');
 
     fireEvent.click(getByTestId('nextButton'));
     await waitFor(() => {
@@ -102,6 +113,7 @@ describe('CreateDatasetWizardPage', () => {
           name: 'logs-dataset',
           data_source: 'source-1',
           resource: 'bucket/*',
+          settings: expect.objectContaining({ format: 'csv', partition_detection: 'hive' }),
         })
       );
       expect(loadDataSets).toHaveBeenCalledTimes(1);
@@ -109,8 +121,8 @@ describe('CreateDatasetWizardPage', () => {
     });
   });
 
-  it('keeps next and back enabled on the advanced step when format is empty', async () => {
-    const { getByTestId } = renderWizard();
+  it('requires format before leaving the dataset step', async () => {
+    const { getByTestId, queryByTestId } = renderWizard();
 
     fireEvent.change(getByTestId('createDatasetFlyoutDataSource'), {
       target: { value: 'source-1' },
@@ -122,19 +134,17 @@ describe('CreateDatasetWizardPage', () => {
       target: { value: 'bucket/*' },
     });
 
-    fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
-
-    expect(getByTestId('backButton')).toBeEnabled();
-    expect(getByTestId('nextButton')).toBeEnabled();
+    expect(getByTestId('createDatasetFlyoutSettingsFormat')).toBeInTheDocument();
+    expect(getByTestId('createDatasetFlyoutSettingsPartitionDetection')).toBeInTheDocument();
 
     fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+    expect(queryByTestId('createDatasetWizardAdvancedStep')).toBeNull();
+    expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
 
-    fireEvent.click(getByTestId('backButton'));
+    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+      target: { value: 'parquet' },
+    });
+    fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
-
-    fireEvent.click(getByTestId('backButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
   });
 });

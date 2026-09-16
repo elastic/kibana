@@ -12,6 +12,8 @@ export interface DatasetWizardDatasetStep {
   description: string;
   data_source: string;
   resource: string;
+  format: string;
+  partition_detection: string;
 }
 
 export interface DatasetWizardContent {

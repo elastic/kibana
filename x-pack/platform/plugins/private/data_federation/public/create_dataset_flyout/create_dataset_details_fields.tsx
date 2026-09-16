@@ -11,7 +11,7 @@ import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import type { DataSource } from '../../common';
-import { DATA_SOURCE_TYPES_TO_HELP_TEXT, validateIndexNameRules } from '../../common';
+import { validateIndexNameRules } from '../../common';
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 
@@ -98,16 +98,6 @@ export function CreateDatasetDetailsFields({
     return [placeholder, ...fromSources];
   }, [dataSources]);
 
-  const resourceHelpText = useMemo(() => {
-    const selected = dataSources.find((ds) => ds.name === dataSourceIdField.value);
-    if (!selected) {
-      return createDatasetFlyoutStrings.resourceHelp();
-    }
-    return (
-      DATA_SOURCE_TYPES_TO_HELP_TEXT[selected.type] ?? createDatasetFlyoutStrings.resourceHelp()
-    );
-  }, [dataSourceIdField.value, dataSources]);
-
   return (
     <>
       <EuiFormRow
@@ -159,26 +149,24 @@ export function CreateDatasetDetailsFields({
           inputRef={descriptionField.ref}
         />
       </EuiFormRow>
-      {dataSourceIdField.value ? (
-        <EuiFormRow
-          label={createDatasetFlyoutStrings.resourceLabel()}
-          helpText={resourceHelpText}
+      <EuiFormRow
+        label={createDatasetFlyoutStrings.resourceLabel()}
+        helpText={createDatasetFlyoutStrings.resourceHelp()}
+        fullWidth
+        isInvalid={Boolean(resourceFieldState.error)}
+        error={resourceFieldState.error?.message}
+      >
+        <EuiFieldText
+          data-test-subj="createDatasetFlyoutResource"
           fullWidth
+          autoComplete="off"
           isInvalid={Boolean(resourceFieldState.error)}
-          error={resourceFieldState.error?.message}
-        >
-          <EuiFieldText
-            data-test-subj="createDatasetFlyoutResource"
-            fullWidth
-            autoComplete="off"
-            isInvalid={Boolean(resourceFieldState.error)}
-            value={resourceField.value}
-            onChange={(e) => resourceField.onChange(e.target.value)}
-            name={resourceField.name}
-            inputRef={resourceField.ref}
-          />
-        </EuiFormRow>
-      ) : null}
+          value={resourceField.value}
+          onChange={(e) => resourceField.onChange(e.target.value)}
+          name={resourceField.name}
+          inputRef={resourceField.ref}
+        />
+      </EuiFormRow>
     </>
   );
 }

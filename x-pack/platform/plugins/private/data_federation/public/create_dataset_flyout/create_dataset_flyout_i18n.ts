@@ -93,7 +93,7 @@ export const createDatasetFlyoutStrings = {
 
   resourceHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.resourceHelp', {
-      defaultMessage: 'Path or identifier for the dataset resource.',
+      defaultMessage: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
     }),
 
   settingsFormatRequired: () =>

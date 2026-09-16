@@ -9,14 +9,14 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
-import { CreateDatasetFlyoutSettings } from '../create_dataset_flyout/create_dataset_flyout_settings';
+import { CreateDatasetAdvancedSettings } from '../create_dataset_flyout/create_dataset_flyout_settings';
 
 export function StepAdvanced() {
   const { control } = useFormContext<CreateDatasetFormValues>();
 
   return (
     <div data-test-subj="createDatasetWizardAdvancedStep">
-      <CreateDatasetFlyoutSettings control={control} />
+      <CreateDatasetAdvancedSettings control={control} />
     </div>
   );
 }

@@ -61,14 +61,14 @@ describe('CreateDatasetFlyout', () => {
     { name: 'source-1', type: 's3', description: '', settings: {} },
   ];
 
-  it('does not render resource/settings until a data source is selected', () => {
+  it('does not render settings until a data source is selected', () => {
     const { queryByTestId, getByTestId } = renderFlyout({
       dataSources,
       existingDataSetNames: [],
       onSave: jest.fn().mockResolvedValue(null),
     });
 
-    expect(queryByTestId('createDatasetFlyoutResource')).toBeNull();
+    expect(getByTestId('createDatasetFlyoutResource')).toBeInTheDocument();
     expect(queryByTestId('createDatasetFlyoutSettingsFormat')).toBeNull();
 
     fireEvent.change(getByTestId('createDatasetFlyoutDataSource'), {
