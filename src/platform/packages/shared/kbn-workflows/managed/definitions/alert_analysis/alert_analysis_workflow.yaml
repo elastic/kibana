@@ -63,6 +63,13 @@ triggers:
     inputs:
       additionalProperties: false
       properties:
+        alerts:
+          type: array
+          description: >
+            Alert documents to analyse, supplied by a `workflow.execute` caller such as the
+            AlertZero Alert Triage Worker. A child run receives no trigger event, so without
+            this the workflow sees zero alerts and silently skips. Absent on the standalone
+            path, which keeps reading the alert trigger's own `event.alerts`.
         autoCloseEnabled:
           type: boolean
           description: >
@@ -91,17 +98,41 @@ triggers:
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
+# Declared in JSON Schema object form, not the legacy `- name: / type:` list. The legacy
+# converter hardcodes array items to `anyOf: [string, number, boolean]`
+# (field_conversion.ts), so an array of objects cannot be expressed in it: `verdicts` would
+# fail output validation once per verdict at the end of an otherwise successful run.
 outputs:
-  - name: verdicts
-    type: array
-  - name: false_positive_count
-    type: number
-  - name: true_positive_count
-    type: number
-  - name: inconclusive_count
-    type: number
-  - name: auto_closed_ids
-    type: array
+  properties:
+    verdicts:
+      type: array
+      items:
+        type: object
+        properties:
+          alert_id:
+            type: string
+          classification:
+            type: string
+          confidence_score:
+            type: number
+          rationale:
+            type: string
+          contributing_factors:
+            type: array
+            items:
+              type: string
+    false_positive_count:
+      type: number
+    true_positive_count:
+      type: number
+    inconclusive_count:
+      type: number
+    auto_closed_ids:
+      type: array
+      items:
+        type: string
+    grouped_counts_summary:
+      type: string
 
 settings:
   on-failure:
@@ -161,8 +192,17 @@ steps:
     with:
       normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
       # One entry per alert, appended by each batch call: { id, classification,
-      # confidence_score, rationale, contributing_factors }.
+      # confidence_score, rationale, contributing_factors }. `id` is the model's echo of the
+      # alert id, so this list is for internal pairing only — never export it to a caller.
       all_verdicts: []
+      # The caller-facing verdict list emitted by workflow.output, accumulated in
+      # apply_verdicts and keyed on the real alert id rather than the model's echo:
+      # { alert_id, classification, confidence_score, rationale, contributing_factors,
+      #   host_name, user_name }.
+      output_verdicts: []
+      # Initialised so the declared output is well-formed on the skip path, where
+      # build_grouped_counts_summary never runs (it sits inside the analysis_enabled guard).
+      grouped_counts_summary: ""
       # One entry per alert: { id, summary } — the related-alert graph, pre-rendered.
       # Reset at the start of each batch iteration (see classify_alert_batches).
       related_summaries: []
@@ -237,17 +277,28 @@ steps:
           # the ai.agent step's superRefine never sees both non-empty (Z1 invariant).
           connector_id: ""
           connector_id_by_feature: "{{ inputs.connectorIdByFeature }}"
-          # Boolean: ternary fallback preserves the runtime-config value when the field
-          # is absent. `| default:` would not work here because Liquid treats false as
-          # falsy, so `false | default: x` returns x rather than false.
-          auto_close_enabled: "${{ inputs.autoCloseEnabled != null ? inputs.autoCloseEnabled : variables.auto_close_enabled }}"
           # When min threshold arrives as an input, collapse max to 1: the range
           # degenerates to a floor, so the Worker can close at any score >= min.
-          # Ternary fallback preserves the fetched runtime-config value when absent.
-          auto_close_confidence_score_min_threshold: "${{ inputs.autoCloseConfidenceScoreMinThreshold != null ? inputs.autoCloseConfidenceScoreMinThreshold : variables.auto_close_confidence_score_min_threshold }}"
+          # NOTE: the engine's Liquid has no ternary operator — `a != null ? a : b` fails at
+          # execution time with "The provided expression is invalid", so every fallback here
+          # is either a filter or a separate gated step.
+          auto_close_confidence_score_min_threshold: "${{ inputs.autoCloseConfidenceScoreMinThreshold | default: variables.auto_close_confidence_score_min_threshold }}"
           auto_close_confidence_score_max_threshold: 1
           agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
           tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
+
+      # autoCloseEnabled cannot use `| default:`: Liquid treats false as falsy, so
+      # `false | default: x` yields x and the Worker's explicit `false` would be discarded —
+      # letting the sub-workflow close alerts the Worker is meant to gate behind a proposal.
+      # A presence-gated step keeps false meaning false.
+      - name: set_auto_close_enabled_if_provided
+        type: if
+        condition: "${{ inputs.autoCloseEnabled != null }}"
+        steps:
+          - name: apply_auto_close_override
+            type: data.set
+            with:
+              auto_close_enabled: "${{ inputs.autoCloseEnabled }}"
 
   # ---------------------------------------------------------------------------
   # Pre-compute connector_configured helper
@@ -275,11 +326,29 @@ steps:
       # every alert is re-analyzed.
       pending_filter_expr: '{% if consts.override_previous %}false{% else %}a.kibana.alert.workflow_tags contains "{{ variables.tag_prefix }}"{% endif %}'
 
+  # The alert set under analysis. `workflow.execute` passes only `inputs` — a child run has
+  # no trigger event at all — so a caller-supplied set is the only way this workflow can be
+  # driven by anything other than its own alert trigger. Defaults to the trigger's alerts,
+  # which keeps the standalone path byte-identical (success criterion 7 / R8).
+  - name: set_alert_set
+    type: data.set
+    with:
+      alert_set: "${{ event.alerts }}"
+
+  - name: use_caller_alerts_if_provided
+    type: if
+    condition: "${{ inputs.alerts != null }}"
+    steps:
+      - name: apply_caller_alerts
+        type: data.set
+        with:
+          alert_set: "${{ inputs.alerts }}"
+
   - name: set_alert_counts
     type: data.set
     with:
-      total_alert_count: "${{ event.alerts | size }}"
-      pending_alert_count: "${{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | size }}"
+      total_alert_count: "${{ variables.alert_set | size }}"
+      pending_alert_count: "${{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | size }}"
 
   # ---------------------------------------------------------------------------
   # Runtime guard
@@ -314,7 +383,7 @@ steps:
       - name: set_enrichment_anchor
         type: data.set
         with:
-          anchor_timestamp: '{{ event.alerts[0]["@timestamp"] }}'
+          anchor_timestamp: '{{ variables.alert_set[0]["@timestamp"] }}'
 
       # Close history: how often this rule's alerts have been closed and
       # the distribution of close reasons (e.g. false_positive, resolved).
@@ -641,7 +710,7 @@ steps:
       # the total alert count), so workflow-execution state stays proportional to batch size.
       - name: classify_alert_batches
         type: foreach
-        foreach: "{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
+        foreach: "{{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
         steps:
 
           # -----------------------------------------------------------------
@@ -1203,7 +1272,7 @@ steps:
 
       - name: apply_verdicts
         type: foreach
-        foreach: "{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}"
+        foreach: "{{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | json }}"
         steps:
           - name: select_alert_verdict
             type: data.set
@@ -1251,6 +1320,35 @@ steps:
                     kbn-xsrf: string
                     Content-Type: application/json
             else:
+
+              # -------------------------------------------------------------------
+              # Accumulate the verdict a caller receives via workflow.output
+              # -------------------------------------------------------------------
+              # Keyed on foreach.item._id — the real alert id — never on the model's echoed
+              # `id`. A caller acts on these: the Alert Triage Worker tags, notes and closes
+              # by this field, so passing the raw model output through would let a fabricated
+              # id close an unrelated alert. Reached only from this else branch, so a verdict
+              # matching no real alert is dropped rather than exported.
+              - name: build_output_verdict
+                type: data.set
+                with:
+                  output_verdict:
+                    alert_id: "{{ foreach.item._id }}"
+                    classification: "{{ variables.alert_verdict.classification }}"
+                    confidence_score: "${{ variables.alert_verdict.confidence_score }}"
+                    rationale: "{{ variables.alert_verdict.rationale }}"
+                    contributing_factors: "${{ variables.alert_verdict.contributing_factors }}"
+                    # Entity the alert belongs to, carried so a caller can group verdicts by
+                    # host/user without re-reading the alerts. Read from the alert document,
+                    # never from the model's reply. `unknown` keeps grouping total: an alert
+                    # with no host still belongs in exactly one group.
+                    host_name: "{{ foreach.item.host.name | default: 'unknown' }}"
+                    user_name: "{{ foreach.item.user.name | default: 'unknown' }}"
+
+              - name: accumulate_output_verdict
+                type: data.set
+                with:
+                  output_verdicts: "${{ variables.output_verdicts | push: variables.output_verdict }}"
 
               # -------------------------------------------------------------------
               # Write the verdict note to the alert timeline
@@ -1369,6 +1467,28 @@ steps:
                       auto_close_ids: "${{ variables.auto_close_ids | push: foreach.item._id }}"
 
       # -----------------------------------------------------------------------
+      # Grouped verdict counts, per entity, as a ready-to-render sentence
+      # -----------------------------------------------------------------------
+      # The epic asks an Investigation conclusion to read "X alerts for host A classified as
+      # true positive. Y alerts from host B were classified as false positives." Rendered
+      # here rather than in the caller so grouping stays with the data that produced it, and
+      # deterministic (plain Liquid over the counts, no second model call — D41).
+      - name: build_grouped_counts_summary
+        type: data.set
+        with:
+          grouped_counts_summary: >-
+            {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq -%}
+            {%- for h in hosts -%}
+            {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
+            {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
+            {%- assign fp = for_host | where: 'classification', 'false_positive' | size -%}
+            {%- assign inc = for_host | where: 'classification', 'inconclusive' | size -%}
+            {%- if tp > 0 %} {{ tp }} alert(s) for host {{ h }} classified as true positive.{% endif -%}
+            {%- if fp > 0 %} {{ fp }} alert(s) for host {{ h }} classified as false positive.{% endif -%}
+            {%- if inc > 0 %} {{ inc }} alert(s) for host {{ h }} were inconclusive.{% endif -%}
+            {%- endfor -%}
+
+      # -----------------------------------------------------------------------
       # Auto-close: close every alert that meets the FP thresholds, in bulk
       # -----------------------------------------------------------------------
       # When auto_close_enabled is true, alerts classified as false_positive with a
@@ -1439,8 +1559,11 @@ steps:
     type: workflow.output
     status: completed
     with:
-      verdicts: "${{ variables.all_verdicts }}"
-      false_positive_count: "${{ variables.all_verdicts | where: 'classification', 'false_positive' | size }}"
-      true_positive_count: "${{ variables.all_verdicts | where: 'classification', 'true_positive' | size }}"
-      inconclusive_count: "${{ variables.all_verdicts | where: 'classification', 'inconclusive' | size }}"
+      # output_verdicts, not all_verdicts: the caller-facing list is keyed on the real alert
+      # id. Exporting all_verdicts would hand a caller the model's echoed id to act on.
+      verdicts: "${{ variables.output_verdicts }}"
+      false_positive_count: "${{ variables.output_verdicts | where: 'classification', 'false_positive' | size }}"
+      true_positive_count: "${{ variables.output_verdicts | where: 'classification', 'true_positive' | size }}"
+      inconclusive_count: "${{ variables.output_verdicts | where: 'classification', 'inconclusive' | size }}"
       auto_closed_ids: "${{ variables.auto_close_ids }}"
+      grouped_counts_summary: "{{ variables.grouped_counts_summary }}"
