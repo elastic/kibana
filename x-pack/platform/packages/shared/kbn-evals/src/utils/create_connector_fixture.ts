@@ -64,7 +64,6 @@ export async function createConnectorFixture({
     const res = (await fetch({
       path: `/internal/_inference/_exists/${encodeURIComponent(inferenceId)}`,
       method: 'GET',
-      // versioned internal route: requests without this header are rejected
       headers: { 'elastic-api-version': INFERENCE_ENDPOINT_INTERNAL_API_VERSION },
     })) as { isEndpointExists?: boolean };
 
@@ -84,7 +83,6 @@ export async function createConnectorFixture({
           exists = await inferenceEndpointExists(inferenceId);
         } catch (error) {
           const status = getStatusCode(error);
-          // Abort immediately on permanent client errors.
           if (status === 400 || status === 401 || status === 403) {
             throw new pRetry.AbortError(error instanceof Error ? error : new Error(String(error)));
           }
@@ -98,8 +96,6 @@ export async function createConnectorFixture({
     ).catch((error) => {
       throw new Error(
         `Inference endpoint [${inferenceId}] for EIS connector [${connectorDisplayId}] is not available. ` +
-          `EIS connectors bind directly to inference endpoints and are never created as stack connectors, ` +
-          `so make sure the EIS/CCM setup has created the endpoint before running evals. ` +
           `Original error: ${error instanceof Error ? error.message : String(error)}`
       );
     });
