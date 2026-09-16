@@ -48,7 +48,7 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
         // The frame is an outline on this non-scrolling wrapper: it doesn't affect layout, doesn't
         // scroll away with the content, isn't touched by focus styles (the focusable element is
         // the scroll container), and sits outside the box where sticky/fixed bars (e.g. console)
-        // can't cover it. This wrapper must never clip (overflow: hidden) or the frame is cut off.
+        // can't cover it.
         // borderBaseFloating is transparent in light mode and visible in dark mode.
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseFloating};
       `}
@@ -74,6 +74,7 @@ const scrollContainer: EmotionFn = (useEuiTheme) => css`
 
   // Keyboard focus only (e.g. skip link when the app has no <main> landmark). Kept outside the
   // box: Chrome clips inset outlines on scroll containers, and EUI's global :focus offsets it -1px.
+  // The wrapper must therefore never clip (overflow: hidden), or this ring is cut off.
   &:focus-visible {
     outline: ${useEuiTheme.euiTheme.focus.width} solid ${useEuiTheme.euiTheme.focus.color};
     outline-offset: 0;
