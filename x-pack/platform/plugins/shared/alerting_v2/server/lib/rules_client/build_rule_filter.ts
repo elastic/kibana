@@ -53,7 +53,7 @@ export const buildRuleSoFilter = createSoFilterBuilder({
     // `filter` field list, and `metadata.template` is not on the rule response.
     // Do not document it; the public path may change when the shape is settled.
     'metadata.template.id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.template.id`,
-    // Phase 4 fields — all indexed in model version '10'.
+    // Phase 4 fields — all indexed in the squashed model version '12'.
     'metadata.signature_id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.signature_id`,
     'metadata.source.type': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.source.type`,
     'metadata.source.id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.source.id`,
