@@ -8,7 +8,15 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormLabel, EuiFormRow, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ESQLColumn } from '@kbn/es-types';
 import type { TimeRange } from '@kbn/es-query';
@@ -122,6 +130,7 @@ export function ValueControlForm({
     valuesRetrieval ? [{ name: valuesRetrieval, type: 'keyword' as const }] : []
   );
   const [showValuesPreview, setShowValuesPreview] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [label, setLabel] = useState(initialState?.title ?? '');
 
   const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
@@ -174,6 +183,7 @@ export function ValueControlForm({
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
+      setIsLoading(true);
       try {
         const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
         const results = await getESQLResults({
@@ -221,6 +231,7 @@ export function ValueControlForm({
         setIsValid(false);
         setEsqlQueryErrors([e]);
       }
+      setIsLoading(false);
     },
     [isMounted, search, timeRange, esqlVariables, core.uiSettings, setIsValid]
   );
@@ -335,23 +346,36 @@ export function ValueControlForm({
             isLoading={false}
             esqlVariables={esqlVariables}
           />
-          {showValuesPreview && (
-            <EuiFormRow
-              label={i18n.translate('esql.flyout.previewValues.placeholder', {
-                defaultMessage: 'Values preview',
-              })}
-              fullWidth
+          {isLoading ? (
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="xl"
               css={css`
-                margin-block-start: ${theme.euiTheme.size.base};
+                text-align: center;
               `}
             >
-              <ESQLValuesPreview
-                values={selectedValues.map((v) => v.label)}
-                columns={queryColumns}
-                error={esqlQueryErrors?.[0]}
-                updateQuery={updateQuery}
-              />
-            </EuiFormRow>
+              <EuiLoadingSpinner size="l" />
+            </EuiPanel>
+          ) : (
+            showValuesPreview && (
+              <EuiFormRow
+                label={i18n.translate('esql.flyout.previewValues.placeholder', {
+                  defaultMessage: 'Values preview',
+                })}
+                fullWidth
+                css={css`
+                  margin-block-start: ${theme.euiTheme.size.base};
+                `}
+              >
+                <ESQLValuesPreview
+                  values={selectedValues.map((v) => v.label)}
+                  columns={queryColumns}
+                  error={esqlQueryErrors?.[0]}
+                  updateQuery={updateQuery}
+                />
+              </EuiFormRow>
+            )
           )}
         </>
       )}
