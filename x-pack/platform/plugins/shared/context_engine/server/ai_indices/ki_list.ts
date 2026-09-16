@@ -7,11 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 
-/** Columns the list reads. Each is guarded by field caps since AI indices vary in shape. */
+/** Columns the list reads. Each is guarded by a schema probe since AI indices vary in shape. */
 const KI_LIST_FIELDS = [
   'id',
   '@timestamp',
@@ -83,16 +84,20 @@ export const getKis = async (
   esClient: ElasticsearchClient,
   { dest, size, type }: GetKisOptions
 ): Promise<ListKisResponse> => {
-  const caps = await esClient.fieldCaps({
-    index: dest.value,
-    fields: [...KI_LIST_FIELDS],
-    ignore_unavailable: true,
-    allow_no_indices: true,
-  });
-  if (caps.indices.length === 0) {
-    return EMPTY;
+  // A zero-row query resolves the mapped columns under the caller's own read privilege.
+  let columns: Set<string>;
+  try {
+    const probe = await esClient.esql.query({
+      query: `FROM ${fromSources(dest.value)} METADATA _id, _index\n| LIMIT 0`,
+    });
+    columns = new Set((probe as unknown as ESQLSearchResponse).columns.map(({ name }) => name));
+  } catch (error) {
+    if (isEsqlUnknownIndexError(error)) {
+      return EMPTY;
+    }
+    throw error;
   }
-  const has = (field: KiListField) => Object.keys(caps.fields[field] ?? {}).length > 0;
+  const has = (field: KiListField) => columns.has(field);
   const base = currentKisQuery(dest, has);
   const typeParams = type !== undefined ? { params: [{ type }] } : {};
 

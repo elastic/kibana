@@ -81,12 +81,46 @@ describe('ki_get', () => {
           filter: [kiIdQuery('ki-1'), { term: { _index: BACKING_INDEX } }],
         },
       },
-      sort: [
-        { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
-        { _doc: { order: 'desc' } },
-      ],
+      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       size: 1,
     });
+  });
+
+  it('breaks an equal-timestamp tie on a data stream by the greatest _id', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'rev-a',
+            _index: '.ds-ai-index-ds-sample-000001',
+            _source: { id: 'ki-1', '@timestamp': '2026-01-01T00:00:00.000Z', title: 'A' },
+          },
+          {
+            _id: 'rev-b',
+            _index: '.ds-ai-index-ds-sample-000001',
+            _source: { id: 'ki-1', '@timestamp': '2026-01-01T00:00:00.000Z', title: 'B' },
+          },
+          {
+            _id: 'rev-z',
+            _index: '.ds-ai-index-ds-sample-000001',
+            _source: { id: 'ki-1', '@timestamp': '2025-12-31T00:00:00.000Z', title: 'older' },
+          },
+        ],
+      },
+    });
+
+    await expect(
+      getKi(esClient, {
+        aiIndexId: 'sample',
+        dest: { type: 'data_stream', value: 'ai-index-ds-sample' },
+        index: '.ds-ai-index-ds-sample-000001',
+        kiId: 'ki-1',
+      })
+    ).resolves.toEqual({
+      id: 'ki-1',
+      document: { id: 'ki-1', '@timestamp': '2026-01-01T00:00:00.000Z', title: 'B' },
+    });
+    expect(search).toHaveBeenCalledWith(expect.objectContaining({ size: 10 }));
   });
 
   it('throws KiNotFoundError when the current revision is deleted', async () => {

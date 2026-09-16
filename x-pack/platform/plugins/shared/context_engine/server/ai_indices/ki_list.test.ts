@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKis } from './ki_list';
 
@@ -12,11 +13,18 @@ const BACKING_INDEX = 'ai-index-idx-sample';
 const INDEX_DEST = { type: 'index' as const, value: BACKING_INDEX };
 const DATA_STREAM_DEST = { type: 'data_stream' as const, value: 'ai-index-ds-sample' };
 
-const fieldCapsFor = (fields: string[]) => ({
-  indices: [BACKING_INDEX],
-  fields: Object.fromEntries(fields.map((f) => [f, { keyword: { type: 'keyword' } }])),
+const probeResponse = (fields: string[]) => ({
+  columns: fields.map((name) => ({ name })),
+  values: [],
 });
 const ALL_FIELDS = ['id', '@timestamp', 'type', 'title', 'governance.lifecycle.status'];
+const unknownIndexError = () =>
+  new errors.ResponseError({
+    statusCode: 400,
+    body: { error: { type: 'verification_exception', reason: 'Unknown index [x]' } },
+    warnings: [],
+    meta: {} as never,
+  });
 
 const rowsResponse = (rows: Array<[string, string, string | null, string | null]>) => ({
   columns: [{ name: '_index' }, { name: 'id' }, { name: 'type' }, { name: 'title' }],
@@ -32,16 +40,15 @@ const bucketsResponse = (rows: Array<[number, string]>) => ({
 });
 
 describe('ki_list', () => {
-  const fieldCaps = jest.fn();
   const query = jest.fn();
-  const esClient = { fieldCaps, esql: { query } } as unknown as ElasticsearchClient;
+  const esClient = { esql: { query } } as unknown as ElasticsearchClient;
 
-  const queryText = (call: number) => query.mock.calls[call][0].query as string;
+  // Call 0 is the schema probe; the numbered calls below are the list queries after it.
+  const queryText = (call: number) => query.mock.calls[call + 1][0].query as string;
 
   beforeEach(() => {
-    fieldCaps.mockReset();
     query.mockReset();
-    fieldCaps.mockResolvedValue(fieldCapsFor(ALL_FIELDS));
+    query.mockResolvedValueOnce(probeResponse(ALL_FIELDS));
   });
 
   it('returns the current revision of each KI with exact totals and capped type buckets', async () => {
@@ -150,11 +157,11 @@ describe('ki_list', () => {
       })
     );
 
-    expect(query.mock.calls[0][0]).toEqual({
+    expect(query.mock.calls[1][0]).toEqual({
       query: expect.stringContaining('| WHERE type == ?type'),
       params: [{ type: 'playbook' }],
     });
-    expect(query.mock.calls[1][0]).toEqual({
+    expect(query.mock.calls[2][0]).toEqual({
       query: expect.stringContaining(
         '| STATS total = COUNT(*), filtered = COUNT(*) WHERE type == ?type'
       ),
@@ -208,12 +215,13 @@ describe('ki_list', () => {
       summary: { total: 6, counts_by_type: [{ type: 'faq', count: 6 }] },
     });
 
-    expect(query).toHaveBeenCalledTimes(2);
+    expect(query).toHaveBeenCalledTimes(3);
     expect(queryText(0)).toContain('| STATS total = COUNT(*)');
   });
 
   it('omits the revision collapse and lifecycle filter for indices without those fields', async () => {
-    fieldCaps.mockResolvedValue(fieldCapsFor(['type', 'title']));
+    query.mockReset();
+    query.mockResolvedValueOnce(probeResponse(['type', 'title']));
     query
       .mockResolvedValueOnce(rowsResponse([[BACKING_INDEX, 'ki-1', 'dashboard', 'Sales']]))
       .mockResolvedValueOnce(totalsResponse(1))
@@ -233,18 +241,24 @@ describe('ki_list', () => {
   });
 
   it('returns an empty list when the backing store does not exist', async () => {
-    fieldCaps.mockResolvedValue({ indices: [], fields: {} });
+    query.mockReset();
+    query.mockRejectedValueOnce(unknownIndexError());
 
     await expect(
       getKis(esClient, { dest: { type: 'index', value: 'ai-index-idx-missing' }, size: 25 })
     ).resolves.toEqual({ kis: [], total: 0, summary: { total: 0, counts_by_type: [] } });
 
-    expect(fieldCaps).toHaveBeenCalledWith({
-      index: 'ai-index-idx-missing',
-      fields: ['id', '@timestamp', 'type', 'title', 'governance.lifecycle.status'],
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    });
-    expect(query).not.toHaveBeenCalled();
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(query.mock.calls[0][0].query).toBe(
+      'FROM "ai-index-idx-missing" METADATA _id, _index\n| LIMIT 0'
+    );
+  });
+
+  it('rethrows probe failures other than a missing index', async () => {
+    query.mockReset();
+    const cause = new Error('boom');
+    query.mockRejectedValueOnce(cause);
+
+    await expect(getKis(esClient, { dest: INDEX_DEST, size: 25 })).rejects.toBe(cause);
   });
 });

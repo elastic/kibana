@@ -20,7 +20,7 @@ import {
   AiIndexNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-import { kiIdQuery } from '../ai_indices/ki_get';
+import { REVISION_TIE_WINDOW, kiIdQuery, pickCurrentRevision } from '../ai_indices/ki_get';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { KiVerificationSummary } from '../ki_verification';
 import { WORKFLOW_VERIFIER_ID_PREFIX } from '../ki_verification';
@@ -426,12 +426,9 @@ export const findKiRevision = async ({
       allow_no_indices: true,
       query: kiIdQuery(kiId),
       ...(isDataStream && {
-        sort: [
-          { '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } },
-          { _doc: { order: 'desc' as const } },
-        ],
+        sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
       }),
-      size: isDataStream ? 1 : 2,
+      size: isDataStream ? REVISION_TIE_WINDOW : 2,
       seq_no_primary_term: true,
       _source: isDataStream ? true : ['id', 'governance'],
     },
@@ -440,7 +437,7 @@ export const findKiRevision = async ({
 
   const { hits } = response.hits;
   // An index-pattern dest can hold the same _id in multiple indices; refuse to pick one arbitrarily.
-  if (hits.length > 1) {
+  if (!isDataStream && hits.length > 1) {
     const indices = hits.flatMap((hit) => (hit._index ? [hit._index] : []));
     throw new ExecutionError({
       type: 'ValidationError',
@@ -449,7 +446,7 @@ export const findKiRevision = async ({
     });
   }
 
-  const hit = hits[0];
+  const hit = isDataStream ? pickCurrentRevision(hits) : hits[0];
   if (!hit?._index) {
     return undefined;
   }

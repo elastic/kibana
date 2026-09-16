@@ -40,6 +40,30 @@ const isDeleted = (document: KiDocument): boolean => {
   );
 };
 
+/** How many equal-timestamp revisions to consider when picking the current one. */
+export const REVISION_TIE_WINDOW = 10;
+
+interface RevisionHit {
+  _id?: string;
+  _source?: Record<string, unknown> | undefined;
+}
+
+/**
+ * Picks the current revision from hits sorted by `@timestamp` descending: among
+ * the hits sharing the newest timestamp, the greatest `_id`. Matches the list's
+ * `MAX(_id)` tie-break so every read path agrees.
+ */
+export const pickCurrentRevision = <T extends RevisionHit>(hits: T[]): T | undefined => {
+  const [newest] = hits;
+  if (!newest) {
+    return undefined;
+  }
+  const newestTimestamp = newest._source?.['@timestamp'];
+  return hits
+    .filter((hit) => hit._source?.['@timestamp'] === newestTimestamp)
+    .reduce((current, hit) => ((hit._id ?? '') > (current._id ?? '') ? hit : current));
+};
+
 export interface GetKiOptions {
   aiIndexId: string;
   dest: AiIndexDest;
@@ -63,11 +87,11 @@ export const getKi = async (
         ],
       },
     },
-    sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }, { _doc: { order: 'desc' } }],
-    size: 1,
+    sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+    size: dest.type === 'data_stream' ? REVISION_TIE_WINDOW : 1,
   });
 
-  const { _id, _source: document } = response.hits.hits[0] ?? {};
+  const { _id, _source: document } = pickCurrentRevision(response.hits.hits) ?? {};
   if (_id === undefined || document === undefined || isDeleted(document)) {
     throw new KiNotFoundError(aiIndexId, kiId);
   }
