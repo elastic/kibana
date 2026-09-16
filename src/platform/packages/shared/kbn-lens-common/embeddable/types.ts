@@ -48,6 +48,7 @@ import type { InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import type { Ast } from '@kbn/interpreter';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
+import type { LensApi } from '@kbn/lens-common-2';
 import type {
   IndexPatternMap,
   IndexPatternRef,
@@ -303,6 +304,10 @@ export type LensComponentProps = Simplify<
        * Optional search terms to highlight in the panel title
        */
       titleHighlight?: string | string[];
+      /**
+       * Callback invoked with the Lens embeddable API once it is available
+       */
+      onApiAvailable?: (api: LensApi) => void;
     }
 >;
 

@@ -8,9 +8,9 @@
  */
 
 import type { ReactElement } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiDelayRender, EuiProgress, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -24,6 +24,7 @@ import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { useStableCallback } from '@kbn/react-hooks';
+import type { LensApi } from '@kbn/lens-common-2';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBucketInterval,
@@ -73,6 +74,7 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -96,6 +98,7 @@ export function UnifiedHistogramChart({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
+  onApiAvailable: consumerOnApiAvailable,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -104,6 +107,23 @@ export function UnifiedHistogramChart({
 
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isApproximationApplied, setIsApproximationApplied] = useState(false);
+  const approximationSubscription = useRef<{ unsubscribe: () => void } | undefined>(undefined);
+
+  useEffect(() => {
+    return () => approximationSubscription.current?.unsubscribe();
+  }, []);
+
+  const onApiAvailable = useCallback(
+    (api: LensApi) => {
+      approximationSubscription.current?.unsubscribe();
+      approximationSubscription.current = api.approximationApplied$.subscribe((value) => {
+        setIsApproximationApplied(Boolean(value));
+      });
+      consumerOnApiAvailable?.(api);
+    },
+    [consumerOnApiAvailable]
+  );
 
   const chartVisible =
     isChartAvailable && !!chart && !chart.hidden && !!visContext && !!visContext?.attributes;
@@ -319,6 +339,26 @@ export function UnifiedHistogramChart({
     });
   }
 
+  const approximationTooltip = i18n.translate('unifiedHistogram.approximationAppliedTooltip', {
+    defaultMessage:
+      'This chart shows approximate results because fast mode is enabled or the query enables approximation.',
+  });
+  const approximationIcon =
+    chartVisible && isApproximationApplied ? (
+      <span style={{ marginRight: 4 }}>
+        <EuiToolTip content={approximationTooltip}>
+          <EuiBadge
+            color="success"
+            iconType="bolt"
+            onClick={() => {}}
+            onClickAriaLabel=""
+            aria-label={approximationTooltip}
+            data-test-subj="unifiedHistogramApproximationApplied"
+          />
+        </EuiToolTip>
+      </span>
+    ) : undefined;
+
   return (
     <>
       <ChartSectionTemplate
@@ -328,6 +368,7 @@ export function UnifiedHistogramChart({
           toggleActions: toolbarToggleActions,
           leftSide: toolbarSelectors,
           rightSide: chartVisible ? actions : [],
+          additionalControls: { prependRight: approximationIcon },
         }}
       >
         {chartVisible && (
@@ -362,6 +403,7 @@ export function UnifiedHistogramChart({
                   abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
+                  onApiAvailable={onApiAvailable}
                 />
               )}
             </section>
