@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type { FakeRawRequest, Headers, KibanaRequest, Logger } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -25,12 +27,65 @@ export const SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS = 10_000;
  */
 export const SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS = 5_000;
 
+/**
+ * Wraps a credential mint for a service account bound fake request. The interceptor decides
+ * whether minting may proceed and observes the outcome; it must call `mint` at most once and
+ * return its result.
+ *
+ * To refuse, throw a client error (a `Boom` with a 4xx status, e.g. when a workload binding no
+ * longer exists): a refusal is terminal for the request, and the interceptor is never consulted
+ * again. Any other error is treated as a transient failure of the check itself, and minting is
+ * retried after the mint-failure backoff.
+ */
+export type ServiceAccountMintInterceptor = (mint: () => Promise<string>) => Promise<string>;
+
 export interface CreateServiceAccountFakeRequestParams {
   /** The ID of the service account the request should be bound to. */
   serviceAccountId: string;
   /** The space the request is scoped to. Defaults to the default space. */
   spaceId?: string;
+  /**
+   * How long transparent credential replacement stays available for this request. Defaults to the
+   * configured `xpack.security.serviceAccounts.requestLifetime`; size it to the expected workload
+   * duration, or pass `Number.POSITIVE_INFINITY` when a `mintInterceptor` gates minting on a
+   * stricter, revocable condition instead.
+   */
+  maxLifetimeMs?: number;
+  /**
+   * Wraps every credential mint for this request — the initial one included. Interceptor
+   * failures are propagated to the caller; on refresh, a refusal (4xx) is terminal and any other
+   * failure is subject to the mint-failure backoff. See {@link ServiceAccountMintInterceptor}.
+   */
+  mintInterceptor?: ServiceAccountMintInterceptor;
 }
+
+/**
+ * Decides whether a failed mint permanently disables credential replacement for its request.
+ *
+ * The exchange reports its own retryability, and anything else it throws is unexpected and fails
+ * closed. A failure raised by the mint interceptor instead is read differently: a client error is
+ * a deliberate refusal (the workload is unbound, was re-bound, or its binding failed
+ * verification), while a server error or a plain exception is a failure of the check itself — a
+ * saved objects read against a briefly unavailable cluster, say — that the next refresh may not
+ * hit again. Latching those would kill a still-valid execution over one blip.
+ */
+const isTerminalMintFailure = (err: unknown, raisedByInterceptor: boolean): boolean => {
+  if (err instanceof ServiceAccountTokenExchangeError) {
+    return !err.retryable;
+  }
+
+  if (!raisedByInterceptor) {
+    return true;
+  }
+
+  if (Boom.isBoom(err)) {
+    const { statusCode } = err.output;
+    // Too Many Requests is the one client error that describes the moment, not the request.
+    return statusCode >= 400 && statusCode < 500 && statusCode !== 429;
+  }
+
+  return false;
+};
 
 interface ServiceAccountFakeRequestEntry {
   serviceAccountId: string;
@@ -41,6 +96,8 @@ interface ServiceAccountFakeRequestEntry {
   inflight?: Promise<string>;
   retryAt?: number;
   nonRetryableError?: Error;
+  maxLifetimeMs: number;
+  mintInterceptor?: ServiceAccountMintInterceptor;
 }
 
 /**
@@ -77,8 +134,24 @@ export class ServiceAccountFakeRequests {
   async create({
     serviceAccountId,
     spaceId,
+    maxLifetimeMs,
+    mintInterceptor,
   }: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
-    const token = await this.mintToken(serviceAccountId);
+    if (maxLifetimeMs !== undefined && !(maxLifetimeMs > 0)) {
+      throw new Error(
+        `The lifetime of a service account bound request must be a positive number of milliseconds, but got ${maxLifetimeMs}.`
+      );
+    }
+
+    // The configured lifetime is the only bound on how long a credential keeps renewing itself.
+    // Waiving it is only safe when something stricter takes its place.
+    if (maxLifetimeMs !== undefined && !Number.isFinite(maxLifetimeMs) && !mintInterceptor) {
+      throw new Error(
+        'A service account bound request without a lifetime must have a mint interceptor gating every mint.'
+      );
+    }
+
+    const token = await this.mintWithInterceptor(serviceAccountId, mintInterceptor);
 
     // The lowercase `authorization` key is load-bearing: the ES client derives a fake request's
     // credential by picking exact lowercased keys off its headers, so any other casing would
@@ -99,6 +172,8 @@ export class ServiceAccountFakeRequests {
       token,
       createdAt: now,
       mintedAt: now,
+      maxLifetimeMs: maxLifetimeMs ?? this.requestLifetimeMs,
+      mintInterceptor,
     });
 
     this.logger.debug(`Created a fake request bound to service account ${serviceAccountId}`);
@@ -143,9 +218,19 @@ export class ServiceAccountFakeRequests {
       return entry.token;
     }
 
-    entry.inflight = this.mintToken(entry.serviceAccountId)
+    // Remembers the exchange's own failure, if any, so the interceptor's failures can be told
+    // apart from it below: the two are retried under different rules.
+    let exchangeFailure: { error: unknown } | undefined;
+
+    entry.inflight = this.mintWithInterceptor(entry.serviceAccountId, entry.mintInterceptor, {
+      onExchangeFailure: (error) => {
+        exchangeFailure = { error };
+      },
+    })
       .then((token) => {
+        this.ensureStillRegistered(request, entry);
         this.ensureWithinLifetime(entry);
+
         // Registry-owned fake requests share mutable raw headers, so subsequent scoped clients
         // observe this replacement despite KibanaRequest exposing the headers as readonly.
         (request.headers as Record<string, string>).authorization = `Bearer ${token}`;
@@ -158,14 +243,26 @@ export class ServiceAccountFakeRequests {
         return token;
       })
       .catch((err) => {
-        if (err instanceof ServiceAccountTokenExchangeError && err.retryable) {
-          entry.retryAt =
-            Date.now() + Math.max(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS, err.retryAfterMs);
-        } else {
+        // A released entry can never refresh again, so recording a backoff or a terminal error
+        // on it would only describe a request nothing will ask about.
+        if (this.registry.get(request) !== entry) {
+          throw err;
+        }
+
+        const raisedByInterceptor =
+          entry.mintInterceptor !== undefined &&
+          !(exchangeFailure !== undefined && err === exchangeFailure.error);
+
+        if (isTerminalMintFailure(err, raisedByInterceptor)) {
           entry.nonRetryableError =
             err instanceof Error
               ? err
               : new Error('Service account token exchange failed.', { cause: err });
+        } else {
+          const retryAfterMs =
+            err instanceof ServiceAccountTokenExchangeError ? err.retryAfterMs : 0;
+          entry.retryAt =
+            Date.now() + Math.max(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS, retryAfterMs);
         }
         this.logger.warn(
           `Failed to replace the token of a fake request bound to service account ${
@@ -181,9 +278,46 @@ export class ServiceAccountFakeRequests {
     return await entry.inflight;
   }
 
+  /**
+   * Drops the request from the registry: transparent credential replacement is permanently
+   * disabled and the request rides out the remainder of its current token. Idempotent; returns
+   * whether the request was registered.
+   */
+  release(request: KibanaRequest): boolean {
+    const released = this.registry.delete(request);
+    if (released) {
+      this.logger.debug('Released a service account bound fake request');
+    }
+    return released;
+  }
+
+  private mintWithInterceptor(
+    serviceAccountId: string,
+    mintInterceptor?: ServiceAccountMintInterceptor,
+    { onExchangeFailure }: { onExchangeFailure?: (error: unknown) => void } = {}
+  ): Promise<string> {
+    const mint = () =>
+      this.mintToken(serviceAccountId).catch((error) => {
+        onExchangeFailure?.(error);
+        throw error;
+      });
+    return mintInterceptor ? mintInterceptor(mint) : mint();
+  }
+
+  private ensureStillRegistered(
+    request: KibanaRequest,
+    entry: ServiceAccountFakeRequestEntry
+  ): void {
+    if (this.registry.get(request) !== entry) {
+      throw new Error(
+        'The request bound to this service account was released while its credential was being replaced.'
+      );
+    }
+  }
+
   private ensureWithinLifetime(entry: ServiceAccountFakeRequestEntry): void {
     // Expiry stops replacement; an already-issued token retains its upstream expiration.
-    if (Date.now() - entry.createdAt >= this.requestLifetimeMs) {
+    if (Date.now() - entry.createdAt >= entry.maxLifetimeMs) {
       this.logger.debug(
         `Refresh lifetime expired for a fake request bound to service account ${entry.serviceAccountId}`
       );
