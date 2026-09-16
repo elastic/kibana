@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiPopover,
-  EuiPopoverTitle,
   EuiTitle,
 } from '@elastic/eui';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
@@ -93,12 +92,6 @@ const RuleTagsCountBadge = ({ tags }: { tags: string[] }) => {
       closePopover={closePopover}
       repositionOnScroll
     >
-      <EuiPopoverTitle>
-        <FormattedMessage
-          id="xpack.observability.alert.grouping.tags.popoverTitle"
-          defaultMessage="Tags"
-        />
-      </EuiPopoverTitle>
       <EuiBadgeGroup css={tagsPopoverListCss}>
         {tags.map((tag, index) => (
           <EuiBadge

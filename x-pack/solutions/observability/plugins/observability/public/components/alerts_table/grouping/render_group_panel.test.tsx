@@ -54,13 +54,13 @@ describe('renderGroupPanel', () => {
   });
 
   it('opens a popover of tag badges when the count badge is clicked', () => {
-    const { getByTestId, getAllByTestId, getByText } = render(
+    const { getByTestId, getAllByTestId, getByText, queryByText } = render(
       renderGroupPanel('kibana.alert.rule.name', ruleNameBucket(['prod', 'apm', 'critical']))!
     );
 
     fireEvent.click(getByTestId(`${RULE_NAME_GROUP_TAGS_TEST_ID}DisplayPopoverButton`));
 
-    expect(getByText('Tags')).toBeInTheDocument();
+    expect(queryByText('Tags')).not.toBeInTheDocument();
     expect(getAllByTestId(RULE_NAME_GROUP_TAG_TEST_ID)).toHaveLength(3);
     expect(getByText('prod')).toBeInTheDocument();
     expect(getByText('apm')).toBeInTheDocument();
