@@ -66,20 +66,9 @@ const getStatsOutputColumns = (statsCommand: ESQLCommand): string[] => {
 };
 
 /**
- * Returns true when the branch's enumerable output scope contains the given
- * column: STATS outputs (aggregations and BY keys) tracked through later
- * RENAME/KEEP/DROP/EVAL commands. An open scope (no STATS, or an unmodeled
- * command) returns false so branch selection falls back explicitly.
- */
-const branchProducesColumn = (branch: ESQLCommand[], columnName: string): boolean => {
-  const scope = computeScope(branch);
-  return scope !== null && scope.has(columnName);
-};
-
-/**
  * Returns true when the command list's output scope contains the given column.
- * Unlike `branchProducesColumn`, an open scope (no STATS, or an unmodeled
- * command) conservatively counts the column as available.
+ * An open scope (no STATS, or an unmodeled command) conservatively counts the
+ * column as available.
  */
 export const commandsProduceColumn = (commands: ESQLCommand[], columnName: string): boolean => {
   const scope = computeScope(commands);
@@ -88,23 +77,24 @@ export const commandsProduceColumn = (commands: ESQLCommand[], columnName: strin
 
 /**
  * Selects the FORK branch to derive the trendline from. Metric fields are
- * checked in priority order (the first entry is the primary metric): the
- * first branch producing the highest-priority metric column wins, so a
- * secondary metric from an earlier branch cannot hijack the selection.
+ * checked in priority order (the first entry is the primary metric). For each
+ * field, a branch with an enumerable matching output wins; otherwise the first
+ * open-scope branch may carry the raw field. This keeps a possible raw-field
+ * match from overriding a definite match in a later branch.
  * Fallback: first branch containing a STATS command, then the first branch.
- *
- * Only branches with an enumerable output scope can be metric-matched: a
- * branch ending in STATS or a KEEP projection. Open-scope branches (e.g.
- * WHERE-only) may well carry a raw metric field but cannot prove it, so they
- * are never selected by metric and are reachable only via the fallbacks.
  */
 const selectForkBranch = (
   branches: ESQLCommand[][],
   metricFields?: string[]
 ): ESQLCommand[] | undefined => {
+  const branchScopes = branches.map((branch) => ({ branch, scope: computeScope(branch) }));
+
   for (const field of metricFields ?? []) {
-    const match = branches.find((branch) => branchProducesColumn(branch, field));
-    if (match) return match;
+    const definiteMatch = branchScopes.find(({ scope }) => scope?.has(field));
+    if (definiteMatch) return definiteMatch.branch;
+
+    const possibleMatch = branchScopes.find(({ scope }) => scope === null);
+    if (possibleMatch) return possibleMatch.branch;
   }
   return branches.find((branch) => branch.some((c) => c.name === 'stats')) ?? branches[0];
 };

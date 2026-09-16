@@ -339,6 +339,29 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       metricFields: ['total'],
     },
     {
+      // Exclude typed metric fields before FORK: the fixture maps them as
+      // counter/gauge types, which conflict with the other branch's null-filled schema.
+      description: 'FORK query selecting an open-scope branch by raw metric field',
+      sourceQuery: `FROM ${index} | DROP bytes_counter, bytes_gauge | FORK (WHERE bytes > 0) (STATS total = COUNT(*))`,
+      expectedQuery: `FROM ${index} | DROP bytes_counter, bytes_gauge | WHERE bytes > 0 | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['AVG(bytes)'],
+      metricFields: ['bytes'],
+      expectedMetricFieldMap: { bytes: 'AVG(bytes)' },
+      expectedUnavailableMetricFields: [],
+    },
+    {
+      // Keep the source query executable against the typed-metric fixture; see the
+      // preceding case for why these fields must be excluded before FORK.
+      description: 'FORK query preferring a definite metric producer over an open scope',
+      sourceQuery: `FROM ${index} | DROP bytes_counter, bytes_gauge | FORK (WHERE bytes > 0) (STATS bytes = MAX(bytes))`,
+      expectedQuery: `FROM ${index} | DROP bytes_counter, bytes_gauge | STATS bytes = MAX(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['bytes'],
+      metricFields: ['bytes'],
+      expectedUnavailableMetricFields: [],
+    },
+    {
       // a non-STATS branch is metric-matched when its KEEP projection makes
       // the output scope enumerable and it carries the raw metric field
       description: 'FORK query selecting a KEEP-projected branch by raw metric field',

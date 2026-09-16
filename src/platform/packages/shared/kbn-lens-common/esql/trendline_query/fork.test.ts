@@ -57,12 +57,6 @@ describe('flattenForkCommands', () => {
     ).toBe('FROM index | WHERE bytes > 0 | KEEP bytes');
   });
 
-  it('never metric-matches an open-scope branch (WHERE-only, no KEEP); falls back to the STATS branch', () => {
-    expect(flatten('FROM index | FORK (WHERE bytes > 0) (STATS total = COUNT(*))', ['bytes'])).toBe(
-      'FROM index | STATS total = COUNT(*)'
-    );
-  });
-
   it('selects a branch by an EVAL-derived metric column', () => {
     expect(
       flatten('FROM index | FORK (STATS a = COUNT(*) | EVAL t = a * 2) (STATS b = COUNT(*))', ['t'])
