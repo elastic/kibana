@@ -118,6 +118,7 @@ import {
 } from './builder_resolution';
 import {
   assertImmutableUnchanged,
+  assertKindPinMatch,
   assertManagedRuleWrite,
   assertRuleSourceUnchanged,
   assertSignatureIdUnchanged,
@@ -474,6 +475,11 @@ export class RulesClient {
       storedOwnership: undefined,
       builderType: data.metadata?.builder_type,
     });
+
+    // Kind-pin check: if the builder type's registration pins a kind, the
+    // create body must supply that kind.
+    // Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
+    assertKindPinMatch(this.builderTypeRegistry, data.kind, data.metadata?.builder_type);
 
     const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, data, {
       validateBuilderFields,
@@ -1011,6 +1017,16 @@ export class RulesClient {
         details: { rule_id: id, rule_kind: existingAttrs.kind },
       });
     }
+
+    // Kind-pin check: kind is immutable, so we compare the stored kind against
+    // the effective builder type after the update resolves (which may change when
+    // the caller supplies a new builder_type).
+    // Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
+    assertKindPinMatch(
+      this.builderTypeRegistry,
+      existingAttrs.kind,
+      parsed.metadata?.builder_type ?? existingAttrs.metadata.builder_type
+    );
 
     // Immutability check: omitted keeps stored value, equal passes, different rejects.
     assertSignatureIdUnchanged(parsed.metadata?.signature_id, existingAttrs);
@@ -2355,6 +2371,12 @@ export class RulesClient {
     assertSignatureIdUnchanged(parsed.metadata?.signature_id, existingAttrs);
     // source.type and source.id are immutable; only source.version can move.
     assertRuleSourceUnchanged(parsed.metadata?.source, existingAttrs);
+
+    // Kind-pin check: assertImmutableUnchanged above already confirmed that
+    // parsed.kind equals the stored kind, so checking parsed.kind here is
+    // equivalent to checking the stored kind.
+    // Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
+    assertKindPinMatch(this.builderTypeRegistry, parsed.kind, parsed.metadata?.builder_type);
 
     const prevEnabled = existingAttrs.enabled;
     const nextEnabled = parsed.enabled ?? prevEnabled;
