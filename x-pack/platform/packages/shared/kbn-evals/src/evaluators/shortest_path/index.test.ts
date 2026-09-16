@@ -37,6 +37,9 @@ describe('createShortestPathEvaluator', () => {
       { maxToolCalls: 3 }
     );
     expect(result.score).toBe(1);
+    // score alone cannot catch an exclusive (<) comparison here: at the boundary
+    // the penalty branch also yields 1 - 0 * stepPenalty === 1. The label can.
+    expect(result.label).toBe('within-budget');
   });
 
   it('applies a step penalty per call over budget', async () => {
