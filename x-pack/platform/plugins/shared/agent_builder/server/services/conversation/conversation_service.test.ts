@@ -57,21 +57,24 @@ describe('ConversationServiceImpl', () => {
   describe('getScopedClient', () => {
     const agents = { getRegistry: jest.fn().mockResolvedValue({ id: 'registry' }) };
 
-    it('wires onAttachmentEvents to the event bus with the scoped request', async () => {
+    it('wires the scoped event emitter to the event bus with the request', async () => {
       const eventBus = { emitMetadataPatched: jest.fn(), emitAttachmentEvents: jest.fn() };
       await createService({ agents, eventBus }).getScopedClient({ request });
 
-      const { onAttachmentEvents } = createClientMock.mock.calls[0][0];
-      const payload = { conversationId: 'conv-1', events: [] };
-      onAttachmentEvents!(payload);
+      const { eventEmitter } = createClientMock.mock.calls[0][0];
+      const metadataPayload = { conversationId: 'conv-1', changedFields: ['x'] };
+      const attachmentPayload = { conversationId: 'conv-1', events: [] };
+      eventEmitter!.emitMetadataPatched(metadataPayload);
+      eventEmitter!.emitAttachmentEvents(attachmentPayload);
 
-      expect(eventBus.emitAttachmentEvents).toHaveBeenCalledWith(request, payload);
+      expect(eventBus.emitMetadataPatched).toHaveBeenCalledWith(request, metadataPayload);
+      expect(eventBus.emitAttachmentEvents).toHaveBeenCalledWith(request, attachmentPayload);
     });
 
-    it('leaves onAttachmentEvents undefined without an event bus', async () => {
+    it('leaves eventEmitter undefined without an event bus', async () => {
       await createService({ agents }).getScopedClient({ request });
 
-      expect(createClientMock.mock.calls[0][0].onAttachmentEvents).toBeUndefined();
+      expect(createClientMock.mock.calls[0][0].eventEmitter).toBeUndefined();
     });
 
     it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {

@@ -41,6 +41,24 @@ export interface ConversationEventBus {
   emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void;
 }
 
+/**
+ * Per-request emitter handed to `ConversationClient`. Pre-binds the scoped request so the client
+ * doesn't have to hold a reference to it, and lets us add new event kinds without growing the
+ * client's constructor signature.
+ */
+export interface ScopedConversationEventEmitter {
+  emitMetadataPatched(payload: ConversationMetadataPatchedPayload): void;
+  emitAttachmentEvents(payload: ConversationAttachmentEventsPayload): void;
+}
+
+export const createScopedConversationEventEmitter = (
+  bus: ConversationEventBus,
+  request: KibanaRequest
+): ScopedConversationEventEmitter => ({
+  emitMetadataPatched: (payload) => bus.emitMetadataPatched(request, payload),
+  emitAttachmentEvents: (payload) => bus.emitAttachmentEvents(request, payload),
+});
+
 export const createConversationEventBus = (): ConversationEventBus =>
   new ConversationEventBusImpl();
 

@@ -2214,7 +2214,7 @@ describe.skip('ConversationClient', () => {
       });
     });
 
-    describe('onMetadataPatched callback', () => {
+    describe('emitMetadataPatched via event emitter', () => {
       const template = makeTemplate('tmpl-cb', {
         status: {
           input_type: 'SELECT',
@@ -2229,15 +2229,20 @@ describe.skip('ConversationClient', () => {
         mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
       });
 
-      it('calls onMetadataPatched with changed fields after a successful write', async () => {
-        const onMetadataPatched = jest.fn();
+      const buildEventEmitter = () => ({
+        emitMetadataPatched: jest.fn(),
+        emitAttachmentEvents: jest.fn(),
+      });
+
+      it('emits emitMetadataPatched with changed fields after a successful write', async () => {
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         mockGetDocumentResponse(
@@ -2249,7 +2254,7 @@ describe.skip('ConversationClient', () => {
 
         await clientWithCb.patchMetadata('conversation-1', { severity: 'high' });
 
-        expect(onMetadataPatched).toHaveBeenCalledWith({
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledWith({
           conversationId: 'conversation-1',
           templateId: template.id,
           parentId: undefined,
@@ -2258,14 +2263,14 @@ describe.skip('ConversationClient', () => {
       });
 
       it('includes parentId when the conversation has a parent_conversation', async () => {
-        const onMetadataPatched = jest.fn();
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         const docWithParent = {
@@ -2282,20 +2287,20 @@ describe.skip('ConversationClient', () => {
 
         await clientWithCb.patchMetadata('conversation-1', { status: 'closed' });
 
-        expect(onMetadataPatched).toHaveBeenCalledWith(
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledWith(
           expect.objectContaining({ parentId: 'parent-conv-1' })
         );
       });
 
-      it('does not call onMetadataPatched when all values are identical (no-op suppression)', async () => {
-        const onMetadataPatched = jest.fn();
+      it('does not emit when all values are identical (no-op suppression)', async () => {
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         mockGetDocumentResponse(
@@ -2308,18 +2313,18 @@ describe.skip('ConversationClient', () => {
 
         await clientWithCb.patchMetadata('conversation-1', { status: 'open' });
 
-        expect(onMetadataPatched).not.toHaveBeenCalled();
+        expect(eventEmitter.emitMetadataPatched).not.toHaveBeenCalled();
       });
 
-      it('does not call onMetadataPatched when the write fails', async () => {
-        const onMetadataPatched = jest.fn();
+      it('does not emit when the write fails', async () => {
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         mockGetDocumentResponse(
@@ -2331,7 +2336,7 @@ describe.skip('ConversationClient', () => {
           clientWithCb.patchMetadata('conversation-1', { severity: 'high' })
         ).rejects.toThrow('disk full');
 
-        expect(onMetadataPatched).not.toHaveBeenCalled();
+        expect(eventEmitter.emitMetadataPatched).not.toHaveBeenCalled();
       });
     });
   });
@@ -2824,7 +2829,7 @@ describe.skip('ConversationClient', () => {
     });
   });
 
-  describe('onAttachmentEvents callback', () => {
+  describe('emitAttachmentEvents callback', () => {
     const attachmentAddedEvent = (id: string): TimelineEvent =>
       ({
         id,
@@ -2848,18 +2853,18 @@ describe.skip('ConversationClient', () => {
       data: { message: 'hello' },
     });
 
-    let onAttachmentEvents: jest.Mock;
+    let emitAttachmentEvents: jest.Mock;
     let clientWithCb: ConversationClient;
 
     beforeEach(() => {
-      onAttachmentEvents = jest.fn();
+      emitAttachmentEvents = jest.fn();
       clientWithCb = createClient({
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
-        onAttachmentEvents,
+        eventEmitter: { emitMetadataPatched: jest.fn(), emitAttachmentEvents },
       });
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
     });
@@ -2874,8 +2879,8 @@ describe.skip('ConversationClient', () => {
       });
 
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
-      expect(onAttachmentEvents).toHaveBeenCalledTimes(1);
-      expect(onAttachmentEvents).toHaveBeenCalledWith({
+      expect(emitAttachmentEvents).toHaveBeenCalledTimes(1);
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
         conversationId: 'conversation-1',
         events: [added],
       });
@@ -2887,7 +2892,7 @@ describe.skip('ConversationClient', () => {
 
       await clientWithCb.appendEvents({ id: 'conversation-1', events: [added] });
 
-      expect(onAttachmentEvents).not.toHaveBeenCalled();
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
     });
 
     it('appendEvents does not fire when there are no attachment events', async () => {
@@ -2898,7 +2903,7 @@ describe.skip('ConversationClient', () => {
         events: [userMessageEvent('r1::user_message')],
       });
 
-      expect(onAttachmentEvents).not.toHaveBeenCalled();
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
     });
 
     it('replaceRoundEvents fires with the attachment events of the new batch', async () => {
@@ -2911,7 +2916,7 @@ describe.skip('ConversationClient', () => {
         events: [userMessageEvent('r1::user_message'), added],
       });
 
-      expect(onAttachmentEvents).toHaveBeenCalledWith({
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
         conversationId: 'conversation-1',
         events: [added],
       });
@@ -2930,7 +2935,7 @@ describe.skip('ConversationClient', () => {
         events: [userMessageEvent('r1::user_message'), added],
       });
 
-      expect(onAttachmentEvents).toHaveBeenCalledWith({
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
         conversationId: 'conversation-1',
         events: [added],
       });
@@ -2941,7 +2946,7 @@ describe.skip('ConversationClient', () => {
 
       await clientWithCb.update({ id: 'conversation-1', title: 'renamed' });
 
-      expect(onAttachmentEvents).not.toHaveBeenCalled();
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
     });
 
     it('does not fire when the write fails', async () => {
@@ -2955,12 +2960,12 @@ describe.skip('ConversationClient', () => {
         })
       ).rejects.toThrow('disk full');
 
-      expect(onAttachmentEvents).not.toHaveBeenCalled();
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
     });
 
     it('a throwing callback does not fail the write', async () => {
       mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
-      onAttachmentEvents.mockImplementation(() => {
+      emitAttachmentEvents.mockImplementation(() => {
         throw new Error('listener exploded');
       });
 

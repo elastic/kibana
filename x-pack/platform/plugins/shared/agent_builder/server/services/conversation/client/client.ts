@@ -103,10 +103,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
-import type {
-  ConversationAttachmentEventsPayload,
-  ConversationMetadataPatchedPayload,
-} from '../../../workflows/triggers/conversation_event_bus';
+import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
 // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
@@ -214,16 +211,14 @@ export const createClient = ({
   esClient,
   user,
   agentRegistry,
-  onMetadataPatched,
-  onAttachmentEvents,
+  eventEmitter,
 }: {
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
-  onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
-  onAttachmentEvents?: (payload: ConversationAttachmentEventsPayload) => void;
+  eventEmitter?: ScopedConversationEventEmitter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -233,8 +228,7 @@ export const createClient = ({
     space,
     agentRegistry,
     logger,
-    onMetadataPatched,
-    onAttachmentEvents,
+    eventEmitter,
   });
 };
 
@@ -245,8 +239,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
-  private readonly onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
-  private readonly onAttachmentEvents?: (payload: ConversationAttachmentEventsPayload) => void;
+  private readonly eventEmitter?: ScopedConversationEventEmitter;
 
   constructor({
     storage,
@@ -255,8 +248,7 @@ class ConversationClientImpl implements ConversationClient {
     space,
     agentRegistry,
     logger,
-    onMetadataPatched,
-    onAttachmentEvents,
+    eventEmitter,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -264,8 +256,7 @@ class ConversationClientImpl implements ConversationClient {
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
-    onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
-    onAttachmentEvents?: (payload: ConversationAttachmentEventsPayload) => void;
+    eventEmitter?: ScopedConversationEventEmitter;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -273,8 +264,7 @@ class ConversationClientImpl implements ConversationClient {
     this.space = space;
     this.agentRegistry = agentRegistry;
     this.logger = logger;
-    this.onMetadataPatched = onMetadataPatched;
-    this.onAttachmentEvents = onAttachmentEvents;
+    this.eventEmitter = eventEmitter;
   }
 
   /**
@@ -282,7 +272,7 @@ class ConversationClientImpl implements ConversationClient {
    * Best-effort: listener failures are logged and never fail the write.
    */
   private notifyAttachmentEvents(conversationId: string, writtenEvents: TimelineEvent[]): void {
-    if (!this.onAttachmentEvents) {
+    if (!this.eventEmitter) {
       return;
     }
     const attachmentEvents = writtenEvents.filter(isAttachmentEvent);
@@ -290,7 +280,7 @@ class ConversationClientImpl implements ConversationClient {
       return;
     }
     try {
-      this.onAttachmentEvents({ conversationId, events: attachmentEvents });
+      this.eventEmitter.emitAttachmentEvents({ conversationId, events: attachmentEvents });
     } catch (error) {
       this.logger.warn(
         `Failed to notify attachment events for conversation "${conversationId}": ${error}`
@@ -984,8 +974,8 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    if (changedFields.length > 0 && this.onMetadataPatched) {
-      this.onMetadataPatched({
+    if (changedFields.length > 0 && this.eventEmitter) {
+      this.eventEmitter.emitMetadataPatched({
         conversationId: result.id,
         templateId: result.template_id,
         parentId: result.parent_conversation?.id,

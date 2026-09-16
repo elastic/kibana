@@ -32,6 +32,7 @@ import { createClient } from './client';
 import { userMessageActor } from './client/rounds_to_events';
 import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
+import { createScopedConversationEventEmitter } from '../../workflows/triggers/conversation_event_bus';
 
 export interface AppendUserMessageOptions {
   request: KibanaRequest;
@@ -99,12 +100,7 @@ export class ConversationServiceImpl implements ConversationService {
       logger: this.logger,
       space,
       agentRegistry,
-      onMetadataPatched: eventBus
-        ? (payload) => eventBus.emitMetadataPatched(request, payload)
-        : undefined,
-      onAttachmentEvents: eventBus
-        ? (payload) => eventBus.emitAttachmentEvents(request, payload)
-        : undefined,
+      eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
     });
   }
 
