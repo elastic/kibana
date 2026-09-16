@@ -144,9 +144,7 @@ describe('RuleTagsSelector', () => {
 
     await user.type(getComboBoxInput(), 'prod');
 
-    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(
-      expect.objectContaining({ search: 'prod' })
-    );
+    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ search: 'prod' }));
   });
 
   it('can discover a tag beyond the initial cap by searching', async () => {
