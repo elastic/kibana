@@ -41,6 +41,17 @@ export interface ChatRequestBodyPayload {
   reasoning_level?: ChatCompletionReasoningEffort;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
+  /** Use `never` to persist a message without executing the agent. */
+  trigger_mode?: 'always' | 'never';
+}
+
+/**
+ * Body payload for a user message request (`trigger_mode: 'never'`), which persists a message
+ * on an existing conversation without executing the agent.
+ */
+export interface UserMessagePayload extends Pick<ChatRequestBodyPayload, 'input' | 'attachments'> {
+  trigger_mode: 'never';
+  conversation_id: string;
 }
 
 export type ChatResponse = Omit<
