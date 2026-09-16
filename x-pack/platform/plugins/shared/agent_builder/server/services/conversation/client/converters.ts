@@ -67,7 +67,7 @@ import {
   roundToEvents,
   roundsToEvents,
 } from './rounds_to_events';
-import { eventsToRounds } from './events_to_rounds';
+import { applyFeedbackMap, eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
   Required<
@@ -177,6 +177,7 @@ export const fromEsWithoutRounds = (
     ...(document._source.template_version !== undefined
       ? { template_version: document._source.template_version }
       : {}),
+    ...(document._source.feedback ? { feedback: document._source.feedback } : {}),
   };
 };
 
@@ -368,7 +369,10 @@ const verifyRoundTrip = (conversation: Conversation): Conversation =>
   shouldVerifyRoundTrip
     ? {
         ...conversation,
-        rounds: eventsToRounds(roundsToEvents(conversation)),
+        rounds: applyFeedbackMap(
+          eventsToRounds(roundsToEvents(conversation)),
+          conversation.feedback
+        ),
       }
     : conversation;
 
@@ -486,6 +490,7 @@ export const toEs = (
     ...(conversation.template_version !== undefined
       ? { template_version: conversation.template_version }
       : {}),
+    ...(conversation.feedback ? { feedback: conversation.feedback } : {}),
   };
 };
 
@@ -522,11 +527,16 @@ export const updateConversation = ({
       ...merged,
       schema_version: CONVERSATION_SCHEMA_VERSION,
       events: updateEvents,
-      rounds: safeUpdate.rounds ?? eventsToRounds(updateEvents),
+      rounds: safeUpdate.rounds ?? applyFeedbackMap(eventsToRounds(updateEvents), merged.feedback),
     };
   }
 
   if (!isEventsNativeVersion(merged.schema_version) || safeUpdate.rounds === undefined) {
+    // When only the feedback map changed, re-project it onto the cached rounds so the
+    // denormalised `rounds[].feedback` field stays consistent with `conversation.feedback`.
+    if (safeUpdate.feedback !== undefined) {
+      return { ...merged, rounds: applyFeedbackMap(merged.rounds, merged.feedback) };
+    }
     return merged;
   }
 

@@ -51,14 +51,9 @@ const copyLabels = {
 
 const ADD_TO_DATASET_METADATA_SOURCE = 'agent_builder';
 
-// Round feedback is not modelled in the events timeline yet — it lives only on the
-// round (`ConversationRoundFeedback`) and is dropped when rounds are projected from
-// events, so a vote can't round-trip and a submitted vote would silently vanish on
-// the next projection. Hide the control until feedback becomes a first-class
-// timeline event. Typed `boolean` (not the `false` literal) so the gated render
-// paths don't read as statically unreachable.
-// TODO(agent-builder): re-enable once round feedback is captured as a timeline event.
-const ROUND_FEEDBACK_ENABLED: boolean = false;
+// Feedback is captured as a `round_feedback` timeline event and projected back
+// onto rounds, so votes survive future event appends and round-trips correctly.
+const ROUND_FEEDBACK_ENABLED: boolean = true;
 
 interface RoundResponseActionsProps {
   content: string;

@@ -14,6 +14,7 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import type {
   ConversationAccessControl,
   ConversationInternalState,
+  ConversationRoundFeedback,
   ConversationRoundStatus,
   ConversationOrigin,
   TimelineEvent,
@@ -81,6 +82,9 @@ const storageSettings = {
         },
       }),
       schema_version: types.long({}),
+      // Keyed by round id; stores the current vote per round. Dynamic false keeps sub-fields
+      // in _source only (vote, chips, etc.) without indexing each key as a separate field.
+      feedback: types.object({ dynamic: false, properties: {} }),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
@@ -173,6 +177,7 @@ export interface ConversationProperties {
   metadata?: Record<string, SerializedMetadataValue>;
   template_id?: string;
   template_version?: number;
+  feedback?: Record<string, ConversationRoundFeedback>;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

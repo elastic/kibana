@@ -8,6 +8,7 @@
 import type {
   ConversationRound,
   ConversationRoundAuthor,
+  ConversationRoundFeedback,
   ConversationRoundStep,
   ExecutionStepEvent,
   ExecutionTerminatedEvent,
@@ -139,6 +140,20 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
   }
 
   return rounds;
+};
+
+/**
+ * Projects the conversation-level feedback map onto the matching rounds, clearing any stale feedback.
+ */
+export const applyFeedbackMap = (
+  rounds: ConversationRound[],
+  feedback?: Record<string, ConversationRoundFeedback>
+): ConversationRound[] => {
+  if (!feedback) return rounds;
+  return rounds.map((round) => {
+    const roundFeedback = feedback[round.id];
+    return { ...round, feedback: roundFeedback };
+  });
 };
 
 /** ask_user_question answers carried by a prompt_response, keyed by prompt_id. */

@@ -13,11 +13,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type {
-  ConversationOrigin,
-  ConversationRoundFeedback,
-  FeedbackChipId,
-} from '@kbn/agent-builder-common';
+import type { ConversationOrigin, FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   type CurrentUser,
   type Conversation,
@@ -97,6 +93,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
@@ -760,32 +757,32 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access: 'owner',
       fields: (current) => {
-        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
-
-        if (roundIndex === -1) {
-          throw createConversationNotFoundError({ conversationId });
+        const round = current.rounds.find((r) => r.id === roundId);
+        if (!round) {
+          throw createBadRequestError(`round not found: ${roundId}`);
         }
 
-        const round = current.rounds[roundIndex];
-        const { feedback: _removed, ...roundWithoutFeedback } = round;
+        const { [roundId]: _removed, ...otherFeedback } = current.feedback ?? {};
 
-        const updatedRound =
-          feedback.vote === null
-            ? roundWithoutFeedback
-            : {
-                ...round,
-                feedback: {
-                  vote: feedback.vote,
-                  chips: feedback.chips ?? [],
-                  comment: feedback.comment ?? '',
-                  submitted_at: new Date().toISOString(),
-                  connector_id: round.model_usage?.connector_id,
-                  model: round.model_usage?.model,
-                } satisfies ConversationRoundFeedback,
-              };
+        if (feedback.vote === null) {
+          return { feedback: otherFeedback };
+        }
 
+        const now = new Date().toISOString();
         return {
-          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
+          feedback: {
+            ...otherFeedback,
+            [roundId]: {
+              vote: feedback.vote,
+              ...(feedback.chips !== undefined ? { chips: feedback.chips } : {}),
+              ...(feedback.comment !== undefined ? { comment: feedback.comment } : {}),
+              submitted_at: now,
+              ...(round.model_usage?.connector_id
+                ? { connector_id: round.model_usage.connector_id }
+                : {}),
+              ...(round.model_usage?.model ? { model: round.model_usage.model } : {}),
+            },
+          },
         };
       },
     });
