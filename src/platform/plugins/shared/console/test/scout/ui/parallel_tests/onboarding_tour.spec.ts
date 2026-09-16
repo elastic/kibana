@@ -28,11 +28,11 @@ spaceTest.describe('Console onboarding tour', { tag: tags.deploymentAgnostic }, 
   });
 
   spaceTest('starts only once the run tour button is pressed', async ({ pageObjects }) => {
-    await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeHidden();
+    await expect(pageObjects.console.tourStep(STEP_TITLES[0])).toBeHidden();
 
     await pageObjects.console.runTour();
 
-    await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeVisible();
+    await expect(pageObjects.console.tourStep(STEP_TITLES[0])).toBeVisible();
   });
 
   spaceTest('walks through the five steps and completes', async ({ pageObjects }) => {
@@ -40,43 +40,45 @@ spaceTest.describe('Console onboarding tour', { tag: tags.deploymentAgnostic }, 
 
     for (const title of STEP_TITLES.slice(0, -1)) {
       await spaceTest.step(title, async () => {
-        await expect(pageObjects.console.tourStepTitle(title)).toBeVisible();
-        await pageObjects.console.nextTourStepButton.click();
+        const step = pageObjects.console.tourStep(title);
+        await expect(step).toBeVisible();
+        // Scoped to this step's dialog: the previous one may still be leaving the page.
+        await step.getByTestId('consoleNextTourStepButton').click();
       });
     }
 
     // The last step offers "Complete" instead of "Next".
     const lastStepTitle = STEP_TITLES[STEP_TITLES.length - 1];
-    await expect(pageObjects.console.tourStepTitle(lastStepTitle)).toBeVisible();
+    await expect(pageObjects.console.tourStep(lastStepTitle)).toBeVisible();
     await expect(pageObjects.console.completeTourButton).toBeVisible();
     await pageObjects.console.completeTourButton.click();
 
     for (const title of STEP_TITLES) {
-      await expect(pageObjects.console.tourStepTitle(title)).toBeHidden();
+      await expect(pageObjects.console.tourStep(title)).toBeHidden();
     }
   });
 
   spaceTest('hides every step when the tour is skipped', async ({ pageObjects }) => {
     await pageObjects.console.runTour();
-    await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeVisible();
+    await expect(pageObjects.console.tourStep(STEP_TITLES[0])).toBeVisible();
 
     await pageObjects.console.skipTourButton.click();
 
     await expect(pageObjects.console.skipTourButton).toBeHidden();
     for (const title of STEP_TITLES) {
-      await expect(pageObjects.console.tourStepTitle(title)).toBeHidden();
+      await expect(pageObjects.console.tourStep(title)).toBeHidden();
     }
   });
 
   spaceTest('can be re-run after being skipped', async ({ pageObjects }) => {
     await pageObjects.console.runTour();
-    await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeVisible();
+    await expect(pageObjects.console.tourStep(STEP_TITLES[0])).toBeVisible();
 
     await pageObjects.console.skipTourButton.click();
-    await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeHidden();
+    await expect(pageObjects.console.tourStep(STEP_TITLES[0])).toBeHidden();
 
     await pageObjects.console.runTour();
 
-    await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeVisible();
+    await expect(pageObjects.console.tourStep(STEP_TITLES[0])).toBeVisible();
   });
 });

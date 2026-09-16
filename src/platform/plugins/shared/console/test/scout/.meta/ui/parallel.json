@@ -1,7 +1,8 @@
 {
-  "sha1": "320a025d0383ff7cb7d8573bbf9987d7a7c4328d",
+  "sha1": "b347e793fed51970ad1e6ca0f72317c7b0c3c118",
   "testChannels": [
-    "ci-on-commit"
+    "ci-on-commit",
+    "ci-batch-3h"
   ],
   "tests": [
     {
@@ -768,8 +769,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/editor_robustness.spec.ts",
-        "line": 60,
-        "column": 79
+        "line": 54,
+        "column": 29
       }
     },
     {
@@ -788,8 +789,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/editor_robustness.spec.ts",
-        "line": 66,
-        "column": 74
+        "line": 61,
+        "column": 23
       }
     },
     {
@@ -808,7 +809,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/history.spec.ts",
-        "line": 20,
+        "line": 19,
         "column": 5
       }
     },
@@ -828,8 +829,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/history.spec.ts",
-        "line": 30,
-        "column": 65
+        "line": 29,
+        "column": 83
       }
     },
     {
@@ -848,8 +849,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/history.spec.ts",
-        "line": 40,
-        "column": 5
+        "line": 41,
+        "column": 13
       }
     },
     {
@@ -1228,7 +1229,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/onboarding_tour.spec.ts",
-        "line": 52,
+        "line": 54,
         "column": 23
       }
     },
@@ -1248,7 +1249,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/onboarding_tour.spec.ts",
-        "line": 61,
+        "line": 63,
         "column": 18
       }
     },

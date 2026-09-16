@@ -84,7 +84,6 @@ export class ConsolePage {
   public readonly variableNameCells: Locator;
 
   public readonly runTourButton: Locator;
-  public readonly nextTourStepButton: Locator;
   public readonly completeTourButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -169,7 +168,6 @@ export class ConsolePage {
     this.variableNameCells = this.page.testSubj.locator('variableNameCell');
 
     this.runTourButton = this.page.testSubj.locator('consoleRunTourButton');
-    this.nextTourStepButton = this.page.testSubj.locator('consoleNextTourStepButton');
     this.completeTourButton = this.page.testSubj.locator('consoleCompleteTourButton');
   }
 
@@ -182,11 +180,13 @@ export class ConsolePage {
   }
 
   /**
-   * The tour steps carry their `data-test-subj` on the popover anchor, which exists whether
-   * the step is open or not, so the step is identified by the title it renders instead.
+   * A tour step's popover dialog. The steps carry their `data-test-subj` on the popover
+   * anchor, which exists whether the step is open or not, so the step is identified by the
+   * title it renders instead. Interactions must stay scoped to this dialog: during a step
+   * transition the outgoing popover is briefly still on the page.
    */
-  tourStepTitle(title: string) {
-    return this.page.getByText(title, { exact: true });
+  tourStep(title: string) {
+    return this.page.getByRole('dialog', { name: title });
   }
 
   async goto() {
