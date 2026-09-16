@@ -24,13 +24,8 @@ jest.mock('./conversation_input/conversation_input', () => ({
 }));
 
 jest.mock('./use_typewriter_loop', () => ({
-  useTypewriterLoop: ({
-    messages,
-    enabled,
-  }: {
-    messages: readonly string[];
-    enabled: boolean;
-  }) => (enabled && messages.length > 0 ? messages[0] : ''),
+  useTypewriterLoop: ({ messages, enabled }: { messages: readonly string[]; enabled: boolean }) =>
+    enabled && messages.length > 0 ? messages[0] : '',
 }));
 
 const mockedUseConversationContext = jest.mocked(useConversationContext);
