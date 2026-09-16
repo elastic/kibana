@@ -287,30 +287,33 @@ export const WatchSettings = lazySchema(() =>
 export type WatchSettings = z.infer<typeof WatchSettings>;
 
 /**
- * Durable per-Worker settings stored as managed template values.
+ * Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the shared read/update path stays generic; each Worker declares a closed schema for its own extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates against that declaration, rejecting unknown or missing fields by name.
+ */
+export const WorkerSettingsExtras = lazySchema(() => z.object({}).catchall(z.unknown()));
+export type WorkerSettingsExtras = z.infer<typeof WorkerSettingsExtras>;
+
+/**
+ * Durable per-Worker settings stored as managed template values. Shared fields sit at the top level; Worker-specific fields live under `extras`. Unknown top-level keys are rejected.
  */
 export const WorkerSettings = lazySchema(() =>
-  z.object({
-    workerId: z.string(),
-    autonomy: WatchAutonomyLevel,
-    /**
-     * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
-     */
-    scheduleInterval: WorkerScheduleInterval.optional().describe(
-      'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
-    ),
-    /**
-     * Minimum confidence score (0–1) an alert classification must reach for the Worker to propose a false-positive close. Omitted for Workers that do not classify alerts.
-     */
-    autoCloseConfidenceScoreMinThreshold: z
-      .number()
-      .min(0)
-      .max(1)
-      .optional()
-      .describe(
-        'Minimum confidence score (0–1) an alert classification must reach for the Worker to propose a false-positive close. Omitted for Workers that do not classify alerts.'
+  z
+    .object({
+      workerId: z.string(),
+      autonomy: WatchAutonomyLevel,
+      /**
+       * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
+       */
+      scheduleInterval: WorkerScheduleInterval.optional().describe(
+        'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
       ),
-  })
+      /**
+       * Omitted for Workers that declare no Worker-specific settings.
+       */
+      extras: WorkerSettingsExtras.optional().describe(
+        'Omitted for Workers that declare no Worker-specific settings.'
+      ),
+    })
+    .strict()
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;
 
