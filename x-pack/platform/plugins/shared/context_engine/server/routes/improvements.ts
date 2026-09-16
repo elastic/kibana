@@ -323,10 +323,10 @@ export const registerImprovementRoutes = ({
             body: { message: `Improvement [${improvementId}] was not found.` },
           });
         }
-        if (improvement.status === 'applied') {
+        if (!isOpenImprovement(improvement.status)) {
           return response.conflict({
             body: {
-              message: `Improvement [${improvementId}] was already applied and cannot be rejected.`,
+              message: `Improvement [${improvementId}] was already ${improvement.status} and cannot be rejected.`,
             },
           });
         }

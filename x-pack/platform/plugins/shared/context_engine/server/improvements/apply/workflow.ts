@@ -141,6 +141,12 @@ export const removeWorkflow = async ({
 }): Promise<string> => {
   const workflow = await getWorkflowOrThrow({ workflows, workflowId, context });
 
+  if (workflow.managed) {
+    throw new ApplyImprovementError(
+      `Workflow [${workflowId}] is managed by Kibana and cannot be removed.`
+    );
+  }
+
   if (workflow.enabled) {
     await workflows.setEnabled({ ...context, workflowId, enabled: false });
   }
