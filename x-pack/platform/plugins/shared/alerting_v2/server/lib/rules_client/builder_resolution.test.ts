@@ -84,6 +84,29 @@ function createMockRegistryWithTypes(
   } as unknown as BuilderTypeRegistry;
 }
 
+/**
+ * Creates a registry where BUILDER_TYPE is registered as a plain write-time
+ * type. The direct-query-write protections (BUILDER_TYPE_NOT_CLEARED) apply
+ * only to registered builder types; an unregistered stored type is a legacy
+ * client-side marker whose query the client owns.
+ */
+function createRegistryWithBuilderType(generateFn: jest.Mock = jest.fn()): BuilderTypeRegistry {
+  return createMockRegistryWithTypes(
+    new Map<string, Partial<RegisteredBuilderType>>([
+      [
+        BUILDER_TYPE,
+        {
+          type: BUILDER_TYPE,
+          builderFieldsSchema: z.object(
+            {}
+          ) as unknown as RegisteredBuilderType['builderFieldsSchema'],
+        },
+      ],
+    ]),
+    generateFn
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Shared fixtures
 // ---------------------------------------------------------------------------
@@ -1091,6 +1114,37 @@ describe('resolveUpdateRuleBuilder', () => {
       });
     });
 
+    it('allows a query change when the body restates an unregistered builder_type', () => {
+      // The stored 'test.builder' type has no registration, so there is no
+      // server-generated query to protect: the client owns the query and may
+      // change it as long as the builder_type is restated rather than dropped.
+      const registry = createMockRegistry();
+      const data: UpdateRuleData = {
+        metadata: { builder_type: BUILDER_TYPE },
+        query: { format: 'standalone', breach: { query: 'FROM new-index-* | LIMIT 5' } },
+      };
+
+      expect(() =>
+        resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)
+      ).not.toThrow();
+    });
+
+    it('throws on a query change when the restated builder_type is registered', () => {
+      const registry = createRegistryWithBuilderType();
+      const data: UpdateRuleData = {
+        metadata: { builder_type: BUILDER_TYPE },
+        query: { format: 'standalone', breach: { query: 'FROM new-index-* | LIMIT 5' } },
+      };
+
+      expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,
+          }),
+        })
+      );
+    });
+
     it('does not throw when the query sent equals the stored query', () => {
       const registry = createMockRegistry();
       // Exact same query as in builderExisting.
@@ -1230,7 +1284,7 @@ describe('resolveReplaceRuleBuilder', () => {
         // A PUT that carries builder_fields regenerates the query through the
         // builder, preserving the builder relationship.
         const generate = jest.fn().mockReturnValue(standaloneGenerated);
-        const registry = createMockRegistry(generate);
+        const registry = createRegistryWithBuilderType(generate);
 
         resolveReplaceRuleBuilder(registry, RULE_ID, builderCreateData, builderExisting);
 
@@ -1242,7 +1296,9 @@ describe('resolveReplaceRuleBuilder', () => {
       });
 
       it('returns the generated query in the result', () => {
-        const registry = createMockRegistry(jest.fn().mockReturnValue(standaloneGenerated));
+        const registry = createRegistryWithBuilderType(
+          jest.fn().mockReturnValue(standaloneGenerated)
+        );
 
         const result = resolveReplaceRuleBuilder(
           registry,
@@ -1266,7 +1322,7 @@ describe('resolveReplaceRuleBuilder', () => {
       // never reaches storage.
 
       it('succeeds and returns the body query when builder_type is null', () => {
-        const registry = createMockRegistry();
+        const registry = createRegistryWithBuilderType();
         // ReplaceRuleData accepts builder_type: null as the explicit escape hatch.
         const data: ReplaceRuleData = {
           ...baseCreateData,
@@ -1280,7 +1336,7 @@ describe('resolveReplaceRuleBuilder', () => {
       });
 
       it('produces a result whose metadata.builder_type is not null (normalised away)', () => {
-        const registry = createMockRegistry();
+        const registry = createRegistryWithBuilderType();
         const data: ReplaceRuleData = {
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_type: null },
@@ -1295,7 +1351,7 @@ describe('resolveReplaceRuleBuilder', () => {
 
       it('does not call registry.generate when builder_type is null (explicit clear path)', () => {
         const generate = jest.fn();
-        const registry = createMockRegistry(generate);
+        const registry = createRegistryWithBuilderType(generate);
         const data: ReplaceRuleData = {
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_type: null },
@@ -1318,7 +1374,7 @@ describe('resolveReplaceRuleBuilder', () => {
       // body to silently strip the builder relationship.
 
       it('throws BUILDER_TYPE_NOT_CLEARED when a plain query is PUT over a builder rule', () => {
-        const registry = createMockRegistry();
+        const registry = createRegistryWithBuilderType();
 
         expect(() =>
           resolveReplaceRuleBuilder(registry, RULE_ID, baseCreateData, builderExisting)
@@ -1333,7 +1389,7 @@ describe('resolveReplaceRuleBuilder', () => {
       });
 
       it('includes the rule_id and builder_type in the BUILDER_TYPE_NOT_CLEARED error details', () => {
-        const registry = createMockRegistry();
+        const registry = createRegistryWithBuilderType();
 
         let caught: unknown;
         try {
@@ -1357,7 +1413,7 @@ describe('resolveReplaceRuleBuilder', () => {
         // body would strip builder_type from storage. The query being identical
         // is not enough to make the PUT safe — the builder_type must be
         // preserved too.
-        const registry = createMockRegistry();
+        const registry = createRegistryWithBuilderType();
         // Same query as in builderExisting.
         const data: CreateRuleData = {
           ...baseCreateData,
@@ -1380,7 +1436,7 @@ describe('resolveReplaceRuleBuilder', () => {
         // PATCH's queryChanged check.
         //
         // Ref: rule-types.md "What this design needs from the framework"
-        const registry = createMockRegistry();
+        const registry = createRegistryWithBuilderType();
         // Carry the same builder_type and the same query as in builderExisting.
         const data = {
           ...baseCreateData,
@@ -1397,7 +1453,7 @@ describe('resolveReplaceRuleBuilder', () => {
       });
 
       it('throws when the round-trip body changes the query even with the same builder_type', () => {
-        const registry = createMockRegistry();
+        const registry = createRegistryWithBuilderType();
         const data = {
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE },
@@ -1420,6 +1476,58 @@ describe('resolveReplaceRuleBuilder', () => {
         expect(() =>
           resolveReplaceRuleBuilder(registry, RULE_ID, baseCreateData, plainExisting)
         ).not.toThrow();
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // Unregistered stored builder type — plain replace semantics
+    // -----------------------------------------------------------------------
+
+    describe('stored builder type has no registration (legacy client-side builder)', () => {
+      // The strict paths above protect server-generated queries, which only
+      // registered types have. A stored builder_type with no registration is a
+      // client-side marker: the client owns the query, and the PUT body is the
+      // full new state (the framework's pre-existing replace semantics).
+
+      it('clears the marker when the body omits builder_type, even with an unchanged query', () => {
+        const registry = createMockRegistry();
+        // Same query as in builderExisting; metadata carries no builder_type.
+        const data: CreateRuleData = {
+          ...baseCreateData,
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        };
+
+        const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
+
+        expect(result.metadata.builder_type).toBeUndefined();
+      });
+
+      it('accepts a changed query when the body restates the unregistered builder_type', () => {
+        const registry = createMockRegistry();
+        const data = {
+          ...baseCreateData,
+          metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE },
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 1' } },
+        } as ReplaceRuleData;
+
+        let result: ReturnType<typeof resolveReplaceRuleBuilder>;
+        expect(
+          () => (result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting))
+        ).not.toThrow();
+        expect(result!.metadata.builder_type).toBe(BUILDER_TYPE);
+        expect(result!.query).toEqual(data.query);
+      });
+
+      it('normalises an explicit builder_type: null away (no null in storage)', () => {
+        const registry = createMockRegistry();
+        const data: ReplaceRuleData = {
+          ...baseCreateData,
+          metadata: { ...baseCreateData.metadata, builder_type: null },
+        };
+
+        const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
+
+        expect(result.metadata.builder_type).not.toBe(null);
       });
     });
 
