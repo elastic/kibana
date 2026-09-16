@@ -17,6 +17,7 @@ import {
   isStateTransitionAllowed,
   updateRuleDataSchema,
   type RuleKind,
+  type RuleOwnership,
   type RuleSource,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -101,6 +102,7 @@ import {
   validateMergedRuleAttributes,
   buildUpdateRuleAttributes,
   computeNextRevision,
+  deriveOwnership,
   groupCandidatesByInterval,
   isTaskMidRun,
   ruleDisabledError,
@@ -412,6 +414,12 @@ export class RulesClient {
 
     const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, data);
 
+    // Derive ownership from the builder type's registration.
+    // Managed types stamp { managed: true, solution, domain }; everything else
+    // stamps { managed: false }. Immutable for the rule's life.
+    // Ref: rule-ownership.md "The invariant and how it holds"
+    const ownership = deriveOwnership(this.builderTypeRegistry, data.metadata?.builder_type);
+
     const attrs = transformCreateRuleBodyToRuleSoAttributes(resolved, {
       enabled,
       createdBy: userProfileUid,
@@ -424,6 +432,7 @@ export class RulesClient {
       // Resolve source: use the caller-supplied value or default to internal.
       // Ref: rule-source.md "Who writes the source"
       source: data.metadata?.source ?? { type: 'internal', version: 1 },
+      ownership,
     });
 
     return {
@@ -1882,6 +1891,10 @@ export class RulesClient {
       // Immutable: always carry the stored value forward on replace.
       signatureId: existingAttrs.metadata.signature_id!,
       source: resolvedSource,
+      // Ownership is immutable — always carry the stored value forward.
+      // Falls back to { managed: false } when the stored rule predates step 4.4
+      // (pending the model-version migration in step 4.5).
+      ownership: (existingAttrs.metadata.ownership ?? { managed: false }) as RuleOwnership,
     });
     // Revision: diff the replacement against stored attributes and bump if needed.
     // Ref: rule-versions.md "How the diff runs"

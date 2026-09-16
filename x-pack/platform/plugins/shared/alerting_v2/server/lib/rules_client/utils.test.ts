@@ -9,6 +9,7 @@ import type { UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
+import { BuilderTypeRegistry } from '../builder_types';
 import type { ResolvedCreateRuleData, RotationCandidate } from './types';
 import {
   transformCreateRuleBodyToRuleSoAttributes,
@@ -18,6 +19,7 @@ import {
   assertImmutableUnchanged,
   assertSignatureIdUnchanged,
   assertRuleSourceUnchanged,
+  deriveOwnership,
   validateMergedRuleAttributes,
   pickImmutable,
   bulkErrorCodeForStatus,
@@ -38,6 +40,7 @@ const serverFields = {
   version: 1,
   signatureId: 'test-sig-id',
   source: { type: 'internal' as const, version: 1 },
+  ownership: { managed: false } as const,
 };
 
 const baseCreateData: ResolvedCreateRuleData = {
@@ -1500,6 +1503,188 @@ describe('utils', () => {
         const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
         expect(() => ruleResponseSchema.parse(result)).not.toThrow();
       }
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Step 4.4: metadata.ownership — server-derived, immutable, response-only
+  // ---------------------------------------------------------------------------
+
+  describe('deriveOwnership (step 4.4)', () => {
+    it('returns { managed: false } when builder type is undefined', () => {
+      const registry = new BuilderTypeRegistry();
+      expect(deriveOwnership(registry, undefined)).toEqual({ managed: false });
+    });
+
+    it('returns { managed: false } when builder type is null', () => {
+      const registry = new BuilderTypeRegistry();
+      expect(deriveOwnership(registry, null)).toEqual({ managed: false });
+    });
+
+    it('returns { managed: false } when the builder type is not in the registry', () => {
+      const registry = new BuilderTypeRegistry();
+      // registry.get('unknown.type') returns undefined — not registered
+      expect(deriveOwnership(registry, 'unknown.type')).toEqual({ managed: false });
+    });
+
+    it('returns { managed: false } when the registered type has no ownership declaration', () => {
+      // Spy on `get` to return an unmanaged type (no `ownership` field).
+      const registry = new BuilderTypeRegistry();
+      jest.spyOn(registry, 'get').mockReturnValue({
+        type: 'platform.test.query',
+        name: 'Test type',
+        builderFieldsSchema: {} as never,
+        generateQuery: jest.fn(),
+        // no `ownership` field → unmanaged
+      });
+      expect(deriveOwnership(registry, 'platform.test.query')).toEqual({ managed: false });
+    });
+
+    it('returns { managed: true, solution, domain } for a managed builder type', () => {
+      const registry = new BuilderTypeRegistry();
+      jest.spyOn(registry, 'get').mockReturnValue({
+        type: 'security.detection.query',
+        name: 'Detection query',
+        ownership: { solution: 'security', domain: 'detection' },
+        builderFieldsSchema: {} as never,
+        generateQuery: jest.fn(),
+      });
+      expect(deriveOwnership(registry, 'security.detection.query')).toEqual({
+        managed: true,
+        solution: 'security',
+        domain: 'detection',
+      });
+    });
+  });
+
+  describe('transformCreateRuleBodyToRuleSoAttributes — ownership (step 4.4)', () => {
+    it('stores the server-supplied ownership in metadata.ownership', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        ownership: { managed: false },
+      });
+      expect(result.metadata.ownership).toEqual({ managed: false });
+    });
+
+    it('stores managed ownership when supplied', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        ownership: { managed: true, solution: 'security', domain: 'detection' },
+      });
+      expect(result.metadata.ownership).toEqual({
+        managed: true,
+        solution: 'security',
+        domain: 'detection',
+      });
+    });
+  });
+
+  describe('buildUpdateRuleAttributes — ownership immutability (step 4.4)', () => {
+    it('preserves stored ownership when update data omits the field', () => {
+      const existing = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          ownership: { managed: true, solution: 'security', domain: 'detection' },
+        },
+      });
+
+      const next = buildUpdateRuleAttributes(existing, {}, { updatedBy: 'u', updatedAt: 't', version: 2 });
+
+      expect(next.metadata.ownership).toEqual({
+        managed: true,
+        solution: 'security',
+        domain: 'detection',
+      });
+    });
+
+    it('preserves stored unmanaged ownership even when absent (pre-migration fallback)', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'rule', signature_id: 'sig' },
+      });
+      // ownership is not set — simulates a rule created before step 4.4
+      delete (existing.metadata as Record<string, unknown>).ownership;
+
+      const next = buildUpdateRuleAttributes(existing, {}, { updatedBy: 'u', updatedAt: 't', version: 2 });
+
+      // The stored value (undefined) is preserved as-is; the fallback happens
+      // only in transformRuleSoAttributesToRuleApiResponse at response time.
+      expect(next.metadata.ownership).toBeUndefined();
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse — ownership (step 4.4)', () => {
+    it('includes managed ownership from stored attributes', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          ownership: { managed: true, solution: 'security', domain: 'detection' },
+        },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.ownership).toEqual({
+        managed: true,
+        solution: 'security',
+        domain: 'detection',
+      });
+    });
+
+    it('includes unmanaged ownership from stored attributes', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule', signature_id: 'sig', ownership: { managed: false } },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.ownership).toEqual({ managed: false });
+    });
+
+    it('falls back to { managed: false } when stored ownership is absent (pre-migration)', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule', signature_id: 'sig' } });
+      delete (attrs.metadata as Record<string, unknown>).ownership;
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+
+      expect(result.metadata.ownership).toEqual({ managed: false });
+    });
+
+    it('passes ruleResponseSchema parse for managed and unmanaged ownership', () => {
+      const variants = [
+        { managed: true as const, solution: 'security', domain: 'detection' },
+        { managed: false as const },
+        { managed: false as const, app: 'significantEvents' },
+      ];
+      for (const ownership of variants) {
+        const attrs = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', ownership },
+        });
+        const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+        expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+      }
+    });
+  });
+
+  describe('ruleResponseSchema rejects ownership in request body (step 4.4)', () => {
+    it('createRuleDataSchema rejects ownership in metadata (response-only field)', () => {
+      const { createRuleDataSchema } = require('@kbn/alerting-v2-schemas');
+      const result = createRuleDataSchema.safeParse({
+        kind: 'alert',
+        metadata: {
+          name: 'test',
+          // ownership is response-only; the strict metadataSchema must reject it
+          ownership: { managed: false },
+        },
+        schedule: { every: '5m' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('updateRuleDataSchema rejects ownership in metadata (response-only field)', () => {
+      const { updateRuleDataSchema } = require('@kbn/alerting-v2-schemas');
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { ownership: { managed: false } },
+      });
+      expect(result.success).toBe(false);
     });
   });
 

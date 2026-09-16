@@ -29,6 +29,8 @@ const baseRuleData: RuleAttachmentData = {
     source: { type: 'internal', version: 1 },
     version: 1,
     revision: 0,
+    // Step 4.4: ownership is now required in ruleResponseMetadataSchema.
+    ownership: { managed: false },
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
