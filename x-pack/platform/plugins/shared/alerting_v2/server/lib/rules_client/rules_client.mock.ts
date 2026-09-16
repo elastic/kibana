@@ -52,7 +52,8 @@ export function createRulesClient(): {
     loggerService,
     artifactTypeRegistry,
     { actor: 'user', options: {} },
-    builderTypeRegistry
+    builderTypeRegistry,
+    undefined // callerIdentity — absent for mock (identity-less by default)
   );
 
   return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };

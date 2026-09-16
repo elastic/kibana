@@ -76,6 +76,7 @@ import {
   RulesSavedObjectServiceScopedToken,
 } from '../services/rules_saved_object_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
+import { type CallerIdentity, CallerIdentityToken } from './caller_identity';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
@@ -251,7 +252,8 @@ export class RulesClient {
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
     @inject(RulesClientEventOriginToken) eventOrigin: RulesClientEventOrigin,
-    @inject(BuilderTypeRegistry) private readonly builderTypeRegistry: BuilderTypeRegistry
+    @inject(BuilderTypeRegistry) private readonly builderTypeRegistry: BuilderTypeRegistry,
+    @inject(CallerIdentityToken) private readonly callerIdentity: CallerIdentity | undefined
   ) {
     this.eventContext = {
       request,
@@ -452,9 +454,15 @@ export class RulesClient {
 
     // Derive ownership from the builder type's registration.
     // Managed types stamp { managed: true, solution, domain }; everything else
-    // stamps { managed: false }. Immutable for the rule's life.
+    // stamps { managed: false }, with `app` from the caller identity when an
+    // in-process caller declared one. Immutable for the rule's life.
     // Ref: rule-ownership.md "The invariant and how it holds"
-    const ownership = deriveOwnership(this.builderTypeRegistry, data.metadata?.builder_type);
+    // Ref: rule-ownership.md "Caller identity"
+    const ownership = deriveOwnership(
+      this.builderTypeRegistry,
+      data.metadata?.builder_type,
+      this.callerIdentity?.app
+    );
 
     const attrs = transformCreateRuleBodyToRuleSoAttributes(resolved, {
       enabled,
