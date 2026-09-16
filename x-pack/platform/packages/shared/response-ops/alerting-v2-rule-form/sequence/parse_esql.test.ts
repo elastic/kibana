@@ -176,6 +176,47 @@ describe('parseSequenceEsql', () => {
     });
   });
 
+  describe('round-trip — OR step with 3+ rules', () => {
+    const original: SequenceFormValues = {
+      steps: [
+        { id: generateStepId(), rules: [makeRule('rule-a')], operator: 'or' },
+        {
+          id: generateStepId(),
+          rules: [makeRule('rule-b'), makeRule('rule-c'), makeRule('rule-d')],
+          operator: 'or',
+        },
+      ],
+      hopWindows: [{ value: 10, unit: 'm' }],
+      recoveryStepIndices: [1],
+    };
+
+    it('reconstructs all 3 rules in step 1', () => {
+      const parsed = roundTrip(original)!;
+      expect(parsed.steps[1].rules).toHaveLength(3);
+      expect(parsed.steps[1].rules.map((r) => r.ruleId)).toEqual(['rule-b', 'rule-c', 'rule-d']);
+    });
+  });
+
+  describe('round-trip — custom recovery targeting multi-rule OR step', () => {
+    const original: SequenceFormValues = {
+      steps: [
+        {
+          id: generateStepId(),
+          rules: [makeRule('rule-a'), makeRule('rule-b')],
+          operator: 'or',
+        },
+        { id: generateStepId(), rules: [makeRule('rule-c')], operator: 'or' },
+      ],
+      hopWindows: [{ value: 5, unit: 'm' }],
+      recoveryStepIndices: [0],
+    };
+
+    it('recovers the correct step index when recovery uses IN', () => {
+      const parsed = roundTrip(original)!;
+      expect(parsed.recoveryStepIndices).toEqual([0]);
+    });
+  });
+
   it('converts seconds back to the most readable hop window unit (minutes)', () => {
     const original: SequenceFormValues = {
       steps: [
