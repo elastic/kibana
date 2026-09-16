@@ -436,7 +436,6 @@ describe('RulesClient', () => {
     describe('signature_id (step 4.1)', () => {
       it('generates a UUID v4 signature_id when the caller does not supply one', async () => {
         const client = createClient();
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-sig-gen' });
 
         const res = await client.createRule({
           data: baseCreateData, // no metadata.signature_id
@@ -449,7 +448,7 @@ describe('RulesClient', () => {
         );
 
         // The generated id must have been stored in the saved object.
-        expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
           expect.objectContaining({
             attrs: expect.objectContaining({
               metadata: expect.objectContaining({
@@ -458,13 +457,12 @@ describe('RulesClient', () => {
                 ),
               }),
             }),
-          })
-        );
+          }),
+        ]);
       });
 
       it('uses the caller-supplied signature_id when provided', async () => {
         const client = createClient();
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-sig-caller' });
 
         const res = await client.createRule({
           data: { ...baseCreateData, metadata: { name: 'rule-1', signature_id: 'my-stable-id' } },
@@ -472,13 +470,13 @@ describe('RulesClient', () => {
         });
 
         expect(res.metadata.signature_id).toBe('my-stable-id');
-        expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
           expect.objectContaining({
             attrs: expect.objectContaining({
               metadata: expect.objectContaining({ signature_id: 'my-stable-id' }),
             }),
-          })
-        );
+          }),
+        ]);
       });
 
       it('rejects with 409 RULE_ALREADY_EXISTS when signature_id collides within the space', async () => {
@@ -509,12 +507,11 @@ describe('RulesClient', () => {
         });
 
         // No SO should have been created since the conflict was caught early.
-        expect(rulesSavedObjectService.create).not.toHaveBeenCalled();
+        expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
       });
 
       it('signature_id is present in the rule response', async () => {
         const client = createClient();
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-sig-resp' });
 
         const res = await client.createRule({
           data: { ...baseCreateData, metadata: { name: 'rule-1', signature_id: 'resp-check-id' } },
@@ -528,7 +525,6 @@ describe('RulesClient', () => {
     describe('options.enabled (step 7.2)', () => {
       it('creates an enabled rule and schedules a task when options.enabled is omitted (default true)', async () => {
         const client = createClient();
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-default-enabled' });
 
         const res = await client.createRule({
           data: baseCreateData,
@@ -536,20 +532,22 @@ describe('RulesClient', () => {
           // no `enabled` key — must behave exactly as today
         });
 
-        expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
-          expect.objectContaining({ attrs: expect.objectContaining({ enabled: true }) })
-        );
-        expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            input: expect.objectContaining({ ruleId: 'rule-default-enabled' }),
-          })
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+          expect.objectContaining({ attrs: expect.objectContaining({ enabled: true }) }),
+        ]);
+        expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
+          [
+            expect.objectContaining({
+              params: expect.objectContaining({ ruleId: 'rule-default-enabled' }),
+            }),
+          ],
+          expect.anything()
         );
         expect(res.enabled).toBe(true);
       });
 
       it('creates a disabled rule and does NOT schedule a task when options.enabled is false', async () => {
         const client = createClient();
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-disabled' });
 
         const res = await client.createRule({
           data: baseCreateData,
@@ -557,11 +555,11 @@ describe('RulesClient', () => {
         });
 
         // The SO is written with enabled: false.
-        expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
-          expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) })
-        );
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+          expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) }),
+        ]);
         // No executor task must be registered.
-        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+        expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
         expect(res.enabled).toBe(false);
       });
 
@@ -571,7 +569,6 @@ describe('RulesClient', () => {
         // one must skip the check entirely.
         const client = createClient({ maxScheduledPerMinute: 1 });
         rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-disabled-limit' });
 
         // Must not throw even though the limit is reached.
         await expect(
@@ -2017,7 +2014,7 @@ describe('RulesClient', () => {
         'elasticsearch unavailable'
       );
 
-      expect(rulesSavedObjectService.create).not.toHaveBeenCalled();
+      expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
@@ -2071,7 +2068,7 @@ describe('RulesClient', () => {
           data: { code: 'RULE_ALREADY_EXISTS' },
         });
 
-        expect(rulesSavedObjectService.create).not.toHaveBeenCalled();
+        expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
       });
     });
 
@@ -4564,9 +4561,6 @@ describe('RulesClient', () => {
             'rule-id-wf-upsert-create'
           )
         );
-        rulesSavedObjectService.create.mockResolvedValueOnce({
-          id: 'rule-id-wf-upsert-create',
-        });
 
         await client.upsertRule({ id: 'rule-id-wf-upsert-create', data: workflowCreateData });
 
@@ -4927,11 +4921,10 @@ describe('RulesClient', () => {
           page: 1,
           per_page: 1,
         });
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-rev-1' });
 
         await client.createRule({ data: baseCreateData });
 
-        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
         expect(attrs.metadata.revision).toBe(0);
       });
 
@@ -4943,11 +4936,10 @@ describe('RulesClient', () => {
           page: 1,
           per_page: 1,
         });
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-rev-2' });
 
         await client.createRule({ data: baseCreateData });
 
-        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
         expect(attrs.metadata.version).toBe(1);
       });
     });
@@ -5139,7 +5131,6 @@ describe('RulesClient', () => {
           page: 1,
           per_page: 1,
         });
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-own-unmanaged' });
 
         const res = await client.createRule({
           data: baseCreateData, // no builder_type
@@ -5150,7 +5141,7 @@ describe('RulesClient', () => {
         expect(res.metadata.ownership).toEqual({ managed: false });
 
         // Stored attributes carry unmanaged ownership.
-        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
         expect(attrs.metadata.ownership).toEqual({ managed: false });
       });
 
@@ -5178,7 +5169,6 @@ describe('RulesClient', () => {
           page: 1,
           per_page: 1,
         });
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-own-managed' });
 
         const res = await client.createRule({
           data: {
@@ -5197,7 +5187,7 @@ describe('RulesClient', () => {
         });
 
         // Stored attributes carry managed ownership.
-        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
         expect(attrs.metadata.ownership).toEqual({
           managed: true,
           solution: 'security',
@@ -5337,7 +5327,6 @@ describe('RulesClient', () => {
           page: 1,
           per_page: 1,
         });
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-app-stamped' });
 
         const res = await client.createRule({
           data: baseCreateData,
@@ -5348,7 +5337,7 @@ describe('RulesClient', () => {
         expect(res.metadata.ownership).toEqual({ managed: false, app: 'significantEvents' });
 
         // Stored attributes carry app.
-        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
         expect(attrs.metadata.ownership).toEqual({ managed: false, app: 'significantEvents' });
       });
 
@@ -5360,7 +5349,6 @@ describe('RulesClient', () => {
           page: 1,
           per_page: 1,
         });
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-no-app' });
 
         const res = await client.createRule({
           data: baseCreateData,
@@ -5371,7 +5359,7 @@ describe('RulesClient', () => {
         expect(res.metadata.ownership).toEqual({ managed: false });
         expect((res.metadata.ownership as { app?: string }).app).toBeUndefined();
 
-        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
         expect(attrs.metadata.ownership).toEqual({ managed: false });
       });
 
@@ -5386,7 +5374,6 @@ describe('RulesClient', () => {
           page: 1,
           per_page: 1,
         });
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-solution-only' });
 
         const res = await client.createRule({
           data: baseCreateData,
@@ -5414,7 +5401,6 @@ describe('RulesClient', () => {
           page: 1,
           per_page: 1,
         });
-        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-managed-no-app' });
 
         const res = await client.createRule({
           data: {
@@ -5499,7 +5485,6 @@ describe('RulesClient', () => {
           page: 1,
           per_page: 1,
         });
-        rulesSavedObjectService.create.mockResolvedValue({ id: 'rule-created' });
       });
 
       it('refuses an identity-less client when the type is managed', async () => {
@@ -5519,7 +5504,7 @@ describe('RulesClient', () => {
             details: { solution: 'security', domain: 'detection' },
           },
         });
-        expect(rulesSavedObjectService.create).not.toHaveBeenCalled();
+        expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
       });
 
       it('allows a matching-solution client to create a managed-type rule', async () => {
@@ -5533,7 +5518,7 @@ describe('RulesClient', () => {
             },
           })
         ).resolves.toBeDefined();
-        expect(rulesSavedObjectService.create).toHaveBeenCalled();
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalled();
       });
 
       it('refuses a mismatched-solution client when the type is managed', async () => {
@@ -5553,14 +5538,14 @@ describe('RulesClient', () => {
             details: { solution: 'security', domain: 'detection' },
           },
         });
-        expect(rulesSavedObjectService.create).not.toHaveBeenCalled();
+        expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
       });
 
       it('allows any caller to create an unmanaged-type rule', async () => {
         useUnregisteredType();
         const client = createClient(undefined, undefined);
         await expect(client.createRule({ data: baseCreateData })).resolves.toBeDefined();
-        expect(rulesSavedObjectService.create).toHaveBeenCalled();
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalled();
       });
     });
 
