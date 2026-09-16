@@ -502,6 +502,76 @@ describe('prepareMessages', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls![0].name).toBe(sanitizeToolId('.search'));
   });
 
+  describe('with a compaction cursor', () => {
+    const structured = {
+      discussion_summary: 's',
+      user_intent: 'i',
+      key_topics: [],
+      entities: [],
+      outcomes_and_decisions: [],
+      unanswered_questions: [],
+      agent_actions: [],
+      tool_calls_summary: [],
+    };
+    const summary = { created_at: 't', token_count: 1, structured_data: structured };
+    const rounds = [
+      createRound({ id: 'a', input: makeRoundInput('first'), response: { message: 'one' } }),
+      createRound({ id: 'b', input: makeRoundInput('second'), response: { message: 'two' } }),
+    ];
+    const text = (messages: Array<{ content: unknown }>) => messages.map((m) => String(m.content));
+
+    it('renders only rounds after the cursor event, preceded by the summary exchange', async () => {
+      const conversation = createConversation({
+        previousRounds: rounds,
+        nextInput: makeRoundInput('now'),
+      });
+      const cursor = conversation.timeline.filter((e) => e.id.startsWith('a::')).at(-1)!.id;
+
+      const messages = await prepareMessages({
+        conversation,
+        compactionSummary: summary,
+        compactionCoverage: { eventId: cursor },
+      });
+
+      const contents = text(messages);
+      expect(contents[0]).toContain('compacted');
+      expect(contents.some((t) => t.includes('first'))).toBe(false);
+      expect(contents.some((t) => t.includes('second'))).toBe(true);
+    });
+
+    it('renders no history rounds when coverage is an in-flight action index', async () => {
+      const conversation = createConversation({
+        previousRounds: rounds,
+        nextInput: makeRoundInput('now'),
+      });
+
+      const messages = await prepareMessages({
+        conversation,
+        compactionSummary: summary,
+        compactionCoverage: { actionIndex: 3 },
+      });
+
+      const contents = text(messages);
+      expect(contents.some((t) => t.includes('first') || t.includes('second'))).toBe(false);
+      expect(contents.at(-1)).toContain('now');
+    });
+
+    it('renders the full history when the cursor id is unknown', async () => {
+      const conversation = createConversation({
+        previousRounds: rounds,
+        nextInput: makeRoundInput('now'),
+      });
+
+      const messages = await prepareMessages({
+        conversation,
+        compactionSummary: summary,
+        compactionCoverage: { eventId: 'nope' },
+      });
+
+      expect(text(messages).some((t) => t.includes('first'))).toBe(true);
+    });
+  });
+
   describe('with attachments', () => {
     it('includes a single attachment in the user message', async () => {
       const attachment = makeProcessedAttachment(
@@ -686,7 +756,7 @@ describe('prepareMessages', () => {
       // Because attachmentTypeInstructionsProvided starts empty each call, the first
       // remaining round that has an esql ref must re-render the type instructions.
       const compactionSummary: CompactionSummary = {
-        summarized_round_count: 2,
+        summarized_up_to_event_id: 'compacted::step::0',
         created_at: '2024-01-01T00:00:00.000Z',
         token_count: 100,
         structured_data: {

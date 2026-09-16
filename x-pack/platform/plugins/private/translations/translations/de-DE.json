@@ -11972,7 +11972,6 @@
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.completed": "Hintergrundagent abgeschlossen",
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.failed": "Hintergrundagent {status}",
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.viewJson": "JSON anzeigen",
-    "xpack.agentBuilder.roundEvents.steps.compaction.complete": "Kontext komprimiert: {before} → {after} Token, {count, plural, one {# round} other {# Runden}}",
     "xpack.agentBuilder.roundEvents.steps.compaction.inProgress": "Verdichtung des Kontexts",
     "xpack.agentBuilder.roundEvents.steps.toolCall.ariaLabel": "Tool-Aufruf",
     "xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.errorTitle": "Ausführungsfehler",

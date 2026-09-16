@@ -16,7 +16,6 @@ import {
 import { isImageResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
-import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
@@ -38,20 +37,12 @@ import {
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
+  isSubstitutionAction,
+  isContextLengthErrorAction,
 } from '../../actions';
 import type { ToolCallResultTransformer } from '../../utils/tool_summarization';
 import { extractToolReturn } from '../../utils/extract_tool_return';
-import { estimateMessagesTokens } from '../../utils/estimate_conversation_tokens';
 import type { PromptImageResolver } from '../types';
-
-const PRESERVED_RECENT_CYCLES = 2;
-
-export const IN_FLIGHT_TOKEN_THRESHOLD = 50_000;
-
-interface IntraRoundCompaction {
-  resultTransformer: ToolCallResultTransformer;
-  toolManager: ToolManager;
-}
 
 export const formatResearcherActionHistory = async ({
   actions,
@@ -59,49 +50,25 @@ export const formatResearcherActionHistory = async ({
   resultTransformer,
   toolManager,
   imageResolver,
+  fromActionIndex = 0,
 }: {
   actions: ResearchAgentAction[];
   cycleLimit: number;
   resultTransformer?: ToolCallResultTransformer;
   toolManager?: ToolManager;
   imageResolver?: PromptImageResolver;
+  /** Actions before this index are covered by the compaction summary and not rendered. */
+  fromActionIndex?: number;
 }): Promise<BaseMessageLike[]> => {
-  const rawMessages = await formatActions({ actions, cycleLimit, imageResolver });
-
-  if (
-    !resultTransformer ||
-    !toolManager ||
-    estimateMessagesTokens(rawMessages as BaseMessage[]) <= IN_FLIGHT_TOKEN_THRESHOLD
-  ) {
-    return rawMessages;
-  }
-
-  const compactedMessages = await formatActions({
-    actions,
-    cycleLimit,
-    compaction: { resultTransformer, toolManager },
-    imageResolver,
-  });
-
-  return compactedMessages;
-};
-
-const formatActions = async ({
-  actions,
-  cycleLimit,
-  compaction,
-  imageResolver,
-}: {
-  actions: ResearchAgentAction[];
-  cycleLimit: number;
-  compaction?: IntraRoundCompaction;
-  imageResolver?: PromptImageResolver;
-}): Promise<BaseMessageLike[]> => {
-  const compactionCutoff = compaction ? getCompactionCutoffCycle(actions) : undefined;
+  const toolIdMapping = toolManager?.getToolIdMapping();
   const formatted: BaseMessageLike[] = [];
 
-  for (let i = 0; i < actions.length; i++) {
+  for (let i = fromActionIndex; i < actions.length; i++) {
     const action = actions[i];
+    // Context-management bookkeeping; never shown to the model.
+    if (isSubstitutionAction(action) || isContextLengthErrorAction(action)) {
+      continue;
+    }
     if (isToolCallAction(action)) {
       // in case of forceful handover, we have a tool_call action without the corresponding tool result
       // so we want to skip it because we need a [ai, user, ai, user, ...] flow
@@ -112,30 +79,25 @@ const formatActions = async ({
       formatted.push(createToolCallMessage(action.tool_calls, action.message));
     }
     if (isExecuteToolAction(action)) {
-      const compactThis =
-        compaction !== undefined &&
-        compactionCutoff !== undefined &&
-        action.cycle !== undefined &&
-        action.cycle <= compactionCutoff;
-
-      if (compactThis) {
-        formatted.push(
-          ...(await formatCompactedToolResults(
-            action,
-            findPrecedingToolCallAction(actions, i),
-            compaction!
-          ))
-        );
-      } else {
-        formatted.push(
-          ...action.tool_results.map((result) =>
-            createToolResultMessage({ content: result.content, toolCallId: result.toolCallId })
-          )
-        );
-        // Tool results carry only a marker — push the actual image bytes as a follow-up user message.
-        if (imageResolver) {
-          await injectImageMessages(action.tool_results, imageResolver, formatted);
-        }
+      const rendered =
+        resultTransformer && toolIdMapping
+          ? await formatTransformedToolResults(
+              action,
+              findPrecedingToolCallAction(actions, i),
+              resultTransformer,
+              toolIdMapping
+            )
+          : {
+              messages: action.tool_results.map((result) =>
+                createToolResultMessage({ content: result.content, toolCallId: result.toolCallId })
+              ),
+              untouched: action.tool_results,
+            };
+      formatted.push(...rendered.messages);
+      // Tool results carry only a marker — push the actual image bytes as a follow-up user message.
+      // Results the transformer replaced (summarized / substituted) do not get their images back.
+      if (imageResolver) {
+        await injectImageMessages(rendered.untouched, imageResolver, formatted);
       }
 
       // Add system reminder about being close to the limit when only 5 cycles left.
@@ -241,18 +203,6 @@ const injectImageMessages = async (
   }
 };
 
-const getCompactionCutoffCycle = (actions: ResearchAgentAction[]): number | undefined => {
-  const cycles = actions
-    .filter(isExecuteToolAction)
-    .map((action) => action.cycle)
-    .filter((cycle): cycle is number => cycle !== undefined);
-
-  if (cycles.length <= PRESERVED_RECENT_CYCLES) {
-    return undefined;
-  }
-  return Math.max(...cycles) - PRESERVED_RECENT_CYCLES;
-};
-
 const findPrecedingToolCallAction = (
   actions: ResearchAgentAction[],
   executeIndex: number
@@ -267,47 +217,39 @@ const findPrecedingToolCallAction = (
 };
 
 /**
- * Runs the result transformer over an older cycle's tool results, mirroring how
- * previous rounds are compacted. Filestore substitution is forced because the
- * pressure comes from the in-flight round, not conversation history. A result whose
- * structured payload can't be recovered falls back to its raw content.
+ * Renders an in-flight tool execution through the result transformer. Transformers return the
+ * input results by reference when they change nothing, so untouched results keep their raw
+ * content (re-serializing would only add overhead). A result whose structured payload can't be
+ * recovered is rendered raw as well.
  */
-const formatCompactedToolResults = async (
+const formatTransformedToolResults = async (
   executeAction: ExecuteToolAction,
   toolCallAction: ToolCallAction | undefined,
-  { resultTransformer, toolManager }: IntraRoundCompaction
-): Promise<BaseMessageLike[]> => {
-  const toolIdMapping = toolManager.getToolIdMapping();
+  resultTransformer: ToolCallResultTransformer,
+  toolIdMapping: Map<string, string>
+): Promise<{ messages: BaseMessageLike[]; untouched: ToolCallResult[] }> => {
   const messages: BaseMessageLike[] = [];
+  const untouched: ToolCallResult[] = [];
 
   for (const result of executeAction.tool_results) {
     const toolCall = reconstructToolCall(result, toolCallAction, toolIdMapping);
-    if (!toolCall) {
+    const transformed = toolCall ? await resultTransformer(toolCall) : undefined;
+    if (!toolCall || transformed === toolCall.results) {
+      untouched.push(result);
       messages.push(
         createToolResultMessage({ content: result.content, toolCallId: result.toolCallId })
       );
       continue;
     }
-
-    const transformed = await resultTransformer(toolCall, { forceFilestoreSubstitution: true });
-    // Only use the transformed form when it's actually smaller. Re-serializing an
-    // unchanged result (no summarizer, and below the filestore threshold) as JSON can
-    // otherwise add overhead and make the prompt larger than the raw rendering.
-    const transformedContent = { results: transformed };
-    const useTransformed =
-      estimateTokens(JSON.stringify(transformedContent)) < estimateTokens(result.content);
     messages.push(
-      createToolResultMessage({
-        content: useTransformed ? transformedContent : result.content,
-        toolCallId: result.toolCallId,
-      })
+      createToolResultMessage({ content: { results: transformed }, toolCallId: result.toolCallId })
     );
   }
 
-  return messages;
+  return { messages, untouched };
 };
 
-const reconstructToolCall = (
+export const reconstructToolCall = (
   result: ToolCallResult,
   toolCallAction: ToolCallAction | undefined,
   toolIdMapping: Map<string, string>

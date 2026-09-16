@@ -12,7 +12,7 @@ import type {
   BaseMessage,
   BaseMessageLike,
 } from '@langchain/core/messages';
-import { AgentActionType } from '../../actions';
+import { AgentActionType, contextLengthErrorAction, substitutionAction } from '../../actions';
 import type {
   ResearchAgentAction,
   ToolCallAction,
@@ -21,6 +21,8 @@ import type {
 } from '../../actions';
 import { formatResearcherActionHistory, formatSystemNotice } from './actions';
 import { ExecutionStatus, ToolResultType } from '@kbn/agent-builder-common';
+import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
@@ -161,12 +163,15 @@ describe('formatResearcherActionHistory', () => {
     expect((messages[0] as any).content).toContain('LLM timeout');
   });
 
-  describe('intra-round compaction', () => {
-    // ~15k tokens of content per cycle, so a handful of cycles exceeds the threshold.
-    const bigContent = 'x'.repeat(60_000);
+  describe('result transformation', () => {
     const mockToolManager = {
-      getToolIdMapping: () => new Map<string, string>(),
+      getToolIdMapping: () => new Map<string, string>([['search', 'platform.search']]),
     } as unknown as ToolManager;
+
+    const rawResults = (n: number): ToolResult[] => [
+      { type: ToolResultType.other, tool_result_id: `r${n}`, data: { value: `RAW_${n}` } },
+    ];
+    const rawResult = (n: number) => JSON.stringify({ results: rawResults(n) });
 
     const makeCycle = (n: number): ResearchAgentAction[] => [
       makeToolCallAction(
@@ -175,21 +180,7 @@ describe('formatResearcherActionHistory', () => {
         n
       ),
       makeExecuteToolAction(
-        [
-          {
-            toolCallId: `c${n}`,
-            content: bigContent,
-            artifact: {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  tool_result_id: `r${n}`,
-                  data: { value: bigContent },
-                },
-              ],
-            },
-          },
-        ],
+        [{ toolCallId: `c${n}`, content: rawResult(n), artifact: { results: rawResults(n) } }],
         n
       ),
     ];
@@ -199,69 +190,79 @@ describe('formatResearcherActionHistory', () => {
         .filter((message): message is ToolMessage => isToolMessage(message as any))
         .find((message) => message.tool_call_id === id);
 
-    it('compacts older cycles while preserving the most recent ones when over the threshold', async () => {
-      const actions: ResearchAgentAction[] = [
-        ...makeCycle(1),
-        ...makeCycle(2),
-        ...makeCycle(3),
-        ...makeCycle(4),
-      ];
+    it('renders results through the transformer, mapping the tool id from the manager', async () => {
       const resultTransformer: ToolCallResultTransformer = jest.fn(async () => [
-        { type: ToolResultType.other, tool_result_id: 'sum', data: { summary: 'compacted' } },
+        { type: ToolResultType.other, tool_result_id: 'sum', data: { summary: 'transformed' } },
       ]);
 
       const messages = await formatResearcherActionHistory({
-        actions,
+        actions: [...makeCycle(1)],
         cycleLimit: 100,
         resultTransformer,
         toolManager: mockToolManager,
       });
 
-      // maxCycle=4, cutoff=2 -> cycles 1 & 2 compacted, cycles 3 & 4 kept verbatim.
-      expect(toolMessageById(messages, 'c1')!.content).toContain('compacted');
-      expect(toolMessageById(messages, 'c1')!.content).not.toContain(bigContent);
-      expect(toolMessageById(messages, 'c2')!.content).toContain('compacted');
-      expect(toolMessageById(messages, 'c3')!.content).toContain(bigContent);
-      expect(toolMessageById(messages, 'c4')!.content).toContain(bigContent);
-
-      expect(resultTransformer).toHaveBeenCalledTimes(2);
       expect(resultTransformer).toHaveBeenCalledWith(
-        expect.objectContaining({ tool_call_id: 'c1' }),
-        {
-          forceFilestoreSubstitution: true,
-        }
+        expect.objectContaining({ tool_call_id: 'c1', tool_id: 'platform.search' })
       );
+      expect(toolMessageById(messages, 'c1')!.content).toContain('transformed');
+      expect(toolMessageById(messages, 'c1')!.content).not.toContain('RAW_1');
     });
 
-    it('leaves the round verbatim when under the threshold', async () => {
-      const actions: ResearchAgentAction[] = [
-        makeToolCallAction([{ toolCallId: 'c1', toolName: 'search' }], undefined, 1),
-        makeExecuteToolAction([{ toolCallId: 'c1', content: 'small result' }], 1),
-      ];
-      const resultTransformer: ToolCallResultTransformer = jest.fn();
+    it('keeps the raw content when the transformer returns the results untouched', async () => {
+      const resultTransformer: ToolCallResultTransformer = jest.fn(async (tc) => tc.results);
+
+      const messages = await formatResearcherActionHistory({
+        actions: [...makeCycle(1)],
+        cycleLimit: 100,
+        resultTransformer,
+        toolManager: mockToolManager,
+      });
+
+      expect(toolMessageById(messages, 'c1')!.content).toContain(rawResult(1));
+    });
+
+    it('skips actions before fromActionIndex', async () => {
+      const actions: ResearchAgentAction[] = [...makeCycle(1), ...makeCycle(2)];
 
       const messages = await formatResearcherActionHistory({
         actions,
         cycleLimit: 100,
-        resultTransformer,
-        toolManager: mockToolManager,
+        fromActionIndex: 2,
       });
 
-      expect(resultTransformer).not.toHaveBeenCalled();
-      expect(toolMessageById(messages, 'c1')!.content).toContain('small result');
+      expect(toolMessageById(messages, 'c1')).toBeUndefined();
+      expect(toolMessageById(messages, 'c2')!.content).toContain('RAW_2');
     });
 
-    it('keeps tool results verbatim when no transformer is wired even if large', async () => {
-      const actions: ResearchAgentAction[] = [
-        ...makeCycle(1),
-        ...makeCycle(2),
-        ...makeCycle(3),
-        ...makeCycle(4),
-      ];
+    it('renders nothing for substitution and context-length-error actions', async () => {
+      const error = createAgentExecutionError(
+        'too long',
+        AgentExecutionErrorCode.contextLengthExceeded,
+        {}
+      );
+      const messages = await formatResearcherActionHistory({
+        actions: [
+          substitutionAction({
+            substituted_tool_call_ids: ['c1'],
+            trigger: 'intra_round',
+            reason: 'input_tokens_threshold',
+          }),
+          contextLengthErrorAction(error),
+        ],
+        cycleLimit: 100,
+      });
 
-      const messages = await formatResearcherActionHistory({ actions, cycleLimit: 100 });
+      expect(messages).toEqual([]);
+    });
 
-      expect(toolMessageById(messages, 'c1')!.content).toContain(bigContent);
+    it('keeps tool results verbatim when no transformer is wired', async () => {
+      const messages = await formatResearcherActionHistory({
+        actions: [...makeCycle(1)],
+        cycleLimit: 100,
+      });
+
+      expect(toolMessageById(messages, 'c1')!.content).toContain(rawResult(1));
     });
   });
 });
@@ -382,34 +383,18 @@ describe('image injection', () => {
     expect((humanMessages[0] as any).content).toContain('could not be loaded');
   });
 
-  it('excludes the image from the final output for a compacted cycle', async () => {
-    const bigContent = 'x'.repeat(60_000);
+  it('does not inject the image when the transformer replaced the tool result', async () => {
     const mockToolManager = {
       getToolIdMapping: () => new Map<string, string>(),
     } as unknown as ToolManager;
     const resultTransformer: ToolCallResultTransformer = jest.fn(async () => [
-      { type: ToolResultType.other, tool_result_id: 'sum', data: { summary: 'compacted' } },
+      { type: ToolResultType.other, tool_result_id: 'sum', data: { summary: 'substituted' } },
     ]);
     const imageResolver = jest.fn().mockResolvedValue({ base64: 'AAA', mimeType: 'image/png' });
 
-    const makeBigCycle = (n: number): ResearchAgentAction[] => [
-      makeToolCallAction([{ toolCallId: `c${n}`, toolName: 'search' }], undefined, n),
-      makeExecuteToolAction(
-        [{ toolCallId: `c${n}`, content: bigContent, artifact: { results: [] } }],
-        n
-      ),
-    ];
-
-    // maxCycle=5, cutoff=5-PRESERVED_RECENT_CYCLES(2)=3 -> cycle 1 (image) falls at or
-    // below the cutoff and is compacted away in the final output. Four big cycles keep
-    // the raw-pass estimate safely over IN_FLIGHT_TOKEN_THRESHOLD so real compaction runs.
     const actions: ResearchAgentAction[] = [
       makeToolCallAction([{ toolCallId: 'c1', toolName: 'attachment_read' }], undefined, 1),
       makeExecuteToolAction([makeImageToolResult({ toolCallId: 'c1', attachmentId: 'img-1' })], 1),
-      ...makeBigCycle(2),
-      ...makeBigCycle(3),
-      ...makeBigCycle(4),
-      ...makeBigCycle(5),
     ];
 
     const messages = await formatResearcherActionHistory({
@@ -420,15 +405,12 @@ describe('image injection', () => {
       imageResolver,
     });
 
-    // The final (compacted) messages must never carry image_url content for a
-    // compacted cycle, even though the resolver may have fired once during the
-    // uncompacted sizing pass that formatResearcherActionHistory runs first —
-    // that fetch is memoized and its result is thrown away here.
     const imageParts = messages
       .filter((m): m is BaseMessage => isHumanMessage(m as any))
       .flatMap((m) => (Array.isArray(m.content) ? m.content : []))
       .filter((part: any) => part.type === 'image_url');
     expect(imageParts).toHaveLength(0);
+    expect(imageResolver).not.toHaveBeenCalled();
   });
 });
 

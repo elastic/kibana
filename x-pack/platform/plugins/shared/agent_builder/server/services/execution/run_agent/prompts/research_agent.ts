@@ -14,10 +14,9 @@ import {
   getRelevantSkillsPointerInstructions,
   createRelevantSkillsNoticeMessage,
 } from './utils/skills';
-import { prepareMessages } from '../utils/to_langchain_messages';
+import { buildVisibleContext } from '../utils/visible_context';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
-import { formatResearcherActionHistory } from './utils/actions';
 import { getFileSystemInstructions } from './utils/filestore';
 import { getAiIndicesInstructions } from './utils/ai_indices';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
@@ -33,23 +32,29 @@ export const getResearchAgentPrompt = async (
     cycleLimit,
     processedConversation,
     resultTransformer,
+    resultStore,
     toolManager,
+    logger,
     conversationTimestamp,
     relevantSkillsEnabled,
     relevantSkills,
     imageResolver,
+    compactionSummary,
+    compactionCoverage,
   } = params;
 
-  // Generate messages from the conversation's rounds, optionally
-  // injecting a compaction summary for older compacted rounds.
-  // The summary is sourced from processedConversation.compactionSummary,
-  // which is set during the compaction phase in the conversation pipeline.
-  const previousRoundsAsMessages = await prepareMessages({
-    conversation: processedConversation,
-    resultTransformer,
-    compactionSummary: processedConversation.compactionSummary,
-    conversationTimestamp,
-  });
+  const { history, inFlight } = await buildVisibleContext(
+    {
+      conversation: processedConversation,
+      actions,
+      cycleLimit,
+      compactionSummary,
+      compactionCoverage,
+      conversationTimestamp,
+      imageResolver,
+    },
+    { resultStore, toolManager, resultTransformer, logger }
+  );
 
   const relevantSkillsMessages =
     relevantSkillsEnabled && relevantSkills && relevantSkills.skills.length > 0
@@ -58,15 +63,9 @@ export const getResearchAgentPrompt = async (
 
   return [
     ['system', await getAgentSystemMessage(params)],
-    ...previousRoundsAsMessages,
+    ...history,
     ...relevantSkillsMessages,
-    ...(await formatResearcherActionHistory({
-      actions,
-      cycleLimit,
-      resultTransformer,
-      toolManager,
-      imageResolver,
-    })),
+    ...inFlight,
   ];
 };
 

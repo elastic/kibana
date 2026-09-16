@@ -8,7 +8,6 @@
 import type {
   BackgroundAgentCompleteEvent,
   BackgroundAgentCompleteStep,
-  CompactionStep,
   ConversationRoundStep,
   ReasoningEvent,
   ReasoningStep,
@@ -18,7 +17,6 @@ import type {
   ToolResultEvent,
 } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType, createRelevantSkillsStep } from '@kbn/agent-builder-common';
-import type { CompactedConversation } from './conversation_compactor';
 import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
 
 /** Builds a tool-call step from its call/result/progress events. */
@@ -68,23 +66,11 @@ export const createBackgroundAgentStep = (
 };
 
 export const createPreExecutionSteps = ({
-  compactionResult,
   relevantSkillsSelection,
 }: {
-  compactionResult?: CompactedConversation;
   relevantSkillsSelection?: RelevantSkillSelection;
 }): ConversationRoundStep[] => {
   const steps: ConversationRoundStep[] = [];
-
-  if (compactionResult?.compactionTriggered && compactionResult.summary) {
-    const compactionStep: CompactionStep = {
-      type: ConversationRoundStepType.compaction,
-      token_count_before: compactionResult.tokensBefore ?? 0,
-      token_count_after: compactionResult.tokensAfter ?? 0,
-      summarized_round_count: compactionResult.summary.summarized_round_count,
-    };
-    steps.push(compactionStep);
-  }
 
   // Relevant-skills step is placed before the event-derived steps so, on replay, its notification
   // renders right after the round's user input and before the round's tool calls.

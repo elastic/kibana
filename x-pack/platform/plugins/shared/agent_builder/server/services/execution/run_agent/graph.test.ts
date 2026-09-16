@@ -8,6 +8,8 @@
 import { AIMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
@@ -16,6 +18,14 @@ import { AgentActionType } from './actions';
 import { createAgentGraph } from './graph';
 import type { PromptFactory } from './prompts';
 import type { ProcessedConversation } from './utils/prepare_conversation';
+import type { ContextManagementDeps } from './utils/context_management';
+import { compactContext } from './utils/conversation_compactor';
+
+jest.mock('./utils/conversation_compactor', () => ({ compactContext: jest.fn() }));
+const compactContextMock = compactContext as jest.Mock;
+
+const contextLengthError = () =>
+  new InferenceTaskError(ChatCompletionErrorCode.ContextLengthExceededError, 'too long', {});
 
 jest.mock('@langchain/langgraph/prebuilt', () => ({
   ToolNode: jest.fn().mockImplementation(() => ({
@@ -48,30 +58,131 @@ const createTestGraph = ({
   const toolManager = {
     list: jest.fn(() => []),
     recordToolUse: jest.fn(),
+    getToolIdMapping: jest.fn(() => new Map()),
   } as unknown as ToolManager;
   const promptFactory = {
     getMainPrompt: jest.fn().mockResolvedValue([]),
     getStructuredAnswerPrompt: jest.fn().mockResolvedValue([]),
   } as jest.Mocked<PromptFactory>;
+  const events = { emit: jest.fn() } as unknown as AgentEventEmitter;
+  const processedConversation = {
+    timeline: [],
+    nextInput: { message: 'q', attachments: [] },
+    attachmentTypes: [],
+    attachmentStateManager: {},
+  } as unknown as ProcessedConversation;
+  const contextManagementDeps: ContextManagementDeps = {
+    conversation: processedConversation,
+    cycleLimit: 10,
+    chatModel,
+    connector: { connectorId: 'c', config: { contextWindowLength: 100_000 } } as any,
+    events,
+    resultStore: {} as any,
+    toolManager,
+    resultTransformer: async (tc) => tc.results,
+    logger: { error: jest.fn(), warn: jest.fn() } as unknown as Logger,
+  };
 
   const graph = createAgentGraph({
     chatModel,
     toolManager,
     configuration: { instructions: '', aiIndices: [] },
     logger: {} as Logger,
-    events: { emit: jest.fn() } as unknown as AgentEventEmitter,
+    events,
     structuredOutput,
-    processedConversation: {} as ProcessedConversation,
+    processedConversation,
     promptFactory,
     roundId: 'test-round',
     sessionId,
     cacheControl,
+    contextManagement: contextManagementDeps,
   });
 
-  return { graph, researchInvoke, structuredInvoke, toolManager, researchWithConfig };
+  return {
+    graph,
+    researchInvoke,
+    structuredInvoke,
+    toolManager,
+    researchWithConfig,
+    promptFactory,
+    contextManagementDeps,
+  };
 };
 
 describe('createAgentGraph', () => {
+  beforeEach(() => {
+    compactContextMock.mockReset();
+  });
+
+  it('retries once through contextManagement on a context-length error, then succeeds', async () => {
+    const { graph, researchInvoke, contextManagementDeps } = createTestGraph();
+    researchInvoke
+      .mockImplementationOnce(() => {
+        throw contextLengthError();
+      })
+      .mockResolvedValueOnce(
+        new AIMessage({
+          content: 'ok',
+          usage_metadata: { input_tokens: 10, output_tokens: 1, total_tokens: 11 },
+        })
+      );
+    compactContextMock.mockResolvedValue({
+      summary: { created_at: 't', token_count: 1, structured_data: {} },
+      coverage: { actionIndex: 0 },
+      tokensBefore: 1,
+      tokensAfter: 1,
+      summarizedCycleCount: 1,
+    });
+
+    const result = await graph.invoke({ cycleLimit: 10 });
+
+    expect(result.finalAnswer).toBe('ok');
+    expect(result.contextRetryCount).toBe(0);
+    expect(result.lastCallUsage).toEqual({ inputTokens: 10 });
+    expect(result.compactionCoverage).toEqual({ actionIndex: 0 });
+    expect(compactContextMock).toHaveBeenCalledWith(
+      expect.objectContaining({ tailCapTokens: 20_000 }),
+      expect.anything()
+    );
+    expect(contextManagementDeps.events.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ type: ChatEventType.compactionCompleted })
+    );
+  });
+
+  it('fails when the retry also exceeds the context length', async () => {
+    const { graph, researchInvoke } = createTestGraph();
+    researchInvoke.mockImplementation(() => {
+      throw contextLengthError();
+    });
+    compactContextMock.mockResolvedValue({
+      summary: { created_at: 't', token_count: 1, structured_data: {} },
+      coverage: { actionIndex: 0 },
+      tokensBefore: 1,
+      tokensAfter: 1,
+      summarizedCycleCount: 1,
+    });
+
+    await expect(graph.invoke({ cycleLimit: 10 })).rejects.toMatchObject({
+      meta: { errCode: AgentExecutionErrorCode.contextLengthExceeded },
+    });
+    expect(researchInvoke).toHaveBeenCalledTimes(2);
+  });
+
+  it('passes compaction state to the prompt factory', async () => {
+    const { graph, researchInvoke, promptFactory } = createTestGraph();
+    researchInvoke.mockResolvedValue(new AIMessage({ content: 'done' }));
+
+    await graph.invoke({
+      cycleLimit: 10,
+      compactionSummary: { created_at: 't', token_count: 1, structured_data: {} as any },
+      compactionCoverage: { eventId: 'e' },
+    });
+
+    expect(promptFactory.getMainPrompt).toHaveBeenCalledWith(
+      expect.objectContaining({ compactionCoverage: { eventId: 'e' } })
+    );
+  });
+
   it('stops after two retries and surfaces emptyResponse for empty research responses', async () => {
     const { graph, researchInvoke } = createTestGraph();
     researchInvoke.mockResolvedValue(new AIMessage({ content: '' }));

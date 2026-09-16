@@ -15,6 +15,7 @@ import type {
   ToolCallStep,
   Conversation,
   CompactionStep,
+  SubstitutionStep,
   BackgroundAgentCompleteStep,
   TodosStep,
 } from '@kbn/agent-builder-common';
@@ -81,15 +82,16 @@ export interface ConversationActions {
   setAskUserQuestionAnswers: (prompts: Record<string, PromptResponse>) => void;
   onConversationCreated: ({ title }: { title: string }) => void;
   addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
+  addSubstitutionStep: ({ step }: { step: SubstitutionStep }) => void;
   addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => void;
   setAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => void;
   addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
   setCompactionStepComplete: ({
     tokenCountAfter,
-    summarizedRoundCount,
+    summarizedCycleCount,
   }: {
     tokenCountAfter: number;
-    summarizedRoundCount: number;
+    summarizedCycleCount: number;
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
@@ -239,6 +241,11 @@ export const createConversationActions = ({
         round.steps.push(step);
       });
     },
+    addSubstitutionStep: ({ step }: { step: SubstitutionStep }) => {
+      setCurrentRound((round) => {
+        round.steps.push(step);
+      });
+    },
     addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => {
       setCurrentRound((round) => {
         const existing = findTodosStep(round.steps);
@@ -264,7 +271,7 @@ export const createConversationActions = ({
       setCurrentRound((round) => {
         const step: CompactionStep = {
           type: ConversationRoundStepType.compaction,
-          summarized_round_count: 0,
+          summarized_cycle_count: 0,
           token_count_before: tokenCountBefore,
           token_count_after: 0,
         };
@@ -273,16 +280,20 @@ export const createConversationActions = ({
     },
     setCompactionStepComplete: ({
       tokenCountAfter,
-      summarizedRoundCount,
+      summarizedCycleCount,
     }: {
       tokenCountAfter: number;
-      summarizedRoundCount: number;
+      summarizedCycleCount: number;
     }) => {
       setCurrentRound((round) => {
-        const step = round.steps.find(isCompactionStep);
+        // several compactions can happen in one round; complete the last one still in progress
+        const step = round.steps
+          .filter(isCompactionStep)
+          .filter((candidate) => candidate.token_count_after === 0)
+          .at(-1);
         if (step) {
           step.token_count_after = tokenCountAfter;
-          step.summarized_round_count = summarizedRoundCount;
+          step.summarized_cycle_count = summarizedCycleCount;
         }
       });
     },

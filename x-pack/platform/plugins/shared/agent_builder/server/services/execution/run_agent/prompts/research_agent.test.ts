@@ -7,10 +7,12 @@
 
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getResearchAgentPrompt } from './research_agent';
-import { prepareMessages } from '../utils/to_langchain_messages';
+import { buildVisibleContext } from '../utils/visible_context';
 
-jest.mock('../utils/to_langchain_messages', () => ({
-  prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
+jest.mock('../utils/visible_context', () => ({
+  buildVisibleContext: jest
+    .fn()
+    .mockResolvedValue({ history: [['human', 'history']], inFlight: [] }),
 }));
 
 // Unique marker present only in the injected notification, not in the static pointer prose.
@@ -43,7 +45,7 @@ describe('getResearchAgentPrompt', () => {
       cycleLimit: 1,
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
-      toolManager: {} as any,
+      toolManager: { getToolIdMapping: () => new Map() } as any,
       resultTransformer: jest.fn(),
       renderers: [],
       ...overrides,
@@ -65,8 +67,9 @@ describe('getResearchAgentPrompt', () => {
 
     const systemMessage = (messages[0] as ['system', string])[1];
     expect(systemMessage).not.toContain('Current date');
-    expect(prepareMessages).toHaveBeenCalledWith(
-      expect.objectContaining({ conversationTimestamp: now })
+    expect(buildVisibleContext).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationTimestamp: now }),
+      expect.anything()
     );
   });
 
@@ -243,7 +246,7 @@ describe('getResearchAgentPrompt', () => {
       actions: [],
       cycleLimit: 1,
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
-      toolManager: {} as any,
+      toolManager: { getToolIdMapping: () => new Map() } as any,
       resultTransformer: jest.fn(),
     } as any;
 

@@ -95,6 +95,7 @@ export enum ConversationRoundStepType {
   askUserQuestion = 'ask_user_question',
   relevantSkills = 'relevant_skills',
   subagentRosterUpdated = 'subagent_roster_updated',
+  substitution = 'substitution',
 }
 
 // tool call step
@@ -198,8 +199,8 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 // compaction step
 
 export interface CompactionStepData {
-  /** Number of conversation rounds that were summarized into a compact form */
-  summarized_round_count: number;
+  /** Number of cycles folded into the summary by this compaction */
+  summarized_cycle_count: number;
   /** Estimated token count of the conversation before compaction */
   token_count_before: number;
   /** Estimated token count of the conversation after compaction */
@@ -213,6 +214,29 @@ export type CompactionStep = ConversationRoundStepMixin<
 
 export const isCompactionStep = (step: ConversationRoundStep): step is CompactionStep => {
   return step.type === ConversationRoundStepType.compaction;
+};
+
+// substitution step
+
+export interface SubstitutionStepData {
+  /** Tool calls whose results are rendered as file references from now on. */
+  substituted_tool_call_ids: string[];
+  trigger: 'round_start' | 'intra_round';
+  reason: 'cache_cold' | 'cache_hot' | 'input_tokens_threshold';
+}
+
+export type SubstitutionStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.substitution,
+  SubstitutionStepData
+>;
+
+export const createSubstitutionStep = (data: SubstitutionStepData): SubstitutionStep => ({
+  type: ConversationRoundStepType.substitution,
+  ...data,
+});
+
+export const isSubstitutionStep = (step: ConversationRoundStep): step is SubstitutionStep => {
+  return step.type === ConversationRoundStepType.substitution;
 };
 
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
@@ -335,7 +359,8 @@ export type ConversationRoundStep =
   | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
-  | SubagentRosterUpdatedStep;
+  | SubagentRosterUpdatedStep
+  | SubstitutionStep;
 
 /**
  * An entry in the active persistent-sub-agent roster.
@@ -563,6 +588,10 @@ export interface RoundModelUsageStats {
    * Model identifier from the provider response, if available.
    */
   model?: string;
+  /**
+   * Total input tokens (including cached) of the agent's last LLM call this round.
+   */
+  last_call_input_tokens?: number;
 }
 
 /** Placeholder title assigned to a new conversation */
@@ -766,8 +795,11 @@ export interface CompactionStructuredData {
  * until the context window fills up again and regeneration is needed.
  */
 export interface CompactionSummary {
-  /** Number of rounds that were summarized */
-  summarized_round_count: number;
+  /**
+   * Cursor into the conversation's event timeline. The summary covers every event up to and
+   * INCLUDING this id; later events are visible verbatim.
+   */
+  summarized_up_to_event_id: string;
   /** When the summary was generated */
   created_at: string;
   /** Estimated token count of the serialized summary */

@@ -6,9 +6,12 @@
  */
 
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
-import { isAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import {
+  createAgentExecutionError,
+  isAgentExecutionError,
+} from '@kbn/agent-builder-common/base/errors';
 import { createInferenceProviderError, createInferenceRequestError } from '@kbn/inference-common';
-import { convertError, isRecoverableError } from './errors';
+import { convertError, isContextLengthError, isRecoverableError } from './errors';
 
 describe('errors', () => {
   describe('convertError', () => {
@@ -81,6 +84,21 @@ describe('errors', () => {
       const converted = convertError(err);
 
       expect(isRecoverableError(converted)).toBe(false);
+    });
+  });
+
+  describe('isContextLengthError', () => {
+    it('is true only for the contextLengthExceeded code', () => {
+      expect(
+        isContextLengthError(
+          createAgentExecutionError('x', AgentExecutionErrorCode.contextLengthExceeded, {})
+        )
+      ).toBe(true);
+      expect(
+        isContextLengthError(
+          createAgentExecutionError('x', AgentExecutionErrorCode.emptyResponse, {})
+        )
+      ).toBe(false);
     });
   });
 });

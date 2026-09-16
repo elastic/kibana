@@ -33,7 +33,10 @@ import {
 import type { Logger } from '@kbn/logging';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
-import { createUserQuestionAskedEvent } from '@kbn/agent-builder-common/chat';
+import {
+  createSubstitutionAppliedEvent,
+  createUserQuestionAskedEvent,
+} from '@kbn/agent-builder-common/chat';
 import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { StateType } from './state';
@@ -44,6 +47,7 @@ import {
   isExecuteToolAction,
   isHandoverAction,
   isSubagentRosterUpdatedAction,
+  isSubstitutionAction,
   isToolCallAction,
   isToolPromptAction,
 } from './actions';
@@ -271,6 +275,16 @@ export const convertGraphEvents = ({
           if (bgEvents.length > 0) {
             return of(...bgEvents);
           }
+        }
+
+        // emit substitution events recorded by the context-management node
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.contextManagement)) {
+          const addedActions = (event.data.output as Partial<StateType>).mainActions ?? [];
+          const substitutionEvents: ConvertedEvents[] = addedActions
+            .filter(isSubstitutionAction)
+            .map(({ type, ...data }) => createSubstitutionAppliedEvent(data));
+
+          return substitutionEvents.length > 0 ? of(...substitutionEvents) : EMPTY;
         }
 
         if (matchEvent(event, 'on_chain_end') && matchName(event, graphName)) {

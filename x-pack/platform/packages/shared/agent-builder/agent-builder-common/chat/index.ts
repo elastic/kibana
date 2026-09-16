@@ -93,6 +93,10 @@ export {
   type SubagentRosterUpdatedStepData,
   createSubagentRosterUpdatedStep,
   isSubagentRosterUpdatedStep,
+  type SubstitutionStep,
+  type SubstitutionStepData,
+  createSubstitutionStep,
+  isSubstitutionStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -159,6 +163,10 @@ export {
   type SubagentRosterUpdatedEventData,
   createSubagentRosterUpdatedEvent,
   isSubagentRosterUpdatedEvent,
+  type SubstitutionAppliedEvent,
+  type SubstitutionAppliedEventData,
+  createSubstitutionAppliedEvent,
+  isSubstitutionAppliedEvent,
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,

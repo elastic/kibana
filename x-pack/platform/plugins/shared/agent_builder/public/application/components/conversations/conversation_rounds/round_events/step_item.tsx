@@ -13,6 +13,7 @@ import {
   isCompactionStep,
   isBackgroundAgentCompleteStep,
   isAskUserQuestionStep,
+  isSubstitutionStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
   VersionedAttachment,
@@ -22,6 +23,7 @@ import { ReasoningStep } from './steps/reasoning_step';
 import { ToolCallStep } from './steps/tool_call_step';
 import { CompactionStep } from './steps/compaction_step';
 import { BackgroundAgentStep } from './steps/background_agent_step';
+import { SubstitutionStep } from './steps/substitution_step';
 import { AskUserQuestionStepEvent } from './steps/ask_user_question_step';
 
 interface StepItemProps {
@@ -59,6 +61,9 @@ export const StepItem: React.FC<StepItemProps> = ({
   }
   if (isBackgroundAgentCompleteStep(step)) {
     return <BackgroundAgentStep step={step} />;
+  }
+  if (isSubstitutionStep(step)) {
+    return <SubstitutionStep step={step} />;
   }
   if (isAskUserQuestionStep(step)) {
     return <AskUserQuestionStepEvent step={step} />;

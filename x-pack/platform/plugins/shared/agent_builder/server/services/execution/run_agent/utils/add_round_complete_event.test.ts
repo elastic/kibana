@@ -32,7 +32,8 @@ import {
   promptResponseEvent,
   resumeExecutionToEvents,
 } from '../../../conversation/client/rounds_to_events';
-import { addRoundCompleteEvent } from './add_round_complete_event';
+import { addRoundCompleteEvent, resolveCoverageCursor } from './add_round_complete_event';
+import { toolCallAction } from '../actions';
 
 describe('addRoundCompleteEvent', () => {
   const createDeps = () => ({
@@ -637,5 +638,117 @@ describe('addRoundCompleteEvent', () => {
     const events = await runFreshRound(undefined);
     const round = events.find(isRoundCompleteEvent)?.data.round;
     expect(round?.steps.some(isRelevantSkillsStep)).toBe(false);
+  });
+
+  it('materializes compaction and substitution events as steps in stream order and records last-call usage', async () => {
+    const deps = createDeps();
+    const events: ConvertedEvents[] = [
+      {
+        type: ChatEventType.toolCall,
+        data: { tool_call_id: 'c1', tool_id: 't', params: {}, tool_call_group_id: 'g1' },
+      } as ConvertedEvents,
+      {
+        type: ChatEventType.toolResult,
+        data: { tool_call_id: 'c1', tool_id: 't', results: [] },
+      } as ConvertedEvents,
+      {
+        type: ChatEventType.compactionCompleted,
+        data: { token_count_before: 100, token_count_after: 40, summarized_cycle_count: 2 },
+      } as ConvertedEvents,
+      {
+        type: ChatEventType.substitutionApplied,
+        data: {
+          substituted_tool_call_ids: ['c1'],
+          trigger: 'intra_round',
+          reason: 'input_tokens_threshold',
+        },
+      } as ConvertedEvents,
+      {
+        type: ChatEventType.messageComplete,
+        data: { message_id: 'm', message_content: 'done' },
+      } as ConvertedEvents,
+      createFinalStateEvent({
+        currentCycle: 0,
+        errorCount: 0,
+        mainActions: [
+          toolCallAction({ toolCalls: [{ toolCallId: 'c1', toolName: 't', args: {} }], cycle: 1 }),
+        ],
+        lastCallUsage: { inputTokens: 1234 },
+        compactionSummary: { created_at: 't', token_count: 1, structured_data: {} },
+        compactionCoverage: { actionIndex: 0 },
+      } as never) as ConvertedEvents,
+    ];
+
+    const emitted = await firstValueFrom(
+      of(...events).pipe(
+        addRoundCompleteEvent({
+          ...deps,
+          pendingRound: undefined,
+          userInput: { message: 'hi' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const round = emitted.find(isRoundCompleteEvent)!.data.round;
+    expect(round.steps.map((s) => s.type)).toEqual([
+      ConversationRoundStepType.toolCall,
+      ConversationRoundStepType.compaction,
+      ConversationRoundStepType.substitution,
+    ]);
+    expect(round.steps[1]).toMatchObject({ token_count_before: 100, summarized_cycle_count: 2 });
+    expect(round.model_usage.last_call_input_tokens).toBe(1234);
+    expect(deps.getConversationState).toHaveBeenCalledWith({
+      compactionSummary: expect.objectContaining({
+        summarized_up_to_event_id: `${round.id}::step::0`,
+        token_count: 1,
+      }),
+    });
+  });
+
+  describe('resolveCoverageCursor', () => {
+    const steps: ConversationRoundStep[] = [
+      { type: ConversationRoundStepType.reasoning, reasoning: 'r' },
+      {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'c1',
+        tool_id: 't',
+        params: {},
+        results: [],
+      },
+      {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'c2',
+        tool_id: 't',
+        params: {},
+        results: [],
+      },
+    ];
+    const actions = [
+      toolCallAction({ toolCalls: [{ toolCallId: 'c1', toolName: 't', args: {} }], cycle: 1 }),
+      toolCallAction({ toolCalls: [{ toolCallId: 'c2', toolName: 't', args: {} }], cycle: 2 }),
+    ];
+
+    it('passes an event cursor through', () => {
+      expect(
+        resolveCoverageCursor({ coverage: { eventId: 'e' }, roundId: 'r', steps, actions })
+      ).toBe('e');
+    });
+
+    it('resolves an action index to the last covered tool call step event', () => {
+      expect(
+        resolveCoverageCursor({ coverage: { actionIndex: 0 }, roundId: 'r', steps, actions })
+      ).toBe('r::step::1');
+      expect(
+        resolveCoverageCursor({ coverage: { actionIndex: 1 }, roundId: 'r', steps, actions })
+      ).toBe('r::step::2');
+    });
+
+    it('falls back to the round user message when no tool call is covered', () => {
+      expect(
+        resolveCoverageCursor({ coverage: { actionIndex: 0 }, roundId: 'r', steps, actions: [] })
+      ).toBe('r::user_message');
+    });
   });
 });

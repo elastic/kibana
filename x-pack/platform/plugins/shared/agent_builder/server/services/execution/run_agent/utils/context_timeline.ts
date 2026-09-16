@@ -14,7 +14,11 @@ import type {
   TimelineEvent,
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
-import { TimelineEventType, isEventsNativeVersion } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  isEventsNativeVersion,
+  isToolCallStep,
+} from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
 import { parseExecutionId, roundsToEvents } from '../../../conversation/client/rounds_to_events';
@@ -131,6 +135,87 @@ export const sliceTimelineRounds = <E extends AnyTimelineEvent>(
   groupTimelineRounds(timeline)
     .slice(start, end)
     .flatMap((round) => round.events);
+
+/** Events strictly after `eventId`; the full timeline when the cursor is unknown (safe direction). */
+export const sliceTimelineAfterEvent = <E extends AnyTimelineEvent>(
+  timeline: E[],
+  eventId: string
+): E[] => {
+  const index = timeline.findIndex((event) => event.id === eventId);
+  return index === -1 ? timeline : timeline.slice(index + 1);
+};
+
+/** One LLM turn's worth of timeline: a tool-call group plus the events leading up to it. */
+export interface TimelineCycle<E extends AnyTimelineEvent = TimelineEvent> {
+  events: E[];
+  steps: ConversationRoundStep[];
+  toolCallGroupId?: string;
+  lastEventId: string;
+}
+
+const stepOf = (event: AnyTimelineEvent): ConversationRoundStep | undefined =>
+  event.type === TimelineEventType.executionStep ? event.data.step : undefined;
+
+/**
+ * Cycle boundary = change of `tool_call_group_id` on tool-call steps. Events preceding a group
+ * attach to it; events following a group stay with it until the next group or the next
+ * `user_message`, which always starts a new unit so a cursor never hides a round's trigger.
+ */
+export const groupTimelineCycles = <E extends AnyTimelineEvent>(
+  timeline: E[]
+): Array<TimelineCycle<E>> => {
+  const cycles: Array<TimelineCycle<E>> = [];
+  let pending: E[] = [];
+  let current: TimelineCycle<E> | undefined;
+
+  const cycleFrom = (events: E[], toolCallGroupId?: string): TimelineCycle<E> => ({
+    events: [...events],
+    steps: events.map(stepOf).filter((s): s is ConversationRoundStep => s !== undefined),
+    toolCallGroupId,
+    lastEventId: events[events.length - 1].id,
+  });
+
+  for (const event of timeline) {
+    const step = stepOf(event);
+    const groupId =
+      step && isToolCallStep(step) ? step.tool_call_group_id ?? step.tool_call_id : undefined;
+
+    if (groupId !== undefined) {
+      if (!current || current.toolCallGroupId !== groupId) {
+        current = cycleFrom([...pending, event], groupId);
+        pending = [];
+        cycles.push(current);
+        continue;
+      }
+      current.events.push(event);
+      current.steps.push(step!);
+      current.lastEventId = event.id;
+      continue;
+    }
+
+    if (event.type === TimelineEventType.userMessage) {
+      if (!current && pending.length > 0) {
+        cycles.push(cycleFrom(pending));
+      }
+      current = undefined;
+      pending = [event];
+      continue;
+    }
+
+    if (current) {
+      current.events.push(event);
+      if (step) current.steps.push(step);
+      current.lastEventId = event.id;
+    } else {
+      pending.push(event);
+    }
+  }
+
+  if (pending.length > 0) {
+    cycles.push(cycleFrom(pending));
+  }
+  return cycles;
+};
 
 export const isAwaitingPrompt = (round: TimelineRound<AnyTimelineEvent>): boolean =>
   round.terminated.data.outcome.type === 'prompt_requested';

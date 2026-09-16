@@ -11998,7 +11998,6 @@
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.completed": "バックグラウンドエージェントの処理が完了しました",
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.failed": "バックグランドエージェント {status}",
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.viewJson": "JSONを表示",
-    "xpack.agentBuilder.roundEvents.steps.compaction.complete": "文脈要約：{before} → {after} トークン、{count, plural, one {# round} other {#ラウンド}}",
     "xpack.agentBuilder.roundEvents.steps.compaction.inProgress": "コンテキストの圧縮",
     "xpack.agentBuilder.roundEvents.steps.toolCall.ariaLabel": "ツール呼び出し",
     "xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.errorTitle": "実行エラー",

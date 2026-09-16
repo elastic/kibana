@@ -21,6 +21,8 @@ import type {
   SubagentRosterUpdatedEvent,
   TodosStep,
   UserQuestionAskedEvent,
+  CompactionCompletedEvent,
+  SubstitutionAppliedEvent,
 } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
@@ -49,8 +51,12 @@ import {
   isUserQuestionAskedEvent,
   isUserQuestionAnsweredEvent,
   createAskUserQuestionStep,
+  isCompactionCompletedEvent,
+  isSubstitutionAppliedEvent,
+  createSubstitutionStep,
 } from '@kbn/agent-builder-common';
 import type {
+  CompactionSummary,
   ConversationInternalState,
   RoundModelUsageStats,
 } from '@kbn/agent-builder-common/chat';
@@ -63,7 +69,6 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
-import type { CompactedConversation } from './conversation_compactor';
 import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import {
@@ -74,6 +79,13 @@ import {
 } from './round_steps';
 import { applyResumeResolution } from '../../../conversation/client/merge_rounds';
 import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
+import {
+  roundStepEventId,
+  roundUserMessageEventId,
+} from '../../../conversation/client/rounds_to_events';
+import type { ResearchAgentAction } from '../actions';
+import { isToolCallAction } from '../actions';
+import type { CompactionCoverage, StateType } from '../state';
 
 type SourceEvents = ConvertedEvents;
 
@@ -82,7 +94,9 @@ type StepEvents =
   | ToolCallEvent
   | BackgroundAgentCompleteEvent
   | SubagentRosterUpdatedEvent
-  | UserQuestionAskedEvent;
+  | UserQuestionAskedEvent
+  | CompactionCompletedEvent
+  | SubstitutionAppliedEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
   return (
@@ -90,8 +104,60 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
     isToolCallEvent(event) ||
     isBackgroundAgentCompleteEvent(event) ||
     isSubagentRosterUpdatedEvent(event) ||
-    isUserQuestionAskedEvent(event)
+    isUserQuestionAskedEvent(event) ||
+    isCompactionCompletedEvent(event) ||
+    isSubstitutionAppliedEvent(event)
   );
+};
+
+/**
+ * Persisted cursor for the graph's coverage. In-flight coverage (`actionIndex`) resolves to the
+ * event id of the last step materialized from a covered tool call, or to the round's user message
+ * when no tool call was covered. Step event ids are deterministic (`roundStepEventId`).
+ */
+export const resolveCoverageCursor = ({
+  coverage,
+  roundId,
+  steps,
+  actions,
+}: {
+  coverage: CompactionCoverage;
+  roundId: string;
+  steps: ConversationRoundStep[];
+  actions: ResearchAgentAction[];
+}): string => {
+  if ('eventId' in coverage) {
+    return coverage.eventId;
+  }
+  const covered = new Set(
+    actions
+      .slice(0, coverage.actionIndex + 1)
+      .filter(isToolCallAction)
+      .flatMap((action) => action.tool_calls.map((toolCall) => toolCall.toolCallId))
+  );
+  const index = steps.reduce(
+    (last, step, i) => (isToolCallStep(step) && covered.has(step.tool_call_id) ? i : last),
+    -1
+  );
+  return index === -1 ? roundUserMessageEventId(roundId) : roundStepEventId(roundId, index);
+};
+
+const persistedCompactionSummary = (
+  finalState: StateType | undefined,
+  round: ConversationRound
+): CompactionSummary | undefined => {
+  if (!finalState?.compactionSummary || !finalState.compactionCoverage) {
+    return undefined;
+  }
+  return {
+    ...finalState.compactionSummary,
+    summarized_up_to_event_id: resolveCoverageCursor({
+      coverage: finalState.compactionCoverage,
+      roundId: round.id,
+      steps: round.steps,
+      actions: finalState.mainActions,
+    }),
+  };
 };
 
 export const addRoundCompleteEvent = ({
@@ -107,7 +173,6 @@ export const addRoundCompleteEvent = ({
   stateManager,
   attachmentStateManager,
   configurationOverrides,
-  compactionResult,
   roundId: providedRoundId,
   initialTodos,
   relevantSkillsSelection,
@@ -133,12 +198,12 @@ export const addRoundCompleteEvent = ({
    */
   mainConnectorId: string;
   stateManager: ConversationStateManager;
-  getConversationState: () => ConversationInternalState;
+  getConversationState: (params: {
+    compactionSummary?: CompactionSummary;
+  }) => ConversationInternalState;
   attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
-  /** Result of the compaction pipeline; used to build the compaction step and audit trail */
-  compactionResult?: CompactedConversation;
   /** Optional pre-generated round ID. If not provided, a new UUID is generated. */
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
@@ -169,7 +234,6 @@ export const addRoundCompleteEvent = ({
               mainConnectorId,
               attachmentRefs,
               configurationOverrides,
-              compactionResult,
             });
             round = resumed.round;
             resumeExecution = { follow_up_round: resumed.followUpRound };
@@ -186,7 +250,6 @@ export const addRoundCompleteEvent = ({
               mainConnectorId,
               attachmentRefs,
               configurationOverrides,
-              compactionResult,
               initialTodos,
               relevantSkillsSelection,
             });
@@ -215,13 +278,16 @@ export const addRoundCompleteEvent = ({
           }
 
           const workspaceId = getWorkspaceId?.();
+          const finalState = events.find(isFinalStateEvent)?.data.state;
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
               round,
               resumed: pendingRound !== undefined,
               ...(resumeExecution ? { resume_execution: resumeExecution } : {}),
-              conversation_state: getConversationState(),
+              conversation_state: getConversationState({
+                compactionSummary: persistedCompactionSummary(finalState, round),
+              }),
               attachments: attachmentStateManager.getAll(),
               ...(workspaceId ? { workspace_id: workspaceId } : {}),
             },
@@ -244,7 +310,6 @@ const resumeRound = ({
   mainConnectorId,
   attachmentRefs,
   configurationOverrides,
-  compactionResult,
 }: {
   pendingRound: ConversationRound;
   events: SourceEvents[];
@@ -255,7 +320,6 @@ const resumeRound = ({
   mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
-  compactionResult?: CompactedConversation;
 }): { round: ConversationRound; followUpRound: ConversationRound } => {
   // The resume re-runs the paused tool calls; synthesize their resolved steps (result + progression)
   // from the replayed graph events so they can be persisted as this execution's own steps. The
@@ -293,7 +357,6 @@ const resumeRound = ({
     mainConnectorId,
     attachmentRefs,
     configurationOverrides,
-    compactionResult,
   });
 
   // The resume execution (exec_k): the resolved paused calls (in their original position) followed
@@ -320,7 +383,6 @@ const createRound = ({
   mainConnectorId,
   attachmentRefs,
   configurationOverrides,
-  compactionResult,
   initialTodos,
   relevantSkillsSelection,
 }: {
@@ -335,7 +397,6 @@ const createRound = ({
   mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
-  compactionResult?: CompactedConversation;
   initialTodos?: TodoItem[];
   relevantSkillsSelection?: RelevantSkillSelection;
 }): ConversationRound => {
@@ -393,6 +454,19 @@ const createRound = ({
         }),
       ];
     }
+    if (isCompactionCompletedEvent(event)) {
+      return [
+        {
+          type: ConversationRoundStepType.compaction,
+          token_count_before: event.data.token_count_before,
+          token_count_after: event.data.token_count_after,
+          summarized_cycle_count: event.data.summarized_cycle_count,
+        },
+      ];
+    }
+    if (isSubstitutionAppliedEvent(event)) {
+      return [createSubstitutionStep(event.data)];
+    }
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
 
@@ -409,7 +483,6 @@ const createRound = ({
     : timeToLastToken;
 
   const steps: ConversationRoundStep[] = createPreExecutionSteps({
-    compactionResult,
     relevantSkillsSelection,
   });
 
@@ -445,7 +518,11 @@ const createRound = ({
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
-    model_usage: getModelUsage(modelProvider.getUsageStats(), mainConnectorId),
+    model_usage: getModelUsage(
+      modelProvider.getUsageStats(),
+      mainConnectorId,
+      events.find(isFinalStateEvent)?.data.state.lastCallUsage?.inputTokens
+    ),
     response: lastMessage
       ? {
           message: lastMessage.message_content,
@@ -460,7 +537,8 @@ const createRound = ({
 
 const getModelUsage = (
   stats: ModelProviderStats,
-  mainConnectorId: string
+  mainConnectorId: string,
+  lastCallInputTokens?: number
 ): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
@@ -485,6 +563,7 @@ const getModelUsage = (
     output_tokens: outputTokens,
     ...(hasCachedInputTokens ? { cached_input_tokens: cachedInputTokens } : {}),
     ...(modelFromResponse ? { model: modelFromResponse } : {}),
+    ...(lastCallInputTokens !== undefined ? { last_call_input_tokens: lastCallInputTokens } : {}),
   };
 };
 
