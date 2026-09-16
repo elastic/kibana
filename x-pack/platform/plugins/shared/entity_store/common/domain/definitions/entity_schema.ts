@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streamlang';
 import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod/v4';
 
@@ -187,6 +188,9 @@ export const entitySchema = z.object({
   // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the
   // LOOKUP JOIN, to filter rows (e.g. keep already-stored entities or IDP-like events). No DSL equivalent.
   postAggFilter: z.optional(streamlangConditionSchema),
+  // Optional document-level predicate (Condition from @kbn/streamlang) marking this entity type's
+  // high-signal logs. Omission means the type has no priority/non-priority split.
+  priorityExtractionGate: z.optional(streamlangConditionSchema),
   // Optional: when conditions are true on source docs, set the given fields (EVAL after field evals, before STATS).
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
   // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
@@ -202,6 +206,14 @@ export type EntityIdentity = z.infer<typeof identityFieldSchema>; // definition-
 export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
 export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'
+
+/**
+ * A definition resolved for an extraction mode, carrying the predicate that selects which logs that
+ * mode handles. Derived from `priorityExtractionGate` on lookup rather than authored, so it is kept
+ * separate from the declared field and out of `entitySchema`. Absent means every document passing
+ * `documentsFilter` is scanned.
+ */
+export type GatedEntityDefinition<T = EntityDefinition> = T & { extractionGate?: Condition };
 export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;
