@@ -229,6 +229,12 @@ describe('scoreCallOrder', () => {
     expect(r.explanation).toContain(LIST_INDICES);
   });
 
+  it('flags a skill reload after drafting', () => {
+    const r = scoreCallOrder(settled([SKILL, CREATE, SKILL, ATTACH_READ]));
+    expect(r.score).toBe(0);
+    expect(r.metadata.exploredAfterDraft).toEqual([SKILL]);
+  });
+
   it('fails a run that never drafted', () => {
     const r = scoreCallOrder(settled([SKILL, LABS]));
     expect(r.score).toBe(0);

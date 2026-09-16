@@ -61,7 +61,7 @@ const fetchToolCalls = async (
 };
 
 /**
- * Agent Builder exports spans in batches (5s delay by default), so a run's spans can still be
+ * Agent Builder exports spans in batches (1s in dev, 5s in prod), so a run's spans can still be
  * arriving when the workflow returns. Polls until two consecutive reads agree.
  */
 export const createTrajectoryFetcher = ({
@@ -204,7 +204,9 @@ export const scoreCallOrder: ScoreFn = ({ toolNames }) => {
   // After drafting, only previewing, redrafting, and Agent Builder's own tools (attachment
   // reads/renders) are expected; anything else is research the skill says comes before.
   const expectedAfterDraft = (name: string) =>
-    name === RULE_CREATION_TOOL_ID || name === RULE_PREVIEW_TOOL_ID || isInternalTool(name);
+    name === RULE_CREATION_TOOL_ID ||
+    name === RULE_PREVIEW_TOOL_ID ||
+    (isInternalTool(name) && name !== internalTools.loadSkill);
   const exploredAfterDraft =
     firstDraft === -1 ? [] : toolNames.slice(firstDraft + 1).filter((n) => !expectedAfterDraft(n));
 
