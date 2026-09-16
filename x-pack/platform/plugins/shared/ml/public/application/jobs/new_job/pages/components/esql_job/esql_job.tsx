@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../../components/ml_app_header';
+import { EsqlQueryStep } from './esql_query_step';
 
 export const Page: FC = () => {
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
@@ -21,6 +22,7 @@ export const Page: FC = () => {
         })}
         back={anomalyDetectionJobsBack}
       />
+      <EsqlQueryStep />
     </div>
   );
 };

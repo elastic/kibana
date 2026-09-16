@@ -22,11 +22,16 @@ jest.mock('../../../../../contexts/kibana', () => ({
   useNavigateToPath: () => jest.fn(),
 }));
 
+jest.mock('./esql_query_step', () => ({
+  EsqlQueryStep: () => <div data-test-subj="mlEsqlQueryStep" />,
+}));
+
 describe('ES|QL job page', () => {
   it('renders without a data source context', () => {
     renderWithI18n(<Page />);
 
     expect(screen.getByTestId('mlPageEsqlJob')).toBeInTheDocument();
     expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('ES|QL');
+    expect(screen.getByTestId('mlEsqlQueryStep')).toBeInTheDocument();
   });
 });
