@@ -438,7 +438,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   //
   // Ref: rule-execution-logic.md "A rule without a persisted query"
   // ---------------------------------------------------------------------------
-  '15': {
+  '16': {
     changes: [],
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV14.extends({}, { unknowns: 'ignore' }),
