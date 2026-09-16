@@ -12,6 +12,15 @@ import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 
 const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
+/**
+ * Only calls the LLM actually issued carry a tool.call.id; a tool's internal helper spans
+ * (e.g. the inner search tools in agent-builder-genai-utils, which call withExecuteToolSpan
+ * without a toolCallId) are TOOL-kind but carry none. The trace-based evaluators all filter
+ * on this, so the setup reachability probe MUST filter on it too — asserting only the weaker
+ * TOOL-kind property lets a stack that exports nothing but inner-tool spans pass setup and
+ * then score N/A on every example, which is the exact false pass the probe exists to stop.
+ */
+export const LLM_ISSUED_TOOL_SPAN = `${TOOL_KIND} AND attributes.gen_ai.tool.call.id IS NOT NULL`;
 
 interface EsqlResponse {
   columns: Array<{ name: string; type: string }>;
@@ -196,7 +205,7 @@ export const assertToolSpansReachable = async ({
   for (const clause of clauses) {
     try {
       const response = (await traceEsClient.esql.query({
-        query: `FROM traces-*\n| WHERE ${clause.where} AND ${TOOL_KIND}\n| STATS tool_spans = COUNT(*)`,
+        query: `FROM traces-*\n| WHERE ${clause.where} AND ${LLM_ISSUED_TOOL_SPAN}\n| STATS tool_spans = COUNT(*)`,
       })) as unknown as EsqlResponse;
       if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
         log.info(`Tool spans reachable via ${clause.name}`);

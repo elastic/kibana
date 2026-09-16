@@ -176,11 +176,30 @@ describe('createTrajectoryEvaluators', () => {
     }
   });
 
-  it('labels every series potentially_incomplete when the span set never settled', async () => {
+  it('does NOT score a run whose span set never settled — a truncated trajectory is unmeasured, not short', async () => {
+    // Span count grows on every read, so the set never settles: the calls still in flight
+    // are exactly the ones that would decide both scores. Scoring here would put a
+    // spurious Call Count pass (bound not yet breached) and a spurious Call Order fail
+    // ("never drafted") into the run mean. It must land in naCount instead.
     const { client } = esWith((_q, call) => rows(Array(call).fill(CREATE)));
     for (const r of await evaluateAll(client, result(), 2)) {
+      expect(r.score).toBeNull();
       expect(r.label).toBe('potentially_incomplete');
       expect((r.metadata as Record<string, unknown>).incomplete).toBe(true);
+      // The observed value is kept for debugging, but out of the average.
+      expect((r.metadata as Record<string, unknown>).unscoredObservedScore).toEqual(
+        expect.any(Number)
+      );
+      expect(r.explanation).toContain('NOT scored');
+    }
+  });
+
+  it('keeps a settled run clean of the incomplete markers', async () => {
+    const { client } = esReturning([SKILL, CREATE]);
+    for (const r of await evaluateAll(client, result())) {
+      expect(r.score).not.toBeNull();
+      expect(r.label).toBeUndefined();
+      expect((r.metadata as Record<string, unknown>).incomplete).toBeUndefined();
     }
   });
 });

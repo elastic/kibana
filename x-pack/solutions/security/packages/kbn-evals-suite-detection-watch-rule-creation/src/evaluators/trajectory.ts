@@ -11,7 +11,7 @@ import type { Evaluator } from '@kbn/evals';
 import { internalTools, isInternalTool } from '@kbn/agent-builder-common/tools';
 import { RULE_CREATION_TOOL_ID, RULE_PREVIEW_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
-import { extractConversationId, toolSpanJoinClauses } from './tool_routing';
+import { extractConversationId, toolSpanJoinClauses, LLM_ISSUED_TOOL_SPAN } from './tool_routing';
 
 const MAX_TOOL_CALLS = 8;
 
@@ -41,7 +41,8 @@ const fetchToolCalls = async (
 ): Promise<ToolCalls | undefined> => {
   const response = (await traceEsClient.esql.query({
     // Only calls the LLM issued carry a tool.call.id; tools' internal helper spans do not.
-    query: `FROM traces-*\n| WHERE ${where} AND attributes.elastic.inference.span.kind == "TOOL" AND attributes.gen_ai.tool.call.id IS NOT NULL\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name`,
+    // Shared with the setup reachability probe so the two cannot drift apart.
+    query: `FROM traces-*\n| WHERE ${where} AND ${LLM_ISSUED_TOOL_SPAN}\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name`,
   })) as unknown as EsqlResponse;
 
   const seen = new Set<string>();
@@ -159,15 +160,37 @@ const trajectoryEvaluator = (
       };
     }
     const { score, explanation, metadata } = scoreFn(trajectory);
+    // An unsettled span set is a TRUNCATED trajectory, not a short one: the calls it is
+    // missing are the ones still in flight. Scoring it anyway corrupts the run mean in
+    // both directions — Call Count passes spuriously because the calls that would have
+    // breached the bound were never read, and Call Order fails "never drafted" against a
+    // run that did draft. Report it as unmeasured (it lands in naCount, where the run
+    // summary already states resolution limits) and keep the observed score in metadata
+    // for debugging rather than in the average.
+    if (!trajectory.settled) {
+      return {
+        score: null,
+        label: 'potentially_incomplete',
+        explanation:
+          `${explanation} (joined on ${trajectory.joinedOn}) — span set never settled, ` +
+          'so this trajectory is truncated and is NOT scored',
+        metadata: {
+          ...metadata,
+          toolNames: trajectory.toolNames,
+          agentTraceId: trajectory.agentTraceId,
+          incomplete: true,
+          unscoredObservedScore: score,
+        },
+      };
+    }
     return {
       score,
-      label: trajectory.settled ? undefined : 'potentially_incomplete',
+      label: undefined,
       explanation: `${explanation} (joined on ${trajectory.joinedOn})`,
       metadata: {
         ...metadata,
         toolNames: trajectory.toolNames,
         agentTraceId: trajectory.agentTraceId,
-        ...(trajectory.settled ? {} : { incomplete: true }),
       },
     };
   },
