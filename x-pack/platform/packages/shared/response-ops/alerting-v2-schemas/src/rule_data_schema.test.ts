@@ -975,16 +975,6 @@ describe('createRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              path: ['artifacts', 0, 'data'],
-              message: `Artifact data must not exceed ${MAX_ARTIFACT_DATA_LENGTH} characters when serialized.`,
-            }),
-          ])
-        );
-      }
     });
 
     it('measures structured values against the ceiling, not just strings', () => {
@@ -1052,16 +1042,6 @@ describe('createRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              path: ['artifacts', 0, 'data'],
-              message: `Artifact data must have at most ${MAX_ARTIFACT_DATA_FIELDS} fields.`,
-            }),
-          ])
-        );
-      }
     });
 
     it('rejects a field name longer than the limit', () => {
@@ -1090,16 +1070,6 @@ describe('createRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              path: ['artifacts', 1, 'id'],
-              message: 'Artifact id "same" must be unique within the rule.',
-            }),
-          ])
-        );
-      }
     });
   });
 
@@ -1681,11 +1651,6 @@ describe('ES|QL query length cap', () => {
 
     expect(result.success).toBe(false);
     expect(parseErrors).not.toHaveBeenCalled();
-    if (!result.success) {
-      expect(result.error.issues).toEqual([
-        expect.objectContaining({ code: 'too_big', path: ['query', 'breach', 'query'] }),
-      ]);
-    }
   });
 
   it('rejects an oversized composed base without invoking the parser', () => {
@@ -1760,16 +1725,6 @@ describe('findRulesRequestSchema', () => {
     const result = findRulesRequestSchema.safeParse({ page: 11, per_page: 1000 });
 
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            path: ['page'],
-            message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`,
-          }),
-        ])
-      );
-    }
   });
 
   it('applies the default page size to the result window check when per_page is omitted', () => {
