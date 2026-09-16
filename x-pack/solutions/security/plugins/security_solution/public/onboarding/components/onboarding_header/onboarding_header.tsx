@@ -45,12 +45,7 @@ export const OnboardingHeader = React.memo(() => {
     <>
       <EuiFlexGroup justifyContent="center" alignItems="center" className={styles}>
         <EuiFlexItem grow={false}>
-          <EuiIllustration
-            type={aerospace}
-            alt=""
-            fullWidth={false}
-            css={{ maxInlineSize: 120 }}
-          />
+          <EuiIllustration type={aerospace} alt="" fullWidth={false} css={{ maxInlineSize: 120 }} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="onboardingHeaderTitleWrapper">
           {currentUserName && (
