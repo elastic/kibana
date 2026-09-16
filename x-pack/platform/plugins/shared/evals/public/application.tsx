@@ -35,11 +35,6 @@ const DatasetDetailPage = React.lazy(async () => {
   return { default: mod.DatasetDetailPage };
 });
 
-const DatasetCreatePage = React.lazy(async () => {
-  const mod = await import('./pages/dataset_create');
-  return { default: mod.DatasetCreatePage };
-});
-
 const RemotesListPage = React.lazy(async () => {
   const mod = await import('./pages/remotes_list');
   return { default: mod.RemotesListPage };
@@ -113,10 +108,6 @@ const runOverviewBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runOv
 
 const datasetDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.datasetDetail', {
   defaultMessage: 'Dataset details',
-});
-
-const datasetCreateBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.datasetCreate', {
-  defaultMessage: 'Create dataset',
 });
 
 const EvalsHeader: React.FC = () => {

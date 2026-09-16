@@ -190,15 +190,25 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="primary"
-                  data-test-subj="dataSetsSetsCreateButton"
-                  disabled={isCreateDisabled}
-                  {...(isCreateDisabled ? {} : createDatasetNav)}
-                >
-                  {mainTranslations.columns.dataSets.addButtonLabel}
-                </EuiButton>
+                {isCreateDisabled ? (
+                  <EuiButton
+                    fill
+                    color="primary"
+                    data-test-subj="dataSetsSetsCreateButton"
+                    disabled
+                  >
+                    {mainTranslations.columns.dataSets.addButtonLabel}
+                  </EuiButton>
+                ) : (
+                  <EuiButton
+                    fill
+                    color="primary"
+                    data-test-subj="dataSetsSetsCreateButton"
+                    {...createDatasetNav}
+                  >
+                    {mainTranslations.columns.dataSets.addButtonLabel}
+                  </EuiButton>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           ),

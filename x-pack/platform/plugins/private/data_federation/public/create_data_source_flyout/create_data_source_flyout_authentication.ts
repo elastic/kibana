@@ -208,6 +208,7 @@ export const applyAuthenticationModeToDataSource = (
         auth: _auth,
         ...rest
       } = data.settings;
+      const { region: _region, ...plaintext } = rest as typeof rest & Record<string, unknown>;
 
       let applied: Record<string, unknown> = {};
       if (mode === 'access_and_secret_keys') {
@@ -230,7 +231,7 @@ export const applyAuthenticationModeToDataSource = (
       return {
         ...data,
         settings: {
-          ...rest,
+          ...plaintext,
           ...authSettings,
           ...applied,
         },

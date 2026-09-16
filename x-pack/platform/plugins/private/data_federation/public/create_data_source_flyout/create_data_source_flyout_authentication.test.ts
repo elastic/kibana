@@ -85,7 +85,7 @@ describe('create_data_source_flyout_authentication', () => {
         description: '',
         settings: {
           auth: 'ignored',
-          region: 'us-east-1',
+          endpoint: 'https://s3.example',
           access_key: 'AKIA',
           secret_key: 'SECRET',
           role_arn: 'role',
@@ -96,7 +96,7 @@ describe('create_data_source_flyout_authentication', () => {
       const applied = applyAuthenticationModeToDataSource(data, 'access_and_secret_keys');
       expect(applied.settings).toEqual(
         expect.objectContaining({
-          region: 'us-east-1',
+          endpoint: 'https://s3.example',
           access_key: 'AKIA',
           secret_key: 'SECRET',
           auth: 'static_credentials',
@@ -112,7 +112,7 @@ describe('create_data_source_flyout_authentication', () => {
         name: 's3',
         description: '',
         settings: {
-          region: 'us-east-1',
+          endpoint: 'https://s3.example',
           access_key: 'AKIA',
           secret_key: 'SECRET',
           role_arn: 'role',
@@ -126,7 +126,7 @@ describe('create_data_source_flyout_authentication', () => {
       const applied = applyAuthenticationModeToDataSource(data, 'federated_identity');
       expect(applied.settings).toEqual(
         expect.objectContaining({
-          region: 'us-east-1',
+          endpoint: 'https://s3.example',
           role_arn: 'role',
           jwt_audience: 'aud',
           role_session_name: 'session',
@@ -145,7 +145,7 @@ describe('create_data_source_flyout_authentication', () => {
         name: 's3',
         description: '',
         settings: {
-          region: 'us-east-1',
+          endpoint: 'https://s3.example',
           access_key: 'AKIA',
           secret_key: 'SECRET',
           role_arn: 'role',
@@ -155,12 +155,27 @@ describe('create_data_source_flyout_authentication', () => {
 
       const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
       expect(applied.settings).toEqual(
-        expect.objectContaining({ region: 'us-east-1', auth: 'anonymous' })
+        expect.objectContaining({ endpoint: 'https://s3.example', auth: 'anonymous' })
       );
       expect(applied.settings).not.toHaveProperty('access_key');
       expect(applied.settings).not.toHaveProperty('secret_key');
       expect(applied.settings).not.toHaveProperty('role_arn');
       expect(applied.settings).not.toHaveProperty('jwt_audience');
+    });
+
+    it('drops leftover s3 region from submitted settings', () => {
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 's3',
+        description: '',
+        settings: {
+          endpoint: 'https://s3.example',
+          region: 'us-east-1',
+        } as any,
+      };
+
+      const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
+      expect(applied.settings).toEqual({ endpoint: 'https://s3.example', auth: 'anonymous' });
     });
 
     it('trims and applies gcs credentials when access_and_secret_keys selected', () => {
