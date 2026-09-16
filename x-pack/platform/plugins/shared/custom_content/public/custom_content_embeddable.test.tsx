@@ -29,14 +29,20 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 >;
 
 let capturedComponentProps:
-  | { onGenerateWithChat?: () => void; onLoadingChange?: (isLoading: boolean) => void }
+  | {
+      isGenerating?: boolean;
+      onGenerateWithChat?: () => void;
+      onLoadingChange?: (isLoading: boolean) => void;
+    }
   | undefined;
 
-jest.mock('./components/custom_content_component', () => ({
+jest.mock('@kbn/custom-content-renderer', () => ({
   CustomContentComponent: (props: {
     esqlQuery: string | undefined;
     savedTemplate: string | undefined;
     generationVersion: number;
+    timeRange: { from: string; to: string } | undefined;
+    isGenerating?: boolean;
     onLoadingChange: (isLoading: boolean) => void;
     onGenerateWithChat?: () => void;
   }) => {
@@ -47,6 +53,8 @@ jest.mock('./components/custom_content_component', () => ({
         data-esql-query={props.esqlQuery ?? ''}
         data-saved-template={props.savedTemplate ?? ''}
         data-generation-version={props.generationVersion}
+        data-time-range={props.timeRange ? `${props.timeRange.from}/${props.timeRange.to}` : ''}
+        data-is-generating={String(Boolean(props.isGenerating))}
       />
     );
   },
@@ -196,6 +204,48 @@ describe('customContentEmbeddableFactory', () => {
       });
       expect(readEsqlQuery(embeddable.api.serializeState())).toBe(
         'FROM metrics | STATS avg = AVG(value)'
+      );
+    });
+  });
+
+  describe('per-panel time range', () => {
+    const panelRange = { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' };
+    const dashboardRange = { from: 'now-15m', to: 'now' };
+    const parentWithTime = { timeRange$: new BehaviorSubject(dashboardRange) };
+
+    // Publishing timeRange$ is what makes the platform's "Customize time range" action appear,
+    // so dropping the manager spread would silently remove the feature.
+    it('publishes a writable time range on the api', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      expect(embeddable.api.timeRange$).toBeDefined();
+      expect(typeof embeddable.api.setTimeRange).toBe('function');
+    });
+
+    it('round-trips time_range through serializeState', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, time_range: panelRange });
+      expect(embeddable.api.serializeState().time_range).toEqual(panelRange);
+    });
+
+    it('renders with the panel override rather than the dashboard range', async () => {
+      const { embeddable } = await buildEmbeddable(
+        { ...baseState, time_range: panelRange },
+        parentWithTime
+      );
+      await act(async () => render(<embeddable.Component />));
+
+      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
+        'data-time-range',
+        `${panelRange.from}/${panelRange.to}`
+      );
+    });
+
+    it('falls back to the dashboard range when the panel has no override', async () => {
+      const { embeddable } = await buildEmbeddable(baseState, parentWithTime);
+      await act(async () => render(<embeddable.Component />));
+
+      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
+        'data-time-range',
+        `${dashboardRange.from}/${dashboardRange.to}`
       );
     });
   });
@@ -635,6 +685,39 @@ describe('customContentEmbeddableFactory', () => {
   });
 
   describe('handleGenerateWithChat', () => {
+    it('shows a generating state while the panel chat round is running', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+
+      await act(async () => {
+        openChat.mock.calls[0][0].onSubmit();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
+        'data-is-generating',
+        'true'
+      );
+
+      await act(async () => {
+        openChat.mock.calls[0][0].onClose();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
+        'data-is-generating',
+        'false'
+      );
+    });
+
     it('clicking "Generate with chat" from the empty prompt on a new panel does not remove it', async () => {
       const removePanel = jest.fn();
       const openChat = jest.fn();

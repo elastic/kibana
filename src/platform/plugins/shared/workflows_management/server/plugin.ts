@@ -31,6 +31,7 @@ import {
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -89,6 +90,14 @@ export class WorkflowsPlugin
       if (plugins.alerting) {
         plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
       }
+
+      registerConnectorEventTriggers({
+        inboundEventsEnabled: plugins.actions
+          .getActionsConfigurationUtilities()
+          .isInboundEventsEnabled(),
+        registerTriggerDefinition: (definition) =>
+          plugins.workflowsExtensions.registerTriggerDefinition(definition),
+      });
     }
 
     plugins.workflowsExtensions.registerWorkflowsClientProvider(

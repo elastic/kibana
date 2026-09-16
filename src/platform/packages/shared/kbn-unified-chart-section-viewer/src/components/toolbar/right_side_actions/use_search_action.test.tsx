@@ -82,6 +82,16 @@ describe('useSearchAction', () => {
     expect(result.current.searchInput).toBeDefined();
   });
 
+  it('syncs the input value when the controlled value prop changes', () => {
+    const { rerender } = render(<Harness {...defaultProps} value="modified" />);
+
+    expect(screen.getByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ)).toHaveValue('modified');
+
+    rerender(<Harness {...defaultProps} value="saved" />);
+
+    expect(screen.getByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ)).toHaveValue('saved');
+  });
+
   it('exports stable data-test-subj string values that Scout page objects depend on', () => {
     expect(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ).toBe('metricsExperienceToolbarSearch');
     expect(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ).toBe('metricsExperienceGridToolbarSearch');

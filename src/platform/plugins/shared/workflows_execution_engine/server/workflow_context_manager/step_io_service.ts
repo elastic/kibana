@@ -10,7 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import {
@@ -482,6 +482,12 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * on the freshly-flushed step IDs.
    */
   public async flush(): Promise<void> {
+    if (isTerminalStatus(this.state.getWorkflowExecutionStatus())) {
+      await this.flushStepChanges();
+      await this.state.flushWorkflowDoc();
+      return;
+    }
+
     await Promise.all([this.state.flushWorkflowDoc(), this.flushStepChanges()]);
   }
 
@@ -688,6 +694,23 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   public releaseReadPins(consumerId: string): void {
     this.readPinnedOutputIdsByConsumer.delete(consumerId);
+  }
+
+  /**
+   * Read-pins an explicit set of step execution ids for `consumerId`.
+   *
+   * {@link prepareForRead} pins the ids it derives from static template
+   * analysis; this is the equivalent for a caller that names the ids itself
+   * (see `StepExecutionRuntime.rehydrateStepOutputs`). Both must pin *before*
+   * awaiting {@link rehydrateOutputs}: that call snapshots only the ids which
+   * are evicted at entry, so a resident id in the set would otherwise be
+   * eligible for the concurrent eviction cycle during the ES round trip and
+   * end up neither fetched nor resident.
+   *
+   * Released by {@link releaseReadPins} under the same `consumerId`.
+   */
+  public pinOutputsForRead(consumerId: string, stepExecutionIds: ReadonlyArray<string>): void {
+    this.readPinnedOutputIdsByConsumer.set(consumerId, new Set(stepExecutionIds));
   }
 
   /**
