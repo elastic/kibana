@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
+import type { VerifyCloudConnectorIacKeyResponse } from '../../../../common/types/rest_spec/cloud_connector';
 
 import { IacKeyCheckCallout } from './iac_key_check_callout';
 
@@ -20,8 +21,6 @@ const renderWithIntl = (element: React.ReactElement) =>
 const baseProps = {
   onUpdateStack: jest.fn(),
   isUpdating: false,
-  onVerify: jest.fn(),
-  isVerifying: false,
 };
 
 describe('IacKeyCheckCallout', () => {
@@ -184,18 +183,82 @@ describe('IacKeyCheckCallout', () => {
     expect(onUpdateStack).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onVerify when the Verify button is clicked', async () => {
-    const onVerify = jest.fn();
+  it('offers Update as its only action: no Verify button', () => {
+    // Verify only re-compared the digest Kibana had just stored, so it never verified anything
+    // (https://github.com/elastic/ingest-dev/issues/9415).
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
-        onVerify={onVerify}
         result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
       />
     );
-    await userEvent.click(
-      screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.VERIFY_BUTTON)
-    );
-    expect(onVerify).toHaveBeenCalledTimes(1);
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    expect(screen.queryByText(/verify/i)).not.toBeInTheDocument();
+  });
+
+  describe('launched state', () => {
+    const mismatch: VerifyCloudConnectorIacKeyResponse = {
+      matches: false,
+      reason: 'key_mismatch',
+      outcome: 'key_mismatch',
+      integrations: [],
+    };
+
+    it('switches to the launched copy on key_mismatch once the update has been launched', () => {
+      renderWithIntl(<IacKeyCheckCallout {...baseProps} result={mismatch} updateLaunched />);
+
+      expect(screen.getByText('CloudFormation stack update opened')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Apply the update in the AWS console, then continue/)
+      ).toBeInTheDocument();
+      expect(screen.queryByText('CloudFormation stack update required')).not.toBeInTheDocument();
+    });
+
+    it('keeps the Update button available to relaunch', async () => {
+      const onUpdateStack = jest.fn();
+      renderWithIntl(
+        <IacKeyCheckCallout
+          {...baseProps}
+          onUpdateStack={onUpdateStack}
+          result={mismatch}
+          updateLaunched
+        />
+      );
+
+      await userEvent.click(
+        screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
+      );
+      expect(onUpdateStack).toHaveBeenCalledTimes(1);
+    });
+
+    it('still shows the no-deployment-id note when the stack ARN is unknown', () => {
+      renderWithIntl(<IacKeyCheckCallout {...baseProps} result={mismatch} updateLaunched />);
+
+      expect(screen.getByText(/stack ARN for this identity isn't recorded/i)).toBeInTheDocument();
+    });
+
+    it('keeps the blocking copy while the update has not been launched', () => {
+      renderWithIntl(
+        <IacKeyCheckCallout {...baseProps} result={mismatch} updateLaunched={false} />
+      );
+
+      expect(screen.getByText('CloudFormation stack update required')).toBeInTheDocument();
+      expect(screen.queryByText('CloudFormation stack update opened')).not.toBeInTheDocument();
+    });
+
+    it('does not apply to no_key: the static-template copy stays, since nothing was blocked', () => {
+      renderWithIntl(
+        <IacKeyCheckCallout
+          {...baseProps}
+          result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
+          updateLaunched
+        />
+      );
+
+      expect(
+        screen.getByText('This identity uses the static CloudFormation template')
+      ).toBeInTheDocument();
+      expect(screen.queryByText('CloudFormation stack update opened')).not.toBeInTheDocument();
+    });
   });
 });

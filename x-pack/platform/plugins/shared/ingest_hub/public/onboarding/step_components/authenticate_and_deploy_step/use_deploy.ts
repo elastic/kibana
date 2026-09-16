@@ -7,6 +7,10 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { sendUpdateCloudConnector } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -42,16 +46,60 @@ export interface UseDeployResult {
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
+  const { services } = useKibana<CoreStart>();
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
   const {
     servicesStep,
     authenticateAndDeployStep,
+    setPendingIac,
     detectAndReviewStep,
     updateDetectAndReviewStep,
     getLatestFailedInstances,
     awsServicesMap: servicesMap,
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
+
+  // The Existing Identity check renders the stack update without touching the connector; the
+  // template's provenance is written only once every integration it was rendered for is deployed,
+  // so a launch the user abandoned never marks the identity as upgraded
+  // (https://github.com/elastic/ingest-dev/issues/9415). Best-effort: the connector is reported as
+  // static until the write lands, and the next Deploy retries it.
+  const writePendingIacProvenance = useCallback(async () => {
+    const { connectorId, pendingIac } = authenticateAndDeployStep;
+    if (!connectorId || !pendingIac || pendingIac.connectorId !== connectorId) {
+      return;
+    }
+    const {
+      iac_key: iacKey,
+      iac_blueprint_id: blueprintId,
+      iac_blueprint_version: version,
+    } = pendingIac;
+    try {
+      const { error } = await sendUpdateCloudConnector(connectorId, {
+        iac_key: iacKey,
+        iac_blueprint_id: blueprintId,
+        iac_blueprint_version: version,
+      });
+      if (error) {
+        throw error;
+      }
+      setPendingIac(undefined);
+    } catch {
+      services.notifications.toasts.addWarning({
+        title: i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.iacProvenanceWriteFailed.title',
+          { defaultMessage: 'Template details were not saved on the identity' }
+        ),
+        text: i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.iacProvenanceWriteFailed.text',
+          {
+            defaultMessage:
+              'Your integrations were deployed, but Kibana could not record which CloudFormation template this identity uses, so it will be reported as using the static template. Kibana will retry if you deploy again.',
+          }
+        ),
+      });
+    }
+  }, [authenticateAndDeployStep, services, setPendingIac]);
 
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
@@ -248,6 +296,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         });
       }
 
+      if (mergedFailed.length === 0) {
+        await writePendingIacProvenance();
+      }
+
       setIsDeploying(false);
       setFailedInstances(mergedFailed);
       updateDetectAndReviewStep({
@@ -279,6 +331,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       dataFormat,
       servicesMap,
       hasEcfServices,
+      writePendingIacProvenance,
     ]
   );
 

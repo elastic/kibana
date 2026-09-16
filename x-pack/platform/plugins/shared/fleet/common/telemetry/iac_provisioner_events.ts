@@ -131,7 +131,11 @@ export type IacKeyVerificationOutcome =
  * (connector details re-check). The browser never names it.
  */
 export type IacKeySurface = 'onboarding' | 'flyout';
-export type IacKeyCheckAction = 'update_stack_clicked' | 'verify_clicked';
+/**
+ * update_stack_clicked: the callout's Update button; redeploy_clicked: the flyout's "Redeploy
+ * CloudFormation stack" (a forced render, offered regardless of the upgrade status).
+ */
+export type IacKeyCheckAction = 'update_stack_clicked' | 'redeploy_clicked';
 export type IacKeyCheckReason = 'no_key' | 'key_mismatch';
 
 export interface IacKeyVerificationCompletedFields {
@@ -228,14 +232,14 @@ export const IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT: EventTypeOpts<IacKeyCheckAc
       type: 'keyword',
       _meta: {
         description:
-          'What the user clicked: update_stack_clicked opens the CloudFormation console with the freshly rendered template; verify_clicked re-runs the key comparison.',
+          'What the user clicked: update_stack_clicked opens the CloudFormation console with the freshly rendered template from the upgrade callout; redeploy_clicked does the same from the flyout\'s "Redeploy CloudFormation stack" action, which is offered even when the stack is current.',
       },
     },
     reason: {
       type: 'keyword',
       _meta: {
         description:
-          'Why the callout was shown: no_key (static template deployed) or key_mismatch (deployed template differs from the current render).',
+          'Why the callout was shown: no_key (static template deployed) or key_mismatch (deployed template differs from the current render). For redeploy_clicked, which has no callout, it reports whether the connector had a stored key (key_mismatch) or not (no_key).',
       },
     },
     hasDeploymentId: {

@@ -69,6 +69,7 @@ function setupMocks({
   cloud = undefined,
   setConnectorId = jest.fn(),
   setStaticKeys = jest.fn(),
+  setPendingIac = jest.fn(),
   connectorId = undefined,
   authMethod = undefined,
   searchParams = '',
@@ -76,6 +77,7 @@ function setupMocks({
   cloud?: object;
   setConnectorId?: jest.Mock;
   setStaticKeys?: jest.Mock;
+  setPendingIac?: jest.Mock;
   connectorId?: string;
   authMethod?: 'identity_federation' | 'static_keys';
   searchParams?: string;
@@ -87,6 +89,7 @@ function setupMocks({
   mockUseOnboardingFlow.mockReturnValue({
     setConnectorId,
     setStaticKeys,
+    setPendingIac,
     authenticateAndDeployStep: { connectorId, authMethod },
     awsServicesMap: new Map([
       [
@@ -106,10 +109,16 @@ function setupMocks({
     ({
       onReadyChange,
       onConnectorIdChange,
+      onIacProvenanceRendered,
       initialConnectorId: initId,
     }: {
       onReadyChange?: (v: boolean) => void;
       onConnectorIdChange?: (id: string | undefined, name?: string) => void;
+      onIacProvenanceRendered?: (iac: {
+        iac_key: string;
+        iac_blueprint_id?: string;
+        iac_blueprint_version?: string;
+      }) => void;
       initialConnectorId?: string;
     }) => (
       <div data-test-subj="identity-federation">
@@ -117,6 +126,17 @@ function setupMocks({
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
         <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
+        <button
+          onClick={() =>
+            onIacProvenanceRendered?.({
+              iac_key: 'sha256:new',
+              iac_blueprint_id: 'federated-identity',
+              iac_blueprint_version: '1.0.0',
+            })
+          }
+        >
+          render-provenance
+        </button>
       </div>
     )
   );
@@ -309,6 +329,75 @@ describe('ManagedIntegrationsSection', () => {
       renderSection({ showIdentityFederation: true });
       fireEvent.click(screen.getByRole('radio', { name: /access keys/i }));
       expect(setConnectorId).toHaveBeenCalledWith(undefined);
+    });
+  });
+
+  describe('Federated Identity template provenance', () => {
+    // The Existing Identity check hands the rendered key here instead of writing the connector;
+    // it is parked on the flow for the post-Deploy write (https://github.com/elastic/ingest-dev/issues/9415).
+    it('parks the rendered provenance on the flow, tagged with the selected connector', () => {
+      const setPendingIac = jest.fn();
+      setupMocks({ setPendingIac, connectorId: 'persisted-connector' });
+      renderSection({ showIdentityFederation: true });
+
+      act(() => {
+        fireEvent.click(screen.getByText('render-provenance'));
+      });
+
+      expect(setPendingIac).toHaveBeenCalledTimes(1);
+      expect(setPendingIac).toHaveBeenCalledWith({
+        connectorId: 'persisted-connector',
+        iac_key: 'sha256:new',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
+    });
+
+    it('uses the connector id current at render time, not the one from mount', () => {
+      const setPendingIac = jest.fn();
+      setupMocks({ setPendingIac, connectorId: undefined });
+      const { rerender } = renderSection({ showIdentityFederation: true });
+
+      // The user picks an identity after mount: the flow now carries its id.
+      mockUseOnboardingFlow.mockReturnValue({
+        ...mockUseOnboardingFlow.mock.results[0].value,
+        authenticateAndDeployStep: { connectorId: 'picked-later' },
+      });
+      rerender(
+        <I18nProvider>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <ManagedIntegrationsSection
+              serviceCount={3}
+              showIdentityFederation={true}
+              iacIntegrations={IAC_INTEGRATIONS}
+              onDeploy={jest.fn()}
+              isDeploying={false}
+              isDone={false}
+              hasFailed={false}
+            />
+          </React.Suspense>
+        </I18nProvider>
+      );
+
+      act(() => {
+        fireEvent.click(screen.getByText('render-provenance'));
+      });
+
+      expect(setPendingIac).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'picked-later' })
+      );
+    });
+
+    it('parks nothing while no connector is selected', () => {
+      const setPendingIac = jest.fn();
+      setupMocks({ setPendingIac, connectorId: undefined });
+      renderSection({ showIdentityFederation: true });
+
+      act(() => {
+        fireEvent.click(screen.getByText('render-provenance'));
+      });
+
+      expect(setPendingIac).not.toHaveBeenCalled();
     });
   });
 

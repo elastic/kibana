@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -39,6 +39,7 @@ import {
 import type {
   AwsStaticKeyCredentials,
   CloudSetupForCloudConnector,
+  IacRenderedProvenance,
   RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -71,8 +72,26 @@ export function ManagedIntegrationsSection({
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { setConnectorId, setStaticKeys, authenticateAndDeployStep } = useOnboardingFlow();
+  const { setConnectorId, setStaticKeys, setPendingIac, authenticateAndDeployStep } =
+    useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
+
+  // The Existing Identity check renders the stack update without writing the key; the provenance
+  // is parked on the flow and written to the connector after Deploy succeeds
+  // (https://github.com/elastic/ingest-dev/issues/9415). The id is read at call time through a
+  // ref so the callback stays stable and always names the identity currently selected.
+  const connectorIdRef = useRef(authenticateAndDeployStep.connectorId);
+  connectorIdRef.current = authenticateAndDeployStep.connectorId;
+  const handleIacProvenanceRendered = useCallback(
+    (iac: IacRenderedProvenance) => {
+      const connectorId = connectorIdRef.current;
+      if (!connectorId) {
+        return;
+      }
+      setPendingIac({ connectorId, ...iac });
+    },
+    [setPendingIac]
+  );
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
   const isStaticKeysEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'static_keys';
@@ -257,6 +276,7 @@ export function ManagedIntegrationsSection({
                   integrations={iacIntegrations}
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
+                  onIacProvenanceRendered={handleIacProvenanceRendered}
                   initialConnectorId={initialConnectorId}
                 />
               ) : isStaticKeysEditMode ? (

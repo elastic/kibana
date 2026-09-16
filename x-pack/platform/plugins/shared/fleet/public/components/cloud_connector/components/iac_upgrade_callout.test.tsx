@@ -21,8 +21,6 @@ describe('IacUpgradeCallout', () => {
     canUpdate: true,
     isUpdating: false,
     onUpdateStack: jest.fn(),
-    onVerify: jest.fn(),
-    isVerifying: false,
   };
 
   const renderComponent = (props = {}) =>
@@ -92,27 +90,13 @@ describe('IacUpgradeCallout', () => {
     expect(onUpdateStack).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onVerify when the verify button is clicked', async () => {
-    const user = userEvent.setup();
-    const onVerify = jest.fn();
-    renderComponent({ onVerify });
+  it('offers Update as its only action: no Verify button', () => {
+    // Verify only re-compared the digest Kibana had just stored, so it never verified anything;
+    // the flyout re-checks on its own after Update (https://github.com/elastic/ingest-dev/issues/9415).
+    renderComponent();
 
-    await user.click(
-      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_VERIFY_BUTTON)
-    );
-
-    expect(onVerify).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows the verify button loading while isVerifying', () => {
-    renderComponent({ isVerifying: true });
-
-    // The update button must stay usable: only the re-check is in flight.
-    expect(
-      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_VERIFY_BUTTON)
-    ).toBeDisabled();
-    expect(
-      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON)
-    ).toBeEnabled();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: /verify/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/verify/i)).not.toBeInTheDocument();
   });
 });

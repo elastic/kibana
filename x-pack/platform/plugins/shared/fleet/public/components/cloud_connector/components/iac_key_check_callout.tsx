@@ -20,8 +20,12 @@ export interface IacKeyCheckCalloutProps {
   integrationCount?: number;
   onUpdateStack: () => void;
   isUpdating: boolean;
-  onVerify: () => void;
-  isVerifying: boolean;
+  /**
+   * The user has launched the stack update for this verdict. On a blocking `key_mismatch` the
+   * callout switches to a "launched" state that tells them to finish in the AWS console and
+   * continue; Update stays available to relaunch (https://github.com/elastic/ingest-dev/issues/9415).
+   */
+  updateLaunched?: boolean;
 }
 
 /** Renders null when the IAC key matches or there is no actionable reason. */
@@ -30,16 +34,21 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
   integrationCount = 1,
   onUpdateStack,
   isUpdating,
-  onVerify,
-  isVerifying,
+  updateLaunched = false,
 }) => {
   if (result.matches || !result.reason) {
     return null;
   }
 
   const isNoKey = result.reason === 'no_key';
+  const isLaunched = updateLaunched && result.reason === 'key_mismatch';
 
-  const title = isNoKey ? (
+  const title = isLaunched ? (
+    <FormattedMessage
+      id="xpack.fleet.cloudConnector.iacCheck.launchedTitle"
+      defaultMessage="CloudFormation stack update opened"
+    />
+  ) : isNoKey ? (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.iacCheck.noKeyTitle"
       defaultMessage="This identity uses the static CloudFormation template"
@@ -62,7 +71,12 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
     </strong>
   );
 
-  const bodyText = isNoKey ? (
+  const bodyText = isLaunched ? (
+    <FormattedMessage
+      id="xpack.fleet.cloudConnector.iacCheck.launchedBody"
+      defaultMessage="Apply the update in the AWS console, then continue. The new services report once the stack is updated."
+    />
+  ) : isNoKey ? (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.iacCheck.noKeyBody"
       defaultMessage="This identity was set up with the static template, either because it predates generated templates or because template generation was unavailable at the time. Update the stack to switch to a template scoped to the permissions required by {integration}. You can continue without updating."
@@ -111,18 +125,6 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
             <FormattedMessage
               id="xpack.fleet.cloudConnector.iacCheck.updateStackButton"
               defaultMessage="Update CloudFormation stack"
-            />
-          ),
-        },
-        secondary: {
-          iconType: 'refresh',
-          isLoading: isVerifying,
-          onClick: onVerify,
-          'data-test-subj': CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.VERIFY_BUTTON,
-          children: (
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.iacCheck.verifyButton"
-              defaultMessage="Verify"
             />
           ),
         },

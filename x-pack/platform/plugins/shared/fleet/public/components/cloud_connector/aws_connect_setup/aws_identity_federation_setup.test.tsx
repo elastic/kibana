@@ -546,6 +546,65 @@ describe('AwsIdentityFederationSetup', () => {
       expect(props?.onValidityChange).toEqual(expect.any(Function));
     });
 
+    it('lets IacKeyCheck write the rendered key itself when no provenance callback is given', () => {
+      renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
+
+      const props = lastIacKeyCheckProps();
+      expect(props).not.toHaveProperty('writeOnRender');
+      expect(props).not.toHaveProperty('onProvenanceRendered');
+    });
+
+    it('turns off the click-time write and forwards the provenance when onIacProvenanceRendered is given', () => {
+      // The onboarding stores the key after Deploy succeeds, so a launch the user never applies
+      // leaves the connector untouched (https://github.com/elastic/ingest-dev/issues/9415).
+      const onIacProvenanceRendered = jest.fn();
+      renderSetup({
+        cloud,
+        integrations,
+        initialConnectorId: 'connector-1',
+        onIacProvenanceRendered,
+      });
+
+      const props = lastIacKeyCheckProps();
+      expect(props?.writeOnRender).toBe(false);
+      expect(props?.onProvenanceRendered).toBe(onIacProvenanceRendered);
+    });
+
+    it('becomes ready once the check reports the launch, while its verdict is still key_mismatch', async () => {
+      // IacKeyCheck reports validity, not the raw verdict: after the user launches the update it
+      // reports true even though the deployed template has not been re-checked ("let them finish").
+      const onIacProvenanceRendered = jest.fn();
+      renderSetup({
+        cloud,
+        integrations,
+        initialConnectorId: 'connector-1',
+        onIacProvenanceRendered,
+      });
+      await waitFor(() => expect(onReadyChange).toHaveBeenCalled());
+
+      act(() => {
+        lastIacKeyCheckProps()?.onValidityChange?.(false);
+      });
+      expect(lastReadyValue(onReadyChange)).toBe(false);
+
+      // The launch: the check hands the provenance to the host and lifts its block.
+      act(() => {
+        lastIacKeyCheckProps()?.onProvenanceRendered?.({
+          iac_key: 'sha256:new',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        });
+        lastIacKeyCheckProps()?.onValidityChange?.(true);
+      });
+
+      expect(onIacProvenanceRendered).toHaveBeenCalledWith({
+        iac_key: 'sha256:new',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
+      expect(lastReadyValue(onReadyChange)).toBe(true);
+    });
+
     it('starts not ready while the check is pending and follows the verdicts it reports', async () => {
       // Readiness starts pessimistic exactly when a check will run, so Deploy/Save cannot be
       // pressed during the verify round-trip (https://github.com/elastic/ingest-dev/issues/9415).

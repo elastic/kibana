@@ -35,7 +35,7 @@ import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_t
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
-import { IacKeyCheck } from '../components/iac_key_check';
+import { IacKeyCheck, type IacRenderedProvenance } from '../components/iac_key_check';
 import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
 import { StackArnField } from '../components/stack_arn_field';
 import { getCloudConnectorNameError, isStackArnInvalid } from '../utils';
@@ -64,6 +64,13 @@ export interface AwsIdentityFederationSetupProps {
   integrations?: RenderIacTemplateIntegration[];
   onReadyChange?: (isReady: boolean) => void;
   onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
+  /**
+   * Existing Identity only. When given, the stack-update launch does not write the rendered key
+   * to the connector; the provenance is handed here instead, for the host to store once its own
+   * flow succeeds (the onboarding writes it after Deploy). Readiness still lifts on the launch
+   * (https://github.com/elastic/ingest-dev/issues/9415).
+   */
+  onIacProvenanceRendered?: (iac: IacRenderedProvenance) => void;
 }
 
 export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProps> = ({
@@ -78,6 +85,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   integrations,
   onReadyChange,
   onConnectorIdChange,
+  onIacProvenanceRendered,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { data: cloudConnectors = [], isLoading: isLoadingConnectors } = useGetCloudConnectors({
@@ -354,6 +362,9 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 accountType={accountType}
                 iacTemplateUrl={iacTemplateUrl}
                 onValidityChange={setIsCheckValid}
+                {...(onIacProvenanceRendered
+                  ? { writeOnRender: false, onProvenanceRendered: onIacProvenanceRendered }
+                  : {})}
               />
             </>
           )}

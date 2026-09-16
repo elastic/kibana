@@ -368,20 +368,18 @@ describe('IacKeyCheck', () => {
       expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('clicking Verify reports telemetry and refetches', async () => {
+    it('offers no Verify button', async () => {
+      // Verify only re-compared the digest Kibana had just stored, so it never verified anything
+      // (https://github.com/elastic/ingest-dev/issues/9415).
       mockVerifyResult({ matches: false, reason: 'no_key', integrations: [] });
 
       renderWithIntl(<IacKeyCheck {...defaultProps} />);
 
-      await userEvent.click(
-        await screen.findByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.VERIFY_BUTTON)
-      );
-
-      expect(mockReportEvent).toHaveBeenCalledWith(
-        'iac_provisioner_key_check_action',
-        expect.objectContaining({ action: 'verify_clicked' })
-      );
-      expect(mockRefetch).toHaveBeenCalledTimes(1);
+      await screen.findByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT);
+      expect(screen.getAllByRole('button')).toHaveLength(1);
+      expect(screen.queryByText(/verify/i)).not.toBeInTheDocument();
+      // Nothing was clicked, so no action telemetry either.
+      expect(mockReportEvent).not.toHaveBeenCalled();
     });
 
     it('onTemplateRendered stores the key, invalidates both query keys, and does not toast', async () => {
@@ -450,6 +448,182 @@ describe('IacKeyCheck', () => {
       });
 
       expect(mockUpdateCloudConnector).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('launching the update ("let them finish")', () => {
+    // Captures the hook's onTemplateRendered so a test can stand in for a successful render.
+    const captureOnTemplateRendered = () => {
+      let captured: ((r: TemplateRendered) => void) | undefined;
+      mockUseCloudConnectorTemplate.mockImplementation(({ onTemplateRendered }) => {
+        captured = onTemplateRendered;
+        return {
+          launchButtonProps: { onClick: mockLaunchOnClick },
+          isDisabled: false,
+          isGeneratingTemplate: false,
+          clearIacConfirm: jest.fn(),
+          isIacProvisionerEnabled: true,
+        };
+      });
+      return () => captured;
+    };
+    const rendered: TemplateRendered = {
+      key: 'sha256:new',
+      integrations: [],
+      ...RENDERED_BLUEPRINT,
+    };
+
+    it('lifts the block once the update is launched, while the verdict is still key_mismatch', async () => {
+      // Kibana cannot see the user apply the update in AWS, so the launch is what unblocks
+      // Deploy (https://github.com/elastic/ingest-dev/issues/9415).
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      const getOnTemplateRendered = captureOnTemplateRendered();
+      const onValidityChange = jest.fn();
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
+      await waitFor(() => expect(onValidityChange).toHaveBeenCalledWith(false));
+
+      await act(async () => {
+        getOnTemplateRendered()?.(rendered);
+      });
+
+      await waitFor(() => expect(onValidityChange).toHaveBeenLastCalledWith(true));
+      expect(onValidityChange).toHaveBeenCalledTimes(2);
+    });
+
+    it('switches the callout to its launched state and keeps Update available', async () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      const getOnTemplateRendered = captureOnTemplateRendered();
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} />);
+      await screen.findByText('CloudFormation stack update required');
+
+      await act(async () => {
+        getOnTemplateRendered()?.(rendered);
+      });
+
+      expect(await screen.findByText('CloudFormation stack update opened')).toBeInTheDocument();
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
+      ).toBeEnabled();
+    });
+
+    it('forgets the launch when the connector changes: the new identity is blocked again', async () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      const getOnTemplateRendered = captureOnTemplateRendered();
+      const onValidityChange = jest.fn();
+
+      const { rerender } = renderWithIntl(
+        <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
+      );
+      await act(async () => {
+        getOnTemplateRendered()?.(rendered);
+      });
+      await waitFor(() => expect(onValidityChange).toHaveBeenLastCalledWith(true));
+
+      rerender(
+        withProviders(
+          <IacKeyCheck
+            {...defaultProps}
+            cloudConnectorId="connector-2"
+            onValidityChange={onValidityChange}
+          />
+        )
+      );
+
+      await waitFor(() => expect(onValidityChange).toHaveBeenLastCalledWith(false));
+      expect(screen.getByText('CloudFormation stack update required')).toBeInTheDocument();
+    });
+
+    it('does not lift the block when the render produced no key', async () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      const getOnTemplateRendered = captureOnTemplateRendered();
+      const onValidityChange = jest.fn();
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
+      await waitFor(() => expect(onValidityChange).toHaveBeenCalledWith(false));
+
+      await act(async () => {
+        getOnTemplateRendered()?.({ ...rendered, key: '' });
+      });
+
+      expect(onValidityChange).not.toHaveBeenCalledWith(true);
+    });
+
+    describe('writeOnRender={false}', () => {
+      it('hands the provenance to the host instead of writing the connector', async () => {
+        mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+        const getOnTemplateRendered = captureOnTemplateRendered();
+        const onProvenanceRendered = jest.fn();
+        const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+
+        renderWithIntl(
+          <IacKeyCheck
+            {...defaultProps}
+            writeOnRender={false}
+            onProvenanceRendered={onProvenanceRendered}
+          />
+        );
+
+        await act(async () => {
+          getOnTemplateRendered()?.(rendered);
+        });
+
+        expect(onProvenanceRendered).toHaveBeenCalledTimes(1);
+        expect(onProvenanceRendered).toHaveBeenCalledWith({
+          iac_key: 'sha256:new',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        });
+        expect(mockUpdateCloudConnector).not.toHaveBeenCalled();
+        expect(invalidateQueriesSpy).not.toHaveBeenCalled();
+      });
+
+      it('still lifts the block and shows the launched state', async () => {
+        mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+        const getOnTemplateRendered = captureOnTemplateRendered();
+        const onValidityChange = jest.fn();
+
+        renderWithIntl(
+          <IacKeyCheck
+            {...defaultProps}
+            writeOnRender={false}
+            onProvenanceRendered={jest.fn()}
+            onValidityChange={onValidityChange}
+          />
+        );
+        await waitFor(() => expect(onValidityChange).toHaveBeenCalledWith(false));
+
+        await act(async () => {
+          getOnTemplateRendered()?.(rendered);
+        });
+
+        await waitFor(() => expect(onValidityChange).toHaveBeenLastCalledWith(true));
+        expect(await screen.findByText('CloudFormation stack update opened')).toBeInTheDocument();
+      });
+
+      it('uses the latest callback the host passed', async () => {
+        mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+        const getOnTemplateRendered = captureOnTemplateRendered();
+        const first = jest.fn();
+        const second = jest.fn();
+
+        const { rerender } = renderWithIntl(
+          <IacKeyCheck {...defaultProps} writeOnRender={false} onProvenanceRendered={first} />
+        );
+        rerender(
+          withProviders(
+            <IacKeyCheck {...defaultProps} writeOnRender={false} onProvenanceRendered={second} />
+          )
+        );
+
+        await act(async () => {
+          getOnTemplateRendered()?.(rendered);
+        });
+
+        expect(first).not.toHaveBeenCalled();
+        expect(second).toHaveBeenCalledTimes(1);
+      });
     });
   });
 

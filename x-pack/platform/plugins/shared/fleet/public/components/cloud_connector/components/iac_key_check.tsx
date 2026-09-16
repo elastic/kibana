@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -29,6 +29,13 @@ import { AWS_PROVIDER } from '../constants';
 
 import { IacKeyCheckCallout } from './iac_key_check_callout';
 
+/** Provenance of a rendered template, in the shape the connector API stores it. */
+export interface IacRenderedProvenance {
+  iac_key: string;
+  iac_blueprint_id?: string;
+  iac_blueprint_version?: string;
+}
+
 export interface IacKeyCheckProps {
   cloudConnectorId: string | undefined;
   /** Integrations the connector will have to cover on top of its saved package policies. */
@@ -37,6 +44,15 @@ export interface IacKeyCheckProps {
   accountType?: AccountType;
   iacTemplateUrl?: string;
   onValidityChange?: (isValid: boolean) => void;
+  /**
+   * Store the rendered key and blueprint on the connector as soon as the Update click renders
+   * (default). Hosts that must not record the template before their own flow succeeds pass
+   * false and take the provenance from `onProvenanceRendered` instead
+   * (https://github.com/elastic/ingest-dev/issues/9415).
+   */
+  writeOnRender?: boolean;
+  /** Called with the rendered provenance when `writeOnRender` is false. */
+  onProvenanceRendered?: (iac: IacRenderedProvenance) => void;
 }
 
 /**
@@ -51,13 +67,15 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
   accountType,
   iacTemplateUrl,
   onValidityChange,
+  writeOnRender = true,
+  onProvenanceRendered,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { analytics, http } = useStartServices();
 
   const isCheckEnabled = isIacProvisionerEnabled && integrations.length > 0;
 
-  const { data, isFetching, isInitialLoading, refetch } = useVerifyIacKey({
+  const { data, isInitialLoading } = useVerifyIacKey({
     cloudConnectorId,
     integrations,
     enabled: isCheckEnabled,
@@ -65,29 +83,53 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
 
   const queryClient = useQueryClient();
 
+  // The identity the user launched the stack update for. Bound to the id rather than a bare
+  // boolean so a change of connector resets it on its own: a launch for one identity says nothing
+  // about the next (the host also keys this component by id).
+  const [launchedForId, setLaunchedForId] = useState<string | undefined>(undefined);
+  const updateLaunched = launchedForId !== undefined && launchedForId === cloudConnectorId;
+
+  const onProvenanceRenderedRef = useRef(onProvenanceRendered);
+  onProvenanceRenderedRef.current = onProvenanceRendered;
+
   const onTemplateRendered = useCallback(
     ({ key, blueprintId, blueprintVersion }: TemplateRendered) => {
       // Runs on the "Update CloudFormation stack" click, once the render succeeds and before the
-      // console opens. Kibana cannot observe the user applying the update in AWS, so the key and
-      // its blueprint provenance are stored at click time
-      // (https://github.com/elastic/ingest-dev/issues/9415). Raw request: no success toast, the
-      // user only asked to open the console.
-      if (key && cloudConnectorId) {
-        updateCloudConnector(http, cloudConnectorId, {
+      // console opens. Kibana cannot observe the user applying the update in AWS, so the launch
+      // itself is what lifts the block ("let them finish"): the callout switches to its launched
+      // state and the host is told the identity is ready
+      // (https://github.com/elastic/ingest-dev/issues/9415).
+      if (!key || !cloudConnectorId) {
+        return;
+      }
+      setLaunchedForId(cloudConnectorId);
+
+      if (!writeOnRender) {
+        // The host records the provenance once its own flow succeeds (the onboarding writes it
+        // after Deploy), so a launch the user never applies leaves the connector untouched.
+        onProvenanceRenderedRef.current?.({
           iac_key: key,
           iac_blueprint_id: blueprintId,
           iac_blueprint_version: blueprintVersion,
-        })
-          .then(() => {
-            queryClient.invalidateQueries(['get-cloud-connectors']);
-            queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
-          })
-          .catch(() => {
-            // Silent: the daily iac_upgrade_check task self-heals key mismatches.
-          });
+        });
+        return;
       }
+
+      // Click-time write. Raw request: no success toast, the user only asked to open the console.
+      updateCloudConnector(http, cloudConnectorId, {
+        iac_key: key,
+        iac_blueprint_id: blueprintId,
+        iac_blueprint_version: blueprintVersion,
+      })
+        .then(() => {
+          queryClient.invalidateQueries(['get-cloud-connectors']);
+          queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
+        })
+        .catch(() => {
+          // Silent: the daily iac_upgrade_check task self-heals key mismatches.
+        });
     },
-    [cloudConnectorId, http, queryClient]
+    [cloudConnectorId, http, queryClient, writeOnRender]
   );
 
   const { launchButtonProps, isGeneratingTemplate, templateGenerationError } =
@@ -105,15 +147,16 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     });
 
   const isBlocking = data?.matches === false && data.reason === 'key_mismatch';
+  // The block lasts until the user has launched the update; Kibana cannot see them apply it.
+  const isValid = !isBlocking || updateLaunched;
   // No verdict yet and one is on its way. Not the same as "no data": a failed check (fail open)
   // and a check waiting for a connector to be selected both leave `data` undefined without
   // being pending.
   const isAwaitingFirstVerdict = isInitialLoading;
 
-  // Report validity only when the blocking state itself changes. Hosts may re-create the
-  // callback on every update, so depending on its identity here would re-fire this effect after
-  // each update it causes — an infinite render loop (seen as a "page unresponsive" prompt during
-  // the 2026-09-09 walkthrough).
+  // Report validity only when it changes. Hosts may re-create the callback on every update, so
+  // depending on its identity here would re-fire this effect after each update it causes — an
+  // infinite render loop (seen as a "page unresponsive" prompt during the 2026-09-09 walkthrough).
   const onValidityChangeRef = useRef(onValidityChange);
   onValidityChangeRef.current = onValidityChange;
   const lastReportedValidityRef = useRef<boolean | undefined>(undefined);
@@ -130,13 +173,12 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     if (isAwaitingFirstVerdict) {
       return;
     }
-    const isValid = !isBlocking;
     if (lastReportedValidityRef.current === isValid) {
       return;
     }
     lastReportedValidityRef.current = isValid;
     onValidityChangeRef.current?.(isValid);
-  }, [isAwaitingFirstVerdict, isBlocking, isCheckEnabled]);
+  }, [isAwaitingFirstVerdict, isValid, isCheckEnabled]);
 
   const reportAction = useCallback(
     (action: IacKeyCheckAction) => {
@@ -168,11 +210,7 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
           }
         }}
         isUpdating={isGeneratingTemplate}
-        onVerify={() => {
-          reportAction('verify_clicked');
-          refetch();
-        }}
-        isVerifying={isFetching}
+        updateLaunched={updateLaunched}
       />
       {templateGenerationError && (
         <>

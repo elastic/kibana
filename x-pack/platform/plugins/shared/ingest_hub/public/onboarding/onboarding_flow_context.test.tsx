@@ -195,6 +195,159 @@ describe('OnboardingFlowProvider', () => {
     });
   });
 
+  describe('pendingIac', () => {
+    // Provenance of a stack update the user launched for an existing Federated Identity, held
+    // until Deploy succeeds (https://github.com/elastic/ingest-dev/issues/9415).
+    const pendingIac = {
+      connectorId: 'connector-1',
+      iac_key: 'sha256:new',
+      iac_blueprint_id: 'federated-identity',
+      iac_blueprint_version: '1.0.0',
+    };
+
+    it('is undefined by default and is exposed once set', () => {
+      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
+      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+
+      act(() => {
+        result.current.setPendingIac(pendingIac);
+      });
+
+      expect(result.current.authenticateAndDeployStep.pendingIac).toEqual(pendingIac);
+    });
+
+    it('is not written to session storage', () => {
+      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setPendingIac(pendingIac);
+      });
+
+      const persistedWrites = mockUseSessionStorage.mock.results
+        .map((r) => (r.value as [unknown, jest.Mock])[1])
+        .flatMap((setter) => setter.mock.calls.map(([value]: [unknown]) => value));
+      expect(JSON.stringify(persistedWrites)).not.toContain('sha256:new');
+    });
+
+    it('survives setConnectorId re-emitting the same id', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setConnectorId('connector-1', 'Identity 1');
+      });
+      rerender();
+      act(() => {
+        result.current.setPendingIac(pendingIac);
+      });
+      rerender();
+
+      // The Fleet component calls this on every readiness change with the unchanged selection.
+      act(() => {
+        result.current.setConnectorId('connector-1', 'Identity 1');
+      });
+      rerender();
+
+      expect(result.current.authenticateAndDeployStep.pendingIac).toEqual(pendingIac);
+    });
+
+    it('is cleared when a different connector is selected', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setConnectorId('connector-1', 'Identity 1');
+      });
+      rerender();
+      act(() => {
+        result.current.setPendingIac(pendingIac);
+      });
+      rerender();
+
+      act(() => {
+        result.current.setConnectorId('connector-2', 'Identity 2');
+      });
+      rerender();
+
+      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+    });
+
+    it('is cleared when the connector is deselected', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setConnectorId('connector-1', 'Identity 1');
+      });
+      rerender();
+      act(() => {
+        result.current.setPendingIac(pendingIac);
+      });
+      rerender();
+
+      act(() => {
+        result.current.setConnectorId(undefined);
+      });
+      rerender();
+
+      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+    });
+
+    it('is cleared when the selected services change: the template was rendered for the old set', () => {
+      // Launch for set A → Back → drop a service → return → Deploy must not record A's digest.
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setConnectorId('connector-1', 'Identity 1');
+      });
+      rerender();
+      act(() => {
+        result.current.setPendingIac(pendingIac);
+      });
+      rerender();
+
+      act(() => {
+        result.current.setSelectedServiceIds(['ec2']);
+      });
+      rerender();
+
+      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+    });
+
+    it('is cleared when the data format changes, which empties the selection', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setPendingIac(pendingIac);
+      });
+      rerender();
+
+      act(() => {
+        result.current.setDataFormat('otel');
+      });
+      rerender();
+
+      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+    });
+
+    it('is cleared when static keys replace the identity', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setConnectorId('connector-1', 'Identity 1');
+      });
+      rerender();
+      act(() => {
+        result.current.setPendingIac(pendingIac);
+      });
+      rerender();
+
+      act(() => {
+        result.current.setStaticKeys({ access_key_id: 'AKIA', secret_access_key: 'secret' });
+      });
+      rerender();
+
+      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+    });
+  });
+
   describe('setDeploymentMethod', () => {
     // Regression: a failed deploy under one method left failedInstances populated, so switching
     // method (or restarting onboarding into the other method) showed a stale "Deployment failed"

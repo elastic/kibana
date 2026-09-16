@@ -19,21 +19,21 @@ export interface IacUpgradeCalloutProps {
   canUpdate: boolean;
   isUpdating: boolean;
   onUpdateStack: () => void;
-  onVerify: () => void;
-  isVerifying: boolean;
 }
 
-/** Upgrade callout shown in the connector flyout when iac_upgrade_status is 'upgrade_available'. */
+/**
+ * Upgrade callout shown in the connector flyout when iac_upgrade_status is 'upgrade_available'.
+ * Its only action is Update: the click stores the rendered key and the flyout re-checks on its
+ * own, so the callout clears itself (https://github.com/elastic/ingest-dev/issues/9415).
+ */
 export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
   checkedAt,
   hasKey,
   canUpdate,
   isUpdating,
   onUpdateStack,
-  onVerify,
-  isVerifying,
 }) => {
-  const { IAC_UPGRADE_CALLOUT, IAC_UPDATE_STACK_BUTTON, IAC_VERIFY_BUTTON } =
+  const { IAC_UPGRADE_CALLOUT, IAC_UPDATE_STACK_BUTTON } =
     CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS;
 
   const bodyText = hasKey ? (
@@ -97,18 +97,6 @@ export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
             <FormattedMessage
               id="xpack.fleet.cloudConnector.policiesFlyout.updateStackButton"
               defaultMessage="Update CloudFormation stack"
-            />
-          ),
-        },
-        secondary: {
-          iconType: 'refresh',
-          isLoading: isVerifying,
-          onClick: onVerify,
-          'data-test-subj': IAC_VERIFY_BUTTON,
-          children: (
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.policiesFlyout.verifyButton"
-              defaultMessage="Verify"
             />
           ),
         },

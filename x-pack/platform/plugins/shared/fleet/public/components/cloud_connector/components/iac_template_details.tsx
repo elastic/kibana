@@ -16,6 +16,8 @@ export interface IacTemplateDetailsProps {
   iacDeploymentId: string;
   isDeploymentIdInvalid: boolean;
   onIacDeploymentIdChange: (value: string) => void;
+  /** Stack-level actions (Redeploy), rendered between the title and the Deployment ID field. */
+  actions?: React.ReactNode;
 }
 
 /**
@@ -26,6 +28,7 @@ export const IacTemplateDetails: React.FC<IacTemplateDetailsProps> = ({
   iacDeploymentId,
   isDeploymentIdInvalid,
   onIacDeploymentIdChange,
+  actions,
 }) => {
   const { IAC_SECTION, IAC_DEPLOYMENT_ID_INPUT, IAC_VIEW_STACK_LINK } =
     CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS;
@@ -37,11 +40,17 @@ export const IacTemplateDetails: React.FC<IacTemplateDetailsProps> = ({
       <EuiTitle size="xxs">
         <h4>
           {i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.iacTitle', {
-            defaultMessage: 'IaC template',
+            defaultMessage: 'CloudFormation stack details',
           })}
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
+      {actions && (
+        <>
+          {actions}
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.iacDeploymentIdLabel', {

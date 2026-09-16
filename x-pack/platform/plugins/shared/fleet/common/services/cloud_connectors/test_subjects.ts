@@ -47,7 +47,6 @@ export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
 export const CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS = {
   CALLOUT: 'cloudConnectorIacCheckCallout',
   UPDATE_STACK_BUTTON: 'cloudConnectorIacCheckUpdateStackButton',
-  VERIFY_BUTTON: 'cloudConnectorIacCheckVerifyButton',
   IAC_CHECK_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacCheckTemplateErrorCallout',
 };
 
@@ -73,6 +72,6 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   IAC_VIEW_STACK_LINK: 'cloudConnectorIacViewStackLink',
   IAC_UPGRADE_CALLOUT: 'cloudConnectorIacUpgradeCallout',
   IAC_UPDATE_STACK_BUTTON: 'cloudConnectorIacUpdateStackButton',
-  IAC_VERIFY_BUTTON: 'cloudConnectorIacVerifyButton',
+  IAC_REDEPLOY_BUTTON: 'cloudConnectorIacRedeployButton',
   IAC_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacTemplateErrorCallout',
 };
