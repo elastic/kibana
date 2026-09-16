@@ -65,8 +65,9 @@ Others omit the field entirely, and their KIs are visible from every space.
 Because of that split, the space condition belongs in the `filter` parameter of `execute_esql`,
 never in a `WHERE` clause: a `WHERE` on `spaces` would discard every KI from the indices that do
 not define the field. When your instructions include an AI INDICES section, pass its exact `filter`
-verbatim as an `execute_esql` argument on every AI-index query below. It is already resolved to the
-current space.
+verbatim as an `execute_esql` argument on every AI-index query below, including memory queries.
+It is already resolved to include unscoped documents and documents assigned to the current space
+or all spaces.
 
 The filter is a tool argument, not part of the ES|QL text, so the query templates below cannot
 show it. Every call pairs the two like this:

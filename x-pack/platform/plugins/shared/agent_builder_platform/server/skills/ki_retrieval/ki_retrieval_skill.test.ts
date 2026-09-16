@@ -38,6 +38,9 @@ describe('kiRetrievalSkill', () => {
   it('requires the prompt-provided space filter on every AI-index query', () => {
     expect(kiRetrievalSkill.content).toContain('pass its exact `filter`');
     expect(kiRetrievalSkill.content).toContain('on every AI-index query');
+    expect(kiRetrievalSkill.content).toContain('`permissions.kibana.privileges`');
+    expect(kiRetrievalSkill.content).toContain('including memory queries');
+    expect(kiRetrievalSkill.content).not.toContain('`spaces` keyword field');
   });
 
   it('documents memory exclusion and recall', () => {
