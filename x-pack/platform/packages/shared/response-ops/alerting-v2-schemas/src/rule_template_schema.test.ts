@@ -364,6 +364,12 @@ describe('rule template create-rule schema coupling', () => {
                   "minLength": 1,
                   "type": "string",
                 },
+                "signature_id": Object {
+                  "description": "Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.",
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string",
+                },
                 "tags": Object {
                   "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
                   "items": Object {

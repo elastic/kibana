@@ -11,11 +11,12 @@ import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV2 } 
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV3 } from './v3';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV4 } from './v4';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV5 } from './v5';
+import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV6 } from './v6';
 
 export type RuleSavedObjectAttributesV2 = TypeOf<typeof ruleSavedObjectAttributesSchemaV2>;
 
-/** Latest attributes shape, introduced by model version 7. */
-export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV5>;
+/** Latest attributes shape. */
+export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV6>;
 
 export {
   ruleSavedObjectAttributesSchemaV1,
@@ -23,6 +24,7 @@ export {
   ruleSavedObjectAttributesSchemaV3,
   ruleSavedObjectAttributesSchemaV4,
   ruleSavedObjectAttributesSchemaV5,
+  ruleSavedObjectAttributesSchemaV6,
 };
 
 /**
@@ -30,10 +32,9 @@ export {
  *
  * `fromBuilderManifest` uses this to build the forward-compatibility schema for
  * every fold line. Update this alias whenever a new versioned attributes schema
- * is created (e.g. v5 for identity/source/ownership fields), so that all
- * existing and future fold lines pick up the new schema automatically without
- * needing individual call-site updates.
+ * is created, so that all existing and future fold lines pick up the new schema
+ * automatically without needing individual call-site updates.
  *
  * Ref: rule-data-migration.md "Rollback behavior"
  */
-export const currentRuleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV4;
+export const currentRuleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV6;

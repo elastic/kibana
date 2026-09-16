@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
+import { v4 as uuidv4 } from 'uuid';
 import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
@@ -32,7 +33,7 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import { type RuleSavedObjectAttributes, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import {
   ArtifactTypeRegistry,
@@ -94,6 +95,7 @@ import type {
 import { resolveCreateRuleBuilder, resolveUpdateRuleBuilder } from './builder_resolution';
 import {
   assertImmutableUnchanged,
+  assertSignatureIdUnchanged,
   validateMergedRuleAttributes,
   buildUpdateRuleAttributes,
   groupCandidatesByInterval,
@@ -414,6 +416,8 @@ export class RulesClient {
       updatedBy: actor,
       updatedAt: nowIso,
       version,
+      // Resolve signature_id: use the caller-supplied value or generate a UUID v4.
+      signatureId: data.metadata?.signature_id ?? uuidv4(),
     });
 
     return {
@@ -611,6 +615,30 @@ export class RulesClient {
     }
   }
 
+  /**
+   * Verifies that no rule in the current space already carries `signatureId`.
+   * Application-level check — shares the read-then-write race v1 always had
+   * (documented and accepted by the rule-identity design, "Uniqueness" section).
+   * Throws a 409 RULE_ALREADY_EXISTS when a collision is found.
+   */
+  private async assertSignatureIdUniqueInSpace(signatureId: string): Promise<void> {
+    // Construct the SO-path KQL directly; this is an internal check that bypasses
+    // the public find-filter allowlist (allowlist addition is step 4.5).
+    const escapedId = signatureId.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const filter = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.signature_id: "${escapedId}"`;
+    const result = await this.rulesSavedObjectService.find({ page: 1, perPage: 1, filter });
+    if (result.total > 0) {
+      const collidingId = result.saved_objects[0]?.id;
+      throw Boom.conflict(
+        `A rule with metadata.signature_id "${signatureId}" already exists in this space`,
+        {
+          code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
+          details: { signature_id: signatureId, rule_id: collidingId },
+        }
+      );
+    }
+  }
+
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
@@ -625,6 +653,10 @@ export class RulesClient {
       nowIso,
       version: this.getNextVersion(),
     });
+
+    // Space-scoped uniqueness check. Application-level, shares the read-then-write
+    // race v1 has always had (documented and accepted by the design).
+    await this.assertSignatureIdUniqueInSpace(prepared.attrs.metadata.signature_id);
 
     await this.validateSchedule([
       { updatedEvery: prepared.attrs.schedule.every, checkLimit: true },
@@ -664,16 +696,16 @@ export class RulesClient {
     for (const item of parsed.rules) {
       const { id, enabled, ...data } = item;
       try {
-        prepared.push(
-          this.prepareRuleForCreate({
-            data,
-            id,
-            enabled,
-            actor,
-            nowIso,
-            version: ruleVersion,
-          })
-        );
+        const preparedItem = this.prepareRuleForCreate({
+          data,
+          id,
+          enabled,
+          actor,
+          nowIso,
+          version: ruleVersion,
+        });
+        await this.assertSignatureIdUniqueInSpace(preparedItem.attrs.metadata.signature_id);
+        prepared.push(preparedItem);
       } catch (e) {
         if (Boom.isBoom(e)) {
           errors.push(toPerItemBoomError(id ?? SavedObjectsUtils.generateId(), e));
@@ -741,6 +773,9 @@ export class RulesClient {
         details: { rule_id: id, rule_kind: existingAttrs.kind },
       });
     }
+
+    // Immutability check: omitted keeps stored value, equal passes, different rejects.
+    assertSignatureIdUnchanged(parsed.metadata?.signature_id, existingAttrs);
 
     const resolved = resolveUpdateRuleBuilder(this.builderTypeRegistry, id, parsed, existingAttrs);
 
@@ -1806,6 +1841,9 @@ export class RulesClient {
     } = await this.getExistingRule(id);
 
     assertImmutableUnchanged(parsed, existingAttrs);
+    // Separate omitted-means-keep check for the nested signature_id — see the
+    // design doc ("Immutability") for why assertImmutableUnchanged cannot cover it.
+    assertSignatureIdUnchanged(parsed.metadata?.signature_id, existingAttrs);
 
     const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     // PUT replaces the whole resource, so the body alone decides whether the
@@ -1818,6 +1856,8 @@ export class RulesClient {
       updatedBy: actor,
       updatedAt: nowIso,
       version: ruleVersion,
+      // Immutable: always carry the stored value forward on replace.
+      signatureId: existingAttrs.metadata.signature_id!,
     });
 
     await this.validateSchedule([
