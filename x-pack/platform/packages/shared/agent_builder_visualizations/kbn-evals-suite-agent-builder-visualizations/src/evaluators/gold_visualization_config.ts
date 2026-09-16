@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensApiConfigESQL, XYConfigESQL } from '@kbn/lens-embeddable-utils';
+import type { LensApiConfigESQL } from '@kbn/lens-embeddable-utils';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -30,25 +30,11 @@ type VisualizationGoldLensConfig = GoldPartial<LensApiConfigESQL>;
 
 export type VisualizationGoldVegaConfig = GoldPartial<{
   data_source: { type: 'esql'; query: string };
-  spec: {
-    mark: string | { type: string };
-    encoding: {
-      x: { field: string };
-      y: { field: string };
-      size: { field: string };
-      color: { field: string };
-      tooltip: { field: string };
-    };
-  };
+  spec: Record<string, unknown>;
 }>;
 
-/**
- * Partial Lens ES|QL Config API, or a Vega-Lite skeleton (`spec` is an object,
- * not the string on persisted `VegaConfig`).
- */
+/** Partial Lens ES|QL Config API, or a Vega-Lite spec object (not `VegaConfig.spec`'s string). */
 export type VisualizationGoldConfig = VisualizationGoldLensConfig | VisualizationGoldVegaConfig;
-
-export type VisualizationGoldLayer = NonNullable<GoldPartial<XYConfigESQL>['layers']>[number];
 
 export interface VisualizationExampleOutput {
   query?: string;
@@ -73,7 +59,13 @@ export function extractGoldQuery(expected: unknown): string {
 export function extractGoldChartType(expected: unknown): string | string[] | undefined {
   const output = asExampleOutput(expected);
   if (output.config && 'type' in output.config && output.config.type !== undefined) {
-    return asTypeAlternatives(output.config.type);
+    const { type } = output.config;
+    if (typeof type === 'string') {
+      return type;
+    }
+    if (Array.isArray(type) && type.every((value): value is string => typeof value === 'string')) {
+      return type;
+    }
   }
   return output.chartType;
 }
@@ -124,14 +116,4 @@ function readDataSourceQuery(dataSource: unknown): string {
     return '';
   }
   return dataSource.query;
-}
-
-function asTypeAlternatives(type: unknown): string | string[] | undefined {
-  if (typeof type === 'string') {
-    return type;
-  }
-  if (Array.isArray(type) && type.every((value): value is string => typeof value === 'string')) {
-    return type;
-  }
-  return undefined;
 }

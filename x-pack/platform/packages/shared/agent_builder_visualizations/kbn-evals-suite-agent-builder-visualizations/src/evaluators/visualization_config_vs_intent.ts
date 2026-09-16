@@ -11,21 +11,21 @@ import {
   extractGoldQuery,
   hasStructuralGoldConfig,
   type VisualizationGoldConfig,
-  type VisualizationGoldLayer,
 } from './gold_visualization_config';
 import { columnsReferToSameExpression } from './resolve_esql_column';
 
 export const VISUALIZATION_CONFIG_VS_INTENT_EVALUATOR_NAME = 'Visualization Config vs Intent';
 
 const SCATTER_MARKS = new Set(['point', 'circle']);
+const SKIP_KEYS = new Set(['data_source']);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
- * CODE evaluator: subset-matches the example's gold Lens/Vega config against
- * the generated visualization. Scores semantic fields (chart type, layer type,
- * column roles) and ignores titles, styling, and column alias wording.
+ * CODE evaluator: subset-matches gold Config API against the generated
+ * visualization. Extra actual fields, titles, styling, and column alias wording
+ * are ignored. New gold keys are scored automatically.
  */
 export function createVisualizationConfigVsIntentEvaluator<
   TExample extends Example = Example,
@@ -33,13 +33,11 @@ export function createVisualizationConfigVsIntentEvaluator<
 >(config: {
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   expectedConfigExtractor: (expected: TExample['output']) => VisualizationGoldConfig | undefined;
-  expectedQueryExtractor?: (expected: TExample['output']) => string;
   name?: string;
 }): Evaluator<TExample, TTaskOutput> {
   const {
     visualizationExtractor,
     expectedConfigExtractor,
-    expectedQueryExtractor,
     name = VISUALIZATION_CONFIG_VS_INTENT_EVALUATOR_NAME,
   } = config;
 
@@ -76,7 +74,7 @@ export function createVisualizationConfigVsIntentEvaluator<
         };
       }
 
-      const goldQuery = expectedQueryExtractor?.(expected) || extractGoldQuery(expected);
+      const goldQuery = extractGoldQuery(expected);
       const details = visualizations.map((visualization, index) => {
         const { matched, mismatches } = matchGoldConfig(goldConfig, visualization, goldQuery);
         return {
@@ -114,237 +112,32 @@ function matchGoldConfig(
   goldQuery: string
 ): { matched: boolean; mismatches: string[] } {
   const mismatches: string[] = [];
-  const actual = visualization.visualization ?? {};
-  const actualQuery = visualization.esql;
-
-  if ('type' in gold && gold.type !== undefined) {
-    const actualType = typeof actual.type === 'string' ? actual.type : visualization.chartType;
-    if (!matchesAny(actualType, gold.type)) {
-      mismatches.push(
-        `type: expected ${formatExpected(gold.type)}, got ${actualType ?? 'undefined'}`
-      );
-    }
-  }
-
-  if ('layers' in gold && Array.isArray(gold.layers)) {
-    matchLayers(gold.layers, actual.layers, goldQuery, actualQuery, mismatches);
-  }
-
-  matchColumnRole(
-    'metrics',
-    'metrics' in gold ? gold.metrics : undefined,
-    actual.metrics,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-  matchColumnRole(
-    'metric',
-    'metric' in gold ? gold.metric : undefined,
-    actual.metric,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-  matchColumnRole(
-    'group_by',
-    'group_by' in gold ? gold.group_by : undefined,
-    actual.group_by,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-  matchColumnRole(
-    'tag_by',
-    'tag_by' in gold ? gold.tag_by : undefined,
-    actual.tag_by,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-  matchColumnRole(
-    'rows',
-    'rows' in gold ? gold.rows : undefined,
-    actual.rows,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-  matchAxes(gold, actual, goldQuery, actualQuery, mismatches);
-
-  if ('spec' in gold && isRecord(gold.spec)) {
-    matchVegaSpec(gold.spec, actual, goldQuery, actualQuery, mismatches);
-  }
-
+  matchValue(gold, actualConfig(visualization), '', goldQuery, visualization.esql, mismatches);
   return { matched: mismatches.length === 0, mismatches };
 }
 
-function matchLayers(
-  goldLayers: VisualizationGoldLayer[],
-  actualLayers: unknown,
-  goldQuery: string,
-  actualQuery: string,
-  mismatches: string[]
-): void {
-  if (!Array.isArray(actualLayers) || actualLayers.length < goldLayers.length) {
-    mismatches.push(
-      `layers: expected at least ${goldLayers.length}, got ${
-        Array.isArray(actualLayers) ? actualLayers.length : 0
-      }`
-    );
-    return;
+function actualConfig(visualization: ExtractedVisualization): Record<string, unknown> {
+  const actual: Record<string, unknown> = { ...(visualization.visualization ?? {}) };
+  if (typeof actual.type !== 'string' && visualization.chartType) {
+    actual.type = visualization.chartType;
   }
-
-  const used = new Set<number>();
-  goldLayers.forEach((goldLayer, goldIndex) => {
-    const matchIndex = actualLayers.findIndex((candidate, actualIndex) => {
-      if (used.has(actualIndex) || !isRecord(candidate)) {
-        return false;
+  if (typeof actual.spec === 'string') {
+    try {
+      const parsed: unknown = JSON.parse(actual.spec);
+      if (isRecord(parsed)) {
+        actual.spec = parsed;
       }
-      return layerMatches(goldLayer, candidate, goldQuery, actualQuery).length === 0;
-    });
-    if (matchIndex < 0) {
-      const firstActual = actualLayers.find((layer) => isRecord(layer));
-      const sample = isRecord(firstActual)
-        ? layerMatches(goldLayer, firstActual, goldQuery, actualQuery)
-        : ['no actual layer'];
-      mismatches.push(`layers[${goldIndex}]: ${sample.join('; ')}`);
-      return;
+    } catch {
+      // Leave the string; subset matching will fail against an object gold spec.
     }
-    used.add(matchIndex);
-  });
+  }
+  return actual;
 }
 
-function layerMatches(
-  gold: VisualizationGoldLayer,
-  actual: Record<string, unknown>,
-  goldQuery: string,
-  actualQuery: string
-): string[] {
-  const mismatches: string[] = [];
-  if ('type' in gold && gold.type !== undefined) {
-    const actualType = typeof actual.type === 'string' ? actual.type : undefined;
-    if (!matchesAny(actualType, gold.type)) {
-      mismatches.push(
-        `type expected ${formatExpected(gold.type)}, got ${actualType ?? 'undefined'}`
-      );
-    }
-  }
-  matchColumnRole(
-    'x',
-    'x' in gold ? gold.x : undefined,
-    actual.x,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-  matchColumnRole(
-    'y',
-    'y' in gold ? gold.y : undefined,
-    actual.y,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-  matchColumnRole(
-    'breakdown_by',
-    'breakdown_by' in gold ? gold.breakdown_by : undefined,
-    actual.breakdown_by,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-  return mismatches;
-}
-
-function matchAxes(
-  gold: VisualizationGoldConfig,
-  actual: Record<string, unknown>,
-  goldQuery: string,
-  actualQuery: string,
-  mismatches: string[]
-): void {
-  if ('layers' in gold && Array.isArray(gold.layers)) {
-    return;
-  }
-  if ('x' in gold && 'y' in gold && gold.x && gold.y) {
-    const goldAxes = [readColumn(gold.x), readColumn(gold.y)].filter(
-      (column): column is string => typeof column === 'string'
-    );
-    const actualAxes = [readColumn(actual.x), readColumn(actual.y)].filter(
-      (column): column is string => typeof column === 'string'
-    );
-    const missing = findMissingColumns(goldAxes, actualAxes, goldQuery, actualQuery);
-    if (missing.length > 0) {
-      mismatches.push(`axes: missing ${missing.join(', ')}`);
-    }
-    return;
-  }
-  matchColumnRole(
-    'x',
-    'x' in gold ? gold.x : undefined,
-    actual.x,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-  matchColumnRole(
-    'y',
-    'y' in gold ? gold.y : undefined,
-    actual.y,
-    goldQuery,
-    actualQuery,
-    mismatches
-  );
-}
-
-function matchVegaSpec(
-  goldSpec: Record<string, unknown>,
-  actual: Record<string, unknown>,
-  goldQuery: string,
-  actualQuery: string,
-  mismatches: string[]
-): void {
-  const actualSpec = readActualSpec(actual);
-  if (!actualSpec) {
-    mismatches.push('spec: actual visualization is missing a Vega spec');
-    return;
-  }
-
-  const goldMark = readMark(goldSpec);
-  const actualMark = readMark(actualSpec);
-  if (goldMark && !marksEquivalent(goldMark, actualMark)) {
-    mismatches.push(`spec.mark: expected ${goldMark}, got ${actualMark ?? 'undefined'}`);
-  }
-
-  if (!isRecord(goldSpec.encoding)) {
-    return;
-  }
-  if (!isRecord(actualSpec.encoding)) {
-    mismatches.push('spec.encoding: actual spec is missing encoding');
-    return;
-  }
-
-  for (const [channel, goldEncoding] of Object.entries(goldSpec.encoding)) {
-    const goldField = readColumn(goldEncoding);
-    if (!goldField) {
-      continue;
-    }
-    const actualField = readColumn(actualSpec.encoding[channel]);
-    if (!actualField) {
-      mismatches.push(`spec.encoding.${channel}: missing field`);
-      continue;
-    }
-    if (!columnsReferToSameExpression(goldField, goldQuery, actualField, actualQuery)) {
-      mismatches.push(`spec.encoding.${channel}: expected ${goldField}, got ${actualField}`);
-    }
-  }
-}
-
-function matchColumnRole(
-  role: string,
+function matchValue(
   gold: unknown,
   actual: unknown,
+  path: string,
   goldQuery: string,
   actualQuery: string,
   mismatches: string[]
@@ -352,15 +145,177 @@ function matchColumnRole(
   if (gold === undefined) {
     return;
   }
-  const goldColumns = readColumnList(gold);
-  if (goldColumns.length === 0) {
+  if (typeof gold === 'string' || typeof gold === 'number' || typeof gold === 'boolean') {
+    if (gold !== actual && String(gold).toLowerCase() !== String(actual ?? '').toLowerCase()) {
+      mismatches.push(`${path || 'value'}: expected ${String(gold)}, got ${String(actual)}`);
+    }
     return;
   }
-  const actualColumns = readColumnList(actual);
-  const missing = findMissingColumns(goldColumns, actualColumns, goldQuery, actualQuery);
-  if (missing.length > 0) {
-    mismatches.push(`${role}: missing ${missing.join(', ')}`);
+  if (Array.isArray(gold)) {
+    matchArray(gold, actual, path, goldQuery, actualQuery, mismatches);
+    return;
   }
+  if (!isRecord(gold)) {
+    return;
+  }
+  matchObject(gold, actual, path, goldQuery, actualQuery, mismatches);
+}
+
+function matchObject(
+  gold: Record<string, unknown>,
+  actual: unknown,
+  path: string,
+  goldQuery: string,
+  actualQuery: string,
+  mismatches: string[]
+): void {
+  const goldColumn = readColumn(gold);
+  if (goldColumn && isColumnBinding(gold)) {
+    const actualColumn = readColumn(actual);
+    if (!actualColumn) {
+      mismatches.push(`${path}: missing column`);
+      return;
+    }
+    if (!columnsReferToSameExpression(goldColumn, goldQuery, actualColumn, actualQuery)) {
+      mismatches.push(`${path}: expected ${goldColumn}, got ${actualColumn}`);
+    }
+    return;
+  }
+
+  if (!isRecord(actual)) {
+    mismatches.push(`${path || 'config'}: actual is missing`);
+    return;
+  }
+
+  if (hasUnorderedAxes(gold)) {
+    matchUnorderedAxes(gold, actual, path, goldQuery, actualQuery, mismatches);
+  }
+
+  for (const [key, goldChild] of Object.entries(gold)) {
+    if (goldChild === undefined || SKIP_KEYS.has(key)) {
+      continue;
+    }
+    if (hasUnorderedAxes(gold) && (key === 'x' || key === 'y')) {
+      continue;
+    }
+    const childPath = path ? `${path}.${key}` : key;
+    if (key === 'type' || key === 'mark') {
+      matchTypeOrMark(goldChild, actual[key], childPath, mismatches);
+      continue;
+    }
+    matchValue(goldChild, actual[key], childPath, goldQuery, actualQuery, mismatches);
+  }
+}
+
+function hasUnorderedAxes(gold: Record<string, unknown>): boolean {
+  return (
+    gold.layers === undefined &&
+    !Array.isArray(gold.x) &&
+    !Array.isArray(gold.y) &&
+    readColumn(gold.x) !== undefined &&
+    readColumn(gold.y) !== undefined
+  );
+}
+
+function matchUnorderedAxes(
+  gold: Record<string, unknown>,
+  actual: Record<string, unknown>,
+  path: string,
+  goldQuery: string,
+  actualQuery: string,
+  mismatches: string[]
+): void {
+  const goldAxes = [readColumn(gold.x), readColumn(gold.y)].filter(
+    (column): column is string => typeof column === 'string'
+  );
+  if (goldAxes.length === 0) {
+    return;
+  }
+  const actualAxes = [readColumn(actual.x), readColumn(actual.y)].filter(
+    (column): column is string => typeof column === 'string'
+  );
+  const missing = findMissingColumns(goldAxes, actualAxes, goldQuery, actualQuery);
+  if (missing.length > 0) {
+    mismatches.push(`${path ? `${path}.` : ''}axes: missing ${missing.join(', ')}`);
+  }
+}
+
+function matchArray(
+  gold: unknown[],
+  actual: unknown,
+  path: string,
+  goldQuery: string,
+  actualQuery: string,
+  mismatches: string[]
+): void {
+  if (gold.every((item) => typeof item === 'string')) {
+    matchTypeOrMark(gold, actual, path, mismatches);
+    return;
+  }
+  if (!Array.isArray(actual) || actual.length < gold.length) {
+    mismatches.push(
+      `${path}: expected at least ${gold.length}, got ${Array.isArray(actual) ? actual.length : 0}`
+    );
+    return;
+  }
+  const used = new Set<number>();
+  gold.forEach((goldItem, goldIndex) => {
+    const matchIndex = actual.findIndex((candidate, actualIndex) => {
+      if (used.has(actualIndex)) {
+        return false;
+      }
+      const nested: string[] = [];
+      matchValue(goldItem, candidate, `${path}[${goldIndex}]`, goldQuery, actualQuery, nested);
+      return nested.length === 0;
+    });
+    if (matchIndex < 0) {
+      const nested: string[] = [];
+      matchValue(goldItem, actual[0], `${path}[${goldIndex}]`, goldQuery, actualQuery, nested);
+      mismatches.push(
+        nested.length > 0 ? nested.join('; ') : `${path}[${goldIndex}]: no matching item`
+      );
+      return;
+    }
+    used.add(matchIndex);
+  });
+}
+
+function matchTypeOrMark(gold: unknown, actual: unknown, path: string, mismatches: string[]): void {
+  const expected = asTypeAlternatives(gold);
+  if (!expected) {
+    return;
+  }
+  const actualType = readTypeOrMark(actual);
+  if (!matchesAny(actualType, expected)) {
+    mismatches.push(
+      `${path}: expected ${formatExpected(expected)}, got ${actualType ?? 'undefined'}`
+    );
+  }
+}
+
+function readTypeOrMark(value: unknown): string | undefined {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim().toLowerCase();
+  }
+  if (isRecord(value) && typeof value.type === 'string') {
+    return value.type.trim().toLowerCase();
+  }
+  return undefined;
+}
+
+function asTypeAlternatives(value: unknown): string | string[] | undefined {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value) && value.every((item): item is string => typeof item === 'string')) {
+    return value;
+  }
+  return undefined;
+}
+
+function isColumnBinding(value: Record<string, unknown>): boolean {
+  const keys = Object.keys(value);
+  return keys.length > 0 && keys.every((key) => key === 'column' || key === 'field');
 }
 
 function findMissingColumns(
@@ -384,16 +339,6 @@ function findMissingColumns(
   return missing;
 }
 
-function readColumnList(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => readColumn(item))
-      .filter((column): column is string => typeof column === 'string');
-  }
-  const column = readColumn(value);
-  return column ? [column] : [];
-}
-
 function readColumn(value: unknown): string | undefined {
   if (!isRecord(value)) {
     return undefined;
@@ -407,44 +352,6 @@ function readColumn(value: unknown): string | undefined {
   return undefined;
 }
 
-function readActualSpec(
-  visualization: Record<string, unknown>
-): Record<string, unknown> | undefined {
-  const spec = visualization.spec;
-  if (isRecord(spec)) {
-    return spec;
-  }
-  if (typeof spec !== 'string') {
-    return undefined;
-  }
-  try {
-    const parsed: unknown = JSON.parse(spec);
-    return isRecord(parsed) ? parsed : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function readMark(spec: Record<string, unknown>): string | undefined {
-  if (typeof spec.mark === 'string' && spec.mark.trim().length > 0) {
-    return spec.mark.trim().toLowerCase();
-  }
-  if (isRecord(spec.mark) && typeof spec.mark.type === 'string') {
-    return spec.mark.type.trim().toLowerCase();
-  }
-  return undefined;
-}
-
-function marksEquivalent(gold: string, actual: string | undefined): boolean {
-  if (!actual) {
-    return false;
-  }
-  if (gold === actual) {
-    return true;
-  }
-  return SCATTER_MARKS.has(gold) && SCATTER_MARKS.has(actual);
-}
-
 function matchesAny(actual: string | undefined, expected: string | readonly string[]): boolean {
   if (!actual) {
     return false;
@@ -452,7 +359,13 @@ function matchesAny(actual: string | undefined, expected: string | readonly stri
   const expectedValues = (Array.isArray(expected) ? expected : [expected]).map((value) =>
     value.trim().toLowerCase()
   );
-  return expectedValues.includes(actual.trim().toLowerCase());
+  if (expectedValues.includes(actual.trim().toLowerCase())) {
+    return true;
+  }
+  return (
+    SCATTER_MARKS.has(actual.trim().toLowerCase()) &&
+    expectedValues.some((value) => SCATTER_MARKS.has(value))
+  );
 }
 
 function formatExpected(expected: string | readonly string[]): string {

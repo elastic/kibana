@@ -180,7 +180,6 @@ export function createEvaluateDataset({
   >({
     visualizationExtractor,
     expectedConfigExtractor: (expected) => expected?.config,
-    expectedQueryExtractor: (expected) => extractGoldQuery(expected),
   });
 
   const chartCompatibleResultEvaluator = createChartCompatibleResultEvaluator<
