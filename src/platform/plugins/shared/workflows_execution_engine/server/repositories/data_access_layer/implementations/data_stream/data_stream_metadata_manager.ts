@@ -16,6 +16,7 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 export interface DataStreamMetadata {
   retentionTime: string | undefined;
   backingIndexes: string[];
+  writableIndex: string;
 }
 
 export interface DataStreamMetadataManagerDeps {
@@ -42,55 +43,41 @@ const computeRefreshIntervalMs = (retentionTime: string | undefined): number => 
 };
 
 /**
- * One instance per data-stream name. start() loads metadata once; each fetch
- * then schedules the next refresh with setTimeout so getMeta() never waits on ES.
+ * Loads data-stream backing-index metadata on init(); each fetch then schedules
+ * the next refresh with setTimeout so getMeta() never waits on ES.
  */
 export class DataStreamMetadataManager {
-  private static readonly byName = new Map<string, DataStreamMetadataManager>();
-
-  static getOrCreate(deps: DataStreamMetadataManagerDeps): DataStreamMetadataManager {
-    const existing = DataStreamMetadataManager.byName.get(deps.dataStreamName);
-    if (existing) {
-      return existing;
-    }
-
-    const created = new DataStreamMetadataManager(deps);
-    DataStreamMetadataManager.byName.set(deps.dataStreamName, created);
-    return created;
-  }
-
   private metadata: DataStreamMetadata | undefined;
   private refreshTimer: ReturnType<typeof setTimeout> | undefined;
-  private startPromise: Promise<void> | undefined;
-  private stopped = false;
+  private initPromise: Promise<void> | undefined;
+  private disposed = false;
 
-  private constructor(private readonly deps: DataStreamMetadataManagerDeps) {}
+  constructor(private readonly deps: DataStreamMetadataManagerDeps) {}
 
-  async start(): Promise<void> {
-    this.stopped = false;
-    if (!this.startPromise) {
-      this.startPromise = this.loadAndSchedule();
+  async init(): Promise<void> {
+    this.disposed = false;
+    if (!this.initPromise) {
+      this.initPromise = this.loadAndSchedule();
     }
-    return this.startPromise;
+    return this.initPromise;
   }
 
   getMeta(): DataStreamMetadata {
     if (!this.metadata) {
       throw new Error(
-        `Data stream metadata for ${this.deps.dataStreamName} is not loaded. Call start() first.`
+        `Data stream metadata for ${this.deps.dataStreamName} is not loaded. Call init() first.`
       );
     }
     return this.metadata;
   }
 
-  stop(): void {
-    this.stopped = true;
+  dispose(): void {
+    this.disposed = true;
     if (this.refreshTimer !== undefined) {
       clearTimeout(this.refreshTimer);
       this.refreshTimer = undefined;
     }
-    this.startPromise = undefined;
-    DataStreamMetadataManager.byName.delete(this.deps.dataStreamName);
+    this.initPromise = undefined;
   }
 
   private async loadAndSchedule(): Promise<void> {
@@ -112,7 +99,7 @@ export class DataStreamMetadataManager {
   }
 
   private scheduleNextRefresh(): void {
-    if (this.stopped) {
+    if (this.disposed) {
       return;
     }
 
@@ -133,6 +120,11 @@ export class DataStreamMetadataManager {
 
     const retentionTime = dataStream?.lifecycle?.data_retention as string | undefined;
     const backingIndexes = (dataStream?.indices ?? []).map((idx) => idx.index_name);
-    return { retentionTime, backingIndexes };
+    const writableIndex = backingIndexes.at(-1);
+    if (!writableIndex) {
+      throw new Error(`Data stream ${this.deps.dataStreamName} has no backing indexes`);
+    }
+
+    return { retentionTime, backingIndexes, writableIndex };
   }
 }

@@ -67,23 +67,23 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       this.deps.logger
     );
 
-    this.workflowMetadataManager = DataStreamMetadataManager.getOrCreate({
+    this.workflowMetadataManager = new DataStreamMetadataManager({
       esClient: this.esClient,
       dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
       logger: this.deps.logger,
     });
-    this.stepMetadataManager = DataStreamMetadataManager.getOrCreate({
+    this.stepMetadataManager = new DataStreamMetadataManager({
       esClient: this.esClient,
       dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
       logger: this.deps.logger,
     });
 
-    await Promise.all([this.workflowMetadataManager.start(), this.stepMetadataManager.start()]);
+    await Promise.all([this.workflowMetadataManager.init(), this.stepMetadataManager.init()]);
   }
 
   async stop(): Promise<void> {
-    this.workflowMetadataManager.stop();
-    this.stepMetadataManager.stop();
+    this.workflowMetadataManager.dispose();
+    this.stepMetadataManager.dispose();
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
@@ -103,10 +103,6 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   }
 
   createStepDataClient(): StepExecutionsDataClient {
-    if (!this.stepMetadataManager) {
-      throw new Error('initStart must be called before creating data clients');
-    }
-
     return new DataStreamDataClient<EsWorkflowStepExecution>({
       esClient: this.esClient,
       dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
