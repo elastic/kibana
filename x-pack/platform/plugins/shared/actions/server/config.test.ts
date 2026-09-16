@@ -48,6 +48,7 @@ describe('config validation', () => {
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
+          "maxEmitted": 25,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -102,6 +103,7 @@ describe('config validation', () => {
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
+          "maxEmitted": 25,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -265,6 +267,7 @@ describe('config validation', () => {
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
+          "maxEmitted": 25,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -455,6 +458,7 @@ describe('config validation', () => {
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
+          "maxEmitted": 25,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -505,14 +509,30 @@ describe('config validation', () => {
     const empty = configSchema.validate({});
     expect(empty.inboundEvents.enabled).toBe(false);
     expect(empty.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(1024 * 1024);
+    expect(empty.inboundEvents.maxEmitted).toBe(25);
 
     const enabled = configSchema.validate({ inboundEvents: { enabled: true } });
     expect(enabled.inboundEvents.enabled).toBe(true);
     expect(enabled.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(1024 * 1024);
+    expect(enabled.inboundEvents.maxEmitted).toBe(25);
 
     const customSize = configSchema.validate({ inboundEvents: { maxBodyBytes: '512kb' } });
     expect(customSize.inboundEvents.enabled).toBe(false);
     expect(customSize.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(512 * 1024);
+
+    const customMax = configSchema.validate({ inboundEvents: { maxEmitted: 100 } });
+    expect(customMax.inboundEvents.maxEmitted).toBe(100);
+
+    expect(() =>
+      configSchema.validate({ inboundEvents: { maxEmitted: 0 } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[inboundEvents.maxEmitted]: Value must be equal to or greater than [1]."`
+    );
+    expect(() =>
+      configSchema.validate({ inboundEvents: { maxEmitted: 251 } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[inboundEvents.maxEmitted]: Value must be equal to or lower than [250]."`
+    );
   });
 
   describe('email.services.ses', () => {

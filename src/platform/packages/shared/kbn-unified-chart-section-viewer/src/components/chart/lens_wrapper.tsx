@@ -11,6 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ACTION_INSPECT_PANEL, EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { QuickActionIds } from '@kbn/embeddable-plugin/public';
+import { getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
@@ -96,9 +97,17 @@ export function LensWrapper({
     }
   `;
 
+  // ES|QL lives on the text-based datasource layers; the top-level slot only
+  // carries a chart-scoped KQL/Lucene filter (legacy docs may still have an
+  // aggregate copy there, used as fallback).
+  const docQuery = useMemo(
+    () => getRepresentativeQuery(lensProps.attributes) ?? EMPTY_KQL_QUERY,
+    [lensProps.attributes]
+  );
+
   const resolvedQuery = useMemo(
-    () => resolveEsqlVariables(lensProps.attributes.state.query, lensProps.esqlVariables),
-    [lensProps.attributes.state.query, lensProps.esqlVariables]
+    () => resolveEsqlVariables(docQuery, lensProps.esqlVariables),
+    [docQuery, lensProps.esqlVariables]
   );
 
   const handleExploreInDiscoverTab = useCallback(

@@ -17,9 +17,9 @@ const getRuleSignals = (event: SignificantEvent) =>
       ? [
           {
             ruleUuid: signal.metadata.rule_uuid,
-            confirmed: signal.confirmed,
             collected_at: signal.collected_at,
             evidence: signal.evidence,
+            verdict: signal.verdict,
           },
         ]
       : []
@@ -28,6 +28,7 @@ const getRuleSignals = (event: SignificantEvent) =>
 export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
   name: 'confirmation_alignment',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output, expected }) => {
     const expectedByEvent = expected?.expected_confirmed_rule_uuids;
     if (!expectedByEvent || Object.keys(expectedByEvent).length === 0) {
@@ -62,16 +63,17 @@ export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
       // evidence, KI grounding) are outside the expected-membership contract.
       const ruleSignals = getRuleSignals(event);
       const actualRuleUuids = asSet(
-        ruleSignals.filter((signal) => signal.confirmed === true).map((signal) => signal.ruleUuid)
+        ruleSignals
+          .filter((signal) => signal.verdict === 'confirms')
+          .map((signal) => signal.ruleUuid)
       );
       const nonMembersWithoutRejection = ruleSignals
         .filter(
           (signal) =>
             !expectedRuleSet.has(signal.ruleUuid) &&
-            signal.confirmed !== false &&
-            (signal.confirmed !== undefined ||
-              signal.collected_at !== undefined ||
-              signal.evidence !== undefined)
+            (signal.verdict === 'confirms' ||
+              signal.verdict === 'inconclusive' ||
+              signal.verdict === 'not_checked')
         )
         .map((signal) => signal.ruleUuid);
       const isExactMatch =
@@ -89,7 +91,9 @@ export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
             .sort()
             .join(', ')}]${
             nonMembersWithoutRejection.length > 0
-              ? `; expected confirmed:false for [${nonMembersWithoutRejection.sort().join(', ')}]`
+              ? `; expected non-blocking verdict for [${nonMembersWithoutRejection
+                  .sort()
+                  .join(', ')}]`
               : ''
           }`
         );

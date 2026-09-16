@@ -9,8 +9,14 @@
 
 export {
   checkForTripleQuotesAndEsqlQuery,
+  createInsideConsoleStringChecker,
+  endsWithConsoleBodyContinuation,
   findRequestLineNumber,
   getFallbackRequestStartPosition,
+  getLineRemainderWithoutConsoleComments,
+  isEscaped,
+  isInsideConsoleComment,
+  isInsideConsoleString,
   isInsideTripleQuotedJsonValue,
   isRequestLineWithUrl,
   unescapeInvalidChars,

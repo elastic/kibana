@@ -1050,9 +1050,9 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        // After MV_EXPAND, the Cartesian product of 2 actors × 3 targets = 6 records
+        // After MV_EXPAND, the Cartesian product of 2 actors × 3 targets = 6 rows.
         // These are grouped by hash into 2 entity nodes (one for actors, one for targets)
-        // and 1 label node representing all 6 relationships
+        // and 1 label node. Counts are per distinct entity id / document, not per row.
         expect(response.body).to.have.property('nodes');
         expect(response.body).to.have.property('edges');
 
@@ -1147,7 +1147,7 @@ export default function (providerContext: FtrProviderContext) {
           })
         );
 
-        // Verify label node exists for the action with count of 6 (2 actors × 3 targets)
+        // Verify label node exists for the action, counting distinct documents (not MV_EXPAND rows)
         const labelNodes = response.body.nodes.filter(
           (node: LabelNodeDataModel) => node.shape === 'label'
         );
@@ -1159,7 +1159,8 @@ export default function (providerContext: FtrProviderContext) {
         const labelNode = labelNodes[0];
         expect(labelNode).to.have.property('label', 'test.multivalue.action');
         expect(labelNode).to.have.property('color', 'primary');
-        expect(labelNode).to.have.property('count', 6); // 2 actors × 3 targets = 6 relationships
+        // `count` is COUNT_DISTINCT(_id), so the 6 Cartesian rows collapse to the 1 source document
+        expect(labelNode).to.have.property('count', 1);
         expect(labelNode).to.have.property('uniqueEventsCount', 1); // 1 source event
 
         // Verify edges connect actor group -> label -> target group
@@ -2608,6 +2609,93 @@ export default function (providerContext: FtrProviderContext) {
               expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
             });
           });
+
+          it('should dedupe documentsData by entity id and union sourceFields for a multi-value identity event', async () => {
+            // MultiActorMultiTargetEvent123 carries three multi-value identity fields
+            // (user.email, user.id, user.name — 2 values each), so MV_EXPAND expands them
+            // independently into a 2×2×2 Cartesian product of 8 rows spanning only 2 real
+            // entity ids. documentsData must hold one entry per entity id (not 8), and each
+            // entry's sourceFields must union the values seen for that id rather than keeping
+            // one arbitrary row — which would attribute another actor's values to this entity.
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                    originEventIds: [{ id: 'multi-actor-multi-target-event', isAlert: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              const actorNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.tag === 'Identity'
+              ) as EntityNodeDataModel;
+              expect(actorNode).not.to.be(undefined);
+
+              // 2 real entities, so count is 2 and documentsData must match it (not the 8 rows).
+              expect(actorNode.count).to.equal(2);
+              expect(actorNode.documentsData).to.have.length(2);
+
+              const actorDocs = actorNode.documentsData!;
+              expect(actorDocs.map((doc) => doc.id).sort()).to.eql([
+                'user:multi-actor-1@example.com@gcp',
+                'user:multi-actor-2@example.com@gcp',
+              ]);
+
+              // user.email composed the EUID, so it is functionally determined by the entity id:
+              // it stays a single value and differs per entity. user.id / user.name were expanded
+              // independently of the EUID, so every value appears under both entities.
+              actorDocs.forEach((doc) => {
+                const sourceFields = doc.entity?.sourceFields as
+                  | Record<string, string | string[]>
+                  | undefined;
+                expect(sourceFields).not.to.be(undefined);
+                expect(sourceFields!['user.email']).to.equal(
+                  doc.id === 'user:multi-actor-1@example.com@gcp'
+                    ? 'multi-actor-1@example.com'
+                    : 'multi-actor-2@example.com'
+                );
+                expect(([] as string[]).concat(sourceFields!['user.id']).sort()).to.eql([
+                  'multi-actor-1@example.com',
+                  'multi-actor-2@example.com',
+                ]);
+                expect(([] as string[]).concat(sourceFields!['user.name']).sort()).to.eql([
+                  'Multi Actor 1',
+                  'Multi Actor 2',
+                ]);
+                // Enrichment still supplies entity metadata alongside the event sourceFields.
+                expect(doc.entity?.availableInEntityStore).to.be(true);
+                expect(doc.entity?.type).to.equal('Identity');
+                expect(doc.entity?.sub_type).to.equal('GCP IAM User');
+              });
+
+              // The two storage buckets come from a single-field identity (entity.target.id), so
+              // each keeps its own scalar value — no cross-product to union.
+              const storageNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.tag === 'Storage'
+              ) as EntityNodeDataModel;
+              expect(storageNode).not.to.be(undefined);
+              expect(storageNode.count).to.equal(2);
+              expect(storageNode.documentsData).to.have.length(2);
+              storageNode.documentsData!.forEach((doc) => {
+                const sourceFields = doc.entity?.sourceFields as Record<string, string> | undefined;
+                expect(sourceFields!['entity.id']).to.equal(doc.id);
+              });
+
+              // The label node counts distinct documents, not MV_EXPAND rows.
+              const labelNode = response.body.nodes.find(
+                (node: LabelNodeDataModel) => node.shape === 'label'
+              ) as LabelNodeDataModel;
+              expect(labelNode).not.to.be(undefined);
+              expect(labelNode.count).to.equal(1);
+              expect(labelNode.uniqueEventsCount).to.equal(1);
+            });
+          });
         };
 
         before(async () => {
@@ -2677,7 +2765,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: getEntitiesLatestIndexName(entitiesSpaceId),
-              expectedCount: 53,
+              expectedCount: 58,
             });
           });
 

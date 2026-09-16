@@ -44,6 +44,7 @@ export default function () {
         `--data.search.aggs.shardDelay.enabled=true`,
         `--data.query.timefilter.minRefreshInterval=1000`,
         `--security.showInsecureClusterWarning=false`,
+        '--xpack.spaces.initialSolutionSetup.enabled=false',
         '--telemetry.banner=false',
         '--telemetry.optIn=false',
         // These are *very* important to have them pointing to staging

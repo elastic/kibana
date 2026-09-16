@@ -10,22 +10,22 @@ import { groupingCorrectnessEvaluator } from './grouping_correctness';
 
 // Only `rule_uuid` matters to this evaluator (grouping is judged by rule_uuid membership per
 // event) — cast past the full shape rather than filling in unused required fields.
+const buildSignal = (rule_uuid: string): SignalEntry => ({
+  type: 'detection',
+  stream_name: 'logs',
+  verdict: 'confirms',
+  description: 'Found: checkout timeout to payment API. Impact: checkout degraded.',
+  metadata: {
+    rule_uuid,
+    detection_id: 'detection-1',
+    change_point_type: 'spike',
+    p_value: 0.01,
+  },
+});
+
 const buildEvent = (...ruleUuids: string[]): Partial<SignificantEvent> => ({
   status: 'open',
-  signals: ruleUuids.map(
-    (rule_uuid): SignalEntry => ({
-      type: 'detection',
-      stream_name: 'logs',
-      confirmed: true,
-      description: 'Testing: something.',
-      metadata: {
-        rule_uuid,
-        detection_id: 'detection-1',
-        change_point_type: 'spike',
-        p_value: 0.01,
-      },
-    })
-  ),
+  signals: ruleUuids.map((rule_uuid) => buildSignal(rule_uuid)),
 });
 
 // The expected grouping is derived from `expected_significant_events`, so build them from the gold groups.

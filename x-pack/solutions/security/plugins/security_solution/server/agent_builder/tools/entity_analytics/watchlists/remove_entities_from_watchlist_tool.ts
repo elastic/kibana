@@ -60,6 +60,13 @@ Use when the user asks to remove entities from a named or known watchlist (e.g. 
 This tool only removes entities that were **manually assigned** to the watchlist. Entities that came in via an entity source are reported as \`not_found\` in the result with the message "Entity not manually assigned to this watchlist" — to remove those, the user must reconfigure or remove the entity source in the UI.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Remove Entities from Watchlist',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

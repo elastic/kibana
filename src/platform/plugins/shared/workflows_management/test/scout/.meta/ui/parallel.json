@@ -1,14 +1,13 @@
 {
-  "sha1": "3677d2a248d9347f2f3bf6cede9842731bc68847",
+  "sha1": "e09be949b80cd18625ab3e1875c06f98199d1b0f",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
       "id": "d375cae3da58c8f-65fd9c357892a20",
       "title": "InternalActions/Cases should run create_get_update_case workflow successfully",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -20,7 +19,7 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/internal_actions/create_get_update_case.spec.ts",
         "line": 48,
-        "column": 58
+        "column": 13
       }
     },
     {
@@ -35,6 +34,24 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/internal_actions/national_parks.spec.ts",
         "line": 56,
         "column": 13
+      }
+    },
+    {
+      "id": "19444d1b23e18a3-5e19e05711f14c3",
+      "title": "Workflow editor actions menu on the executions tab shows the actions menu only while the workflow is editable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/actions_menu_executions.spec.ts",
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -587,7 +604,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 143,
+        "line": 141,
         "column": 51
       }
     },
@@ -605,8 +622,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 157,
-        "column": 31
+        "line": 154,
+        "column": 87
       }
     },
     {

@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { AgentName, AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -22,6 +23,7 @@ import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_ca
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
 import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
+import { SERVICE_HEADER_EBT_ELEMENTS } from '../../../app/ebt_constants';
 
 interface ServiceHeaderStatusProps {
   start: string;
@@ -216,6 +218,10 @@ export function ServiceHeaderBadges(props: ServiceHeaderStatusProps) {
               color="danger"
               iconType="warning"
               href={data.alertsTabHref}
+              {...getEbtProps({
+                action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+                element: SERVICE_HEADER_EBT_ELEMENTS.ALERTS_BADGE,
+              })}
             >
               {data.alertsCount}
             </EuiBadge>
@@ -233,6 +239,10 @@ export function ServiceHeaderBadges(props: ServiceHeaderStatusProps) {
             sloCount={data.sloCount}
             serviceName={data.serviceName}
             onClick={data.onSloClick}
+            ebt={{
+              action: EBT_CLICK_ACTIONS.VIEW_SLOS,
+              element: SERVICE_HEADER_EBT_ELEMENTS.SLO_BADGE,
+            }}
           />
         ),
       });
@@ -246,6 +256,10 @@ export function ServiceHeaderBadges(props: ServiceHeaderStatusProps) {
             <AnomaliesBadge
               score={data.anomalyScore}
               detectorType={data.anomalyDetectorType}
+              ebt={{
+                action: EBT_CLICK_ACTIONS.VIEW_ANOMALIES,
+                element: SERVICE_HEADER_EBT_ELEMENTS.ANOMALIES_BADGE,
+              }}
               navigationProps={
                 data.agentName &&
                 data.anomalyEnvironment &&

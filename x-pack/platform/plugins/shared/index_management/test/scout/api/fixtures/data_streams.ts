@@ -15,7 +15,8 @@ export const createDataStream = async (esClient: EsClient, name: string, indexMo
     index_patterns: [`${name}*`],
     template: {
       mappings: { properties: { '@timestamp': { type: 'date' } } },
-      settings: { index: { mode: indexMode } },
+      // Pin replicas to 0 so the single backing shard is always allocated (green) regardless of node count.
+      settings: { index: { mode: indexMode, number_of_replicas: 0 } },
       lifecycle: { enabled: true },
     },
     data_stream: {},
@@ -62,12 +63,14 @@ export const expectedDataStream = ({
   uuid,
   health,
   lifecycle,
+  indexMode = 'standard',
 }: {
   name: string;
   indexName: string;
   uuid: string;
   health: string;
   lifecycle: object;
+  indexMode?: string;
 }) => ({
   name,
   lifecycle,
@@ -87,7 +90,7 @@ export const expectedDataStream = ({
   failureStoreEnabled: false,
   matchesFailureStoreClusterPattern: false,
   failureStoreRetention: { defaultRetentionPeriod: '30d', retentionDisabled: false },
-  indexMode: 'standard',
+  indexMode,
 });
 
 // The delete route only removes the data stream, so the template goes separately.

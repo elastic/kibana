@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { searchKnowledgeIndicators } from '@kbn/streams-ai';
+import { searchKnowledgeIndicators } from '@kbn/nightshift-ai';
 import type {
   KnowledgeIndicator,
   KnowledgeIndicatorFeature,
   KnowledgeIndicatorQuery,
   SearchKnowledgeIndicatorsInput,
-} from '@kbn/streams-ai';
+} from '@kbn/nightshift-ai';
 import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
 import {
   COMPUTED_FEATURE_TYPES,

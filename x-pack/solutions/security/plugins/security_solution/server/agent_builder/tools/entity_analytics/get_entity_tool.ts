@@ -10,7 +10,7 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
-import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
+import { resolveHistorySnapshotIndexPatterns } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
@@ -384,8 +384,9 @@ const enrichEntityResult = async ({
   // date takes full priority: skip risk inputs and return the profile for the matching calendar day
   if (date != null) {
     const { start, end } = dateToUtcDayRange(date);
-    const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
-      spaceId
+    const historyPatterns = await resolveHistorySnapshotIndexPatterns(esClient, spaceId);
+    const snapshotQuery = `FROM ${historyPatterns.join(
+      ','
     )} | WHERE entity.id == "${escapedRowEntityId}" AND @timestamp >= "${start}" AND @timestamp <= "${end}" | LIMIT 1`;
     const snapshotResponse = await executeEsql({ query: snapshotQuery, esClient });
     const profileHistory = snapshotResponse.values.map((r) =>
@@ -447,8 +448,9 @@ const enrichEntityResult = async ({
   }
 
   if (interval) {
-    const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
-      spaceId
+    const historyPatterns = await resolveHistorySnapshotIndexPatterns(esClient, spaceId);
+    const snapshotQuery = `FROM ${historyPatterns.join(
+      ','
     )} | WHERE entity.id == "${escapedRowEntityId}" AND @timestamp >= ${intervalToEsql(
       interval
     )} | SORT @timestamp DESC | LIMIT 100`;
@@ -481,6 +483,13 @@ export const getEntityTool = (
 When exactly one entity is resolved, this tool also stores a \`security.entity\` attachment (creating new or updating existing) and its \`other\` result includes a pre-formatted \`renderTag\` string. To show the rich entity card inline, copy that \`renderTag\` string verbatim onto its own line in your reply BEFORE your prose summary. Do NOT assemble the tag yourself from \`attachmentId\` and \`version\`, and do NOT substitute the id with anything derived from the user's prompt. When the query resolves multiple candidates (fallback match) no attachment is stored, no \`renderTag\` is returned, and you must not emit a render tag in that case.`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics'],
+    annotations: {
+      title: 'Get Entity',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) =>

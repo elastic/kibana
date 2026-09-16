@@ -83,14 +83,14 @@
     ]
   },
   {
-    "id": "cloud-services",
-    "name": "Cloud Services",
+    "id": "siem-conduit",
+    "name": "SIEM Conduit",
     "areas": [
       "security"
     ],
     "github": {
-      "team": "elastic/cloud-services",
-      "label": "Team:Security-Cloud Services"
+      "team": "elastic/siem-conduit",
+      "label": "Team:security-siem-conduit"
     }
   },
   {
@@ -215,9 +215,7 @@
   {
     "id": "kibana-cloud-security-posture",
     "name": "Contextual Security Apps Team",
-    "areas": [
-      "security"
-    ],
+    "areas": [],
     "github": {
       "team": "elastic/kibana-cloud-security-posture",
       "label": "Team:Cloud Security"
@@ -250,6 +248,23 @@
       "Telemetry",
       "User-specific settings",
       "Migrations"
+    ]
+  },
+  {
+    "id": "discover",
+    "name": "Discover",
+    "areas": [
+      "platform"
+    ],
+    "github": {
+      "team": "elastic/kibana-discover",
+      "label": "Team:Discover"
+    },
+    "responsibilities": [
+      "Discover",
+      "ES|QL editor",
+      "Data plugin",
+      "Data view plugin"
     ]
   },
   {
@@ -352,6 +367,27 @@
     "github": {
       "team": "elastic/kibana-performance-testing"
     }
+  },
+  {
+    "id": "dashboards",
+    "name": "Dashboards",
+    "areas": [
+      "platform"
+    ],
+    "github": {
+      "team": "elastic/kibana-dashboards",
+      "label": "Team:Dashboards"
+    },
+    "responsibilities": [
+      "Dashboards app",
+      "Visualizations (Lens, Timelion, TSVB, Vega, Maps, Graph)",
+      "Markdown embeddable",
+      "Links embeddable",
+      "Embeddable framework",
+      "Unified Search",
+      "Input Controls",
+      "Canvas application"
+    ]
   },
   {
     "id": "presentation",
@@ -478,6 +514,15 @@
       "Observability observed asset model",
       "Evals"
     ]
+  },
+  {
+    "id": "nightshift-investigations",
+    "name": "Nightshift Investigations",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift-investigations-team",
+      "label": "Team:nightshift-investigations"
+    }
   },
   {
     "id": "nightshift-sre-agent",
@@ -608,16 +653,6 @@
     ]
   },
   {
-    "id": "obs-sig-events-team",
-    "name": "Obs Sig Events Team",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-sig-events-team"
-    }
-  },
-  {
     "id": "obs-ux-management-team",
     "name": "Obs Ux Management Team",
     "areas": [
@@ -745,13 +780,13 @@
     }
   },
   {
-    "id": "security-data-analytics",
-    "name": "Security Data Analytics",
+    "id": "security-data-engineering",
+    "name": "Security Data Engineering",
     "areas": [
       "security"
     ],
     "github": {
-      "team": "elastic/security-data-analytics",
+      "team": "elastic/security-data-engineering",
       "label": "Team: SecuritySolution"
     },
     "responsibilities": [

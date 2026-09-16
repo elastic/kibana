@@ -7,7 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { MONITORING_ENTITY_SOURCE_URL } from '../../../../../../common/constants';
+import { createMockConfig } from '../../../../../config.mock';
 import {
   serverMock,
   requestContextMock,
@@ -61,7 +63,12 @@ describe('POST /api/entity_analytics/monitoring/entity_source - createMonitoring
 
     context = requestContextMock.convertContext(ctx);
 
-    createMonitoringEntitySourceRoute(server.router, logger);
+    createMonitoringEntitySourceRoute(
+      server.router,
+      logger,
+      createMockConfig(),
+      docLinksServiceMock.createSetupContract()
+    );
   });
 
   afterEach(() => {

@@ -34,9 +34,23 @@ jest.mock('../../../../hooks/use_kibana', () => ({
         clearFocusedEvent: jest.fn(),
       },
     },
-    core: { notifications: { toasts: { addSuccess: jest.fn() } } },
+    core: {
+      notifications: { toasts: { addSuccess: jest.fn() } },
+      application: {
+        capabilities: {
+          nightshift: {
+            manage: true,
+          },
+        },
+      },
+    },
     dependencies: {
       start: {
+        share: {
+          url: {
+            locators: { get: jest.fn(() => ({ getRedirectUrl: jest.fn(() => undefined) })) },
+          },
+        },
         significantEvents: {
           significantEventsRepositoryClient: { fetch: jest.fn() },
         },
@@ -85,8 +99,8 @@ jest.mock('../../../../hooks/use_timefilter', () => ({
 jest.mock('../../../../hooks/use_time_range_update', () => ({
   useTimeRangeUpdate: jest.fn(() => ({ updateTimeRange: mockUpdateTimeRange })),
 }));
-jest.mock('../knowledge_indicators_table/ki_generation_context', () => ({
-  useKiGeneration: jest.fn(() => ({ filteredStreams: [] })),
+jest.mock('../../hooks/use_fetch_streams', () => ({
+  useFetchStreams: jest.fn(() => ({ data: { streams: [] } })),
 }));
 jest.mock('../../context/significant_events_page_context', () => ({
   useSignificantEventsPageContext: jest.fn(() => ({
