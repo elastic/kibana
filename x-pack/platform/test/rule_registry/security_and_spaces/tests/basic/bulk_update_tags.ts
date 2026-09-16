@@ -113,9 +113,17 @@ export default ({ getService }: FtrProviderContext) => {
           expectedStatusCode: 207,
         });
 
+        const kqlQuery = buildEsQuery(undefined, { query, language: 'kuery' }, []);
+        const verifyQuery = spaceId
+          ? {
+              bool: {
+                filter: [kqlQuery, { terms: { 'kibana.space_ids': [spaceId, '*'] } }],
+              },
+            }
+          : kqlQuery;
         const res = await esClient.search<{ 'kibana.alert.workflow_tags': string[] }>({
           index,
-          query: buildEsQuery(undefined, { query, language: 'kuery' }, []),
+          query: verifyQuery,
         });
 
         for (const hit of res.hits.hits) {
@@ -137,9 +145,17 @@ export default ({ getService }: FtrProviderContext) => {
           expectedStatusCode: 207,
         });
 
+        const kqlQuery2 = buildEsQuery(undefined, { query, language: 'kuery' }, []);
+        const verifyQuery2 = spaceId
+          ? {
+              bool: {
+                filter: [kqlQuery2, { terms: { 'kibana.space_ids': [spaceId, '*'] } }],
+              },
+            }
+          : kqlQuery2;
         const res = await esClient.search<{ 'kibana.alert.workflow_tags': string[] }>({
           index,
-          query: buildEsQuery(undefined, { query, language: 'kuery' }, []),
+          query: verifyQuery2,
         });
 
         for (const hit of res.hits.hits) {
