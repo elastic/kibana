@@ -46,6 +46,7 @@ import type {
   CloudProvider,
   CloudConnectorVars,
   AccountType,
+  IacUpgradeStatus,
   VerificationStatus,
 } from '../../common/types/models/cloud_connector';
 import type {
@@ -370,6 +371,12 @@ export interface CloudConnectorSOAttributes {
   verification_status?: VerificationStatus;
   verification_started_at?: string;
   verification_failed_at?: string;
+  iac_key?: string | null;
+  iac_blueprint_id?: string | null;
+  iac_blueprint_version?: string | null;
+  iac_deployment_id?: string;
+  iac_upgrade_status?: IacUpgradeStatus;
+  iac_upgrade_checked_at?: string;
 }
 
 export interface CloudOnboardingDeploymentSOAttributes {
