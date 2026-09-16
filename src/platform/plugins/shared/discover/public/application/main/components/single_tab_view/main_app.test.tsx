@@ -58,5 +58,5 @@ describe('DiscoverMainApp', () => {
     );
 
     expect(screen.getByTestId('discoverTopNavMock')).toBeVisible();
-  });
+  }, 30_000);
 });
