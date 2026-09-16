@@ -7,6 +7,7 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getPalettes } from '@kbn/palettes';
+import { isPlainObject } from 'lodash';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './types';
 
@@ -57,11 +58,26 @@ const getCategoricalPalettePreviews = (): string[] =>
     })
   );
 
+/** Band count of every stepped color config in an existing visualization, wherever it sits. */
+const getExistingStepCounts = (value: unknown): number[] => {
+  if (Array.isArray(value)) {
+    return value.flatMap(getExistingStepCounts);
+  }
+  if (!isPlainObject(value)) {
+    return [];
+  }
+  return Object.entries(value as Record<string, unknown>).flatMap(([key, child]) =>
+    key === 'steps' && Array.isArray(child) && child.length
+      ? [child.length]
+      : getExistingStepCounts(child)
+  );
+};
+
 /**
  * Color mechanics for charts that support dynamic or categorical coloring:
  * when to emit explicit steps or mappings, how to express them, and the
- * palette previews sized to the chart's band count (plus the band count of an
- * existing gauge being edited). Charts without such support get nothing.
+ * palette previews sized to the chart's band count (plus the band counts of
+ * an existing config being edited). Charts without such support get nothing.
  * Their chart rules hold their whole color policy.
  */
 export const getColorConfigPromptContent = (
@@ -77,11 +93,7 @@ export const getColorConfigPromptContent = (
   }
 
   const stepsCount = coloring?.dynamic?.recommendedStepCount ?? CATALOG_PREVIEW_STEPS;
-  const existingGaugeColor =
-    existingConfig?.type === SupportedChartType.Gauge ? existingConfig.metric.color : undefined;
-  const existingStepsCount =
-    existingGaugeColor && 'steps' in existingGaugeColor ? existingGaugeColor.steps.length : 0;
-  const previewStepCounts = [...new Set([stepsCount, existingStepsCount].filter(Boolean))];
+  const previewStepCounts = [...new Set([stepsCount, ...getExistingStepCounts(existingConfig)])];
 
   const lines: string[] = [
     'COLOR MECHANICS:',
@@ -98,7 +110,9 @@ export const getColorConfigPromptContent = (
     const bandCount =
       chartType === SupportedChartType.Gauge
         ? 'the band count from the gauge rules above'
-        : `exactly ${stepsCount} step${stepsCount === 1 ? '' : 's'}`;
+        : `exactly ${stepsCount} step${
+            stepsCount === 1 ? '' : 's'
+          } for a new color config, or the existing step count when editing one`;
     lines.push(
       `- For explicit \`steps\`, pick exactly ONE palette from the previews below: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, "Cool"/"Warm"/"Gray" for neutral magnitude. Use ${bandCount}, with every \`steps[*].color\` hex copied from that palette's preview line for that count.`,
       "- Step thresholds are data values in the metric column's unit and scale, not display labels. For rates, do not assume per-second thresholds unless the ES|QL query computes per-second values. Keep palette order. To reverse it, reverse the `steps` colors yourself, since there is no `reverse` field."
