@@ -52,6 +52,7 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/unified-search-plugin'
 tags:
   - plugin

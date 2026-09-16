@@ -6,213 +6,89 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { forwardRef, useImperativeHandle } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
+import { InvestigationSection } from './investigation_section';
 
-import { InvestigationListItem } from './investigation_list_item';
-
-export const INVESTIGATION_LIST_PAGE_SIZE = 20;
+export interface InvestigationListHandle {
+  scrollToSeverity: (severity: Severity) => void;
+}
 
 export interface InvestigationListProps {
-  investigations: ListInvestigationItem[];
-  total: number;
-  page: number;
-  onPageChange: (page: number) => void;
-  isInitialLoading?: boolean;
+  sections: InvestigationSectionState[];
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: ListInvestigationItem) => void;
 }
 
-export function InvestigationList({
-  investigations,
-  total,
-  page,
-  onPageChange,
-  isInitialLoading = false,
-  selectedInvestigationId,
-  onInvestigationClick,
-}: InvestigationListProps): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
+const isVisibleSection = (section: InvestigationSectionState): boolean =>
+  section.isInitialLoading ||
+  section.error != null ||
+  section.total > 0 ||
+  section.investigations.length > 0;
 
-  const roundedPanelCss = css`
-    box-sizing: border-box;
-    overflow: hidden;
-    border-radius: ${euiTheme.size.s};
-  `;
+export const InvestigationList = forwardRef<InvestigationListHandle, InvestigationListProps>(
+  function InvestigationList(
+    { sections, selectedInvestigationId, onInvestigationClick },
+    ref
+  ): React.ReactElement {
+    const { euiTheme } = useEuiTheme();
+    const visibleSections = sections.filter(isVisibleSection);
 
-  const shown = (page - 1) * INVESTIGATION_LIST_PAGE_SIZE + investigations.length;
-  const hasMore = shown < total;
-  const hasPrev = page > 1;
-  const heading = (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle
-            size="xs"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-            `}
-          >
-            <h2>
-              {i18n.translate('xpack.nightshift.investigations.listTitle', {
-                defaultMessage: 'Investigations',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        {!isInitialLoading && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge data-test-subj="nightshiftInvestigationsCount">{total}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-    </>
-  );
+    useImperativeHandle(ref, () => ({
+      scrollToSeverity: (severity: Severity) => {
+        document.getElementById(`nightshiftInvestigationSection-${severity}`)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      },
+    }));
 
-  if (isInitialLoading) {
-    return (
-      <>
-        {heading}
-        <EuiPanel hasBorder hasShadow={false} paddingSize="l" css={roundedPanelCss}>
-          <div aria-hidden data-test-subj="nightshiftInvestigationListSkeleton">
-            <EuiSkeletonText lines={3} />
-          </div>
-        </EuiPanel>
-      </>
-    );
-  }
-
-  if (investigations.length === 0) {
-    return (
-      <>
-        {heading}
-        <EuiPanel hasBorder hasShadow={false} paddingSize="l" color="subdued" css={roundedPanelCss}>
-          <EuiText textAlign="center" color="subdued" size="s">
-            <p>
-              {i18n.translate('xpack.nightshift.investigations.emptyDescription', {
-                defaultMessage: 'No investigations found',
-              })}
-            </p>
-          </EuiText>
-        </EuiPanel>
-        {hasPrev && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup justifyContent="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="nightshiftInvestigationsPrevPageButton"
-                  iconType="arrowLeft"
-                  size="s"
-                  onClick={() => onPageChange(page - 1)}
-                >
-                  {i18n.translate('xpack.nightshift.investigations.prevPageButton', {
-                    defaultMessage: 'Previous',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
-      </>
-    );
-  }
-
-  return (
-    <>
-      {heading}
-      <EuiPanel hasBorder hasShadow={false} paddingSize="none" css={roundedPanelCss}>
-        <ol
+    if (visibleSections.length === 0) {
+      return (
+        <EuiPanel
+          hasBorder
+          hasShadow={false}
+          paddingSize="l"
+          color="subdued"
+          data-test-subj="nightshiftInvestigationsEmpty"
           css={css`
-            list-style: none;
-            margin: 0;
-            padding: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+            border-radius: ${euiTheme.size.s};
           `}
         >
-          {investigations.map((investigation, index) => (
-            <li
-              key={investigation.investigation_id}
-              css={
-                index < investigations.length - 1
-                  ? css`
-                      border-bottom: ${euiTheme.border.thin};
-                    `
-                  : undefined
-              }
-            >
-              <InvestigationListItem
-                investigation={investigation}
-                isSelected={investigation.investigation_id === selectedInvestigationId}
-                onClick={onInvestigationClick}
-              />
-            </li>
-          ))}
-        </ol>
-      </EuiPanel>
+          <EuiText textAlign="center" color="subdued" size="s">
+            {i18n.translate('xpack.nightshift.investigations.emptyDescription', {
+              defaultMessage: 'No investigations found',
+            })}
+          </EuiText>
+        </EuiPanel>
+      );
+    }
 
-      {(hasMore || hasPrev) && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="center"
-            gutterSize="s"
-            responsive={false}
-          >
-            {hasPrev && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="nightshiftInvestigationsPrevPageButton"
-                  iconType="arrowLeft"
-                  size="s"
-                  onClick={() => onPageChange(page - 1)}
-                >
-                  {i18n.translate('xpack.nightshift.investigations.prevPageButton', {
-                    defaultMessage: 'Previous',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="xs">
-                {i18n.translate('xpack.nightshift.investigations.showingCount', {
-                  defaultMessage: 'Showing {shown} of {total}',
-                  values: { shown, total },
-                })}
-              </EuiText>
-            </EuiFlexItem>
-            {hasMore && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="nightshiftInvestigationsNextPageButton"
-                  iconType="arrowRight"
-                  iconSide="right"
-                  size="s"
-                  onClick={() => onPageChange(page + 1)}
-                >
-                  {i18n.translate('xpack.nightshift.investigations.nextPageButton', {
-                    defaultMessage: 'Next',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </>
-      )}
-    </>
-  );
-}
+    return (
+      <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+        {visibleSections.map((section) => (
+          <EuiFlexItem key={section.id} grow={false}>
+            <InvestigationSection
+              id={section.id}
+              investigations={section.investigations}
+              total={section.total}
+              hasMore={section.hasMore}
+              isInitialLoading={section.isInitialLoading}
+              isLoadingMore={section.isFetchingNextPage}
+              error={section.error}
+              onShowMore={section.fetchNextPage}
+              onRetry={section.refetch}
+              selectedInvestigationId={selectedInvestigationId}
+              onInvestigationClick={onInvestigationClick}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+);

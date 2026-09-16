@@ -7,26 +7,26 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
-
-const SEVERITY_DOT_COLOR_KEY: Record<Severity, 'danger' | 'warning' | 'primary' | 'success'> = {
-  '80-critical': 'danger',
-  '60-high': 'warning',
-  '40-medium': 'primary',
-  '20-low': 'success',
-};
+import { SEVERITY_DOT_COLOR_KEY } from '../common/severity';
 
 export interface InvestigationSeverityTilesProps {
   severityCounts: SeverityCounts;
-  activeSeverity?: Severity;
   onSeverityClick: (severity: Severity) => void;
 }
 
 export function InvestigationSeverityTiles({
   severityCounts,
-  activeSeverity,
   onSeverityClick,
 }: InvestigationSeverityTilesProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -34,9 +34,9 @@ export function InvestigationSeverityTiles({
   return (
     <EuiFlexGroup gutterSize="s" responsive={false}>
       {SEVERITY_OPTIONS.map((severity) => {
-        const isActive = severity === activeSeverity;
-        const dotColor = euiTheme.colors[SEVERITY_DOT_COLOR_KEY[severity]];
         const count = severityCounts[severity];
+        // Nothing to scroll to when a tier is empty, since its section is hidden.
+        const isMuted = count === 0;
 
         return (
           <EuiFlexItem key={severity}>
@@ -44,28 +44,35 @@ export function InvestigationSeverityTiles({
               hasBorder
               hasShadow={false}
               paddingSize="m"
-              role="button"
-              tabIndex={0}
-              aria-pressed={isActive}
+              role={isMuted ? undefined : 'button'}
+              tabIndex={isMuted ? undefined : 0}
               data-test-subj={`nightshiftSeverityTile-${severity}`}
-              onClick={() => onSeverityClick(severity)}
-              onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onSeverityClick(severity);
-                }
-              }}
-              css={css`
-                cursor: pointer;
-                outline: ${isActive
-                  ? `2px solid ${euiTheme.colors.primary}`
-                  : '2px solid transparent'};
-                transition: outline 150ms ease;
-                &:hover,
-                &:focus-visible {
-                  outline: 2px solid ${euiTheme.colors.primary};
-                }
-              `}
+              onClick={isMuted ? undefined : () => onSeverityClick(severity)}
+              onKeyDown={
+                isMuted
+                  ? undefined
+                  : (e: React.KeyboardEvent<HTMLDivElement>) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSeverityClick(severity);
+                      }
+                    }
+              }
+              css={
+                isMuted
+                  ? css`
+                      opacity: 0.5;
+                    `
+                  : css`
+                      cursor: pointer;
+                      outline: 2px solid transparent;
+                      transition: outline 150ms ease;
+                      &:hover,
+                      &:focus-visible {
+                        outline: 2px solid ${euiTheme.colors.primary};
+                      }
+                    `
+              }
             >
               <EuiText
                 color="subdued"
@@ -79,16 +86,7 @@ export function InvestigationSeverityTiles({
               </EuiText>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <span
-                    aria-hidden={true}
-                    css={css`
-                      color: ${dotColor};
-                      font-size: ${euiTheme.size.m};
-                      line-height: 1;
-                    `}
-                  >
-                    ●
-                  </span>
+                  <EuiIcon type="dot" color={SEVERITY_DOT_COLOR_KEY[severity]} aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
