@@ -378,7 +378,11 @@ export const ScheduledReportForm = ({
                       validator: emptyField(i18n.SCHEDULED_REPORT_FORM_START_DATE_REQUIRED_MESSAGE),
                     },
                     {
-                      validator: getStartDateValidator(now, timezone ?? defaultTimezone, startDate),
+                      validator: getStartDateValidator(
+                        now,
+                        timezone ?? defaultTimezone,
+                        scheduledReport.startDate
+                      ),
                     },
                   ],
                 }}
