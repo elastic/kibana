@@ -37,12 +37,12 @@ export function toListItem(
     timestamp: document['@timestamp'],
     actor: {
       name: document.user.name,
-      ...(document.user.id ? { profileId: document.user.id } : {}),
+      ...(document.user.id ? { profile_id: document.user.id } : {}),
     },
     action: document.event.action,
     ...(changes ? { changes } : {}),
     ...(document.event.reason ? { comment: document.event.reason } : {}),
-    ...(isCurrent ? { isCurrent: true } : {}),
+    ...(isCurrent ? { is_current: true } : {}),
     ...(document.tags && document.tags.length > 0 ? { tags: document.tags } : {}),
     ...(document.object.sequence !== undefined
       ? { metadata: { version: document.object.sequence } }

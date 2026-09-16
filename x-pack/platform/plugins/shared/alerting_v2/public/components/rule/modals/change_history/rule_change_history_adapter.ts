@@ -8,14 +8,28 @@
 import type {
   ChangeHistoryAdapter,
   ChangeHistoryDetail,
+  ChangeHistoryListItem,
   ListChangeHistoryResult,
 } from '@kbn/change-history-ui';
+import type { RuleChangeHistoryListItem } from '@kbn/alerting-v2-schemas';
 import type { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
+
+const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryListItem => ({
+  id: item.id,
+  timestamp: item.timestamp,
+  actor: { name: item.actor.name, profileId: item.actor.profile_id },
+  action: item.action,
+  changes: item.changes,
+  comment: item.comment,
+  tags: item.tags,
+  metadata: item.metadata,
+  isCurrent: item.is_current,
+});
 
 /**
  * Builds the {@link ChangeHistoryAdapter} for alerting v2 rules from
- * the HTTP read API. The API DTOs are structurally compatible with the package
- * row/detail types, so mapping is limited to pagination (the package uses a
+ * the HTTP read API. Maps the API DTOs to the change-history UI
+ * row/detail types, and adapts 1-based pagination (the package uses a
  * 0-based `page.index`; the API is 1-based).
  */
 export const createRuleChangeHistoryAdapter = (
@@ -29,8 +43,18 @@ export const createRuleChangeHistoryAdapter = (
       signal,
     });
 
-    return { items, total };
+    return { items: items.map(toChangeHistoryItem), total };
   },
-  getChange: async ({ objectId, changeId, signal }): Promise<ChangeHistoryDetail> =>
-    api.getRuleChangeEvent({ id: objectId, eventId: changeId, signal }),
+  getChange: async ({ objectId, changeId, signal }): Promise<ChangeHistoryDetail> => {
+    const { snapshot, reason, ...item } = await api.getRuleChangeEvent({
+      id: objectId,
+      eventId: changeId,
+      signal,
+    });
+    return {
+      ...toChangeHistoryItem(item),
+      snapshot,
+      reason,
+    };
+  },
 });
