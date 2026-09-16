@@ -224,6 +224,24 @@ export {
 } from './cortex';
 
 export {
+  DECISION_TREE_AI_INDEX_ID,
+  DECISION_TREE_AI_INDEX_DEST,
+  DECISION_TREE_DOC_TYPES,
+  type DecisionTreeDocType,
+  type DecisionTreeStatus,
+  type DecisionTreeSummary,
+  type DecisionTreeDetail,
+  type DecisionTreeVersionSummary,
+  type DecisionTreeVersionDetail,
+  type DecisionTreeStats,
+  type ListDecisionTreesResponse,
+  type GetDecisionTreeResponse,
+  type ListDecisionTreeVersionsResponse,
+  type GetDecisionTreeVersionResponse,
+  type GetDecisionTreesAvailabilityResponse,
+} from './decision_trees';
+
+export {
   INVESTIGATION_STARTED_TRIGGER_ID,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,

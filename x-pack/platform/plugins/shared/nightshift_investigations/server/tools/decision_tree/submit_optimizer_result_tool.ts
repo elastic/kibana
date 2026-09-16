@@ -25,6 +25,7 @@ import {
   symptomSlugFromTreeId,
   validateEvidenceMetadata,
 } from '@kbn/nightshift-decision-trees';
+import type { LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeStore } from '../../decision_trees/store';
 import type { SandboxConnectionManager } from '../sandbox_bash/grpc_client';
 import {
@@ -43,7 +44,7 @@ const submissionSchema = z.object({
     .string()
     .max(256)
     .describe(
-      'Identifier of the tree, formatted as symptom:<slug>. Reuse the id shown in decision-trees/INDEX.md for an existing tree; for a new tree use the symptom slug you chose.'
+      'Identifier of the tree, formatted as symptom:<slug>. For an existing tree, use symptom:<symptom> with the symptom from the decision-trees/monitors.md table; for a new tree use the symptom slug you chose.'
     ),
   file_path: z
     .string()
@@ -91,11 +92,17 @@ export const createSubmitOptimizerResultTool = ({
   connectionManager,
   getStore,
   getSpaceId,
+  getUsername,
+  drainLearnings,
   logger,
 }: {
   connectionManager: SandboxConnectionManager;
   getStore: (esClient: ElasticsearchClient) => DecisionTreeStore;
   getSpaceId: (request: KibanaRequest) => string;
+  /** Resolves the authenticated user, recorded as the version author. */
+  getUsername?: (request: KibanaRequest) => string | undefined;
+  /** Takes and clears the learnings this conversation recorded this turn. */
+  drainLearnings?: (conversationId: string) => LearningRecord[];
   logger: Logger;
 }): BuiltinToolDefinition<typeof submitSchema> => ({
   id: DECISION_TREE_SUBMIT_TOOL_ID,
@@ -122,6 +129,10 @@ export const createSubmitOptimizerResultTool = ({
     }
 
     const store = getStore(context.esClient.asCurrentUser);
+    const author = getUsername?.(context.request) || 'system';
+    // Drained once per turn: the learnings recorded this round land on every tree submitted with
+    // them, and the buffer is cleared so a later turn does not re-attach them.
+    const turnLearnings = drainLearnings?.(conversationId) ?? [];
     const outcomes: SubmissionOutcome[] = [];
 
     for (const submission of params.symptom_trees) {
@@ -133,6 +144,9 @@ export const createSubmitOptimizerResultTool = ({
             connectionManager,
             context,
             store,
+            author,
+            summary: params.summary,
+            learnings: turnLearnings,
           })
         );
       } catch (error) {
@@ -194,12 +208,18 @@ const persistSubmission = async ({
   connectionManager,
   context,
   store,
+  author,
+  summary,
+  learnings,
 }: {
   submission: z.infer<typeof submissionSchema>;
   conversationId: string;
   connectionManager: SandboxConnectionManager;
   context: Parameters<typeof getSandboxCallContext>[0];
   store: DecisionTreeStore;
+  author: string;
+  summary: string;
+  learnings: LearningRecord[];
 }): Promise<SubmissionOutcome> => {
   const { tree_id: treeId, file_path: filePath, evidence_gatherer_metadata: metadata } = submission;
 
@@ -262,8 +282,7 @@ const persistSubmission = async ({
   // A taken path only exists once the investigation confirmed which branch was causal, so it is
   // the signal that promotes a tree from tentative to established.
   const reinforced = newTree.edges.some((edge) => edge.is_taken);
-  await store.upsert({ treeId, markdown, reinforced });
-  await store.markVisited(treeId);
+  await store.commit({ treeId, markdown, tree: newTree, reinforced, author, summary, learnings });
 
   return {
     tree_id: treeId,

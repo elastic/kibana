@@ -24,14 +24,12 @@ export const deriveCausalConfirmed = (response: string): boolean =>
 /**
  * Decides whether this round seeds the tree or builds on it.
  *
- * The post-execution hook carries no round index, so the tree's own visit history stands in for
- * it: a tree nobody has reinforced yet is still being established, and once one has been visited
- * later rounds are follow-ups that either reinforce a confirmed path or extend the tree.
+ * The post-execution hook carries no round index, so the tree's own version history stands in for
+ * it: a tree still on its first version is being established, and once it has been revised a later
+ * round is a follow-up that either reinforces a confirmed path or extends the tree.
  */
 export const deriveTurnKind = (trees: DecisionTreeSummary[]): DecisionTreeTurnKind =>
-  trees.some((tree) => tree.corroborations > 0)
-    ? 'feedback_reinforcement'
-    : 'initial_investigation';
+  trees.some((tree) => tree.version > 1) ? 'feedback_reinforcement' : 'initial_investigation';
 
 /** Assembles the message handed to the reinforcement agent for one round. */
 export const buildReinforcementPrompt = ({

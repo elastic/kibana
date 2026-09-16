@@ -20,6 +20,7 @@ export type SignificantEventsAppTab =
   | 'significant_events'
   | 'memory'
   | 'cortex'
+  | 'decision_trees'
   | 'settings';
 
 /**

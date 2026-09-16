@@ -9,12 +9,14 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   SYSTEM_LEARNING_CATEGORIES,
   TOOL_LEARNING_CATEGORIES,
 } from '@kbn/nightshift-decision-trees';
+import type { LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { LearningStore } from '../../decision_trees/learning_store';
+import { getScopedConversationId } from '../sandbox_bash/tool_utils';
 
 export const RECORD_SYSTEM_LEARNING_TOOL_ID = 'nightshift_record_system_learning';
 export const RECORD_TOOL_LEARNING_TOOL_ID = 'nightshift_record_tool_learning';
@@ -29,6 +31,10 @@ const RETENTION_RULE =
 interface LearningToolDeps {
   getStore: (esClient: ElasticsearchClient) => LearningStore;
   logger: Logger;
+  /** Resolves the space for the current request, to scope the per-conversation learning buffer. */
+  getSpaceId?: (request: KibanaRequest) => string;
+  /** Buffers a recorded learning so the submit tool can attach it to the committed tree version. */
+  onRecord?: (conversationId: string, record: LearningRecord) => void;
 }
 
 const systemLearningSchema = z.object({
@@ -69,13 +75,30 @@ const recordAndReport = async ({
   store,
   logger,
   input,
+  context,
+  getSpaceId,
+  onRecord,
 }: {
   store: LearningStore;
   logger: Logger;
   input: Parameters<LearningStore['record']>[0];
+  context: { runContext?: { stack: unknown[] }; request?: KibanaRequest };
+  getSpaceId?: (request: KibanaRequest) => string;
+  onRecord?: (conversationId: string, record: LearningRecord) => void;
 }) => {
   try {
     const record = await store.record(input);
+    // Best-effort: buffer the learning for the submit tool so the committed version records what
+    // was learned this turn. A missing conversation context simply skips buffering.
+    if (onRecord && getSpaceId && context.runContext && context.request) {
+      const conversationId = getScopedConversationId(
+        { runContext: context.runContext, request: context.request },
+        getSpaceId
+      );
+      if (conversationId) {
+        onRecord(conversationId, record);
+      }
+    }
     return {
       results: [
         {
@@ -96,6 +119,8 @@ const recordAndReport = async ({
 export const createRecordSystemLearningTool = ({
   getStore,
   logger,
+  getSpaceId,
+  onRecord,
 }: LearningToolDeps): BuiltinToolDefinition<typeof systemLearningSchema> => ({
   id: RECORD_SYSTEM_LEARNING_TOOL_ID,
   type: ToolType.builtin,
@@ -114,6 +139,9 @@ export const createRecordSystemLearningTool = ({
       store: getStore(context.esClient.asCurrentUser),
       logger,
       input: { kind: 'system', category: params.category, content: params.content },
+      context,
+      getSpaceId,
+      onRecord,
     }),
 });
 
@@ -121,6 +149,8 @@ export const createRecordToolLearningTool = ({
   getStore,
   logger,
   connectorNames,
+  getSpaceId,
+  onRecord,
 }: LearningToolDeps & { connectorNames: readonly string[] }): BuiltinToolDefinition<
   ReturnType<typeof toolLearningSchema>
 > => {
@@ -148,6 +178,9 @@ export const createRecordToolLearningTool = ({
           connectorName: params.connector_name,
           content: params.content,
         },
+        context,
+        getSpaceId,
+        onRecord,
       }),
   };
 };
@@ -155,6 +188,8 @@ export const createRecordToolLearningTool = ({
 export const createRecordRemediationTool = ({
   getStore,
   logger,
+  getSpaceId,
+  onRecord,
 }: LearningToolDeps): BuiltinToolDefinition<typeof remediationSchema> => ({
   id: RECORD_REMEDIATION_TOOL_ID,
   type: ToolType.builtin,
@@ -173,5 +208,8 @@ export const createRecordRemediationTool = ({
       store: getStore(context.esClient.asCurrentUser),
       logger,
       input: { kind: 'remediation', content: params.content },
+      context,
+      getSpaceId,
+      onRecord,
     }),
 });

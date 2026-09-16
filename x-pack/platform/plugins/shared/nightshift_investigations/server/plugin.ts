@@ -35,6 +35,8 @@ import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { createDecisionTreeStore, ensureDecisionTreeIndex } from './decision_trees/store';
+import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
@@ -88,6 +90,7 @@ export class NightshiftInvestigationsPlugin
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
+  private security?: CoreStart['security'];
   private cortexEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
@@ -109,12 +112,15 @@ export class NightshiftInvestigationsPlugin
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
     }
 
-    // Decision trees are stored as Cortex pages and edited in the sandbox, so the feature only
-    // works when both are configured.
+    // Decision trees are edited in the sandbox and read the Cortex investigator context, so the
+    // feature only works when Cortex and the sandbox are both configured.
     this.decisionTreesEnabled =
       this.ctx.config.get().decision_trees.enabled &&
       this.cortexEnabled &&
       Boolean(this.ctx.config.get().sandbox);
+    if (this.decisionTreesEnabled) {
+      registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
+    }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
 
@@ -219,6 +225,7 @@ export class NightshiftInvestigationsPlugin
             connectionManager,
             connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
             getSpaceId,
+            getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
             logger: decisionTreeLogger,
           })) {
             plugins.agentBuilder.tools.register(tool);
@@ -288,6 +295,18 @@ export class NightshiftInvestigationsPlugin
               spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
           },
+          isDecisionTreesEnabled: () => this.decisionTreesEnabled,
+          getDecisionTreeStore: (request: KibanaRequest) => {
+            if (!this.elasticsearch) {
+              throw new Error(
+                'elasticsearch is not available — plugin start() has not been called'
+              );
+            }
+            return createDecisionTreeStore({
+              esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
+              logger: this.logger.get('decision_trees'),
+            });
+          },
         },
         core,
         logger: this.logger,
@@ -322,6 +341,18 @@ export class NightshiftInvestigationsPlugin
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
     this.actionsStart = plugins.actions;
+    this.security = coreStart.security;
+
+    // Create the backing index up front with explicit mappings, before any agent turn writes to
+    // it and lets Elasticsearch auto-create it from the generic template.
+    if (this.decisionTreesEnabled) {
+      void ensureDecisionTreeIndex(
+        coreStart.elasticsearch.client.asInternalUser,
+        this.logger.get('decision_trees')
+      ).catch((err) => {
+        this.logger.error(`Failed to ensure the decision-tree index: ${err.message}`);
+      });
+    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

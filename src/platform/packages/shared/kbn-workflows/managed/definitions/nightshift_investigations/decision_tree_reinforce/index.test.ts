@@ -20,6 +20,7 @@ const workflow = parse(NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW.yaml) as {
     type?: string;
     if?: string;
     'agent-id'?: string;
+    'on-failure'?: unknown;
     with?: Record<string, string>;
   }>;
 };
@@ -32,17 +33,37 @@ describe('decision tree reinforce workflow', () => {
     expect(workflow.name).toBe('Decision Tree Reinforce');
     expect(workflow.steps.map((step) => [step.name, step.type])).toEqual([
       ['prepare_turn', 'nightshift.decisionTreePrepare'],
+      ['ensure_reinforcement_agent', 'nightshift.ensureInvestigationAgent'],
       ['reinforce_decision_trees', 'ai.agent'],
     ]);
   });
 
   it('runs the reinforcement agent on the message the prepare step built', () => {
-    const [, reinforce] = workflow.steps;
+    const [, , reinforce] = workflow.steps;
     expect(reinforce['agent-id']).toBe('significant-events.decision-tree-reinforcement');
     expect(reinforce.with?.message).toBe('{{ steps.prepare_turn.output.message }}');
   });
 
-  it('skips the agent for rounds the prepare step ruled ineligible', () => {
-    expect(workflow.steps[1].if).toBe('${{ steps.prepare_turn.output.skipped == false }}');
+  // Nothing else installs it, so the agent step resolves a missing agent without this.
+  it('installs the agent it is about to run', () => {
+    const [, ensure, reinforce] = workflow.steps;
+    expect(ensure.with?.agent_id).toBe(reinforce['agent-id']);
+  });
+
+  it('skips the agent, and installing it, for rounds the prepare step ruled ineligible', () => {
+    const ineligible = '${{ steps.prepare_turn.output.skipped == false }}';
+    expect(workflow.steps[1].if).toBe(ineligible);
+    expect(workflow.steps[2].if).toBe(ineligible);
+  });
+
+  // A swallowed failure here reports a green execution that silently reinforced nothing, which
+  // is how a missing agent went unnoticed. Post-execution hooks log failures without aborting
+  // the investigation, so there is nothing to protect by continuing.
+  it('lets every step fail loudly', () => {
+    expect(workflow.steps.map((step) => step['on-failure'])).toEqual([
+      undefined,
+      undefined,
+      undefined,
+    ]);
   });
 });

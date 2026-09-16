@@ -38,8 +38,10 @@ const cortexConfigSchema = schema.object({
 
 const decisionTreesConfigSchema = schema.object({
   // Governs the decision-tree reinforcement agent end to end: the post-execution hook on the
-  // deductive agent, the hydrate step that materializes trees into the sandbox, and the agent's
-  // own tools. Trees are stored as Cortex pages, so this depends on cortex.enabled as well.
+  // deductive agent, the hydrate step that materializes trees into the sandbox, the agent's own
+  // tools, the decision-tree AI index, and the Decision Trees tab in the significant events app.
+  // Trees are edited in the sandbox and read the Cortex investigator context, so this depends on
+  // cortex.enabled (and sandbox) as well.
   enabled: schema.boolean({ defaultValue: false }),
 });
 

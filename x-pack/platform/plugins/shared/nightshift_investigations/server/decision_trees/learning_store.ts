@@ -8,24 +8,23 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { validateShortText } from '@kbn/nightshift-decision-trees';
 import type {
+  LearningKind,
   LearningRecord,
   SystemLearningCategory,
   ToolLearningCategory,
 } from '@kbn/nightshift-decision-trees';
-import type { CortexEntityType } from '../../common/cortex';
-import { LEARNING_SLUG_PREFIX, isLearningSlug } from '../../common/decision_trees';
-import { createCortexPageStore, slugFromCortexId } from '../cortex/page_store';
-import type { CortexPageStore } from '../cortex/page_store';
+import { DECISION_TREE_AI_INDEX_DEST, DECISION_TREE_TAG } from '../../common/decision_trees';
+import { ensureDecisionTreeIndex } from './store';
 
-/**
- * Each learning kind lands in the Cortex bucket that matches what it is about, so the wiki stays
- * browsable: system facts are topics, tool behaviour is a query note, remediations are runbooks.
- */
-const ENTITY_TYPE_BY_KIND = {
-  system: 'topic',
-  tool: 'query',
-  remediation: 'runbook',
-} as const satisfies Record<LearningRecord['kind'], CortexEntityType>;
+const MAX_LEARNINGS = 200;
+
+/** Backing document for one learning slot in the decision-tree index. */
+interface DecisionTreeLearningSource extends LearningRecord {
+  '@timestamp': string;
+  type: 'decision_tree_learning';
+  title: string;
+  tags: string[];
+}
 
 const slugify = (value: string): string =>
   value
@@ -35,27 +34,27 @@ const slugify = (value: string): string =>
     .replace(/^-+|-+$/g, '');
 
 /**
- * Slug for a learning slot. Recording the same category (and connector) again replaces the
- * previous entry rather than accumulating near-duplicates, which is the single-slot behaviour
- * the tool descriptions promise the model.
+ * Document id for a learning slot. Recording the same kind (and category, and connector) again
+ * writes the same id, so the previous entry is replaced rather than a near-duplicate accumulated —
+ * the single-slot behaviour the tool descriptions promise the model.
  */
-export const learningSlug = (record: {
-  kind: LearningRecord['kind'];
+const learningDocId = (record: {
+  kind: LearningKind;
   category?: string;
   connectorName?: string;
 }): string => {
-  const parts = [LEARNING_SLUG_PREFIX.replace(/-$/, ''), record.kind];
+  const parts = ['dtree_learning', record.kind];
   if (record.category) {
     parts.push(slugify(record.category));
   }
   if (record.connectorName) {
     parts.push(slugify(record.connectorName));
   }
-  return parts.join('-');
+  return parts.join('_');
 };
 
 const titleFor = (record: {
-  kind: LearningRecord['kind'];
+  kind: LearningKind;
   category?: string;
   connectorName?: string;
 }): string => {
@@ -71,7 +70,7 @@ const titleFor = (record: {
 export interface LearningStore {
   /** Replaces the slot for this kind/category/connector and returns the stored record. */
   record: (input: {
-    kind: LearningRecord['kind'];
+    kind: LearningKind;
     content: string;
     category?: SystemLearningCategory | ToolLearningCategory;
     connectorName?: string;
@@ -80,24 +79,21 @@ export interface LearningStore {
   list: () => Promise<LearningRecord[]>;
 }
 
-const parseSlug = (slug: string): { kind?: LearningRecord['kind']; rest: string[] } => {
-  const [, kind, ...rest] = slug.split('-');
-  const known = kind === 'system' || kind === 'tool' || kind === 'remediation' ? kind : undefined;
-  return { kind: known, rest };
-};
+const toRecord = (source: DecisionTreeLearningSource): LearningRecord => ({
+  kind: source.kind,
+  content: source.content,
+  keywords: source.keywords ?? [],
+  ...(source.category ? { category: source.category } : {}),
+  ...(source.connector_name ? { connector_name: source.connector_name } : {}),
+});
 
 export const createLearningStore = ({
   esClient,
   logger,
-  pageStore,
 }: {
-  esClient?: ElasticsearchClient;
+  esClient: ElasticsearchClient;
   logger: Logger;
-  pageStore?: CortexPageStore;
 }): LearningStore => {
-  const store =
-    pageStore ?? createCortexPageStore({ esClient: esClient as ElasticsearchClient, logger });
-
   return {
     record: async ({ kind, content, category, connectorName }) => {
       const label =
@@ -107,7 +103,8 @@ export const createLearningStore = ({
         throw new Error(`${label} must not be empty`);
       }
 
-      const slug = learningSlug({ kind, category, connectorName });
+      await ensureDecisionTreeIndex(esClient, logger);
+
       const keywords = [
         'nightshift-reinforcement',
         `learning:${kind}`,
@@ -115,60 +112,45 @@ export const createLearningStore = ({
         ...(connectorName ? [`connector:${connectorName}`] : []),
       ];
 
-      await store.upsert({
-        entityType: ENTITY_TYPE_BY_KIND[kind],
-        slug,
-        title: titleFor({ kind, category, connectorName }),
-        description: keywords.join(', '),
-        content: validated,
-        status: 'tentative',
-      });
-      logger.debug(`Recorded ${kind} learning ${slug}`);
-
-      return {
+      const record: LearningRecord = {
         kind,
         content: validated,
         keywords,
         ...(category ? { category } : {}),
         ...(connectorName ? { connector_name: connectorName } : {}),
       };
+
+      const document: DecisionTreeLearningSource = {
+        '@timestamp': new Date().toISOString(),
+        type: 'decision_tree_learning',
+        title: titleFor({ kind, category, connectorName }),
+        tags: ['nightshift', DECISION_TREE_TAG, 'learning'],
+        ...record,
+      };
+
+      await esClient.index({
+        index: DECISION_TREE_AI_INDEX_DEST,
+        id: learningDocId({ kind, category, connectorName }),
+        document,
+        refresh: 'wait_for',
+      });
+      logger.debug(`Recorded ${kind} learning ${learningDocId({ kind, category, connectorName })}`);
+
+      return record;
     },
 
     list: async () => {
-      const { pages } = await store.list();
-      const learningPages = pages.filter((page) =>
-        isLearningSlug(slugFromCortexId(page.id, page.entity_type))
-      );
+      const response = await esClient.search<DecisionTreeLearningSource>({
+        index: DECISION_TREE_AI_INDEX_DEST,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: MAX_LEARNINGS,
+        track_total_hits: false,
+        query: { term: { type: 'decision_tree_learning' } },
+        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+      });
 
-      const records = await Promise.all(
-        learningPages.map(async (summary) => {
-          const page = await store.get(summary.id);
-          if (!page) {
-            return undefined;
-          }
-          const { kind, rest } = parseSlug(page.slug);
-          if (!kind) {
-            return undefined;
-          }
-          const record: LearningRecord = {
-            kind,
-            content: page.content,
-            keywords: (page.description ?? '').split(', ').filter(Boolean),
-            ...(kind === 'system' && rest[0]
-              ? { category: rest[0] as SystemLearningCategory }
-              : {}),
-            ...(kind === 'tool' && rest.length >= 2
-              ? {
-                  category: rest[0] as ToolLearningCategory,
-                  connector_name: rest.slice(1).join('-'),
-                }
-              : {}),
-          };
-          return record;
-        })
-      );
-
-      return records.filter((record): record is LearningRecord => record !== undefined);
+      return response.hits.hits.flatMap((hit) => (hit._source ? [toRecord(hit._source)] : []));
     },
   };
 };
