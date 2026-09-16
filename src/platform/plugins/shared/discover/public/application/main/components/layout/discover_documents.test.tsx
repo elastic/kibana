@@ -88,6 +88,13 @@ async function mountComponent({
   const testDocuments = {
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+    ...(isEsqlMode
+      ? {
+          esqlQueryColumns: [
+            { id: 'message', name: 'message', meta: { type: 'string' as const } },
+          ],
+        }
+      : {}),
   };
 
   const dataStateContainer = toolkit.getCurrentTabDataStateContainer();

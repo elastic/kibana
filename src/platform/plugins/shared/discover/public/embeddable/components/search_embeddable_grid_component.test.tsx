@@ -97,18 +97,33 @@ const createApi = (savedSearch: SavedSearch) => {
 describe('SearchEmbeddableGridComponent', () => {
   const services = createDiscoverServicesMock();
   const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+  const getLastGridProps = () => mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  const renderComponent = ({ isEsql }: { isEsql: boolean }) => {
+  const renderComponent = ({
+    isEsql,
+    fetchContext,
+    columnsMeta,
+  }: {
+    isEsql: boolean;
+    fetchContext?: FetchContext;
+    columnsMeta?: DataTableColumnsMeta;
+  }) => {
     const savedSearch = createSavedSearch(isEsql);
     const api = createApi(savedSearch);
     const stateManager = createStateManager();
     const docViewerRef = React.createRef<DocViewerApi>();
     stateManager.rows.next(rows);
     stateManager.totalHitCount.next(rows.length);
+    if (columnsMeta) {
+      stateManager.columnsMeta.next(columnsMeta);
+    }
+    if (fetchContext) {
+      api.fetchContext$.next(fetchContext);
+    }
 
     render(
       <DiscoverTestProvider services={services}>
@@ -141,7 +156,7 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
       });
 
-      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      const lastCallProps = getLastGridProps();
       expect(lastCallProps?.onUpdateSampleSize).toBeUndefined();
     });
 
@@ -152,7 +167,7 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
       });
 
-      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      const lastCallProps = getLastGridProps();
       expect(lastCallProps?.onUpdateSampleSize).toBeDefined();
       expect(typeof lastCallProps?.onUpdateSampleSize).toBe('function');
     });
@@ -166,7 +181,7 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
       });
 
-      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      const lastCallProps = getLastGridProps();
       const onResize = lastCallProps?.onResize as (params: {
         columnId: string;
         width: number | undefined;
@@ -177,6 +192,62 @@ describe('SearchEmbeddableGridComponent', () => {
 
       onResize({ columnId: '_source', width: undefined });
       expect(stateManager.grid.getValue()).toEqual({ columns: { _source: {} } });
+    });
+  });
+
+  describe('searchContext', () => {
+    const fetchContext: FetchContext = {
+      isReload: false,
+      filters: [{ meta: { key: 'host' } }] as FetchContext['filters'],
+      query: { query: 'host: web', language: 'kuery' },
+      searchSessionId: 'session-embeddable',
+      timeRange: { from: 'now-1d', to: 'now' },
+      timeslice: undefined,
+      esqlVariables: undefined,
+      projectRouting: '_alias:_origin',
+      isApproximate: true,
+    };
+
+    const columnsMeta: DataTableColumnsMeta = {
+      message: { type: 'string' },
+    };
+
+    it('passes a completed ES|QL table and dashboard filterQuery', async () => {
+      renderComponent({ isEsql: true, fetchContext, columnsMeta });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = getLastGridProps();
+      expect(lastCallProps?.searchContext?.query).toEqual({ esql: 'FROM test | LIMIT 100' });
+      expect(lastCallProps?.searchContext?.filterQuery).toEqual({
+        query: 'host: web',
+        language: 'kuery',
+      });
+      expect(lastCallProps?.searchContext?.table?.columns.map((c: { id: string }) => c.id)).toEqual(
+        ['message']
+      );
+      expect(lastCallProps?.searchContext?.searchSessionId).toBe('session-embeddable');
+      expect(lastCallProps?.searchContext?.projectRouting).toBe('_alias:_origin');
+      expect(lastCallProps?.searchContext?.isApproximate).toBe(true);
+    });
+
+    it('changes requestId when the grid rows identity changes', async () => {
+      const { stateManager } = renderComponent({ isEsql: true, fetchContext, columnsMeta });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const firstRequestId = getLastGridProps()?.searchContext?.requestId;
+
+      stateManager.rows.next([...rows]);
+
+      await waitFor(() => {
+        const nextRequestId = getLastGridProps()?.searchContext?.requestId;
+        expect(nextRequestId).not.toBe(firstRequestId);
+      });
     });
   });
 });
