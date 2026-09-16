@@ -28,6 +28,7 @@ export const AdvancedMatchingAccordion = ({
   return (
     <EuiAccordion
       id={accordionId}
+      buttonProps={{ 'data-test-subj': 'advancedMatchingAccordionToggle' }}
       buttonContent={
         <strong>
           {i18n.translate(

@@ -63,14 +63,14 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
   const showCapGuidance = !search && apiTags.length >= TAGS_RESPONSE_LIMIT;
 
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.label', {
-        defaultMessage: 'Rule tags',
-      })}
-      labelAppend={optionalLabel}
-      fullWidth
-    >
-      <>
+    <>
+      <EuiFormRow
+        label={i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.label', {
+          defaultMessage: 'Rule tags',
+        })}
+        labelAppend={optionalLabel}
+        fullWidth
+      >
         <EuiComboBox<string>
           fullWidth
           isLoading={isLoading}
@@ -89,22 +89,22 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
           isClearable
           data-test-subj="ruleTagsSelector"
         />
-        {!isLoading && !search && apiTags.length === 0 && selectedTags.length === 0 && (
-          <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorEmptyState">
-            {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.emptyState', {
-              defaultMessage: 'No rule tags in this space yet. Add a tag to scope this policy.',
-            })}
-          </EuiText>
-        )}
-        {showCapGuidance && (
-          <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorCapGuidance">
-            {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.capGuidance', {
-              defaultMessage: 'Showing first {cap} most-used tags. Type to search for more.',
-              values: { cap: TAGS_RESPONSE_LIMIT },
-            })}
-          </EuiText>
-        )}
-      </>
-    </EuiFormRow>
+      </EuiFormRow>
+      {!isLoading && !search && apiTags.length === 0 && selectedTags.length === 0 && (
+        <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorEmptyState">
+          {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.emptyState', {
+            defaultMessage: 'No rule tags in this space yet. Add a tag to scope this policy.',
+          })}
+        </EuiText>
+      )}
+      {showCapGuidance && (
+        <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorCapGuidance">
+          {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.capGuidance', {
+            defaultMessage: 'Showing first {cap} most-used tags. Type to search for more.',
+            values: { cap: TAGS_RESPONSE_LIMIT },
+          })}
+        </EuiText>
+      )}
+    </>
   );
 };
