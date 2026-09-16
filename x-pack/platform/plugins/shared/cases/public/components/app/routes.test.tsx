@@ -30,12 +30,12 @@ jest.mock('../create', () => ({
   CreateCase: () => <div>{'Create case'}</div>,
 }));
 
-jest.mock('../cases_redesign/configure_cases/configure_cases', () => ({
+jest.mock('../configure_cases/configure_cases', () => ({
   __esModule: true,
   default: () => <div>{'Settings'}</div>,
 }));
 
-jest.mock('../cases_redesign/case_view', () => ({
+jest.mock('../case_view', () => ({
   __esModule: true,
   default: () => <div>{'Case View Page'}</div>,
 }));
