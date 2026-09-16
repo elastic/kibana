@@ -71,9 +71,18 @@ export const createSandboxViewFileTool = ({
       };
     }
 
+    const sandboxStart = getSandboxStart();
+    if (!sandboxStart) {
+      return {
+        results: [
+          { type: ToolResultType.error, data: { message: 'Sandbox is not available.' } },
+        ],
+      };
+    }
+
     let session: SandboxSession;
     try {
-      session = getSandboxStart()!.getSession(context.request, rawConversationId);
+      session = sandboxStart.getSession(context.request, rawConversationId);
     } catch (err) {
       return {
         results: [

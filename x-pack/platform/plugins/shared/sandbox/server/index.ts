@@ -26,7 +26,7 @@
  * ```
  *
  * When `enabled` is `false` (the default), or when `api_key`/`ssl` are absent,
- * `SandboxPluginStart.getSession` returns `undefined` for every call.
+ * `SandboxPluginStart.getSession` throws a descriptive error for every call.
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';

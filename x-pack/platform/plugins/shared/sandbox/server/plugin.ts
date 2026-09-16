@@ -121,7 +121,7 @@ export class SandboxPlugin implements Plugin<void, SandboxPluginStart, {}, Sandb
     return {
       getSession: (request, sessionId) => {
         const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        const key = `${spaceId}__${sessionId}`;
+        const key = `${spaceId}:${sessionId}`;
         let session = sessions.get(key);
         if (!session) {
           session = new SandboxSessionImpl(key, apiClient, logger.get('session'));
