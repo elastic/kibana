@@ -11,7 +11,7 @@ disable-model-invocation: true
 
 Document every user-facing `kibana.yml` setting and Advanced Settings (`uiSettings`) entry in `{settings}` YAML. Do not write the reference as freeform Markdown.
 
-Schema, `applies_to`, description style, the `default` field, gated notes, and lifecycle history live in docs-builder: [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md) and [settings-with-applies-example.yml](https://github.com/elastic/docs-builder/blob/main/docs/syntax/settings-with-applies-example.yml). If Description and default or Lifecycle history are missing on `main`, read [docs-builder#4101](https://github.com/elastic/docs-builder/pull/4101).
+Schema, `applies_to`, description style, the `default` field, gated notes, and lifecycle history live in docs-builder: [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md) and [settings-with-applies-example.yml](https://github.com/elastic/docs-builder/blob/main/docs/syntax/settings-with-applies-example.yml).
 
 This YAML does not follow the usual `docs-applies-to-tagging` lifecycle-symmetry rule. Read the settings page, not that skill.
 
