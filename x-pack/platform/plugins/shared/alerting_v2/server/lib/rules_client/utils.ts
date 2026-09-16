@@ -730,7 +730,13 @@ export function buildUpdateRuleAttributes(
       version,
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
-    schedule: { ...existingAttrs.schedule, ...updateData.schedule },
+    schedule: {
+      ...existingAttrs.schedule,
+      ...updateData.schedule,
+      // `null` → clear (undefined). SO schema uses maybe() without nullable(),
+      // so a cleared lookback must be stored as undefined (absent), not null.
+      lookback: nullToUndefined(updateData.schedule?.lookback, existingAttrs.schedule.lookback),
+    },
     // `query` semantics for the resolved update data:
     //   undefined  → preserve existing (ordinary PATCH with no query change)
     //   null       → clear (execution-time type; must carry no stored query, even
