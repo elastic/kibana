@@ -132,7 +132,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
+      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning, approximationApplied }) => {
         fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
         if (isEsqlQuery) {
@@ -177,6 +177,7 @@ export function fetchAll(
           esqlQueryColumns,
           esqlHeaderWarning,
           interceptedWarnings,
+          approximationApplied,
           query,
         });
 
