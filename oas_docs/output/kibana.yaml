@@ -97885,6 +97885,7 @@ components:
           type: string
         download_source_ids:
           items:
+            maxLength: 500
             type: string
           maxItems: 3
           type: array
@@ -114854,6 +114855,7 @@ components:
           type: string
         download_source_ids:
           items:
+            maxLength: 500
             type: string
           maxItems: 3
           type: array
@@ -122911,6 +122913,7 @@ components:
           type: string
         download_source_ids:
           items:
+            maxLength: 500
             type: string
           maxItems: 3
           type: array
