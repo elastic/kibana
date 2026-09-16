@@ -17,6 +17,7 @@ import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
 import type { PerOsAntivirusRegistrationCardProps } from './per_os_antivirus_registration_card';
 import { PerOsAntivirusRegistrationCard } from './per_os_antivirus_registration_card';
+import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
 describe('PerOsAntivirusRegistrationCard', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').perOsAntivirusRegistration;
@@ -132,10 +133,12 @@ describe('PerOsAntivirusRegistrationCard', () => {
 
     await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
 
-    const optionLabels = renderResult.getAllByRole('option').map((option) => option.textContent);
+    const optionLabels = (await renderResult.findAllByRole('option')).map(
+      (option) => option.textContent
+    );
     expect(optionLabels).toEqual(['Disabled', 'Sync with malware protection level', 'Enabled']);
 
-    const disabledOption = renderResult.getByRole('option', { name: /^Disabled$/ });
+    const disabledOption = await renderResult.findByRole('option', { name: /^Disabled$/ });
     expect(disabledOption.querySelector('[color="danger"]')).toBeInTheDocument();
   });
 
@@ -145,8 +148,7 @@ describe('PerOsAntivirusRegistrationCard', () => {
     const linuxBefore = cloneDeep(policy.linux);
     render();
 
-    await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
-    await userEvent.click(renderResult.getByRole('option', { name: 'Enabled' }));
+    await selectOsControlOption(renderResult, testSubj.windows.modeSelect, 'Enabled');
 
     const updatedPolicy = getUpdatedPolicy();
     expect(updatedPolicy.windows.antivirus_registration.mode).toBe(
@@ -162,8 +164,7 @@ describe('PerOsAntivirusRegistrationCard', () => {
     const enabledBefore = policy.windows.antivirus_registration.enabled;
     render();
 
-    await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
-    await userEvent.click(renderResult.getByRole('option', { name: 'Enabled' }));
+    await selectOsControlOption(renderResult, testSubj.windows.modeSelect, 'Enabled');
 
     const updatedPolicy = getUpdatedPolicy();
     expect(updatedPolicy.windows.antivirus_registration.mode).toBe(

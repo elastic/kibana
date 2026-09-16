@@ -26,6 +26,7 @@ import {
   PER_OS_DEVICE_CONTROL_CARD_TITLE,
   PerOsDeviceControlCard,
 } from './per_os_device_control_card';
+import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
 jest.mock('../../../../../../common/hooks/use_license');
 jest.mock('../hooks/use_get_device_control_component');
@@ -130,8 +131,7 @@ describe('PerOsDeviceControlCard', () => {
     const linuxBefore = cloneDeep(policy[PolicyOperatingSystem.linux]);
     render();
 
-    await userEvent.click(renderResult.getByTestId(testSubj.mac.accessLevelSelect));
-    await userEvent.click(renderResult.getByRole('option', { name: 'Read and write' }));
+    await selectOsControlOption(renderResult, testSubj.mac.accessLevelSelect, 'Read and write');
 
     const updatedPolicy = getUpdatedPolicy();
     expect(updatedPolicy.mac.device_control?.usb_storage).toBe(DeviceControlAccessLevel.no_execute);
@@ -147,8 +147,7 @@ describe('PerOsDeviceControlCard', () => {
     const linuxBefore = cloneDeep(policy[PolicyOperatingSystem.linux]);
     render();
 
-    await userEvent.click(renderResult.getByTestId(testSubj.mac.accessLevelSelect));
-    await userEvent.click(renderResult.getByRole('option', { name: 'Block all' }));
+    await selectOsControlOption(renderResult, testSubj.mac.accessLevelSelect, 'Block all');
 
     const afterDenyAll = getUpdatedPolicy();
     expect(afterDenyAll.mac.device_control?.usb_storage).toBe(DeviceControlAccessLevel.deny_all);
@@ -158,8 +157,7 @@ describe('PerOsDeviceControlCard', () => {
 
     renderResult.rerender(<PerOsDeviceControlCard {...props} policy={afterDenyAll} />);
 
-    await userEvent.click(renderResult.getByTestId(testSubj.mac.accessLevelSelect));
-    await userEvent.click(renderResult.getByRole('option', { name: 'Read only' }));
+    await selectOsControlOption(renderResult, testSubj.mac.accessLevelSelect, 'Read only');
 
     const afterLeaveDenyAll = getUpdatedPolicy();
     expect(afterLeaveDenyAll.mac.device_control?.usb_storage).toBe(

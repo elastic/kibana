@@ -24,6 +24,7 @@ import {
   LOCKED_CARD_RANSOMWARE_TITLE,
   PerOsRansomwareProtectionCard,
 } from './per_os_ransomware_protection_card';
+import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
 jest.mock('../../../../../../common/hooks/use_license');
 jest.mock('../hooks/use_get_protections_unavailable_component');
@@ -116,8 +117,7 @@ describe('PerOsRansomwareProtectionCard', () => {
     const windowsBefore = cloneDeep(policy.windows);
     render();
 
-    await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
-    await userEvent.click(renderResult.getByRole('option', { name: /^Disable$/ }));
+    await selectOsControlOption(renderResult, testSubj.windows.modeSelect, /^Disable$/);
     const afterDisable = getUpdatedPolicy();
     expect(afterDisable.windows.ransomware.mode).toBe(ProtectionModes.off);
     expect(afterDisable.windows.popup.ransomware.enabled).toBe(true);
@@ -133,16 +133,14 @@ describe('PerOsRansomwareProtectionCard', () => {
     rerender(afterDisable);
     expect(renderResult.queryByTestId(testSubj.windows.notifyUserCheckbox)).not.toBeInTheDocument();
 
-    await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
-    await userEvent.click(renderResult.getByRole('option', { name: /^Detect$/ }));
+    await selectOsControlOption(renderResult, testSubj.windows.modeSelect, /^Detect$/);
     const afterDetect = getUpdatedPolicy();
     expect(afterDetect.windows.ransomware.mode).toBe(ProtectionModes.detect);
     expect(afterDetect.windows.popup.ransomware.enabled).toBe(false);
     expect(afterDetect.windows.popup.ransomware.message).toBe('keep me');
 
     rerender(afterDetect);
-    await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
-    await userEvent.click(renderResult.getByRole('option', { name: /^Detect & prevent$/ }));
+    await selectOsControlOption(renderResult, testSubj.windows.modeSelect, /^Detect & prevent$/);
     const afterPrevent = getUpdatedPolicy();
     expect(afterPrevent.windows.ransomware.mode).toBe(ProtectionModes.prevent);
     expect(afterPrevent.windows.popup.ransomware.enabled).toBe(true);
@@ -157,8 +155,7 @@ describe('PerOsRansomwareProtectionCard', () => {
     const supportedBefore = policy.mac.ransomware.supported;
     render();
 
-    await userEvent.click(renderResult.getByTestId(testSubj.mac.modeSelect));
-    await userEvent.click(renderResult.getByRole('option', { name: /^Detect$/ }));
+    await selectOsControlOption(renderResult, testSubj.mac.modeSelect, /^Detect$/);
     const afterMode = getUpdatedPolicy();
     expect(afterMode.mac.ransomware.mode).toBe(ProtectionModes.detect);
     expect(afterMode.mac.popup.ransomware.enabled).toBe(false);

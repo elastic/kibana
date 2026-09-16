@@ -24,6 +24,7 @@ import { useGetProtectionsUnavailableComponent as _useGetProtectionsUnavailableC
 import { useGetDeviceControlUpsellComponent as _useGetDeviceControlUpsellComponent } from '../hooks/use_get_device_control_component';
 import type { PerOsPolicySettingsFormProps } from './per_os_policy_settings_form';
 import { PerOsPolicySettingsForm } from './per_os_policy_settings_form';
+import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
 jest.mock('../../../../../../common/hooks/use_license');
 jest.mock('../hooks/use_get_protections_unavailable_component');
@@ -118,8 +119,11 @@ describe('PerOsPolicySettingsForm', () => {
 
   describe('antivirus-registration sync proxy', () => {
     const changeWindowsMalwareMode = async (optionName: RegExp) => {
-      await userEvent.click(renderResult.getByTestId(testSubj.perOsMalware.windows.modeSelect));
-      await userEvent.click(renderResult.getByRole('option', { name: optionName }));
+      await selectOsControlOption(
+        renderResult,
+        testSubj.perOsMalware.windows.modeSelect,
+        optionName
+      );
     };
 
     const getUpdatedPolicy = () =>

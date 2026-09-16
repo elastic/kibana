@@ -9,7 +9,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
+import { AdvancedPolicySchema } from '../../../../../../../common/endpoint/service/policy/advanced_policy_schema';
 import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { AdvancedSection } from './advanced_section';
 

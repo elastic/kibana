@@ -13,6 +13,7 @@ import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
 import type { OsProtectionModeSelectProps } from './os_protection_mode_select';
 import { OsProtectionModeSelect } from './os_protection_mode_select';
+import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
 describe('OsProtectionModeSelect', () => {
   const testSubj = 'osProtectionModeSelect';
@@ -41,10 +42,12 @@ describe('OsProtectionModeSelect', () => {
 
     await userEvent.click(renderResult.getByTestId(testSubj));
 
-    const optionLabels = renderResult.getAllByRole('option').map((option) => option.textContent);
+    const optionLabels = (await renderResult.findAllByRole('option')).map(
+      (option) => option.textContent
+    );
     expect(optionLabels).toEqual(['Disable', 'Detect', 'Detect & prevent']);
 
-    const disableOption = renderResult.getByRole('option', { name: /^Disable$/ });
+    const disableOption = await renderResult.findByRole('option', { name: /^Disable$/ });
     expect(disableOption.querySelector('[color="danger"]')).toBeInTheDocument();
   });
 
@@ -80,8 +83,7 @@ describe('OsProtectionModeSelect', () => {
   it('fires onModeChange once with the selected ProtectionModes value', async () => {
     render({ mode: ProtectionModes.prevent });
 
-    await userEvent.click(renderResult.getByTestId(testSubj));
-    await userEvent.click(renderResult.getByRole('option', { name: /^Detect$/ }));
+    await selectOsControlOption(renderResult, testSubj, /^Detect$/);
 
     expect(formProps.onModeChange).toHaveBeenCalledTimes(1);
     expect(formProps.onModeChange).toHaveBeenCalledWith(ProtectionModes.detect);
