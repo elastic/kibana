@@ -34,7 +34,9 @@ This parameter should only be used when you already know of a specific pattern t
 e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.
 
 Datasets are external sources (e.g. CSV files on object storage) that can only be queried with
-ES|QL ("FROM <dataset_name>"); they do not support _search.`,
+ES|QL ("FROM <dataset_name>"); they do not support _search.
+
+Do NOT use this tool if a more specific skill is available for the request (see the SKILLS section) — prefer loading that skill first, since its dedicated tools are scoped to the right indices for that domain.`,
     annotations: {
       title: 'List Indices, aliases, datastreams, and ES|QL Data Sources',
       readOnlyHint: true,

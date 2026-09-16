@@ -499,7 +499,11 @@ describe('findRules inline tool handler', () => {
     const message = (result.results[0].data as { message: string }).message;
     expect(message).toContain('847');
     expect(message).toContain('top 20');
-    expect(message).toContain('Narrow');
+    // Class B (RFC security-team#18054 Layer 3): the total is authoritative and the model must not
+    // re-query to confirm it — only narrow the filter.
+    expect(message).toContain('authoritative total');
+    expect(message).toContain('do NOT re-query');
+    expect(message).toContain('narrow the filter');
     expect(result.results[0].data).toMatchObject({ total: 847 });
   });
 

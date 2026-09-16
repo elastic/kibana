@@ -9,6 +9,7 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { createFindRulesInlineTool } from './find_rules_tool';
@@ -168,5 +169,17 @@ This skill is read-only. Never suggest or offer to enable, disable, edit, delete
     getInlineTools: () => [
       createFindRulesInlineTool({ getStartServices, logger }),
       createDiscoverRuleTagsInlineTool({ getStartServices, logger }),
+    ],
+    // Subtractive tool binding (RFC security-team#18054): while this skill is loaded, shadow the
+    // general-purpose builtins the model was observed escaping to instead of the dedicated rule
+    // tools. Traces on the security-ai-rules `routing` suite showed rule-body/coverage queries
+    // fanning out to `get_document_by_id` (to fetch rule bodies the summary omitted) and to the
+    // generic ES search / ES|QL tools, rather than answering from `security.find_rules`. Removing
+    // them from the resolved set forces the model onto the skill's own tools.
+    getExcludedToolIds: () => [
+      platformCoreTools.getDocumentById,
+      platformCoreTools.search,
+      platformCoreTools.generateEsql,
+      platformCoreTools.executeEsql,
     ],
   });

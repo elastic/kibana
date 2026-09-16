@@ -221,6 +221,15 @@ function summarizeRule(rule: RuleFromFind) {
     severity: params.severity,
     riskScore: params.risk_score ?? params.riskScore,
     type: params.type,
+    // Non-elective query fields (RFC security-team#18054, Layer 3 / Class A): the find_rules
+    // result historically omitted the rule body, so the model escaped to
+    // `platform.core.get_document_by_id` to read it (the highest-frequency fan-out, x11 in the
+    // 5-rep routing trace). `query`/`index` were added upstream for the coverage rubric; the
+    // remaining non-elective fields are returned here so the body is complete in the result and
+    // there is nothing left to fetch.
+    language: params.language,
+    filters: params.filters,
+    threshold: params.threshold,
     updatedAt: rule.updatedAt,
   };
 }
@@ -270,11 +279,12 @@ export const createFindRulesInlineTool = ({
       const truncated = findResult.total > rules.length;
 
       const ruleNames = rules.map((r) => r.name).join(', ');
+      const topLabel = `top ${rules.length} by ${sortField ?? 'relevance'}`;
       const baseMessage =
         findResult.total === 0
           ? 'No detection rules matched the filter.'
           : truncated
-          ? `Found ${findResult.total} detection rules — showing top ${rules.length}: ${ruleNames}. Results exceed the display limit. Narrow by severity, rule type, tag, or MITRE technique to see more specific results.`
+          ? `Found ${findResult.total} detection rules (authoritative total for this filter) — showing the ${topLabel}: ${ruleNames}. The count ${findResult.total} is complete and correct; do NOT re-query to confirm it. Only narrow the filter (severity, rule type, tag, or MITRE technique) if the user needs to see rules beyond the ${topLabel}.`
           : `Found ${findResult.total} detection rules: ${ruleNames}.`;
 
       return {

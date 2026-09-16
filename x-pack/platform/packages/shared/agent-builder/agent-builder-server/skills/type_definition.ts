@@ -161,6 +161,21 @@ export interface SkillDefinition<
    * Can be used to expose tools which are specific to the skill.
    */
   getInlineTools?: () => MaybePromise<SkillBoundedTool[]>;
+
+  /**
+   * Returns the IDs of builtin/default tools that this skill *shadows* while it is loaded.
+   *
+   * When the skill is active on an agent, these tool IDs are removed from the resolved tool
+   * set — even when they would otherwise be bound via `enable_elastic_capabilities` /
+   * `defaultAgentToolIds` — so the model reaches for this skill's dedicated inline tools
+   * instead of a competing general-purpose builtin. This is the per-tool complement to
+   * `excludeFromElasticCapabilities` and is the mechanism behind subtractive tool binding
+   * (RFC security-team#18054).
+   *
+   * Each returned ID must belong to `defaultAgentToolIds`. Exclusions from all loaded skills
+   * are unioned, and exclusion always wins over inclusion.
+   */
+  getExcludedToolIds?: () => MaybePromise<string[]>;
 }
 
 export interface ReferencedContent {
