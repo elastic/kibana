@@ -1162,6 +1162,11 @@ export const ruleResponseSchema = createRuleDataBaseSchema
     // `null` clears the field on write; the server stores that as absent, so a
     // response never carries it.
     state_transition: stateTransitionSchema.optional(),
+    /**
+     * Absent on execution-compiled builder rules, which persist no query at all
+     * (rule-execution-logic.md "A rule without a persisted query").
+     */
+    query: querySchema.optional(),
     id: z.string().describe('Unique rule identifier.'),
     version: z
       .number()
