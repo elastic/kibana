@@ -8,7 +8,7 @@
 import { EuiAccordion, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { MatcherInput } from '../matcher_input';
 import { optionalLabel } from '../optional_label';
 
@@ -24,6 +24,11 @@ export const AdvancedMatchingAccordion = ({
   dataFieldNames,
 }: AdvancedMatchingAccordionProps) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'advancedMatchingAccordion' });
+
+  const handleExpressionChange = useCallback(
+    (expr: string) => onChange({ ...matcher, expression: expr || null }),
+    [matcher, onChange]
+  );
 
   return (
     <EuiAccordion
@@ -49,7 +54,7 @@ export const AdvancedMatchingAccordion = ({
       >
         <MatcherInput
           value={matcher?.expression ?? ''}
-          onChange={(expr) => onChange({ ...matcher, expression: expr || null })}
+          onChange={handleExpressionChange}
           fullWidth
           data-test-subj="matcherInput"
           dataFieldNames={dataFieldNames}

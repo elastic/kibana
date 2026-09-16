@@ -14,7 +14,7 @@ import {
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
 import { optionalLabel } from '../optional_label';
 
@@ -24,8 +24,6 @@ interface RuleTagsSelectorProps {
 }
 
 export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) => {
-  const [customTags, setCustomTags] = useState<string[]>([]);
-
   const { data: apiTags = [], isLoading } = useFetchRuleTags({ kind: 'alert', enabled: true });
 
   const selectedTags = useMemo(() => matcher?.tags ?? [], [matcher]);
@@ -44,40 +42,44 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     }
 
     const apiTagSet = new Set(apiTags);
-    const orphanedFromMatcher = selectedTags.filter((t) => !apiTagSet.has(t));
-    const allCustom = Array.from(new Set([...customTags, ...orphanedFromMatcher]));
+    const orphaned = selectedTags.filter((t) => !apiTagSet.has(t));
 
-    if (allCustom.length > 0) {
+    if (orphaned.length > 0) {
       groups.push({
         label: i18n.translate(
           'xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.groupOther',
           { defaultMessage: 'Other' }
         ),
-        options: allCustom.map((tag) => ({ label: tag, value: tag })),
+        options: orphaned.map((tag) => ({ label: tag, value: tag })),
       });
     }
 
     return groups;
-  }, [apiTags, customTags, selectedTags]);
+  }, [apiTags, selectedTags]);
 
   const selectedOptions = useMemo((): Array<EuiComboBoxOptionOption<string>> => {
     return selectedTags.map((tag) => ({ label: tag, value: tag }));
   }, [selectedTags]);
 
-  const handleChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
-    const tags = selected.map((o) => o.value ?? o.label);
-    onChange({ ...matcher, tags: tags.length > 0 ? tags : null });
-  };
+  const handleChange = useCallback(
+    (selected: Array<EuiComboBoxOptionOption<string>>) => {
+      const tags = selected.map((o) => o.value ?? o.label);
+      onChange({ ...matcher, tags: tags.length > 0 ? tags : null });
+    },
+    [matcher, onChange]
+  );
 
-  const handleCreateOption = (newTag: string) => {
-    const trimmed = newTag.trim();
-    if (!trimmed) return;
-    setCustomTags((prev) => (prev.includes(trimmed) ? prev : [...prev, trimmed]));
-    onChange({
-      ...matcher,
-      tags: [...(matcher?.tags ?? []), trimmed],
-    });
-  };
+  const handleCreateOption = useCallback(
+    (newTag: string) => {
+      const trimmed = newTag.trim();
+      if (!trimmed) return;
+      onChange({
+        ...matcher,
+        tags: [...(matcher?.tags ?? []), trimmed],
+      });
+    },
+    [matcher, onChange]
+  );
 
   const showCapGuidance = apiTags.length >= TAGS_RESPONSE_LIMIT;
 
@@ -100,12 +102,8 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
           isClearable
           data-test-subj="ruleTagsSelector"
         />
-        {!isLoading && apiTags.length === 0 && customTags.length === 0 && !selectedTags.length && (
-          <EuiText
-            size="xs"
-            color="subdued"
-            data-test-subj="ruleTagsSelectorEmptyState"
-          >
+        {!isLoading && apiTags.length === 0 && selectedTags.length === 0 && (
+          <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorEmptyState">
             {i18n.translate(
               'xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.emptyState',
               {
