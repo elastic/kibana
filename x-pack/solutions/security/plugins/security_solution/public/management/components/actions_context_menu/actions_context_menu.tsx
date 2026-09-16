@@ -24,6 +24,11 @@ export interface ActionsContextMenuProps {
   isDisabled?: boolean;
   /** If defined, then the disabled button will be wrapped in on-hover tooltip */
   disabledTooltip?: ReactNode;
+  /**
+   * Name of the item these actions belong to. It is included in the menu button's accessible name so
+   * that the button can be told apart from those of sibling items
+   */
+  itemName: string;
 }
 
 /**
@@ -36,6 +41,7 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
     icon = 'boxesVertical',
     isDisabled = false,
     disabledTooltip,
+    itemName,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [isOpen, setIsOpen] = useState(false);
@@ -67,6 +73,7 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
     const menuButton = useMemo(() => {
       const button = (
         <EuiToolTip
+          // Kept short, as the tooltip sits right next to the name of the item it belongs to
           content={i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
             defaultMessage: 'Open',
           })}
@@ -77,8 +84,9 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
             iconType={icon}
             onClick={handleToggleMenu}
             isDisabled={isDisabled}
-            aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
-              defaultMessage: 'Open',
+            aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.itemLabel', {
+              defaultMessage: 'Open actions for {itemName}',
+              values: { itemName },
             })}
           />
         </EuiToolTip>
@@ -89,7 +97,7 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
       }
 
       return button;
-    }, [disabledTooltip, getTestId, handleToggleMenu, icon, isDisabled]);
+    }, [disabledTooltip, getTestId, handleToggleMenu, icon, isDisabled, itemName]);
 
     return (
       <EuiPopover

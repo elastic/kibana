@@ -17,10 +17,12 @@ import { useArtifactActionsDisabled } from '../../../hooks/artifacts';
 export interface CardActionsFlexItemProps extends Pick<CommonProps, 'data-test-subj'> {
   /** If defined, then an overflow menu will be shown with the actions provided */
   actions?: ActionsContextMenuProps['items'];
+  /** Name of the artifact these actions belong to. Included in the menu button's accessible name */
+  itemName: ActionsContextMenuProps['itemName'];
 }
 
 export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
-  ({ actions, 'data-test-subj': dataTestSubj }) => {
+  ({ actions, itemName, 'data-test-subj': dataTestSubj }) => {
     const item = useCardArtifact() as ExceptionListItemSchema;
     const { isDisabled, disabledTooltip } = useArtifactActionsDisabled(item);
 
@@ -31,6 +33,7 @@ export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
           icon="boxesVertical"
           isDisabled={isDisabled}
           disabledTooltip={disabledTooltip}
+          itemName={itemName}
           data-test-subj={dataTestSubj}
         />
       </EuiFlexItem>

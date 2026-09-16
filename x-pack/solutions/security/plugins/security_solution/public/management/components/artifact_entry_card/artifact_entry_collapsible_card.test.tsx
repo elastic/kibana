@@ -135,6 +135,57 @@ describe.each([
     expect(passedItem).toBe(item);
   });
 
+  describe('and using a screen reader', () => {
+    const getExpandButton = (): HTMLElement =>
+      renderResult.getByTestId('testCard-header-expandCollapse');
+
+    it('should name the expand button after the artifact it expands', () => {
+      render();
+
+      expect(getExpandButton()).toHaveAccessibleName(`Expand ${item.name}`);
+    });
+
+    it('should name the expand button after the artifact it collapses when expanded', () => {
+      render({ expanded: true });
+
+      expect(getExpandButton()).toHaveAccessibleName(`Collapse ${item.name}`);
+    });
+
+    it.each([
+      ['false', false],
+      ['true', true],
+    ])('should report `aria-expanded` as %s on the expand button', (ariaExpanded, expanded) => {
+      render({ expanded });
+
+      expect(getExpandButton()).toHaveAttribute('aria-expanded', ariaExpanded);
+    });
+
+    it('should point the expand button at the card section it toggles when expanded', () => {
+      render({ expanded: true });
+
+      const controlsId = getExpandButton().getAttribute('aria-controls') ?? '';
+
+      expect(controlsId).not.toBe('');
+      expect(document.getElementById(controlsId)).toContainElement(
+        renderResult.getByTestId('testCard-criteriaConditions')
+      );
+    });
+
+    it('should NOT reference a card section that is not rendered while collapsed', () => {
+      render();
+
+      expect(getExpandButton()).not.toHaveAttribute('aria-controls');
+    });
+
+    it('should name the actions menu button after the artifact it acts on', () => {
+      render({ actions: [{ 'data-test-subj': 'test-action', children: 'action one' }] });
+
+      expect(renderResult.getByTestId('testCard-header-actions-button')).toHaveAccessibleName(
+        `Open actions for ${item.name}`
+      );
+    });
+  });
+
   it('should not display decorator when collapsed', () => {
     let passedItem: ArtifactEntryCardDecoratorProps['item'] | null = null;
     const MockDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item: actualItem }) => {
