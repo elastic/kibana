@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { MANAGE_MONITOR_TYPES_API } from '../../feature';
+import { MANAGE_MONITOR_POLICY_API } from '../../feature';
 import { MonitorTypeEnum } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { buildMultiSpaceSettingsRepository } from '../../services/allowed_monitor_types';
@@ -44,7 +44,7 @@ export const getMonitorTypesPolicyRoute: SyntheticsRestApiRouteFactory<
 });
 
 // Editing the per-space monitor-type allow-list is gated behind the dedicated
-// `manage-monitor-types` privilege so monitor writers (base `all`) cannot widen the policy
+// `manage-monitor-policy` privilege so monitor writers (base `all`) cannot widen the policy
 // that constrains them. The policy is stored on the shared multi-space settings object and
 // can be applied across multiple spaces, like the remote clusters settings.
 export const editMonitorTypesPolicyRoute: SyntheticsRestApiRouteFactory<
@@ -53,7 +53,7 @@ export const editMonitorTypesPolicyRoute: SyntheticsRestApiRouteFactory<
   method: 'PUT',
   path: SYNTHETICS_API_URLS.MONITOR_TYPES_POLICY,
   writeAccess: false,
-  requiredPrivileges: [MANAGE_MONITOR_TYPES_API],
+  requiredPrivileges: [MANAGE_MONITOR_POLICY_API],
   validate: {
     body: schema.object({
       allowedMonitorTypes: AllowedMonitorTypesSchema,

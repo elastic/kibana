@@ -26,7 +26,7 @@ import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { isEqual } from 'lodash';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import type { ClientPluginsStart } from '../../../../../plugin';
-import { useCanManageMonitorTypes } from '../../../../../hooks/use_capabilities';
+import { useCanManageMonitorPolicy } from '../../../../../hooks/use_capabilities';
 import type { MonitorTypesPolicy } from '../../../state/settings/api';
 import { getAllowedMonitorTypesPolicy, setAllowedMonitorTypes } from '../../../state/settings/api';
 
@@ -53,7 +53,7 @@ const sorted = (values: string[]) => [...values].sort();
 export const MonitorTypesForm = () => {
   const { services } = useKibana<ClientPluginsStart>();
   const { spaces, notifications } = services;
-  const canEdit = useCanManageMonitorTypes();
+  const canEdit = useCanManageMonitorPolicy();
 
   const [savedPolicy, setSavedPolicy] = useState<MonitorTypesPolicy | null>(null);
   const [loading, setLoading] = useState(true);
