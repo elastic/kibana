@@ -15,12 +15,16 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiPopover,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiSwitch,
@@ -423,6 +427,65 @@ const computeAlertsBadge = (
   const { total, active } = entity.alerts;
   if (active > 0) return { label: `${active} active alert${active > 1 ? 's' : ''}`, color: 'danger' };
   return { label: '0 active alerts', color: 'success' };
+};
+
+const MoreActionsMenu = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const button = (
+    <EuiButtonIcon
+      iconType="boxesHorizontal"
+      aria-label={i18n.translate(
+        'xpack.streams.entityCentricLab.entities.moreActions',
+        { defaultMessage: 'More actions' }
+      )}
+      color="text"
+      display="base"
+      size="s"
+      onClick={() => setIsOpen(!isOpen)}
+      data-test-subj="entityCentricLabMoreActions"
+    />
+  );
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="downRight"
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel
+        size="s"
+        items={[
+          <EuiContextMenuItem
+            key="documentation"
+            icon="documentation"
+            onClick={() => {
+              setIsOpen(false);
+              window.open('https://ela.st/entity-centric-docs', '_blank');
+            }}
+          >
+            {i18n.translate(
+              'xpack.streams.entityCentricLab.entities.moreActions.documentation',
+              { defaultMessage: 'View documentation' }
+            )}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="feedback"
+            icon="editorComment"
+            onClick={() => {
+              setIsOpen(false);
+              window.open('https://ela.st/entity-centric-feedback', '_blank');
+            }}
+          >
+            {i18n.translate(
+              'xpack.streams.entityCentricLab.entities.moreActions.feedback',
+              { defaultMessage: 'Feedback' }
+            )}
+          </EuiContextMenuItem>,
+        ]}
+      />
+    </EuiPopover>
+  );
 };
 
 const AllEntitiesViewInner = ({
@@ -1463,6 +1526,7 @@ const AllEntitiesViewInner = ({
                         neutral
                         hideBadge
                       />,
+                      <MoreActionsMenu key="more-actions" />,
                     ]
                   : []),
               ]

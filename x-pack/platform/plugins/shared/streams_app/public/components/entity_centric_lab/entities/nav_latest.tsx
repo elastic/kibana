@@ -90,11 +90,7 @@ const useLabModeIsElasticOn = (coreStart: CoreStart): boolean => {
  * Observability nav tree can filter the panel's contents.
  */
 export const LatestInventoryNavHeader = ({ coreStart }: { coreStart: CoreStart }) => {
-  const { euiTheme } = useEuiTheme();
-  const isLatest = useLabModeIsLatest(coreStart);
-  const query = useIntegrationsSearch();
-
-  if (!isLatest) return null;
+  return null;
 
   const wrapperStyles = css`
     padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
