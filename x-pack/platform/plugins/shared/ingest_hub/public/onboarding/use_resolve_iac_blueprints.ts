@@ -14,40 +14,41 @@ import {
 
 import { useOnboardingFlow } from './onboarding_flow_context';
 import { getIacRenderIntegrations } from './step_components/authenticate_and_deploy_step/iac_render_integrations';
+import type { IacInstanceSelection } from './step_components/authenticate_and_deploy_step/iac_render_integrations';
 import type { ServiceVars } from './step_components/service_settings_step/use_service_settings';
 
 /**
  * Fires the IaC Provisioner resolve call when the user leaves Service
  * Settings, so the Authenticate & Deploy step knows which identity workflows
  * a blueprint can actually deploy for the selected managed integrations.
+ * Takes the reconciled instances (not service ids) so inputs enabled only on
+ * duplicated instances are part of what the provisioner evaluates.
  *
  * Fire-and-forget: the returned callback never blocks navigation, and any
  * failure simply leaves the coverage unset so the next step falls back to
  * manifest-derived capability.
  */
-export function useResolveIacBlueprints(): (serviceVars: Record<string, ServiceVars>) => void {
+export function useResolveIacBlueprints(): (
+  instances: IacInstanceSelection[],
+  serviceVars: Record<string, ServiceVars>
+) => void {
   const { isIacProvisionerEnabled } = useIacProvisioner();
-  const {
-    servicesStep,
-    awsServicesMap,
-    invalidateIacBlueprintCoverage,
-    commitIacBlueprintCoverage,
-  } = useOnboardingFlow();
-  const { selectedServiceIds } = servicesStep;
+  const { awsServicesMap, invalidateIacBlueprintCoverage, commitIacBlueprintCoverage } =
+    useOnboardingFlow();
 
   return useCallback(
-    (serviceVars: Record<string, ServiceVars>) => {
+    (instances: IacInstanceSelection[], serviceVars: Record<string, ServiceVars>) => {
       if (!isIacProvisionerEnabled) {
         return;
       }
 
-      const managedIntegrationServiceIds = selectedServiceIds.filter((id) =>
+      const managedIntegrationInstances = instances.filter(({ serviceId }) =>
         awsServicesMap
-          ?.get(id)
+          ?.get(serviceId)
           ?.deploymentMethods.some(({ method }) => method === 'managed_integration')
       );
       const integrations = getIacRenderIntegrations(
-        managedIntegrationServiceIds,
+        managedIntegrationInstances,
         awsServicesMap,
         serviceVars
       );
@@ -78,7 +79,6 @@ export function useResolveIacBlueprints(): (serviceVars: Record<string, ServiceV
     },
     [
       isIacProvisionerEnabled,
-      selectedServiceIds,
       awsServicesMap,
       invalidateIacBlueprintCoverage,
       commitIacBlueprintCoverage,

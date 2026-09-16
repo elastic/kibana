@@ -44,6 +44,7 @@ import type {
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
 import { getIacRenderIntegrations } from './iac_render_integrations';
+import type { IacInstanceSelection } from './iac_render_integrations';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
@@ -51,6 +52,8 @@ type PreferredMethod = 'identity_federation' | 'access_keys';
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
   serviceIds: string[];
+  /** All reconciled instances; duplicates carry vars under their own instanceId. */
+  instances: IacInstanceSelection[];
   serviceVars: Record<string, ServiceVars>;
   showIdentityFederation: boolean;
   onDeploy: () => void;
@@ -62,6 +65,7 @@ interface ManagedIntegrationsSectionProps {
 export function ManagedIntegrationsSection({
   serviceCount,
   serviceIds,
+  instances,
   serviceVars,
   showIdentityFederation,
   onDeploy,
@@ -116,10 +120,14 @@ export function ManagedIntegrationsSection({
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
   );
-  const iacIntegrations: RenderIacTemplateIntegration[] = useMemo(
-    () => getIacRenderIntegrations(serviceIds, awsServicesMap, serviceVars),
-    [serviceIds, awsServicesMap, serviceVars]
-  );
+  const iacIntegrations: RenderIacTemplateIntegration[] = useMemo(() => {
+    const managedServiceIds = new Set(serviceIds);
+    return getIacRenderIntegrations(
+      instances.filter(({ serviceId }) => managedServiceIds.has(serviceId)),
+      awsServicesMap,
+      serviceVars
+    );
+  }, [instances, serviceIds, awsServicesMap, serviceVars]);
   const cloud = services.cloud as CloudSetupForCloudConnector | undefined;
 
   const radioOptions = [

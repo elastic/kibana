@@ -74,11 +74,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
-  // ECF instances: prefer session-storage instances because they carry duplicate-instance ARNs
-  // (multi-bucket / multi-log-group configs from Step 2). Fall back to one base instance per
-  // selected service when session storage hasn't been written yet — e.g. the user jumped to
-  // Step 3 directly via the horizontal step indicator without clicking Next in Step 2.
-  const ecfInstances = useMemo(() => {
+  // Reconciled instances (ECF and managed integrations): prefer session-storage instances
+  // because they carry duplicate-instance configs (multi-bucket / multi-log-group from Step 2).
+  // Fall back to one base instance per selected service when session storage hasn't been
+  // written yet — e.g. the user jumped to Step 3 directly via the horizontal step indicator
+  // without clicking Next in Step 2.
+  const reconciledInstances = useMemo(() => {
     const stored = serviceSettings?.instances;
     if (stored && stored.length > 0) return stored;
     return selectedServiceIds.flatMap((id) => {
@@ -190,7 +191,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
   } = useEcfDeployment({
-    instances: isAgentBased ? [] : ecfInstances,
+    instances: isAgentBased ? [] : reconciledInstances,
     serviceVars,
     globalRegion,
     otlpEndpoint,
@@ -331,6 +332,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <ManagedIntegrationsSection
           serviceCount={miServiceIds.length}
           serviceIds={miServiceIds}
+          instances={reconciledInstances}
           serviceVars={serviceVars}
           showIdentityFederation={showIdentityFederation}
           onDeploy={handleDeployClick}

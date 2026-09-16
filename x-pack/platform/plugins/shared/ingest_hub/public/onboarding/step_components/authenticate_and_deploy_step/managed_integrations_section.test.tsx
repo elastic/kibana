@@ -171,6 +171,7 @@ function renderSection(
         <ManagedIntegrationsSection
           serviceCount={props.serviceCount ?? 3}
           serviceIds={['guardduty']}
+          instances={[{ instanceId: 'guardduty', serviceId: 'guardduty' }]}
           serviceVars={{}}
           showIdentityFederation={props.showIdentityFederation ?? true}
           onDeploy={props.onDeploy ?? jest.fn()}
@@ -410,6 +411,7 @@ describe('ManagedIntegrationsSection', () => {
               <ManagedIntegrationsSection
                 serviceCount={3}
                 serviceIds={['guardduty']}
+                instances={[{ instanceId: 'guardduty', serviceId: 'guardduty' }]}
                 serviceVars={{}}
                 showIdentityFederation={true}
                 onDeploy={jest.fn()}

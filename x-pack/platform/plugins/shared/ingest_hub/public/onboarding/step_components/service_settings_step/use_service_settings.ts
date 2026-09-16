@@ -237,8 +237,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
           },
         },
       });
+      // The new instance's inputs join the resolve payload, so coverage
+      // resolved before the duplicate existed no longer applies.
+      invalidateIacBlueprintCoverage();
     },
-    [persisted, setPersisted, instances, getServiceVars]
+    [persisted, setPersisted, instances, getServiceVars, invalidateIacBlueprintCoverage]
   );
 
   const removeInstance = useCallback(
@@ -331,8 +334,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       instances,
     });
     // Ask the IaC Provisioner which identity workflows are deployable for the
-    // configured services. Fire-and-forget: navigation never waits on it.
-    resolveIacBlueprints(persisted?.serviceVars ?? {});
+    // configured instances. Fire-and-forget: navigation never waits on it.
+    resolveIacBlueprints(instances, persisted?.serviceVars ?? {});
     onContinue();
   }, [onContinue, persisted, setPersisted, instances, resolveIacBlueprints]);
 

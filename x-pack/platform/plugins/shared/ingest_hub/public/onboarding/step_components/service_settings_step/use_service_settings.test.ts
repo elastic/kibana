@@ -251,6 +251,9 @@ describe('useServiceSettings — handleNext', () => {
 
     expect(mockResolveIacBlueprints).toHaveBeenCalledTimes(1);
     expect(mockResolveIacBlueprints).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ instanceId: 'guardduty', serviceId: 'guardduty' }),
+      ]),
       expect.objectContaining({
         guardduty: expect.objectContaining({ enabledDataStreams: vars.enabledDataStreams }),
       })
@@ -266,7 +269,12 @@ describe('useServiceSettings — handleNext', () => {
       result.current.handleNext();
     });
 
-    expect(mockResolveIacBlueprints).toHaveBeenCalledWith({});
+    expect(mockResolveIacBlueprints).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ instanceId: 'guardduty', serviceId: 'guardduty' }),
+      ]),
+      {}
+    );
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 });
@@ -288,8 +296,13 @@ describe('useServiceSettings — blueprint coverage invalidation', () => {
     expect(invalidateIacBlueprintCoverage).toHaveBeenCalledTimes(1);
 
     act(() => {
-      result.current.removeInstance('guardduty');
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
     });
     expect(invalidateIacBlueprintCoverage).toHaveBeenCalledTimes(2);
+
+    act(() => {
+      result.current.removeInstance('guardduty');
+    });
+    expect(invalidateIacBlueprintCoverage).toHaveBeenCalledTimes(3);
   });
 });

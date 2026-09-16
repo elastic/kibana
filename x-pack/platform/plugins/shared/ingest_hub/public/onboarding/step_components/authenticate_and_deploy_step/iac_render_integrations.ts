@@ -51,25 +51,34 @@ const getActiveInputs = (
   return [...inputs];
 };
 
+export interface IacInstanceSelection {
+  /** Service Settings row identity; the key into `serviceVars`. */
+  instanceId: string;
+  /** Service matrix / policy-template key. Duplicates share it. */
+  serviceId: string;
+}
+
 /**
  * Builds the IaC Provisioner `integrations` payload for Ingest Hub's Launch
- * CloudFormation button: one entry per package, with each selected managed
- * integration's policy template and the inputs the user actually enabled.
+ * CloudFormation button and resolve call: one entry per package, with each
+ * selected managed integration's policy template and the inputs the user
+ * actually enabled. Callers pass instances (not service ids) so inputs
+ * enabled only on a duplicated instance are unioned in too.
  */
 export const getIacRenderIntegrations = (
-  serviceIds: string[],
+  instances: IacInstanceSelection[],
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined,
   serviceVars: Record<string, ServiceVars>
 ): RenderIacTemplateIntegration[] => {
   const templatesByPackage = new Map<string, Map<string, Set<string>>>();
 
-  for (const serviceId of serviceIds) {
+  for (const { instanceId, serviceId } of instances) {
     const service = awsServicesMap?.get(serviceId);
     if (!service || service.identityFederationSupported === false) {
       continue;
     }
 
-    const enabledInputs = getActiveInputs(service, serviceVars[serviceId]);
+    const enabledInputs = getActiveInputs(service, serviceVars[instanceId]);
     if (enabledInputs.length === 0) {
       continue;
     }

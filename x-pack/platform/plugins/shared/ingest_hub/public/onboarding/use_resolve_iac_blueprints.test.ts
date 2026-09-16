@@ -57,6 +57,11 @@ const DEPLOYABLE_COVERAGE = {
   ],
 };
 
+const BASE_INSTANCES = [
+  { instanceId: 'guardduty', serviceId: 'guardduty' },
+  { instanceId: 'cloudtrail', serviceId: 'cloudtrail' },
+];
+
 describe('useResolveIacBlueprints', () => {
   let invalidateIacBlueprintCoverage: jest.Mock;
   let commitIacBlueprintCoverage: jest.Mock;
@@ -69,7 +74,6 @@ describe('useResolveIacBlueprints', () => {
     commitIacBlueprintCoverage = jest.fn();
     mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
     mockUseOnboardingFlow.mockReturnValue({
-      servicesStep: { selectedServiceIds: ['guardduty', 'cloudtrail'], dataFormat: 'json' },
       awsServicesMap: new Map([
         ['guardduty', guarddutyService],
         ['cloudtrail', ecfOnlyService],
@@ -84,7 +88,7 @@ describe('useResolveIacBlueprints', () => {
 
     const { result } = renderHook(() => useResolveIacBlueprints());
     act(() => {
-      result.current({});
+      result.current(BASE_INSTANCES, {});
     });
 
     expect(mockSendResolve).toHaveBeenCalledWith({
@@ -110,7 +114,7 @@ describe('useResolveIacBlueprints', () => {
 
     const { result } = renderHook(() => useResolveIacBlueprints());
     act(() => {
-      result.current({});
+      result.current(BASE_INSTANCES, {});
     });
 
     expect(mockSendResolve).not.toHaveBeenCalled();
@@ -120,7 +124,6 @@ describe('useResolveIacBlueprints', () => {
 
   it('invalidates coverage without calling resolve when nothing is resolvable', () => {
     mockUseOnboardingFlow.mockReturnValue({
-      servicesStep: { selectedServiceIds: ['cloudtrail'], dataFormat: 'json' },
       awsServicesMap: new Map([['cloudtrail', ecfOnlyService]]),
       invalidateIacBlueprintCoverage,
       commitIacBlueprintCoverage,
@@ -128,7 +131,7 @@ describe('useResolveIacBlueprints', () => {
 
     const { result } = renderHook(() => useResolveIacBlueprints());
     act(() => {
-      result.current({});
+      result.current([{ instanceId: 'cloudtrail', serviceId: 'cloudtrail' }], {});
     });
 
     expect(mockSendResolve).not.toHaveBeenCalled();
@@ -144,7 +147,7 @@ describe('useResolveIacBlueprints', () => {
 
     const { result } = renderHook(() => useResolveIacBlueprints());
     act(() => {
-      result.current({});
+      result.current(BASE_INSTANCES, {});
     });
 
     await waitFor(() => {
@@ -177,13 +180,13 @@ describe('useResolveIacBlueprints', () => {
 
     const { result, unmount } = renderHook(() => useResolveIacBlueprints());
     act(() => {
-      result.current({});
+      result.current(BASE_INSTANCES, {});
     });
     // Simulate the Back/Next remount that resets any hook-local state.
     unmount();
     const { result: remounted } = renderHook(() => useResolveIacBlueprints());
     act(() => {
-      remounted.current({});
+      remounted.current(BASE_INSTANCES, {});
     });
 
     await waitFor(() => {
@@ -208,7 +211,7 @@ describe('useResolveIacBlueprints', () => {
     const { result } = renderHook(() => useResolveIacBlueprints());
     expect(() => {
       act(() => {
-        result.current({});
+        result.current(BASE_INSTANCES, {});
       });
     }).not.toThrow();
 
