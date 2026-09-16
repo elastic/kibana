@@ -118,9 +118,7 @@ export const DashboardListing = ({
 
   const onImportSuccess = useCallback((id: string, title: string) => {
     setRefreshListBouncer((b) => !b);
-    coreServices.notifications.toasts.addSuccess(
-      importDashboardJsonStrings.getSuccessToast(title)
-    );
+    coreServices.notifications.toasts.addSuccess(importDashboardJsonStrings.getSuccessToast(title));
   }, []);
 
   const appMenu = useMemo<AppMenuConfig | undefined>(() => {
