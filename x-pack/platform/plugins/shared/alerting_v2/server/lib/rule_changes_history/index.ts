@@ -13,6 +13,7 @@ export {
   RULE_CHANGES_HISTORY_OBJECT_TYPE,
   RULE_CHANGES_HISTORY_RESOURCE_KEY,
   RULE_VERSION_FALLBACK,
+  RULE_REVISION_FALLBACK,
 } from './constants';
 export { computeChanges } from './compute_changes';
 export { createChangeHistoryClient } from './create_change_history_client';

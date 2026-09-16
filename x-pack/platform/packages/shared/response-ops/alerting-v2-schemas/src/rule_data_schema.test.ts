@@ -2002,7 +2002,7 @@ describe('bulkGetRulesResponseSchema', () => {
     id: 'rule-1',
     version: 1,
     kind: 'alert' as const,
-    metadata: { name: 'r', signature_id: 'sample-sig-id' },
+    metadata: { name: 'r', signature_id: 'sample-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 } },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { base: 'FROM logs-* | LIMIT 1' },
