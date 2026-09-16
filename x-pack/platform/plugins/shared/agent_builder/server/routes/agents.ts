@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
+import {
+  AgentAccessControlRole,
+  AgentAccessControlMode,
+  agentIdMaxLength,
+} from '@kbn/agent-builder-common';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
@@ -84,6 +88,24 @@ const AI_INDICES_SCHEMA = schema.arrayOf(
   {
     maxSize: 100,
     meta: { description: 'Array of AI indices to associate with the agent.' },
+  }
+);
+
+const SUBAGENT_IDS_SCHEMA = schema.arrayOf(
+  schema.string({
+    maxLength: agentIdMaxLength,
+    meta: {
+      description:
+        "Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.",
+    },
+  }),
+  {
+    maxSize: 50,
+    meta: {
+      availability: { stability: 'tech_preview' },
+      description:
+        "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
+    },
   }
 );
 
@@ -370,6 +392,7 @@ export function registerAgentRoutes({
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   ai_indices: schema.maybe(AI_INDICES_SCHEMA),
+                  subagent_ids: schema.maybe(SUBAGENT_IDS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -520,6 +543,7 @@ export function registerAgentRoutes({
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                     ai_indices: schema.maybe(AI_INDICES_SCHEMA),
+                    subagent_ids: schema.maybe(SUBAGENT_IDS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },

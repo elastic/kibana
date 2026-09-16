@@ -64,10 +64,6 @@ jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: string) => mockServices[token],
 }));
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => key,
-}));
-
 const successResult = {
   phases: [],
   groupingValuesByHash: {},
