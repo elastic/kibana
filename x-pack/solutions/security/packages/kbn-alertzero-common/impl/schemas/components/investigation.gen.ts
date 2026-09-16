@@ -39,7 +39,7 @@ export type ProposalStatusEnum = typeof ProposalStatus.enum;
 export const ProposalStatusEnum = ProposalStatus.enum;
 
 export const WatchTier = lazySchema(() =>
-  z.enum(['floor', 'officer', 'dark', 'deep', 'detection'])
+  z.enum(['floor', 'officer', 'hunt', 'deep', 'detection'])
 );
 export type WatchTier = z.infer<typeof WatchTier>;
 export type WatchTierEnum = typeof WatchTier.enum;
