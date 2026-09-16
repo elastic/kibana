@@ -25,12 +25,14 @@ describe('chart type guidance', () => {
     );
   });
 
-  it('keeps metric values uncolored unless a deliberate color config is set', () => {
+  it('leaves metrics uncolored by default but colors bounded measures that read as good or bad', () => {
     const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
 
-    expect(metricConfig).toContain('By default omit both `color` and `apply_color_to`');
+    expect(metricConfig).toContain('Omit `color` by default');
+    expect(metricConfig).toContain('are the usual exception');
+    expect(metricConfig).toContain('explicit 3-band `steps`');
     expect(metricConfig).toContain('Never set `apply_color_to` on its own');
-    expect(metricConfig).toContain('only in the same edit that sets a deliberate `color` config');
+    expect(metricConfig).toContain('in the same edit that sets the `color` config');
   });
 
   it('always sets XY legend visibility so breakdown legends are not hidden', () => {
