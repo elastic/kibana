@@ -643,7 +643,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     };
     expect(overrideStep).toBeDefined();
     expect(overrideStep.type).toBe('if');
-    // Gate on the presence of the feature-registry connector id — absent on standalone path
+    // Gate on the presence of the feature-registry connector id — absent on standalone path.
+    // NOTE: workflow_enabled is intentionally not overridden here — a space admin's decision
+    // to disable the workflow is respected on both standalone and Worker paths.
     expect(overrideStep.condition).toBe('${{ inputs.connectorIdByFeature != null }}');
 
     const setStep = findStepByName(overrideStep.steps, 'set_caller_overrides') as {
@@ -712,7 +714,7 @@ const makeRenderContext = (batchAlerts: unknown[], relatedSummaries: unknown[] =
     batch_llm_calls: 1,
     batch_input_tokens: 0,
     batch_output_tokens: 0,
-    normalized_version: 'v0_0_3',
+    normalized_version: 'v0_0_4',
     connector_id: 'test-connector',
   },
   steps: {

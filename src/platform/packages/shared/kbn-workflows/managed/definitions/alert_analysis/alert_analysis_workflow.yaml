@@ -54,6 +54,12 @@ triggers:
     # Optional caller-supplied inputs. When provided (e.g. by the AlertZero Alert Triage Worker
     # via workflow.execute), they override the space's uiSettings runtime_config values.
     # Absent inputs leave the standalone path byte-identical (success criterion 7 / R8).
+    #
+    # CONTRACT — inputs are all-or-nothing for the current caller set. The override step
+    # is gated on connectorIdByFeature; a caller that supplies any of the other four fields
+    # without connectorIdByFeature will have all overrides silently dropped and the workflow
+    # will run in standalone mode. Future callers that do not need connectorIdByFeature must
+    # use a different gate or extend the override step.
     inputs:
       additionalProperties: false
       properties:
@@ -75,10 +81,13 @@ triggers:
           description: Tag prefix for workflow tags. Overrides the uiSettings tagPrefix.
         connectorIdByFeature:
           type: string
+          minLength: 1
           description: >
             Model Management feature id used to resolve the LLM connector at run time.
             Mutually exclusive with the uiSettings-derived connectorId: supplying this
             tells the sub-workflow to use the feature registry instead of uiSettings.
+            Must be non-empty — an empty string passes the != null gate but leaves both
+            connectors unset, causing analysis to silently skip with empty verdicts.
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
@@ -211,6 +220,12 @@ steps:
   # precedence over the space's uiSettings read above. Gated on connectorIdByFeature
   # because that field is always present when the Worker calls; its absence means
   # standalone mode, which must remain byte-identical to the pre-Worker path (R8).
+  #
+  # NOTE — workflow_enabled is intentionally NOT overridden here. If a space admin
+  # has disabled the workflow in uiSettings, Worker invocations will also no-op (the
+  # analysis_enabled guard sees workflow_enabled=false and skips). This is the intended
+  # behaviour: space-admin intent is respected on both paths. The Worker must check
+  # workflowEnabled before invoking this sub-workflow (PR 4's responsibility).
   - name: apply_caller_input_overrides
     type: if
     condition: "${{ inputs.connectorIdByFeature != null }}"
