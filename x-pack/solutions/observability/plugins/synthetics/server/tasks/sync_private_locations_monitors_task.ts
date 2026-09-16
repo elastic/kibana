@@ -40,16 +40,19 @@ export const DEFAULT_TASK_SCHEDULE = `${MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}m`;
  * recreate that can never succeed stops re-running every interval.
  */
 export const DEFAULT_MAX_CLEANUP_RETRIES = 3;
-/** Bump to unlatch existing tasks once so leftover extras are scanned after this change. */
+/** Bump to unlatch leftover-scan callers that still pass a stale version. */
 export const LEFTOVER_CLEANUP_SCAN_VERSION = 1;
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
+  disableAutoSync?: boolean;
+  privateLocationId?: string;
+}
+
+export interface LeftoverCleanupTaskState {
   hasAlreadyDoneCleanup: boolean;
   maxCleanUpRetries: number;
   cleanupScanVersion?: number;
-  disableAutoSync?: boolean;
-  privateLocationId?: string;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -239,11 +242,6 @@ export class SyncPrivateLocationMonitorsTask {
 
     return {
       lastStartedAt: startedAt.toISOString(),
-      hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
-      // `??`, not `||`: a persisted 0 means the budget is spent, and `||` would
-      // silently hand back a fresh 3 and re-run cleanup on every interval forever
-      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries ?? DEFAULT_MAX_CLEANUP_RETRIES,
-      cleanupScanVersion: taskInstance.state.cleanupScanVersion ?? 0,
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
     };
   }

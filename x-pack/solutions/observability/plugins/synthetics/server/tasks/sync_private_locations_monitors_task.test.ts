@@ -7,8 +7,8 @@
 
 import type {
   CustomTaskInstance,
+  LeftoverCleanupTaskState,
   SyncTaskRunResult,
-  SyncTaskState,
 } from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
@@ -192,10 +192,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
         disableAutoSync: false,
-        hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
-        maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES,
-        cleanupScanVersion: 0,
       });
     });
 
@@ -231,10 +228,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
         disableAutoSync: false,
-        maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES,
-        hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
-        cleanupScanVersion: 0,
       });
     });
 
@@ -262,9 +256,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.state).toEqual({
         disableAutoSync: false,
         lastStartedAt: expect.anything(),
-        hasAlreadyDoneCleanup: false,
-        maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES,
-        cleanupScanVersion: 0,
       });
     });
 
@@ -459,7 +450,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.error).toBeUndefined();
-      expect(result.state.hasAlreadyDoneCleanup).toBe(false);
+      expect(result.state.hasAlreadyDoneCleanup).toBeUndefined();
       expect(mockTaskManagerStart.schedule).not.toHaveBeenCalled();
     });
 
@@ -738,15 +729,17 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
     });
 
-    it('defaults cleanupScanVersion to 0 and keeps a persisted value', () => {
-      expect(task.getNewTaskState({ taskInstance: getMockTaskInstance() }).cleanupScanVersion).toBe(
-        0
-      );
-      expect(
-        task.getNewTaskState({
-          taskInstance: getMockTaskInstance({ cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION }),
-        }).cleanupScanVersion
-      ).toBe(LEFTOVER_CLEANUP_SCAN_VERSION);
+    it('does not persist leftover cleanup latch on PL sync state', () => {
+      const state = task.getNewTaskState({
+        taskInstance: getMockTaskInstance({
+          hasAlreadyDoneCleanup: true,
+          maxCleanUpRetries: 0,
+          cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION,
+        }),
+      });
+      expect(state.hasAlreadyDoneCleanup).toBeUndefined();
+      expect(state.maxCleanUpRetries).toBeUndefined();
+      expect(state.cleanupScanVersion).toBeUndefined();
     });
 
     it('should not delete any policies if all are expected', async () => {
@@ -1004,7 +997,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield ['monitor1-loc1', 'monitor1-loc1-stores'];
         })()
       );
-      const state: Partial<SyncTaskState> = {
+      const state: Partial<LeftoverCleanupTaskState> = {
         hasAlreadyDoneCleanup: true,
         maxCleanUpRetries: 3,
       };
@@ -1071,7 +1064,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield ['monitor1-loc1', 'monitor1-loc1-stores'];
         })()
       );
-      const state: Partial<SyncTaskState> = {
+      const state: Partial<LeftoverCleanupTaskState> = {
         hasAlreadyDoneCleanup: true,
         maxCleanUpRetries: 0,
       };

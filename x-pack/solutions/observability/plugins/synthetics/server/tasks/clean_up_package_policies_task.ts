@@ -24,7 +24,7 @@ import {
   DEFAULT_MAX_CLEANUP_RETRIES,
   LEFTOVER_CLEANUP_SCAN_VERSION,
   runTaskPerPrivateLocation,
-  type SyncTaskState,
+  type LeftoverCleanupTaskState,
 } from './sync_private_locations_monitors_task';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 
@@ -174,8 +174,7 @@ async function cleanUpLeftoverPrivateLocationPolicies(
   try {
     // Fresh leftover-scan latch each run: leftovers are not created on the
     // happy path, so a daily scan is enough and a persisted latch would hide them.
-    const leftoverState: SyncTaskState = {
-      lastStartedAt: new Date().toISOString(),
+    const leftoverState: LeftoverCleanupTaskState = {
       hasAlreadyDoneCleanup: false,
       maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES,
       cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION,

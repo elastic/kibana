@@ -13,7 +13,7 @@ import { getFilterForTestNowRun } from './test_now_run_filter';
 import {
   DEFAULT_MAX_CLEANUP_RETRIES,
   LEFTOVER_CLEANUP_SCAN_VERSION,
-  type SyncTaskState,
+  type LeftoverCleanupTaskState,
 } from './sync_private_locations_monitors_task';
 import type { SyntheticsServerSetup } from '../types';
 
@@ -35,7 +35,7 @@ export interface CleanUpDuplicatedPackagePoliciesResult {
 export async function cleanUpDuplicatedPackagePolicies(
   serverSetup: SyntheticsServerSetup,
   soClient: SavedObjectsClientContract,
-  taskState: SyncTaskState
+  taskState: LeftoverCleanupTaskState
 ): Promise<CleanUpDuplicatedPackagePoliciesResult> {
   let performCleanupSync = false;
   let failedAgentPolicyIds: string[] = [];
