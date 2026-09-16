@@ -119,6 +119,7 @@ export type {
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
+export { createShortestPathEvaluator } from './src/evaluators/shortest_path';
 export { createConversationCoherenceEvaluator } from './src/evaluators/conversation_coherence';
 export { createMultiJudgeEvaluator } from './src/evaluators/multi_judge';
 export {

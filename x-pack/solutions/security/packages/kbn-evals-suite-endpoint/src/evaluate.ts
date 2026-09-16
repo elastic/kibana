@@ -28,8 +28,8 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
-      use(
+    async ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
+      await use(
         createEvaluateSecurityDataset({
           chatClient,
           evaluators,

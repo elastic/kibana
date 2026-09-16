@@ -13,8 +13,13 @@ import type {
   Evaluator,
   EvalsExecutorClient,
   Example,
+  TaskOutput,
 } from '@kbn/evals';
-import { createToolCallsEvaluator, createTrajectoryEvaluator } from '@kbn/evals';
+import {
+  createShortestPathEvaluator,
+  createTrajectoryEvaluator,
+  getToolCallSteps,
+} from '@kbn/evals';
 import type { SecurityEvalChatClient } from './chat_client';
 
 export interface SecurityDatasetExample extends Example {
@@ -51,34 +56,11 @@ export function createEndpointCriteriaEvaluator({
   };
 }
 
-function createShortestPathEvaluator(): Evaluator {
-  return {
-    name: 'Shortest Path',
-    kind: 'CODE' as const,
-    evaluate: async ({ output, expected }) => {
-      const expectedOutput = expected as SecurityDatasetExample['output'] | null;
-      const maxToolCalls = expectedOutput?.maxToolCalls;
-      const actualToolCalls =
-        (output as { steps?: Array<{ type?: string; tool_id?: string }> })?.steps?.filter(
-          (s) => s.type === 'tool_call' || s.tool_id
-        ).length ?? 0;
-
-      if (!maxToolCalls || maxToolCalls <= 0) {
-        return { score: 1, label: 'skipped', explanation: 'No maxToolCalls expectation set' };
-      }
-
-      const score =
-        actualToolCalls <= maxToolCalls
-          ? 1
-          : Math.max(0, 1 - (actualToolCalls - maxToolCalls) * 0.2);
-      return {
-        score,
-        label: score >= 1 ? 'optimal' : score >= 0.6 ? 'acceptable' : 'verbose',
-        explanation: `Used ${actualToolCalls} tool calls (limit: ${maxToolCalls}).`,
-        metadata: { actualToolCalls, maxToolCalls },
-      };
-    },
-  };
+function createShortestPathEvaluatorLocal(): Evaluator {
+  return createShortestPathEvaluator({
+    maxToolCallsExtractor: (expected) =>
+      (expected as SecurityDatasetExample['output'] | null)?.maxToolCalls,
+  });
 }
 
 export function createEvaluateSecurityDataset({
@@ -110,14 +92,10 @@ export function createEvaluateSecurityDataset({
     } satisfies EvaluationDataset;
 
     const trajectoryEvaluator = createTrajectoryEvaluator({
-      extractToolCalls: (output: unknown) => {
-        const steps =
-          (output as { steps?: Array<{ type?: string; tool_id?: string }> })?.steps ?? [];
-        return steps
-          .filter((s) => s.type === 'tool_call' || s.tool_id)
-          .map((s) => s.tool_id ?? 'unknown')
-          .filter(Boolean);
-      },
+      extractToolCalls: (output: unknown) =>
+        getToolCallSteps(output as TaskOutput)
+          .map((s) => s.tool_id)
+          .filter((id): id is string => Boolean(id)),
       goldenPathExtractor: (expected: unknown) => {
         return (expected as SecurityDatasetExample['output'])?.expectedToolCalls ?? [];
       },
@@ -125,7 +103,6 @@ export function createEvaluateSecurityDataset({
       coverageWeight: 0.5,
     });
 
-    const toolCallsEvaluator = createToolCallsEvaluator({ traceEsClient, log });
     // Note: skillInvocationEvaluator disabled because OTel trace index does not
     // contain `attributes.elastic.inference.skill.name`. The platform telemetry
     // gap is tracked separately; tool-call coverage is already enforced by
@@ -148,8 +125,8 @@ export function createEvaluateSecurityDataset({
       [
         createEndpointCriteriaEvaluator({ evaluators }),
         trajectoryEvaluator,
-        toolCallsEvaluator,
-        createShortestPathEvaluator(),
+        evaluators.traceBasedEvaluators.toolCalls,
+        createShortestPathEvaluatorLocal(),
       ]
     );
   };

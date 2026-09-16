@@ -47,7 +47,7 @@ export function createSpanLatencyEvaluator({
     traceEsClient,
     log,
     config: {
-      name: 'Latency',
+      name: `Span Latency (${spanName})`,
       buildQuery: (traceId) => `FROM traces-*
 | WHERE TraceId == "${traceId}" AND Name == "${spanName}"
 | EVAL latency_seconds = TO_DOUBLE(Duration) / 1000000000
