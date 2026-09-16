@@ -309,6 +309,18 @@ const toStringDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'text',
           optional: false,
           description:
