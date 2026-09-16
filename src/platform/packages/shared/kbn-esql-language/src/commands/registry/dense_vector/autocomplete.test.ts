@@ -13,11 +13,13 @@ import {
 } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import {
+  onCompleteItem,
   withCompleteItem,
   withMapCompleteItem,
   pipeCompleteItem,
   newLineCompleteItem,
   commaCompleteItem,
+  assignCompletionItem,
 } from '../complete_items';
 import { expectSuggestions, suggest } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
@@ -85,10 +87,30 @@ describe('DENSE_VECTOR Autocomplete', () => {
       );
     });
 
-    test('does not suggest a new user-defined column, since assignments are not allowed', async () => {
+    test('suggests a target column name, to open the `target = field` form', async () => {
+      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+
       await expectDenseVectorSuggestions(
         'from a | dense_vector ',
-        { notContains: ['col0 = '] },
+        { contains: ['col0 = '] },
+        mockCallbacks
+      );
+    });
+
+    test('suggests the assignment operator after an unrecognized first name', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector vec',
+        { contains: [assignCompletionItem.text] },
+        mockCallbacks
+      );
+    });
+
+    test('does not suggest a target assignment after a comma, where the grammar rejects it', async () => {
+      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector textField, ',
+        { contains: ['keywordField'], notContains: ['col0 = '] },
         mockCallbacks
       );
     });
@@ -117,6 +139,102 @@ describe('DENSE_VECTOR Autocomplete', () => {
           contains: ['keywordField'],
           notContains: ['integerField'],
         },
+        mockCallbacks
+      );
+    });
+  });
+
+  describe('target = field form', () => {
+    test('suggests fields, but no further target, inside the assignment', async () => {
+      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector vec = ',
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: ['integerField', 'col0 = '],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('suggests continuations after the assigned field', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector vec = textField ',
+        [newLineCompleteItem.text, pipeCompleteItem.text, ', ', withCompleteItem.text],
+        mockCallbacks
+      );
+    });
+  });
+
+  describe('suffix = "..." ON form', () => {
+    test('suggests the suffix modifier right after the command keyword', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector ',
+        { contains: ['suffix = "${0:_dense_vector}" ON '] },
+        mockCallbacks
+      );
+    });
+
+    test('does not suggest the suffix modifier once a field is being typed', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector textField, ',
+        { notContains: ['suffix = "${0:_dense_vector}" ON '] },
+        mockCallbacks
+      );
+    });
+
+    // Until ON is typed, `suffix = "_dv"` is indistinguishable from the literal-input form,
+    // so ON has to stay on offer here.
+    test('suggests ON after a quoted value assigned to a name', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector suffix = "_dv" ',
+        [
+          onCompleteItem.text,
+          withCompleteItem.text,
+          newLineCompleteItem.text,
+          pipeCompleteItem.text,
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('suggests text and keyword fields after ON', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector suffix = "_dv" ON ',
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: ['integerField'],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('does not suggest a target assignment in the ON list', async () => {
+      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector suffix = "_dv" ON ',
+        { notContains: ['col0 = '] },
+        mockCallbacks
+      );
+    });
+
+    test('suggests continuations after a field in the ON list', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector suffix = "_dv" ON textField ',
+        [newLineCompleteItem.text, pipeCompleteItem.text, ', ', withCompleteItem.text],
+        mockCallbacks
+      );
+    });
+  });
+
+  describe('string literal input', () => {
+    // `DENSE_VECTOR "text" ON field` is a syntax error, so ON must not be offered here.
+    test('suggests only WITH and pipe after a bare literal', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector "some text" ',
+        [withCompleteItem.text, newLineCompleteItem.text, pipeCompleteItem.text],
         mockCallbacks
       );
     });

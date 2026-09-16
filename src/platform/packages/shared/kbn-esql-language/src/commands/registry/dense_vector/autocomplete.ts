@@ -10,8 +10,18 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstDenseVectorCommand } from '@elastic/esql/types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import { Location } from '../types';
-import { getPosition, CaretPosition } from './utils';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import {
+  getPosition,
+  CaretPosition,
+  getFieldListExpressions,
+  canSuggestSuffixModifier,
+  canSuggestTargetAssignment,
+  DENSE_VECTOR_SUFFIX_KEYWORD,
+  DENSE_VECTOR_DEFAULT_SUFFIX,
+} from './utils';
+import {
+  onCompleteItem,
   withCompleteItem,
   withMapCompleteItem,
   buildMapValueCompleteItem,
@@ -21,6 +31,21 @@ import { createInferenceEndpointToCompletionItem } from '../../definitions/utils
 import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
+
+/** Opens the multi-field form, which renames every generated column with a shared suffix. */
+const SUFFIX_MODIFIER_SUGGESTION: ISuggestionItem = {
+  label: `${DENSE_VECTOR_SUFFIX_KEYWORD} = "..." ON`,
+  text: `${DENSE_VECTOR_SUFFIX_KEYWORD} = "$\{0:${DENSE_VECTOR_DEFAULT_SUFFIX}}" ON `,
+  kind: 'Keyword',
+  detail: i18n.translate(
+    'kbn-esql-language.commands.denseVector.autocomplete.suffixModifierDetail',
+    {
+      defaultMessage: 'Custom suffix for the generated columns (default: _dense_vector)',
+    }
+  ),
+  asSnippet: true,
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
+};
 
 /**
  * Parameters accepted by the `WITH { ... }` map. Built on demand so the descriptions are
@@ -66,6 +91,46 @@ export async function autocomplete(
 
   switch (position) {
     case CaretPosition.FIELD_LIST: {
+      const suggestions = await suggestFieldsList(
+        query,
+        command,
+        getFieldListExpressions(denseVectorCommand),
+        Location.DENSE_VECTOR,
+        callbacks,
+        context,
+        cursorPosition,
+        {
+          afterCompleteSuggestions: [withCompleteItem],
+          allowSingleColumnFields: true,
+          // `col0 = field` names the output column, but only as the first item of the list.
+          disableNewColumnSuggestion: !canSuggestTargetAssignment(
+            query,
+            denseVectorCommand,
+            cursorPosition
+          ),
+          preferredExpressionType: ['text', 'keyword'],
+        }
+      );
+
+      // The `suffix = "..." ON` modifier has to come first, so it is only offered up front.
+      if (canSuggestSuffixModifier(query, denseVectorCommand, cursorPosition)) {
+        suggestions.push(SUFFIX_MODIFIER_SUGGESTION);
+      }
+
+      return suggestions;
+    }
+
+    case CaretPosition.AFTER_LITERAL_INPUT: {
+      // A literal is a complete input on its own. When it was introduced by an assignment it
+      // may still turn out to be the `suffix = "..." ON ...` form, so `ON` stays available.
+      return [
+        ...(denseVectorCommand.targetField !== undefined ? [onCompleteItem] : []),
+        withCompleteItem,
+        ...newLineAndPipeCompleteItems,
+      ];
+    }
+
+    case CaretPosition.SUFFIX_ON_FIELD_LIST: {
       return suggestFieldsList(
         query,
         command,
@@ -77,7 +142,7 @@ export async function autocomplete(
         {
           afterCompleteSuggestions: [withCompleteItem],
           allowSingleColumnFields: true,
-          // The grammar accepts plain column names only — no `col0 = ...` assignments.
+          // The ON list accepts plain column names only.
           disableNewColumnSuggestion: true,
           preferredExpressionType: ['text', 'keyword'],
         }

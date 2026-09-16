@@ -6,26 +6,45 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstDenseVectorCommand } from '@elastic/esql/types';
-import { isMap } from '@elastic/esql';
+import type { ESQLAstDenseVectorCommand, ESQLAstField } from '@elastic/esql/types';
+import { isMap, isOptionNode } from '@elastic/esql';
+
+/**
+ * The keyword accepted by the `suffix = "..." ON ...` modifier. The grammar accepts any
+ * identifier there, so callers must check it against this value — Elasticsearch rejects
+ * anything else.
+ */
+export const DENSE_VECTOR_SUFFIX_KEYWORD = 'suffix';
+
+/** Suffix applied to the generated columns when `suffix = "..."` is not specified. */
+export const DENSE_VECTOR_DEFAULT_SUFFIX = '_dense_vector';
 
 export enum CaretPosition {
-  FIELD_LIST, // After DENSE_VECTOR: suggest the comma-separated field list
+  FIELD_LIST, // After DENSE_VECTOR: the field list, optionally opened by `target =`
+  AFTER_LITERAL_INPUT, // After a string literal input: `ON` (to make it a suffix), WITH or pipe
+  SUFFIX_ON_FIELD_LIST, // After `suffix = "..." ON`: the field list
   AFTER_WITH_KEYWORD, // After WITH but before the opening brace: suggest the map opener
   WITHIN_MAP_EXPRESSION, // Within WITH { ... }: suggest map parameters
   AFTER_COMMAND, // Command is complete: suggest pipe
 }
 
 /**
- * The grammar is `DENSE_VECTOR <field list> [WITH { ... }]`, so the only branch that needs
- * inspecting is the `WITH` map — anything before it belongs to the field list, which
- * `suggestFieldsList` resolves on its own.
+ * The command has four surface forms, which the parser disambiguates for us:
+ *
+ * - `DENSE_VECTOR f1, f2`           → `fields`
+ * - `DENSE_VECTOR target = f1`      → `targetField` + `fields`
+ * - `DENSE_VECTOR target = "text"`  → `targetField` + `literalInput`
+ * - `DENSE_VECTOR suffix = "_dv" ON f1, f2` → `suffix` + `fields`
+ *
+ * Note `suffix` is only populated once `ON` is typed; until then `suffix = "_dv"` looks
+ * exactly like the literal-input form, which is why {@link CaretPosition.AFTER_LITERAL_INPUT}
+ * offers `ON`.
  */
 export function getPosition(
   command: ESQLAstDenseVectorCommand,
   cursorPosition: number
 ): CaretPosition {
-  const { namedParameters } = command;
+  const { namedParameters, suffix, literalInput } = command;
 
   if (namedParameters !== undefined) {
     const map = isMap(namedParameters) ? namedParameters : undefined;
@@ -42,5 +61,61 @@ export function getPosition(
     return isWithinMap ? CaretPosition.WITHIN_MAP_EXPRESSION : CaretPosition.AFTER_COMMAND;
   }
 
+  if (suffix !== undefined) {
+    return CaretPosition.SUFFIX_ON_FIELD_LIST;
+  }
+
+  if (literalInput !== undefined) {
+    return CaretPosition.AFTER_LITERAL_INPUT;
+  }
+
   return CaretPosition.FIELD_LIST;
 }
+
+/**
+ * The expressions making up the top-level field list. Option nodes (`ON`, `WITH`) are dropped
+ * so only the field expressions remain — including the leading `target = field` assignment,
+ * which `suggestFieldsList` unwraps on its own.
+ */
+export const getFieldListExpressions = (command: ESQLAstDenseVectorCommand): ESQLAstField[] =>
+  command.args.filter((arg) => Array.isArray(arg) || !isOptionNode(arg)) as ESQLAstField[];
+
+/** Matches the leading `DENSE_VECTOR` keyword, so it can be stripped from the command text. */
+const COMMAND_KEYWORD_REGEX = /^\s*dense_vector\b/i;
+
+/**
+ * Text typed after the DENSE_VECTOR keyword and before the cursor.
+ *
+ * The guards below read the text rather than the AST because the autocomplete parse path drops
+ * the trailing empty column after a comma: `DENSE_VECTOR a, ` and `DENSE_VECTOR a ` both yield
+ * `fields: ['a']`, so the AST alone cannot tell which list position the cursor is in.
+ */
+const getTextAfterCommandKeyword = (
+  query: string,
+  command: ESQLAstDenseVectorCommand,
+  cursorPosition: number
+): string => query.slice(command.location.min, cursorPosition).replace(COMMAND_KEYWORD_REGEX, '');
+
+/**
+ * Whether the `suffix = "..." ON` modifier can still be typed: it must come first and only
+ * once, so only while nothing at all has been typed after the keyword.
+ */
+export const canSuggestSuffixModifier = (
+  query: string,
+  command: ESQLAstDenseVectorCommand,
+  cursorPosition: number
+): boolean =>
+  command.targetField === undefined &&
+  getTextAfterCommandKeyword(query, command, cursorPosition).trim() === '';
+
+/**
+ * Whether a `col0 = ` suggestion is valid at the cursor. The grammar only accepts an assignment
+ * as the first item of the list — `DENSE_VECTOR a, col0 = b` is a syntax error.
+ */
+export const canSuggestTargetAssignment = (
+  query: string,
+  command: ESQLAstDenseVectorCommand,
+  cursorPosition: number
+): boolean =>
+  command.targetField === undefined &&
+  !getTextAfterCommandKeyword(query, command, cursorPosition).includes(',');
