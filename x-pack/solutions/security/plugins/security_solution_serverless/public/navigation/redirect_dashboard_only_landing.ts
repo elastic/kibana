@@ -7,8 +7,7 @@
 
 import type { Capabilities } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
-import { APP_PATH } from '@kbn/security-solution-plugin/common';
-import { isSecuritySolutionAccessible } from '@kbn/security-solution-plugin/public';
+import { APP_PATH, isSecuritySolutionAccessible } from '@kbn/security-solution-plugin/common';
 import type { Services } from '../common/services';
 
 const DASHBOARDS_APP_ID = 'dashboards';

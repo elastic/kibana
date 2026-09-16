@@ -16,7 +16,8 @@ import {
   subscribeDashboardOnlyLanding,
 } from './redirect_dashboard_only_landing';
 
-jest.mock('@kbn/security-solution-plugin/public', () => ({
+jest.mock('@kbn/security-solution-plugin/common', () => ({
+  ...jest.requireActual('@kbn/security-solution-plugin/common'),
   isSecuritySolutionAccessible: ({ siemV5 }: { siemV5?: { show?: boolean } }) =>
     Boolean(siemV5?.show),
 }));
