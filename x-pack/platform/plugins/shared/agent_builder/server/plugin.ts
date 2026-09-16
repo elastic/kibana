@@ -306,6 +306,9 @@ export class AgentBuilderPlugin
       renderers: {
         register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
+      conversationEvents: {
+        register: serviceSetups.conversationEvents.register.bind(serviceSetups.conversationEvents),
+      },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
@@ -329,7 +332,6 @@ export class AgentBuilderPlugin
     void registerTracingExporter({
       core: coreStart,
       tracingConfig: this.config.tracing,
-      logger: this.logger.get('tracing'),
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });

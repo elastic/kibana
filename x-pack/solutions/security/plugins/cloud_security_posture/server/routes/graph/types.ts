@@ -42,6 +42,8 @@ export interface GraphEdge {
   actorEntityName?: string | string[] | null;
   actorHostIps?: string[] | string;
   actorsDocData?: Array<string | null> | string;
+  actorRiskScore?: RiskScoreRange;
+  actorAssetCriticality?: AssetCriticalityCount[];
   // Target attributes (shared)
   targetNodeId: string | null;
   targetIdsCount: number;
@@ -50,6 +52,22 @@ export interface GraphEdge {
   targetEntityName?: string | string[] | null;
   targetHostIps?: string[] | string;
   targetsDocData?: Array<string | null> | string;
+  targetRiskScore?: RiskScoreRange;
+  targetAssetCriticality?: AssetCriticalityCount[];
+}
+
+/** Risk score spread across the entities a node represents; min === max for a single entity. */
+export interface RiskScoreRange {
+  min: number;
+  max: number;
+}
+
+/** One asset criticality level and how many of a node's entities carry it. */
+export interface AssetCriticalityCount {
+  /** Raw entity-store level, e.g. "extreme_impact". The consumer resolves the display label. */
+  level: string;
+  /** Number of the node's entities at this level. */
+  count: number;
 }
 
 /**
@@ -162,6 +180,13 @@ export interface EntityRecord {
   type: string;
   sub_type: string;
   docData: string;
+  /**
+   * Risk score / asset criticality, KEEP-ed as columns by the entities ES|QL query (which
+   * also serializes them into `docData`). Kept separately because the node-level riskScore
+   * range and assetCriticality distribution are computed here in TypeScript.
+   */
+  riskScore?: number | null;
+  assetCriticality?: string | null;
 }
 
 /**
