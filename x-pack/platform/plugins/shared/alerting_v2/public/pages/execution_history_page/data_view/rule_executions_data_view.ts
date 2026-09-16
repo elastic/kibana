@@ -81,10 +81,13 @@ export const useRuleExecutionsDataView = () => useAdHocDataView(RULE_EXECUTIONS_
 // through the typed `item` is the drift guard: a shape change in `RuleExecutionView` (e.g. moving
 // `timings.duration` or renaming `rule.id`) fails to compile here. The Rule name and the message
 // success/empty fallbacks are resolved at render time (rule name needs the rules cache, the
-// fallbacks are presentation), so only the raw values are carried here.
+// fallbacks are presentation), so only the raw values are carried in `flattened`. `raw` holds the
+// full item so the grid's "copy as JSON" / JSON source views serialize the real record.
 export const ruleExecutionToDataTableRecord = (item: RuleExecutionView): DataTableRecord => ({
   id: item.id,
-  raw: {},
+  raw: {
+    _source: item,
+  },
   flattened: {
     [RULE_EXECUTION_FIELDS.startedAt]: item.started_at,
     [RULE_EXECUTION_FIELDS.ruleId]: item.rule.id,
