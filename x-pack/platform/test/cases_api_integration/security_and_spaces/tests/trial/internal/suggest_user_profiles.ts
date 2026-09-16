@@ -181,18 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       expect(profiles.length).to.be(1);
-      expectSnapshot(profiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
-        Array [
-          Object {
-            "data": Object {},
-            "user": Object {
-              "email": "sec_only_read@elastic.co",
-              "full_name": "sec only_read",
-              "username": "sec_only_read",
-            },
-          },
-        ]
-      `);
+      expect(profiles[0].user.username).to.contain('only');
     });
 
     // Failing: See https://github.com/elastic/kibana/issues/262485

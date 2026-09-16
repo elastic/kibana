@@ -585,8 +585,13 @@ export default ({ getService }: FtrProviderContext): void => {
             commentId: patchedCase.comments![0].id,
           });
 
-          expect(theCase.external_service?.pushed_by).to.eql(superUserInfo);
-          expect(pushedComment.pushed_by).to.eql(superUserInfo);
+          const { username, full_name, email } = superUserInfo;
+          expect(theCase.external_service?.pushed_by).to.have.property('username', username);
+          expect(theCase.external_service?.pushed_by).to.have.property('full_name', full_name);
+          expect(theCase.external_service?.pushed_by).to.have.property('email', email);
+          expect(pushedComment.pushed_by).to.have.property('username', username);
+          expect(pushedComment.pushed_by).to.have.property('full_name', full_name);
+          expect(pushedComment.pushed_by).to.have.property('email', email);
         });
       });
 

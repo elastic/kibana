@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+
 import {
   createSpacesAndUsers,
   deleteSpacesAndUsers,
