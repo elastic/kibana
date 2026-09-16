@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { fireEvent } from '@testing-library/react';
 import type { RawBucket } from '@kbn/grouping/src';
 import { render } from '../../../utils/test_helper';
 import type { AlertsByGroupingAgg } from '../types';
 import {
   renderGroupPanel,
+  RULE_NAME_GROUP_TAG_TEST_ID,
   RULE_NAME_GROUP_TAGS_TEST_ID,
   RULE_NAME_GROUP_TEST_ID,
 } from './render_group_panel';
@@ -36,16 +38,30 @@ const ruleNameBucket = (tags: string[]): RawBucket<AlertsByGroupingAgg> => ({
 });
 
 describe('renderGroupPanel', () => {
-  it('renders rule name and tags on the same grouping row', () => {
-    const { getByTestId, getByText } = render(
+  it('renders a tag-count badge on the same row as the rule name', () => {
+    const { getByTestId, queryByText } = render(
       renderGroupPanel('kibana.alert.rule.name', ruleNameBucket(['prod', 'apm', 'critical']))!
     );
 
     const group = getByTestId(RULE_NAME_GROUP_TEST_ID);
     const tags = getByTestId(RULE_NAME_GROUP_TAGS_TEST_ID);
+    const countBadge = getByTestId(`${RULE_NAME_GROUP_TAGS_TEST_ID}DisplayPopoverButton`);
 
     expect(group).toContainElement(tags);
     expect(group).toHaveTextContent('APM Failed Transaction Rate');
+    expect(countBadge).toHaveTextContent('3');
+    expect(queryByText('prod')).not.toBeInTheDocument();
+  });
+
+  it('opens a popover of tag badges when the count badge is clicked', () => {
+    const { getByTestId, getAllByTestId, getByText } = render(
+      renderGroupPanel('kibana.alert.rule.name', ruleNameBucket(['prod', 'apm', 'critical']))!
+    );
+
+    fireEvent.click(getByTestId(`${RULE_NAME_GROUP_TAGS_TEST_ID}DisplayPopoverButton`));
+
+    expect(getByText('Tags')).toBeInTheDocument();
+    expect(getAllByTestId(RULE_NAME_GROUP_TAG_TEST_ID)).toHaveLength(3);
     expect(getByText('prod')).toBeInTheDocument();
     expect(getByText('apm')).toBeInTheDocument();
     expect(getByText('critical')).toBeInTheDocument();

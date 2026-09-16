@@ -5,24 +5,44 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { isArray } from 'lodash/fp';
-import { EuiFlexGroup, EuiIconTip, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiTitle,
+} from '@elastic/eui';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
 import { firstNonNullValue } from '@kbn/grouping/src';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AlertsByGroupingAgg, BucketItem } from '../types';
-import { Tags } from '../../tags';
 import { ungrouped } from './constants';
 
 export const RULE_NAME_GROUP_TEST_ID = 'rule-name-group-renderer';
 export const RULE_NAME_GROUP_TAGS_TEST_ID = 'rule-name-group-renderer-tags';
+export const RULE_NAME_GROUP_TAG_TEST_ID = 'rule-name-group-renderer-tag';
 
 const panelWrapperCss = {
   display: 'table',
   tableLayout: 'fixed' as const,
   width: '100%',
 };
+
+const tagsPopoverListCss = {
+  maxHeight: 200,
+  maxWidth: 600,
+  overflow: 'auto',
+};
+
+const tagsPopoverTitle = i18n.translate('xpack.observability.alert.grouping.tags.popoverTitle', {
+  defaultMessage: 'Tags',
+});
 
 export const renderGroupPanel: GroupPanelRenderer<AlertsByGroupingAgg> = (
   selectedGroup,
@@ -39,6 +59,59 @@ export const renderGroupPanel: GroupPanelRenderer<AlertsByGroupingAgg> = (
     case 'kibana.alert.instance.id':
       return <InstanceIdGroupContent instanceId={firstNonNullValue(bucket.key)} />;
   }
+};
+
+const RuleTagsCountBadge = ({ tags }: { tags: string[] }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const tagCount = tags.length.toString();
+
+  const onBadgeClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setIsPopoverOpen((isOpen) => !isOpen);
+  }, []);
+
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, []);
+
+  return (
+    <EuiPopover
+      ownFocus
+      aria-label={tagsPopoverTitle}
+      button={
+        <EuiBadge
+          iconType="tag"
+          color="hollow"
+          data-test-subj={`${RULE_NAME_GROUP_TAGS_TEST_ID}DisplayPopoverButton`}
+          onClick={onBadgeClick}
+          onClickAriaLabel={tagCount}
+        >
+          {tagCount}
+        </EuiBadge>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      repositionOnScroll
+    >
+      <EuiPopoverTitle>
+        <FormattedMessage
+          id="xpack.observability.alert.grouping.tags.popoverTitle"
+          defaultMessage="Tags"
+        />
+      </EuiPopoverTitle>
+      <EuiBadgeGroup css={tagsPopoverListCss}>
+        {tags.map((tag, index) => (
+          <EuiBadge
+            color="hollow"
+            key={`${tag}-${index}`}
+            data-test-subj={RULE_NAME_GROUP_TAG_TEST_ID}
+          >
+            {tag}
+          </EuiBadge>
+        ))}
+      </EuiBadgeGroup>
+    </EuiPopover>
+  );
 };
 
 const RuleNameGroupContent = React.memo<{
@@ -63,7 +136,7 @@ const RuleNameGroupContent = React.memo<{
         </EuiFlexItem>
         {hasTags ? (
           <EuiFlexItem grow={false} data-test-subj={RULE_NAME_GROUP_TAGS_TEST_ID}>
-            <Tags tags={tags} color="hollow" size={5} oneLine />
+            <RuleTagsCountBadge tags={tags} />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
