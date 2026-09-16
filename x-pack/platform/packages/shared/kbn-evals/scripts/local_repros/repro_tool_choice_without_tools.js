@@ -8,18 +8,20 @@
 /*
  * Local repro: trigger the gateway/Anthropic error when `tool_choice` is sent without `tools`.
  *
- * Usage (after starting Kibana + setting KIBANA_TESTING_AI_CONNECTORS):
+ * Usage (after starting Kibana + setting KIBANA_TESTING_INFERENCE_ENDPOINTS):
  *   node x-pack/platform/packages/shared/kbn-evals/scripts/local_repros/repro_tool_choice_without_tools.js \
  *     --connector-id openrouter-anthropic-claude-opus-4-5 \
  *     --kibana-url http://localhost:5620
  *
  * Notes:
- * - This script creates a connector in Kibana using the definition from KIBANA_TESTING_AI_CONNECTORS,
- *   calls /internal/inference/chat_complete with toolChoice:"auto" and no tools, then deletes the connector.
+ * - This script creates the inference endpoint described by the KIBANA_TESTING_INFERENCE_ENDPOINTS
+ *   definition, then calls /internal/inference/chat_complete with
+ *   toolChoice:"auto" and no tools. EIS definitions (provider: elastic) are assumed to be provisioned
+ *   already and are never created.
  * - Do NOT print connector secrets.
  */
 
-const { v5: uuidv5 } = require('uuid');
+const INFERENCE_ENDPOINT_INTERNAL_API_VERSION = '1';
 
 function parseArgs(argv) {
   const out = {};
@@ -47,12 +49,13 @@ function safeJsonParse(s) {
   }
 }
 
-function decodeConnectorsEnv() {
-  const b64 = process.env.KIBANA_TESTING_AI_CONNECTORS;
-  if (!b64) die('Missing KIBANA_TESTING_AI_CONNECTORS env var.');
-  const json = Buffer.from(b64, 'base64').toString('utf8');
-  const parsed = safeJsonParse(json);
-  if (!parsed || typeof parsed !== 'object') die('Failed to parse KIBANA_TESTING_AI_CONNECTORS.');
+function decodeEndpointsEnv() {
+  const raw = process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS;
+  if (!raw) die('Missing KIBANA_TESTING_INFERENCE_ENDPOINTS env var.');
+  const parsed = safeJsonParse(Buffer.from(raw, 'base64').toString('utf8')) ?? safeJsonParse(raw);
+  if (!parsed || typeof parsed !== 'object') {
+    die('Failed to parse KIBANA_TESTING_INFERENCE_ENDPOINTS.');
+  }
   return parsed;
 }
 
@@ -93,7 +96,7 @@ async function main() {
         'Required:',
         '  --kibana-url <url>         e.g. http://localhost:5620',
         'Optional:',
-        '  --connector-id <id>        logical id from KIBANA_TESTING_AI_CONNECTORS (defaults to a Claude id)',
+        '  --connector-id <id>        logical id from KIBANA_TESTING_INFERENCE_ENDPOINTS (defaults to a Claude id)',
         '  --username <u>             default: elastic',
         '  --password <p>             default: changeme',
         '',
@@ -108,70 +111,84 @@ async function main() {
   const username = args.username ?? 'elastic';
   const password = args.password ?? 'changeme';
 
-  const connectors = decodeConnectorsEnv();
-  const ids = Object.keys(connectors);
-  if (ids.length === 0) die('No connectors found in KIBANA_TESTING_AI_CONNECTORS.');
+  const endpoints = decodeEndpointsEnv();
+  const ids = Object.keys(endpoints);
+  if (ids.length === 0) die('No endpoint definitions found in KIBANA_TESTING_INFERENCE_ENDPOINTS.');
 
   const logicalId = args.connectorId ?? pickDefaultClaudeConnectorId(ids);
-  const def = connectors[logicalId];
+  const def = endpoints[logicalId];
   if (!def) {
-    die(`Connector id not found in KIBANA_TESTING_AI_CONNECTORS: ${logicalId}`);
+    die(`Connector id not found in KIBANA_TESTING_INFERENCE_ENDPOINTS: ${logicalId}`);
+  }
+  if (typeof def.inferenceId !== 'string' || !def.inferenceId) {
+    die(`Definition ${logicalId} has no inferenceId; is this an inference endpoint definition?`);
   }
 
-  const connectorUuid = uuidv5(logicalId, uuidv5.DNS);
+  const inferenceId = def.inferenceId;
 
   const commonHeaders = {
     Authorization: getBasicAuthHeader(username, password),
     'Content-Type': 'application/json',
     'kbn-xsrf': 'true',
     'x-elastic-internal-origin': 'Kibana',
+    'elastic-api-version': INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
   };
 
-  // Best-effort cleanup
-  await fetch(`${kibanaUrl}/api/actions/connector/${connectorUuid}`, {
-    method: 'DELETE',
-    headers: commonHeaders,
-  }).catch(() => {});
-
-  // Create connector (do not log secrets)
-  const create = await httpJson(`${kibanaUrl}/api/actions/connector/${connectorUuid}`, {
-    method: 'POST',
-    headers: commonHeaders,
-    body: {
-      config: def.config,
-      connector_type_id: def.actionTypeId,
-      name: def.name,
-      secrets: def.secrets,
-    },
-  });
-  if (!create.res.ok) {
-    die(`Failed to create connector (${create.res.status}): ${create.text.slice(0, 2000)}`);
+  const exists = await httpJson(
+    `${kibanaUrl}/internal/_inference/_exists/${encodeURIComponent(inferenceId)}`,
+    { method: 'GET', headers: commonHeaders }
+  );
+  if (!exists.res.ok) {
+    die(`Failed to check inference endpoint (${exists.res.status}): ${exists.text.slice(0, 2000)}`);
   }
 
-  // Trigger inference: toolChoice without tools.
+  if (exists.json?.isEndpointExists) {
+    process.stdout.write(`Inference endpoint already exists: ${inferenceId}\n`);
+  } else if (def.provider === 'elastic') {
+    die(`EIS endpoint ${inferenceId} is not provisioned; run with EIS/CCM enabled.`);
+  } else {
+    // Create the endpoint (do not log secrets)
+    const create = await httpJson(`${kibanaUrl}/internal/_inference/_add`, {
+      method: 'POST',
+      headers: commonHeaders,
+      body: {
+        config: {
+          inferenceId,
+          provider: def.provider,
+          taskType: def.taskType,
+          providerConfig: def.providerConfig ?? {},
+          ...(def.taskTypeConfig ? { taskTypeConfig: def.taskTypeConfig } : {}),
+          ...(def.headers ? { headers: def.headers } : {}),
+        },
+        secrets: { providerSecrets: def.secrets?.providerSecrets ?? {} },
+      },
+    });
+    if (!create.res.ok) {
+      die(
+        `Failed to create inference endpoint (${create.res.status}): ${create.text.slice(0, 2000)}`
+      );
+    }
+    process.stdout.write(`Created inference endpoint: ${inferenceId}\n`);
+  }
+
+  // Trigger inference: toolChoice without tools. The inference plugin resolves endpoint ids as connector ids.
   const invoke = await httpJson(`${kibanaUrl}/internal/inference/chat_complete`, {
     method: 'POST',
     headers: commonHeaders,
     body: {
-      connectorId: connectorUuid,
+      connectorId: inferenceId,
       toolChoice: 'auto',
       messages: [{ role: 'user', content: 'Say hello.' }],
     },
   });
 
-  process.stdout.write(`Connector: ${logicalId} (${connectorUuid})\n`);
+  process.stdout.write(`Connector: ${logicalId} (${inferenceId})\n`);
   process.stdout.write(`Status: ${invoke.res.status}\n`);
   if (invoke.res.ok) {
     process.stdout.write(`Response (ok): ${invoke.text.slice(0, 2000)}\n`);
   } else {
     process.stdout.write(`Response (error): ${invoke.text.slice(0, 4000)}\n`);
   }
-
-  // Teardown
-  await fetch(`${kibanaUrl}/api/actions/connector/${connectorUuid}`, {
-    method: 'DELETE',
-    headers: commonHeaders,
-  }).catch(() => {});
 }
 
 main().catch((e) => {

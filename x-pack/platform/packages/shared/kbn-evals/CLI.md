@@ -32,7 +32,7 @@ node scripts/evals init
 
 EIS connector discovery is automatically skipped when a valid cache exists at `~/.elastic/eis-connectors-cache.json` (7-day TTL). To force re-discovery, delete the cache file and run `init` again.
 
-Discovered EIS models and generated OpenRouter entries are emitted as **inference endpoint definitions** (`actionTypeId: .inference`), not stack connectors: EIS ids bind to endpoints provisioned by EIS/CCM, and OpenRouter endpoints are created on demand during the run. Legacy `.gen-ai` definitions are no longer treated as LLM definitions and silently fall back to a deprecated stack connector, see [Connector definitions and inference endpoints](./README.md#connector-definitions-and-inference-endpoints).
+Discovered EIS models and generated OpenRouter entries are emitted as **inference endpoint definitions** (flat `{ name, inferenceId, provider, taskType, providerConfig, secrets }` entries), not stack connectors: EIS ids bind to endpoints provisioned by EIS/CCM, and OpenRouter endpoints are created on demand during the run. Legacy `.gen-ai` definitions are no longer treated as LLM definitions and silently fall back to a deprecated stack connector, see [Connector definitions and inference endpoints](./README.md#connector-definitions-and-inference-endpoints).
 
 #### `init config` -- Create a custom config file
 

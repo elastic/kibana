@@ -54,6 +54,9 @@ export function loadInferenceEndpoints(): InferenceEndpointDefinition[] {
     if (typeof d.taskType !== 'string' || d.taskType.length === 0) {
       throw new Error(`Inference endpoint "${id}" is missing required field "taskType"`);
     }
-    return { id, ...d, type: 'inference_endpoint' } as InferenceEndpointDefinition;
+    if (typeof d.name !== 'string' || d.name.length === 0) {
+      throw new Error(`Inference endpoint "${id}" is missing required field "name"`);
+    }
+    return { ...d, id, type: 'inference_endpoint' } as InferenceEndpointDefinition;
   });
 }

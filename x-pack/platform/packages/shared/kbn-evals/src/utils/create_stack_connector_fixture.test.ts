@@ -12,7 +12,6 @@ import { KbnClientRequesterError } from '@kbn/kbn-client';
 import {
   createStackConnectorFixture,
   getConnectorIdAsUuid,
-  resolveConnectorId,
 } from './create_stack_connector_fixture';
 
 describe('getConnectorIdAsUuid', () => {
@@ -32,26 +31,6 @@ describe('getConnectorIdAsUuid', () => {
     const a = getConnectorIdAsUuid('connector-a');
     const b = getConnectorIdAsUuid('connector-b');
     expect(a).not.toBe(b);
-  });
-});
-
-describe('resolveConnectorId', () => {
-  afterEach(() => {
-    delete process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP;
-  });
-
-  it('returns a UUID when KBN_EVALS_SKIP_CONNECTOR_SETUP is not set', () => {
-    delete process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP;
-
-    const result = resolveConnectorId('my-connector');
-    expect(result).toBe(getConnectorIdAsUuid('my-connector'));
-  });
-
-  it('returns the original id when KBN_EVALS_SKIP_CONNECTOR_SETUP is set', () => {
-    process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
-
-    const result = resolveConnectorId('my-connector');
-    expect(result).toBe('my-connector');
   });
 });
 

@@ -473,19 +473,49 @@ node scripts/evals dataplex sync --dry-run   # Preview changes
 
 ### Connector definitions and inference endpoints
 
-Model definitions come from `KIBANA_TESTING_INFERENCE_ENDPOINTS` (base64-encoded JSON, set by CI or exported by `node scripts/evals init`) or, locally, from `xpack.actions.preconfigured` in `config/kibana.dev.yml`.
+Model definitions come from two sources, read in this order:
+
+1. `KIBANA_TESTING_INFERENCE_ENDPOINTS` — **inference endpoint definitions** (base64-encoded or raw JSON, set by CI or exported by `node scripts/evals init`).
+2. `KIBANA_TESTING_AI_CONNECTORS` or, locally, `xpack.actions.preconfigured` in `config/kibana.dev.yml` — **stack connector definitions** (Actions saved objects, e.g. the workflow suites' mock Slack/email connectors).
+
+An id present in both sources resolves to the inference endpoint.
 
 #### Inference endpoints vs. stack connectors
 
-- An **inference endpoint** is a pure Elasticsearch resource (`PUT _inference/{taskType}/{inferenceId}`), with no Kibana saved object behind it. The inference plugin resolves inference endpoint ids passed as connector ids, so evals binds the `inferenceClient` fixture directly to the endpoint.
-- An **endpoint definition** is an envelope entry with `actionTypeId: .inference` and a `config.inferenceId`. Its `config`/`secrets` are byte-for-byte the body of Kibana's `POST /internal/_inference/_add` wrapper around the ES API (`config.provider`, `config.taskType`, `config.inferenceId`, `config.providerConfig`, `secrets.providerSecrets`). Here `actionTypeId: .inference` is only the envelope's routing tag — no `.inference` stack connector is created.
-- A **stack connector** is an Actions saved object (`POST /api/actions/connector`). Evals creates stack connectors only for definitions with any other `actionTypeId` — non-LLM action targets such as the workflow suites' mock Slack/email connectors — and otherwise touches them only when reusing what already exists (preconfigured connectors, or anything under `KBN_EVALS_SKIP_CONNECTOR_SETUP`).
+- An **inference endpoint** is a pure Elasticsearch resource (`PUT _inference/{taskType}/{inferenceId}`), with no Kibana saved object behind it. The inference plugin resolves inference endpoint ids passed as connector ids, so evals binds the `inferenceClient` fixture directly to the endpoint. Suites receive the endpoint's `inferenceId` as `connector.id`.
+- An **inference endpoint definition** is a flat entry keyed by connector id, shaped after the `config` of Kibana's `POST /internal/_inference/_add` body plus a display `name`. Required fields are `name`, `inferenceId`, `provider` and `taskType`; `providerConfig`, `taskTypeConfig`, `headers` and `secrets.providerSecrets` are optional. There is no `actionTypeId` and no `config` wrapper. EIS definitions (`provider: elastic`) bind to the endpoint that EIS/CCM provisioned and are never created by evals; any other provider (e.g. OpenRouter via `provider: openai`) is created on demand with `POST /internal/_inference/_add` if missing.
+- A **stack connector** is an Actions saved object (`POST /api/actions/connector`). Every `KIBANA_TESTING_AI_CONNECTORS` / `kibana.dev.yml` entry, including `actionTypeId: .inference` ones, goes through the Actions path: preconfigured connectors are reused as-is, anything else is created with a deterministic UUID. `KBN_EVALS_SKIP_CONNECTOR_SETUP` skips provisioning for both kinds.
+
+`KIBANA_TESTING_INFERENCE_ENDPOINTS` example (decoded):
+
+```json
+{
+  "eis-anthropic-claude-sonnet-4-6": {
+    "name": "EIS anthropic-claude-sonnet-4-6",
+    "inferenceId": ".anthropic-claude-sonnet-4-6-chat_completion",
+    "provider": "elastic",
+    "taskType": "chat_completion",
+    "providerConfig": { "model_id": "anthropic-claude-sonnet-4-6" }
+  },
+  "openrouter-openai-gpt-4o": {
+    "name": "OpenRouter openai/gpt-4o",
+    "inferenceId": "openrouter-openai-gpt-4o",
+    "provider": "openai",
+    "taskType": "chat_completion",
+    "providerConfig": {
+      "model_id": "openai/gpt-4o",
+      "url": "https://openrouter.ai/api/v1/chat/completions"
+    },
+    "secrets": { "providerSecrets": { "api_key": "<api key>" } }
+  }
+}
+```
 
 #### Migrating `.gen-ai` definitions
 
-`.gen-ai` definitions are no longer recognized as LLM definitions. They are not rejected either: like any non-`.inference` definition they fall through the generic Actions path, which silently creates (or reuses) a **deprecated `.gen-ai` stack connector**. Such a run misattributes scores (results are recorded as if the model were an inference endpoint) and will break outright once the platform removes the connector type — replace stale local definitions instead of relying on the fallback.
+`.gen-ai` definitions are no longer recognized as LLM definitions. They are not rejected either: like any other stack connector definition they fall through the generic Actions path, which silently creates (or reuses) a **deprecated `.gen-ai` stack connector**. Such a run misattributes scores and will break outright once the platform removes the connector type — replace stale local definitions instead of relying on the fallback.
 
-Endpoint-shaped replacement for a `kibana.dev.yml` `.gen-ai` definition (any OpenAI-compatible API, e.g. OpenRouter):
+Preferred replacement: an inference endpoint definition in `KIBANA_TESTING_INFERENCE_ENDPOINTS` (see the `openrouter-openai-gpt-4o` entry above). If you would rather keep the model in `kibana.dev.yml`, use a preconfigured `.inference` stack connector — Kibana creates the underlying endpoint at startup and evals reuses the preconfigured connector:
 
 ```yaml
 # Before

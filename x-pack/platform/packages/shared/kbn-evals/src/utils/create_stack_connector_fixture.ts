@@ -16,12 +16,6 @@ export function getConnectorIdAsUuid(connectorId: string): string {
   return v5(connectorId, v5.DNS);
 }
 
-export function resolveConnectorId(connectorId: string): string {
-  return process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP
-    ? connectorId
-    : getConnectorIdAsUuid(connectorId);
-}
-
 export async function createStackConnectorFixture({
   predefinedConnector,
   fetch,

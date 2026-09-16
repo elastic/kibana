@@ -125,6 +125,31 @@ describe('loadInferenceEndpoints', () => {
     );
   });
 
+  it('throws when a definition is missing name', () => {
+    const defs = {
+      'my-conn': { inferenceId: '.my-ep', provider: 'elastic', taskType: 'chat_completion' },
+    };
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = JSON.stringify(defs);
+    expect(() => loadInferenceEndpoints()).toThrow(
+      'Inference endpoint "my-conn" is missing required field "name"'
+    );
+  });
+
+  it('keys the definition by the map key even when the entry carries its own `id`', () => {
+    const defs = {
+      'eis-claude-sonnet-4-6': {
+        id: 'something-else',
+        name: 'EIS claude-sonnet-4.6',
+        inferenceId: '.anthropic-claude-sonnet-4-6',
+        provider: 'elastic',
+        taskType: 'chat_completion',
+      },
+    };
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = JSON.stringify(defs);
+
+    expect(loadInferenceEndpoints()[0].id).toBe('eis-claude-sonnet-4-6');
+  });
+
   it('throws when the env var is not valid JSON', () => {
     process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = 'not-valid-json';
     expect(() => loadInferenceEndpoints()).toThrow(
