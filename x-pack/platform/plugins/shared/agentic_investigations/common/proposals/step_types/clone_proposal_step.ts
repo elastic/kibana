@@ -37,6 +37,7 @@ export const cloneProposalStepCommonDefinition: BaseStepDefinition<
     defaultMessage: 'Re-offers a failed proposal as a fresh one and supersedes the original.',
   }),
   category: StepCategory.Kibana,
+  stability: 'beta',
   inputSchema: cloneProposalStepInputSchema,
   outputSchema: cloneProposalStepOutputSchema,
   documentation: {

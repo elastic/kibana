@@ -77,6 +77,7 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
       'Creates a proposal record for a human to approve or dismiss, optionally carrying an executable action.',
   }),
   category: StepCategory.Kibana,
+  stability: 'beta',
   inputSchema: createProposalStepInputSchema,
   outputSchema: createProposalStepOutputSchema,
   documentation: {

@@ -39,6 +39,7 @@ export const getProposalStepCommonDefinition: BaseStepDefinition<
     defaultMessage: 'Reads the fields a gating workflow branches on.',
   }),
   category: StepCategory.Kibana,
+  stability: 'beta',
   inputSchema: getProposalStepInputSchema,
   outputSchema: getProposalStepOutputSchema,
   documentation: {

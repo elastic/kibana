@@ -52,6 +52,7 @@ export const checkDecidePrivilegesStepCommonDefinition: BaseStepDefinition<
     }
   ),
   category: StepCategory.Kibana,
+  stability: 'beta',
   inputSchema: checkDecidePrivilegesStepInputSchema,
   outputSchema: checkDecidePrivilegesStepOutputSchema,
   documentation: {

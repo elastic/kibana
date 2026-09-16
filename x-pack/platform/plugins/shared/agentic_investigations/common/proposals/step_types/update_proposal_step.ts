@@ -55,6 +55,7 @@ export const updateProposalStepCommonDefinition: BaseStepDefinition<
     defaultMessage: 'Records a decision on a proposal, or advances its status.',
   }),
   category: StepCategory.Kibana,
+  stability: 'beta',
   inputSchema: updateProposalStepInputSchema,
   outputSchema: updateProposalStepOutputSchema,
   documentation: {
