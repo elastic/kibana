@@ -15,6 +15,7 @@ const aiIndex = (id: string, target = `ai-index-idx-${id}`): AiIndexHttpItem => 
   id,
   dest: { type: 'index', value: target },
   managed: false,
+  memory_enabled: false,
   automations: [],
   sources: [],
   date_created: '2026-01-01T00:00:00.000Z',
