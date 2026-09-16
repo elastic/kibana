@@ -11,6 +11,7 @@ import type { AlertZeroClientConfig } from '../types';
 const DEFAULT_CONFIG: AlertZeroClientConfig = {
   enabled: true,
   ui: { useMockData: true },
+  featureFlags: { alertTriageWorkerEnabled: false },
 };
 
 /** Browser-exposed `xpack.alertZero` config. Defaults to mock presentation when the provider is absent. */

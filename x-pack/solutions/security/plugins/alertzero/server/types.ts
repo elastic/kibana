@@ -16,6 +16,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 
 export type AlertZeroPluginSetup = Record<string, never>;
 export type AlertZeroPluginStart = Record<string, never>;
@@ -26,6 +27,7 @@ export interface AlertZeroSetupDependencies {
   workflowsManagement: WorkflowsServerPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
   agenticInvestigations: AgenticInvestigationsPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface AlertZeroStartDependencies {

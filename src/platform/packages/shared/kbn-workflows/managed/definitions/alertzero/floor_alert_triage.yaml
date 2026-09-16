@@ -20,6 +20,7 @@ settings:
 
 triggers:
   - type: alert
+  # Keep manual for desk testing without a rule execution.
   - type: manual
 
 consts:
