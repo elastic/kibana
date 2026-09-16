@@ -308,7 +308,8 @@ export default function (program) {
       .option(
         '--eis',
         'Auto-discover EIS inference endpoints and configure preconfigured connectors (requires ES running with --eis). ' +
-          'Override ES credentials via KBN_EIS_ES_USERNAME (default: elastic) and KBN_EIS_ES_PASSWORD (default: changeme).'
+          'Override ES connection via KBN_EIS_ES_HOST, KBN_EIS_ES_USERNAME, and KBN_EIS_ES_PASSWORD. ' +
+          'In serverless mode, defaults to https://localhost:9200 as elastic_serverless/changeme.'
       );
   }
 

@@ -18,8 +18,8 @@
  *  - `eisHttpRequest`, a minimal HTTP helper used by both this module and the
  *    connector discovery orchestrator in kbn-cli-dev-mode.
  *
- * Used by `yarn es snapshot --eis` (sets the key) and `yarn start --eis`
- * (discovers connectors).
+ * Used by `yarn es snapshot --eis` / `yarn es serverless --eis` (sets the key)
+ * and `yarn start --eis` / `yarn serverless-* --eis` (discovers connectors).
  */
 
 import http from 'http';
