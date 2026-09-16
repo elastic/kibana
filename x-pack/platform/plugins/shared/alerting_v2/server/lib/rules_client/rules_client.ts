@@ -757,10 +757,17 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
+    // `enabled` defaults to true so existing callers keep today's behavior.
+    // Pass false to create a disabled rule: no executor task is registered and
+    // the schedule-limit check is skipped (mirrors how updateRule and enableRule
+    // condition the check).
+    // Ref: rule-crud-api.md "Create a rule" (initial-enabled option)
+    const enabled = params.options?.enabled ?? true;
+
     const prepared = this.prepareRuleForCreate({
       data: parsed,
       id: params.options?.id,
-      enabled: true,
+      enabled,
       userProfileUid,
       nowIso,
       version: this.getNextVersion(),
@@ -771,8 +778,10 @@ export class RulesClient {
     // race v1 has always had (documented and accepted by the design).
     await this.assertSignatureIdUniqueInSpace(prepared.attrs.metadata.signature_id);
 
+    // Only count enabled rules towards the schedule limit, mirroring the
+    // conditioning that updateRule and enableRule already apply.
     await this.validateSchedule([
-      { updatedEvery: prepared.attrs.schedule.every, checkLimit: true },
+      { updatedEvery: prepared.attrs.schedule.every, checkLimit: enabled },
     ]);
 
     const { created, errors } = await this.persistPreparedRules([prepared]);
@@ -1235,9 +1244,13 @@ export class RulesClient {
 
   @withApm
   public async getTags(
-    params: { search?: string; kind?: RuleKind; size?: number } = {}
+    params: { search?: string; kind?: RuleKind; filter?: string; size?: number } = {}
   ): Promise<string[]> {
-    const soFilter = params.kind ? buildRuleSoFilter(`kind:${params.kind}`) : undefined;
+    const parts: string[] = [];
+    if (params.kind) parts.push(`kind:${params.kind}`);
+    if (params.filter) parts.push(params.filter);
+    const combined = parts.length === 2 ? `(${parts[0]}) AND (${parts[1]})` : parts[0] ?? undefined;
+    const soFilter = combined ? buildRuleSoFilter(combined) : undefined;
     return this.rulesSavedObjectService.findTags({
       search: params.search,
       filter: soFilter,
