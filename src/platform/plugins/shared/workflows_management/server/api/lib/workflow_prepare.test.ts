@@ -442,7 +442,10 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('fetcher'),
-      expect.objectContaining({ stepNames: ['status'] })
+      expect.objectContaining({
+        tags: expect.arrayContaining(['deprecated']),
+        labels: expect.objectContaining({ step_names: 'status' }),
+      })
     );
   });
 });
