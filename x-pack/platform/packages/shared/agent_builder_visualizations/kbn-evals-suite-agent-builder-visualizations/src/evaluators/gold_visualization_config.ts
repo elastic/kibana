@@ -14,9 +14,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
  * Deep-partial of a Config API type. String `type` fields also accept
  * alternatives (`'bar'` or `['bar', 'bar_horizontal']`).
  */
-export type GoldPartial<T> = T extends (...args: never[]) => unknown
-  ? T
-  : T extends ReadonlyArray<infer U>
+export type GoldPartial<T> = T extends ReadonlyArray<infer U>
   ? Array<GoldPartial<U>>
   : T extends object
   ? {
@@ -26,29 +24,18 @@ export type GoldPartial<T> = T extends (...args: never[]) => unknown
 
 type GoldTypeAlternatives<T> = [T] extends [string] ? T | readonly T[] : GoldPartial<T>;
 
-type VisualizationGoldLensConfig = GoldPartial<LensApiConfigESQL>;
-
-export type VisualizationGoldVegaConfig = GoldPartial<{
-  data_source: { type: 'esql'; query: string };
-  spec: Record<string, unknown>;
-}>;
-
 /** Partial Lens ES|QL Config API, or a Vega-Lite spec object (not `VegaConfig.spec`'s string). */
-export type VisualizationGoldConfig = VisualizationGoldLensConfig | VisualizationGoldVegaConfig;
+export type VisualizationGoldConfig =
+  | GoldPartial<LensApiConfigESQL>
+  | GoldPartial<{
+      data_source: { type: 'esql'; query: string };
+      spec: Record<string, unknown>;
+    }>;
 
-export interface VisualizationExampleOutput {
-  query?: string;
-  chartType?: string | string[];
-  renderer?: 'lens' | 'vega';
-  goldenToolPath?: string[];
-  config?: VisualizationGoldConfig;
-}
-
-const asExampleOutput = (expected: unknown): VisualizationExampleOutput =>
-  isRecord(expected) ? (expected as VisualizationExampleOutput) : {};
+const asRecord = (value: unknown): Record<string, unknown> => (isRecord(value) ? value : {});
 
 export function extractGoldQuery(expected: unknown): string {
-  const output = asExampleOutput(expected);
+  const output = asRecord(expected);
   const fromConfig = extractQueryFromConfig(output.config);
   if (fromConfig) {
     return fromConfig;
@@ -57,25 +44,19 @@ export function extractGoldQuery(expected: unknown): string {
 }
 
 export function extractGoldChartType(expected: unknown): string | string[] | undefined {
-  const output = asExampleOutput(expected);
-  if (output.config && 'type' in output.config && output.config.type !== undefined) {
-    const { type } = output.config;
-    if (typeof type === 'string') {
-      return type;
-    }
-    if (Array.isArray(type) && type.every((value): value is string => typeof value === 'string')) {
-      return type;
-    }
-  }
-  return output.chartType;
+  const output = asRecord(expected);
+  return (
+    asStringOrStringArray(isRecord(output.config) ? output.config.type : undefined) ??
+    asStringOrStringArray(output.chartType)
+  );
 }
 
 export function extractGoldRenderer(expected: unknown): 'lens' | 'vega' | undefined {
-  const output = asExampleOutput(expected);
+  const output = asRecord(expected);
   if (output.renderer === 'lens' || output.renderer === 'vega') {
     return output.renderer;
   }
-  if (output.config && 'spec' in output.config && isRecord(output.config.spec)) {
+  if (isRecord(output.config) && isRecord(output.config.spec)) {
     return 'vega';
   }
   return undefined;
@@ -86,26 +67,21 @@ export function hasStructuralGoldConfig(config: VisualizationGoldConfig | undefi
   return config != null && Object.keys(config).some((key) => key !== 'data_source');
 }
 
-function extractQueryFromConfig(config: VisualizationGoldConfig | undefined): string {
-  if (!config) {
+function extractQueryFromConfig(config: unknown): string {
+  if (!isRecord(config)) {
     return '';
   }
-  if ('data_source' in config) {
-    const topLevel = readDataSourceQuery(config.data_source);
-    if (topLevel) {
-      return topLevel;
-    }
+  const direct = readDataSourceQuery(config.data_source);
+  if (direct) {
+    return direct;
   }
-  if (!('layers' in config) || !Array.isArray(config.layers)) {
+  if (!Array.isArray(config.layers)) {
     return '';
   }
   for (const layer of config.layers) {
-    if (!('data_source' in layer)) {
-      continue;
-    }
-    const query = readDataSourceQuery(layer.data_source);
-    if (query) {
-      return query;
+    const nested = extractQueryFromConfig(layer);
+    if (nested) {
+      return nested;
     }
   }
   return '';
@@ -116,4 +92,14 @@ function readDataSourceQuery(dataSource: unknown): string {
     return '';
   }
   return dataSource.query;
+}
+
+function asStringOrStringArray(value: unknown): string | string[] | undefined {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value) && value.every((item): item is string => typeof item === 'string')) {
+    return value;
+  }
+  return undefined;
 }

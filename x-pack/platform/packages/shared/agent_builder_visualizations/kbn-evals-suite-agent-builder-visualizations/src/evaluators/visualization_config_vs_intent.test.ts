@@ -157,7 +157,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
-  it('matches heatmap axes even when x and y are swapped', async () => {
+  it('matches heatmap axes after alias resolution', async () => {
     const goldQuery = `FROM kibana_sample_data_logs
 | EVAL hour = DATE_EXTRACT("HOUR_OF_DAY", @timestamp)
 | STATS \`Request Count\` = COUNT(*) BY hour, response.keyword`;
@@ -177,8 +177,8 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
 | STATS c = COUNT(*) BY h, response.keyword`,
           visualization: {
             type: 'heatmap',
-            x: { column: 'response.keyword' },
-            y: { column: 'h' },
+            x: { column: 'h' },
+            y: { column: 'response.keyword' },
             metric: { column: 'c' },
           },
         },

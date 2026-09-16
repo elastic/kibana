@@ -86,35 +86,44 @@ function addAssignments(aliases: Map<string, string>, clause: string): void {
   }
 }
 
+type QuoteChar = '"' | "'" | '`';
+
 function splitPipes(query: string): string[] {
   return splitTopLevel(query.replace(/\r\n/g, '\n'), '|');
 }
 
+function advanceScan(
+  source: string,
+  index: number,
+  quote: QuoteChar | null,
+  depth: number
+): { quote: QuoteChar | null; depth: number; inQuoteOrParen: boolean } {
+  const ch = source[index];
+  if (quote) {
+    const closed = ch === quote && source[index - 1] !== '\\';
+    return { quote: closed ? null : quote, depth, inQuoteOrParen: true };
+  }
+  if (ch === '"' || ch === "'" || ch === '`') {
+    return { quote: ch, depth, inQuoteOrParen: true };
+  }
+  if (ch === '(') {
+    return { quote, depth: depth + 1, inQuoteOrParen: true };
+  }
+  if (ch === ')') {
+    return { quote, depth: depth - 1, inQuoteOrParen: true };
+  }
+  return { quote, depth, inQuoteOrParen: depth !== 0 };
+}
+
 function splitTopLevelBy(body: string): [string, string | undefined] {
   let depth = 0;
-  let quote: '"' | "'" | '`' | null = null;
+  let quote: QuoteChar | null = null;
 
   for (let i = 0; i < body.length; i++) {
-    const ch = body[i];
-    if (quote) {
-      if (ch === quote && body[i - 1] !== '\\') {
-        quote = null;
-      }
-      continue;
-    }
-    if (ch === '"' || ch === "'" || ch === '`') {
-      quote = ch;
-      continue;
-    }
-    if (ch === '(') {
-      depth++;
-      continue;
-    }
-    if (ch === ')') {
-      depth--;
-      continue;
-    }
-    if (depth === 0 && isBySeparator(body, i)) {
+    const state = advanceScan(body, i, quote, depth);
+    quote = state.quote;
+    depth = state.depth;
+    if (!state.inQuoteOrParen && isBySeparator(body, i)) {
       return [body.slice(0, i), body.slice(i + 3)];
     }
   }
@@ -137,33 +146,14 @@ function splitTopLevel(source: string, delimiter: string): string[] {
   const parts: string[] = [];
   let current = '';
   let depth = 0;
-  let quote: '"' | "'" | '`' | null = null;
+  let quote: QuoteChar | null = null;
 
   for (let i = 0; i < source.length; i++) {
     const ch = source[i];
-    if (quote) {
-      current += ch;
-      if (ch === quote && source[i - 1] !== '\\') {
-        quote = null;
-      }
-      continue;
-    }
-    if (ch === '"' || ch === "'" || ch === '`') {
-      quote = ch;
-      current += ch;
-      continue;
-    }
-    if (ch === '(') {
-      depth++;
-      current += ch;
-      continue;
-    }
-    if (ch === ')') {
-      depth--;
-      current += ch;
-      continue;
-    }
-    if (depth === 0 && source.startsWith(delimiter, i)) {
+    const state = advanceScan(source, i, quote, depth);
+    quote = state.quote;
+    depth = state.depth;
+    if (!state.inQuoteOrParen && source.startsWith(delimiter, i)) {
       parts.push(current);
       current = '';
       i += delimiter.length - 1;
@@ -178,34 +168,20 @@ function splitTopLevel(source: string, delimiter: string): string[] {
 
 function splitTopLevelAssignment(item: string): { alias: string; expression: string } | undefined {
   let depth = 0;
-  let quote: '"' | "'" | '`' | null = null;
+  let quote: QuoteChar | null = null;
 
   for (let i = 0; i < item.length; i++) {
     const ch = item[i];
-    if (quote) {
-      if (ch === quote && item[i - 1] !== '\\') {
-        quote = null;
-      }
+    const state = advanceScan(item, i, quote, depth);
+    quote = state.quote;
+    depth = state.depth;
+    if (state.inQuoteOrParen || ch !== '=' || item[i + 1] === '=') {
       continue;
     }
-    if (ch === '"' || ch === "'" || ch === '`') {
-      quote = ch;
-      continue;
-    }
-    if (ch === '(') {
-      depth++;
-      continue;
-    }
-    if (ch === ')') {
-      depth--;
-      continue;
-    }
-    if (depth === 0 && ch === '=' && item[i + 1] !== '=') {
-      const alias = item.slice(0, i).trim();
-      const expression = item.slice(i + 1).trim();
-      if (alias && expression) {
-        return { alias, expression };
-      }
+    const alias = item.slice(0, i).trim();
+    const expression = item.slice(i + 1).trim();
+    if (alias && expression) {
+      return { alias, expression };
     }
   }
 
@@ -213,13 +189,7 @@ function splitTopLevelAssignment(item: string): { alias: string; expression: str
 }
 
 function expressionsEquivalent(left: string, right: string): boolean {
-  if (left === right) {
-    return true;
-  }
-  if (left === 'time_bucket' && right === 'time_bucket') {
-    return true;
-  }
-  return isKeywordTwin(left, right);
+  return left === right || isKeywordTwin(left, right);
 }
 
 function isKeywordTwin(left: string, right: string): boolean {
