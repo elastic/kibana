@@ -4,14 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
-import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { Logger } from '@kbn/core/server';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import type { Error } from '@kbn/apm-types';
 import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
@@ -30,6 +24,10 @@ import {
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { compactMap } from '../../utils/compact_map';
+import {
+  createApmEventFieldsAccessor,
+  type SearchHitWithFields,
+} from '../../utils/create_apm_event_fields_accessor';
 
 const requiredOtelFields = asMutableArray([SPAN_ID, ID, SERVICE_NAME, AT_TIMESTAMP] as const);
 const optionalOtelFields = asMutableArray([
@@ -41,12 +39,14 @@ const optionalOtelFields = asMutableArray([
 
 export async function getUnprocessedOtelErrors({
   logsClient,
+  logger,
   traceId,
   docId,
   start,
   end,
 }: {
   logsClient: LogsClient;
+  logger: Logger;
   traceId: string;
   docId?: string;
   start: number;
@@ -72,12 +72,17 @@ export async function getUnprocessedOtelErrors({
     fields: [...requiredOtelFields, ...optionalOtelFields],
   });
 
+  const accessor = createApmEventFieldsAccessor({
+    logger,
+    operation: 'get_unprocessed_otel_errors',
+  });
+
   return compactMap(response.hits.hits, (hit) => {
-    const event = hit.fields
-      ? accessKnownApmEventFields(hit.fields as Partial<FlattenedApmEvent>).requireFields(
-          requiredOtelFields
-        )
-      : undefined;
+    // `logs-*` is not typed against the APM schema, so the known field types are asserted here.
+    const event = accessor.tryAccess(
+      hit as SearchHitWithFields<Partial<FlattenedApmEvent>>,
+      requiredOtelFields
+    );
 
     if (!event) return null;
 

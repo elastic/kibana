@@ -6,7 +6,7 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { Logger } from '@kbn/core/server';
 import type { EventOutcome, StatusCode, Transaction } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
@@ -53,6 +53,7 @@ import type {
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { compactMap } from '../../utils/compact_map';
+import { createApmEventFieldsAccessor } from '../../utils/create_apm_event_fields_accessor';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
 import { fields, getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
@@ -91,6 +92,7 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
 export async function getUnifiedTraceItems({
   apmEventClient,
   logsClient,
+  logger,
   maxTraceItems,
   traceId,
   start,
@@ -100,6 +102,7 @@ export async function getUnifiedTraceItems({
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
+  logger: Logger;
   maxTraceItems: number;
   traceId: string;
   start: number;
@@ -116,6 +119,7 @@ export async function getUnifiedTraceItems({
     getUnifiedTraceErrors({
       apmEventClient,
       logsClient,
+      logger,
       traceId,
       start,
       end,
@@ -140,8 +144,14 @@ export async function getUnifiedTraceItems({
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
   const agentMarks: Record<string, number> = {};
   const noDestinationTraceItems = new Set<TraceItem>();
+  const accessor = createApmEventFieldsAccessor({ logger, operation: 'get_unified_trace_items' });
   const traceItems = compactMap(unifiedTraceItems.hits, (hit) => {
-    const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
+    const event = accessor.tryAccess(hit, fields);
+
+    if (!event) {
+      return undefined;
+    }
+
     const isTransactionDocument = event[PROCESSOR_EVENT] === ProcessorEvent.transaction;
     if (isTransactionDocument) {
       const source = hit._source as {
