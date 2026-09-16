@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core/public';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { CustomYaraSignaturesForm } from './custom_yara_signatures_form';
 import type {
@@ -17,7 +19,14 @@ import type {
 } from '../../../../components/artifact_list_page';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { DETAILS_DESCRIPTION, FORM_TITLE, NAME_ERROR, OPTIONAL_LABEL } from './translations';
+import { OS_TITLES } from '../../../../common/translations';
+import {
+  DETAILS_DESCRIPTION,
+  FORM_TITLE,
+  NAME_ERROR,
+  OPTIONAL_LABEL,
+  OS_ERROR,
+} from './translations';
 
 describe('Custom YARA signatures form', () => {
   let user: UserEvent;
@@ -34,6 +43,7 @@ describe('Custom YARA signatures form', () => {
       description: '',
       entries: [],
       type: 'simple',
+      os_types: [OperatingSystem.WINDOWS],
     };
     return {
       ...defaults,
@@ -95,6 +105,7 @@ describe('Custom YARA signatures form', () => {
       DETAILS_DESCRIPTION
     );
     expect(screen.getByTestId('customYaraSignatures-form-name-input')).toHaveValue('');
+    expect(screen.getByTestId('customYaraSignatures-form-os-input')).toBeInTheDocument();
     expect(screen.getByTestId('customYaraSignatures-form-description-input')).toHaveValue('');
     expect(screen.getByText(OPTIONAL_LABEL)).toBeInTheDocument();
   });
@@ -157,5 +168,110 @@ describe('Custom YARA signatures form', () => {
     render(createProps({ error: new Error(message) as IHttpFetchError }));
 
     expect(screen.getByTestId('customYaraSignatures-form-submitError')).toHaveTextContent(message);
+  });
+
+  describe('operating system selector', () => {
+    const formPrefix = 'customYaraSignatures-form';
+
+    const openOsCombo = async () => {
+      const combo = screen.getByTestId(`${formPrefix}-os-input`);
+      await user.click(within(combo).getByTestId('comboBoxToggleListButton'));
+      await waitForEuiPopoverOpen();
+    };
+
+    it('should sit between name and description', () => {
+      const { container } = render();
+      const labels = Array.from(container.querySelectorAll('.euiFormRow__label')).map((label) =>
+        (label.textContent || '').trim()
+      );
+
+      expect(labels).toEqual(['Name', 'Operating system', 'Description']);
+    });
+
+    it('should allow selecting any combination of Windows, Mac, and Linux', async () => {
+      render(createProps({ item: createItem({ os_types: [] }) }));
+      await openOsCombo();
+
+      const options = Array.from(document.querySelectorAll('.euiComboBoxOption')).map((el) =>
+        el.textContent?.trim()
+      );
+
+      expect(options).toEqual([
+        OS_TITLES[OperatingSystem.WINDOWS],
+        OS_TITLES[OperatingSystem.MAC],
+        OS_TITLES[OperatingSystem.LINUX],
+      ]);
+    });
+
+    it('should default os_types to Windows', () => {
+      render();
+      expect(
+        within(screen.getByTestId(`${formPrefix}-os-input`)).getByTitle(
+          OS_TITLES[OperatingSystem.WINDOWS]
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should add Mac to os_types', async () => {
+      render();
+      await openOsCombo();
+      await user.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
+
+      expect(onChangeSpy).toHaveBeenCalledWith(
+        createOnChangeArgs({
+          item: createItem({ os_types: [OperatingSystem.WINDOWS, OperatingSystem.MAC] }),
+          isValid: false,
+        })
+      );
+    });
+
+    it('should populate os_types with all three operating systems', async () => {
+      render(
+        createProps({
+          item: createItem({
+            os_types: [OperatingSystem.WINDOWS, OperatingSystem.MAC],
+          }),
+        })
+      );
+      await openOsCombo();
+      await user.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.LINUX] }));
+
+      expect(onChangeSpy).toHaveBeenCalledWith(
+        createOnChangeArgs({
+          item: createItem({
+            os_types: [OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX],
+          }),
+          isValid: false,
+        })
+      );
+    });
+
+    it('should be invalid if no operating system is selected', async () => {
+      render(createProps({ item: createItem({ name: 'test name' }) }));
+      await user.click(
+        screen.getByTitle(
+          `Remove ${OS_TITLES[OperatingSystem.WINDOWS]} from selection in this group`
+        )
+      );
+
+      expect(onChangeSpy).toHaveBeenCalledWith(
+        createOnChangeArgs({
+          item: createItem({ name: 'test name', os_types: [] }),
+          isValid: false,
+        })
+      );
+    });
+
+    it('should show OS required message after OS input blur when empty', async () => {
+      render(createProps({ item: createItem({ os_types: [] }) }));
+
+      await user.click(
+        within(screen.getByTestId(`${formPrefix}-os-input`)).getByTestId('comboBoxSearchInput')
+      );
+      expect(screen.queryByText(OS_ERROR)).toBeNull();
+
+      await user.click(screen.getByTestId(`${formPrefix}-description-input`));
+      expect(screen.getByText(OS_ERROR)).toBeInTheDocument();
+    });
   });
 });

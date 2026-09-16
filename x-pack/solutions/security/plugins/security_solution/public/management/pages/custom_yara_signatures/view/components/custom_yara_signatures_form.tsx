@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiComboBox,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -15,9 +17,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
+import { OS_TITLES } from '../../../../common/translations';
 import {
   DESCRIPTION_LABEL,
   DETAILS_DESCRIPTION,
@@ -25,7 +29,28 @@ import {
   NAME_ERROR,
   NAME_LABEL,
   OPTIONAL_LABEL,
+  OS_ERROR,
+  OS_LABEL,
+  OS_PLACEHOLDER,
 } from './translations';
+
+const OS_OPTIONS: Array<EuiComboBoxOptionOption<OperatingSystem>> = [
+  {
+    label: OS_TITLES[OperatingSystem.WINDOWS],
+    value: OperatingSystem.WINDOWS,
+  },
+  {
+    label: OS_TITLES[OperatingSystem.MAC],
+    value: OperatingSystem.MAC,
+  },
+  {
+    label: OS_TITLES[OperatingSystem.LINUX],
+    value: OperatingSystem.LINUX,
+  },
+];
+
+const isItemValid = (nextItem: ArtifactFormComponentProps['item']): boolean =>
+  !!nextItem.name?.trim() && (nextItem.os_types?.length ?? 0) > 0;
 
 export const testIdPrefix = 'customYaraSignatures-form';
 
@@ -33,7 +58,18 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, disabled, error }) => {
     const getTestId = useTestIdGenerator(testIdPrefix);
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
+    const [hasBeenOsVisited, setHasBeenOsVisited] = useState(false);
+
     const [hasNameError, setHasNameError] = useState(!item.name?.trim());
+    const [hasOsError, setHasOsError] = useState(!(item.os_types?.length ?? 0));
+
+    const selectedOsOptions = useMemo(
+      () =>
+        OS_OPTIONS.filter(
+          (option) => option.value !== undefined && item.os_types?.includes(option.value)
+        ),
+      [item.os_types]
+    );
 
     const notifyOfChange = useCallback(
       (updatedItem?: Partial<ArtifactFormComponentProps['item']>) => {
@@ -46,7 +82,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
         onChange({
           item: nextItem,
-          isValid: !!nextItem.name?.trim(),
+          isValid: isItemValid(nextItem),
         });
       },
       [item, onChange]
@@ -68,11 +104,29 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
       [notifyOfChange]
     );
 
+    const handleOnOsChange = useCallback(
+      (selectedOptions: Array<EuiComboBoxOptionOption<OperatingSystem>>) => {
+        const osTypes: OperatingSystem[] = selectedOptions
+          .filter(({ value }) => value)
+          .map(({ value }) => value as OperatingSystem);
+
+        setHasOsError(osTypes.length === 0);
+        notifyOfChange({ os_types: osTypes });
+      },
+      [notifyOfChange]
+    );
+
     const handleOnNameBlur = useCallback(() => {
       if (!hasBeenInputNameVisited) {
         setHasBeenInputNameVisited(true);
       }
     }, [hasBeenInputNameVisited]);
+
+    const handleOnOsBlur = useCallback(() => {
+      if (!hasBeenOsVisited) {
+        setHasBeenOsVisited(true);
+      }
+    }, [hasBeenOsVisited]);
 
     const nameInput = useMemo(
       () => (
@@ -107,6 +161,42 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
         handleOnChangeName,
         handleOnNameBlur,
         item.name,
+      ]
+    );
+
+    const osInput = useMemo(
+      () => (
+        <EuiFormRow
+          label={OS_LABEL}
+          fullWidth
+          isInvalid={hasOsError && hasBeenOsVisited}
+          error={OS_ERROR}
+          isDisabled={disabled}
+          data-test-subj={getTestId('os-input-formRow')}
+        >
+          <EuiComboBox<OperatingSystem>
+            placeholder={OS_PLACEHOLDER}
+            options={OS_OPTIONS}
+            selectedOptions={selectedOsOptions}
+            onChange={handleOnOsChange}
+            onBlur={handleOnOsBlur}
+            isClearable={false}
+            fullWidth
+            isDisabled={disabled}
+            isInvalid={hasOsError && hasBeenOsVisited}
+            data-test-subj={getTestId('os-input')}
+            aria-label={OS_LABEL}
+          />
+        </EuiFormRow>
+      ),
+      [
+        disabled,
+        getTestId,
+        handleOnOsBlur,
+        handleOnOsChange,
+        hasBeenOsVisited,
+        hasOsError,
+        selectedOsOptions,
       ]
     );
 
@@ -157,6 +247,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
         <EuiSpacer size="m" />
 
         {nameInput}
+        {osInput}
         {descriptionInput}
       </EuiForm>
     );

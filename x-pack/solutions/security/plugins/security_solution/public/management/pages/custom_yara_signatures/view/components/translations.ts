@@ -36,6 +36,24 @@ export const NAME_ERROR = i18n.translate(
   }
 );
 
+export const OS_LABEL = i18n.translate('xpack.securitySolution.customYaraSignatures.form.osLabel', {
+  defaultMessage: 'Operating system',
+});
+
+export const OS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.osPlaceholder',
+  {
+    defaultMessage: 'Select operating systems',
+  }
+);
+
+export const OS_ERROR = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.osErrorMessage',
+  {
+    defaultMessage: 'Select at least one operating system',
+  }
+);
+
 export const DESCRIPTION_LABEL = i18n.translate(
   'xpack.securitySolution.customYaraSignatures.form.descriptionLabel',
   {
