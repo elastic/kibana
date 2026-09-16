@@ -13,6 +13,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import useLatest from 'react-use/lib/useLatest';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { isEmptyEsqlQuery } from '@kbn/es-query';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -77,6 +78,10 @@ export const SingleTabView = ({
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
+  const currentAppStateQuery = useCurrentTabSelector((tab) => tab.appState.query);
+  const isEmptyEsql =
+    currentTabInitializationState.initializationStatus === TabInitializationStatus.Complete &&
+    isEmptyEsqlQuery(currentAppStateQuery);
 
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
   const initializeTab = useLatest(
@@ -175,7 +180,11 @@ export const SingleTabView = ({
     );
   }
 
-  if (!currentDataStateContainer || !currentCustomizationService || !currentDataView) {
+  if (
+    !currentDataStateContainer ||
+    !currentCustomizationService ||
+    (!currentDataView && !isEmptyEsql)
+  ) {
     return <BrandedLoadingIndicator />;
   }
 

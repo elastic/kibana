@@ -219,6 +219,10 @@ export const useDiscoverHistogram = (
   );
 
   const collectedFetchParams: UnifiedHistogramFetchParamsExternal | undefined = useMemo(() => {
+    if (!dataView) {
+      return undefined;
+    }
+
     return {
       searchSessionId,
       requestAdapter: inspectorAdapters.requests,
@@ -258,6 +262,10 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
+      if (!collectedFetchParams) {
+        return;
+      }
+
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
         isEsqlMode,

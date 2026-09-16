@@ -40,13 +40,13 @@ import { fetchData } from './tab_state';
  * Set the data view in the tab's runtime state
  */
 export const setDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
+  [TabActionPayload<{ dataView: DataView | undefined }>]
 > =
   ({ tabId, dataView }) =>
   (dispatch, _, { runtimeStateManager }) => {
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
 
-    if (dataView.id !== currentDataView$.getValue()?.id) {
+    if (dataView?.id !== currentDataView$.getValue()?.id) {
       dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 

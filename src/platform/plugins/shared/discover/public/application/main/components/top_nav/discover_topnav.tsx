@@ -101,7 +101,7 @@ export const DiscoverTopNav = ({
   );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
-    if (dataView.type === DataViewType.ROLLUP) {
+    if (!dataView || dataView.type === DataViewType.ROLLUP) {
       return false;
     }
     return { disabled: !dataView.isTimeBased() };
@@ -148,7 +148,7 @@ export const DiscoverTopNav = ({
   }, []);
 
   const canEditDataView =
-    Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView?.isPersisted();
 
   const editField = useMemo(
     () =>
@@ -412,7 +412,7 @@ export const DiscoverTopNav = ({
           !!services.capabilities.discover_v2.storeSearchSession
         }
         appName="discover"
-        indexPatterns={[dataView]}
+        indexPatterns={dataView ? [dataView] : []}
         onQuerySubmit={onQuerySubmit}
         onCancel={onCancelClick}
         isLoading={isLoading}
