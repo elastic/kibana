@@ -75,7 +75,9 @@ describe('endpointForensicAnalysisSkill', () => {
 
     const getTool = async (): Promise<BuiltinSkillBoundedTool> => {
       const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
-      const tool = inlineTools.find(({ id }) => id === ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID);
+      const tool = inlineTools.find(
+        ({ id }) => id === ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID
+      );
       if (tool?.type !== ToolType.builtin) {
         throw new Error(
           `${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID} is not a builtin inline tool`

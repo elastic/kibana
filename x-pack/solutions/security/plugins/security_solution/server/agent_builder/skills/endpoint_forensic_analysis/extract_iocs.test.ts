@@ -33,10 +33,7 @@ async function getExtractIocsTool(): Promise<BuiltinSkillBoundedTool> {
   return tool;
 }
 
-async function runExtractIocs(
-  hosts: string[] = ['WKSTN-RECV01'],
-  timeWindowHours?: number
-) {
+async function runExtractIocs(hosts: string[] = ['WKSTN-RECV01'], timeWindowHours?: number) {
   const tool = await getExtractIocsTool();
   const toolReturn = await tool.handler(
     { hosts, ...(timeWindowHours !== undefined ? { time_window_hours: timeWindowHours } : {}) },
@@ -127,11 +124,7 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
 
   it('routes command lines to malicious_commands rather than the file path category', async () => {
     mockEsqlQuery.mockResolvedValue({
-      columns: [
-        { name: 'file.path' },
-        { name: 'process.command_line' },
-        { name: 'event.action' },
-      ],
+      columns: [{ name: 'file.path' }, { name: 'process.command_line' }, { name: 'event.action' }],
       values: [
         [
           'C:\\Users\\Public\\Desktop\\README_RESTORE.txt',
