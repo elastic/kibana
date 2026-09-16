@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePrototypeVersion } from './services/use_prototype_version';
@@ -28,9 +27,6 @@ export const PrototypeVersionSwitcher: React.FunctionComponent = () => {
 
   return (
     <EuiButtonGroup
-      css={css`
-        padding-left: 12px;
-      `}
       legend={i18n.translate('esqlViews.prototypeVersionSwitcher.legend', {
         defaultMessage: 'Prototype version',
       })}

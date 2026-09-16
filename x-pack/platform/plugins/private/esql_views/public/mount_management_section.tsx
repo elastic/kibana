@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { VersionedEsqlViewsApp } from './versioned_app';
-import { PrototypeVersionSwitcher } from './prototype_version_switcher';
+import { PrototypeBreadcrumbExtensions } from './prototype_breadcrumb_extensions';
 import type { StartDependencies } from './types';
 
 export const mountManagementSection = (
@@ -19,7 +19,7 @@ export const mountManagementSection = (
   { element }: ManagementAppMountParams
 ) => {
   const unregisterVersionSwitcher = coreStart.chrome.setBreadcrumbsAppendExtension({
-    content: <PrototypeVersionSwitcher />,
+    content: <PrototypeBreadcrumbExtensions />,
     order: 0,
   });
 

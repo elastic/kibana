@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -38,6 +38,8 @@ import {
 } from './create_edit_view_flyout';
 import { deleteView } from './services/views_client';
 import { getAllLocalViewMetadata, removeLocalViewMetadata } from './services/local_metadata';
+import { getPrototypeTableState } from './services/prototype_table_state_store';
+import { usePrototypeTableState } from './services/use_prototype_table_state';
 
 export interface EsqlViewsAppProps {
   notifications: NotificationsStart;
@@ -213,6 +215,9 @@ const buildInitialViews = (): EsqlView[] => {
   return [...seeded, ...createdElsewhere];
 };
 
+const viewsForPrototypeTableState = (): EsqlView[] =>
+  getPrototypeTableState() === 'filled' ? buildInitialViews() : [];
+
 export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
   notifications,
   http,
@@ -222,12 +227,18 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
   FlyoutComponent = CreateEditEsqlViewFlyout,
 }) => {
   const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
-  const [views, setViews] = useState<EsqlView[]>(buildInitialViews);
+  const [prototypeTableState] = usePrototypeTableState();
+  const [views, setViews] = useState<EsqlView[]>(viewsForPrototypeTableState);
   const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
   const [selectedItems, setSelectedItems] = useState<EsqlView[]>([]);
   const [viewsPendingDelete, setViewsPendingDelete] = useState<EsqlView[] | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteModalTitleId = useGeneratedHtmlId({ prefix: 'esqlViewsDeleteModalTitle' });
+
+  useEffect(() => {
+    setViews(prototypeTableState === 'filled' ? buildInitialViews() : []);
+    setSelectedItems([]);
+  }, [prototypeTableState]);
 
   const openCreateFlyout = useCallback(() => setFlyoutState({ mode: 'create' }), []);
   const openEditFlyout = useCallback(
@@ -370,6 +381,19 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
     [openEditFlyout, discoverLocator]
   );
 
+  const noItemsMessage = useMemo(
+    () =>
+      views.length === 0
+        ? i18n.translate('esqlViews.table.emptyState', {
+            defaultMessage:
+              'You do not have any ES|QL Views yet. Create one to save an ES|QL query as a reusable data source.',
+          })
+        : i18n.translate('esqlViews.table.noSearchResults', {
+            defaultMessage: 'No ES|QL Views match your search.',
+          }),
+    [views.length]
+  );
+
   return (
     <>
       <AppHeader
@@ -392,7 +416,12 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
         items={views}
         columns={columns}
         search={{
-          box: { incremental: true, placeholder: 'Search views' },
+          box: {
+            incremental: true,
+            placeholder: i18n.translate('esqlViews.table.searchPlaceholder', {
+              defaultMessage: 'Search views',
+            }),
+          },
           toolsLeft:
             selectedItems.length === 0
               ? undefined
@@ -419,6 +448,7 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
         pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
         itemId="name"
         data-test-subj="esqlViewsTable"
+        noItemsMessage={noItemsMessage}
       />
       {flyoutState && (
         <FlyoutComponent
