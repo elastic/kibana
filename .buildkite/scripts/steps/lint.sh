@@ -10,21 +10,24 @@ echo '--- Lint: stylelint'
 node scripts/stylelint
 echo "stylelint ✅"
 
-echo '--- Lint: eslint'
-# disable "Exit immediately" mode so that we can run eslint and oxfmt, capture their exit codes,
-# and respond appropriately after possibly committing fixed files to the repo.
-# oxfmt runs last so that it formats any eslint autofixes in the same pass.
+# disable "Exit immediately" mode so that we can run oxlint, eslint and oxfmt, capture their exit
+# codes, and respond appropriately after possibly committing fixed files to the repo.
+# oxfmt runs last so that it formats any oxlint and eslint autofixes in the same pass.
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  desc="node scripts/eslint_all_files --no-cache --fix && node scripts/oxfmt"
+  fix_flag="--fix"
   oxfmt_flag=""
-  node scripts/eslint_all_files --no-cache --fix
 else
-  desc="node scripts/eslint_all_files --no-cache && node scripts/oxfmt --check"
+  fix_flag=""
   oxfmt_flag="--check"
-  node scripts/eslint_all_files --no-cache
 fi
 
+echo '--- Lint: oxlint'
+node scripts/lint.js $fix_flag
+oxlint_exit=$?
+
+echo '--- Lint: eslint'
+node scripts/eslint_all_files --no-cache $fix_flag
 eslint_exit=$?
 
 echo '--- Lint: oxfmt'
@@ -33,17 +36,22 @@ oxfmt_exit=$?
 # re-enable "Exit immediately" mode
 set -e;
 
+desc="node scripts/lint.js $fix_flag && node scripts/eslint_all_files --no-cache $fix_flag && node scripts/oxfmt $oxfmt_flag"
 check_for_changed_files "$desc" true
 
+if [[ "${oxlint_exit}" != "0" ]]; then
+  echo "oxlint ❌"
+fi
 if [[ "${eslint_exit}" != "0" ]]; then
   echo "eslint ❌"
 fi
 if [[ "${oxfmt_exit}" != "0" ]]; then
   echo "oxfmt ❌"
 fi
-if [[ "${eslint_exit}" != "0" || "${oxfmt_exit}" != "0" ]]; then
+if [[ "${oxlint_exit}" != "0" || "${eslint_exit}" != "0" || "${oxfmt_exit}" != "0" ]]; then
   exit 1
 fi
 
+echo "oxlint ✅"
 echo "eslint ✅"
 echo "oxfmt ✅"
