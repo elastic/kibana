@@ -226,6 +226,8 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
       const epsToUnmute = eps.filter((ep) => ep.is_muted === true);
       const epsToUnsnooze = eps.filter((ep) => ep.snooze_expiry != null);
 
+      let unmuteFailed = false;
+
       if (epsToUnmute.length > 0) {
         const rules = groupByRule(epsToUnmute);
         const mutedOnlyCount = epsToUnmute.filter((ep) => ep.snooze_expiry == null).length;
@@ -233,7 +235,8 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
           await bulkUnmuteAlerts({ http, rules });
           succeeded += mutedOnlyCount;
         } catch (e) {
-          failed += mutedOnlyCount;
+          unmuteFailed = true;
+          failed += epsToUnmute.length;
           errors.push(e?.message ?? 'Unknown error');
         }
       }
@@ -249,10 +252,14 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
             });
           })
         );
-        for (const r of results) {
-          if (r.status === 'fulfilled') succeeded++;
-          else {
-            failed++;
+        for (let i = 0; i < results.length; i++) {
+          const r = results[i];
+          // Already counted as failed in the unmute path above
+          const skipCount = unmuteFailed && epsToUnsnooze[i].is_muted === true;
+          if (r.status === 'fulfilled') {
+            if (!skipCount) succeeded++;
+          } else {
+            if (!skipCount) failed++;
             errors.push(r.reason?.message ?? 'Unknown error');
           }
         }

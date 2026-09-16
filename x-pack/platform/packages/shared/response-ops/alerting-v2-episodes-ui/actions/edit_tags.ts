@@ -6,7 +6,7 @@
  */
 
 // For a single episode, seed the flyout from `last_tags`. For multiple selections, start empty
-// (no single "current" set when replacing tags across groups).
+// (no single "current" set when replacing tags across episodes).
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
