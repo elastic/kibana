@@ -3048,6 +3048,7 @@ module.exports = {
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_max_one_describe': 'error',
+        '@kbn/eslint/scout_max_tests_per_file': 'warn',
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
