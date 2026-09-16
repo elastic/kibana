@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
 import { useCallback, useMemo } from 'react';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
