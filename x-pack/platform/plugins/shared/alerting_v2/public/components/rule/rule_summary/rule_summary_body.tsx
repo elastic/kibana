@@ -6,19 +6,27 @@
  */
 
 import React from 'react';
+import { useService } from '@kbn/core-di-browser';
+import { UserCapabilities } from '../../../services/user_capabilities';
 import { RuleSummaryAboutSection } from './rule_summary_about_section';
 import { RuleSummaryInvestigationSection } from './rule_summary_investigation_section';
+import { RuleSummaryActionPoliciesSection } from './rule_summary_action_policies_section';
+import { RuleSummaryArtifactsSection } from './rule_summary_artifacts_section';
 import type { RuleSummaryData } from './types';
 
 export interface RuleSummaryBodyProps {
   rule: RuleSummaryData;
-  children?: React.ReactNode;
 }
 
-export const RuleSummaryBody: React.FC<RuleSummaryBodyProps> = ({ rule, children }) => (
-  <div data-test-subj="ruleSummaryBody">
-    <RuleSummaryAboutSection rule={rule} />
-    <RuleSummaryInvestigationSection rule={rule} />
-    {children}
-  </div>
-);
+export const RuleSummaryBody: React.FC<RuleSummaryBodyProps> = ({ rule }) => {
+  const canReadActionPolicies = useService(UserCapabilities).canRead('actionPolicies');
+
+  return (
+    <div data-test-subj="ruleSummaryBody">
+      <RuleSummaryAboutSection rule={rule} />
+      <RuleSummaryInvestigationSection rule={rule} />
+      {canReadActionPolicies && <RuleSummaryActionPoliciesSection />}
+      <RuleSummaryArtifactsSection rule={rule} />
+    </div>
+  );
+};

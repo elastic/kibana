@@ -10,6 +10,22 @@ import { render, screen } from '@testing-library/react';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleSummaryBody } from './rule_summary_body';
 
+jest.mock('../../../services/user_capabilities', () => ({
+  UserCapabilities: 'UserCapabilities',
+}));
+
+jest.mock('@kbn/core-di-browser', () => {
+  const canRead = jest.fn(() => true);
+  return {
+    useService: () => ({ canRead }),
+    mockCanRead: canRead,
+  };
+});
+
+const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
+  mockCanRead: jest.Mock;
+};
+
 jest.mock('./rule_summary_about_section', () => ({
   RuleSummaryAboutSection: ({ rule }: { rule: RuleApiResponse }) => (
     <div data-test-subj="mockAboutSection">{rule.metadata.name}</div>
@@ -19,6 +35,16 @@ jest.mock('./rule_summary_about_section', () => ({
 jest.mock('./rule_summary_investigation_section', () => ({
   RuleSummaryInvestigationSection: ({ rule }: { rule: RuleApiResponse }) => (
     <div data-test-subj="mockInvestigationSection">{rule.metadata.name}</div>
+  ),
+}));
+
+jest.mock('./rule_summary_action_policies_section', () => ({
+  RuleSummaryActionPoliciesSection: () => <div data-test-subj="mockActionPoliciesSection" />,
+}));
+
+jest.mock('./rule_summary_artifacts_section', () => ({
+  RuleSummaryArtifactsSection: ({ rule }: { rule: RuleApiResponse }) => (
+    <div data-test-subj="mockArtifactsSection">{rule.metadata.name}</div>
   ),
 }));
 
@@ -37,16 +63,27 @@ const rule: RuleApiResponse = {
 };
 
 describe('RuleSummaryBody', () => {
-  it('renders its shared sections and optional host-provided sections without a flyout wrapper', () => {
-    render(
-      <RuleSummaryBody rule={rule}>
-        <div data-test-subj="hostSection" />
-      </RuleSummaryBody>
-    );
+  beforeEach(() => {
+    mockCanRead.mockReturnValue(true);
+  });
+
+  it('renders all summary sections without a flyout wrapper', () => {
+    render(<RuleSummaryBody rule={rule} />);
 
     expect(screen.getByTestId('ruleSummaryBody')).toBeInTheDocument();
     expect(screen.getByTestId('mockAboutSection')).toHaveTextContent('Test rule');
     expect(screen.getByTestId('mockInvestigationSection')).toHaveTextContent('Test rule');
-    expect(screen.getByTestId('hostSection')).toBeInTheDocument();
+    expect(screen.getByTestId('mockActionPoliciesSection')).toBeInTheDocument();
+    expect(screen.getByTestId('mockArtifactsSection')).toHaveTextContent('Test rule');
+    expect(mockCanRead).toHaveBeenCalledWith('actionPolicies');
+  });
+
+  it('omits action policies when the user cannot read them', () => {
+    mockCanRead.mockReturnValue(false);
+
+    render(<RuleSummaryBody rule={rule} />);
+
+    expect(screen.queryByTestId('mockActionPoliciesSection')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockArtifactsSection')).toBeInTheDocument();
   });
 });
