@@ -7,6 +7,10 @@
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
+  securityDetectionQueryManifest,
+  securityDetectionThresholdManifest,
+} from '@kbn/security-detection-rule-schema';
+import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
   ruleSavedObjectAttributesSchemaV3,
@@ -14,6 +18,7 @@ import {
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
+import { fromBuilderManifest } from './from_builder_manifest';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -124,4 +129,29 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       create: ruleSavedObjectAttributesSchemaV4,
     },
   },
+  // ---------------------------------------------------------------------------
+  // Detection-type manifest folds (step 3.5)
+  //
+  // Each line expands one manifest version into an ordinary model version.
+  // The global model-version sequence is append-only and totally ordered; both
+  // the number and the manifest must stay here permanently once published.
+  //
+  // As a side effect, fromBuilderManifest() records each (type, version) pair
+  // in globalFoldedVersions so the registration-time manifest-consistency
+  // check (check 6) can verify every manifest version has been folded.
+  //
+  // Ref: rule-type-registration.md "The fold into the saved-object registration"
+  //      rule-data-migration.md "From manifest version to model version"
+  // ---------------------------------------------------------------------------
+
+  // security.detection.query v1: adds the shared detection fragment's typed
+  // sub-fields (risk_score, max_signals as integer; note, setup as text) plus
+  // `query` as a text sub-field for full-text search. Version 1 needs no
+  // backfill — no stored rule carries these fields yet.
+  '7': fromBuilderManifest(securityDetectionQueryManifest, 1),
+
+  // security.detection.threshold v1: same fragment sub-fields as the query
+  // type (identical declarations merge silently at the mapping assembly) plus
+  // `query` as text. No backfill needed for the same reason.
+  '8': fromBuilderManifest(securityDetectionThresholdManifest, 1),
 };
