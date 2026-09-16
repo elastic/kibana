@@ -13,7 +13,7 @@ const ID_SEPARATOR = ':';
 export const smlOriginUri = (type: string, originId: string): string =>
   `${type}${SCHEME_SEPARATOR}${originId}`;
 
-/** The entry id for an origin: `${type}:${originId}`. Deterministic so re-indexing replaces the entry. */
+/** Entry id for an origin, `${type}:${originId}`. */
 export const smlEntryId = (type: string, originId: string): string =>
   `${type}${ID_SEPARATOR}${originId}`;
 

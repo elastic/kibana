@@ -247,8 +247,7 @@ class SmlIndexerImpl implements SmlIndexer {
       return;
     }
 
-    // The id, `type`, and origin reference all derive from the type; a writer that returns another
-    // type would produce a document whose origin cannot be reconstructed from its id.
+    // The id and origin reference derive from the attachment type, so the entry must agree.
     if (smlEntry.type !== attachmentType) {
       this.logger.warn(
         `SML indexer: type '${attachmentType}' returned an entry of type '${smlEntry.type}' for origin '${originId}' — skipping (fail closed), existing entry left intact`
@@ -391,7 +390,6 @@ class SmlIndexerImpl implements SmlIndexer {
       metadata: { ingestion_method: ingestionMethod },
     };
 
-    // The origin reference is written first, ahead of the producer's own references.
     const document: SmlDocument = {
       '@timestamp': createdAt || now,
       id: entryId,

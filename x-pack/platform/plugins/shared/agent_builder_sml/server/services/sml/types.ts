@@ -233,7 +233,7 @@ export interface SmlDocument {
   tags?: string[];
   /** Last write time */
   updated_at: string;
-  /** The origin as `{ uri: '${type}://${originId}', relation: 'derived_from' }`, then the type writer's own references. */
+  /** The origin as a `derived_from` reference, plus the type writer's references. */
   references: SmlReference[];
   governance: { provenance: { created_by: SmlWriter; updated_by: SmlWriter } };
   /**
