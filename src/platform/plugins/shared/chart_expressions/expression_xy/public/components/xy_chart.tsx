@@ -923,7 +923,7 @@ export function XYChart({
               externalPointerEvents={{
                 tooltip: { visible: syncTooltips, placement: Placement.Right },
               }}
-              legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
+              legendColorPicker={interactive && uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               showLegend={showLegend}
               legendPosition={legend?.isInside ? legendInsideParams : legend.position}

@@ -20,6 +20,7 @@ import type {
   ExpressionRendererEvent,
   ExpressionRendererParams,
 } from '@kbn/expressions-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { toExpressionAst } from './to_ast';
 import { getExecutionContext, getTimeFilter } from '../services';
 import type { VisParams } from '../types';
@@ -35,6 +36,7 @@ interface GetExpressionRendererPropsParams {
   esqlVariables?: ExecutionContextSearch['esqlVariables'];
   timeRange?: TimeRange;
   disableTriggers?: boolean;
+  viewMode?: ViewMode;
   settings: {
     syncColors?: boolean;
     syncCursor?: boolean;
@@ -60,6 +62,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
   esqlVariables,
   settings: { syncColors = true, syncCursor = true, syncTooltips = false },
   disableTriggers = false,
+  viewMode = 'edit',
   parentExecutionContext,
   searchSessionId,
   vis,
@@ -108,7 +111,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     syncTooltips,
     syncCursor,
     uiState: vis.uiState,
-    interactive: !disableTriggers,
+    interactive: !disableTriggers && viewMode !== 'preview',
     inspectorAdapters,
     executionContext,
     onRender$: onRender,
