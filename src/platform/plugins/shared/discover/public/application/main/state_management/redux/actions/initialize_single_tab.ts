@@ -334,21 +334,34 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // Begin syncing the state and trigger the initial fetch
     // if this is still the current tab, otherwise mark the
     // tab to fetch when selected
+
+    // Skip the initial fetch for fresh "+" tabs and empty ES|QL queries.
+    // skipInitialFetch is in-memory only and is lost on refresh. Empty ES|QL is
+    // the persisted signal — restore the flag so a later switch to classic does
+    // not treat the tab as search-on-page-load and get stuck in LOADING.
+    const shouldSkipInitialFetch =
+      tabState.skipInitialFetch || isEmptyEsqlQuery(initialAppState.query);
+
+    if (shouldSkipInitialFetch && !tabState.skipInitialFetch) {
+      dispatch(
+        internalStateSlice.actions.setSkipInitialFetch({
+          tabId,
+          skipInitialFetch: true,
+        })
+      );
+    }
+
     if (isCurrentTabActive()) {
       dispatch(initializeAndSync({ tabId }));
 
-      // Skip the initial fetch for fresh "+" tabs and empty ES|QL queries.
-      // skipInitialFetch is in-memory only, so empty ES|QL is what keeps a
-      // restored uninitialized tab from executing after refresh.
-      if (!tabState.skipInitialFetch && !isEmptyEsqlQuery(initialAppState.query)) {
+      if (!shouldSkipInitialFetch) {
         dispatch(fetchData({ tabId, initial: true }));
       }
     } else {
       dispatch(
         internalStateSlice.actions.setForceFetchOnSelect({
           tabId,
-          forceFetchOnSelect:
-            !tabState.skipInitialFetch && !isEmptyEsqlQuery(initialAppState.query),
+          forceFetchOnSelect: !shouldSkipInitialFetch,
         })
       );
     }

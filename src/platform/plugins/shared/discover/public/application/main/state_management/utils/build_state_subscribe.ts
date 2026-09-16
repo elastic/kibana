@@ -28,7 +28,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../../common/data_sources';
-import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
+import { sendLoadingMsg, sendResetMsg } from '../../hooks/use_saved_search_messages';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
@@ -150,6 +150,12 @@ export const buildStateSubscribe =
         prevState,
         nextState,
       });
+      // reset() uses getInitialFetchStatus() for the new language. After refresh,
+      // skipInitialFetch is gone and empty ES|QL is no longer the current query,
+      // so reset() can flip UNINITIALIZED → LOADING without starting a fetch.
+      if (dataState.data$.main$.getValue().fetchStatus !== FetchStatus.UNINITIALIZED) {
+        sendResetMsg(dataState.data$, FetchStatus.UNINITIALIZED);
+      }
       return;
     }
 
