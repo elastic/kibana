@@ -17,11 +17,10 @@ jest.mock('./use_core');
 const mockUseStartServices = useStartServices as jest.MockedFunction<typeof useStartServices>;
 
 const createLocator = () => ({
-  getRedirectUrl: jest.fn(
-    ({ templateId, host }: { templateId?: string; host?: { app: string } }) =>
-      host
-        ? `/app/${host.app}/rule-library?templateId=${templateId}`
-        : `/app/management/alertingV2/rule_library?templateId=${templateId}`
+  getRedirectUrl: jest.fn(({ templateId, host }: { templateId?: string; host?: { app: string } }) =>
+    host
+      ? `/app/${host.app}/rule-library?templateId=${templateId}`
+      : `/app/management/alertingV2/rule_library?templateId=${templateId}`
   ),
   getLocation: jest.fn(),
   getUrl: jest.fn(),

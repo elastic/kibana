@@ -31,4 +31,3 @@ export {
   type AlertingV2LocatorHost,
   type ObservabilityContextSignals,
 } from './resolve_rule_library_host';
-
