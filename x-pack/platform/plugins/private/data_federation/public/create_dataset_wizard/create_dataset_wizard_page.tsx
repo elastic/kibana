@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -36,6 +37,13 @@ import { StepReview } from './step_review';
 import type { DatasetWizardContent, DatasetWizardSection } from './types';
 
 const { FormWizard, FormWizardStep } = Forms;
+
+const WIZARD_CONTENT_WIDTH_PX = 800;
+
+const wizardContentCss = css({
+  width: WIZARD_CONTENT_WIDTH_PX,
+  margin: '0 auto',
+});
 
 const emptyWizardValue: DatasetWizardContent = {
   dataset: {
@@ -140,6 +148,11 @@ export function CreateDatasetWizardPage({
           isSaving={isSaving}
           apiError={apiError}
           texts={{ save: createDatasetFlyoutStrings.addButton() }}
+          contentWrapper={(content) => (
+            <div css={wizardContentCss} data-test-subj="createDatasetWizardContent">
+              {content}
+            </div>
+          )}
         >
           <FormWizardStep
             id="dataset"

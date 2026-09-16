@@ -61,6 +61,7 @@ describe('CreateDatasetWizardPage', () => {
   it('walks through dataset, advanced, and confirm steps then saves', async () => {
     const { getByTestId, getByText, queryByTestId, history, add, loadDataSets } = renderWizard();
 
+    expect(getByTestId('createDatasetWizardContent')).toBeInTheDocument();
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
     expect(getByTestId('createDatasetFlyoutResource')).toBeInTheDocument();
     expect(
