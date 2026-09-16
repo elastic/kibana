@@ -139059,6 +139059,8 @@ components:
       properties:
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+        enabled:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
@@ -139067,6 +139069,8 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
           $ref: '#/components/schemas/Security_Osquery_API_Removed'
+        result_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         snapshot:
           $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
@@ -139115,8 +139119,12 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+            min_osquery_version:
+              $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
+            platform:
+              $ref: '#/components/schemas/Security_Osquery_API_Platform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
@@ -139126,6 +139134,8 @@ components:
                 properties:
                   ecs_mapping:
                     $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                  enabled:
+                    $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
                   id:
                     type: string
                   interval:
@@ -139136,6 +139146,8 @@ components:
                     type: string
                   removed:
                     type: boolean
+                  result_type:
+                    $ref: '#/components/schemas/Security_Osquery_API_ResultType'
                   rrule_schedule:
                     $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
                   schedule_type:
@@ -139147,6 +139159,8 @@ components:
                   version:
                     type: string
               type: array
+            result_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
@@ -139449,12 +139463,18 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+        min_osquery_version:
+          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
+        platform:
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+        result_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
           $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
         schedule_type:
@@ -139511,12 +139531,18 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+            min_osquery_version:
+              $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
+            platform:
+              $ref: '#/components/schemas/Security_Osquery_API_Platform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+            result_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
@@ -140092,6 +140118,8 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+            min_osquery_version:
+              $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             namespaces:
@@ -140099,6 +140127,8 @@ components:
               items:
                 type: string
               type: array
+            platform:
+              $ref: '#/components/schemas/Security_Osquery_API_Platform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
@@ -140106,6 +140136,8 @@ components:
             read_only:
               description: Whether the pack is read-only (true for prebuilt packs).
               type: boolean
+            result_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
@@ -140182,8 +140214,12 @@ components:
                 $ref: '#/components/schemas/Security_Osquery_API_Enabled'
               interval:
                 $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              min_osquery_version:
+                $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
               name:
                 $ref: '#/components/schemas/Security_Osquery_API_PackName'
+              platform:
+                $ref: '#/components/schemas/Security_Osquery_API_Platform'
               policy_ids:
                 $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
               queries:
@@ -140193,6 +140229,8 @@ components:
                   properties:
                     ecs_mapping:
                       $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                    enabled:
+                      $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
                     id:
                       type: string
                     interval:
@@ -140203,6 +140241,8 @@ components:
                       type: string
                     removed:
                       type: boolean
+                    result_type:
+                      $ref: '#/components/schemas/Security_Osquery_API_ResultType'
                     rrule_schedule:
                       $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
                     schedule_type:
@@ -140217,6 +140257,8 @@ components:
               read_only:
                 description: Whether the pack is read-only (true for prebuilt packs).
                 type: boolean
+              result_type:
+                $ref: '#/components/schemas/Security_Osquery_API_ResultType'
               rrule_schedule:
                 $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
               saved_object_id:
@@ -140653,6 +140695,14 @@ components:
           required:
             - sourceType
             - source
+    Security_Osquery_API_MinOsqueryVersion:
+      description: Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
+      example: 5.10.0
+      maxLength: 64
+      type: string
+    Security_Osquery_API_MinOsqueryVersionOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
+      nullable: true
     Security_Osquery_API_ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesItem'
@@ -140663,6 +140713,8 @@ components:
       properties:
         ecs_mapping:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+        enabled:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         interval:
@@ -140676,6 +140728,8 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
           $ref: '#/components/schemas/Security_Osquery_API_Removed'
+        result_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
           $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
         saved_query_id:
@@ -140725,6 +140779,7 @@ components:
     Security_Osquery_API_Platform:
       description: Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.
       example: linux,darwin
+      maxLength: 256
       type: string
     Security_Osquery_API_PlatformOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Platform'
@@ -140744,6 +140799,13 @@ components:
       description: The SQL query you want to run.
       example: select * from uptime;
       type: string
+    Security_Osquery_API_QueryEnabled:
+      description: Whether this query is enabled. When false, the query is omitted from the Fleet policy. Default is true.
+      example: true
+      type: boolean
+    Security_Osquery_API_QueryEnabledOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
+      nullable: true
     Security_Osquery_API_QueryId:
       description: The ID of the query.
       example: 3c42c847-eb30-4452-80e0-728584042334
@@ -140757,6 +140819,20 @@ components:
       type: boolean
     Security_Osquery_API_RemovedOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Removed'
+      nullable: true
+    Security_Osquery_API_ResultType:
+      description: |
+        Controls the result document type emitted by osquerybeat for this pack or query.
+        - `snapshot`: Full table snapshot on every scheduled run (default).
+        - `differential`: Rows added or removed since the previous run.
+        - `differential_added_only`: Only rows added since the previous run (no removals).
+      enum:
+        - snapshot
+        - differential
+        - differential_added_only
+      type: string
+    Security_Osquery_API_ResultTypeOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_ResultType'
       nullable: true
     Security_Osquery_API_RRuleScheduleConfig:
       description: |
@@ -140999,12 +141075,18 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+        min_osquery_version:
+          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
+        platform:
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+        result_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
           $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
         schedule_type:
@@ -141058,12 +141140,18 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+            min_osquery_version:
+              $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
+            platform:
+              $ref: '#/components/schemas/Security_Osquery_API_Platform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+            result_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:

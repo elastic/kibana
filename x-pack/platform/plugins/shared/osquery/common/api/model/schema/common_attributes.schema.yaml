@@ -24,6 +24,7 @@ components:
       description: 'Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.'
       example: 'linux,darwin'
       type: string
+      maxLength: 256
 
     PlatformOrUndefined:
       $ref: '#/components/schemas/Platform'
@@ -117,6 +118,15 @@ components:
       $ref: '#/components/schemas/Enabled'
       nullable: true
 
+    QueryEnabled:
+      description: 'Whether this query is enabled. When false, the query is omitted from the Fleet policy. Default is true.'
+      example: true
+      type: boolean
+
+    QueryEnabledOrUndefined:
+      $ref: '#/components/schemas/QueryEnabled'
+      nullable: true
+
     PolicyIds:
       description: 'A list of agents policy IDs.'
       example:
@@ -196,6 +206,10 @@ components:
           $ref: '#/components/schemas/RemovedOrUndefined'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/QueryEnabledOrUndefined'
+        result_type:
+          $ref: '#/components/schemas/ResultTypeOrUndefined'
 
     ArrayQueries:
       type: array
@@ -235,6 +249,10 @@ components:
           $ref: '#/components/schemas/ScheduleTypeOrUndefined'
         rrule_schedule:
           $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/QueryEnabledOrUndefined'
+        result_type:
+          $ref: '#/components/schemas/ResultTypeOrUndefined'
 
     ObjectQueries:
       type: object
@@ -376,4 +394,30 @@ components:
 
     PackIntervalOrUndefined:
       $ref: '#/components/schemas/PackInterval'
+      nullable: true
+
+    ResultType:
+      description: |
+        Controls the result document type emitted by osquerybeat for this pack or query.
+        - `snapshot`: Full table snapshot on every scheduled run (default).
+        - `differential`: Rows added or removed since the previous run.
+        - `differential_added_only`: Only rows added since the previous run (no removals).
+      type: string
+      enum:
+        - snapshot
+        - differential
+        - differential_added_only
+
+    ResultTypeOrUndefined:
+      $ref: '#/components/schemas/ResultType'
+      nullable: true
+
+    MinOsqueryVersion:
+      description: 'Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.'
+      type: string
+      maxLength: 64
+      example: '5.10.0'
+
+    MinOsqueryVersionOrUndefined:
+      $ref: '#/components/schemas/MinOsqueryVersion'
       nullable: true

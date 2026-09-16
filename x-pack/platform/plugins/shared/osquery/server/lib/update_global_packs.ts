@@ -95,6 +95,11 @@ export const updateGlobalPacksCreateCallback = async (
           },
           isRruleFeatureEnabled,
           fallbackStartDate: pack.created_at,
+          packExecutionDefaults: {
+            min_osquery_version: pack.min_osquery_version,
+            result_type: pack.result_type ?? undefined,
+            platform: pack.platform ?? undefined,
+          },
         });
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,

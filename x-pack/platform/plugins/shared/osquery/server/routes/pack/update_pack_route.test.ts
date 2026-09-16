@@ -4079,4 +4079,227 @@ describe('updatePackRoute', () => {
       expect(responseBody.policy_ids).toEqual(['policy-1']);
     });
   });
+
+  describe('V5: pack-level execution defaults on update', () => {
+    const makeBaseSOWithDefaults = (
+      overrides: Partial<PackSavedObject> = {}
+    ): { id: string; references: unknown[]; attributes: Partial<PackSavedObject> } => ({
+      id: 'pack-id',
+      references: [],
+      attributes: {
+        name: 'my-pack',
+        description: '',
+        queries: [],
+        enabled: false,
+        shards: [],
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: 'admin',
+        updated_at: '2024-01-01T00:00:00.000Z',
+        updated_by: 'admin',
+        ...overrides,
+      },
+    });
+
+    const setupV5Route = (
+      currentOverrides: Partial<PackSavedObject> = {},
+      updatedOverrides: Partial<PackSavedObject> = {}
+    ) => {
+      const currentSO = makeBaseSOWithDefaults(currentOverrides);
+      const updatedSO = makeBaseSOWithDefaults({ ...currentOverrides, ...updatedOverrides });
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: [],
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+      const packagePolicyList = jest.fn().mockResolvedValue({ items: [] });
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: false },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: jest.fn().mockResolvedValue({}),
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      return { mockClient };
+    };
+
+    it('sets min_osquery_version and result_type on the SO when provided', async () => {
+      const { mockClient } = setupV5Route();
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          name: 'my-pack',
+          min_osquery_version: '5.10.0',
+          result_type: 'differential',
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const updateCall = mockClient.update.mock.calls[0];
+      const patchedAttributes = updateCall[2];
+      expect(patchedAttributes.min_osquery_version).toBe('5.10.0');
+      expect(patchedAttributes.result_type).toBe('differential');
+    });
+
+    // Regression: the body destructure pulled only min_osquery_version and
+    // result_type, so a pack-level `platform` was accepted by the request
+    // schema, silently dropped by the handler, and reverted on reload.
+    it('sets pack-level platform on the SO when provided', async () => {
+      const { mockClient } = setupV5Route();
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { name: 'my-pack', platform: 'linux,darwin' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const patchedAttributes = mockClient.update.mock.calls[0][2];
+      expect(patchedAttributes.platform).toBe('linux,darwin');
+    });
+
+    it('clears pack-level platform when null is provided (explicit unset)', async () => {
+      const { mockClient } = setupV5Route({ platform: 'linux' }, { platform: null });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { name: 'my-pack', platform: null },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const patchedAttributes = mockClient.update.mock.calls[0][2];
+      expect(patchedAttributes.platform).toBeNull();
+    });
+
+    it('does not patch pack-level platform when it is absent from the request body', async () => {
+      const { mockClient } = setupV5Route({ platform: 'linux' });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'only updating description' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const patchedAttributes = mockClient.update.mock.calls[0][2];
+      expect(patchedAttributes).not.toHaveProperty('platform');
+    });
+
+    it('clears min_osquery_version and result_type when null is provided (explicit unset)', async () => {
+      const { mockClient } = setupV5Route(
+        { min_osquery_version: '5.10.0', result_type: 'differential' as const },
+        { min_osquery_version: null, result_type: null }
+      );
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          name: 'my-pack',
+          min_osquery_version: null,
+          result_type: null,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const updateCall = mockClient.update.mock.calls[0];
+      const patchedAttributes = updateCall[2];
+      expect(patchedAttributes.min_osquery_version).toBeNull();
+      expect(patchedAttributes.result_type).toBeNull();
+    });
+
+    it('does not patch execution defaults when they are absent from request body (preserve existing)', async () => {
+      const { mockClient } = setupV5Route({ min_osquery_version: '5.10.0' });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'only updating description' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const updateCall = mockClient.update.mock.calls[0];
+      const patchedAttributes = updateCall[2];
+      // Field absent from request → should not appear in patch at all
+      expect(patchedAttributes).not.toHaveProperty('min_osquery_version');
+      expect(patchedAttributes).not.toHaveProperty('result_type');
+    });
+
+    it('surfaces updated min_osquery_version and result_type in response', async () => {
+      setupV5Route({}, { min_osquery_version: '5.11.0', result_type: 'snapshot' as const });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { name: 'my-pack', min_osquery_version: '5.11.0', result_type: 'snapshot' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseData = (mockResponse.ok.mock.calls[0][0]?.body as any).data;
+      expect(responseData.min_osquery_version).toBe('5.11.0');
+      expect(responseData.result_type).toBe('snapshot');
+    });
+
+    it('io-ts schema rejects an invalid result_type value', () => {
+      // Route handler tests bypass framework validation middleware — test the codec directly.
+      const isRight = (v: unknown) => (v as any)._tag === 'Right';
+      const decode = (body: unknown) => updatePacksRequestBodySchema.decode(body);
+
+      expect(isRight(decode({ result_type: 'bad-value' }))).toBe(false);
+      expect(isRight(decode({ result_type: 'differential' }))).toBe(true);
+      expect(isRight(decode({ result_type: 'snapshot' }))).toBe(true);
+      expect(isRight(decode({ result_type: 'differential_added_only' }))).toBe(true);
+      // null is valid for update (explicit clear)
+      expect(isRight(decode({ result_type: null }))).toBe(true);
+    });
+  });
 });

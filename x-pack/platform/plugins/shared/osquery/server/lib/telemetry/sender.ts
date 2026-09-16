@@ -139,6 +139,27 @@ export class TelemetryEventsSender {
             description: 'Pack enabled',
           },
         },
+        has_pack_level_version: {
+          type: 'boolean',
+          _meta: {
+            description: 'Pack has a pack-level minimum osquery version set',
+            optional: true,
+          },
+        },
+        has_pack_level_result_type: {
+          type: 'boolean',
+          _meta: {
+            description: 'Pack has a pack-level result type (snapshot/differential) set',
+            optional: true,
+          },
+        },
+        disabled_query_count: {
+          type: 'short',
+          _meta: {
+            description: 'Number of queries in the pack that are disabled',
+            optional: true,
+          },
+        },
       },
     });
 
@@ -225,6 +246,13 @@ export class TelemetryEventsSender {
           type: 'pass_through',
           _meta: {
             description: '',
+            optional: true,
+          },
+        },
+        version_set: {
+          type: 'boolean',
+          _meta: {
+            description: 'Saved query has a per-query minimum osquery version set',
             optional: true,
           },
         },

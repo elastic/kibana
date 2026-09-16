@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { RRuleScheduleConfig, ScheduleType } from '../../common/schedule';
+import type { ResultType } from '../../common/result_type';
 import type { Shard } from '../../common/utils/converters';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
 
@@ -12,6 +13,12 @@ export interface PackSavedObject {
   saved_object_id: string;
   name: string;
   description: string | undefined;
+  /**
+   * Per-query fields as returned by the read-pack API. `version` is a string
+   * on the wire; the flyout form wraps it into `string[]`. The migration
+   * advisory must not assume the form shape (`version[0]` on a string is the
+   * first character).
+   */
   queries: Record<string, Omit<PackQueryFormData, 'id'>>;
   version?: number;
   enabled: boolean | undefined;
@@ -33,6 +40,15 @@ export interface PackSavedObject {
   interval?: number;
   /** Pack-level RRULE schedule. Only present when `schedule_type === 'rrule'`. */
   rrule_schedule?: RRuleScheduleConfig;
+  /** Pack-level minimum osquery version default. Fans out to queries that do not override. */
+  min_osquery_version?: string;
+  /** Pack-level result type default. Fans out to queries that do not override. */
+  result_type?: ResultType;
+  /**
+   * Pack-level platform default (comma-separated osquery platform tokens).
+   * Fans out to queries that do not override. Not a pack-level gate.
+   */
+  platform?: string;
 }
 
 export type PackItem = PackSavedObject & {
@@ -41,3 +57,17 @@ export type PackItem = PackSavedObject & {
   read_only?: boolean;
   shards?: Shard;
 };
+
+/**
+ * Pack-level execution defaults as sent on the wire.
+ *
+ * The update route distinguishes three states: absent means "preserve the
+ * stored value", `null` means "clear it", and a value means "set it". The
+ * stored ({@link PackSavedObject}) shape has no use for `null`, so the
+ * clearable form only exists at the request boundary.
+ */
+export interface ClearableExecutionDefaults {
+  min_osquery_version?: string | null;
+  result_type?: ResultType | null;
+  platform?: string | null;
+}

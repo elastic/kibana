@@ -524,4 +524,140 @@ describe('copyPackRoute', () => {
     expect(createArgs.schedule_type).toBe('rrule');
     expect(createArgs.rrule_schedule).toEqual(rruleValue);
   });
+
+  describe('V5: copy preserves pack-level execution defaults', () => {
+    it('copies min_osquery_version and result_type from source SO to new SO', async () => {
+      const sourceWithDefaults = {
+        ...sourcePackSO,
+        attributes: {
+          ...sourcePackSO.attributes,
+          min_osquery_version: '5.10.0',
+          result_type: 'differential' as const,
+        },
+      };
+
+      let capturedCreateArgs: Record<string, unknown>;
+      const mockSavedObjectsClient = {
+        get: jest.fn().mockResolvedValue(sourceWithDefaults),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        create: jest.fn().mockImplementation((_type: string, attrs: Record<string, unknown>) => {
+          capturedCreateArgs = attrs;
+
+          return Promise.resolve({
+            id: 'new-pack-id',
+            attributes: {
+              ...attrs,
+              name: 'my-pack_copy',
+              enabled: false,
+              created_at: '2025-06-01T00:00:00.000Z',
+              created_by: 'tester',
+              updated_at: '2025-06-01T00:00:00.000Z',
+              updated_by: 'tester',
+            },
+          });
+        }),
+      };
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+        mockSavedObjectsClient
+      );
+      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+      setupRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'source-pack-id' } });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(capturedCreateArgs!.min_osquery_version).toBe('5.10.0');
+      expect(capturedCreateArgs!.result_type).toBe('differential');
+    });
+
+    it('surfaces min_osquery_version and result_type in copy response', async () => {
+      const sourceWithDefaults = {
+        ...sourcePackSO,
+        attributes: {
+          ...sourcePackSO.attributes,
+          min_osquery_version: '5.12.0',
+          result_type: 'snapshot' as const,
+        },
+      };
+
+      const mockSavedObjectsClient = {
+        get: jest.fn().mockResolvedValue(sourceWithDefaults),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        create: jest.fn().mockResolvedValue({
+          id: 'new-pack-id',
+          attributes: {
+            name: 'my-pack_copy',
+            enabled: false,
+            min_osquery_version: '5.12.0',
+            result_type: 'snapshot',
+            created_at: '2025-06-01T00:00:00.000Z',
+            created_by: 'tester',
+            updated_at: '2025-06-01T00:00:00.000Z',
+            updated_by: 'tester',
+          },
+        }),
+      };
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+        mockSavedObjectsClient
+      );
+      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+      setupRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'source-pack-id' } });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as {
+        data: Record<string, unknown>;
+      };
+      expect(responseBody.data.min_osquery_version).toBe('5.12.0');
+      expect(responseBody.data.result_type).toBe('snapshot');
+    });
+
+    it('copy of a pack without execution defaults has neither field in response', async () => {
+      const mockSavedObjectsClient = {
+        get: jest.fn().mockResolvedValue(sourcePackSO),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        create: jest.fn().mockResolvedValue({
+          id: 'new-pack-id',
+          attributes: {
+            name: 'my-pack_copy',
+            enabled: false,
+            created_at: '2025-06-01T00:00:00.000Z',
+            created_by: 'tester',
+            updated_at: '2025-06-01T00:00:00.000Z',
+            updated_by: 'tester',
+          },
+        }),
+      };
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+        mockSavedObjectsClient
+      );
+      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+      setupRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'source-pack-id' } });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as {
+        data: Record<string, unknown>;
+      };
+      expect(responseBody.data).not.toHaveProperty('min_osquery_version');
+      expect(responseBody.data).not.toHaveProperty('result_type');
+    });
+  });
 });

@@ -14,6 +14,7 @@ import {
   packSavedObjectModelVersion2,
   packSavedObjectModelVersion3,
   packSavedObjectModelVersion4,
+  packSavedObjectModelVersion5,
   savedQueryModelVersion1,
   savedQueryModelVersion2,
 } from './saved_object_model_versions';
@@ -216,6 +217,7 @@ export const packType: SavedObjectsType = {
     2: packSavedObjectModelVersion2,
     3: packSavedObjectModelVersion3,
     4: packSavedObjectModelVersion4,
+    5: packSavedObjectModelVersion5,
   },
   management: {
     defaultSearchField: 'name',

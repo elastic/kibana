@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getFlattenedObject } from '@kbn/std';
 import type { ObjectType } from '@kbn/config-schema';
 import type {
   SavedObjectModelDataBackfillFn,
@@ -14,6 +15,7 @@ import {
   packSavedObjectModelVersion3,
   packSavedObjectModelVersion4,
 } from './saved_object_model_versions';
+import { packType } from './saved_object_mappings';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
 
 describe('Pack saved object model version 3 forward compatibility', () => {
@@ -648,5 +650,47 @@ describe('Pack saved object model version 4 — schedule_id/start_date/id backfi
     };
 
     expect(() => (forwardCompatibility as ObjectType).validate(migratedDoc)).not.toThrow();
+  });
+});
+
+// Kibana refuses to boot when a model version's `mappings_addition` declares a
+// field that the global mappings definition omits (or types differently):
+//
+//   FATAL Error: Type osquery-pack: mappings added on model versions not
+//   present on the global mappings definition: platform.type,platform.ignore_above
+//
+// This replicates core's `validateAddedMappings` so that failure surfaces as a
+// unit-test failure instead of a startup crash.
+describe('osquery-pack model version mappings', () => {
+  it('declares every mappings_addition field in the global mappings with identical values', () => {
+    const flattenedMappings = new Map(
+      Object.entries(getFlattenedObject(packType.mappings.properties as object))
+    );
+
+    const addedMappings = new Map<string, unknown>();
+    Object.values(packType.modelVersions as Record<string, { changes?: unknown[] }>)
+      .flatMap((version) => version.changes ?? [])
+      .filter(
+        (change): change is { type: string; addedMappings: object } =>
+          (change as { type?: string })?.type === 'mappings_addition'
+      )
+      .forEach((change) => {
+        const flattened = getFlattenedObject(change.addedMappings);
+        Object.keys(flattened).forEach((key) => {
+          addedMappings.set(key, (flattened as Record<string, unknown>)[key]);
+        });
+      });
+
+    const missing: string[] = [];
+    const differing: string[] = [];
+    for (const [key, value] of addedMappings.entries()) {
+      if (!flattenedMappings.has(key)) {
+        missing.push(key);
+      } else if (flattenedMappings.get(key) !== value) {
+        differing.push(key);
+      }
+    }
+
+    expect({ missing, differing }).toEqual({ missing: [], differing: [] });
   });
 });

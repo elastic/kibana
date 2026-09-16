@@ -61,6 +61,17 @@ const packQuerySchema = schema.object(
     ecs_mapping: schema.maybe(ecsMappingSchema),
     snapshot: schema.maybe(schema.boolean()),
     removed: schema.maybe(schema.boolean()),
+    // V5: declared for validation honesty. The queries map is `dynamic: false`
+    // with `unknowns: 'allow'`, so no mappings addition is needed.
+    enabled: schema.maybe(schema.boolean()),
+    // Per-query result_type override value.
+    result_type: schema.maybe(
+      schema.oneOf([
+        schema.literal('snapshot'),
+        schema.literal('differential'),
+        schema.literal('differential_added_only'),
+      ])
+    ),
   },
   { unknowns: 'allow' }
 );
@@ -122,3 +133,24 @@ export const packSchemaV3 = packSchemaV2.extends({
 // V4 adds no new schema surface — new fields live under `queries`, already
 // `unknowns: 'allow'`.
 export const packSchemaV4 = packSchemaV3;
+
+// V5 adds three pack-level execution defaults: `min_osquery_version`,
+// `result_type`, and `platform`. They are stored unindexed (`dynamic: false`
+// on the type). The field name `min_osquery_version` avoids colliding with the
+// pack-asset `version: long`.
+//
+// These are *defaults that fan out onto inheriting queries*, never pack-level
+// gates — a query's own value always wins.
+export const packSchemaV5 = packSchemaV4.extends({
+  min_osquery_version: schema.maybe(schema.nullable(schema.string())),
+  result_type: schema.maybe(
+    schema.nullable(
+      schema.oneOf([
+        schema.literal('snapshot'),
+        schema.literal('differential'),
+        schema.literal('differential_added_only'),
+      ])
+    )
+  ),
+  platform: schema.maybe(schema.nullable(schema.string())),
+});

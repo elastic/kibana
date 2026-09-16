@@ -10,7 +10,13 @@ import type {
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
 import { v5 as uuidv5 } from 'uuid';
-import { savedQuerySchemaV2, packSchemaV2, packSchemaV3, packSchemaV4 } from './schemas';
+import {
+  savedQuerySchemaV2,
+  packSchemaV2,
+  packSchemaV3,
+  packSchemaV4,
+  packSchemaV5,
+} from './schemas';
 import {
   deriveEffectiveQueryKey,
   hasQueries,
@@ -184,6 +190,23 @@ export const packSavedObjectModelVersion4: SavedObjectsModelVersion = {
   schemas: {
     forwardCompatibility: packSchemaV4.extends({}, { unknowns: 'ignore' }),
     create: packSchemaV4.extends({}, { unknowns: 'allow' }),
+  },
+};
+
+/**
+ * V5 adds three pack-level execution defaults: `min_osquery_version`,
+ * `result_type`, and `platform`. They are stored unindexed (`dynamic: false`
+ * on the type): nothing searches, filters, sorts or aggregates on them, and
+ * mappings cannot be removed once released. Existing packs with none of these
+ * fields are valid; pre-V5 Kibana silently ignores the new fields on write.
+ * Per-query `enabled` lives in the `queries` map which is `dynamic: false` with
+ * `unknowns: 'allow'`, so no mappings addition is needed there.
+ */
+export const packSavedObjectModelVersion5: SavedObjectsModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: packSchemaV5.extends({}, { unknowns: 'ignore' }),
+    create: packSchemaV5.extends({}, { unknowns: 'allow' }),
   },
 };
 
