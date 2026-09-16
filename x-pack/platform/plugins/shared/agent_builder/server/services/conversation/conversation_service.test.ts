@@ -7,7 +7,12 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationOriginType } from '@kbn/agent-builder-common';
+import {
+  CONVERSATION_SCHEMA_VERSION,
+  ConversationOriginType,
+  TimelineEventType,
+  isBadRequestError,
+} from '@kbn/agent-builder-common';
 import { getUserFromRequest } from '../utils';
 import { createClient } from './client';
 import { ConversationServiceImpl } from './conversation_service';
@@ -24,7 +29,10 @@ const request = { headers: {} } as unknown as KibanaRequest;
 const asCurrentUser = { name: 'as-current-user' } as never;
 const asInternalUser = { name: 'as-internal-user' } as never;
 
-const createService = ({ agents = {} }: { agents?: object } = {}) => {
+const createService = ({
+  agents = {},
+  attachments = { getTypeDefinition: jest.fn() },
+}: { agents?: object; attachments?: object } = {}) => {
   return new ConversationServiceImpl({
     logger: loggingSystemMock.createLogger(),
     security: {} as never,
@@ -34,6 +42,7 @@ const createService = ({ agents = {} }: { agents?: object } = {}) => {
       },
     } as never,
     agents: agents as never,
+    attachments: attachments as never,
   });
 };
 
@@ -114,6 +123,89 @@ describe('ConversationServiceImpl', () => {
       const author = await service.getConversationRoundAuthor({ request });
 
       expect(author).toBeUndefined();
+    });
+  });
+  describe('appendUserMessage', () => {
+    const conversation = {
+      id: 'conversation-1',
+      agent_id: 'agent-1',
+      user: { id: 'profile-1', username: 'jane' },
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+      attachments: [],
+    };
+
+    const accessedRefs = [{ attachment_id: 'a1', version: 1 }];
+    let appendEvents: jest.Mock;
+    let mergeAttachmentInputs: jest.Mock;
+
+    const appendedEvent = () => appendEvents.mock.calls[0][0].events[0];
+
+    const appendUserMessage = (options: { message?: string; attachments?: never[] } = {}) =>
+      createService({
+        agents: { getRegistry: jest.fn() },
+        attachments: {
+          getTypeDefinition: jest.fn(),
+          createStateManager: () => ({ getAccessedRefs: () => accessedRefs, getAll: () => [] }),
+          mergeAttachmentInputs,
+        },
+      }).appendUserMessage({ request, conversationId: 'conversation-1', ...options });
+
+    beforeEach(() => {
+      appendEvents = jest.fn();
+      mergeAttachmentInputs = jest.fn();
+      createClientMock.mockReturnValue({
+        get: jest.fn().mockImplementation(async () => conversation),
+        appendEvents,
+      } as never);
+    });
+
+    it('appends one user message event carrying the accessed attachment refs', async () => {
+      const before = Date.now();
+
+      await appendUserMessage({ message: 'hello' });
+
+      expect(appendEvents).toHaveBeenCalledTimes(1);
+      expect(appendedEvent()).toEqual({
+        id: expect.stringMatching(/^[0-9a-f-]{36}$/),
+        type: TimelineEventType.userMessage,
+        created_at: expect.any(String),
+        actor: { type: 'user', id: 'profile-1', username: 'jane' },
+        data: { message: 'hello', attachment_refs: accessedRefs },
+      });
+      expect(Date.parse(appendedEvent().created_at)).toBeGreaterThanOrEqual(before);
+    });
+
+    it('trims the stored message and defaults it when absent', async () => {
+      await appendUserMessage({ message: '  spaced  ' });
+      expect(appendedEvent().data.message).toBe('spaced');
+
+      appendEvents.mockClear();
+      await appendUserMessage();
+      expect(appendedEvent().data.message).toBe('');
+    });
+
+    it('rejects a conversation that predates canonical event storage as a bad request', async () => {
+      createClientMock.mockReturnValue({
+        get: jest.fn().mockResolvedValue({ ...conversation, schema_version: undefined }),
+        appendEvents,
+      } as never);
+
+      const error = await appendUserMessage({ message: 'hello' }).catch((thrown) => thrown);
+
+      expect(isBadRequestError(error)).toBe(true);
+      expect(error.message).toContain('canonical event storage');
+      expect(appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('appends to read-only conversations, which are only read-only in the UI', async () => {
+      createClientMock.mockReturnValue({
+        get: jest.fn().mockResolvedValue({ ...conversation, read_only: true }),
+        appendEvents,
+      } as never);
+
+      await appendUserMessage({ message: 'hello' });
+
+      expect(appendEvents).toHaveBeenCalledTimes(1);
     });
   });
 });
