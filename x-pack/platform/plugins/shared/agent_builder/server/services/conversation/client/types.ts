@@ -23,10 +23,7 @@ import type {
   ConversationAccessControl,
   ConversationInternalState,
 } from '@kbn/agent-builder-common/chat';
-import type {
-  AttachmentVersionRef,
-  VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
 import type { TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
@@ -109,19 +106,6 @@ export interface ReplaceRoundEventsRequest {
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
   /** Applied only when the stored conversation has no workspace yet. */
   workspaceId?: string;
-}
-
-/**
- * Adds attachments to the conversation and references them from the last stored
- * round. Merge semantics: the target round and the attachment list are both
- * resolved against stored state, so concurrent round or attachment writes survive.
- */
-export interface AddAttachmentsToLastRoundRequest {
-  id: string;
-  /** Merged into the last stored round's `input.attachment_refs`. */
-  refs: AttachmentVersionRef[];
-  /** Reconciled into the stored list; `snapshot` is what the caller started from. */
-  attachments: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
 }
 
 export interface ConversationListOptions {

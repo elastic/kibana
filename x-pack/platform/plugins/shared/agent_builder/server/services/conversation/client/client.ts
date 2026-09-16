@@ -63,7 +63,6 @@ import {
   type ConversationAccess,
 } from '../access_control';
 import type {
-  AddAttachmentsToLastRoundRequest,
   AppendEventsRequest,
   ConversationCreateRequest,
   ConversationUpdatableFields,
@@ -87,7 +86,6 @@ import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
 import { reconcileAttachments } from './round_writes';
-import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
 import { buildSearchSort, compileConversationFilter } from '../search';
@@ -125,10 +123,6 @@ export interface ConversationClient {
   update(
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess; retryOnConflict?: boolean }
-  ): Promise<Conversation>;
-  addAttachmentsToLastRound(
-    request: AddAttachmentsToLastRoundRequest,
-    options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   appendEvents(
     request: AppendEventsRequest,
@@ -647,38 +641,6 @@ class ConversationClientImpl implements ConversationClient {
       fields: () => withBoundedTitle(fields),
     });
 
-    return result;
-  }
-
-  async addAttachmentsToLastRound(
-    request: AddAttachmentsToLastRoundRequest,
-    options: { access: ConversationAccess } = { access: 'owner' }
-  ): Promise<Conversation> {
-    const { id: conversationId, refs, attachments } = request;
-    const { access } = options;
-
-    const result = await this.writeConversation({
-      conversationId,
-      access,
-      fields: (current) => {
-        if (current.rounds.length === 0) {
-          throw createBadRequestError(`Conversation ${conversationId} has no rounds to attach to`);
-        }
-
-        return {
-          rounds: applyAttachmentRefsToRounds(
-            current.rounds,
-            new Map([[current.rounds.length - 1, refs]])
-          ),
-          attachments: reconcileAttachments({
-            snapshot: attachments.snapshot,
-            stored: current.attachments ?? [],
-            produced: attachments.produced,
-            storedRounds: current.rounds,
-          }),
-        };
-      },
-    });
     return result;
   }
 
