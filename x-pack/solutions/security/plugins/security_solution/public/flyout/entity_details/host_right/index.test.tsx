@@ -43,7 +43,7 @@ jest.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => ({
 
 const mockedUseObservedHost = jest.fn().mockReturnValue(mockObservedHostData);
 
-jest.mock('./hooks/use_observed_host', () => ({
+jest.mock('../../../flyout_v2/entity/host/main/hooks/use_observed_host', () => ({
   useObservedHost: () => mockedUseObservedHost(),
 }));
 
@@ -71,6 +71,24 @@ describe('HostPanel', () => {
   });
 
   it('renders', () => {
+    mockedUseObservedHost.mockReturnValue({
+      ...mockObservedHostData,
+      entityRecord: {
+        '@timestamp': '2024-01-15T10:00:00.000Z',
+        entity: {
+          id: 'host-entity-id',
+          name: 'test',
+          type: 'host',
+          risk: {
+            calculated_level: 'High',
+            calculated_score: 80,
+            calculated_score_norm: 80,
+          },
+        },
+        host: { name: 'test' },
+      },
+    });
+
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <HostPanel {...mockProps} />

@@ -30,38 +30,37 @@ export const McpClientDetailsField = ({
   children,
 }: PropsWithChildren<McpClientDetailsFieldProps>) => {
   return (
-    <EuiPanel color="subdued" hasBorder={false} hasShadow={false} paddingSize="m">
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <strong>{label}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        {actions && actions.length > 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              {actions.map((action, index) => (
-                <EuiFlexItem key={index} grow={false}>
-                  {action}
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiText size="xs">{label}</EuiText>
+      <EuiPanel color="subdued" hasBorder={false} hasShadow={false} paddingSize="m">
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <EuiFlexItem grow={true}>
+            <div css={fieldValueStyles}>{children}</div>
           </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <div css={fieldValueStyles}>{children}</div>
-      {append && (
-        <>
-          <EuiSpacer size="s" />
-          {append}
-        </>
-      )}
-    </EuiPanel>
+          {actions && actions.length > 0 ? (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                {actions.map((action, index) => (
+                  <EuiFlexItem key={index} grow={false}>
+                    {action}
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+        {append && (
+          <>
+            <EuiSpacer size="s" />
+            {append}
+          </>
+        )}
+      </EuiPanel>
+    </EuiFlexGroup>
   );
 };

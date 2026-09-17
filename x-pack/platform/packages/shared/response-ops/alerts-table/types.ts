@@ -44,7 +44,7 @@ import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
-import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
+import type { MutedAlerts, SnoozedAlerts } from '@kbn/response-ops-alerts-apis/types';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -107,7 +107,7 @@ export interface SystemCellComponentMap {
 export type SystemCellId = keyof SystemCellComponentMap;
 
 type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
-  open: ({ attachments }: { attachments: any[] }) => void;
+  open: (props: { attachments?: any[]; getAttachments?: (owner: string) => any[] }) => void;
   close: () => void;
 };
 
@@ -117,7 +117,7 @@ type UseCasesAddToExistingCaseModal = (
   open: ({
     getAttachments,
   }: {
-    getAttachments: ({ theCase }: { theCase?: { id: string } }) => any[];
+    getAttachments: ({ theCase }: { theCase?: { id: string; owner: string } }) => any[];
   }) => void;
   close: () => void;
 };
@@ -149,7 +149,7 @@ export interface CasesService {
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
-    groupAlertsByRule: (items: any[]) => any[];
+    groupAlertsByRule: (items: any[], owner: string) => any[];
     canUseCases: (owners: CasesOwner[]) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
@@ -533,6 +533,9 @@ export type RenderContext<AC extends AdditionalContext> = {
   isLoadingMutedAlerts: boolean;
   mutedAlerts?: MutedAlerts;
 
+  isLoadingSnoozedAlerts: boolean;
+  snoozedAlerts?: SnoozedAlerts;
+
   isLoadingCases: boolean;
   cases?: Map<string, Case>;
 
@@ -619,8 +622,6 @@ export interface PublicAlertsDataGridProps
     featureId: string;
     owner: CasesOwner[];
     appId?: string;
-    syncAlerts?: boolean;
-    extractObservables?: boolean;
   };
   /**
    * If true, hides the bulk actions controls
@@ -703,6 +704,15 @@ export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> 
        * Used to generate "View in App" links for individual alerts.
        */
       getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
+      /**
+       * When `true`, the alert "modify" row actions (Acknowledge, Mark as untracked,
+       * Mute/Unmute, Edit tags) are shown even if the user is not authorized to create
+       * rules. Consumers can derive this from their own alert-write capability (e.g. RAC
+       * `alert:all` / `rule:mute_alerts`), which is not exposed via rule-type permissions.
+       * The value is additive: it never hides actions that are already shown for
+       * rule-create authorized users.
+       */
+      canModifyAlerts?: boolean;
     };
 
 export interface BulkActionsConfig {

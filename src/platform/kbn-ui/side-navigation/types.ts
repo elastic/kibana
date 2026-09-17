@@ -83,6 +83,10 @@ export interface MenuItem {
    */
   label: string;
   /**
+   * (optional) Override for the secondary menu/panel header title. Defaults to `label` when omitted.
+   */
+  secondaryMenuTitle?: string;
+  /**
    * (optional) `data-test-subj` attribute for testing and tracking purposes.
    */
   'data-test-subj'?: string;
@@ -91,9 +95,15 @@ export interface MenuItem {
    */
   badgeType?: BadgeType;
   /**
-   * (optional) The secondary menu sections belonging to the menu item.
+   * (optional) Secondary menu sections shown in the expanded side panel.
+   * Also used as popover content when `popoverSections` is omitted.
    */
   sections?: SecondaryMenuSection[];
+  /**
+   * (optional) Secondary menu sections shown in the hover popover only.
+   * Does not open the expanded side panel. Not shown in More.
+   */
+  popoverSections?: SecondaryMenuSection[];
 }
 
 /**
@@ -128,27 +138,4 @@ export interface MenuCalculations {
    * The maximum number of menu items that can be displayed in the navigation menu.
    */
   maxVisibleItems: number;
-}
-
-export interface SideNavLogo {
-  /**
-   * The route ID of the logo, used for the active state.
-   */
-  id: string;
-  /**
-   * The href of the logo link, typically the home page.
-   */
-  href: string;
-  /**
-   * The label for the logo, typically the product name.
-   */
-  label: string;
-  /**
-   * The logo type, e.g. `appObservability`, `appSecurity`, etc.
-   */
-  iconType: string;
-  /**
-   * (optional) `data-test-subj` attribute for testing and tracking purposes.
-   */
-  'data-test-subj'?: string;
 }

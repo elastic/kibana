@@ -161,9 +161,7 @@ describe('RulesSettingsFlappingClient', () => {
         lookBackWindow: 19,
         statusChangeThreshold: 3,
       })
-    ).rejects.toThrowError(
-      'savedObjectsClient errored trying to update flapping settings: failed!!'
-    );
+    ).rejects.toThrow('savedObjectsClient errored trying to update flapping settings: failed!!');
   });
 
   test('throws if new flapping setting fails verification', async () => {
@@ -174,7 +172,7 @@ describe('RulesSettingsFlappingClient', () => {
         lookBackWindow: 200,
         statusChangeThreshold: 500,
       })
-    ).rejects.toThrowError('Invalid lookBackWindow value, must be between 2 and 20, but got: 200.');
+    ).rejects.toThrow('Invalid lookBackWindow value, must be between 2 and 20, but got: 200.');
 
     await expect(
       client.update({
@@ -182,7 +180,7 @@ describe('RulesSettingsFlappingClient', () => {
         lookBackWindow: 20,
         statusChangeThreshold: 500,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Invalid statusChangeThreshold value, must be between 2 and 20, but got: 500.'
     );
 
@@ -192,7 +190,7 @@ describe('RulesSettingsFlappingClient', () => {
         lookBackWindow: 10,
         statusChangeThreshold: 20,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Invalid values,lookBackWindow (10) must be equal to or greater than statusChangeThreshold (20).'
     );
   });
@@ -263,7 +261,7 @@ describe('RulesSettingsFlappingClient', () => {
       )
     );
     // @ts-expect-error access private method
-    await expect(client.getSettings()).rejects.toThrowError();
+    await expect(client.getSettings()).rejects.toThrow();
   });
 
   test('can persist flapping settings when saved object does not exist', async () => {

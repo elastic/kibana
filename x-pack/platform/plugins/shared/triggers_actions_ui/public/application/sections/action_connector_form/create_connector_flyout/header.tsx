@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +20,7 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 
 interface Props {
@@ -27,6 +29,8 @@ interface Props {
   actionTypeMessage?: string | null;
   compatibility?: string[] | null;
   isExperimental?: boolean;
+  docsUrl?: string;
+  selectConnectorDocsUrl?: string;
 }
 
 const FlyoutHeaderComponent: React.FC<Props> = ({
@@ -35,7 +39,15 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   actionTypeMessage,
   compatibility,
   isExperimental,
+  docsUrl,
+  selectConnectorDocsUrl,
 }) => {
+  const {
+    docLinks: { links },
+  } = useKibana().services;
+
+  const documentationUrl = docsUrl || selectConnectorDocsUrl || links.alerting.connectors;
+
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -44,10 +56,10 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
             <EuiIcon type={icon} size="xl" aria-hidden={true} />
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           {actionTypeName && actionTypeMessage ? (
             <>
-              <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+              <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center" wrap>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
                     <h3 id="flyoutTitle">
@@ -111,6 +123,21 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
             </EuiTitle>
           )}
         </EuiFlexItem>
+        {documentationUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="create-connector-flyout-header-docs-link"
+              href={documentationUrl}
+              target="_blank"
+              iconType="question"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderDocsLink"
+                defaultMessage="Documentation"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiFlyoutHeader>
   );

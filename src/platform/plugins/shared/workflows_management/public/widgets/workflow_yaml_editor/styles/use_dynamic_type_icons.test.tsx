@@ -9,7 +9,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { useDynamicTypeIcons } from './use_dynamic_type_icons';
+import { isMonochromeActionType, useDynamicTypeIcons } from './use_dynamic_type_icons';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -34,7 +34,11 @@ function connectorTypeStub(actionTypeId: string): ConnectorTypeInfo {
 }
 
 describe('useDynamicTypeIcons', () => {
-  it('does not call actionTypeRegistry.get for connector types missing from the UI registry', async () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('does not call actionTypeRegistry.get for connector types missing from the UI registry', () => {
     const registeredId = '.registered';
     const unregisteredId = '.notInRegistry';
 
@@ -63,14 +67,12 @@ describe('useDynamicTypeIcons', () => {
       },
     };
 
+    jest.useFakeTimers();
     const { unmount } = renderHook(() => useDynamicTypeIcons(connectorsData, undefined, true), {
       wrapper: getTestProvider({ services }),
     });
 
-    await waitFor(() => {
-      expect(get).toHaveBeenCalledTimes(1);
-    });
-
+    expect(get).toHaveBeenCalledTimes(1);
     expect(get).toHaveBeenCalledWith(registeredId);
     expect(has).toHaveBeenCalledWith(unregisteredId);
 
@@ -111,4 +113,24 @@ describe('useDynamicTypeIcons', () => {
 
     unmount();
   });
+});
+
+describe('isMonochromeActionType', () => {
+  // Prefix branch: ids NOT explicitly in MonochromeIcons but matched by prefix.
+  // NOTE: these characterize the current, deliberately-broad prefix brush —
+  // narrowing the brush to stop over-masking a colored extension icon would update these.
+  it.each(['data.somethingNew', 'ai.classify', 'security.foo', 'cases.bar', 'search.baz'])(
+    '"%s" is treated as monochrome via prefix match',
+    (id) => {
+      expect(isMonochromeActionType(id)).toBe(true);
+    }
+  );
+
+  // Over-masking guard: colored logos must NEVER be masked (would flatten to a solid currentColor).
+  it.each(['.slack', '.slack_api', 'elasticsearch', 'kibana'])(
+    '"%s" is a colored logo and must NOT be masked',
+    (id) => {
+      expect(isMonochromeActionType(id)).toBe(false);
+    }
+  );
 });

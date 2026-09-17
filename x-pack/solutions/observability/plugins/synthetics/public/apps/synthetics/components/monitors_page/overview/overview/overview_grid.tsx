@@ -5,11 +5,12 @@
  * 2.0.
  */
 import React, { memo, useCallback, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
 import { ShowLastRunToggle } from '../../common/show_last_run_toggle';
 import { DisplayOptionsPopover } from '../../common/display_options_popover';
+import { AutodiscoveredMonitorsTour } from '../../common/autodiscovered_monitors_tour';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
@@ -28,12 +29,13 @@ import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
 import { ViewButtons } from './view_buttons/view_buttons';
 import { OverviewCardView } from './overview_cards_view/overview_card_view';
+import { OverviewTableColumnSelector } from './compact_view/components/overview_table_column_selector';
 
 export const OverviewGrid = memo(
   ({ view, isEmbeddable }: { view: OverviewView; isEmbeddable?: boolean }) => {
     const dispatch = useDispatch();
 
-    const { status, loaded: isInitialized, loading } = useOverviewStatusState();
+    const { status, loaded: isInitialized, loading, total } = useOverviewStatusState();
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
 
     const setFlyoutConfigCallback = useCallback(
@@ -69,7 +71,7 @@ export const OverviewGrid = memo(
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <OverviewPaginationInfo
-                  total={status ? monitorsSortedByStatus.length : undefined}
+                  total={status ? total ?? monitorsSortedByStatus.length : undefined}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -89,6 +91,7 @@ export const OverviewGrid = memo(
           <EuiFlexItem grow={false}>
             <SortFields />
           </EuiFlexItem>
+          {view === 'compactView' ? <OverviewTableColumnSelector /> : null}
           <EuiFlexItem grow={false}>
             <GroupFields />
           </EuiFlexItem>
@@ -98,7 +101,9 @@ export const OverviewGrid = memo(
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
-            <DisplayOptionsPopover />
+            <AutodiscoveredMonitorsTour>
+              <DisplayOptionsPopover />
+            </AutodiscoveredMonitorsTour>
           </EuiFlexItem>
         </EuiFlexGroup>
         {/*

@@ -86,8 +86,11 @@ apiTest.describe('Ingest pipelines structure tree API', { tag: tags.stateful.cla
 
   apiTest.beforeAll(async ({ esClient, requestAuth }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    // Create a complex tree of 7 levels and 3 children per node.
-    await createComplexTree({ esClient, levels: 7, childrenPerNode: 3 });
+    // Create a complex tree of 6 levels and 3 children per node.
+    // The API only ever returns down to level 6 (MAX_TREE_LEVEL = 5), so 6 levels
+    // exercises the full response depth while keeping setup small enough to fit the
+    // hook budget on Cloud (364 vs 1093 pipelines, each a serial cluster-state write).
+    await createComplexTree({ esClient, levels: 6, childrenPerNode: 3 });
   });
 
   apiTest.afterAll(async ({ esClient, log }) => {

@@ -5,7 +5,29 @@
  * 2.0.
  */
 
-import { promptResponseEntrySchema } from './chat';
+import { createHash } from 'crypto';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  ChatEventType,
+  ConversationOriginType,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
+import { firstValueFrom, of, Subject, toArray } from 'rxjs';
+import { internalApiPath, publicApiPath } from '../../common/constants';
+import {
+  callbackConversePayloadSchema,
+  chatPayloadSchema,
+  conversePayloadSchema,
+  promptResponseEntrySchema,
+  registerChatRoutes,
+} from './chat';
+
+const mockObservableIntoEventSourceStream = jest.fn();
+jest.mock('@kbn/sse-utils-server', () => ({
+  observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
+    mockObservableIntoEventSourceStream(observable, options),
+  cloudProxyBufferSize: 4096,
+}));
 
 describe('promptResponseEntrySchema', () => {
   it('accepts the confirmation variant', () => {
@@ -56,5 +78,863 @@ describe('promptResponseEntrySchema', () => {
 
   it('rejects unknown payload shapes', () => {
     expect(() => promptResponseEntrySchema.validate({ foo: 'bar' })).toThrow();
+  });
+});
+
+describe('conversePayloadSchema', () => {
+  it('rejects trigger_mode', () => {
+    expect(() => conversePayloadSchema.validate({ input: 'Hello', trigger_mode: 'never' })).toThrow(
+      /trigger_mode/
+    );
+  });
+
+  it('rejects unsupported conversation access mode values', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Unsupported access mode test',
+        access_control: {
+          access_mode: 'shared',
+        },
+      })
+    ).toThrow(/access_mode/);
+  });
+
+  it('accepts configuration_overrides with skill_ids', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: {
+          skill_ids: ['skill-a', 'skill-b'],
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects configuration_overrides.skill_ids exceeding 100 entries', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: {
+          skill_ids: Array.from({ length: 101 }, (_, i) => `skill-${i}`),
+        },
+      })
+    ).toThrow(/skill_ids/);
+  });
+
+  it('accepts configuration_overrides with enable_elastic_capabilities true', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: { enable_elastic_capabilities: true },
+      })
+    ).not.toThrow();
+  });
+
+  it('accepts configuration_overrides with enable_elastic_capabilities false', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: { enable_elastic_capabilities: false },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects configuration_overrides.enable_elastic_capabilities when not a boolean', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: { enable_elastic_capabilities: 'yes' },
+      })
+    ).toThrow(/enable_elastic_capabilities/);
+  });
+});
+
+describe('chatPayloadSchema', () => {
+  it('accepts trigger_mode for sync chat requests', () => {
+    expect(chatPayloadSchema.validate({ input: 'hi' }).trigger_mode).toBe('always');
+    expect(
+      chatPayloadSchema.validate({
+        trigger_mode: 'never',
+        conversation_id: '00000000-0000-4000-8000-000000000001',
+        input: 'hi',
+      })
+    ).toMatchObject({ trigger_mode: 'never' });
+  });
+
+  it('rejects unsupported trigger_mode values', () => {
+    expect(() => chatPayloadSchema.validate({ trigger_mode: 'auto' })).toThrow();
+  });
+
+  it('accepts execution options alongside trigger_mode never', () => {
+    expect(() =>
+      chatPayloadSchema.validate({
+        trigger_mode: 'never',
+        conversation_id: '00000000-0000-4000-8000-000000000001',
+        input: 'hi',
+        connector_id: 'connector-1',
+        read_only: true,
+      })
+    ).not.toThrow();
+  });
+});
+
+describe('callbackConversePayloadSchema', () => {
+  const basePayload = {
+    agent_id: 'agent-1',
+    input: 'Hello',
+    execution_idempotency_key: 'Ev0PV23K4AB1',
+    origin: {
+      type: ConversationOriginType.Slack,
+      external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+    },
+    callback: {
+      url: 'https://callback.example.com/events?token=abc',
+    },
+  };
+
+  it('accepts origin and callback URL', () => {
+    expect(() => callbackConversePayloadSchema.validate(basePayload)).not.toThrow();
+  });
+
+  it('rejects trigger_mode', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        trigger_mode: 'never',
+      })
+    ).toThrow(/trigger_mode/);
+  });
+
+  it('accepts callback payloads without origin', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        origin: undefined,
+      })
+    ).not.toThrow();
+  });
+
+  it('accepts a origin author when provided', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        origin: {
+          ...basePayload.origin,
+          author: {
+            id: 'U123',
+            full_name: 'Jane Doe',
+            username: 'jane',
+          },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('requires origin author id when origin author is provided', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        origin: {
+          ...basePayload.origin,
+          author: {
+            full_name: 'Jane Doe',
+          },
+        },
+      })
+    ).toThrow(/id/);
+  });
+
+  it('rejects unsupported origin types', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        origin: {
+          type: 'teams',
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+        },
+      })
+    ).toThrow(/origin/);
+  });
+
+  it('limits external conversation id length', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        origin: {
+          type: ConversationOriginType.Slack,
+          external_conversation_id: 'x'.repeat(1025),
+        },
+      })
+    ).toThrow(/external_conversation_id/);
+  });
+
+  it('limits callback URL length', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        callback: {
+          url: `https://callback.example.com/events?token=${'x'.repeat(2048)}`,
+        },
+      })
+    ).toThrow(/url/);
+  });
+
+  it('requires a valid HTTP or HTTPS callback URL', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        callback: {
+          url: 'ftp://callback.example.com/events',
+        },
+      })
+    ).toThrow(/url/);
+  });
+
+  it('requires an idempotency key', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        execution_idempotency_key: undefined,
+      })
+    ).toThrow(/execution_idempotency_key/);
+  });
+
+  it('rejects an empty idempotency key', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        execution_idempotency_key: '',
+      })
+    ).toThrow(/execution_idempotency_key/);
+  });
+
+  it('limits idempotency key length', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        execution_idempotency_key: 'x'.repeat(257),
+      })
+    ).toThrow(/execution_idempotency_key/);
+  });
+});
+
+describe('registerChatRoutes', () => {
+  it('registers an internal callback converse route', () => {
+    const postConfigs: Array<{ path: string; access?: string }> = [];
+    const createVersionedRoute = () => ({
+      addVersion: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
+    });
+    const router = {
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string; access?: string }) => {
+          postConfigs.push(config);
+          return createVersionedRoute();
+        }),
+      },
+    };
+
+    registerChatRoutes({
+      router,
+      getInternalServices: jest.fn(),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    expect(postConfigs).toContainEqual(
+      expect.objectContaining({
+        path: `${internalApiPath}/converse/callback`,
+        access: 'internal',
+      })
+    );
+  });
+
+  it('schedules callback converse with origin for conversation resolution', async () => {
+    const callbackPath = `${internalApiPath}/converse/callback`;
+    let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const validateCallbackUrl = jest.fn();
+    const executeAgent = jest.fn().mockResolvedValue({
+      executionId: 'execution-1',
+      events$: of(),
+    });
+    const origin = {
+      type: ConversationOriginType.Slack,
+      external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      author: {
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      },
+    };
+
+    const router = {
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation(
+              (
+                _versionConfig: unknown,
+                handler: (ctx: any, req: any, res: any) => Promise<any>
+              ) => {
+                if (config.path === callbackPath) {
+                  callbackHandler = handler;
+                }
+              }
+            ),
+        })),
+      },
+    };
+
+    registerChatRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        callbackDeliveryService: { validateCallbackUrl },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = {
+      accepted: jest.fn(({ body }) => ({ status: 202, payload: body })),
+      forbidden: jest.fn(),
+      customError: jest.fn(),
+      notFound: jest.fn(),
+    };
+    const result = await callbackHandler!(
+      {
+        core: Promise.resolve({}),
+        licensing: Promise.resolve({
+          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        }),
+        agentBuilder: Promise.resolve({
+          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+        }),
+      },
+      {
+        body: {
+          agent_id: 'agent-1',
+          input: 'Hello',
+          execution_idempotency_key: 'Ev0PV23K4AB1',
+          origin,
+          callback: {
+            url: 'https://callback.example.com/events?token=abc',
+          },
+        },
+      },
+      response
+    );
+
+    expect(result).toEqual({
+      status: 202,
+      payload: { execution_id: 'execution-1' },
+    });
+    expect(validateCallbackUrl).toHaveBeenCalledWith(
+      'https://callback.example.com/events?token=abc'
+    );
+    expect(executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        useTaskManager: true,
+        params: expect.objectContaining({
+          conversationId: undefined,
+          origin,
+          callback: {
+            url: 'https://callback.example.com/events?token=abc',
+          },
+        }),
+      })
+    );
+  });
+
+  it('passes the idempotency key through to the execution service', async () => {
+    const callbackPath = `${internalApiPath}/converse/callback`;
+    let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const validateCallbackUrl = jest.fn();
+    const executeAgent = jest.fn().mockResolvedValue({
+      executionId: 'execution-1',
+      events$: of(),
+    });
+
+    const router = {
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation(
+              (
+                _versionConfig: unknown,
+                handler: (ctx: any, req: any, res: any) => Promise<any>
+              ) => {
+                if (config.path === callbackPath) {
+                  callbackHandler = handler;
+                }
+              }
+            ),
+        })),
+      },
+    };
+
+    registerChatRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        callbackDeliveryService: { validateCallbackUrl },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = {
+      accepted: jest.fn(({ body }) => ({ status: 202, payload: body })),
+      forbidden: jest.fn(),
+      customError: jest.fn(),
+      notFound: jest.fn(),
+    };
+    const result = await callbackHandler!(
+      {
+        core: Promise.resolve({}),
+        licensing: Promise.resolve({
+          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        }),
+        agentBuilder: Promise.resolve({
+          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+        }),
+      },
+      {
+        body: {
+          agent_id: 'agent-1',
+          input: 'Hello',
+          execution_idempotency_key: 'Ev0PV23K4AB1',
+          origin: {
+            type: ConversationOriginType.Slack,
+            external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+          },
+          callback: {
+            url: 'https://callback.example.com/events?token=abc',
+          },
+        },
+      },
+      response
+    );
+
+    expect(result).toEqual({
+      status: 202,
+      payload: { execution_id: 'execution-1' },
+    });
+    expect(executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionId: createHash('sha256')
+          .update(
+            [
+              'default',
+              ConversationOriginType.Slack,
+              'team:T123/channel:C123/thread:1712345678.000100',
+              'Ev0PV23K4AB1',
+            ].join('\u0000')
+          )
+          .digest('hex'),
+        metadata: { execution_idempotency_key: 'Ev0PV23K4AB1' },
+        useTaskManager: true,
+        params: expect.objectContaining({
+          origin: {
+            type: ConversationOriginType.Slack,
+            external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+          },
+        }),
+      })
+    );
+  });
+
+  it('prefers a caller-provided execution id over the idempotency key', async () => {
+    const callbackPath = `${internalApiPath}/converse/callback`;
+    let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const validateCallbackUrl = jest.fn();
+    const executeAgent = jest.fn().mockResolvedValue({
+      executionId: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+      events$: of(),
+    });
+
+    const router = {
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation(
+              (
+                _versionConfig: unknown,
+                handler: (ctx: any, req: any, res: any) => Promise<any>
+              ) => {
+                if (config.path === callbackPath) {
+                  callbackHandler = handler;
+                }
+              }
+            ),
+        })),
+      },
+    };
+
+    registerChatRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        callbackDeliveryService: { validateCallbackUrl },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = {
+      accepted: jest.fn(({ body }) => ({ status: 202, payload: body })),
+      forbidden: jest.fn(),
+      customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+      notFound: jest.fn(),
+    };
+
+    const result = await callbackHandler!(
+      {
+        core: Promise.resolve({}),
+        licensing: Promise.resolve({
+          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        }),
+        agentBuilder: Promise.resolve({
+          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+        }),
+      },
+      {
+        body: {
+          agent_id: 'agent-1',
+          input: 'Hello',
+          execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+          execution_idempotency_key: 'Ev0PV23K4AB1',
+          origin: {
+            type: ConversationOriginType.Slack,
+            external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+          },
+          callback: {
+            url: 'https://callback.example.com/events?token=abc',
+          },
+        },
+      },
+      response
+    );
+
+    expect(result).toEqual({
+      status: 202,
+      payload: {
+        execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+      },
+    });
+    expect(executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionId: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+        metadata: { execution_idempotency_key: 'Ev0PV23K4AB1' },
+      })
+    );
+  });
+
+  it('rejects callback converse when the callback URL is not allowlisted', async () => {
+    const callbackPath = `${internalApiPath}/converse/callback`;
+    let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const validateCallbackUrl = jest.fn().mockImplementation(() => {
+      throw new Error(
+        'target url "https://disallowed.example.com/events" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
+    });
+    const executeAgent = jest.fn();
+
+    const router = {
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation(
+              (
+                _versionConfig: unknown,
+                handler: (ctx: any, req: any, res: any) => Promise<any>
+              ) => {
+                if (config.path === callbackPath) {
+                  callbackHandler = handler;
+                }
+              }
+            ),
+        })),
+      },
+    };
+
+    registerChatRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        callbackDeliveryService: { validateCallbackUrl },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = {
+      accepted: jest.fn(),
+      forbidden: jest.fn(),
+      customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+      notFound: jest.fn(),
+    };
+
+    const result = await callbackHandler!(
+      {
+        core: Promise.resolve({}),
+        licensing: Promise.resolve({
+          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        }),
+        agentBuilder: Promise.resolve({
+          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+        }),
+      },
+      {
+        body: {
+          agent_id: 'agent-1',
+          input: 'Hello',
+          callback: {
+            url: 'https://disallowed.example.com/events',
+          },
+        },
+      },
+      response
+    );
+
+    expect(result).toEqual({
+      status: 400,
+      payload: {
+        attributes: {},
+        message:
+          'target url "https://disallowed.example.com/events" is not added to the Kibana config xpack.actions.allowedHosts',
+      },
+    });
+    expect(executeAgent).not.toHaveBeenCalled();
+  });
+
+  describe('skill_ids override validation', () => {
+    const conversePath = `${publicApiPath}/converse`;
+
+    const buildRouter = (onConverse: (handler: Function) => void) => ({
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest.fn().mockImplementation((_versionConfig: unknown, handler: Function) => {
+            if (config.path === conversePath) {
+              onConverse(handler);
+            }
+          }),
+        })),
+      },
+    });
+
+    const baseContext = {
+      core: Promise.resolve({}),
+      licensing: Promise.resolve({
+        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      }),
+      agentBuilder: Promise.resolve({
+        spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+      }),
+    };
+
+    it('rejects unknown skill ids with a 400', async () => {
+      let converseHandler: Function | undefined;
+      const executeAgent = jest.fn();
+      const skillRegistry = { bulkGet: jest.fn().mockResolvedValue(new Map()) };
+
+      const router = buildRouter((h) => {
+        converseHandler = h;
+      });
+
+      registerChatRoutes({
+        router,
+        getInternalServices: jest.fn().mockReturnValue({
+          execution: { executeAgent },
+          skills: { getRegistry: jest.fn().mockResolvedValue(skillRegistry) },
+        }),
+        coreSetup: {} as never,
+        pluginsSetup: {},
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+
+      const response = {
+        ok: jest.fn(),
+        customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+        forbidden: jest.fn(),
+        notFound: jest.fn(),
+      };
+
+      const result = await converseHandler!(
+        baseContext,
+        {
+          body: {
+            agent_id: 'agent-1',
+            input: 'Hello',
+            configuration_overrides: { skill_ids: ['unknown-skill'] },
+          },
+        },
+        response
+      );
+
+      expect(result).toMatchObject({ status: 400 });
+      expect(result.payload.message).toMatch(/unknown-skill/);
+      expect(executeAgent).not.toHaveBeenCalled();
+    });
+
+    it('proceeds when all skill ids are known', async () => {
+      let converseHandler: Function | undefined;
+      const executeAgent = jest.fn().mockResolvedValue({ events$: of() });
+      const skillRegistry = {
+        bulkGet: jest.fn().mockResolvedValue(new Map([['known-skill', { id: 'known-skill' }]])),
+      };
+
+      const router = buildRouter((h) => {
+        converseHandler = h;
+      });
+
+      registerChatRoutes({
+        router,
+        getInternalServices: jest.fn().mockReturnValue({
+          execution: { executeAgent },
+          skills: { getRegistry: jest.fn().mockResolvedValue(skillRegistry) },
+        }),
+        coreSetup: {} as never,
+        pluginsSetup: {},
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+
+      const response = {
+        ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
+        customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+        forbidden: jest.fn(),
+        notFound: jest.fn(),
+      };
+
+      await converseHandler!(
+        baseContext,
+        {
+          body: {
+            agent_id: 'agent-1',
+            input: 'Hello',
+            configuration_overrides: { skill_ids: ['known-skill'] },
+          },
+        },
+        response
+      );
+
+      expect(skillRegistry.bulkGet).toHaveBeenCalledWith(['known-skill']);
+      expect(executeAgent).toHaveBeenCalled();
+    });
+  });
+
+  describe('/converse/async streaming filter', () => {
+    const asyncPath = `${publicApiPath}/converse/async`;
+
+    it('keeps round_complete and drops execution_started + execution_terminated on the legacy SSE stream', async () => {
+      let asyncHandler: Function | undefined;
+      const roundCompleteEvent = { type: ChatEventType.roundComplete, data: {} };
+      const executionStartedEvent = {
+        id: 'r::execution_started',
+        type: TimelineEventType.executionStarted,
+        created_at: '2024-01-01T00:00:00.000Z',
+        actor: { type: 'agent', id: 'a' },
+        execution_id: 'r::execution',
+        trigger_event_id: 'r::user_message',
+        data: { trigger_type: 'user_message' },
+      };
+      const executionTerminatedEvent = {
+        id: 'r::execution_terminated',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2024-01-01T00:00:00.000Z',
+        actor: { type: 'agent', id: 'a' },
+        execution_id: 'r::execution',
+        trigger_event_id: 'r::user_message',
+        data: {},
+      };
+      const conversationUpdated = {
+        type: ChatEventType.conversationUpdated,
+        data: {
+          conversation_id: 'c',
+          title: 't',
+          access_control: { access_mode: 'private', entries: [] },
+        },
+      };
+      const executeAgent = jest.fn().mockResolvedValue({
+        events$: of(
+          roundCompleteEvent,
+          executionStartedEvent,
+          executionTerminatedEvent,
+          conversationUpdated
+        ),
+      });
+
+      mockObservableIntoEventSourceStream.mockReset();
+      mockObservableIntoEventSourceStream.mockReturnValue('BODY');
+
+      const router = {
+        versioned: {
+          post: jest.fn().mockImplementation((config: { path: string }) => ({
+            addVersion: jest.fn().mockImplementation((_v: unknown, handler: Function) => {
+              if (config.path === asyncPath) {
+                asyncHandler = handler;
+              }
+            }),
+          })),
+        },
+      };
+
+      registerChatRoutes({
+        router,
+        getInternalServices: jest.fn().mockReturnValue({
+          execution: { executeAgent },
+        }),
+        coreSetup: {
+          getStartServices: jest.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
+        },
+        pluginsSetup: {},
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+
+      const response = {
+        ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
+        forbidden: jest.fn(),
+        customError: jest.fn(),
+        notFound: jest.fn(),
+      };
+      const aborted$ = new Subject<void>();
+
+      await asyncHandler!(
+        {
+          core: Promise.resolve({}),
+          licensing: Promise.resolve({
+            license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+          }),
+          agentBuilder: Promise.resolve({
+            spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+          }),
+        },
+        {
+          body: { agent_id: 'agent-1', input: 'Hello' },
+          events: { aborted$: aborted$.asObservable() },
+        },
+        response
+      );
+
+      expect(mockObservableIntoEventSourceStream).toHaveBeenCalledTimes(1);
+      const [passedObservable] = mockObservableIntoEventSourceStream.mock.calls[0] as [
+        { pipe: (...operators: any[]) => any }
+      ];
+      const emitted = (await firstValueFrom(passedObservable.pipe(toArray()))) as Array<{
+        type: string;
+      }>;
+      expect(emitted.map((event) => event.type)).toEqual([
+        ChatEventType.roundComplete,
+        ChatEventType.conversationUpdated,
+      ]);
+    });
   });
 });

@@ -6,30 +6,42 @@
  */
 
 import React from 'react';
-import type { EuiButtonProps } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
+import { EuiHeaderLink, type EuiHeaderLinkProps } from '@elastic/eui';
+import { useChangeHistoryModal } from '../../provider/use_change_history_modal';
 import * as i18n from '../timeline/translations';
 
+type ChangeHistoryHeaderLinkProps = Pick<
+  EuiHeaderLinkProps,
+  'size' | 'iconSide' | 'iconSize' | 'color' | 'isDisabled' | 'isLoading' | 'aria-label'
+>;
+
 export interface ChangeHistoryTriggerProps {
-  buttonProps?: Partial<EuiButtonProps>;
-  children?: React.ReactNode;
+  label?: string;
+  iconType?: string;
+  'data-test-subj'?: string;
+  headerLinkProps?: ChangeHistoryHeaderLinkProps;
 }
 
 export function ChangeHistoryTrigger({
-  buttonProps,
-  children,
+  label = i18n.TRIGGER_LABEL,
+  iconType = 'clock',
+  'data-test-subj': dataTestSubj = 'changeHistoryTrigger',
+  headerLinkProps,
 }: ChangeHistoryTriggerProps): JSX.Element {
-  const { openModal } = useChangeHistoryConfig();
+  const { openModal } = useChangeHistoryModal();
 
   return (
-    <EuiButton
-      iconType="clock"
+    <EuiHeaderLink
+      iconType={iconType}
+      size="s"
+      iconSide="left"
+      iconSize="m"
+      color="text"
       onClick={openModal}
-      data-test-subj="changeHistoryTrigger"
-      {...buttonProps}
+      data-test-subj={dataTestSubj}
+      {...headerLinkProps}
     >
-      {children ?? i18n.TRIGGER_LABEL}
-    </EuiButton>
+      {label}
+    </EuiHeaderLink>
   );
 }

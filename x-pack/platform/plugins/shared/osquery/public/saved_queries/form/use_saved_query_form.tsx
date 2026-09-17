@@ -7,8 +7,8 @@
 
 import { useForm as useHookForm } from 'react-hook-form';
 import { isArray, isEmpty, map } from 'lodash';
-import type { Draft } from 'immer';
-import produce from 'immer';
+import type { Draft } from 'immer-v9';
+import produce from 'immer-v9';
 import { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
@@ -57,7 +57,7 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
 });
 
-export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
+const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
   // @ts-expect-error update types
   produce<SavedQueryFormData>(payload, (draft: Draft<SavedQuerySOFormData>) => {
     if (isArray(draft.version)) {

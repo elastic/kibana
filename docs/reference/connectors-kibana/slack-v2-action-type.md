@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It authenticates using OAuth Authorization Code (Slack OAuth v2).
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: EARS (Elastic OAuth, recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -17,7 +17,20 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [slack-v2-connector-configuration]
 
-Slack (v2) connectors use OAuth Authorization Code authentication. When creating the connector, you will be prompted to authorize access to your Slack workspace. No additional configuration properties are required beyond the OAuth credentials.
+Slack (v2) connectors support three authentication methods:
+
+EARS (recommended)
+:   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required.
+
+OAuth Authorization Code
+:   Slack's OAuth v2 flow using your own Slack app. You will be redirected to Slack to authorize access to your workspace. Requires a Slack app with a Client ID, Client Secret, and the appropriate user token scopes. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth) for setup steps.
+
+Bot Token
+:   A long-lived Slack bot token (format: `xoxb-...`) from a Slack app. Paste the token directly — no OAuth redirect is required. See [Get API credentials (Bot Token)](#slack-v2-api-credentials-bot-token) for setup steps.
+
+::::{note}
+The **Search messages** action requires a user token and is not available when using Bot Token authentication. Use **Get conversation history** to read messages from a specific channel instead.
+::::
 
 ## Test connectors [slack-v2-action-configuration]
 
@@ -139,9 +152,9 @@ Send message
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list.
 
-## Get API credentials [slack-v2-api-credentials]
+## Get API credentials (OAuth) [slack-v2-api-credentials-oauth]
 
-To use the Slack (v2) connector, you need a Slack app configured for OAuth.
+To use OAuth Authorization Code authentication, you need a Slack app configured for OAuth.
 
 1. Go to [Slack API: Your Apps](https://api.slack.com/apps) and select **Create New App**.
 2. Choose **From scratch**, give it a name (for example, "Kibana Slack Connector"), and select your workspace.
@@ -169,4 +182,39 @@ To use the Slack (v2) connector, you need a Slack app configured for OAuth.
 
 ::::{note}
 Additional scopes may be required for certain actions. For example, `groups:write` is needed to create private channels or invite users. Add scopes as needed under **User Token Scopes** in your Slack app configuration.
+::::
+
+## Get API credentials (Bot Token) [slack-v2-api-credentials-bot-token]
+
+To use Bot Token authentication, you need a Slack app with a bot token.
+
+1. Go to [Slack API: Your Apps](https://api.slack.com/apps) and select **Create New App**.
+2. Choose **From scratch**, give it a name (for example, "Kibana Bot"), and select your workspace.
+3. Under **OAuth & Permissions**, add the following **Bot Token Scopes**:
+   - `channels:read` — list public channels
+   - `channels:history` — read public channel message history
+   - `chat:write` — send messages as the bot
+   - `files:read` — access file metadata
+   - `groups:read` — list private channels the bot is a member of
+   - `groups:history` — read private channel history
+   - `im:read` — list direct messages with the bot
+   - `im:history` — read DM history
+   - `mpim:read` — list group direct messages
+   - `mpim:history` — read group DM history
+   - `users:read` — look up user information
+   - `users:read.email` — look up users by email
+4. Under **OAuth & Permissions**, select **Install to Workspace** and authorize the app.
+5. Copy the **Bot User OAuth Token** (starts with `xoxb-`).
+6. In {{kib}}, paste the token into the **Slack Bot Token** field when creating the connector.
+
+::::{note}
+Bot tokens cannot search across the workspace — the **Search messages** action is not supported with bot token authentication. Use **Get conversation history** to read messages from channels the bot is a member of. To use **Get conversation history** on a private channel, the bot must first be invited to that channel.
+::::
+
+::::{note}
+The scopes above enable all read and messaging actions out of the box. Additional write scopes are required for channel-management actions:
+- `channels:manage` — required for **Create conversation** (public channels)
+- `groups:write` — required for **Create conversation** (private channels) and **Invite to conversation**
+
+Add these scopes under **Bot Token Scopes** in your Slack app configuration if you need these actions.
 ::::

@@ -10,6 +10,7 @@ import {
   simulateClassicStreamTemplate,
   updateDataStreamsFailureStore,
   updateDataStreamsLifecycle,
+  updateDataStreamsMappings,
 } from './manage_data_streams';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
@@ -76,6 +77,22 @@ describe('getTemplateLifecycle', () => {
     });
     expect(result).toEqual({
       dsl: { data_retention: '30d', downsample: [{ after: '1d', fixed_interval: '1h' }] },
+    });
+  });
+
+  it('maps template frozen_after into dsl', () => {
+    const result = getTemplateLifecycle({
+      aliases: {},
+      mappings: {},
+      lifecycle: {
+        enabled: true,
+        data_retention: '30d',
+        frozen_after: '10d',
+      },
+      settings: { index: { lifecycle: { prefer_ilm: false } } },
+    });
+    expect(result).toEqual({
+      dsl: { data_retention: '30d', frozen_after: '10d' },
     });
   });
 
@@ -216,6 +233,48 @@ describe('updateDataStreamsLifecycle downsampling', () => {
       data_retention: '30d',
     });
   });
+
+  it('preserves frozen_after alongside downsampling steps', async () => {
+    await updateDataStreamsLifecycle({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
+      names: ['test-stream'],
+      lifecycle: {
+        dsl: {
+          data_retention: '30d',
+          frozen_after: '10d',
+          downsample: [{ after: '1d', fixed_interval: '1h' }],
+        },
+      },
+      isServerless: true,
+    });
+
+    expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: ['test-stream'],
+      data_retention: '30d',
+      downsampling: [{ after: '1d', fixed_interval: '1h' }],
+      frozen_after: '10d',
+    });
+  });
+
+  it('omits frozen_after when it is not set', async () => {
+    await updateDataStreamsLifecycle({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
+      names: ['test-stream'],
+      lifecycle: {
+        dsl: {
+          data_retention: '30d',
+        },
+      },
+      isServerless: true,
+    });
+
+    expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: ['test-stream'],
+      data_retention: '30d',
+    });
+  });
 });
 
 describe('updateDataStreamsLifecycle inherit', () => {
@@ -249,6 +308,7 @@ describe('updateDataStreamsLifecycle inherit', () => {
               enabled: true,
               data_retention: '80d',
               downsampling: [{ after: '7d', fixed_interval: '1h' }],
+              frozen_after: '10d',
             },
           },
         }),
@@ -280,6 +340,7 @@ describe('updateDataStreamsLifecycle inherit', () => {
       name: 'logs-foo-default',
       data_retention: '80d',
       downsampling: [{ after: '7d', fixed_interval: '1h' }],
+      frozen_after: '10d',
     });
     expect(mockEsClient.indices.deleteDataLifecycle).not.toHaveBeenCalled();
   });
@@ -301,7 +362,10 @@ describe('updateDataStreamsLifecycle inherit', () => {
 
 describe('updateDataStreamsFailureStore', () => {
   interface FailureStoreEsClient {
-    indices: Pick<ElasticsearchClient['indices'], 'putDataStreamOptions' | 'simulateIndexTemplate'>;
+    indices: Pick<
+      ElasticsearchClient['indices'],
+      'putDataStreamOptions' | 'getDataStream' | 'simulateTemplate' | 'simulateIndexTemplate'
+    >;
   }
 
   let mockEsClient: jest.Mocked<FailureStoreEsClient>;
@@ -311,13 +375,17 @@ describe('updateDataStreamsFailureStore', () => {
     mockEsClient = {
       indices: {
         putDataStreamOptions: jest.fn().mockResolvedValue({}),
-        simulateIndexTemplate: jest.fn().mockResolvedValue({
+        getDataStream: jest.fn().mockResolvedValue({
+          data_streams: [{ name: 'test-stream', template: 'test-stream-template' }],
+        }),
+        simulateTemplate: jest.fn().mockResolvedValue({
           template: {
             data_stream_options: {
               failure_store: { enabled: true, lifecycle: { enabled: true, data_retention: '7d' } },
             },
           },
         }),
+        simulateIndexTemplate: jest.fn().mockResolvedValue({}),
       },
     };
 
@@ -456,9 +524,10 @@ describe('updateDataStreamsFailureStore', () => {
       isServerless: false,
     });
 
-    expect(mockEsClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
-      name: 'test-stream',
+    expect(mockEsClient.indices.simulateTemplate).toHaveBeenCalledWith({
+      name: 'test-stream-template',
     });
+    expect(mockEsClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
 
     expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
       {
@@ -473,7 +542,7 @@ describe('updateDataStreamsFailureStore', () => {
   });
 
   it('disables failure store when failureStore is set to inherit and template has no failure store config', async () => {
-    mockEsClient.indices.simulateIndexTemplate = jest.fn().mockResolvedValue({
+    mockEsClient.indices.simulateTemplate = jest.fn().mockResolvedValue({
       template: {},
     });
 
@@ -489,8 +558,8 @@ describe('updateDataStreamsFailureStore', () => {
       isServerless: false,
     });
 
-    expect(mockEsClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
-      name: 'test-stream',
+    expect(mockEsClient.indices.simulateTemplate).toHaveBeenCalledWith({
+      name: 'test-stream-template',
     });
 
     expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
@@ -527,9 +596,10 @@ describe('updateDataStreamsFailureStore', () => {
     );
   });
 
-  it('logs and throws error when simulateIndexTemplate fails', async () => {
-    const error = new Error('Template simulation error');
-    mockEsClient.indices.simulateIndexTemplate = jest.fn().mockRejectedValue(error);
+  it('fails closed (does not change failure store) when the template cannot be simulated', async () => {
+    mockEsClient.indices.simulateTemplate = jest
+      .fn()
+      .mockRejectedValue(new Error('Template simulation error'));
 
     await expect(
       updateDataStreamsFailureStore({
@@ -539,11 +609,11 @@ describe('updateDataStreamsFailureStore', () => {
         stream: createMockClassicStream('test-stream'),
         isServerless: false,
       })
-    ).rejects.toThrow('Template simulation error');
-
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'Error updating data stream failure store: Template simulation error'
+    ).rejects.toThrow(
+      'Cannot determine template failure store for test-stream — the data stream may be replicated and managed by a remote cluster'
     );
+
+    expect(mockEsClient.indices.putDataStreamOptions).not.toHaveBeenCalled();
   });
 });
 
@@ -644,16 +714,69 @@ describe('simulateClassicStreamTemplate', () => {
 
     expect(template).toBeUndefined();
   });
+});
 
-  it('degrades to undefined when the template simulation fails', async () => {
-    mockSimulateTemplate.mockRejectedValue(new Error('boom'));
+describe('updateDataStreamsMappings', () => {
+  interface MappingsEsClient {
+    transport: { request: jest.Mock };
+    indices: { rollover: jest.Mock };
+  }
 
-    const template = await simulateClassicStreamTemplate({
+  let mockEsClient: MappingsEsClient;
+  let mockLogger: jest.Mocked<MockLogger>;
+
+  beforeEach(() => {
+    mockEsClient = {
+      transport: {
+        request: jest.fn().mockResolvedValue({
+          data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
+        }),
+      },
+      indices: {
+        rollover: jest.fn().mockResolvedValue({}),
+      },
+    };
+    mockLogger = createMockLogger();
+  });
+
+  it('sets the override with streams _meta when mappings are provided', async () => {
+    await updateDataStreamsMappings({
       esClient: mockEsClient as unknown as ElasticsearchClient,
-      name: 'logs-foo-default',
       logger: mockLogger as unknown as Logger,
+      name: 'logs-test-default',
+      mappings: { 'foo.bar': { type: 'keyword' } },
     });
 
-    expect(template).toBeUndefined();
+    expect(mockEsClient.transport.request).toHaveBeenCalledWith({
+      method: 'PUT',
+      path: '/_data_stream/logs-test-default/_mappings',
+      body: {
+        properties: { 'foo.bar': { type: 'keyword' } },
+        _meta: { managed_by: 'streams' },
+      },
+    });
+    expect(mockEsClient.indices.rollover).toHaveBeenCalledWith({
+      alias: 'logs-test-default',
+      lazy: true,
+    });
+  });
+
+  it('resets the override with an empty body when no mappings are provided', async () => {
+    await updateDataStreamsMappings({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
+      name: 'logs-test-default',
+      mappings: undefined,
+    });
+
+    expect(mockEsClient.transport.request).toHaveBeenCalledWith({
+      method: 'PUT',
+      path: '/_data_stream/logs-test-default/_mappings',
+      body: {},
+    });
+    expect(mockEsClient.indices.rollover).toHaveBeenCalledWith({
+      alias: 'logs-test-default',
+      lazy: true,
+    });
   });
 });

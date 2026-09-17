@@ -13,7 +13,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
@@ -47,6 +47,7 @@ const createMockServices = (): AlertingV2KibanaServices => {
     lens: lensPluginMock.createStartContract(),
     uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings,
+    featureFlags: coreMock.createStart().featureFlags,
     expressions: {} as AlertingV2KibanaServices['expressions'],
     container: {} as AlertingV2KibanaServices['container'],
   };
@@ -60,10 +61,7 @@ jest.mock('./components/rule_create_options/rule_create_options_flyout', () => (
       <div data-test-subj="mockRuleCreateOptionsFlyout">
         <button data-test-subj="esqlBtn" onClick={props.onCreateEsqlRule as () => void} />
         <button data-test-subj="agentBtn" onClick={props.onCreateWithAgent as () => void} />
-        <button
-          data-test-subj="thresholdBtn"
-          onClick={props.onCreateThresholdAlert as () => void}
-        />
+        <button data-test-subj="thresholdBtn" onClick={props.onCreateThresholdRule as () => void} />
       </div>
     );
   },
@@ -225,6 +223,9 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
+      expect(capturedSelectorProps.createWithAgentDisabled).toBe(false);
+      expect(capturedSelectorProps.createWithAgentTooltipText).toBeUndefined();
+
       fireEvent.click(screen.getByTestId('agentBtn'));
 
       expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(AGENT_BUILDER_APP_ID, {
@@ -234,7 +235,7 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('does not pass onCreateWithAgent when agentBuilder capability is missing', async () => {
+    it('disables (does not hide) the agent option when agentBuilder capability is missing', async () => {
       mockServices.application.capabilities = {
         ...mockServices.application.capabilities,
         agentBuilder: {
@@ -253,10 +254,12 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
-      expect(capturedSelectorProps.onCreateWithAgent).toBeUndefined();
+      expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
+      expect(capturedSelectorProps.createWithAgentDisabled).toBe(true);
+      expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
     });
 
-    it('does not pass onCreateWithAgent when experimental features are disabled', async () => {
+    it('disables (does not hide) the agent option when experimental features are disabled', async () => {
       (mockServices.uiSettings.get as jest.Mock).mockReturnValue(false);
       renderFlyout();
       resolveServices(mockServices);
@@ -265,7 +268,9 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
-      expect(capturedSelectorProps.onCreateWithAgent).toBeUndefined();
+      expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
+      expect(capturedSelectorProps.createWithAgentDisabled).toBe(true);
+      expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
     });
   });
 

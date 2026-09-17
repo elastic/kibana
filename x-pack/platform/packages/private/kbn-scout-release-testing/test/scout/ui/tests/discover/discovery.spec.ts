@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test, tags } from '@kbn/scout';
+import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import fs from 'fs';
 import os from 'os';
@@ -31,7 +31,7 @@ const queryName2 = 'Query # 2';
 const queryName3 = 'CSV Export Test';
 let downloadedFilePath: string | null = null;
 
-test.describe('Discover app', { tag: tags.stateful.classic }, () => {
+test.describe('Discover app', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.update(defaultSettings);
   });
@@ -210,15 +210,18 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
       .toBe(true);
   });
 
-  test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
-    await page.testSubj.click('dscViewModeFieldStatsButton');
+  test('click Field Stats button and validate Document Stats is present', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.discover.selectFieldStatisticsView();
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
     await page.testSubj.click('dataVisualizerDetailsToggle-bytes-chevronSingleRight');
     await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
   });
 
   test('navigate to Lens from field statistics', async ({ page, pageObjects }) => {
-    await page.testSubj.click('dscViewModeFieldStatsButton');
+    await pageObjects.discover.selectFieldStatisticsView();
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
     const viewLensButton = await pageObjects.discover.getFirstViewLensButtonFromFieldStatistics();
     await viewLensButton.click();

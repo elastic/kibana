@@ -9,6 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { workflowExecutionLoop } from './workflow_execution_loop';
+import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
 jest.mock('elastic-apm-node', () => ({
@@ -29,9 +30,14 @@ jest.mock('./persistence_loop', () => ({
 
 describe('workflowExecutionLoop', () => {
   const createParams = () => ({
+    workflowExecutionCursor: createMockWorkflowExecutionCursor(),
     workflowRuntime: {
       saveState: jest.fn().mockResolvedValue(undefined),
       setWorkflowError: jest.fn(),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        id: 'exec-1',
+        status: ExecutionStatus.RUNNING,
+      }),
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
@@ -45,7 +51,7 @@ describe('workflowExecutionLoop', () => {
       flushEvents: jest.fn().mockResolvedValue(undefined),
       logWarn: jest.fn(),
     },
-    taskAbortController: new AbortController(),
+    signal: new AbortController().signal,
   });
 
   beforeEach(() => {
@@ -64,6 +70,7 @@ describe('workflowExecutionLoop', () => {
     expect(executionFlowLoop).toHaveBeenCalledWith(params);
     expect(persistenceLoop).toHaveBeenCalled();
     expect(flushState).toHaveBeenCalled();
+    expect(params.workflowExecutionCursor.start).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();
     // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
@@ -81,13 +88,16 @@ describe('workflowExecutionLoop', () => {
 
     await workflowExecutionLoop(params as any);
 
-    expect(params.workflowRuntime.setWorkflowError).toHaveBeenCalledWith(testError);
+    expect(params.workflowExecutionCursor.error).toEqual(
+      expect.objectContaining({ message: 'execution failed' })
+    );
   });
 
   it('updates execution state when task abort is signaled during workflow execution', async () => {
     const params = createParams();
-    const loopPromise = workflowExecutionLoop(params as any);
-    params.taskAbortController.abort();
+    const abortController = new AbortController();
+    const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
+    abortController.abort();
     await loopPromise;
 
     expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -96,14 +106,16 @@ describe('workflowExecutionLoop', () => {
         status: ExecutionStatus.CANCELLED,
       })
     );
+    expect(params.workflowExecutionCursor.stop).toHaveBeenCalled();
   });
 
   it('marks Task Manager abort as system cancellation and suppresses workflow log errors', async () => {
     const params = createParams();
+    const abortController = new AbortController();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { flushState } = require('./persistence_loop');
-    const loopPromise = workflowExecutionLoop(params as any);
-    params.taskAbortController.abort(new WorkflowTaskManagerAbortError());
+    const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
+    abortController.abort(new WorkflowTaskManagerAbortError());
     await loopPromise;
 
     expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -115,12 +127,12 @@ describe('workflowExecutionLoop', () => {
       })
     );
     expect(flushState).toHaveBeenCalledWith(params, {
-      workflowLogFlushSignal: params.taskAbortController.signal,
+      workflowLogFlushSignal: params.signal,
     });
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();
     expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
-      signal: params.taskAbortController.signal,
+      signal: params.signal,
     });
   });
 });

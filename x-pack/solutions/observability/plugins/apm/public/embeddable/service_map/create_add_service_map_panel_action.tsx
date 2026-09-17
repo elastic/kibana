@@ -15,11 +15,18 @@ import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
+import { firstValueFrom } from 'rxjs';
 import type { ServiceMapEmbeddableState } from '../../../common/embeddable/service_map_embeddable_schema';
+import { isActivePlatinumLicense } from '../../../common/license_check';
 import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID, APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 import type { EmbeddableDeps } from '../types';
 import { ApmEmbeddableContext } from '../embeddable_context';
+
+async function hasServiceMapLicense(deps: EmbeddableDeps) {
+  const license = await firstValueFrom(deps.pluginsStart.licensing.license$);
+  return isActivePlatinumLicense(license);
+}
 
 export function createAddServiceMapPanelAction(
   deps: EmbeddableDeps
@@ -30,10 +37,18 @@ export function createAddServiceMapPanelAction(
     order: 25,
     getIconType: () => 'apps',
     isCompatible: async ({ embeddable }) => {
-      return deps.config.serviceMapEnabled && apiIsPresentationContainer(embeddable);
+      return Boolean(
+        deps.config.serviceMapEnabled &&
+          (await hasServiceMapLicense(deps)) &&
+          apiIsPresentationContainer(embeddable)
+      );
     },
-    execute: async ({ embeddable }) => {
-      if (!deps.config.serviceMapEnabled || !apiIsPresentationContainer(embeddable)) {
+    execute: async ({ embeddable, returnFocus }) => {
+      if (
+        !deps.config.serviceMapEnabled ||
+        !(await hasServiceMapLicense(deps)) ||
+        !apiIsPresentationContainer(embeddable)
+      ) {
         throw new IncompatibleActionError();
       }
 
@@ -44,6 +59,7 @@ export function createAddServiceMapPanelAction(
       openLazyFlyout({
         core: deps.coreStart,
         parentApi: embeddable,
+        returnFocus,
         flyoutProps: {
           size: 'm',
         },

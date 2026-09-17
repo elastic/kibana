@@ -45,6 +45,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: true,
 
   /**
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6, backported to 9.5.x
+   */
+  responseActionsEndpointMemoryDumpRaw: true,
+
+  /**
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
@@ -66,7 +72,29 @@ export const allowedExperimentalValues = Object.freeze({
    * `cancel` response action for Elastic Defend Endpoint
    * Release: 9.5
    */
-  responseActionsEndpointCancel: false,
+  responseActionsEndpointCancel: true,
+
+  /**
+   * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointKillProcessDescendants: false,
+
+  /**
+   * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
+   * (Fleet remote output) is visible from the managing cluster's Kibana.
+   * Release: 9.5
+   */
+  defendRemoteOutputCcs: true,
+
+  /**
+   * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
+   * it covers from the internal user to a project-routed current-user client. Fan-out additionally
+   * requires the request to resolve at least one linked project via `cps.isCpsActive()`, so a
+   * serverless project with no linked projects reads exactly as it did before CPS. Off until the
+   * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   */
+  defendCrossProjectSearch: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -115,10 +143,11 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
-   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
-   * can be disabled if necessary in a given environment.
+   * Entity Analytics: enables attaching entities (users, hosts, IPs) to a case from
+   * Entity Analytics surfaces such as the entity flyout, and registers the
+   * `security.entity` unified cases attachment type.
    */
-  entityStoreDisabled: false,
+  entityAttachmentsEnabled: true,
 
   /**
    * Enables AI rule creation feature
@@ -190,7 +219,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the Microsoft Sentinel rules import feature
    */
-  sentinelRulesMigration: false,
+  sentinelRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -239,21 +268,48 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
+   * Shipped dark by default; enable per environment via config.
+   */
+  endpointForensicAnalysisSkill: false,
+
+  /**
+   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
+   * Shipped dark by default; enable per environment via config.
+   */
+  elasticDefendPolicyManagementSkill: false,
+
+  /**
+   * Enables the investigate-rule Agent Builder skill.
+   * Gates skill registration so the feature can ship dark and be enabled per environment.
+   */
+  investigateRuleSkill: false,
+
+  /**
    * Enables the find-security-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillFindRules: false,
+  dexAiSkillFindRules: true,
 
   /**
    * Enables the recommend-prebuilt-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillRecommendPrebuiltRules: false,
+  dexAiSkillRecommendPrebuiltRules: true,
 
   /**
-   * Enables the new flyout using the EUI flyout system
+   * Enables the detection-coverage Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  newFlyoutSystemEnabled: false,
+  dexAiSkillDetectionCoverage: false,
+
+  /**
+   * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
+   * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
+   * Turning this flag on unregisters that advanced setting, forcing the
+   * legacy flyout and effectively removing the new flyout option.
+   */
+  newFlyoutSystemDisabled: false,
 
   /**
    * Uses entity store v2 for entity analytics skill
@@ -263,7 +319,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables entity ML anomaly details API
    */
-  entityAnalyticsAnomalyDetails: false,
+  entityAnalyticsAnomalyDetails: true,
 
   /**
    * Enables the deprecated prebuilt rules UI
@@ -279,17 +335,7 @@ export const allowedExperimentalValues = Object.freeze({
    * config flag, which gates the underlying primitive that produces the history
    * records. Both must be enabled for the API to return non-empty results.
    */
-  ruleChangesHistoryEnabled: false,
-
-  /**
-   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
-   */
-  securityClassicNavExternalLinks: false,
-  /**
-   * Enables public Detection Engine attacks REST APIs
-   * (`/api/detection_engine/attacks/*`).
-   */
-  publicAttacksApiEnabled: false,
+  ruleChangesHistoryEnabled: true,
 
   /**
    * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
@@ -301,13 +347,35 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the risk score history API endpoint for Entity Analytics.
    */
-  riskScoreHistoryEnabled: false,
+  riskScoreHistoryEnabled: true,
 
   /**
-   * Enables the Attacks page tour (welcome callout + guided tour).
-   * Release: 9.5
+   * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
+   * from the locally stored kibana mappings after a MITRE version bump.
    */
-  attacksPageTourEnabled: false,
+  mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: false,
+
+  /**
+   * Enables the SIEM Rule Migrations Agent Builder tools.
+   */
+  siemRuleMigrationsAgentBuilderEnabled: false,
+
+  /**
+   * Threat-intel supply pipeline (indices, ingest adapters, create
+   * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
+   * off. Direct index access is not yet cross-space hardened, so this must remain
+   * disabled until that isolation is implemented or the administrator trust model
+   * is explicitly accepted. Enable with:
+   *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
+   */
+  threatIntelSupplyEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

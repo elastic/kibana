@@ -12,4 +12,6 @@ import { MAP_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 export const mapAttachmentType: UnifiedAttachmentTypeSetup = {
   id: MAP_ATTACHMENT_TYPE,
   schema: MapAttachmentPayloadSchema,
+  // Exclude pesistable data from the workflow schema
+  workflowSchema: MapAttachmentPayloadSchema.omit({ data: true }),
 };

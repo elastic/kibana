@@ -45,7 +45,7 @@ export function ImportExportPanel({ definition, refreshDefinition }: ImportExpor
         <EuiText color="subdued" size="s">
           {i18n.translate('xpack.streams.streamOverview.importExportPanel.description', {
             defaultMessage:
-              "Package and export this stream's configuration including significant events and child streams, or import a package with a guided preview.",
+              "Package and export this stream's structure (routing, mappings, and child streams). Significant events and other detections are not included. Import a package with a guided preview.",
           })}
         </EuiText>
 

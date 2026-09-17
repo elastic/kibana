@@ -8,23 +8,30 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
+import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
 } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
+import {
+  ensureWorkflowIdleTimeoutResumeAfterLoop,
+  getIdleTimeoutResumeDeadlineMs,
+} from '../workflow_execution_loop/handle_execution_delay';
 
 export async function resumeWorkflow({
   workflowRunId,
   spaceId,
-  taskAbortController,
+  signal,
   dependencies,
   logger,
   config,
@@ -32,10 +39,12 @@ export async function resumeWorkflow({
   workflowsExecutionEngine,
   meteringService,
   internalResumeWorkflowExecution,
+  workflowExecutionRepository,
+  stepExecutionRepository,
 }: {
   workflowRunId: string;
   spaceId: string;
-  taskAbortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
@@ -43,7 +52,35 @@ export async function resumeWorkflow({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
-}): Promise<void> {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+}): Promise<{ retryAt?: Date }> {
+  let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
+  try {
+    setupResult = await setupDependencies(
+      workflowRunId,
+      spaceId,
+      logger,
+      config,
+      dependencies,
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      fakeRequest,
+      workflowsExecutionEngine
+    );
+  } catch (error) {
+    // The graph could not be built — a permanent author error (the parallel
+    // branch-body constraints, normally caught in the editor by validateGraphBuild
+    // but reachable here for API/imported/legacy workflows that bypass the UI).
+    // setupDependencies has already persisted the execution as FAILED with the
+    // graph-build reason; return cleanly so the resume task does not surface an
+    // opaque TaskRecoveryError.
+    if (isWorkflowGraphSetupError(error)) {
+      return {};
+    }
+    throw error;
+  }
+
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
@@ -54,43 +91,67 @@ export async function resumeWorkflow({
     workflowExecutionGraph,
     esClient,
     workflowTaskManager,
-    workflowExecutionRepository,
-  } = await setupDependencies(
-    workflowRunId,
-    spaceId,
-    logger,
-    config,
-    dependencies,
-    fakeRequest,
-    workflowsExecutionEngine
-  );
+    workflowExecutionCursor,
+  } = setupResult;
 
   const loadedExecution = workflowExecutionState.getWorkflowExecution();
   if (isTerminalStatus(loadedExecution.status)) {
     logger.info(
       `Resume skipped for ${workflowRunId}: already in terminal status ${loadedExecution.status}`
     );
-    return;
+    return {};
+  }
+
+  const waitingForInput = loadedExecution.status === ExecutionStatus.WAITING_FOR_INPUT;
+  const hasResumeInput = loadedExecution.context?.resumeInput != null;
+  const node = loadedExecution.currentNodeId ? workflowRuntime.getCurrentNode() : undefined;
+  if (
+    !loadedExecution.cancelRequested &&
+    (loadedExecution.status === ExecutionStatus.WAITING || (waitingForInput && !hasResumeInput)) &&
+    node?.type !== 'enter-parallel' &&
+    node?.stepId
+  ) {
+    // Read persisted metadata before deciding whether this notification may advance the workflow.
+    await stepIoService.load();
+    const stepExecution = workflowExecutionState.getLatestStepExecution(node.stepId);
+    const deadline = getIdleTimeoutResumeDeadlineMs(
+      { workflowExecutionGraph, workflowExecutionState },
+      loadedExecution,
+      workflowExecutionCursor.currentStackFrames,
+      { node, startedAt: stepExecution?.startedAt }
+    );
+    const resumeAt = stepExecution?.state?.resumeAt;
+    const waitDeadline = typeof resumeAt === 'string' ? new Date(resumeAt).getTime() : Infinity;
+    const nextRunAt = Math.min(waitingForInput ? Infinity : waitDeadline, deadline ?? Infinity);
+    if ((waitingForInput || typeof resumeAt === 'string') && nextRunAt > Date.now()) {
+      // A notification is not approval. Keep HITL parked until input, cancellation, or a deadline.
+      if (!Number.isFinite(nextRunAt)) return {};
+      return { retryAt: new Date(nextRunAt) };
+    }
   }
 
   await workflowRuntime.resume();
 
+  const workflowExecutionLoopParams = {
+    workflowRuntime,
+    workflowExecutionCursor,
+    stepExecutionRuntimeFactory,
+    workflowExecutionState,
+    stepIoService,
+    workflowExecutionRepository,
+    workflowLogger,
+    nodesFactory,
+    workflowExecutionGraph,
+    esClient,
+    fakeRequest,
+    coreStart: dependencies.coreStart,
+    signal,
+    workflowTaskManager,
+  };
+
   try {
-    await workflowExecutionLoop({
-      workflowRuntime,
-      stepExecutionRuntimeFactory,
-      workflowExecutionState,
-      stepIoService,
-      workflowExecutionRepository,
-      workflowLogger,
-      nodesFactory,
-      workflowExecutionGraph,
-      esClient,
-      fakeRequest,
-      coreStart: dependencies.coreStart,
-      taskAbortController,
-      workflowTaskManager,
-    });
+    await workflowExecutionLoop(workflowExecutionLoopParams);
+    await ensureWorkflowIdleTimeoutResumeAfterLoop(workflowExecutionLoopParams);
   } finally {
     await emitWorkflowExecutionFailedEventIfFailed({
       workflowRuntime,
@@ -113,4 +174,6 @@ export async function resumeWorkflow({
     meteringService,
     cloudSetup: dependencies.cloudSetup,
   });
+
+  return {};
 }

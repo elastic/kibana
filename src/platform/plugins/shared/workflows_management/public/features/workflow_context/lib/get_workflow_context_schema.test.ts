@@ -353,7 +353,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       label: 'manual trigger',
       triggers: [{ type: 'manual' }],
       expectedKeys: ['spaceId'],
-      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params', 'inputs'],
     },
     {
       label: 'scheduled trigger',
@@ -410,6 +410,48 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     }
   );
 
+  it('should expose event.inputs when manual trigger has inputs defined', () => {
+    const workflow: WorkflowYaml = {
+      ...baseWorkflow,
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
+            properties: {
+              threatIndicator: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string', enum: ['ip', 'domain'] },
+                  value: { type: 'string' },
+                },
+                required: ['type', 'value'],
+                additionalProperties: false,
+              },
+            },
+            required: ['threatIndicator'],
+            additionalProperties: false,
+          },
+        },
+      ],
+    } as WorkflowYaml;
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+
+    // event.inputs should exist as a key in the event schema
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+    const eventKeys = Object.keys(getShape(eventResult.schema!));
+    expect(eventKeys).toContain('inputs');
+
+    // event.inputs.threatIndicator.type must be reachable
+    expect(
+      getSchemaAtPath(contextSchema, 'event.inputs.threatIndicator.type').schema
+    ).toBeDefined();
+    expect(
+      getSchemaAtPath(contextSchema, 'event.inputs.threatIndicator.value').schema
+    ).toBeDefined();
+  });
+
   it('should allow accessing event.rule and event.spaceId when alert trigger is present', () => {
     const workflow: WorkflowYaml = { ...baseWorkflow, triggers: [{ type: 'alert' }] };
     const contextSchema = getWorkflowContextSchema(workflow);
@@ -451,6 +493,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     } as unknown as WorkflowYaml;
     const mockTriggerDefinition = {
       id: 'example.custom_trigger',
+      stability: 'tech_preview' as const,
       title: 'Example custom trigger',
       description: 'Test trigger for event schema merge',
       eventSchema: customEventSchema,
@@ -476,5 +519,25 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     } finally {
       getTriggerDefinitionSpy.mockRestore();
     }
+  });
+});
+
+describe('getWorkflowContextSchema - HITL template context', () => {
+  it('should expose context.hitl.externalFormLink for channel message validation', () => {
+    const workflow: WorkflowYaml = {
+      version: '1',
+      name: 'HITL Workflow',
+      description: undefined,
+      settings: undefined,
+      enabled: true,
+      tags: undefined,
+      triggers: [{ type: 'manual' }],
+      steps: [],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+
+    expect(getSchemaAtPath(contextSchema, 'context.hitl.externalFormLink').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'context.hitl.externalQueryLink').schema).toBeDefined();
   });
 });

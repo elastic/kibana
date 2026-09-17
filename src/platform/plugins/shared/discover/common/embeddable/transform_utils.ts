@@ -21,8 +21,9 @@ import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { isLegacySort, type SortOrder } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { JsonModeSettings } from '@kbn/unified-data-table';
 import {
   isDiscoverSessionEmbeddableByReferenceState,
   isDiscoverSessionEsqlTab,
@@ -81,6 +82,8 @@ export function fromStoredSearchEmbeddableByRef(
     rowsPerPage,
     headerRowHeight,
     density,
+    documentsDisplayMode,
+    jsonModeSettings,
     grid,
     selectedTabId,
     savedObjectId,
@@ -135,6 +138,8 @@ export function fromStoredSearchEmbeddableByValue(
     rowsPerPage,
     headerRowHeight,
     density,
+    documentsDisplayMode,
+    jsonModeSettings,
     grid,
     attributes,
     title,
@@ -196,16 +201,12 @@ export function fromStoredTab(
     sort,
     sampleSize,
     rowsPerPage,
-    headerRowHeight,
-    density,
     viewMode,
     kibanaSavedObjectMeta: { searchSourceJSON },
   } = tab;
   const apiTab = {
     ...toDiscoverSessionPanelOverrides(tab),
     sort: fromStoredSort(sort),
-    header_row_height: fromStoredHeight(headerRowHeight),
-    density: density ?? DataGridDensity.COMPACT,
   };
   const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
   const { index, query, filter } = injectReferences(searchSourceValues, references);
@@ -228,7 +229,10 @@ export function fromStoredTab(
       };
 }
 
-export function toStoredTab(apiTab: DiscoverSessionTab): {
+export function toStoredTab(
+  apiTab: DiscoverSessionTab,
+  options?: { refNamePrefix?: string }
+): {
   state: DiscoverSessionTabAttributes;
   references: SavedObjectReference[];
 } {
@@ -241,7 +245,7 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
     ...('filters' in apiTab && { filter: toStoredFilters(apiTab.filters) }),
     ...(!isDiscoverSessionEsqlTab(apiTab) && { index: toStoredDataView(apiTab.data_source) }),
   };
-  const [searchSourceFields, references] = extractReferences(searchSourceValues);
+  const [searchSourceFields, references] = extractReferences(searchSourceValues, options);
   const state: DiscoverSessionTabAttributes = {
     ...fromDiscoverSessionPanelOverrides(apiTab),
     sort: toStoredSort(sort),
@@ -259,18 +263,30 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
 export function toDiscoverSessionPanelOverrides(
   storedState: StoredSearchEmbeddableState | DiscoverSessionTabAttributes
 ): DiscoverSessionPanelOverrides {
-  const { sort, columns, rowHeight, sampleSize, rowsPerPage, headerRowHeight, density, grid } =
-    storedState;
+  const {
+    sort,
+    columns,
+    rowHeight,
+    sampleSize,
+    rowsPerPage,
+    headerRowHeight,
+    density,
+    documentsDisplayMode,
+    jsonModeSettings,
+    grid,
+  } = storedState;
   return {
     ...(sort && { sort: fromStoredSort(sort) }),
     ...(columns && { column_order: columns }),
     ...(grid &&
       Object.keys(grid?.columns ?? {}).length && { column_settings: fromStoredGrid(grid) }),
-    ...(rowHeight && { row_height: fromStoredHeight(rowHeight) }),
+    ...(rowHeight && { row_height: fromStoredRowHeight(rowHeight) }),
     ...(sampleSize && { sample_size: sampleSize }),
     ...(rowsPerPage && { rows_per_page: rowsPerPage }),
-    ...(headerRowHeight && { header_row_height: fromStoredHeight(headerRowHeight) }),
+    ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
+    ...(documentsDisplayMode && { documents_display_mode: documentsDisplayMode }),
+    ...fromStoredJsonModeSettings(jsonModeSettings),
   };
 }
 
@@ -286,7 +302,9 @@ export function fromDiscoverSessionPanelOverrides(
     rows_per_page: rowsPerPage,
     header_row_height: headerRowHeight,
     density,
+    documents_display_mode: documentsDisplayMode,
   } = apiState;
+  const jsonModeSettings = toStoredJsonModeSettings(apiState);
   return {
     ...(sort && { sort: toStoredSort(sort) }),
     ...(columnOrder && { columns: columnOrder }),
@@ -295,9 +313,39 @@ export function fromDiscoverSessionPanelOverrides(
     ...(rowsPerPage && { rowsPerPage }),
     ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
     ...(density && { density }),
+    ...(documentsDisplayMode && { documentsDisplayMode }),
+    ...(jsonModeSettings && { jsonModeSettings }),
     ...(Object.keys(columnSettings ?? {}).length && { grid: toStoredGrid(columnSettings) }),
   };
 }
+
+const fromStoredJsonModeSettings = (
+  jsonModeSettings?: JsonModeSettings
+): Pick<DiscoverSessionPanelOverrides, 'hide_nulls' | 'wrap_lines' | 'default_rendered_nodes'> => {
+  if (!jsonModeSettings) {
+    return {};
+  }
+  return {
+    ...(jsonModeSettings.hideNulls !== undefined && { hide_nulls: jsonModeSettings.hideNulls }),
+    ...(jsonModeSettings.wrapLines !== undefined && { wrap_lines: jsonModeSettings.wrapLines }),
+    ...(jsonModeSettings.defaultRenderedNodes !== undefined && {
+      default_rendered_nodes: jsonModeSettings.defaultRenderedNodes,
+    }),
+  };
+};
+
+const toStoredJsonModeSettings = (
+  apiState: DiscoverSessionPanelOverrides
+): JsonModeSettings | undefined => {
+  const jsonModeSettings: JsonModeSettings = {
+    ...(apiState.hide_nulls !== undefined && { hideNulls: apiState.hide_nulls }),
+    ...(apiState.wrap_lines !== undefined && { wrapLines: apiState.wrap_lines }),
+    ...(apiState.default_rendered_nodes !== undefined && {
+      defaultRenderedNodes: apiState.default_rendered_nodes,
+    }),
+  };
+  return Object.keys(jsonModeSettings).length > 0 ? jsonModeSettings : undefined;
+};
 
 export function fromStoredGrid(
   grid: DiscoverSessionTabAttributes['grid']
@@ -314,7 +362,10 @@ export function toStoredGrid(
 export function fromStoredSort(
   sort: DiscoverSessionTabAttributes['sort']
 ): DiscoverSessionTab['sort'] {
-  return sort.map((s) => {
+  const sortInput = sort as SortOrder | SortOrder[];
+  const normalizedSort: SortOrder[] = isLegacySort(sortInput) ? [sortInput] : sortInput;
+
+  return normalizedSort.map((s) => {
     const [name, dir] = Array.isArray(s) ? s : [s, 'desc'];
     const direction = dir === 'asc' || dir === 'desc' ? dir : 'desc';
     return { name, direction };
@@ -327,7 +378,7 @@ export function toStoredSort(
   return sort.map((s) => [s.name, s.direction]);
 }
 
-export function fromStoredHeight(height: number = 3): DiscoverSessionTab['row_height'] {
+export function fromStoredRowHeight(height: number) {
   return height === -1 ? 'auto' : height;
 }
 

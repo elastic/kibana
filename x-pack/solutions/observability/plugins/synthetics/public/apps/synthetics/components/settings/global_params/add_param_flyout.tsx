@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiFlyout,
@@ -17,15 +17,21 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiScreenReaderLive,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
-import { NoPermissionsTooltip } from '../../common/components/permissions';
 import {
+  CANNOT_PERFORM_ACTION_SYNTHETICS,
+  NoPermissionsTooltip,
+} from '../../common/components/permissions';
+import {
+  ADD_PARAM_SUCCESS_MESSAGE,
+  EDIT_PARAM_SUCCESS_MESSAGE,
   addNewGlobalParamAction,
   editGlobalParamAction,
   getGlobalParamAction,
@@ -36,6 +42,10 @@ import type { ListParamItem } from './params_list';
 import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
+import {
+  useHasSettingsHeaderAction,
+  useRegisterSettingsHeaderAction,
+} from '../settings_header_action';
 
 export const AddParamFlyout = ({
   items,
@@ -47,6 +57,10 @@ export const AddParamFlyout = ({
   setIsEditingItem: React.Dispatch<React.SetStateAction<ListParamItem | null>>;
 }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+  // Announced by screen readers when a param is saved, since the toast that carries the
+  // success message is not reliably announced once the flyout closes and focus moves.
+  const [announcement, setAnnouncement] = useState('');
 
   const { id, ...dataToSave } = isEditingItem ?? {};
 
@@ -73,10 +87,26 @@ export const AddParamFlyout = ({
   const { application } = useKibana<ClientPluginsStart>().services;
 
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const isHeaderAction = useHasSettingsHeaderAction();
+  const openFlyout = useCallback(() => setIsFlyoutVisible(true), []);
+  const createParamAction = useMemo(
+    () => ({
+      id: 'createParameter',
+      label: CREATE_PARAM,
+      iconType: 'plusCircle',
+      testId: 'syntheticsAddParamFlyoutButton',
+      disableButton: !canSave,
+      tooltipContent: !canSave ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined,
+      run: openFlyout,
+    }),
+    [canSave, openFlyout]
+  );
+  useRegisterSettingsHeaderAction(createParamAction);
 
   const dispatch = useDispatch();
 
   const { isSaving, savedData } = useSelector(selectGlobalParamState);
+  const wasSavingRef = useRef(false);
 
   const onSubmit = (formData: SyntheticsParams) => {
     const { namespaces, ...paramRequest } = formData;
@@ -111,10 +141,28 @@ export const AddParamFlyout = ({
   };
 
   useEffect(() => {
-    if (savedData && !isSaving) {
+    if (isSaving) {
+      // Clear so an identical follow-up message still re-announces.
+      setAnnouncement('');
+      wasSavingRef.current = true;
+      return;
+    }
+
+    // savedData stays in the reducer after success, so only announce for a save
+    // that started during this mount — not when remounting with stale state.
+    if (!wasSavingRef.current) {
+      return;
+    }
+
+    wasSavingRef.current = false;
+
+    if (savedData) {
+      setAnnouncement(isEditingItem ? EDIT_PARAM_SUCCESS_MESSAGE : ADD_PARAM_SUCCESS_MESSAGE);
       closeFlyout();
       dispatch(getGlobalParamAction.get());
     }
+    // isEditingItem is intentionally read at success time and reset by closeFlyout
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedData, isSaving, closeFlyout, dispatch]);
 
   useEffect(() => {
@@ -183,19 +231,22 @@ export const AddParamFlyout = ({
 
   return (
     <div>
-      <NoPermissionsTooltip canEditSynthetics={canSave}>
-        <EuiButton
-          data-test-subj="syntheticsAddParamFlyoutButton"
-          fill
-          iconType="plusCircle"
-          iconSide="left"
-          onClick={() => setIsFlyoutVisible(true)}
-          isDisabled={!canSave}
-        >
-          {CREATE_PARAM}
-        </EuiButton>
-      </NoPermissionsTooltip>
+      {!isHeaderAction ? (
+        <NoPermissionsTooltip canEditSynthetics={canSave}>
+          <EuiButton
+            data-test-subj="syntheticsAddParamFlyoutButton"
+            fill
+            iconType="plusCircle"
+            iconSide="left"
+            onClick={openFlyout}
+            isDisabled={!canSave}
+          >
+            {CREATE_PARAM}
+          </EuiButton>
+        </NoPermissionsTooltip>
+      ) : null}
       {flyout}
+      <EuiScreenReaderLive>{announcement}</EuiScreenReaderLive>
     </div>
   );
 };

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { getBytesRt } from './bytes_rt';
-import { isRight } from 'fp-ts/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { getBytesSchema } from './bytes_rt';
 
-describe('bytesRt', () => {
+describe('bytesSchema', () => {
   describe('must accept any amount and unit', () => {
-    const bytesRt = getBytesRt({});
+    const bytesSchema = getBytesSchema({});
     describe('it should not accept', () => {
       ['mb', 1, '1', '5gb', '6tb'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(bytesRt.decode(input))).toBe(false);
+          expectParseError(bytesSchema.safeParse(input));
         });
       });
     });
@@ -23,20 +22,20 @@ describe('bytesRt', () => {
     describe('it should accept', () => {
       ['-1b', '0mb', '1b', '2kb', '3mb', '1000mb'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(bytesRt.decode(input))).toBe(true);
+          expectParseSuccess(bytesSchema.safeParse(input));
         });
       });
     });
   });
   describe('must be at least 0b', () => {
-    const bytesRt = getBytesRt({
+    const bytesSchema = getBytesSchema({
       min: '0b',
     });
 
     describe('it should not accept', () => {
       ['mb', '-1kb', '5gb', '6tb'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(bytesRt.decode(input))).toBe(false);
+          expectParseError(bytesSchema.safeParse(input));
         });
       });
     });
@@ -44,10 +43,9 @@ describe('bytesRt', () => {
     describe('it should return correct error message', () => {
       ['-1kb', '5gb', '6tb'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          const result = bytesRt.decode(input);
-          const message = PathReporter.report(result)[0];
-          expect(message).toEqual('Must be greater than 0b');
-          expect(isRight(result)).toBeFalsy();
+          const result = bytesSchema.safeParse(input);
+          expectParseError(result);
+          expect(result.error.issues[0].message).toEqual('Must be greater than 0b');
         });
       });
     });
@@ -55,37 +53,36 @@ describe('bytesRt', () => {
     describe('it should accept', () => {
       ['1b', '2kb', '3mb'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(bytesRt.decode(input))).toBe(true);
+          expectParseSuccess(bytesSchema.safeParse(input));
         });
       });
     });
   });
   describe('must be between 500b and 1kb', () => {
-    const bytesRt = getBytesRt({
+    const bytesSchema = getBytesSchema({
       min: '500b',
       max: '1kb',
     });
     describe('it should not accept', () => {
       ['mb', '-1b', '1b', '499b', '1025b', '2kb', '1mb'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(bytesRt.decode(input))).toBe(false);
+          expectParseError(bytesSchema.safeParse(input));
         });
       });
     });
     describe('it should return correct error message', () => {
       ['-1b', '1b', '499b', '1025b', '2kb', '1mb'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          const result = bytesRt.decode(input);
-          const message = PathReporter.report(result)[0];
-          expect(message).toEqual('Must be between 500b and 1kb');
-          expect(isRight(result)).toBeFalsy();
+          const result = bytesSchema.safeParse(input);
+          expectParseError(result);
+          expect(result.error.issues[0].message).toEqual('Must be between 500b and 1kb');
         });
       });
     });
     describe('it should accept', () => {
       ['500b', '1024b', '1kb'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(bytesRt.decode(input))).toBe(true);
+          expectParseSuccess(bytesSchema.safeParse(input));
         });
       });
     });

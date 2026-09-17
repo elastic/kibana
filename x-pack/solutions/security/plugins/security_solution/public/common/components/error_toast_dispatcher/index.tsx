@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { appSelectors } from '../../store';

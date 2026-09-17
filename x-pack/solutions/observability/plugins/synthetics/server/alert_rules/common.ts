@@ -5,7 +5,6 @@
  * 2.0.
  */
 import moment from 'moment';
-import { isRight } from 'fp-ts/Either';
 import Mustache from 'mustache';
 import type { IBasePath } from '@kbn/core/server';
 import type {
@@ -43,8 +42,11 @@ import type {
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
-import { SyntheticsCommonStateCodec } from '../../common/runtime_types/alert_rules/common';
-import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
+import { SyntheticsCommonStateCodec } from '../../common/runtime_types/zod/alert_rules_common';
+import {
+  getSyntheticsErrorRouteFromMonitorId,
+  getSyntheticsCertificatesRoute,
+} from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import type { MonitorStatusAlertDocument, MonitorSummaryStatusRule } from './status_rule/types';
 
@@ -54,8 +56,8 @@ export const updateState = (
   meta?: SyntheticsCommonState['meta']
 ): SyntheticsCommonState => {
   const now = new Date().toISOString();
-  const decoded = SyntheticsCommonStateCodec.decode(state);
-  if (!isRight(decoded)) {
+  const decoded = SyntheticsCommonStateCodec.safeParse(state);
+  if (!decoded.success) {
     const triggerVal = isTriggeredNow ? now : undefined;
     return {
       firstCheckedAt: now,
@@ -64,7 +66,9 @@ export const updateState = (
       lastTriggeredAt: triggerVal,
       lastCheckedAt: now,
       lastResolvedAt: undefined,
-      meta: {},
+      // Keep caller meta on the first run; `pendingCount` lives here and must
+      // survive so consecutive pending evaluations can cross pendingThreshold.
+      meta: meta ?? {},
     };
   }
   const {
@@ -75,7 +79,7 @@ export const updateState = (
     // to differentiate it from the `isTriggeredNow` param
     isTriggered: wasTriggered,
     lastResolvedAt,
-  } = decoded.right;
+  } = decoded.data;
 
   return {
     meta,
@@ -137,6 +141,14 @@ export const getRelativeViewInAppUrl = ({
     locationId,
   });
 };
+
+export const getRelativeCertificatesViewInAppUrl = ({
+  commonName,
+  issuer,
+}: {
+  commonName?: string;
+  issuer?: string;
+}) => getSyntheticsCertificatesRoute({ commonName, issuer });
 
 /**
  * For ungrouped alerts, the alert ID is just the configId (no location suffix),

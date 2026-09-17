@@ -6,31 +6,42 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor, ESQL_LANG_ID } from '@kbn/code-editor';
 
 const defaultEmptyMessage = i18n.translate(
   'xpack.alertingV2.composeDiscover.querySummary.noQueryDefined',
   { defaultMessage: 'No query defined' }
 );
 
+const copyAriaLabel = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySummary.copyAriaLabel',
+  { defaultMessage: 'Copy query' }
+);
+
+/** Visible line cap before the block scrolls (matches the old CodeEditor summary). */
+const MAX_VISIBLE_LINES = 5;
+
+/** Matches ES|QL code block height in alerting-v2-episodes-ui rule_overview_panel. */
+const QUERY_SUMMARY_OVERFLOW_HEIGHT = 240;
+
+export const getQuerySummaryOverflowHeight = (query: string): number | undefined => {
+  if (!query.trim()) {
+    return undefined;
+  }
+
+  return query.split('\n').length > MAX_VISIBLE_LINES ? QUERY_SUMMARY_OVERFLOW_HEIGHT : undefined;
+};
+
 interface QuerySummaryProps {
   query: string;
   emptyMessage?: string;
-  maxLines?: number;
 }
 
 export const QuerySummary: React.FC<QuerySummaryProps> = ({
   query,
   emptyMessage = defaultEmptyMessage,
-  maxLines = 5,
 }) => {
-  const actualLines = query.split('\n').length;
-  const lineCount = Math.max(2, Math.min(actualLines, maxLines));
-  const height = lineCount * 18 + 16;
-  const isScrollable = actualLines > maxLines;
-
   if (!query.trim()) {
     return (
       <EuiPanel color="subdued" paddingSize="s">
@@ -41,24 +52,35 @@ export const QuerySummary: React.FC<QuerySummaryProps> = ({
     );
   }
 
+  const overflowHeight = getQuerySummaryOverflowHeight(query);
+
   return (
-    <EuiPanel color="subdued" paddingSize="none" hasBorder>
-      <CodeEditor
-        languageId={ESQL_LANG_ID}
-        value={query}
-        height={height}
-        options={{
-          readOnly: true,
-          minimap: { enabled: false },
-          lineNumbers: 'off',
-          scrollBeyondLastLine: false,
-          folding: false,
-          renderLineHighlight: 'none',
-          overviewRulerLanes: 0,
-          scrollbar: { vertical: isScrollable ? 'auto' : 'hidden', horizontal: 'hidden' },
-          domReadOnly: true,
-        }}
-      />
-    </EuiPanel>
+    <EuiCodeBlock
+      language="esql"
+      isCopyable
+      copyAriaLabel={copyAriaLabel}
+      paddingSize="s"
+      fontSize="s"
+      overflowHeight={overflowHeight}
+      data-test-subj="composeDiscoverQuerySummary"
+    >
+      {query}
+    </EuiCodeBlock>
   );
 };
+
+interface QueryBlockProps {
+  label: React.ReactNode;
+  query: string;
+  emptyMessage?: string;
+}
+
+export const QueryBlock: React.FC<QueryBlockProps> = ({ label, query, emptyMessage }) => (
+  <>
+    <EuiText size="xs" color="subdued">
+      <strong>{label}</strong>
+    </EuiText>
+    <EuiSpacer size="xs" />
+    <QuerySummary query={query} emptyMessage={emptyMessage} />
+  </>
+);

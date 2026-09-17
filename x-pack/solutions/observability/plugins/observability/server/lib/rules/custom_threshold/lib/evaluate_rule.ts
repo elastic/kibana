@@ -33,6 +33,7 @@ export type Evaluation = CustomMetricExpressionParams & {
   currentValue: number | null;
   timestamp: string;
   shouldFire: boolean;
+  shouldWarn: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
   flattenGrouping?: Record<string, any>;
@@ -113,12 +114,13 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           currentValues[missingGroup.key] = {
             value: null,
             trigger: false,
+            warn: false,
             bucketKey: missingGroup.bucketKey,
           };
         }
       }
 
-      // When getData returns the global '*' no-data entry (e.g. 0 composite buckets) and
+      // When getData returns the global '*' no-data entry (e.g. all shards unavailable) and
       // checkMissingGroups reinjected per-group entries, drop the redundant '*' so the
       // executor doesn't emit a duplicate ungrouped alert alongside per-group ones.
       const keys = Object.keys(currentValues);
@@ -129,12 +131,13 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const evaluations: Record<string, Evaluation> = {};
       for (const key of Object.keys(currentValues)) {
         const result = currentValues[key];
-        if (result.trigger || result.value === null) {
+        if (result.trigger || result.warn || result.value === null) {
           evaluations[key] = {
             ...criterion,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,
+            shouldWarn: result.warn,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
             flattenGrouping: result.flattenGrouping,

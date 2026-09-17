@@ -37,13 +37,13 @@ describe('cleanupOrphanSummaries', () => {
   let esClient: ElasticsearchClientMock;
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let logger: jest.Mocked<MockedLogger>;
-  let abortController: AbortController;
+  let signal: AbortSignal;
 
   beforeEach(() => {
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
-    abortController = new AbortController();
+    signal = new AbortController().signal;
     jest.clearAllMocks();
   });
 
@@ -52,7 +52,7 @@ describe('cleanupOrphanSummaries', () => {
 
     const result = await cleanupOrphanSummaries(
       {},
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
@@ -83,7 +83,7 @@ describe('cleanupOrphanSummaries', () => {
 
     const result = await cleanupOrphanSummaries(
       {},
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
@@ -116,7 +116,7 @@ describe('cleanupOrphanSummaries', () => {
 
     const result = await cleanupOrphanSummaries(
       {},
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
@@ -143,7 +143,7 @@ describe('cleanupOrphanSummaries', () => {
           },
         },
       },
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
   });
 
@@ -164,7 +164,7 @@ describe('cleanupOrphanSummaries', () => {
 
     const result = await cleanupOrphanSummaries(
       {},
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
@@ -191,7 +191,7 @@ describe('cleanupOrphanSummaries', () => {
           },
         },
       },
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
   });
 
@@ -230,7 +230,7 @@ describe('cleanupOrphanSummaries', () => {
 
     const result = await cleanupOrphanSummaries(
       { chunkSize: 2 },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
@@ -258,7 +258,7 @@ describe('cleanupOrphanSummaries', () => {
           },
         },
       },
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
 
     // Second delete call for slo-orphan-2
@@ -281,7 +281,7 @@ describe('cleanupOrphanSummaries', () => {
           },
         },
       },
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
   });
 
@@ -310,7 +310,7 @@ describe('cleanupOrphanSummaries', () => {
 
     const result = await cleanupOrphanSummaries(
       { chunkSize: 2 },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
@@ -333,14 +333,11 @@ describe('cleanupOrphanSummaries', () => {
   it('should use abort controller signal in search calls', async () => {
     esClient.search.mockResolvedValueOnce(createMockAggregationResponse([]));
 
-    await cleanupOrphanSummaries(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanSummaries({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.any(Object),
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
   });
 
@@ -356,14 +353,11 @@ describe('cleanupOrphanSummaries', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanSummaries(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanSummaries({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.any(Object),
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
   });
 
@@ -406,7 +400,7 @@ describe('cleanupOrphanSummaries', () => {
 
     const result = await cleanupOrphanSummaries(
       { chunkSize: 1, maxRuns: 2 },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({
@@ -434,7 +428,7 @@ describe('cleanupOrphanSummaries', () => {
 
     const result = await cleanupOrphanSummaries(
       { searchAfter },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
@@ -458,7 +452,7 @@ describe('cleanupOrphanSummaries', () => {
 
     const result = await cleanupOrphanSummaries(
       { searchAfter },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({
@@ -472,7 +466,7 @@ describe('cleanupOrphanSummaries', () => {
     esClient.search.mockRejectedValueOnce(new Error('Network error'));
 
     await expect(
-      cleanupOrphanSummaries({}, { esClient, soClient: soClient as any, logger, abortController })
+      cleanupOrphanSummaries({}, { esClient, soClient: soClient as any, logger, signal })
     ).rejects.toThrow('Network error');
   });
 });

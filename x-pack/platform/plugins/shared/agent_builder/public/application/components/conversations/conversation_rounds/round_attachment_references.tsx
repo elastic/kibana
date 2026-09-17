@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, type EuiFlexGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   Attachment,
   AttachmentVersionRef,
   AttachmentRefActor,
-  AttachmentRefOperation,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  ATTACHMENT_REF_OPERATION,
-  estimateTokens,
-  hashContent,
-} from '@kbn/agent-builder-common/attachments';
+import type { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { css } from '@emotion/react';
+import { RoundAttachmentPill } from './round_attachment_pill';
+import { useResolvedAttachmentReferences } from './use_resolved_attachment_references';
 
 export interface RoundAttachmentReferencesProps {
   attachmentRefs?: AttachmentVersionRef[];
@@ -29,68 +25,17 @@ export interface RoundAttachmentReferencesProps {
   fallbackAttachments?: Attachment[];
   actorFilter?: AttachmentRefActor[];
   justifyContent?: EuiFlexGroupProps['justifyContent'];
-}
-
-interface ResolvedReference {
-  attachment: VersionedAttachment;
-  version: number;
-  operation: AttachmentRefOperation;
-  actor: AttachmentRefActor;
+  /** Attachment types to exclude from rendering. Hidden when all remaining refs are excluded. */
+  excludeTypes?: AttachmentType[];
 }
 
 const labels = {
   attachments: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachments', {
     defaultMessage: 'Attachments',
   }),
-  attachmentAdded: (description: string) =>
-    i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachmentAdded', {
-      defaultMessage: 'Attachment added: {description}',
-      values: { description },
-    }),
-};
-
-const attachmentItemStyles = css`
-  font-style: italic;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const resolveOperation = (
-  refOperation: AttachmentRefOperation | undefined,
-  version: number
-): AttachmentRefOperation => {
-  if (refOperation) {
-    return refOperation;
-  }
-
-  return version === 1 ? ATTACHMENT_REF_OPERATION.created : ATTACHMENT_REF_OPERATION.updated;
-};
-
-const resolveActor = (actor: AttachmentRefActor | undefined): AttachmentRefActor => {
-  return actor ?? ATTACHMENT_REF_ACTOR.system;
-};
-
-const buildFallbackVersionedAttachments = (attachments: Attachment[]): VersionedAttachment[] => {
-  const now = new Date().toISOString();
-  return attachments.map((attachment, index) => ({
-    id: attachment.id ?? `pending-${index}`,
-    type: attachment.type,
-    versions: [
-      {
-        version: 1,
-        data: attachment.data,
-        created_at: now,
-        content_hash: hashContent(attachment.data),
-        estimated_tokens: estimateTokens(attachment.data),
-      },
-    ],
-    current_version: 1,
-    active: true,
-    hidden: attachment.hidden,
-    ...(attachment.groupId !== undefined ? { group_id: attachment.groupId } : {}),
-    ...(attachment.description !== undefined ? { description: attachment.description } : {}),
-  }));
+  added: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.added', {
+    defaultMessage: 'Added',
+  }),
 };
 
 export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps> = ({
@@ -99,102 +44,64 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
   fallbackAttachments,
   actorFilter,
   justifyContent = 'flexStart',
+  excludeTypes,
 }) => {
-  const resolvedReferences = useMemo((): ResolvedReference[] => {
-    const fallbackVersioned = fallbackAttachments?.length
-      ? buildFallbackVersionedAttachments(fallbackAttachments)
-      : [];
-    const effectiveAttachments = conversationAttachments?.length
-      ? [
-          ...conversationAttachments,
-          ...fallbackVersioned.filter((attachment) =>
-            conversationAttachments.every((existing) => existing.id !== attachment.id)
-          ),
-        ]
-      : fallbackVersioned;
+  const allResolved = useResolvedAttachmentReferences({
+    attachmentRefs,
+    conversationAttachments,
+    fallbackAttachments,
+    actorFilter,
+  });
 
-    const refs =
-      attachmentRefs?.length || !fallbackAttachments?.length
-        ? attachmentRefs
-        : fallbackAttachments.map((attachment, index) => ({
-            attachment_id: attachment.id ?? `pending-${index}`,
-            version: 1,
-            operation: ATTACHMENT_REF_OPERATION.created,
-            actor: ATTACHMENT_REF_ACTOR.user,
-          }));
-
-    if (!refs?.length || !effectiveAttachments.length) {
-      return [];
-    }
-
-    const attachmentMap = new Map<string, VersionedAttachment>();
-    for (const attachment of effectiveAttachments) {
-      if (attachment.hidden) {
-        continue;
-      }
-      attachmentMap.set(attachment.id, attachment);
-    }
-
-    const resolved: ResolvedReference[] = [];
-    const seenGroupIds = new Set<string>();
-    for (const ref of refs) {
-      const attachment = attachmentMap.get(ref.attachment_id);
-      if (!attachment) {
-        continue;
-      }
-
-      const actor = resolveActor(ref.actor);
-      if (actorFilter?.length && !actorFilter.includes(actor)) {
-        continue;
-      }
-
-      const operation = resolveOperation(ref.operation, ref.version);
-      if (operation === ATTACHMENT_REF_OPERATION.read) {
-        continue;
-      }
-
-      if (attachment.group_id) {
-        if (seenGroupIds.has(attachment.group_id)) {
-          continue;
-        }
-        seenGroupIds.add(attachment.group_id);
-      }
-
-      resolved.push({
-        attachment,
-        version: ref.version,
-        operation,
-        actor,
-      });
-    }
-
-    return resolved;
-  }, [attachmentRefs, conversationAttachments, fallbackAttachments, actorFilter]);
+  const resolvedReferences = excludeTypes?.length
+    ? allResolved.filter((ref) => !excludeTypes.includes(ref.attachment.type as AttachmentType))
+    : allResolved;
 
   if (resolvedReferences.length === 0) {
     return null;
   }
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      direction="column"
-      responsive={false}
-      justifyContent={justifyContent}
-      role="list"
-      aria-label={labels.attachments}
-      data-test-subj="agentBuilderRoundAttachmentReferences"
-    >
-      {resolvedReferences.map((ref) => (
-        <EuiFlexItem
-          css={attachmentItemStyles}
-          key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}
-        >
-          <EuiText color="subdued" size="xs">
-            {labels.attachmentAdded(ref.attachment.description ?? '')}
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup
+        gutterSize="s"
+        direction="column"
+        responsive={false}
+        data-test-subj="agentBuilderRoundAttachmentReferences"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={
+              justifyContent === 'flexEnd'
+                ? css`
+                    text-align: right;
+                  `
+                : undefined
+            }
+          >
+            {labels.added}
           </EuiText>
         </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            direction="row"
+            wrap
+            responsive={false}
+            gutterSize="s"
+            justifyContent={justifyContent}
+            role="list"
+            aria-label={labels.attachments}
+          >
+            {resolvedReferences.map((ref) => (
+              <EuiFlexItem grow={false} key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}>
+                <RoundAttachmentPill attachment={ref.attachment} version={ref.version} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   );
 };

@@ -22,11 +22,12 @@ export const GetCertsParamsType = t.partial({
   monitorIds: t.array(t.string),
   monitorTypes: t.array(t.string),
   browserResourceTypes: t.array(t.string),
-  party: t.array(t.string),
+  certOrigin: t.array(t.string),
   tags: t.array(t.string),
   issuers: t.array(t.string),
   includeBrowserCerts: t.boolean,
   remoteNames: t.array(t.string),
+  showFromAllSpaces: t.boolean,
 });
 
 export type GetCertsParams = t.TypeOf<typeof GetCertsParamsType>;
@@ -38,6 +39,9 @@ export const CertMonitorType = t.partial({
   url: t.string,
   type: t.string,
   remote: remoteMonitorInfoSchema,
+  // Present when the monitor saved object was loaded with `namespaces: ['*']`
+  // (certificates "all permitted spaces"). Used to deep-link with `?spaceId=`.
+  spaces: t.array(t.string),
 });
 
 export const CertType = t.intersection([
@@ -89,7 +93,7 @@ export const CertFacetsType = t.type({
   tags: t.array(CertFacetCountType),
   issuers: t.array(CertFacetCountType),
   resourceTypes: t.array(CertFacetCountType),
-  party: t.array(CertFacetCountType),
+  certOrigin: t.array(CertFacetCountType),
   expiringWithin: t.array(CertFacetCountType),
 });
 

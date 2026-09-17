@@ -9,6 +9,7 @@ import type { CommandBadgeData } from './types';
 import { getCommandDefinition } from '../command_menu';
 import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
+import { IMAGE_ATTACHMENT_SCHEME } from '../image_placeholder';
 
 interface TextSegment {
   type: 'text';
@@ -18,7 +19,11 @@ interface BadgeSegment {
   type: 'badge';
   data: CommandBadgeData;
 }
-export type ContentSegment = TextSegment | BadgeSegment;
+interface ImageSegment {
+  type: 'image';
+  name: string;
+}
+export type ContentSegment = TextSegment | BadgeSegment | ImageSegment;
 
 export class CommandBadgeSerializationError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -77,10 +82,10 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
 const BADGE_PATTERN = /\[([^\]]+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
 
 /**
- * Parses text containing serialized badge markdown-links into segments.
- * Used to restore badges from serialized content.
+ * Parses text containing serialized badge and image markdown-links into segments.
+ * Used to restore badges and image chips from serialized content.
  */
-export const deserializeCommandBadge = (text: string): ContentSegment[] => {
+export const deserializeInputSegments = (text: string): ContentSegment[] => {
   const segments: ContentSegment[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -93,34 +98,44 @@ export const deserializeCommandBadge = (text: string): ContentSegment[] => {
     }
 
     const [_, displayText, scheme, path, queryString] = match;
-    const commandDefinition = getCommandDefinitionByScheme(scheme);
 
-    if (commandDefinition) {
-      const { id: commandId, sequence } = commandDefinition;
-      const label = displayText.startsWith(sequence)
-        ? displayText.slice(sequence.length)
-        : displayText;
-
-      const metadata: CommandBadgeData['metadata'] = {};
-      if (queryString) {
-        const params = new URLSearchParams(queryString);
-        params.forEach((value, key) => {
-          metadata[key] = value;
-        });
+    if (scheme === IMAGE_ATTACHMENT_SCHEME) {
+      try {
+        segments.push({ type: 'image', name: decodeURIComponent(path) });
+      } catch {
+        // Malformed percent-encoding, preserve as text
+        segments.push({ type: 'text', value: match[0] });
       }
-
-      segments.push({
-        type: 'badge',
-        data: {
-          commandId,
-          label,
-          id: path,
-          metadata,
-        },
-      });
     } else {
-      // Unknown scheme, preserve as text
-      segments.push({ type: 'text', value: match[0] });
+      const commandDefinition = getCommandDefinitionByScheme(scheme);
+
+      if (commandDefinition) {
+        const { id: commandId, sequence } = commandDefinition;
+        const label = displayText.startsWith(sequence)
+          ? displayText.slice(sequence.length)
+          : displayText;
+
+        const metadata: CommandBadgeData['metadata'] = {};
+        if (queryString) {
+          const params = new URLSearchParams(queryString);
+          params.forEach((value, key) => {
+            metadata[key] = value;
+          });
+        }
+
+        segments.push({
+          type: 'badge',
+          data: {
+            commandId,
+            label,
+            id: path,
+            metadata,
+          },
+        });
+      } else {
+        // Unknown scheme, preserve as text
+        segments.push({ type: 'text', value: match[0] });
+      }
     }
 
     lastIndex = match.index + match[0].length;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformRRuleToCustomSchedule } from '../../../../../../../lib/transforms/rrule_to_custom/latest';
+import { transformRRuleToCustomSchedule } from '@kbn/response-ops-schedule-schema';
 import type { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../../schemas/maintenance_window/internal/request/update';
 import type { UpdateMaintenanceWindowParams } from '../../../../../../../application/methods/update/types';
 

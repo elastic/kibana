@@ -350,6 +350,43 @@ describe('RetentionCard', () => {
       expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('1 data phase');
     });
 
+    it('counts the frozen phase: hot + frozen + delete = 3 data phases', () => {
+      const definition = createMockDefinition(
+        {
+          dsl: {
+            data_retention: '30d',
+            frozen_after: '10d',
+          },
+        },
+        { inherit: {} },
+        'logs-test',
+        { lifecycle: true },
+        'time_series'
+      );
+
+      renderWithSync(<RetentionCard definition={definition} />);
+
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('3 data phases');
+    });
+
+    it('counts hot + frozen = 2 data phases when frozen is set without data_retention', () => {
+      const definition = createMockDefinition(
+        {
+          dsl: {
+            frozen_after: '10d',
+          },
+        },
+        { inherit: {} },
+        'logs-test',
+        { lifecycle: true },
+        'time_series'
+      );
+
+      renderWithSync(<RetentionCard definition={definition} />);
+
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('2 data phases');
+    });
+
     it('uses preview downsample step count while editing DSL downsampling', () => {
       const definition = createMockDefinition(
         { dsl: {} },

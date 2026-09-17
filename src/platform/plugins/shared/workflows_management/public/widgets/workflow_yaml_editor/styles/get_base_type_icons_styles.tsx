@@ -10,7 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
+import { HardcodedIcons } from '@kbn/workflows-ui';
 
 export function getBaseTypeIconsStyles(euiThemeContext: UseEuiTheme) {
   const { euiTheme } = euiThemeContext;

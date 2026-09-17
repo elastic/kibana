@@ -5,9 +5,30 @@
  * 2.0.
  */
 
+import {
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+} from '@kbn/workflows';
 import { parse } from 'yaml';
 import { INLINE_WORKFLOW_TAG } from '../constants';
-import { buildInlineWorkflowYaml, InvalidInlineWorkflowError } from './build_inline_workflow_yaml';
+import {
+  buildInlineWorkflowYaml,
+  InvalidInlineWorkflowError,
+  stepTypeFromConnectorType,
+} from './build_inline_workflow_yaml';
+
+const EXPECTED_TRIGGER = {
+  type: 'manual',
+  inputs: {
+    type: 'object',
+    properties: {
+      payload: {
+        $ref: `${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}`,
+      },
+    },
+    required: ['payload'],
+  },
+};
 
 describe('buildInlineWorkflowYaml', () => {
   it('builds a valid email workflow YAML', () => {
@@ -22,7 +43,7 @@ describe('buildInlineWorkflowYaml', () => {
     const parsed = parse(yaml);
     expect(parsed.enabled).toBe(true);
     expect(parsed.tags).toEqual([INLINE_WORKFLOW_TAG]);
-    expect(parsed.triggers).toEqual([{ type: 'manual' }]);
+    expect(parsed.triggers).toEqual([EXPECTED_TRIGGER]);
     expect(parsed.steps).toHaveLength(1);
     expect(parsed.steps[0]).toMatchObject({
       name: 'notify',
@@ -36,16 +57,16 @@ describe('buildInlineWorkflowYaml', () => {
     const yaml = buildInlineWorkflowYaml({
       id: 't2',
       source: 'inline',
-      stepType: 'slack',
+      stepType: 'slack2.sendMessage',
       connectorId: 'my-slack-connector',
-      params: 'message: "Hello {{ policyId }}"',
+      params: 'channel: "my-channel"\ntext: "Hello {{ policyId }}"',
     });
 
     const parsed = parse(yaml);
     expect(parsed.steps[0]).toMatchObject({
-      type: 'slack',
+      type: 'slack2.sendMessage',
       'connector-id': 'my-slack-connector',
-      with: { message: 'Hello {{ policyId }}' },
+      with: { channel: 'my-channel', text: 'Hello {{ policyId }}' },
     });
   });
 
@@ -105,5 +126,34 @@ describe('buildInlineWorkflowYaml', () => {
         params: 'to: ""',
       })
     ).toThrow(InvalidInlineWorkflowError);
+  });
+
+  it('builds a valid slack v2 workflow YAML', () => {
+    const yaml = buildInlineWorkflowYaml({
+      id: 't8',
+      source: 'inline',
+      stepType: 'slack2.sendMessage',
+      connectorId: 'my-slackv2-connector',
+      params: 'channel: "channel"\ntext: "Hello {{ policyId }}"',
+    });
+
+    const parsed = parse(yaml);
+    expect(parsed.steps[0]).toMatchObject({
+      type: 'slack2.sendMessage',
+      'connector-id': 'my-slackv2-connector',
+      with: { channel: 'channel', text: 'Hello {{ policyId }}' },
+    });
+  });
+});
+
+describe('stepTypeFromConnectorType', () => {
+  it('returns the connector type ID without a leading dot', () => {
+    expect(stepTypeFromConnectorType('.email')).toBe('email');
+    expect(stepTypeFromConnectorType('slack')).toBe('slack');
+  });
+
+  it('returns the connector type ID with subAction if provided', () => {
+    expect(stepTypeFromConnectorType('.slack2', 'sendMessage')).toBe('slack2.sendMessage');
+    expect(stepTypeFromConnectorType('custom', 'doSomething')).toBe('custom.doSomething');
   });
 });

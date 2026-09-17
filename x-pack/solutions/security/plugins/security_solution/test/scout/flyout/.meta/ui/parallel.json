@@ -1,0 +1,243 @@
+{
+  "sha1": "09007b918917af3580591e7c8b91c2d531194a25",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "8d72edc08d77646-1054e603e578b92",
+      "title": "Ingest archives to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "8e7d3ac6b5df63c-3916e4686fbd655",
+      "title": "Expandable flyout state sync should test flyout url sync",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/alert_details_url_sync.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "aa0820952880f6d-a065b8256c500ca",
+      "title": "Document flyout v2 — alerts page entry header status badge: closing with a reason updates the badge to closed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/document_flyout.spec.ts",
+        "line": 37,
+        "column": 52
+      }
+    },
+    {
+      "id": "aa0820952880f6d-70420addcb3a02f",
+      "title": "Document flyout v2 — alerts page entry assignees: assigning the current user shows the avatar in the flyout header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/document_flyout.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "4a0063a1f646a55-3c0525af7bdcd41",
+      "title": "Document flyout v2 — Investigation section highlighted fields: clicking the host.name value opens the host details child flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/investigation.spec.ts",
+        "line": 31,
+        "column": 64
+      }
+    },
+    {
+      "id": "2dededc22430e75-0162bfd3bbbb3e4",
+      "title": "Document flyout v2 — Take action menu investigate in timeline — opens Timeline with document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/take_action.spec.ts",
+        "line": 36,
+        "column": 15
+      }
+    },
+    {
+      "id": "ed02d16410021f9-ddf48453b092713",
+      "title": "Document flyout v2 — Analyzer tool overlay clicking an analyzed process node opens its document in a child flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/analyzer.spec.ts",
+        "line": 38,
+        "column": 25
+      }
+    },
+    {
+      "id": "ed02d16410021f9-4732b4a380e894c",
+      "title": "Document flyout v2 — Analyzer tool overlay drills an analyzed node down to its alert event type and opens the corresponding rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/analyzer.spec.ts",
+        "line": 60,
+        "column": 34
+      }
+    },
+    {
+      "id": "39384badfc95f1f-9d50377b8c10d28",
+      "title": "Document flyout v2 — Correlations tool overlay opens correlations tool overlay and section row expand opens the correct child flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/correlations.spec.ts",
+        "line": 32,
+        "column": 45
+      }
+    },
+    {
+      "id": "7064f4be1f4bfd5-724b18333b69fa4",
+      "title": "Document flyout v2 — Prevalence tool overlay tools flyout header shows rule name with alert icon and opens child document flyout on click",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/prevalence.spec.ts",
+        "line": 33,
+        "column": 36
+      }
+    },
+    {
+      "id": "d89449ed16e39bf-f08b7b918d47b6a",
+      "title": "Host entity flyout v2 opens from the alerts table host cell",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/entity/main/host_flyout.spec.ts",
+        "line": 42,
+        "column": 25
+      }
+    },
+    {
+      "id": "9a28f15a9b2bc8e-9c4fbf838d3a355",
+      "title": "User entity flyout v2 opens from the alerts table user cell",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/entity/main/user_flyout.spec.ts",
+        "line": 42,
+        "column": 25
+      }
+    },
+    {
+      "id": "04570643e85ae7e-dddb3037d7ada4f",
+      "title": "Host entity flyout v2 - Alerts insight tool expanding an alert row opens the document flyout for that rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/entity/tools/host_alerts_insights.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "cdddb7a0f0e3a88-dad6c846ade180c",
+      "title": "Network flyout v2 clicking the source.ip value in the alerts table opens the network flyout v2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/network/network_flyout.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "7e160348a3c13a8-84eed230e3514cc",
+      "title": "Rule flyout v2 rule name in the alerts table opens the rule flyout v2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/rule/rule_flyout.spec.ts",
+        "line": 34,
+        "column": 15
+      }
+    }
+  ]
+}

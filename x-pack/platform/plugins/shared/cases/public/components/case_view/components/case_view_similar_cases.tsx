@@ -6,19 +6,21 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 
 import { useGetSimilarCases, initialData } from '../../../containers/use_get_similar_cases';
 import type { CaseUI } from '../../../../common/ui/types';
 
 import { CASES_TABLE_PER_PAGE_VALUES, type EuiBasicTableOnChange } from '../../all_cases/types';
 import { SimilarCasesTable } from '../../similar_cases/table';
+import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
 
 interface CaseViewSimilarCasesProps {
   caseData: CaseUI;
 }
 
 export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) => {
+  const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);
 
@@ -45,18 +47,21 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
   );
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <SimilarCasesTable
-              isLoading={isLoadingCases}
-              cases={data.cases}
-              pagination={pagination}
-              onChange={tableOnChangeCallback}
-            />
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.size.s }}>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <SidebarToggleButton />
           </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <SimilarCasesTable
+          isLoading={isLoadingCases}
+          cases={data.cases}
+          pagination={pagination}
+          onChange={tableOnChangeCallback}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

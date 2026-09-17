@@ -36,14 +36,14 @@ export const disableAllWorkflows = async (params: {
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
   spaceId?: string;
-  versioningEnabled?: boolean;
 }): Promise<{
   total: number;
   disabled: number;
   failures: Array<{ id: string; error: string }>;
   disabledWorkflows: Array<{ id: string; document: WorkflowProperties }>;
 }> => {
-  const { storage, taskScheduler, logger, spaceId, versioningEnabled = false } = params;
+  const { storage, taskScheduler, logger, spaceId } = params;
+  const bumpVersion = Boolean(spaceId);
   const client = storage.getClient();
   const pageSize = 1000;
   const failures: Array<{ id: string; error: string }> = [];
@@ -84,9 +84,9 @@ export const disableAllWorkflows = async (params: {
         } = await bulkIndexWithOccRetry({
           client,
           hits: occHits,
-          mutate: mutateWorkflowToDisabled,
+          mutate: (hit) => mutateWorkflowToDisabled(hit._source),
           logger,
-          versioningEnabled,
+          bumpVersion,
         });
 
         failures.push(...bulkFailures);

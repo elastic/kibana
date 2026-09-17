@@ -59,7 +59,11 @@ jest.mock('../../hooks/use_header_data', () => ({
   useHeaderData: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_attack_entities_lists', () => ({
+jest.mock('../../hooks/use_original_alert_ids', () => ({
+  useOriginalAlertIds: jest.fn().mockReturnValue([]),
+}));
+
+jest.mock('../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists', () => ({
   useAttackEntitiesLists: jest.fn(),
 }));
 
@@ -106,8 +110,9 @@ jest.mock('../../../document_details/left/components/host_details', () => ({
 }));
 
 const useHeaderData = jest.requireMock('../../hooks/use_header_data').useHeaderData as jest.Mock;
-const useAttackEntitiesLists = jest.requireMock('../../hooks/use_attack_entities_lists')
-  .useAttackEntitiesLists as jest.Mock;
+const useAttackEntitiesLists = jest.requireMock(
+  '../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists'
+).useAttackEntitiesLists as jest.Mock;
 
 const mockContextValue = {
   attackId: 'attack-1',

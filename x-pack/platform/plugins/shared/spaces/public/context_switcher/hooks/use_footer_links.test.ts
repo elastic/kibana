@@ -62,10 +62,35 @@ describe('useFooterLinks', () => {
     );
   });
 
-  it('returns "Connection details" link for serverless cloud', () => {
+  it('returns "Get started" link pointing at the vectordb onboarding for vectordb serverless projects', () => {
+    const application = createApplication({ navLinks: { home: true, vectordb: true } });
+    const cloudMock = createCloud({
+      serverless: { projectType: 'vectordb' } as CloudStart['serverless'],
+    });
+
+    const { result } = renderHook(() =>
+      useFooterLinks({ application, cloud: cloudMock, isServerless: true })
+    );
+
+    expect(result.current).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'getStarted',
+          label: 'Get started',
+        }),
+      ])
+    );
+    expect(application.getUrlForApp).toHaveBeenCalledWith('vectordb', {
+      path: '/getting_started',
+    });
+  });
+
+  it('returns "Connection details" link when cloud is enabled', () => {
     const application = createApplication();
 
-    const { result } = renderHook(() => useFooterLinks({ application, cloud, isServerless: true }));
+    const { result } = renderHook(() =>
+      useFooterLinks({ application, cloud, isServerless: false, activeSpaceSolution: 'es' })
+    );
 
     expect(result.current).toEqual(
       expect.arrayContaining([
@@ -77,11 +102,12 @@ describe('useFooterLinks', () => {
     );
   });
 
-  it('does not return "Connection details" when not serverless', () => {
+  it('does not return "Connection details" when cloud is disabled', () => {
     const application = createApplication();
+    const cloudMock = createCloud({ isCloudEnabled: false });
 
     const { result } = renderHook(() =>
-      useFooterLinks({ application, cloud, isServerless: false, activeSpaceSolution: 'es' })
+      useFooterLinks({ application, cloud: cloudMock, activeSpaceSolution: 'es' })
     );
 
     const ids = result.current.map((item) => item.id);

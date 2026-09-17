@@ -66,7 +66,7 @@ describe('Description', () => {
     await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({ description: 'My new description' }, true);
+      expect(onSubmit).toHaveBeenCalledWith({ description: 'My new description' }, true);
     });
   });
 
@@ -92,7 +92,7 @@ describe('Description', () => {
     await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({}, false);
+      expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
 
     expect(await screen.findByText('A description is required.')).toBeInTheDocument();
@@ -122,7 +122,7 @@ describe('Description', () => {
     await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({}, false);
+      expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
 
     expect(

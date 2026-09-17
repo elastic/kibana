@@ -13,6 +13,7 @@ import { getRuleMigrationStatsMock } from '../../__mocks__/migration_rule_stats'
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
+import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../common/hooks/use_get_missing_resources');
 jest.mock('../../../common/components/migration_data_input_flyout_context', () => ({
@@ -68,7 +69,11 @@ describe('RuleMigrationsUploadMissingPanel', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders the panel when there are missing resources', () => {
+  it.each([
+    [MigrationSource.SPLUNK, 'Upload missing macros and lookup lists.'],
+    [MigrationSource.QRADAR, 'Upload missing reference sets'],
+    [MigrationSource.SENTINEL, 'Upload missing watchlists'],
+  ])('renders the panel title for %s missing resources', (vendor, expectedTitle) => {
     let setMissingResourcesCallback: (resources: SiemMigrationResourceBase[]) => void = jest.fn();
     mockUseGetMissingResources.mockImplementation((_entity, setMissingResources) => {
       setMissingResourcesCallback = setMissingResources;
@@ -80,7 +85,9 @@ describe('RuleMigrationsUploadMissingPanel', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} />
+        <RuleMigrationsUploadMissingPanel
+          migrationStats={getRuleMigrationStatsMock({ id: 'test-id', vendor })}
+        />
       </TestProviders>
     );
 
@@ -92,9 +99,7 @@ describe('RuleMigrationsUploadMissingPanel', () => {
     expect(getByTestId('uploadMissingPanel')).toBeInTheDocument();
     // Title
     expect(getByTestId('uploadMissingPanelTitle')).toBeInTheDocument();
-    expect(getByTestId('uploadMissingPanelTitle')).toHaveTextContent(
-      'Upload missing macros and lookup lists.'
-    );
+    expect(getByTestId('uploadMissingPanelTitle')).toHaveTextContent(expectedTitle);
     // Description
     expect(getByTestId('uploadMissingPanelDescription')).toBeInTheDocument();
     expect(getByTestId('uploadMissingPanelDescription')).toHaveTextContent(

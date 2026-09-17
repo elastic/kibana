@@ -19,8 +19,8 @@
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/content-list-common",
-    "@kbn/dashboard-plugin",
     "@kbn/expressions-plugin",
     "@kbn/saved-objects-management-plugin",
     "@kbn/telemetry-plugin",
@@ -31,7 +31,6 @@
     "@kbn/core-provider-plugin",
     "@kbn/test",
     "@kbn/repo-info",
-    "@kbn/utils",
     "@kbn/expect",
     "@kbn/data-plugin",
     "@kbn/ftr-common-functional-services",
@@ -65,7 +64,6 @@
     "@kbn/core-deprecations-common",
     "@kbn/data-grid-in-table-search",
     "@kbn/scout-info",
-    "@kbn/synthtrace-client",
     "@kbn/synthtrace",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
@@ -76,6 +74,5 @@
     "@kbn/session-notifications-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/deeplinks-analytics",
-    "@kbn/unified-tabs"
   ]
 }

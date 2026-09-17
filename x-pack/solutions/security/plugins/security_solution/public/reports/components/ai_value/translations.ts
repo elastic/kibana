@@ -395,6 +395,10 @@ export const ATTACK_DISCOVERY_LINK = i18n.translate(
   }
 );
 
+export const ATTACKS_LINK = i18n.translate('xpack.securitySolution.reports.aiValue.attacksLink', {
+  defaultMessage: 'Go to Attacks',
+});
+
 export const NO_RESULTS_TITLE = i18n.translate(
   'xpack.securitySolution.reports.aiValue.noResultsEmptyStateTitle',
   {

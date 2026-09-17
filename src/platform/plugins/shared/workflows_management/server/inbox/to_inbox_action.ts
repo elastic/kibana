@@ -8,6 +8,7 @@
  */
 
 import type { InboxAction, InboxActionStatus } from '@kbn/inbox-common';
+import { buildWorkflowSourceId as buildSourceId } from '@kbn/inbox-common';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -76,7 +77,7 @@ export const deriveHistoryStatus = (
  * propagation work per [security-team#16710](https://github.com/elastic/security-team/issues/16710).
  */
 export const buildWorkflowSourceId = (step: EsWorkflowStepExecution): string =>
-  `${step.workflowId}:${step.workflowRunId}:${step.id}`;
+  buildSourceId(step.workflowId, step.workflowRunId, step.id);
 
 /**
  * Extracts the `workflowRunId` (a.k.a. executionId) from a composite source id.
@@ -112,6 +113,8 @@ export const toInboxAction = (
   const input = (step.input ?? {}) as {
     message?: unknown;
     schema?: unknown;
+    approveLabel?: unknown;
+    rejectLabel?: unknown;
   };
   const message =
     typeof input.message === 'string' && input.message.length > 0 ? input.message : undefined;
@@ -125,8 +128,11 @@ export const toInboxAction = (
     source_app: 'workflows',
     source_id: buildWorkflowSourceId(step),
     status: 'pending',
-    // Short summary: prefer the rendered message, fall back to step id.
-    title: message ?? `Step "${step.stepId}" is waiting for input`,
+    title:
+      message ??
+      (step.stepType === 'waitForApproval'
+        ? `Step "${step.stepId}" is waiting for approval`
+        : `Step "${step.stepId}" is waiting for input`),
     description: `Workflow ${step.workflowId} — step "${step.stepId}"`,
     input_message: message,
     input_schema: schema,

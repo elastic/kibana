@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
@@ -71,8 +71,8 @@ export const useAddBulkToTimelineAction = ({
   } = useUserPrivileges();
 
   const { dataView } = useDataView(scopeId);
-  const browserFields = useBrowserFields(scopeId);
-  const selectedPatterns = useSelectedPatterns(scopeId);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const runtimeMappings = useMemo(
     () => dataView.getRuntimeMappings() as RunTimeMappings,
     [dataView]

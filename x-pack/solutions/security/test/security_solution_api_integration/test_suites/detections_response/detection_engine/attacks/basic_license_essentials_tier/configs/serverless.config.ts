@@ -8,9 +8,6 @@
 import { createTestConfig } from '../../../../../../config/serverless/config.base.essentials';
 
 export default createTestConfig({
-  kbnTestServerArgs: [
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify(['publicAttacksApiEnabled'])}`,
-  ],
   testFiles: [require.resolve('..')],
   junit: {
     reportName:

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, type FunctionComponent } from 'react';
+import React, { useEffect, type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiSteps, useGeneratedHtmlId } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -24,9 +24,7 @@ import { FeedbackButtons } from '../shared/feedback_buttons';
 import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../shared/use_pricing_feature';
-import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { AutoDetectInstallStep, AutoDetectVisualizeStep } from './steps';
-import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   useFlowBreadcrumb(
@@ -39,15 +37,6 @@ export const AutoDetectPanel: FunctionComponent = () => {
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
 
-  const {
-    isEnabled: isWiredStreamsEnabled,
-    isLoading: isWiredStreamsLoading,
-    isEnabling,
-    enableWiredStreams,
-  } = useWiredStreamsStatus();
-  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
-  const useWiredStreams = ingestionMode === 'wired';
-
   const command = data
     ? getAutoDetectCommand({
         scriptDownloadUrl: data.scriptDownloadUrl,
@@ -57,13 +46,12 @@ export const AutoDetectPanel: FunctionComponent = () => {
         ingestApiKey: data.ingestApiKey,
         elasticAgentVersion: data.elasticAgentVersionInfo.agentVersion,
         metricsEnabled: metricsOnboardingEnabled,
-        useWiredStreams,
       })
     : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: { share, docLinks },
+    services: { share },
   } = useKibana<ObservabilityOnboardingContextValue>();
 
   useEffect(() => {
@@ -100,16 +88,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                 command={command}
                 onboardingFlowId={data?.onboardingFlow.id}
                 status={status}
-                ingestionMode={ingestionMode}
-                onIngestionModeChange={setIngestionMode}
                 isMetricsOnboardingEnabled={metricsOnboardingEnabled}
-                wiredStreamsStatus={{
-                  isEnabled: isWiredStreamsEnabled,
-                  isLoading: isWiredStreamsLoading,
-                  isEnabling,
-                  enableWiredStreams,
-                }}
-                streamsDocLink={docLinks?.links.observability.logsStreams}
               />
             ),
           },
@@ -129,7 +108,6 @@ export const AutoDetectPanel: FunctionComponent = () => {
                 status={status}
                 installedIntegrations={installedIntegrations}
                 onboardingFlowId={data?.onboardingFlow?.id}
-                useWiredStreams={useWiredStreams}
                 isMetricsOnboardingEnabled={metricsOnboardingEnabled}
                 accordionId={accordionId}
                 logsLocator={logsLocator}

@@ -72,6 +72,7 @@ const ErrorRateChartContent = ({
   return (
     <Chart
       id="errorRate"
+      isSelected={false}
       esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}

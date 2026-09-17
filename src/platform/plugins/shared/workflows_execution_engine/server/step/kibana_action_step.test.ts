@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import {
+  markExternalUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 
 import { KibanaActionStepImpl } from './kibana_action_step';
 import type { RunStepResult } from './node_implementation';
+import { WorkflowTemplatingEngine } from '../templating_engine';
+import { EVENT_CHAIN_DEPTH_HEADER } from '../trigger_events/event_context/event_chain_context';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -19,6 +26,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 // Mock fetch globally
 global.fetch = jest.fn();
 const mockedFetch = global.fetch as jest.MockedFunction<typeof fetch>;
+const mockGetInternalCallerAttestationHeaders = jest.fn();
 
 const runStep = (
   step: KibanaActionStepImpl,
@@ -100,6 +108,15 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         http: {
           basePath: { publicBaseUrl: 'https://localhost:5601' },
         },
+        security: {
+          authc: {
+            apiKeys: {
+              uiam: {
+                getInternalCallerAttestationHeaders: mockGetInternalCallerAttestationHeaders,
+              },
+            },
+          },
+        },
       }),
       getFakeRequest: jest.fn().mockReturnValue({
         headers: { authorization: 'ApiKey test-key' },
@@ -135,6 +152,111 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  it('attaches the UIAM internal-caller attestation to loopback requests', async () => {
+    mockGetInternalCallerAttestationHeaders.mockReturnValue({
+      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'valid-attestation',
+    });
+    mockContextManager.getFakeRequest.mockReturnValue({
+      headers: { authorization: 'ApiKey essu_internal_key' },
+    } as unknown as KibanaRequest);
+
+    const stepWith = {
+      request: {
+        method: 'GET',
+        path: '/api/status',
+        headers: {
+          Authorization: 'ApiKey another_key',
+          'X-Kbn-Uiam-Internal-Caller-Attestation': 'forged-attestation',
+          'X-Kibana-Event-Chain-Depth': '999',
+        },
+      },
+    };
+    const step = {
+      id: 'test_step',
+      type: 'kibana.request',
+      stepId: 'test_step',
+      stepType: 'kibana.request',
+      configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+    } as unknown as KibanaGraphNode;
+
+    await runStep(
+      new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      ),
+      stepWith
+    );
+
+    const fetchOptions = mockedFetch.mock.calls[0][1] as RequestInit;
+    const headers = new Headers(fetchOptions.headers);
+    expect(headers.get('authorization')).toBe('ApiKey essu_internal_key');
+    expect(headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe('valid-attestation');
+    expect(headers.get(EVENT_CHAIN_DEPTH_HEADER)).toBeNull();
+    expect(mockGetInternalCallerAttestationHeaders).toHaveBeenCalledTimes(1);
+
+    mockedFetch.mockClear();
+    mockGetInternalCallerAttestationHeaders.mockClear();
+    mockContextManager.getFakeRequest.mockReturnValue({
+      headers: { authorization: 'ApiKey regular_key' },
+    } as unknown as KibanaRequest);
+
+    await runStep(
+      new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      ),
+      stepWith
+    );
+
+    const unattestedFetchOptions = mockedFetch.mock.calls[0][1] as RequestInit;
+    const unattestedHeaders = new Headers(unattestedFetchOptions.headers);
+    expect(unattestedHeaders.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBeNull();
+    expect(mockGetInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('does not attest a user-created (external) UIAM credential on loopback requests', async () => {
+    // The receiving Kibana would honor the attestation and attach the UIAM shared secret to its
+    // Elasticsearch calls, and UIAM rejects external keys presented with client authentication.
+    mockGetInternalCallerAttestationHeaders.mockReturnValue({
+      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'valid-attestation',
+    });
+    const externalKeyRequest = {
+      headers: { authorization: 'ApiKey essu_user_created_key' },
+      isFakeRequest: true,
+    } as unknown as KibanaRequest;
+    markExternalUiamCredential(externalKeyRequest);
+    mockContextManager.getFakeRequest.mockReturnValue(externalKeyRequest);
+
+    const stepWith = { request: { method: 'GET', path: '/api/status' } };
+    const step = {
+      id: 'test_step',
+      type: 'kibana.request',
+      stepId: 'test_step',
+      stepType: 'kibana.request',
+      configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+    } as unknown as KibanaGraphNode;
+
+    await runStep(
+      new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      ),
+      stepWith
+    );
+
+    const headers = new Headers((mockedFetch.mock.calls[0][1] as RequestInit).headers);
+    // The credential itself still goes out; only the attestation is withheld.
+    expect(headers.get('authorization')).toBe('ApiKey essu_user_created_key');
+    expect(headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBeNull();
+    expect(mockGetInternalCallerAttestationHeaders).not.toHaveBeenCalled();
   });
 
   describe('fetcher options extraction', () => {
@@ -1019,6 +1141,49 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       expect(result.error).toBeUndefined();
       expect(result.output).toEqual({ id: 'case-1', title: 'Test' });
+    });
+  });
+
+  describe('multipart form data', () => {
+    it('should preserve decoded binary content in file uploads', async () => {
+      const content = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe]);
+      const templatingEngine = new WorkflowTemplatingEngine();
+      const stepWith = templatingEngine.render(
+        {
+          method: 'POST',
+          path: '/api/cases/case-id/files',
+          form_data: {
+            file: {
+              content: '${{ screenshot | base64_decode_bytes }}',
+              filename: 'screenshot.png',
+              content_type: 'image/png',
+            },
+          },
+        },
+        { screenshot: content.toString('base64') }
+      );
+      const step = {
+        id: 'upload_file',
+        type: 'kibana.request',
+        stepId: 'upload_file',
+        stepType: 'kibana.request',
+        configuration: { name: 'upload_file', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await runStep(kibanaStep, stepWith);
+
+      expect(result.error).toBeUndefined();
+      expect(Buffer.isBuffer(stepWith.form_data.file.content)).toBe(true);
+      const formData = mockedFetch.mock.calls[0][1]?.body as FormData;
+      const file = formData.get('file') as Blob;
+      expect(file.type).toBe('image/png');
+      expect(Buffer.from(await file.arrayBuffer())).toEqual(content);
     });
   });
 

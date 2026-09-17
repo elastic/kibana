@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState, Warnings } from '../types';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { stripUnmappedKeys } from '../scope_tooling';
@@ -39,7 +40,7 @@ export async function sanitize(
   );
   warnings.push(...dashboardStateWarnings, ...scopeWarnings);
   // TODO: As part of sanitization, we should drop panels, filters, etc. that exceed their max array sizes
-  const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
+  const sanitizedDashboardState = dashboardStateSchema.parse(scopedDashboardState);
 
   // access_control is separate from the transforms and stripping logic since it is not part of the
   // dashboard saved object attributes but it should be preserved in the sanitized output if present

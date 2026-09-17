@@ -51,7 +51,6 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       key="reloadPolicies"
       data-test-subj="reloadPoliciesButton"
       iconType="refresh"
-      color="success"
       onClick={onReloadClick}
     >
       <FormattedMessage

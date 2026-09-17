@@ -1,5 +1,8 @@
 {
-  "sha1": "ab09fc4db7cfb2da258e3430dbdc728014bb9470",
+  "sha1": "9c85ce3fc81c65c345ebcb8379e148cccb2d482f",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "1927b5fbbdf0acf-9f84f21350dbcbe",
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access_token_errors.spec.ts",
-        "line": 40,
-        "column": 10
+        "line": 33,
+        "column": 24
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access_token_errors.spec.ts",
-        "line": 69,
-        "column": 10
+        "line": 59,
+        "column": 11
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 56,
+        "column": 26
       }
     },
     {
@@ -109,8 +112,64 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 104,
-        "column": 12
+        "line": 101,
+        "column": 25
+      }
+    },
+    {
+      "id": "bf75566191cf10a-a43f6e33c1f7dde",
+      "title": "[NON-MKI] UIAM API Keys grant and invalidate functions should be able to grant a UIAM API key on a real request authenticated with an internal UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
+        "line": 144,
+        "column": 27
+      }
+    },
+    {
+      "id": "bf75566191cf10a-467bf33af432936",
+      "title": "[NON-MKI] UIAM API Keys grant and invalidate functions should be able to grant a UIAM API key on a real request authenticated with an organization UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
+        "line": 161,
+        "column": 24
       }
     },
     {
@@ -137,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 149,
-        "column": 12
+        "line": 194,
+        "column": 16
       }
     },
     {
@@ -165,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 166,
-        "column": 12
+        "line": 211,
+        "column": 11
       }
     },
     {
@@ -193,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 24,
+        "column": 14
       }
     },
     {
@@ -221,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
-        "line": 53,
-        "column": 10
+        "line": 45,
+        "column": 14
       }
     },
     {
@@ -249,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
-        "line": 78,
-        "column": 10
+        "line": 70,
+        "column": 24
       }
     },
     {
@@ -277,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
-        "line": 93,
-        "column": 10
+        "line": 84,
+        "column": 60
       }
     },
     {
@@ -305,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_create_session.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 13,
+        "column": 17
       }
     },
     {
@@ -333,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
-        "line": 67,
-        "column": 10
+        "line": 58,
+        "column": 25
       }
     },
     {
@@ -361,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 31,
+        "column": 24
       }
     },
     {
@@ -389,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 73,
-        "column": 10
+        "line": 64,
+        "column": 18
       }
     },
     {
@@ -417,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 105,
-        "column": 10
+        "line": 91,
+        "column": 21
       }
     },
     {
@@ -445,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 59,
+        "column": 26
       }
     },
     {
@@ -473,8 +532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 82,
+        "column": 25
       }
     },
     {
@@ -501,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 139,
-        "column": 12
+        "line": 130,
+        "column": 10
       }
     },
     {
@@ -529,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 156,
-        "column": 12
+        "line": 147,
+        "column": 9
       }
     },
     {
@@ -557,8 +616,120 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 177,
-        "column": 12
+        "line": 165,
+        "column": 19
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-4a4b91ea500569e",
+      "title": "[NON-MKI] Use UIAM credentials for various purposes in real and fake requests should be able to use internal UIAM API key on a real request WITH a valid attestation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 184,
+        "column": 32
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-f1ec4f1da24d33b",
+      "title": "[NON-MKI] Use UIAM credentials for various purposes in real and fake requests should reject an internal UIAM API key on a real request WITHOUT an attestation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 205,
+        "column": 32
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-24381838afc7697",
+      "title": "[NON-MKI] Use UIAM credentials for various purposes in real and fake requests should reject an internal UIAM API key on a real request with a wrong attestation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 219,
+        "column": 16
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-37171507c73c80e",
+      "title": "[NON-MKI] Use UIAM credentials for various purposes in real and fake requests should reject an internal UIAM API key on a real request with an attestation bound to another key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 237,
+        "column": 32
       }
     }
   ]

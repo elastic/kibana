@@ -40,7 +40,7 @@ const createExecutionContext = (): ExecutionContext =>
   } as unknown as ExecutionContext);
 
 const getMockSearchService = (
-  columns: Array<{ name: string; type: string }>,
+  columns: Array<{ name: string; type: string; _meta?: Record<string, unknown> }>,
   values: unknown[][] = [['v1']]
 ): MockTypedSearchService => {
   const mockTyped = {
@@ -132,6 +132,7 @@ describe('getEsqlFn', () => {
     );
 
     expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('old_name');
+    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(true);
     expect(result?.columns?.[0]?.name).toBe('new_name');
   });
 
@@ -144,7 +145,37 @@ describe('getEsqlFn', () => {
       createExecutionContext()
     );
 
+    // A plain pass-through field is its own real, filterable field, even though it was never
+    // renamed.
     expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('host');
+    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(true);
+  });
+
+  it('treats an EVAL-computed field with no rename as not filterable', async () => {
+    const mockSearchService = getMockSearchService([{ name: 'doubled', type: 'long' }]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index | EVAL doubled = bytes * 2' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('doubled');
+    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(false);
+  });
+
+  it('treats a METADATA column as filterable, even though it was never renamed', async () => {
+    const mockSearchService = getMockSearchService([{ name: '_id', type: 'keyword' }]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index METADATA _id' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.isComputedColumn).toBe(true);
+    expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('_id');
+    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(true);
   });
 
   it('resolves chained RENAME pipeline for meta.sourceParams.sourceField', async () => {
@@ -158,6 +189,46 @@ describe('getEsqlFn', () => {
 
     expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('a');
     expect(result?.columns?.[0]?.name).toBe('c');
+  });
+
+  it('passes ES column _meta through to meta.esMeta', async () => {
+    const columnMeta = { approximation: { type: 'count_distinct', column: '@timestamp' } };
+    const mockSearchService = getMockSearchService([
+      { name: 'count', type: 'long', _meta: columnMeta },
+    ]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index | STATS COUNT(DISTINCT @timestamp)' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.meta?.esMeta).toEqual(columnMeta);
+  });
+
+  it('omits meta.esMeta when ES column has no _meta', async () => {
+    const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.meta?.esMeta).toBeUndefined();
+  });
+
+  it('requests column_metadata from Elasticsearch', async () => {
+    const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
+
+    await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    const options = mockSearchService.esql.mock.calls[0][1];
+    expect(options?.columnMetadata).toBe(true);
   });
 
   it('resolves meta.sourceParams.sourceField for STATS BY alias = column', async () => {
@@ -178,5 +249,28 @@ describe('getEsqlFn', () => {
     expect(
       result?.columns?.find((col) => col.name === 'cnt')?.meta?.sourceParams?.sourceField
     ).toBe('cnt');
+  });
+
+  describe('resolves meta.sourceParams.appliedTimeRange for date columns when an input time range is provided', () => {
+    it('sets appliedTimeRange for date columns when an input time range is provided', async () => {
+      const mockSearchService = getMockSearchService([{ name: '@timestamp', type: 'date' }]);
+
+      const input: KibanaContext = {
+        type: 'kibana_context',
+        timeRange: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+      };
+
+      const result = await createEsqlFn(mockSearchService).fn(
+        input,
+        { query: 'FROM index' },
+        createExecutionContext()
+      );
+
+      const sourceParams = result?.columns?.[0]?.meta?.sourceParams;
+      expect(sourceParams).toHaveProperty('appliedTimeRange', {
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+      });
+    });
   });
 });

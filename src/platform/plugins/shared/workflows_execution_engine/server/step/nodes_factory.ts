@@ -15,6 +15,7 @@ import type {
   EnterDefaultBranchNode,
   EnterForeachNode,
   EnterIfNode,
+  EnterParallelNode,
   EnterRetryNode,
   EnterSwitchNode,
   EnterTryBlockNode,
@@ -29,11 +30,11 @@ import type {
   ExitWhileNode,
   LoopBreakNode,
   LoopContinueNode,
+  WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
-  WorkflowGraph,
   WorkflowOutputGraphNode,
 } from '@kbn/workflows/graph';
 import {
@@ -68,6 +69,7 @@ import {
   ExitTryBlockNodeImpl,
 } from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import { EnterParallelNodeImpl, ExitParallelNodeImpl } from './parallel_step';
 import {
   EnterBranchNodeImpl,
   EnterSwitchNodeImpl,
@@ -80,6 +82,7 @@ import {
   ExitStepTimeoutZoneNodeImpl,
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
+import { WaitForApprovalStepImpl } from './wait_for_approval_step/wait_for_approval_step';
 import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
@@ -91,6 +94,7 @@ import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/st
 import type { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export class NodesFactory {
@@ -98,7 +102,7 @@ export class NodesFactory {
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private workflowGraph: WorkflowGraph,
+    private workflowGraph: WorkflowRuntimeGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies,
     private stepIoService: StepIoService
@@ -204,7 +208,8 @@ export class NodesFactory {
           node as EnterWhileNode,
           this.workflowRuntime,
           stepExecutionRuntime,
-          stepLogger
+          stepLogger,
+          this.stepIoService
         );
       case 'exit-while':
         return new ExitWhileNodeImpl(
@@ -215,6 +220,18 @@ export class NodesFactory {
           this.stepIoService,
           this.workflowGraph
         );
+      case 'enter-parallel':
+        return new EnterParallelNodeImpl(
+          node as EnterParallelNode,
+          this.workflowRuntime,
+          stepExecutionRuntime,
+          stepLogger,
+          this.stepExecutionRuntimeFactory,
+          this,
+          this.workflowGraph
+        );
+      case 'exit-parallel':
+        return new ExitParallelNodeImpl(this.workflowRuntime);
       case 'loop-break':
         return new LoopBreakNodeImpl(
           node as LoopBreakNode,
@@ -352,7 +369,18 @@ export class NodesFactory {
           node as WaitForInputGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.connectorExecutor,
+          this.dependencies
+        );
+      case 'waitForApproval':
+        return new WaitForApprovalStepImpl(
+          node as WaitForApprovalGraphNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger,
+          this.connectorExecutor,
+          this.dependencies
         );
       case 'atomic':
         return new AtomicStepImpl(

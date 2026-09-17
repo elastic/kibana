@@ -350,49 +350,32 @@ describe('FirecrawlConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = FirecrawlConnector.test;
+
     it('should return success when API is accessible', async () => {
       mockClient.post.mockResolvedValue({ data: { success: true } });
 
-      if (!FirecrawlConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await FirecrawlConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.post).toHaveBeenCalledWith('https://api.firecrawl.dev/v2/scrape', {
         url: 'https://example.com',
       });
       expect(mockContext.log.debug).toHaveBeenCalledWith('Firecrawl test handler');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Firecrawl API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error when API is not accessible', async () => {
       mockClient.post.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!FirecrawlConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await FirecrawlConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
-      expect(result.message).toContain('Invalid API key');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should return failure with specific message when API returns 401', async () => {
+    it('should throw with specific message when API returns 401', async () => {
       const err = new Error('Unauthorized') as Error & { response?: { status: number } };
       err.response = { status: 401 };
       mockClient.post.mockRejectedValue(err);
 
-      if (!FirecrawlConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await FirecrawlConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Invalid or missing API key');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Invalid or missing API key');
     });
   });
 });

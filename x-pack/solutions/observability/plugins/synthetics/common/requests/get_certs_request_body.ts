@@ -8,10 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import DateMath from '@kbn/datemath';
 import { isNonLocalIndexName } from '@kbn/es-query';
-
-// Inlined: the constant lives in a non-public sub-path of `@kbn/spaces-plugin`
-// that the public bundle optimizer rejects. Stable saved-objects contract.
-const ALL_SPACES_ID = '*';
+import { ALL_SPACES_ID } from '@kbn/core-spaces-common';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
@@ -180,7 +177,7 @@ export const getCertsRequestBody = (
     filters,
     monitorTypes,
     browserResourceTypes,
-    party,
+    certOrigin,
     tags,
     issuers,
     includeBrowserCerts = false,
@@ -207,8 +204,8 @@ export const getCertsRequestBody = (
   // maps the indexed `http.response.mime_type` onto the shared mime categories
   // (the browser engine's own `synthetics.payload.type` is stored unindexed, so
   // it is not queryable — see common/constants/mime_types.ts).
-  const wantsFirstParty = party?.includes(FIRST_PARTY);
-  const wantsThirdParty = party?.includes(THIRD_PARTY);
+  const wantsFirstParty = certOrigin?.includes(FIRST_PARTY);
+  const wantsThirdParty = certOrigin?.includes(THIRD_PARTY);
   const partyFilter =
     wantsFirstParty && !wantsThirdParty
       ? [partyQuery(FIRST_PARTY)]

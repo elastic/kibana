@@ -10,8 +10,16 @@
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { StoredLinksState } from '../../server';
 
-export type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../server';
+export type {
+  LinksByReferenceState,
+  LinksByValueState,
+  LinksApiState,
+  LinksEmbeddableState,
+} from '../../server';
 
 export type StoredLinksEmbeddableState = SerializedTitles &
-  // enhancements and disabled actions were accidentally serialized in previous versions
-  StoredLinksState & { enhancements?: unknown; disabledActions?: unknown };
+  Omit<StoredLinksState, 'title'> & {
+    // enhancements and disabled actions were accidentally serialized in previous versions
+    enhancements?: unknown;
+    disabledActions?: unknown;
+  };

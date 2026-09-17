@@ -27,13 +27,17 @@ import { getReversibleMappings } from '../utils';
 
 export function getAccessorNameForXY(
   layer: XYLayer,
+  layerIndex: number,
   accessorType: 'x' | 'y' | 'y_ref' | 'breakdown' | 'threshold' | 'event',
   index?: number
 ): string {
-  if (index == null) {
-    return `${layer.type}_${accessorType}`;
-  }
-  return `${layer.type}_${accessorType}_${index}`;
+  // Column/accessor ids must be unique across the whole document, not just within
+  // a layer, otherwise two same-series-type layers (e.g. two `bar_stacked` layers)
+  // produce colliding ids that corrupt multi-layer state on the `fromAPIFormat`
+  // round-trip. Namespace the accessor with the layer index, mirroring
+  // `getIdForLayer`, so the id becomes `${layerId}_${accessorType}[_${index}]`.
+  const base = `${getIdForLayer(layer, layerIndex)}_${accessorType}`;
+  return index == null ? base : `${base}_${index}`;
 }
 
 export function getIdForLayer(layer: XYLayer, i: number) {
@@ -63,7 +67,11 @@ export function isAPIXYLayer(layer: unknown): layer is XYLayer {
 }
 
 export function isAPIesqlXYLayer(layer: XYLayer): layer is LayerTypeESQL {
-  return 'data_source' in layer && isEsqlTableTypeDataSource(layer.data_source);
+  return (
+    'data_source' in layer &&
+    layer.data_source != null &&
+    isEsqlTableTypeDataSource(layer.data_source)
+  );
 }
 
 export function isLensStateDataLayer(

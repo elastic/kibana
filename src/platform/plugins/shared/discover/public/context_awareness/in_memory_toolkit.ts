@@ -9,13 +9,13 @@
 
 import { isEqual } from 'lodash';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { ProfileStateDefinition, ProfileStateRegistry } from '../../common/context_awareness';
 import type { ContextAwarenessToolkit, ContextAwarenessToolkitActions } from './toolkit';
 import {
   createProfileStateAdapterFactory,
   type ProfileStateAdapter,
-  type ProfileStateDefinition,
-  type ProfileStateRegistry,
-} from './profile_state';
+} from './profile_state_adapter';
 
 /**
  * Creates a complete context awareness toolkit for hosts that do not have tab-backed state.
@@ -32,7 +32,7 @@ export const createInMemoryContextAwarenessToolkit = ({
     actions,
     getStateAdapter: createProfileStateAdapterFactory({
       profileStateRegistry,
-      createAdapter: <TState extends object>(
+      createAdapter: <TState extends SerializableRecord>(
         definition: ProfileStateDefinition<TState>
       ): ProfileStateAdapter<TState> => {
         const stateSubject = new BehaviorSubject<TState>(definition.defaultState);

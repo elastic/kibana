@@ -20,11 +20,12 @@ export const getCertsList = async (queryParams: GetCertsParams): Promise<CertRes
     direction,
     monitorTypes,
     browserResourceTypes,
-    party,
+    certOrigin,
     tags,
     issuers,
     notValidAfter,
     remoteNames,
+    showFromAllSpaces,
   } = queryParams;
   const result = (await apiService.get(SYNTHETICS_API_URLS.CERTS, {
     pageIndex,
@@ -34,20 +35,28 @@ export const getCertsList = async (queryParams: GetCertsParams): Promise<CertRes
     direction,
     monitorTypes: toParam(monitorTypes),
     browserResourceTypes: toParam(browserResourceTypes),
-    party: toParam(party),
+    certOrigin: toParam(certOrigin),
     tags: toParam(tags),
     issuers: toParam(issuers),
     notValidAfter,
     remoteNames: toParam(remoteNames),
+    showFromAllSpaces,
   })) as {
     data: CertResult;
   };
   return result.data;
 };
 
-export const getCertFacets = async (remoteNames?: string[]): Promise<CertFacets> => {
+export const getCertFacets = async ({
+  remoteNames,
+  showFromAllSpaces,
+}: {
+  remoteNames?: string[];
+  showFromAllSpaces?: boolean;
+} = {}): Promise<CertFacets> => {
   const result = (await apiService.get(SYNTHETICS_API_URLS.CERTS_FACETS, {
     remoteNames: toParam(remoteNames),
+    showFromAllSpaces,
   })) as {
     data: CertFacets;
   };

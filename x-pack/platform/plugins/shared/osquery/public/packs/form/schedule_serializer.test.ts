@@ -127,6 +127,56 @@ describe('schedule_serializer', () => {
       expect(result.rrule_schedule?.rrule).toContain('FREQ=WEEKLY');
       expect(result.rrule_schedule?.rrule).toContain('BYDAY=MO,WE,FR');
     });
+
+    it('should serialize custom + months recurrence with no BYMONTHDAY, no INTERVAL when 1', () => {
+      const result = serializeSchedule(
+        makeRruleFormData({
+          recurrence: { frequency: 'custom', interval: 1, byweekday: [], repeatUnit: 'months' },
+        })
+      );
+
+      expect(result.rrule_schedule?.rrule).toBe('FREQ=MONTHLY');
+    });
+
+    it('should serialize custom + months recurrence with INTERVAL when > 1', () => {
+      const result = serializeSchedule(
+        makeRruleFormData({
+          recurrence: { frequency: 'custom', interval: 3, byweekday: [], repeatUnit: 'months' },
+        })
+      );
+
+      expect(result.rrule_schedule?.rrule).toBe('FREQ=MONTHLY;INTERVAL=3');
+    });
+
+    it('should serialize custom + years recurrence with no BYMONTH/BYMONTHDAY, no INTERVAL when 1', () => {
+      const result = serializeSchedule(
+        makeRruleFormData({
+          recurrence: { frequency: 'custom', interval: 1, byweekday: [], repeatUnit: 'years' },
+        })
+      );
+
+      expect(result.rrule_schedule?.rrule).toBe('FREQ=YEARLY');
+    });
+
+    it('should serialize custom + years recurrence with INTERVAL when > 1', () => {
+      const result = serializeSchedule(
+        makeRruleFormData({
+          recurrence: { frequency: 'custom', interval: 2, byweekday: [], repeatUnit: 'years' },
+        })
+      );
+
+      expect(result.rrule_schedule?.rrule).toBe('FREQ=YEARLY;INTERVAL=2');
+    });
+
+    it('should treat an unset repeatUnit as "weeks" (backward compatibility)', () => {
+      const result = serializeSchedule(
+        makeRruleFormData({
+          recurrence: { frequency: 'custom', interval: 1, byweekday: ['MO'] },
+        })
+      );
+
+      expect(result.rrule_schedule?.rrule).toBe('FREQ=WEEKLY;BYDAY=MO');
+    });
   });
 
   describe('deserializeSchedule', () => {
@@ -215,6 +265,142 @@ describe('schedule_serializer', () => {
       expect(restored.startDate.toISOString()).toBe(startDate.toISOString());
       expect(restored.recurrence.frequency).toBe('daily');
     });
+
+    it('should deserialize a MONTHLY rule with no BYMONTHDAY to Custom + Month(s)', () => {
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=MONTHLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      expect(result.recurrence.frequency).toBe('custom');
+      expect(result.recurrence.repeatUnit).toBe('months');
+      expect(result.recurrence._unknown).toBeUndefined();
+    });
+
+    it('should deserialize a MONTHLY rule with INTERVAL to Custom + Month(s)', () => {
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=MONTHLY;INTERVAL=3',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      expect(result.recurrence.frequency).toBe('custom');
+      expect(result.recurrence.repeatUnit).toBe('months');
+      expect(result.recurrence.interval).toBe(3);
+    });
+
+    it('should deserialize a YEARLY rule with no BYMONTH/BYMONTHDAY to Custom + Year(s)', () => {
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=YEARLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      expect(result.recurrence.frequency).toBe('custom');
+      expect(result.recurrence.repeatUnit).toBe('years');
+      expect(result.recurrence._unknown).toBeUndefined();
+    });
+
+    it('should not carry the fresh-form Mon–Fri weekday default when hydrating a bare MONTHLY rule', () => {
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=MONTHLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      // Month(s) hides the weekday checkboxes, so the deserialized state must
+      // not inherit the createDefaultRecurrence Mon–Fri default — otherwise a
+      // later switch to Week(s) would inject a BYDAY that was never loaded.
+      expect(result.recurrence.byweekday).toEqual([]);
+    });
+
+    it('should not carry the fresh-form Mon–Fri weekday default when hydrating a bare YEARLY rule', () => {
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=YEARLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      expect(result.recurrence.byweekday).toEqual([]);
+    });
+
+    it('should not inject BYDAY when a hydrated MONTHLY rule is switched to Week(s) and re-saved', () => {
+      const { recurrence } = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=MONTHLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      // Mimic the unit-change handler (frequency_selector.tsx): switching the
+      // Custom unit to Week(s) preserves `byweekday` and clears `_unknown`.
+      const switchedToWeeks = makeRruleFormData({
+        recurrence: { ...recurrence, repeatUnit: 'weeks', _unknown: undefined },
+      });
+
+      expect(serializeSchedule(switchedToWeeks).rrule_schedule?.rrule).toBe('FREQ=WEEKLY');
+    });
+
+    it('should not inject BYDAY when a hydrated YEARLY rule is switched to Week(s) and re-saved', () => {
+      const { recurrence } = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=YEARLY',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      const switchedToWeeks = makeRruleFormData({
+        recurrence: { ...recurrence, repeatUnit: 'weeks', _unknown: undefined },
+      });
+
+      expect(serializeSchedule(switchedToWeeks).rrule_schedule?.rrule).toBe('FREQ=WEEKLY');
+    });
+
+    it('should round-trip rrule custom + months mode: serialize → deserialize', () => {
+      const startDate = new Date('2024-05-10T00:00:00.000Z');
+      const original = makeRruleFormData({
+        startDate,
+        recurrence: { frequency: 'custom', interval: 2, byweekday: [], repeatUnit: 'months' },
+      });
+      const serialized = serializeSchedule(original);
+      const restored = deserializeSchedule({
+        schedule_type: serialized.schedule_type,
+        rrule_schedule: serialized.rrule_schedule,
+      });
+
+      expect(restored.recurrence.frequency).toBe('custom');
+      expect(restored.recurrence.repeatUnit).toBe('months');
+      expect(restored.recurrence.interval).toBe(2);
+    });
+
+    it('should round-trip rrule custom + years mode: serialize → deserialize', () => {
+      const startDate = new Date('2024-05-10T00:00:00.000Z');
+      const original = makeRruleFormData({
+        startDate,
+        recurrence: { frequency: 'custom', interval: 1, byweekday: [], repeatUnit: 'years' },
+      });
+      const serialized = serializeSchedule(original);
+      const restored = deserializeSchedule({
+        schedule_type: serialized.schedule_type,
+        rrule_schedule: serialized.rrule_schedule,
+      });
+
+      expect(restored.recurrence.frequency).toBe('custom');
+      expect(restored.recurrence.repeatUnit).toBe('years');
+    });
   });
 
   // 11.2.2/11.2.3: recognized-but-unrenderable parts fold into `_unknown` so a
@@ -235,9 +421,52 @@ describe('schedule_serializer', () => {
       expect(roundTripRrule('FREQ=DAILY;INTERVAL=2')).toBe('FREQ=DAILY;INTERVAL=2');
     });
 
-    it('preserves BYMONTHDAY on a MONTHLY freq', () => {
-      // MONTHLY is not renderable — FREQ + BYMONTHDAY both survive verbatim.
+    it('renders a MONTHLY rule with no BYMONTHDAY as Custom + Month(s) (not folded)', () => {
+      // D39: MONTHLY with no override renders via Custom's unit dropdown, since
+      // the day-of-month is implicitly DTSTART's per RFC 5545.
+      expect(roundTripRrule('FREQ=MONTHLY')).toBe('FREQ=MONTHLY');
+    });
+
+    it('folds a MONTHLY rule with an explicit BYMONTHDAY (no day-of-month override UI)', () => {
       expect(roundTripRrule('FREQ=MONTHLY;BYMONTHDAY=15')).toBe('FREQ=MONTHLY;BYMONTHDAY=15');
+    });
+
+    it('folds a multi-value MONTHLY;BYMONTHDAY', () => {
+      expect(roundTripRrule('FREQ=MONTHLY;BYMONTHDAY=1,15')).toBe('FREQ=MONTHLY;BYMONTHDAY=1,15');
+    });
+
+    it('folds a negative BYMONTHDAY on MONTHLY (last-day-of-month)', () => {
+      expect(roundTripRrule('FREQ=MONTHLY;BYMONTHDAY=-1')).toBe('FREQ=MONTHLY;BYMONTHDAY=-1');
+    });
+
+    it('renders a MONTHLY rule with INTERVAL and no BYMONTHDAY as Custom + Month(s)', () => {
+      expect(roundTripRrule('FREQ=MONTHLY;INTERVAL=2')).toBe('FREQ=MONTHLY;INTERVAL=2');
+    });
+
+    it('renders a YEARLY rule with no BYMONTH/BYMONTHDAY as Custom + Year(s) (not folded)', () => {
+      expect(roundTripRrule('FREQ=YEARLY')).toBe('FREQ=YEARLY');
+    });
+
+    it('folds a YEARLY rule with an explicit BYMONTH + BYMONTHDAY (no picker UI)', () => {
+      // The fallback branch re-emits recognized parts in its own fixed order
+      // (BYMONTHDAY before BYMONTH) rather than preserving the original
+      // string's part order — both parts survive, just not byte-identically.
+      expect(roundTripRrule('FREQ=YEARLY;BYMONTH=1;BYMONTHDAY=1')).toBe(
+        'FREQ=YEARLY;BYMONTHDAY=1;BYMONTH=1'
+      );
+    });
+
+    it('folds a YEARLY rule with only BYMONTHDAY set', () => {
+      expect(roundTripRrule('FREQ=YEARLY;BYMONTHDAY=1')).toBe('FREQ=YEARLY;BYMONTHDAY=1');
+    });
+
+    it('folds a multi-value YEARLY;BYMONTH', () => {
+      // The fallback branch re-emits recognized parts in its own fixed order
+      // (BYMONTHDAY before BYMONTH) rather than preserving the original
+      // string's part order — both parts survive, just not byte-identically.
+      expect(roundTripRrule('FREQ=YEARLY;BYMONTH=1,6;BYMONTHDAY=1')).toBe(
+        'FREQ=YEARLY;BYMONTHDAY=1;BYMONTH=1,6'
+      );
     });
 
     it('preserves a WEEKLY rule with no BYDAY (no Mon–Fri injection)', () => {
@@ -248,6 +477,9 @@ describe('schedule_serializer', () => {
     });
 
     it('surfaces a non-empty _unknown so the advanced-parts advisory can render', () => {
+      // A MONTHLY rule with no BYMONTHDAY renders as Custom + Month(s) since
+      // D39 — use an explicit BYMONTHDAY (no day-of-month override UI) to
+      // exercise a shape that still folds into `_unknown`.
       const restored = deserializeSchedule({
         schedule_type: 'rrule',
         rrule_schedule: {
@@ -258,6 +490,21 @@ describe('schedule_serializer', () => {
 
       expect(restored.recurrence._unknown).toBeDefined();
       expect(Object.keys(restored.recurrence._unknown ?? {}).length).toBeGreaterThan(0);
+    });
+
+    it('round-trips an ordinal BYDAY on MONTHLY byte-identically, landing on daily (D3/D4)', () => {
+      const restored = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: { rrule: 'FREQ=MONTHLY;BYDAY=1MO', start_date: '2026-01-01T00:00:00.000Z' },
+      });
+
+      expect(restored.recurrence.frequency).toBe('daily');
+      expect(restored.recurrence._unknown).toEqual({ FREQ: 'MONTHLY', BYDAY: '1MO' });
+      expect(serializeSchedule(restored).rrule_schedule!.rrule).toBe('FREQ=MONTHLY;BYDAY=1MO');
+    });
+
+    it('round-trips an ordinal BYDAY on YEARLY byte-identically, landing on daily (D3/D4)', () => {
+      expect(roundTripRrule('FREQ=YEARLY;BYDAY=-1FR')).toBe('FREQ=YEARLY;BYDAY=-1FR');
     });
 
     it('does not double-emit a part present as both a typed field and _unknown', () => {

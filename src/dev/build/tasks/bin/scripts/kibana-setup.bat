@@ -29,7 +29,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 )
 
 TITLE Kibana Setup
-"%NODE%" "%DIR%\src\cli\setup\dist" %*
+"%NODE%" "%DIR%\node_modules\@kbn\cli\setup\dist" %*
 
 :finally
 

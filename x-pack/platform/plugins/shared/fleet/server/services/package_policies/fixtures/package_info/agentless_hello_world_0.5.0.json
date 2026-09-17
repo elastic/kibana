@@ -1,0 +1,201 @@
+{
+  "name": "agentless_hello_world",
+  "title": "Agentless Hello World",
+  "version": "0.5.0",
+  "release": "beta",
+  "description": "A sample integration to exercise the Agentless infrastructure by fetching https://epr.elastic.co every minute. Optionally includes a counter data stream for high-rate mock metric ingestion testing.",
+  "type": "integration",
+  "download": "/epr/agentless_hello_world/agentless_hello_world-0.5.0.zip",
+  "path": "/package/agentless_hello_world/0.5.0",
+  "icons": [
+    {
+      "src": "/img/icon.svg",
+      "path": "/package/agentless_hello_world/0.5.0/img/icon.svg",
+      "title": "Agentless Hello World",
+      "size": "32x32",
+      "type": "image/svg+xml"
+    }
+  ],
+  "conditions": {
+    "kibana": {
+      "version": "^8.18.0 || ^9.0.0"
+    },
+    "elastic": {
+      "subscription": "basic"
+    }
+  },
+  "owner": {
+    "type": "elastic",
+    "github": "elastic/ingest-managed-jobs"
+  },
+  "categories": [
+    "observability"
+  ],
+  "signature_path": "/epr/agentless_hello_world/agentless_hello_world-0.5.0.zip.sig",
+  "format_version": "3.3.2",
+  "readme": "/package/agentless_hello_world/0.5.0/docs/README.md",
+  "license": "basic",
+  "assets": [
+    "/package/agentless_hello_world/0.5.0/LICENSE.txt",
+    "/package/agentless_hello_world/0.5.0/changelog.yml",
+    "/package/agentless_hello_world/0.5.0/manifest.yml",
+    "/package/agentless_hello_world/0.5.0/docs/README.md",
+    "/package/agentless_hello_world/0.5.0/img/icon.svg",
+    "/package/agentless_hello_world/0.5.0/data_stream/generic/manifest.yml",
+    "/package/agentless_hello_world/0.5.0/data_stream/generic/sample_event.json",
+    "/package/agentless_hello_world/0.5.0/data_stream/mock_counter/manifest.yml",
+    "/package/agentless_hello_world/0.5.0/data_stream/mock_counter/sample_event.json",
+    "/package/agentless_hello_world/0.5.0/data_stream/generic/fields/base-fields.yml",
+    "/package/agentless_hello_world/0.5.0/data_stream/generic/fields/fields.yml",
+    "/package/agentless_hello_world/0.5.0/data_stream/mock_counter/fields/base-fields.yml",
+    "/package/agentless_hello_world/0.5.0/data_stream/mock_counter/fields/fields.yml",
+    "/package/agentless_hello_world/0.5.0/data_stream/generic/agent/stream/cel.yml.hbs",
+    "/package/agentless_hello_world/0.5.0/data_stream/generic/agent/stream/httpjson.yml.hbs",
+    "/package/agentless_hello_world/0.5.0/data_stream/generic/elasticsearch/ingest_pipeline/default.yml",
+    "/package/agentless_hello_world/0.5.0/data_stream/mock_counter/agent/stream/cel.yml.hbs",
+    "/package/agentless_hello_world/0.5.0/data_stream/mock_counter/elasticsearch/ingest_pipeline/default.yml"
+  ],
+  "policy_templates": [
+    {
+      "name": "agentless_hello_world",
+      "title": "Agentless Hello World",
+      "description": "Collect data from EPR endpoint every minute.",
+      "inputs": [
+        {
+          "type": "cel",
+          "title": "Collect data from EPR endpoint (CEL)",
+          "description": "Fetches https://epr.elastic.co every 20s using CEL input."
+        },
+        {
+          "type": "httpjson",
+          "title": "Collect data from EPR endpoint (HTTPJSON)",
+          "description": "Fetches https://epr.elastic.co every 20s using HTTPJSON input."
+        }
+      ],
+      "multiple": true,
+      "deployment_modes": {
+        "default": {
+          "enabled": true
+        },
+        "agentless": {
+          "enabled": true,
+          "is_default": true
+        }
+      }
+    }
+  ],
+  "data_streams": [
+    {
+      "type": "logs",
+      "dataset": "agentless_hello_world.generic",
+      "title": "Generic logs",
+      "release": "beta",
+      "ingest_pipeline": "default",
+      "streams": [
+        {
+          "input": "cel",
+          "vars": [
+            {
+              "name": "url",
+              "type": "text",
+              "title": "EPR URL",
+              "description": "URL of the EPR endpoint (internal use only, for testing)",
+              "multi": false,
+              "required": false,
+              "show_user": false,
+              "default": "https://epr.elastic.co"
+            }
+          ],
+          "template_path": "cel.yml.hbs",
+          "title": "Generic logs (CEL)",
+          "description": "Collect generic logs from EPR endpoint using CEL input.",
+          "enabled": true,
+          "ingestion_method": "API"
+        },
+        {
+          "input": "httpjson",
+          "vars": [
+            {
+              "name": "url",
+              "type": "text",
+              "title": "EPR URL",
+              "description": "URL of the EPR endpoint (internal use only, for testing)",
+              "multi": false,
+              "required": false,
+              "show_user": false,
+              "default": "https://epr.elastic.co"
+            }
+          ],
+          "template_path": "httpjson.yml.hbs",
+          "title": "Generic logs (HTTPJSON)",
+          "description": "Collect generic logs from EPR endpoint using HTTPJSON input.",
+          "enabled": false,
+          "ingestion_method": "API"
+        }
+      ],
+      "package": "agentless_hello_world",
+      "path": "generic"
+    },
+    {
+      "type": "metrics",
+      "dataset": "agentless_hello_world.mock_counter",
+      "title": "Mock counter metrics",
+      "release": "beta",
+      "ingest_pipeline": "default",
+      "streams": [
+        {
+          "input": "cel",
+          "vars": [
+            {
+              "name": "mode",
+              "type": "select",
+              "title": "Mode",
+              "description": "Rate pattern: 'constant' for steady rate, 'spike' for periodic bursts.",
+              "multi": false,
+              "required": true,
+              "show_user": true,
+              "default": "constant"
+            },
+            {
+              "name": "events_per_second",
+              "type": "integer",
+              "title": "Events per second",
+              "description": "Number of counter events to generate per second. In spike mode this is the baseline rate between spikes. Maximum allowed value is 200.",
+              "multi": false,
+              "required": true,
+              "show_user": true,
+              "default": 10
+            },
+            {
+              "name": "spike_events",
+              "type": "integer",
+              "title": "Events per spike burst (spike mode)",
+              "description": "Number of events generated in each spike burst. Maximum allowed value is 200.",
+              "multi": false,
+              "required": true,
+              "show_user": false,
+              "default": 100
+            },
+            {
+              "name": "spike_every_seconds",
+              "type": "integer",
+              "title": "Spike every N seconds (spike mode)",
+              "description": "How often a spike occurs, in seconds.",
+              "multi": false,
+              "required": true,
+              "show_user": false,
+              "default": 60
+            }
+          ],
+          "template_path": "cel.yml.hbs",
+          "title": "Mock counter metrics",
+          "description": "Generate mock counter metrics at a configurable rate. Data is generated entirely within the agent; the EPR endpoint is not called.",
+          "enabled": false,
+          "ingestion_method": "API"
+        }
+      ],
+      "package": "agentless_hello_world",
+      "path": "mock_counter"
+    }
+  ]
+}

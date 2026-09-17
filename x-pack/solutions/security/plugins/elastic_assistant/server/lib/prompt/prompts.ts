@@ -159,48 +159,46 @@ MESSAGE: I am having trouble with the Elastic Security app.
 TITLE: Troubleshooting Elastic Security app issues
 `;
 
-export const ALERT_SUMMARY_500 = `Evaluate the cyber security alert from the context above. Your response should take all the important elements of the alert into consideration to give me a concise summary of what happened. This is being used in an alert details flyout in a SIEM, so keep it detailed, but brief. Limit your response to 500 characters. Anyone reading this summary should immediately understand what happened in the alert in question. Only reply with the summary, and nothing else.
-
-Using another 200 characters, add a second paragraph with a bulleted list of recommended actions a cyber security analyst should take here. Don't invent random, potentially harmful recommended actions.`;
+export const ALERT_SUMMARY_500 = `Summarize the cyber security alert from the context above for an analyst viewing the SIEM alert details flyout. Limit the summary to 500 characters and the recommended actions to a further 200 characters. Reply with the summary and a bulleted list of recommended actions, and nothing else. Do not invent recommended actions that are not supported by the alert.`;
 
 export const ALERT_SUMMARY_SYSTEM_PROMPT =
-  'Return **only a single-line stringified JSON object** without any code fences, explanations, or variable assignments. Do **not** wrap the output in triple backticks or any Markdown code block. \n' +
-  '\n' +
-  'The result must be a valid stringified JSON object that can be directly parsed with `JSON.parse()` in JavaScript.\n' +
+  'Return **only a single-line stringified JSON object** that can be passed directly to `JSON.parse()` in JavaScript. Do not include code fences, triple backticks, explanations, or variable assignments.\n' +
   '\n' +
   '**Strict rules**:\n' +
-  '- The output must **not** include any code blocks (no triple backticks).\n' +
-  '- The output must be **a string**, ready to be passed directly into `JSON.parse()`.\n' +
   '- All backslashes (`\\`) must be escaped **twice** (`\\\\\\\\`) so that the string parses correctly in JavaScript.\n' +
   '- The JSON must follow this structure:\n' +
   '  {{\n' +
   '    "summary": "Markdown-formatted summary with inline code where relevant.",\n' +
   '    "recommendedActions": "Markdown-formatted action list starting with a `###` header."\n' +
   '  }}\n' +
-  '- The summary text should just be text. It does not need any titles or leading items in bold.\n' +
-  '- Markdown formatting should be used inside string values:\n' +
-  '  - Use `inline code` (backticks) for technical values like file paths, process names, arguments, etc.\n' +
-  '  - Use `**bold**` for emphasis.\n' +
-  '  - Use `-` for bullet points.\n' +
-  '  - The `recommendedActions` value must start with a `###` header describing the main action dynamically (but **not** include "Recommended Actions" as the title).\n' +
-  '- **Do not** include any extra explanation or text. Only return the stringified JSON object.\n' +
+  '- `summary` is plain text with optional inline markdown; it does not need titles or leading items in bold.\n' +
+  '- `recommendedActions` must start with a `###` header describing the main action dynamically (but **not** include "Recommended Actions" as the title).\n' +
+  '- Inside string values use Markdown: `inline code` (backticks) for technical values like file paths, process names, and arguments; `**bold**` for emphasis; `-` for bullet points.\n' +
   '\n' +
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
 
-export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate structured information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration.
+export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate structured information for an entity so a Security analyst can act. Your response must take all important elements of the entity context into consideration.
 
-Generate a list of highlight items, each with a title and text. Only include highlights for which information is available in the context.
-  - Risk score: Summarize the entity's risk score and the main factors contributing to it. Don't mention any risk contribution scores.
-  - Criticality: Note the entity's criticality level and its impact on the risk score. Take into account the criticality contribution score inside risk score.
-  - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.
-  - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
+Generate a list of highlight items, each with a title and text. Keep each highlight to 1 sentence — at most 2, and only when an anomaly needs the extra clause for a MITRE ATT&CK / Kill Chain mapping. Aim to keep the highlights section under 600 characters total.
 
-Additionally, provide a list of actionable recommendations for the security analyst if available.
+Only include a highlight when that signal is present and non-empty in the context:
+  - Risk score: Include only when a risk score is present. State the score and describe the dominant threat pattern — do not list individual rules or alerts. Only mention a specific rule if it clearly accounts for the majority of the score.
+  - Criticality: Include only when an assigned asset criticality level is present. State the level and how it affects the overall risk. Do not treat an empty criticality list as Unassigned or as a criticality record.
+  - Anomalies: Include only when anomalies are present. Identify the most significant pattern across anomalies rather than listing them. Only if one or more ML job results clearly correspond to a known attack technique, map it to the relevant MITRE ATT&CK tactic (e.g. \`Execution\`, \`Lateral Movement\`) or Lockheed Martin Kill Chain phase (e.g. \`Exploitation\`, \`Command & Control\`) in the same highlight. If the anomalies are ambiguous or look benign, omit the mapping rather than guessing.
+  - Vulnerabilities: Include only when vulnerabilities are present. State the most critical vulnerability present and why it matters.
+
+If risk score, criticality, anomalies, and vulnerabilities are all missing or empty, return an empty highlights list and omit recommended actions. Do not invent filler such as "no risk score", "no criticality", or "no anomalies detected".
+
+When signals are present, provide up to 3 actionable recommendations for the security analyst, prioritised by urgency. Each must be 1 sentence. Omit recommended actions when there is nothing concrete to recommend from the available signals.
 
 **Guidelines**:
   - Only include highlight items for which information is available in the context.
-  - Use must use inline code (backticks) for technical values like file paths, process names, arguments, scores, package versions, etc.
+  - Only use values that are explicitly present in the provided context. Do not infer, extrapolate, or fabricate any values, scores, CVEs, job names, or attack-technique mappings that are not present in the context.
+  - Prefer human-readable entity names from the context when referring to the entity. Do not treat raw entity ids / EUIDs as display names.
+  - You must always use inline code (backticks) for all technical values — criticality levels, risk scores, job names, CVE IDs, CVSS scores, process names, file paths, package versions. Never use single quotes or plain text for these values.
+  - Round all numeric values to 2 decimal places (e.g. \`72.00\`, \`26.62\`).
+  - Synthesise — do not list. If multiple signals point to the same pattern, say what the pattern is.
   - **Do not** include any extra explanation, reasoning or text.
 `;
 
@@ -281,7 +279,7 @@ Make sure you use tools available to you to fulfill this request.
 Use markdown headers, tables, and code blocks for clarity. Include relevant emojis for visual distinction and ensure the response is concise, actionable, and tailored to Elastic Security workflows.`;
 export const starterPromptDescription2 = 'Latest Elastic Security Labs research';
 export const starterPromptTitle2 = 'Research';
-export const starterPromptIcon2 = 'launch';
+export const starterPromptIcon2 = 'rocket';
 export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top, and consider using all tools available to you to fulfill this request. Ensure the response includes:
 Article Summaries
 Title and Link: Provide the title of each article with a hyperlink to the original content.

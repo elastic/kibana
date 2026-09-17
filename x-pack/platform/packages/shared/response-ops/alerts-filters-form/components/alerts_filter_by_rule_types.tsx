@@ -40,6 +40,7 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
     isError: cannotLoadRuleTypes,
   } = useGetInternalRuleTypesQuery({
     http,
+    includeAlertViewableTypes: true,
   });
 
   const options = useMemo<Array<SetRequired<EuiComboBoxOptionOption<string>, 'value'>>>(

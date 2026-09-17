@@ -9,6 +9,7 @@
 
 import React from 'react';
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, MAX_PATH_LENGTH, toReactRouterPath } from './create_router';
 import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
@@ -200,21 +201,21 @@ describe('createRouter', () => {
     it('throws an error if the given path does not match any routes', () => {
       expect(() => {
         router.getParams('/service-map', history.location);
-      }).toThrowError('/service-map does not match current path /');
+      }).toThrow('/service-map does not match current path /');
 
       expect(() => {
         router.getParams('/services/{serviceName}', history.location);
-      }).toThrowError('/services/{serviceName} does not match current path /');
+      }).toThrow('/services/{serviceName} does not match current path /');
 
       expect(() => {
         router.getParams('/service-map', '/services/{serviceName}', history.location);
-      }).toThrowError('None of /service-map, /services/{serviceName} match current path /');
+      }).toThrow('None of /service-map, /services/{serviceName} match current path /');
     });
 
     it('does not throw an error if the given path does not match any routes but is marked as optional', () => {
       expect(() => {
         router.getParams('/service-map', history.location, true);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
 
     it('applies defaults', () => {
@@ -306,7 +307,7 @@ describe('createRouter', () => {
 
       expect(() => {
         router.matchRoutes('/traces', history.location);
-      }).toThrowError('/traces does not match current path /service-map');
+      }).toThrow('/traces does not match current path /service-map');
     });
 
     it('applies defaults', () => {
@@ -391,7 +392,7 @@ describe('createRouter', () => {
             rangeFrom: {},
           },
         } as any);
-      }).toThrowError();
+      }).toThrow();
 
       expect(() => {
         router.link('/service-map', {
@@ -401,7 +402,7 @@ describe('createRouter', () => {
             rangeTo: 'now',
           },
         } as any);
-      }).toThrowError();
+      }).toThrow();
     });
 
     it('applies defaults', () => {
@@ -667,6 +668,119 @@ describe('createRouter', () => {
   });
 });
 
+describe('createRouter with zod params', () => {
+  const zodRoutes = {
+    '/': {
+      element: <></>,
+      params: z.object({
+        query: z.object({
+          rangeFrom: z.string(),
+          rangeTo: z.string(),
+        }),
+      }),
+      defaults: {
+        query: {
+          rangeFrom: 'now-30m',
+        },
+      },
+      children: {
+        '/services': {
+          element: <></>,
+          params: z.object({
+            query: z.object({
+              transactionType: z.string(),
+            }),
+          }),
+        },
+        '/service-map': {
+          element: <></>,
+          params: z.object({
+            query: z.object({
+              maxNumNodes: z.coerce.number(),
+            }),
+          }),
+        },
+      },
+    },
+  };
+
+  let history = createMemoryHistory();
+  const router = createRouter(zodRoutes);
+
+  beforeEach(() => {
+    history = createMemoryHistory();
+  });
+
+  it('returns and coerces params for a matching route', () => {
+    history.push('/service-map?rangeFrom=now-15m&rangeTo=now&maxNumNodes=3');
+
+    expect(router.getParams('/', history.location)).toEqual({
+      path: {},
+      query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+    });
+
+    expect(router.getParams('/service-map', history.location)).toEqual({
+      path: {},
+      query: { rangeFrom: 'now-15m', rangeTo: 'now', maxNumNodes: 3 },
+    });
+  });
+
+  it('applies defaults', () => {
+    history.push('/services?rangeTo=now&transactionType=request');
+
+    expect(router.getParams('/', history.location)).toEqual({
+      path: {},
+      query: { rangeFrom: 'now-30m', rangeTo: 'now' },
+    });
+  });
+
+  it('recovers a null query param that has a default via InvalidRouteParamsException', () => {
+    history.push('/services?rangeFrom&rangeTo=now&transactionType=request');
+
+    expect(() => {
+      router.getParams('/services', history.location);
+    }).toThrow(InvalidRouteParamsException);
+
+    try {
+      router.getParams('/services', history.location);
+    } catch (e) {
+      const error = e as InvalidRouteParamsException;
+      expect(error.patched.query).toEqual(
+        expect.objectContaining({
+          rangeFrom: 'now-30m',
+          rangeTo: 'now',
+          transactionType: 'request',
+        })
+      );
+    }
+  });
+
+  it('throws a plain Error when recovery with defaults also fails', () => {
+    history.push('/services?transactionType=request');
+
+    expect(() => {
+      router.getParams('/services', history.location);
+    }).not.toThrow(InvalidRouteParamsException);
+    expect(() => {
+      router.getParams('/services', history.location);
+    }).toThrow(Error);
+  });
+
+  it('builds and validates links', () => {
+    expect(
+      router.link('/service-map', {
+        query: { maxNumNodes: '3', rangeFrom: 'now-15m', rangeTo: 'now' },
+      } as any)
+    ).toEqual('/service-map?maxNumNodes=3&rangeFrom=now-15m&rangeTo=now');
+
+    expect(() => {
+      router.link('/service-map', {
+        query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+      } as any);
+    }).toThrow();
+  });
+});
+
 describe('toReactRouterPath', () => {
   it('converts {param} placeholders to :param format', () => {
     expect(toReactRouterPath('/services/{serviceName}')).toBe('/services/:serviceName');
@@ -703,13 +817,13 @@ describe('toReactRouterPath', () => {
 
     expect(() => {
       toReactRouterPath(malicious);
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   it('throws an error if the path is too long', () => {
     const malicious = '/app/apm/services/' + '{{.'.repeat(MAX_PATH_LENGTH + 1);
     expect(() => {
       toReactRouterPath(malicious);
-    }).toThrowError('Path is too long to process');
+    }).toThrow('Path is too long to process');
   });
 });

@@ -19,10 +19,15 @@ import type {
 import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
 import type { RegistryVarGroup } from '../types/models/package_spec';
 import type { NewAgentlessPolicy } from '../types/rest_spec/agentless_policy';
+import type { AgentlessPolicy } from '../types/models/agentless_policy';
 
 import { PackagePolicyValidationError } from '../errors';
 
-import { packageToPackagePolicy, getInputEffectiveName } from './package_to_package_policy';
+import {
+  packageToPackagePolicy,
+  packageToPackagePolicyInputs,
+  getInputEffectiveName,
+} from './package_to_package_policy';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
 import { detectTargetCsp } from './cloud_connectors';
 
@@ -119,16 +124,19 @@ export function formatInputs(
       acc = {};
     }
 
+    const isInputAllowed = isInputAllowedForDeploymentMode(
+      input,
+      supportsAgentless ? 'agentless' : 'default',
+      packageInfo
+    );
+
     acc[inputId] = {
-      enabled: isInputAllowedForDeploymentMode(
-        input,
-        supportsAgentless ? 'agentless' : 'default',
-        packageInfo
-      )
-        ? input.enabled
-        : false,
+      enabled: isInputAllowed ? input.enabled : false,
       vars: formatVars(input.vars),
-      streams: formatStreams(input.streams),
+      // Mirror the read path (`simplifiedPackagePolicytoNewPackagePolicy`, where a
+      // disallowed input forces its streams off)
+      // For `default` mode `isInputAllowed` is always true, so this is a no-op there.
+      streams: formatStreams(input.streams, isInputAllowed),
       ...(input.condition !== undefined ? { condition: input.condition } : {}),
     };
 
@@ -153,13 +161,16 @@ export function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {
   }, {} as SimplifiedVars);
 }
 
-function formatStreams(streams: NewPackagePolicy['inputs'][number]['streams']) {
+function formatStreams(
+  streams: NewPackagePolicy['inputs'][number]['streams'],
+  isInputAllowed: boolean = true
+) {
   return streams.reduce((acc, stream) => {
     if (!acc) {
       acc = {};
     }
     acc[stream.data_stream.dataset] = {
-      enabled: stream.enabled,
+      enabled: isInputAllowed === false ? false : stream.enabled,
       vars: formatVars(stream.vars),
       ...(stream.condition !== undefined ? { condition: stream.condition } : {}),
     };
@@ -349,10 +360,15 @@ type AgentlessPolicyInput = NewPackagePolicy & {
  * payload leak-proof as `NewPackagePolicy` evolves — any new/unknown property
  * (e.g. `overrides`, `elasticsearch`, `is_managed`) is dropped instead of being
  * silently sent and potentially rejected by the server.
+ *
+ * Pass `packageInfo` whenever it is available so the agentless input allow-check
+ * (`isInputAllowedForDeploymentMode`) uses the same package-template-aware logic as
+ * the read path ({@link agentlessPolicyToPackagePolicy}).
  */
 export const toNewAgentlessPolicy = (
   packagePolicy: AgentlessPolicyInput,
-  varGroups?: RegistryVarGroup[]
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
 ): NewAgentlessPolicy => {
   const targetCsp = detectTargetCsp(packagePolicy, varGroups);
 
@@ -369,7 +385,7 @@ export const toNewAgentlessPolicy = (
     ]),
     package: omit(packagePolicy.package, 'title'),
     id: packagePolicy.id ? String(packagePolicy.id) : undefined,
-    inputs: formatInputs(packagePolicy.inputs, true),
+    inputs: formatInputs(packagePolicy.inputs, true, packageInfo),
     vars: formatVars(packagePolicy.vars),
     ...(packagePolicy.supports_cloud_connector && {
       cloud_connector: {
@@ -384,5 +400,98 @@ export const toNewAgentlessPolicy = (
           }),
       },
     }),
+  };
+};
+
+/**
+ * For a multi-template package, work out which `policy_template` an {@link AgentlessPolicy}
+ * belongs to by mapping its enabled input ids back to the manifest. An agentless deployment
+ * enables exactly one integration, so we only disambiguate when a single template is
+ * represented; otherwise we return `undefined` and let the full-inputs contract drive
+ * enablement (see {@link agentlessPolicyToPackagePolicy}).
+ */
+const deriveAgentlessPolicyTemplate = (
+  agentlessPolicy: AgentlessPolicy,
+  packageInfo: PackageInfo
+): string | undefined => {
+  const templates = packageInfo.policy_templates ?? [];
+  // Single-template (or template-less) packages have nothing to disambiguate.
+  if (templates.length <= 1) {
+    return undefined;
+  }
+
+  const inputIdToTemplate = new Map<string, string | undefined>();
+  packageToPackagePolicyInputs(packageInfo).forEach((input) => {
+    inputIdToTemplate.set(generateInputId(input), input.policy_template);
+  });
+
+  const activeTemplates = new Set<string>();
+  Object.entries((agentlessPolicy.inputs as SimplifiedInputs | undefined) ?? {}).forEach(
+    ([inputId, value]) => {
+      // Skip explicitly-disabled inputs: under the full-inputs contract the response carries
+      // every input (including other templates' disabled ones), so only the enabled inputs
+      // identify the active template.
+      if (value?.enabled === false) {
+        return;
+      }
+      const template = inputIdToTemplate.get(inputId);
+      if (template) {
+        activeTemplates.add(template);
+      }
+    }
+  );
+
+  return activeTemplates.size === 1 ? [...activeTemplates][0] : undefined;
+};
+
+/**
+ * Inverse of {@link toNewAgentlessPolicy}: expand a clean {@link AgentlessPolicy}
+ * (as returned by the GET/LIST agentless API, with simplified object-style `inputs`)
+ * back into the full {@link NewPackagePolicy} shape that the shared edit/copy form
+ * components and `validatePackagePolicy` expect (array-based `inputs`).
+ *
+ * `packageInfo` must be loaded (with `full: true`) for `agentlessPolicy.package.version` — the
+ * form fetches it from the EPM/registry API — so the scaffold carries every template's inputs.
+ *
+ * `policyTemplate` selects the integration for multi-template packages. The API response does
+ * not carry it, so when the caller omits it we derive it from the enabled inputs
+ * ({@link deriveAgentlessPolicyTemplate}). Today the GET serializes *every* input (full-inputs
+ * contract), so enablement is reconstructed correctly even without the hint; deriving it keeps
+ * the read correct if the API ever returns a partial `inputs` object (otherwise other templates'
+ * default-enabled inputs would leak in as enabled). An explicit `options.policyTemplate` wins.
+ */
+export const agentlessPolicyToPackagePolicy = (
+  agentlessPolicy: AgentlessPolicy,
+  packageInfo: PackageInfo,
+  options?: { policyTemplate?: string }
+): NewPackagePolicy => {
+  const { cloud_connector: cloudConnector } = agentlessPolicy;
+
+  const simplified: SimplifiedPackagePolicy = {
+    name: agentlessPolicy.name,
+    namespace: agentlessPolicy.namespace ?? 'default',
+    description: agentlessPolicy.description,
+    // Agentless deployments are not attached to a user-managed agent policy.
+    policy_ids: [],
+    inputs: agentlessPolicy.inputs as SimplifiedInputs,
+    vars: agentlessPolicy.vars as SimplifiedVars | undefined,
+    var_group_selections: agentlessPolicy.var_group_selections,
+    global_data_tags: agentlessPolicy.global_data_tags,
+    additional_datastreams_permissions: agentlessPolicy.additional_datastreams_permissions,
+    supports_agentless: true,
+    supports_cloud_connector: Boolean(cloudConnector?.enabled),
+    cloud_connector_id: cloudConnector?.cloud_connector_id ?? null,
+  };
+
+  const policyTemplate =
+    options?.policyTemplate ?? deriveAgentlessPolicyTemplate(agentlessPolicy, packageInfo);
+
+  const packagePolicy = simplifiedPackagePolicytoNewPackagePolicy(simplified, packageInfo, {
+    policyTemplate,
+  });
+
+  return {
+    ...packagePolicy,
+    id: agentlessPolicy.id,
   };
 };

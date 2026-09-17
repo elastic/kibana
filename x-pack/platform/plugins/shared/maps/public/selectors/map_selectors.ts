@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import type { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -46,7 +46,6 @@ import type {
   DrawState,
   EMSVectorTileLayerDescriptor,
   EditState,
-  Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
   LayerGroupDescriptor,
@@ -155,12 +154,8 @@ export const getHasLockedTooltips = (state: MapStoreState): boolean => {
   });
 };
 
-export const getMapReady = ({ map }: MapStoreState): boolean => map && map.ready;
-
 export const getMapInitError = ({ map }: MapStoreState): string | null | undefined =>
   map.mapInitError;
-
-export const getGoto = ({ map }: MapStoreState): Goto | null | undefined => map && map.goto;
 
 export const getSelectedLayerId = ({ map }: MapStoreState): string | null => {
   return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
@@ -176,8 +171,7 @@ export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => m
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;
 
-export const getMapZoom = ({ map }: MapStoreState): number =>
-  map.mapState.zoom ? map.mapState.zoom : 0;
+export const getMapZoom = ({ map }: MapStoreState): number => map.mapState.zoom ?? 1;
 
 export const getMapCenter = ({ map }: MapStoreState): MapCenter =>
   map.mapState.center ? map.mapState.center : { lat: 0, lon: 0 };

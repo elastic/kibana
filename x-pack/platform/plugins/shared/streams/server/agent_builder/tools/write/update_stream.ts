@@ -7,9 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { StreamlangDSL } from '@kbn/streamlang';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools/handler';
 import type {
   Streams,
   IngestStreamLifecycle,
@@ -17,9 +20,13 @@ import type {
   FieldDefinitionConfig,
   ClassicFieldDefinition,
 } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
+import type { StreamsClient } from '../../../lib/streams/client';
+import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import { patchIngestAndUpsert } from '../../../lib/streams/helpers/ingest_upsert';
+import { upsertQueryStream } from '../../../lib/streams/helpers/query_upsert';
 import {
   STREAMS_UPDATE_STREAM_TOOL_ID as UPDATE_STREAM,
   STREAMS_DESIGN_PIPELINE_TOOL_ID as DESIGN_PIPELINE,
@@ -79,6 +86,20 @@ const failureStoreSchema = z.object({
     .describe('For "enabled" only: retention period for failed documents, e.g. "30d".'),
 });
 
+const queryStreamSchema = z.object({
+  esql: z
+    .string()
+    .describe(
+      'The ES|QL query that defines this query stream. Must include a FROM clause. For a child query stream (e.g. "logs.ecs.errors"), the FROM clause must reference the parent stream or its ES|QL view. Example: \'FROM logs.ecs | WHERE log.level == "error"\''
+    ),
+  field_descriptions: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe(
+      'Optional map of field name -> human-readable description for fields the query produces. Example: {"error.message":"The human-readable error text"}'
+    ),
+});
+
 const updateStreamSchema = z.object({
   name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
   changes: z
@@ -93,15 +114,20 @@ const updateStreamSchema = z.object({
       lifecycle: lifecycleSchema.optional(),
       fields: fieldsSchema.optional(),
       failure_store: failureStoreSchema.optional(),
+      query: queryStreamSchema
+        .optional()
+        .describe(
+          'Create or update a query stream (a read-only ES|QL view). If the named stream does not exist it is created as a query stream; if it already exists as a query stream its ES|QL is updated. Mutually exclusive with processing, lifecycle, fields, and failure_store — query streams have no ingest configuration. May be combined with changes.description.'
+        ),
     })
     .describe(
-      'All modifications go INSIDE this object. For processing changes, set changes.processing = [steps]. For lifecycle changes, set changes.lifecycle = {...}. Never put processing or other change keys at the top level — they will be ignored.'
+      'All modifications go INSIDE this object. For processing changes, set changes.processing = [steps]. For lifecycle changes, set changes.lifecycle = {...}. To create or update a query stream, set changes.query = {esql, ...}. Never put processing or other change keys at the top level — they will be ignored.'
     ),
   confirmation_body: z
     .string()
     .optional()
     .describe(
-      'Markdown text displayed in the user-facing confirmation dialog. Summarize what will change (current → proposed) and any impact. This is NOT an instruction — it does not drive the change. The actual changes go in the `changes` object.'
+      "Narrative summary of what will change and why. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the change. The actual changes go in the `changes` object."
     ),
 });
 
@@ -123,10 +149,9 @@ export const createUpdateStreamTool = ({
     instructions — they are requests for analysis. For those, use ${DESIGN_PIPELINE} to
     investigate and present findings, then stop and wait for the user to confirm.
 
-    **Cancellation:** If this tool returns "The user chose not to proceed with this action",
-    acknowledge the cancellation for this specific operation. Do NOT retry the same operation
-    with different parameters. You may continue with other unrelated operations the user
-    requested, or ask how they want to proceed.
+    **Cancellation:** If this tool returns a result indicating the operation was declined,
+    acknowledge it for this specific operation. Do NOT retry the same operation with different
+    parameters. You may continue with other unrelated operations the user requested.
 
     **Processing:** Set changes.processing to the complete pipeline array. The array replaces the entire pipeline.
     - Use ${DESIGN_PIPELINE} to design new or modified steps. To remove a step, omit it from the array. To reorder, change the array order.
@@ -139,16 +164,33 @@ export const createUpdateStreamTool = ({
     - lifecycle: Set retention (inherit, dsl with data_retention, or ilm with policy name)
     - fields: Map fields with type definitions (e.g. {"response_time":{"type":"long"}})
     - failure_store: Configure failure store (inherit, disabled, enabled with retention)
+
+    **Query streams:** Set changes.query = {esql, field_descriptions?} to create or update a query stream (a read-only ES|QL view).
+    - If the named stream does not exist, it is created as a query stream. If it already exists as a query stream, its ES|QL is updated.
+    - changes.query is mutually exclusive with processing, lifecycle, fields, and failure_store — query streams have no ingest configuration. It may be combined with changes.description.
+    - For a child query stream, the esql FROM clause must reference the parent stream (or its ES|QL view). Use ${INSPECT_STREAMS} on the parent first if unsure of the source.
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Update Stream',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   schema: updateStreamSchema,
   confirmation: {
     askUser: 'always',
     getConfirmation: ({ toolParams }) => ({
-      title: i18n.translate('xpack.streams.agentBuilder.tools.updateStream.confirmTitle', {
-        defaultMessage: 'Update stream "{name}"',
-        values: { name: toolParams.name },
-      }),
+      title: toolParams.changes?.query
+        ? i18n.translate('xpack.streams.agentBuilder.tools.updateStream.confirmQueryStreamTitle', {
+            defaultMessage: 'Create or update query stream "{name}"',
+            values: { name: toolParams.name },
+          })
+        : i18n.translate('xpack.streams.agentBuilder.tools.updateStream.confirmTitle', {
+            defaultMessage: 'Update stream "{name}"',
+            values: { name: toolParams.name },
+          }),
       message: getConfirmationMessage(toolParams, 'confirmation_body'),
       confirm_text: i18n.translate(
         'xpack.streams.agentBuilder.tools.updateStream.confirmButtonLabel',
@@ -160,9 +202,22 @@ export const createUpdateStreamTool = ({
   handler: async ({ name, changes }, { request }) => {
     const signal = abortSignalFromRequest(request);
     try {
-      const { streamsClient, attachmentClient } = await getScopedClients({
+      const { streamsClient, attachmentClient, uiSettingsClient } = await getScopedClients({
         request,
       });
+
+      if (changes.query) {
+        return await handleQueryStreamChange({
+          name,
+          query: changes.query,
+          otherChanges: changes,
+          streamsClient,
+          attachmentClient,
+          uiSettingsClient,
+          writeQueue,
+          signal,
+        });
+      }
 
       if (changes.processing) {
         const validation = validateProcessingJson({ steps: changes.processing });
@@ -208,8 +263,7 @@ export const createUpdateStreamTool = ({
                 ...updatedIngest,
                 processing: {
                   ...updatedIngest.processing,
-                  steps:
-                    changes.processing as unknown as Streams.ingest.all.Definition['ingest']['processing']['steps'],
+                  steps: changes.processing as unknown as StreamlangDSL['steps'],
                 },
               };
               applied.push('processing');
@@ -296,6 +350,117 @@ export const createUpdateStreamTool = ({
     }
   },
 });
+
+type UpdateStreamChanges = z.infer<typeof updateStreamSchema>['changes'];
+
+/**
+ * Creates or updates a query stream. Query streams are read-only ES|QL views with no ingest
+ * configuration, so this path is distinct from the ingest patch flow: it rejects combinations
+ * with ingest-only change types, enforces the query streams feature flag, and delegates the
+ * create/update to the shared `upsertQueryStream` helper (also used by the REST route).
+ */
+const handleQueryStreamChange = async ({
+  name,
+  query,
+  otherChanges,
+  streamsClient,
+  attachmentClient,
+  uiSettingsClient,
+  writeQueue,
+  signal,
+}: {
+  name: string;
+  query: NonNullable<UpdateStreamChanges['query']>;
+  otherChanges: UpdateStreamChanges;
+  streamsClient: StreamsClient;
+  attachmentClient: AttachmentClient;
+  uiSettingsClient: IUiSettingsClient;
+  writeQueue: StreamsWriteQueue;
+  signal: AbortSignal;
+}): Promise<ToolHandlerReturn> => {
+  const conflictingKeys = [
+    otherChanges.processing && 'processing',
+    otherChanges.lifecycle && 'lifecycle',
+    otherChanges.fields && 'fields',
+    otherChanges.failure_store && 'failure_store',
+  ].filter((key): key is string => Boolean(key));
+
+  if (conflictingKeys.length > 0) {
+    return {
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message: `Query streams are defined only by an ES|QL query. Remove ${conflictingKeys.join(
+              ', '
+            )} from changes — query streams have no processing, lifecycle, fields, or failure store.`,
+            stream: name,
+            operation: 'update_stream',
+            likely_cause: 'changes.query was combined with ingest-stream change types.',
+          },
+        },
+      ],
+    };
+  }
+
+  const queryStreamsEnabled = await uiSettingsClient.get<boolean>(
+    OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS
+  );
+  if (!queryStreamsEnabled) {
+    return {
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message: 'Query streams are not enabled on this deployment, so they cannot be created.',
+            stream: name,
+            operation: 'update_stream',
+            likely_cause:
+              'The "observability:streamsEnableQueryStreams" advanced setting is disabled.',
+          },
+        },
+      ],
+    };
+  }
+
+  const { esql, field_descriptions: fieldDescriptions } = query;
+  const description = otherChanges.description;
+
+  const upsertResult = await writeQueue.enqueue(
+    () =>
+      upsertQueryStream({
+        streamsClient,
+        attachmentClient,
+        name,
+        esql,
+        fieldDescriptions,
+        description,
+      }),
+    signal
+  );
+
+  const appliedChanges = ['query', ...(description !== undefined ? ['description'] : [])];
+
+  return {
+    results: [
+      {
+        type: ToolResultType.other,
+        data: {
+          success: true,
+          stream: name,
+          stream_type: 'query',
+          applied_changes: appliedChanges,
+          applied_at: new Date().toISOString(),
+          result: upsertResult.result,
+          note:
+            upsertResult.result === 'created'
+              ? 'Query stream created. It is a read-only ES|QL view — query its data with the query documents tool.'
+              : 'Query stream updated. The ES|QL view now reflects the new query.',
+        },
+      },
+    ],
+  };
+};
 
 const toIngestLifecycle = (input: z.infer<typeof lifecycleSchema>): IngestStreamLifecycle => {
   switch (input.type) {

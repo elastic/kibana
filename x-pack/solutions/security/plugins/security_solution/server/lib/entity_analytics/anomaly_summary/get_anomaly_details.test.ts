@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { getEntityAnomalies } from './get_anomaly_details';
@@ -45,17 +45,23 @@ const makeJobConfig = (overrides: Partial<JobConfig> = {}): JobConfig => ({
   jobName: null,
   threatTactics: [],
   threatTechniques: [],
+  hasThreatTactics: false,
   ...overrides,
 });
 
 const soClient = savedObjectsClientMock.create();
+const request = httpServerMock.createKibanaRequest();
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 let esClient: ElasticsearchClient;
 let mockMl: MlPluginSetup;
 
+const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };
+
 const defaultParams = {
   entityId: 'user:alice',
   entityType: 'user' as const,
+  entityRecord: mockEntityRecord,
+  request,
 };
 
 beforeEach(() => {
@@ -66,8 +72,8 @@ beforeEach(() => {
     mlSystemProvider: jest.fn().mockReturnValue({}),
   } as unknown as MlPluginSetup;
   searchEntityAnomalies.mockResolvedValue({ hits: [], total: 0 });
-  getSecurityMlJobIds.mockResolvedValue([]);
-  getJobConfig.mockResolvedValue(new Map());
+  getSecurityMlJobIds.mockResolvedValue(['security-job-1']);
+  getJobConfig.mockResolvedValue(new Map([['security-job-1', makeJobConfig()]]));
   fetchBaselineBehavior.mockImplementation(
     ({ anomaly }: { anomaly: ReturnType<typeof makeAnomaly> }) => Promise.resolve(anomaly)
   );
@@ -88,6 +94,23 @@ describe('getEntityAnomalies', () => {
     expect(result.anomalies).toEqual([]);
     expect(result.total).toBe(0);
     expect(fetchBaselineBehavior).not.toHaveBeenCalled();
+  });
+
+  it('returns empty without calling searchEntityAnomalies when no ML jobs are installed in the current space', async () => {
+    getSecurityMlJobIds.mockResolvedValue(['job-A', 'job-B']);
+    // getJobConfig returns empty — simulates jobs defined in module templates but not installed
+    getJobConfig.mockResolvedValue(new Map());
+
+    const result = await getEntityAnomalies({
+      ...defaultParams,
+      esClient,
+      logger,
+      ml: mockMl,
+      soClient,
+    });
+
+    expect(result).toEqual({ anomalies: [], total: 0 });
+    expect(searchEntityAnomalies).not.toHaveBeenCalled();
   });
 
   it('maps an EnrichedAnomalyHit to an AnomalySummaryEntry correctly', async () => {
@@ -118,6 +141,7 @@ describe('getEntityAnomalies', () => {
 
     expect(result.anomalies).toHaveLength(1);
     expect(result.anomalies[0]).toMatchObject({
+      recordId: 'a1',
       jobId: 'security-job-1',
       detectorIndex: 0,
       detectorFunction: 'rare',
@@ -248,7 +272,8 @@ describe('getEntityAnomalies', () => {
   it('passes null jobConfig when the job is unknown', async () => {
     const anomaly = makeAnomaly({ _id: 'a1', jobId: 'unknown-job' });
     searchEntityAnomalies.mockResolvedValue({ hits: [anomaly], total: 1 });
-    getJobConfig.mockResolvedValue(new Map()); // no entry for unknown-job
+    // Installed jobs exist (so we don't return early), but unknown-job is not among them.
+    getJobConfig.mockResolvedValue(new Map([['security-job-1', makeJobConfig()]]));
 
     await getEntityAnomalies({
       ...defaultParams,
@@ -410,6 +435,12 @@ describe('getEntityAnomalies', () => {
 
     it('does not filter jobs when threatTactics is an empty array', async () => {
       getSecurityMlJobIds.mockResolvedValue(['job-A', 'job-B']);
+      getJobConfig.mockResolvedValue(
+        new Map([
+          ['job-A', makeJobConfig()],
+          ['job-B', makeJobConfig()],
+        ])
+      );
 
       await getEntityAnomalies({
         ...defaultParams,

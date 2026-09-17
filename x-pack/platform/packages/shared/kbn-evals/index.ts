@@ -73,7 +73,8 @@ export type {
   AgentBuilderClientResponse,
   ConverseStep,
 } from './src/utils/agent_builder_client';
-export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';
+export type { DefaultEvaluators, EvaluatorKind, ReportDisplayOptions } from './src/types';
+export type { Direction } from '@kbn/evals-common';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
@@ -101,6 +102,7 @@ export { createQuantitativeGroundednessEvaluator } from './src/evaluators/ground
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
+export { calculateSetMetrics, type SetMetrics } from './src/utils/set_metrics';
 export {
   containsAllTerms,
   extractAllStrings,
@@ -128,6 +130,7 @@ export {
   type UpsertDatasetInput,
   type DatasetWithId,
 } from './src/utils/evals_client';
+export { EvaluatorApiClient, type MapContextFn } from './src/utils/evaluator_api_client';
 export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
 export { buildIngestRequest } from './src/utils/build_ingest_request';
 
@@ -147,23 +150,29 @@ export {
   type TraceBasedEvaluatorConfig,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
+  createChatCallsEvaluator,
   createToolCallsEvaluator,
 } from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {
+  getEffectiveK,
   createPrecisionAtKEvaluator,
   createRecallAtKEvaluator,
   createF1AtKEvaluator,
-  createRagEvaluators,
-} from './src/evaluators/rag';
+  createHitRateAtKEvaluator,
+  createMrrAtKEvaluator,
+  createNdcgAtKEvaluator,
+  createMapAtKEvaluator,
+  createIrEvaluators,
+} from './src/evaluators/ir';
 export type {
   GroundTruth,
-  RagEvaluatorConfig,
+  IrEvaluatorConfig,
   RetrievedDocsExtractor,
   GroundTruthExtractor,
   RetrievedDoc,
-} from './src/evaluators/rag/types';
+} from './src/evaluators/ir/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';

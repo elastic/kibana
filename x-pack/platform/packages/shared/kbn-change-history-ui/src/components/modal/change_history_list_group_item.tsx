@@ -5,43 +5,36 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with, at
- * your election, the Elastic License 2.0.
- */
-
 import React, { useCallback } from 'react';
-import type { EuiListGroupItemProps } from '@elastic/eui';
-import { EuiListGroupItem } from '@elastic/eui';
-import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
+import { EuiListGroupItem, type EuiListGroupItemProps } from '@elastic/eui';
+import { useChangeHistoryModal } from '../../provider/use_change_history_modal';
 import * as i18n from '../timeline/translations';
 
 export interface ChangeHistoryListGroupItemProps {
-  onClick?: () => void;
-  label?: EuiListGroupItemProps['label'];
-  listGroupItemProps?: Partial<EuiListGroupItemProps>;
+  label?: string;
+  iconType?: string;
+  'data-test-subj'?: string;
+  listGroupItemProps?: Omit<EuiListGroupItemProps, 'iconType' | 'label' | 'onClick'>;
 }
 
 export function ChangeHistoryListGroupItem({
-  onClick,
-  label,
+  label = i18n.HISTORY_LIST_ITEM_LABEL,
+  iconType = 'clockCounter',
+  'data-test-subj': dataTestSubj = 'changeHistoryListGroupItem',
   listGroupItemProps,
-}: ChangeHistoryListGroupItemProps): JSX.Element {
-  const { openModal } = useChangeHistoryConfig();
+}: ChangeHistoryListGroupItemProps = {}): JSX.Element {
+  const { openModal } = useChangeHistoryModal();
 
   const handleClick = useCallback(() => {
-    onClick?.();
     openModal();
-  }, [onClick, openModal]);
+  }, [openModal]);
 
   return (
     <EuiListGroupItem
-      iconType="clockCounter"
-      label={label ?? i18n.HISTORY_LIST_ITEM_LABEL}
+      iconType={iconType}
+      label={label}
       onClick={handleClick}
-      data-test-subj="changeHistoryListGroupItem"
+      data-test-subj={dataTestSubj}
       {...listGroupItemProps}
     />
   );

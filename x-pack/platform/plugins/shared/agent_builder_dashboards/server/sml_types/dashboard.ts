@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type {
   DashboardPanel,
-  DashboardPluginStart,
   DashboardSection,
   DashboardState,
-} from '@kbn/dashboard-plugin/server';
-
-const DASHBOARD_SML_TYPE = 'dashboard';
+} from '@kbn/as-code-dashboard-schema';
+import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 interface CreateDashboardSmlTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
@@ -65,7 +65,7 @@ const toDashboardSearchContent = (state: DashboardState): string => {
 export const createDashboardSmlType = ({
   getDashboardClient,
 }: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
-  id: DASHBOARD_SML_TYPE,
+  id: DASHBOARD_KI_TYPE,
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -89,23 +89,15 @@ export const createDashboardSmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const dashboardClient = await getDashboardClient();
       const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
-        chunks: [
-          {
-            type: DASHBOARD_SML_TYPE,
-            title: dashboard.data.title ?? originId,
-            content: toDashboardSearchContent(dashboard.data),
-            permissions: {
-              kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-              elasticsearch: { indices: [] },
-            },
-          },
-        ],
+        type: DASHBOARD_KI_TYPE,
+        title: dashboard.data.title ?? originId,
+        content: toDashboardSearchContent(dashboard.data),
       };
     } catch (error) {
       context.logger.warn(
@@ -115,13 +107,13 @@ export const createDashboardSmlType = ({
     }
   },
 
+  getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_KI_TYPE }),
+
   toAttachment: async (item, context) => {
+    const originId = getSmlOriginId(item);
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(
-        context.savedObjectsClient,
-        item.origin_id ?? ''
-      );
+      const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,
@@ -130,7 +122,7 @@ export const createDashboardSmlType = ({
       };
     } catch (error) {
       throw new Error(
-        `SML dashboard: failed to get data for '${item.origin_id}': ${(error as Error).message}`
+        `SML dashboard: failed to get data for '${originId}': ${(error as Error).message}`
       );
     }
   },

@@ -25,6 +25,7 @@ interface SelectedWorkflow {
 export const WorkflowSelector = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
   const destinations = useWatch({ control, name: 'destinations' });
+  const inlineActions = useWatch({ control, name: 'inlineActions' });
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
   const isWorkflowsEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID);
@@ -97,7 +98,7 @@ export const WorkflowSelector = () => {
       control={control}
       rules={{
         validate: (value) =>
-          value.length > 0
+          value.length > 0 || inlineActions.length > 0
             ? true
             : i18n.translate('xpack.alertingV2.actionPolicy.form.destination.required', {
                 defaultMessage: 'At least one destination is required',

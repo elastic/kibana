@@ -9,7 +9,7 @@
 
 import { useEffect } from 'react';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 
 interface AppMenuProps {
   config?: AppMenuConfig;

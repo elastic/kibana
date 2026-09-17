@@ -121,20 +121,9 @@ export interface FunctionParameter {
   supportsWildcard?: boolean;
 
   /**
-   * If set, this parameter does not accept a field. It only accepts a constant,
-   * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
-   */
-  constantOnly?: boolean;
-
-  /**
    * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
    */
   fieldsOnly?: boolean;
-
-  /**
-   * A list of suggested values for this parameter.
-   */
-  suggestedValues?: string[];
 
   mapParams?: string;
 
@@ -144,8 +133,10 @@ export interface FunctionParameter {
   supportsMultiValues?: boolean;
 
   /**
-   * Provides information that is useful for getting parameter values from external sources.
-   * For example, an inference endpoint
+   * Describes how this parameter's value should be sourced. It can constrain the
+   * parameter to constants (`kind: 'constant'`, optionally with `allowedValues`),
+   * mark it as expecting an aggregation, or point to an external source such as an
+   * inference endpoint.
    */
   hint?: ParameterHint;
 }
@@ -155,7 +146,22 @@ export interface ElasticsearchCommandDefinition {
   name: string;
   license?: LicenseType;
   observability_tier?: string;
+  output?: ElasticsearchCommandOutputDefinition;
 }
+
+export interface ElasticsearchCommandOutputDefinition {
+  vary_by: string;
+  selected_by?: string;
+  variants: Record<string, ElasticsearchCommandOutputVariant>;
+}
+
+export type ElasticsearchCommandOutputVariant = Record<
+  string,
+  {
+    type: SupportedDataType;
+    default?: boolean;
+  }
+>;
 
 export interface ElasticsearchSettingsDefinition {
   name: string;
@@ -212,6 +218,7 @@ export interface FunctionFilterPredicates {
 export enum PromQLFunctionDefinitionTypes {
   WITHIN_SERIES = 'within_series',
   ACROSS_SERIES = 'across_series',
+  ACROSS_SERIES_REDUCTION = 'across_series_reduction',
   VALUE_TRANSFORMATION = 'value_transformation',
   VECTOR_CONVERSION = 'vector_conversion',
   SCALAR = 'scalar',
@@ -220,6 +227,7 @@ export enum PromQLFunctionDefinitionTypes {
   SCALAR_CONVERSION = 'scalar_conversion',
   TIME = 'time',
   HISTOGRAM = 'histogram',
+  METADATA = 'metadata',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -378,6 +386,14 @@ export interface ValidationErrors {
     message: string;
     type: { columnName: string; types?: string };
   };
+  inSubqueryTypeMismatch: {
+    message: string;
+    type: { leftField: string; leftType: string; rightField: string; rightType: string };
+  };
+  inSubqueryColumnCountMismatch: {
+    message: string;
+    type: { expected: number; actual: number };
+  };
   unsupportedMode: {
     message: string;
     type: { command: string; value: string; expected: string };
@@ -497,6 +513,22 @@ export interface ValidationErrors {
   mmrOnFieldWrongType: {
     message: string;
     type: { type: string };
+  };
+  invalidMapParameterValue: {
+    message: string;
+    type: { paramName: string; value: string; allowedValues: string };
+  };
+  highlightMissingOnClause: {
+    message: string;
+    type: {};
+  };
+  highlightInvalidPrefixModifier: {
+    message: string;
+    type: { keyword: string };
+  };
+  highlightInvalidQueryExpression: {
+    message: string;
+    type: { expression: string };
   };
   tsdbIncompatibleFunction: {
     message: string;

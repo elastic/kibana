@@ -45,6 +45,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import type { ServiceAccountsServiceStart } from '../service_accounts';
 import type { Session } from '../session_management';
 import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
@@ -58,6 +59,7 @@ interface AuthenticationServiceSetupParams {
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
+  getServiceAccounts: () => ServiceAccountsServiceStart | null;
 }
 
 interface AuthenticationServiceStartParams {
@@ -112,6 +114,7 @@ export class AuthenticationService {
     license,
     elasticsearch,
     customBranding,
+    getServiceAccounts,
   }: AuthenticationServiceSetupParams) {
     this.license = license;
 
@@ -330,6 +333,18 @@ export class AuthenticationService {
         `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
       );
 
+      // Fake requests never carry a session, so the re-authentication machinery below cannot help
+      // them (and its BWC header-scrubbing must never touch them). The one recoverable case is a
+      // request bound to a service account, whose credential Kibana minted and can mint again;
+      // everything else — API-key fakes from task manager/alerting, external user-created
+      // credentials — is deliberately left to its owner.
+      if (request.isFakeRequest) {
+        const authHeaders = await getServiceAccounts()
+          ?.backend.reauthenticateFakeRequest(request)
+          .catch(() => null);
+        return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
+      }
+
       let authenticationResult;
       const originalHeaders = request.headers;
       try {
@@ -393,6 +408,9 @@ export class AuthenticationService {
     uiam,
     userActivity,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
+    const getCurrentUser = (request: KibanaRequest) =>
+      http.auth.get<AuthenticatedUser>(request).state ?? null;
+
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
@@ -408,6 +426,7 @@ export class AuthenticationService {
           logger: this.logger.get('api-key-uiam'),
           license: this.license,
           uiam,
+          getCurrentUser,
         })
       : null;
 
@@ -429,9 +448,6 @@ export class AuthenticationService {
 
       return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
     };
-
-    const getCurrentUser = (request: KibanaRequest) =>
-      http.auth.get<AuthenticatedUser>(request).state ?? null;
 
     this.session = session;
     const authenticator = (this.authenticator = new Authenticator({
@@ -472,6 +488,8 @@ export class AuthenticationService {
               grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
               invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
               convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
+              getInternalCallerAttestationHeaders:
+                uiamAPIKeys.getInternalCallerAttestationHeaders.bind(uiamAPIKeys),
             }
           : null,
       },
@@ -482,9 +500,12 @@ export class AuthenticationService {
             listClients: uiamOAuth.listClients.bind(uiamOAuth),
             updateClient: uiamOAuth.updateClient.bind(uiamOAuth),
             revokeClient: uiamOAuth.revokeClient.bind(uiamOAuth),
+            deleteClient: uiamOAuth.deleteClient.bind(uiamOAuth),
             listConnections: uiamOAuth.listConnections.bind(uiamOAuth),
             updateConnection: uiamOAuth.updateConnection.bind(uiamOAuth),
             revokeConnection: uiamOAuth.revokeConnection.bind(uiamOAuth),
+            deleteConnection: uiamOAuth.deleteConnection.bind(uiamOAuth),
+            resolveUsers: uiamOAuth.resolveUsers.bind(uiamOAuth),
           }
         : null,
 

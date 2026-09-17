@@ -14,9 +14,21 @@ export interface ChangeHistoryHttpClient {
       signal?: AbortSignal;
     }
   ): Promise<T>;
+  post?(
+    path: string,
+    options?: {
+      body?: unknown;
+      signal?: AbortSignal;
+    }
+  ): Promise<unknown>;
 }
 
 export interface ChangeHistoryHttpGetOptions {
   query?: Record<string, string | number | boolean | undefined>;
+  signal?: AbortSignal;
+}
+
+export interface ChangeHistoryHttpPostOptions {
+  body?: unknown;
   signal?: AbortSignal;
 }

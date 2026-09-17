@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
+  "include": ["*.ts", "src/**/*", "test/**/*", "__mocks__/**/*.ts"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/data-views-plugin",
@@ -38,6 +38,7 @@
     "@kbn/css-utils",
     "@kbn/field-formats-common",
     "@kbn/ebt-click",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

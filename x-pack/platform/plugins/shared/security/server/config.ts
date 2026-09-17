@@ -323,6 +323,22 @@ export const ConfigSchema = schema.object({
   }),
 
   // Setting only allowed in the Serverless offering
+  serviceAccounts: offeringBasedSchema({
+    serverless: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      requestLifetime: schema.duration({
+        defaultValue: '10m',
+        validate(value) {
+          const milliseconds = value.asMilliseconds();
+          if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+            return 'the value must be a positive, finite duration.';
+          }
+        },
+      }),
+    }),
+  }),
+
+  // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({
     serverless: schema.object({
       userManagementEnabled: schema.boolean({ defaultValue: true }),
@@ -383,7 +399,7 @@ export const ConfigSchema = schema.object({
             authorization_servers: schema.arrayOf(schema.uri({ scheme: ['https', 'http'] }), {
               minSize: 1,
             }),
-            // Identifier for this protected resource (typically the Kibana public base URL).
+            // Canonical resource identifier for this protected resource (the full MCP server URL).
             resource: schema.uri({ scheme: ['https', 'http'] }),
             // Methods supported for sending bearer tokens. Defaults to ["header"].
             bearer_methods_supported: schema.maybe(

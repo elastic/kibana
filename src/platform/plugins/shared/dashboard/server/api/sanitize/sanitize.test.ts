@@ -9,7 +9,7 @@
 
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
-import type { DashboardState } from '../types';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 jest.mock('../transforms', () => ({
   transformDashboardIn: jest.fn(),
@@ -72,7 +72,7 @@ describe('sanitize', () => {
     });
 
     const dashboardStateSchema = {
-      validate: jest.fn().mockReturnValue(baseDashboardState),
+      parse: jest.fn().mockReturnValue(baseDashboardState),
     };
 
     const result = await sanitize(
@@ -109,7 +109,7 @@ describe('sanitize', () => {
     });
 
     const dashboardStateSchema = {
-      validate: jest.fn().mockReturnValue(baseDashboardState),
+      parse: jest.fn().mockReturnValue(baseDashboardState),
     };
 
     const result = await sanitize(

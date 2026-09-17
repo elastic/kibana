@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/agent-context-layer-plugin/public';
+import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/agent-builder-sml-plugin/public';
 import { normalizeSmlSearchQuery } from './normalize_sml_search_query';
 
 describe('normalizeSmlSearchQuery', () => {

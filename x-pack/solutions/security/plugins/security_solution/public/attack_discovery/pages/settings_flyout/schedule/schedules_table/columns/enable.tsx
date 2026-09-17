@@ -58,7 +58,7 @@ const EnableSwitch = ({
         {showLoader ? (
           <EuiLoadingSpinner size="m" data-test-subj="scheduleSwitchLoader" />
         ) : (
-          <WithMissingPrivileges>
+          <WithMissingPrivileges requireWorkflowsExecute>
             {(canUpdateSchedule) => (
               <EuiSwitch
                 data-test-subj="scheduleSwitch"

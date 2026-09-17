@@ -22,7 +22,11 @@ import type { FleetStartServices } from '../../../plugin';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 
 import { InstallStatus } from '../../../types';
-import { isVerificationError } from '../services';
+import {
+  isVerificationError,
+  isAssetVerificationError,
+  getMissingAssetsFromError,
+} from '../services';
 
 import type { InstalledPackageUIPackageListItem } from '../sections/epm/screens/installed_integrations/types';
 
@@ -177,15 +181,30 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
           setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
         }
 
+        const missingAssets = getMissingAssetsFromError(error);
+        const toastMessage =
+          isAssetVerificationError(error) && missingAssets?.length
+            ? i18n.translate(
+                'xpack.fleet.integrations.packageInstallVerificationErrorDescription',
+                {
+                  defaultMessage:
+                    'Installation completed but the following asset(s) could not be found in Elasticsearch: {missingAssets}. Please try again later.',
+                  values: {
+                    missingAssets: missingAssets.map((a) => `${a.type}/${a.id}`).join(', '),
+                  },
+                }
+              )
+            : i18n.translate('xpack.fleet.integrations.packageInstallErrorDescription', {
+                defaultMessage:
+                  'Something went wrong while trying to install this package. Please try again later.',
+              });
+
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.integrations.packageInstallErrorTitle', {
             defaultMessage: 'Failed to install {title} package',
             values: { title },
           }),
-          toastMessage: i18n.translate('xpack.fleet.integrations.packageInstallErrorDescription', {
-            defaultMessage:
-              'Something went wrong while trying to install this package. Please try again later.',
-          }),
+          toastMessage,
         });
         return false;
       }

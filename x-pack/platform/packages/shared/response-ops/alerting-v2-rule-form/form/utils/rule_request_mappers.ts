@@ -33,18 +33,28 @@ import {
 
 /**
  * Resolves the recovery_strategy for an API request.
- * Non-representable strategies (no_breach, none) are preserved as-is.
+ * Non-query strategies (no_breach, none) are preserved as-is.
  * 'query' is always derived from the recovery block presence — never
  * kept as a stale value — because the form can add/remove recovery
  * without updating the recoveryStrategy field.
+ * Signal rules never carry a recovery_strategy, regardless of what's
+ * left over in the field from a previous alert/signal toggle.
  */
 export const resolveRecoveryStrategy = (
-  formValues: Pick<FormValues, 'recoveryStrategy' | 'query'>
+  formValues: Pick<FormValues, 'kind' | 'recoveryStrategy' | 'query'>
 ): RecoveryStrategy | undefined => {
+  if (formValues.kind !== 'alert') return undefined;
   if (formValues.recoveryStrategy && formValues.recoveryStrategy !== 'query') {
     return formValues.recoveryStrategy;
   }
   return formValues.query.recovery != null ? ('query' as const) : undefined;
+};
+
+export const isRecoveryEnabled = (
+  formValues: Pick<FormValues, 'kind' | 'recoveryStrategy' | 'query'>
+): boolean => {
+  const strategy = resolveRecoveryStrategy(formValues);
+  return strategy != null && strategy !== 'none';
 };
 
 // ---------------------------------------------------------------------------
@@ -92,16 +102,20 @@ const mapStateTransition = (formValues: FormValues) => {
     }
   }
 
-  if (recoveryMode === DELAY_MODE.immediate) {
-    out.recovering_count = 0;
-  } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
-    out.recovering_count = stateTransition.recoveringCount;
-  } else if (recoveryMode === DELAY_MODE.duration) {
-    if (stateTransition?.recoveringTimeframe != null) {
-      out.recovering_timeframe = stateTransition.recoveringTimeframe;
-    }
-    if (stateTransition?.recoveringCount != null) {
+  // Recovering thresholds are only meaningful when recovery is enabled; emitting them
+  // while recovery is disabled is inert and rejected by the write API.
+  if (isRecoveryEnabled(formValues)) {
+    if (recoveryMode === DELAY_MODE.immediate) {
+      out.recovering_count = 0;
+    } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
       out.recovering_count = stateTransition.recoveringCount;
+    } else if (recoveryMode === DELAY_MODE.duration) {
+      if (stateTransition?.recoveringTimeframe != null) {
+        out.recovering_timeframe = stateTransition.recoveringTimeframe;
+      }
+      if (stateTransition?.recoveringCount != null) {
+        out.recovering_count = stateTransition.recoveringCount;
+      }
     }
   }
 
@@ -134,6 +148,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
   const { metadata, timeField, schedule, query, grouping } = formValues;
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
+  const noDataStrategy = formValues.noDataStrategy;
 
   return {
     metadata: mapMetadata(metadata),
@@ -141,7 +156,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     schedule: mapSchedule(schedule),
     query: ruleQueryToApiQuery(query),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
-    ...(formValues.noDataStrategy ? { no_data_strategy: formValues.noDataStrategy } : {}),
+    ...(noDataStrategy ? { no_data_strategy: noDataStrategy } : {}),
     grouping: mapGrouping(grouping),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
@@ -195,7 +210,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     },
     query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
-    noDataStrategy: rule.no_data_strategy ?? undefined,
+    noDataStrategy: rule.no_data_strategy ?? (rule.kind === 'alert' ? 'none' : undefined),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),

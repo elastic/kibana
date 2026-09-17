@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/ci-stats-reporter",
+    "@kbn/code-owners",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/tooling-log",
@@ -19,6 +20,7 @@
     "@kbn/jest-serializers",
     "@kbn/journeys",
     "@kbn/repo-info",
+    "@kbn/scout-reporting",
   ],
   "exclude": [
     "target/**/*",

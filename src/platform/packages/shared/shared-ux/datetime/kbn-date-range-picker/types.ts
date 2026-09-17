@@ -53,6 +53,12 @@ export interface TimeRangeBounds {
 /** Used for presets and recent options */
 export interface TimeRangeBoundsOption extends TimeRangeBounds {
   label?: string;
+  /**
+   * Whether the option belongs to the user. Options owned by configuration set
+   * this to `false` so they cannot be removed from the UI.
+   * @default true
+   */
+  isEditable?: boolean;
 }
 
 /** Calendar-specific configuration options. */
@@ -69,19 +75,19 @@ export interface TimeRangeTransformOptions {
   /** Additional accepted delimiter (on top of the built-in `'to'`, `'until'`, and `'-'`) */
   delimiter?: string;
   /**
-   * Additional format string for parsing absolute dates.
-   * Prepended to built-in formats so the parser recognises custom-formatted input.
-   * Does not affect how dates are displayed.
+   * Additional moment format strings accepted when parsing absolute dates typed
+   * by the user. Tried before the built-in formats. Display always uses the
+   * picker's own format, see {@link TimeRangeFormatOptions}.
    */
-  dateFormat?: string;
+  inputDateFormats?: string[];
   /**
-   * Controls rounding of the start bound for relative time ranges.
-   * Only affects relative `start` bounds (strings containing `now`);
-   * future ranges where start is bare `now` are unaffected.
-   * - `true`: keep existing rounding; if absent, infer it from the offset
-   *   unit (`/d` for day-and-above, next-unit-up for sub-day units).
-   * - `false`: strip any rounding suffix.
-   * - `undefined`: leave the start string as-is.
+   * Controls rounding of relative time range bounds (strings containing
+   * `now`); bare `now` bounds are unaffected.
+   * - `true`: keep existing rounding; if absent, infer it for each bound
+   *   from its own offset unit (`/d` for week-and-above, next finer unit
+   *   otherwise).
+   * - `false` / `undefined`: leave the bounds as-is, preserving any
+   *   rounding the user or a preset provided.
    * @default undefined
    */
   roundRelativeTime?: boolean;
@@ -90,7 +96,26 @@ export interface TimeRangeTransformOptions {
    * @default 's'
    */
   timePrecision?: TimePrecision;
+  /**
+   * Locale used to recognise and generate named ranges, natural-language
+   * durations/instants, and delimiters. English is always recognised
+   * alongside the active locale. Shorthand datemath, unix timestamps, and
+   * absolute dates are unaffected (locale-invariant).
+   * @default `i18n.getLocale()`
+   */
+  locale?: string;
 }
+
+/**
+ * Options accepted by the display formatters. Deliberately excludes
+ * `inputDateFormats` and `roundRelativeTime`: those only shape parsing, and
+ * the button, presets list, and tooltip must never pick up a consumer's input
+ * format (the part-level display parser only understands the built-in one).
+ */
+export type TimeRangeFormatOptions = Omit<
+  TimeRangeTransformOptions,
+  'inputDateFormats' | 'roundRelativeTime'
+>;
 
 /** Time unit for the auto-refresh interval. */
 export type AutoRefreshIntervalUnit = 's' | 'm' | 'h';
@@ -121,9 +146,9 @@ export type TimePrecision = 's' | 'ms' | 'none';
 /** User-facing settings exposed by the date range picker settings panel. */
 export interface DateRangePickerSettings {
   /**
-   * When true, relative time ranges round to the nearest full unit
-   * (e.g. minute, hour, day).
-   * @default true
+   * When true, relative time range bounds round to a full unit one step
+   * finer than their offset unit (e.g. `now-1h` → `now-1h/m`).
+   * @default false
    */
   roundRelativeTime: boolean;
   /**

@@ -49,6 +49,18 @@ describe('OptionsListFetchCache', () => {
     ...overrides,
   });
 
+  const baseDslRequest = (overrides: Record<string, unknown> = {}) => ({
+    kind: 'dsl' as const,
+    index: 'logs-*',
+    fieldName: 'host',
+    size: 10,
+    sort: { by: '_count' as const, direction: 'desc' as const },
+    searchString: '',
+    searchTechnique: 'prefix' as const,
+    selectedOptions: [],
+    ...overrides,
+  });
+
   const okSuggestionsResponse = {
     suggestions: [{ value: 'a' }],
     totalCardinality: 1,
@@ -111,6 +123,56 @@ describe('OptionsListFetchCache', () => {
     );
 
     expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  describe('CPS project routing', () => {
+    it('refetches when the DSL project routing changes between calls', async () => {
+      fetchSpy.mockResolvedValue(okSuggestionsResponse);
+      const cache = new OptionsListFetchCache();
+
+      await cache.runFetchRequest(
+        baseDslRequest({ projectRouting: '_alias:_origin' }),
+        new AbortController().signal
+      );
+      await cache.runFetchRequest(
+        baseDslRequest({ projectRouting: '_alias:*' }),
+        new AbortController().signal
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('serves the cached response when the DSL project routing is unchanged', async () => {
+      fetchSpy.mockResolvedValueOnce(okSuggestionsResponse);
+      const cache = new OptionsListFetchCache();
+
+      await cache.runFetchRequest(
+        baseDslRequest({ projectRouting: '_alias:*' }),
+        new AbortController().signal
+      );
+      await cache.runFetchRequest(
+        baseDslRequest({ projectRouting: '_alias:*' }),
+        new AbortController().signal
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('refetches when the ES|QL project routing changes between calls', async () => {
+      fetchSpy.mockResolvedValue(okSuggestionsResponse);
+      const cache = new OptionsListFetchCache();
+
+      await cache.runFetchRequest(
+        baseEsqlRequest({ projectRouting: '_alias:_origin' }),
+        new AbortController().signal
+      );
+      await cache.runFetchRequest(
+        baseEsqlRequest({ projectRouting: '_alias:*' }),
+        new AbortController().signal
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('ignoreValidations', () => {

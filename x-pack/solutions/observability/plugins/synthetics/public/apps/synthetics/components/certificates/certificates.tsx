@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { CertFacetCount } from '../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';
-import { setCertificatesTotalAction } from '../../state/certificates/certificates';
+import {
+  certificatesSelector,
+  setCertificatesTotalAction,
+} from '../../state/certificates/certificates';
+import { selectOverviewPageState } from '../../state';
+import { ShowAllSpaces } from '../monitors_page/common/show_all_spaces';
+import { LastRefreshed } from '../common/components/last_refreshed';
+import { AutoRefreshButton } from '../common/components/auto_refresh_button';
+import { SyntheticsHeaderToolbar, SyntheticsPage } from '../common/app_header';
 import { CertificateSearch } from './cert_search';
 import { CertStats } from './cert_stats';
 import { CertQuickFilter } from './cert_quick_filter';
@@ -28,6 +37,7 @@ import { useCertSearch } from './use_cert_search';
 import type { CertSort } from './certificates_list';
 import { CertificateList } from './certificates_list';
 import { useBreadcrumbs } from '../../hooks';
+import { CertRefreshBtn } from './cert_refresh_btn';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -58,6 +68,11 @@ export const CertificatesPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'certificates', delay: 15000 });
 
   useBreadcrumbs([{ text: 'Certificates' }]);
+  const total = useSelector(certificatesSelector);
+  const title = i18n.translate('xpack.synthetics.certificates.heading', {
+    defaultMessage: 'TLS Certificates ({total})',
+    values: { total: total ?? 0 },
+  });
 
   const [page, setPage] = useState({ index: 0, size: getPageSizeValue() });
   const [sort, setSort] = useState<CertSort>({
@@ -71,7 +86,7 @@ export const CertificatesPage: React.FC = () => {
     search,
     monitorTypes,
     browserResourceTypes,
-    party,
+    certOrigin,
     tags,
     issuers,
     remoteNames,
@@ -79,16 +94,21 @@ export const CertificatesPage: React.FC = () => {
     setSearch,
     setMonitorTypes,
     setBrowserResourceTypes,
-    setParty,
+    setCertOrigin,
     setTags,
     setIssuers,
     setExpiringWithin,
   } = useCertFilters();
 
   const dispatch = useDispatch();
+  const { showFromAllSpaces } = useSelector(selectOverviewPageState);
+
+  useEffect(() => {
+    setPage((prev) => (prev.index === 0 ? prev : { ...prev, index: 0 }));
+  }, [showFromAllSpaces]);
 
   // URL-driven cluster selection — see #273622 for the planned quick filter.
-  const facets = useCertFacets(remoteNames);
+  const facets = useCertFacets(remoteNames, showFromAllSpaces);
 
   const monitorTypeOptions = useMemo(
     () => withCounts(MONITOR_TYPE_FILTER_OPTIONS, facets?.monitorTypes),
@@ -99,8 +119,8 @@ export const CertificatesPage: React.FC = () => {
     [facets?.resourceTypes]
   );
   const partyOptions = useMemo(
-    () => withCounts(PARTY_FILTER_OPTIONS, facets?.party),
-    [facets?.party]
+    () => withCounts(PARTY_FILTER_OPTIONS, facets?.certOrigin),
+    [facets?.certOrigin]
   );
   // The tag list itself is derived from the cert facets, so only tags that actually
   // appear on certificate-bearing documents are offered (each with its cert count).
@@ -130,11 +150,12 @@ export const CertificatesPage: React.FC = () => {
     direction: sort.direction,
     monitorTypes,
     browserResourceTypes: isBrowserIncluded ? browserResourceTypes : undefined,
-    party: isBrowserIncluded ? party : undefined,
+    certOrigin: isBrowserIncluded ? certOrigin : undefined,
     tags,
     issuers,
     notValidAfter: expiringWithin,
     remoteNames,
+    showFromAllSpaces,
   });
 
   useEffect(() => {
@@ -142,8 +163,16 @@ export const CertificatesPage: React.FC = () => {
   }, [certificates.total, dispatch]);
 
   return (
-    <>
-      <EuiSpacer size="m" />
+    <SyntheticsPage
+      title={title}
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <LastRefreshed />
+          <AutoRefreshButton />
+          <CertRefreshBtn />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem>
           <CertificateSearch
@@ -206,15 +235,18 @@ export const CertificatesPage: React.FC = () => {
               label={labels.PARTY_FILTER}
               dataTestSubj="certPartyFilterButton"
               options={partyOptions}
-              selectedValues={party}
+              selectedValues={certOrigin}
               isDisabled={!isBrowserIncluded}
               disabledTooltip={labels.BROWSER_FILTER_DISABLED_TOOLTIP}
               onChange={(values) => {
-                setParty(values);
+                setCertOrigin(values);
                 resetToFirstPage();
               }}
             />
           </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ShowAllSpaces />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -237,6 +269,6 @@ export const CertificatesPage: React.FC = () => {
         sort={sort}
         certificates={certificates}
       />
-    </>
+    </SyntheticsPage>
   );
 };

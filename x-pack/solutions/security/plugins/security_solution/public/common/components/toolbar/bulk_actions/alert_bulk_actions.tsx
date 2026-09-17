@@ -8,8 +8,8 @@
 import numeral from '@elastic/numeral';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   dataTableSelectors,
@@ -233,7 +233,12 @@ const mapDispatchToProps = {
   clearSelected: dataTableActions.clearSelected,
 };
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type DispatchProps = typeof mapDispatchToProps;
+const connector = connect<StateProps, DispatchProps, OwnProps, DataTableState>(
+  makeMapStateToProps,
+  mapDispatchToProps
+);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

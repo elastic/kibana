@@ -59,6 +59,6 @@ export const toDescriptorWithSchema = async (
 };
 
 export const toDescriptor = (tool: InternalToolDefinition): ToolDefinition => {
-  const { id, type, description, tags, configuration, readonly, experimental } = tool;
-  return { id, type, description, tags, configuration, readonly, experimental };
+  const { id, type, description, tags, configuration, readonly, experimental, confirmation } = tool;
+  return { id, type, description, tags, configuration, readonly, experimental, confirmation };
 };

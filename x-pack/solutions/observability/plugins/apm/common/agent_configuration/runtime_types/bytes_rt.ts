@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getBytesRt } from '@kbn/apm-common';
+export { getBytesSchema } from '@kbn/apm-common';

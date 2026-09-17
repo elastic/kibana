@@ -19,6 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
+  /**
+   * Purpose: Exists smoke test
+   *
+   * Migration: migrate to scout
+   */
   describe('Test exists query', () => {
     let controlId: string;
 
