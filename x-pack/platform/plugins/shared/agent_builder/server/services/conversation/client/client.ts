@@ -684,7 +684,6 @@ class ConversationClientImpl implements ConversationClient {
     return materialized;
   }
 
-
   /** Appends timeline events onto a conversation.*/
   async appendEvents(
     request: AppendEventsRequest,
