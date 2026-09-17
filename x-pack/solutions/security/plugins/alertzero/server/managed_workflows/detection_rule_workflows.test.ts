@@ -853,29 +853,22 @@ describe('detection rule workflows', () => {
 
       // The gates live in the review children (one execution = one resume slot),
       // while the sweep fans out synchronously and joins once every gate settles.
-      it('fans out one sync review per rule and joins on all gates', () => {
-        const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')! as NestedStep & {
-          mode?: string;
-          concurrency?: { max: number; 'count-waiting': boolean };
-        };
-        const launches = tuningSteps.filter(({ type }) => type === 'workflow.execute');
+      it('fans out one async review per rule without waiting on its gate', () => {
+        const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')!;
+        const launches = tuningSteps.filter(({ type }) => type === 'workflow.executeAsync');
 
-        expect(fanOut.type).toBe('parallel');
-        // Settled: one failed review must not skip the other rules' gates.
-        expect(fanOut.mode).toBe('settled');
-        // A slot per launched rule (max_rules_per_sweep; the input can only lower
-        // the cap) so every gate opens at once.
-        expect(fanOut.concurrency).toEqual({ max: 10, 'count-waiting': false });
-        // A timeout here would abort branches and cancel children mid-approval;
-        // the child gate's own timeout is the only clock.
+        // A sync launch would park the sweep in WAITING_FOR_CHILD for up to 72h
+        // per gate and block the space's scheduled sweeps behind it.
+        expect(fanOut.type).toBe('foreach');
         expect(fanOut).not.toHaveProperty('timeout');
         expect(fanOut).not.toHaveProperty('branch-timeout');
 
         expect(launches.map(({ name }) => name)).toEqual(['run_review']);
         expect(launches[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID);
-        expect(launches[0]).not.toHaveProperty('on-failure');
+        // A dropped or rejected start must not stop the remaining rules' reviews.
+        expect(launches[0]['on-failure']).toEqual({ continue: true });
         expect(tuningSteps.map(({ type }) => type)).not.toContain('waitForApproval');
-        expect(tuningSteps.map(({ type }) => type)).not.toContain('workflow.executeAsync');
+        expect(tuningSteps.map(({ type }) => type)).not.toContain('workflow.execute');
 
         const { concurrency } = (review as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { key: string; strategy: string; max: number } };
@@ -884,36 +877,60 @@ describe('detection rule workflows', () => {
         expect(concurrency.max).toBe(1);
       });
 
-      // The limit is per space; with max 1 a sweep waiting on its gates (up to 72h)
-      // would make every scheduled 2h sweep get skipped until it finishes.
-      it('keeps sweeping a space for new rules while earlier gates are pending', () => {
+      // The sweep finishes in seconds now that it does not join on gates, so two
+      // sweeps in one space would only race each other for the same rules.
+      it('runs one sweep per space at a time', () => {
         const { concurrency } = (tuning as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { strategy: string; max: number } };
 
         expect(concurrency.strategy).toBe('drop');
-        expect(concurrency.max).toBe(5);
+        expect(concurrency.max).toBe(1);
       });
 
-      // The fan-in reads the settled aggregate, so the summary cannot run before
-      // every gate has resolved or failed.
-      it('summarizes decisions from the settled fan-out results', () => {
-        const summary = tuningSteps.find(({ name }) => name === 'summarize_decisions')!;
-        const emit = tuningSteps.find(({ name }) => name === 'emit_result')!;
-        const summaryInput = JSON.stringify(summary.with);
+      // Reviews outlive their sweep, so without a ceiling every sweep would add up to
+      // max_rules_per_sweep more while earlier gates are still pending.
+      it('caps active reviews per space', () => {
+        const consts = (tuning as unknown as { consts: Record<string, number> }).consts;
+        const free = tuningSteps.find(({ name }) => name === 'resolve_free_slots')!;
+        const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
+        const trigger = (
+          tuning.triggers as unknown as Array<{
+            type: string;
+            inputs: { properties: Record<string, Record<string, unknown>> };
+          }>
+        ).find(({ type }) => type === 'manual')!;
 
-        expect(summaryInput).toContain('steps.run_reviews.output.failed');
-        expect(summaryInput).toContain("where: 'approved'");
-        expect(summaryInput).toContain("where: 'applied'");
-        for (const key of [
+        // The active-review lookup returns at most 100, so a higher ceiling could
+        // not be enforced.
+        expect(consts.max_open_reviews).toBeLessThanOrEqual(100);
+        expect(trigger.inputs.properties.max_open_reviews).toEqual(
+          expect.objectContaining({ minimum: 1, maximum: 100 })
+        );
+        expect(String(free.with?.free)).toContain(
+          'inputs.max_open_reviews | default: consts.max_open_reviews | minus: steps.collect_active_rules.output.expected | at_least: 0'
+        );
+        expect(String(rows.with?.rows)).toContain(
+          '| slice: 0, steps.resolve_free_slots.output.free'
+        );
+      });
+
+      // Decisions land in each review, not in the sweep: the sweep can only report
+      // what it started and what was already in flight.
+      it('reports launches and in-flight reviews instead of decisions', () => {
+        const emit = tuningSteps.find(({ name }) => name === 'emit_result')!;
+        const outputs = emit.with as Record<string, string>;
+
+        expect(tuningSteps.map(({ name }) => name)).not.toContain('summarize_decisions');
+        expect(Object.keys(outputs).sort()).toEqual([
+          'harvest_failed',
+          'lookup_failed',
+          'reviews_in_flight',
           'reviews_requested',
-          'reviews_approved',
-          'reviews_failed',
-          'rules_applied',
-        ]) {
-          expect(String((emit.with as Record<string, string>)[key])).toContain(
-            `steps.summarize_decisions.output.${key}`
-          );
-        }
+        ]);
+        expect(outputs.reviews_requested).toContain('steps.resolve_fanout_rows.output.rows');
+        expect(outputs.reviews_in_flight).toContain('steps.collect_active_rules.output.expected');
+        expect(outputs.harvest_failed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
+        expect(outputs.lookup_failed).toContain('steps.list_active_reviews.error != null');
       });
     });
   });

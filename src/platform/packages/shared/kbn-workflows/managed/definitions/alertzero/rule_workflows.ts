@@ -47,7 +47,7 @@ export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW = {
   id: ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 25,
+  version: 26,
   yaml: RULE_TUNING_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
