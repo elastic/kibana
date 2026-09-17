@@ -44,7 +44,9 @@ export const buildEntitiesWithAlertsCountQuery = (
   parts.push(
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
   );
-  parts.push(`| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`);
+  // Use entity.id (source entity) not effective_id (resolution target) so the terms
+  // filter matches the actual entities in entity-latest and Resolution grouping shows them.
+  parts.push(`| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`);
 
   return parts.join('\n');
 };

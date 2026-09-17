@@ -97,6 +97,16 @@ const riskPanelFlexItemStyle = css`
   min-width: 460px;
 `;
 
+// ES has a 1 MB HTTP body limit. A terms filter with thousands of entity IDs easily
+// exceeds it once the grouping aggregation is added. Cap at 500 IDs; beyond that,
+// return null so the table shows all entities (tile stays highlighted for context).
+const MAX_CARD_FILTER_TERMS = 500;
+const toTermsFilter = (ids: string[]): QueryDslQueryContainer | null => {
+  if (ids.length === 0) return null;
+  const capped = ids.length > MAX_CARD_FILTER_TERMS ? ids.slice(0, MAX_CARD_FILTER_TERMS) : ids;
+  return { terms: { 'entity.id': capped } };
+};
+
 export const EntityAnalyticsHomePage = () => {
   const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
   const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
@@ -253,25 +263,17 @@ const EntityAnalyticsHomePageContent = () => {
     if (!activeFilter || activeFilter.type !== 'card') return null;
     switch (activeFilter.cardId) {
       case 'entitiesWithAlerts':
-        return alertsEntityIds.length > 0 ? { terms: { 'entity.id': alertsEntityIds } } : null;
+        return toTermsFilter(alertsEntityIds);
       case 'entitiesWithAnomalies':
-        return anomaliesEntityIds.length > 0
-          ? { terms: { 'entity.id': anomaliesEntityIds } }
-          : null;
+        return toTermsFilter(anomaliesEntityIds);
       case 'riskMovers':
-        return riskMoversEntityIds.length > 0
-          ? { terms: { 'entity.id': riskMoversEntityIds } }
-          : null;
+        return toTermsFilter(riskMoversEntityIds);
       case 'newlyHighCritical':
-        return newlyHCEntityIds.length > 0 ? { terms: { 'entity.id': newlyHCEntityIds } } : null;
+        return toTermsFilter(newlyHCEntityIds);
       case 'watchlisted':
-        return watchlistedEntityIds.length > 0
-          ? { terms: { 'entity.id': watchlistedEntityIds } }
-          : null;
+        return toTermsFilter(watchlistedEntityIds);
       case 'newEntity':
-        return newEntityEntityIds.length > 0
-          ? { terms: { 'entity.id': newEntityEntityIds } }
-          : null;
+        return toTermsFilter(newEntityEntityIds);
       default:
         return getCardEntityFilter(activeFilter.cardId);
     }

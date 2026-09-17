@@ -21,7 +21,7 @@ export const useWatchlistedCount = ({ spaceId, skip }: { spaceId: string; skip?:
   const query = `FROM ${index}
 | WHERE entity.attributes.watchlists IS NOT NULL AND entity.risk.calculated_score > 0
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`;
+| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`;
 
   const isEnabled =
     !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
