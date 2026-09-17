@@ -75,6 +75,10 @@ Rules:
 
 export const createThreatAttachmentType = (): AttachmentTypeDefinition => ({
   id: THREAT_ATTACHMENT_ID,
+  // System-produced reference: the agent must not create or update these via the
+  // attachment_add/update tools. Also gates the attachment_read path, which only
+  // invokes format() for readonly types.
+  isReadonly: true,
   validate: (input) => {
     const parseResult = threatAttachmentDataSchema.safeParse(input);
     if (parseResult.success) {

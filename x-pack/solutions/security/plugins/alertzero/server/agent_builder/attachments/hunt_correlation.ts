@@ -112,6 +112,10 @@ Rules:
 
 export const createHuntCorrelationAttachmentType = (): AttachmentTypeDefinition => ({
   id: HUNT_CORRELATION_ATTACHMENT_ID,
+  // System-produced evidence: the agent must not create or update these via the
+  // attachment_add/update tools. Also gates the attachment_read path, which only
+  // invokes format() for readonly types.
+  isReadonly: true,
   validate: (input) => {
     const parseResult = huntCorrelationAttachmentDataSchema.safeParse(input);
     if (parseResult.success) {

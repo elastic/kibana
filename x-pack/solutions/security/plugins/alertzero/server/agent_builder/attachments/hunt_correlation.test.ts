@@ -33,6 +33,10 @@ describe('createHuntCorrelationAttachmentType', () => {
     expect(HUNT_CORRELATION_ATTACHMENT_ID).toBe('security.hunt_correlation');
   });
 
+  it('is readonly so the agent cannot create or update these attachments', () => {
+    expect(attachmentType.isReadonly).toBe(true);
+  });
+
   describe('validate', () => {
     it('returns valid for a well-formed payload', async () => {
       const result = await attachmentType.validate(validPayload);

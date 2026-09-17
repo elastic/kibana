@@ -20,6 +20,10 @@ describe('createThreatAttachmentType', () => {
     expect(THREAT_ATTACHMENT_ID).toBe('security.threat');
   });
 
+  it('is readonly so the agent cannot create or update these attachments', () => {
+    expect(attachmentType.isReadonly).toBe(true);
+  });
+
   describe('validate', () => {
     it('returns valid with only the required report_id', async () => {
       const input = { attachmentLabel: 'Threat Report', report_id: 'report-1' };

@@ -41,6 +41,10 @@ describe('createSignificantSecurityEventAttachmentType', () => {
     expect(SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID).toBe('security.significant_security_event');
   });
 
+  it('is readonly so the agent cannot create or update these attachments', () => {
+    expect(attachmentType.isReadonly).toBe(true);
+  });
+
   describe('validate', () => {
     it('returns valid for a well-formed payload', async () => {
       const result = await attachmentType.validate(validPayload);
@@ -91,6 +95,29 @@ describe('createSignificantSecurityEventAttachmentType', () => {
 
       expect(result.valid).toBe(true);
     });
+
+    it('rejects maps_to_proposal.actionInput with more than 50 keys', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        maps_to_proposal: {
+          actionInput: Object.fromEntries(
+            Array.from({ length: 51 }, (_, i) => [`key-${i}`, 'value'])
+          ),
+        },
+      });
+
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects a non-integer truncated_original_count', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        truncated: true,
+        truncated_original_count: 1.5,
+      });
+
+      expect(result.valid).toBe(false);
+    });
   });
 
   describe('format', () => {
@@ -111,6 +138,70 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(value).toContain(validPayload.title);
       expect(value).toContain('high');
       expect(value).toContain('RDP session established');
+    });
+
+    it('includes indicators, evidence content, and the evaluation record ref', async () => {
+      const attachment: Attachment<string, unknown> = {
+        id: 'test-id',
+        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
+        data: validPayload,
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: '' };
+
+      const value = (representation as TextAttachmentRepresentation).value;
+      expect(value).toContain('technique: T1021 (confidence 0.9)');
+      expect(value).toContain('- RDP session from unusual host');
+      expect(value).toContain('Evidence against:\n  none recorded');
+      expect(value).toContain('Evaluation record: eval-record-1');
+    });
+
+    it('renders maps_to_proposal details when present', async () => {
+      const attachment: Attachment<string, unknown> = {
+        id: 'test-id',
+        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
+        data: {
+          ...validPayload,
+          maps_to_proposal: {
+            category: 'containment',
+            impact: 'Isolate affected hosts',
+            confidence: 0.7,
+            actionWorkflowId: 'workflow-1',
+            manual_remediation: ['Rotate the compromised key'],
+          },
+        },
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: '' };
+
+      const value = (representation as TextAttachmentRepresentation).value;
+      expect(value).toContain('Maps to proposal:');
+      expect(value).toContain('Category: containment');
+      expect(value).toContain('Impact: Isolate affected hosts');
+      expect(value).toContain('Action workflow: workflow-1');
+      expect(value).toContain('- Rotate the compromised key');
+    });
+
+    it('surfaces the truncation note when the payload was truncated', async () => {
+      const attachment: Attachment<string, unknown> = {
+        id: 'test-id',
+        type: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
+        data: { ...validPayload, truncated: true, truncated_original_count: 120 },
+      };
+
+      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: '' };
+
+      const value = (representation as TextAttachmentRepresentation).value;
+      expect(value).toContain('truncated from 120 original entries');
     });
 
     it('throws when attachment data is invalid', () => {

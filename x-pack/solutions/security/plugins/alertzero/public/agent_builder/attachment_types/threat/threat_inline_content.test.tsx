@@ -28,6 +28,14 @@ const renderProps = (attachment: ThreatAttachment, http: HttpStart) => ({
 describe('ThreatAttachmentInlineContent', () => {
   // The module-scoped query client caches by `report_id`; clear it between tests so a prior
   // test's resolved/errored query state can't leak into the next one via the shared cache.
+  // Retries are also disabled for the suite: the rejection tests would otherwise wait out
+  // the client's `retry: 1` (~1s each) before the fallback path renders.
+  beforeEach(() => {
+    threatAttachmentQueryClient.setDefaultOptions({
+      queries: { refetchOnWindowFocus: false, retry: 0, staleTime: 30_000 },
+    });
+  });
+
   afterEach(() => {
     threatAttachmentQueryClient.clear();
   });

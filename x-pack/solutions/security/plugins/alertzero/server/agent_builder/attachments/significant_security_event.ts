@@ -36,7 +36,14 @@ const mapsToProposalSchema = z
     impact: z.string().max(2000).optional(),
     confidence: z.number().min(0).max(1).optional(),
     actionWorkflowId: z.string().max(512).optional(),
-    actionInput: z.record(z.string(), z.unknown()).optional(),
+    // Workflow input values are arbitrary JSON, so value size can't be bounded by
+    // schema; bound the keyspace instead so a hostile payload can't grow without limit.
+    actionInput: z
+      .record(z.string().max(256), z.unknown())
+      .refine((input) => Object.keys(input).length <= 50, {
+        message: 'actionInput accepts at most 50 keys',
+      })
+      .optional(),
     manual_remediation: z.array(z.string().max(2000)).max(50).optional(),
   })
   .optional();
@@ -64,7 +71,7 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
   maps_to_proposal: mapsToProposalSchema,
   evaluation_record_ref: z.string().max(512),
   truncated: z.boolean().optional(),
-  truncated_original_count: z.number().optional(),
+  truncated_original_count: z.number().int().min(0).optional(),
   report_revision: z.string().max(256).optional(),
 });
 
@@ -94,14 +101,85 @@ const formatSignificantSecurityEventForAgent = (
     }
   }
 
-  lines.push('', `Evidence for: ${data.evidence_for.length}`);
-  lines.push(`Evidence against: ${data.evidence_against.length}`);
+  lines.push('', 'Security knowledge indicators:');
+  if (data.security_knowledge_indicators.length === 0) {
+    lines.push('  no indicators recorded');
+  } else {
+    for (const indicator of data.security_knowledge_indicators) {
+      const confidence =
+        indicator.confidence != null ? ` (confidence ${indicator.confidence})` : '';
+      lines.push(`  ${indicator.type}: ${indicator.value}${confidence}`);
+    }
+  }
 
   lines.push('', 'Entities:');
   if (data.entities.length === 0) {
     lines.push('  no entities recorded');
   } else {
     lines.push(`  ${data.entities.join(', ')}`);
+  }
+
+  if (data.alerts && data.alerts.length > 0) {
+    lines.push('', 'Alerts:');
+    lines.push(`  ${data.alerts.join(', ')}`);
+  }
+
+  if (data.events && data.events.length > 0) {
+    lines.push('', 'Events:');
+    lines.push(`  ${data.events.join(', ')}`);
+  }
+
+  lines.push('', 'Evidence for:');
+  if (data.evidence_for.length === 0) {
+    lines.push('  none recorded');
+  } else {
+    for (const item of data.evidence_for) {
+      lines.push(`  - ${item}`);
+    }
+  }
+
+  lines.push('', 'Evidence against:');
+  if (data.evidence_against.length === 0) {
+    lines.push('  none recorded');
+  } else {
+    for (const item of data.evidence_against) {
+      lines.push(`  - ${item}`);
+    }
+  }
+
+  if (data.maps_to_proposal) {
+    const proposal = data.maps_to_proposal;
+    lines.push('', 'Maps to proposal:');
+    if (proposal.category) {
+      lines.push(`  Category: ${proposal.category}`);
+    }
+    if (proposal.impact) {
+      lines.push(`  Impact: ${proposal.impact}`);
+    }
+    if (proposal.confidence != null) {
+      lines.push(`  Confidence: ${proposal.confidence}`);
+    }
+    if (proposal.actionWorkflowId) {
+      lines.push(`  Action workflow: ${proposal.actionWorkflowId}`);
+    }
+    if (proposal.manual_remediation && proposal.manual_remediation.length > 0) {
+      lines.push('  Manual remediation:');
+      for (const step of proposal.manual_remediation) {
+        lines.push(`    - ${step}`);
+      }
+    }
+  }
+
+  lines.push('', `Evaluation record: ${data.evaluation_record_ref}`);
+
+  if (data.truncated) {
+    lines.push(
+      `Note: this payload was truncated${
+        data.truncated_original_count != null
+          ? ` from ${data.truncated_original_count} original entries`
+          : ''
+      }; the counts above reflect only the retained entries.`
+    );
   }
 
   return lines.join('\n');
@@ -137,6 +215,10 @@ Rules:
 
 export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDefinition => ({
   id: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
+  // System-produced event: the agent must not create or update these via the
+  // attachment_add/update tools. Also gates the attachment_read path, which only
+  // invokes format() for readonly types.
+  isReadonly: true,
   validate: (input) => {
     const parseResult = significantSecurityEventAttachmentDataSchema.safeParse(input);
     if (parseResult.success) {
