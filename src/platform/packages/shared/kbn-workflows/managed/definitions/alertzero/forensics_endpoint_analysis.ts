@@ -9,10 +9,7 @@
 
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
-import {
-  renderScheduledWorkerYaml,
-  type ScheduledWorkerTemplateValues,
-} from './worker_template_values';
+import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID =
@@ -23,7 +20,7 @@ export const ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW = {
   id: ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
-  yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
-    renderScheduledWorkerYaml(FORENSICS_ENDPOINT_ANALYSIS_YAML, values),
-} as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;
+  version: 3,
+  yamlTemplate: (values: CommonWorkerTemplateValues): string =>
+    renderCommonWorkerYaml(FORENSICS_ENDPOINT_ANALYSIS_YAML, values),
+} as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;

@@ -8,7 +8,6 @@
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -19,11 +18,7 @@ import { createWorkerSettingsRegistration } from './worker_settings';
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 
-const SCHEDULED_WORKER_IDS: string[] = [
-  AD_WORKER_ID,
-  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-  RULE_TUNING_WORKER_ID,
-];
+const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
 
 /** Every other Worker is alert- or event-triggered and owns no schedule. */
 const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
@@ -165,55 +160,6 @@ describe('createWorkerSettingsRegistration', () => {
     });
   });
 
-  describe('schedule interval — endpoint analysis (opted in after v1 install)', () => {
-    const FORENSICS_WORKER_ID = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
-    const registration = createWorkerSettingsRegistration(FORENSICS_WORKER_ID);
-
-    it('defaults to 15m at settings version 2', () => {
-      expect(registration.createDefaultValues()).toEqual({
-        settingsVersion: 2,
-        autonomyLevel: 'manual',
-        scheduleInterval: '15m',
-      });
-    });
-
-    it('reads a v1 document that has no interval as the 15m default', () => {
-      expect(
-        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'assisted' })
-      ).toEqual({
-        workerId: FORENSICS_WORKER_ID,
-        autonomy: 'assisted',
-        scheduleInterval: '15m',
-      });
-    });
-
-    it('keeps a v1 document interval when one is already stored', () => {
-      expect(
-        registration.toSettings({
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-          scheduleInterval: '1h',
-        })
-      ).toEqual({
-        workerId: FORENSICS_WORKER_ID,
-        autonomy: 'manual',
-        scheduleInterval: '1h',
-      });
-    });
-
-    it('writes version 2 when a v1 document is patched', () => {
-      expect(
-        registration.applyPatch({ settingsVersion: 1, autonomyLevel: 'manual' }, { autonomy: 'assisted' })
-      ).toEqual({
-        values: {
-          settingsVersion: 2,
-          autonomyLevel: 'assisted',
-          scheduleInterval: '15m',
-        },
-      });
-    });
-  });
-
   describe('Worker-specific settings — detection rule tuning', () => {
     const registration = createWorkerSettingsRegistration(RULE_TUNING_WORKER_ID);
     const storedDefaults = {
@@ -295,11 +241,7 @@ describe('createWorkerSettingsRegistration', () => {
   });
 
   describe('Workers that declare no extras', () => {
-    it.each([
-      ...UNSCHEDULED_WORKER_IDS,
-      AD_WORKER_ID,
-      SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-    ])(
+    it.each([...UNSCHEDULED_WORKER_IDS, AD_WORKER_ID])(
       "%s rejects another Worker's extras field, naming it",
       (workerId) => {
         const registration = createWorkerSettingsRegistration(workerId);
