@@ -50,8 +50,12 @@ export interface IacKeyCheckProps {
    * false and take the template details from `onTemplateRecorded` instead.
    */
   writeOnRender?: boolean;
-  /** Called with the rendered template details when `writeOnRender` is false. */
-  onTemplateRecorded?: (iac: IacRenderedTemplate) => void;
+  /**
+   * Called with the rendered template details when `writeOnRender` is false, together with the
+   * id of the identity the update was launched for. The render is asynchronous, so by the time
+   * it lands the host may have selected another identity; the details belong to this one.
+   */
+  onTemplateRecorded?: (iac: IacRenderedTemplate, cloudConnectorId: string) => void;
 }
 
 /**
@@ -113,11 +117,14 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
       if (!writeOnRender) {
         // The host records the template details once its own flow succeeds (the onboarding writes it
         // after Deploy), so a launch the user never applies leaves the connector untouched.
-        onTemplateRecordedRef.current?.({
-          iac_key: key,
-          iac_blueprint_id: blueprintId,
-          iac_blueprint_version: blueprintVersion,
-        });
+        onTemplateRecordedRef.current?.(
+          {
+            iac_key: key,
+            iac_blueprint_id: blueprintId,
+            iac_blueprint_version: blueprintVersion,
+          },
+          cloudConnectorId
+        );
         return;
       }
 

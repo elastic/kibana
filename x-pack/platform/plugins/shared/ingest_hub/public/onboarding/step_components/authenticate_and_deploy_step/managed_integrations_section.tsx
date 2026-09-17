@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -76,17 +76,12 @@ export function ManagedIntegrationsSection({
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
   // The Existing Identity check renders the stack update without writing the key; the template
-  // details are parked on the flow and written to the connector after Deploy succeeds.
-  // The id is read at call time through a
-  // ref so the callback stays stable and always names the identity currently selected.
-  const connectorIdRef = useRef(authenticateAndDeployStep.connectorId);
-  connectorIdRef.current = authenticateAndDeployStep.connectorId;
+  // details are parked on the flow and written to the connector after Deploy succeeds. They are
+  // tagged with the identity the render was launched for, not the one selected when it lands:
+  // the render is asynchronous and the user may have switched identities meanwhile. Deploy only
+  // writes the parked details when they match the identity it deploys.
   const handleIacTemplateRecorded = useCallback(
-    (iac: IacRenderedTemplate) => {
-      const connectorId = connectorIdRef.current;
-      if (!connectorId) {
-        return;
-      }
+    (iac: IacRenderedTemplate, connectorId: string) => {
       setPendingIacTemplate({ connectorId, ...iac });
     },
     [setPendingIacTemplate]

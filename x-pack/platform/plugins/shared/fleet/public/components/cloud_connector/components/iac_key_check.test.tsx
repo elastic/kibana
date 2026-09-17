@@ -605,11 +605,16 @@ describe('IacKeyCheck', () => {
         });
 
         expect(onTemplateRecorded).toHaveBeenCalledTimes(1);
-        expect(onTemplateRecorded).toHaveBeenCalledWith({
-          iac_key: 'sha256:new',
-          iac_blueprint_id: 'federated-identity',
-          iac_blueprint_version: '1.0.0',
-        });
+        // Tagged with the identity the update was launched for: the host may have selected
+        // another one by the time the asynchronous render lands.
+        expect(onTemplateRecorded).toHaveBeenCalledWith(
+          {
+            iac_key: 'sha256:new',
+            iac_blueprint_id: 'federated-identity',
+            iac_blueprint_version: '1.0.0',
+          },
+          'connector-1'
+        );
         expect(mockUpdateCloudConnector).not.toHaveBeenCalled();
         expect(invalidateQueriesSpy).not.toHaveBeenCalled();
       });

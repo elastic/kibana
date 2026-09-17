@@ -544,19 +544,25 @@ describe('AwsIdentityFederationSetup', () => {
 
       // The launch: the check hands the template details to the host and lifts its block.
       act(() => {
-        lastIacKeyCheckProps()?.onTemplateRecorded?.({
-          iac_key: 'sha256:new',
-          iac_blueprint_id: 'federated-identity',
-          iac_blueprint_version: '1.0.0',
-        });
+        lastIacKeyCheckProps()?.onTemplateRecorded?.(
+          {
+            iac_key: 'sha256:new',
+            iac_blueprint_id: 'federated-identity',
+            iac_blueprint_version: '1.0.0',
+          },
+          'connector-1'
+        );
         lastIacKeyCheckProps()?.onValidityChange?.(true);
       });
 
-      expect(onIacTemplateRecorded).toHaveBeenCalledWith({
-        iac_key: 'sha256:new',
-        iac_blueprint_id: 'federated-identity',
-        iac_blueprint_version: '1.0.0',
-      });
+      expect(onIacTemplateRecorded).toHaveBeenCalledWith(
+        {
+          iac_key: 'sha256:new',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        },
+        'connector-1'
+      );
       expect(lastReadyValue(onReadyChange)).toBe(true);
     });
 

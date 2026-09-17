@@ -66,10 +66,11 @@ export interface AwsIdentityFederationSetupProps {
   onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
   /**
    * Existing Identity only. When given, the stack-update launch does not write the rendered key
-   * to the connector; the template details is handed here instead, for the host to store once its own
-   * flow succeeds (the onboarding writes it after Deploy). Readiness still lifts on the launch.
+   * to the connector; the template details are handed here instead, with the id of the identity
+   * they were rendered for, for the host to store once its own flow succeeds (the onboarding
+   * writes them after Deploy). Readiness still lifts on the launch.
    */
-  onIacTemplateRecorded?: (iac: IacRenderedTemplate) => void;
+  onIacTemplateRecorded?: (iac: IacRenderedTemplate, cloudConnectorId: string) => void;
 }
 
 export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProps> = ({

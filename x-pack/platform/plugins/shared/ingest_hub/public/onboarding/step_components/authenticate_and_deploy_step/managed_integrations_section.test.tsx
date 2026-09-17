@@ -114,11 +114,14 @@ function setupMocks({
     }: {
       onReadyChange?: (v: boolean) => void;
       onConnectorIdChange?: (id: string | undefined, name?: string) => void;
-      onIacTemplateRecorded?: (iac: {
-        iac_key: string;
-        iac_blueprint_id?: string;
-        iac_blueprint_version?: string;
-      }) => void;
+      onIacTemplateRecorded?: (
+        iac: {
+          iac_key: string;
+          iac_blueprint_id?: string;
+          iac_blueprint_version?: string;
+        },
+        cloudConnectorId: string
+      ) => void;
       initialConnectorId?: string;
     }) => (
       <div data-test-subj="identity-federation">
@@ -128,11 +131,14 @@ function setupMocks({
         <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
         <button
           onClick={() =>
-            onIacTemplateRecorded?.({
-              iac_key: 'sha256:new',
-              iac_blueprint_id: 'federated-identity',
-              iac_blueprint_version: '1.0.0',
-            })
+            onIacTemplateRecorded?.(
+              {
+                iac_key: 'sha256:new',
+                iac_blueprint_id: 'federated-identity',
+                iac_blueprint_version: '1.0.0',
+              },
+              'launched-for-connector'
+            )
           }
         >
           record-template
@@ -335,7 +341,10 @@ describe('ManagedIntegrationsSection', () => {
   describe('Federated Identity template details', () => {
     // The Existing Identity check hands the rendered key here instead of writing the connector;
     // it is parked on the flow for the post-Deploy write.
-    it('parks the rendered template details on the flow, tagged with the selected connector', () => {
+    it('parks the rendered template details tagged with the identity the render was launched for, not the one selected', () => {
+      // The render is asynchronous: the user may select another identity before it lands. The
+      // flow carries 'persisted-connector' now, but the details belong to the identity whose
+      // Update started the render; Deploy only writes them when the two match.
       const setPendingIacTemplate = jest.fn();
       setupMocks({ setPendingIacTemplate, connectorId: 'persisted-connector' });
       renderSection({ showIdentityFederation: true });
@@ -346,58 +355,11 @@ describe('ManagedIntegrationsSection', () => {
 
       expect(setPendingIacTemplate).toHaveBeenCalledTimes(1);
       expect(setPendingIacTemplate).toHaveBeenCalledWith({
-        connectorId: 'persisted-connector',
+        connectorId: 'launched-for-connector',
         iac_key: 'sha256:new',
         iac_blueprint_id: 'federated-identity',
         iac_blueprint_version: '1.0.0',
       });
-    });
-
-    it('uses the connector id current at render time, not the one from mount', () => {
-      const setPendingIacTemplate = jest.fn();
-      setupMocks({ setPendingIacTemplate, connectorId: undefined });
-      const { rerender } = renderSection({ showIdentityFederation: true });
-
-      // The user picks an identity after mount: the flow now carries its id.
-      mockUseOnboardingFlow.mockReturnValue({
-        ...mockUseOnboardingFlow.mock.results[0].value,
-        authenticateAndDeployStep: { connectorId: 'picked-later' },
-      });
-      rerender(
-        <I18nProvider>
-          <React.Suspense fallback={<div>Loading...</div>}>
-            <ManagedIntegrationsSection
-              serviceCount={3}
-              showIdentityFederation={true}
-              iacIntegrations={IAC_INTEGRATIONS}
-              onDeploy={jest.fn()}
-              isDeploying={false}
-              isDone={false}
-              hasFailed={false}
-            />
-          </React.Suspense>
-        </I18nProvider>
-      );
-
-      act(() => {
-        fireEvent.click(screen.getByText('record-template'));
-      });
-
-      expect(setPendingIacTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorId: 'picked-later' })
-      );
-    });
-
-    it('parks nothing while no connector is selected', () => {
-      const setPendingIacTemplate = jest.fn();
-      setupMocks({ setPendingIacTemplate, connectorId: undefined });
-      renderSection({ showIdentityFederation: true });
-
-      act(() => {
-        fireEvent.click(screen.getByText('record-template'));
-      });
-
-      expect(setPendingIacTemplate).not.toHaveBeenCalled();
     });
   });
 
