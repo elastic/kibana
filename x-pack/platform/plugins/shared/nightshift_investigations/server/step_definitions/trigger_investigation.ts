@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { INVESTIGATION_TRIGGER_TYPES } from '../../common';
@@ -17,6 +17,11 @@ const inputSchema = z.object({
     .enum(['significant_event', 'alert'])
     .describe('The type of entity being investigated'),
   subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
+  title: z
+    .string()
+    .min(1)
+    .max(MAX_TITLE_LENGTH)
+    .describe('Human-readable headline for the investigation, e.g. the event title or rule name'),
   trigger_type: z
     .enum(INVESTIGATION_TRIGGER_TYPES)
     .optional()
@@ -68,6 +73,7 @@ export const triggerInvestigationStepDefinition = (
           id: input.subject_id,
           summary: input.summary,
         },
+        title: input.title,
         trigger_type: input.trigger_type ?? 'automatic',
         concurrency_key: input.concurrency_key,
         context: input.context,

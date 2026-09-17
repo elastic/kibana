@@ -97,6 +97,7 @@ jest.mock('@kbn/cell-actions', () => ({
 jest.mock('./data_view', () => ({
   ...jest.requireActual('./data_view'),
   useRuleExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+  usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
 }));
 
 jest.mock('./hooks/use_unified_data_table_services', () => ({
@@ -143,7 +144,7 @@ jest.mock('../../hooks/use_compose_discover_flyout', () => ({
   }),
 }));
 
-jest.mock('../../components/rule/flyouts/rule_summary_flyout_container', () => ({
+jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => ({
   RuleSummaryFlyoutContainer: ({
     ruleId,
     onClose,
