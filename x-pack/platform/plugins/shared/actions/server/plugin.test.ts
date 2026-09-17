@@ -1102,6 +1102,9 @@ describe('Actions Plugin', () => {
             isDeprecated: false,
             source: 'stack',
             isTestable: false,
+            hasEvents: false,
+            isInboundOnly: false,
+            isEarsExperimental: false,
           },
         ]);
 

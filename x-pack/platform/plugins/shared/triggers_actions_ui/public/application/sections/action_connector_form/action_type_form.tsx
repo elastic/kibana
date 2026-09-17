@@ -373,6 +373,7 @@ export const ActionTypeForm = ({
       http,
       docLinks,
       uiSettings,
+      isInboundOnly: actionTypesIndex[actionConnector.actionTypeId]?.isInboundOnly,
     });
 
   if (isLoadingActionTypeModel) {

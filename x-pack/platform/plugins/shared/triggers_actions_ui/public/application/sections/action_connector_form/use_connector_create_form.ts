@@ -25,6 +25,8 @@ export interface UseConnectorCreateFormParams {
   actionTypeId: string | undefined;
   /** Optional initial values merged onto the empty connector (name, config, …). */
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>>;
+  /** When true, hide the generic settings heading (inbound-only spec types). */
+  isInboundOnly?: boolean;
 }
 
 /**
@@ -38,6 +40,7 @@ export const useConnectorCreateForm = ({
   actionTypeRegistry,
   actionTypeId,
   initialConnector,
+  isInboundOnly,
 }: UseConnectorCreateFormParams) => {
   const {
     application: { capabilities },
@@ -70,7 +73,14 @@ export const useConnectorCreateForm = ({
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
-  } = useActionTypeModel({ actionTypeRegistry, actionTypeId, http, docLinks, uiSettings });
+  } = useActionTypeModel({
+    actionTypeRegistry,
+    actionTypeId,
+    http,
+    docLinks,
+    uiSettings,
+    isInboundOnly,
+  });
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);

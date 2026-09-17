@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { useConnectorOAuthDisconnect } from '@kbn/response-ops-oauth-hooks';
 import React, { useCallback, useState } from 'react';
-import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
@@ -24,6 +23,7 @@ import { useConnectorsActions } from '../../../context/connectors_provider';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
 import { labels } from '../../../utils/i18n';
+import { useEarsExperimentalConnectorTypeIds } from '../../../hooks/connectors/use_ears_experimental_connector_type_ids';
 
 export interface ConnectorContextMenuProps {
   connector: ConnectorItem;
@@ -108,10 +108,11 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
   } = useKibana();
   const canDelete = application.capabilities.actions?.delete === true;
   const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
+  const earsExperimentalTypeIds = useEarsExperimentalConnectorTypeIds();
   const isEarsDisabled =
     connector.config?.authType === 'ears' &&
     (!isEarsEnabled ||
-      (isEarsExperimentalConnector(connector.actionTypeId) && !isEarsExperimentalEnabled));
+      (earsExperimentalTypeIds.has(connector.actionTypeId) && !isEarsExperimentalEnabled));
   const isAuthorized = connector.oauthStatus === OAUTH_STATUS.AUTHORIZED;
   const closeMenu = () => setIsOpen(false);
 

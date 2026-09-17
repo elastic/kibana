@@ -162,6 +162,22 @@ export const connectorTypeResponseSchema = schema.object(
         description: 'Indicates whether the connector type supports testing.',
       },
     }),
+    has_events: schema.boolean({
+      meta: {
+        description: 'Indicates whether the connector type can receive inbound events.',
+      },
+    }),
+    is_inbound_only: schema.boolean({
+      meta: {
+        description:
+          'Indicates whether the connector type has inbound events and no outbound actions.',
+      },
+    }),
+    is_ears_experimental: schema.boolean({
+      meta: {
+        description: 'Indicates whether the connector type uses experimental EARS authentication.',
+      },
+    }),
   },
   { meta: { id: 'connector_type_response' } }
 );

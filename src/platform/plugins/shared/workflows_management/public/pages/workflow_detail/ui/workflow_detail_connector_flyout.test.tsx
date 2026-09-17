@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { monaco } from '@kbn/monaco';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
@@ -23,6 +23,11 @@ import { TestWrapper } from '../../../shared/test_utils';
 const mockUseKibana = jest.fn();
 const mockUseAsyncThunk = jest.fn();
 const mockUseFetchConnector = jest.fn();
+const mockFetchConnectorTypes = jest.fn();
+
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector_types', () => ({
+  fetchConnectorTypes: (...args: unknown[]) => mockFetchConnectorTypes(...args),
+}));
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => mockUseKibana(),
@@ -89,12 +94,18 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
+        http: {},
         triggersActionsUi: {
           getAddConnectorFlyout: mockGetAddConnectorFlyout,
           getEditConnectorFlyout: mockGetEditConnectorFlyout,
         },
       },
     });
+
+    mockFetchConnectorTypes.mockResolvedValue([
+      { id: '.inboundWebhook', hasEvents: true },
+      { id: 'test-action-type', hasEvents: false },
+    ]);
 
     mockUseAsyncThunk.mockReturnValue(mockLoadConnectors);
 
@@ -238,7 +249,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
       expect(editorModel?.pushEditOperations).not.toHaveBeenCalled();
     });
 
-    it('keeps the flyout open after creating an inbound webhook so the ingest token remains visible', () => {
+    it('keeps the flyout open after creating an inbound webhook so the ingest token remains visible', async () => {
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
       mockGetAddConnectorFlyout.mockImplementation((config: any) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
@@ -253,6 +264,13 @@ describe('WorkflowDetailConnectorFlyout', () => {
             insertPosition: mockInsertPosition,
           })
         );
+      });
+
+      await waitFor(() => {
+        expect(mockFetchConnectorTypes).toHaveBeenCalled();
+      });
+      await waitFor(() => {
+        expect(mockGetAddConnectorFlyout.mock.calls.length).toBeGreaterThanOrEqual(2);
       });
 
       act(() => {

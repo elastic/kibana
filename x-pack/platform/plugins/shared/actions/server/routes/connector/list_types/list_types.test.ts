@@ -56,9 +56,12 @@ describe('listTypesRoute', () => {
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
+            "has_events": false,
             "id": "1",
             "is_deprecated": false,
+            "is_ears_experimental": false,
             "is_experimental": undefined,
+            "is_inbound_only": false,
             "is_system_action_type": false,
             "is_testable": false,
             "minimum_license_required": "gold",
@@ -88,6 +91,9 @@ describe('listTypesRoute', () => {
           is_deprecated: false,
           source: 'stack',
           is_testable: false,
+          has_events: false,
+          is_inbound_only: false,
+          is_ears_experimental: false,
         },
       ],
     });
@@ -133,9 +139,12 @@ describe('listTypesRoute', () => {
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
+            "has_events": false,
             "id": "1",
             "is_deprecated": false,
+            "is_ears_experimental": false,
             "is_experimental": undefined,
+            "is_inbound_only": false,
             "is_system_action_type": false,
             "is_testable": false,
             "minimum_license_required": "gold",
@@ -173,6 +182,9 @@ describe('listTypesRoute', () => {
           is_deprecated: false,
           source: 'stack',
           is_testable: false,
+          has_events: false,
+          is_inbound_only: false,
+          is_ears_experimental: false,
         },
       ],
     });
@@ -250,5 +262,56 @@ describe('listTypesRoute', () => {
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
+  });
+
+  it('maps capability flags from registered connector types', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    listTypesRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const listTypes = [
+      createMockConnectorType({
+        id: '.inboundWebhook',
+        name: 'Inbound Webhook',
+        source: 'spec',
+        hasEvents: true,
+        isInboundOnly: true,
+        isEarsExperimental: false,
+      }),
+      createMockConnectorType({
+        id: '.google_calendar',
+        name: 'Google Calendar',
+        source: 'spec',
+        hasEvents: false,
+        isInboundOnly: false,
+        isEarsExperimental: true,
+      }),
+    ];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce(listTypes);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { query: {} }, ['ok']);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.arrayContaining([
+        expect.objectContaining({
+          id: '.inboundWebhook',
+          has_events: true,
+          is_inbound_only: true,
+          is_ears_experimental: false,
+        }),
+        expect.objectContaining({
+          id: '.google_calendar',
+          has_events: false,
+          is_inbound_only: false,
+          is_ears_experimental: true,
+        }),
+      ]),
+    });
   });
 });

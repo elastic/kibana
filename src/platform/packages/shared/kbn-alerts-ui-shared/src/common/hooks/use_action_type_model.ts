@@ -46,12 +46,14 @@ export function useActionTypeModel({
   http,
   docLinks,
   uiSettings,
+  isInboundOnly = false,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
   actionTypeId: string | undefined;
   http: HttpSetup;
   docLinks: DocLinksStart;
   uiSettings?: IUiSettingsClient;
+  isInboundOnly?: boolean;
 }): UseActionTypeModelResult {
   const registeredModel = useMemo(() => {
     if (!actionTypeId) {
@@ -94,8 +96,9 @@ export function useActionTypeModel({
   // renders, preventing infinite re-render loops in React Query (which re-runs select when its
   // function reference changes).
   const specBasedModel = useMemo(
-    () => (data ? transformSpecToActionTypeModel(data, docLinks, uiSettings) : null),
-    [data, docLinks, uiSettings]
+    () =>
+      data ? transformSpecToActionTypeModel(data, docLinks, uiSettings, { isInboundOnly }) : null,
+    [data, docLinks, uiSettings, isInboundOnly]
   );
 
   return {

@@ -72,6 +72,32 @@ describe('spec connector edit flyout Test tab', () => {
     secrets: {},
   });
 
+  const mockHttpGet = (isTestable: boolean) =>
+    jest.fn().mockImplementation(async (path: string) => {
+      if (String(path).endsWith('/access_control')) {
+        return { permissions: { read: true, execute: true, edit: true, manage: true } };
+      }
+      if (String(path).includes('/connector_types') && !String(path).includes('/spec')) {
+        return [
+          {
+            id: 'spec-connector-test',
+            name: 'Spec Connector Test',
+            enabled: true,
+            enabled_in_config: true,
+            enabled_in_license: true,
+            supported_feature_ids: ['workflows'],
+            minimum_license_required: 'basic',
+            is_system_action_type: false,
+            is_deprecated: false,
+            has_events: false,
+            is_inbound_only: false,
+            is_ears_experimental: false,
+          },
+        ];
+      }
+      return mockSpecResponse(isTestable);
+    });
+
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
@@ -80,7 +106,7 @@ describe('spec connector edit flyout Test tab', () => {
       actions: { save: true, show: true, execute: true },
     };
     actionTypeRegistry.has.mockReturnValue(false);
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse(true));
+    appMockRenderer.coreStart.http.get = mockHttpGet(true);
     appMockRenderer.coreStart.uiSettings.get = jest.fn().mockImplementation((key: string) => {
       if (key === 'workflows:ui:enabled') {
         return true;
@@ -113,7 +139,7 @@ describe('spec connector edit flyout Test tab', () => {
   });
 
   it('hides the Test tab for a spec connector that has not opted in to testing', async () => {
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse(false));
+    appMockRenderer.coreStart.http.get = mockHttpGet(false);
 
     appMockRenderer.render(
       <EditConnectorFlyout
@@ -165,7 +191,30 @@ describe('spec connector edit flyout Test tab', () => {
     const specPromise = new Promise<ReturnType<typeof mockSpecResponse>>((resolve) => {
       resolveSpec = resolve;
     });
-    appMockRenderer.coreStart.http.get = jest.fn().mockReturnValue(specPromise);
+    appMockRenderer.coreStart.http.get = jest.fn().mockImplementation(async (path: string) => {
+      if (String(path).endsWith('/access_control')) {
+        return { permissions: { read: true, execute: true, edit: true, manage: true } };
+      }
+      if (String(path).includes('/connector_types') && !String(path).includes('/spec')) {
+        return [
+          {
+            id: 'spec-connector-test',
+            name: 'Spec Connector Test',
+            enabled: true,
+            enabled_in_config: true,
+            enabled_in_license: true,
+            supported_feature_ids: ['workflows'],
+            minimum_license_required: 'basic',
+            is_system_action_type: false,
+            is_deprecated: false,
+            has_events: false,
+            is_inbound_only: false,
+            is_ears_experimental: false,
+          },
+        ];
+      }
+      return specPromise;
+    });
 
     appMockRenderer.render(
       <EditConnectorFlyout
@@ -190,10 +239,35 @@ describe('spec connector edit flyout Test tab', () => {
 
   it('shows error state on the Test tab when spec fetch fails and retries', async () => {
     const errorMessage = 'Failed to fetch spec';
-    appMockRenderer.coreStart.http.get = jest
-      .fn()
-      .mockRejectedValueOnce(new Error(errorMessage))
-      .mockResolvedValueOnce(mockSpecResponse(true));
+    let specAttempts = 0;
+    appMockRenderer.coreStart.http.get = jest.fn().mockImplementation(async (path: string) => {
+      if (String(path).endsWith('/access_control')) {
+        return { permissions: { read: true, execute: true, edit: true, manage: true } };
+      }
+      if (String(path).includes('/connector_types') && !String(path).includes('/spec')) {
+        return [
+          {
+            id: 'spec-connector-test',
+            name: 'Spec Connector Test',
+            enabled: true,
+            enabled_in_config: true,
+            enabled_in_license: true,
+            supported_feature_ids: ['workflows'],
+            minimum_license_required: 'basic',
+            is_system_action_type: false,
+            is_deprecated: false,
+            has_events: false,
+            is_inbound_only: false,
+            is_ears_experimental: false,
+          },
+        ];
+      }
+      specAttempts += 1;
+      if (specAttempts === 1) {
+        throw new Error(errorMessage);
+      }
+      return mockSpecResponse(true);
+    });
 
     appMockRenderer.render(
       <EditConnectorFlyout
@@ -218,7 +292,7 @@ describe('spec connector edit flyout Test tab', () => {
     await userEvent.click(screen.getByTestId('connector-spec-load-retry'));
 
     expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
-    expect(appMockRenderer.coreStart.http.get).toHaveBeenCalledTimes(2);
+    expect(specAttempts).toBe(2);
   });
 });
 

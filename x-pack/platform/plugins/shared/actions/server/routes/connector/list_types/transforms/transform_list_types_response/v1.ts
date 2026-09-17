@@ -28,6 +28,9 @@ export const transformListTypesResponse = (
       description,
       isExperimental,
       isTestable,
+      hasEvents,
+      isInboundOnly,
+      isEarsExperimental,
     }) => ({
       id,
       name,
@@ -44,6 +47,9 @@ export const transformListTypesResponse = (
       description,
       is_experimental: isExperimental,
       is_testable: Boolean(isTestable),
+      has_events: Boolean(hasEvents),
+      is_inbound_only: Boolean(isInboundOnly),
+      is_ears_experimental: Boolean(isEarsExperimental),
     })
   );
 };

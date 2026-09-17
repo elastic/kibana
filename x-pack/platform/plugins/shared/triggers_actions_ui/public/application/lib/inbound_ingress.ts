@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import type { ActionConnector } from '../../types';
 
 export const getInboundIngestToken = (connector: ActionConnector): string | undefined => {
@@ -17,5 +16,7 @@ export const getInboundIngestToken = (connector: ActionConnector): string | unde
   return typeof token === 'string' && token.length > 0 ? token : undefined;
 };
 
-export const isInboundIngressConnector = (connector: ActionConnector): boolean =>
-  connectorTypeHasInboundEvents(connector.actionTypeId);
+export const isInboundIngressConnector = (
+  _connector: ActionConnector,
+  hasEvents = false
+): boolean => hasEvents;

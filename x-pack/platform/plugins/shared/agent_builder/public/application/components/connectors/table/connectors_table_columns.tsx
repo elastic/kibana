@@ -20,7 +20,6 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConnectorOAuthConnect, OAuthRedirectMode } from '@kbn/response-ops-oauth-hooks';
 import React, { useMemo } from 'react';
-import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
 import { useConnectorsActions } from '../../../context/connectors_provider';
@@ -30,6 +29,7 @@ import { labels } from '../../../utils/i18n';
 import { ConnectorTypeIcon } from '../connector_type_icon';
 import { ConnectorContextMenu } from './connectors_table_context_menu';
 import { ConnectorQuickActions } from './connectors_table_quick_actions';
+import { useEarsExperimentalConnectorTypeIds } from '../../../hooks/connectors/use_ears_experimental_connector_type_ids';
 
 /**
  * Clickable badge for not-authorized OAuth connectors.
@@ -94,12 +94,13 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
   const { actionTypeRegistry } = triggersActionsUi;
 
   const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
+  const earsExperimentalTypeIds = useEarsExperimentalConnectorTypeIds();
 
   return useMemo(() => {
     const isDisabledEarsConnector = (connector: ConnectorItem): boolean =>
       connector.config?.authType === 'ears' &&
       (!isEarsEnabled ||
-        (isEarsExperimentalConnector(connector.actionTypeId) && !isEarsExperimentalEnabled));
+        (earsExperimentalTypeIds.has(connector.actionTypeId) && !isEarsExperimentalEnabled));
 
     return [
       {
@@ -202,5 +203,12 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
         ),
       },
     ];
-  }, [editConnector, actionTypeRegistry, canDelete, isEarsEnabled, isEarsExperimentalEnabled]);
+  }, [
+    editConnector,
+    actionTypeRegistry,
+    canDelete,
+    isEarsEnabled,
+    isEarsExperimentalEnabled,
+    earsExperimentalTypeIds,
+  ]);
 };

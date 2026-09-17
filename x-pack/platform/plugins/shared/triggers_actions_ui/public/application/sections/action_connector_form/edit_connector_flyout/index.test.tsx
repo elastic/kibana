@@ -79,6 +79,23 @@ describe('EditConnectorFlyout', () => {
         minimum_license_required: 'basic',
         is_system_action_type: false,
         is_deprecated: false,
+        has_events: false,
+        is_inbound_only: false,
+        is_ears_experimental: false,
+      },
+      {
+        id: '.inboundWebhook',
+        name: 'Inbound Webhook',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        supported_feature_ids: ['workflows'],
+        minimum_license_required: 'gold',
+        is_system_action_type: false,
+        is_deprecated: false,
+        has_events: true,
+        is_inbound_only: true,
+        is_ears_experimental: false,
       },
     ]);
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);

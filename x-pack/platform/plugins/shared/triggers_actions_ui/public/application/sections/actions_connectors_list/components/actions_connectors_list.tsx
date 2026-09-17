@@ -31,7 +31,6 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
-import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import {
   DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
   DEPRECATED_LABEL,
@@ -116,19 +115,20 @@ const ActionsConnectorsList = ({
   const location = useLocation();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
+  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const isDisabledEarsConnector = useCallback(
     (item: ActionConnectorTableItem | ActionConnector) => {
       if (!('config' in item) || (item.config as Record<string, unknown>)?.authType !== 'ears') {
         return false;
       }
       if (!isEarsEnabled) return true;
-      if (isEarsExperimentalConnector(item.actionTypeId) && !isEarsExperimentalEnabled) return true;
+      if (actionTypesIndex?.[item.actionTypeId]?.isEarsExperimental && !isEarsExperimentalEnabled)
+        return true;
       return false;
     },
-    [isEarsEnabled, isEarsExperimentalEnabled]
+    [actionTypesIndex, isEarsEnabled, isEarsExperimentalEnabled]
   );
 
-  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);

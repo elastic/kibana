@@ -36,6 +36,12 @@ export interface ActionType {
   description?: string;
   isExperimental?: boolean;
   isTestable?: boolean;
+  /** When true, the connector type can receive inbound events. */
+  hasEvents?: boolean;
+  /** When true, the connector type has inbound events and no outbound actions. */
+  isInboundOnly?: boolean;
+  /** When true, the connector type uses experimental EARS authentication. */
+  isEarsExperimental?: boolean;
 }
 
 export enum InvalidEmailReason {

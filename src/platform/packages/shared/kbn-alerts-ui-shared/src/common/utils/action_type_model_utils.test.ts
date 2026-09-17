@@ -298,7 +298,9 @@ describe('action_type_model_utils', () => {
           schema: { type: 'object', properties: {} },
           isTestable: false,
         },
-        docLinks
+        docLinks,
+        undefined,
+        { isInboundOnly: true }
       );
       expect(model.connectorForm?.hideSettingsTitle).toBe(true);
     });

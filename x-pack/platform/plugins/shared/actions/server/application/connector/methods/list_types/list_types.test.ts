@@ -106,6 +106,9 @@ describe('listTypes()', () => {
         isDeprecated: false,
         source: 'stack',
         isTestable: false,
+        hasEvents: false,
+        isInboundOnly: false,
+        isEarsExperimental: false,
       },
     ]);
   });
@@ -145,6 +148,9 @@ describe('listTypes()', () => {
         isDeprecated: false,
         source: 'stack',
         isTestable: false,
+        hasEvents: false,
+        isInboundOnly: false,
+        isEarsExperimental: false,
       },
       {
         id: 'my-connector-type-2',
@@ -158,6 +164,9 @@ describe('listTypes()', () => {
         isDeprecated: false,
         source: 'stack',
         isTestable: false,
+        hasEvents: false,
+        isInboundOnly: false,
+        isEarsExperimental: false,
       },
     ]);
   });
@@ -190,6 +199,9 @@ describe('listTypes()', () => {
         isDeprecated: false,
         source: 'stack',
         isTestable: false,
+        hasEvents: false,
+        isInboundOnly: false,
+        isEarsExperimental: false,
       },
       {
         id: '.cases',
@@ -203,6 +215,9 @@ describe('listTypes()', () => {
         isDeprecated: false,
         source: 'stack',
         isTestable: false,
+        hasEvents: false,
+        isInboundOnly: false,
+        isEarsExperimental: false,
       },
     ]);
   });

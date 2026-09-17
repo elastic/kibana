@@ -5,25 +5,14 @@
  * 2.0.
  */
 
-import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 import { getInboundIngestToken, isInboundIngressConnector } from './inbound_ingress';
 
 describe('inbound ingress helpers', () => {
-  it('treats connectors with inbound events as inbound ingress', () => {
-    expect(
-      isInboundIngressConnector(
-        createMockActionConnector({ actionTypeId: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID })
-      )
-    ).toBe(true);
-    expect(
-      isInboundIngressConnector(
-        createMockActionConnector({
-          actionTypeId: '.http',
-          config: { ingestTokenHash: 'a'.repeat(64) },
-        })
-      )
-    ).toBe(false);
+  it('treats connectors as inbound ingress when the action type has events', () => {
+    const connector = createMockActionConnector({ actionTypeId: '.inboundWebhook' });
+    expect(isInboundIngressConnector(connector, true)).toBe(true);
+    expect(isInboundIngressConnector(connector, false)).toBe(false);
     expect(isInboundIngressConnector(createMockActionConnector({ actionTypeId: '.http' }))).toBe(
       false
     );

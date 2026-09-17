@@ -256,6 +256,18 @@ export interface ActionTypeCoreFields<
    */
   isExperimental?: boolean;
   /**
+   * When true, the connector type can receive inbound events.
+   */
+  hasEvents?: boolean;
+  /**
+   * When true, the connector type has inbound events and no outbound actions.
+   */
+  isInboundOnly?: boolean;
+  /**
+   * When true, the connector type uses experimental EARS authentication.
+   */
+  isEarsExperimental?: boolean;
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute

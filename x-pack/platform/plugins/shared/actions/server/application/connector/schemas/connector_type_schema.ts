@@ -30,4 +30,7 @@ export const connectorTypeSchema = schema.object({
   description: schema.maybe(schema.string()),
   isExperimental: schema.maybe(schema.boolean()),
   isTestable: schema.boolean({ defaultValue: false }),
+  hasEvents: schema.boolean({ defaultValue: false }),
+  isInboundOnly: schema.boolean({ defaultValue: false }),
+  isEarsExperimental: schema.boolean({ defaultValue: false }),
 });

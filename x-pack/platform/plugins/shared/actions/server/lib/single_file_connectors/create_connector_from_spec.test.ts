@@ -6,7 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { EARS_AUTH_ID, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 import { createConnectorTypeFromSpec } from './create_connector_from_spec';
@@ -693,6 +693,67 @@ describe('createConnectorTypeFromSpec', () => {
           ingestTokenHash: hash,
         })
       ).not.toThrow();
+    });
+  });
+
+  describe('capability flags', () => {
+    const inboundEvents = {
+      definitions: {
+        received: {
+          eventId: 'inbound.received',
+          title: 'Received',
+          description: 'Inbound event',
+          eventSchema: z4.object({ body: z4.unknown() }),
+        },
+      },
+      handleEvents: async () => ({ type: 'emit' as const, events: [] }),
+    };
+
+    it('sets hasEvents for a spec with event definitions', () => {
+      const connectorType = createConnectorTypeFromSpec(
+        createMockSpec({ events: inboundEvents }),
+        mockActionsPlugin
+      );
+
+      expect(connectorType.hasEvents).toBe(true);
+      expect(connectorType.isInboundOnly).toBe(false);
+      expect(connectorType.isEarsExperimental).toBe(false);
+    });
+
+    it('sets isInboundOnly for an events-only spec', () => {
+      const connectorType = createConnectorTypeFromSpec(
+        createMockSpec({
+          actions: {},
+          test: { handler: jest.fn(), enabled: false },
+          events: inboundEvents,
+        }),
+        mockActionsPlugin
+      );
+
+      expect(connectorType.hasEvents).toBe(true);
+      expect(connectorType.isInboundOnly).toBe(true);
+      expect(connectorType.isEarsExperimental).toBe(false);
+    });
+
+    it('sets isEarsExperimental when the spec uses experimental EARS auth', () => {
+      const connectorType = createConnectorTypeFromSpec(
+        createMockSpec({
+          auth: {
+            types: [
+              {
+                type: EARS_AUTH_ID,
+                isExperimental: true,
+                defaults: {},
+              },
+            ],
+          },
+        }),
+        mockActionsPlugin
+      );
+
+      expect(connectorType.hasEvents).toBe(false);
+      expect(connectorType.isInboundOnly).toBe(false);
+      expect(connectorType.isEarsExperimental).toBe(true);
     });
   });
 });

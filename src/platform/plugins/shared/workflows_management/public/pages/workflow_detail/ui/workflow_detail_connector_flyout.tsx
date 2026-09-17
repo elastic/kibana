@@ -9,8 +9,9 @@
 
 import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import { fetchConnectorTypes } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector_types';
 import { monaco } from '@kbn/monaco';
+import { useQuery } from '@kbn/react-query';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useFetchConnector } from '../../../entities/connectors/model/use_available_connectors';
 import type { LineColumnPosition } from '../../../entities/workflows/store';
@@ -31,7 +32,7 @@ interface WorkflowDetailConnectorFlyoutProps {
 
 export const WorkflowDetailConnectorFlyout = React.memo(
   ({ editorRef }: WorkflowDetailConnectorFlyoutProps) => {
-    const { triggersActionsUi } = useKibana().services;
+    const { triggersActionsUi, http } = useKibana().services;
     const loadConnectors = useAsyncThunk(loadConnectorsThunk);
     const isOpen = useSelector(selectIsConnectorFlyoutOpen);
     const connectorType = useSelector(selectConnectorFlyoutType);
@@ -39,6 +40,12 @@ export const WorkflowDetailConnectorFlyout = React.memo(
     const insertPosition = useSelector(selectConnectorFlyoutInsertPosition);
     const { data: connector, isLoading: isLoadingConnector } = useFetchConnector(connectorIdToEdit);
     const dispatch = useDispatch();
+    const { data: actionTypes } = useQuery({
+      queryKey: ['connectorTypes'],
+      queryFn: () => fetchConnectorTypes({ http }),
+      staleTime: 5 * 60 * 1000,
+      enabled: isOpen,
+    });
 
     const addConnectorFlyout = useMemo(() => {
       if (!isOpen || !connectorType) {
@@ -72,7 +79,10 @@ export const WorkflowDetailConnectorFlyout = React.memo(
             }
             loadConnectors();
             // Inbound create stays open so the one-time ingest token can be copied.
-            if (!connectorTypeHasInboundEvents(createdConnector.actionTypeId)) {
+            const hasEvents = actionTypes?.some(
+              (type) => type.id === createdConnector.actionTypeId && type.hasEvents
+            );
+            if (!hasEvents) {
               dispatch(closeConnectorFlyout());
             }
           },
@@ -89,6 +99,7 @@ export const WorkflowDetailConnectorFlyout = React.memo(
       isLoadingConnector,
       insertPosition,
       editorRef,
+      actionTypes,
     ]);
 
     return addConnectorFlyout;

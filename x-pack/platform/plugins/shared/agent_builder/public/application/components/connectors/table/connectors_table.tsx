@@ -9,7 +9,6 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { memo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { useListConnectors } from '../../../hooks/tools/use_mcp_connectors';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -18,6 +17,7 @@ import { useConnectorsTableColumns } from './connectors_table_columns';
 import { ConnectorsTableHeader } from './connectors_table_header';
 import { connectorQuickActionsHoverStyles } from './connectors_table_quick_actions';
 import { useConnectorsTableSearch } from './connectors_table_search';
+import { useEarsExperimentalConnectorTypeIds } from '../../../hooks/connectors/use_ears_experimental_connector_type_ids';
 
 export const AgentBuilderConnectorsTable = memo(() => {
   const { connectors, isLoading, error } = useListConnectors({});
@@ -33,11 +33,12 @@ export const AgentBuilderConnectorsTable = memo(() => {
 
   const { euiTheme } = useEuiTheme();
   const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
+  const earsExperimentalTypeIds = useEarsExperimentalConnectorTypeIds();
 
   const isDisabledEarsConnector = (connector: ConnectorItem): boolean => {
     if (connector.config?.authType !== 'ears') return false;
     if (!isEarsEnabled) return true;
-    if (isEarsExperimentalConnector(connector.actionTypeId) && !isEarsExperimentalEnabled)
+    if (earsExperimentalTypeIds.has(connector.actionTypeId) && !isEarsExperimentalEnabled)
       return true;
     return false;
   };

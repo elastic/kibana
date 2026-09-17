@@ -251,10 +251,34 @@ describe('actionTypeRegistry', () => {
           isDeprecated: false,
           source: 'stack',
           isTestable: false,
+          hasEvents: false,
+          isInboundOnly: false,
+          isEarsExperimental: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+    });
+
+    test('includes capability flags from the registered action type', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          hasEvents: true,
+          isInboundOnly: true,
+          isEarsExperimental: true,
+        })
+      );
+
+      expect(actionTypeRegistry.list()).toEqual([
+        expect.objectContaining({
+          id: 'my-connector-type',
+          hasEvents: true,
+          isInboundOnly: true,
+          isEarsExperimental: true,
+        }),
+      ]);
     });
 
     test('returns list of connector types with parameter schema', () => {
@@ -310,6 +334,9 @@ describe('actionTypeRegistry', () => {
           isDeprecated: false,
           source: 'stack',
           isTestable: false,
+          hasEvents: false,
+          isInboundOnly: false,
+          isEarsExperimental: false,
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -324,6 +351,9 @@ describe('actionTypeRegistry', () => {
           isDeprecated: false,
           source: 'stack',
           isTestable: false,
+          hasEvents: false,
+          isInboundOnly: false,
+          isEarsExperimental: false,
         },
       ]);
 
@@ -463,6 +493,9 @@ describe('actionTypeRegistry', () => {
           isDeprecated: false,
           source: 'stack',
           isTestable: false,
+          hasEvents: false,
+          isInboundOnly: false,
+          isEarsExperimental: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -497,6 +530,9 @@ describe('actionTypeRegistry', () => {
           isDeprecated: false,
           source: 'stack',
           isTestable: false,
+          hasEvents: false,
+          isInboundOnly: false,
+          isEarsExperimental: false,
         },
       ]);
     });
@@ -532,6 +568,9 @@ describe('actionTypeRegistry', () => {
           isDeprecated: false,
           source: 'stack',
           isTestable: false,
+          hasEvents: false,
+          isInboundOnly: false,
+          isEarsExperimental: false,
         },
       ]);
     });

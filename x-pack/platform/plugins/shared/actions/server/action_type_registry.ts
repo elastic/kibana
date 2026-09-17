@@ -299,6 +299,9 @@ export class ActionTypeRegistry {
         description: actionType.description,
         isExperimental: actionType.isExperimental,
         isTestable: Boolean(actionType.isTestable),
+        hasEvents: Boolean(actionType.hasEvents),
+        isInboundOnly: Boolean(actionType.isInboundOnly),
+        isEarsExperimental: Boolean(actionType.isEarsExperimental),
       }));
   }
 

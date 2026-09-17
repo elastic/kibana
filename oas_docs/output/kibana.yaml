@@ -101851,6 +101851,15 @@ components:
         is_testable:
           description: Indicates whether the connector type supports testing.
           type: boolean
+        has_events:
+          description: Indicates whether the connector type can receive inbound events.
+          type: boolean
+        is_inbound_only:
+          description: Indicates whether the connector type has inbound events and no outbound actions.
+          type: boolean
+        is_ears_experimental:
+          description: Indicates whether the connector type uses experimental EARS authentication.
+          type: boolean
         minimum_license_required:
           description: The minimum license required to enable the connector.
           enum:
@@ -101893,6 +101902,9 @@ components:
         - is_deprecated
         - source
         - is_testable
+        - has_events
+        - is_inbound_only
+        - is_ears_experimental
       title: connector_type_response
       type: object
     Kibana_HTTP_APIs_ContentPackIncludedObjects:

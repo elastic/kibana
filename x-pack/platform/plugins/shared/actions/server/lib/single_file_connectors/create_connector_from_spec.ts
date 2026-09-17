@@ -10,7 +10,9 @@ import {
   TEST_CONNECTOR_SUB_ACTION,
   connectorSpecHasEvents,
   ingestTokenHashSchema,
+  isInboundOnlyConnectorSpec,
 } from '@kbn/connector-specs';
+import { isEarsExperimentalAuthType } from '@kbn/connector-specs/src/lib/ears_experimental_utils';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 
@@ -109,5 +111,8 @@ export const createConnectorTypeFromSpec = (
     description: spec.metadata.description,
     isExperimental: spec.metadata.isTechnicalPreview,
     isTestable: Boolean(spec.test.enabled),
+    hasEvents,
+    isInboundOnly: isInboundOnlyConnectorSpec(spec),
+    isEarsExperimental: Boolean(spec.auth?.types.some(isEarsExperimentalAuthType)),
   };
 };

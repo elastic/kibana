@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useQuery } from '@kbn/react-query';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { Option } from 'fp-ts/Option';
@@ -49,6 +50,7 @@ import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { InboundIngressCredentials } from '../inbound_ingress_credentials';
 import { isInboundIngressConnector } from '../../../lib/inbound_ingress';
+import { loadActionTypes } from '../../../lib/action_connector_api';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -183,6 +185,12 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
   const { isLoading: isExecutingConnector, executeConnector } = useExecuteConnector();
+  const { data: actionTypes } = useQuery({
+    queryKey: ['connectorTypes'],
+    queryFn: () => loadActionTypes({ http }),
+    staleTime: 5 * 60 * 1000,
+  });
+  const connectorActionType = actionTypes?.find((type) => type.id === connector.actionTypeId);
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
@@ -242,13 +250,14 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     http,
     docLinks,
     uiSettings,
+    isInboundOnly: connectorActionType?.isInboundOnly,
   });
 
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
   const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
 
   const inboundSettingsContent = useMemo(() => {
-    if (!isInboundIngressConnector(connector)) {
+    if (!isInboundIngressConnector(connector, connectorActionType?.hasEvents)) {
       return undefined;
     }
     return (
@@ -257,7 +266,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         allowRotate={canSave && !connector.isPreconfigured}
       />
     );
-  }, [canSave, connector]);
+  }, [canSave, connector, connectorActionType?.hasEvents]);
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);

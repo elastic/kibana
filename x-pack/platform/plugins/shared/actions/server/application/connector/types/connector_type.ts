@@ -26,4 +26,7 @@ export interface ConnectorType {
   description?: ConnectorTypeSchemaType['description'];
   isExperimental?: ConnectorTypeSchemaType['isExperimental'];
   isTestable: ConnectorTypeSchemaType['isTestable'];
+  hasEvents: ConnectorTypeSchemaType['hasEvents'];
+  isInboundOnly: ConnectorTypeSchemaType['isInboundOnly'];
+  isEarsExperimental: ConnectorTypeSchemaType['isEarsExperimental'];
 }

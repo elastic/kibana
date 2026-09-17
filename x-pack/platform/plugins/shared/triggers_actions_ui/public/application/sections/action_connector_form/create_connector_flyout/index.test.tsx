@@ -697,6 +697,28 @@ describe('CreateConnectorFlyout', () => {
     });
 
     it('keeps the flyout open and shows webhook URL and ingest token after inbound create', async () => {
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionTypeModel.id,
+          enabled: true,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting', 'siem'],
+        },
+        {
+          id: '.inboundWebhook',
+          enabled: true,
+          name: 'Inbound Webhook',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'gold' as const,
+          supportedFeatureIds: ['workflows'],
+          hasEvents: true,
+          isInboundOnly: true,
+        },
+      ]);
       appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
         if (String(path).includes('_rotate_event_token')) {
           return Promise.resolve({ ingest_token: 'once-token' });
@@ -747,6 +769,28 @@ describe('CreateConnectorFlyout', () => {
     });
 
     it('stays on the create form when inbound rotate fails after create', async () => {
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionTypeModel.id,
+          enabled: true,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting', 'siem'],
+        },
+        {
+          id: '.inboundWebhook',
+          enabled: true,
+          name: 'Inbound Webhook',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'gold' as const,
+          supportedFeatureIds: ['workflows'],
+          hasEvents: true,
+          isInboundOnly: true,
+        },
+      ]);
       appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
         if (String(path).includes('_rotate_event_token')) {
           return Promise.reject({ name: 'Error', body: { message: 'Cannot rotate' } });

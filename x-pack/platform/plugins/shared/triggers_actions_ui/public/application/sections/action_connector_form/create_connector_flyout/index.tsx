@@ -26,7 +26,6 @@ import {
   getConnectorFeatureName,
 } from '@kbn/actions-plugin/common';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
@@ -104,6 +103,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionTypeRegistry,
     actionTypeId: actionType?.id,
     initialConnector,
+    isInboundOnly: actionType?.isInboundOnly,
   });
 
   useEffect(() => {
@@ -203,7 +203,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onConnectorCreated(createdConnector);
       }
 
-      if (isInboundIngressConnector(createdConnector)) {
+      if (
+        isInboundIngressConnector(
+          createdConnector,
+          allActionTypes?.[createdConnector.actionTypeId]?.hasEvents
+        )
+      ) {
         try {
           const rotated = await rotateIngress(createdConnector.id);
           setCreatedInboundConnector({
@@ -218,7 +223,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
       onClose();
     }
-  }, [validateAndCreateConnector, onClose, onConnectorCreated, rotateIngress]);
+  }, [validateAndCreateConnector, onClose, onConnectorCreated, rotateIngress, allActionTypes]);
 
   const handleSearchValueChange = useCallback((newValue: string) => {
     setSearchValue(newValue);
@@ -262,7 +267,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     if (createdInboundConnector) {
       return <InboundIngressCredentials allowRotate connector={createdInboundConnector} />;
     }
-    if (actionType == null || !connectorTypeHasInboundEvents(actionType.id)) {
+    if (actionType == null || !actionType.hasEvents) {
       return undefined;
     }
     return (
