@@ -339,6 +339,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -688,6 +691,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1029,6 +1035,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1523,6 +1532,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/350.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1694,6 +1706,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1863,6 +1878,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/370.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
