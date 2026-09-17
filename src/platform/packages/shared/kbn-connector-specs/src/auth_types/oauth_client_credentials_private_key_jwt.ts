@@ -9,18 +9,24 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
+import {
+  CERTIFICATE_BINDING_KINDS,
+  CLIENT_ASSERTION_TYPE,
+  JWT_ALGORITHMS,
+  OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
+  type CertificateBindingKind,
+  type JwtAlgorithm,
+} from '@kbn/connector-specs-common';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
-export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID =
-  'oauth_client_credentials_private_key_jwt';
-export const CLIENT_ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
-
-export const JWT_ALGORITHMS = ['PS256', 'RS256', 'ES256'] as const;
-export type JwtAlgorithm = (typeof JWT_ALGORITHMS)[number];
-
-export const CERTIFICATE_BINDING_KINDS = ['x5t#S256', 'x5c', 'kid'] as const;
-export type CertificateBindingKind = (typeof CERTIFICATE_BINDING_KINDS)[number];
+export {
+  CERTIFICATE_BINDING_KINDS,
+  CLIENT_ASSERTION_TYPE,
+  JWT_ALGORITHMS,
+  OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
+};
+export type { CertificateBindingKind, JwtAlgorithm };
 
 const CERTIFICATE_MARKER = /^$|-----BEGIN CERTIFICATE-----/;
 const PRIVATE_KEY_MARKER = /-----BEGIN (?:RSA |ENCRYPTED )?PRIVATE KEY-----/;

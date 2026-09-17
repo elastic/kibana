@@ -26,6 +26,7 @@
     "@kbn/code-editor",
     "@kbn/use-observable",
     "@kbn/connector-specs",
+    "@kbn/connector-specs-common",
     "@kbn/workflows-extensions",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerts-ui-shared",

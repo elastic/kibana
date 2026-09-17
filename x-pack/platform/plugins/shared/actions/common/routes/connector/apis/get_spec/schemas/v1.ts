@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
+import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs-common';
 
 export const getConnectorSpecParamsSchema = schema.object({
   id: schema.string({

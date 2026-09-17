@@ -12,7 +12,7 @@ import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { resolveRegisteredStepIcon } from './resolve_registered_step_icon';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 
-jest.mock('@kbn/connector-specs/icons', () => ({
+jest.mock('@kbn/connector-specs-common', () => ({
   ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
 }));
 

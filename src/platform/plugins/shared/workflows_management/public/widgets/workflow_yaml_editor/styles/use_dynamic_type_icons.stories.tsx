@@ -12,7 +12,7 @@ import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import { connectorsSpecs } from '@kbn/connector-specs';
-import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
+import { ConnectorIconsMap } from '@kbn/connector-specs-common';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';

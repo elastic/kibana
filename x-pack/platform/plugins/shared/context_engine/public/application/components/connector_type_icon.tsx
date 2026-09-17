@@ -7,7 +7,7 @@
 
 import { EuiIcon, EuiSkeletonCircle } from '@elastic/eui';
 import type { EuiSkeletonCircleProps, IconSize, IconType } from '@elastic/eui';
-import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
+import { ConnectorIconsMap } from '@kbn/connector-specs-common';
 import React, { Suspense } from 'react';
 import { useKibana } from '../hooks/use_kibana';
 

@@ -59,6 +59,7 @@
     "@kbn/zod",
     "@kbn/connector-schemas",
     "@kbn/connector-specs",
+    "@kbn/connector-specs-common",
     "@kbn/actions-utils",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/usage-api-plugin",

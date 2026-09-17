@@ -10,7 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { getMeta, setMeta, addMeta } from '@kbn/connector-specs/src/connector_spec_ui';
+import { getMeta, setMeta, addMeta } from '@kbn/connector-specs-common';
 import { MultiOptionUnionWidget } from './multi_option_union_widget';
 
 const meta = { getMeta, setMeta };

@@ -7,53 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isString } from 'lodash';
-import type { AuthMode } from './connector_spec';
-import * as allAuthTypes from './all_auth_types';
-
-function isAuthTypeSpecEntry(value: unknown): value is {
-  id: string;
-  authMode?: AuthMode;
-  usesRelayTransport?: boolean;
-  isKibanaManaged?: boolean;
-} {
-  return isString((value as { id?: unknown })?.id);
-}
-
-function usesRelayTransportOf(spec: { id: string; usesRelayTransport?: boolean }): boolean {
-  return spec.usesRelayTransport ?? false;
-}
-
-function isKibanaManagedOf(spec: { id: string; isKibanaManaged?: boolean }): boolean {
-  return spec.isKibanaManaged ?? false;
-}
-
-export const AUTH_MODE_BY_AUTH_TYPE_ID: Record<string, AuthMode> = Object.fromEntries(
-  Object.values(allAuthTypes)
-    .filter(isAuthTypeSpecEntry)
-    .map((spec) => [spec.id, spec.authMode ?? 'shared'])
-) as Record<string, AuthMode>;
-
-export function getAuthModeForAuthTypeId(authTypeId: string): AuthMode {
-  return AUTH_MODE_BY_AUTH_TYPE_ID[authTypeId] ?? 'shared';
-}
-
-export const USES_RELAY_BY_AUTH_TYPE_ID: Record<string, boolean> = Object.fromEntries(
-  Object.values(allAuthTypes)
-    .filter(isAuthTypeSpecEntry)
-    .map((spec) => [spec.id, usesRelayTransportOf(spec)])
-) as Record<string, boolean>;
-
-export function authTypeUsesRelay(authTypeId: string): boolean {
-  return USES_RELAY_BY_AUTH_TYPE_ID[authTypeId] ?? false;
-}
-
-export const IS_KIBANA_MANAGED_BY_AUTH_TYPE_ID: Record<string, boolean> = Object.fromEntries(
-  Object.values(allAuthTypes)
-    .filter(isAuthTypeSpecEntry)
-    .map((spec) => [spec.id, isKibanaManagedOf(spec)])
-) as Record<string, boolean>;
-
-export function isKibanaManagedAuthTypeId(authTypeId: string): boolean {
-  return IS_KIBANA_MANAGED_BY_AUTH_TYPE_ID[authTypeId] ?? false;
-}
+export {
+  AUTH_MODE_BY_AUTH_TYPE_ID,
+  getAuthModeForAuthTypeId,
+  USES_RELAY_BY_AUTH_TYPE_ID,
+  authTypeUsesRelay,
+  IS_KIBANA_MANAGED_BY_AUTH_TYPE_ID,
+  isKibanaManagedAuthTypeId,
+} from '@kbn/connector-specs-common';

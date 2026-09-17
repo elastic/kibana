@@ -369,6 +369,8 @@
       "@kbn/connector-schemas/*": ["./src/platform/packages/shared/kbn-connector-schemas/*"],
       "@kbn/connector-specs": ["./src/platform/packages/shared/kbn-connector-specs"],
       "@kbn/connector-specs/*": ["./src/platform/packages/shared/kbn-connector-specs/*"],
+      "@kbn/connector-specs-common": ["./src/platform/packages/shared/kbn-connector-specs-common"],
+      "@kbn/connector-specs-common/*": ["./src/platform/packages/shared/kbn-connector-specs-common/*"],
       "@kbn/console-plugin": ["./src/platform/plugins/shared/console"],
       "@kbn/console-plugin/*": ["./src/platform/plugins/shared/console/*"],
       "@kbn/content-connectors-plugin": ["./x-pack/platform/plugins/shared/content_connectors"],

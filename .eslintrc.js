@@ -2000,7 +2000,10 @@ module.exports = {
       },
     },
     {
-      files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
+      files: [
+        'src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-connector-specs-common/src/specs/**/icon/*.{ts,tsx}',
+      ],
       rules: {
         'import/no-default-export': 'off',
       },

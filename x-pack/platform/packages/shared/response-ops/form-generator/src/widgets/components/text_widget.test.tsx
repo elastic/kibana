@@ -13,7 +13,7 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextWidget } from './text_widget';
-import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
+import { getMeta, setMeta } from '@kbn/connector-specs-common';
 
 const meta = { getMeta, setMeta };
 

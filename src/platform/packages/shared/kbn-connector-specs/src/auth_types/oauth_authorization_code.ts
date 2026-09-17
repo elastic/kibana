@@ -9,12 +9,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
+import { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from '@kbn/connector-specs-common';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
 import { isConnectorAuthorizationError } from '../errors';
 import * as i18n from './translations';
 
-export const OAUTH_AUTHORIZATION_CODE_AUTH_ID = 'oauth_authorization_code';
+export { OAUTH_AUTHORIZATION_CODE_AUTH_ID };
 
 const authSchema = lazySchema(() =>
   z

@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/i18n-react'
   - '@kbn/connector-specs'
+  - '@kbn/connector-specs-common'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/i18n'
 tags:

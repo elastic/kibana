@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorMetadata } from '@kbn/connector-specs';
+import type { ConnectorMetadata } from '@kbn/connector-specs-common';
 
 /**
  * Wire JSON from GET /internal/actions/connector_types/{id}/spec

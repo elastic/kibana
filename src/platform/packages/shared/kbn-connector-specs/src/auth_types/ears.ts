@@ -9,13 +9,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
+import { EARS_AUTH_ID, EARS_PROVIDERS } from '@kbn/connector-specs-common';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import { isConnectorAuthorizationError } from '../errors/connector_authorization_error';
 import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
 import * as i18n from './translations';
 
-export const EARS_AUTH_ID = 'ears';
-export const EARS_PROVIDERS = ['google', 'microsoft', 'slack'] as const;
+export { EARS_AUTH_ID, EARS_PROVIDERS };
 
 const authSchema = lazySchema(() =>
   z

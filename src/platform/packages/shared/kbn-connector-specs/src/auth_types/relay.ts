@@ -9,10 +9,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
+import { RELAY_AUTH_ID } from '@kbn/connector-specs-common';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
-export const RELAY_AUTH_ID = 'relay';
+export { RELAY_AUTH_ID };
 
 const authSchema = lazySchema(() =>
   z

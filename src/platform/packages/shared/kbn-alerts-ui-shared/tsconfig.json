@@ -16,6 +16,7 @@
     "@kbn/alerting-types",
     "@kbn/actions-types",
     "@kbn/connector-specs",
+    "@kbn/connector-specs-common",
     "@kbn/data-views-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/es-query",

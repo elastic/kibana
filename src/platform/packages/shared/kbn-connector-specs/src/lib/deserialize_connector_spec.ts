@@ -7,32 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ZodDiscriminatedUnion, ZodObject, type ZodRawShape } from '@kbn/zod/v4';
-import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
-
-interface ConnectorShape {
-  config: ZodObject<ZodRawShape>;
-  secrets: ZodObject<ZodRawShape> | ZodDiscriminatedUnion;
-}
-
-export type ConnectorZodSchema = ZodObject<ZodRawShape> & {
-  shape: ConnectorShape;
-};
-
-export function fromConnectorSpecSchema(
-  jsonSchema: Record<string, unknown>
-): ConnectorZodSchema | undefined {
-  const schema = fromJSONSchema(jsonSchema, { preserveMeta: true });
-
-  if (!schema || !(schema instanceof ZodObject)) {
-    return undefined;
-  }
-
-  const { config, secrets } = schema.shape;
-  const hasValidSecrets = secrets instanceof ZodObject || secrets instanceof ZodDiscriminatedUnion;
-
-  if (!(config instanceof ZodObject) || !hasValidSecrets) {
-    return undefined;
-  }
-  return schema.strict() as ConnectorZodSchema;
-}
+export { fromConnectorSpecSchema, type ConnectorZodSchema } from '@kbn/connector-specs-common';

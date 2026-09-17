@@ -11,17 +11,31 @@ export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
 export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
-export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
-export { RELAY_AUTH_ID } from './src/auth_types/relay';
-export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
 export {
+  EARS_AUTH_ID,
+  EARS_PROVIDERS,
+  RELAY_AUTH_ID,
+  OAUTH_AUTHORIZATION_CODE_AUTH_ID,
   CERTIFICATE_BINDING_KINDS,
   CLIENT_ASSERTION_TYPE,
   JWT_ALGORITHMS,
   OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
   type CertificateBindingKind,
   type JwtAlgorithm,
-} from './src/auth_types/oauth_client_credentials_private_key_jwt';
+  INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+  MAX_HANDSHAKE_CHALLENGE_LENGTH,
+  TEST_CONNECTOR_SUB_ACTION,
+  MAX_CONNECTOR_TYPE_ID_LENGTH,
+  AUTH_MODE_BY_AUTH_TYPE_ID,
+  getAuthModeForAuthTypeId,
+  USES_RELAY_BY_AUTH_TYPE_ID,
+  authTypeUsesRelay,
+  isKibanaManagedAuthTypeId,
+  getMeta,
+  setMeta,
+  addMeta,
+  type BaseMetadata,
+} from '@kbn/connector-specs-common';
 
 export { getConnectorSpec } from './src/get_connector_spec';
 export {
@@ -30,11 +44,7 @@ export {
 } from './src/connector_spec_has_events';
 export { isInboundOnlyConnectorSpec } from './src/is_inbound_only_connector_spec';
 export { ingestTokenHashSchema } from './src/ingest_token_hash_schema';
-export {
-  INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
-  MAX_HANDSHAKE_CHALLENGE_LENGTH,
-} from './src/specs/inbound_webhook/constants';
-export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
+export { isToolAction } from './src/connector_spec';
 export type {
   ConnectorIngressContext,
   EventDefinition,
@@ -64,7 +74,6 @@ export {
   buildEventId,
   connectorTypeToEventNamespace,
   normalizeConnectorTypeId,
-  MAX_CONNECTOR_TYPE_ID_LENGTH,
 } from './src/event_type_id';
 export {
   validateEmittedEvents,
@@ -85,15 +94,6 @@ export { isEarsExperimentalConnector } from './src/lib/ears_experimental_utils';
 
 export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
 export type { ConnectorAuthorizationReason } from './src/errors';
-export {
-  AUTH_MODE_BY_AUTH_TYPE_ID,
-  getAuthModeForAuthTypeId,
-  USES_RELAY_BY_AUTH_TYPE_ID,
-  authTypeUsesRelay,
-  isKibanaManagedAuthTypeId,
-} from './src/auth_mode_by_auth_type_id';
-export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
-export type { BaseMetadata } from './src/connector_spec_ui';
 export type {
   ClientTypeSpec,
   BuildContext,

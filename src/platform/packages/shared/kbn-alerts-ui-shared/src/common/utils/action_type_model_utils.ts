@@ -12,11 +12,14 @@ import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import { getConnectorSpec, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
-import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
-import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
-import type { ConnectorZodSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
-import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
-import { narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs/src/lib/narrow_secrets_schema_for_auth_mode';
+import {
+  ConnectorIconsMap,
+  fromConnectorSpecSchema,
+  getMeta,
+  setMeta,
+  narrowSecretsSchemaForAuthMode,
+  type ConnectorZodSchema,
+} from '@kbn/connector-specs-common';
 import type {
   ConnectorSpecResponse,
   ConnectorSpecWireResponse,

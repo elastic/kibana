@@ -747,6 +747,7 @@ packages:
   - 'src/platform/packages/shared/kbn-connector-cli'
   - 'src/platform/packages/shared/kbn-connector-schemas'
   - 'src/platform/packages/shared/kbn-connector-specs'
+  - 'src/platform/packages/shared/kbn-connector-specs-common'
   - 'src/platform/packages/shared/kbn-content-management-utils'
   - 'src/platform/packages/shared/kbn-core-server-benchmarks'
   - 'src/platform/packages/shared/kbn-cps-server-utils'

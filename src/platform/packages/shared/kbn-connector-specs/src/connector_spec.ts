@@ -24,12 +24,13 @@
 import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
-import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
+import type { AuthMode, ConnectorMetadata } from '@kbn/connector-specs-common';
 import type { ConnectorSpecEvents } from './connector_spec_events';
 import type { ClientRegistry, ClientTypeId } from './lib/clients';
 
-export { UISchemas } from './connector_spec_ui';
+export { UISchemas, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs-common';
+export type { AuthMode, ConnectorMetadata };
 
 // ============================================================================
 // INTERNATIONALIZATION
@@ -45,40 +46,6 @@ export function createI18nKeys(connectorId: string) {
     validation: (key: string) => `${base}.validation.${key}`,
     test: (key: string) => `${base}.test.${key}`,
   };
-}
-
-// ============================================================================
-// METADATA
-// ============================================================================
-
-export interface ConnectorMetadata {
-  id: string;
-  displayName: string;
-  icon?: string;
-  description: string;
-  /**
-   * Documentation URL for this connector type. Set it when the id-based derivation
-   * wouldn't resolve to the published page (e.g. a differing slug or a third-party site).
-   * Use an empty string when the connector has no dedicated page: it resolves to the
-   * connectors index via the doc-links service. When omitted, the URL is derived from
-   * the connector id.
-   */
-  docsUrl?: string;
-  minimumLicense: LicenseType;
-  isTechnicalPreview?: boolean;
-  supportedFeatureIds: Array<
-    | 'alerting'
-    | 'cases'
-    | 'uptime'
-    | 'siem'
-    | 'generativeAIForSecurity'
-    | 'generativeAIForObservability'
-    | 'generativeAIForSearchPlayground'
-    | 'endpointSecurity'
-    | 'workflows'
-    | 'agentBuilder'
-    | 'contextEngine'
-  >;
 }
 
 // ============================================================================
@@ -127,8 +94,6 @@ export interface AuthContext {
   proxySettings?: ProxySettings;
   sslSettings: SSLSettings;
 }
-
-export type AuthMode = 'per-user' | 'shared';
 
 export interface AuthTypeDefinition {
   id: string;
@@ -328,8 +293,6 @@ export interface Transformations {
 // ============================================================================
 // TESTING
 // ============================================================================
-
-export const TEST_CONNECTOR_SUB_ACTION = '_test';
 
 /**
  * Success = return data (use `{}` when there's nothing to report); failure = throw.

@@ -349,6 +349,7 @@
     "@kbn/connector-events-bridge-plugin": "workspace:*",
     "@kbn/connector-schemas": "workspace:*",
     "@kbn/connector-specs": "workspace:*",
+    "@kbn/connector-specs-common": "workspace:*",
     "@kbn/console-plugin": "workspace:*",
     "@kbn/content-connectors-plugin": "workspace:*",
     "@kbn/content-list": "workspace:*",

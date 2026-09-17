@@ -8,7 +8,7 @@
  */
 
 import { type IconType } from '@elastic/eui';
-import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
+import { ConnectorIconsMap } from '@kbn/connector-specs-common';
 import { getBaseConnectorType } from './get_base_connector_type';
 
 export function getConnectorSpecIcon(stepType: string): IconType | undefined {

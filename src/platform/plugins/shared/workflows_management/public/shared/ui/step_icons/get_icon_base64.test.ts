@@ -29,7 +29,7 @@ jest.mock('./icons/elasticsearch.svg', () => ({
 jest.mock('./icons/kibana.svg', () => ({
   KibanaLogo: () => 'KibanaLogo',
 }));
-jest.mock('@kbn/connector-specs/icons', () => ({
+jest.mock('@kbn/connector-specs-common', () => ({
   ConnectorIconsMap: new Map([['.notion', () => null]]),
 }));
 

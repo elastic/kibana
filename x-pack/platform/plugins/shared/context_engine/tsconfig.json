@@ -51,6 +51,7 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/tooling-log",
     "@kbn/connector-specs",
+    "@kbn/connector-specs-common",
     "@kbn/console-plugin",
     "@kbn/core-security-server",
     "@kbn/workflows-ui",

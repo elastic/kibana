@@ -14,7 +14,7 @@ import { CatalogBrowser } from './catalog_browser';
 import { useActiveSolution } from '../hooks/use_active_solution';
 import { useCatalog } from '../hooks/use_catalog';
 
-jest.mock('@kbn/connector-specs/icons', () => ({
+jest.mock('@kbn/connector-specs-common', () => ({
   ConnectorIconsMap: new Map(),
 }));
 jest.mock('../../context/workflows_ui_services');

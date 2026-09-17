@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Max length for `ConnectorSpec.metadata.id` (action / connector type id, e.g. `.slack2`).
- * Distinct from Actions saved-object connector instance ids (`CONNECTOR_ID_MAX_LENGTH` = 36).
- */
-export const MAX_CONNECTOR_TYPE_ID_LENGTH = 64;
+export { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs-common';
 
 /**
  * Connector eventId namespace — strips leading dot.

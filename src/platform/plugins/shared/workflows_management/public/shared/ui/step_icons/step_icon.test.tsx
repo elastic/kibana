@@ -15,7 +15,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 // Activates the __mocks__/use_kibana.ts auto-mock which uses createStartServicesMock()
 jest.mock('../../../hooks/use_kibana');
-jest.mock('@kbn/connector-specs/icons', () => ({
+jest.mock('@kbn/connector-specs-common', () => ({
   ConnectorIconsMap: new Map([['.sharepoint-online', 'logoKibana']]),
 }));
 

@@ -20,7 +20,7 @@ import { TypeIcon } from './type_icon';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 import { useWorkflowsUiServices } from '../../context/workflows_ui_services';
 
-jest.mock('@kbn/connector-specs/icons', () => ({
+jest.mock('@kbn/connector-specs-common', () => ({
   ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
 }));
 jest.mock('../../context/workflows_ui_services');

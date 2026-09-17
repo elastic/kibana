@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
+import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs-common';
 
 import { CONNECTOR_ID_MAX_LENGTH } from '../../../../..';
 import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from '../../../../../inbound_events';

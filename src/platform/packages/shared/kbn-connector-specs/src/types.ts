@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiIconProps } from '@elastic/eui';
-
-export type ConnectorIconProps = Omit<EuiIconProps, 'type'>;
+export type { ConnectorIconProps } from '@kbn/connector-specs-common';

@@ -18,7 +18,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import { type ConnectorSpec, connectorsSpecs } from '@kbn/connector-specs';
-import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
+import { ConnectorIconsMap } from '@kbn/connector-specs-common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';

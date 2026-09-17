@@ -10,7 +10,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
-import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
+import { fromConnectorSpecSchema } from '@kbn/connector-specs-common';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 import {
   fetchConnectorSpec,

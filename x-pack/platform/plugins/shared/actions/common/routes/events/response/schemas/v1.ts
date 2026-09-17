@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { MAX_HANDSHAKE_CHALLENGE_LENGTH } from '@kbn/connector-specs';
+import { MAX_HANDSHAKE_CHALLENGE_LENGTH } from '@kbn/connector-specs-common';
 
 export const ingestEventsResponseSchema = schema.object(
   {

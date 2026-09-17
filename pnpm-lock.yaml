@@ -767,6 +767,9 @@ importers:
       '@kbn/connector-specs':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-connector-specs
+      '@kbn/connector-specs-common':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-connector-specs-common
       '@kbn/console-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/console
@@ -7722,6 +7725,8 @@ importers:
       graphql:
         specifier: ^17.0.2
         version: 17.0.2
+
+  src/platform/packages/shared/kbn-connector-specs-common: {}
 
   src/platform/packages/shared/kbn-content-management-utils: {}
 

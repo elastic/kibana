@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs-common';
 
 export function getSpecConnectorTestExecutionParams(
   params: Record<string, unknown>,

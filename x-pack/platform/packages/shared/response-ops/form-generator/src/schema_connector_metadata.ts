@@ -7,6 +7,6 @@
 
 // In the long-term, we'll want to remove the connector_spec dependency from this package
 // Packages using this shared package should be able to define their own metadata
-import type { BaseMetadata } from '@kbn/connector-specs/src/connector_spec_ui';
+import type { BaseMetadata } from '@kbn/connector-specs-common';
 export type { BaseMetadata };
-export { getMeta, setMeta, addMeta } from '@kbn/connector-specs/src/connector_spec_ui';
+export { getMeta, setMeta, addMeta } from '@kbn/connector-specs-common';

@@ -135,6 +135,7 @@
     "@kbn/search-inference-endpoints",
     "@kbn/response-ops-oauth-hooks",
     "@kbn/connector-specs",
+    "@kbn/connector-specs-common",
     "@kbn/security-plugin-types-public",
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",

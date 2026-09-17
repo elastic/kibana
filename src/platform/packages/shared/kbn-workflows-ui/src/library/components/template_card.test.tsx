@@ -12,7 +12,7 @@ import React from 'react';
 import type { Template } from '@kbn/workflows-library';
 import { TemplateCard } from './template_card';
 
-jest.mock('@kbn/connector-specs/icons', () => ({
+jest.mock('@kbn/connector-specs-common', () => ({
   ConnectorIconsMap: new Map(),
 }));
 jest.mock('../../context/workflows_ui_services');
