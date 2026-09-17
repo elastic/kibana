@@ -45,7 +45,7 @@ const serviceDashboardsRoute = createApmServerRoute({
   params: routeDefinitions.customDashboards.getServiceDashboards.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<GetServiceDashboardsResponse> => {
-    const { context, params } = resources;
+    const { context, params, logger } = resources;
     const { start, end } = params.query;
 
     const { serviceName } = params.path;
@@ -66,6 +66,7 @@ const serviceDashboardsRoute = createApmServerRoute({
       serviceName,
       start,
       end,
+      logger,
     });
 
     return { serviceDashboards: servicesWithDashboards };

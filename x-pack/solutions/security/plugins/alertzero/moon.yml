@@ -48,6 +48,8 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/std'
   - '@kbn/core-security-server'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-http-server'
   - '@kbn/charts-theme'
 tags:
   - plugin
