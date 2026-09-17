@@ -34,12 +34,6 @@ const renderSection = (props: { severity?: SeverityConfig; alertConditions: Aler
 };
 
 describe('SeveritySection', () => {
-  it('disables severity with a callout when multiple conditions are configured', () => {
-    renderSection({ alertConditions: [condition(), condition({ id: 'c2' })] });
-    expect(screen.getByTestId('ruleBuilderSeverityDisabledCallout')).toBeInTheDocument();
-    expect(screen.queryByTestId('ruleBuilderSeverityEnable')).not.toBeInTheDocument();
-  });
-
   it('enables a default single severity when the switch is turned on', () => {
     const { onChange } = renderSection({ alertConditions: [condition()] });
     fireEvent.click(screen.getByTestId('ruleBuilderSeverityEnable'));

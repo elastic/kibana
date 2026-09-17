@@ -1086,6 +1086,28 @@ describe('RuleBuilderAlertConditionStep', () => {
   });
 
   describe('severity', () => {
+    it('shows the single-condition callout and hides severity for multiple conditions', () => {
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({
+        alertConditions: [
+          { id: 'cond-1', metric: 'count', comparator: Comparator.GT, threshold: [100] },
+          { id: 'cond-2', metric: 'count', comparator: Comparator.GT, threshold: [200] },
+        ],
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('ruleBuilderSeverityDisabledCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleBuilderSeverityEnable')).not.toBeInTheDocument();
+    });
+
     it('enables single severity from the step UI', () => {
       const onBuilderStateChange = jest.fn();
       render(

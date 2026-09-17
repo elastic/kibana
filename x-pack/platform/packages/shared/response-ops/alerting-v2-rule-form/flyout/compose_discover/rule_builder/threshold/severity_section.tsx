@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -38,7 +39,6 @@ import {
   generateId,
   getSeverityValidationError,
   isMultiSeveritySupported,
-  isSeveritySupported,
   nextSeverityLevel,
   MAX_SEVERITY_LEVELS,
 } from './form_types';
@@ -72,7 +72,6 @@ const SeverityValidationCallout: React.FC<SeverityValidationCalloutProps> = ({
     </>
   );
 };
-
 interface SeveritySectionProps {
   severity: SeverityConfig | undefined;
   alertConditions: AlertCondition[];
@@ -84,8 +83,7 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
   alertConditions,
   onChange,
 }) => {
-  const severitySupported = isSeveritySupported(alertConditions);
-  const condition = severitySupported ? alertConditions[0] : undefined;
+  const condition = alertConditions[0];
   const multiSupported = condition ? isMultiSeveritySupported(condition.comparator) : false;
 
   const toggleEnabled = (enabled: boolean) =>
@@ -137,191 +135,174 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
 
   return (
     <>
-      <EuiSpacer size="m" />
-      <EuiTitle size="xxs">
-        <h4>
-          <FormattedMessage
-            id="xpack.alertingV2.ruleBuilder.severity.title"
-            defaultMessage="Severity (optional)"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-
-      {!severitySupported ? (
-        <EuiCallOut
-          announceOnMount
-          size="s"
-          color="primary"
-          iconType="info"
-          title={i18n.translate('xpack.alertingV2.ruleBuilder.severity.singleConditionOnly', {
-            defaultMessage:
-              'Severity is only available when a single alert condition is configured.',
-          })}
-          data-test-subj="ruleBuilderSeverityDisabledCallout"
-        />
-      ) : (
-        <>
+      <EuiHorizontalRule margin="s" />
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h4>
+              <FormattedMessage
+                id="xpack.alertingV2.ruleBuilder.severity.title"
+                defaultMessage="Severity"
+              />
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiSwitch
             label={i18n.translate('xpack.alertingV2.ruleBuilder.severity.enableLabel', {
-              defaultMessage: 'Assign a severity to generated alerts',
+              defaultMessage: 'Assign a severity',
             })}
             checked={Boolean(severity)}
             onChange={(e) => toggleEnabled(e.target.checked)}
             data-test-subj="ruleBuilderSeverityEnable"
+            compressed
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {severity && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.alertingV2.ruleBuilder.severity.modeLegend', {
+              defaultMessage: 'Severity mode',
+            })}
+            options={SEVERITY_MODE_OPTIONS.map((option) => ({
+              ...option,
+              'data-test-subj': `ruleBuilderSeverityMode-${option.id}`,
+              ...(option.id === 'multi' && !multiSupported ? { isDisabled: true } : {}),
+            }))}
+            idSelected={severity.mode}
+            onChange={(id) => setMode(id as SeverityMode)}
+            buttonSize="compressed"
+            data-test-subj="ruleBuilderSeverityMode"
           />
 
-          {severity && (
+          {!multiSupported && (
             <>
-              <EuiSpacer size="s" />
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.alertingV2.ruleBuilder.severity.modeLegend', {
-                  defaultMessage: 'Severity mode',
-                })}
-                options={SEVERITY_MODE_OPTIONS.map((option) => ({
-                  ...option,
-                  'data-test-subj': `ruleBuilderSeverityMode-${option.id}`,
-                  ...(option.id === 'multi' && !multiSupported ? { isDisabled: true } : {}),
-                }))}
-                idSelected={severity.mode}
-                onChange={(id) => setMode(id as SeverityMode)}
-                buttonSize="compressed"
-                data-test-subj="ruleBuilderSeverityMode"
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleBuilder.severity.multiUnsupported"
+                  defaultMessage="Multiple severity levels are not available for between comparators."
+                />
+              </EuiText>
+            </>
+          )}
+
+          <EuiSpacer size="s" />
+
+          {severity.mode === 'single' ? (
+            <EuiFormRow
+              label={i18n.translate('xpack.alertingV2.ruleBuilder.severity.levelLabel', {
+                defaultMessage: 'Severity level',
+              })}
+              fullWidth
+            >
+              <EuiSelect
+                fullWidth
+                compressed
+                options={SEVERITY_LEVEL_OPTIONS}
+                value={severity.singleLevelSeverity}
+                onChange={(e) => setSingleLevel(e.target.value as AlertEventSeverity)}
+                data-test-subj="ruleBuilderSeveritySingleLevel"
               />
-
-              {!multiSupported && (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="xpack.alertingV2.ruleBuilder.severity.multiUnsupported"
-                      defaultMessage="Multiple severity levels are not available for between / not between comparators."
-                    />
-                  </EuiText>
-                </>
-              )}
-
-              <EuiSpacer size="s" />
-
-              {severity.mode === 'single' ? (
-                <EuiFormRow
-                  label={i18n.translate('xpack.alertingV2.ruleBuilder.severity.levelLabel', {
-                    defaultMessage: 'Severity level',
-                  })}
-                  fullWidth
-                >
-                  <EuiSelect
-                    fullWidth
-                    compressed
-                    options={SEVERITY_LEVEL_OPTIONS}
-                    value={severity.singleLevelSeverity}
-                    onChange={(e) => setSingleLevel(e.target.value as AlertEventSeverity)}
-                    data-test-subj="ruleBuilderSeveritySingleLevel"
-                  />
-                </EuiFormRow>
-              ) : (
-                <>
-                  {severity.levels.map((level, idx) => (
-                    <React.Fragment key={level.id}>
-                      {idx > 0 && <EuiSpacer size="s" />}
-                      <EuiFlexGroup gutterSize="s" alignItems="flexEnd" wrap>
-                          <EuiFlexItem grow={2}>
-                            <EuiFormRow
-                              label={
-                                idx === 0
-                                  ? i18n.translate(
-                                      'xpack.alertingV2.ruleBuilder.severity.levelLabel',
-                                      { defaultMessage: 'Severity level' }
-                                    )
-                                  : undefined
-                              }
-                              fullWidth
-                            >
-                              <EuiSelect
-                                fullWidth
-                                compressed
-                                options={SEVERITY_LEVEL_OPTIONS}
-                                value={level.severity}
-                                onChange={(e) =>
-                                  updateLevel(idx, {
-                                    severity: e.target.value as AlertEventSeverity,
-                                  })
-                                }
-                                data-test-subj={`ruleBuilderSeverityLevel-${idx}`}
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={1}>
-                            <EuiFormRow
-                              label={
-                                idx === 0
-                                  ? i18n.translate(
-                                      'xpack.alertingV2.ruleBuilder.severity.thresholdLabel',
-                                      { defaultMessage: 'Threshold' }
-                                    )
-                                  : undefined
-                              }
-                              fullWidth
-                            >
-                              {/* Operator is inherited from the alert condition and shown as a
-                                  read-only prepend — it cannot differ per severity level. */}
-                              <EuiFieldNumber
-                                fullWidth
-                                compressed
-                                prepend={condition?.comparator ?? ''}
-                                value={level.threshold}
-                                onChange={(e) =>
-                                  updateLevel(idx, { threshold: parseFloat(e.target.value) || 0 })
-                                }
-                                data-test-subj={`ruleBuilderSeverityThreshold-${idx}`}
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          {severity.levels.length > 1 && (
-                            <EuiFlexItem grow={false}>
-                              <EuiToolTip
-                                content={i18n.translate(
-                                  'xpack.alertingV2.ruleBuilder.severity.removeLevel',
-                                  { defaultMessage: 'Remove severity level' }
-                                )}
-                                disableScreenReaderOutput
-                              >
-                                <EuiButtonIcon
-                                  iconType="trash"
-                                  color="danger"
-                                  aria-label={i18n.translate(
-                                    'xpack.alertingV2.ruleBuilder.severity.removeLevel',
-                                    { defaultMessage: 'Remove severity level' }
-                                  )}
-                                  onClick={() => removeLevel(idx)}
-                                  data-test-subj={`ruleBuilderRemoveSeverityLevel-${idx}`}
-                                />
-                              </EuiToolTip>
-                            </EuiFlexItem>
+            </EuiFormRow>
+          ) : (
+            <>
+              {severity.levels.map((level, idx) => (
+                <React.Fragment key={level.id}>
+                  {idx > 0 && <EuiSpacer size="s" />}
+                  <EuiFlexGroup gutterSize="s" alignItems="flexEnd" wrap>
+                    <EuiFlexItem grow={2}>
+                      <EuiFormRow
+                        label={
+                          idx === 0
+                            ? i18n.translate('xpack.alertingV2.ruleBuilder.severity.levelLabel', {
+                                defaultMessage: 'Severity level',
+                              })
+                            : undefined
+                        }
+                        fullWidth
+                      >
+                        <EuiSelect
+                          fullWidth
+                          compressed
+                          options={SEVERITY_LEVEL_OPTIONS}
+                          value={level.severity}
+                          onChange={(e) =>
+                            updateLevel(idx, { severity: e.target.value as AlertEventSeverity })
+                          }
+                          data-test-subj={`ruleBuilderSeverityLevel-${idx}`}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={1}>
+                      <EuiFormRow
+                        label={
+                          idx === 0
+                            ? i18n.translate(
+                                'xpack.alertingV2.ruleBuilder.severity.thresholdLabel',
+                                { defaultMessage: 'Threshold' }
+                              )
+                            : undefined
+                        }
+                        fullWidth
+                      >
+                        {/* Operator is inherited from the alert condition and shown as a
+                            read-only prepend — it cannot differ per severity level. */}
+                        <EuiFieldNumber
+                          fullWidth
+                          compressed
+                          prepend={condition?.comparator ?? ''}
+                          value={level.threshold}
+                          onChange={(e) =>
+                            updateLevel(idx, { threshold: parseFloat(e.target.value) || 0 })
+                          }
+                          data-test-subj={`ruleBuilderSeverityThreshold-${idx}`}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    {severity.levels.length > 1 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'xpack.alertingV2.ruleBuilder.severity.removeLevel',
+                            { defaultMessage: 'Remove severity level' }
                           )}
-                      </EuiFlexGroup>
-                    </React.Fragment>
-                  ))}
-                  <EuiSpacer size="s" />
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType="plusCircle"
-                    onClick={addLevel}
-                    isDisabled={severity.levels.length >= MAX_SEVERITY_LEVELS}
-                    data-test-subj="ruleBuilderAddSeverityLevel"
-                  >
-                    <FormattedMessage
-                      id="xpack.alertingV2.ruleBuilder.severity.addLevelButton"
-                      defaultMessage="Add severity level"
-                    />
-                  </EuiButtonEmpty>
-                  {condition && (
-                    <SeverityValidationCallout
-                      severity={severity}
-                      comparator={condition.comparator}
-                    />
-                  )}
-                </>
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            iconType="trash"
+                            color="danger"
+                            aria-label={i18n.translate(
+                              'xpack.alertingV2.ruleBuilder.severity.removeLevel',
+                              { defaultMessage: 'Remove severity level' }
+                            )}
+                            onClick={() => removeLevel(idx)}
+                            data-test-subj={`ruleBuilderRemoveSeverityLevel-${idx}`}
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </React.Fragment>
+              ))}
+              <EuiSpacer size="s" />
+              <EuiButtonEmpty
+                size="s"
+                iconType="plusCircle"
+                onClick={addLevel}
+                isDisabled={severity.levels.length >= MAX_SEVERITY_LEVELS}
+                data-test-subj="ruleBuilderAddSeverityLevel"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleBuilder.severity.addLevelButton"
+                  defaultMessage="Add severity level"
+                />
+              </EuiButtonEmpty>
+              {condition && (
+                <SeverityValidationCallout severity={severity} comparator={condition.comparator} />
               )}
             </>
           )}

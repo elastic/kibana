@@ -63,6 +63,7 @@ import {
   normalizeSeverityOrder,
   syncSeverityToConditionThreshold,
   syncConditionToSeverityThreshold,
+  isSeveritySupported,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
@@ -460,6 +461,8 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     },
     [thresholdValues, onThresholdValuesChange]
   );
+
+  const severitySupported = isSeveritySupported(thresholdValues.alertConditions);
 
   return (
     <>
@@ -994,6 +997,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
+              {severitySupported && (
+                <SeveritySection
+                  severity={thresholdValues.severity}
+                  alertConditions={thresholdValues.alertConditions}
+                  onChange={updateSeverity}
+                />
+              )}
             </EuiPanel>
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -1011,12 +1021,23 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         />
       </EuiButtonEmpty>
 
-      {/* ── Severity ── */}
-      <SeveritySection
-        severity={thresholdValues.severity}
-        alertConditions={thresholdValues.alertConditions}
-        onChange={updateSeverity}
-      />
+      {/* ── Non-configurable severity notice ── */}
+      {!severitySupported && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="primary"
+            iconType="info"
+            title={i18n.translate('xpack.alertingV2.ruleBuilder.severity.singleConditionOnly', {
+              defaultMessage:
+                'Severity is not configurable when multiple threshold conditions are defined.',
+            })}
+            data-test-subj="ruleBuilderSeverityDisabledCallout"
+          />
+        </>
+      )}
     </>
   );
 };
