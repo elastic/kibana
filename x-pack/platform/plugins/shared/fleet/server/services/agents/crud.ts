@@ -233,7 +233,12 @@ export async function getAgentsByKuery(
     aggregations?: Record<string, AggregationsAggregationContainer>;
     /**
      * When false, skip the agent-status runtime field and the inactivity-timeout SO scan it
-     * requires. Defaults to true. Forced on when `getStatusSummary` is true.
+     * requires. Defaults to true. Forced on when `getStatusSummary` is true or the kuery
+     * references `status`.
+     *
+     * Opting out replaces `NOT status:unenrolled` with the stored `active:true` field, so
+     * unenrolled agents stay excluded. `showInactive: false` cannot exclude `status:inactive`
+     * without the runtime field (inactivity is policy-timeout based).
      */
     includeStatusRuntimeField?: boolean;
   }
@@ -295,17 +300,26 @@ export async function getAgentsByKuery(
     }
   }
 
-  if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
-  }
+  // Status kuery (`status:inactive`, `status:unenrolled`, …) is only queryable with the
+  // runtime field. Force it on when the caller already referenced `status`.
+  const kueryReferencesStatus = Boolean(kuery?.toLowerCase().includes('status:'));
+  const shouldIncludeStatusRuntimeField =
+    includeStatusRuntimeField || getStatusSummary || kueryReferencesStatus;
 
-  if (!includeUnenrolled(kuery)) {
-    filters.push(ENROLLED_AGENT_CONDITION);
+  if (shouldIncludeStatusRuntimeField) {
+    if (showInactive === false) {
+      filters.push(ACTIVE_AGENT_CONDITION);
+    }
+    if (!includeUnenrolled(kuery)) {
+      filters.push(ENROLLED_AGENT_CONDITION);
+    }
+  } else {
+    // `status` is unmapped without the runtime field, so `NOT status:unenrolled` would
+    // match everything. The runtime script treats missing/false `active` as unenrolled.
+    filters.push('active:true');
   }
 
   const kueryNode = _joinFilters(filters);
-
-  const shouldIncludeStatusRuntimeField = includeStatusRuntimeField || getStatusSummary;
   const runtimeFields = {
     ...(shouldIncludeStatusRuntimeField ? await buildAgentStatusRuntimeField(soClient) : {}),
     ...SIGNALS_RUNTIME_FIELD,
