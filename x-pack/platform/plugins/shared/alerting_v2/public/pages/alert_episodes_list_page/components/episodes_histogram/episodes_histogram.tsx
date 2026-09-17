@@ -33,7 +33,7 @@ import { buildEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/querie
 import { computeBucketInterval } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
 import { HISTOGRAM_BREAKDOWN_COLUMNS } from '@kbn/alerting-v2-episodes-ui/constants';
 import { buildModifiedVisAttributes } from '@kbn/alerting-v2-episodes-ui/utils/episodes_color_mapping';
-import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ApplicationStart, CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -58,6 +58,7 @@ interface EpisodesHistogramServices {
   expressions: ExpressionsStart;
   fieldFormats: FieldFormatsStart;
   http: HttpStart;
+  notifications?: CoreStart['notifications'];
   lens: LensPublicStart;
   spaces: SpacesPluginStart;
   storage: Storage;
@@ -110,7 +111,12 @@ export const EpisodesHistogram = ({
     error,
     refetch,
   } = useEpisodesHistogramQuery({
-    services: { expressions: services.expressions, spaces: services.spaces, http: services.http },
+    services: {
+      expressions: services.expressions,
+      spaces: services.spaces,
+      http: services.http,
+      notifications: services.notifications,
+    },
     filterState,
     timeRange,
     bucketInterval,
@@ -252,6 +258,7 @@ export const EpisodesHistogram = ({
       {error ? (
         <EuiCallOut
           announceOnMount
+          data-test-subj="episodesHistogramError"
           title={EPISODES_HISTOGRAM_QUERY_ERROR}
           color="danger"
           iconType="error"
