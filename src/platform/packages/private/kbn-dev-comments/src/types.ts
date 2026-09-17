@@ -102,13 +102,6 @@ export interface CommentPatch {
   reply?: { author: CommentAuthor; text: string };
 }
 
-/** Every comment as one JSON document, screenshots included. */
-export interface CommentsExport {
-  version: 2;
-  exportedAt: string;
-  comments: Comment[];
-}
-
 /**
  * Persistence implemented by the host. Comments are resolved, never deleted.
  * Hosts reject writes beyond their limits with an error whose message can be
@@ -120,8 +113,6 @@ export interface CommentsApi {
   getSnapshot(id: string): Promise<CommentSnapshot | undefined>;
   create(input: NewComment): Promise<Comment>;
   update(id: string, patch: CommentPatch): Promise<Comment>;
-  /** Every comment with its screenshot image. */
-  exportAll(): Promise<CommentsExport>;
 }
 
 export interface CommentsLocationService {

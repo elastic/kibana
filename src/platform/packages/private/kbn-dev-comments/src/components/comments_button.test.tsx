@@ -11,9 +11,18 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createInMemoryCommentsApi } from '../lib/in_memory_api';
+import type { CommentsHostServices } from '../types';
 import { CommentsButton } from './comments_button';
 
 const flush = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+
+const createServices = (overrides: Partial<CommentsHostServices> = {}): CommentsHostServices => ({
+  api: createInMemoryCommentsApi(),
+  location: { getPageKey: () => '/page', getPath: () => '/page', subscribe: () => () => {} },
+  navigateToPath: async () => {},
+  getCurrentUser: async () => ({ username: 'dana', fullName: 'Dana' }),
+  ...overrides,
+});
 
 const query = (selector: string): HTMLElement => {
   const element = document.querySelector<HTMLElement>(selector);
@@ -63,19 +72,7 @@ describe('CommentsButton', () => {
     render(
       <EuiThemeProvider>
         <div id="toolbar">
-          <CommentsButton
-            services={{
-              api,
-              location: {
-                getPageKey: () => '/page',
-                getPath: () => '/page',
-                subscribe: () => () => {},
-              },
-              navigateToPath: async () => {},
-              getCurrentUser: async () => ({ username: 'dana', fullName: 'Dana' }),
-              ignoreSelectors: ['#toolbar'],
-            }}
-          />
+          <CommentsButton services={createServices({ api, ignoreSelectors: ['#toolbar'] })} />
         </div>
       </EuiThemeProvider>
     );
@@ -102,5 +99,25 @@ describe('CommentsButton', () => {
         }),
       }),
     ]);
+  });
+
+  it('leaves comment mode from its own button without the host listing it in `ignoreSelectors`', async () => {
+    render(
+      <EuiThemeProvider>
+        <CommentsButton services={createServices()} />
+      </EuiThemeProvider>
+    );
+    await flush();
+    const button = screen.getByTestId('devCommentsButton');
+
+    // Real clicks have `detail` 1; on page UI, comment mode would swallow the click and pick the element.
+    fireEvent.click(button, { detail: 1 });
+    await screen.findByTestId('devCommentsPanel');
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(button, { detail: 1 });
+    await waitFor(() => expect(screen.queryByTestId('devCommentsPanel')).toBeNull());
+    expect(button).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.queryByTestId('devCommentsComposer')).toBeNull();
   });
 });

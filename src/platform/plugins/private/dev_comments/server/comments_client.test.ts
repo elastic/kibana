@@ -283,43 +283,24 @@ describe('CommentsClient', () => {
     });
   });
 
-  describe('list and exportAll', () => {
-    it('reads comments without the quota document, rewriting first-version records; only the export has the screenshot images', async () => {
+  describe('list', () => {
+    it('reads comments without the quota document or screenshot images, rewriting first-version records', async () => {
       esClient.search.mockResponse(searchResponse([{ _id: 'a', _source: legacyStored }]));
 
       const [listed] = await client().list();
-      const exported = await client().exportAll();
 
-      const query = { bool: { must_not: { ids: { values: [QUOTA_ID] } } } };
-      expect(esClient.search).toHaveBeenNthCalledWith(
-        1,
+      expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           size: MAX_COMMENTS,
-          query,
+          query: { bool: { must_not: { ids: { values: [QUOTA_ID] } } } },
           _source_excludes: ['snapshot.image'],
         })
-      );
-      expect(esClient.search).toHaveBeenNthCalledWith(
-        2,
-        expect.not.objectContaining({ _source_excludes: expect.anything() })
-      );
-      expect(esClient.search).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ size: MAX_COMMENTS, query })
       );
       expect(listed).toEqual(
         expect.objectContaining({
           id: 'a',
           trail: [],
           route: { pageKey: '/app/x#/view/y', path: '/app/x?q=1#/view/y?_g=(a:b)' },
-        })
-      );
-      expect(exported.version).toBe(2);
-      expect(exported.comments[0]).toEqual(
-        expect.objectContaining({
-          id: 'a',
-          route: { pageKey: '/app/x#/view/y', path: '/app/x?q=1#/view/y?_g=(a:b)' },
-          snapshot: legacyStored.snapshot,
         })
       );
     });

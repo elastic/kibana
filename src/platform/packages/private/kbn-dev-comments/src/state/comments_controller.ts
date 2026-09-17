@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DISPLAY_NAME_STORAGE_KEY, IGNORE_ATTR } from '../constants';
+import { DISPLAY_NAME_STORAGE_KEY } from '../constants';
 import { buildAnchor } from '../lib/anchor';
 import { isSafeRelativePath } from '../lib/route';
 import { createSnapshot } from '../lib/snapshot';
@@ -16,10 +16,12 @@ import { createTrailRecorder } from '../lib/trail';
 import type {
   Comment,
   CommentAuthor,
+  CommentRoute,
   CommentsHostServices,
   CommentsUser,
   ElementAnchor,
   NewComment,
+  TrailStep,
 } from '../types';
 import { createStore, type Store } from './store';
 
@@ -30,6 +32,10 @@ export interface PendingComment {
   anchor: ElementAnchor;
   /** Viewport coordinates of the click, used when `element` leaves the DOM before the comment is saved. */
   point: { x: number; y: number };
+  /** The page the element was picked on; the comment is made there even when the page changes under its save. */
+  route: CommentRoute;
+  /** The author's clicks on that page up to the pick, see `Comment.trail`. */
+  trail: TrailStep[];
   /** The draft is being saved; until that ends it can neither move nor be discarded. */
   saving: boolean;
 }
@@ -89,8 +95,6 @@ export interface CommentsController {
   /** Ends the guide; with `found`, opens the comment it led to. */
   stopGuide(found?: boolean): void;
   setOverlayOpen(open: boolean): void;
-  /** Downloads every comment, screenshots included, as JSON. */
-  exportAll(): Promise<void>;
   dismissNotice(): void;
 }
 
@@ -98,21 +102,6 @@ const NOTICE_TIMEOUT_MS = 4000;
 
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
-
-const downloadJson = (filename: string, value: unknown) => {
-  const url = URL.createObjectURL(
-    new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' })
-  );
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  // Layer UI: in comment mode, clicks on anything else are swallowed before they act.
-  link.setAttribute(IGNORE_ATTR, 'true');
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-};
 
 // Storage can be disabled or full (private browsing); the name then lasts for the session only.
 const readStoredDisplayName = (): string => {
@@ -270,15 +259,17 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     if (pageKey === previous) {
       return;
     }
-    // A guide survives the navigation it asked for (to the comment's page), nothing else.
+    // A guide survives the navigation it asked for (to the comment's page), nothing
+    // else; a draft being saved is kept until the save settles, so that a failure
+    // can hand it back with its text instead of losing it.
     const guided = comments.find(({ id }) => id === guideId);
-    store.setState({
+    store.setState((state) => ({
       pageKey,
-      pending: null,
       activeThreadId: null,
       focusPinId: null,
       guideId: guided?.route.pageKey === pageKey ? guideId : null,
-    });
+      ...droppingDraft(state),
+    }));
     void load();
   };
 
@@ -345,9 +336,18 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       if (store.getState().pending?.saving) {
         return;
       }
-      const anchor = buildAnchor(element, { point, hit });
+      // The draft describes the moment of commenting: the element, the page it is on
+      // and the clicks that led there. Saving takes time, during which the page may change.
       store.setState({
-        pending: { id: ++draftSequence, element, anchor, point, saving: false },
+        pending: {
+          id: ++draftSequence,
+          element,
+          anchor: buildAnchor(element, { point, hit }),
+          point,
+          route: { pageKey: location.getPageKey(), path: location.getPath() },
+          trail: trail.steps(),
+          saving: false,
+        },
         activeThreadId: null,
         focusPinId: null,
       });
@@ -362,16 +362,14 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       if (!draft || draft.saving) {
         return;
       }
-      // Everything describing the moment of commenting is taken now: the screenshot
-      // and the request take time, during which the page may change or be left.
       const input: NewComment = {
         author: signAs(displayName),
         text: text.trim(),
         resolved: false,
         replies: [],
-        route: { pageKey: location.getPageKey(), path: location.getPath() },
+        route: draft.route,
         anchor: draft.anchor,
-        trail: trail.steps(),
+        trail: draft.trail,
       };
       const updateDraft = (changes: Partial<PendingComment>) =>
         store.setState((state) =>
@@ -380,14 +378,21 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       updateDraft({ saving: true });
       try {
         const { captureViewport } = services;
+        // The screenshot shows the page the comment is about; a draft handed back by a
+        // failed save after the page changed is saved without one.
         const snapshot =
-          attachScreenshot && captureViewport ? await createSnapshot(captureViewport) : undefined;
+          attachScreenshot && captureViewport && location.getPageKey() === draft.route.pageKey
+            ? await createSnapshot(captureViewport)
+            : undefined;
         const created = await api.create({ ...input, ...(snapshot ? { snapshot } : {}) });
         writes += 1;
+        // The new comment opens with its pin focused, unless the page changed under
+        // the save: its pin is on the page it was made on.
         store.setState((state) => ({
           comments: [...state.comments, created],
-          ...(state.pending?.id === draft.id
-            ? { pending: null, activeThreadId: created.id, focusPinId: created.id }
+          ...(state.pending?.id === draft.id ? { pending: null } : {}),
+          ...(state.pending?.id === draft.id && state.pageKey === draft.route.pageKey
+            ? { activeThreadId: created.id, focusPinId: created.id }
             : {}),
         }));
       } catch (error) {
@@ -495,21 +500,6 @@ export const createCommentsController = (services: CommentsHostServices): Commen
 
     setOverlayOpen(open) {
       store.setState({ overlayOpen: open });
-    },
-
-    async exportAll() {
-      try {
-        const payload = await api.exportAll();
-        downloadJson(`comments-${payload.exportedAt.slice(0, 10)}.json`, payload);
-      } catch (error) {
-        notify(
-          'error',
-          i18n.translate('devComments.notice.exportFailed', {
-            defaultMessage: 'Export failed: {message}',
-            values: { message: errorMessage(error) },
-          })
-        );
-      }
     },
 
     dismissNotice() {

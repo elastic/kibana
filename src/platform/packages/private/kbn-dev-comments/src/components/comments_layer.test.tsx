@@ -12,7 +12,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createInMemoryCommentsApi } from '../lib/in_memory_api';
 import { createCommentsController } from '../state/comments_controller';
-import type { Comment } from '../types';
+import type { Comment, CommentsHostServices } from '../types';
 import { CommentsProvider } from './comments_context';
 import { CommentsLayer } from './comments_layer';
 
@@ -61,12 +61,13 @@ describe('CommentsLayer', () => {
 
   afterEach(() => page.remove());
 
-  const renderLayer = async () => {
+  const renderLayer = async (overrides: Partial<CommentsHostServices> = {}) => {
     const controller = createCommentsController({
       api: createInMemoryCommentsApi([seeded]),
       location: { getPageKey: () => '/page', getPath: () => '/page', subscribe: () => () => {} },
       navigateToPath: async () => {},
       getCurrentUser: async () => ({ username: 'dana' }),
+      ...overrides,
     });
     controller.start();
     render(
@@ -115,18 +116,6 @@ describe('CommentsLayer', () => {
     );
   });
 
-  it('closes the panel menu with Escape without leaving comment mode', async () => {
-    const controller = await renderLayer();
-    act(() => controller.setActive(true));
-    fireEvent.click(await screen.findByTestId('devCommentsPanelMenu'));
-    await screen.findByTestId('devCommentsExport');
-
-    escape();
-
-    await waitFor(() => expect(screen.queryByTestId('devCommentsExport')).toBeNull());
-    expect(controller.store.getState().active).toBe(true);
-  });
-
   it('keeps a draft that is being saved when Escape is pressed, and discards one that is not', async () => {
     const controller = await renderLayer();
     act(() => controller.setActive(true));
@@ -152,5 +141,40 @@ describe('CommentsLayer', () => {
     escape();
     expect(controller.store.getState().pending).toBeNull();
     expect(controller.store.getState().active).toBe(true);
+  });
+
+  it('keeps the comment being written, text included, when the page changes under a save that then fails', async () => {
+    const listeners = new Set<() => void>();
+    let path = '/page';
+    let rejectCreate!: (error: Error) => void;
+    const api = createInMemoryCommentsApi([seeded]);
+    const controller = await renderLayer({
+      api: { ...api, create: () => new Promise((_, reject) => (rejectCreate = reject)) },
+      location: {
+        getPageKey: () => path,
+        getPath: () => path,
+        subscribe: (listener) => {
+          listeners.add(listener);
+          return () => listeners.delete(listener);
+        },
+      },
+    });
+    act(() => controller.setActive(true));
+    act(() => controller.pick(target(), { x: 20, y: 20 }));
+    fireEvent.change(await screen.findByTestId('devCommentsComposerInput'), {
+      target: { value: 'Kept' },
+    });
+    fireEvent.click(screen.getByTestId('devCommentsComposerSubmit'));
+    await waitFor(() => expect(controller.store.getState().pending?.saving).toBe(true));
+
+    act(() => {
+      path = '/other';
+      listeners.forEach((listener) => listener());
+    });
+    act(() => rejectCreate(new Error('offline')));
+    await flush();
+
+    expect(controller.store.getState().pending?.saving).toBe(false);
+    expect(screen.getByTestId('devCommentsComposerInput')).toHaveValue('Kept');
   });
 });

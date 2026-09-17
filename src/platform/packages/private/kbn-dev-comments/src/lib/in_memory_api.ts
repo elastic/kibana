@@ -70,10 +70,5 @@ export const createInMemoryCommentsApi = (initial: Comment[] = []): CommentsApi 
       comments.set(id, updated);
       return withoutImage(updated);
     },
-    exportAll: async () => ({
-      version: 2,
-      exportedAt: new Date().toISOString(),
-      comments: Array.from(comments.values()),
-    }),
   };
 };

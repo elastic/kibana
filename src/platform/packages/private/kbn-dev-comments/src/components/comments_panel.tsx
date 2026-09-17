@@ -13,14 +13,11 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiNotificationBadge,
   EuiPanel,
-  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -29,15 +26,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IGNORE_ATTR } from '../constants';
 import type { Comment } from '../types';
 import { useComments, useCommentsState } from './comments_context';
 import { useLayerPortal, useLayerZIndex } from './hooks';
 import { threadSize } from './pins_layer';
 import { useResolvedAnchors } from './resolved_anchors';
 import { AuthorMeta, ResolveButton, ThreadContent, commentTextStyles } from './thread_content';
-
-const ignoreProps = { [IGNORE_ATTR]: true } as Record<string, unknown>;
 
 const clampedTextStyles = css`
   display: -webkit-box;
@@ -212,75 +206,6 @@ const HeaderButton = ({
   </EuiToolTip>
 );
 
-/** "⋯" menu of the panel header: export. */
-const PanelMenu = () => {
-  const controller = useComments();
-  const zIndex = useLayerZIndex();
-  const pending = useCommentsState((state) => state.pending);
-  const [isOpen, setIsOpen] = useState(false);
-
-  // Page clicks never reach EUI's outside-click detection in comment mode; they start a comment instead.
-  useEffect(() => setIsOpen(false), [pending]);
-
-  // Escape closes the open menu and nothing else. The layer handles Escape on
-  // `document` in the capture phase; `window` comes before it in that phase.
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.stopPropagation();
-        setIsOpen(false);
-      }
-    };
-    window.addEventListener('keydown', onKeyDown, true);
-    return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, [isOpen]);
-
-  const run = (action: () => unknown) => () => {
-    setIsOpen(false);
-    void action();
-  };
-
-  const label = i18n.translate('devComments.panel.menu', {
-    defaultMessage: 'More actions',
-  });
-
-  return (
-    <EuiPopover
-      aria-label={label}
-      button={
-        <HeaderButton
-          iconType="ellipsis"
-          label={label}
-          onClick={() => setIsOpen((open) => !open)}
-          data-test-subj="devCommentsPanelMenu"
-        />
-      }
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="upRight"
-      panelProps={ignoreProps}
-      zIndex={zIndex.popover}
-    >
-      <EuiContextMenuPanel
-        items={[
-          <EuiContextMenuItem
-            key="export"
-            icon="download"
-            onClick={run(() => controller.exportAll())}
-            data-test-subj="devCommentsExport"
-          >
-            {i18n.translate('devComments.panel.export', { defaultMessage: 'Export all' })}
-          </EuiContextMenuItem>,
-        ]}
-      />
-    </EuiPopover>
-  );
-};
-
 /**
  * Floating list of every comment, grouped by page with the current page first.
  * Selecting a comment opens its pin, or the thread inline when its element is
@@ -359,9 +284,6 @@ export const CommentsPanel = () => {
           >
             {comments.length}
           </EuiNotificationBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <PanelMenu />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <HeaderButton

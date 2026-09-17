@@ -59,7 +59,6 @@ const createHost = () => {
         replies: patch.reply ? [{ id: 'reply', createdAt: '', ...patch.reply }] : [],
       })
     ),
-    exportAll: jest.fn(async () => ({ version: 2 as const, exportedAt: '', comments: [] })),
   };
   const services: CommentsHostServices = {
     api,
@@ -163,7 +162,7 @@ describe('createCommentsController', () => {
   });
 
   describe('saving', () => {
-    it('describes the moment of commenting before the request and completes only the originating draft', async () => {
+    it('describes the moment of commenting before the request and keeps the draft until the save settles', async () => {
       const { api, services } = createHost();
       const controller = createCommentsController(services);
       const create = deferred<Comment>();
@@ -197,16 +196,63 @@ describe('createCommentsController', () => {
         })
       );
 
-      // The page changes under the save; the draft is dropped but the result is still added.
+      // The page changes under the save; the draft stays until the result is in, which is
+      // added without being opened: its pin is on the page it was made on.
       await services.navigateToPath('/app/two');
-      expect(controller.store.getState().pending).toBeNull();
+      expect(controller.store.getState().pending).toEqual(
+        expect.objectContaining({ saving: true })
+      );
       create.resolve(comment('created'));
       await saving;
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ pending: null, activeThreadId: null, focusPinId: null })
+      );
       expect(controller.store.getState().comments.map(({ id }) => id)).toEqual(['created']);
-      expect(controller.store.getState().activeThreadId).toBeNull();
 
       controller.setActive(false);
       expect(controller.store.getState().active).toBe(false);
+    });
+
+    it('hands a draft back when its save fails after the page changed, and then saves it for the page it was made on', async () => {
+      const { api, services } = createHost();
+      const captureViewport = jest.fn(async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 0; // nothing to encode in jsdom; the capture is what is checked
+        return canvas;
+      });
+      const controller = createCommentsController({ ...services, captureViewport });
+      const create = deferred<Comment>();
+      api.create.mockReturnValueOnce(create.promise);
+      controller.start();
+
+      controller.setActive(true);
+      controller.pick(target(), { x: 5, y: 5 });
+      const saving = controller.save('Hello', { attachScreenshot: true, displayName: 'Dana' });
+      await flush();
+      expect(captureViewport).toHaveBeenCalledTimes(1);
+      await services.navigateToPath('/app/two');
+      create.reject(new Error('offline'));
+      await saving;
+
+      // The composer is back with the draft, on the new page.
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({
+          pageKey: '/app/two',
+          pending: expect.objectContaining({ element: target(), saving: false }),
+          notice: { type: 'error', message: 'Could not save the comment: offline' },
+        })
+      );
+
+      // Saved again, the comment is made where its element was, without a screenshot of this page.
+      await controller.save('Hello', { attachScreenshot: true, displayName: 'Dana' });
+      expect(captureViewport).toHaveBeenCalledTimes(1);
+      expect(api.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({ route: { pageKey: '/app/one', path: '/app/one?x=1' } })
+      );
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ pending: null, activeThreadId: null })
+      );
+      expect(controller.store.getState().comments).toHaveLength(1);
     });
 
     it('lets comment mode be left once the save has settled, and reports failures while keeping the draft', async () => {

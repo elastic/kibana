@@ -14,7 +14,6 @@ import type {
   CommentPatch,
   CommentRoute,
   CommentSnapshot,
-  CommentsExport,
   NewComment,
   TrailStep,
 } from '../common';
@@ -95,8 +94,19 @@ export class CommentsClient {
 
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
-  public list(): Promise<Comment[]> {
-    return this.search({ excludeImage: true });
+  /** Every comment, oldest first, without screenshot images (see `getSnapshot`). */
+  public async list(): Promise<Comment[]> {
+    await this.ensureIndex();
+    const response = await this.esClient.search<StoredComment>({
+      index: COMMENTS_INDEX,
+      size: MAX_COMMENTS,
+      query: COMMENTS_QUERY,
+      sort: [{ createdAt: 'asc' }],
+      _source_excludes: [SNAPSHOT_IMAGE_FIELD],
+    });
+    return response.hits.hits.flatMap((hit) =>
+      hit._source ? [fromStored(hit._id ?? '', hit._source)] : []
+    );
   }
 
   public async getSnapshot(id: string): Promise<CommentSnapshot | undefined> {
@@ -165,29 +175,6 @@ export class CommentsClient {
     }
     const updated = response.get?._source;
     return updated ? withoutImage(fromStored(id, updated)) : undefined;
-  }
-
-  /** Every comment with its screenshot. */
-  public async exportAll(): Promise<CommentsExport> {
-    return {
-      version: 2,
-      exportedAt: new Date().toISOString(),
-      comments: await this.search({ excludeImage: false }),
-    };
-  }
-
-  private async search({ excludeImage }: { excludeImage: boolean }): Promise<Comment[]> {
-    await this.ensureIndex();
-    const response = await this.esClient.search<StoredComment>({
-      index: COMMENTS_INDEX,
-      size: MAX_COMMENTS,
-      query: COMMENTS_QUERY,
-      sort: [{ createdAt: 'asc' }],
-      ...(excludeImage ? { _source_excludes: [SNAPSHOT_IMAGE_FIELD] } : {}),
-    });
-    return response.hits.hits.flatMap((hit) =>
-      hit._source ? [fromStored(hit._id ?? '', hit._source)] : []
-    );
   }
 
   /**

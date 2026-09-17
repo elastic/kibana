@@ -38,11 +38,6 @@ export const registerCommentsRoutes = (router: IRouter, client: Promise<Comments
   );
 
   router.get(
-    { path: `${COMMENTS_API_PATH}/export`, security, options: access, validate: false },
-    async (_context, _request, response) => response.ok({ body: await (await client).exportAll() })
-  );
-
-  router.get(
     {
       path: `${COMMENTS_API_PATH}/{id}/snapshot`,
       security,

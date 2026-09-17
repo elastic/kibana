@@ -43,15 +43,12 @@ describe('createInMemoryCommentsApi', () => {
     expect((await api.list()).map(({ id }) => id)).toEqual(['comment-1', 'comment-2']);
   });
 
-  it('lists without screenshot images, and exports with them', async () => {
+  it('lists without screenshot images, which are fetched on demand', async () => {
     const api = createInMemoryCommentsApi([seeded]);
 
     const [listed] = await api.list();
-    const exported = await api.exportAll();
 
     expect(listed.snapshot).toEqual({ ...seeded.snapshot, image: undefined });
     expect(await api.getSnapshot(seeded.id)).toEqual(seeded.snapshot);
-    expect(exported.version).toBe(2);
-    expect(exported.comments[0].snapshot).toEqual(seeded.snapshot);
   });
 });

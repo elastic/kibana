@@ -10,7 +10,7 @@ The package is host-agnostic: everything it needs (persistence, location, naviga
 import { CommentsButton, type CommentsHostServices } from '@kbn/dev-comments';
 
 const services: CommentsHostServices = {
-  api,            // CommentsApi: list / getSnapshot / create / update / exportAll
+  api,            // CommentsApi: list / getSnapshot / create / update
   location,       // getPageKey / getPath (both relative to the host's origin and base path) / subscribe
   navigateToPath, // opens a path within the host, in-app when possible
   getCurrentUser, // { username, fullName? }
@@ -29,7 +29,7 @@ The button (or `⌘⇧K` / `Ctrl+Shift+K`) switches comment mode on and off. Whi
 
 - The page is not interactable: pointer and keyboard input is swallowed so the UI state under review stays as it is, the cursor becomes a comment bubble and a click starts a comment on the element under it. Clicking elsewhere while writing moves the comment there. `Tab` still moves focus through the page, and `Enter` or `Space` starts a comment on the focused element.
 - Pins mark the current page's comments, each showing its author's avatar (the same color and initial as in the thread). Resolved threads keep their pin, with a wider, green border.
-- The "Comments" panel lists every comment, grouped by the page it was made on, the current page first. It can be minimized to its header (comment count, "⋯" menu with export, close); closing it leaves comment mode.
+- The "Comments" panel lists every comment, grouped by the page it was made on, the current page first. It can be minimized to its header (comment count, close); closing it leaves comment mode.
 - The layer's own UI, and anything matching `ignoreSelectors`, stays interactable.
 - Leaving comment mode returns focus to where it was before.
 
@@ -52,14 +52,13 @@ Comments whose element is not on screen (their flyout is closed, the UI changed,
 | --- | --- |
 | `⌘⇧K` / `Ctrl+Shift+K` | Toggle comment mode |
 | `Tab`, `Enter` / `Space` | In comment mode: move through the page, start a comment on the focused element |
-| `Esc` | Close the panel menu; else discard the comment being written (unless it is being saved), stop "Take me there", close the open thread, then leave comment mode |
+| `Esc` | Discard the comment being written (unless it is being saved), stop "Take me there", close the open thread, then leave comment mode |
 | `⌘↵` / `Ctrl+Enter` | Submit a comment or reply |
 
 ## Notes for hosts
 
 - `CommentsApi.list()` returns every comment, without screenshot images; `getSnapshot(id)` fetches an image on demand.
 - `CommentsApi.update(id, patch)` should apply the patch atomically on the host's side: two readers replying at once must both get their reply in. Errors thrown by the API are shown to the user with their `message`, so hosts can explain limits (comment count, replies per comment) there.
-- "Export all" downloads every comment as JSON (`CommentsExport`, `version: 2`), screenshots included; there is no import.
 - `location.getPageKey()` identifies a page without anything that varies between visits (for example the pathname plus the hash route, without query state); `location.getPath()` is what `navigateToPath` gets back for "Take me there". `isSafeRelativePath` is exported for hosts that want to check paths themselves.
 - All UI the package renders carries `IGNORE_ATTR` (`data-devtool-ignore`), the attribute in-page developer tools use to leave each other alone. Hosts can mark their own UI with it or list it in `ignoreSelectors`.
 - `captureViewport` should render the viewport at its size in CSS pixels and leave out everything marked with `IGNORE_ATTR`, so the layer's own pins and popovers do not end up in the screenshot. `getEffectiveBackgroundColor(element)` is exported for such implementations: it returns the first non-transparent background color up the tree, so screenshots keep the page's color mode.
