@@ -205,7 +205,7 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
         {
           meta: {
             description:
-              'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.',
+              'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent configuration; `manager` adds deleting the agent and managing its access control.',
           },
         }
       ),
