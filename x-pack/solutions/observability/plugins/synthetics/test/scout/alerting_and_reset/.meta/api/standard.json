@@ -1,5 +1,5 @@
 {
-  "sha1": "fd34558646a98c2948c162713e8d1db85697e485",
+  "sha1": "fbe20ab225f38fccdba2068b98c7ace4f61d51d6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -268,6 +268,132 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
         "line": 203,
         "column": 25
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-2a45512b10497e8",
+      "title": "Synthetics manage rules privilege does not let a read-only user create a rule",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 99,
+        "column": 27
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-eb10c137e1bb265",
+      "title": "Synthetics manage rules privilege lets a read user with can_manage_rules manage a rule",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 102,
+        "column": 37
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-00fbde421470293",
+      "title": "Synthetics manage rules privilege does not let a read user with can_manage_rules write monitors, settings, params, or private locations",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 166,
+        "column": 28
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-341aea6a7844c49",
+      "title": "Synthetics manage rules privilege does not let a read-only user enable or update default alerting",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 203,
+        "column": 6
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-6de230ddfe36819",
+      "title": "Synthetics manage rules privilege lets a read user with can_manage_rules enable default alerting",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 227,
+        "column": 10
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-8744401896c479b",
+      "title": "Synthetics manage rules privilege does not let a read-only user inspect status or TLS rules",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 237,
+        "column": 7
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-5fbc0194638957c",
+      "title": "Synthetics manage rules privilege lets a read user with can_manage_rules inspect status and TLS rules",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 250,
+        "column": 27
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-0d121d36a5033e6",
+      "title": "Synthetics manage rules privilege keeps rule management available to all users",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 258,
+        "column": 78
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-fc6ea4cbb43447f",
+      "title": "Synthetics manage rules privilege keeps rule management available to minimal_all users",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 267,
+        "column": 27
       }
     },
     {

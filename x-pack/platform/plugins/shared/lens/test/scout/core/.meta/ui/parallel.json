@@ -1,5 +1,5 @@
 {
-  "sha1": "a7b1316ad48ae8eadceb332e98f81f47eeb08726",
+  "sha1": "6b41d5433e5871713a83b7af8c86dd4f6d6f9b01",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -778,8 +778,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
-        "line": 88,
-        "column": 20
+        "line": 127,
+        "column": 15
+      }
+    },
+    {
+      "id": "a67f0ea6f9cf137-9a4508d4ebdd9a6",
+      "title": "Dashboard with ES|QL Lens panel cancels the search request when navigating away cancels both ES|QL and classic requests when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
+        "line": 158,
+        "column": 95
       }
     },
     {
@@ -1355,6 +1368,19 @@
       }
     },
     {
+      "id": "79b736095ef203d-841136227d41f25",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline for a FORK query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 91,
+        "column": 49
+      }
+    },
+    {
       "id": "5dffcb3ca98df72-085afac13830272",
       "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses inline data view spec",
       "expectedStatus": "passed",
@@ -1507,7 +1533,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 59,
-        "column": 9
+        "column": 27
       }
     },
     {
@@ -1520,7 +1546,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 84,
-        "column": 18
+        "column": 22
       }
     },
     {
@@ -1533,7 +1559,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 110,
-        "column": 9
+        "column": 13
       }
     },
     {
@@ -1545,7 +1571,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 132,
+        "line": 135,
         "column": 4
       }
     },
@@ -1559,7 +1585,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 158,
-        "column": 25
+        "column": 20
       }
     },
     {
@@ -1572,7 +1598,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 187,
-        "column": 25
+        "column": 9
       }
     },
     {
@@ -1584,8 +1610,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 231,
-        "column": 31
+        "line": 233,
+        "column": 24
       }
     },
     {

@@ -15,6 +15,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ContentList, ContentListToolbar } from '@kbn/content-list';
+import type { EisDisplayOptions } from '../../utils/eis_utils';
+import { useDisplayOptionsTour } from '../../hooks/use_display_options_tour';
+import { DisplayOptions } from './display_options';
 import { EisCardGrid } from './eis_card_grid';
 import { EisNoModelsPrompt } from './eis_no_models_prompt';
 import { ModelFamilyFilterPart, TaskTypeFilterPart } from './eis_model_filters';
@@ -26,6 +29,9 @@ type EisViewModeOption = Omit<EuiButtonGroupOptionProps, 'id'> & { id: EisViewMo
 
 interface EisModelsListingProps {
   onViewModelDetails: (modelId: string) => void;
+  displayOptions: EisDisplayOptions;
+  onApplyDisplayOptions: (next: EisDisplayOptions) => void;
+  hasBlockedModels: boolean;
 }
 
 const VIEW_MODE_OPTIONS: EisViewModeOption[] = [
@@ -50,8 +56,14 @@ const VIEW_MODE_OPTIONS: EisViewModeOption[] = [
 const isEisViewMode = (id: string): id is EisViewMode =>
   VIEW_MODE_OPTIONS.some((option) => option.id === id);
 
-export const EisModelsListing = ({ onViewModelDetails }: EisModelsListingProps) => {
+export const EisModelsListing = ({
+  onViewModelDetails,
+  displayOptions,
+  onApplyDisplayOptions,
+  hasBlockedModels,
+}: EisModelsListingProps) => {
   const [viewMode, setViewMode] = useState<EisViewMode>('card');
+  const { isTourOpen, dismissTour, hideTour } = useDisplayOptionsTour(hasBlockedModels);
 
   return (
     <ContentList emptyState={<EisNoModelsPrompt />}>
@@ -80,6 +92,15 @@ export const EisModelsListing = ({ onViewModelDetails }: EisModelsListingProps) 
             buttonSize="m"
             isIconOnly
             data-test-subj="eisModelsViewModeSelector"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DisplayOptions
+            value={displayOptions}
+            onApply={onApplyDisplayOptions}
+            onOpen={hideTour}
+            isTourOpen={isTourOpen}
+            onDismissTour={dismissTour}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
