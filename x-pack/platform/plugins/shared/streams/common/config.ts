@@ -17,14 +17,14 @@ export const configSchema = schema.object({
    * and `POST /v1/validate`). When `url` is unset, unit publish and validation
    * are skipped so local canvas saves still work.
    */
-  configDistributor: schema.object(
+  distributor: schema.object(
     {
       url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       ssl: schema.object(
         {
-          certificatePath: schema.maybe(schema.string({ maxLength: 4096 })),
-          keyPath: schema.maybe(schema.string({ maxLength: 4096 })),
-          certificateAuthoritiesPath: schema.maybe(schema.string({ maxLength: 4096 })),
+          certificate: schema.maybe(schema.string({ maxLength: 4096 })),
+          key: schema.maybe(schema.string({ maxLength: 4096 })),
+          certificateAuthorities: schema.maybe(schema.string({ maxLength: 4096 })),
         },
         { defaultValue: {} }
       ),

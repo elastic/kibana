@@ -19,10 +19,10 @@ xpack.streams.canvas.enabled: true
 
 # Optional. When unset, unit PUT still writes saved objects but skips
 # streams-config-distributor validate and publish (local canvas saves still work).
-# xpack.streams.configDistributor.url: "https://localhost:8443"
-# xpack.streams.configDistributor.ssl.certificatePath: /tmp/certs/kibana.crt
-# xpack.streams.configDistributor.ssl.keyPath: /tmp/certs/kibana.key
-# xpack.streams.configDistributor.ssl.certificateAuthoritiesPath: /tmp/certs/server-ca.crt
+# xpack.streams.distributor.url: "https://localhost:18443"
+# xpack.streams.distributor.ssl.certificate: /tmp/certs/kibana.crt
+# xpack.streams.distributor.ssl.key: /tmp/certs/kibana.key
+# xpack.streams.distributor.ssl.certificateAuthorities: /tmp/certs/server-ca.crt
 
 uiSettings.overrides:
   observability:streamsEnableCanvas: true
@@ -62,7 +62,7 @@ Important consequences:
 - `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest; `unit_id` is in AAD. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document — do not `soClient.update` encrypted or AAD attributes.
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
 - Unit PUT write order: configuration SO → config distributor → UI metadata. Distributor failure rolls back the configuration SO (including decrypted `secrets`).
-- Without `xpack.streams.configDistributor.url`, validate and publish are no-ops.
+- Without `xpack.streams.distributor.url`, validate and publish are no-ops.
 - PUT requires `xpack.encryptedSavedObjects.encryptionKey` (`canEncrypt`). Dev mode configures a static key automatically.
 
 ### Credentials
@@ -116,7 +116,7 @@ GET kbn:/internal/streams/unit/default
 POST kbn:/internal/streams/unit/default/_reset
 ```
 
-Component `id`s must be unique across sources, processors, and destinations. Semantic / compile validation calls config-distributor `POST /v1/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)) when `xpack.streams.configDistributor.url` is set. Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. Without a distributor URL, only Kibana structural checks run.
+Component `id`s must be unique across sources, processors, and destinations. Semantic / compile validation calls config-distributor `POST /v1/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)) when `xpack.streams.distributor.url` is set. Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. Without a distributor URL, only Kibana structural checks run.
 
 The distributor (via `transpiler.Compile()`) is the authority on whether a unit is valid. Kibana schema and Zod types are structural DX only. 
 
@@ -130,8 +130,8 @@ There isn't an easy way to truly test all of this end to end yet, with a working
 
 
 ```
-xpack.streams.configDistributor.url: <DISTRIBUTOR_URL>
-xpack.streams.configDistributor.ssl.certificatePath: <CERT_PATH>
-xpack.streams.configDistributor.ssl.keyPath: <KEY_PATH>
-xpack.streams.configDistributor.ssl.certificateAuthoritiesPath: <CA_PATH>
+xpack.streams.distributor.url: <DISTRIBUTOR_URL>
+xpack.streams.distributor.ssl.certificate: <CERT_PATH>
+xpack.streams.distributor.ssl.key: <KEY_PATH>
+xpack.streams.distributor.ssl.certificateAuthorities: <CA_PATH>
 ```

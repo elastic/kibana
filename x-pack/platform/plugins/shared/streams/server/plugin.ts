@@ -293,7 +293,7 @@ export class StreamsPlugin
     // available; publish with non-empty secrets fails rather than
     // sending plaintext. At-rest encryption is Encrypted Saved Objects.
     const unitConfigHooks: UnitConfigHooks = createConfigDistributorClient({
-      config: this.config.configDistributor,
+      config: this.config.distributor,
       logger: this.logger.get('config-distributor'),
     });
 

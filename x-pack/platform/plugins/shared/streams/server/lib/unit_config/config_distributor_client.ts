@@ -18,9 +18,9 @@ import type { UnitConfigHooks, UnitCredential } from './types';
 export interface ConfigDistributorClientConfig {
   url?: string;
   ssl: {
-    certificatePath?: string;
-    keyPath?: string;
-    certificateAuthoritiesPath?: string;
+    certificate?: string;
+    key?: string;
+    certificateAuthorities?: string;
   };
 }
 
@@ -70,16 +70,16 @@ type DistributorFetch = (
 const createDistributorTls = (
   ssl: ConfigDistributorClientConfig['ssl']
 ): HttpsAgent | undefined => {
-  if (!ssl.certificatePath && !ssl.keyPath && !ssl.certificateAuthoritiesPath) {
+  if (!ssl.certificate && !ssl.key && !ssl.certificateAuthorities) {
     return undefined;
   }
 
   const tlsConfig = new SslConfig(
     sslSchema.validate({
-      enabled: Boolean(ssl.certificatePath && ssl.keyPath),
-      certificate: ssl.certificatePath,
-      key: ssl.keyPath,
-      certificateAuthorities: ssl.certificateAuthoritiesPath,
+      enabled: Boolean(ssl.certificate && ssl.key),
+      certificate: ssl.certificate,
+      key: ssl.key,
+      certificateAuthorities: ssl.certificateAuthorities,
     })
   );
 
@@ -171,9 +171,9 @@ export const createConfigDistributorClient = ({
   const ssl = config.ssl ?? {};
   const agent = createDistributorTls(ssl);
 
-  if (baseUrl.startsWith('https:') && !ssl.certificateAuthoritiesPath) {
+  if (baseUrl.startsWith('https:') && !ssl.certificateAuthorities) {
     logger.warn(
-      'streams-config-distributor URL is HTTPS but xpack.streams.configDistributor.ssl.certificateAuthoritiesPath is not set; TLS verification will fail against a local CA.'
+      'streams-config-distributor URL is HTTPS but xpack.streams.distributor.ssl.certificateAuthorities is not set; TLS verification will fail against a local CA.'
     );
   }
 
@@ -320,9 +320,9 @@ const statusErrorFromFetchFailure = (
 ): StatusError => {
   const detail = formatNetworkError(error);
   const missingCaHint =
-    !ssl.certificateAuthoritiesPath &&
+    !ssl.certificateAuthorities &&
     /unable to verify the first certificate|unable to get (local )?issuer certificate/i.test(detail)
-      ? ' Set xpack.streams.configDistributor.ssl.certificateAuthoritiesPath to the distributor CA.'
+      ? ' Set xpack.streams.distributor.ssl.certificateAuthorities to the distributor CA.'
       : '';
 
   return new StatusError(
