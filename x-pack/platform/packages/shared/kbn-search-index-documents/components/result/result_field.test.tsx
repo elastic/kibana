@@ -42,6 +42,24 @@ describe('ResultField', () => {
     expect(icons).toEqual(['tokenSemanticText', 'tokenVectorDense']);
     expect(screen.getByText('body')).toBeInTheDocument();
     expect(screen.getByText('embeddings')).toBeInTheDocument();
+    expect(screen.getByText('2 dims')).toBeInTheDocument();
+  });
+
+  it('shows dims and chunks for a semantic_text field with chunked vectors when expanded', () => {
+    renderField({
+      fieldName: 'content',
+      fieldType: 'semantic_text',
+      fieldValue: '"the original text"',
+      embeddings: JSON.stringify([
+        [0.1, 0.2],
+        [0.3, 0.4],
+        [0.5, 0.6],
+      ]),
+      dimensions: 2,
+      isExpanded: true,
+    });
+    expect(screen.getByText('2 dims')).toBeInTheDocument();
+    expect(screen.getByText('3 chunks')).toBeInTheDocument();
   });
 
   it('renders a compact single row for a semantic_text field with vectors when collapsed', () => {
@@ -77,5 +95,14 @@ describe('ResultField', () => {
       fieldValue: '"hello"',
     });
     expect(iconTypeOf(container)).toBe('tokenString');
+  });
+
+  it('shows dims for a dense_vector field', () => {
+    renderField({
+      fieldName: 'embedding',
+      fieldType: 'dense_vector',
+      fieldValue: JSON.stringify([0.1, 0.2, 0.3]),
+    });
+    expect(screen.getByText('3 dims')).toBeInTheDocument();
   });
 });

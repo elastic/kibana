@@ -43,6 +43,7 @@ import { createJobActionFocusTrapProps } from '../../../../util/create_focus_tra
 import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../../common/constants/cps';
 import { showProjectRoutingChangeConfirmModal } from '../../../components/project_routing_change_confirm';
+import { getIsMlCpsEnabled } from '../../../../services/ml_server_info';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -209,6 +210,8 @@ export class EditJobFlyoutUI extends Component {
       });
     }
 
+    const isMlCpsEnabled = getIsMlCpsEnabled();
+
     this.setState({
       job,
       hasDatafeed,
@@ -218,6 +221,7 @@ export class EditJobFlyoutUI extends Component {
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
       ...(datafeedRunning === false &&
+      isMlCpsEnabled &&
       this.props.kibana.services.cps?.cpsManager &&
       !this._initialJobFormState.datafeedProjectRouting &&
       defaultProjectRouting

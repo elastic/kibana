@@ -228,6 +228,9 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           defaultEdgeOptions={NON_SELECTABLE_EDGE_OPTIONS}
           fitView
           fitViewOptions={{ padding: FIT_VIEW_PADDING }}
+          onInit={(instance) => {
+            instance.fitView({ padding: FIT_VIEW_PADDING });
+          }}
           minZoom={MIN_ZOOM}
           maxZoom={MAX_ZOOM}
           translateExtent={translateExtent}

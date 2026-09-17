@@ -31,12 +31,16 @@ spec:
       pipeline_file: .buildkite/scripts/pipelines/pull_request/pipeline.sh
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
+            no_cone: true
             paths:
               - .buildkite
               - .node-version
               - package.json
               - tsconfig.base.json
               - versions.json
+              - kibana.jsonc
+              - '**/kibana.jsonc'
+              - '**/tsconfig.json'
             cleanup_sparse_state: true
       provider_settings:
         build_branches: false

@@ -13,7 +13,7 @@ import { useState, useCallback } from 'react';
  * TODO: Once this tour is removed, update the test to no longer dismiss it.
  * See {@link ThreatMatchRuleCreatePage.dismissCpsTourIfPresent}.
  */
-const TOUR_STORAGE_KEY = 'cps:projectPicker:tourShown';
+export const TOUR_STORAGE_KEY = 'cps:projectPicker:tourShown';
 
 const hasSeenTour = (): boolean => {
   try {

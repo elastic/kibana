@@ -13,13 +13,15 @@ import type {
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { createRuleResponse } from '../../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { buildLatestAlertEvent, buildStrategyStateTransitionContext } from '../test_utils';
 
 describe('CountTimeframeStrategy', () => {
   let strategy: CountTimeframeStrategy;
 
   beforeEach(() => {
-    strategy = new CountTimeframeStrategy();
+    const { loggerService } = createLoggerService();
+    strategy = new CountTimeframeStrategy(loggerService);
   });
 
   const getNextState = (...args: Parameters<typeof buildStrategyStateTransitionContext>) =>

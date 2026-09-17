@@ -7,9 +7,14 @@
 
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../../common/project_routings';
 import type { SLODefinition } from '../../domain/models';
 import { twoMinute } from '../fixtures/duration';
-import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
+import {
+  createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+  createSyntheticsAvailabilityIndicator,
+} from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
 
 const SPACE_ID = 'custom-space';
@@ -33,6 +38,31 @@ describe('Synthetics Availability Transform Generator', () => {
       expect(transform.source.query?.bool?.filter).toContainEqual({
         term: {
           'summary.final_attempt': true,
+        },
+      });
+    });
+
+    it('builds a good-slice aggregation for timeslices SLOs', async () => {
+      const slo = createSLOWithTimeslicesBudgetingMethod({
+        id: 'irrelevant',
+        indicator: createSyntheticsAvailabilityIndicator(),
+      });
+      const transform = await generator.getTransformParams(slo);
+
+      expect(transform.pivot?.aggregations?.['slo.isGoodSlice']).toEqual({
+        bucket_script: {
+          buckets_path: {
+            goodEvents: 'slo.numerator>_count',
+            totalEvents: 'slo.denominator>_count',
+          },
+          script:
+            'if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0 }',
+        },
+      });
+      expect(transform.pivot?.group_by?.['@timestamp']).toEqual({
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: '2m',
         },
       });
     });
@@ -337,6 +367,60 @@ describe('Synthetics Availability Transform Generator', () => {
       const transform = await generator.getTransformParams(slo);
 
       expect(transform.sync?.time?.field).toEqual('@timestamp');
+    });
+  });
+
+  describe('project_routing', () => {
+    const cpsGenerator = new SyntheticsAvailabilityTransformGenerator(
+      SPACE_ID,
+      dataViewsService,
+      true,
+      true
+    );
+
+    const sloWithSettings = (settings: {
+      projectRoutings?: string | null;
+      preventCrossProjectSearch?: boolean;
+    }) => {
+      const slo = createSLO({ indicator: createSyntheticsAvailabilityIndicator() });
+      return {
+        ...slo,
+        settings: {
+          syncDelay: slo.settings.syncDelay,
+          frequency: slo.settings.frequency,
+          preventInitialBackfill: slo.settings.preventInitialBackfill,
+          ...settings,
+        },
+      };
+    };
+
+    it('uses origin routing for legacy preventCrossProjectSearch true', async () => {
+      const transform = await cpsGenerator.getTransformParams(
+        sloWithSettings({ preventCrossProjectSearch: true })
+      );
+      expect(transform.source.project_routing).toBe(LOCAL_PROJECT_ROUTING);
+    });
+
+    it('uses all-projects routing when both routing fields are unset', async () => {
+      const transform = await cpsGenerator.getTransformParams(sloWithSettings({}));
+      expect(transform.source.project_routing).toBe(ALL_PROJECT_ROUTING);
+    });
+
+    it('uses all-projects routing when preventCrossProjectSearch is false', async () => {
+      const transform = await cpsGenerator.getTransformParams(
+        sloWithSettings({ preventCrossProjectSearch: false })
+      );
+      expect(transform.source.project_routing).toBe(ALL_PROJECT_ROUTING);
+    });
+
+    it('lets stored projectRoutings win', async () => {
+      const transform = await cpsGenerator.getTransformParams(
+        sloWithSettings({
+          projectRoutings: '_id:p1 AND _id:p2',
+          preventCrossProjectSearch: true,
+        })
+      );
+      expect(transform.source.project_routing).toBe('_id:p1 AND _id:p2');
     });
   });
 });

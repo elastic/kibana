@@ -6,7 +6,8 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -26,9 +27,12 @@
     "@kbn/security-hardening",
     "@kbn/react-kibana-context-render",
     "@kbn/css-utils",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/scout",
+    "@kbn/repo-info"
   ],
   "exclude": [
     "target/**/*",
+    "test/plugins/**/*",
   ]
 }

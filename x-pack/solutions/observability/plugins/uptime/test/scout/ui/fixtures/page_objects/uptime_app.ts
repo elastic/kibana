@@ -224,6 +224,20 @@ export class UptimeAppPage {
     return (await this.page.testSubj.locator('uptimeCertTotal').textContent()) ?? '0';
   }
 
+  /**
+   * Re-fetch the certificates query without reloading the whole Kibana app.
+   *
+   * The cert page's "Refresh" button bumps `lastRefresh` on `UptimeRefreshContext`,
+   * which `useCertSearch` depends on, so this re-runs the ES query in place. We
+   * prefer this over `refreshApp()` (full `page.reload()`) inside `toPass` retry
+   * loops because a hard reload can cost 30s+ on a loaded CI agent and exhaust
+   * the retry budget before any data check runs.
+   */
+  async refreshCertificates() {
+    await this.page.testSubj.locator('certificatesRefreshButton').locator('button').click();
+    await this.waitForLoadingToFinish();
+  }
+
   async certificateExists(certId: string, monitorId: string) {
     await this.page.testSubj.waitForSelector(certId, { timeout: 60_000 });
     await this.page.testSubj.waitForSelector(`monitor-page-link-${monitorId}`, { timeout: 5_000 });

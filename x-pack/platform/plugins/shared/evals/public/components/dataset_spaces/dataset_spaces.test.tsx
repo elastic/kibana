@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common';
 import type { AccessibleSpacesResult } from '../../hooks/use_spaces';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import { DatasetSharedNotice } from './dataset_shared_notice';

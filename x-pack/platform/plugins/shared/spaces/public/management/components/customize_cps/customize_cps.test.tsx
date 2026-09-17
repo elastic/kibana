@@ -9,6 +9,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 
+import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
@@ -46,10 +47,11 @@ describe('CustomizeCps', () => {
 
   const mockCpsManager = {
     fetchProjects: mockFetchProjects,
+    getConfigurationLinks: jest.fn(),
   };
 
-  const defaultSpace: { id: string; name: string; projectRouting?: string } = {
-    id: 'test-space',
+  const defaultSpace: { id: SpaceId; name: string; projectRouting?: string } = {
+    id: asSpaceId('test-space'),
     name: 'Test Space',
     projectRouting: '_alias:*',
   };
@@ -130,7 +132,7 @@ describe('CustomizeCps', () => {
 
     it('renders with a space that has no projectRouting', async () => {
       const spaceWithoutRouting = {
-        id: 'test-space',
+        id: asSpaceId('test-space'),
         name: 'Test Space',
       };
 
@@ -193,21 +195,21 @@ describe('CustomizeCps', () => {
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
 
-      await user.click(await getProjectSwitchButton(linkedProject._id));
+      await user.click(await getProjectSwitchButton(originProject._id));
 
       expect(mockOnChange).toHaveBeenLastCalledWith({
-        id: 'test-space',
+        id: asSpaceId('test-space'),
         name: 'Test Space',
-        projectRouting: '_id:* AND NOT _id:badce1234567890',
+        projectRouting: `_alias:* AND (_id:* AND NOT _id:${originProject._id})`,
       });
 
-      await user.click(await getProjectSwitchButton(linkedProject._id));
+      await user.click(await getProjectSwitchButton(originProject._id));
 
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
 
       expect(mockOnChange).toHaveBeenLastCalledWith({
-        id: 'test-space',
+        id: asSpaceId('test-space'),
         name: 'Test Space',
         projectRouting: '_alias:*',
       });

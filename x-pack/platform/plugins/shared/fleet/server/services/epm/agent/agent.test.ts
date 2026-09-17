@@ -626,7 +626,7 @@ paths:
 `;
     const vars = {};
 
-    expect(() => compileTemplate(vars, getMockedMetaVariable(), streamTemplate)).toThrowError(
+    expect(() => compileTemplate(vars, getMockedMetaVariable(), streamTemplate)).toThrow(
       'Error while compiling agent template: options.inverse is not a function'
     );
   });
@@ -643,7 +643,7 @@ paths:
       },
     };
 
-    expect(() => compileTemplate(vars, getMockedMetaVariable(), template)).toThrowError(
+    expect(() => compileTemplate(vars, getMockedMetaVariable(), template)).toThrow(
       'YAMLException: Duplicated key "processors" found in agent policy yaml, please check your yaml variables.'
     );
   });

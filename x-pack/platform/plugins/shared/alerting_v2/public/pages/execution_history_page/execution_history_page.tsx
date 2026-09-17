@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +27,15 @@ const EXECUTION_HISTORY_PAGE_TITLE = i18n.translate('xpack.alertingV2.executionH
   defaultMessage: 'Execution history',
 });
 
+// Full-height flex column so the selected tab can grow and own its own scroll (the grid scrolls
+// internally) instead of the whole page scrolling.
+const pageCss = css`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-block-size: 0;
+`;
+
 const getExecutionHistoryTabs = ({
   selectedTabId,
   onSelect,
@@ -44,8 +54,8 @@ const getExecutionHistoryTabs = ({
   },
   {
     id: POLICIES_TAB_ID,
-    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
-      defaultMessage: 'Policies',
+    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.actionPoliciesLabel', {
+      defaultMessage: 'Action policies',
     }),
     isSelected: selectedTabId === POLICIES_TAB_ID,
     onClick: () => onSelect(POLICIES_TAB_ID),
@@ -59,7 +69,12 @@ export const ExecutionHistoryPage = () => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
-  const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const {
+    flyout: composeFlyout,
+    confirmationModal,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
 
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
@@ -77,7 +92,7 @@ export const ExecutionHistoryPage = () => {
   );
 
   return (
-    <div data-test-subj="executionHistoryPage">
+    <div data-test-subj="executionHistoryPage" css={pageCss}>
       <AppHeader
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
@@ -116,6 +131,7 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
+      {confirmationModal}
     </div>
   );
 };

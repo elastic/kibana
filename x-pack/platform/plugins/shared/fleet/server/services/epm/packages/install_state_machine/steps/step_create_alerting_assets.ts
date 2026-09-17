@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID, brandSpaceId } from '@kbn/core-spaces-common';
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -346,7 +346,7 @@ export async function stepCreateAlertingAssets(
     const rulesClient = context.request
       ? await appContextService
           .getAlertingStart()
-          ?.getRulesClientWithRequestInSpace(context.request, spaceId)
+          ?.getRulesClientWithRequestInSpace(context.request, brandSpaceId(spaceId))
       : undefined;
 
     const alertTemplateAssets: ArchiveAsset[] = [];

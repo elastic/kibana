@@ -20,6 +20,7 @@ import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
 import { type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { VegaByValueState } from '../../server';
 import { getNotifications } from '../services';
 import type { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
@@ -85,23 +86,29 @@ const monacoOverride = {
 
 export function VegaSpecEditor({
   editorValue,
+  initialFormat,
   onChange,
+  onFormatChange,
 }: {
   editorValue: string;
+  initialFormat?: VegaByValueState['spec']['format'];
   onChange: (value: string) => void;
+  onFormatChange?: (format: VegaByValueState['spec']['format']) => void;
 }) {
   const styles = useMemoCss(vegaVisStyles);
   const monacoStyles = useMemoCss(monacoOverride);
   const [languageId, setLanguageId] = useState<string>();
 
   useMount(() => {
-    let specLang = XJsonLang.ID;
+    let fmt: VegaByValueState['spec']['format'];
     try {
-      JSON.parse(editorValue);
+      if (!initialFormat) JSON.parse(editorValue);
+      fmt = initialFormat ?? 'json';
     } catch {
-      specLang = HJSON_LANG_ID;
+      fmt = 'hjson';
     }
-    setLanguageId(specLang);
+    setLanguageId(fmt === 'json' ? XJsonLang.ID : HJSON_LANG_ID);
+    onFormatChange?.(fmt);
   });
 
   const setSpec = useCallback(
@@ -109,9 +116,10 @@ export function VegaSpecEditor({
       onChange(value);
       if (specLang) {
         setLanguageId(specLang);
+        onFormatChange?.(specLang === HJSON_LANG_ID ? 'hjson' : 'json');
       }
     },
-    [onChange]
+    [onChange, onFormatChange]
   );
 
   const handleChange = useCallback((value: string) => setSpec(value), [setSpec]);

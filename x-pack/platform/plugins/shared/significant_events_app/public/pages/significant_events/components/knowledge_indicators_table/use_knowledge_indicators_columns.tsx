@@ -15,7 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../../components/spark_plot';
@@ -49,6 +49,7 @@ interface UseKnowledgeIndicatorsColumnsParams {
   selectedKnowledgeIndicatorId: string | undefined;
   toggleSelectedKnowledgeIndicator: (ki: KnowledgeIndicator) => void;
   setKnowledgeIndicatorsToDelete: (items: KnowledgeIndicator[]) => void;
+  canManage: boolean;
 }
 
 export const useKnowledgeIndicatorsColumns = ({
@@ -56,9 +57,10 @@ export const useKnowledgeIndicatorsColumns = ({
   selectedKnowledgeIndicatorId,
   toggleSelectedKnowledgeIndicator,
   setKnowledgeIndicatorsToDelete,
-}: UseKnowledgeIndicatorsColumnsParams) =>
-  useMemo<Array<EuiBasicTableColumn<KnowledgeIndicator>>>(
-    () => [
+  canManage,
+}: UseKnowledgeIndicatorsColumnsParams) => {
+  return useMemo(() => {
+    const columns: Array<EuiBasicTableColumn<KnowledgeIndicator>> = [
       {
         name: TITLE_COLUMN_LABEL,
         render: (ki: KnowledgeIndicator) => {
@@ -97,7 +99,9 @@ export const useKnowledgeIndicatorsColumns = ({
           }
 
           const occurrences = occurrencesByQueryId[ki.query.id];
-          if (!occurrences) return null;
+          if (!occurrences) {
+            return null;
+          }
 
           return (
             <SparkPlot
@@ -157,11 +161,18 @@ export const useKnowledgeIndicatorsColumns = ({
           />
         ),
       },
-    ],
-    [
-      occurrencesByQueryId,
-      selectedKnowledgeIndicatorId,
-      toggleSelectedKnowledgeIndicator,
-      setKnowledgeIndicatorsToDelete,
-    ]
-  );
+    ];
+
+    if (!canManage) {
+      return columns.filter((column) => column.name !== ACTIONS_COLUMN_LABEL);
+    }
+
+    return columns;
+  }, [
+    canManage,
+    occurrencesByQueryId,
+    selectedKnowledgeIndicatorId,
+    toggleSelectedKnowledgeIndicator,
+    setKnowledgeIndicatorsToDelete,
+  ]);
+};

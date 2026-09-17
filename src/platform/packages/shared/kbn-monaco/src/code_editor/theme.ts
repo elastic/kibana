@@ -11,11 +11,11 @@ import type { UseEuiTheme } from '@elastic/eui';
 import type { monaco } from '../..';
 
 export function createTheme(
-  { euiTheme }: UseEuiTheme,
+  { colorMode, euiTheme }: UseEuiTheme,
   backgroundColor?: string
 ): monaco.editor.IStandaloneThemeData {
   return {
-    base: 'vs',
+    base: colorMode === 'DARK' ? 'vs-dark' : 'vs',
     inherit: true,
     rules: [
       {

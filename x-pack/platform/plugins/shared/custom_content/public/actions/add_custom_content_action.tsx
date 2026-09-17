@@ -17,6 +17,7 @@ import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { CustomContentIcon } from './custom_content_icon';
 import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../../common/constants';
+import { getTelemetry } from '../telemetry';
 
 export const getAddCustomContentAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_CUSTOM_CONTENT_ACTION_ID,
@@ -27,10 +28,12 @@ export const getAddCustomContentAction = (): ActionDefinition<EmbeddableApiConte
   execute: async ({ embeddable, returnFocus }) => {
     if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
+    getTelemetry().trackPanelAdded('dashboard_panel');
+
     const panelApi = await embeddable.addNewPanel(
       {
         panelType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-        serializedState: { prompt: '', template: undefined },
+        serializedState: { template: undefined },
       },
       { displaySuccessMessage: false }
     );
