@@ -6,6 +6,7 @@
  */
 
 export * from './rule_data_schema';
+export * from './legacy_rule_shape';
 export * from './rule_attachment_schema';
 export * from './error_response_schema';
 export * from './constants';
@@ -16,6 +17,8 @@ export {
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  validateComposedEsqlQuery,
+  composeEsqlQuery,
   parseDurationToMs,
 } from './validation';
 export * from './policy_matcher_schema';
