@@ -328,6 +328,56 @@ const findReviewChildrenSince = async (
   return results.filter((r) => Date.parse(r.startedAt) >= startedAt);
 };
 
+/** The failure text for a sweep that settled without opening a review child. */
+const noReviewChildError = (workflowExecutionId: string, workerStatus: ExecutionStatus): Error =>
+  new Error(
+    `Worker execution ${workflowExecutionId} settled (status: ${workerStatus}) but opened no ` +
+      `review children — the seeded rule was not harvested. Check seed_fp_cluster tags/index and ` +
+      `that the rule is enabled.`
+  );
+
+/**
+ * The sweep's review child, or `undefined` while the sweep is still coming up.
+ *
+ * A just-scheduled sweep is `pending` until the runtime picks it up (seconds), and only
+ * then can its harvest step open a child — so an empty child list read while the worker is
+ * non-terminal is NOT evidence of a failed harvest. Treating it as one made every run of
+ * the approval-gate spec fail on its first poll with `status: pending`, and the spec's own
+ * `afterEach` then swept the seeded alerts before the sweep's harvest ever ran, so the
+ * failure text blamed a seeding bug that did not exist. Only a SETTLED worker with no
+ * child means the rule was not harvested.
+ *
+ * More than one child is always fatal — it means the cancel pass missed something or the
+ * stack is shared — and is reported as such rather than as a seeding problem.
+ */
+const soleReviewChild = async ({
+  fetch,
+  workflowExecutionId,
+  workerStatus,
+  startedAt,
+}: {
+  fetch: HttpHandler;
+  workflowExecutionId: string;
+  workerStatus: ExecutionStatus;
+  startedAt: number;
+}): Promise<WorkflowExecutionListItemDto | undefined> => {
+  const reviewChildren = await findReviewChildrenSince(fetch, startedAt);
+
+  if (reviewChildren.length > 1) {
+    throw new Error(
+      `Expected exactly 1 review child from the seeded fixture, found ${reviewChildren.length}: ` +
+        `${reviewChildren.map((r) => `${r.id}@${r.status}`).join(', ')}`
+    );
+  }
+  if (reviewChildren.length === 0) {
+    if (!isTerminal(workerStatus)) {
+      return undefined;
+    }
+    throw noReviewChildError(workflowExecutionId, workerStatus);
+  }
+  return reviewChildren[0];
+};
+
 /** The seeded fixture must fan out exactly one review; anything else poisons attribution. */
 const assertSoleReviewChild = async ({
   fetch,
@@ -340,24 +390,11 @@ const assertSoleReviewChild = async ({
   workerStatus: ExecutionStatus;
   startedAt: number;
 }): Promise<WorkflowExecutionListItemDto> => {
-  const reviewChildren = await findReviewChildrenSince(fetch, startedAt);
-
-  if (reviewChildren.length === 0) {
-    throw new Error(
-      `Worker execution ${workflowExecutionId} settled (status: ${workerStatus}) but opened no ` +
-        `review children — the seeded rule was not harvested. Check seed_fp_cluster tags/index and ` +
-        `that the rule is enabled.`
-    );
+  const child = await soleReviewChild({ fetch, workflowExecutionId, workerStatus, startedAt });
+  if (!child) {
+    throw noReviewChildError(workflowExecutionId, workerStatus);
   }
-  if (reviewChildren.length > 1) {
-    // One seeded rule must yield exactly one review; more means our cancel pass
-    // missed something or the stack is shared — both poison attribution.
-    throw new Error(
-      `Expected exactly 1 review child from the seeded fixture, found ${reviewChildren.length}: ` +
-        `${reviewChildren.map((r) => `${r.id}@${r.status}`).join(', ')}`
-    );
-  }
-  return reviewChildren[0];
+  return child;
 };
 
 /**
@@ -545,39 +582,49 @@ export const runRuleTuningToApprovalGate = async ({
       );
     }
 
-    // More than one child means the cancel pass missed something or the stack is shared;
-    // assert it here so the failure names the fixture, not a later ambiguous gate.
-    const child = await assertSoleReviewChild({
+    // A freshly scheduled sweep has to be picked up by the runtime (and then run its
+    // harvest pass) before it can open its review child, so an empty child list here is
+    // only meaningful once the worker has settled — `soleReviewChild` returns undefined
+    // while it is still coming up and we poll again. More than one child means the cancel
+    // pass missed something or the stack is shared; that fails immediately, naming the
+    // fixture rather than a later ambiguous gate.
+    const child = await soleReviewChild({
       fetch,
       workflowExecutionId,
       workerStatus: worker.status,
       startedAt,
     });
-    const review = await getExecution(fetch, child.id);
-    lastReviewStatus = review.status;
 
-    if (isAwaitingApproval(review.status)) {
-      const proposal = readProposalOrThrow(review);
-      log.info(
-        `Review execution ${review.id} is parked on its approval gate ` +
-          `(status: ${review.status}, change_type: ${proposal.change_type})`
-      );
-      return { workflowExecutionId, reviewExecutionId: review.id, proposal };
+    if (!child) {
+      // Sweep is still coming up: no child to inspect on this tick.
+      await sleep(pollIntervalMs);
+    } else {
+      const review = await getExecution(fetch, child.id);
+      lastReviewStatus = review.status;
+
+      if (isAwaitingApproval(review.status)) {
+        const proposal = readProposalOrThrow(review);
+        log.info(
+          `Review execution ${review.id} is parked on its approval gate ` +
+            `(status: ${review.status}, change_type: ${proposal.change_type})`
+        );
+        return { workflowExecutionId, reviewExecutionId: review.id, proposal };
+      }
+
+      // The child finished without ever pausing: the gate is guarded on the diagnose step
+      // producing a summary, so there is no pending decision to answer. Fail with the state
+      // that distinguishes the two causes instead of polling a review that will never park.
+      if (isTerminal(review.status)) {
+        throw new Error(
+          `Review execution ${review.id} reached ${review.status} without pausing at the ` +
+            `approval gate (pendingApproval=false) — ${explainMissingProposal(
+              review.stepExecutions ?? []
+            )}`
+        );
+      }
+
+      await sleep(pollIntervalMs);
     }
-
-    // The child finished without ever pausing: the gate is guarded on the diagnose step
-    // producing a summary, so there is no pending decision to answer. Fail with the state
-    // that distinguishes the two causes instead of polling a review that will never park.
-    if (isTerminal(review.status)) {
-      throw new Error(
-        `Review execution ${review.id} reached ${review.status} without pausing at the ` +
-          `approval gate (pendingApproval=false) — ${explainMissingProposal(
-            review.stepExecutions ?? []
-          )}`
-      );
-    }
-
-    await sleep(pollIntervalMs);
   }
 
   throw new Error(
