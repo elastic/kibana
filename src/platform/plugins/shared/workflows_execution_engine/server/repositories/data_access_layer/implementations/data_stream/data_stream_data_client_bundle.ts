@@ -10,16 +10,12 @@
 import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import {
-  WORKFLOWS_EXECUTIONS_DATA_STREAM,
-  WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
-} from './constants';
+  STEP_EXECUTIONS_DATA_STREAM_DEFINITION,
+  WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION,
+} from './data-stream-definitions';
 import { DataStreamDataClient } from './data_stream_data_client';
 import { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import { DocumentVersionManager } from './document_version_manager';
-import {
-  DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-  DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-} from './types';
 import { createRetryingEsClient } from '../../../../lib/create_retrying_es_client';
 import type {
   CreateDataClientDeps,
@@ -37,22 +33,22 @@ export class DataStreamDataClientBundle implements DataClientBundle {
 
   async initSetup(coreSetup: CoreSetup): Promise<void> {
     coreSetup.dataStreams.registerDataStream({
-      name: WORKFLOWS_EXECUTIONS_DATA_STREAM,
-      version: 1,
-      hidden: true,
+      name: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.name,
+      version: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.version,
+      hidden: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.hidden,
       template: {
-        mappings: DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-        settings: { auto_expand_replicas: '0-1' },
+        mappings: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.mappings,
+        settings: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.settings,
         lifecycle: { data_retention: this.deps.dataRetention },
       },
     });
     coreSetup.dataStreams.registerDataStream({
-      name: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
-      version: 1,
-      hidden: true,
+      name: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.name,
+      version: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.version,
+      hidden: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.hidden,
       template: {
-        mappings: DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-        settings: { auto_expand_replicas: '0-1' },
+        mappings: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.mappings,
+        settings: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.settings,
         lifecycle: { data_retention: this.deps.dataRetention },
       },
     });
@@ -60,8 +56,8 @@ export class DataStreamDataClientBundle implements DataClientBundle {
 
   async initStart(coreStart: CoreStart): Promise<void> {
     await Promise.all([
-      coreStart.dataStreams.initializeClient(WORKFLOWS_EXECUTIONS_DATA_STREAM),
-      coreStart.dataStreams.initializeClient(WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM),
+      coreStart.dataStreams.initializeClient(WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.name),
+      coreStart.dataStreams.initializeClient(STEP_EXECUTIONS_DATA_STREAM_DEFINITION.name),
     ]);
 
     this.esClient = createRetryingEsClient(
@@ -71,12 +67,12 @@ export class DataStreamDataClientBundle implements DataClientBundle {
 
     this.workflowMetadataManager = new DataStreamMetadataManager({
       esClient: this.esClient,
-      dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
+      dataStreamName: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.name,
       logger: this.deps.logger,
     });
     this.stepMetadataManager = new DataStreamMetadataManager({
       esClient: this.esClient,
-      dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
+      dataStreamName: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.name,
       logger: this.deps.logger,
     });
 
@@ -91,10 +87,10 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
     return new DataStreamDataClient<EsWorkflowExecution>({
       esClient: this.esClient,
-      dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
+      dataStreamName: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.name,
       versionManager: new DocumentVersionManager({
         esClient: this.esClient,
-        dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
+        dataStreamName: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.name,
         metadataManager: this.workflowMetadataManager,
       }),
       metadataManager: this.workflowMetadataManager,
@@ -107,10 +103,10 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   createStepDataClient(): StepExecutionsDataClient {
     return new DataStreamDataClient<EsWorkflowStepExecution>({
       esClient: this.esClient,
-      dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
+      dataStreamName: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.name,
       versionManager: new DocumentVersionManager({
         esClient: this.esClient,
-        dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
+        dataStreamName: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.name,
         metadataManager: this.stepMetadataManager,
       }),
       metadataManager: this.stepMetadataManager,

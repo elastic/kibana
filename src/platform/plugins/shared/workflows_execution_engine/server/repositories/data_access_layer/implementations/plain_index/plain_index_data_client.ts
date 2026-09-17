@@ -190,7 +190,7 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       }
     }
 
-    // --- Plain items: sharedBulk (retryOnConflicts handles retry internally) ---
+    // --- Plain items: sharedBulk (OCC retries happen inside sharedBulk) ---
     if (plainItemsWithIndex.length > 0) {
       const plainResponse = await sharedBulk(
         this.deps.esClient,
