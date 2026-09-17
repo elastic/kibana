@@ -110,6 +110,7 @@ export const useInvestigationSections = ({
   // shrinking total catches one finishing past the loaded window, where the loaded ids never move.
   const inProgressInvestigations = inProgress.investigations;
   const previousInProgress = useRef({
+    query,
     total: inProgress.total,
     ids: toInvestigationIds(inProgressInvestigations),
   });
@@ -117,7 +118,11 @@ export const useInvestigationSections = ({
   useEffect(() => {
     const ids = toInvestigationIds(inProgressInvestigations);
     const previous = previousInProgress.current;
-    previousInProgress.current = { total: inProgress.total, ids };
+    previousInProgress.current = { query, total: inProgress.total, ids };
+
+    if (previous.query !== query) {
+      return;
+    }
 
     const hasFinished =
       inProgress.total < previous.total || [...previous.ids].some((id) => !ids.has(id));
@@ -132,6 +137,7 @@ export const useInvestigationSections = ({
     refetchLow();
     refetchFailed();
   }, [
+    query,
     inProgress.total,
     inProgressInvestigations,
     refetchCritical,

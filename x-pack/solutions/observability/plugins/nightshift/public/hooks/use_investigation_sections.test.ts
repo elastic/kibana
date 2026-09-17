@@ -296,4 +296,29 @@ describe('useInvestigationSections', () => {
     expect(refetchCritical).toHaveBeenCalledTimes(1);
     expect(refetchFailed).toHaveBeenCalledTimes(1);
   });
+  it('does not treat a search change as work finishing, since the rows are a different filter', () => {
+    const refetchCritical = jest.fn();
+    const refetchFailed = jest.fn();
+
+    mockUseInvestigationSection.mockImplementation(
+      implementationWithInProgressIds({
+        ids: ['running-a', 'running-b'],
+        refetchCritical,
+        refetchFailed,
+      })
+    );
+    const { rerender } = renderHook(({ query }) => useInvestigationSections({ query }), {
+      initialProps: { query: 'checkout' },
+    });
+
+    // A narrower search swaps the in-progress rows wholesale; the other sections are re-keyed by
+    // the same query and refetch on their own.
+    mockUseInvestigationSection.mockImplementation(
+      implementationWithInProgressIds({ ids: ['running-c'], refetchCritical, refetchFailed })
+    );
+    rerender({ query: 'checkout errors' });
+
+    expect(refetchCritical).not.toHaveBeenCalled();
+    expect(refetchFailed).not.toHaveBeenCalled();
+  });
 });

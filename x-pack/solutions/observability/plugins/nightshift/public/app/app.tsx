@@ -114,6 +114,7 @@ export function NightshiftApp(): React.ReactElement {
       setNightshiftSeverityParam(params, severity);
       history.replace({ search: params.toString() });
       sectionsRef.current?.scrollToSeverity(severity);
+      didScrollFromUrl.current = true;
     },
     [history]
   );
