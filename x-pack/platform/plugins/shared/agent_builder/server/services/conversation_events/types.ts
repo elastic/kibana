@@ -15,8 +15,3 @@ export interface ConversationEventsServiceStart {
   getDefinition(type: string): ConversationEventTypeDefinition | undefined;
   list(): ConversationEventTypeDefinition[];
 }
-
-export interface ValidatedConversationEventAddInput {
-  type: string;
-  data: Record<string, unknown>;
-}

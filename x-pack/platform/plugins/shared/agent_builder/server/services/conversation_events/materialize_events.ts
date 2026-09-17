@@ -6,15 +6,18 @@
  */
 
 import { v4 as uuid_v4 } from 'uuid';
-import type { ConversationEvent, EventActor } from '@kbn/agent-builder-common';
-import type { ValidatedConversationEventAddInput } from './types';
+import type {
+  ConversationEvent,
+  EventActor,
+  ConversationAddEventInput,
+} from '@kbn/agent-builder-common';
 
 export const materializeConversationEvents = ({
   events,
   actor,
   now,
 }: {
-  events: ValidatedConversationEventAddInput[];
+  events: ConversationAddEventInput[];
   actor: EventActor;
   now: Date;
 }): ConversationEvent[] => {

@@ -11,7 +11,7 @@ import {
   type ConversationAddEventInput,
 } from '@kbn/agent-builder-common';
 
-import type { ConversationEventsServiceStart, ValidatedConversationEventAddInput } from './types';
+import type { ConversationEventsServiceStart } from './types';
 
 const validateEvent =
   (registry: Pick<ConversationEventsServiceStart, 'getDefinition'>) =>
@@ -45,6 +45,6 @@ const validateEvent =
 export const validateConversationEvents = (
   events: ConversationAddEventInput[],
   registry: Pick<ConversationEventsServiceStart, 'getDefinition'>
-): ValidatedConversationEventAddInput[] => {
+): ConversationAddEventInput[] => {
   return events.map(validateEvent(registry));
 };
