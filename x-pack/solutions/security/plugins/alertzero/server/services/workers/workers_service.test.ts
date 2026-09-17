@@ -660,6 +660,22 @@ describe('WorkersService', () => {
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
+    // The preflight check must not be gated on getAttachmentService being present.
+    // In environments where securitySolution plugin is absent the attachment service
+    // is undefined, but the runtime config guard must still block the enable.
+    it('runtime config off: rejects even when attachment service is absent', async () => {
+      const harness = createPersistentHarness();
+      const service = makeService(harness, undefined, true, async () => false);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toMatchObject({
+        outcome: 'rejected',
+        what: expect.stringContaining('alert analysis'),
+      });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
     // The workflow's `enabled` flag is not sufficient on its own. It installs enabled, but
     // `securitySolution:alertAnalysisWorkflowEnabled` now defaults to false, and with that off
     // the workflow's own guard short-circuits: it completes having classified nothing, so the

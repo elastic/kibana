@@ -186,6 +186,7 @@ export const WatchDetailPage: React.FC = () => {
                         enabled={draft.enabled}
                         settings={draft.settings}
                         error={draft.error}
+                        errorLink={draft.errorLink}
                         settingsLocked={worker.state === 'unavailable'}
                         isSaving={isSaving}
                         onEnabledChange={(enabled) => updateEnabled(worker, enabled)}

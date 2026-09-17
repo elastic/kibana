@@ -73,10 +73,10 @@ export const registerUpdateWorkerRoute = ({
             case 'rejected':
               return response.badRequest({
                 body: {
-                  message: i18n.translate('xpack.alertzero.workerSettingsRejectedErrorMessage', {
-                    defaultMessage: 'Cannot apply {setting} to worker "{workerId}"',
-                    values: { setting: result.what, workerId },
-                  }),
+                  message: result.what,
+                  ...(result.settingsPath
+                    ? { attributes: { settingsPath: result.settingsPath } }
+                    : {}),
                 },
               });
             case 'invalid':
