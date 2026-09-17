@@ -255,27 +255,32 @@ jest.mock('./hooks/use_agent_builder_integration', () => ({
   })),
 }));
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    editor: {
-      setModelMarkers: jest.fn(),
-      registerCommand: jest.fn().mockReturnValue({
-        dispose: jest.fn(),
-      }),
+jest.mock('@kbn/monaco', () => {
+  const actual = jest.requireActual('@kbn/monaco');
+
+  return {
+    ...actual,
+    monaco: {
+      editor: {
+        ...actual.monaco.editor,
+        setModelMarkers: jest.fn(),
+        registerCommand: jest.fn().mockReturnValue({
+          dispose: jest.fn(),
+        }),
+      },
+      languages: {
+        registerCompletionItemProvider: jest.fn().mockReturnValue({
+          dispose: jest.fn(),
+        }),
+        registerCodeActionProvider: jest.fn().mockReturnValue({
+          dispose: jest.fn(),
+        }),
+      },
     },
-    languages: {
-      registerCompletionItemProvider: jest.fn().mockReturnValue({
-        dispose: jest.fn(),
-      }),
-      registerCodeActionProvider: jest.fn().mockReturnValue({
-        dispose: jest.fn(),
-      }),
-    },
-  },
-  defaultThemesResolvers: {},
-  initializeSupportedLanguages: jest.fn(),
-  YAML_LANG_ID: 'yaml',
-}));
+    defaultThemesResolvers: {},
+    initializeSupportedLanguages: jest.fn(),
+  };
+});
 
 describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {
