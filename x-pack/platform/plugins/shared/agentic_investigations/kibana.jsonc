@@ -11,9 +11,7 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["features", "workflowsExtensions", "workflowsManagement"],
-    // `security` is optional because Kibana can run without it, but the
-    // proposal privilege checks fail closed when it is absent: a workflow whose
-    // principal cannot be evaluated must not write proposals.
+    "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["security", "spaces", "agentBuilder"],
     "extraPublicDirs": ["common"]
   }

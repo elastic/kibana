@@ -9,10 +9,6 @@ import { proposalToInvestigation } from './proposal_to_investigation';
 import type { ProposalItem } from '../../../common/proposals/list';
 import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
 
-const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
-
-const isQueueRow = (status?: string): boolean => QUEUE_STATUSES.has(status ?? 'open');
-
 const baseProposal: ProposalItem = {
   id: 'prop-001',
   spaceId: 'default',
@@ -28,7 +24,7 @@ const baseProposal: ProposalItem = {
 
 describe('proposalToInvestigation', () => {
   describe('title derivation', () => {
-    it('prefers conversationTitle', () => {
+    it('titles the card with the investigation it belongs to', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         conversationTitle: 'My conversation',
@@ -37,26 +33,23 @@ describe('proposalToInvestigation', () => {
       expect(result.title).toBe('My conversation');
     });
 
-    it('falls back to action.name when conversationTitle is absent', () => {
+    it('never titles the card with the action, which is already the call to action', () => {
+      // Titling by action name loses the only thing that says which incident this
+      // decision is about, and repeats the CTA label right beside it.
       const result = proposalToInvestigation({
         ...baseProposal,
         action: { name: 'Isolate host' } as ProposalWithMetadata['action'],
-        actionWorkflowId: 'wf-1',
+        actionWorkflowId: 'system-alertzero-action-isolate-host',
       });
-      expect(result.title).toBe('Isolate host');
+
+      expect(result.title).not.toBe('Isolate host');
+      expect(result.title).not.toBe('system-alertzero-action-isolate-host');
+      expect(result.primaryActionLabel).toBe('Isolate host');
     });
 
-    it('falls back to actionWorkflowId when action.name is absent', () => {
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        actionWorkflowId: 'system-alertzero-action-block-ip',
-      });
-      expect(result.title).toBe('system-alertzero-action-block-ip');
-    });
-
-    it('falls back to sentinel when nothing is available', () => {
+    it('falls back to a placeholder when the conversation title could not be read', () => {
       const result = proposalToInvestigation({ ...baseProposal });
-      expect(result.title).toBe('No automated action');
+      expect(result.title).toBe('Untitled investigation');
     });
   });
 
@@ -101,11 +94,15 @@ describe('proposalToInvestigation', () => {
     });
   });
 
-  describe('isQueueRow regression', () => {
-    it('status is undefined so isQueueRow passes (defaults to "open")', () => {
-      const result = proposalToInvestigation(baseProposal);
-      expect(result.status).toBeUndefined();
-      expect(isQueueRow(result.status)).toBe(true);
+  describe('status', () => {
+    it('is left undefined rather than carrying the proposal status across', () => {
+      // A proposal's statuses are not investigation statuses. Mapping 'pending' here
+      // would invent a meaning, and any status-based queue filter downstream would then
+      // silently hide rows.
+      expect(proposalToInvestigation(baseProposal).status).toBeUndefined();
+      expect(
+        proposalToInvestigation({ ...baseProposal, status: 'succeeded' }).status
+      ).toBeUndefined();
     });
   });
 
