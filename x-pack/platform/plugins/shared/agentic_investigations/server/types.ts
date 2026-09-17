@@ -27,11 +27,6 @@ export interface AgenticInvestigationsSetupDependencies {
 export interface AgenticInvestigationsStartDependencies {
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-  /**
-   * agentBuilder is a required plugin (added to kibana.jsonc requiredPlugins).
-   * IncidentsService uses it to obtain a per-request conversation client;
-   * nothing is registered against agent_builder at setup time.
-   */
   agentBuilder: AgentBuilderPluginStart;
 }
 

@@ -12,7 +12,6 @@ import { listIncidentsQuerySchema } from '../../../common/incidents/incident';
 import { INCIDENTS_API_PRIVILEGE_READ } from '../constants';
 import type { IncidentRouteDependencies } from '../types';
 import { handleIncidentRouteError } from './handle_route_error';
-import { INTERNAL_ACCESS } from './shared';
 
 export const registerListIncidentsRoute = ({
   router,
@@ -22,7 +21,7 @@ export const registerListIncidentsRoute = ({
   router.versioned
     .get({
       path: INCIDENTS_INTERNAL_URL,
-      access: INTERNAL_ACCESS,
+      access: 'internal',
       security: { authz: { requiredPrivileges: [INCIDENTS_API_PRIVILEGE_READ] } },
       summary: 'List incidents',
     })

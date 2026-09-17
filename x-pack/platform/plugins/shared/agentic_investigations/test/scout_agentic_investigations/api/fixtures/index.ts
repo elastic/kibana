@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// No custom samlAuth extension needed — the tests use `samlAuth.asInteractiveUser('admin')`
-// and `samlAuth.asInteractiveUser('viewer')`, which are built-in roles that cover the
-// agenticInvestigations `all` and `read` privileges respectively.
 export { apiTest } from '@kbn/scout';
 export {
   INTERNAL_HEADERS,

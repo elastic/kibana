@@ -59,20 +59,11 @@ export const createConversationPublicClient = ({
       });
     },
     patchMetadata: async (conversationId, updates) => {
-      // patchMetadata validates against the conversation's template, runs OCC-safe
-      // read-modify-write with up to 5 retries (writeConversation), and returns the
-      // internal Conversation type. A second get retrieves ConversationWithPermissions
-      // (which adds the `permissions` object derived from the caller's identity).
       const { changedFields } = await client.patchMetadata(conversationId, updates);
       const conversation = await client.get(conversationId);
       return { conversation, changedFields };
     },
     update: async ({ id, title }) => {
-      // Uses access: 'owner' and retryOnConflict: true (the default is retryOnConflict:
-      // false, which sets maxRetries: 0 and surfaces write conflicts to the caller).
-      // Only title is writable here. Metadata must go through patchMetadata so it is
-      // validated against the conversation's template — client.update's fields path
-      // does NOT run validateMetadataUpdate.
       await client.update({ id, title }, { access: 'owner', retryOnConflict: true });
       return client.get(id);
     },

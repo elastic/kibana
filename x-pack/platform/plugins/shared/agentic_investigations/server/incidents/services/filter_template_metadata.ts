@@ -8,28 +8,13 @@
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 
 /**
- * Narrows one conversation's metadata to the keys another template declares.
+ * Filters a conversation's metadata to only the keys declared by the target template,
+ * dropping empty values so the template's own field defaults can apply.
  *
- * Load-bearing. `client.create` runs `validateMetadataUpdate` (agent_builder
- * templates/validation.ts:213), which throws:
- *   `field "<key>" is not declared in template "<templateId>"`
- * for any undeclared key. The `investigation` template declares
- * `workflow_execution_id`; `incident` does not. Spreading an investigation's
- * metadata straight into an incident create is therefore a guaranteed 400.
- *
- * Empty values are dropped rather than copied: `validateMetadataUpdate` enforces
- * `required` on every key *present* in the update, so copying an empty required
- * field (e.g. `status`) would fail, while omitting it lets the template's own
- * default ('open') apply.
- *
- * Note: The overlap between the two templates is computed from `declaredFields` at
- * runtime rather than being hardcoded. This keeps the filter correct for free when
- * either template gains or loses fields.
- *
- * Caveat: serialize/deserialize for TEXT, SELECT, and TEXT_ARRAY fields is
- * effectively identity (serialize.ts:23-53), so the round trip here is lossless
- * for today's field types. A future TOGGLE or NUMBER field would not be lossless —
- * add explicit tests if either template adds one.
+ * Necessary because `client.create` rejects any metadata key not declared in the
+ * target template (e.g. `workflow_execution_id` exists on investigations but not
+ * incidents), and copying an empty required field would fail validation instead of
+ * falling back to the template default.
  */
 export const filterMetadataToTemplateFields = ({
   metadata,

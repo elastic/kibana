@@ -131,8 +131,6 @@ export class AgenticInvestigationsPlugin
 
     this.incidentsService = new IncidentsService({
       logger: this.logger,
-      // Per-request and space-scoped by agent_builder. There is no internal-user path:
-      // a conversation's owner and ACL are derived from the caller's own identity.
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
       conversationTemplates: plugins.agentBuilder.conversationTemplates,

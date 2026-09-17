@@ -12,7 +12,7 @@ import { updateIncidentRequestSchema } from '../../../common/incidents/incident'
 import { INCIDENTS_API_PRIVILEGE_MANAGE } from '../constants';
 import type { IncidentRouteDependencies } from '../types';
 import { handleIncidentRouteError } from './handle_route_error';
-import { INTERNAL_ACCESS, incidentIdParamsSchema } from './shared';
+import { incidentIdParamsSchema } from './shared';
 
 export const registerUpdateIncidentRoute = ({
   router,
@@ -22,7 +22,7 @@ export const registerUpdateIncidentRoute = ({
   router.versioned
     .patch({
       path: INCIDENT_BY_ID_URL,
-      access: INTERNAL_ACCESS,
+      access: 'internal',
       security: { authz: { requiredPrivileges: [INCIDENTS_API_PRIVILEGE_MANAGE] } },
       summary: 'Update an incident title or linked investigations',
     })
@@ -31,8 +31,6 @@ export const registerUpdateIncidentRoute = ({
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         validate: {
           request: {
-            // The incident id comes from the path, not the body. REST-consistent
-            // with PROPOSAL_BY_ID_URL; keeps body to mutable fields only.
             params: buildRouteValidationWithZod(incidentIdParamsSchema),
             body: buildRouteValidationWithZod(updateIncidentRequestSchema),
           },

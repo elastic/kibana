@@ -12,7 +12,6 @@ import { createIncidentRequestSchema } from '../../../common/incidents/incident'
 import { INCIDENTS_API_PRIVILEGE_MANAGE } from '../constants';
 import type { IncidentRouteDependencies } from '../types';
 import { handleIncidentRouteError } from './handle_route_error';
-import { INTERNAL_ACCESS } from './shared';
 
 export const registerCreateIncidentRoute = ({
   router,
@@ -22,7 +21,7 @@ export const registerCreateIncidentRoute = ({
   router.versioned
     .post({
       path: INCIDENTS_INTERNAL_URL,
-      access: INTERNAL_ACCESS,
+      access: 'internal',
       security: { authz: { requiredPrivileges: [INCIDENTS_API_PRIVILEGE_MANAGE] } },
       summary: 'Create an incident',
     })

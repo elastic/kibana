@@ -24,9 +24,7 @@ import {
 } from './constants';
 
 /**
- * An incident *is* a conversation on the `incident` template. The API returns
- * agent_builder's conversation shape directly rather than maintaining a parallel
- * projection that would have to stay in sync with upstream.
+ * An incident is a templated conversation of the `incident` type
  */
 export type IncidentConversation = ConversationWithPermissions;
 
@@ -68,9 +66,7 @@ export const createIncidentRequestSchema = z
         message: 'collaborators is required when visibility is "private"',
       });
     }
-    // Enforced here because nothing downstream does: unlike buildAccessControlUpdate,
-    // client.create runs validateAccessControlEntries without a public-mode check, so
-    // entries on a public conversation would be written silently and then ignored.
+
     if (value.visibility === 'public' && value.collaborators.length > 0) {
       ctx.addIssue({
         code: 'custom',
@@ -131,11 +127,6 @@ export type ListIncidentsQuery = z.infer<typeof listIncidentsQuerySchema>;
 
 /**
  * An incident as returned by the **list** endpoint.
- *
- * Distinct from `IncidentConversation` (which includes rounds): the conversation
- * client's `search()` method sources results from `CONVERSATION_LIST_SOURCE_FIELDS`,
- * which excludes round data and attachment content. Using a separate type keeps
- * the contract honest.
  */
 export type IncidentConversationSummary = ConversationWithoutRoundsWithPermissions;
 

@@ -56,9 +56,6 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ui: [PROPOSALS_UI_CAPABILITY_SHOW],
       },
     },
-    // Note: adding the first sub-feature means minimal_all and minimal_read stop
-    // being equivalent to all and read — until now (README.md:42) stated they were
-    // because no sub-feature privileges existed. Update README accordingly.
     subFeatures: [
       {
         name: i18n.translate('xpack.agenticInvestigations.incidentsSubFeatureName', {
@@ -66,10 +63,6 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         }),
         privilegeGroups: [
           {
-            // `mutually_exclusive`: a user gets exactly one of these. The more permissive
-            // privilege (`incidents_all`) must come first. `incidents_all` includes both
-            // read and manage API privileges so that an `all` user can list incidents
-            // without needing a separate explicit read grant.
             groupType: 'mutually_exclusive',
             privileges: [
               {

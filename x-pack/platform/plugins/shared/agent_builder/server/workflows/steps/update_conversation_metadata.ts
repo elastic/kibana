@@ -24,9 +24,6 @@ export const updateConversationMetadataStepDefinition = ({
     handler: async (context: StepHandlerContext) => {
       try {
         const request = context.contextManager.getFakeRequest();
-        // This gate stays in the step handler deliberately. The public client itself
-        // carries no gate so that non-step callers (incident API, future entities) are
-        // not blocked by the experimental setting.
         if (!(await isExperimentalEnabled(request))) {
           return {
             error: new Error(

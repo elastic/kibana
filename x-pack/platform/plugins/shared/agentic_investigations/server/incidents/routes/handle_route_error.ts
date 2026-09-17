@@ -23,7 +23,6 @@ import { InvalidLinkedInvestigationError } from '../services/errors';
  * Note on 404 vs 403: `getDocumentWithAccess` (client.ts:1078-1080) throws
  * conversationNotFound — *not* forbidden — when access is denied. A collaborator
  * trying to update a private incident they do not own receives 404, not 403.
- * This is agent_builder's deliberate non-enumeration choice. Do not "fix" it.
  */
 export const handleIncidentRouteError = (
   error: unknown,
