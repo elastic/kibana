@@ -8,6 +8,14 @@
 /** How often (ms) the abort monitor polls the execution status to detect abort requests. */
 export const ABORT_POLL_INTERVAL_MS = 2000;
 
+/**
+ * After an abort is observed, how long (ms) the agent stream may keep emitting — so the handler
+ * can wind down and emit `round_interrupted` with the partial run summary — before it is cut and a
+ * `RequestAbortedError` is raised anyway. LangGraph aborts promptly on the signal, so this is a
+ * fallback for tools that ignore it.
+ */
+export const CANCELLATION_DEADLINE_MS = 5_000;
+
 /** How often (ms) followExecution polls for new events. */
 export const FOLLOW_POLL_INTERVAL_MS = 500;
 

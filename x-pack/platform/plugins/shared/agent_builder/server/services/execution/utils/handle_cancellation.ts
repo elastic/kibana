@@ -6,43 +6,78 @@
  */
 
 import type { OperatorFunction } from 'rxjs';
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { Observable } from 'rxjs';
 import { createRequestAbortedError } from '@kbn/agent-builder-common';
+import { CANCELLATION_DEADLINE_MS } from '../constants';
 
 /**
- * Handles cancellation by unsubscribing to the observable and emitting an error if the request is aborted.
- * @param abortSignal The abort signal to listen to for cancellation.
+ * Graceful cancellation with abort normalisation.
+ *
+ * Before the signal fires, the source is mirrored and its errors flow through unchanged. Once it
+ * fires the source keeps being forwarded so the agent can wind down (and emit `round_interrupted`);
+ * the stream then errors with `RequestAbortedError` when the source terminates — any source error
+ * or completion after an abort is normalised to it — or when `deadlineMs` elapses, whichever comes
+ * first. This is the single point where "an abort was observed" becomes the canonical error;
+ * nothing downstream needs to look at the signal.
  */
-export function handleCancellation<T>(abortSignal?: AbortSignal): OperatorFunction<T, T> {
+export function handleCancellation<T>(
+  abortSignal?: AbortSignal,
+  { deadlineMs = CANCELLATION_DEADLINE_MS }: { deadlineMs?: number } = {}
+): OperatorFunction<T, T> {
   return (source$) => {
     if (!abortSignal) {
       return source$;
     }
 
-    const stop$ = new Subject<void>();
-    if (abortSignal.aborted) {
-      stop$.next();
-    }
-    abortSignal.addEventListener('abort', () => {
-      stop$.next();
-    });
-
     return new Observable<T>((subscriber) => {
-      return source$.pipe(takeUntil(stop$)).subscribe({
+      let deadline: ReturnType<typeof setTimeout> | undefined;
+      const abortedError = () => createRequestAbortedError('Converse request was aborted');
+      const clearDeadline = () => {
+        if (deadline !== undefined) {
+          clearTimeout(deadline);
+          deadline = undefined;
+        }
+      };
+
+      const subscription = source$.subscribe({
         next: (value) => {
           subscriber.next(value);
         },
         error: (err) => {
-          subscriber.error(err);
+          clearDeadline();
+          subscriber.error(abortSignal.aborted ? abortedError() : err);
         },
         complete: () => {
+          clearDeadline();
           if (abortSignal.aborted) {
-            subscriber.error(createRequestAbortedError('Converse request was aborted'));
+            subscriber.error(abortedError());
           } else {
             subscriber.complete();
           }
         },
       });
+
+      const onAbort = () => {
+        if (subscription.closed) {
+          return;
+        }
+        deadline = setTimeout(() => {
+          subscription.unsubscribe();
+          subscriber.error(abortedError());
+        }, deadlineMs);
+      };
+
+      if (abortSignal.aborted) {
+        onAbort();
+      } else {
+        abortSignal.addEventListener('abort', onAbort, { once: true });
+      }
+
+      return () => {
+        clearDeadline();
+        abortSignal.removeEventListener('abort', onAbort);
+        subscription.unsubscribe();
+      };
     });
   };
 }
