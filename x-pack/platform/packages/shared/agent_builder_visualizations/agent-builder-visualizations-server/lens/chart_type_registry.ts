@@ -155,7 +155,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Displays terms sized by frequency or value. Choose only when the terms are short strings (tags, status codes, country codes, browsers). Do not use for long text such as error messages, URLs, or log lines — use a table instead.',
-      rules: [noPanelTitleRule('the labels within the tag cloud already name the content')],
+      rules: [panelTitleRule],
     },
   },
   [SupportedChartType.RegionMap]: {
@@ -206,7 +206,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Grid of small squares where the filled share encodes a proportion. Choose for intuitive single-percentage displays that read easier than pie charts (e.g. "percentage of requests that are errors").',
-      rules: [noPanelTitleRule('the labels within the waffle chart already name the content')],
+      rules: [panelTitleRule],
     },
   },
   [SupportedChartType.Mosaic]: {
