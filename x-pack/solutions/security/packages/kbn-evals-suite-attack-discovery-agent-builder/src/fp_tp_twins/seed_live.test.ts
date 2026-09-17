@@ -12,10 +12,7 @@ import {
   ENCODED_POWERSHELL_PROCESS_1_ID,
   FP_TP_ATTACK_ADHOC_INDEX,
 } from './constants';
-import {
-  buildEncodedPowershellLiveSeedPlan,
-  cleanupEncodedPowershellTwinLive,
-} from './seed_live';
+import { buildEncodedPowershellLiveSeedPlan, cleanupEncodedPowershellTwinLive } from './seed_live';
 
 describe('buildEncodedPowershellLiveSeedPlan', () => {
   const now = new Date('2026-09-17T16:00:00.000Z');
@@ -61,15 +58,12 @@ describe('cleanupEncodedPowershellTwinLive', () => {
   it('returns a delete-by-id query for leftover data-stream events', async () => {
     const deleteByQuery = jest.fn().mockResolvedValue({});
 
-    await cleanupEncodedPowershellTwinLive(
-      { deleteByQuery } as unknown as EsClient,
-      [
-        {
-          index: 'logs-endpoint.events.process-default',
-          id: ENCODED_POWERSHELL_PROCESS_1_ID,
-        },
-      ]
-    );
+    await cleanupEncodedPowershellTwinLive({ deleteByQuery } as unknown as EsClient, [
+      {
+        index: 'logs-endpoint.events.process-default',
+        id: ENCODED_POWERSHELL_PROCESS_1_ID,
+      },
+    ]);
 
     expect(deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -19,14 +19,12 @@ import type { FpTpEntityCrudRequest } from './entity_crud';
 import { shiftTwinToNow } from './shift_timestamps';
 import type { FpTpGold, FpTpTwin, FpTpTwinVariant } from './types';
 
-export interface FpTpLiveKbnRequest {
-  (options: {
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-    path: string;
-    body?: unknown;
-    version?: string;
-  }): Promise<{ statusCode: number; body: unknown }>;
-}
+export type FpTpLiveKbnRequest = (options: {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  path: string;
+  body?: unknown;
+  version?: string;
+}) => Promise<{ statusCode: number; body: unknown }>;
 
 export interface FpTpLiveSeedPlan {
   readonly twin: FpTpTwin;
