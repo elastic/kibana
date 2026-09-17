@@ -631,9 +631,12 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // guard sees connector_configured = (connector_id != '' or '' != '') = (connector_id != ''),
     // which is byte-identical to the pre-Worker guard behaviour.
     const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
-      with: { connector_id_by_feature: string };
+      with: { connector_id_by_feature: string; investigation_conversation_id: string };
     };
     expect(initStep.with.connector_id_by_feature).toBe('');
+    // Standalone path: empty string keeps conversation creation under uiSettings control.
+    // Worker path: set_caller_overrides overwrites this with the Investigation conversation id (R3).
+    expect(initStep.with.investigation_conversation_id).toBe('');
   });
 
   it('applies caller-supplied inputs only when connectorIdByFeature is present', () => {
@@ -677,6 +680,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // and neither field would be intentionally set to "")
     expect(setStep.with.agent_id).toBe('{{ inputs.agentId | default: variables.agent_id }}');
     expect(setStep.with.tag_prefix).toBe('{{ inputs.tagPrefix | default: variables.tag_prefix }}');
+    // R3: Worker forces the agent reasoning into the Investigation conversation.
+    // create_conversation: false prevents a second orphaned conversation from being created;
+    // investigation_conversation_id is passed to runAgent_step's conversation_id (Mode B).
+    expect(setStep.with.create_conversation).toBe(false);
+    expect(setStep.with.investigation_conversation_id).toBe(
+      '{{ inputs.investigationConversationId }}'
+    );
   });
 
   // `workflow.execute` hands the child only `inputs` — a child run has no trigger event —

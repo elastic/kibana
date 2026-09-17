@@ -101,6 +101,14 @@ triggers:
             workflow.execute (not by the alert trigger directly). When true, Worker-specific
             steps activate: input overrides, caller-supplied alerts, and output accumulation.
             Absent (or false) keeps the standalone path byte-identical (R8).
+        investigationConversationId:
+          type: string
+          description: >
+            Conversation id of an existing Investigation conversation (created by the
+            Worker before calling this sub-workflow). When supplied, the agent reasoning
+            is written directly into that conversation so the analyst sees the full
+            classification chain without leaving the Investigation (R3). Absent on the
+            standalone path — falls back to the uiSettings createConversation setting.
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
@@ -224,6 +232,10 @@ steps:
       # Kept at the same level as connector_id so the analysis_enabled guard and the
       # ai.agent step can check both with a single variable.
       connector_id_by_feature: ""
+      # Initialised empty; overridden by apply_caller_input_overrides when the Worker
+      # passes investigationConversationId. When non-empty, runAgent_step writes
+      # its reasoning directly into the Investigation conversation (R3).
+      investigation_conversation_id: ""
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -291,6 +303,12 @@ steps:
           auto_close_confidence_score_max_threshold: 1
           agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
           tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
+          # Force the agent reasoning into the Investigation conversation so the
+          # analyst sees the full classification chain without leaving it (R3).
+          # Setting create_conversation: false prevents a second orphaned conversation;
+          # investigation_conversation_id drives the ai.agent step's conversation_id.
+          create_conversation: false
+          investigation_conversation_id: "{{ inputs.investigationConversationId }}"
 
       # autoCloseEnabled cannot use `| default:`: Liquid treats false as falsy, so
       # `false | default: x` yields x and the Worker's explicit `false` would be discarded —
@@ -1190,6 +1208,10 @@ steps:
               # partial batch: the verdicts it did return are applied, the rest get error notes.
               continue: true
             with:
+              # Worker path: write reasoning into the existing Investigation conversation (R3).
+              # Standalone path: empty string — the engine treats it as absent and
+              # create-conversation (set from uiSettings) controls conversation creation.
+              conversation_id: "{{ variables.investigation_conversation_id }}"
               # Context is pre-built, so strip the tool belt: no tool calls, and smaller framework prompt.
               configuration_overrides:
                 enable_elastic_capabilities: false
