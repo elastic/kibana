@@ -26,7 +26,6 @@ const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
   destinations: [{ type: 'workflow', id: 'wf-critical-route' }],
   matcher: { expression: 'alert.severity = "critical"' },
   groupingMode: 'per_episode',
-  tags: ['oncall', 'critical'],
   apiKeyOwner: 'elastic',
   apiKeyCreatedByUser: true,
   createdBy: 'elastic',
@@ -202,7 +201,6 @@ describe('createActionPolicySmlType', () => {
           '(alert.severity = "critical")',
           'per_episode',
           'workflow:wf-critical-route',
-          'oncall, critical',
         ].join('\n'),
       });
     });

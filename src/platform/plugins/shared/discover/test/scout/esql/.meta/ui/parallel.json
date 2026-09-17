@@ -1,5 +1,5 @@
 {
-  "sha1": "ca4f3a88b856d2846a3c4a856757b4da5d31ea4d",
+  "sha1": "d0ac9d836e1985f4185ed522391fc597a4908477",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,32 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "95a4162c4fd9ba0-3d4b9025b235af5",
+      "title": "Discover ES|QL dashboard saves a Discover ES|QL visualization to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_esql_dashboard.spec.ts",
+        "line": 20,
+        "column": 33
+      }
+    },
+    {
+      "id": "95a4162c4fd9ba0-0fd7ebff115ddd5",
+      "title": "Discover ES|QL dashboard changes dimensions in the Discover ES|QL Lens flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_esql_dashboard.spec.ts",
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -247,6 +273,32 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_starred.spec.ts",
         "line": 34,
         "column": 93
+      }
+    },
+    {
+      "id": "0e35b2f74c7ab52-52b0a7a61df9eed",
+      "title": "Discover ES|QL visualization renders and changes the ES|QL histogram visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_visualize_field.spec.ts",
+        "line": 22,
+        "column": 23
+      }
+    },
+    {
+      "id": "0e35b2f74c7ab52-871544196967a1f",
+      "title": "Discover ES|QL visualization opens the ES|QL visualization in the Lens flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_visualize_field.spec.ts",
+        "line": 31,
+        "column": 5
       }
     },
     {

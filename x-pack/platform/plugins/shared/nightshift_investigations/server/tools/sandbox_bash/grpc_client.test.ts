@@ -17,24 +17,45 @@ interface MockServiceClient {
 }
 
 jest.mock('@grpc/grpc-js', () => {
-  const actual = jest.requireActual<typeof import('@grpc/grpc-js')>('@grpc/grpc-js');
-
   function MockSandboxServiceClient(this: MockServiceClient): void {
     this.close = mockClose;
   }
 
   return {
-    ...actual,
     makeClientConstructor: () => MockSandboxServiceClient,
+    credentials: {
+      createInsecure: () => ({}),
+      createSsl: () => ({}),
+    },
+    Metadata: class MockMetadata {
+      set(_key: string, _value: string) {}
+    },
   };
 });
+
+const sandboxConfig = {
+  host: 'sandbox-api',
+  port: 50051,
+  api_key: 'secret-key',
+  ssl: {
+    certificate: 'mock-cert',
+    key: 'mock-key',
+  },
+};
 
 describe('grpc_client', () => {
   let client: SandboxApiClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    client = new SandboxApiClient({ host: 'sandbox-api', port: 50051, apiKey: 'secret-key' });
+    client = new SandboxApiClient({
+      host: 'sandbox-api',
+      port: 50051,
+      apiKey: 'secret-key',
+      rootCertPem: Buffer.from('mock-ca'),
+      clientCertPem: Buffer.from('mock-cert'),
+      clientKeyPem: Buffer.from('mock-key'),
+    });
   });
 
   describe('close', () => {
@@ -69,24 +90,19 @@ describe('SandboxConnectionManager', () => {
   };
 
   let logger: jest.Mocked<Logger>;
+  let writeManifest: jest.Mock<Promise<void>, [string, SandboxCallContext]>;
   let manager: SandboxConnectionManager;
-  let restoreCallback: jest.Mock<Promise<void>, [string]>;
   let runCommand: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggerMock.create();
+    writeManifest = jest.fn().mockResolvedValue(undefined);
     manager = new SandboxConnectionManager({
-      config: {
-        sandbox_api_host: 'sandbox-api',
-        sandbox_api_port: 50051,
-        sandbox_api_key: 'secret-key',
-        s3_region: 'us-east-1',
-      },
+      config: sandboxConfig,
       logger,
+      writeManifest,
     });
-    restoreCallback = jest.fn().mockResolvedValue(undefined);
-    manager.setRestoreCallback(restoreCallback);
     runCommand = jest.spyOn(manager.apiClient, 'runCommand');
   });
 
@@ -95,11 +111,11 @@ describe('SandboxConnectionManager', () => {
   it('re-initializes on the next call after an UNAVAILABLE failure', async () => {
     runCommand.mockRejectedValueOnce(unavailable());
     await expect(run()).rejects.toMatchObject({ code: 14 });
-    expect(restoreCallback).toHaveBeenCalledTimes(1);
+    expect(writeManifest).toHaveBeenCalledTimes(1);
 
     runCommand.mockResolvedValueOnce({ stdout: '', stderr: '', exit_code: 0, timed_out: false });
     await run();
-    expect(restoreCallback).toHaveBeenCalledTimes(2);
+    expect(writeManifest).toHaveBeenCalledTimes(2);
   });
 
   it('does not clear init state installed by a later call when a stale UNAVAILABLE arrives late', async () => {
@@ -110,21 +126,21 @@ describe('SandboxConnectionManager', () => {
     const resultA = run();
     const resultB = run();
     await expect(resultA).rejects.toMatchObject({ code: 14 });
-    expect(restoreCallback).toHaveBeenCalledTimes(1);
+    expect(writeManifest).toHaveBeenCalledTimes(1);
 
     // Caller G arrives after A's reset and installs init generation 2 against a fresh pod.
     runCommand.mockResolvedValueOnce({ stdout: '', stderr: '', exit_code: 0, timed_out: false });
     await run();
-    expect(restoreCallback).toHaveBeenCalledTimes(2);
+    expect(writeManifest).toHaveBeenCalledTimes(2);
 
     // B's stale failure from generation 1 arrives now. It must not evict generation 2.
     callB.reject(unavailable());
     await expect(resultB).rejects.toMatchObject({ code: 14 });
 
-    // Caller H reuses generation 2: no third restore.
+    // Caller H reuses generation 2: no third init.
     runCommand.mockResolvedValueOnce({ stdout: '', stderr: '', exit_code: 0, timed_out: false });
     await run();
-    expect(restoreCallback).toHaveBeenCalledTimes(2);
+    expect(writeManifest).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 

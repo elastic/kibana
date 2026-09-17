@@ -220,6 +220,7 @@ export class AgentBuilderPlugin
           attachmentsService: services.attachments,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'workflow',
         });
       },
       isExperimentalEnabled: this.isExperimentalEnabled,
@@ -332,7 +333,6 @@ export class AgentBuilderPlugin
     void registerTracingExporter({
       core: coreStart,
       tracingConfig: this.config.tracing,
-      logger: this.logger.get('tracing'),
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
@@ -456,6 +456,7 @@ export class AgentBuilderPlugin
             attachmentsService: attachments,
             coreStart,
             spaces,
+            source: 'server_api',
           }),
       },
       conversationTemplates,
