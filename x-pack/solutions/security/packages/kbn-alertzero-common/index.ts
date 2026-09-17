@@ -98,6 +98,8 @@ export {
   WatchTriggerProjection,
   AnalysisWindowDays,
   RuleTuningWorkerExtras,
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,

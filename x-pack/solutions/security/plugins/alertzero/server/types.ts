@@ -18,6 +18,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
+import type { PluginStart as SecuritySolutionPluginStart } from '@kbn/security-solution-plugin/server';
 
 export type AlertZeroPluginSetup = Record<string, never>;
 export type AlertZeroPluginStart = Record<string, never>;
@@ -36,6 +37,7 @@ export interface AlertZeroStartDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   agentBuilder: AgentBuilderPluginStart;
   agenticInvestigations: AgenticInvestigationsPluginStart;
+  securitySolution?: SecuritySolutionPluginStart;
 }
 
 export type AlertZeroRouter = IRouter;
