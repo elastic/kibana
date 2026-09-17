@@ -12,7 +12,6 @@ import { Redirect } from 'react-router-dom';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { SelectedFilterPills } from '../common/monitor_filters/selected_filter_pills';
-import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
 import {
   selectOverviewPageState,
@@ -34,7 +33,7 @@ import { OverviewStatus } from './overview/overview_status';
 import { QuickFilters } from './overview/quick_filters';
 import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
-import { OverviewErrors } from './overview/overview_errors/overview_errors';
+import { OverviewActivityChart } from './overview/overview_activity_chart';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
@@ -179,11 +178,8 @@ export const OverviewPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <OverviewStatus />
             </EuiFlexItem>
-            <EuiFlexItem grow={3} css={{ minWidth: 300 }}>
-              <OverviewErrors />
-            </EuiFlexItem>
-            <EuiFlexItem grow={3} css={{ minWidth: 300 }}>
-              <OverviewAlerts />
+            <EuiFlexItem grow={1} css={{ minWidth: 500 }}>
+              <OverviewActivityChart />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
