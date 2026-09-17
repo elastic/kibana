@@ -422,10 +422,20 @@ export class SyntheticsAppPage {
 
   async selectFilterOption(filterLabel: string, optionText: string) {
     await this.page.getByLabel(`expands filter group for ${filterLabel} filter`).click();
-    await this.page.components
-      .selectable('o11yFieldValueSelectionSelectable')
-      .selectOption(optionText);
-    await this.page.getByLabel(`Apply the selected filters for ${filterLabel}`).click();
+    const option = this.page.testSubj
+      .locator('o11yFieldValueSelectionSelectable')
+      .locator(`li[title="${optionText}"]`);
+    await option.waitFor({ state: 'visible' });
+    const wasChecked = (await option.getAttribute('aria-checked')) === 'true';
+    await option.click();
+    await option
+      .and(this.page.locator(`[aria-checked="${wasChecked ? 'false' : 'true'}"]`))
+      .waitFor({ state: 'visible' });
+    const applyButton = this.page.testSubj
+      .locator('o11yFieldValueSelectionApplyButton')
+      .and(this.page.locator(':enabled'));
+    await applyButton.waitFor({ state: 'visible' });
+    await applyButton.click();
   }
 
   async deleteMonitorFromEditPage() {
