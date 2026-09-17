@@ -74,15 +74,6 @@ describe('useSyncShowBuildingBlockAlerts', () => {
     expect(dispatchSpy).toHaveBeenCalledWith(buildingBlockFilterAction(true));
   });
 
-  it('does not dispatch when the table exists and the value is already correct', () => {
-    const { dispatchSpy } = renderUseSyncShowBuildingBlockAlerts(
-      true,
-      createMockStore(stateWithRuleDetailsTable({ showBuildingBlockAlerts: true }))
-    );
-
-    expect(dispatchSpy).not.toHaveBeenCalledWith(buildingBlockFilterAction(true));
-  });
-
   it('dispatches after the table is initialized', () => {
     const { dispatchSpy, store } = renderUseSyncShowBuildingBlockAlerts(true);
 
@@ -110,5 +101,44 @@ describe('useSyncShowBuildingBlockAlerts', () => {
     );
 
     expect(dispatchSpy).toHaveBeenCalledWith(buildingBlockFilterAction(false));
+  });
+
+  it('does not re-apply the building-block filter after the user unchecks it', () => {
+    const { dispatchSpy, store } = renderUseSyncShowBuildingBlockAlerts(
+      true,
+      createMockStore(stateWithRuleDetailsTable())
+    );
+
+    expect(dispatchSpy).toHaveBeenCalledWith(buildingBlockFilterAction(true));
+    dispatchSpy.mockClear();
+
+    act(() => {
+      store.dispatch(buildingBlockFilterAction(false));
+    });
+
+    expect(dispatchSpy).not.toHaveBeenCalledWith(buildingBlockFilterAction(true));
+    expect(
+      store.getState().dataTable.tableById[TableId.alertsOnRuleDetailsPage].additionalFilters
+        .showBuildingBlockAlerts
+    ).toBe(false);
+  });
+
+  it('does not clear the building-block filter after the user checks it on a non-building-block rule', () => {
+    const { dispatchSpy, store } = renderUseSyncShowBuildingBlockAlerts(
+      false,
+      createMockStore(stateWithRuleDetailsTable())
+    );
+
+    dispatchSpy.mockClear();
+
+    act(() => {
+      store.dispatch(buildingBlockFilterAction(true));
+    });
+
+    expect(dispatchSpy).not.toHaveBeenCalledWith(buildingBlockFilterAction(false));
+    expect(
+      store.getState().dataTable.tableById[TableId.alertsOnRuleDetailsPage].additionalFilters
+        .showBuildingBlockAlerts
+    ).toBe(true);
   });
 });
