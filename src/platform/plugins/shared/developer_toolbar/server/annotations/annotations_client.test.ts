@@ -10,6 +10,8 @@
 import type {
   BulkResponse,
   CountResponse,
+  GetResponse,
+  IndexResponse,
   MgetResponse,
   SearchResponse,
   UpdateResponse,
@@ -33,7 +35,18 @@ const updateResponse = (
   ...(source ? { get: { found: true, _source: source } } : {}),
 });
 
+const indexResponse: IndexResponse = { ...writeBase, result: 'created' };
+
 const countResponse = (count: number): CountResponse => ({ count, _shards: shards });
+
+const quotaResponse: GetResponse = {
+  _index: ANNOTATIONS_INDEX,
+  _id: QUOTA_ID,
+  found: true,
+  _seq_no: 7,
+  _primary_term: 2,
+  _source: { count: MAX_ANNOTATIONS },
+};
 
 const searchResponse = (hits: Array<{ _id: string; _source: object }>): SearchResponse => ({
   took: 1,
@@ -78,6 +91,8 @@ describe('AnnotationsClient', () => {
     jest.clearAllMocks();
     esClient.indices.exists.mockResponse(true);
     esClient.update.mockResponse(updateResponse('updated'));
+    esClient.index.mockResponse(indexResponse);
+    esClient.get.mockResponse(quotaResponse);
   });
 
   describe('create', () => {
@@ -91,16 +106,30 @@ describe('AnnotationsClient', () => {
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           id: QUOTA_ID,
-          upsert: { count: 0 },
-          scripted_upsert: true,
           retry_on_conflict: 5,
           script: expect.objectContaining({ params: { increment: 1, max: MAX_ANNOTATIONS } }),
-        })
+        }),
+        { ignore: [404], meta: true }
       );
 
       esClient.index.mockRejectedValueOnce(new Error('boom'));
       await expect(client().create(input)).rejects.toThrow('boom');
       expect(quotaCalls()).toEqual([1, 1, -1]);
+    });
+
+    it('creates a missing quota document from the comments already stored', async () => {
+      esClient.update.mockResponseOnce(updateResponse('noop'), { statusCode: 404 });
+      esClient.count.mockResponseOnce(countResponse(500));
+
+      await client().create(input);
+
+      expect(esClient.index).toHaveBeenNthCalledWith(
+        1,
+        { index: ANNOTATIONS_INDEX, id: QUOTA_ID, document: { count: 500 }, op_type: 'create' },
+        { ignore: [409] }
+      );
+      expect(quotaCalls()).toEqual([1, 1]);
+      expect(esClient.index).toHaveBeenCalledTimes(2);
     });
 
     it('recounts when the quota says the store is full, then refuses or corrects the count', async () => {
@@ -112,17 +141,37 @@ describe('AnnotationsClient', () => {
       esClient.update.mockResponseOnce(updateResponse('noop'));
       esClient.count.mockResponseOnce(countResponse(3));
       await client().create(input);
-      expect(esClient.index).toHaveBeenNthCalledWith(1, {
-        index: ANNOTATIONS_INDEX,
-        id: QUOTA_ID,
-        document: { count: 4 },
-      });
+      expect(esClient.index).toHaveBeenNthCalledWith(
+        1,
+        {
+          index: ANNOTATIONS_INDEX,
+          id: QUOTA_ID,
+          document: { count: 4 },
+          if_seq_no: 7,
+          if_primary_term: 2,
+        },
+        { ignore: [409], meta: true }
+      );
       expect(esClient.index).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
           index: ANNOTATIONS_INDEX,
           document: expect.objectContaining(input),
         })
+      );
+    });
+
+    it('claims again when another writer corrected the quota first', async () => {
+      esClient.update.mockResponseOnce(updateResponse('noop'));
+      esClient.count.mockResponseOnce(countResponse(3));
+      esClient.index.mockResponseOnce(indexResponse, { statusCode: 409 });
+
+      await client().create(input);
+
+      expect(quotaCalls()).toEqual([1, 1]);
+      expect(esClient.index).toHaveBeenCalledTimes(2);
+      expect(esClient.index).toHaveBeenLastCalledWith(
+        expect.objectContaining({ document: expect.objectContaining(input) })
       );
     });
   });

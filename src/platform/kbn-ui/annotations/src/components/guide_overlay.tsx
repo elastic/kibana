@@ -30,7 +30,7 @@ import { useAnnotations, useAnnotationsState } from './annotations_context';
 import { useLayerPortal, useLayerZIndex, useLayoutTick } from './hooks';
 import { useResolvedAnchor } from './resolved_anchors';
 
-/** Time the page gets to render before the guide reports the comment as lost. */
+/** Time the page gets to render, on arrival and after each step, before the guide reports the comment as lost. */
 const SETTLE_MS = 4000;
 
 interface GuideStep {
@@ -94,10 +94,13 @@ export const GuideOverlay = ({ annotation }: { annotation: Annotation }) => {
   const stepRef = useRef(step);
   stepRef.current = step;
 
+  // The render window opens anew whenever the scene changes: on arriving at the
+  // page and after each completed step, whose UI may take a moment to appear.
   useEffect(() => {
+    setSettled(false);
     const timer = setTimeout(() => setSettled(true), SETTLE_MS);
     return () => clearTimeout(timer);
-  }, []);
+  }, [onPage, done]);
 
   useEffect(() => {
     if (target) {

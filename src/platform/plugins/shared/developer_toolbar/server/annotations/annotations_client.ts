@@ -222,31 +222,30 @@ export class AnnotationsClient {
   /**
    * Claims room for `count` more comments in the quota document, atomically, so
    * concurrent writers cannot take the store past `MAX_ANNOTATIONS` together.
-   * The document mirrors the index; when it says the store is full, the
-   * comments are recounted first, in case some were removed by hand.
+   * The document mirrors the index: it is created from the comments already
+   * stored when missing, and when it says the store is full the comments are
+   * recounted first, in case some were removed by hand.
    */
   private async reserve(count: number): Promise<void> {
     if (count === 0) {
       return;
     }
-    const response = await this.adjustQuota(count);
-    if (response.result !== 'noop') {
-      return;
+    for (let attempt = 0; attempt <= RETRY_ON_CONFLICT; attempt++) {
+      const result = await this.adjustQuota(count);
+      if (result === 'applied') {
+        return;
+      }
+      if (result === 'missing') {
+        await this.bootstrapQuota();
+        continue;
+      }
+      if (await this.reconcileQuota(count)) {
+        return;
+      }
     }
-    const { count: stored } = await this.esClient.count({
-      index: ANNOTATIONS_INDEX,
-      query: COMMENTS_QUERY,
-    });
-    if (stored + count > MAX_ANNOTATIONS) {
-      throw new AnnotationsLimitError(
-        `At most ${MAX_ANNOTATIONS} comments can be stored; ${stored} are, and ${count} more would be added.`
-      );
-    }
-    await this.esClient.index<QuotaDocument>({
-      index: ANNOTATIONS_INDEX,
-      id: QUOTA_ID,
-      document: { count: stored + count },
-    });
+    throw new Error(
+      `Could not claim room for ${count} developer toolbar annotations: the quota kept changing.`
+    );
   }
 
   /** Gives back room claimed for comments that were not written after all; a failure here only makes the quota conservative. */
@@ -255,25 +254,87 @@ export class AnnotationsClient {
       return;
     }
     try {
+      // Nothing to give back when the document is missing: it will be recreated from the index.
       await this.adjustQuota(-count);
     } catch (error) {
       this.logger.warn(`Failed to release ${count} developer toolbar annotation slots: ${error}`);
     }
   }
 
-  private adjustQuota(increment: number) {
-    return this.esClient.update<QuotaDocument, QuotaDocument, QuotaDocument>({
-      index: ANNOTATIONS_INDEX,
-      id: QUOTA_ID,
-      script: {
-        lang: 'painless',
-        source: QUOTA_SCRIPT,
-        params: { increment, max: MAX_ANNOTATIONS },
+  /** Moves the count by `increment`; `full` when that would exceed the maximum, `missing` when there is no quota document. */
+  private async adjustQuota(increment: number): Promise<'applied' | 'full' | 'missing'> {
+    const { body, statusCode } = await this.esClient.update<
+      QuotaDocument,
+      QuotaDocument,
+      QuotaDocument
+    >(
+      {
+        index: ANNOTATIONS_INDEX,
+        id: QUOTA_ID,
+        script: {
+          lang: 'painless',
+          source: QUOTA_SCRIPT,
+          params: { increment, max: MAX_ANNOTATIONS },
+        },
+        retry_on_conflict: RETRY_ON_CONFLICT,
       },
-      upsert: { count: 0 },
-      scripted_upsert: true,
-      retry_on_conflict: RETRY_ON_CONFLICT,
+      { ignore: [404], meta: true }
+    );
+    if (statusCode === 404) {
+      return 'missing';
+    }
+    return body.result === 'noop' ? 'full' : 'applied';
+  }
+
+  /**
+   * Creates the quota document from the comments in the index, which predates
+   * the document or lost it. Losing the race to another instance is fine, as
+   * theirs counts the same comments.
+   */
+  private async bootstrapQuota(): Promise<void> {
+    const { count } = await this.esClient.count({
+      index: ANNOTATIONS_INDEX,
+      query: COMMENTS_QUERY,
     });
+    await this.esClient.index<QuotaDocument>(
+      { index: ANNOTATIONS_INDEX, id: QUOTA_ID, document: { count }, op_type: 'create' },
+      { ignore: [409] }
+    );
+  }
+
+  /**
+   * Replaces a quota document that says the store is full with the actual
+   * number of comments plus `count`, provided nobody changed the document in
+   * the meantime, so that two writers cannot both claim the same room. False
+   * when another writer got there first; throws when the store really is full.
+   */
+  private async reconcileQuota(count: number): Promise<boolean> {
+    const [{ count: stored }, quota] = await Promise.all([
+      this.esClient.count({ index: ANNOTATIONS_INDEX, query: COMMENTS_QUERY }),
+      this.esClient.get<QuotaDocument>(
+        { index: ANNOTATIONS_INDEX, id: QUOTA_ID },
+        { ignore: [404] }
+      ),
+    ]);
+    if (stored + count > MAX_ANNOTATIONS) {
+      throw new AnnotationsLimitError(
+        `At most ${MAX_ANNOTATIONS} comments can be stored; ${stored} are, and ${count} more would be added.`
+      );
+    }
+    if (!quota.found) {
+      return false;
+    }
+    const { statusCode } = await this.esClient.index<QuotaDocument>(
+      {
+        index: ANNOTATIONS_INDEX,
+        id: QUOTA_ID,
+        document: { count: stored + count },
+        if_seq_no: quota._seq_no,
+        if_primary_term: quota._primary_term,
+      },
+      { ignore: [409], meta: true }
+    );
+    return statusCode !== 409;
   }
 
   private ensureIndex(): Promise<void> {
