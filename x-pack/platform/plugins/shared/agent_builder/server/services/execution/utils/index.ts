@@ -11,8 +11,6 @@ export { handleCancellation } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';
 export {
   getConversation,
-  updateConversation$,
-  createConversation$,
   persistRoundInput,
   appendRoundTerminated$,
   appendResumeExecution$,

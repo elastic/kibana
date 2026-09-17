@@ -322,7 +322,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   );
 
   apiTest(
-    'POST /internal/agent_builder/sml/_attach attaches entry and persists attachment refs',
+    'POST /internal/agent_builder/sml/_attach attaches entry and emits attachment_added',
     async ({ apiClient, asAdmin, log, kbnClient }) => {
       const runId = randomUUID();
       const entryId = `sml-scout-attach-${runId}`;
@@ -379,14 +379,23 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       expect(conversation).toHaveStatusCode(200);
       const conv = conversation.body as {
         attachments?: Array<{ type: string; id: string }>;
-        rounds: Array<{ input: { attachment_refs?: Array<{ attachment_id: string }> } }>;
+        events?: Array<{
+          type: string;
+          actor?: { type: string };
+          data?: { attachment_id?: string; source?: string };
+        }>;
       };
       const attachments = conv.attachments ?? [];
       expect(attachments[0].type).toBe('text');
       expect(attachments[1].type).toBe('connector');
-      const lastRound = conv.rounds[conv.rounds.length - 1];
-      expect(lastRound.input.attachment_refs?.[0].attachment_id).toBe(attachments[0].id);
-      expect(lastRound.input.attachment_refs?.[1].attachment_id).toBe(attachments[1].id);
+      // The SML item goes through the attachment client, so it emits `attachment_added`
+      // attributed to the calling user with the HTTP source, like any HTTP-created attachment.
+      const addedEvent = (conv.events ?? []).find(
+        (e) => e.type === 'attachment_added' && e.data?.attachment_id === attachments[1].id
+      );
+      expect(addedEvent).toBeDefined();
+      expect(addedEvent?.data?.source).toBe('http_api');
+      expect(addedEvent?.actor?.type).toBe('user');
 
       await asAdmin.delete(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`
