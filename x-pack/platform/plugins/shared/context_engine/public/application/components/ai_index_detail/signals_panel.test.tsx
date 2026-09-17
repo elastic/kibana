@@ -176,7 +176,7 @@ describe('SignalsPanel', () => {
 
     expect(screen.getByTestId('contextSignalsAnalyzeButton')).toBeDisabled();
     expect(screen.getByTestId('contextSignalsFeedbackAgentPrompt')).toHaveTextContent(
-      'Improvements panel'
+      'Feedback loop panel'
     );
 
     fireEvent.click(screen.getByTestId('contextSignalsAnalyzeButton'));

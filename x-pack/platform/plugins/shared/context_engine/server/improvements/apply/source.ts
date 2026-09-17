@@ -33,11 +33,10 @@ const sameSource = (source: AiIndexSource, value: string): boolean => source.val
 
 const writeSources = async (
   { aiIndexService, aiIndexId, actions, request }: SourceApplyContext,
+  aiIndex: Awaited<ReturnType<AiIndexService['get']>>,
   sources: AiIndexSource[]
 ): Promise<void> => {
   await validateConnectorSources({ sources, actions, request });
-
-  const aiIndex = await aiIndexService.get(aiIndexId);
   await aiIndexService.put(aiIndexId, {
     description: aiIndex.description,
     dest: aiIndex.dest,
@@ -51,13 +50,14 @@ export const addSource = async (
   context: SourceApplyContext,
   source: AiIndexSource
 ): Promise<string> => {
-  const { sources } = await context.aiIndexService.get(context.aiIndexId);
+  const aiIndex = await context.aiIndexService.get(context.aiIndexId);
+  const { sources } = aiIndex;
 
   if (sources.some((existing) => sameSource(existing, source.value))) {
     return source.value;
   }
 
-  await writeSources(context, [...sources, source]);
+  await writeSources(context, aiIndex, [...sources, source]);
   return source.value;
 };
 
@@ -67,7 +67,8 @@ export const editSource = async (
   sourceValue: string,
   source: AiIndexSource
 ): Promise<string> => {
-  const { sources } = await context.aiIndexService.get(context.aiIndexId);
+  const aiIndex = await context.aiIndexService.get(context.aiIndexId);
+  const { sources } = aiIndex;
 
   if (!sources.some((existing) => sameSource(existing, sourceValue))) {
     throw new ApplyImprovementError(
@@ -77,6 +78,7 @@ export const editSource = async (
 
   await writeSources(
     context,
+    aiIndex,
     sources.map((existing) => (sameSource(existing, sourceValue) ? source : existing))
   );
   return source.value;
@@ -90,7 +92,8 @@ export const removeSource = async (
   context: SourceApplyContext,
   sourceValue: string
 ): Promise<string> => {
-  const { sources } = await context.aiIndexService.get(context.aiIndexId);
+  const aiIndex = await context.aiIndexService.get(context.aiIndexId);
+  const { sources } = aiIndex;
   const remaining = sources.filter((existing) => !sameSource(existing, sourceValue));
 
   if (remaining.length === sources.length) {
@@ -99,6 +102,6 @@ export const removeSource = async (
     );
   }
 
-  await writeSources(context, remaining);
+  await writeSources(context, aiIndex, remaining);
   return sourceValue;
 };
