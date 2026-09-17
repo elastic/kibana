@@ -98,7 +98,6 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/css-utils'
   - '@kbn/es-query-server'
-  - '@kbn/data-service-server'
   - '@kbn/controls-schemas'
   - '@kbn/controls-constants'
   - '@kbn/controls-renderer'
@@ -135,6 +134,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
+  - '@kbn/as-code-dashboard-schema'
 tags:
   - plugin
   - prod

@@ -329,6 +329,7 @@ export function ServiceFlyoutOverview() {
         {capabilities.overview?.transactions && (
           <EuiFlexItem data-test-subj="serviceFlyoutSection-transactions">
             <ServiceFlyoutTransactionsSection
+              docLinks={core.docLinks}
               http={core.http}
               notifications={core.notifications}
               locators={share.url.locators}

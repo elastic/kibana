@@ -37,7 +37,12 @@ import {
 } from './lib/slack_app/saved_object';
 import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
-import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
+import {
+  consumeRunQuota,
+  createRunQuotaInternalRepository,
+  runQuotaLedgerSavedObjectType,
+  runQuotaSettingsSavedObjectType,
+} from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -157,6 +162,16 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
+
+    plugins.nightshiftInvestigations?.registerInvestigationQuota(async () => {
+      if (!this.server?.core) {
+        throw new Error('Significant Events start services are unavailable');
+      }
+      return consumeRunQuota({
+        internalRepository: createRunQuotaInternalRepository(this.server),
+        group: 'investigation',
+      });
+    });
 
     this.ebtTelemetryService.setup(core.analytics);
 

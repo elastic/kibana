@@ -49,6 +49,8 @@ const discoveryQueriesRoute = internalKIQueriesRoutes['GET /internal/streams/_qu
 const discoveryOccurrencesRoute =
   internalKIQueriesRoutes['GET /internal/streams/_queries/_occurrences'];
 const bulkDeleteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_bulk_delete'];
+const upsertQueryRoute =
+  internalKIQueriesRoutes['PUT /internal/significant_events/queries/{queryId}'];
 const RECONCILE_MAX_STREAMS = 10;
 
 type HandlerParams = Parameters<typeof route.handler>[0];
@@ -229,6 +231,18 @@ describe('pause guard on rule-touching query routes', () => {
     await expectPausedBeforeRuleWork(generateRoute.handler, {
       path: { streamName: 'logs.test' },
       body: null,
+    });
+  });
+
+  it('rejects upsert with 409 while paused', async () => {
+    await expectPausedBeforeRuleWork(upsertQueryRoute.handler, {
+      path: { queryId: 'q1' },
+      body: {
+        title: 'Error count',
+        description: '',
+        esql: { query: 'FROM logs.test | WHERE log.level == "error"' },
+        target_name: 'logs.test',
+      },
     });
   });
 });
@@ -508,5 +522,109 @@ describe('generateQueriesRoute', () => {
       generateRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
     ).rejects.toThrow('Agent Builder is required');
     expect(mockGenerateKIQueries).not.toHaveBeenCalled();
+  });
+});
+
+describe('upsertQueryRoute', () => {
+  const definition = { name: 'logs.test' };
+  const upsertBody = {
+    title: 'Error count',
+    description: '',
+    esql: { query: 'FROM logs.test, logs.test.* | WHERE log.level == "error"' },
+  };
+
+  it('upserts against the provided target_name', async () => {
+    const upsertQuery = jest.fn().mockResolvedValue(undefined);
+    const getQueryLinks = jest.fn();
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: { ...upsertBody, target_name: 'logs.test' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery, getQueryLinks }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
+    expect(getQueryLinks).not.toHaveBeenCalled();
+    expect(upsertQuery).toHaveBeenCalledWith(
+      definition,
+      expect.objectContaining({
+        id: 'q1',
+        type: 'match',
+        title: 'Error count',
+        esql: upsertBody.esql,
+      })
+    );
+  });
+
+  it('resolves the stream from an existing query when target_name is omitted', async () => {
+    const upsertQuery = jest.fn().mockResolvedValue(undefined);
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: upsertBody },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
+    expect(upsertQuery).toHaveBeenCalledWith(definition, expect.objectContaining({ id: 'q1' }));
+  });
+
+  it('throws 404 when the query is missing and no target_name is provided', async () => {
+    const upsertQuery = jest.fn();
+    const handlerParams = {
+      params: { path: { queryId: 'missing' }, body: upsertBody },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn() },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 404 },
+    });
+    expect(upsertQuery).not.toHaveBeenCalled();
+  });
+
+  it('does not persist when ES|QL is invalid', async () => {
+    const upsertQuery = jest.fn();
+    const handlerParams = {
+      params: {
+        path: { queryId: 'q1' },
+        body: { ...upsertBody, esql: { query: 'NOT VALID' }, target_name: 'logs.test' },
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(upsertQuery).not.toHaveBeenCalled();
   });
 });

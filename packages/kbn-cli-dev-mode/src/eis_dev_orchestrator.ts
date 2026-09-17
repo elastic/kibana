@@ -8,7 +8,7 @@
  */
 
 /**
- * EIS connector discovery for `yarn start --eis`.
+ * EIS connector discovery for `pnpm start --eis`.
  *
  * Two-phase flow:
  *
@@ -18,7 +18,7 @@
  *  2. Poll `GET /_inference/_all` for EIS-provided endpoints
  *     (`service === 'elastic'`) — bounded retry budget (~30s). If ES is
  *     healthy but no EIS endpoints exist, that is a configuration error
- *     (typically `yarn es snapshot` was run without `--eis`, or the CCM
+ *     (typically `pnpm es snapshot` was run without `--eis`, or the CCM
  *     API key was not set).
  *
  * Converts each endpoint into a Kibana preconfigured connector definition
@@ -29,13 +29,13 @@
  * are picked up — the gateway-defined task type is preserved on each connector.
  *
  * This module does NOT start or stop Elasticsearch — that is handled separately
- * by `yarn es snapshot --eis`.
+ * by `pnpm es snapshot --eis`.
  *
  * Environment variables:
  *  - KBN_EIS_ES_HOST     — full ES base URL including protocol (default:
  *                           `http://localhost:9200`). Set to
  *                           `https://localhost:9200` when ES was started with
- *                           `--ssl` (e.g. `yarn es snapshot --eis --ssl`).
+ *                           `--ssl` (e.g. `pnpm es snapshot --eis --ssl`).
  *  - KBN_EIS_ES_USERNAME — ES username (default: `elastic`)
  *  - KBN_EIS_ES_PASSWORD — ES password (default: `changeme`)
  */
@@ -160,7 +160,7 @@ const discoverEisEndpoints = async (
     [
       `No EIS inference endpoints found after ${maxAttempts} attempts (${detail}).`,
       'Elasticsearch is responding but EIS endpoints are not registered.',
-      'Make sure Elasticsearch was started with `yarn es snapshot --eis` and that the CCM API key was set successfully.',
+      'Make sure Elasticsearch was started with `pnpm es snapshot --eis` and that the CCM API key was set successfully.',
     ].join('\n')
   );
 };
@@ -211,7 +211,7 @@ const buildConnectors = (
   return connectors;
 };
 
-/** Entry point called from bootstrap.ts when `--eis` is passed to `yarn start`. */
+/** Entry point called from bootstrap.ts when `--eis` is passed to `pnpm start`. */
 export const discoverEisConnectors = async (log: Log): Promise<EisConnectorResult> => {
   log.good('eis', 'Setting up EIS connectors from Elasticsearch...');
 

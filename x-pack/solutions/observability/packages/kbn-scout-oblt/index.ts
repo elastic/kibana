@@ -26,6 +26,7 @@ export { globalSetupHook, globalTeardownHook } from './src/playwright/global_hoo
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
+  AppMenu,
   browserAuthFixture,
   apiServicesFixture,
   createPlaywrightConfig,
