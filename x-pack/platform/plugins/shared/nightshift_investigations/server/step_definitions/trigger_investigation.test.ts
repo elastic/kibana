@@ -185,4 +185,48 @@ describe('triggerInvestigationStepDefinition', () => {
       })
     );
   });
+
+  it('keeps sibling context keys so start() can reject a second trigger', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(
+      createContext({
+        subject_type: 'alert',
+        subject_id: 'alert-1',
+        title: 'CPU threshold',
+        context: {
+          alerts: [
+            {
+              _id: 'alert-1',
+              kibana: {
+                alert: {
+                  uuid: 'alert-1',
+                  status: 'active',
+                  start: '2026-09-02T10:00:00.000Z',
+                  reason: 'CPU saturation',
+                  rule: {
+                    uuid: 'rule-1',
+                    name: 'CPU threshold',
+                    rule_type_id: 'metrics.alert.threshold',
+                    category: 'Metric threshold',
+                  },
+                },
+              },
+            },
+          ],
+          event_uuid: 'event-1',
+        },
+      })
+    );
+
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: {
+          alerts: [expect.objectContaining({ id: 'alert-1' })],
+          event_uuid: 'event-1',
+        },
+      })
+    );
+  });
 });

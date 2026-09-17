@@ -53,7 +53,10 @@ const toAlertStartContext = (
     return context;
   }
 
+  // Every other key is passed through untouched so the client's strict alert schema still
+  // rejects a context that smuggles in a second trigger, rather than silently dropping it.
   return {
+    ...context,
     alerts: context.alerts.map((alert) => snapshotFromAlertDocument(alert) ?? alert),
   };
 };
