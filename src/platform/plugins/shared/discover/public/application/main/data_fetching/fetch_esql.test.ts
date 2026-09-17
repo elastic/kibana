@@ -63,8 +63,10 @@ describe('fetchEsql', () => {
     const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
     expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
       records,
+      esqlColumns: ['_id', 'foo'],
       esqlHeaderWarning: undefined,
       interceptedWarnings: [],
+      approximationApplied: undefined,
     });
     expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[0] });
@@ -107,8 +109,10 @@ describe('fetchEsql', () => {
             flattened: hits[1],
           },
         ],
+        esqlColumns: ['_id', 'foo'],
         esqlHeaderWarning: undefined,
         interceptedWarnings: [],
+        approximationApplied: undefined,
       });
     } finally {
       jest.useRealTimers();
