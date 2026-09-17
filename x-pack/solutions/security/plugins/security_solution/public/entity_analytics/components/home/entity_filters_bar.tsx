@@ -163,6 +163,25 @@ const useEntityFilterBarCounts = ({
 const ENTITY_TYPE_OPTIONS = getEntityAnalyticsEntityTypes();
 const RISK_LEVEL_OPTIONS = SEVERITY_UI_SORT_ORDER.slice().reverse();
 
+const FILTER_TITLES = {
+  entityType: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.entityType', {
+    defaultMessage: 'Entity type',
+  }),
+  riskLevel: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.riskLevel', {
+    defaultMessage: 'Risk level',
+  }),
+  assetCriticality: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.home.filter.assetCriticality',
+    { defaultMessage: 'Asset criticality' }
+  ),
+  dataSource: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.dataSource', {
+    defaultMessage: 'Data source',
+  }),
+  watchlist: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.watchlist', {
+    defaultMessage: 'Watchlist',
+  }),
+};
+
 const FilterEntry = ({ children }: { children: React.ReactNode }) => (
   <EuiFlexItem>
     <EuiFilterGroup compressed>{children}</EuiFilterGroup>
@@ -254,7 +273,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <FilterEntry>
         <MultiselectFilter<EntityType>
-          title="Entity type"
+          title={FILTER_TITLES.entityType}
           items={entityTypeOptions.map((o) => o.value)}
           selectedItems={filters.entityTypes}
           onSelectionChange={(entityTypes) => onFiltersChange({ ...filters, entityTypes })}
@@ -276,7 +295,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<RiskSeverity>
-          title="Risk level"
+          title={FILTER_TITLES.riskLevel}
           items={riskLevelOptions.map((o) => o.value)}
           selectedItems={filters.riskLevels}
           onSelectionChange={(riskLevels) => onFiltersChange({ ...filters, riskLevels })}
@@ -306,7 +325,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<string>
-          title="Asset criticality"
+          title={FILTER_TITLES.assetCriticality}
           items={criticalityOptions.map((o) => o.value)}
           selectedItems={filters.assetCriticality}
           onSelectionChange={(assetCriticality) =>
@@ -326,7 +345,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<string>
-          title="Data source"
+          title={FILTER_TITLES.dataSource}
           items={dataSourceOptions.map((o) => o.value)}
           selectedItems={filters.dataSources}
           onSelectionChange={(dataSources) => onFiltersChange({ ...filters, dataSources })}
@@ -341,7 +360,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<string>
-          title="Watchlist"
+          title={FILTER_TITLES.watchlist}
           items={watchlistOptions.map((o) => o.id)}
           selectedItems={filters.watchlists}
           onSelectionChange={(watchlists) => onFiltersChange({ ...filters, watchlists })}
