@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import {
   getConnectorSpecsResponseBodySchemaV1,
@@ -28,7 +28,8 @@ import { transformGetConnectorSpecResponseV1 } from '../get_spec/transforms';
 export const getConnectorSpecsRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  logger: Logger
 ) => {
   router.get(
     {
@@ -68,8 +69,12 @@ export const getConnectorSpecsRoute = (
               configurationUtilities,
             });
             responseBody.push(transformGetConnectorSpecResponseV1(specResult));
-          } catch {
-            // Skip types whose spec cannot be loaded or serialized.
+          } catch (error) {
+            logger.warn(
+              `Failed to serialize connector spec for type "${type.id}": ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
           }
         }
 

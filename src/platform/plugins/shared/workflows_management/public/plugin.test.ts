@@ -174,7 +174,6 @@ describe('WorkflowsPlugin', () => {
           },
           schema: {},
           isTestable: false,
-          isInboundOnly: true,
           actions: {},
           events: {
             definitions: [

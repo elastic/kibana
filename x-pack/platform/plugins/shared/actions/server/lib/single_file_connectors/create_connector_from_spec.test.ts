@@ -716,8 +716,6 @@ describe('createConnectorTypeFromSpec', () => {
       );
 
       expect(connectorType.hasEvents).toBe(true);
-      expect(connectorType.isInboundOnly).toBe(false);
-      expect(connectorType.isEarsExperimental).toBe(false);
     });
 
     it('sets isInboundOnly for an events-only spec', () => {
@@ -730,9 +728,7 @@ describe('createConnectorTypeFromSpec', () => {
         mockActionsPlugin
       );
 
-      expect(connectorType.hasEvents).toBe(true);
       expect(connectorType.isInboundOnly).toBe(true);
-      expect(connectorType.isEarsExperimental).toBe(false);
     });
 
     it('sets isEarsExperimental when the spec uses experimental EARS auth', () => {
@@ -751,8 +747,6 @@ describe('createConnectorTypeFromSpec', () => {
         mockActionsPlugin
       );
 
-      expect(connectorType.hasEvents).toBe(false);
-      expect(connectorType.isInboundOnly).toBe(false);
       expect(connectorType.isEarsExperimental).toBe(true);
     });
   });

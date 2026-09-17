@@ -83,7 +83,7 @@ export function defineRoutes(opts: RouteOptions) {
   listTypesWithSystemRoute(router, licenseState);
 
   getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
-  getConnectorSpecsRoute(router, licenseState, actionsConfigUtils);
+  getConnectorSpecsRoute(router, licenseState, actionsConfigUtils, logger);
 
   // Only register when `xpack.actions.inboundEvents.enabled` — absent when off (not 403).
   if (inboundEvents) {

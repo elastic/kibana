@@ -26,7 +26,6 @@ export interface ConnectorSpecWireResponse {
   };
   schema: Record<string, unknown>;
   is_testable: boolean;
-  is_inbound_only: boolean;
   actions: Record<
     string,
     {
@@ -63,7 +62,6 @@ export interface ConnectorSpecResponse {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
   isTestable: boolean;
-  isInboundOnly: boolean;
   actions: Record<string, ConnectorSpecAction>;
   events?: { definitions: ConnectorSpecEventDefinition[] };
 }
@@ -95,7 +93,6 @@ export function transformConnectorSpecResponse(
     },
     schema: wire.schema,
     isTestable: wire.is_testable,
-    isInboundOnly: Boolean(wire.is_inbound_only),
     actions: Object.fromEntries(
       Object.entries(wire.actions ?? {}).map(([name, action]) => [
         name,

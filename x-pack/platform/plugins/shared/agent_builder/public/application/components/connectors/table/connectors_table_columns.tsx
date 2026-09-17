@@ -29,7 +29,7 @@ import { labels } from '../../../utils/i18n';
 import { ConnectorTypeIcon } from '../connector_type_icon';
 import { ConnectorContextMenu } from './connectors_table_context_menu';
 import { ConnectorQuickActions } from './connectors_table_quick_actions';
-import { useEarsExperimentalConnectorTypeIds } from '../../../hooks/connectors/use_ears_experimental_connector_type_ids';
+import { isDisabledEarsConnector } from '../../../hooks/connectors/is_disabled_ears_connector';
 
 /**
  * Clickable badge for not-authorized OAuth connectors.
@@ -94,21 +94,16 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
   const { actionTypeRegistry } = triggersActionsUi;
 
   const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
-  const earsExperimentalTypeIds = useEarsExperimentalConnectorTypeIds();
 
   return useMemo(() => {
-    const isDisabledEarsConnector = (connector: ConnectorItem): boolean =>
-      connector.config?.authType === 'ears' &&
-      (!isEarsEnabled ||
-        (earsExperimentalTypeIds.has(connector.actionTypeId) && !isEarsExperimentalEnabled));
-
+    const earsFlags = { isEarsEnabled, isEarsExperimentalEnabled };
     return [
       {
         field: 'name',
         name: labels.connectors.nameColumn,
         width: '45%',
         render: (name: string, connector: ConnectorItem) => {
-          const disabled = isDisabledEarsConnector(connector);
+          const disabled = isDisabledEarsConnector(connector, earsFlags);
           return (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -164,7 +159,7 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
         name: labels.connectors.statusColumn,
         width: '25%',
         render: (oauthStatus: ConnectorItem['oauthStatus'], connector: ConnectorItem) => {
-          if (isDisabledEarsConnector(connector)) {
+          if (isDisabledEarsConnector(connector, earsFlags)) {
             return (
               <EuiToolTip content={labels.connectors.statusEarsDisabledTooltip}>
                 <EuiBadge
@@ -203,12 +198,5 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
         ),
       },
     ];
-  }, [
-    editConnector,
-    actionTypeRegistry,
-    canDelete,
-    isEarsEnabled,
-    isEarsExperimentalEnabled,
-    earsExperimentalTypeIds,
-  ]);
+  }, [editConnector, actionTypeRegistry, canDelete, isEarsEnabled, isEarsExperimentalEnabled]);
 };

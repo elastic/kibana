@@ -12,7 +12,6 @@ export interface GetConnectorSpecServiceResult {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
   isTestable: boolean;
-  isInboundOnly: boolean;
   actions: Record<
     string,
     {
@@ -60,7 +59,6 @@ export const transformGetConnectorSpecResponse = (
   },
   schema: spec.schema,
   is_testable: spec.isTestable,
-  is_inbound_only: Boolean(spec.isInboundOnly),
   actions: transformActions(spec.actions ?? {}),
   ...(spec.events
     ? {

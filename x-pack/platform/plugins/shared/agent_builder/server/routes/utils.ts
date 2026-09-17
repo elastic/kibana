@@ -6,7 +6,7 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { getConnectorSpec, isEarsExperimentalConnector, isToolAction } from '@kbn/connector-specs';
 import type { ConnectorItem, ConnectorSubAction, OAuthStatus } from '../../common/http_api/tools';
 
 export const getTechnicalPreviewWarning = (featureName: string) => {
@@ -55,6 +55,7 @@ export const toConnectorItem = (
     config: connector.config,
     authMode: connector.authMode,
     oauthStatus: options?.oauthStatus,
+    isEarsExperimental: isEarsExperimentalConnector(connector.actionTypeId),
     subActions: getConnectorSubActions(connector.actionTypeId),
   };
 };

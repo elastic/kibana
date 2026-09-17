@@ -24,7 +24,6 @@ describe('transformConnectorSpecResponse', () => {
       },
       schema: { type: 'object', properties: {} },
       is_testable: true,
-      is_inbound_only: false,
       actions: {},
     });
 
@@ -40,7 +39,6 @@ describe('transformConnectorSpecResponse', () => {
     });
     expect(result.schema).toEqual({ type: 'object', properties: {} });
     expect(result.isTestable).toBe(true);
-    expect(result.isInboundOnly).toBe(false);
     expect(result.actions).toEqual({});
   });
 
@@ -55,7 +53,6 @@ describe('transformConnectorSpecResponse', () => {
       },
       schema: {},
       is_testable: false,
-      is_inbound_only: false,
       actions: {},
     });
 
@@ -80,7 +77,6 @@ describe('transformConnectorSpecResponse', () => {
       },
       schema: {},
       is_testable: false,
-      is_inbound_only: true,
       actions: {
         getIndicator: {
           is_tool: true,
@@ -100,7 +96,6 @@ describe('transformConnectorSpecResponse', () => {
       },
     });
 
-    expect(result.isInboundOnly).toBe(true);
     expect(result.actions.getIndicator).toEqual({
       isTool: true,
       description: 'Look up',

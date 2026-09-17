@@ -31,7 +31,6 @@ function minimalConnectorSpecForForm(): ConnectorSpecResponse {
     },
     schema: { type: 'object', properties: {} },
     isTestable: false,
-    isInboundOnly: false,
     actions: {},
   };
 }
@@ -50,7 +49,6 @@ describe('action_type_model_utils', () => {
       },
       schema: { type: 'object', properties: {} },
       is_testable: true,
-      is_inbound_only: false,
       actions: {},
     });
 
@@ -64,7 +62,6 @@ describe('action_type_model_utils', () => {
       },
       schema: { type: 'object', properties: {} },
       isTestable: true,
-      isInboundOnly: false,
       actions: {},
     });
 
@@ -101,7 +98,6 @@ describe('action_type_model_utils', () => {
         },
       },
       isTestable: false,
-      isInboundOnly: false,
       actions: {},
     };
 
@@ -305,7 +301,6 @@ describe('action_type_model_utils', () => {
           },
           schema: { type: 'object', properties: {} },
           isTestable: false,
-          isInboundOnly: true,
           actions: {},
         },
         docLinks,

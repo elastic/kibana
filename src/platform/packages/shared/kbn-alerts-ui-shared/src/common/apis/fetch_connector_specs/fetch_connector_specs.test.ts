@@ -29,7 +29,6 @@ describe('fetchConnectorSpecs', () => {
         },
         schema: { type: 'object' },
         is_testable: true,
-        is_inbound_only: false,
         actions: {
           getIndicator: {
             input: { type: 'object' },
@@ -43,6 +42,5 @@ describe('fetchConnectorSpecs', () => {
     expect(http.get).toHaveBeenCalledWith('/internal/actions/connector_types/specs');
     expect(result[0].metadata.id).toBe('.alienvault-otx');
     expect(result[0].actions.getIndicator.input).toEqual({ type: 'object' });
-    expect(result[0].isInboundOnly).toBe(false);
   });
 });

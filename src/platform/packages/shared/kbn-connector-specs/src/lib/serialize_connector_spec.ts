@@ -9,7 +9,6 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
-import { isInboundOnlyConnectorSpec } from '../is_inbound_only_connector_spec';
 import { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_spec';
 
 export interface SerializeConnectorSpecOptions {
@@ -34,7 +33,6 @@ export interface SerializedConnectorSpecEventDefinition {
 export interface SerializedConnectorSpec {
   metadata: ConnectorSpec['metadata'];
   schema: Record<string, unknown>;
-  isInboundOnly: boolean;
   actions: Record<string, SerializedConnectorSpecAction>;
   events?: { definitions: SerializedConnectorSpecEventDefinition[] };
 }
@@ -87,7 +85,6 @@ export function serializeConnectorSpec(
   return {
     metadata: spec.metadata,
     schema: jsonSchema as Record<string, unknown>,
-    isInboundOnly: isInboundOnlyConnectorSpec(spec),
     actions,
     ...(eventDefinitions.length > 0 ? { events: { definitions: eventDefinitions } } : {}),
   };

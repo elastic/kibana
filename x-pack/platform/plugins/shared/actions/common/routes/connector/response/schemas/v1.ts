@@ -383,12 +383,6 @@ export const getConnectorSpecResponseBodySchema = schema.object({
       description: 'When true, this connector type supports the reserved test sub-action.',
     },
   }),
-  is_inbound_only: schema.boolean({
-    meta: {
-      description:
-        'Indicates whether the connector type has inbound events and no outbound actions.',
-    },
-  }),
   actions: schema.recordOf(
     schema.string({ maxLength: MAX_CONNECTOR_SPEC_ACTION_NAME_LENGTH }),
     connectorSpecActionSchema,

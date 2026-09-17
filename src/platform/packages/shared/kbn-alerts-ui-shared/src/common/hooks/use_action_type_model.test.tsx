@@ -45,7 +45,6 @@ describe('useActionTypeModel', () => {
       unknown
     >,
     is_testable: true,
-    is_inbound_only: false,
     actions: {},
   };
 

@@ -17,7 +17,7 @@ import { useConnectorsTableColumns } from './connectors_table_columns';
 import { ConnectorsTableHeader } from './connectors_table_header';
 import { connectorQuickActionsHoverStyles } from './connectors_table_quick_actions';
 import { useConnectorsTableSearch } from './connectors_table_search';
-import { useEarsExperimentalConnectorTypeIds } from '../../../hooks/connectors/use_ears_experimental_connector_type_ids';
+import { isDisabledEarsConnector } from '../../../hooks/connectors/is_disabled_ears_connector';
 
 export const AgentBuilderConnectorsTable = memo(() => {
   const { connectors, isLoading, error } = useListConnectors({});
@@ -33,15 +33,7 @@ export const AgentBuilderConnectorsTable = memo(() => {
 
   const { euiTheme } = useEuiTheme();
   const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
-  const earsExperimentalTypeIds = useEarsExperimentalConnectorTypeIds();
-
-  const isDisabledEarsConnector = (connector: ConnectorItem): boolean => {
-    if (connector.config?.authType !== 'ears') return false;
-    if (!isEarsEnabled) return true;
-    if (earsExperimentalTypeIds.has(connector.actionTypeId) && !isEarsExperimentalEnabled)
-      return true;
-    return false;
-  };
+  const earsFlags = { isEarsEnabled, isEarsExperimentalEnabled };
 
   const disabledRowCss = css({ backgroundColor: euiTheme.colors.lightestShade });
 
@@ -92,7 +84,7 @@ export const AgentBuilderConnectorsTable = memo(() => {
       }}
       rowProps={(connector) => ({
         'data-test-subj': `agentBuilderConnectorsTableRow-${connector.id}`,
-        ...(isDisabledEarsConnector(connector) ? { css: disabledRowCss } : {}),
+        ...(isDisabledEarsConnector(connector, earsFlags) ? { css: disabledRowCss } : {}),
       })}
       selection={{
         selectable: (connector) => !connector.isPreconfigured,

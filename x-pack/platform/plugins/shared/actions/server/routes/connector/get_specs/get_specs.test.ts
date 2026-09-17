@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
@@ -31,12 +31,22 @@ const createActionsConfigUtilsMock = (): ActionsConfigurationUtilities =>
     isEarsEnabled: jest.fn(() => false),
   } as unknown as ActionsConfigurationUtilities);
 
+const registerRoute = (
+  router: ReturnType<typeof httpServiceMock.createRouter>,
+  licenseState: ReturnType<typeof licenseStateMock.create>,
+  configUtils = createActionsConfigUtilsMock(),
+  logger = loggingSystemMock.createLogger()
+) => {
+  getConnectorSpecsRoute(router, licenseState, configUtils, logger);
+  return logger;
+};
+
 describe('getConnectorSpecsRoute', () => {
   it('registers the route with correct path', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecsRoute(router, licenseState, createActionsConfigUtilsMock());
+    registerRoute(router, licenseState);
 
     expect(router.get).toHaveBeenCalledTimes(1);
     const [config] = router.get.mock.calls[0];
@@ -47,7 +57,7 @@ describe('getConnectorSpecsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecsRoute(router, licenseState, createActionsConfigUtilsMock());
+    registerRoute(router, licenseState);
 
     const [config] = router.get.mock.calls[0];
     expect(config.options?.access).toBe('internal');
@@ -57,7 +67,7 @@ describe('getConnectorSpecsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecsRoute(router, licenseState, createActionsConfigUtilsMock());
+    registerRoute(router, licenseState);
 
     const [config] = router.get.mock.calls[0];
     expect(config.security).toEqual(DEFAULT_ACTION_ROUTE_SECURITY);
@@ -112,7 +122,6 @@ describe('getConnectorSpecsRoute', () => {
       },
       schema: { type: 'object' },
       isTestable: true,
-      isInboundOnly: false,
       actions: {
         getIndicator: {
           isTool: true,
@@ -125,7 +134,7 @@ describe('getConnectorSpecsRoute', () => {
     };
     actionsClient.getConnectorSpec.mockResolvedValue(specResult as never);
 
-    getConnectorSpecsRoute(router, licenseState, actionsConfigUtils);
+    registerRoute(router, licenseState, actionsConfigUtils);
 
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
@@ -143,7 +152,6 @@ describe('getConnectorSpecsRoute', () => {
           },
           schema: { type: 'object' },
           is_testable: true,
-          is_inbound_only: false,
           actions: {
             getIndicator: {
               is_tool: true,
@@ -173,12 +181,50 @@ describe('getConnectorSpecsRoute', () => {
       throw new Error('License check failed');
     });
 
-    getConnectorSpecsRoute(router, licenseState, createActionsConfigUtilsMock());
+    registerRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     await expect(handler(context, req, res)).rejects.toThrow('License check failed');
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
+  });
+
+  it('skips types that fail to serialize and logs a warning', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const actionsClient = actionsClientMock.create();
+    const logger = loggingSystemMock.createLogger();
+    const serializeError = new Error('boom');
+    actionsClient.listTypes.mockResolvedValue([
+      {
+        id: '.alienvault-otx',
+        name: 'AlienVault OTX',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['workflows'],
+        minimumLicenseRequired: 'gold',
+        isSystemActionType: false,
+        isDeprecated: false,
+        source: 'spec',
+        isTestable: true,
+        hasEvents: false,
+        isInboundOnly: false,
+        isEarsExperimental: false,
+      },
+    ]);
+    actionsClient.getConnectorSpec.mockRejectedValue(serializeError);
+
+    registerRoute(router, licenseState, createActionsConfigUtilsMock(), logger);
+
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+    const result = await handler(context, req, res);
+
+    expect(result).toEqual({ body: [] });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Failed to serialize connector spec for type ".alienvault-otx": boom'
+    );
   });
 });

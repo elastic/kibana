@@ -201,6 +201,8 @@ export interface ConnectorItem {
   isConnectorTypeDeprecated: boolean;
   authMode?: 'shared' | 'per-user';
   oauthStatus?: OAuthStatus;
+  /** When true, this connector type uses experimental EARS authentication. */
+  isEarsExperimental?: boolean;
   /** Sub-actions derived from the connector spec (isTool: true actions) */
   subActions: ConnectorSubAction[];
 }

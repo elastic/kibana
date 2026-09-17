@@ -23,7 +23,7 @@ import { useConnectorsActions } from '../../../context/connectors_provider';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
 import { labels } from '../../../utils/i18n';
-import { useEarsExperimentalConnectorTypeIds } from '../../../hooks/connectors/use_ears_experimental_connector_type_ids';
+import { isDisabledEarsConnector } from '../../../hooks/connectors/is_disabled_ears_connector';
 
 export interface ConnectorContextMenuProps {
   connector: ConnectorItem;
@@ -108,11 +108,10 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
   } = useKibana();
   const canDelete = application.capabilities.actions?.delete === true;
   const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
-  const earsExperimentalTypeIds = useEarsExperimentalConnectorTypeIds();
-  const isEarsDisabled =
-    connector.config?.authType === 'ears' &&
-    (!isEarsEnabled ||
-      (earsExperimentalTypeIds.has(connector.actionTypeId) && !isEarsExperimentalEnabled));
+  const isEarsDisabled = isDisabledEarsConnector(connector, {
+    isEarsEnabled,
+    isEarsExperimentalEnabled,
+  });
   const isAuthorized = connector.oauthStatus === OAUTH_STATUS.AUTHORIZED;
   const closeMenu = () => setIsOpen(false);
 

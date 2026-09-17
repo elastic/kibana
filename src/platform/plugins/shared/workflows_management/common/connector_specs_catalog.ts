@@ -13,7 +13,6 @@ import { stepSchemas } from './step_schemas';
 
 export interface SerializedConnectorSpecCatalogEntry {
   id: string;
-  isInboundOnly: boolean;
   actions: Record<
     string,
     {
@@ -66,12 +65,15 @@ const toZodObject = (jsonSchema: Record<string, unknown>): z.ZodObject => {
   return z.object({}).passthrough();
 };
 
+const isInboundOnlyCatalogEntry = (entry: SerializedConnectorSpecCatalogEntry): boolean =>
+  (entry.events?.definitions.length ?? 0) > 0 && Object.keys(entry.actions).length === 0;
+
 export function rehydrateConnectorSpecsCatalog(
   entries: SerializedConnectorSpecCatalogEntry[]
 ): RehydratedConnectorSpecCatalogEntry[] {
   return entries.map((entry) => ({
     id: entry.id,
-    isInboundOnly: entry.isInboundOnly,
+    isInboundOnly: isInboundOnlyCatalogEntry(entry),
     actions: Object.fromEntries(
       Object.entries(entry.actions).map(([name, action]) => [
         name,

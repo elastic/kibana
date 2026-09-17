@@ -501,7 +501,6 @@ describe('serializeConnectorSpec', () => {
 
       const result = serializeConnectorSpec(spec);
 
-      expect(result.isInboundOnly).toBe(false);
       expect(result.actions.lookup.isTool).toBe(true);
       expect(result.actions.lookup.description).toBe('Look up an indicator');
       expect(JSON.stringify(result)).not.toMatch(/handler/);
@@ -556,7 +555,6 @@ describe('serializeConnectorSpec', () => {
 
       const result = serializeConnectorSpec(spec);
 
-      expect(result.isInboundOnly).toBe(true);
       expect(result.events?.definitions).toHaveLength(1);
       expect(result.events?.definitions[0].eventId).toBe('inbound.received');
       expect(JSON.stringify(result)).not.toMatch(/handleEvents/);

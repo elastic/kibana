@@ -33,7 +33,6 @@ describe('connector specs catalog', () => {
     const [entry] = rehydrateConnectorSpecsCatalog([
       {
         id: '.alienvault-otx',
-        isInboundOnly: false,
         actions: {
           getIndicator: {
             description: 'Get indicator',
@@ -66,7 +65,6 @@ describe('connector specs catalog', () => {
       rehydrateConnectorSpecsCatalog([
         {
           id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
-          isInboundOnly: true,
           actions: {},
           events: {
             definitions: [
@@ -93,7 +91,6 @@ describe('connector specs catalog', () => {
     const catalog = await ensureConnectorSpecsCatalogLoaded(async () => [
       {
         id: '.slack',
-        isInboundOnly: false,
         actions: {
           postMessage: {
             input: {

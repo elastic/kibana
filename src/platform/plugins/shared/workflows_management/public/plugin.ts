@@ -70,7 +70,6 @@ export class WorkflowsPlugin
   private appVisibilitySubscription?: Subscription;
   private workflowsUiEnabled = false;
   private connectorEventTriggers?: Omit<RegisterConnectorEventTriggersPublicParams, 'specs'>;
-  private catalogLoadPromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
@@ -187,34 +186,25 @@ export class WorkflowsPlugin
     if (!this.workflowsUiEnabled) {
       return;
     }
-    if (!this.catalogLoadPromise) {
-      this.catalogLoadPromise = ensureConnectorSpecsCatalogLoaded(async () => {
+    try {
+      const catalog = await ensureConnectorSpecsCatalogLoaded(async () => {
         const specs = await fetchConnectorSpecs({ http });
         return specs.map((spec) => ({
           id: spec.metadata.id,
-          isInboundOnly: spec.isInboundOnly,
           actions: spec.actions,
           ...(spec.events !== undefined ? { events: spec.events } : {}),
         }));
-      })
-        .then((catalog) => {
-          if (this.connectorEventTriggers) {
-            registerConnectorEventTriggersPublic({
-              ...this.connectorEventTriggers,
-              specs: catalog,
-            });
-          }
-        })
-        .catch((error) => {
-          this.catalogLoadPromise = undefined;
-          this.logger.error('Failed to load connector specs catalog', { error });
-          throw error;
+      });
+      if (this.connectorEventTriggers) {
+        const triggers = this.connectorEventTriggers;
+        this.connectorEventTriggers = undefined;
+        registerConnectorEventTriggersPublic({
+          ...triggers,
+          specs: catalog,
         });
-    }
-    try {
-      await this.catalogLoadPromise;
-    } catch {
-      // YAML editor still mounts; spec connectors stay unavailable until retry.
+      }
+    } catch (error) {
+      this.logger.error('Failed to load connector specs catalog', { error });
     }
   }
 
