@@ -25,6 +25,7 @@ import {
   ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
 } from '../constants';
 import {
+  disableCustomYaraSignatures,
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
@@ -77,6 +78,13 @@ export const createDefaultPolicy = (
     !experimentalFeatures.trustedDevices
   ) {
     defaultPolicyPerType = removeDeviceControl(defaultPolicyPerType);
+  }
+
+  if (
+    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
+    !experimentalFeatures.customYaraSignaturesEnabled
+  ) {
+    defaultPolicyPerType = disableCustomYaraSignatures(defaultPolicyPerType);
   }
 
   if (!experimentalFeatures.linuxDnsEvents) {

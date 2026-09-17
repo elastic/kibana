@@ -73,6 +73,11 @@ export const getPolicySettingsFormTestSubjects = (
       notifyUserCheckbox: memoryTestSubj('notifyUser-checkbox'),
       osValuesContainer: memoryTestSubj('osValues'),
       rulesCallout: memoryTestSubj('rulesCallout'),
+      customYaraSignatures: memoryTestSubj('customYaraSignatures'),
+      customYaraSignaturesEnableDisableSwitch: memoryTestSubj(
+        'customYaraSignatures-enableDisableSwitch'
+      ),
+      customYaraSignaturesTooltipIcon: memoryTestSubj('customYaraSignatures-tooltipIcon'),
     },
     behaviour: {
       card: behaviourTestSubj(),

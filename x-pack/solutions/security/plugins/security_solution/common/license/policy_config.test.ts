@@ -32,6 +32,16 @@ describe('policy_config and licenses', () => {
     if (policy.mac.device_control) policy.mac.device_control.enabled = false;
     if (policy.windows.popup.device_control) policy.windows.popup.device_control.enabled = false;
     if (policy.mac.popup.device_control) policy.mac.popup.device_control.enabled = false;
+    policy.windows.memory_protection.custom_yara_signatures = false;
+    policy.mac.memory_protection.custom_yara_signatures = false;
+    policy.linux.memory_protection.custom_yara_signatures = false;
+  };
+
+  const omitCustomYaraSignatures = (policy: PolicyConfig) => {
+    for (const os of ['windows', 'mac', 'linux'] as const) {
+      const memoryProtection: { custom_yara_signatures?: boolean } = policy[os].memory_protection;
+      delete memoryProtection.custom_yara_signatures;
+    }
   };
 
   describe('isEndpointPolicyValidForLicense', () => {
@@ -742,6 +752,19 @@ describe('policy_config and licenses', () => {
         supported: true,
       });
     });
+
+    it('preserves custom_yara_signatures on memory_protection', () => {
+      const policy = policyFactory();
+      policy.windows.memory_protection.custom_yara_signatures = false;
+      policy.mac.memory_protection.custom_yara_signatures = true;
+      policy.linux.memory_protection.custom_yara_signatures = false;
+
+      const supported = policyFactoryWithSupportedFeatures(policy);
+
+      expect(supported.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(supported.mac.memory_protection.custom_yara_signatures).toBe(true);
+      expect(supported.linux.memory_protection.custom_yara_signatures).toBe(false);
+    });
   });
 
   describe('isEndpointDeviceControlPolicyValidForLicense', () => {
@@ -867,6 +890,7 @@ describe('policy_config and licenses', () => {
 
     it('allows Mac and Windows popup device control with empty message and disabled state for non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.device_control) {
         policy.windows.device_control.enabled = false;
       }
@@ -890,6 +914,7 @@ describe('policy_config and licenses', () => {
     it('allows Mac and Windows popup device control with default message and disabled state for non-Enterprise license', () => {
       const policy = policyFactory();
 
+      disableEnterpriseFeatures(policy);
       if (policy.windows.device_control) policy.windows.device_control.enabled = false;
       if (policy.windows.popup.device_control) {
         policy.windows.popup.device_control.enabled = false;
@@ -915,6 +940,65 @@ describe('policy_config and licenses', () => {
 
       const valid = isEndpointPolicyValidForLicense(policy, null);
       expect(valid).toBeFalsy();
+    });
+  });
+
+  describe('custom yara signatures license gating', () => {
+    it('allows custom_yara_signatures enabled with an Enterprise license', () => {
+      const policy = policyFactory();
+      expect(isEndpointPolicyValidForLicense(policy, Enterprise)).toBe(true);
+    });
+
+    it('allows a policy with custom_yara_signatures absent on all OSes below Enterprise', () => {
+      const platinumPolicy = policyFactory();
+      disableEnterpriseFeatures(platinumPolicy);
+      omitCustomYaraSignatures(platinumPolicy);
+      expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(true);
+
+      const unpaidPolicy = policyFactoryWithoutPaidFeatures();
+      omitCustomYaraSignatures(unpaidPolicy);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Gold)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Basic)).toBe(true);
+    });
+
+    it.each(['windows', 'mac', 'linux'] as const)(
+      'is invalid below Enterprise when custom_yara_signatures is true on %s',
+      (os) => {
+        const platinumPolicy = policyFactory();
+        disableEnterpriseFeatures(platinumPolicy);
+        platinumPolicy[os].memory_protection.custom_yara_signatures = true;
+        expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(false);
+
+        const unpaidPolicy = policyFactoryWithoutPaidFeatures();
+        unpaidPolicy[os].memory_protection.custom_yara_signatures = true;
+        expect(isEndpointPolicyValidForLicense(unpaidPolicy, Gold)).toBe(false);
+        expect(isEndpointPolicyValidForLicense(unpaidPolicy, Basic)).toBe(false);
+      }
+    );
+
+    it('allows custom_yara_signatures disabled below Enterprise', () => {
+      const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
+      expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(true);
+    });
+
+    it('turns custom_yara_signatures off below Enterprise and keeps it for Enterprise', () => {
+      const enterprisePolicy = unsetPolicyFeaturesAccordingToLicenseLevel(
+        policyFactory(),
+        Enterprise
+      );
+      expect(enterprisePolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
+      expect(enterprisePolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+      expect(enterprisePolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
+      expect(isEndpointPolicyValidForLicense(enterprisePolicy, Enterprise)).toBe(true);
+
+      for (const license of [Platinum, Gold, Basic]) {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policyFactory(), license);
+        expect(stripped.windows.memory_protection.custom_yara_signatures).toBe(false);
+        expect(stripped.mac.memory_protection.custom_yara_signatures).toBe(false);
+        expect(stripped.linux.memory_protection.custom_yara_signatures).toBe(false);
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
     });
   });
 });

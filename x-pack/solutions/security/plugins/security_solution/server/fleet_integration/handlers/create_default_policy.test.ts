@@ -46,6 +46,7 @@ describe('Create Default Policy tests ', () => {
   const telemetryConfigProviderMock = createTelemetryConfigProviderMock();
   const experimentalFeatures = {
     trustedDevices: true,
+    customYaraSignaturesEnabled: true,
   } as ExperimentalFeatures;
 
   const createDefaultPolicyCallback = async (
@@ -90,7 +91,11 @@ describe('Create Default Policy tests ', () => {
       expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
 
       // check some of the protections to be disabled
-      const disabledButSupported = { mode: ProtectionModes.off, supported: true };
+      const disabledButSupported = {
+        mode: ProtectionModes.off,
+        supported: true,
+        custom_yara_signatures: false,
+      };
       const disabledButSupportedBehaviorProtection = {
         mode: ProtectionModes.off,
         supported: true,
@@ -118,7 +123,11 @@ describe('Create Default Policy tests ', () => {
       expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
 
       // check some of the protections to be disabled and unsupported
-      const disabledAndUnsupported = { mode: ProtectionModes.off, supported: false };
+      const disabledAndUnsupported = {
+        mode: ProtectionModes.off,
+        supported: false,
+        custom_yara_signatures: false,
+      };
       const disabledAndUnsupportedBehaviorProtection = {
         mode: ProtectionModes.off,
         supported: false,
@@ -194,7 +203,11 @@ describe('Create Default Policy tests ', () => {
       expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
 
       // check some of the protections to be disabled
-      const disabledButSupported = { mode: ProtectionModes.off, supported: true };
+      const disabledButSupported = {
+        mode: ProtectionModes.off,
+        supported: true,
+        custom_yara_signatures: false,
+      };
       const disabledButSupportedBehaviorProtection = {
         mode: ProtectionModes.off,
         supported: true,
@@ -523,6 +536,83 @@ describe('Create Default Policy tests ', () => {
 
       expect(removeDeviceControlSpy).not.toHaveBeenCalled();
       removeDeviceControlSpy.mockRestore();
+    });
+  });
+
+  describe('Custom YARA signatures gating', () => {
+    const edrCompleteConfig: PolicyCreateEndpointConfig = {
+      type: 'endpoint',
+      endpointConfig: { preset: 'EDRComplete' },
+    };
+    const dataCollectionConfig: PolicyCreateEndpointConfig = {
+      type: 'endpoint',
+      endpointConfig: { preset: 'DataCollection' },
+    };
+    const osList = ['windows', 'mac', 'linux'] as const;
+
+    const expectCustomYaraSignatures = (policy: PolicyConfig, enabled: boolean) => {
+      for (const os of osList) {
+        expect(policy[os].memory_protection.custom_yara_signatures).toBe(enabled);
+      }
+    };
+
+    it('should enable custom YARA signatures on all OSes when flag, product feature, and Enterprise license are on', async () => {
+      licenseEmitter.next(Enterprise);
+
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig);
+
+      expectCustomYaraSignatures(policy, true);
+    });
+
+    it('should disable custom YARA signatures when the experimental flag is off', async () => {
+      licenseEmitter.next(Enterprise);
+      const experimentalFeaturesWithCysDisabled = {
+        trustedDevices: true,
+        linuxDnsEvents: true,
+        customYaraSignaturesEnabled: false,
+      } as ExperimentalFeatures;
+
+      const esClientInfo = await elasticsearchServiceMock
+        .createClusterClient()
+        .asInternalUser.info();
+      esClientInfo.cluster_name = '';
+      esClientInfo.cluster_uuid = '';
+      const policy = createDefaultPolicy(
+        licenseService,
+        edrCompleteConfig,
+        cloud,
+        esClientInfo,
+        productFeaturesService,
+        telemetryConfigProviderMock,
+        experimentalFeaturesWithCysDisabled
+      );
+
+      expectCustomYaraSignatures(policy, false);
+    });
+
+    it('should disable custom YARA signatures when the endpointCustomYaraSignatures product feature is off', async () => {
+      licenseEmitter.next(Enterprise);
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_custom_yara_signatures')
+      );
+
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig);
+
+      expectCustomYaraSignatures(policy, false);
+    });
+
+    it('should disable custom YARA signatures for the Data Collection preset', async () => {
+      licenseEmitter.next(Enterprise);
+
+      const policy = await createDefaultPolicyCallback(dataCollectionConfig);
+
+      expectCustomYaraSignatures(policy, false);
+    });
+
+    it('should disable custom YARA signatures on Platinum license', async () => {
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig);
+
+      expectCustomYaraSignatures(policy, false);
     });
   });
 

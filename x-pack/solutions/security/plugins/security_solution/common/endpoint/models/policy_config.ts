@@ -60,6 +60,7 @@ export const policyFactory = ({
       memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
+        custom_yara_signatures: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
@@ -130,6 +131,7 @@ export const policyFactory = ({
       memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
+        custom_yara_signatures: true,
       },
       popup: {
         malware: {
@@ -182,6 +184,7 @@ export const policyFactory = ({
       memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
+        custom_yara_signatures: true,
       },
       popup: {
         malware: {
@@ -226,6 +229,10 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
         enabled: false,
         usb_storage: DeviceControlAccessLevel.audit,
       },
+      memory_protection: {
+        ...policy.windows.memory_protection,
+        custom_yara_signatures: false,
+      },
       popup: {
         ...policy.windows.popup,
         device_control: {
@@ -240,12 +247,23 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
         enabled: false,
         usb_storage: DeviceControlAccessLevel.audit,
       },
+      memory_protection: {
+        ...policy.mac.memory_protection,
+        custom_yara_signatures: false,
+      },
       popup: {
         ...policy.mac.popup,
         device_control: {
           enabled: false,
           message: '',
         },
+      },
+    },
+    linux: {
+      ...policy.linux,
+      memory_protection: {
+        ...policy.linux.memory_protection,
+        custom_yara_signatures: false,
       },
     },
   };
@@ -292,6 +310,7 @@ export const policyFactoryWithoutPaidFeatures = (
       memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
+        custom_yara_signatures: false,
       },
       behavior_protection: {
         mode: ProtectionModes.off,
@@ -345,6 +364,7 @@ export const policyFactoryWithoutPaidFeatures = (
       memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
+        custom_yara_signatures: false,
       },
       device_control: {
         enabled: false,
@@ -384,6 +404,7 @@ export const policyFactoryWithoutPaidFeatures = (
       memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
+        custom_yara_signatures: false,
       },
       popup: {
         ...policy.linux.popup,

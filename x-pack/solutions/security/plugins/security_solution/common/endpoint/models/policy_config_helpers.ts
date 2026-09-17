@@ -170,6 +170,7 @@ const getDisabledCommonProtectionsForOS = (
   memory_protection: {
     ...policy[os].memory_protection,
     mode: ProtectionModes.off,
+    custom_yara_signatures: false,
   },
   malware: {
     ...policy[os].malware,
@@ -453,6 +454,51 @@ export const setMalwareBoolean = (
     policy[os].malware[field] = value;
   });
   return policy;
+};
+
+export const setCustomYaraSignatures = (
+  policy: PolicyConfig,
+  value: boolean,
+  osList: readonly (keyof UIPolicyConfig)[]
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    policy[os].memory_protection.custom_yara_signatures = value;
+  });
+  return policy;
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with custom YARA signatures disabled
+ * on Windows, Mac, and Linux memory protection.
+ *
+ * @param policy
+ * @returns PolicyConfig with custom_yara_signatures set to false on all OSes
+ */
+export const disableCustomYaraSignatures = (policy: PolicyConfig): PolicyConfig => {
+  return {
+    ...policy,
+    windows: {
+      ...policy.windows,
+      memory_protection: {
+        ...policy.windows.memory_protection,
+        custom_yara_signatures: false,
+      },
+    },
+    mac: {
+      ...policy.mac,
+      memory_protection: {
+        ...policy.mac.memory_protection,
+        custom_yara_signatures: false,
+      },
+    },
+    linux: {
+      ...policy.linux,
+      memory_protection: {
+        ...policy.linux.memory_protection,
+        custom_yara_signatures: false,
+      },
+    },
+  };
 };
 
 export const setDeviceControlSwitch = (policy: PolicyConfig, value: boolean): PolicyConfig => {
