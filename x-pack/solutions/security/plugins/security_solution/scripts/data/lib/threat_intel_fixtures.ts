@@ -312,7 +312,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       body:
         'Security researchers documented a confirmed privilege-escalation campaign in AWS account ' +
         '123456789012. Compromised user dev-user@corp.example (source IP 192[.]0[.]2[.]30 / 192.0.2.30) ' +
-        'attached AdministratorAccess, assumed escalated-role, and staged access toward S3 bucket ' +
+        'assumed escalated-role via AssumeRole, attached AdministratorAccess, and staged access toward S3 bucket ' +
         'corp-prod-data. Follow-on activity from 192[.]0[.]2[.]31 (192.0.2.31) included GetSecretValue ' +
         'on prod/db-credentials plus StopLogging and DeleteTrail for defense evasion. The campaign ' +
         'is well evidenced with reusable IOCs and ATT&CK mappings, so defenders should prioritize ' +
@@ -323,30 +323,30 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'CloudTrail retrospective: AdministratorAccess attach in account 123456789012',
           body:
             'Retrospective for AWS account 123456789012 where user dev-user (dev-user@corp.example) from ' +
-            '192[.]0[.]2[.]30 (192.0.2.30) attached AdministratorAccess and later reached bucket ' +
-            'corp-prod-data. Secondary IP 192[.]0[.]2[.]31 (192.0.2.31) called GetSecretValue on ' +
+            '192[.]0[.]2[.]30 (192.0.2.30) called AssumeRole into escalated-role, attached AdministratorAccess, ' +
+            'and later reached bucket corp-prod-data. Secondary IP 192[.]0[.]2[.]31 (192.0.2.31) called GetSecretValue on ' +
             'prod/db-credentials and StopLogging. Map to T1098.001, T1078.004, and T1562.008.',
         },
         {
           title: 'Secrets Manager access after IAM escalation toward corp-prod-data',
           body:
             'After privilege escalation in 123456789012, analysts saw GetSecretValue on ' +
-            'prod/db-credentials from 192[.]0[.]2[.]31 (192.0.2.31) following activity by ' +
-            'dev-user@corp.example (dev-user) at 192[.]0[.]2[.]30 (192.0.2.30). AdministratorAccess ' +
+            'prod/db-credentials from 192[.]0[.]2[.]31 (192.0.2.31) following AssumeRole activity by ' +
+            'dev-user@corp.example (dev-user) into escalated-role at 192[.]0[.]2[.]30 (192.0.2.30). AdministratorAccess ' +
             'and StopLogging preceded S3 staging on corp-prod-data. Hunt T1098.001, T1078.004, T1562.008.',
         },
         {
           title: 'Defense evasion note: StopLogging paired with DeleteTrail in AWS IAM abuse',
           body:
             'Defense-evasion note for account 123456789012. Operators used StopLogging after ' +
-            'AdministratorAccess attach by dev-user / dev-user@corp.example from 192[.]0[.]2[.]30 ' +
+            'AssumeRole into escalated-role and AdministratorAccess attach by dev-user / dev-user@corp.example from 192[.]0[.]2[.]30 ' +
             '(192.0.2.30), with follow-on 192[.]0[.]2[.]31 (192.0.2.31) against prod/db-credentials and ' +
             'corp-prod-data. Techniques: T1098.001, T1078.004, T1562.008.',
         },
         {
           title: 'IAM role assumption playbook for escalated-role in production accounts',
           body:
-            'Playbook covering escalated-role assumption in 123456789012. Seed with ' +
+            'Playbook covering AssumeRole into escalated-role in 123456789012. Seed with ' +
             'dev-user@corp.example (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
             '192[.]0[.]2[.]31 (192.0.2.31), AdministratorAccess attach, corp-prod-data access, ' +
             'prod/db-credentials reads, and StopLogging. ATT&CK: T1098.001, T1078.004, T1562.008.',
@@ -355,7 +355,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'S3 staging indicators after credential theft in AWS account 123456789012',
           body:
             'S3 staging indicators for corp-prod-data in account 123456789012 following credential ' +
-            'theft by dev-user@corp.example (dev-user). Ingress IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
+            'theft by dev-user@corp.example (dev-user), who used AssumeRole to reach escalated-role. Ingress IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
             '192[.]0[.]2[.]31 (192.0.2.31) align with AdministratorAccess, GetSecretValue on ' +
             'prod/db-credentials, and StopLogging. Cover T1098.001, T1078.004, and T1562.008.',
         },
@@ -363,7 +363,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           title: 'AWS privilege-escalation IOC refresh for CloudTrail monitoring teams',
           body:
             'IOC refresh for CloudTrail monitors in 123456789012: 192[.]0[.]2[.]30 (192.0.2.30), ' +
-            '192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example, short name dev-user, ' +
+            '192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example, short name dev-user, AssumeRole into escalated-role, ' +
             'AdministratorAccess, corp-prod-data, prod/db-credentials, and StopLogging. Keep hunts ' +
             'aligned to T1098.001, T1078.004, and T1562.008.',
         },
@@ -380,6 +380,8 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         'corp-prod-data',
         'prod/db-credentials',
         'StopLogging',
+        'AssumeRole',
+        'escalated-role',
         'T1098.001',
         'T1078.004',
         'T1562.008',
