@@ -29,10 +29,11 @@ export const getRecordImprovementsStepDefinition = ({
     ...recordImprovementsStepCommonDefinition,
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
-      await assertContextEngineEnabled(isContextEngineEnabled, request);
+      const spaceId = context.contextManager.getContext().workflow.spaceId;
+      await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
       await assertFeedbackLoopEnabled(isFeedbackLoopEnabled);
 
-      if (!(await checkWritePrivilege(request))) {
+      if (!(await checkWritePrivilege(request, spaceId))) {
         throw new ExecutionError({
           type: 'PermissionError',
           message: 'Insufficient privileges to record Context Engine improvements',
@@ -51,17 +52,21 @@ export const getRecordImprovementsStepDefinition = ({
       const auditLogger = await getAuditLogger(request);
 
       try {
-        const { feedback_analysis: feedbackAnalysis } = await getAiIndexService().get(aiIndexId);
+        const { feedback_analysis: feedbackAnalysis } = await getAiIndexService().get(
+          aiIndexId,
+          spaceId
+        );
         const allowedActions = feedbackAnalysis?.allowed_actions ?? [...IMPROVEMENT_ACTIONS];
 
         const result = await recordImprovements({
           aiIndexId,
+          spaceId,
           agentRunId,
           signalWindow,
           signalSpaces,
           allowedActions,
           proposals: improvements,
-          improvementsService: getImprovementsService(esClient),
+          improvementsService: getImprovementsService(esClient, spaceId),
         });
 
         auditLogger?.log(improvementAuditEvent({ aiIndexId, recorded: result.recorded.length }));
