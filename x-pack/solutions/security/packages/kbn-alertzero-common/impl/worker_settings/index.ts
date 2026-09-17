@@ -71,4 +71,5 @@ export {
   ANALYSIS_WINDOW_DAYS_MIN,
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
+export { ALERT_TRIAGE_DEFAULT_EXTRAS } from './floor_watch';
 export type { WorkerSettingsDeclaration } from './types';
