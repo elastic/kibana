@@ -15,6 +15,8 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
@@ -32,6 +34,11 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
 import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
+import {
+  CatalogSpecSource,
+  DeclarativeCatalogService,
+  registerDeclarativeCatalogRoutes,
+} from './declarative_connectors';
 
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
@@ -59,11 +66,25 @@ export class StackConnectorsPlugin
   private isServerless = false;
   private isServerlessTrial = false;
   private licensing?: LicensingPluginStart;
+  private declarativeCatalog?: DeclarativeCatalogService;
+  private registerSpecType?: (spec: ConnectorSpec) => void;
 
   constructor(context: PluginInitializerContext) {
     this.config = context.config.get();
     this.logger = context.logger.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+
+    if (this.config.declarativeCatalog?.enabled) {
+      this.declarativeCatalog = new DeclarativeCatalogService({
+        source: new CatalogSpecSource({
+          registryUrl: this.config.declarativeCatalog.registryUrl,
+          logger: this.logger,
+        }),
+        registryUrl: this.config.declarativeCatalog.registryUrl,
+        refreshIntervalMs: this.config.declarativeCatalog.refreshIntervalMs,
+        logger: this.logger,
+      });
+    }
   }
 
   // Trial detection for the Elastic-managed email SMTP relay (the `elastic_cloud` service).
@@ -93,6 +114,10 @@ export class StackConnectorsPlugin
     getWebhookSecretHeadersKeyRoute(router, core.getStartServices);
     getHttpSecretQueryParamsKeyRoute(router, core.getStartServices);
 
+    if (this.declarativeCatalog) {
+      registerDeclarativeCatalogRoutes({ router, service: this.declarativeCatalog });
+    }
+
     registerConnectorTypes({
       actions,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
@@ -101,17 +126,28 @@ export class StackConnectorsPlugin
     });
 
     if (this.experimentalFeatures.connectorsFromSpecs) {
-      registerConnectorTypesFromSpecs({ actions, logger: this.logger });
+      registerConnectorTypesFromSpecs({ actions });
     }
+
+    this.registerSpecType = (spec) =>
+      actions.registerType(createConnectorTypeFromSpec(spec, actions));
 
     if (plugins.usageCollection) {
       registerInferenceConnectorsUsageCollector(plugins.usageCollection, core);
     }
   }
 
-  public start(core: CoreStart, plugins: ConnectorsPluginsStart) {
+  public async start(core: CoreStart, plugins: ConnectorsPluginsStart): Promise<void> {
     this.licensing = plugins.licensing;
+    if (this.declarativeCatalog && this.registerSpecType) {
+      await this.declarativeCatalog.start({
+        registerSpec: this.registerSpecType,
+        isTypeRegistered: (id) => plugins.actions.getAllTypes().includes(id),
+      });
+    }
   }
 
-  public stop() {}
+  public stop() {
+    this.declarativeCatalog?.stop();
+  }
 }

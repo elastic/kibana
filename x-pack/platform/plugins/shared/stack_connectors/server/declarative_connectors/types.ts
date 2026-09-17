@@ -75,3 +75,46 @@ export interface DeclarativeConnectorSpec {
     request: DeclarativeRequest;
   };
 }
+
+export interface DeclarativeCatalogEntry {
+  id: string;
+  version: string;
+  definitionUrl: string;
+  contentHash: string;
+}
+
+export interface DeclarativeCatalogManifest {
+  schemaVersion: 1;
+  catalogVersion: string;
+  activeVersions: Record<string, string>;
+  connectors: DeclarativeCatalogEntry[];
+}
+
+export type DeclarativeCatalogVersionStatus = 'active' | 'published';
+
+export interface DeclarativeCatalogVersionEntry {
+  id: string;
+  version: string;
+  status: DeclarativeCatalogVersionStatus;
+}
+
+export type DeclarativeCatalogSkipReason = 'reserved_prefix' | 'already_registered' | 'load_failed';
+
+export interface DeclarativeCatalogSkippedEntry {
+  id: string;
+  version?: string;
+  reason: DeclarativeCatalogSkipReason;
+  detail?: string;
+}
+
+export interface DeclarativeCatalogHealth {
+  enabled: boolean;
+  ready: boolean;
+  sourceUrl: string;
+  activeCatalogVersion?: string;
+  versions: DeclarativeCatalogVersionEntry[];
+  registeredTypeIds: string[];
+  skipped: DeclarativeCatalogSkippedEntry[];
+  lastRefreshAt?: string;
+  lastError?: { message: string; at: string };
+}

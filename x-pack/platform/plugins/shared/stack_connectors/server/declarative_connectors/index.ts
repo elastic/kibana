@@ -5,6 +5,17 @@
  * 2.0.
  */
 
-export { FsSpecReader } from './fs_spec_reader';
-export { loadDeclarativeConnectorSpecs } from './load_declarative_specs';
+export { loadDeclarativeConnectorSpec } from './load_declarative_specs';
 export { ConnectorSpecSource } from './spec_source';
+export { CatalogSpecSource } from './catalog_spec_source';
+export { DeclarativeCatalogService } from './catalog_service';
+export { registerDeclarativeCatalogRoutes } from './catalog_routes';
+export type {
+  DeclarativeCatalogEntry,
+  DeclarativeCatalogHealth,
+  DeclarativeCatalogManifest,
+  DeclarativeCatalogSkipReason,
+  DeclarativeCatalogSkippedEntry,
+  DeclarativeCatalogVersionEntry,
+  DeclarativeCatalogVersionStatus,
+} from './types';

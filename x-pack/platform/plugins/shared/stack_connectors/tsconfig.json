@@ -60,7 +60,6 @@
     "@kbn/mcp-client",
     "@kbn/std",
     "@kbn/ui-callout",
-    "@kbn/actions-types",
   ],
   "exclude": [
     "target/**/*",

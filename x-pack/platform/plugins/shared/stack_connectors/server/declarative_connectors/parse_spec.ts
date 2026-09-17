@@ -9,7 +9,7 @@ import yaml from 'yaml';
 import { z, ZodError } from '@kbn/zod/v4';
 import { areValidFeatures } from '@kbn/actions-plugin/common';
 import { LICENSE_TYPE, type LicenseType } from '@kbn/licensing-types';
-import type { DeclarativeConnectorSpec } from './types';
+import type { DeclarativeCatalogManifest, DeclarativeConnectorSpec } from './types';
 
 const LICENSE_TYPES = Object.values(LICENSE_TYPE).filter(
   (value): value is LicenseType => typeof value === 'string'
@@ -205,6 +205,31 @@ const connectorSpecSchema = z
   })
   .strict();
 
+const catalogManifestSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    catalogVersion: z.string().min(1),
+    activeVersions: z
+      .record(z.string().regex(/^\.[a-z0-9_-]+$/), z.string().regex(/^\d+\.\d+\.\d+$/))
+      .refine(
+        (versions) => Object.keys(versions).length > 0,
+        'At least one active version is required.'
+      ),
+    connectors: z
+      .array(
+        z
+          .object({
+            id: z.string().regex(/^\.[a-z0-9_-]+$/),
+            version: z.string().regex(/^\d+\.\d+\.\d+$/),
+            definitionUrl: z.string().min(1),
+            contentHash: contentHashSchema,
+          })
+          .strict()
+      )
+      .min(1),
+  })
+  .strict();
+
 const formatIssues = (error: ZodError): string =>
   error.issues
     .map((issue) => `${issue.path.length > 0 ? issue.path.join('.') : '(root)'}: ${issue.message}`)
@@ -222,6 +247,20 @@ export const parseDeclarativeConnectorSpec = (raw: string): DeclarativeConnector
   } catch (error) {
     if (error instanceof ZodError) {
       throw new Error(`Declarative connector definition is invalid: ${formatIssues(error)}`, {
+        cause: error,
+      });
+    }
+    throw error;
+  }
+};
+
+/** Parses and validates a declarative catalog `catalog.json` document. */
+export const parseDeclarativeCatalogManifest = (value: unknown): DeclarativeCatalogManifest => {
+  try {
+    return catalogManifestSchema.parse(value) as DeclarativeCatalogManifest;
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(`Declarative connector catalog is invalid: ${formatIssues(error)}`, {
         cause: error,
       });
     }

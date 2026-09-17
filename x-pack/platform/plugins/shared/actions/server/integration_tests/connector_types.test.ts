@@ -74,7 +74,7 @@ describe('Connector type config checks', () => {
     const connectorSpecIds = Object.values(connectorsSpecs)
       .filter((spec) => inboundEventsEnabled || !isInboundOnlyConnectorSpec(spec))
       .map(({ metadata }) => metadata.id);
-    expect([...connectorTypes, ...connectorSpecIds, '.abuseipdb'].sort()).toEqual(
+    expect([...connectorTypes, ...connectorSpecIds].sort()).toEqual(
       actionTypeRegistry.getAllTypes().sort()
     );
   });

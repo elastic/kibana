@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { connectorsSpecs } from '@kbn/connector-specs';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { registerConnectorTypesFromSpecs } from '.';
 
 describe('registerConnectorTypesFromSpecs', () => {
-  const logger = loggerMock.create();
-
   const createActionsSetup = (inboundEventsEnabled: boolean) => {
     const actions = actionsMock.createSetup();
     const configUtils = actions.getActionsConfigurationUtilities();
@@ -22,45 +18,30 @@ describe('registerConnectorTypesFromSpecs', () => {
     return actions;
   };
 
-  const registeredTypes = (registerType: jest.Mock): Array<{ id: string; source?: string }> =>
-    registerType.mock.calls.map(([actionType]: [{ id: string; source?: string }]) => actionType);
-
   const registeredIds = (registerType: jest.Mock): string[] =>
-    registeredTypes(registerType).map(({ id }) => id);
+    registerType.mock.calls.map(([actionType]: [{ id: string }]) => actionType.id);
 
   it('skips inbound-only specs when inbound events are disabled', () => {
     const actions = createActionsSetup(false);
 
-    registerConnectorTypesFromSpecs({ actions, logger });
+    registerConnectorTypesFromSpecs({ actions });
 
     const ids = registeredIds(actions.registerType as jest.Mock);
     expect(ids).not.toContain('.inboundWebhook');
-    expect(ids).toHaveLength(Object.values(connectorsSpecs).length);
+    expect(ids).not.toContain('.abuseipdb');
+    expect(ids).toHaveLength(
+      Object.values(connectorsSpecs).filter((spec) => !isInboundOnlyConnectorSpec(spec)).length
+    );
   });
 
   it('registers inbound-only specs when inbound events are enabled', () => {
     const actions = createActionsSetup(true);
 
-    registerConnectorTypesFromSpecs({ actions, logger });
+    registerConnectorTypesFromSpecs({ actions });
 
     const ids = registeredIds(actions.registerType as jest.Mock);
     expect(ids).toContain('.inboundWebhook');
-    expect(ids).toHaveLength(Object.values(connectorsSpecs).length + 1);
-  });
-
-  it('registers the shipped declarative AbuseIPDB spec as a real spec type', () => {
-    const actions = createActionsSetup(false);
-
-    registerConnectorTypesFromSpecs({ actions, logger });
-
-    const abuseipdb = registeredTypes(actions.registerType as jest.Mock).find(
-      ({ id }) => id === '.abuseipdb'
-    );
-    expect(abuseipdb).toEqual(
-      expect.objectContaining({
-        id: '.abuseipdb',
-        source: ACTION_TYPE_SOURCES.spec,
-      })
-    );
+    expect(ids).not.toContain('.abuseipdb');
+    expect(ids).toHaveLength(Object.values(connectorsSpecs).length);
   });
 });

@@ -9,6 +9,8 @@ applies_to:
 
 The AbuseIPDB connector communicates with the AbuseIPDB API to check IP reputation and report abusive IPs.
 
+This connector type is loaded from the declarative connector catalog. It is absent unless `xpack.stack_connectors.declarativeCatalog.enabled` is `true`. When enabled, Kibana fetches the catalog from `xpack.stack_connectors.declarativeCatalog.registryUrl` (default `http://127.0.0.1:8089`) and refreshes it every `xpack.stack_connectors.declarativeCatalog.refreshIntervalMs` milliseconds (default `60000`, minimum `10000`). The catalog definition is a technical preview and requires a gold license.
+
 ## Create connectors in {{kib}} [define-abuseipdb-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:

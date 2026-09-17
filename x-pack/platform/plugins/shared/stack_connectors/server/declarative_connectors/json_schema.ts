@@ -14,7 +14,12 @@ const IP_FORMATS: Record<string, () => z.ZodType> = {
 };
 
 const withMeta = (jsonSchema: JsonSchema, zodSchema: z.ZodType): z.ZodType => {
-  const meta = extractUiMeta(jsonSchema);
+  const extracted = extractUiMeta(jsonSchema);
+  const { xUi, ...flat } = extracted;
+  const meta =
+    xUi !== null && typeof xUi === 'object' && !Array.isArray(xUi)
+      ? { ...flat, ...(xUi as Record<string, unknown>) }
+      : flat;
   if (Object.keys(meta).length > 0) z.globalRegistry.add(zodSchema, meta);
   return zodSchema;
 };

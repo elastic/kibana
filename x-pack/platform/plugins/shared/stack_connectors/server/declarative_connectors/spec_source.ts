@@ -13,10 +13,10 @@ export interface RawConnectorSpecAsset {
 }
 
 /**
- * Source of raw connector spec bytes. `FsSpecReader` reads shipped YAML/SVG
- * from disk; a catalog fetcher can replace it later without changing parse
- * or materialize.
+ * Source of raw connector spec bytes. `CatalogSpecSource` fetches YAML/SVG
+ * from the declarative catalog; parse and materialize stay independent of
+ * how the bytes were obtained.
  */
 export abstract class ConnectorSpecSource {
-  abstract loadRawSpecs(): RawConnectorSpecAsset[];
+  abstract loadRawSpecs(): Promise<RawConnectorSpecAsset[]>;
 }

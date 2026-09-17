@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-import path from 'path';
 import { validateSvgIcon } from './icon';
-
-const shippedSvg = readFileSync(path.join(__dirname, 'specs', 'abuseipdb.svg'), 'utf8');
+import { LIVE_ABUSEIPDB_ICON } from './test_fixtures';
 
 describe('validateSvgIcon', () => {
-  it('accepts the shipped AbuseIPDB svg with same-document url(#e) and xlink:href="#a"', () => {
-    expect(shippedSvg).toContain('url(#e)');
-    expect(shippedSvg).toContain('xlink:href="#a"');
-    expect(() => validateSvgIcon(shippedSvg)).not.toThrow();
+  it('accepts the AbuseIPDB svg with same-document url(#e) and xlink:href="#a"', () => {
+    expect(LIVE_ABUSEIPDB_ICON).toContain('url(#e)');
+    expect(LIVE_ABUSEIPDB_ICON).toContain('xlink:href="#a"');
+    expect(() => validateSvgIcon(LIVE_ABUSEIPDB_ICON)).not.toThrow();
   });
 
   it('rejects script tags', () => {

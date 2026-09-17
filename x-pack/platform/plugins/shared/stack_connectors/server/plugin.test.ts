@@ -19,6 +19,12 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { experimentalFeaturesMock } from '../public/mocks';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
+import { DeclarativeCatalogService } from './declarative_connectors';
+import { CatalogSpecSource } from './declarative_connectors/catalog_spec_source';
+import {
+  LIVE_ABUSEIPDB_1_1_0_YAML,
+  LIVE_ABUSEIPDB_ICON,
+} from './declarative_connectors/test_fixtures';
 
 jest.mock('../common/experimental_features');
 
@@ -58,7 +64,7 @@ describe('Stack Connectors Plugin', () => {
       const builtInConnectorTypesCount = 18;
 
       expect(actionsSetup.registerType).toHaveBeenCalledTimes(
-        builtInConnectorTypesCount + specConnectorTypes.length + 1
+        builtInConnectorTypesCount + specConnectorTypes.length
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
@@ -191,10 +197,9 @@ describe('Stack Connectors Plugin', () => {
         );
       });
 
-      expect(actionsSetup.registerType).toHaveBeenCalledWith(
+      expect(actionsSetup.registerType).not.toHaveBeenCalledWith(
         expect.objectContaining({
           id: '.abuseipdb',
-          source: 'spec',
         })
       );
 
@@ -291,6 +296,129 @@ describe('Stack Connectors Plugin', () => {
           name: 'CrowdStrike',
         })
       );
+    });
+
+    const createActionsSetup = () => {
+      const actionsSetup = actionsMock.createSetup();
+      const actionsConfigurationUtilities = actionsSetup.getActionsConfigurationUtilities();
+      actionsSetup.getActionsConfigurationUtilities.mockReturnValue(actionsConfigurationUtilities);
+      (actionsConfigurationUtilities.getWebhookSettings as jest.Mock).mockReturnValue({
+        ssl: { pfx: { enabled: true } },
+      });
+      return actionsSetup;
+    };
+
+    it('does not build a catalog service or register catalog routes when the flag is off', async () => {
+      const startSpy = jest
+        .spyOn(DeclarativeCatalogService.prototype, 'start')
+        .mockResolvedValue(undefined);
+      plugin.setup(coreSetup, { actions: createActionsSetup() });
+
+      const router = coreSetup.http.createRouter.mock.results[0].value;
+      const catalogPaths = [
+        ...router.get.mock.calls.map(([config]: [{ path: string }]) => config.path),
+        ...router.post.mock.calls.map(([config]: [{ path: string }]) => config.path),
+      ].filter((routePath: string) => routePath.includes('declarative_catalog'));
+
+      expect(catalogPaths).toEqual([]);
+      await expect(
+        plugin.start(coreMock.createStart(), {
+          licensing: licensingMock.createStart(),
+        } as unknown as ConnectorsPluginsStart)
+      ).resolves.toBeUndefined();
+      expect(startSpy).not.toHaveBeenCalled();
+      startSpy.mockRestore();
+    });
+
+    it('registers catalog routes and awaits service.start() when the flag is on', async () => {
+      const startSpy = jest
+        .spyOn(DeclarativeCatalogService.prototype, 'start')
+        .mockResolvedValue(undefined);
+      const enabledContext = coreMock.createPluginInitializerContext({
+        declarativeCatalog: {
+          enabled: true,
+          registryUrl: 'http://127.0.0.1:8089',
+          refreshIntervalMs: 60_000,
+        },
+      });
+      mockParseExperimentalConfigValue.mockReturnValue({
+        ...experimentalFeaturesMock,
+      });
+      const enabledPlugin = new StackConnectorsPlugin(enabledContext);
+      const enabledCoreSetup = coreMock.createSetup();
+
+      enabledPlugin.setup(enabledCoreSetup, { actions: createActionsSetup() });
+
+      const router = enabledCoreSetup.http.createRouter.mock.results[0].value;
+      expect(router.get).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/internal/stack_connectors/declarative_catalog/_health',
+        }),
+        expect.any(Function)
+      );
+      expect(router.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/internal/stack_connectors/declarative_catalog/_refresh',
+        }),
+        expect.any(Function)
+      );
+
+      await enabledPlugin.start(coreMock.createStart(), {
+        licensing: licensingMock.createStart(),
+      } as unknown as ConnectorsPluginsStart);
+      expect(startSpy).toHaveBeenCalledTimes(1);
+      startSpy.mockRestore();
+    });
+
+    it('does not register .abuseipdb in setup() and registers it from the catalog during start()', async () => {
+      const loadSnapshot = jest
+        .spyOn(CatalogSpecSource.prototype, 'loadSnapshot')
+        .mockResolvedValue({
+          catalogVersion: 'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
+          versions: [{ id: '.abuseipdb', version: '1.1.0', status: 'active' }],
+          assets: [
+            {
+              yamlPath: 'http://127.0.0.1:8089/connectors/abuseipdb/1.1.0.yaml',
+              yaml: LIVE_ABUSEIPDB_1_1_0_YAML,
+              icon: LIVE_ABUSEIPDB_ICON,
+            },
+          ],
+          skipped: [],
+        });
+      const enabledContext = coreMock.createPluginInitializerContext({
+        declarativeCatalog: {
+          enabled: true,
+          registryUrl: 'http://127.0.0.1:8089',
+          refreshIntervalMs: 60_000,
+        },
+      });
+      mockParseExperimentalConfigValue.mockReturnValue({
+        ...experimentalFeaturesMock,
+      });
+      const enabledPlugin = new StackConnectorsPlugin(enabledContext);
+      const enabledCoreSetup = coreMock.createSetup();
+      const actionsSetup = createActionsSetup();
+
+      enabledPlugin.setup(enabledCoreSetup, { actions: actionsSetup });
+      expect(actionsSetup.registerType).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: '.abuseipdb' })
+      );
+
+      const actionsStart = actionsMock.createStart();
+      actionsStart.getAllTypes.mockReturnValue([]);
+      await enabledPlugin.start(coreMock.createStart(), {
+        licensing: licensingMock.createStart(),
+        actions: actionsStart,
+      } as unknown as ConnectorsPluginsStart);
+
+      expect(actionsSetup.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '.abuseipdb',
+          source: 'spec',
+        })
+      );
+      enabledPlugin.stop();
+      loadSnapshot.mockRestore();
     });
   });
 

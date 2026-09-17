@@ -101,6 +101,69 @@ describe('declarativeJsonSchemaToZod', () => {
     );
   });
 
+  it('unwraps xUi nested UI hints into flat global-registry meta', () => {
+    const schema = declarativeJsonSchemaToZod(
+      {
+        type: 'object',
+        properties: {
+          baseUrl: {
+            type: 'string',
+            format: 'uri',
+            xUi: {
+              label: 'Base URL',
+              placeholder: 'https://api.abuseipdb.com',
+              helpText: 'Use the API host',
+              validate: { allowedHosts: true },
+            },
+          },
+        },
+      },
+      'config'
+    );
+
+    expect(schema).toBeInstanceOf(z.ZodObject);
+    const baseUrl = (schema as z.ZodObject).shape.baseUrl;
+    expect(z.globalRegistry.get(baseUrl)).toEqual({
+      label: 'Base URL',
+      placeholder: 'https://api.abuseipdb.com',
+      helpText: 'Use the API host',
+      validate: { allowedHosts: true },
+    });
+    expect(z.globalRegistry.get(baseUrl)).not.toHaveProperty('xUi');
+  });
+
+  it('lets xUi keys win when both flat and nested hints are present', () => {
+    const schema = declarativeJsonSchemaToZod(
+      {
+        type: 'object',
+        properties: {
+          baseUrl: {
+            type: 'string',
+            format: 'uri',
+            label: 'Flat label',
+            placeholder: 'flat-placeholder',
+            xUi: {
+              label: 'Nested label',
+              placeholder: 'nested-placeholder',
+              helpText: 'Use the API host',
+              validate: { allowedHosts: true },
+            },
+          },
+        },
+      },
+      'config'
+    );
+
+    const baseUrl = (schema as z.ZodObject).shape.baseUrl;
+    expect(z.globalRegistry.get(baseUrl)).toEqual({
+      label: 'Nested label',
+      placeholder: 'nested-placeholder',
+      helpText: 'Use the API host',
+      validate: { allowedHosts: true },
+    });
+    expect(z.globalRegistry.get(baseUrl)).not.toHaveProperty('xUi');
+  });
+
   it('throws with the schema path when conversion is unsupported', () => {
     expect(() =>
       declarativeJsonSchemaToZod({ type: 'string', pattern: '[' }, 'config.properties.baseUrl')

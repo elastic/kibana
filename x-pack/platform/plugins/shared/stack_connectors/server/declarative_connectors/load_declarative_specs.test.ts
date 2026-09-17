@@ -7,33 +7,24 @@
 
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
-import { loggerMock } from '@kbn/logging-mocks';
-import { FsSpecReader } from './fs_spec_reader';
 import { getContentHash } from './icon';
-import { loadDeclarativeConnectorSpecs } from './load_declarative_specs';
-import { ConnectorSpecSource, type RawConnectorSpecAsset } from './spec_source';
+import { loadDeclarativeConnectorSpec } from './load_declarative_specs';
 import { ABUSE_IPDB_SPEC_FIXTURE, CONNECTOR_ICON_FIXTURE } from './test_fixtures';
-
-class InMemorySpecSource extends ConnectorSpecSource {
-  constructor(private readonly assets: RawConnectorSpecAsset[]) {
-    super();
-  }
-
-  public loadRawSpecs(): RawConnectorSpecAsset[] {
-    return this.assets;
-  }
-}
 
 const matchingIconHash = getContentHash(CONNECTOR_ICON_FIXTURE);
 
 const withIconHash = (yaml: string, contentHash: string): string =>
   yaml.replace(/contentHash: sha256:[a-f0-9]{64}/, `contentHash: ${contentHash}`);
 
-describe('loadDeclarativeConnectorSpecs', () => {
-  const logger = loggerMock.create();
+const validAsset = (overrides: { yaml?: string; icon?: string } = {}) => ({
+  yamlPath: '/tmp/abuseipdb.yaml',
+  yaml: overrides.yaml ?? withIconHash(ABUSE_IPDB_SPEC_FIXTURE, matchingIconHash),
+  icon: 'icon' in overrides ? overrides.icon : CONNECTOR_ICON_FIXTURE,
+});
 
-  it('materializes the shipped AbuseIPDB spec from disk', () => {
-    const [spec] = loadDeclarativeConnectorSpecs(new FsSpecReader(), logger);
+describe('loadDeclarativeConnectorSpec', () => {
+  it('materializes a valid spec with a matching icon', () => {
+    const spec = loadDeclarativeConnectorSpec(validAsset());
 
     expect(spec.metadata.id).toBe('.abuseipdb');
     expect(Object.keys(spec.actions)).toEqual(['checkIp', 'reportIp']);
@@ -48,46 +39,49 @@ describe('loadDeclarativeConnectorSpecs', () => {
   });
 
   it('rejects an icon whose content hash does not match', () => {
-    const source = new InMemorySpecSource([
-      {
-        yamlPath: '/tmp/abuseipdb.yaml',
-        yaml: withIconHash(ABUSE_IPDB_SPEC_FIXTURE, `sha256:${'0'.repeat(64)}`),
-        icon: CONNECTOR_ICON_FIXTURE,
-      },
-    ]);
-
-    expect(() => loadDeclarativeConnectorSpecs(source, logger)).toThrow('integrity check');
+    expect(() =>
+      loadDeclarativeConnectorSpec(
+        validAsset({ yaml: withIconHash(ABUSE_IPDB_SPEC_FIXTURE, `sha256:${'0'.repeat(64)}`) })
+      )
+    ).toThrow('integrity check');
   });
 
   it('rejects an unsafe svg icon', () => {
     const unsafeIcon = '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>';
-    const source = new InMemorySpecSource([
-      {
+    expect(() =>
+      loadDeclarativeConnectorSpec(
+        validAsset({
+          yaml: withIconHash(ABUSE_IPDB_SPEC_FIXTURE, getContentHash(unsafeIcon)),
+          icon: unsafeIcon,
+        })
+      )
+    ).toThrow('unsupported active or external content');
+  });
+
+  it('rejects unknown auth types', () => {
+    expect(() =>
+      loadDeclarativeConnectorSpec(
+        validAsset({
+          yaml: withIconHash(
+            ABUSE_IPDB_SPEC_FIXTURE.replace('type: api_key_header', 'type: future_auth_type'),
+            matchingIconHash
+          ),
+        })
+      )
+    ).toThrow('auth type "future_auth_type", which is not registered in this Kibana version');
+  });
+
+  it('rejects a declared icon that was not provided', () => {
+    expect(() =>
+      loadDeclarativeConnectorSpec({
         yamlPath: '/tmp/abuseipdb.yaml',
-        yaml: withIconHash(ABUSE_IPDB_SPEC_FIXTURE, getContentHash(unsafeIcon)),
-        icon: unsafeIcon,
-      },
-    ]);
-
-    expect(() => loadDeclarativeConnectorSpecs(source, logger)).toThrow(
-      'unsupported active or external content'
-    );
+        yaml: withIconHash(ABUSE_IPDB_SPEC_FIXTURE, matchingIconHash),
+      })
+    ).toThrow('declares an icon but no icon file was provided');
   });
 
-  it('rejects duplicate connector ids', () => {
-    const yaml = withIconHash(ABUSE_IPDB_SPEC_FIXTURE, matchingIconHash);
-    const source = new InMemorySpecSource([
-      { yamlPath: '/tmp/a.yaml', yaml, icon: CONNECTOR_ICON_FIXTURE },
-      { yamlPath: '/tmp/b.yaml', yaml, icon: CONNECTOR_ICON_FIXTURE },
-    ]);
-
-    expect(() => loadDeclarativeConnectorSpecs(source, logger)).toThrow(
-      'Duplicate declarative connector id ".abuseipdb"'
-    );
-  });
-
-  it('round-trips the shipped spec and rejects unknown config keys', () => {
-    const [spec] = loadDeclarativeConnectorSpecs(new FsSpecReader(), logger);
+  it('round-trips the materialized spec and rejects unknown config keys', () => {
+    const spec = loadDeclarativeConnectorSpec(validAsset());
     const serialized = serializeConnectorSpec(spec);
     const restored = fromConnectorSpecSchema(serialized.schema);
 
@@ -110,19 +104,5 @@ describe('loadDeclarativeConnectorSpecs', () => {
         secrets,
       })
     ).toThrow();
-  });
-
-  it('rejects unknown auth types', () => {
-    const yaml = withIconHash(
-      ABUSE_IPDB_SPEC_FIXTURE.replace('type: api_key_header', 'type: future_auth_type'),
-      matchingIconHash
-    );
-    const source = new InMemorySpecSource([
-      { yamlPath: '/tmp/abuseipdb.yaml', yaml, icon: CONNECTOR_ICON_FIXTURE },
-    ]);
-
-    expect(() => loadDeclarativeConnectorSpecs(source, logger)).toThrow(
-      'auth type "future_auth_type", which is not registered in this Kibana version'
-    );
   });
 });

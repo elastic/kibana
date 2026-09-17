@@ -79,7 +79,6 @@ export default function ({ getService }: FtrProviderContext) {
         'Synthetics:Sync-Global-Params-Private-Locations',
         'Synthetics:Sync-Private-Location-Monitors',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
-        'actions:.abuseipdb',
         'actions:.bedrock',
         'actions:.cases',
         'actions:.cases-webhook',
