@@ -27,9 +27,9 @@ export interface OpenDocFlyoutParams {
  * Hook that provides a callback for handling error clicks in the trace waterfall.
  *
  * Routing:
- *  - multiple errors on a row  → span flyout scrolled to the Errors table (any source)
  *  - single unprocessed OTel error → log flyout for the individual error doc
- *  - single classic APM error  → navigate to the APM Errors page
+ *  - multiple errors where any is unprocessed OTel → span flyout scrolled to the Errors table
+ *  - classic APM errors (single or multiple) → navigate to the APM Errors page
  */
 export function useErrorClickHandler(
   traceItems: TraceItem[],
@@ -49,19 +49,20 @@ export function useErrorClickHandler(
 
   return useCallback(
     ({ traceId: errorTraceId, docId, errorCount, errorDocId, docIndex, errorSource }) => {
-      // Multiple errors on this row → open the span flyout's Errors tab regardless of source.
-      if (errorCount > 1) {
-        onOpenDocFlyout({ type: 'span', docId, docIndex: undefined, activeSection: 'errors-table' });
-        return;
-      }
-
       // Single unprocessed OTel error → open the log doc flyout.
-      if (errorSource === 'unprocessedOtel' && errorDocId) {
+      if (errorCount === 1 && errorSource === 'unprocessedOtel' && errorDocId) {
         onOpenDocFlyout({ type: 'log', docId: errorDocId, docIndex, activeSection: undefined });
         return;
       }
 
-      // Single classic APM error → navigate to the Errors page (unchanged).
+      // Multiple errors that include at least one unprocessed OTel error → span flyout with errors
+      // table. Classic APM multi-error rows fall through to the Errors page below.
+      if (errorCount > 1 && errorSource === 'unprocessedOtel') {
+        onOpenDocFlyout({ type: 'span', docId, docIndex: undefined, activeSection: 'errors-table' });
+        return;
+      }
+
+      // Classic APM errors (single or multiple) → navigate to the Errors page.
       const item = traceItems?.find((i) => i.id === docId);
       if (!item) return;
 
