@@ -69,9 +69,8 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
     { type: 'workflow', id: 'wf-1' },
     { type: 'workflow', id: 'wf-2' },
   ],
-  matcher: 'data.severity : "critical"',
+  matcher: { expression: 'data.severity : "critical"' },
   group_by: ['host.name', 'service.name'],
-  tags: ['production', 'oncall'],
   grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozed_until: null,
@@ -196,23 +195,6 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout();
 
       expect(screen.getByText('Routes critical alerts to the oncall workflow')).toBeInTheDocument();
-      expect(screen.getByText('production')).toBeInTheDocument();
-    });
-
-    it('renders a expandable list of tags when there are more than one', () => {
-      renderFlyout();
-
-      expect(screen.getByText('production')).toBeInTheDocument();
-      expect(screen.getByText('+1')).toBeInTheDocument();
-    });
-
-    it('opens the tags popover when the "+N" button is clicked', async () => {
-      const user = userEvent.setup();
-      renderFlyout();
-
-      await user.click(screen.getByText('+1'));
-
-      expect(screen.getByText('oncall')).toBeInTheDocument();
     });
 
     it('renders the matcher as the KQL string when provided', () => {

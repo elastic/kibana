@@ -358,7 +358,7 @@ describe('TriggerEventHandler', () => {
     await handler.handleEvent({
       triggerId: 'inboundWebhook.received',
       payload: { connectorId: 'webhook-1' },
-      request: mockRequest,
+      request: { headers: { authorization: 'ApiKey encoded-key' } } as KibanaRequest,
     });
 
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
@@ -524,7 +524,7 @@ describe('TriggerEventHandler', () => {
     await handler.handleEvent({
       triggerId: 'inboundWebhook.received',
       payload: { connectorId: 'webhook-2' },
-      request: mockRequest,
+      request: { headers: { authorization: 'ApiKey encoded-key' } } as KibanaRequest,
     });
 
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);

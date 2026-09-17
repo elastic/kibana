@@ -157,7 +157,6 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-user-profile-common'
-  - '@kbn/synthtrace-client'
   - '@kbn/significant-events-plugin'
   - '@kbn/alerting-v2-schemas'
 tags:

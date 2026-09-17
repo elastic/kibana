@@ -3108,6 +3108,65 @@ describe('The custom threshold alert type', () => {
         });
       });
 
+      describe('legacy alertOnGroupDisappear: false with noDataBehavior', () => {
+        const runWith = async (params: Record<string, unknown>) => {
+          setEvaluationResults([{}]);
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              groupBy: ['groupByField'],
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              ...params,
+            },
+          });
+        };
+
+        const trackedMissingGroups = () =>
+          jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6];
+
+        test('remainActive still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'remainActive',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('alertOnNoData still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'alertOnNoData',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('recover does not track missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'recover',
+            alertOnGroupDisappear: true,
+          });
+          expect(trackedMissingGroups()).toBe(false);
+        });
+
+        test('legacy alertOnGroupDisappear: false without noDataBehavior does not track', async () => {
+          await runWith({
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(false);
+        });
+      });
+
       describe("noDataBehavior: 'alertOnNoData' with groupBy", () => {
         const instanceIdA = 'a';
         const instanceIdB = 'b';

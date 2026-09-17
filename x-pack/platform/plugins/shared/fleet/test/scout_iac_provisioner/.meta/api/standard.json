@@ -1,9 +1,23 @@
 {
-  "sha1": "6faa89f0498ced253408b02ad86195eefa62dd3e",
+  "sha1": "ba0d02f3d9045298f1be1f544726797f92224dcc",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "a389cee79d09b10-b3588691f578cbc",
+      "title": "Fleet IaC Provisioner render route when the feature flag is off returns 404 with IaC Provisioner is not enabled for an authorized render request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template_flag_off.spec.ts",
+        "line": 30,
+        "column": 31
+      }
+    },
     {
       "id": "c44a76f06065e66-7c7f2207db1899e",
       "title": "Fleet IaC Provisioner render route rejects a caller without Fleet privileges with 403",
@@ -14,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 21,
-        "column": 1
+        "line": 34,
+        "column": 9
       }
     },
     {
@@ -28,8 +42,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 37,
-        "column": 12
+        "line": 47,
+        "column": 25
+      }
+    },
+    {
+      "id": "c44a76f06065e66-7bd4dffb0c9ec1b",
+      "title": "Fleet IaC Provisioner render route returns 400 when workflow is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 60,
+        "column": 13
       }
     },
     {
@@ -42,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 52,
-        "column": 87
+        "line": 69,
+        "column": 10
       }
     },
     {
@@ -56,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 64,
+        "line": 80,
         "column": 51
       }
     },
@@ -70,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 83,
-        "column": 17
+        "line": 101,
+        "column": 23
       }
     }
   ]

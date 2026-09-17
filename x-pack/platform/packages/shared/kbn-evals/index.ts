@@ -102,6 +102,7 @@ export { createQuantitativeGroundednessEvaluator } from './src/evaluators/ground
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
+export { calculateSetMetrics, type SetMetrics } from './src/utils/set_metrics';
 export {
   containsAllTerms,
   extractAllStrings,
@@ -155,18 +156,23 @@ export {
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {
+  getEffectiveK,
   createPrecisionAtKEvaluator,
   createRecallAtKEvaluator,
   createF1AtKEvaluator,
-  createRagEvaluators,
-} from './src/evaluators/rag';
+  createHitRateAtKEvaluator,
+  createMrrAtKEvaluator,
+  createNdcgAtKEvaluator,
+  createMapAtKEvaluator,
+  createIrEvaluators,
+} from './src/evaluators/ir';
 export type {
   GroundTruth,
-  RagEvaluatorConfig,
+  IrEvaluatorConfig,
   RetrievedDocsExtractor,
   GroundTruthExtractor,
   RetrievedDoc,
-} from './src/evaluators/rag/types';
+} from './src/evaluators/ir/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';

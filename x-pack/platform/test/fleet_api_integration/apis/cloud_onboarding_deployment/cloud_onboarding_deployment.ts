@@ -83,10 +83,10 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: primaryConnectorId,
-            mechanisms: ['agentless'],
+            mechanisms: ['managed_integration'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
-              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+              cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' },
             },
           })
           .expect(200);
@@ -94,7 +94,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item).to.have.property('id');
         expect(body.item.provider).to.equal('aws');
         expect(body.item.connectorId).to.equal(primaryConnectorId);
-        expect(body.item.mechanisms).to.eql(['agentless']);
+        expect(body.item.mechanisms).to.eql(['managed_integration']);
         expect(body.item.services).to.eql(['cloudwatch_metrics']);
         expect(body.item.status).to.equal('pending');
         expect(body.item.attemptCount).to.equal(1);
@@ -143,12 +143,30 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return 400 when connectorId is missing', async () => {
-        await supertest
+      it('should create a static-keys deployment when connectorId is omitted', async () => {
+        // connectorId is now optional — static-keys flow omits it and passes authMethod instead.
+        const { body } = await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
-          .send({ provider: 'aws', mechanisms: [], services: ['cloudtrail'] })
-          .expect(400);
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            globalRegion: 'us-east-1',
+            dataFormat: 'ecs',
+          })
+          .expect(200);
+
+        expect(body.item).to.have.property('id');
+        expect(body.item.provider).to.equal('aws');
+        expect(body.item.authMethod).to.equal('static_keys');
+        expect(body.item.globalRegion).to.equal('us-east-1');
+        expect(body.item.dataFormat).to.equal('ecs');
+        expect(body.item.connectorId).to.be(undefined);
+        expect(body.item.status).to.equal('pending');
+
+        createdIds.push(body.item.id);
       });
 
       it('should return 400 when connectorId is empty string', async () => {
@@ -212,10 +230,10 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: primaryConnectorId,
-            mechanisms: ['agentless'],
+            mechanisms: ['managed_integration'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
-              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+              cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' },
             },
           })
           .expect(200);
@@ -245,7 +263,7 @@ export default function (providerContext: FtrProviderContext) {
 
       before(async () => {
         // Create two deployments for the same connector
-        for (const mechanism of ['agentless', 'firehose'] as const) {
+        for (const mechanism of ['managed_integration', 'ecf'] as const) {
           const { body } = await supertest
             .post(BASE_URL)
             .set('kbn-xsrf', 'xxxx')
@@ -301,10 +319,10 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: primaryConnectorId,
-            mechanisms: ['agentless'],
+            mechanisms: ['managed_integration'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
-              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+              cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' },
             },
           })
           .expect(200);
@@ -372,7 +390,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should update serviceVars', async () => {
         const serviceVars = {
-          cloudwatch_metrics: [{ regions: ['us-east-1', 'eu-west-1'], namespace: 'AWS/EC2' }],
+          cloudwatch_metrics: { regions: ['us-east-1', 'eu-west-1'], namespace: 'AWS/EC2' },
         };
 
         const { body } = await supertest
@@ -421,7 +439,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: defaultSpaceConnectorId,
-            mechanisms: ['agentless'],
+            mechanisms: ['managed_integration'],
             services: ['cloudtrail'],
           })
           .expect(200);
@@ -433,7 +451,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: testSpaceConnectorId,
-            mechanisms: ['agentless'],
+            mechanisms: ['managed_integration'],
             services: ['cloudtrail'],
           })
           .expect(200);
@@ -504,10 +522,10 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: primaryConnectorId,
-            mechanisms: ['agentless'],
+            mechanisms: ['managed_integration'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
-              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+              cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' },
             },
           })
           .expect(200);

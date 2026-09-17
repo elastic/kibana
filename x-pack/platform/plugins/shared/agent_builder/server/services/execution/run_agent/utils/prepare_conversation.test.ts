@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
+import type { ConversationRound, ConverseInput, TimelineEvent } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  TimelineEventType,
   ToolResultType,
-  isBadRequestError,
 } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
@@ -24,7 +24,30 @@ import {
   createAgentHandlerContextMock,
   type AgentHandlerContextMock,
 } from '../../../../test_utils/runner';
-import { prepareConversation } from './prepare_conversation';
+import { prepareConversation as prepareConversationFromTimeline } from './prepare_conversation';
+import { eventsForContext, groupTimelineRounds } from './context_timeline';
+import {
+  TIMELINE_FIXTURE_AUTHOR,
+  eventsNativeConversation,
+  pausedAndResumedRoundTimeline,
+  roundsOfTimeline,
+  timelineFromRounds,
+} from '../../../../test_utils/timeline';
+
+type PrepareParams = Parameters<typeof prepareConversationFromTimeline>[0];
+
+// Rounds fixtures are normalized to the timeline the pipeline consumes and the processed timeline
+// is folded back to rounds, so every expectation below also checks the rounds -> events path.
+const prepareConversation = async ({
+  previousRounds,
+  ...params
+}: Omit<PrepareParams, 'timeline'> & { previousRounds: ConversationRound[] }) => {
+  const result = await prepareConversationFromTimeline({
+    ...params,
+    timeline: timelineFromRounds(previousRounds),
+  });
+  return { ...result, previousRounds: roundsOfTimeline(result.timeline) };
+};
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 
@@ -479,11 +502,14 @@ describe('prepareConversation', () => {
       });
 
       expect(result.previousRounds).toHaveLength(1);
+      // A round without an explicit author is attributed to the conversation owner by the timeline.
       expect(result.previousRounds[0]).toEqual({
         ...previousRound,
+        author: TIMELINE_FIXTURE_AUTHOR,
         input: {
           ...previousRound.input,
           attachments: [],
+          author: TIMELINE_FIXTURE_AUTHOR,
         },
       });
     });
@@ -667,11 +693,106 @@ describe('prepareConversation', () => {
 
       expect(result.previousRounds[0]).toEqual({
         ...previousRounds[0],
+        author: TIMELINE_FIXTURE_AUTHOR,
         input: {
           ...previousRounds[0].input,
           attachments: [],
+          author: TIMELINE_FIXTURE_AUTHOR,
         },
       });
+    });
+  });
+
+  describe('multi-execution (HITL) timelines', () => {
+    const textAttachment = (id: string): VersionedAttachment => ({
+      id,
+      type: 'text',
+      active: true,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: { content: 'v1' },
+          created_at: '2024-01-01T00:00:00.000Z',
+          content_hash: `hash-${id}`,
+          estimated_tokens: 1,
+        },
+      ],
+    });
+
+    it('processes the normalized round once, keeping the answered ask and the final response', async () => {
+      const timeline = eventsForContext(eventsNativeConversation(pausedAndResumedRoundTimeline()));
+
+      const result = await prepareConversationFromTimeline({
+        timeline,
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      const rounds = groupTimelineRounds(result.timeline);
+      expect(rounds).toHaveLength(1);
+      expect(rounds[0].userMessage.data).toEqual({
+        message: 'do it',
+        attachments: [],
+        author: { id: 'u1', username: 'user1' },
+      });
+      expect(rounds[0].steps[0]).toEqual(
+        expect.objectContaining({ prompt_id: 'p1', answers: [{ choice: [0] }] })
+      );
+      expect(rounds[0].terminated.data.outcome).toEqual({
+        type: 'responded',
+        response: { message: 'done' },
+      });
+    });
+
+    it('keeps processed attachment refs when the resume carried refs of its own', async () => {
+      mockContext.attachmentStateManager = createAttachmentStateManager([textAttachment('att-1')], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
+      const ref = { attachment_id: 'att-1', version: 1 };
+      const stored = pausedAndResumedRoundTimeline().map((event) => {
+        if (event.type === TimelineEventType.userMessage) {
+          return { ...event, data: { ...event.data, attachment_refs: [ref] } };
+        }
+        if (event.type === TimelineEventType.promptResponse) {
+          return {
+            ...event,
+            data: { ...event.data, input: { message: '', attachment_refs: [ref] } },
+          };
+        }
+        return event;
+      }) as TimelineEvent[];
+
+      const result = await prepareConversationFromTimeline({
+        timeline: eventsForContext(eventsNativeConversation(stored)),
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      const [round] = groupTimelineRounds(result.timeline);
+      expect(round.userMessage.data.attachment_refs).toEqual([{ ...ref, type: 'text' }]);
+      expect(result.attachmentTypes.map((type) => type.type)).toEqual(['text']);
+    });
+
+    it('drops events that belong to no round', async () => {
+      const orphan = {
+        ...pausedAndResumedRoundTimeline()[0],
+        id: 'orphan::user_message',
+        data: { message: 'never answered' },
+      } as unknown as TimelineEvent;
+
+      const result = await prepareConversationFromTimeline({
+        timeline: [...timelineFromRounds([{ id: 'r0', input: { message: 'first' } }]), orphan],
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      expect(result.timeline.some((event) => event.id === 'orphan::user_message')).toBe(false);
+      expect(groupTimelineRounds(result.timeline).map((round) => round.id)).toEqual(['r0']);
     });
   });
 
@@ -1014,72 +1135,83 @@ describe('prepareConversation', () => {
     });
   });
 
-  describe('action=regenerate', () => {
-    it('throws a bad request error (400) when conversation has no rounds', async () => {
-      await expect(
-        prepareConversation({
-          previousRounds: [],
-          nextInput: { message: 'ignored' },
-          context: mockContext,
-          action: 'regenerate',
-        })
-      ).rejects.toThrow('Cannot regenerate: conversation has no rounds');
-
-      let thrown: unknown;
-      try {
-        await prepareConversation({
-          previousRounds: [],
-          nextInput: { message: 'ignored' },
-          context: mockContext,
-          action: 'regenerate',
-        });
-      } catch (e) {
-        thrown = e;
-      }
-      expect(isBadRequestError(thrown)).toBe(true);
-    });
-
-    it('uses the last round input and ignores nextInput from request', async () => {
-      const lastRoundInput: RoundInput = {
-        message: 'Original message',
-        attachment_refs: [{ attachment_id: 'a-1', version: 1, actor: 'user' as const }],
-      };
+  describe('attachment change log (chat_input drain)', () => {
+    it('leaves no changes behind for legacy attachments re-migrated from previous rounds', async () => {
       const previousRounds = [
         createRound({
           id: 'round-1',
-          input: lastRoundInput,
-          response: { message: 'Response to regenerate' },
+          input: {
+            message: 'Previous message',
+            attachments: [{ id: 'legacy-1', type: 'text', data: { content: 'old' } }],
+          },
         }),
       ];
 
       const result = await prepareConversation({
         previousRounds,
-        nextInput: { message: 'ignored by regenerate' },
+        nextInput: { message: 'New message' },
         context: mockContext,
-        action: 'regenerate',
       });
 
-      // Strips the last round from previous rounds
-      expect(result.previousRounds).toHaveLength(0);
-
-      // Uses the last round's input (full spread preserves all fields for downstream)
-      expect(result.nextInput.message).toBe('Original message');
-
-      // The original round's attachment_refs must be preserved (merged), not dropped.
-      // type is undefined because a-1 is not in the state manager for this conversation.
-      expect(result.nextInput.attachment_refs).toEqual([
-        { attachment_id: 'a-1', version: 1, actor: 'user', type: undefined },
-      ]);
+      // The legacy attachment was promoted into the state manager...
+      expect(result.attachmentStateManager.getAll().map((a) => a.id)).toEqual(['legacy-1']);
+      // ...but re-migration of history must never surface as an attachment event.
+      expect(result.attachmentStateManager.drainChanges()).toEqual([]);
     });
 
-    it('preserves a "created" attachment_ref through regenerate even though the reprocessing pass never re-triggers an add() for it', async () => {
-      // Attachment 'a-1' already exists in the state manager (as if created by an
-      // earlier, now-regenerated execution of this same round). Regenerating the round
-      // replays its stored input, which carries no legacy `attachments` payload, so the
-      // merge phase for nextInput has nothing to add/update — attachmentStateManager's
-      // own access tracking alone would report zero refs. If prepare_conversation
-      // replaced (rather than merged) attachment_refs with that fresh, empty tracking
-      // result, the original "created" ref would be silently lost.
+    it('leaves no changes behind for legacy attachments on standalone user messages', async () => {
+      const standaloneUserMessage = {
+        id: 'standalone-message-1',
+        type: 'user_message',
+        created_at: '2024-01-02T00:00:00.000Z',
+        actor: { type: 'user', id: 'u1' },
+        data: {
+          message: 'posted without agent',
+          attachments: [{ id: 'standalone-1', type: 'text', data: { content: 'x' } }],
+        },
+      } as unknown as TimelineEvent;
+
+      const result = await prepareConversationFromTimeline({
+        timeline: [
+          ...timelineFromRounds([{ id: 'r0', input: { message: 'first' } }]),
+          standaloneUserMessage,
+        ],
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      expect(result.attachmentStateManager.getAll().map((a) => a.id)).toContain('standalone-1');
+      expect(result.attachmentStateManager.drainChanges()).toEqual([]);
+    });
+
+    it('surfaces only the next input attachments as changes', async () => {
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: {
+            message: 'Previous message',
+            attachments: [{ id: 'legacy-1', type: 'text', data: { content: 'old' } }],
+          },
+        }),
+      ];
+
+      const result = await prepareConversation({
+        previousRounds,
+        nextInput: {
+          message: 'Hello',
+          attachments: [{ id: 'fresh-1', type: 'text', data: { content: 'new' } }],
+        },
+        context: mockContext,
+      });
+
+      expect(result.attachmentStateManager.drainChanges()).toEqual([
+        { kind: 'added', attachment_id: 'fresh-1', attachment_type: 'text', current_version: 1 },
+      ]);
+      // drain is destructive
+      expect(result.attachmentStateManager.drainChanges()).toEqual([]);
+    });
+
+    it('records an updated change when the next input re-sends an existing id with new content', async () => {
       const existing: VersionedAttachment = {
         id: 'a-1',
         type: 'text',
@@ -1103,30 +1235,23 @@ describe('prepareConversation', () => {
         }),
       });
 
-      const lastRoundInput: RoundInput = {
-        message: 'Original message',
-        attachment_refs: [
-          { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user' as const },
-        ],
-      };
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: lastRoundInput,
-          response: { message: 'Response to regenerate' },
-        }),
-      ];
-
       const result = await prepareConversation({
-        previousRounds,
-        nextInput: { message: 'ignored by regenerate' },
+        previousRounds: [],
+        nextInput: {
+          message: 'Hello',
+          attachments: [{ id: 'a-1', type: 'text', data: { content: 'v2' } }],
+        },
         context: mockContext,
-        action: 'regenerate',
       });
 
-      // a-1 exists in the state manager with type 'text', so type is set on the ref.
-      expect(result.nextInput.attachment_refs).toEqual([
-        { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user', type: 'text' },
+      expect(result.attachmentStateManager.drainChanges()).toEqual([
+        {
+          kind: 'updated',
+          attachment_id: 'a-1',
+          attachment_type: 'text',
+          previous_version: 1,
+          current_version: 2,
+        },
       ]);
     });
   });

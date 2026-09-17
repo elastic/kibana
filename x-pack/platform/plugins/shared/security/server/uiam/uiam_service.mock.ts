@@ -32,6 +32,17 @@ export const uiamServiceMock = {
     exchangeOAuthToken: jest.fn().mockResolvedValue('mock-ephemeral-token'),
     revokeApiKey: jest.fn().mockResolvedValue(undefined),
     convertApiKeys: jest.fn().mockResolvedValue({ results: [] }),
+    exchangeServiceAccountToken: jest
+      .fn()
+      .mockResolvedValue({ token: 'essu_mock-service-account-token' }),
+    createServiceAccount: jest.fn().mockResolvedValue({
+      id: 'mock-service-account-id',
+      type: 'project' as const,
+      name: 'mock-service-account-name',
+      organization_id: 'mock-organization-id',
+      role_assignments: {},
+      assumable_by: [],
+    }),
     createOAuthClient: jest.fn().mockResolvedValue({
       id: 'mock-client-id',
       resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',

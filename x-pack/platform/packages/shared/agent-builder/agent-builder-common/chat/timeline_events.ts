@@ -90,12 +90,26 @@ export enum TimelineEventType {
   executionTerminated = 'execution_terminated',
   executionFailed = 'execution_failed',
   executionAborted = 'execution_aborted',
+  // Attachment lifecycle
+  attachmentAdded = 'attachment_added',
+  attachmentUpdated = 'attachment_updated',
+  attachmentDeleted = 'attachment_deleted',
+}
+
+/** Fields the server fills in when an event is accepted; absent on producer input. */
+export interface ServerAssignedEventFields {
+  id: string;
+  created_at: string;
+  actor: EventActor;
 }
 
 /**
- * The fields a producer supplies for a timeline event.
+ * Unconstrained event envelope — works for both built-in and custom event types.
+ * `TType` is open here; `BaseTimelineEventInput` re-adds the `TimelineEventType` constraint so
+ * the closed `TimelineEvent` union and all existing narrowing remain unaffected.
  */
-export interface BaseTimelineEventInput<TType extends TimelineEventType, TData> {
+export interface ConversationEventInput<TType extends string = string, TData = unknown>
+  extends Partial<ServerAssignedEventFields> {
   /** The event type discriminator. */
   type: TType;
   /** The type-specific payload. */
@@ -104,26 +118,28 @@ export interface BaseTimelineEventInput<TType extends TimelineEventType, TData> 
   execution_id?: string;
   /** The content event that triggered the run this event belongs to. */
   trigger_event_id?: string;
-  /** Server-assigned when omitted. */
-  id?: string;
-  /** Server-assigned when omitted. */
-  created_at?: string;
-  /** Defaults to the scoped user when omitted. */
-  actor?: EventActor;
 }
+
+/** A stored conversation event: producer fields plus server-assigned fields made required. */
+export type ConversationEvent<
+  TType extends string = string,
+  TData = unknown
+> = ConversationEventInput<TType, TData> & ServerAssignedEventFields;
+
+/** The fields a producer supplies for a timeline event. */
+export type BaseTimelineEventInput<TType extends TimelineEventType, TData> = ConversationEventInput<
+  TType,
+  TData
+>;
 
 /**
  * A stored timeline event: the producer fields, plus the server-assigned `id`, `created_at`, and
  * `actor` made required.
  */
-export type BaseTimelineEvent<TType extends TimelineEventType, TData> = BaseTimelineEventInput<
+export type BaseTimelineEvent<TType extends TimelineEventType, TData> = ConversationEvent<
   TType,
   TData
-> & {
-  id: string;
-  created_at: string;
-  actor: EventActor;
-};
+>;
 
 /** A message from a user, stored the moment it arrives, apart from any run. */
 export type UserMessageEventData = RoundInput;
@@ -138,6 +154,8 @@ export interface PromptResponseEventData {
   prompt_requested_event_id: string;
   /** The responses, keyed by prompt id. */
   responses: Record<string, PromptResponse>;
+  /** Resume input lives here because a resume has no user_message event. */
+  input?: RoundInput;
 }
 export type PromptResponseEvent = BaseTimelineEvent<
   TimelineEventType.promptResponse,
@@ -223,6 +241,69 @@ export type ExecutionAbortedEvent = BaseTimelineEvent<
   ExecutionAbortedEventData
 >;
 
+/** What triggered an attachment mutation. */
+export type AttachmentEventSource =
+  | 'workflow'
+  | 'http_api'
+  | 'server_api'
+  | 'chat_input'
+  | 'execution';
+
+/** An attachment was created in the conversation. */
+export interface AttachmentAddedEventData {
+  attachment_id: string;
+  attachment_type: string;
+  /** Always 1 today; kept so consumers never special-case the first version. */
+  current_version: number;
+  /** When true, the UI should render the attachment automatically on open. */
+  render_inline: boolean;
+  source: AttachmentEventSource;
+}
+export type AttachmentAddedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentAdded,
+  AttachmentAddedEventData
+>;
+
+/** An attachment received a new content version. */
+export interface AttachmentUpdatedEventData {
+  attachment_id: string;
+  attachment_type: string;
+  previous_version: number;
+  current_version: number;
+  render_inline: boolean;
+  source: AttachmentEventSource;
+}
+export type AttachmentUpdatedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentUpdated,
+  AttachmentUpdatedEventData
+>;
+
+/** An attachment was soft- or hard-deleted. */
+export interface AttachmentDeletedEventData {
+  attachment_id: string;
+  attachment_type: string;
+  hard_delete: boolean;
+  source: AttachmentEventSource;
+}
+export type AttachmentDeletedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentDeleted,
+  AttachmentDeletedEventData
+>;
+
+export type AttachmentTimelineEvent =
+  | AttachmentAddedEvent
+  | AttachmentUpdatedEvent
+  | AttachmentDeletedEvent;
+
+const ATTACHMENT_EVENT_TYPES: ReadonlySet<string> = new Set([
+  TimelineEventType.attachmentAdded,
+  TimelineEventType.attachmentUpdated,
+  TimelineEventType.attachmentDeleted,
+]);
+
+export const isAttachmentEvent = (event: { type: string }): event is AttachmentTimelineEvent =>
+  ATTACHMENT_EVENT_TYPES.has(event.type);
+
 /** The discriminated union of all stored timeline events. */
 export type TimelineEvent =
   | UserMessageEvent
@@ -231,7 +312,10 @@ export type TimelineEvent =
   | ExecutionStepEvent
   | ExecutionTerminatedEvent
   | ExecutionFailedEvent
-  | ExecutionAbortedEvent;
+  | ExecutionAbortedEvent
+  | AttachmentAddedEvent
+  | AttachmentUpdatedEvent
+  | AttachmentDeletedEvent;
 
 /** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
 export type TimelineEventInput =
@@ -241,7 +325,10 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData>
   | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
-  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>;
+  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentAdded, AttachmentAddedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentUpdated, AttachmentUpdatedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>;
 
 /**
  * The run lock held on a conversation while an execution is active.
@@ -251,3 +338,54 @@ export interface ActiveExecution {
   trigger_event_id: string;
   started_at: string;
 }
+
+/**
+ * The delimiter used in round-derived event ids (e.g. `${roundId}::user_message`).
+ * A registered event `type` must not contain this character — it would produce ids
+ * indistinguishable from round-derived ones and get silently dropped or overwritten.
+ */
+export const CONVERSATION_EVENT_ID_DELIMITER = '::' as const;
+
+/**
+ * Type names that are not covered by a `TimelineEventType` member but would still
+ * produce ids colliding with round-derived ones.
+ */
+export const RESERVED_CONVERSATION_EVENT_TYPES = ['execution', 'step'] as const;
+export type ReservedConversationEventType = (typeof RESERVED_CONVERSATION_EVENT_TYPES)[number];
+
+/**
+ * The built-in timeline event type names. Derived from `TimelineEventType` rather than written
+ * out, so it cannot drift from the enum: adding a member to `TimelineEventType` adds it here.
+ * A custom event type may not reuse one of these names — the round-derived events projection
+ * owns them.
+ */
+export const BUILT_IN_CONVERSATION_EVENT_TYPES: readonly TimelineEventType[] =
+  Object.values(TimelineEventType);
+
+/** True when `type` is one of the built-in timeline event type names. */
+export const isBuiltInConversationEventType = (type: string): type is TimelineEventType =>
+  (BUILT_IN_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type);
+
+/**
+ * Union of the string values of all built-in timeline event types.
+ * Uses template-literal distribution so that `'user_message' extends BuiltInConversationEventTypeValue`
+ * evaluates to `true` — plain string literals do not extend string enum types in TypeScript's
+ * type system even when the runtime values match.
+ */
+type BuiltInConversationEventTypeValue = `${TimelineEventType}`;
+
+/**
+ * Compile-time guard that rejects a type string if it contains the id delimiter, is reserved, or
+ * is a built-in timeline event type.
+ *
+ * Only effective when `T` is inferred as a literal — a `string`-typed variable slips through.
+ * Always pair with the runtime checks in the registry.
+ */
+export type ValidConversationEventType<T extends string> =
+  T extends `${string}${typeof CONVERSATION_EVENT_ID_DELIMITER}${string}`
+    ? never
+    : T extends ReservedConversationEventType
+    ? never
+    : T extends BuiltInConversationEventTypeValue
+    ? never
+    : T;

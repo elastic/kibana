@@ -29,7 +29,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 The root forwards a fixed subset of `EuiFlyoutProps` — `id`, `hasChildBackground`, `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `outsideClickCloses`, `focusTrapProps`, `closeButtonProps`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
 
-Tab props also live on the root: `tabs` (array of `FlyoutTabProps`), `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [Tabs](#tabs) below.
+Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [`src/header/tab/README.md`](src/header/tab/README.md).
 
 ## Zones
 
@@ -42,7 +42,7 @@ Tab props also live on the root: `tabs` (array of `FlyoutTabProps`), `selectedTa
 - `collapsed` — renders the compact layout permanently, regardless of scroll position.
 - `children` — `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts. Free-form content (arbitrary elements, components, bare text) is not rendered, and the assembly library warns in development about unrecognized children.
 
-**`FlyoutTemplate.Body`** renders `Body.TabPanel` parts plus arbitrary passthrough content inside `EuiFlyoutBody` in source order. Passthrough children manage their own layout; the template adds no sectioning, titling, or dividers around them. See [Tabs](#tabs) below.
+**`FlyoutTemplate.Body`** renders `Body.Section`, `Body.Accordion`, and `Body.TabPanel` parts alongside arbitrary passthrough content inside `EuiFlyoutBody`, in source order. Passthrough children manage their own layout; the template adds no sectioning, titling, or dividers around them. See [`src/body/README.md`](src/body/README.md) for sections and unstructured content, and [Tabs](#tabs) below.
 
 **`FlyoutTemplate.Footer`** renders `PrimaryAction` and `SecondaryAction` right-aligned inside `EuiFlyoutFooter`, secondary first. If neither action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered.
 
@@ -115,3 +115,32 @@ Zone subjects derive from the root `data-test-subj` prop with a zone suffix, and
 | Footer | `${root}Footer` | `FlyoutTemplate.Footer` `data-test-subj` |
 
 Footer action buttons are not derived; their `data-test-subj` passes through to the button as given.
+
+## Opening a flyout imperatively
+
+`core.overlays.openFlyoutTemplate` takes the template's root props and a component that renders `FlyoutTemplate` with its zones. Because the component renders the template itself, the zones are literal children of it and every rule documented above still applies.
+
+```tsx
+const AlertDetails = ({ onClose }) => {
+  const alert = useAlert();
+
+  return (
+    <FlyoutTemplate onClose={onClose}>
+      <FlyoutTemplate.Header title="Alert details" />
+      <FlyoutTemplate.Body>
+        <FlyoutTemplate.Body.Section title="Summary">
+          <AlertSummary alert={alert} />
+        </FlyoutTemplate.Body.Section>
+      </FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+};
+
+core.overlays.openFlyoutTemplate({ size: 'm', session: 'start' }, AlertDetails);
+```
+
+The component is a real React boundary, so it may use hooks and re-render. `onClose` is the only root prop it sets — it stays required so a `FlyoutTemplate` can never be rendered without a way to dismiss it — and it arrives as a prop on the content component. Every other root prop comes from `FlyoutTemplateManagedProvider` (fed by the options argument) regardless of what the content component passes to `FlyoutTemplate`; extra root props on the element are ignored and warn in development. See `@kbn/core-overlays-browser` for the full signature.
+
+Wrapping `onClose` is fine; declining to call it does not keep the flyout open. EUI's flyout manager routes the close button, history navigation, and cascade closes through that prop and has already removed the flyout by the time a handler runs, so the template tears down regardless. `useFlyoutClose` is available for content nested too deeply to receive the prop.
+
+**A part written inside another component does not render.** Parts are identified by parsing direct JSX children, so one returned from inside a component sits behind a boundary the parser cannot see through and silently renders nothing. Keep parts in the JSX of the zone that parses them, and put your own components inside those parts.

@@ -10,7 +10,6 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyDefinitionList } from './action_policy_definition_list';
 import type { ActionPolicyDefinitionListProps } from './action_policy_definition_list';
-import userEvent from '@testing-library/user-event';
 
 const renderWithI18n = (props: ActionPolicyDefinitionListProps) =>
   render(
@@ -49,8 +48,7 @@ jest.mock('../labels', () => ({
 const defaultProps: ActionPolicyDefinitionListProps = {
   policy: {
     description: 'A test description',
-    tags: ['tag-a', 'tag-b'],
-    matcher: 'rule.id: "abc"',
+    matcher: { tags: ['abc'] },
     grouping_mode: 'per_episode',
     destinations: [
       { type: 'workflow', id: 'wf-1' },
@@ -66,30 +64,11 @@ describe('ActionPolicyDefinitionList', () => {
 
     expect(screen.getByText('Description')).toBeDefined();
     expect(screen.getByText('A test description')).toBeDefined();
-    expect(screen.getByText('Tags')).toBeDefined();
-    expect(screen.getByText('tag-a')).toBeDefined();
     expect(screen.getByText('Matcher')).toBeDefined();
     expect(screen.getByText('Dispatch per')).toBeDefined();
     expect(screen.getByText('Frequency')).toBeDefined();
     expect(screen.getByText('Destinations')).toBeDefined();
     expect(screen.getAllByTestId('mockDestinationRow')).toHaveLength(2);
-  });
-
-  it('renders a expandable list of tags when there are more than one', () => {
-    renderWithI18n(defaultProps);
-
-    expect(screen.getByText('tag-a')).toBeDefined();
-    expect(screen.getByText('+1')).toBeDefined();
-  });
-
-  it('opens the tags popover when the "+N" button is clicked', async () => {
-    const user = userEvent.setup();
-
-    renderWithI18n(defaultProps);
-
-    await user.click(screen.getByText('+1'));
-
-    expect(screen.getByText('tag-b')).toBeInTheDocument();
   });
 
   it('renders empty values when fields are missing', () => {

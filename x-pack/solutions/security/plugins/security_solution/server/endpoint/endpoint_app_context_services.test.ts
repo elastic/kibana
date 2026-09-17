@@ -6,12 +6,23 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from './mocks';
+import type { ResponseActionsClient } from './services';
+
+// Keep the real `./services` module, but replace the response actions client factory so tests can
+// assert exactly what `getInternalResponseActionsClient()` hands it.
+jest.mock('./services', () => ({
+  ...jest.requireActual('./services'),
+  getResponseActionsClient: jest.fn(),
+}));
+
+import { getResponseActionsClient } from './services';
 
 describe('test endpoint app context services', () => {
   it('should return undefined on getManifestManager if dependencies are not enabled', async () => {
@@ -93,8 +104,11 @@ describe('test endpoint app context services', () => {
     let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
     const request = httpServerMock.createKibanaRequest();
 
-    const startService = (cpsEnabled: boolean) => {
-      startContract = { ...createMockEndpointAppContextServiceStartContract(), cpsEnabled };
+    const startService = (cpsActive: boolean) => {
+      startContract = {
+        ...createMockEndpointAppContextServiceStartContract(),
+        isCpsActive: jest.fn().mockResolvedValue(cpsActive),
+      };
       service.setup(createMockEndpointAppContextServiceSetupContract());
       service.start(startContract);
     };
@@ -107,37 +121,47 @@ describe('test endpoint app context services', () => {
       service.stop();
     });
 
-    it('reports CPS as disabled when the deployment and flag check resolved to false', () => {
+    it('reports CPS as inactive when the resolver resolves to false', async () => {
       startService(false);
 
-      expect(service.isCpsEnabled()).toBe(false);
+      expect(await service.isCpsActive(request)).toBe(false);
     });
 
-    it('returns the internal ES client when CPS is disabled', () => {
+    it('returns the internal ES client when CPS is inactive', async () => {
       startService(false);
 
-      expect(service.getReadEsClient(request)).toBe(startContract.esClient);
+      expect(await service.getReadEsClient(request)).toBe(startContract.esClient);
       expect(startContract.clusterClient.asScoped).not.toHaveBeenCalled();
     });
 
-    it('reports a read with no request identity as not fanning out, whatever the flag says', () => {
-      startService(true);
+    it('reads origin-only when the resolver reports no linked projects, and never scopes the cluster client', async () => {
+      // Capability and feature flag may both be on; the resolver still returns false when this
+      // principal can see no linked projects (or listing them failed). That must not fan out.
+      startService(false);
 
-      expect(service.isCpsRead()).toBe(false);
-      expect(service.isCpsRead(request)).toBe(true);
-    });
-
-    it('returns the internal ES client when CPS is enabled but the caller has no request', () => {
-      startService(true);
-
-      expect(service.getReadEsClient()).toBe(startContract.esClient);
+      expect(await service.isCpsRead(request)).toBe(false);
+      expect(await service.getReadEsClient(request)).toBe(startContract.esClient);
       expect(startContract.clusterClient.asScoped).not.toHaveBeenCalled();
     });
 
-    it('returns a current-user client with space project routing when CPS is enabled', () => {
+    it('reports a read with no request identity as not fanning out, whatever the flag says', async () => {
       startService(true);
 
-      const client = service.getReadEsClient(request);
+      expect(await service.isCpsRead()).toBe(false);
+      expect(await service.isCpsRead(request)).toBe(true);
+    });
+
+    it('returns the internal ES client when CPS is active but the caller has no request', async () => {
+      startService(true);
+
+      expect(await service.getReadEsClient()).toBe(startContract.esClient);
+      expect(startContract.clusterClient.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('returns a current-user client with space project routing when CPS is active', async () => {
+      startService(true);
+
+      const client = await service.getReadEsClient(request);
 
       expect(startContract.clusterClient.asScoped).toHaveBeenCalledWith(request, {
         projectRouting: 'space',
@@ -146,18 +170,18 @@ describe('test endpoint app context services', () => {
       expect(client).not.toBe(startContract.esClient);
     });
 
-    it('scopes the search client without project routing when CPS is disabled', () => {
+    it('scopes the search client without project routing when CPS is inactive', async () => {
       startService(false);
 
-      service.getScopedSearchClient(request);
+      await service.getScopedSearchClient(request);
 
       expect(startContract.dataStart.search.asScoped).toHaveBeenCalledWith(request);
     });
 
-    it('scopes the search client with space project routing when CPS is enabled', () => {
+    it('scopes the search client with space project routing when CPS is active', async () => {
       startService(true);
 
-      service.getScopedSearchClient(request);
+      await service.getScopedSearchClient(request);
 
       expect(startContract.dataStart.search.asScoped).toHaveBeenCalledWith(request, {
         projectRouting: 'space',
@@ -170,8 +194,11 @@ describe('test endpoint app context services', () => {
     let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
     const request = httpServerMock.createKibanaRequest();
 
-    const startService = (cpsEnabled: boolean) => {
-      startContract = { ...createMockEndpointAppContextServiceStartContract(), cpsEnabled };
+    const startService = (cpsActive: boolean) => {
+      startContract = {
+        ...createMockEndpointAppContextServiceStartContract(),
+        isCpsActive: jest.fn().mockResolvedValue(cpsActive),
+      };
       service.setup(createMockEndpointAppContextServiceSetupContract());
       service.start(startContract);
     };
@@ -184,22 +211,22 @@ describe('test endpoint app context services', () => {
       service.stop();
     });
 
-    it('isCpsRead() returns false when the flag is off', () => {
+    it('isCpsRead() returns false when the resolver is inactive', async () => {
       startService(false);
 
-      expect(service.asScoped(request).isCpsRead()).toBe(false);
+      expect((await service.asScoped(request)).isCpsRead()).toBe(false);
     });
 
-    it('isCpsRead() returns true when the flag is on and a request is present', () => {
+    it('isCpsRead() returns true when the resolver is active and a request is present', async () => {
       startService(true);
 
-      expect(service.asScoped(request).isCpsRead()).toBe(true);
+      expect((await service.asScoped(request)).isCpsRead()).toBe(true);
     });
 
-    it('getEsClient() returns a different client than the internal one when the flag is on', () => {
+    it('getEsClient() returns a different client than the internal one when the resolver is active', async () => {
       startService(true);
 
-      const scoped = service.asScoped(request);
+      const scoped = await service.asScoped(request);
 
       expect(scoped.getEsClient()).not.toBe(startContract.esClient);
     });
@@ -213,10 +240,134 @@ describe('test endpoint app context services', () => {
       };
       jest.spyOn(service, 'getActiveSpace').mockResolvedValue(expectedSpace);
 
-      const result = await service.asScoped(request).getSpace();
+      const result = await (await service.asScoped(request)).getSpace();
 
       expect(result).toBe(expectedSpace);
       expect(service.getActiveSpace).toHaveBeenCalledWith(request);
+    });
+  });
+
+  describe('getCurrentUsername', () => {
+    let service: EndpointAppContextService;
+    let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
+    let getCurrentUserMock: jest.Mock;
+
+    const startService = () => {
+      startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(startContract);
+      getCurrentUserMock = startContract.security.authc.getCurrentUser as jest.Mock;
+    };
+
+    beforeEach(() => {
+      service = new EndpointAppContextService();
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it("returns the authenticated user's username for the request", () => {
+      startService();
+      getCurrentUserMock.mockReturnValue({ username: 'some-analyst' });
+
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBe('some-analyst');
+      expect(getCurrentUserMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns the 'unknown' sentinel when the request is unauthenticated", () => {
+      startService();
+      getCurrentUserMock.mockReturnValue(null);
+
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBe('unknown');
+    });
+
+    it('returns unknown when the security plugin is not available', () => {
+      // no setup/start — `this.security` is null
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBe('unknown');
+    });
+  });
+
+  describe('getInternalResponseActionsClient', () => {
+    let service: EndpointAppContextService;
+
+    const responseActionsClientFactoryMock = getResponseActionsClient as jest.Mock;
+    const fakeClient = {} as ResponseActionsClient;
+
+    const startService = () => {
+      service = new EndpointAppContextService();
+      const startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(startContract);
+      return startContract;
+    };
+
+    beforeEach(() => {
+      responseActionsClientFactoryMock.mockReset();
+      responseActionsClientFactoryMock.mockReturnValue(fakeClient);
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it('defaults isAutomated to true to preserve behavior for rule-triggered actions', () => {
+      startService();
+
+      const client = service.getInternalResponseActionsClient({ spaceId: 'default' });
+
+      expect(client).toBe(fakeClient);
+      expect(responseActionsClientFactoryMock).toHaveBeenCalledTimes(1);
+      const [, options] = responseActionsClientFactoryMock.mock.calls[0];
+      expect(options.isAutomated).toBe(true);
+    });
+
+    it('passes isAutomated: false through to the response actions client factory', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const startContract = startService();
+      startContract.security.authc.getCurrentUser.mockReturnValue(
+        securityMock.createMockAuthenticatedUser({ username: 'some-analyst' })
+      );
+      const getCurrentUserMock = startContract.security.authc.getCurrentUser as jest.Mock;
+
+      const client = service.getInternalResponseActionsClient({
+        spaceId: 'default',
+        isAutomated: false,
+        request,
+      });
+
+      expect(client).toBe(fakeClient);
+      expect(responseActionsClientFactoryMock).toHaveBeenCalledTimes(1);
+      const [, options] = responseActionsClientFactoryMock.mock.calls[0];
+      expect(options.isAutomated).toBe(false);
+      // username is derived from the request's authenticated user, never the 'elastic' default
+      expect(options.username).toBe('some-analyst');
+      expect(getCurrentUserMock).toHaveBeenCalledWith(request);
+    });
+
+    it('derives the unknown sentinel username when the manual-caller request has no user', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const startContract = startService();
+      startContract.security.authc.getCurrentUser.mockReturnValue(null);
+
+      service.getInternalResponseActionsClient({
+        spaceId: 'default',
+        isAutomated: false,
+        request,
+      });
+
+      const [, options] = responseActionsClientFactoryMock.mock.calls[0];
+      // distinguishable sentinel — NOT the system user, which would misattribute the action
+      expect(options.username).toBe('unknown');
+    });
+
+    it('throws if the service was not started', () => {
+      service = new EndpointAppContextService();
+
+      expect(() => service.getInternalResponseActionsClient({ spaceId: 'default' })).toThrow(
+        /has not been started/
+      );
+      expect(responseActionsClientFactoryMock).not.toHaveBeenCalled();
     });
   });
 });

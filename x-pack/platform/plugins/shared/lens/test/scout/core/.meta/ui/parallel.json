@@ -1,5 +1,5 @@
 {
-  "sha1": "7e980ff78ae4ff28cda153d3f20ccd32223d09e0",
+  "sha1": "6b41d5433e5871713a83b7af8c86dd4f6d6f9b01",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -778,8 +778,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
-        "line": 88,
-        "column": 20
+        "line": 127,
+        "column": 15
+      }
+    },
+    {
+      "id": "a67f0ea6f9cf137-9a4508d4ebdd9a6",
+      "title": "Dashboard with ES|QL Lens panel cancels the search request when navigating away cancels both ES|QL and classic requests when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
+        "line": 158,
+        "column": 95
+      }
+    },
+    {
+      "id": "d8893df3b2e499c-2867e4a4bffc4e3",
+      "title": "Lens Convert to ES|QL button should not display button for inline visualizations when feature flag is set to false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_conversion/button_hidden.spec.ts",
+        "line": 30,
+        "column": 5
       }
     },
     {
@@ -811,27 +837,40 @@
     {
       "id": "19db52c9b83cb21-00047d302ca0c1c",
       "title": "Lens ES|QL filter data view selector dashboard add filter from ES|QL panel should not show duplicate data view names",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 46,
-        "column": 46
+        "line": 116,
+        "column": 9
       }
     },
     {
       "id": "19db52c9b83cb21-d35e8ca1522ac6f",
       "title": "Lens ES|QL filter data view selector filter fields should be available after changing ES|QL query source",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 113,
-        "column": 31
+        "line": 162,
+        "column": 11
+      }
+    },
+    {
+      "id": "77434e60a599e43-78f10f03c229085",
+      "title": "Lens legacy dual-written ES|QL slot self-heal (by-value inline editing) renders the layer query, self-heals the stale slot on save, and survives re-open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_legacy_slot_self_heal.spec.ts",
+        "line": 137,
+        "column": 33
       }
     },
     {
@@ -1238,19 +1277,6 @@
       }
     },
     {
-      "id": "a16fbb825b008d7-ebf2b94c7596db4",
-      "title": "Lens metric trendline conversion to ES|QL trendline persists after converting form-based metric to ES|QL",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_conversion.spec.ts",
-        "line": 75,
-        "column": 24
-      }
-    },
-    {
       "id": "e427f09410fb7e8-bfcc34bcd13d7aa",
       "title": "Lens ES|QL metric trendline editor interactions toggling background chart to None keeps Color set to Panel",
       "expectedStatus": "passed",
@@ -1339,6 +1365,19 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
         "line": 55,
         "column": 15
+      }
+    },
+    {
+      "id": "79b736095ef203d-841136227d41f25",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline for a FORK query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 91,
+        "column": 49
       }
     },
     {
@@ -1494,7 +1533,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 59,
-        "column": 9
+        "column": 27
       }
     },
     {
@@ -1507,7 +1546,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 84,
-        "column": 18
+        "column": 22
       }
     },
     {
@@ -1520,7 +1559,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 110,
-        "column": 9
+        "column": 13
       }
     },
     {
@@ -1532,7 +1571,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 132,
+        "line": 135,
         "column": 4
       }
     },
@@ -1546,7 +1585,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 158,
-        "column": 25
+        "column": 20
       }
     },
     {
@@ -1559,7 +1598,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 187,
-        "column": 25
+        "column": 9
       }
     },
     {
@@ -1571,8 +1610,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 231,
-        "column": 31
+        "line": 233,
+        "column": 24
       }
     },
     {
