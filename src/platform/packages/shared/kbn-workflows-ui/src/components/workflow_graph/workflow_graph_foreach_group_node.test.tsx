@@ -11,6 +11,7 @@ import { render, screen } from '@testing-library/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
 
 // Stub @xyflow/react's Handle — it requires an internal React Flow context that
@@ -24,8 +25,23 @@ jest.mock('@xyflow/react', () => ({
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
   readonly stepType: string;
-  readonly stepExecution?: { id: string; stepId: string; status: ExecutionStatus };
+  readonly stepExecution?: WorkflowStepExecutionDto;
 }
+
+// Constructs a minimal but fully-typed WorkflowStepExecutionDto. The component
+// reads only `.status`; the other required fields carry sentinel values.
+const makeExecution = (status: ExecutionStatus): WorkflowStepExecutionDto => ({
+  id: 'e1',
+  stepId: 'group-1',
+  status,
+  scopeStack: [],
+  workflowRunId: 'run-1',
+  workflowId: 'wf-1',
+  startedAt: '2024-01-01T00:00:00.000Z',
+  topologicalIndex: 0,
+  globalExecutionIndex: 0,
+  stepExecutionIndex: 0,
+});
 
 // Minimal NodeProps-shaped object for `WorkflowGraphForeachGroupNode`.
 const makeNodeProps = (
@@ -81,7 +97,7 @@ describe('WorkflowGraphForeachGroupNode', () => {
     // isolated in its own container so querySelector never crosses renders.
     const iconColor = (status?: ExecutionStatus): string | null => {
       const { container } = renderGroup({
-        stepExecution: status ? ({ id: 'e1', stepId: 'group-1', status } as any) : undefined,
+        stepExecution: status ? makeExecution(status) : undefined,
       });
       return (
         container
