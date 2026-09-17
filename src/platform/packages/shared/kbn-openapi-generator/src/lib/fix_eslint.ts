@@ -20,7 +20,7 @@ export async function fixEslint(path: string) {
     // fix-vs-suggest on whether they detect an editor env (VSCODE_CWD, JetBrains,
     // etc.). Setting IS_KIBANA_PRECOMIT_HOOK forces the non-editor branch so the
     // generator output is deterministic regardless of the invoking shell —
-    // otherwise running `yarn openapi:generate` from a VSCode/Cursor terminal
+    // otherwise running `pnpm openapi:generate` from a VSCode/Cursor terminal
     // leaves dead imports the fix-step can't remove.
     env: { ...process.env, IS_KIBANA_PRECOMIT_HOOK: '1' },
   });
