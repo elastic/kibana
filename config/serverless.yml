@@ -299,7 +299,18 @@ xpack.reporting.export_types.png.enabled: true
 # ignoreDuplicateSlashes, so a trailing slash here yields `//v1/render-page`
 # and a 404.
 xpack.pageRenderScreenshotting.enabled: true
-xpack.pageRenderScreenshotting.url: http://page-render-service.page-render-service.svc
+xpack.pageRenderScreenshotting.url: https://page-render-service.page-render-service.svc
+
+# The service reads this Kibana's identity off the client certificate we present, and
+# forwards it to UIAM with the token we mint -- so this must be the same certificate as
+# xpack.security.uiam.ssl, which the operator supplies. Same mount the uptime service
+# reads in serverless.oblt.yml.
+xpack.pageRenderScreenshotting.ssl.certificate: /mnt/elastic-internal/http-certs/tls.crt
+xpack.pageRenderScreenshotting.ssl.key: /mnt/elastic-internal/http-certs/tls.key
+# TODO(response-ops-team#682): certificateAuthorities is deliberately unset here. The
+# service's certificate comes from ecp-issuer, which is not in the system trust store, so
+# this needs the same CA bundle the operator sets on xpack.security.uiam.ssl -- confirm
+# the path in QA rather than guessing it here.
 
 # Disabled Platform plugins
 monitoring.enabled: false
