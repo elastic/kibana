@@ -21900,7 +21900,6 @@
     "xpack.fleet.awsConnectSetup.continueButton": "Continuar",
     "xpack.fleet.awsIdentityFederationSetup.createButton": "Criar Identidade",
     "xpack.fleet.awsIdentityFederationSetup.existingIdentityTab": "Identidade existente",
-    "xpack.fleet.awsIdentityFederationSetup.launchCloudFormation": "Executar CloudFormation",
     "xpack.fleet.awsIdentityFederationSetup.newIdentityTab": "Nova identidade",
     "xpack.fleet.awsIdentityFederationSetup.roleArnLabel": "Função ARN",
     "xpack.fleet.awsIdentityFederationSetup.roleArnRequired": "O ARN da função é obrigatório",
