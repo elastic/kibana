@@ -24,7 +24,7 @@ import {
   useApproveProposal,
   useDismissProposal,
   usePendingProposals,
-} from '../../hooks/use_proposals_api';
+} from '@kbn/agentic-investigations-plugin/public';
 import { DismissProposalModal } from './dismiss_proposal_modal';
 import { ProposalDecisionCard } from './proposal_decision_card';
 import * as i18n from './translations';
