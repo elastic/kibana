@@ -8,6 +8,7 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import type {
   ActionConnector,
@@ -26,12 +27,10 @@ interface ConnectorOption {
 interface SelectionProps {
   allowGroupConnector?: string[];
   /**
-   * Both are supplied by the wrapping `EuiFormRow`, which clones its direct
-   * child with its own generated `id` and renders the label with an `id` of
-   * `${id}-label`. Either one lets the combo box announce the visible label.
+   * ID of the element holding the visible label, so the announced name matches
+   * it. Falls back to a generic `aria-label` when not provided.
    */
   'aria-labelledby'?: string;
-  id?: string;
   actionItem: RuleUiAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
@@ -45,7 +44,6 @@ export const ConnectorsSelection = React.memo(ConnectorsSelectionComponent);
 function ConnectorsSelectionComponent({
   'aria-labelledby': ariaLabelledBy,
   allowGroupConnector,
-  id,
   actionItem,
   accordionIndex,
   actionTypesIndex,
@@ -86,11 +84,10 @@ function ConnectorsSelectionComponent({
     [onConnectorSelected]
   );
 
-  const labelId = ariaLabelledBy ?? (id ? `${id}-label` : undefined);
-
   return (
     <EuiComboBox
-      aria-labelledby={labelId}
+      aria-label={ariaLabelledBy ? undefined : getFallbackAriaLabel(actionItem, actionTypesIndex)}
+      aria-labelledby={ariaLabelledBy}
       data-test-subj={`selectActionConnector-${actionItem.actionTypeId}-${accordionIndex}`}
       fullWidth
       singleSelection={{ asPlainText: true }}
@@ -157,3 +154,11 @@ const getTitle = (connector: ActionConnector, actionTypeRegistered: ActionTypeMo
 
   return connector.name;
 };
+
+const getFallbackAriaLabel = (actionItem: RuleUiAction, actionTypesIndex: ActionTypeIndex) =>
+  i18n.translate('xpack.triggersActionsUI.sections.actionForm.connectorsSelectionAriaLabel', {
+    defaultMessage: '{connectorInstance} connector',
+    values: {
+      connectorInstance: actionTypesIndex[actionItem.actionTypeId]?.name ?? actionItem.actionTypeId,
+    },
+  });

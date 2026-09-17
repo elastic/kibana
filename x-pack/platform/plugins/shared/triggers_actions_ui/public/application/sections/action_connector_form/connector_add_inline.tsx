@@ -24,6 +24,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { RuleUiAction, ActionTypeIndex, ActionConnector } from '../../../types';
@@ -59,6 +60,7 @@ export const AddConnectorInline = ({
     application: { capabilities },
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
+  const connectorFormRowId = useGeneratedHtmlId({ prefix: 'connectorSelection' });
   const [hasConnectors, setHasConnectors] = useState<boolean>(false);
   const [isEmptyActionId, setIsEmptyActionId] = useState<boolean>(false);
 
@@ -110,6 +112,7 @@ export const AddConnectorInline = ({
   const connectorsDropdown = (
     <EuiFormRow
       fullWidth
+      id={connectorFormRowId}
       label={
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.connectorAddInline.connectorAddInline.actionIdLabel"
@@ -135,6 +138,7 @@ export const AddConnectorInline = ({
       isInvalid
     >
       <ConnectorsSelection
+        aria-labelledby={`${connectorFormRowId}-label`}
         actionItem={actionItem}
         accordionIndex={index}
         actionTypesIndex={actionTypesIndex}

@@ -12,7 +12,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { ActionType, GenericValidationResult } from '../../../types';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -118,32 +118,13 @@ describe('connectors_selection', () => {
     expect(screen.getByRole('combobox')).toHaveValue('test pagerduty');
   });
 
-  it('takes its accessible name from the wrapping EuiFormRow label', () => {
-    render(
-      <KibanaThemeProvider {...core}>
-        <EuiFormRow label="Test connector">
-          <ConnectorsSelection
-            accordionIndex={0}
-            actionItem={actionItem}
-            actionTypesIndex={actionTypeIndex}
-            actionTypeRegistered={actionType}
-            connectors={connectors}
-            onConnectorSelected={jest.fn()}
-          />
-        </EuiFormRow>
-      </KibanaThemeProvider>
-    );
-
-    expect(screen.getByRole('combobox', { name: 'Test connector' })).toBeInTheDocument();
-  });
-
-  it('prefers an explicitly provided aria-labelledby', () => {
+  it('names the combo box from the aria-labelledby element', () => {
     render(
       <KibanaThemeProvider {...core}>
         <>
-          <span id="customLabel">{'Custom connector label'}</span>
+          <span id="connectorLabel">{'Use another Test connector'}</span>
           <ConnectorsSelection
-            aria-labelledby="customLabel"
+            aria-labelledby="connectorLabel"
             accordionIndex={0}
             actionItem={actionItem}
             actionTypesIndex={actionTypeIndex}
@@ -155,6 +136,26 @@ describe('connectors_selection', () => {
       </KibanaThemeProvider>
     );
 
-    expect(screen.getByRole('combobox', { name: 'Custom connector label' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('combobox', { name: 'Use another Test connector' })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: 'Test connector' })).not.toBeInTheDocument();
+  });
+
+  it('falls back to an action type derived aria-label', () => {
+    render(
+      <KibanaThemeProvider {...core}>
+        <ConnectorsSelection
+          accordionIndex={0}
+          actionItem={actionItem}
+          actionTypesIndex={actionTypeIndex}
+          actionTypeRegistered={actionType}
+          connectors={connectors}
+          onConnectorSelected={jest.fn()}
+        />
+      </KibanaThemeProvider>
+    );
+
+    expect(screen.getByRole('combobox', { name: 'Test connector' })).toBeInTheDocument();
   });
 });
