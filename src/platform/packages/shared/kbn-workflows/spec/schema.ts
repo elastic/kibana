@@ -27,9 +27,12 @@ import {
   MAX_HITL_MESSAGE_LENGTH,
   MAX_HITL_SLACK_CHANNEL_LENGTH,
 } from '../common/hitl';
-import { DURATION_REGEX } from '../common/utils/duration/duration';
+import { DURATION_REGEX, MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 
-export const DurationSchema = z.string().regex(DURATION_REGEX, 'Invalid duration format');
+export const DurationSchema = z
+  .string()
+  .max(MAX_DURATION_LENGTH)
+  .regex(DURATION_REGEX, 'Invalid duration format');
 
 export const ByteSizeSchema = z
   .string()

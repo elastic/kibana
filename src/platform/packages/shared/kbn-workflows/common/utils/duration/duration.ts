@@ -17,15 +17,26 @@ const DURATION_MS = {
 } as const;
 
 /**
+ * Upper bound on a duration string. Compound forms like `1w2d3h4m5s6ms` are
+ * well under this; the cap is applied before either duration regex, including
+ * on values rendered from HITL timeout templates.
+ */
+export const MAX_DURATION_LENGTH = 64;
+
+/**
  * Compound duration with units in descending order (w, d, h, m, s, ms).
  * That order is the validation: `1h30m` matches, `1m1h` does not.
  * `(?=.)` rejects the empty string (every unit group is otherwise optional).
  */
 export const DURATION_REGEX = /^(?=.)(?:\d+w)?(?:\d+d)?(?:\d+h)?(?:\d+m)?(?:\d+s)?(?:\d+ms)?$/;
 
-/** True when `duration` matches {@link DURATION_REGEX}. */
+/** True when `duration` is a compound duration no longer than {@link MAX_DURATION_LENGTH}. */
 export function isValidDuration(duration: unknown): duration is string {
-  return typeof duration === 'string' && DURATION_REGEX.test(duration);
+  return (
+    typeof duration === 'string' &&
+    duration.length <= MAX_DURATION_LENGTH &&
+    DURATION_REGEX.test(duration)
+  );
 }
 
 /** Throws if `duration` is not a compound duration string. */

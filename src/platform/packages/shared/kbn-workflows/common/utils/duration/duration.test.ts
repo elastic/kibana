@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { assertValidDuration, DURATION_REGEX, isValidDuration, parseDuration } from './duration';
+import {
+  assertValidDuration,
+  DURATION_REGEX,
+  isValidDuration,
+  MAX_DURATION_LENGTH,
+  parseDuration,
+} from './duration';
 
 describe('isValidDuration', () => {
   it.each(['1ms', '30s', '5m', '2h', '1d', '1w', '1h30m', '1w2d3h4m5s6ms', '1h500ms', '0s'])(
@@ -24,6 +30,21 @@ describe('isValidDuration', () => {
       expect(isValidDuration(duration)).toBe(false);
     }
   );
+
+  it('rejects a duration longer than MAX_DURATION_LENGTH', () => {
+    const atLimit = `${'1'.repeat(MAX_DURATION_LENGTH - 1)}s`;
+    const overLimit = `${'1'.repeat(MAX_DURATION_LENGTH)}s`;
+    expect(atLimit).toHaveLength(MAX_DURATION_LENGTH);
+    expect(overLimit).toHaveLength(MAX_DURATION_LENGTH + 1);
+    expect(isValidDuration(atLimit)).toBe(true);
+    expect(isValidDuration(overLimit)).toBe(false);
+  });
+
+  it('rejects a 65-character duration', () => {
+    const duration = `${'1'.repeat(64)}s`;
+    expect(duration).toHaveLength(65);
+    expect(isValidDuration(duration)).toBe(false);
+  });
 });
 
 describe('assertValidDuration', () => {
@@ -111,6 +132,12 @@ describe('parseDuration', () => {
       ['9999h', 9999 * 3600000],
     ])('should handle large numbers: %s', (input, expected) => {
       expect(parseDuration(input)).toBe(expected);
+    });
+
+    it('throws for a duration longer than MAX_DURATION_LENGTH', () => {
+      expect(() => parseDuration(`${'1'.repeat(MAX_DURATION_LENGTH)}s`)).toThrow(
+        'Invalid duration format'
+      );
     });
   });
 

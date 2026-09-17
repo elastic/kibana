@@ -72,6 +72,14 @@ describe('hitl_timeout_helpers', () => {
       );
     });
 
+    it('throws when the rendered duration is 65 characters', () => {
+      const rendered = `${'1'.repeat(64)}s`;
+      expect(rendered).toHaveLength(65);
+      expect(() => resolveDynamicTimeout('{{ inputs.expiresIn }}', '24h', () => rendered)).toThrow(
+        'Invalid duration format'
+      );
+    });
+
     it('accepts compound durations', () => {
       expect(resolveDynamicTimeout('{{ inputs.expiresIn }}', '24h', () => '1h30m')).toBe('1h30m');
     });

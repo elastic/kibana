@@ -43,6 +43,7 @@ import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
 import { IF_CONDITION_MAX_LENGTH } from '../common/constants';
+import { MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 import { getShape } from '../common/utils/zod';
 
 describe('WorkflowSchemaForAutocomplete', () => {
@@ -1277,6 +1278,13 @@ describe('DurationSchema', () => {
 
   it.each(['', 'soon', '1m1h', '5h 30m', '1.5s'])('rejects %s', (duration) => {
     expect(DurationSchema.safeParse(duration).success).toBe(false);
+  });
+
+  it('rejects a duration longer than MAX_DURATION_LENGTH', () => {
+    const atLimit = `${'1'.repeat(MAX_DURATION_LENGTH - 1)}s`;
+    const overLimit = `${'1'.repeat(MAX_DURATION_LENGTH)}s`;
+    expect(DurationSchema.safeParse(atLimit).success).toBe(true);
+    expect(DurationSchema.safeParse(overLimit).success).toBe(false);
   });
 });
 
