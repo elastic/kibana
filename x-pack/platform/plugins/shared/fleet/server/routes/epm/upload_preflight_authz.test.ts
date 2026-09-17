@@ -76,7 +76,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).resolves.toBeUndefined();
 
     // No privilege check needed for asset types without required privileges
@@ -120,7 +125,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
@@ -188,7 +198,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(null);
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 

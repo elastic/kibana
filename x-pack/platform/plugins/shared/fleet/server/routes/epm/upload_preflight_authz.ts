@@ -32,15 +32,18 @@ export async function checkUploadPackageAssetPrivileges(
   const iterator = createArchiveIterator(archiveBuffer, contentType);
   const requiredPrivilegeNames = new Set<string>();
 
-  await iterator.traverseEntries(async (entry) => {
-    const parts = getPathParts(entry.path);
-    if (parts.service !== 'kibana') return;
-    const assetType = parts.type as KibanaAssetType;
-    const privileges = ASSET_REQUIRED_PRIVILEGES[assetType];
-    if (privileges) {
-      privileges.forEach((p) => requiredPrivilegeNames.add(p));
-    }
-  }, () => false);
+  await iterator.traverseEntries(
+    async (entry) => {
+      const parts = getPathParts(entry.path);
+      if (parts.service !== 'kibana') return;
+      const assetType = parts.type as KibanaAssetType;
+      const privileges = ASSET_REQUIRED_PRIVILEGES[assetType];
+      if (privileges) {
+        privileges.forEach((p) => requiredPrivilegeNames.add(p));
+      }
+    },
+    () => false
+  );
 
   if (requiredPrivilegeNames.size === 0) {
     return;
@@ -53,9 +56,7 @@ export async function checkUploadPackageAssetPrivileges(
     );
   }
 
-  const actions = [...requiredPrivilegeNames].map((name) =>
-    security.authz.actions.api.get(name)
-  );
+  const actions = [...requiredPrivilegeNames].map((name) => security.authz.actions.api.get(name));
 
   const checkResult = await security.authz
     .checkPrivilegesWithRequest(request)
