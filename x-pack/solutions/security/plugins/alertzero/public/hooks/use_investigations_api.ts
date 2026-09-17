@@ -14,6 +14,7 @@ import {
 } from '@kbn/alertzero-common';
 import type { GetInvestigationResponse, ListInvestigationsResponse } from '@kbn/alertzero-common';
 import type { ListProposalsResponse } from '@kbn/agentic-investigations-plugin/common';
+import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
 
 // TODO: update the API schemas as well for renaming investigations to conversations and remove the ListInvestigationsResponse type
