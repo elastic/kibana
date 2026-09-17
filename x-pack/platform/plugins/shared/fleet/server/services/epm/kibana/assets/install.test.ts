@@ -264,6 +264,51 @@ describe('installKibanaSavedObjects', () => {
     expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(2);
   });
 
+  it('carries destinationId into the missing-references retry so ambiguous_conflict is not re-raised', async () => {
+    // Object has both ambiguous_conflict (from orphan) and missing_references (from a
+    // legacy index pattern ref). Without forwarding destinationId, the second
+    // resolveImportErrors call would re-trigger the origin search and re-raise
+    // ambiguous_conflict, causing a KibanaSOReferenceError.
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-chosen', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+    // Initial import raises ambiguous_conflict
+    mockImporter.import.mockResolvedValueOnce(createImportResponse([ambiguousError]));
+    // Ambiguous pass re-surfaces missing_references for the same object
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(
+      createImportResponse([createImportError(asset, 'missing_references')])
+    );
+    // Missing-references pass succeeds
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(
+      createImportResponse([], [createImportSuccess(asset)])
+    );
+
+    await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [asset],
+    });
+
+    // The second resolveImportErrors call (missing-references pass) must include
+    // destinationId so checkOriginConflicts skips the origin search.
+    expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(2);
+    expect(mockImporter.resolveImportErrors).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        retries: expect.arrayContaining([
+          expect.objectContaining({ id: asset.id, destinationId: 'dest-chosen' }),
+        ]),
+      })
+    );
+  });
+
   it('does not throw on empty destinations array in ambiguous_conflict error', async () => {
     const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
     const ambiguousError: SavedObjectsImportFailure = {

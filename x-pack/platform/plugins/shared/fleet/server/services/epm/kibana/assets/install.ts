@@ -764,15 +764,24 @@ async function installKibanaSavedObjectsChunk({
   // originId. Orphan cleanup (deleteOrphanedMultipleIsolatedAssets) normally prevents this,
   // but if any slipped through (e.g. created outside Fleet's control), resolve by picking
   // the most-recently-updated destination rather than aborting the whole install.
+  // destinationIds picked during ambiguous-conflict resolution, keyed by "type:id".
+  // Must be forwarded to the missing-references retry map so that checkOriginConflicts
+  // skips the origin search for these objects and does not re-raise ambiguous_conflict.
+  const pickedDestinations = new Map<string, string>();
+
   if (ambiguousConflictErrors.length) {
-    const { successResults: ambiguousSuccessResults, referenceErrors: ambiguousRefErrors } =
-      await resolveAmbiguousConflicts({
-        ambiguousConflictErrors,
-        toBeSavedObjects,
-        savedObjectsImporter,
-        logger,
-        spaceId: options?.spaceId ?? DEFAULT_SPACE_ID,
-      });
+    const {
+      successResults: ambiguousSuccessResults,
+      referenceErrors: ambiguousRefErrors,
+      pickedDestinations: picked,
+    } = await resolveAmbiguousConflicts({
+      ambiguousConflictErrors,
+      toBeSavedObjects,
+      savedObjectsImporter,
+      logger,
+      spaceId: options?.spaceId ?? DEFAULT_SPACE_ID,
+    });
+    for (const [key, destId] of picked) pickedDestinations.set(key, destId);
     referenceErrors.push(...ambiguousRefErrors);
     allSuccessResults = allSuccessResults.concat(ambiguousSuccessResults);
   }
@@ -793,6 +802,10 @@ async function installKibanaSavedObjectsChunk({
     );
 
     const retries = toBeSavedObjects.map(({ id, type }) => {
+      // Carry forward any destinationId chosen during the ambiguous-conflict pass.
+      // Without it, checkOriginConflicts re-runs the origin search and re-raises
+      // ambiguous_conflict for objects that had both error types.
+      const destinationId = pickedDestinations.get(`${type}:${id}`);
       if (referenceErrors.find(({ id: idToSearch }) => idToSearch === id)) {
         return {
           id,
@@ -800,9 +813,16 @@ async function installKibanaSavedObjectsChunk({
           ignoreMissingReferences: true,
           replaceReferences: [],
           overwrite: true,
+          ...(destinationId ? { destinationId } : {}),
         };
       }
-      return { id, type, overwrite: true, replaceReferences: [] };
+      return {
+        id,
+        type,
+        overwrite: true,
+        replaceReferences: [],
+        ...(destinationId ? { destinationId } : {}),
+      };
     });
 
     const { successResults: resolveSuccessResults = [], errors: resolveErrors = [] } =
@@ -852,6 +872,7 @@ async function resolveAmbiguousConflicts({
 }): Promise<{
   successResults: SavedObjectsImportSuccess[];
   referenceErrors: SavedObjectsImportFailure[];
+  pickedDestinations: Map<string, string>;
 }> {
   logger.warn(
     `[Fleet] Encountered ${
@@ -860,6 +881,11 @@ async function resolveAmbiguousConflicts({
       ambiguousConflictErrors
     )}`
   );
+
+  // Track which destinationId was chosen per object so the caller can forward them to
+  // any subsequent missing-references retry pass (without it, checkOriginConflicts re-runs
+  // the origin search and re-raises ambiguous_conflict for objects with both error types).
+  const pickedDestinations = new Map<string, string>();
 
   const retries = toBeSavedObjects.map(({ id, type }) => {
     const conflictError = ambiguousConflictErrors.find(
@@ -878,6 +904,7 @@ async function resolveAmbiguousConflicts({
       if (!best?.id) {
         return { id, type, overwrite: true, replaceReferences: [] };
       }
+      pickedDestinations.set(`${type}:${id}`, best.id);
       return { id, type, overwrite: true, replaceReferences: [], destinationId: best.id };
     }
     return { id, type, overwrite: true, replaceReferences: [] };
@@ -914,10 +941,10 @@ async function resolveAmbiguousConflicts({
       );
     }
 
-    return { successResults, referenceErrors };
+    return { successResults, referenceErrors, pickedDestinations };
   }
 
-  return { successResults, referenceErrors: [] };
+  return { successResults, referenceErrors: [], pickedDestinations };
 }
 
 // Filter out any reserved index patterns
