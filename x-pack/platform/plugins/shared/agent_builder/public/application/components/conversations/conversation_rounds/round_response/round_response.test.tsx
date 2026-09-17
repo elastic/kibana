@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { ConversationRound } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { createExecutionTerminatedEvent } from '../../timeline/items/execution_terminated_event.factory';
 import { RoundResponseActions } from './round_response_actions';
 import { RoundResponse } from './round_response';
 
@@ -26,27 +25,7 @@ jest.mock('./round_response_actions', () => ({
 
 const roundResponseActionsMock = jest.mocked(RoundResponseActions);
 
-const createRound = (): ConversationRound =>
-  ({
-    id: 'round-1',
-    status: ConversationRoundStatus.completed,
-    input: {
-      message: 'hello',
-    },
-    steps: [],
-    response: {
-      message: 'hi',
-    },
-    started_at: '2026-01-01T00:00:00.000Z',
-    time_to_first_token: 1,
-    time_to_last_token: 1,
-    model_usage: {
-      connector_id: 'connector-1',
-      llm_calls: 1,
-      input_tokens: 1,
-      output_tokens: 1,
-    },
-  } as ConversationRound);
+const terminated = createExecutionTerminatedEvent();
 
 describe('RoundResponse', () => {
   beforeEach(() => {
@@ -54,15 +33,13 @@ describe('RoundResponse', () => {
   });
 
   it('renders response actions after a completed response', () => {
-    const round = createRound();
-
     render(
       <RoundResponse
         hasError={false}
-        response={round.response}
-        steps={round.steps}
+        response={{ message: 'hi' }}
+        steps={[]}
         isLoading={false}
-        rawRound={round}
+        executionTerminatedEvent={terminated}
       />
     );
 
@@ -70,22 +47,21 @@ describe('RoundResponse', () => {
       expect.objectContaining({
         content: 'hi',
         isVisible: true,
-        rawRound: round,
+        executionTerminatedEvent: terminated,
+        steps: [],
       }),
       expect.anything()
     );
   });
 
   it('does not render response actions while loading', () => {
-    const round = createRound();
-
     render(
       <RoundResponse
         hasError={false}
-        response={round.response}
-        steps={round.steps}
+        response={{ message: 'hi' }}
+        steps={[]}
         isLoading={true}
-        rawRound={round}
+        executionTerminatedEvent={terminated}
       />
     );
 

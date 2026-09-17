@@ -11904,7 +11904,6 @@
     "xpack.agentBuilder.rerankStep.inferenceIdSelection.service": "Service : {service}",
     "xpack.agentBuilder.rerankStep.label": "Reclasser les résultats",
     "xpack.agentBuilder.round.assistantResponse": "Réponse de l'assistant",
-    "xpack.agentBuilder.round.container": "Conversation par tour",
     "xpack.agentBuilder.round.error.contextExceeded.description": "Cette conversation a dépassé la longueur de contexte maximale. Cela se produit généralement lorsque les outils renvoient une réponse très volumineuse. Réessayez avec une autre demande ou démarrez une nouvelle conversation. {docsLink}.",
     "xpack.agentBuilder.round.error.contextExceeded.learnMore": "En savoir plus",
     "xpack.agentBuilder.round.error.generic.description": "Une erreur s'est produite lors du traitement de votre demande. Consultez le log des erreurs ci-dessous pour plus de détails.",

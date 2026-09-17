@@ -11950,7 +11950,6 @@
     "xpack.agentBuilder.rerankStep.inferenceIdSelection.service": "サービス：{service}",
     "xpack.agentBuilder.rerankStep.label": "リランク結果",
     "xpack.agentBuilder.round.assistantResponse": "アシスタントの応答",
-    "xpack.agentBuilder.round.container": "会話ラウンド",
     "xpack.agentBuilder.round.error.contextExceeded.description": "この会話はコンテキストの最大長を超えました。これは通常、ツールが非常に大きな応答を返す場合に発生します。別のリクエストでもう一度試すか、新しい会話を始めてください。{docsLink}。",
     "xpack.agentBuilder.round.error.contextExceeded.learnMore": "詳しくはこちら",
     "xpack.agentBuilder.round.error.generic.description": "リクエストの処理中にエラーが発生しました。詳細については、以下のエラーログを参照してください。",

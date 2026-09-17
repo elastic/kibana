@@ -9,6 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
+import { ConversationRoundStepType } from '@kbn/agent-builder-common';
+import { createExecutionTerminatedEvent } from '../../timeline/items/execution_terminated_event.factory';
 import { RoundResponseActions } from './round_response_actions';
 import { useToasts } from '../../../../hooks/use_toasts';
 
@@ -51,6 +53,30 @@ describe('RoundResponseActions', () => {
 
     expect(copyMock).toHaveBeenCalledWith('my question');
     expect(addSuccessToast).toHaveBeenCalledWith('Prompt copied to clipboard');
+  });
+
+  it('shows the execution metadata and its JSON from the terminated event', async () => {
+    const terminated = createExecutionTerminatedEvent({
+      data: { ...createExecutionTerminatedEvent().data, time_to_last_token: 4200 },
+    });
+    const steps = [{ type: ConversationRoundStepType.reasoning, reasoning: 'thinking' } as never];
+
+    render(
+      <RoundResponseActions
+        content="the answer"
+        isVisible
+        executionTerminatedEvent={terminated}
+        steps={steps}
+      />
+    );
+
+    expect(screen.getByTestId('roundMetadataPopoverTrigger')).toHaveTextContent('4s');
+    await userEvent.click(screen.getByTestId('roundMetadataPopoverTrigger'));
+    expect(screen.getByText('100')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('roundMetadataPopoverViewJsonButton'));
+    expect(screen.getByText(/"execution_id": "execution-1"/)).toBeInTheDocument();
+    expect(screen.getByText(/"reasoning": "thinking"/)).toBeInTheDocument();
   });
 
   it('keeps copy available without regeneration', () => {

@@ -10,19 +10,32 @@ import { EuiCodeBlock, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } fro
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
 
 const title = i18n.translate('xpack.agentBuilder.round.jsonFlyout.title', {
   defaultMessage: 'Raw response',
 });
 
 interface RoundJsonFlyoutProps {
-  rawRound: ConversationRound;
+  executionTerminatedEvent: ExecutionTerminatedEvent;
+  /** The execution's steps, which the saved event omits because they are stored as separate events. */
+  steps?: ConversationRoundStep[];
   onClose: () => void;
 }
 
-export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({ rawRound, onClose }) => {
-  const formattedJson = useMemo(() => JSON.stringify(rawRound, null, 2), [rawRound]);
+export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({
+  executionTerminatedEvent,
+  steps,
+  onClose,
+}) => {
+  const formattedJson = useMemo(() => {
+    const { data } = executionTerminatedEvent;
+    return JSON.stringify(
+      { ...executionTerminatedEvent, data: { ...data, steps: data.steps ?? steps } },
+      null,
+      2
+    );
+  }, [executionTerminatedEvent, steps]);
 
   return (
     <EuiFlyout

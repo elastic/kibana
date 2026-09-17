@@ -10,8 +10,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
   AssistantResponse,
-  ConversationRound,
   ConversationRoundStep,
+  ExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
 import type {
   VersionedAttachment,
@@ -30,7 +30,7 @@ export interface RoundResponseProps {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
-  rawRound?: ConversationRound;
+  executionTerminatedEvent?: ExecutionTerminatedEvent;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -41,7 +41,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   conversationAttachments,
   attachmentRefs,
   conversationId,
-  rawRound,
+  executionTerminatedEvent,
 }) => {
   const hasMessage = Boolean(response.message);
 
@@ -81,7 +81,12 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       </EuiFlexItem>
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
-          <RoundResponseActions content={response.message} isVisible rawRound={rawRound} />
+          <RoundResponseActions
+            content={response.message}
+            isVisible
+            executionTerminatedEvent={executionTerminatedEvent}
+            steps={steps}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

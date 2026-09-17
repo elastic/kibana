@@ -11,7 +11,7 @@ import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
@@ -40,7 +40,9 @@ const copyLabels = {
 interface RoundResponseActionsProps {
   content: string;
   isVisible: boolean;
-  rawRound?: ConversationRound;
+  /** Present for a completed execution; enables the trace button and the metadata popover. */
+  executionTerminatedEvent?: ExecutionTerminatedEvent;
+  steps?: ConversationRoundStep[];
   /** Which side of the round `content` comes from, so the copy wording matches it. */
   copyTarget?: keyof typeof copyLabels;
 }
@@ -48,7 +50,8 @@ interface RoundResponseActionsProps {
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   content,
   isVisible,
-  rawRound,
+  executionTerminatedEvent,
+  steps,
   copyTarget = 'response',
 }) => {
   const { addSuccessToast } = useToasts();
@@ -66,10 +69,10 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   // Normalise trace_id — backend models it as `string | string[]` to keep the
   // door open for multi-trace rounds; only the first id is meaningful today.
   const traceId = useMemo(() => {
-    const id = rawRound?.trace_id;
+    const id = executionTerminatedEvent?.data.trace_id;
     if (!id) return undefined;
     return Array.isArray(id) ? id[0] : id;
-  }, [rawRound?.trace_id]);
+  }, [executionTerminatedEvent?.data.trace_id]);
 
   const showTraceButton = isTracingEnabled && Boolean(traceId);
 
@@ -106,9 +109,9 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           <RoundTraceButton traceId={traceId} />
         </EuiFlexItem>
       )}
-      {rawRound && (
+      {executionTerminatedEvent && (
         <EuiFlexItem grow={false}>
-          <RoundMetadataPopover rawRound={rawRound} />
+          <RoundMetadataPopover executionTerminatedEvent={executionTerminatedEvent} steps={steps} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

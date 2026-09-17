@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   AssistantResponse,
-  ConversationRound,
   ConversationRoundStep,
+  ExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
 import { RoundResponse } from '../conversation_rounds/round_response/round_response';
 import { RoundEvents } from '../conversation_rounds/round_events/round_events';
@@ -19,8 +19,8 @@ interface AgentResponseProps {
   steps: ConversationRoundStep[];
   response: AssistantResponse;
   isLoading: boolean;
-  /** The round shape the response actions still expect. Omitted while streaming - actions are hidden then. */
-  rawRound?: ConversationRound;
+  /** The event that ended the execution; omitted while streaming, when the actions are hidden. */
+  executionTerminatedEvent?: ExecutionTerminatedEvent;
 }
 
 /** The assistant's turn: shared presenter for both the finished run and the in-flight one. */
@@ -28,7 +28,7 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
   steps,
   response,
   isLoading,
-  rawRound,
+  executionTerminatedEvent,
 }) => (
   <EuiFlexGroup direction="column" gutterSize="s">
     {steps.length > 0 && (
@@ -42,7 +42,7 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
         steps={steps}
         isLoading={isLoading}
         hasError={false}
-        rawRound={rawRound}
+        executionTerminatedEvent={executionTerminatedEvent}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

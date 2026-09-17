@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { RoundJsonFlyout } from './round_json_flyout';
@@ -47,10 +47,14 @@ const labels = {
 };
 
 interface RoundMetadataPopoverProps {
-  rawRound: ConversationRound;
+  executionTerminatedEvent: ExecutionTerminatedEvent;
+  steps?: ConversationRoundStep[];
 }
 
-export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawRound }) => {
+export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({
+  executionTerminatedEvent,
+  steps,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isJsonFlyoutOpen, setIsJsonFlyoutOpen] = useState(false);
 
@@ -63,7 +67,7 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawR
   }, []);
   const closeJsonFlyout = useCallback(() => setIsJsonFlyoutOpen(false), []);
 
-  const { time_to_last_token: timeMs, model_usage: modelUsage } = rawRound;
+  const { time_to_last_token: timeMs, model_usage: modelUsage } = executionTerminatedEvent.data;
 
   if (!timeMs) {
     return null;
@@ -141,7 +145,13 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawR
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopover>
-      {isJsonFlyoutOpen && <RoundJsonFlyout rawRound={rawRound} onClose={closeJsonFlyout} />}
+      {isJsonFlyoutOpen && (
+        <RoundJsonFlyout
+          executionTerminatedEvent={executionTerminatedEvent}
+          steps={steps}
+          onClose={closeJsonFlyout}
+        />
+      )}
     </>
   );
 };

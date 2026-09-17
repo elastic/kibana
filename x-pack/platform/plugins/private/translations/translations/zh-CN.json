@@ -11952,7 +11952,6 @@
     "xpack.agentBuilder.rerankStep.inferenceIdSelection.service": "服务：{service}",
     "xpack.agentBuilder.rerankStep.label": "重新排名结果",
     "xpack.agentBuilder.round.assistantResponse": "助理响应",
-    "xpack.agentBuilder.round.container": "对话回合",
     "xpack.agentBuilder.round.error.contextExceeded.description": "这段对话超过了最大上下文长度限制。这通常发生在工具返回一个非常大的响应时。再试一次，换个请求，或者重新开始对话。{docsLink}。",
     "xpack.agentBuilder.round.error.contextExceeded.learnMore": "了解详情",
     "xpack.agentBuilder.round.error.generic.description": "在处理您的请求时发生错误。请您查看下方的错误日志以了解详情。",
