@@ -42,7 +42,7 @@ export const useOverviewActivityStats = (): MonitorStatProps[] => {
   ];
 };
 
-const ACTIVITY_CHART_HEIGHT = '220px';
+const ACTIVITY_CHART_HEIGHT = '180px';
 
 export const OverviewActivityChart = () => {
   // Follows the page-level date picker (URL params), defaulting to the overview's
