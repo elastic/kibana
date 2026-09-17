@@ -70,6 +70,8 @@ steps:
     with:
       template_id: investigation
       title: "Alert Triage — {{ event.rule.name }}"
+      access_control:
+        access_mode: public
       metadata:
         status: open
         severity: "{{ event.rule.severity | default: 'medium' }}"
@@ -119,6 +121,9 @@ steps:
         autoCloseConfidenceScoreMinThreshold: "${{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
         connectorIdByFeature: alertzero_alert_triage
         calledByWorker: true
+        # Thread the Investigation conversation id so the agent reasoning is written
+        # directly into it — analyst sees the full classification chain in one place (R3).
+        investigationConversationId: "{{ steps.create_investigation.output.conversation_id }}"
 
   # ---------------------------------------------------------------------------
   # 4. Compute the FP candidate list: verdicts classified as false_positive
@@ -213,7 +218,7 @@ steps:
           eventId: "{{ foreach.item.alert_id }}"
           timelineId: ''
           note: |
-            🤖 **Alert Triage Worker** — [{{ steps.create_investigation.output.conversation_id }}]({{ steps.create_investigation.output.conversation_id }})
+            🤖 **Alert Triage Worker** — [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})
 
             **Verdict:** {{ foreach.item.classification }}
             **Confidence:** {{ foreach.item.confidence_score }}
@@ -297,10 +302,9 @@ steps:
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: >-
-              {{ variables.fp_candidate_ids | size }} alert(s) from rule "{{ event.rule.name }}"
-              were classified as false positives at or above the configured confidence floor
-              ({{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}).
+              {{ variables.fp_candidate_ids | size }} alert(s) from rule "{{ event.rule.name }}" were classified as false positives at or above the configured confidence floor ({{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}).
               Approving this proposal will close them with workflow_reason=false_positive.
+              Investigation: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}
             actionWorkflowId: system-alertzero-action-close-alerts-fp
             actionInput:
               alertIds: "${{ variables.fp_candidate_ids }}"
