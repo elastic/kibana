@@ -41,6 +41,7 @@ const getAttachments = jest.fn().mockReturnValue([alertComment]);
 const useCasesToastMock = useCasesToast as jest.Mock;
 const useCasesAddToNewCaseFlyoutMock = useCasesAddToNewCaseFlyout as jest.Mock;
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
+const openCreateNewCaseFlyout = jest.fn();
 
 // test component to test the hook integration
 const TestComponent: React.FC<AddToExistingCaseModalProps> = (
@@ -91,17 +92,15 @@ describe('use cases add to existing case modal hook', () => {
     return { onSuccess };
   };
 
-  const mockOpenCreateCaseFlyout = jest.fn();
-
   beforeEach(() => {
     dispatch.mockReset();
     AllCasesSelectorModalMock.mockReset();
-    onSuccess.mockReset();
-    mockOpenCreateCaseFlyout.mockReset();
+    openCreateNewCaseFlyout.mockReset();
     useCasesAddToNewCaseFlyoutMock.mockReturnValue({
-      open: mockOpenCreateCaseFlyout,
       close: jest.fn(),
+      open: openCreateNewCaseFlyout,
     });
+    onSuccess.mockReset();
   });
 
   it('should throw if called outside of a cases context', () => {
@@ -183,11 +182,13 @@ describe('use cases add to existing case modal hook', () => {
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
-      expect(mockOpenCreateCaseFlyout).toHaveBeenCalledWith({
-        getAttachments: expect.any(Function),
+      expect(openCreateNewCaseFlyout).toHaveBeenCalledWith({
         headerContent,
+        getAttachments: expect.any(Function),
       });
     });
+    const { getAttachments: flyoutGetAttachments } = openCreateNewCaseFlyout.mock.calls[0][0];
+    expect(flyoutGetAttachments('cases')).toEqual([alertComment]);
     expect(useCasesAddToNewCaseFlyoutMock).toHaveBeenCalledWith(
       expect.objectContaining({ initialValue })
     );
@@ -355,12 +356,12 @@ describe('use cases add to existing case modal hook', () => {
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
-      expect(mockOpenCreateCaseFlyout).toHaveBeenCalledWith({
+      expect(openCreateNewCaseFlyout).toHaveBeenCalledWith({
         getAttachments: expect.any(Function),
       });
     });
 
-    const { getAttachments: flyoutGetAttachments } = mockOpenCreateCaseFlyout.mock.calls[0][0];
+    const { getAttachments: flyoutGetAttachments } = openCreateNewCaseFlyout.mock.calls[0][0];
 
     // the flyout only knows the owner once the case is created; the modal must
     // forward that owner back to the caller's getAttachments instead of the
