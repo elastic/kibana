@@ -474,6 +474,19 @@ describe('AuthenticateAndDeployStep', () => {
           isDuplicate: false,
         },
       ]);
+      // The ECF path consumes the same reconciled list.
+      expect(mockUseEcfDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          instances: [
+            {
+              instanceId: 'guardduty',
+              serviceId: 'guardduty',
+              name: 'AWS GuardDuty',
+              isDuplicate: false,
+            },
+          ],
+        })
+      );
     });
   });
 
