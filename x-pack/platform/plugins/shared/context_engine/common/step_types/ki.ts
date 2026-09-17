@@ -20,6 +20,12 @@ export const MAX_KI_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_KI_ATTRIBUTE_VALUE_LENGTH = 10_000;
 export const MAX_KI_ATTRIBUTE_ARRAY_VALUES = 100;
 export const MAX_KI_ATTRIBUTES = 100;
+export const MAX_KI_REFERENCES = 100;
+export const MAX_KI_REFERENCE_URI_LENGTH = 2048;
+export const MAX_KI_REFERENCE_DESCRIPTION_LENGTH = 2048;
+
+export const KI_REFERENCE_RELATIONS = ['derived_from', 'relates_to', 'supersedes'] as const;
+export const KI_LIFECYCLE_STATUSES = ['active', 'deleted'] as const;
 
 export const aiIndexIdSchema = z
   .string()
@@ -32,6 +38,31 @@ export const kiIdSchema = z
   .min(1)
   .max(MAX_KI_ID_LENGTH)
   .describe('The document id of the knowledge indicator');
+
+export const kiReferenceRelationSchema = z
+  .enum(KI_REFERENCE_RELATIONS)
+  .describe('How the URI relates to this KI');
+export type KiReferenceRelation = z.infer<typeof kiReferenceRelationSchema>;
+
+export const kiLifecycleStatusSchema = z
+  .enum(KI_LIFECYCLE_STATUSES)
+  .describe('Lifecycle status of the KI. Unset reads as active');
+export type KiLifecycleStatus = z.infer<typeof kiLifecycleStatusSchema>;
+
+/** A URI this KI relates to. */
+export const kiReferenceSchema = z.object({
+  uri: z
+    .string()
+    .min(1)
+    .max(MAX_KI_REFERENCE_URI_LENGTH)
+    .describe('The referenced URI, for example index://logs-*'),
+  relation: kiReferenceRelationSchema.optional(),
+  description: z
+    .string()
+    .max(MAX_KI_REFERENCE_DESCRIPTION_LENGTH)
+    .optional()
+    .describe('Why this reference exists'),
+});
 
 /**
  * A Knowledge Indicator (KI) document. Fields mirror the base AI index
@@ -74,10 +105,21 @@ export const kiFieldsSchema = z.object({
     })
     .optional()
     .describe('Arbitrary key-value attributes attached to the KI'),
+  references: z
+    .array(kiReferenceSchema)
+    .max(MAX_KI_REFERENCES)
+    .optional()
+    .describe('URIs this KI relates to'),
+  expires_at: z.iso
+    .datetime({ offset: true })
+    .optional()
+    .describe('Expiry date in ISO 8601. Leave unset and the KI never expires'),
 });
 
-/** The subset of KI fields that can be changed by an update. */
-export const kiPartialFieldsSchema = kiFieldsSchema.partial();
+/** The subset of KI fields that can be changed by an update. A null `expires_at` clears the expiry. */
+export const kiPartialFieldsSchema = kiFieldsSchema.partial().extend({
+  expires_at: kiFieldsSchema.shape.expires_at.nullable(),
+});
 
 export type KiFields = z.infer<typeof kiFieldsSchema>;
 export type KiPartialFields = z.infer<typeof kiPartialFieldsSchema>;
