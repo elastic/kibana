@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -34,6 +35,7 @@ const kqlValuesClause = (field: string, values: Array<string | number>): string 
  */
 export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefined {
   const { dataViews } = useKibana<ClientPluginsStart>().services;
+  const { euiTheme } = useEuiTheme();
   const { locations } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
 
@@ -66,12 +68,12 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       filter: { type: 'kibana_query', query: kqlClauses, language: 'kuery' },
       timeField: '@timestamp',
       label: alertsAnnotationLabel,
-      color: '#E7664C',
+      color: euiTheme.colors.accent,
       icon: 'alert',
     };
 
     return [{ dataView: alertsDataView, annotations: [annotation] }];
-  }, [alertsDataView, kqlClauses]);
+  }, [alertsDataView, kqlClauses, euiTheme.colors.accent]);
 }
 
 const alertsAnnotationLabel = i18n.translate(
