@@ -65,18 +65,19 @@ const resolvePanels = (
           const asEntry = item as {
             isSeparator?: boolean;
             panel?: unknown;
+            href?: string;
             onClick?: (e: React.MouseEvent) => void;
           };
-          const { onClick } = asEntry;
-          // Only wrap items that are already clickable.
+          const { onClick, href } = asEntry;
+          // Only wrap items that are actionable (have onClick or href).
           // Adding an onClick to static items causes EUI to incorrectly render them as interactive buttons.
-          if (!closeOnItemClick || asEntry.isSeparator || asEntry.panel != null || !onClick) {
+          if (!closeOnItemClick || asEntry.isSeparator || asEntry.panel != null || (!onClick && !href)) {
             return item;
           }
           return {
             ...item,
             onClick: (event: React.MouseEvent<Element, globalThis.MouseEvent>) => {
-              onClick(event);
+              onClick?.(event);
               closePopover();
             },
           };

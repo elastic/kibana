@@ -160,6 +160,19 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
     expect(screen.getByRole('dialog', { name: 'Take action menu' })).toBeInTheDocument();
   });
 
+  it('clicking an href item closes the menu', async () => {
+    const panels: FlyoutFooterMenuPanel[] = [
+      { id: 0, items: [{ name: 'Go there', href: 'https://example.com', target: '_blank' }] },
+    ];
+
+    const { container } = renderMenu({ panels });
+
+    await user.click(screen.getByRole('button', { name: /take action/i }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Go there' }));
+
+    expect(container.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
+  });
+
   it('clicking an item that opens a nested panel does not close the menu', async () => {
     renderMenu({ panels: NESTED_PANELS });
 
