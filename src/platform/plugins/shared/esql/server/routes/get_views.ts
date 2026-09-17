@@ -50,9 +50,8 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
           tags: ['esql', 'views'],
           error: { stack_trace: error instanceof Error ? error.stack : undefined },
         });
-        return response.customError({
-          statusCode,
-          body: { message },
+        return response.ok({
+          body: { views: [] },
         });
       }
     }

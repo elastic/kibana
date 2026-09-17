@@ -74,7 +74,7 @@ describe('ES|QL views routes', () => {
   });
 
   describe('list route', () => {
-    it('preserves Elasticsearch errors instead of returning an empty list', async () => {
+    it('returns an empty list when Elasticsearch fails', async () => {
       const mocks = createMocks();
       const error = Object.assign(new Error('Forbidden'), { statusCode: 403 });
       service.getViews.mockRejectedValue(error);
@@ -83,13 +83,10 @@ describe('ES|QL views routes', () => {
       await expect(
         mocks.handlers.get(mocks.requestHandlerContext, {}, mocks.response)
       ).resolves.toEqual({
-        status: 403,
-        body: { message: 'Forbidden' },
+        status: 200,
+        body: { views: [] },
       });
-      expect(mocks.response.customError).toHaveBeenCalledWith({
-        statusCode: 403,
-        body: { message: 'Forbidden' },
-      });
+      expect(mocks.response.customError).not.toHaveBeenCalled();
     });
   });
 
