@@ -283,6 +283,13 @@ describe('isRoundDerivedEventId', () => {
     expect(isRoundDerivedEventId('round-42::step::12')).toBe(true);
   });
 
+  it('recognizes the terminal ids of interrupted executions (initial and resume)', () => {
+    expect(isRoundDerivedEventId('round-1::execution_failed')).toBe(true);
+    expect(isRoundDerivedEventId('round-1::execution_aborted')).toBe(true);
+    expect(isRoundDerivedEventId('round-1::execution::3::execution_failed')).toBe(true);
+    expect(isRoundDerivedEventId('round-1::execution::3::execution_aborted')).toBe(true);
+  });
+
   it('rejects ids that are not round-derived', () => {
     expect(isRoundDerivedEventId('some-additive-error')).toBe(false);
     expect(isRoundDerivedEventId('::user_message::follow-up')).toBe(false);

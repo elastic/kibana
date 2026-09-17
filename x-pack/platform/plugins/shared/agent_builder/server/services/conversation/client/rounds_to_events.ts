@@ -30,6 +30,8 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   userMessage: '::user_message',
   executionStarted: '::execution_started',
   executionTerminated: '::execution_terminated',
+  executionFailed: '::execution_failed',
+  executionAborted: '::execution_aborted',
   execution: '::execution',
   stepPrefix: '::step::',
   promptResponse: '::prompt_response',
@@ -39,6 +41,8 @@ const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
   ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage,
   ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted,
   ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.executionFailed,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.executionAborted,
   ROUND_DERIVED_EVENT_ID_SUFFIXES.execution,
 ];
 
