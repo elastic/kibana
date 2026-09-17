@@ -317,6 +317,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       {showMiSection && (
         <ManagedIntegrationsSection
           serviceCount={miServiceIds.length}
+          serviceIds={miServiceIds}
+          serviceVars={serviceVars}
           showIdentityFederation={showIdentityFederation}
           onDeploy={handleDeployClick}
           isDeploying={isDeploying}
