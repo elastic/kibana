@@ -14,7 +14,6 @@ import type {
   ConverseInput,
   ChatAgentEvent,
   AgentConfigurationOverrides,
-  ConversationAction,
   AgentExecutionMode,
   ChatEvent,
   ExecutionStatus,
@@ -49,6 +48,7 @@ import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 import type { AiIndexResolver } from './ai_index_resolver';
+import type { AgentRegistry } from './registry';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
@@ -312,6 +312,10 @@ export interface AgentHandlerContext {
    */
   subAgentExecutor: SubAgentExecutor;
   /**
+   * Agent registry scoped to the current user
+   */
+  agentRegistry: AgentRegistry;
+  /**
    * Conversation store client scoped to the current user. Prefer this over
    * issuing raw ES queries against the conversation index.
    */
@@ -393,10 +397,6 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
-  /**
-   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
-   */
-  action?: ConversationAction;
   /**
    * The execution ID for this run. Used for sub-agent parent tracking.
    */

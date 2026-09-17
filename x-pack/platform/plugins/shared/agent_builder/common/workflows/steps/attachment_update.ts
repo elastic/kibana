@@ -26,6 +26,10 @@ const InputSchema = z.object({
   description: z.string().max(1024).optional().meta({
     description: 'Optional new description for the attachment.',
   }),
+  render_inline: z.boolean().optional().meta({
+    description:
+      'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it. Defaults to false.',
+  }),
 });
 
 const OutputSchema = z.object({
