@@ -135,6 +135,7 @@ describe('forget tool', () => {
     const result = await run();
 
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
+    expect(get).toHaveBeenCalledWith('support', 'space-1');
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'ai-index-idx-support',

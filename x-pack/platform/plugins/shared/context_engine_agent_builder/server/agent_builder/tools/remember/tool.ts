@@ -127,7 +127,7 @@ export const createRememberTool = ({
         getSecurityStart,
       });
 
-      const aiIndex = await (await getAiIndexService()).get(params.aiIndexId);
+      const aiIndex = await (await getAiIndexService()).get(params.aiIndexId, spaceId);
       if (!aiIndex.memory_enabled) {
         throw new Error(`AI index '${params.aiIndexId}' does not have memory enabled.`);
       }

@@ -146,6 +146,7 @@ describe('remember tool', () => {
     const result = await run(params, 'conversation-1');
 
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
+    expect(get).toHaveBeenCalledWith('support', 'space-1');
     expect(index).toHaveBeenCalledWith({
       index: 'ai-index-idx-support',
       id: 'logical-memory-id',
