@@ -10,6 +10,7 @@
 import type { Locator } from '../../../..';
 import { expect } from '../..';
 import { resolveSelector } from '../../utils';
+import { dataGridHeaderCellContentSelector } from '../utils/eui_selectors';
 import { type DataViewOptions } from './base';
 import { SaveMixin } from './save';
 
@@ -880,9 +881,7 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   getDocHeaderLabels(): Locator {
-    return this.page.locator(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
-    );
+    return this.page.locator(dataGridHeaderCellContentSelector());
   }
 
   async getDocHeader(): Promise<string[]> {
