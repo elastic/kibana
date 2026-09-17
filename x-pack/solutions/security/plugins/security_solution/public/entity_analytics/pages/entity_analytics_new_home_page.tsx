@@ -90,32 +90,28 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         <div
           css={css`
             padding-block-start: ${euiTheme.size.s};
-            margin-inline-start: -${euiTheme.size.s};
             display: flex;
             flex-direction: column;
             height: 100%;
           `}
         >
-          <EntitySearchBar
-            dataView={dataView}
-            timeRange={timeRange}
-            onTimeRangeChange={setTimeRange}
-          />
-          <EuiSpacer size="s" />
-          <div
-            css={css`
-              padding-inline-start: ${euiTheme.size.s};
-            `}
-          >
-            <EntityFiltersBar
-              filters={entityFilters}
-              onFiltersChange={setEntityFilters}
-              spaceId={spaceId}
-              view={viewBy}
-              esFilter={esFilter}
-              watchlistNames={watchlistNames}
+          {/* SiemSearchBar has internal left padding; pull it left so its content aligns with the page edge */}
+          <div css={css`margin-inline-start: -${euiTheme.size.s};`}>
+            <EntitySearchBar
+              dataView={dataView}
+              timeRange={timeRange}
+              onTimeRangeChange={setTimeRange}
             />
           </div>
+          <EuiSpacer size="s" />
+          <EntityFiltersBar
+            filters={entityFilters}
+            onFiltersChange={setEntityFilters}
+            spaceId={spaceId}
+            view={viewBy}
+            esFilter={esFilter}
+            watchlistNames={watchlistNames}
+          />
         </div>
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
