@@ -458,6 +458,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-alert');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
       trigger_type: 'automatic',
       context: alertContext,
