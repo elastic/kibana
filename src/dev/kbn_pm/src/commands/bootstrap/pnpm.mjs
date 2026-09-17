@@ -122,7 +122,11 @@ export async function pnpmInstallDeps(log, { offline, quiet, frozenLockfile, for
   }
 
   const args = ['install', '--config.confirmModulesPurge=false'];
-  if (frozenLockfile) args.push('--frozen-lockfile');
+  if (frozenLockfile) {
+    args.push('--frozen-lockfile');
+  } else {
+    args.push('--no-frozen-lockfile');
+  }
   if (offline) args.push('--offline');
   if (quiet) args.push('--reporter=silent');
 

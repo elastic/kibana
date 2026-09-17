@@ -32,7 +32,7 @@ overrides:
   '@types/react': 18.2.79
   '@types/react-dom': 18.2.25
   '@typescript-eslint/utils': 8.60.0
-  adm-zip: 0.6.0
+  adm-zip: 0.6.1
   apache-arrow: 20.x - 21.x
   baseline-browser-mapping: 2.9.14
   cheerio: 1.0.0-rc.12
@@ -192,8 +192,8 @@ importers:
         specifier: 8.7.0
         version: 8.7.0
       '@elastic/esql':
-        specifier: 4.24.0
-        version: 4.24.0
+        specifier: 4.25.0
+        version: 4.25.0
       '@elastic/eui':
         specifier: 121.0.0
         version: 121.0.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
@@ -1868,6 +1868,9 @@ importers:
       '@kbn/esql':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/esql
+      '@kbn/esql-browser':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/esql/kbn-esql-browser
       '@kbn/esql-composer':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-esql-composer
@@ -4083,8 +4086,8 @@ importers:
         specifier: 12.11.1
         version: 12.11.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       adm-zip:
-        specifier: 0.6.0
-        version: 0.6.0
+        specifier: 0.6.1
+        version: 0.6.1
       ai:
         specifier: 5.0.190
         version: 5.0.190(zod@4.4.3)
@@ -4260,8 +4263,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       graphql:
-        specifier: 16.13.2
-        version: 16.13.2
+        specifier: 17.0.2
+        version: 17.0.2
       handlebars:
         specifier: 4.7.9
         version: 4.7.9
@@ -4311,8 +4314,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       joi:
-        specifier: 18.2.5
-        version: 18.2.5
+        specifier: 18.2.9
+        version: 18.2.9
       joi-to-json:
         specifier: 5.0.0
         version: 5.0.0
@@ -4412,6 +4415,9 @@ importers:
       mustache:
         specifier: 4.2.0
         version: 4.2.0
+      mysql2:
+        specifier: 3.24.3
+        version: 3.24.3(@types/node@24.10.13)
       node-diff3:
         specifier: 3.1.2
         version: 3.1.2
@@ -7642,6 +7648,8 @@ importers:
 
   src/platform/packages/shared/deeplinks/workplace_ai: {}
 
+  src/platform/packages/shared/esql/kbn-esql-browser: {}
+
   src/platform/packages/shared/home/sample_data_card: {}
 
   src/platform/packages/shared/home/sample_data_tab: {}
@@ -7715,8 +7723,8 @@ importers:
   src/platform/packages/shared/kbn-connector-specs:
     dependencies:
       graphql:
-        specifier: ^16.13.1
-        version: 16.13.2
+        specifier: ^17.0.2
+        version: 17.0.2
 
   src/platform/packages/shared/kbn-content-management-utils: {}
 
@@ -10701,29 +10709,29 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.24.0':
-    resolution: {integrity: sha512-WtRUz6FL8RscXGGxuBySJoT19yJtG+eqykfVAOSv4fDVRKPyNKhh52FXJ8rmeLZcEsCHjVJ6StSedGjMJ2A03w==}
+  '@elastic/esql-ast@4.25.0':
+    resolution: {integrity: sha512-ChyULZBOPv1yZn0Bg3KiucXc660rsUTJ/Sa9VauvgbAtFzFNzpe9Pxl1LfK5rc4nsIxhVUVnOYUrktatcXVyag==}
 
-  '@elastic/esql-definitions@4.24.0':
-    resolution: {integrity: sha512-C546jdmNynpxuYdoOOxDgy2kX80EQoy93ZWU9xggNfZ29JF3Qefg0bp2IizrMRM3qy1lUin0Wj6rcKcWauXOcA==}
+  '@elastic/esql-definitions@4.25.0':
+    resolution: {integrity: sha512-4/rn0qt1y5O/pLVLwGlGYOKUiG68uF2kOWNwphot8CLbQP7umgpr9E1kwFHM1eVRn2lc4/HFqS5Gng+XcrUBPQ==}
 
   '@elastic/esql-grammar@4.22.0':
     resolution: {integrity: sha512-mcapI2ONGgzebyI10DJ8ssl71AVcd6hp4q69mH32JocgzZ0p7DfEZm8VjtFEL+0s0XhjJR7cv3A85Qhh2/d3og==}
 
-  '@elastic/esql-parser@4.24.0':
-    resolution: {integrity: sha512-anXoCQ7q6e61nw1xf0gnT9ZM8ZyoWIT8PpYoEk8023C+fufimLBfxGBdTcN4cmW2IUjfQs4k3rvCBaDvPnjmQw==}
+  '@elastic/esql-parser@4.25.0':
+    resolution: {integrity: sha512-0rCWXNYIPaka5mJfPFk2rk80rg9XKQQdX4rpapnUJvnqegAhGaMqmIUYktl8IPdqeFi/n0/Lr6LkTnO7wJtMtg==}
 
   '@elastic/esql-promql-grammar@4.22.0':
     resolution: {integrity: sha512-XckBRo/9mFHaeXsOqIUkU/UUTCdZEg2JP4wHtst0VQsshX34+er2j75aCx96fj8L3lu1xAtaTjqZlTNXXT3mxQ==}
 
-  '@elastic/esql-traversal@4.24.0':
-    resolution: {integrity: sha512-QrgXjuvWiPVFvp42i4Gd0XoONNChYrQzbkwq7jPAYosgf193HR5nf8TiNtPhSmjY1AEXQeLNWTGhWSSK17Q7Ag==}
+  '@elastic/esql-traversal@4.25.0':
+    resolution: {integrity: sha512-srfRsaVkzILzJpG72HzDhdHdc1tuFkaXn4ywnBPZXcPo+rKA418fDAQMM4E2QgKFb2UFSkeHi3n+6UyXUQc6wQ==}
 
   '@elastic/esql-types@4.22.0':
     resolution: {integrity: sha512-bbmdKK2+Qr0TwBDIJeME6ABy5hK6JjiM9NaUac4GlZI1N1kic1MlDeUEDjp8KZLa5xfvIEuF7d+YP4+6AASjVA==}
 
-  '@elastic/esql@4.24.0':
-    resolution: {integrity: sha512-I2CEWqd64FPGwaGeJjqIIn06tkFNDByG3teT6zSs/U9QqsZ9ajr2dQopxaHlUWyTpaRfUwpK5FVuA9X1gF8ToQ==}
+  '@elastic/esql@4.25.0':
+    resolution: {integrity: sha512-4DFggfZsEYslfylmGniKC4yeTO5wGeLqqVEGHaxEQhVg2Ns1eWKDOad4FGopJkRtX5nwcmXwIwyPpPBiKhG2Uw==}
 
   '@elastic/eui-illustrations@1.0.2':
     resolution: {integrity: sha512-gYK9mHdGm/P7wbf6yhYo17qoP61IlUcwVwIDyOSHqx89TymSn9AyVZzbgjwmGdaLFNfgM+RKvg+hfTB7Unm+Gw==}
@@ -15767,8 +15775,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  adm-zip@0.6.0:
-    resolution: {integrity: sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==}
+  adm-zip@0.6.1:
+    resolution: {integrity: sha512-Xwrja8nx9e5o2N1my4DsKCeKpdrnACyr1wtbPxBDgGzKzKyE9kRtBFA8mWldI+RVlD7CBZNWY/wQ2+ydwOR6kQ==}
     engines: {node: '>=14.0'}
 
   after-all-results@2.0.0:
@@ -16138,6 +16146,10 @@ packages:
 
   aws-sign2@0.7.0:
     resolution: {integrity: sha512-08kcGqnYf/YmjoRhfxyu+CLxBjUtHLXLXX/vUfx9l2LYzG3c1m61nrpyFUZI6zeS+Li/wWMMidD9KgrqtGq3mA==}
+
+  aws-ssl-profiles@1.1.2:
+    resolution: {integrity: sha512-NZKeq9AfyQvEeNlN0zSYAaWrmBffJh3IELMZfRpJVWgrpEbtEpnjvzqBPf+mxoI287JohRDoa+/nsfqqiZmF6g==}
+    engines: {node: '>= 6.0.0'}
 
   aws4@1.13.2:
     resolution: {integrity: sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==}
@@ -18659,8 +18671,8 @@ packages:
   fast-string-width@3.0.2:
     resolution: {integrity: sha512-gX8LrtNEI5hq8DVUfRQMbr5lpaS4nMIWV+7XEbXk2b8kiQIizgnlr12B4dA3ZEx3308ze0O4Q1R+cHts8kyUJg==}
 
-  fast-uri@3.1.7:
-    resolution: {integrity: sha512-dOvZVzjdZdz7phd9v6jCbwxrBW3fK6n8Rc0CtdmM4bumzMnxywBYhuph6J819RRw/ku+rLbelwfMunktuzVVHg==}
+  fast-uri@3.1.8:
+    resolution: {integrity: sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg==}
 
   fast-wrap-ansi@0.2.2:
     resolution: {integrity: sha512-7F2Fl+TjRSenLqlU3UjSH0iyqopqoZIu7eZVpEirP2g1GtWa2G/ecEmBdgz31+Mxr+ELclgg6sokpSFIQiZ02Q==}
@@ -18983,6 +18995,9 @@ packages:
     engines: {node: '>=20.0.0'}
     hasBin: true
 
+  generate-function@2.3.1:
+    resolution: {integrity: sha512-eeB5GfMNeevm/GRYq20ShmsaGcmI81kIX2K9XQx5miC8KdHaC6Jm0qQ8ZNeGOi7wYB8OsdxKs+Y2oVuTFuVwKQ==}
+
   generator-function@2.0.1:
     resolution: {integrity: sha512-SFdFmIJi+ybC0vjlHN0ZGVGHc3lgE0DxPAT0djjVg+kjOnSqclqmj0KQ7ykTOLP6YxoqOvuAODGdcHJn+43q3g==}
     engines: {node: '>= 0.4'}
@@ -19204,6 +19219,10 @@ packages:
   graphql@16.13.2:
     resolution: {integrity: sha512-5bJ+nf/UCpAjHM8i06fl7eLyVC9iuNAjm9qzkiu2ZGhM0VscSvS6WDPfAwkdkBuoXGM9FJSbKl6wylMwP9Ktig==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
+
+  graphql@17.0.2:
+    resolution: {integrity: sha512-FRWbddMxfkjiB7z+aQDWIR+E34xo9I8c9mtK2RPv8PmMzKRvrdsreHL/Ui/TmwHJfhHChEtsFPyMHKI+xuarQQ==}
+    engines: {node: ^22.0.0 || ^24.0.0 || ^25.0.0 || >=26.0.0}
 
   gulp-brotli@3.0.0:
     resolution: {integrity: sha512-AkGR+FRn4Nrf9Ocx8/WXgNNX+owk4FN4xU4kRrso41DWWd9v1KXO8EyG1cGcwt4364Ax68b7ANcP9Em+/RM2OQ==}
@@ -20004,6 +20023,9 @@ packages:
   is-promise@4.0.0:
     resolution: {integrity: sha512-hvpoI6korhJMnej285dSg6nu1+e6uxs7zG3BYAm5byqDsgJNWwxzM6z6iZiAgQR4TJ30JmBTOwqZUw3WlyH3AQ==}
 
+  is-property@1.0.2:
+    resolution: {integrity: sha512-Ks/IoX00TtClbGQr4TWXemAnktAQvYB7HzcCxDGqEZU6oCmb2INHuOoKxbtR+HFkmYWBKv/dOZtGRiAjDhj92g==}
+
   is-regex@1.2.1:
     resolution: {integrity: sha512-MjYsKHO5O7mCsmRGxWcLWheFqN9DJ/2TmngvjKXihe6efViPqc274+Fx/4fYj/r03+ESvBdTXK0V6tA3rgez1g==}
     engines: {node: '>= 0.4'}
@@ -20317,11 +20339,11 @@ packages:
   joi-to-json@5.0.0:
     resolution: {integrity: sha512-G1pJKCtgRYwBRgMQt/wkZ2NsDY/Vsx339oN2qPwiIbAOysw1bnrNUWoTGTelIxXBGFOW4o4oH4GrRNBoWeFPfw==}
 
-  joi@17.13.7:
-    resolution: {integrity: sha512-MF80Dm5Y2veNy8QWVx9Bj3ui4mo7+VPSPsR1M+oaHXV0Gx6zGX9a2F+OZG3Blby9tOlzU9Rs5FUimlEhbKtfnQ==}
+  joi@17.13.8:
+    resolution: {integrity: sha512-iPKOGmiRw1jxf/JOPwxmCcUQAOdF359mdzYiP2DJ+TMX0YK2zjK3D+zYOaGjpumWxOFF/l2xVWjRVK5bGSLdEw==}
 
-  joi@18.2.5:
-    resolution: {integrity: sha512-+gEA7rLfaNWx9JzawWPrPetSZwT16NUqHtECDgjyAJreXcs4TM7tx2Pa+VVJJK0YHM83ybrVdaT6UekHH50FJQ==}
+  joi@18.2.9:
+    resolution: {integrity: sha512-2mD929bUVKUhOLQQEVhlf6EZ0Mlo0DeRb5MO7cViR9AXLtBauuccEtB1py9Ocxpo/P7ucnh442iY/iOwrh3IQw==}
     engines: {node: '>= 20'}
 
   jora@1.0.0-beta.8:
@@ -20926,6 +20948,10 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
+  lru.min@1.1.5:
+    resolution: {integrity: sha512-5J9ysMYUpYIg9RF2vJpy9SinEmSviFSe0GyPpCQ4L5QSkLAgeLXlTAOu2ZwWUU5m+0SBl6gUU1R1ZQB3aKypfA==}
+    engines: {bun: '>=1.0.0', deno: '>=1.30.0', node: '>=8.0.0'}
+
   luxon@1.28.1:
     resolution: {integrity: sha512-gYHAa180mKrNIUJCbwpmD0aTu9kV0dREDrwNnuyFAsO1Wt0EVYSZelPnJlbj9HplzXX/YWXHFTL45kvZ53M0pw==}
 
@@ -21501,6 +21527,16 @@ packages:
   mute-stream@3.0.0:
     resolution: {integrity: sha512-dkEJPVvun4FryqBmZ5KhDo0K9iDXAwn08tMLDinNdRBNPcYEDiWYysLcc6k3mjTMlbP9KyylvRpd4wFtwrT9rw==}
     engines: {node: ^20.17.0 || >=22.9.0}
+
+  mysql2@3.24.3:
+    resolution: {integrity: sha512-OKfWHkMAg9v06neq8FmSyhbxPQKABN9PAW5G9/bDTXzJBO5xXtkKL0V27vju7HQWk9UD4Od5BZsvCtBTB1CPEw==}
+    engines: {node: '>= 8.0'}
+    peerDependencies:
+      '@types/node': 24.10.13
+
+  named-placeholders@1.1.6:
+    resolution: {integrity: sha512-Tz09sEL2EEuv5fFowm419c1+a/jSMiBjI9gHxVLrVdbUkkNUUfjsVYs9pVZu5oCon/kmRh9TfLEObFtkVxmY0w==}
+    engines: {node: '>=8.0.0'}
 
   nano-css@5.6.2:
     resolution: {integrity: sha512-+6bHaC8dSDGALM1HJjOHVXpuastdu2xFoZlC77Jh4cg+33Zcgm+Gxd+1xsnpZK14eyHObSp82+ll5y3SX75liw==}
@@ -22662,8 +22698,8 @@ packages:
   protocol-buffers-schema@3.6.1:
     resolution: {integrity: sha512-VG2K63Igkiv9p76tk1lilczEK1cT+kCjKtkdhw1dQZV3k3IXJbd3o6Ho8b9zJZaHSnT2hKe4I+ObmX9w6m5SmQ==}
 
-  proxy-addr@2.0.7:
-    resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
+  proxy-addr@2.0.8:
+    resolution: {integrity: sha512-5nnx0yGyVUcY6t9RnWcARWtwT9F1D8O9rt08htPvnd49W1IgZtmLkhu9WfMzQj1cFxjHIO6connUNVW5k7AVyQ==}
     engines: {node: '>= 0.10'}
 
   proxy-agent-negotiate@1.1.0:
@@ -24180,6 +24216,10 @@ packages:
   sql-escape-string@1.1.0:
     resolution: {integrity: sha512-/kqO4pLZSLfV0KsBM2xkVh2S3GbjJJone37d7gYwLyP0c+REh3vnmkhQ7VwNrX76igC0OhJWpTg0ukkdef9vvA==}
 
+  sql-escaper@1.5.1:
+    resolution: {integrity: sha512-4toX5E1fQbBrpfXidaHnF0669nkAdETeIPTs2SUjxxD7RRIs9ICG4gtpmfc68JCEKehsdwLFqBu9VlQqZ1P1gg==}
+    engines: {bun: '>=1.0.0', deno: '>=2.0.0', node: '>=12.0.0'}
+
   sql-summary@1.0.1:
     resolution: {integrity: sha512-IpCr2tpnNkP3Jera4ncexsZUp0enJBLr+pHCyTweMUBrbJsTgQeLWx1FXLhoBj/MvcnUQpkgOn2EY8FKOkUzww==}
 
@@ -24628,6 +24668,9 @@ packages:
 
   third-party-web@0.29.2:
     resolution: {integrity: sha512-fegtha91tq2DHphyoiBXVHjVi2YG9zFaRnboT9C28tO1en9Y3wJsfspuy40F+u5wl3hHVbw7cnd1b67kEGHb8g==}
+
+  third-party-web@0.30.0:
+    resolution: {integrity: sha512-p+PfyL5U0ediGzvwPzMSdD9MnC8rHW6nWJJVLIQvqN7RsSqfaZ+7n4c9GILqH36EYR0eXB9CzAeCRnKFr/9uJg==}
 
   thread-stream@2.7.0:
     resolution: {integrity: sha512-qQiRWsU/wvNolI6tbbCKd9iKaTnCXsTwVxhhKM6nctPdujTyztjlbUkUTUymidWcMnZ5pWR0ej4a0tjsW021vw==}
@@ -27511,27 +27554,27 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.24.0':
+  '@elastic/esql-ast@4.25.0':
     dependencies:
-      '@elastic/esql-definitions': 4.24.0
+      '@elastic/esql-definitions': 4.25.0
       '@elastic/esql-grammar': 4.22.0
       '@elastic/esql-promql-grammar': 4.22.0
       '@elastic/esql-types': 4.22.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.24.0': {}
+  '@elastic/esql-definitions@4.25.0': {}
 
   '@elastic/esql-grammar@4.22.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-parser@4.24.0':
+  '@elastic/esql-parser@4.25.0':
     dependencies:
-      '@elastic/esql-ast': 4.24.0
-      '@elastic/esql-definitions': 4.24.0
+      '@elastic/esql-ast': 4.25.0
+      '@elastic/esql-definitions': 4.25.0
       '@elastic/esql-promql-grammar': 4.22.0
-      '@elastic/esql-traversal': 4.24.0
+      '@elastic/esql-traversal': 4.25.0
       '@elastic/esql-types': 4.22.0
       antlr4: 4.13.2
       tslib: 2.8.1
@@ -27541,23 +27584,23 @@ snapshots:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.24.0':
+  '@elastic/esql-traversal@4.25.0':
     dependencies:
-      '@elastic/esql-ast': 4.24.0
+      '@elastic/esql-ast': 4.25.0
       '@elastic/esql-types': 4.22.0
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/esql-types@4.22.0': {}
 
-  '@elastic/esql@4.24.0':
+  '@elastic/esql@4.25.0':
     dependencies:
-      '@elastic/esql-ast': 4.24.0
-      '@elastic/esql-definitions': 4.24.0
+      '@elastic/esql-ast': 4.25.0
+      '@elastic/esql-definitions': 4.25.0
       '@elastic/esql-grammar': 4.22.0
-      '@elastic/esql-parser': 4.24.0
+      '@elastic/esql-parser': 4.25.0
       '@elastic/esql-promql-grammar': 4.22.0
-      '@elastic/esql-traversal': 4.24.0
+      '@elastic/esql-traversal': 4.25.0
       '@elastic/esql-types': 4.22.0
       '@elastic/pretty-printer': 4.22.0
       antlr4: 4.13.2
@@ -27655,7 +27698,7 @@ snapshots:
 
   '@elastic/monaco-esql@4.24.0(monaco-editor@0.44.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.24.0
+      '@elastic/esql-definitions': 4.25.0
       monaco-editor: 0.44.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -27743,7 +27786,7 @@ snapshots:
 
   '@elastic/prismjs-esql@4.23.0':
     dependencies:
-      '@elastic/esql-definitions': 4.24.0
+      '@elastic/esql-definitions': 4.25.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
@@ -30732,7 +30775,7 @@ snapshots:
   '@paulirish/trace_engine@0.0.65':
     dependencies:
       legacy-javascript: 0.0.1
-      third-party-web: 0.29.2
+      third-party-web: 0.30.0
 
   '@pdf-lib/standard-fonts@1.0.0':
     dependencies:
@@ -32345,7 +32388,7 @@ snapshots:
     dependencies:
       '@hapi/hapi': 21.4.9
       '@types/node': 24.10.13
-      joi: 17.13.7
+      joi: 17.13.8
 
   '@types/has-ansi@3.0.0': {}
 
@@ -33358,7 +33401,7 @@ snapshots:
 
   acorn@8.18.0: {}
 
-  adm-zip@0.6.0: {}
+  adm-zip@0.6.1: {}
 
   after-all-results@2.0.0: {}
 
@@ -33428,7 +33471,7 @@ snapshots:
   ajv@8.20.0:
     dependencies:
       fast-deep-equal: 3.1.3
-      fast-uri: 3.1.7
+      fast-uri: 3.1.8
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
@@ -33727,6 +33770,8 @@ snapshots:
       possible-typed-array-names: 1.1.0
 
   aws-sign2@0.7.0: {}
+
+  aws-ssl-profiles@1.1.2: {}
 
   aws4@1.13.2: {}
 
@@ -34471,7 +34516,7 @@ snapshots:
   chromedriver@152.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
       '@testim/chrome-version': 1.1.4
-      adm-zip: 0.6.0
+      adm-zip: 0.6.1
       axios: 1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       compare-versions: 6.1.1
       proxy-agent: 8.0.2(supports-color@10.2.2)
@@ -36621,7 +36666,7 @@ snapshots:
       on-finished: 2.4.1
       parseurl: 1.3.3
       path-to-regexp: 0.1.13
-      proxy-addr: 2.0.7
+      proxy-addr: 2.0.8
       qs: 6.16.0
       range-parser: 1.2.1
       safe-buffer: 5.2.1
@@ -36656,7 +36701,7 @@ snapshots:
       on-finished: 2.4.1
       once: 1.4.0
       parseurl: 1.3.3
-      proxy-addr: 2.0.7
+      proxy-addr: 2.0.8
       qs: 6.16.0
       range-parser: 1.3.0
       router: 2.2.0(supports-color@10.2.2)
@@ -36751,7 +36796,7 @@ snapshots:
     dependencies:
       fast-string-truncated-width: 3.0.3
 
-  fast-uri@3.1.7: {}
+  fast-uri@3.1.8: {}
 
   fast-wrap-ansi@0.2.2:
     dependencies:
@@ -37188,6 +37233,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  generate-function@2.3.1:
+    dependencies:
+      is-property: 1.0.2
+
   generator-function@2.0.1: {}
 
   gensync@1.0.0-beta.2: {}
@@ -37450,6 +37499,8 @@ snapshots:
   graphemer@1.4.0: {}
 
   graphql@16.13.2: {}
+
+  graphql@17.0.2: {}
 
   gulp-brotli@3.0.0:
     dependencies:
@@ -38361,6 +38412,8 @@ snapshots:
 
   is-promise@4.0.0: {}
 
+  is-property@1.0.2: {}
+
   is-regex@1.2.1:
     dependencies:
       call-bound: 1.0.4
@@ -38853,7 +38906,7 @@ snapshots:
       combinations: 1.0.0
       lodash: 4.18.1
 
-  joi@17.13.7:
+  joi@17.13.8:
     dependencies:
       '@hapi/hoek': 9.3.0
       '@hapi/topo': 5.1.0
@@ -38861,7 +38914,7 @@ snapshots:
       '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
 
-  joi@18.2.5:
+  joi@18.2.9:
     dependencies:
       '@hapi/address': 5.1.1
       '@hapi/formula': 3.0.2
@@ -39520,6 +39573,8 @@ snapshots:
       yallist: 4.0.0
 
   lru-cache@7.18.3: {}
+
+  lru.min@1.1.5: {}
 
   luxon@1.28.1: {}
 
@@ -40390,6 +40445,21 @@ snapshots:
   mute-stream@0.0.8: {}
 
   mute-stream@3.0.0: {}
+
+  mysql2@3.24.3(@types/node@24.10.13):
+    dependencies:
+      '@types/node': 24.10.13
+      aws-ssl-profiles: 1.1.2
+      generate-function: 2.3.1
+      iconv-lite: 0.7.3
+      long: 5.3.2
+      lru.min: 1.1.5
+      named-placeholders: 1.1.6
+      sql-escaper: 1.5.1
+
+  named-placeholders@1.1.6:
+    dependencies:
+      lru.min: 1.1.5
 
   nano-css@5.6.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
@@ -41643,7 +41713,7 @@ snapshots:
 
   protocol-buffers-schema@3.6.1: {}
 
-  proxy-addr@2.0.7:
+  proxy-addr@2.0.8:
     dependencies:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
@@ -43501,6 +43571,8 @@ snapshots:
 
   sql-escape-string@1.1.0: {}
 
+  sql-escaper@1.5.1: {}
+
   sql-summary@1.0.1: {}
 
   sql.js@1.14.2: {}
@@ -44086,6 +44158,8 @@ snapshots:
       tslib: 2.8.1
 
   third-party-web@0.29.2: {}
+
+  third-party-web@0.30.0: {}
 
   thread-stream@2.7.0:
     dependencies:
