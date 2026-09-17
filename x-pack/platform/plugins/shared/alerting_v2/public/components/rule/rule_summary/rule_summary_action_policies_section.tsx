@@ -6,13 +6,18 @@
  */
 
 import { FlyoutAccordion } from '@kbn/flyout-sections';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { UserCapabilities } from '../../../services/user_capabilities';
 import { ActionPoliciesArtifactsSubsection } from '../../rule_details/overview/artifacts/action_policies_artifacts_subsection';
-import type { RuleSummarySectionProps } from '../types';
+import { useRuleSummary } from './rule_summary_context';
 
-export const RuleSummaryActionPoliciesSection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
-  if (rule.kind === 'signal') {
+export const RuleSummaryActionPoliciesSection: React.FC = () => {
+  const rule = useRuleSummary();
+  const canReadActionPolicies = useService(UserCapabilities).canRead('actionPolicies');
+
+  if (rule.kind === 'signal' || !canReadActionPolicies) {
     return null;
   }
 
