@@ -92,22 +92,15 @@ describe('use cases add to existing case modal hook', () => {
     return { onSuccess };
   };
 
-  const mockOpenCreateCaseFlyout = jest.fn();
-
   beforeEach(() => {
     dispatch.mockReset();
     AllCasesSelectorModalMock.mockReset();
+    openCreateNewCaseFlyout.mockReset();
     useCasesAddToNewCaseFlyoutMock.mockReturnValue({
       close: jest.fn(),
       open: openCreateNewCaseFlyout,
     });
-    openCreateNewCaseFlyout.mockReset();
     onSuccess.mockReset();
-    mockOpenCreateCaseFlyout.mockReset();
-    useCasesAddToNewCaseFlyoutMock.mockReturnValue({
-      open: mockOpenCreateCaseFlyout,
-      close: jest.fn(),
-    });
   });
 
   it('should throw if called outside of a cases context', () => {
@@ -190,10 +183,12 @@ describe('use cases add to existing case modal hook', () => {
 
     await waitFor(() => {
       expect(openCreateNewCaseFlyout).toHaveBeenCalledWith({
-        attachments: [alertComment],
         headerContent,
+        getAttachments: expect.any(Function),
       });
     });
+    const { getAttachments: flyoutGetAttachments } = openCreateNewCaseFlyout.mock.calls[0][0];
+    expect(flyoutGetAttachments('cases')).toEqual([alertComment]);
     expect(useCasesAddToNewCaseFlyoutMock).toHaveBeenCalledWith(
       expect.objectContaining({ initialValue })
     );
@@ -361,12 +356,12 @@ describe('use cases add to existing case modal hook', () => {
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
-      expect(mockOpenCreateCaseFlyout).toHaveBeenCalledWith({
+      expect(openCreateNewCaseFlyout).toHaveBeenCalledWith({
         getAttachments: expect.any(Function),
       });
     });
 
-    const { getAttachments: flyoutGetAttachments } = mockOpenCreateCaseFlyout.mock.calls[0][0];
+    const { getAttachments: flyoutGetAttachments } = openCreateNewCaseFlyout.mock.calls[0][0];
 
     // the flyout only knows the owner once the case is created; the modal must
     // forward that owner back to the caller's getAttachments instead of the
