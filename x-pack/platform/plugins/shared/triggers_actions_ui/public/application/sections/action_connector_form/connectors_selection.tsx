@@ -8,7 +8,6 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import type {
   ActionConnector,
@@ -26,6 +25,8 @@ interface ConnectorOption {
 
 interface SelectionProps {
   allowGroupConnector?: string[];
+  /** ID of the element holding the visible label, so the announced name matches it. */
+  ariaLabelledBy: string;
   actionItem: RuleUiAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
@@ -38,6 +39,7 @@ export const ConnectorsSelection = React.memo(ConnectorsSelectionComponent);
 
 function ConnectorsSelectionComponent({
   allowGroupConnector,
+  ariaLabelledBy,
   actionItem,
   accordionIndex,
   actionTypesIndex,
@@ -80,7 +82,7 @@ function ConnectorsSelectionComponent({
 
   return (
     <EuiComboBox
-      aria-label={incidentManagemSystem}
+      aria-labelledby={ariaLabelledBy}
       data-test-subj={`selectActionConnector-${actionItem.actionTypeId}-${accordionIndex}`}
       fullWidth
       singleSelection={{ asPlainText: true }}
@@ -147,10 +149,3 @@ const getTitle = (connector: ActionConnector, actionTypeRegistered: ActionTypeMo
 
   return connector.name;
 };
-
-const incidentManagemSystem = i18n.translate(
-  'xpack.triggersActionsUI.sections.actionForm.incidentManagementSystemLabel',
-  {
-    defaultMessage: 'Incident management system',
-  }
-);

@@ -88,6 +88,7 @@ describe('connectors_selection', () => {
     render(
       <KibanaThemeProvider {...core}>
         <ConnectorsSelection
+          ariaLabelledBy="connectorLabel"
           accordionIndex={0}
           actionItem={actionItem}
           actionTypesIndex={actionTypeIndex}
@@ -105,6 +106,7 @@ describe('connectors_selection', () => {
     render(
       <KibanaThemeProvider {...core}>
         <ConnectorsSelection
+          ariaLabelledBy="connectorLabel"
           accordionIndex={0}
           actionItem={actionItem}
           actionTypesIndex={actionTypeIndex}
@@ -116,5 +118,26 @@ describe('connectors_selection', () => {
     );
 
     expect(screen.getByRole('combobox')).toHaveValue('test pagerduty');
+  });
+
+  it('takes its accessible name from the visible label', () => {
+    render(
+      <KibanaThemeProvider {...core}>
+        <>
+          <span id="connectorLabel">{'Test connector'}</span>
+          <ConnectorsSelection
+            ariaLabelledBy="connectorLabel"
+            accordionIndex={0}
+            actionItem={actionItem}
+            actionTypesIndex={actionTypeIndex}
+            actionTypeRegistered={actionType}
+            connectors={connectors}
+            onConnectorSelected={jest.fn()}
+          />
+        </>
+      </KibanaThemeProvider>
+    );
+
+    expect(screen.getByRole('combobox', { name: 'Test connector' })).toBeInTheDocument();
   });
 });

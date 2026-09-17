@@ -57976,7 +57976,6 @@
     "xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle": "Actions",
     "xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel": "Ajouter une action",
     "xpack.triggersActionsUI.sections.actionForm.getMoreConnectorsTitle": "Obtenir davantage de connecteurs",
-    "xpack.triggersActionsUI.sections.actionForm.incidentManagementSystemLabel": "Système de gestion des incidents",
     "xpack.triggersActionsUI.sections.actionForm.loadingConnectorsDescription": "Chargement des connecteurs…",
     "xpack.triggersActionsUI.sections.actionForm.loadingConnectorTypesDescription": "Chargement des types de connecteurs…",
     "xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage": "(préconfiguré)",

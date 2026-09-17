@@ -58417,7 +58417,6 @@
     "xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle": "操作",
     "xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel": "添加操作",
     "xpack.triggersActionsUI.sections.actionForm.getMoreConnectorsTitle": "获取更多连接器",
-    "xpack.triggersActionsUI.sections.actionForm.incidentManagementSystemLabel": "事件管理系统",
     "xpack.triggersActionsUI.sections.actionForm.loadingConnectorsDescription": "正在加载连接器……",
     "xpack.triggersActionsUI.sections.actionForm.loadingConnectorTypesDescription": "正在加载连接器类型……",
     "xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage": "（预配置）",
