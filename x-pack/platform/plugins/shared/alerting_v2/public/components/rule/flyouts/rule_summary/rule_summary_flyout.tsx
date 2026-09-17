@@ -48,7 +48,6 @@ export interface RuleSummaryFlyoutProps {
   canWrite?: boolean;
   isToggleLoading?: boolean;
   session?: EuiFlyoutProps['session'];
-  ownFocus?: EuiFlyoutProps['ownFocus'];
 }
 
 export const RuleSummaryFlyout = ({
@@ -64,7 +63,6 @@ export const RuleSummaryFlyout = ({
   canWrite = true,
   isToggleLoading = false,
   session,
-  ownFocus = true,
 }: RuleSummaryFlyoutProps) => {
   const chrome = useService(CoreStart('chrome'));
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
@@ -73,7 +71,11 @@ export const RuleSummaryFlyout = ({
   const { rulesLocators } = useAlertingLocators();
   useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
-  const { data: executionsData, isLoading: isLoadingLastExecution } = useFetchRuleExecutions({
+  const {
+    data: executionsData,
+    isLoading: isLoadingLastExecution,
+    isError: isErrorLastExecution,
+  } = useFetchRuleExecutions({
     ruleIds: [rule.id],
     perPage: 1,
     sort: 'startedAt',
@@ -101,7 +103,6 @@ export const RuleSummaryFlyout = ({
         type="overlay"
         size="m"
         resizable
-        ownFocus={ownFocus}
         session={session}
         onClose={onClose}
         data-test-subj="ruleSummaryFlyout"
@@ -148,6 +149,12 @@ export const RuleSummaryFlyout = ({
           >
             {isLoadingLastExecution ? (
               <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutLastExecutionSpinner" size="m" />
+            ) : isErrorLastExecution ? (
+              <EuiHealth color="subdued" data-test-subj="ruleSummaryFlyoutLastExecutionError">
+                {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution.unavailable', {
+                  defaultMessage: 'Unavailable',
+                })}
+              </EuiHealth>
             ) : lastExecution ? (
               <EuiHealth
                 color={lastExecution.outcome === 'success' ? 'success' : 'danger'}
