@@ -10,7 +10,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { EuiPopover, euiCanAnimate, useEuiTheme, type EuiPopoverProps } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiPopover,
+  euiCanAnimate,
+  useEuiTheme,
+  type EuiPopoverProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IGNORE_ATTR, PIN_SIZE } from '../constants';
 import { getAnchorPoint } from '../lib/anchor';
@@ -26,7 +32,6 @@ interface PositionedPin {
   annotation: Annotation;
   x: number;
   y: number;
-  exact: boolean;
 }
 
 const ignoreProps = { [IGNORE_ATTR]: true } as Record<string, unknown>;
@@ -67,9 +72,9 @@ const Pin = ({
   onFocused: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { annotation, x, y, exact } = pin;
+  const { annotation, x, y } = pin;
+  const { author, resolved } = annotation;
   const count = threadSize(annotation);
-  const background = annotation.resolved ? euiTheme.colors.success : euiTheme.colors.primary;
   // The popover panel is inserted next to the pin, inside the layer's container, so it stacks with the layer.
   const [wrapper, setWrapper] = useState<HTMLDivElement | null>(null);
   const [side, setSide] = useState<PopoverSide>('bottom');
@@ -88,36 +93,45 @@ const Pin = ({
       type="button"
       onClick={onToggle}
       aria-label={
-        annotation.resolved
+        resolved
           ? i18n.translate('kbnUI.annotations.pin.resolvedLabel', {
               defaultMessage:
                 'Resolved comment by {author}, {count, plural, one {# message} other {# messages}}',
-              values: { count, author: annotation.author.displayName },
+              values: { count, author: author.displayName },
             })
           : i18n.translate('kbnUI.annotations.pin.label', {
               defaultMessage:
                 'Comment by {author}, {count, plural, one {# message} other {# messages}}',
-              values: { count, author: annotation.author.displayName },
+              values: { count, author: author.displayName },
             })
       }
       aria-expanded={isActive}
-      css={[
-        pinShapeStyles(euiTheme, { background, dashed: !exact }),
-        css`
-          cursor: pointer;
-          pointer-events: auto;
-          transform: ${isActive ? 'scale(1.15)' : 'none'};
-          &:hover {
-            transform: scale(1.15);
-          }
-          ${euiCanAnimate} {
-            transition: transform 120ms ease-out;
-          }
-        `,
-      ]}
+      css={css`
+        display: inline-flex;
+        padding: 0;
+        border: 0;
+        border-radius: 50% 50% 50% 0;
+        background: none;
+        cursor: pointer;
+        pointer-events: auto;
+        transform: ${isActive ? 'scale(1.15)' : 'none'};
+        &:hover {
+          transform: scale(1.15);
+        }
+        ${euiCanAnimate} {
+          transition: transform 120ms ease-out;
+        }
+      `}
       data-test-subj={`kbnUiAnnotationsPin-${annotation.id}`}
     >
-      {count}
+      {/* The author's avatar, as in the thread, so the pin tells who commented. */}
+      <EuiAvatar
+        name={author.displayName}
+        size="s"
+        initialsLength={1}
+        aria-hidden={true}
+        css={pinShapeStyles(euiTheme, { resolved })}
+      />
     </button>
   );
 
@@ -174,7 +188,7 @@ export const PinsLayer = () => {
     if (!isOnScreen(x, y)) {
       return [];
     }
-    return [{ annotation, x, y, exact: resolved.exact }];
+    return [{ annotation, x, y }];
   });
 
   if (!container) {

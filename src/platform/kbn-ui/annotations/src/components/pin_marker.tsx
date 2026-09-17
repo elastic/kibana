@@ -12,23 +12,17 @@ import { css } from '@emotion/react';
 import { EuiIcon, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { PIN_SIZE } from '../constants';
 
-/** Teardrop pin shape shared by the placed pins and the pending pin. */
+/** Teardrop pin shape shared by the placed pins and the pending pin; a resolved comment's pin has a wider, green border. */
 export const pinShapeStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
-  { background, dashed = false }: { background: string; dashed?: boolean }
+  { resolved = false }: { resolved?: boolean } = {}
 ) => css`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: ${PIN_SIZE}px;
   height: ${PIN_SIZE}px;
   border-radius: 50% 50% 50% 0;
-  border: 2px ${dashed ? 'dashed' : 'solid'} ${euiTheme.colors.emptyShade};
-  background: ${background};
-  color: ${euiTheme.colors.emptyShade};
-  font-size: ${euiTheme.size.m};
-  font-weight: ${euiTheme.font.weight.bold};
-  line-height: 1;
+  border: ${resolved
+    ? `3px solid ${euiTheme.colors.success}`
+    : `2px solid ${euiTheme.colors.emptyShade}`};
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 `;
 
@@ -46,7 +40,17 @@ export const PinMarker = ({ x, y }: { x: number; y: number }) => {
       `}
       data-test-subj="kbnUiAnnotationsPendingPin"
     >
-      <span css={pinShapeStyles(euiTheme, { background: euiTheme.colors.primary })}>
+      <span
+        css={[
+          pinShapeStyles(euiTheme),
+          css`
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: ${euiTheme.colors.primary};
+          `,
+        ]}
+      >
         <EuiIcon type="plus" size="s" color="ghost" aria-hidden={true} />
       </span>
     </div>

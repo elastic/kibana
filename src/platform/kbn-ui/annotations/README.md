@@ -28,7 +28,7 @@ const services: AnnotationsHostServices = {
 The button (or `⌘⇧K` / `Ctrl+Shift+K`) switches comment mode on and off. While it is on:
 
 - The page is not interactable: pointer and keyboard input is swallowed so the UI state under review stays as it is, the cursor becomes a comment bubble and a click starts a comment on the element under it. Clicking elsewhere while writing moves the comment there. `Tab` still moves focus through the page, and `Enter` or `Space` starts a comment on the focused element.
-- Pins mark the current page's comments; the number on a pin is the size of its thread. Resolved threads keep their pin, in the success color.
+- Pins mark the current page's comments, each showing its author's avatar (the same color and initial as in the thread). Resolved threads keep their pin, with a wider, green border.
 - The "Comments" panel lists every comment, grouped by the page it was made on, the current page first. It can be minimized to its header (comment count, "⋯" menu with export / import, close); closing it leaves comment mode.
 - The layer's own UI, and anything matching `ignoreSelectors`, stays interactable.
 - Leaving comment mode returns focus to where it was before.
