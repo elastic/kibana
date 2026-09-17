@@ -25,6 +25,7 @@ import type {
   FetchContext,
   HasParentApi,
   PublishesDataViews,
+  PublishesWritableDataViews,
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesDataLoading,
@@ -38,7 +39,7 @@ import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warni
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { EsqlSource } from '@kbn/data-source';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
-import { createEsqlSource } from '../application/main/data_fetching/create_esql_source';
+import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
@@ -54,6 +55,7 @@ type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesBlockingError &
   PublishesDataLoading &
   PublishesDataViews &
+  Partial<Pick<PublishesWritableDataViews, 'setDataViews'>> &
   PublishesTitle &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
@@ -130,6 +132,24 @@ const getRelevantESQLVariables = (
   return [];
 };
 
+const getEsqlSourceCacheIdentity = ({
+  esql,
+  esqlVariables,
+  projectRouting,
+  timeRange,
+}: {
+  esql: string;
+  esqlVariables?: ESQLControlVariable[];
+  projectRouting?: string;
+  timeRange?: { from: string; to: string };
+}): string =>
+  JSON.stringify({
+    esql,
+    esqlVariables: esqlVariables?.map(({ key, value, type }) => ({ key, value, type })),
+    projectRouting: projectRouting ?? null,
+    timeRange: timeRange ? { from: timeRange.from, to: timeRange.to } : null,
+  });
+
 export function initializeFetch({
   api,
   stateManager,
@@ -139,6 +159,7 @@ export function initializeFetch({
   setDataLoading,
   setBlockingError,
   setApproximationApplied,
+  esqlSource$,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
@@ -148,10 +169,11 @@ export function initializeFetch({
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setBlockingError: (error: Error | undefined) => void;
   setApproximationApplied: (value: boolean | undefined) => void;
+  esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
-  let cachedEsqlSource: { esql: string; source: EsqlSource } | undefined;
+  let cachedEsqlSource: { identity: string; source: EsqlSource } | undefined;
 
   const observables = [fetch$(api), api.savedSearch$, api.dataViews$, refreshTrigger$] as const;
 
@@ -216,23 +238,37 @@ export function initializeFetch({
             isOfAggregateQueryType(searchSourceQuery) &&
             (!fetchContext.query || isOfQueryType(fetchContext.query))
           ) {
-            if (!cachedEsqlSource || cachedEsqlSource.esql !== searchSourceQuery.esql) {
-              cachedEsqlSource = {
+            const timeRange = getTimeRangeFromFetchContext(fetchContext);
+            const esqlVariables = getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables);
+            const identity = getEsqlSourceCacheIdentity({
+              esql: searchSourceQuery.esql,
+              esqlVariables,
+              projectRouting: fetchContext.projectRouting,
+              timeRange,
+            });
+            if (!cachedEsqlSource || cachedEsqlSource.identity !== identity) {
+              const { esqlSource, dataView: resolvedDataView } = await resolveEsqlSource({
                 esql: searchSourceQuery.esql,
-                source: await createEsqlSource({
-                  esql: searchSourceQuery.esql,
-                  http: discoverServices.http,
-                  projectRoutingFallback: fetchContext.projectRouting,
-                  timeRange: getTimeRangeFromFetchContext(fetchContext),
-                  esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
-                }),
+                services: discoverServices,
+                projectRoutingFallback: fetchContext.projectRouting,
+                timeRange,
+                esqlVariables,
+                previousSourceId: cachedEsqlSource?.source.id ?? esqlSource$?.getValue()?.id,
+              });
+              cachedEsqlSource = {
+                identity,
+                source: esqlSource,
               };
+              esqlSource$?.next(esqlSource);
+              if (resolvedDataView && resolvedDataView.id !== dataView.id) {
+                api.setDataViews?.([resolvedDataView]);
+              }
             }
             const embeddableEsqlSource = cachedEsqlSource.source;
             // Request ES|QL data
             const result = await fetchEsql({
               query: searchSourceQuery,
-              timeRange: getTimeRangeFromFetchContext(fetchContext),
+              timeRange,
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
               timeFieldName: embeddableEsqlSource.timeFieldName,
@@ -242,7 +278,7 @@ export function initializeFetch({
               expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
-              esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
+              esqlVariables,
               projectRouting: fetchContext.projectRouting,
               esqlApproximation: fetchContext.isApproximate,
             });

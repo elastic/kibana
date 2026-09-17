@@ -249,6 +249,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
         if (path.startsWith('/internal/esql/get_timefield')) {
           return Promise.resolve({ timeField: '@timestamp' });
         }
+        if (path.startsWith('/internal/esql/source_info')) {
+          return Promise.resolve({ columns: [] });
+        }
         return Promise.resolve('');
       }),
     },

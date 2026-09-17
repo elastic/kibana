@@ -553,6 +553,7 @@ function DiscoverDocumentsComponent({
             columnsMeta={columnsMeta}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
+            dataSource={currentDataSource}
             loadingState={
               isDataLoading
                 ? DataLoadingState.loading

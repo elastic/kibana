@@ -338,6 +338,7 @@ export const getSearchEmbeddableFactory = ({
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
         setApproximationApplied: searchEmbeddable.internalApi.setApproximationApplied,
+        esqlSource$: searchEmbeddable.esqlSource$,
       });
       cancelRequests = _cancelRequests;
 
@@ -458,6 +459,7 @@ export const getSearchEmbeddableFactory = ({
                       <SearchEmbeddableGridComponent
                         api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
+                        esqlSource$={searchEmbeddable.esqlSource$}
                         onAddFilter={enableFilters ? addFilter : undefined}
                         enableDocumentViewer={enableDocumentViewer}
                         expandedDoc={enableDocumentViewer ? expandedDoc : undefined}

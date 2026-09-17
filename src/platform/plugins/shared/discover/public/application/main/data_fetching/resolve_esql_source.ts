@@ -18,8 +18,8 @@ import { createEsqlSource } from './create_esql_source';
  * Resolves an `EsqlSource` (time field + LIMIT 0 schema via `EsqlSource.create`)
  * and registers it with `DataSourceService` and the DataViews cache shim.
  *
- * Call this whenever the ES|QL query identity changes — tab init or app-state
- * subscribe — then let fetch read `currentDataSource$`.
+ * Call this whenever the ES|QL query identity changes — tab init, app-state
+ * subscribe, or embeddable fetch — then let consumers read the registered source.
  */
 export async function resolveEsqlSource({
   esql,
@@ -27,17 +27,19 @@ export async function resolveEsqlSource({
   esqlVariables,
   timeRange,
   previousSourceId,
+  projectRoutingFallback,
 }: {
   esql: string;
   services: DiscoverServices;
   esqlVariables?: ESQLControlVariable[];
   timeRange?: { from: string; to: string };
   previousSourceId?: string;
+  projectRoutingFallback?: string;
 }): Promise<{ esqlSource: EsqlSource; dataView: DataView }> {
   const esqlSource = await createEsqlSource({
     esql,
     http: services.http,
-    projectRoutingFallback: services.cps?.cpsManager?.getProjectRouting(),
+    projectRoutingFallback: projectRoutingFallback ?? services.cps?.cpsManager?.getProjectRouting(),
     timeRange: timeRange ?? services.data.query.timefilter.timefilter.getTime(),
     esqlVariables,
   });
