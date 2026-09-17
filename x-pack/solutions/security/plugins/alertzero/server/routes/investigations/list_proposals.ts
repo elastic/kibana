@@ -11,8 +11,8 @@ import {
   INTERNAL_API_ACCESS,
   ALERTZERO_INVESTIGATION_URL_TEMPLATE,
 } from '@kbn/alertzero-common';
-import type { ListInvestigationProposalsResponse } from '@kbn/alertzero-common';
-import { getMockProposalsByInvestigationId } from '@kbn/alertzero-common';
+import type { ListProposalsResponse } from '@kbn/agentic-investigations-plugin/common';
+import { getMockProposalsByConversationId } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
@@ -51,15 +51,12 @@ export const registerListInvestigationProposalsRoute = ({
           const { id } = request.params;
 
           if (config.ui.useMockData) {
-            const proposals = getMockProposalsByInvestigationId(id);
-            const body: ListInvestigationProposalsResponse = {
-              proposals,
-              total: proposals.length,
-            };
+            const proposals = getMockProposalsByConversationId(id);
+            const body: ListProposalsResponse = { proposals, total: proposals.length };
             return response.ok({ body });
           }
 
-          const body: ListInvestigationProposalsResponse = { proposals: [], total: 0 };
+          const body: ListProposalsResponse = { proposals: [], total: 0 };
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list investigation proposals: ${error}`);
