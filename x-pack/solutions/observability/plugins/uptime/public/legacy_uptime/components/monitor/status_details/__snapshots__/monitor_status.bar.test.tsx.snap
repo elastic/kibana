@@ -18,7 +18,7 @@ Array [
     style="grid-template-columns:1fr 3fr"
   >
     <dt
-      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-compressedReverse"
     >
       Overall availability
     </dt>
@@ -29,7 +29,7 @@ Array [
       0.00 %
     </dd>
     <dt
-      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-compressedReverse"
     >
       Url
     </dt>
@@ -40,7 +40,7 @@ Array [
       --
     </dd>
     <dt
-      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-compressedReverse"
     >
       Monitor ID
     </dt>
@@ -49,7 +49,7 @@ Array [
       data-test-subj="monitor-page-title"
     />
     <dt
-      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-compressedReverse"
     >
       Tags
     </dt>
@@ -77,7 +77,7 @@ Array [
       </a>
     </dd>
     <dt
-      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-compressedReverse"
     >
       Enable status alerts
     </dt>
