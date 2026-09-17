@@ -369,15 +369,13 @@ describe('buildThresholdEsql', () => {
         })
       );
       expect(result).toContain(
-        '| EVAL severity = CASE(cpu_avg > 0.95, "high", cpu_avg > 0.9, "medium", "low")'
+        '| EVAL severity = CASE(cpu_avg > 0.95, "high", cpu_avg > 0.9, "medium", cpu_avg > 0.8, "low")'
       );
     });
 
     it('builds the WHERE from the alert condition, not the severity levels', () => {
-      // The lowest severity level is kept in sync with the condition threshold in the
-      // form (ADR option 1), so build_esql never rewrites the WHERE from severity. Using
-      // an intentionally out-of-sync level here documents that the WHERE follows the
-      // condition threshold, not the level threshold.
+      // Severity is a pure enrichment layer: the breach WHERE always comes from the alert
+      // condition, and severity band thresholds are independent of it (no coupling).
       const result = buildThresholdEsql(
         makeValues({
           stats: [cpuStat],
@@ -414,7 +412,7 @@ describe('buildThresholdEsql', () => {
         })
       );
       expect(result).toContain(
-        '| EVAL severity = CASE(mem_free < 100, "high", mem_free < 300, "medium", "low")'
+        '| EVAL severity = CASE(mem_free < 100, "high", mem_free < 300, "medium", mem_free < 500, "low")'
       );
       expect(result).toContain('| WHERE mem_free < 500');
     });

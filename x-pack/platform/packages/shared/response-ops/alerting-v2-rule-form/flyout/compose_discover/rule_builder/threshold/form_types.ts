@@ -287,97 +287,108 @@ export const reconcileSeverity = (
   return severity;
 };
 
-const hasMultiLevels = (severity: SeverityConfig | undefined): severity is SeverityConfig =>
-  severity?.mode === 'multi' && severity.levels.length > 0;
-
-/**
- * Mirror the alert condition threshold onto the lowest multi-severity level,
- * so editing the condition keeps the lowest level — which defines the breach
- * threshold — in sync.
- */
-export const syncSeverityToConditionThreshold = (
-  severity: SeverityConfig | undefined,
-  conditionThreshold: number | undefined
-): SeverityConfig | undefined => {
-  if (!hasMultiLevels(severity) || conditionThreshold === undefined) return severity;
-  return {
-    ...severity,
-    levels: severity.levels.map((lvl, i) =>
-      i === 0 ? { ...lvl, threshold: conditionThreshold } : lvl
-    ),
-  };
-};
-
-/**
- * Mirror the lowest multi-severity level threshold onto the single alert condition,
- * so editing that level keeps the generated breach WHERE in sync with the UI.
- */
-export const syncConditionToSeverityThreshold = (
-  alertConditions: AlertCondition[],
-  severity: SeverityConfig | undefined
-): AlertCondition[] => {
-  if (alertConditions.length !== 1 || !hasMultiLevels(severity)) return alertConditions;
-  const [condition] = alertConditions;
-  const lowestThreshold = severity.levels[0].threshold;
-  return [{ ...condition, threshold: [lowestThreshold, ...condition.threshold.slice(1)] }];
-};
-
 /** Order two severity levels by ascending severity (info < low < ... < critical). */
 export const compareSeverity = (a: AlertEventSeverity, b: AlertEventSeverity): number =>
   SEVERITY_LEVELS.indexOf(a) - SEVERITY_LEVELS.indexOf(b);
 
-/**
- * Sort multi-severity levels least-to-most severe so `levels[0]` is always the
- * least-severe (fallback) level. ES|QL generation, threshold coupling and the
- * round-trip parser all rely on this ordering, but the level dropdowns let the
- * user pick any level per row — normalize on every mutation so the stored order
- * can never drift from severity order.
- */
+/** Sort a copy of the levels least-to-most severe, so index 0 is the least-severe level. */
+export const sortLevelsBySeverity = (levels: SeverityLevel[]): SeverityLevel[] =>
+  [...levels].sort((a, b) => compareSeverity(a.severity, b.severity));
+
+/** Sort multi-severity levels least-to-most severe so `levels[0]` is the least-severe level. */
 export const normalizeSeverityOrder = (
   severity: SeverityConfig | undefined
 ): SeverityConfig | undefined => {
   if (!severity || severity.mode !== 'multi') return severity;
-  return {
-    ...severity,
-    levels: [...severity.levels].sort((a, b) => compareSeverity(a.severity, b.severity)),
-  };
+  return { ...severity, levels: sortLevelsBySeverity(severity.levels) };
+};
+
+/**
+ * Suggest a valid threshold for a newly added band following the breach direction (ascending
+ * for `>`/`>=`, descending for `<`/`<=`): strictly more extreme than the neighbouring
+ * less-severe band and at least the condition threshold, and strictly less extreme than the
+ * neighbouring more-severe band. Falls back to the condition threshold for the first band, or
+ * one step beyond the current extreme when appending the most-severe band.
+ */
+export const nextSeverityThreshold = (
+  levels: SeverityLevel[],
+  severity: AlertEventSeverity,
+  condition: AlertCondition
+): number => {
+  const ascending =
+    condition.comparator === Comparator.GT || condition.comparator === Comparator.GTE;
+  const dir = ascending ? 1 : -1;
+  const [conditionThreshold = 0] = condition.threshold;
+
+  // Work in "extremeness" space (larger = more severe breach) so both directions share logic.
+  const conditionExtremeness = dir * conditionThreshold;
+  const lessSevere = levels
+    .filter((lvl) => compareSeverity(lvl.severity, severity) < 0)
+    .map((lvl) => dir * lvl.threshold);
+  const moreSevere = levels
+    .filter((lvl) => compareSeverity(lvl.severity, severity) > 0)
+    .map((lvl) => dir * lvl.threshold);
+
+  const lowerBound = Math.max(conditionExtremeness, ...lessSevere);
+  if (moreSevere.length > 0) {
+    const upperBound = Math.min(...moreSevere);
+    return dir * ((lowerBound + upperBound) / 2);
+  }
+  const nextExtremeness = lessSevere.length > 0 ? lowerBound + 1 : conditionExtremeness;
+  return dir * nextExtremeness;
 };
 
 export type SeverityValidationError =
   | 'invalid_threshold'
   | 'duplicate_level'
   | 'duplicate_threshold'
-  | 'threshold_order';
+  | 'threshold_order'
+  | 'threshold_below_condition';
 
 /**
- * Validate a multi-severity config against the inherited comparator. Returns the
- * first validation error, or `null` when valid. Single mode and disabled
- * severity are always valid.
+ * Validate a multi-severity config. Every level is a band tested against its own threshold,
+ * which must sit beyond the alert condition threshold in the breach direction, be unique,
+ * and be strictly ordered by severity. Returns the first error, or `null` when valid. Single
+ * mode and disabled severity are always valid.
  */
 export const getSeverityValidationError = (
   severity: SeverityConfig | undefined,
-  comparator: Comparator
+  condition: AlertCondition
 ): SeverityValidationError | null => {
   if (!severity || severity.mode === 'single') return null;
 
   const { levels } = severity;
-  if (levels.length === 0) return 'invalid_threshold';
-
-  if (levels.some((lvl) => !Number.isFinite(lvl.threshold))) return 'invalid_threshold';
+  // Multi requires at least two levels (otherwise it is single severity).
+  if (levels.length < 2) return 'invalid_threshold';
 
   const severities = levels.map((lvl) => lvl.severity);
   if (new Set(severities).size !== severities.length) return 'duplicate_level';
 
-  const thresholds = levels.map((lvl) => lvl.threshold);
+  const bands = sortLevelsBySeverity(levels);
+
+  if (bands.some((band) => !Number.isFinite(band.threshold))) return 'invalid_threshold';
+
+  const [conditionThreshold] = condition.threshold;
+  const ascending =
+    condition.comparator === Comparator.GT || condition.comparator === Comparator.GTE;
+
+  // A band cannot be less extreme than the breach threshold itself — that row never breaches.
+  if (
+    bands.some((band) =>
+      ascending ? band.threshold < conditionThreshold : band.threshold > conditionThreshold
+    )
+  ) {
+    return 'threshold_below_condition';
+  }
+
+  const thresholds = bands.map((band) => band.threshold);
   if (new Set(thresholds).size !== thresholds.length) return 'duplicate_threshold';
 
-  // More severe levels must have more severe thresholds: strictly increasing for
-  // ascending comparators (>, >=), strictly decreasing for descending (<, <=).
-  const ascending = comparator === Comparator.GT || comparator === Comparator.GTE;
-  const bySeverity = [...levels].sort((a, b) => compareSeverity(a.severity, b.severity));
-  for (let i = 1; i < bySeverity.length; i++) {
-    const prev = bySeverity[i - 1].threshold;
-    const curr = bySeverity[i].threshold;
+  // More severe bands must be more extreme: strictly increasing for ascending comparators
+  // (>, >=), strictly decreasing for descending ones (<, <=).
+  for (let i = 1; i < bands.length; i++) {
+    const prev = bands[i - 1].threshold;
+    const curr = bands[i].threshold;
     if (ascending ? curr <= prev : curr >= prev) return 'threshold_order';
   }
 

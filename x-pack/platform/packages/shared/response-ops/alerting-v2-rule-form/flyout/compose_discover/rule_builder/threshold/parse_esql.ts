@@ -329,14 +329,10 @@ const isSeverityEval = (cmd: ESQLCommand): boolean => {
 
 /**
  * Reconstruct the severity config from an `EVAL severity = ...` command. A bare
- * string literal maps to single mode; a `CASE(...)` maps to multi mode. Because
- * the least-severe threshold lives in the breach WHERE (not the CASE), it is
- * taken from the parsed alert condition.
+ * string literal maps to single mode; a `CASE(...)` maps to multi mode. Every CASE
+ * branch is a band carrying its own threshold; there is no default branch.
  */
-const parseSeverityEval = (
-  cmd: ESQLCommand,
-  alertConditions: AlertCondition[]
-): SeverityConfig | null => {
+const parseSeverityEval = (cmd: ESQLCommand): SeverityConfig | null => {
   const fn = cmd.args[0] as ESQLFunction;
   const rhs = unwrapSingleItem(fn.args[1]);
 
@@ -347,38 +343,29 @@ const parseSeverityEval = (
     return { mode: 'single', singleLevelSeverity: singleLiteral, levels: [] };
   }
 
-  // Multi mode: EVAL severity = CASE(cond, "lvl", ..., "defaultLvl")
+  // Multi mode: EVAL severity = CASE(cond, "lvl", ..., cond, "lvl")
   if (!isFunctionExpression(rhs)) return null;
   const caseFn = rhs as ESQLFunction;
   if (caseFn.name.toUpperCase() !== 'CASE') return null;
 
   const caseArgs = caseFn.args;
-  // Expect (condition, result) pairs followed by a single default result (odd length).
-  if (caseArgs.length < 3 || caseArgs.length % 2 === 0) return null;
+  // Expect (condition, result) pairs with no trailing default (even length).
+  if (caseArgs.length < 2 || caseArgs.length % 2 !== 0) return null;
 
-  const defaultLevel = extractStringLiteral(caseArgs[caseArgs.length - 1]);
-  if (!defaultLevel || !isSeverityValue(defaultLevel)) return null;
-
-  const [condition] = alertConditions;
-  const lowestThreshold = condition?.threshold[0];
-  if (lowestThreshold === undefined) return null;
-
-  const pairs: SeverityLevel[] = [];
-  for (let i = 0; i < caseArgs.length - 1; i += 2) {
+  const bands: SeverityLevel[] = [];
+  for (let i = 0; i < caseArgs.length; i += 2) {
     const leaf = parseConditionNode(unwrapSingleItem(caseArgs[i]));
     const level = extractStringLiteral(caseArgs[i + 1]);
     if (!leaf || !level || !isSeverityValue(level)) return null;
-    pairs.push({ id: generateId(), severity: level, threshold: leaf.threshold[0] });
+    bands.push({ id: generateId(), severity: level, threshold: leaf.threshold[0] });
   }
 
-  // CASE lists branches most-to-least severe; levels are ordered least-to-most,
-  // with the default (least severe) inheriting the breach WHERE threshold.
-  const levels: SeverityLevel[] = [
-    { id: generateId(), severity: defaultLevel, threshold: lowestThreshold },
-    ...pairs.reverse(),
-  ];
-
-  return { mode: 'multi', singleLevelSeverity: DEFAULT_SINGLE_SEVERITY_LEVEL, levels };
+  // CASE lists bands most-to-least severe; levels are stored least-to-most.
+  return {
+    mode: 'multi',
+    singleLevelSeverity: DEFAULT_SINGLE_SEVERITY_LEVEL,
+    levels: bands.reverse(),
+  };
 };
 
 export const parseRecoveryBlock = (
@@ -486,7 +473,7 @@ export const parseThresholdEsql = (
   // Optional trailing EVAL severity = ... (emitted after the breach WHERE)
   let severity: SeverityConfig | undefined;
   if (idx < commands.length && isSeverityEval(commands[idx])) {
-    const parsedSeverity = parseSeverityEval(commands[idx], alertConditions);
+    const parsedSeverity = parseSeverityEval(commands[idx]);
     if (!parsedSeverity) return null;
     severity = parsedSeverity;
     idx++;

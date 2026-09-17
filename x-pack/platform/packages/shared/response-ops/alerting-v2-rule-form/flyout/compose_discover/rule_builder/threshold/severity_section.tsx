@@ -25,32 +25,28 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
-import type {
-  AlertCondition,
-  Comparator,
-  SeverityConfig,
-  SeverityLevel,
-} from './form_types';
+import type { AlertCondition, SeverityConfig, SeverityLevel } from './form_types';
 import {
   createDefaultSeverityConfig,
   generateId,
   getSeverityValidationError,
   isMultiSeveritySupported,
   nextSeverityLevel,
+  nextSeverityThreshold,
   MAX_SEVERITY_LEVELS,
 } from './form_types';
 import { SEVERITY_LEVEL_OPTIONS, SEVERITY_VALIDATION_ERRORS } from './translations';
 
 interface SeverityValidationCalloutProps {
   severity: SeverityConfig;
-  comparator: Comparator;
+  condition: AlertCondition;
 }
 
 const SeverityValidationCallout: React.FC<SeverityValidationCalloutProps> = ({
   severity,
-  comparator,
+  condition,
 }) => {
-  const error = getSeverityValidationError(severity, comparator);
+  const error = getSeverityValidationError(severity, condition);
   if (!error) return null;
   return (
     <>
@@ -83,21 +79,22 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
     onChange(enabled ? createDefaultSeverityConfig() : undefined);
 
   // Adding a second level promotes single → multi: the current single severity becomes the
-  // least-severe (fallback) level and a more-severe level is seeded alongside it.
+  // least-severe band (at the condition threshold) and a more-severe band is seeded one step
+  // beyond it, so both start out valid for the breach direction.
   const promoteToMulti = () => {
     if (!severity || !condition) return;
-    const [baseThreshold = 0] = condition.threshold;
     const base: SeverityLevel = {
       id: generateId(),
       severity: severity.singleLevelSeverity,
-      threshold: baseThreshold,
+      threshold: nextSeverityThreshold([], severity.singleLevelSeverity, condition),
     };
-    const next: SeverityLevel = {
+    const bandSeverity = nextSeverityLevel([base]);
+    const band: SeverityLevel = {
       id: generateId(),
-      severity: nextSeverityLevel([base]),
-      threshold: baseThreshold,
+      severity: bandSeverity,
+      threshold: nextSeverityThreshold([base], bandSeverity, condition),
     };
-    onChange({ ...severity, mode: 'multi', levels: [base, next] });
+    onChange({ ...severity, mode: 'multi', levels: [base, band] });
   };
 
   const setSingleLevel = (level: AlertEventSeverity) => {
@@ -114,16 +111,16 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
   };
 
   const addLevel = () => {
-    if (!severity) return;
-    const [baseThreshold = 0] = condition?.threshold ?? [];
+    if (!severity || !condition) return;
+    const bandSeverity = nextSeverityLevel(severity.levels);
     onChange({
       ...severity,
       levels: [
         ...severity.levels,
         {
           id: generateId(),
-          severity: nextSeverityLevel(severity.levels),
-          threshold: baseThreshold,
+          severity: bandSeverity,
+          threshold: nextSeverityThreshold(severity.levels, bandSeverity, condition),
         },
       ],
     });
@@ -320,7 +317,7 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                 />
               </EuiButtonEmpty>
               {condition && (
-                <SeverityValidationCallout severity={severity} comparator={condition.comparator} />
+                <SeverityValidationCallout severity={severity} condition={condition} />
               )}
             </>
           )}

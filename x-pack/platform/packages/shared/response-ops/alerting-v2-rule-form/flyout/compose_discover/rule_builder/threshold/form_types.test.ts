@@ -14,6 +14,7 @@ import {
   getSeverityValidationError,
   normalizeSeverityOrder,
   nextSeverityLevel,
+  nextSeverityThreshold,
   isMultiSeveritySupported,
   isSeveritySupported,
   isStatFieldValid,
@@ -22,8 +23,6 @@ import {
   reconcileAlertConditionMetrics,
   reconcileSeverity,
   shouldSyncConditionMetricOnLabelChange,
-  syncConditionToSeverityThreshold,
-  syncSeverityToConditionThreshold,
 } from './form_types';
 
 describe('nextStatLabel', () => {
@@ -156,73 +155,6 @@ describe('severity helpers', () => {
     });
   });
 
-  describe('threshold coupling', () => {
-    const multi = (levels: SeverityConfig['levels']): SeverityConfig => ({
-      mode: 'multi',
-      singleLevelSeverity: 'high',
-      levels,
-    });
-
-    describe('syncSeverityToConditionThreshold', () => {
-      it('mirrors the condition threshold onto the lowest multi level', () => {
-        const result = syncSeverityToConditionThreshold(
-          multi([
-            { id: 'l1', severity: 'low', threshold: 0.8 },
-            { id: 'l2', severity: 'high', threshold: 0.95 },
-          ]),
-          0.6
-        );
-        expect(result?.levels[0].threshold).toBe(0.6);
-        expect(result?.levels[1].threshold).toBe(0.95);
-      });
-
-      it('leaves single mode untouched', () => {
-        const single: SeverityConfig = { mode: 'single', singleLevelSeverity: 'high', levels: [] };
-        expect(syncSeverityToConditionThreshold(single, 0.6)).toBe(single);
-      });
-
-      it('is a no-op for undefined severity or threshold', () => {
-        expect(syncSeverityToConditionThreshold(undefined, 0.6)).toBeUndefined();
-        const config = multi([{ id: 'l1', severity: 'low', threshold: 0.8 }]);
-        expect(syncSeverityToConditionThreshold(config, undefined)).toBe(config);
-      });
-    });
-
-    describe('syncConditionToSeverityThreshold', () => {
-      it('mirrors the lowest multi level onto the single condition', () => {
-        const result = syncConditionToSeverityThreshold(
-          [condition(Comparator.GT)],
-          multi([
-            { id: 'l1', severity: 'low', threshold: 0.6 },
-            { id: 'l2', severity: 'high', threshold: 0.95 },
-          ])
-        );
-        expect(result[0].threshold).toEqual([0.6]);
-      });
-
-      it('preserves an upper bound if present', () => {
-        const result = syncConditionToSeverityThreshold(
-          [{ id: '1', metric: 'm', comparator: Comparator.GT, threshold: [100, 200] }],
-          multi([{ id: 'l1', severity: 'low', threshold: 50 }])
-        );
-        expect(result[0].threshold).toEqual([50, 200]);
-      });
-
-      it('is a no-op for multiple conditions or single-mode severity', () => {
-        const conditions = [condition(Comparator.GT), condition(Comparator.LT)];
-        expect(syncConditionToSeverityThreshold(conditions, multi([]))).toBe(conditions);
-        const single = [condition(Comparator.GT)];
-        expect(
-          syncConditionToSeverityThreshold(single, {
-            mode: 'single',
-            singleLevelSeverity: 'high',
-            levels: [],
-          })
-        ).toBe(single);
-      });
-    });
-  });
-
   describe('compareSeverity', () => {
     it('orders by ascending severity', () => {
       expect(compareSeverity('low', 'high')).toBeLessThan(0);
@@ -292,24 +224,73 @@ describe('severity helpers', () => {
     });
   });
 
+  describe('nextSeverityThreshold', () => {
+    const cond = (comparator: Comparator, threshold: number[]): AlertCondition => ({
+      id: 'c1',
+      metric: 'cpu',
+      comparator,
+      threshold,
+    });
+
+    it('seeds the first band at the condition threshold', () => {
+      expect(nextSeverityThreshold([], 'high', cond(Comparator.GT, [80]))).toBe(80);
+      expect(nextSeverityThreshold([], 'high', cond(Comparator.LT, [500]))).toBe(500);
+    });
+
+    it('appends one step beyond the current extreme (ascending / descending)', () => {
+      const ascending = nextSeverityThreshold(
+        [{ id: 'a', severity: 'low', threshold: 80 }],
+        'high',
+        cond(Comparator.GT, [80])
+      );
+      expect(ascending).toBe(81);
+      const descending = nextSeverityThreshold(
+        [{ id: 'a', severity: 'low', threshold: 500 }],
+        'high',
+        cond(Comparator.LT, [500])
+      );
+      expect(descending).toBe(499);
+    });
+
+    it('places a gap-filling band between its severity neighbours', () => {
+      // Adding `medium` between `low` (80) and `high` (100) lands on the midpoint.
+      const value = nextSeverityThreshold(
+        [
+          { id: 'a', severity: 'low', threshold: 80 },
+          { id: 'b', severity: 'high', threshold: 100 },
+        ],
+        'medium',
+        cond(Comparator.GT, [80])
+      );
+      expect(value).toBe(90);
+    });
+  });
+
   describe('getSeverityValidationError', () => {
     const multi = (levels: SeverityConfig['levels']): SeverityConfig => ({
       mode: 'multi',
       singleLevelSeverity: 'high',
       levels,
     });
+    const cond = (comparator: Comparator, threshold: number[]): AlertCondition => ({
+      id: 'c1',
+      metric: 'cpu',
+      comparator,
+      threshold,
+    });
 
     it('accepts disabled and single-mode severity', () => {
-      expect(getSeverityValidationError(undefined, Comparator.GT)).toBeNull();
+      expect(getSeverityValidationError(undefined, cond(Comparator.GT, [0]))).toBeNull();
       expect(
         getSeverityValidationError(
           { mode: 'single', singleLevelSeverity: 'high', levels: [] },
-          Comparator.LT
+          cond(Comparator.LT, [0])
         )
       ).toBeNull();
     });
 
-    it('accepts ascending thresholds for a > comparator', () => {
+    it('accepts ascending band thresholds beyond the condition (> comparator)', () => {
+      // Every level is a band; each sits at or beyond the condition (0.8) and is ordered.
       expect(
         getSeverityValidationError(
           multi([
@@ -317,30 +298,44 @@ describe('severity helpers', () => {
             { id: 'b', severity: 'medium', threshold: 0.9 },
             { id: 'c', severity: 'high', threshold: 0.95 },
           ]),
-          Comparator.GT
+          cond(Comparator.GT, [0.8])
         )
       ).toBeNull();
     });
 
-    it('accepts descending thresholds for a < comparator', () => {
+    it('accepts descending band thresholds beyond the condition (< comparator)', () => {
       expect(
         getSeverityValidationError(
           multi([
-            { id: 'a', severity: 'low', threshold: 500 },
+            { id: 'a', severity: 'low', threshold: 450 },
             { id: 'b', severity: 'medium', threshold: 300 },
             { id: 'c', severity: 'high', threshold: 100 },
           ]),
-          Comparator.LT
+          cond(Comparator.LT, [500])
         )
       ).toBeNull();
     });
 
-    it('flags empty levels and non-finite thresholds', () => {
-      expect(getSeverityValidationError(multi([]), Comparator.GT)).toBe('invalid_threshold');
+    it('requires at least two levels for multi mode', () => {
+      expect(getSeverityValidationError(multi([]), cond(Comparator.GT, [0]))).toBe(
+        'invalid_threshold'
+      );
       expect(
         getSeverityValidationError(
-          multi([{ id: 'a', severity: 'low', threshold: NaN }]),
-          Comparator.GT
+          multi([{ id: 'a', severity: 'low', threshold: 0 }]),
+          cond(Comparator.GT, [0])
+        )
+      ).toBe('invalid_threshold');
+    });
+
+    it('flags a non-finite band threshold', () => {
+      expect(
+        getSeverityValidationError(
+          multi([
+            { id: 'a', severity: 'low', threshold: 0 },
+            { id: 'b', severity: 'high', threshold: NaN },
+          ]),
+          cond(Comparator.GT, [0.8])
         )
       ).toBe('invalid_threshold');
     });
@@ -349,46 +344,72 @@ describe('severity helpers', () => {
       expect(
         getSeverityValidationError(
           multi([
-            { id: 'a', severity: 'low', threshold: 1 },
+            { id: 'a', severity: 'low', threshold: 0 },
             { id: 'b', severity: 'low', threshold: 2 },
           ]),
-          Comparator.GT
+          cond(Comparator.GT, [1])
         )
       ).toBe('duplicate_level');
     });
 
-    it('flags duplicate thresholds', () => {
+    it('flags a band that is not beyond the condition threshold', () => {
+      // Ascending: a band below the condition (0.8) would swallow every breaching row.
+      expect(
+        getSeverityValidationError(
+          multi([
+            { id: 'a', severity: 'low', threshold: 0 },
+            { id: 'b', severity: 'high', threshold: 0.7 },
+          ]),
+          cond(Comparator.GT, [0.8])
+        )
+      ).toBe('threshold_below_condition');
+      // Descending: symmetric — a band above the condition is invalid.
+      expect(
+        getSeverityValidationError(
+          multi([
+            { id: 'a', severity: 'low', threshold: 0 },
+            { id: 'b', severity: 'high', threshold: 600 },
+          ]),
+          cond(Comparator.LT, [500])
+        )
+      ).toBe('threshold_below_condition');
+    });
+
+    it('flags duplicate band thresholds', () => {
       expect(
         getSeverityValidationError(
           multi([
             { id: 'a', severity: 'low', threshold: 1 },
-            { id: 'b', severity: 'high', threshold: 1 },
+            { id: 'b', severity: 'medium', threshold: 2 },
+            { id: 'c', severity: 'high', threshold: 2 },
           ]),
-          Comparator.GT
+          cond(Comparator.GT, [1])
         )
       ).toBe('duplicate_threshold');
     });
 
-    it('flags thresholds not ordered by severity (ascending)', () => {
+    it('flags bands not ordered by severity (ascending)', () => {
       expect(
         getSeverityValidationError(
           multi([
-            { id: 'a', severity: 'low', threshold: 0.9 },
-            { id: 'b', severity: 'high', threshold: 0.8 },
+            { id: 'a', severity: 'low', threshold: 0.8 },
+            { id: 'b', severity: 'medium', threshold: 0.95 },
+            { id: 'c', severity: 'high', threshold: 0.9 },
           ]),
-          Comparator.GT
+          cond(Comparator.GT, [0.8])
         )
       ).toBe('threshold_order');
     });
 
-    it('flags thresholds not ordered by severity (descending)', () => {
+    it('flags bands not ordered by severity (descending)', () => {
       expect(
         getSeverityValidationError(
           multi([
-            { id: 'a', severity: 'low', threshold: 100 },
-            { id: 'b', severity: 'high', threshold: 300 },
+            { id: 'a', severity: 'low', threshold: 0 },
+            { id: 'b', severity: 'medium', threshold: 100 },
+            { id: 'c', severity: 'high', threshold: 300 },
           ]),
-          Comparator.LT
+          cond(Comparator.LT, [500])
         )
       ).toBe('threshold_order');
     });

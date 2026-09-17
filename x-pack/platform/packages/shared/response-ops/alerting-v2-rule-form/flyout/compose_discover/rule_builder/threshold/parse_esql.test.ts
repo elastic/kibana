@@ -927,8 +927,9 @@ describe('severity round-trip', () => {
       severity: {
         mode: 'multi',
         singleLevelSeverity: 'high',
+        // Every level is a band with its own threshold, all beyond the condition (0.8).
         levels: [
-          { id: 'l1', severity: 'low', threshold: 0.8 },
+          { id: 'l1', severity: 'low', threshold: 0.85 },
           { id: 'l2', severity: 'medium', threshold: 0.9 },
           { id: 'l3', severity: 'high', threshold: 0.95 },
         ],
@@ -943,7 +944,7 @@ describe('severity round-trip', () => {
       mode: 'multi',
       singleLevelSeverity: 'high',
       levels: [
-        { severity: 'low', threshold: 0.8 },
+        { severity: 'low', threshold: 0.85 },
         { severity: 'medium', threshold: 0.9 },
         { severity: 'high', threshold: 0.95 },
       ],
@@ -960,8 +961,9 @@ describe('severity round-trip', () => {
       severity: {
         mode: 'multi',
         singleLevelSeverity: 'high',
+        // Every level is a band with its own threshold, all beyond the condition (500, `<`).
         levels: [
-          { id: 'l1', severity: 'low', threshold: 500 },
+          { id: 'l1', severity: 'low', threshold: 450 },
           { id: 'l2', severity: 'medium', threshold: 300 },
           { id: 'l3', severity: 'high', threshold: 100 },
         ],
@@ -973,7 +975,7 @@ describe('severity round-trip', () => {
 
     expect(parsed).not.toBeNull();
     expect(stripLevelIds(parsed!.severity!).levels).toEqual([
-      { severity: 'low', threshold: 500 },
+      { severity: 'low', threshold: 450 },
       { severity: 'medium', threshold: 300 },
       { severity: 'high', threshold: 100 },
     ]);

@@ -77,6 +77,7 @@ describe('threshold builder validate', () => {
       severity: {
         mode: 'multi',
         singleLevelSeverity: 'high',
+        // Every level is a band at or beyond the condition (100).
         levels: [
           { id: 'l1', severity: 'low', threshold: 100 },
           { id: 'l2', severity: 'high', threshold: 200 },
@@ -93,8 +94,9 @@ describe('threshold builder validate', () => {
         mode: 'multi',
         singleLevelSeverity: 'high',
         levels: [
-          { id: 'l1', severity: 'low', threshold: 200 },
-          { id: 'l2', severity: 'high', threshold: 100 },
+          { id: 'l1', severity: 'low', threshold: 100 },
+          { id: 'l2', severity: 'medium', threshold: 300 },
+          { id: 'l3', severity: 'high', threshold: 200 },
         ],
       },
     });

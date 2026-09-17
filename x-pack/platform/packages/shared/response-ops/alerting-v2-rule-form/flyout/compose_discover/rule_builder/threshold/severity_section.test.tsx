@@ -78,9 +78,10 @@ describe('SeveritySection', () => {
     const next = onChange.mock.calls[0][0] as SeverityConfig;
     expect(next.mode).toBe('multi');
     expect(next.levels).toHaveLength(2);
-    // Keeps the single severity as the fallback and seeds a more-severe level.
+    // Keeps the single severity as the least-severe band (at the condition threshold) and
+    // seeds a more-severe band one step beyond it — both valid for the `>` breach direction.
     expect(next.levels.map((l) => l.severity)).toEqual(['high', 'critical']);
-    expect(next.levels.every((l) => l.threshold === 0.8)).toBe(true);
+    expect(next.levels.map((l) => l.threshold)).toEqual([0.8, 1.8]);
   });
 
   it('hides the add-level button and explains why for range comparators', () => {
@@ -92,7 +93,7 @@ describe('SeveritySection', () => {
     expect(screen.getByText(/Multiple severity levels are not available/i)).toBeInTheDocument();
   });
 
-  it('shows the inherited operator as a prepend and the threshold per level in multi mode', () => {
+  it('renders a threshold with an operator prepend for every level', () => {
     renderSection({
       alertConditions: [condition()],
       severity: {
@@ -104,7 +105,7 @@ describe('SeveritySection', () => {
         ],
       },
     });
-    // The comparator is inherited from the condition and rendered as a read-only prepend.
+    // Every level is a band: it carries its own threshold with the inherited comparator prepend.
     expect(screen.getAllByText('>').length).toBeGreaterThan(0);
     expect(screen.getByTestId('ruleBuilderSeverityThreshold-0')).toHaveValue(0.8);
     expect(screen.getByTestId('ruleBuilderSeverityThreshold-1')).toHaveValue(0.95);
@@ -182,15 +183,16 @@ describe('SeveritySection', () => {
     expect(next.levels.map((l) => l.severity)).toEqual(['low', 'medium']);
   });
 
-  it('shows a validation error when multi thresholds are out of order', () => {
+  it('shows a validation error when band thresholds are out of order', () => {
     renderSection({
       alertConditions: [condition()],
       severity: {
         mode: 'multi',
         singleLevelSeverity: 'high',
         levels: [
-          { id: 'l1', severity: 'low', threshold: 0.9 },
-          { id: 'l2', severity: 'high', threshold: 0.8 },
+          { id: 'l1', severity: 'low', threshold: 0.8 },
+          { id: 'l2', severity: 'medium', threshold: 0.95 },
+          { id: 'l3', severity: 'high', threshold: 0.9 },
         ],
       },
     });

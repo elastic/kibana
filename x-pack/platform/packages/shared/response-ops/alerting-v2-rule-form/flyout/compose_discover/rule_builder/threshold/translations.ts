@@ -149,6 +149,10 @@ export const SEVERITY_VALIDATION_ERRORS: Record<SeverityValidationError, string>
   threshold_order: i18n.translate('xpack.alertingV2.ruleBuilder.severity.error.thresholdOrder', {
     defaultMessage: 'More severe levels must have more severe thresholds.',
   }),
+  threshold_below_condition: i18n.translate(
+    'xpack.alertingV2.ruleBuilder.severity.error.thresholdBelowCondition',
+    { defaultMessage: 'Severity thresholds must be beyond the alert condition threshold.' }
+  ),
 };
 
 export const THRESHOLD_STEP_TITLE = i18n.translate(

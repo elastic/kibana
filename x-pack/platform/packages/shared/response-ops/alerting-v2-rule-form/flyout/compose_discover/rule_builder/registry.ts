@@ -44,8 +44,8 @@ const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
   );
   if (!hasValidCondition) return false;
 
-  // Severity only applies to a single alert condition, whose comparator it inherits.
-  if (getSeverityValidationError(values.severity, values.alertConditions[0].comparator) !== null) {
+  // Severity only applies to a single alert condition, whose comparator and threshold it uses.
+  if (getSeverityValidationError(values.severity, values.alertConditions[0]) !== null) {
     return false;
   }
 

@@ -12,6 +12,7 @@ import {
   Aggregation,
   Comparator,
   AGGREGATIONS_REQUIRING_FIELD,
+  sortLevelsBySeverity,
   type StatDefinition,
   type AlertCondition,
   type SeverityConfig,
@@ -117,12 +118,12 @@ const buildConditionExpr = (condition: AlertCondition): ESQLSingleAstItem => {
 
 /**
  * Build the right-hand side of `EVAL severity = <rhs>`. Single mode emits a
- * constant `"<level>"`; multi mode emits a `CASE(...)` evaluated from most to
- * least severe (the least-severe level being the fallback). The WHERE clause is
- * driven by the alert condition itself — the lowest severity level threshold is
- * kept in sync with the condition threshold in the form (see ADR), so no query
- * rewrite is needed here. Returns `null` when multi mode cannot be represented
- * (range comparator or no levels).
+ * constant `"<level>"`; multi mode emits a `CASE(...)` evaluated most-to-least
+ * severe, where every level is a band tested against its own threshold. The CASE
+ * has no default branch: a breaching row below the least-severe band gets no
+ * severity (null). The breach WHERE is driven by the alert condition alone, so
+ * severity is a pure enrichment layer. Returns `null` when multi mode cannot be
+ * represented (range comparator or no levels).
  */
 const buildSeverityEvalRhs = (
   severity: SeverityConfig,
@@ -136,15 +137,12 @@ const buildSeverityEvalRhs = (
   if (!operator || severity.levels.length === 0) return null;
 
   const column = escapeField(condition.metric);
-  const [lowest, ...moreSevere] = severity.levels;
-  const branches = moreSevere
-    .slice()
+  // Emit every level as a band, most-severe first, with no trailing default.
+  const branches = sortLevelsBySeverity(severity.levels)
     .reverse()
     .map((level) => `${column} ${operator} ${level.threshold}, "${level.severity}"`);
 
-  return branches.length > 0
-    ? `CASE(${branches.join(', ')}, "${lowest.severity}")`
-    : `"${lowest.severity}"`;
+  return `CASE(${branches.join(', ')})`;
 };
 
 const isStatValid = (stat: StatDefinition): boolean => {

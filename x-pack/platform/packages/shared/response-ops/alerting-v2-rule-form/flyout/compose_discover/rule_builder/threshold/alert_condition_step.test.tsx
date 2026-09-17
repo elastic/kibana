@@ -1125,14 +1125,45 @@ describe('RuleBuilderAlertConditionStep', () => {
       expect(next.severity).toEqual({ mode: 'single', singleLevelSeverity: 'high', levels: [] });
     });
 
-    it('mirrors the condition threshold onto the lowest multi-severity level', () => {
+    it('leaves the condition threshold unchanged when a severity band is edited', () => {
       const onBuilderStateChange = jest.fn();
       const builderState = makeBuilderState({
         severity: {
           mode: 'multi',
           singleLevelSeverity: 'high',
           levels: [
-            { id: 'l1', severity: 'low', threshold: 100 },
+            { id: 'l1', severity: 'low', threshold: 0 }, // fallback (no input)
+            { id: 'l2', severity: 'high', threshold: 200 }, // band at idx 1
+          ],
+        },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      // Editing the band threshold must not rewrite the condition threshold (no coupling).
+      fireEvent.change(screen.getByTestId('ruleBuilderSeverityThreshold-1'), {
+        target: { value: '250' },
+      });
+      const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(next.severity?.levels[1].threshold).toBe(250);
+      expect(next.alertConditions[0].threshold).toEqual([100]);
+    });
+
+    it('leaves severity band thresholds unchanged when the condition threshold is edited', () => {
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({
+        severity: {
+          mode: 'multi',
+          singleLevelSeverity: 'high',
+          levels: [
+            { id: 'l1', severity: 'low', threshold: 0 },
             { id: 'l2', severity: 'high', threshold: 200 },
           ],
         },
@@ -1147,43 +1178,13 @@ describe('RuleBuilderAlertConditionStep', () => {
         </Wrapper>
       );
 
+      // Editing the condition threshold must not rewrite the severity bands (no coupling).
       fireEvent.change(screen.getByTestId('ruleBuilderConditionThreshold-0'), {
         target: { value: '150' },
       });
       const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
       expect(next.alertConditions[0].threshold).toEqual([150]);
-      expect(next.severity?.levels[0].threshold).toBe(150);
       expect(next.severity?.levels[1].threshold).toBe(200);
-    });
-
-    it('mirrors the lowest multi-severity level onto the condition threshold', () => {
-      const onBuilderStateChange = jest.fn();
-      const builderState = makeBuilderState({
-        severity: {
-          mode: 'multi',
-          singleLevelSeverity: 'high',
-          levels: [
-            { id: 'l1', severity: 'low', threshold: 100 },
-            { id: 'l2', severity: 'high', threshold: 200 },
-          ],
-        },
-      });
-      render(
-        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
-          <RuleBuilderAlertConditionStep
-            state={createState()}
-            dispatch={dispatch}
-            services={createMockServices()}
-          />
-        </Wrapper>
-      );
-
-      fireEvent.change(screen.getByTestId('ruleBuilderSeverityThreshold-0'), {
-        target: { value: '120' },
-      });
-      const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
-      expect(next.severity?.levels[0].threshold).toBe(120);
-      expect(next.alertConditions[0].threshold).toEqual([120]);
     });
 
     it('re-normalizes level order when a row is set to an out-of-order severity', () => {

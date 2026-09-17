@@ -61,8 +61,6 @@ import {
   getAvailableMetricLabels,
   reconcileSeverity,
   normalizeSeverityOrder,
-  syncSeverityToConditionThreshold,
-  syncConditionToSeverityThreshold,
   isSeveritySupported,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
@@ -410,14 +408,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     (index: number, updates: Partial<AlertCondition>) => {
       const next = [...thresholdValues.alertConditions];
       next[index] = { ...next[index], ...updates };
-      // Severity inherits the condition's comparator/count, so re-check it stays applicable,
-      // then keep the lowest multi-severity level in sync with the (single) condition threshold.
-      const reconciled = reconcileSeverity(thresholdValues.severity, next);
-      const severity =
-        index === 0
-          ? syncSeverityToConditionThreshold(reconciled, next[0].threshold[0])
-          : reconciled;
-      onThresholdValuesChange({ ...thresholdValues, alertConditions: next, severity });
+      // Severity inherits the condition's comparator, so re-check it stays applicable. Its
+      // thresholds are independent of the condition threshold (no coupling).
+      onThresholdValuesChange({
+        ...thresholdValues,
+        alertConditions: next,
+        severity: reconcileSeverity(thresholdValues.severity, next),
+      });
     },
     [thresholdValues, onThresholdValuesChange]
   );
@@ -449,15 +446,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   const updateSeverity = useCallback(
     (severity: ThresholdFormValues['severity']) => {
-      // Keep levels in severity order (levels[0] = least severe) so ES|QL generation and
-      // the threshold coupling below never depend on the row order the user happened to edit in.
-      const normalized = normalizeSeverityOrder(severity);
-      // Keep the (single) condition threshold in sync with the lowest multi-severity level.
-      const alertConditions = syncConditionToSeverityThreshold(
-        thresholdValues.alertConditions,
-        normalized
-      );
-      onThresholdValuesChange({ ...thresholdValues, alertConditions, severity: normalized });
+      onThresholdValuesChange({ ...thresholdValues, severity: normalizeSeverityOrder(severity) });
     },
     [thresholdValues, onThresholdValuesChange]
   );
