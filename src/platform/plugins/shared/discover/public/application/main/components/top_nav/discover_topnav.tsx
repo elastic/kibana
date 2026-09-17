@@ -101,8 +101,13 @@ export const DiscoverTopNav = ({
   );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
-    if (!dataView || dataView.type === DataViewType.ROLLUP) {
+    if (dataView?.type === DataViewType.ROLLUP) {
       return false;
+    }
+    if (!dataView) {
+      // No data view yet (e.g. uninitialized ES|QL tab) — show the picker disabled
+      // so it's visible but non-interactive until a query resolves a data view.
+      return { disabled: true };
     }
     return { disabled: !dataView.isTimeBased() };
   }, [dataView]);
@@ -339,8 +344,9 @@ export const DiscoverTopNav = ({
     setIsLiveEsqlEmpty(isEmptyEsqlQuery(nextQuery));
   }, []);
 
+  const disableEmptyEsqlSubmit = isEsqlMode && isLiveEsqlEmpty;
   const disableEmptyEsqlControls = isUninitializedEsqlTab && isLiveEsqlEmpty;
-  const emptyEsqlQueryDisabledTooltip = disableEmptyEsqlControls
+  const emptyEsqlQueryDisabledTooltip = disableEmptyEsqlSubmit
     ? i18n.translate('discover.topNav.emptyEsqlQueryDisabledTooltip', {
         defaultMessage: 'Enter an ES|QL query to enable this.',
       })
@@ -416,7 +422,7 @@ export const DiscoverTopNav = ({
         onQuerySubmit={onQuerySubmit}
         onCancel={onCancelClick}
         isLoading={isLoading}
-        disableSubmitAction={disableEmptyEsqlControls}
+        disableSubmitAction={disableEmptyEsqlSubmit}
         onQueryChange={onQueryChange}
         onSavedQueryIdChange={updateSavedQueryId}
         disableSubscribingToGlobalDataServices={true}

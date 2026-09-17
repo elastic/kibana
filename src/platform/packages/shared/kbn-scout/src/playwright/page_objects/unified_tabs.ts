@@ -337,9 +337,11 @@ export class UnifiedTabs {
     }
 
     const tabId = tabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+    const closedTab = this.page.testSubj.locator(tabTestSubj);
+
     await tab.hover();
     await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.closeTabBtnPrefix}${tabId}`);
-    await tab.waitFor({ state: 'hidden' });
+    await closedTab.waitFor({ state: 'hidden' });
     await this.hideTabPreview();
   }
 

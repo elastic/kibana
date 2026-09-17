@@ -40,7 +40,11 @@ describe('triggerInvestigationStepDefinition', () => {
     const { definition } = createDefinition(start);
 
     await definition.handler(
-      createContext({ subject_type: 'significant_event', subject_id: 'event-1' })
+      createContext({
+        subject_type: 'significant_event',
+        subject_id: 'event-1',
+        title: 'Checkout latency breach',
+      })
     );
 
     expect(start).toHaveBeenCalledWith(
@@ -58,6 +62,7 @@ describe('triggerInvestigationStepDefinition', () => {
       createContext({
         subject_type: 'significant_event',
         subject_id: 'event-1',
+        title: 'Checkout latency breach',
         trigger_type: 'manual',
       })
     );
@@ -76,9 +81,62 @@ describe('triggerInvestigationStepDefinition', () => {
 
     await expect(
       definition.handler(
-        createContext({ subject_type: 'significant_event', subject_id: 'event-1' })
+        createContext({
+          subject_type: 'significant_event',
+          subject_id: 'event-1',
+          title: 'Checkout latency breach',
+        })
       )
     ).rejects.toBe(error);
     expect(start).toHaveBeenCalledTimes(1);
+  });
+
+  it('turns a nested v1 alert document into an investigation snapshot', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(
+      createContext({
+        subject_type: 'alert',
+        subject_id: 'alert-1',
+        context: {
+          alerts: [
+            {
+              _id: 'alert-1',
+              kibana: {
+                alert: {
+                  uuid: 'alert-1',
+                  status: 'active',
+                  start: '2026-09-02T10:00:00.000Z',
+                  reason: 'CPU saturation',
+                  rule: {
+                    uuid: 'rule-1',
+                    name: 'CPU threshold',
+                    rule_type_id: 'metrics.alert.threshold',
+                    category: 'Metric threshold',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: { type: 'alert', id: 'alert-1', summary: undefined },
+        context: {
+          alerts: [
+            expect.objectContaining({
+              id: 'alert-1',
+              rule_id: 'rule-1',
+              rule_name: 'CPU threshold',
+              reason: 'CPU saturation',
+            }),
+          ],
+        },
+      })
+    );
   });
 });

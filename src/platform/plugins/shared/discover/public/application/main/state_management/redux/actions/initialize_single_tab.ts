@@ -147,9 +147,13 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       : undefined;
 
     const persistedTabDataView = persistedTabSearchSource?.getField('index');
+    const initialDataViewId =
+      typeof initialDataViewIdOrSpec === 'string'
+        ? initialDataViewIdOrSpec
+        : initialAdHocDataViewSpec?.id;
     const dataViewId = isDataViewSource(urlAppState?.dataSource)
       ? urlAppState?.dataSource.dataViewId
-      : persistedTabDataView?.id;
+      : persistedTabDataView?.id ?? initialDataViewId;
 
     const tabHasInitialAdHocDataViewSpec =
       dataViewId && initialAdHocDataViewSpec?.id === dataViewId;
@@ -192,7 +196,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         services
       );
     } else {
-      // Load the requested data view if one exists, or a fallback otherwise
+      // Load the requested data view if one exists, or a fallback otherwise.
+      // For empty ES|QL, updateTabs stores the previous tab's view on
+      // initialInternalState so dataViewId above is set and we skip the default.
       const result = await loadAndResolveDataView({
         dataViewId,
         locationDataViewSpec: dataViewSpec,

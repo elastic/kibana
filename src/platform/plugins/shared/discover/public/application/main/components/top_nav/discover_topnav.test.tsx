@@ -247,6 +247,29 @@ describe('Discover topnav component', () => {
     expect(toolkit.getCurrentTab().uiState.esqlEditor?.isHistoryOpen).toBe(expectedIsHistoryOpen);
   });
 
+  test('disables submit when the ES|QL editor is empty after a search', async () => {
+    const { toolkit, props } = await setup();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId, appState: { query: { esql: '' } } })
+    );
+    toolkit.getCurrentTabDataStateContainer().data$.main$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      foundDocuments: true,
+    });
+
+    renderTestComponent({ toolkit, props });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+        'data-disable-submit-action',
+        'true'
+      );
+    });
+  });
+
+
   test('disables submit on an uninitialized ES|QL tab with an empty query', async () => {
     const { toolkit, props } = await setup();
     const tabId = toolkit.getCurrentTab().id;
