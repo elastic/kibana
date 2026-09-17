@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import {
+  AgentBuilderErrorCode,
+  AgentExecutionMode,
+  createRequestAbortedError,
+} from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
 import type { AttachmentServiceStart } from '../attachments';
@@ -311,6 +315,94 @@ describe('AgentExecutionService', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(receivedEvents).toEqual([fakeEvent]);
+    });
+  });
+
+  describe('executeAgent (local mode) — execution status alignment', () => {
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 10));
+
+    it('records aborted (not failed) when the live stream errors with RequestAbortedError', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const aborted = createRequestAbortedError('Converse request was aborted');
+      mockHandleAgentExecution.mockResolvedValue(throwError(() => aborted));
+      mockCollectAndWriteEvents.mockRejectedValue(aborted);
+
+      const { executionId } = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
+      });
+      await settle();
+
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        executionId,
+        ExecutionStatus.aborted,
+        expect.objectContaining({ code: AgentBuilderErrorCode.requestAborted })
+      );
+    });
+
+    it('records failed when the live stream errors with any other error', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const failure = new Error('llm exploded');
+      mockHandleAgentExecution.mockResolvedValue(throwError(() => failure));
+      mockCollectAndWriteEvents.mockRejectedValue(failure);
+
+      const { executionId } = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
+      });
+      await settle();
+
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        executionId,
+        ExecutionStatus.failed,
+        expect.objectContaining({ message: 'llm exploded' })
+      );
+    });
+
+    it('records failed with the error when the setup rejects before the stream exists, then rethrows', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockHandleAgentExecution.mockRejectedValue(new Error('registry down'));
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+          useTaskManager: false,
+        })
+      ).rejects.toThrow('registry down');
+
+      const statuses = mockExecutionClient.updateStatus.mock.calls.map(([, status]) => status);
+      expect(statuses).toEqual([ExecutionStatus.running, ExecutionStatus.failed]);
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        expect.any(String),
+        ExecutionStatus.failed,
+        expect.objectContaining({ message: 'registry down' })
+      );
+    });
+
+    it('records aborted when the setup rejects with RequestAbortedError', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockHandleAgentExecution.mockRejectedValue(createRequestAbortedError('stop'));
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+          useTaskManager: false,
+        })
+      ).rejects.toThrow();
+
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        expect.any(String),
+        ExecutionStatus.aborted,
+        expect.objectContaining({ code: AgentBuilderErrorCode.requestAborted })
+      );
     });
   });
 

@@ -184,13 +184,22 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     status: ExecutionStatus,
     error?: SerializedExecutionError
   ): Promise<void> {
+    // `aborted` is sticky: once an abort was requested the execution reports it, and neither a
+    // later `failed` (the graph erroring inside the abort-detection window) nor `completed` (the
+    // graph finishing inside it) may overwrite it. The error, when given, is still recorded.
     await this.esClient.update({
       index: agentExecutionIndexName,
       id: executionId,
       retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
-      doc: {
-        status,
-        ...(error ? { error } : {}),
+      script: {
+        lang: 'painless',
+        source: `
+          boolean keepAborted = ctx._source.status == 'aborted'
+            && (params.status == 'failed' || params.status == 'completed');
+          if (!keepAborted) { ctx._source.status = params.status; }
+          if (params.error != null) { ctx._source.error = params.error; }
+        `,
+        params: { status, error: error ?? null },
       },
     });
   }

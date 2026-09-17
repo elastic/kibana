@@ -17,6 +17,7 @@ import type { ChatEvent, InteractivityConfig } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
+  isRequestAbortedError,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
 import type {
@@ -36,9 +37,9 @@ import { createAgentExecutionClient, type AgentExecutionClient } from './persist
 import {
   handleAgentExecution,
   collectAndWriteEvents,
-  serializeExecutionError,
   type AgentExecutionDeps,
 } from './execution_runner';
+import { serializeExecutionError } from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
@@ -302,6 +303,16 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     } catch (e) {
       abortMonitor.stop();
       heartbeatReporter.stop();
+      // The stream never existed, so the stream-based status writers never ran: record the
+      // terminal status here instead of leaving the document `running` forever.
+      const status = isRequestAbortedError(e) ? ExecutionStatus.aborted : ExecutionStatus.failed;
+      try {
+        await executionClient.updateStatus(executionId, status, serializeExecutionError(e));
+      } catch (statusErr) {
+        this.logger.error(
+          `Failed to update status for local execution ${executionId}: ${statusErr.message}`
+        );
+      }
       throw e;
     }
   }
@@ -338,12 +349,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       .catch(async (error) => {
         this.logger.error(`Local execution ${executionId} failed: ${error.message}`);
 
+        // Same classification as the Task Manager handler: an abort is recorded as `aborted`.
+        const status = isRequestAbortedError(error)
+          ? ExecutionStatus.aborted
+          : ExecutionStatus.failed;
         try {
-          await executionClient.updateStatus(
-            executionId,
-            ExecutionStatus.failed,
-            serializeExecutionError(error)
-          );
+          await executionClient.updateStatus(executionId, status, serializeExecutionError(error));
         } catch (statusErr) {
           this.logger.error(
             `Failed to update status for local execution ${executionId}: ${statusErr.message}`
