@@ -1388,6 +1388,36 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     );
   });
 
+  it('still accepts in-flight executions of the previous deductive investigation id', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeEnsureExecution({
+        workflowId: 'system-deductive-investigation',
+        originManagedWorkflowId: 'system-deductive-investigation',
+        context: {
+          inputs: {
+            message: 'Investigate last error',
+            context: {
+              source: 'manual',
+              manual_id: 'manual',
+              trigger_type: 'manual',
+            },
+          },
+        },
+      })
+    );
+
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: EXECUTION_ID,
+        attributes: expect.objectContaining({
+          subject_type: 'manual',
+          subject_id: 'manual',
+        }),
+      })
+    );
+  });
+
   it('throws InvestigationNotFoundError for an execution of an unrelated workflow', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(
       makeEnsureExecution({ workflowId: 'some-other-workflow', originManagedWorkflowId: undefined })

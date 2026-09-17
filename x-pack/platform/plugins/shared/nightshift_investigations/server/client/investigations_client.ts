@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -88,9 +88,12 @@ const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
 const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
   typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
 
+const LEGACY_DEDUCTIVE_INVESTIGATION_WORKFLOW_ID = 'system-deductive-investigation';
+
 const INVESTIGATION_WORKFLOW_IDS = new Set([
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  LEGACY_DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
 ]);
 
 /**
@@ -103,7 +106,7 @@ const usesNightshiftWorkflow = (subject: InvestigationSubject): boolean =>
 
 const workflowIdForSubject = (subject: InvestigationSubject): string =>
   usesNightshiftWorkflow(subject)
-    ? DEDUCTIVE_INVESTIGATION_WORKFLOW_ID
+    ? NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID
     : SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
 
 /** Each workflow calls its own agent, so the pre-install has to follow the same split. */
