@@ -1,45 +1,101 @@
 {
   "10.9.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.9.0 and 10.10.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "type": "user",
+      "status": "started",
+      "logExtractionState": {
+        "checkpointTimestamp": "2026-03-04T18:00:00.000Z",
+        "paginationId": null,
+        "lastExecutionTimestamp": "2026-03-04T17:37:20.000Z",
+        "sliceEndTimestamp": null
+      },
+      "error": null,
+      "versionState": {
+        "version": "2",
+        "state": "running",
+        "isMigratedFromV1": true
+      }
+    },
+    {
+      "type": "service",
+      "status": "stopped",
+      "logExtractionState": {
+        "checkpointTimestamp": null,
+        "paginationId": null,
+        "lastExecutionTimestamp": null,
+        "sliceEndTimestamp": null
+      },
+      "error": null,
+      "versionState": {
+        "version": "2",
+        "state": "running",
+        "isMigratedFromV1": false
+      }
+    },
+    {
+      "type": "host",
+      "status": "started",
+      "logExtractionState": {
+        "checkpointTimestamp": "2026-03-04T17:00:00.000Z",
+        "paginationId": "some-pagination-id",
+        "lastExecutionTimestamp": "2026-03-04T16:37:20.000Z",
+        "sliceEndTimestamp": "2026-03-04T17:30:00.000Z"
+      },
+      "error": null,
+      "versionState": {
+        "version": "2",
+        "state": "running",
+        "isMigratedFromV1": false
+      }
     }
   ],
   "10.10.0": [
     {
-      "type": "user|host|service|generic",
-      "status": "installing|started|stopped|updating|error",
-      "error": "object?|null",
-      "nonPriorityLogExtractionState": "object?|null",
-      "nonPriorityStatus": "installing?|started?|stopped?|updating?|error?|null",
-      "nonPriorityError": "object?|null",
+      "type": "user",
+      "status": "started",
       "logExtractionState": {
-        "checkpointTimestamp": "string?|null",
-        "paginationId": "string?|null",
-        "lastExecutionTimestamp": "string?|null",
-        "sliceEndTimestamp": "string?|null"
+        "checkpointTimestamp": "2026-03-04T18:00:00.000Z",
+        "paginationId": null,
+        "lastExecutionTimestamp": "2026-03-04T17:37:20.000Z",
+        "sliceEndTimestamp": null
       },
+      "error": null,
       "versionState": {
-        "version": "1|2",
-        "state": "running|migrating",
-        "isMigratedFromV1": "boolean"
+        "version": "2",
+        "state": "running",
+        "isMigratedFromV1": true
+      }
+    },
+    {
+      "type": "service",
+      "status": "stopped",
+      "logExtractionState": {
+        "checkpointTimestamp": null,
+        "paginationId": null,
+        "lastExecutionTimestamp": null,
+        "sliceEndTimestamp": null
       },
-      "logExtractionConfig": {
-        "additionalIndexPatterns": "array?|null",
-        "excludedIndexPatterns": "array?|null",
-        "lookbackPeriod": "string?|null",
-        "delay": "string?|null",
-        "docsLimit": "number?|null",
-        "maxLogsPerPage": "number?|null",
-        "frequency": "string?|null",
-        "maxTimeWindowSize": "string?|null",
-        "maxLogsPerWindow": "number?|null",
-        "maxLogsPerWindowCapBehavior": "defer?|drop?|null"
+      "error": null,
+      "versionState": {
+        "version": "2",
+        "state": "running",
+        "isMigratedFromV1": false
+      }
+    },
+    {
+      "type": "host",
+      "status": "started",
+      "logExtractionState": {
+        "checkpointTimestamp": "2026-03-04T17:00:00.000Z",
+        "paginationId": "some-pagination-id",
+        "lastExecutionTimestamp": "2026-03-04T16:37:20.000Z",
+        "sliceEndTimestamp": "2026-03-04T17:30:00.000Z"
+      },
+      "error": null,
+      "versionState": {
+        "version": "2",
+        "state": "running",
+        "isMigratedFromV1": false
       }
     }
   ]
