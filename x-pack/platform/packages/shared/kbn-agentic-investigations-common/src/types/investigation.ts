@@ -6,7 +6,7 @@
  */
 
 /** Brief bucket recommendation for an investigation */
-export type RecommendedAction = 'contain' | 'escalate' | 'investigate' | 'tune';
+export type RecommendedAction = 'respond' | 'investigate' | 'configure' | 'closed';
 
 export interface TimelineEvent {
   id: string;

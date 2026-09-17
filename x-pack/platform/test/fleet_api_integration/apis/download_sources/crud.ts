@@ -1319,6 +1319,100 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('download source ID immutability', () => {
+      let targetSourceId: string;
+
+      beforeEach(async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'id-immutability-test',
+            host: 'https://artifacts.test.co:443',
+            is_default: false,
+          })
+          .expect(200);
+        targetSourceId = body.item.id;
+      });
+
+      afterEach(async () => {
+        if (!targetSourceId) return;
+        await supertest
+          .delete(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 400 when body id is a payload that does not match path sourceId', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'mismatch',
+            name: 'id-immutability-test',
+            host: 'https://artifacts.test.co:443',
+          })
+          .expect(400);
+
+        expect(body.message).to.contain('Cannot change download source ID');
+
+        // Source unchanged and still retrievable by canonical id
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .expect(200);
+        expect(getBody.item.id).to.equal(targetSourceId);
+        expect(getBody.item.host).to.equal('https://artifacts.test.co:443');
+      });
+
+      it('should return 200 and preserve canonical id when body id matches path sourceId', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: targetSourceId,
+            name: 'id-immutability-test',
+            host: 'https://updated.test.co:443',
+          })
+          .expect(200);
+
+        expect(body.item.id).to.equal(targetSourceId);
+
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .expect(200);
+        expect(getBody.item.id).to.equal(targetSourceId);
+      });
+
+      it('should return canonical id in list and still be deletable after rejected PUT', async function () {
+        // Rejected update
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'poisoned-id',
+            name: 'id-immutability-test',
+            host: 'https://artifacts.test.co:443',
+          })
+          .expect(400);
+
+        // List returns canonical id
+        const { body: listBody } = await supertest
+          .get(`/api/fleet/agent_download_sources`)
+          .expect(200);
+        const found = listBody.items.find((s: any) => s.id === targetSourceId);
+        expect(found).to.be.ok();
+        expect(found.id).to.equal(targetSourceId);
+
+        // Delete by canonical id succeeds
+        await supertest
+          .delete(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        targetSourceId = '';
+      });
+    });
+
     describe('proxy_id behaviour', () => {
       const PROXY_ID = 'download-source-proxy-id';
       before(async () => {
