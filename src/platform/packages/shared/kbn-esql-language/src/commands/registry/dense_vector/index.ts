@@ -13,11 +13,13 @@ import type { ICommandContext } from '../types';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import { columnsAfter } from './columns_after';
+import { summary } from './summary';
 
 const denseVectorCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
   columnsAfter,
+  summary,
 };
 
 export const denseVectorCommand: ICommand = {
