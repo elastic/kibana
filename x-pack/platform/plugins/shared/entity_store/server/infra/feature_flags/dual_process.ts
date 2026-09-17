@@ -116,7 +116,7 @@ async function enableNonPriorityTasks({
     ({ attributes }) =>
       hasPriorityExtractionGate(attributes.type) &&
       attributes.status === ENGINE_STATUS.STARTED &&
-      attributes.nonPriorityStatus === ENGINE_STATUS.STOPPED
+      attributes.nonPriorityStatus !== ENGINE_STATUS.STARTED
   );
 
   await Promise.all(
@@ -165,12 +165,11 @@ export const subscribeToDualProcessFlag = ({
   // Reconcile on startup: pairwise() only reacts to in-session transitions, so flag changes
   // between restarts (config edits, version upgrades) are handled here.
   isDualProcessEnabled(coreStart.featureFlags)
-    .then((enabled) => {
-      logger.info(`[DUAL-PROCESS] FF STARTUP: entityStore.dualProcess.enabled=${enabled}`);
-      return enabled
+    .then((enabled) =>
+      enabled
         ? enableNonPriorityTasks({ coreStart, logger })
-        : teardownNonPriorityTasks({ coreStart, logger });
-    })
+        : teardownNonPriorityTasks({ coreStart, logger })
+    )
     .catch((err: Error) =>
       logger.error(`Dual-process startup reconciliation failed: ${err.message}`)
     );
@@ -182,9 +181,6 @@ export const subscribeToDualProcessFlag = ({
       takeUntil(stop$),
       concatMap(([prev, curr]) => {
         if (prev === curr) return Promise.resolve();
-        logger.info(
-          `[DUAL-PROCESS] FF CHANGED: entityStore.dualProcess.enabled ${prev} -> ${curr}`
-        );
         const transition =
           prev && !curr
             ? teardownNonPriorityTasks({ coreStart, logger })
