@@ -38,7 +38,7 @@ export { getExternals } from './config/externals';
 
 // Build runner
 export { runBuild, type BuildOptions, type BuildResult } from './run_build';
-export { buildSharedPackages } from './build_shared_packages';
+export { buildSharedPackages, watchSharedPackages } from './build_shared_packages';
 
 // CLI
 export { runRspackCli, type CliOptions } from './cli';

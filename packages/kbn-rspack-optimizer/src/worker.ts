@@ -22,7 +22,7 @@
 
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import type { KibanaGroup } from '@kbn/projects-solutions-groups';
-import { runBuild, formatSize } from './run_build';
+import { runBuild, formatSize, type BuildResult } from './run_build';
 import type { ThemeTag } from './types';
 
 interface StartMessage {
@@ -40,10 +40,16 @@ interface StartMessage {
     allowlistPluginGroups?: readonly KibanaGroup[];
     hmr?: boolean;
     basePath?: string;
+    buildSharedDeps?: boolean;
   };
 }
 
-type ParentMessage = StartMessage;
+interface InvalidateMessage {
+  type: 'invalidate';
+}
+
+type ParentMessage = StartMessage | InvalidateMessage;
+let activeBuild: BuildResult | undefined;
 
 // Simple logger that sends messages to parent
 const createWorkerLog = () => ({
@@ -72,8 +78,10 @@ async function handleStart(options: StartMessage['options']) {
       allowlistPluginGroups: options.allowlistPluginGroups,
       hmr: options.hmr,
       basePath: options.basePath,
+      buildSharedDeps: options.buildSharedDeps,
       log,
     });
+    activeBuild = result;
 
     if (result.success) {
       const entryLabel = result.entryCount === 1 ? 'entry' : 'entries';
@@ -98,6 +106,8 @@ process.on('message', (message: ParentMessage) => {
     handleStart(message.options).catch((err) => {
       process.send?.({ type: 'done', success: false, errors: [err.message] });
     });
+  } else {
+    activeBuild?.invalidate?.();
   }
 });
 

@@ -19,7 +19,11 @@ import { isHmrEnabled } from './hmr/hmr_enabled';
 import { HmrServer } from './hmr/hmr_server';
 import type { ThemeTag } from './types';
 import { BUNDLES_SUBDIR } from './paths';
-import { buildSharedPackages } from './build_shared_packages';
+import {
+  buildSharedPackages,
+  watchSharedPackages,
+  type SharedPackagesWatcher,
+} from './build_shared_packages';
 
 export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /[\\/]node_modules[\\/]/,
@@ -80,6 +84,8 @@ export interface BuildResult {
   close?: () => Promise<void>;
   /** Resolves when the watcher closes (watch mode only) */
   done?: Promise<void>;
+  /** Request a rebuild (watch mode only) */
+  invalidate?: () => void;
   /** True if build was interrupted by SIGINT/SIGTERM */
   interrupted?: boolean;
 }
@@ -115,10 +121,15 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const startTime = Date.now();
 
   let hmrServer: HmrServer | undefined;
+  let sharedPackagesWatcher: SharedPackagesWatcher | undefined;
 
   try {
     if (buildSharedDeps) {
-      await buildSharedPackages({ repoRoot, dist, cache, log });
+      if (watch) {
+        sharedPackagesWatcher = await watchSharedPackages({ repoRoot, dist, log });
+      } else {
+        await buildSharedPackages({ repoRoot, dist, cache, log });
+      }
     }
 
     // Resolve HMR enablement
@@ -164,13 +175,28 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const compiler = rspack(config) as Compiler;
 
     if (watch) {
-      return runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
+      const result = await runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
+      if (!sharedPackagesWatcher) {
+        return result;
+      }
+
+      sharedPackagesWatcher.onRebuild(() => result.invalidate?.());
+      const closeRspack = result.close;
+      return {
+        ...result,
+        close: async () => {
+          sharedPackagesWatcher?.onRebuild(() => {});
+          await sharedPackagesWatcher?.close();
+          await closeRspack?.();
+        },
+      };
     } else {
       // HMR is not used outside watch mode; clean up if somehow started
       await hmrServer?.close();
       return runProductionBuild(compiler, log, startTime, repoRoot);
     }
   } catch (error: any) {
+    await sharedPackagesWatcher?.close();
     await hmrServer?.close();
     log?.error(`Build failed: ${error.message}`);
     if (error.stack) {
@@ -359,6 +385,7 @@ async function runWatchBuild(
             ...result,
             close: closeWatcher,
             done,
+            invalidate: () => watching.invalidate(),
           });
           return;
         }
