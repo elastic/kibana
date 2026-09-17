@@ -41,9 +41,9 @@ export interface MonitorStatProps {
 }
 
 const STATS_PER_ROW = 3;
-// Fixed per-column width so a stat in row 2 (e.g. Alerts) lines up under the
-// column above it (Down) instead of drifting with each row's own content width.
-const STAT_COLUMN_WIDTH = 100;
+// Matches the "Pings over time" chart's height below, so the two panels read
+// as an even pair instead of this one collapsing tightly around its content.
+const STATS_AREA_HEIGHT = '180px';
 
 export const MonitorStat = ({
   dataTestSubj,
@@ -77,7 +77,12 @@ export const MonitorStat = ({
     />
   );
   const stat = isClickable ? (
-    <EuiButtonEmpty data-test-subj={`${dataTestSubj}Btn`} onClick={onClickStat}>
+    <EuiButtonEmpty
+      color="text"
+      data-test-subj={`${dataTestSubj}Btn`}
+      onClick={onClickStat}
+      css={{ height: 'auto', blockSize: 'auto', '.euiButtonEmpty__content': { height: 'auto' } }}
+    >
       {statComponent}
     </EuiButtonEmpty>
   ) : (
@@ -258,14 +263,18 @@ export function OverviewStatus({
     return stats;
   }, [areStatsClickable, getOnClickStat, statusConfig]);
 
-  const statRows = useMemo(() => {
-    const allStats = [...monitorStatData, ...extraStats];
-    const rows: MonitorStatProps[][] = [];
-    for (let i = 0; i < allStats.length; i += STATS_PER_ROW) {
-      rows.push(allStats.slice(i, i + STATS_PER_ROW));
-    }
-    return rows;
-  }, [monitorStatData, extraStats]);
+  const allStats = useMemo(
+    () => [...monitorStatData, ...extraStats],
+    [monitorStatData, extraStats]
+  );
+  // Balance columns (e.g. 4 stats -> 2x2, not a 3-column row with a sparse
+  // remainder row) and lay them out on an actual CSS grid, so every stat
+  // lands in a shared column position across rows — a flex row per row would
+  // otherwise center each row's items independently, and same-column stats
+  // (e.g. "Up" over "Pending") would drift out of alignment whenever a
+  // neighboring column's content width differs row to row.
+  const numRows = Math.max(1, Math.ceil(allStats.length / STATS_PER_ROW));
+  const columns = Math.ceil(allStats.length / numRows);
 
   return (
     <EmbeddablePanelWrapper
@@ -274,18 +283,20 @@ export function OverviewStatus({
       titleAppend={titleAppend}
       hideTitle={hideTitle}
     >
-      {statRows.map((row, rowIndex) => (
-        <React.Fragment key={rowIndex}>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="xl">
-            {row.map((props) => (
-              <EuiFlexItem grow={false} css={{ width: STAT_COLUMN_WIDTH }} key={props.dataTestSubj}>
-                <MonitorStat {...props} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </React.Fragment>
-      ))}
+      <EuiSpacer size="m" />
+      <div
+        css={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${columns}, 1fr)`,
+          justifyItems: 'center',
+          alignContent: 'space-around',
+          minHeight: STATS_AREA_HEIGHT,
+        }}
+      >
+        {allStats.map((props) => (
+          <MonitorStat {...props} key={props.dataTestSubj} />
+        ))}
+      </div>
     </EmbeddablePanelWrapper>
   );
 }
