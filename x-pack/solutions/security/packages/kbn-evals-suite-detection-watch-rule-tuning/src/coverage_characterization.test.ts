@@ -7,6 +7,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { CHANGE_TYPES, EXCEPTION_OPERATOR_PAYLOAD } from './constants';
 
 /**
  * Characterization tests for the rule-tuning eval suite.
@@ -53,6 +54,34 @@ const goldenLabels = () => {
   return new Map(ids.map((id, i) => [id, expected[i]]));
 };
 
+/**
+ * Split the diagnose step's schema into one chunk per `oneOf` branch, keyed by the
+ * branch's `const:` value. A branch runs from its own `const:` to the next branch's,
+ * which keeps each branch's trailing `required:` list inside its chunk (the
+ * exception branch's nested entry-item unions also declare `required:` lists).
+ */
+const schemaBranches = (): Map<string, string> => {
+  const review = readReview();
+  const diagnose = review.slice(review.indexOf('- name: diagnose_rule'));
+  const schema = diagnose.slice(diagnose.indexOf('schema:'));
+  const consts = [...schema.matchAll(/const:\s*([a-z_]+)/g)];
+  const branches = new Map<string, string>();
+  consts.forEach((match, index) => {
+    const start = match.index ?? 0;
+    const end =
+      index + 1 < consts.length ? consts[index + 1].index ?? schema.length : schema.length;
+    branches.set(match[1], schema.slice(start, end));
+  });
+  return branches;
+};
+
+/** The branch-level `required:` list — the LAST one in a chunk, not a nested item's. */
+const requiredFields = (chunk: string): string[] => {
+  const matches = [...chunk.matchAll(/required:\s*\[([^\]]+)\]/g)];
+  const branchRequired = matches[matches.length - 1];
+  return branchRequired ? branchRequired[1].split(',').map((field) => field.trim()) : [];
+};
+
 describe('rule-tuning coverage characterization', () => {
   it('characterizes seeded alert scoring as a shared medium/40 literal', () => {
     // The seeder writes the SAME severity/risk_score onto every alert row and every rule,
@@ -84,28 +113,86 @@ describe('rule-tuning coverage characterization', () => {
     expect(diagnose).toMatch(/timeout: "10m"/);
   });
 
-  it('characterizes the diagnose enum as the post-split four', () => {
-    // The fork characterized a six-value enum including risk_score/disable/manual.
-    // Post-split the review can only emit [exception, suppression, query, threshold];
-    // pin that so re-adding a label is a deliberate, reviewed change (and the fixture
-    // labels can never silently include an unemittable one again).
+  it('characterizes the diagnose schema as the post-#288807 oneOf of four const branches', () => {
+    // The fork's review step declared a flat enum of six tunings; the port pinned
+    // [exception, suppression, query, threshold]; upstream #288807 replaced both with a
+    // root `oneOf` of four const-branched objects. Pin the branch SET (not the yaml's
+    // branch order, which is a formatting choice) against the suite's own CHANGE_TYPES,
+    // so re-adding or renaming a branch is a deliberate, reviewed change and the fixture
+    // labels can never silently include an unemittable one again.
+    const branches = schemaBranches();
+    expect(new Set(branches.keys())).toEqual(new Set(CHANGE_TYPES));
+
     const review = readReview();
     const diagnose = review.slice(review.indexOf('- name: diagnose_rule'));
     const schema = diagnose.slice(diagnose.indexOf('schema:'));
-    expect(schema).toMatch(/enum: \[exception, suppression, query, threshold\]/);
+    expect(schema).not.toMatch(/enum:\s*\[\s*exception/);
+  });
+
+  it('characterizes the payload field every oneOf branch requires', () => {
+    // The per-branch payload is the contract validProposal enforces: an exception
+    // without entries, a query without a query, or a risk_score without a score and
+    // severity can never be rendered by the gate or applied by the apply steps.
+    const branches = schemaBranches();
+    expect(requiredFields(branches.get('exception') ?? '')).toEqual([
+      'change_type',
+      'summary',
+      'exception_entries',
+    ]);
+    expect(requiredFields(branches.get('query') ?? '')).toEqual([
+      'change_type',
+      'summary',
+      'proposed_query',
+    ]);
+    expect(requiredFields(branches.get('risk_score') ?? '')).toEqual([
+      'change_type',
+      'summary',
+      'proposed_risk_score',
+      'proposed_severity',
+    ]);
+    // `manual` carries no payload beyond the summary every branch requires.
+    expect(requiredFields(branches.get('manual') ?? '')).toEqual(['change_type', 'summary']);
+  });
+
+  it('characterizes the exception operator vocabulary validProposal mirrors', () => {
+    // The evaluator maps each operator to the payload field it requires. If the yaml
+    // adds or removes an operator, an entry the workflow could apply would score
+    // invalid (or vice versa), so the two lists must stay identical.
+    const exception = schemaBranches().get('exception') ?? '';
+    const operators = new Set(
+      [...exception.matchAll(/enum:\s*\[([^\]]+)\]/g)].flatMap((match) =>
+        match[1].split(',').map((operator) => operator.trim())
+      )
+    );
+    expect(operators).toEqual(new Set(Object.keys(EXCEPTION_OPERATOR_PAYLOAD)));
   });
 
   it('characterizes the golden label contract of all fixtures', () => {
-    // Labels are PRELIMINARY after the 2026-09-11 port (23 re-derived); pin the
-    // current mapping so any further relabel is a deliberate, reviewed decision.
+    // Labels are PRELIMINARY until validated on the live stack; pin the mapping so any
+    // further relabel is a deliberate, reviewed decision. `manual` is the majority class
+    // at 17/35 — one fixture below the 0.5 guard in eval_budget.test.ts.
     const labels = goldenLabels();
     expect(labels.size).toBe(35);
-    // No label may sit outside the emittable enum — the port's core invariant.
-    const emittable = new Set(['exception', 'suppression', 'query', 'threshold']);
+
+    const counts = new Map<string, number>();
+    for (const label of labels.values()) counts.set(label, (counts.get(label) ?? 0) + 1);
+    expect(Object.fromEntries(counts)).toEqual({
+      exception: 6,
+      query: 6,
+      risk_score: 6,
+      manual: 17,
+    });
+
+    // No label may sit outside the emittable oneOf branches — the suite's core invariant.
     for (const [id, label] of labels) {
-      if (!emittable.has(label)) {
+      if (!(CHANGE_TYPES as readonly string[]).includes(label)) {
         throw new Error(`fixture ${id} carries unemittable label ${label}`);
       }
+    }
+    // ...and every branch must be exercised, or the accuracy number silently stops
+    // saying anything about the branch nothing is labeled with.
+    for (const changeType of CHANGE_TYPES) {
+      expect(counts.get(changeType) ?? 0).toBeGreaterThan(0);
     }
   });
 });

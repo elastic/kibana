@@ -33,7 +33,7 @@ describe('rule-tuning evaluators', () => {
 
     it('scores 0 when the predicted change_type differs from the golden label', async () => {
       const output: RuleTuningVerdict = {
-        change_type: 'threshold',
+        change_type: 'risk_score',
         executionId: 'exec-2',
         executionStatus: 'completed' as never,
       };
@@ -62,7 +62,8 @@ describe('rule-tuning evaluators', () => {
   describe('validProposal', () => {
     const base: RuleTuningVerdict = {
       change_type: 'exception',
-      exception_condition: 'host.name is web-01 (backup host)',
+      summary: 'FPs are all the build agent running java, not a detection',
+      exception_entries: [{ field: 'host.name', operator: 'is', value: 'build-agent-01' }],
       executionId: 'exec-4',
       executionStatus: 'completed' as never,
     };
@@ -72,14 +73,57 @@ describe('rule-tuning evaluators', () => {
       expect(result.score).toBe(1);
     });
 
-    it('rejects an exception proposal with a blank exception_condition', async () => {
+    it('accepts an exception entry that carries a values array', async () => {
       const result = await validProposal.evaluate!({
-        output: { ...base, exception_condition: '' },
+        output: {
+          ...base,
+          exception_entries: [
+            { field: 'process.name', operator: 'is_one_of', values: ['java', 'node'] },
+          ],
+        },
+      } as never);
+      expect(result.score).toBe(1);
+    });
+
+    it('accepts an existence-only exception entry with no payload', async () => {
+      const result = await validProposal.evaluate!({
+        output: {
+          ...base,
+          exception_entries: [{ field: 'process.parent.name', operator: 'exists' }],
+        },
+      } as never);
+      expect(result.score).toBe(1);
+    });
+
+    it('rejects an exception proposal with no entries', async () => {
+      const result = await validProposal.evaluate!({
+        output: { ...base, exception_entries: [] },
       } as never);
       expect(result.score).toBe(0);
     });
 
-    it('rejects a change_type outside the enum', async () => {
+    it('rejects an exception entry whose operator needs a value but carries none', async () => {
+      const result = await validProposal.evaluate!({
+        output: {
+          ...base,
+          exception_entries: [{ field: 'host.name', operator: 'is' }],
+        },
+      } as never);
+      expect(result.score).toBe(0);
+    });
+
+    it('rejects an exception entry with an operator outside the workflow vocabulary', async () => {
+      const result = await validProposal.evaluate!({
+        output: {
+          ...base,
+          exception_entries: [{ field: 'host.name', operator: 'roughly_is', value: 'web-01' }],
+        },
+      } as never);
+      expect(result.score).toBe(0);
+      expect((result.metadata as { payloadValid: boolean }).payloadValid).toBe(false);
+    });
+
+    it('rejects a change_type outside the four-branch union', async () => {
       const result = await validProposal.evaluate!({
         output: { ...base, change_type: 'delete_rule' as ChangeType },
       } as never);
@@ -87,74 +131,135 @@ describe('rule-tuning evaluators', () => {
       expect((result.metadata as { changeTypeValid: boolean }).changeTypeValid).toBe(false);
     });
 
-    it('rejects a query proposal with an empty proposed_query', async () => {
-      const result = await validProposal.evaluate!({
-        output: { ...base, change_type: 'query', proposed_query: '' },
-      } as never);
-      expect(result.score).toBe(0);
+    it('rejects the pre-#288807 labels the workflow can no longer emit', async () => {
+      // #288807 replaced the flat `enum: [exception, suppression, query, threshold]`
+      // with a oneOf of four consts. A proposal still using the old vocabulary is
+      // schema drift, not a tuning decision — score it invalid, not merely wrong.
+      for (const legacy of ['suppression', 'threshold'] as const) {
+        const result = await validProposal.evaluate!({
+          output: { ...base, change_type: legacy },
+        } as never);
+        expect(result.score).toBe(0);
+        expect((result.metadata as { changeTypeValid: boolean }).changeTypeValid).toBe(false);
+      }
     });
 
-    it('rejects a threshold proposal missing proposed_query content', async () => {
-      // Post-split, threshold is the in-band noise reducer and its payload rides the
-      // proposal strings; a bare change_type with no renderable content must fail
-      // (the old risk_score + proposed_severity pair no longer exists).
-      const result = await validProposal.evaluate!({
-        output: { ...base, change_type: 'threshold' as ChangeType, exception_condition: '' },
-      } as never);
-      expect(result.score).toBe(0);
-    });
-
-    it('accepts a threshold proposal with renderable content', async () => {
+    it('accepts a query proposal on a query rule', async () => {
       const result = await validProposal.evaluate!({
         output: {
           ...base,
-          change_type: 'threshold' as ChangeType,
-          exception_condition: 'raise threshold above benign daily volume',
-          summary: 'benign volume dominates',
+          change_type: 'query',
+          proposed_query: 'process.name:java and host.os.type:linux',
         },
+        metadata: { ruleType: 'query' },
       } as never);
       expect(result.score).toBe(1);
     });
 
-    it('rejects suppression on a rule type whose PATCH has no alert_suppression field', async () => {
+    it('rejects a query proposal with an empty proposed_query', async () => {
       const result = await validProposal.evaluate!({
-        output: {
-          ...base,
-          change_type: 'suppression' as ChangeType,
-          exception_condition: 'group by host.name',
-        },
-        metadata: { ruleType: 'machine_learning' },
+        output: { ...base, change_type: 'query', proposed_query: '' },
+        metadata: { ruleType: 'query' },
       } as never);
       expect(result.score).toBe(0);
     });
 
-    it('rejects suppression when ruleType is absent from metadata', async () => {
-      // The rule-type precondition must bite, not be waived. `ruleType == null ||` made the
-      // gate vacuous: any example whose metadata lost ruleType scored a suppression
-      // proposal valid. Removing that clause (so a missing ruleType fails the check) is
-      // the mutation under test here — this test goes RED if the clause returns.
+    it('rejects a query proposal on a rule type whose query is never previewed or applied', async () => {
+      // can_preview_query_change requires fetch_rule.output.type == 'query'; on any
+      // other rule type the proposed query is unreachable, so it must not validate.
       const result = await validProposal.evaluate!({
-        output: {
-          ...base,
-          change_type: 'suppression' as ChangeType,
-          exception_condition: 'group by host.name',
-        },
-        metadata: {},
+        output: { ...base, change_type: 'query', proposed_query: 'process.name:java' },
+        metadata: { ruleType: 'new_terms' },
       } as never);
       expect(result.score).toBe(0);
       expect((result.metadata as { payloadValid: boolean }).payloadValid).toBe(false);
     });
 
-    it('accepts suppression on a suppression-capable rule type', async () => {
+    it('rejects a query proposal when ruleType is absent from metadata', async () => {
+      // `ruleType == null ||` would make the rule-type precondition vacuous: an
+      // example whose metadata lost ruleType would score a query proposal valid for
+      // free, which is exactly the drift this evaluator exists to catch.
+      const result = await validProposal.evaluate!({
+        output: { ...base, change_type: 'query', proposed_query: 'process.name:java' },
+        metadata: {},
+      } as never);
+      expect(result.score).toBe(0);
+    });
+
+    it('accepts a well-formed risk_score proposal', async () => {
       const result = await validProposal.evaluate!({
         output: {
           ...base,
-          change_type: 'suppression' as ChangeType,
-          exception_condition: 'group by host.name',
+          change_type: 'risk_score',
+          proposed_risk_score: 21,
+          proposed_severity: 'low',
         },
-        metadata: { ruleType: 'query' },
       } as never);
       expect(result.score).toBe(1);
+    });
+
+    it('rejects a risk_score proposal missing the score or the severity', async () => {
+      const missingSeverity = await validProposal.evaluate!({
+        output: { ...base, change_type: 'risk_score', proposed_risk_score: 21 },
+      } as never);
+      expect(missingSeverity.score).toBe(0);
+
+      const missingScore = await validProposal.evaluate!({
+        output: { ...base, change_type: 'risk_score', proposed_severity: 'low' },
+      } as never);
+      expect(missingScore.score).toBe(0);
+    });
+
+    it('rejects a risk_score proposal whose score is outside 0-100', async () => {
+      for (const outOfRangeScore of [-1, 101, 21.5]) {
+        const result = await validProposal.evaluate!({
+          output: {
+            ...base,
+            change_type: 'risk_score',
+            proposed_risk_score: outOfRangeScore,
+            proposed_severity: 'low',
+          },
+        } as never);
+        expect(result.score).toBe(0);
+      }
+    });
+
+    it('rejects a risk_score proposal with a severity outside the vocabulary', async () => {
+      const result = await validProposal.evaluate!({
+        output: {
+          ...base,
+          change_type: 'risk_score',
+          proposed_risk_score: 40,
+          proposed_severity: 'urgent',
+        },
+      } as never);
+      expect(result.score).toBe(0);
+    });
+
+    it('accepts a manual proposal whose payload is the summary alone', async () => {
+      const result = await validProposal.evaluate!({
+        output: {
+          ...base,
+          change_type: 'manual',
+          summary: 'No stable field separates the scanner from the targeted behaviour',
+        },
+      } as never);
+      expect(result.score).toBe(1);
+    });
+
+    it('rejects any branch that has no renderable summary', async () => {
+      // review_tuning's gate opens only when structured_output.summary != null, so a
+      // summary-less proposal of ANY change_type can never reach a decision.
+      const noSummary = await validProposal.evaluate!({
+        output: { ...base, summary: undefined },
+      } as never);
+      expect(noSummary.score).toBe(0);
+      expect((noSummary.metadata as { summaryValid: boolean }).summaryValid).toBe(false);
+
+      const blankSummary = await validProposal.evaluate!({
+        output: { ...base, change_type: 'manual', summary: '   ' },
+      } as never);
+      expect(blankSummary.score).toBe(0);
     });
   });
 

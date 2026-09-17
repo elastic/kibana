@@ -37,17 +37,37 @@ export const RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-revie
 export const WORKFLOWS_API_VERSION = '2023-10-31';
 
 /**
- * The review workflow's diagnose step enum (rule_tuning_review.yaml). Post-split,
- * `risk_score`/`disable`/`manual` are no longer emittable — the closest intents
- * (low-value rules, unfixable noise) now route to the analyst via the approval
- * gate's Dismiss/Approve, so the old `manual` label has no successor in-band.
+ * The four branches the review workflow's `diagnose_rule` step can emit, in the
+ * preference order its prompt declares (rule_tuning_review.yaml, root `oneOf`
+ * since upstream #288807).
+ *
+ * `suppression` and `threshold` — the previous flat-enum values — are NOT
+ * emittable: the workflow's apply steps only exist for exception, query and
+ * risk_score, and everything else is a `manual` hand-off. A volume-only fix has
+ * no in-band branch, so it has to be recommended through `manual`.
  */
-export const CHANGE_TYPES = ['exception', 'suppression', 'query', 'threshold'] as const;
+export const CHANGE_TYPES = ['exception', 'query', 'risk_score', 'manual'] as const;
 
 export type ChangeType = (typeof CHANGE_TYPES)[number];
 
-/** Rule types whose PATCH payload accepts `alert_suppression` (see rule_schemas.schema.yaml). */
-export const SUPPRESSION_CAPABLE_RULE_TYPES = ['query', 'saved_query', 'eql', 'threshold'] as const;
+/** Values the `risk_score` branch's `proposed_severity` accepts. */
+export const PROPOSED_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+
+/**
+ * `exception` branch operators mapped to the payload field each one requires
+ * (see the `exception_entries` item union in rule_tuning_review.yaml). Operators
+ * outside this map are not part of the workflow's schema.
+ */
+export const EXCEPTION_OPERATOR_PAYLOAD = {
+  is: 'value',
+  is_not: 'value',
+  matches: 'value',
+  does_not_match: 'value',
+  is_one_of: 'values',
+  is_not_one_of: 'values',
+  exists: null,
+  does_not_exist: null,
+} as const;
 
 /** Tag prefix the workflow writes to harvested alerts. Isolated to the eval namespace. */
 export const EVAL_TAG_PREFIX = 'eval-rule-tuning';

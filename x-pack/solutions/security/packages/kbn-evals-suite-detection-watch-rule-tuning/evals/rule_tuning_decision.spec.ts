@@ -23,7 +23,8 @@
  * Evaluators:
  *   - ChangeTypeAccuracy (CODE, primary): predicted tuning path == golden label.
  *   - ValidProposal (CODE): structured output conforms to the workflow's fail-closed gate
- *     contract (per-path payload fields, suppression only on capable rule types).
+ *     contract (a summary on every branch plus that branch's payload fields; a query only
+ *     on a rule type the workflow can actually preview and apply).
  *   - RationaleQuality (LLM): the summary is grounded in the seeded FP evidence.
  */
 
@@ -45,15 +46,26 @@ const SUMMARY_CRITERIA = [
   'The summary does not invent alert fields, hosts, users, or commands that are not in the seeded data',
 ];
 
-/** Golden tuning-path fixtures, one per decision path the review workflow can take.
+/** Golden tuning-path fixtures, one per branch of the review workflow's `oneOf`.
  *
- * LABEL PROVENANCE (2026-09-11 port): the fork's golden labels included `risk_score`
- * (6) and `manual` (17), which the post-split review schema can no longer emit (enum
- * is [exception, suppression, query, threshold]). Those 23 labels were re-derived
- * from the new diagnose prompt's stated semantics — prefer query; exception for
- * identity-keyed benign sources; suppression for volume on capable rule types;
- * threshold as the remaining in-band noise reducer. These are PRELIMINARY until
- * validated on the live stack: the first full run must be treated as a
+ * LABEL DERIVATION: the review workflow's `diagnose_rule` schema is a root `oneOf` of
+ * four const branches — exception (+`exception_entries`), query (+`proposed_query`),
+ * risk_score (+`proposed_risk_score`/`proposed_severity`) and manual (summary only) —
+ * and its prompt asks for the branch whose criteria the entity evidence actually meets.
+ * Every label here is one of those four, derived from the fixture's own description and
+ * seeded entity profile:
+ *
+ *   - `exception`: one repeated, known-good entity the rule can be excepted on.
+ *   - `query`: FPs spread across unrelated entities sharing an over-broad query term.
+ *   - `risk_score`: real detections the description asks to be downgraded.
+ *   - `manual`: no automated branch applies — the pattern is volume rather than
+ *     identity, every entity is distinct with no shared key, or the rule type blocks the
+ *     only candidate (a query change needs a `query` rule). The workflow's only
+ *     automated paths are exception/query/risk_score, so a volume-shaped fix has to be
+ *     recommended through the hand-off branch.
+ *
+ * Distribution: 6 exception / 6 query / 6 risk_score / 17 manual. Labels are
+ * PRELIMINARY until validated on the live stack: the first full run is a
  * characterization baseline, and any relabel must go through the golden-label
  * characterization test in the same commit.
  */
@@ -77,35 +89,38 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-volume-suppression',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Low-value alert flood from a repeated benign process — no automated path, recommend suppression manually',
   },
   {
     id: 'fp-low-value-risk',
-    expected: 'exception',
+    expected: 'risk_score',
     ruleType: 'query',
     description: 'Alerts are real but low-value — downgrade risk score and severity',
   },
   {
     id: 'fp-unfixable-noise',
-    expected: 'threshold',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Rule fires exclusively on benign activity with no discriminating signal — disable',
   },
-  // Rule-type precondition fixture. The alert cluster looks exactly like the suppression
-  // case (one entity re-firing), but `new_terms` is not in SUPPRESSION_CAPABLE_RULE_TYPES,
-  // so `can_apply_suppression` must refuse and the safe answer is the manual hand-off.
-  // Without this the suppression rule-type gate is asserted only in unit tests and never
-  // exercised against a real model on a real rule.
+  // Rule-type precondition fixture: the alert cluster looks exactly like the
+  // single-entity exception cases (one entity re-firing), but `new_terms` is not a
+  // rule type the workflow can preview or apply a query change on
+  // (`can_preview_query_change` requires type == "query"), and a novel term on a
+  // new_terms rule is a judgement call rather than a tuning — so the only safe
+  // answer is the manual hand-off. Without this the query rule-type gate is
+  // asserted only in unit tests and never exercised against a real model on a real
+  // rule.
   {
     id: 'fp-suppression-incapable-rule-type',
-    expected: 'threshold',
+    expected: 'manual',
     ruleType: 'new_terms',
     description:
-      'Repeated single-entity FPs on a new_terms rule — suppression is not applicable to ' +
+      'Repeated single-entity FPs on a new_terms rule — a query change is not applicable to ' +
       'this rule type, so the worker must fall back to a manual hand-off',
   },
   {
@@ -175,133 +190,133 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-suppression-healthcheck',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Benign curl re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-vulnscan',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Benign nessus re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-inventory',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Benign osqueryd re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-patchagent',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Benign wuauclt re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-logship',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Benign filebeat re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-low-value-admin-tools',
-    expected: 'exception',
+    expected: 'risk_score',
     ruleType: 'query',
     description:
       'Sanctioned admin tooling generates true but unremarkable hits - lower risk score and severity',
   },
   {
     id: 'fp-low-value-devtools',
-    expected: 'exception',
+    expected: 'risk_score',
     ruleType: 'query',
     description:
       'Developer tooling on build laptops fires constantly with no incident value - downgrade scoring',
   },
   {
     id: 'fp-low-value-remote-support',
-    expected: 'exception',
+    expected: 'risk_score',
     ruleType: 'query',
     description:
       'Approved remote-support sessions are real yet routine - reduce risk score rather than exclude',
   },
   {
     id: 'fp-low-value-archive',
-    expected: 'exception',
+    expected: 'risk_score',
     ruleType: 'query',
     description:
       'Routine archive extraction is benign in this environment - downgrade instead of suppressing',
   },
   {
     id: 'fp-low-value-scripting',
-    expected: 'exception',
+    expected: 'risk_score',
     ruleType: 'query',
     description:
       'Everyday scripting by platform engineers is expected - lower severity to keep visibility',
   },
   {
     id: 'fp-unfixable-telemetry',
-    expected: 'threshold',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Only telemetry agents match, with no field separating benign from malicious - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-agentmesh',
-    expected: 'threshold',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Service-mesh sidecars account for every hit and share no discriminating attribute - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-buildfarm',
-    expected: 'threshold',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Ephemeral build-farm workers regenerate identifiers each run, so no stable filter exists - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-imaging',
-    expected: 'threshold',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'OS imaging fleets reproduce the pattern wholesale with nothing to key an exception on - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-mailflow',
-    expected: 'threshold',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Mail-gateway scanning is indistinguishable from the targeted behaviour - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-manual-newterms-dns',
-    expected: 'exception',
+    expected: 'manual',
     ruleType: 'new_terms',
     description:
-      'New DNS resolvers trip a new_terms rule; suppression is unsupported for this rule type, so escalate',
+      'New DNS resolvers trip a new_terms rule; an unseen term is a judgement call for the analyst, so escalate',
   },
   {
     id: 'fp-manual-newterms-proxy',
-    expected: 'exception',
+    expected: 'manual',
     ruleType: 'new_terms',
     description:
-      'A newly introduced proxy host looks novel to a new_terms rule - needs human review, not suppression',
+      'A newly introduced proxy host looks novel to a new_terms rule - needs human review, not an automated tuning',
   },
   {
     id: 'fp-manual-newterms-vpn',
-    expected: 'exception',
+    expected: 'manual',
     ruleType: 'new_terms',
     description:
       'A replacement VPN concentrator registers as an unseen term - escalate rather than auto-tune',
   },
   {
     id: 'fp-manual-newterms-ntp',
-    expected: 'exception',
+    expected: 'manual',
     ruleType: 'new_terms',
     description:
       'A re-pointed NTP source appears novel on a new_terms rule - route to manual review',
@@ -363,7 +378,7 @@ evaluate.describe(
                   'Runs the managed system-security-rule-tuning-worker/review workflows ' +
                   'end-to-end against ' +
                   `${TUNING_FIXTURES.length} seeded false-positive clusters (one per tuning path: ` +
-                  'exception, query, suppression, threshold) and grades the diagnose_rule ' +
+                  'exception, query, risk_score, manual) and grades the diagnose_rule ' +
                   "step's change_type against the golden label.",
                 examples,
               } satisfies EvaluationDataset,
@@ -409,44 +424,78 @@ evaluate.describe(
         executionId: 'evaluator-control',
         executionStatus: 'completed' as never,
       };
+      const summary = 'FPs are the sanctioned scanner, not a detection';
 
-      // change_type outside the enum — the runtime gate would refuse the PATCH.
-      const outOfEnum = await validProposal.evaluate?.({
+      // change_type outside the four-branch union — the runtime gate would refuse the PATCH.
+      const outOfUnion = await validProposal.evaluate?.({
         output: {
           ...completedRun,
           change_type: 'delete_rule' as ChangeType,
+          summary,
         },
         metadata: { ruleType: 'query' },
       } as never);
-      expect(outOfEnum?.score).toBe(0);
-      expect(outOfEnum?.label).toBe('invalid');
+      expect(outOfUnion?.score).toBe(0);
+      expect(outOfUnion?.label).toBe('invalid');
 
-      // Well-formed change_type but empty payload — the review gate needs a
-      // non-empty payload to render an approval decision from. Post-split the
-      // exception payload is the free-form exception_condition string.
-      const emptyEntries = await validProposal.evaluate?.({
+      // A label from the pre-#288807 enum: nothing in the merged workflow can emit it,
+      // so a model still returning it has not followed the prompt.
+      const legacyLabel = await validProposal.evaluate?.({
+        output: {
+          ...completedRun,
+          change_type: 'threshold' as ChangeType,
+          summary,
+        },
+        metadata: { ruleType: 'query' },
+      } as never);
+      expect(legacyLabel?.score).toBe(0);
+
+      // Well-formed change_type but an empty payload — the exception branch's apply step
+      // iterates exception_entries, so an entry-less proposal renders an empty exception.
+      const noEntries = await validProposal.evaluate?.({
         output: {
           ...completedRun,
           change_type: 'exception' as ChangeType,
-          exception_condition: '   ',
+          summary,
+          exception_entries: [],
         },
         metadata: { ruleType: 'query' },
       } as never);
-      expect(emptyEntries?.score).toBe(0);
+      expect(noEntries?.score).toBe(0);
 
-      // Suppression proposed for a rule type that cannot carry it — must reject
-      // rather than fall through to a free pass. Post-split the suppression
-      // payload rides proposed_query's sibling contract; a blank proposal with
-      // change_type suppression still has no renderable gate content.
-      const suppressionIncapable = await validProposal.evaluate?.({
+      // A query proposal on a rule type whose query is never previewed or applied —
+      // can_preview_query_change requires the rule type to be "query".
+      const queryOnUnsupportedRuleType = await validProposal.evaluate?.({
         output: {
           ...completedRun,
-          change_type: 'suppression' as ChangeType,
-          exception_condition: '',
+          change_type: 'query' as ChangeType,
+          summary,
+          proposed_query: 'process.name:java',
         },
         metadata: { ruleType: 'new_terms' },
       } as never);
-      expect(suppressionIncapable?.score).toBe(0);
+      expect(queryOnUnsupportedRuleType?.score).toBe(0);
+
+      // risk_score outside the schema's 0-100 bounds and with an unlisted severity.
+      const badRiskScore = await validProposal.evaluate?.({
+        output: {
+          ...completedRun,
+          change_type: 'risk_score' as ChangeType,
+          summary,
+          proposed_risk_score: 140,
+          proposed_severity: 'urgent',
+        },
+        metadata: { ruleType: 'query' },
+      } as never);
+      expect(badRiskScore?.score).toBe(0);
+
+      // No summary at all — the review_tuning gate never opens, so no decision is
+      // possible whatever the branch.
+      const noSummary = await validProposal.evaluate?.({
+        output: { ...completedRun, change_type: 'manual' as ChangeType },
+        metadata: { ruleType: 'query' },
+      } as never);
+      expect(noSummary?.score).toBe(0);
 
       // No proposal at all (workflow failed upstream) — accuracy must score 0, not error.
       const noProposal = await changeTypeAccuracy.evaluate?.({

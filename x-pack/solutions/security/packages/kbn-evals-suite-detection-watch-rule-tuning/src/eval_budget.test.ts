@@ -108,10 +108,9 @@ describe('rule-tuning eval budget', () => {
   });
 
   it('keeps the majority class small enough that a constant answer cannot look competent', () => {
-    // Port note: after the 23-label re-derivation, `exception` holds 16/35 — above the
-    // 0.5 guard's intent only in spirit (0.457 ≤ 0.5 passes numerically). If the first
-    // live-stack characterization run shows the true distribution skews further, the
-    // fix is rebalancing fixtures, not raising the guard.
+    // `manual` holds 17/35 = 0.486 — one fixture from the guard, so the next fixture
+    // added must be exception/query/risk_score. If a live-stack run shows the true
+    // distribution skews further, the fix is rebalancing fixtures, not raising the guard.
     const counts = labelCounts();
     const total = [...counts.values()].reduce((sum, n) => sum + n, 0);
     const majority = Math.max(...counts.values());
@@ -171,18 +170,23 @@ describe('rule-tuning eval budget', () => {
     expect(message).toMatch(/steps\.fetch_rule\.output\.language/);
   });
 
-  it('spells out criteria for every change_type it can emit', () => {
+  it('spells out criteria for every branch it can emit', () => {
     const review = readReview();
     const diagnose = review.slice(review.indexOf('- name: diagnose_rule'));
     const message = diagnose.slice(0, diagnose.indexOf('schema:'));
+    const schema = diagnose.slice(diagnose.indexOf('schema:'));
 
-    const enumMatch = review.match(/change_type:\s*\n\s*type: string\s*\n\s*enum: \[([^\]]+)\]/);
-    if (!enumMatch)
-      throw new Error('rule_tuning_review.yaml no longer declares a change_type enum');
+    // Post-#288807 the branch set is the `const:` values of the root oneOf, not a flat
+    // `change_type` enum — the old enum probe no longer finds anything.
+    const branches = [...schema.matchAll(/const:\s*([a-z_]+)/g)].map((match) => match[1]);
+    if (branches.length === 0) {
+      throw new Error('rule_tuning_review.yaml no longer declares oneOf branch consts');
+    }
 
-    // The merged prompt names each enum value in its guidance sentences (it no
-    // longer uses the `label — description` bullet form). Each label must appear.
-    for (const label of enumMatch[1].split(',').map((value) => value.trim())) {
+    // The merged prompt names each branch in its guidance sentences (it no
+    // longer uses the `label — description` bullet form). Each label must appear,
+    // so a branch that is emittable but undescribed is a visible diff.
+    for (const label of branches) {
       expect(message).toMatch(new RegExp(label));
     }
   });

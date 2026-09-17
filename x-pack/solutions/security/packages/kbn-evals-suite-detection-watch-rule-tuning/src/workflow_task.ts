@@ -28,15 +28,31 @@ import {
  */
 const AGENT_STEP_TYPE = 'ai.agent';
 
-/** Structured output the diagnose step is schema-constrained to return (post-split schema). */
+/** One item of the `exception` branch's `exception_entries` (see the item union in the yaml). */
+export interface ExceptionEntry {
+  field: string;
+  operator: string;
+  /** Required by the is / is_not / matches / does_not_match operators. */
+  value?: string;
+  /** Required by the is_one_of / is_not_one_of operators. */
+  values?: string[];
+}
+
+/**
+ * Structured output the diagnose step is schema-constrained to return. The review
+ * workflow declares a root `oneOf` of four const-branched objects (upstream
+ * #288807), so only the fields of the emitted branch are populated: `exception`
+ * carries `exception_entries`, `query` carries `proposed_query`, `risk_score`
+ * carries `proposed_risk_score` + `proposed_severity`, and `manual` carries
+ * nothing but the `summary` every branch requires.
+ */
 export interface RuleTuningProposal {
   change_type?: ChangeType;
   summary?: string;
-  current_query?: string;
+  exception_entries?: ExceptionEntry[];
   proposed_query?: string;
-  /** Free-form condition describing the exception; no structured entries post-split. */
-  exception_condition?: string;
-  rekey_required?: boolean;
+  proposed_risk_score?: number;
+  proposed_severity?: string;
 }
 
 /** Verdict graded by the suite's evaluators: the diagnose proposal plus run metadata. */
