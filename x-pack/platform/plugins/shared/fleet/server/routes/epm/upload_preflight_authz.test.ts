@@ -101,9 +101,14 @@ describe('collectArchiveSignals', () => {
   });
 
   it('reads buffer for security_rule paths to detect ML rules', async () => {
-    const mlRuleBuffer = makeAssetBuffer({ type: 'machine_learning', machine_learning_job_id: 'my-job' });
+    const mlRuleBuffer = makeAssetBuffer({
+      type: 'machine_learning',
+      machine_learning_job_id: 'my-job',
+    });
     (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer }])
+      makeIterator([
+        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer },
+      ])
     );
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
@@ -114,7 +119,9 @@ describe('collectArchiveSignals', () => {
   it('does not set hasMlSecurityRules for non-ML security_rule', async () => {
     const queryRuleBuffer = makeAssetBuffer({ type: 'query', query: 'event.action: *' });
     (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: queryRuleBuffer }])
+      makeIterator([
+        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: queryRuleBuffer },
+      ])
     );
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
@@ -125,7 +132,10 @@ describe('collectArchiveSignals', () => {
 
   it('does not read buffers for non-security_rule kibana assets', async () => {
     const iterator = makeIterator([
-      { path: 'mypackage-1.0.0/kibana/security_ai_prompt/my-prompt.json', buffer: Buffer.from('{}') },
+      {
+        path: 'mypackage-1.0.0/kibana/security_ai_prompt/my-prompt.json',
+        buffer: Buffer.from('{}'),
+      },
     ]);
     (createArchiveIterator as jest.Mock).mockReturnValue(iterator);
 
@@ -242,7 +252,11 @@ describe('buildRequiredActions', () => {
 
   it('accumulates actions for multiple gated types', () => {
     const signals = {
-      gatedTypesFound: new Set(['security_rule', 'security_ai_prompt', 'osquery_saved_query'] as any),
+      gatedTypesFound: new Set([
+        'security_rule',
+        'security_ai_prompt',
+        'osquery_saved_query',
+      ] as any),
       blockedTypes: [],
       hasMlSecurityRules: true,
     };
@@ -272,7 +286,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).resolves.toBeUndefined();
 
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
@@ -281,13 +300,20 @@ describe('checkUploadPackageAssetPrivileges', () => {
   it('checks rules-all for non-ML security_rule package', async () => {
     const queryRuleBuffer = makeAssetBuffer({ type: 'query' });
     (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: queryRuleBuffer }])
+      makeIterator([
+        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: queryRuleBuffer },
+      ])
     );
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -301,15 +327,25 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('checks rules-all + ml:canCreateJob for ML security_rule package', async () => {
-    const mlRuleBuffer = makeAssetBuffer({ type: 'machine_learning', machine_learning_job_id: 'my-job' });
+    const mlRuleBuffer = makeAssetBuffer({
+      type: 'machine_learning',
+      machine_learning_job_id: 'my-job',
+    });
     (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer }])
+      makeIterator([
+        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer },
+      ])
     );
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -323,14 +359,21 @@ describe('checkUploadPackageAssetPrivileges', () => {
   it('throws FleetUnauthorizedError when caller lacks ml:canCreateJob for ML rule package', async () => {
     const mlRuleBuffer = makeAssetBuffer({ type: 'machine_learning' });
     (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer }])
+      makeIterator([
+        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer },
+      ])
     );
 
     const security = makeSecurity(false, ['api:ml:canCreateJob']);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
@@ -343,7 +386,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
@@ -355,7 +403,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -372,7 +425,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -389,7 +447,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -406,7 +469,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -429,7 +497,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -453,12 +526,19 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
       [mockSpaceId],
-      expect.objectContaining({ kibana: expect.arrayContaining(['api:cloud-security-posture-all']) })
+      expect.objectContaining({
+        kibana: expect.arrayContaining(['api:cloud-security-posture-all']),
+      })
     );
   });
 
@@ -471,7 +551,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     );
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
@@ -483,7 +568,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -501,7 +591,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     );
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
@@ -514,7 +609,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).resolves.toBeUndefined();
 
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
@@ -527,7 +627,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(null);
 
     await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId
+      )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 });

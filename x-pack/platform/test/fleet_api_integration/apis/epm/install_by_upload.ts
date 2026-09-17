@@ -335,10 +335,7 @@ export default function (providerContext: FtrProviderContext) {
           `  kibana.version: "^8.0.0"`,
         ].join('\n')
       );
-      zip.file(
-        `${pkgKey}/kibana/${assetType}/test-asset.json`,
-        JSON.stringify(assetContent)
-      );
+      zip.file(`${pkgKey}/kibana/${assetType}/test-asset.json`, JSON.stringify(assetContent));
       const buffer = await zip.generateAsync({ type: 'nodebuffer' });
       return buffer;
     }

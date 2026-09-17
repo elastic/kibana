@@ -57,33 +57,36 @@ export async function collectArchiveSignals(
   const blockedTypes: KibanaAssetType[] = [];
   let hasMlSecurityRules = false;
 
-  await iterator.traverseEntries(async (entry) => {
-    const parts = getPathParts(entry.path);
-    if (parts.service !== 'kibana') return;
-    const assetType = parts.type as KibanaAssetType;
-    if (!GATED_ASSET_TYPES.has(assetType)) return;
+  await iterator.traverseEntries(
+    async (entry) => {
+      const parts = getPathParts(entry.path);
+      if (parts.service !== 'kibana') return;
+      const assetType = parts.type as KibanaAssetType;
+      if (!GATED_ASSET_TYPES.has(assetType)) return;
 
-    if (!ASSET_REQUIRED_PRIVILEGES[assetType]) {
-      blockedTypes.push(assetType);
-      return;
-    }
-
-    gatedTypesFound.add(assetType);
-
-    if (assetType === KibanaAssetType.securityRule && entry.buffer) {
-      try {
-        const asset = JSON.parse(entry.buffer.toString('utf8'));
-        if (asset?.attributes?.type === 'machine_learning') {
-          hasMlSecurityRules = true;
-        }
-      } catch {
-        // Malformed JSON in a security_rule file; install will fail later with a better error.
+      if (!ASSET_REQUIRED_PRIVILEGES[assetType]) {
+        blockedTypes.push(assetType);
+        return;
       }
+
+      gatedTypesFound.add(assetType);
+
+      if (assetType === KibanaAssetType.securityRule && entry.buffer) {
+        try {
+          const asset = JSON.parse(entry.buffer.toString('utf8'));
+          if (asset?.attributes?.type === 'machine_learning') {
+            hasMlSecurityRules = true;
+          }
+        } catch {
+          // Malformed JSON in a security_rule file; install will fail later with a better error.
+        }
+      }
+    },
+    (path) => {
+      const parts = getPathParts(path);
+      return parts.service === 'kibana' && parts.type === KibanaAssetType.securityRule;
     }
-  }, (path) => {
-    const parts = getPathParts(path);
-    return parts.service === 'kibana' && parts.type === KibanaAssetType.securityRule;
-  });
+  );
 
   return { gatedTypesFound, blockedTypes, hasMlSecurityRules };
 }
@@ -118,7 +121,9 @@ export async function checkUploadPackageAssetPrivileges(
 
   if (signals.blockedTypes.length > 0) {
     throw new FleetUnauthorizedError(
-      `Package contains asset types that cannot be authorized for upload: ${[...new Set(signals.blockedTypes)].join(', ')}`
+      `Package contains asset types that cannot be authorized for upload: ${[
+        ...new Set(signals.blockedTypes),
+      ].join(', ')}`
     );
   }
 
