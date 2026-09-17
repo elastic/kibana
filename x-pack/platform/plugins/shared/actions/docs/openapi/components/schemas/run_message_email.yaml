@@ -6,6 +6,13 @@ type: object
 required:
   - message
   - subject
+anyOf:
+  - required:
+      - to
+  - required:
+      - cc
+  - required:
+      - bcc
 properties:
   bcc:
     type: array
