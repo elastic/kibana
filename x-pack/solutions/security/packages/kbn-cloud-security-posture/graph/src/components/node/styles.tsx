@@ -37,7 +37,7 @@ export const ENTITY_NODE_TOTAL_HEIGHT = 60;
 /**
  * The height Dagre reserves per entity node in the layout, set to the fully-expanded
  * card height (header + all metadata rows visible). Pre-reserving this space prevents
- * nodes from overlapping neighbours when the user zooms past LAYERS_ZOOM_THRESHOLD.
+ * nodes from overlapping their neighbours.
  *
  * Calculation (worst-case: grouped node, 5 metadata rows):
  *   60px (header) + 1px (metadata border-top) + 5 × 56px (rows) = 341px → 360px (snapped to GRID_SIZE×2=20).

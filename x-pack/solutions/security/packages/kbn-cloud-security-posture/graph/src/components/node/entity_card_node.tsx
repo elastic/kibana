@@ -191,7 +191,7 @@ const CountBadge = styled.div<{ euiTheme: EuiThemeComputed }>`
   border-radius: 10px;
   padding: 0 ${({ euiTheme }) => euiTheme.size.xs};
   background: ${({ euiTheme }) => euiTheme.colors.primary};
-  color: #ffffff;
+  color: ${({ euiTheme }) => euiTheme.colors.textInverse};
   font-size: 11px;
   font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
   display: flex;
@@ -242,14 +242,6 @@ const StackedCard = styled.div<{
   transform: scale(${({ scale }) => scale});
   transform-origin: center bottom;
   z-index: -1;
-`;
-
-/**
- * Full-width metadata item — spans both columns in the 2-column metadata grid.
- * Used for Source, Asset criticality, and Risk score rows in the grouped node panel.
- */
-const FullWidthMetadataItem = styled(MetadataItem)`
-  grid-column: 1 / -1;
 `;
 
 /**

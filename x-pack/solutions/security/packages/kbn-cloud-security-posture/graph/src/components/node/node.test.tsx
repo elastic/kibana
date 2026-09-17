@@ -31,13 +31,6 @@ jest.mock('../constants', () => ({
   ONLY_RENDER_VISIBLE_ELEMENTS: false,
 }));
 
-// Control zoom level for "with layers on" tests
-const mockViewport = { zoom: 1, x: 0, y: 0 };
-jest.mock('@xyflow/react', () => ({
-  ...jest.requireActual('@xyflow/react'),
-  useViewport: () => mockViewport,
-}));
-
 const nodeTypes = {
   diamond: DiamondNode,
   ellipse: EllipseNode,
@@ -158,47 +151,31 @@ describe('Entity Nodes', () => {
     });
   });
 
-  describe('Layers Panel (with layers on state)', () => {
-    beforeEach(() => {
-      mockViewport.zoom = 1;
-    });
-
-    it('should not render layers panel at default zoom (< threshold)', () => {
-      mockViewport.zoom = 1;
-      renderNodeInFlow({ label: 'server-01' });
-      expect(screen.queryByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).not.toBeInTheDocument();
-    });
-
-    it('should render layers panel when zoomed in past threshold', () => {
-      mockViewport.zoom = 1.5;
+  describe('Metadata Panel', () => {
+    it('should always render the metadata panel', () => {
       renderNodeInFlow({ label: 'server-01' });
       expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
     });
 
-    it('should show IP address in layers panel', () => {
-      mockViewport.zoom = 2;
+    it('should show IP address in the metadata panel', () => {
       renderNodeInFlow({ label: 'server-01', ips: ['10.128.0.93'] });
       expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
       expect(screen.getByText('10.128.0.93')).toBeInTheDocument();
     });
 
-    it('should show "—" for IP when ips is absent', () => {
-      mockViewport.zoom = 2;
+    it('should show "—" placeholder when ips is absent', () => {
       renderNodeInFlow({ label: 'server-01', ips: undefined });
-      const panel = screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID);
-      expect(panel).toBeInTheDocument();
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
     });
 
-    it('should show flag emoji for country code in layers panel', () => {
-      mockViewport.zoom = 2;
+    it('should show flag emoji for a country code', () => {
       renderNodeInFlow({ label: 'server-01', countryCodes: ['US'] });
       const panel = screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID);
       // 🇺🇸 flag emoji for US
       expect(panel.textContent).toContain('🇺🇸');
     });
 
-    it('should show "—" for geolocation when countryCodes is absent', () => {
-      mockViewport.zoom = 2;
+    it('should show "—" placeholder when countryCodes is absent', () => {
       renderNodeInFlow({ label: 'server-01', countryCodes: undefined });
       expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
     });
@@ -247,7 +224,7 @@ describe('Entity Nodes', () => {
     describe.each(nodeComponents)(
       '$shape node stacked cards',
       ({ shape, component: NodeComponent }) => {
-        it.each([2, 1000])('shows 2 stacked cards when count is %d', (count) => {
+        it.each([2, 1000])('shows 1 stacked card when count is %d', (count) => {
           const props = createNodeProps(shape, count);
           render(
             <ReactFlow>
@@ -256,7 +233,7 @@ describe('Entity Nodes', () => {
           );
 
           expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
-          expect(screen.getAllByTestId(GRAPH_STACKED_SHAPE_ID)).toHaveLength(2);
+          expect(screen.getAllByTestId(GRAPH_STACKED_SHAPE_ID)).toHaveLength(1);
         });
 
         it.each([

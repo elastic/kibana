@@ -82,8 +82,8 @@ export const layoutGraph = (
         nodesById[child.data.id] = child;
       });
     } else if (isEntityNode(node.data)) {
-      // Reserve the full expanded height so that nodes never overlap their neighbours
-      // when the user zooms past LAYERS_ZOOM_THRESHOLD and the metadata panel opens.
+      // Reserve the full expanded height so nodes never overlap neighbours
+      // once the metadata panel (always visible) is taken into account.
       size.height = ENTITY_NODE_LAYOUT_HEIGHT;
     }
 
