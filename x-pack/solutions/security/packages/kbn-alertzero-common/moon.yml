@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/deeplinks-security'
   - '@kbn/workflows'
+  - '@kbn/agentic-investigations-plugin'
 tags:
   - shared-common
   - package
