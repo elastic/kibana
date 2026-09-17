@@ -1668,4 +1668,185 @@ describe('executeGenerationWorkflow', () => {
       expect(getCurrentUser).not.toHaveBeenCalled();
     });
   });
+
+  describe('sub-workflow dispatch', () => {
+    const grantAsInternalUser = jest.fn();
+    const invalidateAsInternalUser = jest.fn();
+    const asScoped = jest.fn();
+    const checkPrivilegesWithRequest = jest.fn();
+    const runWorkflow = jest.fn();
+    const scheduleWorkflow = jest.fn();
+
+    const createInteractiveRequest = (): KibanaRequest =>
+      httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer session-access-token' },
+      });
+
+    const createFakeRequest = (): KibanaRequest =>
+      kibanaRequestFactory({
+        headers: { authorization: 'ApiKey incoming-fake-request-key' },
+        path: '/',
+        spaceId: asSpaceId('default'),
+      });
+
+    const buildArgs = (request: KibanaRequest): Parameters<typeof executeGenerationWorkflow>[0] => {
+      const coreStartMock: CoreStart = {
+        elasticsearch: { client: { asScoped } },
+        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+        security: {
+          authc: { apiKeys: { grantAsInternalUser, invalidateAsInternalUser } },
+        },
+      } as unknown as CoreStart;
+
+      return {
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        apiConfig: {
+          action_type_id: '.gen-ai',
+          connector_id: 'test-connector-id',
+          model: 'gpt-4',
+        },
+        authz: {
+          actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+          checkPrivilegesWithRequest,
+        } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz'],
+        executionUuid: 'test-execution-uuid',
+        getEventLogIndex: async () => '.kibana-event-log-test',
+        getEventLogger: async () =>
+          ({ logEvent: jest.fn() } as unknown as jest.Mocked<IEventLogger>),
+        getStartServices: (async () => ({
+          coreStart: coreStartMock,
+          pluginsStart: {},
+        })) as GetStartServices,
+        logger: {
+          debug: jest.fn(),
+          error: jest.fn(),
+          info: jest.fn(),
+          warn: jest.fn(),
+        } as unknown as Logger,
+        request,
+        type: 'attack_discovery' as const,
+        workflowConfig: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
+          validation_workflow_id: 'default',
+        },
+        workflowsManagementApi: {
+          createWorkflow: jest.fn(),
+          getWorkflow: jest.fn(),
+          getWorkflowExecution: jest.fn(),
+          getWorkflows: jest.fn(),
+          runWorkflow,
+          scheduleWorkflow,
+        } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+      };
+    };
+
+    /**
+     * Invokes `runWorkflow` on the api the pipeline was actually handed, so the test
+     * observes how a sub-workflow would be dispatched.
+     */
+    const dispatchSubWorkflow = async (): Promise<void> => {
+      const { workflowsManagementApi: pipelineApi } = mockRunManualOrchestration.mock.calls[0][0];
+
+      await pipelineApi.runWorkflow(
+        { id: 'sub-workflow' },
+        'default',
+        { some: 'input' },
+        createFakeRequest()
+      );
+    };
+
+    beforeEach(() => {
+      asScoped.mockReturnValue({
+        asCurrentUser: {
+          indices: { refresh: jest.fn().mockResolvedValue(undefined) },
+          security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+        },
+      });
+
+      checkPrivilegesWithRequest.mockReturnValue({
+        atSpace: async () => ({ hasAllRequested: true, privileges: { kibana: [] } }),
+      });
+
+      grantAsInternalUser.mockResolvedValue({
+        api_key: 'granted-secret',
+        id: 'granted-id',
+        name: 'attack-discovery-test-execution-uuid',
+      });
+
+      invalidateAsInternalUser.mockResolvedValue({ invalidated_api_keys: ['granted-id'] });
+
+      runWorkflow.mockResolvedValue('inline-run-id');
+      scheduleWorkflow.mockResolvedValue('scheduled-run-id');
+    });
+
+    describe('when running under a granted API key', () => {
+      it('routes sub-workflows through scheduleWorkflow, so the run id is known immediately', async () => {
+        await executeGenerationWorkflow(buildArgs(createInteractiveRequest()));
+
+        await dispatchSubWorkflow();
+
+        expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not run sub-workflows inline', async () => {
+        await executeGenerationWorkflow(buildArgs(createInteractiveRequest()));
+
+        await dispatchSubWorkflow();
+
+        expect(runWorkflow).not.toHaveBeenCalled();
+      });
+
+      it('records the pipeline trigger, so runs are not labeled as scheduled', async () => {
+        await executeGenerationWorkflow(buildArgs(createInteractiveRequest()));
+
+        await dispatchSubWorkflow();
+
+        expect(scheduleWorkflow.mock.calls[0][4]).toEqual('attack-discovery-pipeline');
+      });
+    });
+
+    describe('when the incoming request is already a fake request', () => {
+      it('routes sub-workflows through scheduleWorkflow', async () => {
+        await executeGenerationWorkflow(buildArgs(createFakeRequest()));
+
+        await dispatchSubWorkflow();
+
+        expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not run sub-workflows inline', async () => {
+        await executeGenerationWorkflow(buildArgs(createFakeRequest()));
+
+        await dispatchSubWorkflow();
+
+        expect(runWorkflow).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when no API key could be granted', () => {
+      beforeEach(() => {
+        grantAsInternalUser.mockResolvedValue(null);
+      });
+
+      it('leaves dispatch unchanged, so the real-request path is unaffected', async () => {
+        await executeGenerationWorkflow(buildArgs(createInteractiveRequest()));
+
+        await dispatchSubWorkflow();
+
+        expect(runWorkflow).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not route sub-workflows through scheduleWorkflow', async () => {
+        await executeGenerationWorkflow(buildArgs(createInteractiveRequest()));
+
+        await dispatchSubWorkflow();
+
+        expect(scheduleWorkflow).not.toHaveBeenCalled();
+      });
+    });
+  });
 });
