@@ -277,24 +277,30 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                     </EuiFlexItem>
                     {severity.levels.length > 1 && (
                       <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.alertingV2.ruleBuilder.severity.removeLevel',
-                            { defaultMessage: 'Remove severity level' }
-                          )}
-                          disableScreenReaderOutput
+                        <EuiFormRow
+                          hasEmptyLabelSpace={idx === 0}
+                          display="centerCompressed"
+                          fullWidth
                         >
-                          <EuiButtonIcon
-                            iconType="trash"
-                            color="danger"
-                            aria-label={i18n.translate(
+                          <EuiToolTip
+                            content={i18n.translate(
                               'xpack.alertingV2.ruleBuilder.severity.removeLevel',
                               { defaultMessage: 'Remove severity level' }
                             )}
-                            onClick={() => removeLevel(idx)}
-                            data-test-subj={`ruleBuilderRemoveSeverityLevel-${idx}`}
-                          />
-                        </EuiToolTip>
+                            disableScreenReaderOutput
+                          >
+                            <EuiButtonIcon
+                              iconType="trash"
+                              color="danger"
+                              aria-label={i18n.translate(
+                                'xpack.alertingV2.ruleBuilder.severity.removeLevel',
+                                { defaultMessage: 'Remove severity level' }
+                              )}
+                              onClick={() => removeLevel(idx)}
+                              data-test-subj={`ruleBuilderRemoveSeverityLevel-${idx}`}
+                            />
+                          </EuiToolTip>
+                        </EuiFormRow>
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
