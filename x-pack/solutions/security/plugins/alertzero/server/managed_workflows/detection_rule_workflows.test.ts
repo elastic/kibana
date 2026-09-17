@@ -561,11 +561,11 @@ describe('detection rule workflows', () => {
         expect(approved).toContain('steps.review_tuning.output.response.approved == true');
         expect(approved).not.toContain(' and ');
 
-        // The review never patches a query itself; only the risk score path patches in-run.
+        // The review never patches a query itself; only the in-run paths patch via patchRule.
         expect(reviewSteps.some(({ name }) => name === 'apply_query_tuning')).toBe(false);
         expect(
           reviewSteps.filter(({ type }) => type === 'security.patchRule').map(({ name }) => name)
-        ).toEqual(['apply_risk_score_tuning']);
+        ).toEqual(['apply_risk_score_tuning', 'apply_threshold_tuning', 'apply_schedule_tuning']);
       });
 
       it('applies exceptions via security.createRuleException for approved exception proposals', () => {

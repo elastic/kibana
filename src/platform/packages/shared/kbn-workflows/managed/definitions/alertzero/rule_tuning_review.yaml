@@ -304,11 +304,26 @@ steps:
           low-priority noise. Populate proposed_risk_score (0–100) and
           proposed_severity (low / medium / high / critical).
 
+        threshold  — The rule fires too broadly because the threshold settings
+          are misconfigured (e.g. threshold.value is too low, capturing noise
+          that a higher count would filter out). Only valid for rule type
+          "threshold". Populate proposed_threshold_value (integer, the new
+          minimum count). Optionally populate proposed_threshold_cardinality
+          (an array of {field, value} objects to replace cardinality conditions).
+          Do not use this for query changes; if the threshold logic is structurally
+          wrong, use query or manual instead.
+
+        schedule  — The rule fires too frequently or sweeps too wide a lookback
+          window, producing FPs that correct timing would prevent. Populate
+          proposed_interval (e.g. "10m") and/or proposed_from (e.g. "now-11m")
+          in the same format the rule currently uses. Both fields are optional but
+          at least one must be populated.
+
         manual  — None of the above is safe to apply automatically. Use summary
           to describe: (a) the false-positive pattern you found, (b) which automated
-          paths you considered (exception / query / risk_score) and why each is unsafe
-          or inapplicable for this rule, and (c) a concrete recommendation for what the
-          analyst should do manually in the Detection Rules UI.
+          paths you considered (exception / query / risk_score / threshold / schedule)
+          and why each is unsafe or inapplicable for this rule, and (c) a concrete
+          recommendation for what the analyst should do manually in the Detection Rules UI.
 
         The analyst sees your output as a proposal card, so fill every field for a
         reader who has not seen the alerts: title is one short line naming the
@@ -413,6 +428,58 @@ steps:
                 type: string
                 enum: [low, medium, high, critical]
             required: [change_type, summary, proposed_risk_score, proposed_severity, title, fp_pattern, reasoning, confidence]
+          - type: object
+            properties:
+              change_type:
+                const: threshold
+              summary:
+                type: string
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_threshold_value:
+                type: integer
+                minimum: 1
+              proposed_threshold_cardinality:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    value:
+                      type: integer
+                      minimum: 0
+                  required: [field, value]
+            required: [change_type, summary, proposed_threshold_value, title, fp_pattern, reasoning, confidence]
+          - type: object
+            properties:
+              change_type:
+                const: schedule
+              summary:
+                type: string
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_interval:
+                type: string
+                maxLength: 32
+              proposed_from:
+                type: string
+                maxLength: 64
+            required: [change_type, summary, title, fp_pattern, reasoning, confidence]
           - type: object
             properties:
               change_type:
@@ -533,7 +600,7 @@ steps:
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
         {{ steps.compose_evidence.output.rule_line }}
-        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "suppression" %}Edit rule settings (alert suppression){% when "threshold" %}Edit rule settings (threshold){% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
+        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "suppression" %}Edit rule settings (alert suppression){% when "threshold" %}Edit rule settings (threshold){% when "schedule" %}Edit rule settings (schedule){% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
         {{ steps.compose_evidence.output.investigation_line }}
 
         **Why this rule needs tuning**
@@ -582,7 +649,31 @@ steps:
         Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
         {% endif %}
-        
+
+        {% if steps.diagnose_rule.output.structured_output.change_type == "threshold" %}
+        Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
+        Proposed threshold value: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}
+        {% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}
+        Proposed threshold cardinality:
+        {% for entry in steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}
+        - {{ entry.field }} >= {{ entry.value }}
+        {% endfor %}
+        {% endif %}
+        Approving patches the rule's threshold settings. The change can be reverted in the Detection Rules UI.
+        {% endif %}
+
+        {% if steps.diagnose_rule.output.structured_output.change_type == "schedule" %}
+        {% if steps.diagnose_rule.output.structured_output.proposed_interval %}
+        Current interval: {{ steps.fetch_rule.output.interval }}
+        Proposed interval: {{ steps.diagnose_rule.output.structured_output.proposed_interval }}
+        {% endif %}
+        {% if steps.diagnose_rule.output.structured_output.proposed_from %}
+        Current lookback (from): {{ steps.fetch_rule.output.from }}
+        Proposed lookback (from): {{ steps.diagnose_rule.output.structured_output.proposed_from }}
+        {% endif %}
+        Approving patches the rule's schedule settings. The change can be reverted in the Detection Rules UI.
+        {% endif %}
+
         {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
         No automated change can be applied safely for this rule.
         Approving records the handoff — no rule changes are made automatically.
@@ -673,11 +764,14 @@ steps:
         ${{ steps.propose_action.output.decision == 'dismissed'
           or steps.propose_manual.output.decision == 'dismissed' }}
 
-  ### this is temporray, unitl excepion/rule score proposals is implemented
+  ### this is temporray, unitl excepion/rule score/threshold/schedule proposals is implemented
   - name: review_tuning
     type: waitForApproval
     if: >-
-      ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' or steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
+        or steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
+        or steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+        or steps.diagnose_rule.output.structured_output.change_type == 'schedule' }}
     timeout: "72h"
     with:
       approveLabel: Approve change
@@ -712,6 +806,36 @@ steps:
         id: "{{ inputs.rule_uuid }}"
         risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
         severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
+
+  ### this is temporray, unitl threshold/schedule proposals is implemented
+  - name: apply_threshold_tuning
+    type: security.patchRule
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'threshold' }}
+    on-failure:
+      continue: true
+    with:
+      patch:
+        id: "{{ inputs.rule_uuid }}"
+        threshold:
+          value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
+          field: "${{ steps.fetch_rule.output.threshold.field }}"
+          cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality | default: steps.fetch_rule.output.threshold.cardinality | default: consts.no_items }}"
+
+  ### this is temporray, unitl threshold/schedule proposals is implemented
+  - name: apply_schedule_tuning
+    type: security.patchRule
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'schedule' }}
+    on-failure:
+      continue: true
+    with:
+      patch:
+        id: "{{ inputs.rule_uuid }}"
+        interval: "{% if steps.diagnose_rule.output.structured_output.proposed_interval %}{{ steps.diagnose_rule.output.structured_output.proposed_interval }}{% else %}{{ steps.fetch_rule.output.interval }}{% endif %}"
+        from: "{% if steps.diagnose_rule.output.structured_output.proposed_from %}{{ steps.diagnose_rule.output.structured_output.proposed_from }}{% else %}{{ steps.fetch_rule.output.from }}{% endif %}"
 
   # The action ran inside the gate, so its result is not visible here; re-read the
   # rule to refresh the attachment with the query that actually landed.
@@ -763,6 +887,14 @@ steps:
         ${{ steps.review_tuning.output.response.approved == true
           and steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
           and steps.apply_risk_score_tuning.error == null }}
+      threshold_applied: >-
+        ${{ steps.review_tuning.output.response.approved == true
+          and steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+          and steps.apply_threshold_tuning.error == null }}
+      schedule_applied: >-
+        ${{ steps.review_tuning.output.response.approved == true
+          and steps.diagnose_rule.output.structured_output.change_type == 'schedule'
+          and steps.apply_schedule_tuning.error == null }}
 
   # Liquid cannot parenthesise conditions, so the OR-of-ANDs for rule_patched is
   # split into a second step that reads the already-resolved individual flags.
@@ -772,7 +904,9 @@ steps:
       rule_patched: >-
         ${{ steps.record_apply_results.output.query_applied == true
           or steps.record_apply_results.output.exception_applied == true
-          or steps.record_apply_results.output.risk_score_applied == true }}
+          or steps.record_apply_results.output.risk_score_applied == true
+          or steps.record_apply_results.output.threshold_applied == true
+          or steps.record_apply_results.output.schedule_applied == true }}
 
   # Dismissals arrive from either gate: the proposal gate for query and manual,
   # the interim in-run gate for exception and risk score.
