@@ -16,6 +16,8 @@ import { identifyKIQueries } from './identify_ki_queries';
 
 jest.mock('@kbn/nightshift-ai', () => ({
   identifyKIQueries: jest.fn(),
+  significantEventsPrompt: 'SHIPPED_PROMPT',
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES: [],
 }));
 
 const generateSignificantEventsMock = identifyKIQueriesThroughAgent as jest.MockedFunction<
@@ -89,6 +91,13 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     expect(args.additionalToolCallbacks).toBeUndefined();
     expect(args.maxSteps).toBeUndefined();
     expect(args.systemPrompt).toBe('SYSTEM');
+  });
+
+  it('uses the shipped significant events prompt when no systemPrompt is provided', async () => {
+    await identifyKIQueries({ definition, connectorId: 'c1' }, buildDeps());
+
+    const args = generateSignificantEventsMock.mock.calls[0][0];
+    expect(args.systemPrompt).toBe('SHIPPED_PROMPT');
   });
 
   it('forwards reasoning diagnostics from the shared agent', async () => {

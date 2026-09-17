@@ -13,7 +13,6 @@ import type {
 } from '@kbn/core/server';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { InferenceClient } from '@kbn/inference-common';
-import { significantEventsPrompt } from '@kbn/nightshift-ai';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
@@ -149,7 +148,6 @@ export async function generateKIQueries(
     {
       definition,
       connectorId,
-      systemPrompt: significantEventsPrompt,
       maxExistingQueriesForContext,
       maxDurationMs,
       queryValidationTimeoutMs,

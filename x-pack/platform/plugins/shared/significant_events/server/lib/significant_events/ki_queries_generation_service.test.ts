@@ -142,4 +142,13 @@ describe('generateKIQueries', () => {
       expect.objectContaining({ maxDurationMs: 300000, connectorId: 'test-connector' })
     );
   });
+
+  it('does not pass a system prompt', async () => {
+    await generateKIQueries(
+      { streamName: 'logs.test', connectorId: 'test-connector' },
+      makeDeps({ logger })
+    );
+
+    expect(identifyKIQueriesMock.mock.calls[0][0]).not.toHaveProperty('systemPrompt');
+  });
 });
