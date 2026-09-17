@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiIcon, euiCanAnimate, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -17,6 +17,7 @@ import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
+import { useOverflowWidth } from '../../hooks/use_overflow_width';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
@@ -52,6 +53,8 @@ export const SecondaryMenuItemComponent = ({
   const { euiTheme } = useEuiTheme();
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
+  const [labelRef, labelOverflowWidth] = useOverflowWidth<HTMLSpanElement>();
+  const isLabelOverflowing = labelOverflowWidth > 0;
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
 
   const iconSide = iconType ? 'left' : 'right';
@@ -90,11 +93,39 @@ export const SecondaryMenuItemComponent = ({
     min-width: 0;
   `;
 
+  const fadeWidth = euiTheme.size.l;
   const labelTextStyles = css`
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    display: block;
     min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    ${isLabelOverflowing &&
+    css`
+      mask-image: linear-gradient(to right, black calc(100% - ${fadeWidth}), transparent);
+      button:hover &,
+      a:hover & {
+        mask-image: linear-gradient(to right, transparent, black ${fadeWidth});
+        // Flip the fade side together with the delayed slide start.
+        transition: mask-image 0s ${euiTheme.animation.slow} allow-discrete;
+      }
+    `}
+  `;
+
+  // Slide the hidden part of the label into view at a steady speed after a short
+  // hover delay; snap back instantly on mouse leave.
+  const marqueeDuration = labelOverflowWidth * 25;
+  const labelInnerStyles = css`
+    display: inline-block;
+    ${isLabelOverflowing &&
+    css`
+      button:hover &,
+      a:hover & {
+        transform: translateX(-${labelOverflowWidth}px);
+        ${euiCanAnimate} {
+          transition: transform ${marqueeDuration}ms linear ${euiTheme.animation.slow};
+        }
+      }
+    `}
   `;
 
   const submenuIconStyles = css`
@@ -114,8 +145,12 @@ export const SecondaryMenuItemComponent = ({
 
   const content = (
     <div css={labelAndBadgeStyles}>
-      <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
-        {children}
+      <span
+        ref={labelRef}
+        css={labelTextStyles}
+        title={isLabelOverflowing && typeof children === 'string' ? children : undefined}
+      >
+        <span css={labelInnerStyles}>{children}</span>
       </span>
       {getBadge()}
       {hasSubmenu && (
