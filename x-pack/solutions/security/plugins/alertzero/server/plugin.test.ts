@@ -103,7 +103,10 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           features,
           workflowsExtensions,
           workflowsManagement: { management: {} },
-          agentBuilder: { tools: { register: jest.fn() } },
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+          },
         } as never
       );
 
@@ -131,7 +134,11 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
-      const agentBuilder = { agents: { registerType: jest.fn() }, tools: { register: jest.fn() } };
+      const agentBuilder = {
+        agents: { registerType: jest.fn() },
+        tools: { register: jest.fn() },
+        attachments: { registerType: jest.fn() },
+      };
 
       plugin.setup(
         coreSetup as never,
@@ -144,6 +151,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(3);
     });
 
     it('installs managed worker workflows during start', () => {
