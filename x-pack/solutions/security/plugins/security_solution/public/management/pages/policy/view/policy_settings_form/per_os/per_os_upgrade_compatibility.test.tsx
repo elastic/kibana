@@ -12,6 +12,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import type { RenderResult } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -121,6 +122,8 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   // mode has to create the branch rather than throw.
   it('renders and writes a mode when the whole macOS ransomware branch is absent', async () => {
     const onChange = jest.fn();
+    // Windows must be off, otherwise the master toggle short-circuits on it and never reads mac.
+    policy.windows.ransomware.mode = ProtectionModes.off;
     // @ts-expect-error reproducing a policy stored before the branch existed
     delete policy.mac.ransomware;
 
@@ -145,5 +148,32 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
 
     const { updatedPolicy } = onChange.mock.calls.at(-1)![0];
     expect(updatedPolicy.mac.ransomware.mode).toBe(ProtectionModes.detect);
+  });
+  // The mode can be active while the notification branch is absent, since 9.4 exposed the mode
+  // through the advanced field without touching `popup`.
+  it('renders the notification controls when the macOS ransomware popup branch is absent', async () => {
+    const onChange = jest.fn();
+    policy.mac.ransomware.mode = ProtectionModes.prevent;
+    // @ts-expect-error reproducing a policy whose notification branch was never written
+    delete policy.mac.popup.ransomware;
+
+    renderResult = mockedContext.render(
+      <PerOsRansomwareProtectionCard
+        policy={policy}
+        onChange={onChange}
+        mode="edit"
+        data-test-subj={testSubjects.perOsRansomware.card}
+      />
+    );
+
+    const notifyCheckbox = renderResult.getByTestId(
+      testSubjects.perOsRansomware.mac.notifyUserCheckbox
+    );
+    expect(notifyCheckbox).not.toBeChecked();
+
+    await userEvent.click(notifyCheckbox);
+
+    const { updatedPolicy } = onChange.mock.calls.at(-1)![0];
+    expect(updatedPolicy.mac.popup.ransomware).toEqual({ enabled: true, message: '' });
   });
 });

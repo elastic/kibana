@@ -11,6 +11,7 @@ import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import type { ImmutableArray, PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import { DefaultPolicyNotificationMessage } from '../../../../../../../common/endpoint/models/policy_config';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type {
@@ -28,6 +29,16 @@ type PerOsProtectionOperatingSystem =
   | MemoryProtectionOSes
   | BehaviorProtectionOSes
   | RansomwareProtectionOSes;
+
+/**
+ * The subset of an OS branch this toggle writes. Protections are optional because a policy stored
+ * before one of them shipped does not carry it.
+ */
+type MutableOsProtectionBranches = Partial<
+  Record<PolicyProtection, { mode: ProtectionModes; reputation_service?: boolean }>
+> & {
+  popup: Partial<Record<PolicyProtection, { enabled: boolean; message: string }>>;
+};
 
 export interface PerOsProtectionSideEffectOptions {
   value: boolean;
@@ -59,19 +70,20 @@ export const PerOsProtectionMasterToggle = memo(
   }: PerOsProtectionMasterToggleProps) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    // A missing mode is treated as off so the switch agrees with the rows.
+    // A missing mode, or a missing branch on a policy older than it, is treated as off so the
+    // switch agrees with the rows.
     const selected = osList.some((os) => {
       if (os === 'windows') {
-        return (policy.windows[protection].mode ?? ProtectionModes.off) !== ProtectionModes.off;
+        return (policy.windows[protection]?.mode ?? ProtectionModes.off) !== ProtectionModes.off;
       }
       if (os === 'mac') {
         return (
-          (policy.mac[protection as MacPolicyProtection].mode ?? ProtectionModes.off) !==
+          (policy.mac[protection as MacPolicyProtection]?.mode ?? ProtectionModes.off) !==
           ProtectionModes.off
         );
       }
       return (
-        (policy.linux[protection as LinuxPolicyProtection].mode ?? ProtectionModes.off) !==
+        (policy.linux[protection as LinuxPolicyProtection]?.mode ?? ProtectionModes.off) !==
         ProtectionModes.off
       );
     });
@@ -82,32 +94,28 @@ export const PerOsProtectionMasterToggle = memo(
         const nextMode = value ? ProtectionModes.prevent : ProtectionModes.off;
         const updatedPolicy = cloneDeep(policy);
 
+        // The three OS branches take identical writes, and TypeScript rejects a union-indexed
+        // write unless the value satisfies every protection at once. This view narrows each OS to
+        // the fields the toggle owns: the branches stay optional, so a policy stored before one of
+        // them existed gains it here instead of throwing, and nothing the license check reads is
+        // ever written.
         for (const os of osList) {
-          if (os === 'windows') {
-            updatedPolicy.windows[protection].mode = nextMode;
-            if (isPlatinumPlus) {
-              updatedPolicy.windows.popup[protection].enabled = value;
-              if (protection === 'behavior_protection') {
-                updatedPolicy.windows.behavior_protection.reputation_service = value;
-              }
-            }
-          } else if (os === 'mac') {
-            const macProtection = protection as MacPolicyProtection;
-            updatedPolicy.mac[macProtection].mode = nextMode;
-            if (isPlatinumPlus) {
-              updatedPolicy.mac.popup[macProtection].enabled = value;
-              if (protection === 'behavior_protection') {
-                updatedPolicy.mac.behavior_protection.reputation_service = value;
-              }
-            }
-          } else {
-            const linuxProtection = protection as LinuxPolicyProtection;
-            updatedPolicy.linux[linuxProtection].mode = nextMode;
-            if (isPlatinumPlus) {
-              updatedPolicy.linux.popup[linuxProtection].enabled = value;
-              if (protection === 'behavior_protection') {
-                updatedPolicy.linux.behavior_protection.reputation_service = value;
-              }
+          const osPolicy = updatedPolicy[os] as MutableOsProtectionBranches;
+
+          const protectionBranch = osPolicy[protection] ?? { mode: nextMode };
+          protectionBranch.mode = nextMode;
+          osPolicy[protection] = protectionBranch;
+
+          if (isPlatinumPlus) {
+            const popupBranch = osPolicy.popup[protection] ?? {
+              enabled: value,
+              message: DefaultPolicyNotificationMessage,
+            };
+            popupBranch.enabled = value;
+            osPolicy.popup[protection] = popupBranch;
+
+            if (protection === 'behavior_protection') {
+              protectionBranch.reputation_service = value;
             }
           }
 

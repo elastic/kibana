@@ -58,6 +58,9 @@ type ReadonlyNotificationPolicyBranch<Protection extends PolicyProtection> = {
   readonly popup: { readonly [Key in Protection]: Readonly<NotificationFields> };
 };
 
+/** The notification branches this component writes; optional, since an older policy may lack one. */
+type MutableNotificationBranches = Partial<Record<PolicyProtection, NotificationFields>>;
+
 export interface PerOsNotifyUserOptionProps<
   Protection extends PolicyProtection = PolicyProtection,
   OS extends ProtectionOperatingSystems[Protection] = ProtectionOperatingSystems[Protection]
@@ -91,16 +94,23 @@ const PerOsNotifyUserOptionComponent = <
   const CustomNotificationUpsellingComponent = useGetCustomNotificationUnavailableComponent();
   const isEditMode = mode === 'edit';
   const osPolicy = accessor.read() as ReadonlyNotificationPolicyBranch<Protection>;
-  const selected = osPolicy[protection].mode;
-  const userNotificationSelected = osPolicy.popup[protection].enabled;
-  const userNotificationMessage = osPolicy.popup[protection].message;
+  const selected = osPolicy[protection]?.mode;
+  // The popup branch can be missing on a policy stored before it existed; an absent notification
+  // is an unchecked box with an empty message rather than a crash.
+  const userNotificationSelected = osPolicy.popup[protection]?.enabled ?? false;
+  const userNotificationMessage = osPolicy.popup[protection]?.message ?? '';
 
   const handleUserNotificationCheckbox = useCallback<EuiCheckboxProps['onChange']>(
     (event) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         const notificationPolicy = currentOsPolicy as PolicyConfig[OS] &
           NotificationPolicyBranch<Protection>;
-        notificationPolicy.popup[protection].enabled = event.target.checked;
+        // Narrowing to an optional branch keeps the union-indexed write legal and lets a policy
+        // that predates the notification branch gain it here.
+        const popupBranches = notificationPolicy.popup as MutableNotificationBranches;
+        const popupBranch = popupBranches[protection] ?? { enabled: false, message: '' };
+        popupBranch.enabled = event.target.checked;
+        popupBranches[protection] = popupBranch;
       });
       onChange({ isValid: true, updatedPolicy });
     },
@@ -112,7 +122,10 @@ const PerOsNotifyUserOptionComponent = <
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         const notificationPolicy = currentOsPolicy as PolicyConfig[OS] &
           NotificationPolicyBranch<Protection>;
-        notificationPolicy.popup[protection].message = event.target.value;
+        const popupBranches = notificationPolicy.popup as MutableNotificationBranches;
+        const popupBranch = popupBranches[protection] ?? { enabled: false, message: '' };
+        popupBranch.message = event.target.value;
+        popupBranches[protection] = popupBranch;
       });
       onChange({ isValid: true, updatedPolicy });
     },
