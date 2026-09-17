@@ -8,13 +8,14 @@
 import React from 'react';
 import { EuiAccordion, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { RuleSummarySectionProps } from '../../../rule/types';
 import { DashboardArtifactsSubsection } from './dashboard_artifacts_subsection';
 
 /**
  * Artifacts section for `signal` rules. Signal rules have no notification
  * policies, so only the dashboards subsection is shown, at full width.
  */
-export const SignalArtifactsSection: React.FC = () => {
+export const SignalArtifactsSection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const artifactsAccordionId = useGeneratedHtmlId({ prefix: 'ruleArtifactsSection' });
 
   return (
@@ -32,7 +33,7 @@ export const SignalArtifactsSection: React.FC = () => {
       }
       initialIsOpen
     >
-      <DashboardArtifactsSubsection />
+      <DashboardArtifactsSubsection rule={rule} />
     </EuiAccordion>
   );
 };
