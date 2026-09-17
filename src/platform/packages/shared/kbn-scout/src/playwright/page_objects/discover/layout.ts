@@ -797,6 +797,41 @@ export abstract class LayoutMixin extends SaveMixin {
     await this.getLensEditFlyout().waitFor({ state: 'visible' });
   }
 
+  async changeVisualizationShape(seriesType: string) {
+    await this.openLensEditFlyout();
+    const chartSwitch = this.page.testSubj.locator('lnsChartSwitchPopover');
+    await chartSwitch.click();
+    await this.page.testSubj.fill('lnsChartSwitchSearch', seriesType);
+    await this.page.testSubj.locator(`lnsChartSwitchPopover_${seriesType.toLowerCase()}`).click();
+    await chartSwitch.getByText(seriesType, { exact: true }).waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.page.testSubj.locator('customizeLens').waitFor({ state: 'hidden' });
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async chooseVisualizationSuggestion(suggestionType: string) {
+    await this.openLensEditFlyout();
+    await this.page.testSubj.click('lensSuggestionsPanelToggleButton');
+    const suggestion = this.page.testSubj.locator(`lnsSuggestion-${suggestionType}`);
+    await suggestion.waitFor({ state: 'visible' });
+    await suggestion.click();
+    await suggestion
+      .locator('[data-test-subj="lnsSuggestion"]')
+      .and(this.page.locator('[aria-current="true"]'))
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getVisualizationTitle(): Promise<string> {
+    await this.openLensEditFlyout();
+    const title = await this.page.testSubj.innerText('lnsChartSwitchPopover');
+    await this.page.testSubj.click('cancelFlyoutButton');
+    return title;
+  }
+
   getLensEditFlyout(): Locator {
     return this.page.testSubj.locator('lnsChartSwitchPopover');
   }
