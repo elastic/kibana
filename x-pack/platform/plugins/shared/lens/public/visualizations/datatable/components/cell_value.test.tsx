@@ -215,10 +215,16 @@ describe('datatable cell renderer', () => {
         context: { handleFilterClick, table: makeTable([{ a: null }]) },
       });
 
-      expect(screen.getByRole('button')).toHaveTextContent('-');
-      expect(screen.queryByText('(null)')).not.toBeInTheDocument();
+      // Sighted users see the dash + tooltip; the (null) label is present in the DOM but
+      // visually hidden so only screen readers announce it.
+      const button = screen.getByRole('button');
+      expect(button).toHaveTextContent('-');
+      const titledDash = screen.getByTitle('(null)');
+      expect(titledDash).toHaveAttribute('aria-hidden', 'true');
+      expect(titledDash).toHaveTextContent('-');
+      expect(button).toHaveTextContent('(null)');
 
-      await userEvent.click(screen.getByRole('button'));
+      await userEvent.click(button);
       expect(handleFilterClick).toHaveBeenCalledWith('a', null, 0, 0);
     });
 

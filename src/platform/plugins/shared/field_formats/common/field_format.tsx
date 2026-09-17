@@ -240,11 +240,16 @@ export abstract class FieldFormat {
     if (isMissingValue(val)) {
       // Only the React path shows the bare dash, because only it can carry the tooltip that
       // gives the dash meaning. Charts go through `convertToText` and keep NULL_LABEL.
-      // `role="img"` lets the dash carry an accessible name; a bare span maps to
-      // `role="generic"`, which ARIA forbids from being named.
+      // Split into two spans to meet accessibility requirements: the dash carries the
+      // visual tooltip via `title` while `aria-hidden` keeps it out of the accessibility
+      // tree, and a screen-reader-only sibling announces the (null) label instead.
+
       return (
-        <span css={emptyValueStyles} role="img" title={NULL_LABEL} aria-label={NULL_LABEL}>
-          {NULL_TOKEN}
+        <span css={emptyValueStyles}>
+          <span aria-hidden="true" title={NULL_LABEL}>
+            {NULL_TOKEN}
+          </span>
+          <span className="euiScreenReaderOnly">{NULL_LABEL}</span>
         </span>
       );
     }
