@@ -8,9 +8,13 @@
  */
 
 import { css } from '@emotion/react';
-import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
+import {
+  euiOverflowScroll,
+  euiShadow,
+  highContrastModeStyles,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { layoutVar, layoutLevels } from '../constants';
-import { getHighContrastBorder } from '../utils';
 import type { LayoutAppearance } from '../layout.types';
 import type { EmotionFn } from '../types';
 
@@ -18,6 +22,8 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
   const isFramedAppearance = appearance === 'framed';
 
   return (useEuiTheme: UseEuiTheme) => {
+    const { euiTheme } = useEuiTheme;
+
     return css`
       grid-area: application;
 
@@ -28,29 +34,28 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       margin-top: ${layoutVar('application.marginTop')};
       margin-bottom: ${layoutVar('application.marginBottom')};
       margin-right: ${layoutVar('application.marginRight')};
+      // Grid items default to min-width/min-height: auto; without 0 the wrapper would grow with
+      // the content (e.g. push flyout padding) instead of constraining the scroll container.
+      min-width: 0;
+      min-height: 0;
 
       z-index: ${layoutLevels.content};
-
       position: relative;
-      display: flex;
-      flex-direction: column;
 
       // Only apply distinguished background styling for framed appearance
       ${isFramedAppearance &&
       css`
-        background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
-        border-radius: ${useEuiTheme.euiTheme.border.radius.frame};
-
-        // use outline so it doesn't affect size/layout and cause a scrollbar
-        outline: ${getHighContrastBorder(useEuiTheme)};
-
-        // Keep the decorative frame unchanged by global focus-ring styles.
-        &:focus:not(:focus-visible) {
-          outline: ${getHighContrastBorder(useEuiTheme)};
-          outline-offset: 0;
-        }
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border-radius: ${euiTheme.border.radius.frame};
 
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
+
+        // The frame is an outline on this non-scrolling wrapper: it doesn't affect layout, doesn't
+        // scroll away with the content, isn't touched by focus styles (the focusable element is
+        // the scroll container), and sits outside the box where sticky/fixed bars (e.g. console)
+        // can't cover it.
+        // borderBaseFloating is transparent in light mode and visible in dark mode.
+        outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseFloating};
       `}
       ${!isFramedAppearance &&
       css`
@@ -58,22 +63,33 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
         border-radius: 0;
         border: none;
       `}
-
-      &:focus-visible {
-        border: 2px solid ${useEuiTheme.euiTheme.colors.textParagraph};
-      }
-
-      // only restrict overflow scroll on screen (not print) to allow for full page printing
-      @media screen {
-        ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
-        // reset the height back to respect the margins
-        height: calc(
-          100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
-        );
-      }
     `;
   };
 };
+
+const scrollContainer: EmotionFn = (useEuiTheme) => css`
+  border-radius: inherit;
+  display: flex;
+  flex-direction: column;
+
+  // only restrict overflow scroll on screen (not print) to allow for full page printing
+  @media screen {
+    ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
+  }
+
+  // Keyboard focus only (e.g. skip link when the app has no <main> landmark). Kept outside the
+  // box: Chrome clips inset outlines on scroll containers, and EUI's global :focus offsets it -1px.
+  // The wrapper must therefore never clip (overflow: hidden), or this ring is cut off.
+  &:focus-visible {
+    outline: ${useEuiTheme.euiTheme.focus.width} solid ${useEuiTheme.euiTheme.focus.color};
+    outline-offset: 0;
+
+    // Thicker ring so it stands out next to the strong high contrast borders around it.
+    ${highContrastModeStyles(useEuiTheme, {
+      preferred: `outline-width: calc(${useEuiTheme.euiTheme.focus.width} * 2);`,
+    })}
+  }
+`;
 
 const content: EmotionFn = () => css`
   display: flex;
@@ -99,6 +115,7 @@ const bottomBar: EmotionFn = ({ euiTheme }) => css`
 
 export const styles = {
   root,
+  scrollContainer,
   content,
   topBar,
   bottomBar,
