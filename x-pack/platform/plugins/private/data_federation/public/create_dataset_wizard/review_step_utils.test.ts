@@ -502,7 +502,7 @@ describe('review_step_utils', () => {
     expect(settingsRows.map(({ label }) => label)).not.toContain('Format');
   });
 
-  it('summarizes schema mapping settings on the schema review column in Flow 3 9.6', () => {
+  it('summarizes schema resolution on the additional settings review column in Flow 3 9.6', () => {
     const values = {
       ...emptyDatasetWizardFormValues(),
       settings: {
@@ -521,12 +521,12 @@ describe('review_step_utils', () => {
     );
     const schemaRows = getReviewSchemaMappingRows(values, DATASET_WIZARD_FLOW_VARIANT_3_9_6);
 
-    expect(additionalRows.map(({ label }) => label)).not.toContain('Schema resolution');
-    expect(schemaRows).toEqual(
+    expect(additionalRows).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ label: 'Schema resolution', displayValue: 'Strict' }),
       ])
     );
+    expect(schemaRows.map(({ label }) => label)).not.toContain('Schema resolution');
   });
 
   it('returns automatic schema mapping rows when inferred field types were modified', () => {
@@ -595,6 +595,42 @@ describe('review_step_utils', () => {
         expect.objectContaining({
           label: 'Dynamic fields',
           displayValue: 'Off',
+          badge: 'modified',
+        }),
+      ])
+    );
+  });
+
+  it('shows infer and define schema labels in flow 3 9.6 review', () => {
+    const inferValues = {
+      ...emptyDatasetWizardFormValues(),
+      schema_mapping_mode: 'automatic' as const,
+      dynamic_fields_enabled: true,
+    };
+    const manualValues = {
+      ...inferValues,
+      dynamic_fields_enabled: false,
+    };
+
+    const inferRows = getReviewSchemaMappingRows(inferValues, DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+    const manualRows = getReviewSchemaMappingRows(manualValues, DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+
+    expect(inferRows.map(({ label }) => label)).not.toContain('Schema mapping mode');
+    expect(manualRows.map(({ label }) => label)).not.toContain('Schema mapping mode');
+    expect(inferRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Schema',
+          displayValue: 'Infer schema',
+          badge: 'default',
+        }),
+      ])
+    );
+    expect(manualRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Schema',
+          displayValue: 'Define schema',
           badge: 'modified',
         }),
       ])

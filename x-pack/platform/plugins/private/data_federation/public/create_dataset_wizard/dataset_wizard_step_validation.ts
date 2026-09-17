@@ -33,7 +33,10 @@ import {
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
 import { getResourceOwnedSettingsFieldIds } from './resource_settings_fields';
-import { getSchemaMappingSettingsFieldIds } from './schema_mapping_settings_fields';
+import {
+  FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS,
+  getSchemaMappingSettingsFieldIds,
+} from './schema_mapping_settings_fields';
 import {
   getWizardStepPosition,
   getWizardSteps,
@@ -99,7 +102,7 @@ export const getAdditionalSettingsStepFields = (
 
   const resourceOwnedFieldIds = getResourceOwnedSettingsFieldIds(flowVariant);
   const schemaMappingFieldIds = isDatasetWizardFlow396(flowVariant)
-    ? new Set(getSchemaMappingSettingsFieldIds(format, errorMode, { showForAllFormats: true }))
+    ? new Set(FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS)
     : new Set<DatasetSettingsFieldId>();
   const fields = toSettingsFieldPaths(
     DATASET_SETTINGS_FIELD_IDS.filter(
@@ -120,6 +123,15 @@ export const getAdditionalSettingsStepFields = (
   return [...regionFields, ...fields, ...customJsonField];
 };
 
+/** Flow 3 9.6 with Define schema requires at least one mapped field before leaving schema mappings. */
+export const isFlow396DefineSchemaMissingFieldMappings = (
+  values: DatasetWizardFormValues,
+  flowVariant: DatasetWizardFlowVariant
+): boolean =>
+  isDatasetWizardFlow396(flowVariant) &&
+  values.dynamic_fields_enabled === false &&
+  Object.keys(values.automatic_field_types ?? {}).length === 0;
+
 export const getSchemaMappingsStepFields = (
   values: DatasetWizardFormValues,
   flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
@@ -134,11 +146,9 @@ export const getSchemaMappingsStepFields = (
 
   return [
     ...glueFields,
-    ...toSettingsFieldPaths(
-      getSchemaMappingSettingsFieldIds(format, errorMode, {
-        showForAllFormats: isDatasetWizardFlow396(flowVariant),
-      })
-    ),
+    ...(isDatasetWizardFlow396(flowVariant)
+      ? []
+      : toSettingsFieldPaths(getSchemaMappingSettingsFieldIds(format, errorMode))),
   ];
 };
 
@@ -221,6 +231,10 @@ export const findFirstInvalidWizardStep = async ({
   flowVariant?: DatasetWizardFlowVariant;
 }): Promise<DatasetWizardStep | undefined> => {
   for (const step of getWizardStepsThrough(targetStep, flowVariant)) {
+    if (step === SCHEMA_MAPPINGS_STEP && isFlow396DefineSchemaMissingFieldMappings(values, flowVariant)) {
+      return SCHEMA_MAPPINGS_STEP;
+    }
+
     const fields = getFieldsToValidateForStep(step, targetStep, values, flowVariant);
     if (fields.length === 0) {
       continue;

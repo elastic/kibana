@@ -25,7 +25,7 @@ import {
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { DatasetFormatField } from '../dataset_format_field';
 import { getResourceOwnedSettingsFieldIds } from '../resource_settings_fields';
-import { SCHEMA_MAPPING_SETTINGS_FIELD_IDS } from '../schema_mapping_settings_fields';
+import { FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS } from '../schema_mapping_settings_fields';
 import { isKnownDatasetFormat, useDatasetFormatSelection } from '../use_dataset_format_selection';
 import { WizardRegionField } from '../wizard_region_field';
 
@@ -62,7 +62,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   const excludedSettingsFieldIds = useMemo(
     () =>
       isFlow396
-        ? [...resourceSettingsFieldIds, ...SCHEMA_MAPPING_SETTINGS_FIELD_IDS]
+        ? [...resourceSettingsFieldIds, ...FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS]
         : resourceSettingsFieldIds,
     [isFlow396, resourceSettingsFieldIds]
   );

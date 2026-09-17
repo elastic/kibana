@@ -322,6 +322,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Next',
     }),
 
+  defineSchemaFieldMappingsRequiredTooltip: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.defineSchemaFieldMappingsRequiredTooltip', {
+      defaultMessage: 'Add at least one field mapping when using Define schema.',
+    }),
+
   saveAndContinueButton: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.saveAndContinueButton', {
       defaultMessage: 'Save and continue',
@@ -578,10 +583,31 @@ export const datasetWizardStrings = {
       defaultMessage: 'Optional definition of how documents should be indexed',
     }),
 
-  schemaMappingsDescriptionFlow3: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsDescriptionFlow3', {
+  schemaInferenceModeLegend: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaInferenceModeLegend', {
+      defaultMessage: 'Schema inference mode',
+    }),
+
+  schemaInferenceModeInferLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaInferenceModeInferLabel', {
+      defaultMessage: 'Infer schema',
+    }),
+
+  schemaInferenceModeInferDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaInferenceModeInferDescription', {
       defaultMessage:
-        "Optional definition of how documents should be indexed. Elastic infers the schema at query time by default. You can manually map desired fields below, and we'll infer the rest of the schema.",
+        "Schema will be inferred at query time for any fields that haven't been mapped.",
+    }),
+
+  schemaInferenceModeManualLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaInferenceModeManualLabel', {
+      defaultMessage: 'Define schema',
+    }),
+
+  schemaInferenceModeManualDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaInferenceModeManualDescription', {
+      defaultMessage:
+        'No schema will be inferred at query time, only fields defined below will be available.',
     }),
 
   inferSchemaButton: () =>
@@ -1015,6 +1041,21 @@ export const datasetWizardStrings = {
   reviewDynamicFieldsOff: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.reviewDynamicFieldsOff', {
       defaultMessage: 'Off',
+    }),
+
+  schemaInferenceModeReviewLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaInferenceModeReviewLabel', {
+      defaultMessage: 'Schema',
+    }),
+
+  reviewSchemaInferenceInfer: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewSchemaInferenceInfer', {
+      defaultMessage: 'Infer schema',
+    }),
+
+  reviewSchemaInferenceManual: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewSchemaInferenceManual', {
+      defaultMessage: 'Define schema',
     }),
 
   reviewManualMappingsCount: (count: number) =>

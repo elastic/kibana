@@ -339,32 +339,29 @@ describe('InferredSchemaMappingsEditor', () => {
     });
   });
 
-  it('renders the dynamic fields toggle on the mapped fields accordion in flow 3 9.6', async () => {
-    const { getByTestId, queryByTestId } = render(
+  it('renders schema inference mode cards instead of the mapped fields accordion in flow 3 9.6', async () => {
+    const { getByRole, getByTestId, queryByTestId, queryByText } = render(
       <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
     );
 
-    const accordion = getByTestId('datasetWizardMappedFieldsAccordion');
-    const toggle = getByTestId('datasetWizardDynamicFieldsEnabled');
-
+    expect(getByTestId('datasetWizardSchemaInferenceModeCards')).toBeInTheDocument();
+    expect(getByRole('radio', { name: /Infer schema/i })).toBeChecked();
     expect(getByTestId('datasetWizardMappedFields')).toBeInTheDocument();
-    expect(accordion).toContainElement(toggle);
+    expect(queryByTestId('datasetWizardMappedFieldsAccordion')).toBeNull();
     expect(queryByTestId('datasetWizardDynamicFieldsSetting')).toBeNull();
     expect(queryByTestId('datasetWizardDynamicFields')).toBeNull();
     expect(queryByTestId('datasetWizardInferSchema')).toBeNull();
     expect(queryByTestId('datasetWizardDynamicFieldsTable')).toBeNull();
-    expect(toggle).toBeChecked();
-    expect(getByTestId('fakeMappedFieldsDescription')).toHaveTextContent(
-      'Fields that are not mapped will remain dynamic and will be inferred at query time.'
-    );
+    expect(queryByTestId('fakeMappedFieldsDescription')).toBeNull();
+    expect(queryByText(/Define the fields for your indexed documents/i)).toBeNull();
+    expect(queryByTestId('datasetWizardFieldMappingsRequiredBadge')).toBeNull();
 
-    fireEvent.click(toggle);
+    fireEvent.click(getByRole('radio', { name: /Define schema/i }));
 
     await waitFor(() => {
-      expect(toggle).not.toBeChecked();
-      expect(getByTestId('fakeMappedFieldsDescription')).toHaveTextContent(
-        'Only mapped fields will be used. Unmapped fields will not be inferred at query time.'
-      );
+      expect(getByRole('radio', { name: /Define schema/i })).toBeChecked();
+      expect(getByRole('radio', { name: /Infer schema/i })).not.toBeChecked();
+      expect(getByTestId('datasetWizardFieldMappingsRequiredBadge')).toHaveTextContent('Required');
     });
   });
 

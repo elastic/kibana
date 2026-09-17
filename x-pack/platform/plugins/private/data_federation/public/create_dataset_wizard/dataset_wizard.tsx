@@ -61,7 +61,11 @@ import {
   getWizardFormDraftStorageKey,
   saveWizardFormDraft,
 } from './dataset_wizard_form_persistence';
-import { findFirstInvalidWizardStep, getWizardStepFields } from './dataset_wizard_step_validation';
+import {
+  findFirstInvalidWizardStep,
+  getWizardStepFields,
+  isFlow396DefineSchemaMissingFieldMappings,
+} from './dataset_wizard_step_validation';
 import { validateResourceForDataSource } from './validate_dataset_resource';
 import { inferRegionFromResource } from './infer_region_from_resource';
 import { LogisticsStep } from './steps/logistics_step';
@@ -168,7 +172,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateDataSourceFlyoutOpen, setIsCreateDataSourceFlyoutOpen] = useState(false);
   const [suppressExistingDataSourceAuthNotice, setSuppressExistingDataSourceAuthNotice] =
-    useState(false);
+    useState(isEditMode);
   const dataSourceStepRef = useRef<DataSourceStepHandle>(null);
   const [connectionTestResult, setConnectionTestResult] = useState<ConnectionTestResult>();
   const [isTestConfigPanelOpen, setIsTestConfigPanelOpen] = useState(false);
@@ -634,6 +638,13 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       return;
     }
 
+    if (
+      currentStep === SCHEMA_MAPPINGS_STEP &&
+      isFlow396DefineSchemaMissingFieldMappings(values, flowVariant)
+    ) {
+      return;
+    }
+
     if (currentStep === DATA_SOURCE_STEP) {
       const isDataSourceReady = await dataSourceStepRef.current?.submit();
       if (!isDataSourceReady) {
@@ -693,6 +704,9 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         ? datasetWizardStrings.saveAndContinueAnywaysButton()
         : datasetWizardStrings.saveAndContinueButton()
       : datasetWizardStrings.nextButton();
+  const isNextDisabled =
+    currentStep === SCHEMA_MAPPINGS_STEP &&
+    isFlow396DefineSchemaMissingFieldMappings(wizardFormValues, flowVariant);
   const showTestConfiguration = isFlow1 && TEST_CONFIGURATION_STEPS.includes(currentStep);
 
   const renderStepContent = () => (
@@ -858,6 +872,12 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                       iconType={isFlow3 ? 'chevronSingleRight' : undefined}
                       iconSide={isFlow3 ? 'right' : undefined}
                       data-test-subj="datasetWizardNext"
+                      disabled={isNextDisabled}
+                      title={
+                        isNextDisabled
+                          ? datasetWizardStrings.defineSchemaFieldMappingsRequiredTooltip()
+                          : undefined
+                      }
                       onClick={() => void handleNext()}
                     >
                       {nextButtonLabel}

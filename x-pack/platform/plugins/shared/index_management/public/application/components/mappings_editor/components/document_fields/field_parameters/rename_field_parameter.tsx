@@ -65,6 +65,7 @@ export const RenameFieldParameter: React.FC = () => {
       componentProps={{
         euiFieldProps: {
           'data-test-subj': 'renameFieldParameterInput',
+          autoComplete: 'off',
         },
       }}
     />

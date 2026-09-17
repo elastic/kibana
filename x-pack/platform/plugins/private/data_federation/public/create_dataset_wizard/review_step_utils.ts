@@ -41,8 +41,6 @@ import {
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
 import { inferFormatFromResource } from './infer_format_from_resource';
 import { getVisibleResourceOwnedSettingsFieldIds } from './resource_settings_fields';
-import { getSchemaMappingSettingsFieldIds } from './schema_mapping_settings_fields';
-
 export type ReviewSettingBadge = 'default' | 'modified';
 
 export interface ReviewSummaryRow {
@@ -314,13 +312,15 @@ export const getReviewSchemaMappingRows = (
   values: DatasetWizardFormValues,
   flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_2
 ): ReviewSummaryRow[] => {
-  const rows: ReviewSummaryRow[] = [
-    {
-      label: datasetWizardStrings.schemaMappingModeLegend(),
-      displayValue: getSchemaMappingModeLabel(values.schema_mapping_mode, flowVariant),
-      badge: values.schema_mapping_mode === 'automatic' ? 'default' : 'modified',
-    },
-  ];
+  const rows: ReviewSummaryRow[] = isDatasetWizardFlow396(flowVariant)
+    ? []
+    : [
+        {
+          label: datasetWizardStrings.schemaMappingModeLegend(),
+          displayValue: getSchemaMappingModeLabel(values.schema_mapping_mode, flowVariant),
+          badge: values.schema_mapping_mode === 'automatic' ? 'default' : 'modified',
+        },
+      ];
 
   if (values.schema_mapping_mode === 'manual') {
     const fieldCount = countManualMappingFields(values.manual_mappings ?? {});
@@ -340,13 +340,23 @@ export const getReviewSchemaMappingRows = (
     if (isDatasetWizardFlow3(flowVariant)) {
       const isDynamicEnabled = values.dynamic_fields_enabled !== false;
 
-      rows.push({
-        label: datasetWizardStrings.dynamicFieldsTitle(),
-        displayValue: isDynamicEnabled
-          ? datasetWizardStrings.reviewDynamicFieldsOn()
-          : datasetWizardStrings.reviewDynamicFieldsOff(),
-        badge: isDynamicEnabled ? 'default' : 'modified',
-      });
+      if (isDatasetWizardFlow396(flowVariant)) {
+        rows.push({
+          label: datasetWizardStrings.schemaInferenceModeReviewLabel(),
+          displayValue: isDynamicEnabled
+            ? datasetWizardStrings.reviewSchemaInferenceInfer()
+            : datasetWizardStrings.reviewSchemaInferenceManual(),
+          badge: isDynamicEnabled ? 'default' : 'modified',
+        });
+      } else {
+        rows.push({
+          label: datasetWizardStrings.dynamicFieldsTitle(),
+          displayValue: isDynamicEnabled
+            ? datasetWizardStrings.reviewDynamicFieldsOn()
+            : datasetWizardStrings.reviewDynamicFieldsOff(),
+          badge: isDynamicEnabled ? 'default' : 'modified',
+        });
+      }
 
       if (mappedFieldCount > 0) {
         rows.push({
@@ -361,35 +371,6 @@ export const getReviewSchemaMappingRows = (
         displayValue: datasetWizardStrings.reviewAutomaticFieldTypesCount(mappedFieldCount),
         badge: 'modified',
       });
-    }
-  }
-
-  if (isDatasetWizardFlow396(flowVariant)) {
-    const effectiveSettings = getEffectiveWizardSettings(
-      values.settings,
-      values.settings_custom_json
-    );
-    const format = effectiveSettings.format;
-
-    if (format) {
-      const defaults = getDefaultSettingsForFormat(format);
-
-      for (const fieldId of getSchemaMappingSettingsFieldIds(format, effectiveSettings.error_mode, {
-        showForAllFormats: true,
-      })) {
-        const value = effectiveSettings[fieldId];
-        if (!value || (typeof value === 'string' && value.trim() === '')) {
-          continue;
-        }
-
-        const isDefault = defaults[fieldId] !== undefined && value === defaults[fieldId];
-
-        rows.push({
-          label: getDatasetSettingsFieldLabel(fieldId),
-          displayValue: formatSettingsFieldDisplayValue(fieldId, value),
-          badge: isDefault ? 'default' : 'modified',
-        });
-      }
     }
   }
 

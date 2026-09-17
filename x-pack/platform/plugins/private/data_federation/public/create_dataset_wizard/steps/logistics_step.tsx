@@ -57,7 +57,10 @@ export interface LogisticsStepProps {
   onRegionManualChange?: (regionId: string) => void;
   isEditMode?: boolean;
   syncedResourceRef?: MutableRefObject<string | null>;
-  /** Flow 3.9.6: hide the auth notice after the user connects a new source via the flyout. */
+  /**
+   * Flow 3.9.6: hide the auth notice in edit mode until the user picks a different source,
+   * or after they connect a new source via the flyout.
+   */
   suppressExistingDataSourceAuthNotice?: boolean;
   /** Flow 3.9.6: user picked an existing source from the dropdown (not via connect-new flyout). */
   onUserSelectedExistingDataSource?: () => void;

@@ -19,6 +19,7 @@ import {
   getAdditionalSettingsStepFields,
   getSchemaMappingsStepFields,
   getWizardStepFields,
+  isFlow396DefineSchemaMissingFieldMappings,
 } from './dataset_wizard_step_validation';
 import {
   ADDITIONAL_SETTINGS_STEP,
@@ -26,6 +27,7 @@ import {
   FLOW_3_REVIEW_STEP,
   LOGISTICS_STEP,
   PREVIEW_RESULTS_STEP,
+  REVIEW_STEP,
   SCHEMA_MAPPINGS_STEP,
 } from './dataset_wizard_constants';
 
@@ -89,7 +91,7 @@ describe('dataset_wizard_step_validation', () => {
     ]);
   });
 
-  it('validates schema mapping settings on the schema mappings step in flow 3 9.6', () => {
+  it('validates schema resolution on additional settings in flow 3 9.6', () => {
     const values = {
       ...emptyDatasetWizardFormValues(),
       settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
@@ -97,7 +99,10 @@ describe('dataset_wizard_step_validation', () => {
 
     expect(
       getWizardStepFields(SCHEMA_MAPPINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
-    ).toEqual(['settings.schema_sample_size', 'settings.schema_resolution']);
+    ).toEqual([]);
+    expect(
+      getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    ).toEqual(expect.arrayContaining(['settings.schema_resolution']));
     expect(
       getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
     ).not.toEqual(expect.arrayContaining(['settings.schema_sample_size']));
@@ -227,5 +232,50 @@ describe('dataset_wizard_step_validation', () => {
     expect(
       getWizardStepFields(PREVIEW_RESULTS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
     ).toEqual(expect.arrayContaining(['data_source', 'name', 'resource']));
+  });
+
+  it('requires mapped fields when Define schema is selected in flow 3 9.6', async () => {
+    const defineSchemaValues = {
+      ...emptyDatasetWizardFormValues(),
+      dynamic_fields_enabled: false,
+      automatic_field_types: {},
+    };
+    const withMappedField = {
+      ...defineSchemaValues,
+      automatic_field_types: { message: 'keyword' },
+    };
+
+    expect(
+      isFlow396DefineSchemaMissingFieldMappings(defineSchemaValues, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    ).toBe(true);
+    expect(
+      isFlow396DefineSchemaMissingFieldMappings(withMappedField, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    ).toBe(false);
+    expect(
+      isFlow396DefineSchemaMissingFieldMappings(
+        { ...defineSchemaValues, dynamic_fields_enabled: true },
+        DATASET_WIZARD_FLOW_VARIANT_3_9_6
+      )
+    ).toBe(false);
+
+    const trigger = jest.fn(async () => true);
+
+    await expect(
+      findFirstInvalidWizardStep({
+        targetStep: REVIEW_STEP,
+        values: defineSchemaValues,
+        trigger,
+        flowVariant: DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+      })
+    ).resolves.toBe(SCHEMA_MAPPINGS_STEP);
+
+    await expect(
+      findFirstInvalidWizardStep({
+        targetStep: REVIEW_STEP,
+        values: withMappedField,
+        trigger,
+        flowVariant: DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+      })
+    ).resolves.toBeUndefined();
   });
 });

@@ -28,6 +28,7 @@ import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import { datasetWizardStepFieldsMaxWidthCss } from '../dataset_wizard_layout';
 import type { DatasetWizardFormValues, SchemaMappingMode } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { SchemaMappingsDescriptionFlow3 } from '../schema_mappings_description_flow3';
 import { getSchemaMappingSettingsFieldIds } from '../schema_mapping_settings_fields';
 import { InferredSchemaPreviewTable } from '../inferred_schema_preview_table';
 import { getTestConfigurationPreviewFields } from '../test_configuration_preview_utils';
@@ -89,8 +90,8 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
   const hasFormatSelected = isKnownFormat(format);
   const schemaMappingSettingsFields = useMemo(
     () =>
-      hasFormatSelected
-        ? getSchemaMappingSettingsFieldIds(format, errorMode, { showForAllFormats: isFlow396 })
+      hasFormatSelected && !isFlow396
+        ? getSchemaMappingSettingsFieldIds(format, errorMode)
         : [],
     [errorMode, format, hasFormatSelected, isFlow396]
   );
@@ -159,12 +160,14 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
         data-test-subj={hideAwsGlueTable ? 'datasetWizardSchemaMappingModeDescription' : undefined}
       >
         <p>
-          {hideAwsGlueTable
-            ? datasetWizardStrings.schemaMappingsDescriptionFlow3()
-            : datasetWizardStrings.schemaMappingsDescription()}
+          {hideAwsGlueTable ? (
+            <SchemaMappingsDescriptionFlow3 />
+          ) : (
+            datasetWizardStrings.schemaMappingsDescription()
+          )}
         </p>
       </EuiText>
-      {isFlow396 ? (
+      {!isFlow396 && schemaMappingSettingsFields.length > 0 ? (
         <>
           <EuiSpacer size="l" />
           <DatasetSettingsSectionAccordion
@@ -176,7 +179,7 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
             fieldsDataTestSubj="datasetWizardSchemaMappingSettings"
             fieldsContainerCss={datasetWizardStepFieldsMaxWidthCss}
           >
-            {hasFormatSelected && schemaMappingSettingsFields.length > 0 ? (
+            {hasFormatSelected ? (
               <DatasetSettingDefaultHintsProvider format={format} isEnabled>
                 <DatasetSettingsFieldsLayout
                   control={control}
@@ -192,7 +195,7 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
           </DatasetSettingsSectionAccordion>
         </>
       ) : null}
-      {isFlow396 ? null : <EuiSpacer size="l" />}
+      <EuiSpacer size="l" />
 
       {hideAwsGlueTable ? (
         <div css={isFlow396 ? collapseSharedAccordionBorderCss : undefined}>

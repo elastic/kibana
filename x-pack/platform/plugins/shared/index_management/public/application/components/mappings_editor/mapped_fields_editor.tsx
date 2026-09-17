@@ -149,18 +149,23 @@ export const MappedFieldsEditor = React.memo(
       return <MultipleMappingsWarning />;
     }
 
+    /** When field search is off, `false` omits the header row (including the default docs blurb). */
+    const hideDocumentFieldsHeader = showFieldSearch === false && fieldsDescription === false;
+
     return (
       <div data-test-subj="mappedFieldsEditor">
         <DocumentFields
           searchComponent={
             <>
-              <DocumentFieldsHeader
-                searchValue={state.search.term}
-                onSearchChange={onSearchChange}
-                compressed={compressed}
-                description={fieldsDescription}
-                showFieldSearch={showFieldSearch}
-              />
+              {hideDocumentFieldsHeader ? null : (
+                <DocumentFieldsHeader
+                  searchValue={state.search.term}
+                  onSearchChange={onSearchChange}
+                  compressed={compressed}
+                  description={fieldsDescription === false ? undefined : fieldsDescription}
+                  showFieldSearch={showFieldSearch}
+                />
+              )}
               {afterFieldsDescription}
               {afterFieldsDescription ? null : <EuiSpacer size="m" />}
             </>

@@ -277,7 +277,12 @@ describe('SchemaMappingsStep flow 3', () => {
     expect(queryByTestId('datasetWizardSchemaMappingModeAutomatic')).toBeNull();
     expect(queryByTestId('datasetWizardSchemaMappingModeAwsGlueTable')).toBeNull();
     expect(getByTestId('datasetWizardSchemaMappingModeDescription')).toHaveTextContent(
-      'Optional definition of how documents should be indexed. Elastic infers the schema at query time by default.'
+      "Optional definition of how documents should be indexed. Elastic infers the schema at query time by default. You can manually map desired fields below, and we'll infer the rest of the schema."
+    );
+    expect(getByTestId('datasetWizardSchemaMappingsDocsLink')).toHaveTextContent('Learn more');
+    expect(getByTestId('datasetWizardSchemaMappingsDocsLink')).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-datasets#declare-a-dataset-mapping'
     );
     expect(queryByTestId('datasetWizardAutomaticSchemaSampleTable')).toBeNull();
     expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
@@ -288,30 +293,7 @@ describe('SchemaMappingsStep flow 3', () => {
 });
 
 describe('SchemaMappingsStep flow 3 9.6', () => {
-  it('shows schema mapping settings under the step description', async () => {
-    const { getByTestId } = render(
-      <TestHarness
-        dataSources={[s3DataSource]}
-        dataSource="s3-source"
-        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
-        defaultValues={{
-          ...emptyDatasetWizardFormValues(),
-          settings: {
-            ...emptyDatasetWizardFormValues().settings,
-            format: 'parquet',
-          },
-        }}
-      />
-    );
-
-    expect(getByTestId('datasetWizardSchemaMappingModeDescription')).toBeInTheDocument();
-    expect(getByTestId('datasetWizardSchemaMappingSettings')).toBeInTheDocument();
-    expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
-    expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
-    expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
-  });
-
-  it('does not render dynamic fields inside schema settings in flow 3 9.6', () => {
+  it('shows mapped fields without a schema settings section on the step', async () => {
     const { getByTestId, queryByTestId } = render(
       <TestHarness
         dataSources={[s3DataSource]}
@@ -327,98 +309,11 @@ describe('SchemaMappingsStep flow 3 9.6', () => {
       />
     );
 
-    expect(
-      queryByTestId('datasetWizardDynamicFieldsEnabled', {
-        container: getByTestId('datasetWizardSchemaMappingSettings'),
-      })
-    ).toBeNull();
-  });
-
-  it('caps schema settings fields at the same max width as earlier wizard steps', () => {
-    const { getByTestId } = render(
-      <TestHarness
-        dataSources={[s3DataSource]}
-        dataSource="s3-source"
-        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
-        defaultValues={{
-          ...emptyDatasetWizardFormValues(),
-          settings: {
-            ...emptyDatasetWizardFormValues().settings,
-            format: 'parquet',
-          },
-        }}
-      />
-    );
-
-    expect(getComputedStyle(getByTestId('datasetWizardSchemaMappingSettings')).maxWidth).toBe(
-      `${DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH}px`
-    );
-  });
-
-  it('groups the schema mapping settings in a section that opens by default', () => {
-    const { getByTestId, getByRole } = render(
-      <TestHarness
-        dataSources={[s3DataSource]}
-        dataSource="s3-source"
-        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
-        defaultValues={{
-          ...emptyDatasetWizardFormValues(),
-          settings: {
-            ...emptyDatasetWizardFormValues().settings,
-            format: 'parquet',
-          },
-        }}
-      />
-    );
-
-    const accordion = getByTestId('datasetWizardSchemaSettingsAccordion');
-    const accordionButton = getByRole('button', { name: 'Schema settings (optional)' });
-
-    expect(accordion).toContainElement(accordionButton);
-    expect(accordionButton).toHaveAttribute('aria-expanded', 'true');
-    expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
-
-    fireEvent.click(accordionButton);
-    expect(accordionButton).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  it('shows schema mapping settings for csv', () => {
-    const { getByTestId } = render(
-      <TestHarness
-        dataSources={[s3DataSource]}
-        dataSource="s3-source"
-        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
-        defaultValues={{
-          ...emptyDatasetWizardFormValues(),
-          settings: {
-            ...emptyDatasetWizardFormValues().settings,
-            format: 'csv',
-          },
-        }}
-      />
-    );
-
-    expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
-    expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
-  });
-
-  it('shows schema mapping settings for ndjson', () => {
-    const { getByTestId } = render(
-      <TestHarness
-        dataSources={[s3DataSource]}
-        dataSource="s3-source"
-        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
-        defaultValues={{
-          ...emptyDatasetWizardFormValues(),
-          settings: {
-            ...emptyDatasetWizardFormValues().settings,
-            format: 'ndjson',
-          },
-        }}
-      />
-    );
-
-    expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
-    expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSchemaMappingModeDescription')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSchemaMappingsDocsLink')).toBeInTheDocument();
+    expect(queryByTestId('datasetWizardSchemaSettingsAccordion')).toBeNull();
+    expect(queryByTestId('datasetWizardSchemaMappingSettings')).toBeNull();
+    expect(queryByTestId('datasetWizardSettingsSchemaResolution')).toBeNull();
+    expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
   });
 });

@@ -62,6 +62,7 @@ export const SourceNameParameter: React.FC = () => {
         euiFieldProps: {
           'data-test-subj': 'sourceNameParameterInput',
           placeholder: sourceNameField?.placeholder,
+          autoComplete: 'off',
         },
       }}
     />

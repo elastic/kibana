@@ -118,7 +118,14 @@ export const CreateField = React.memo(function CreateFieldComponent({
     },
   } = useConfig();
   const { euiTheme } = useEuiTheme();
-  const { fields, mappingViewFields } = useMappingsState();
+  const {
+    fields,
+    mappingViewFields,
+    documentFields: { status: documentFieldsStatus },
+  } = useMappingsState();
+  const previousDocumentFieldsStatusRef = useRef<'idle' | 'creatingField' | 'editingField' | 'disabled'>(
+    'idle'
+  );
   const {
     showFieldRename,
     prepareFieldDataForSubmit,
@@ -147,6 +154,16 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     return subscription.unsubscribe;
   }, [dispatch, subscribe]);
+
+  useEffect(() => {
+    const previousStatus = previousDocumentFieldsStatusRef.current;
+    previousDocumentFieldsStatusRef.current = documentFieldsStatus;
+
+    if (previousStatus !== 'creatingField' && documentFieldsStatus === 'creatingField') {
+      form.reset();
+      setInlineOptionalDateFormatText('');
+    }
+  }, [documentFieldsStatus, form]);
   const cancel = () => {
     if (isAddingFields && onCancelAddingNewFields) {
       onCancelAddingNewFields();

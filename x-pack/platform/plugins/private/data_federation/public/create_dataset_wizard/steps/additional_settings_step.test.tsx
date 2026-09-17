@@ -518,10 +518,8 @@ describe('AdditionalSettingsStep', () => {
       expect(queryByTestId('datasetWizardSettingsFormat')).toBeNull();
     });
 
-    it('hides the advanced accordion when the other steps have claimed all of its fields', async () => {
-      // Orc leaves only the partition path and schema resolution to advanced,
-      // and both are asked for on another step.
-      const { queryByTestId, getByTestId } = render(
+    it('keeps schema resolution in advanced settings for orc in flow 3 9.6', async () => {
+      const { getByTestId } = render(
         <TestHarness
           resource="s3://bucket/data.orc"
           flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
@@ -532,7 +530,8 @@ describe('AdditionalSettingsStep', () => {
         expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
       });
 
-      expect(queryByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeNull();
+      expect(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
     });
 
     it('keeps the advanced accordion for a format that still has fields for it', async () => {
@@ -810,7 +809,7 @@ describe('AdditionalSettingsStep', () => {
       expect(queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
     });
 
-    it('moves schema mapping settings to the schema mappings step in flow 3 9.6', async () => {
+    it('shows schema resolution in advanced settings in flow 3 9.6', async () => {
       const { getByTestId, queryByTestId } = render(
         <TestHarness
           resource="s3://bucket/data.parquet"
@@ -822,7 +821,8 @@ describe('AdditionalSettingsStep', () => {
         expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
       });
 
-      expect(queryByTestId('datasetWizardSettingsSchemaResolution')).toBeNull();
+      expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
+      expect(queryByTestId('datasetWizardSettingsSchemaSampleSize')).toBeNull();
     });
 
     it('keeps schema mapping settings on additional settings in flow 3', async () => {

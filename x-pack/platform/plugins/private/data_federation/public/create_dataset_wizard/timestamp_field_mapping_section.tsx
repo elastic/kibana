@@ -150,6 +150,7 @@ export const TimestampFieldMappingSection: FunctionComponent<TimestampFieldMappi
                 value={fieldPath}
                 onChange={(event) => setFieldPath(event.target.value)}
                 placeholder={datasetWizardStrings.timestampMappingPathPlaceholder()}
+                autoComplete="off"
                 fullWidth
               />
             </EuiFormRow>

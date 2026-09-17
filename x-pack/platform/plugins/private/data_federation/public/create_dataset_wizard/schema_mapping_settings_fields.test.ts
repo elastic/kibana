@@ -35,14 +35,16 @@ describe('schema_mapping_settings_fields', () => {
     expect(getSchemaMappingSettingsFieldIds('orc')).toEqual(['schema_resolution']);
   });
 
-  it('returns all schema mapping settings for every format in flow 3 9.6', () => {
+  it('returns schema resolution for every format in flow 3 9.6', () => {
     const formats = ['csv', 'tsv', 'ndjson', 'parquet', 'orc'] as const;
 
     formats.forEach((format) => {
-      expect(getSchemaMappingSettingsFieldIds(format, '', { showForAllFormats: true })).toEqual([
-        'schema_sample_size',
-        'schema_resolution',
-      ]);
+      expect(
+        getSchemaMappingSettingsFieldIds(format, '', {
+          showForAllFormats: true,
+          omitSchemaSampleSize: true,
+        })
+      ).toEqual(['schema_resolution']);
     });
   });
 });

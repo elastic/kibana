@@ -21,18 +21,29 @@ export const SCHEMA_MAPPING_SETTINGS_FIELD_IDS: readonly DatasetSettingsFieldId[
   'schema_resolution',
 ];
 
+/** Flow 3 9.6 hides these on additional settings; schema resolution lives in advanced settings instead. */
+export const FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS: readonly DatasetSettingsFieldId[] = [
+  'schema_sample_size',
+];
+
 export interface GetSchemaMappingSettingsFieldIdsOptions {
   /** Flow 3 9.6 shows schema mapping settings for every format on the schema mappings step. */
   showForAllFormats?: boolean;
+  /** Flow 3 9.6 does not expose schema sample size in the wizard. */
+  omitSchemaSampleSize?: boolean;
 }
 
 export const getSchemaMappingSettingsFieldIds = (
   format: Exclude<DatasetFormatFormValue, ''>,
   errorMode: DatasetErrorModeFormValue = '',
-  { showForAllFormats = false }: GetSchemaMappingSettingsFieldIdsOptions = {}
+  {
+    showForAllFormats = false,
+    omitSchemaSampleSize = false,
+  }: GetSchemaMappingSettingsFieldIdsOptions = {}
 ): DatasetSettingsFieldId[] =>
   SCHEMA_MAPPING_SETTINGS_FIELD_IDS.filter(
     (fieldId) =>
+      !(omitSchemaSampleSize && fieldId === 'schema_sample_size') &&
       (showForAllFormats || isFieldVisibleForFormat(fieldId, format)) &&
       isFieldVisibleForErrorMode(fieldId, errorMode)
   );

@@ -23,7 +23,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { FieldSourceNameChange } from '@kbn/index-management-shared-types';
+import type { FieldSourceNameChange, MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { debounce } from 'lodash';
@@ -47,6 +47,7 @@ import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { formatMappedFieldTypeLabel } from '../inferred_field_type_options';
 import type { TestConfigurationPreviewField } from '../test_configuration_preview_utils';
 import { MappingSubsectionTitle } from '../mapping_subsection_title';
+import { SchemaInferenceModeCards } from '../schema_inference_mode_cards';
 import { TimestampFieldMappingSection } from '../timestamp_field_mapping_section';
 
 export interface InferredSchemaMappingsEditorProps {
@@ -147,7 +148,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   const mappedFieldsHeaderCss = css`
     min-block-size: ${euiTheme.size.xl};
   `;
-  const fieldMappingsListDividerCss = css`
+  const fieldMappingsSectionDividerCss = css`
     border-bottom: ${euiTheme.border.thin};
   `;
   const mappedFieldsAccordionId = useGeneratedHtmlId({
@@ -171,16 +172,6 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     name: 'dynamic_fields_enabled',
   });
   const isDynamicEnabled = dynamicFieldsEnabledField.value !== false;
-
-  const fieldsDescription = useMemo(() => {
-    if (!isFlow396) {
-      return undefined;
-    }
-
-    return isDynamicEnabled
-      ? datasetWizardStrings.dynamicFieldsEnabledHelp()
-      : datasetWizardStrings.dynamicFieldsDisabled();
-  }, [isDynamicEnabled, isFlow396]);
 
   const [schemaEditorKey, setSchemaEditorKey] = useState(0);
   const [isAddFieldFormOpen, setIsAddFieldFormOpen] = useState(false);
@@ -337,18 +328,25 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
         <>
           <TimestampFieldMappingSection isRequired={false} />
           <EuiSpacer size="xl" />
+          <div
+            css={fieldMappingsSectionDividerCss}
+            data-test-subj="datasetWizardFieldMappingsSectionTopDivider"
+          />
+          <EuiSpacer size="m" />
           <MappingSubsectionTitle
             title={datasetWizardStrings.fieldMappingsSectionTitle()}
             data-test-subj="datasetWizardFieldMappingsSectionTitle"
-          />
-          <EuiSpacer size="m" />
-          <div
-            css={fieldMappingsListDividerCss}
-            data-test-subj="datasetWizardFieldMappingsSectionDivider"
+            trailing={
+              !isDynamicEnabled ? (
+                <EuiBadge color="danger" data-test-subj="datasetWizardFieldMappingsRequiredBadge">
+                  {datasetWizardStrings.timestampMappingRequiredBadge()}
+                </EuiBadge>
+              ) : undefined
+            }
           />
         </>
       ) : undefined,
-    [fieldMappingsListDividerCss, isFlow396]
+    [fieldMappingsSectionDividerCss, isDynamicEnabled, isFlow396]
   );
 
   useEffect(() => {
@@ -409,11 +407,6 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     display: none;
   `;
 
-  /** Same inset as the accordion panel's block-end padding in {@link DatasetSettingsSectionAccordion}. */
-  const mappedFieldsAddFieldFooterCss = css`
-    margin-block-start: ${euiTheme.size.m};
-  `;
-
   const mappedFieldsAddFieldButton = (
     <EuiButton
       iconType="plusCircle"
@@ -427,6 +420,43 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     >
       {datasetWizardStrings.addFieldButton()}
     </EuiButton>
+  );
+
+  const mappedFieldsEditor = (
+    <MappedFieldsEditorComponent
+      key={schemaEditorKey}
+      value={mappings}
+      compressed
+      fieldEditDisplay="inline"
+      {...(isFlow396
+        ? {
+            showFieldSearch: false as const,
+            fieldsDescription: false as const,
+            allowMultiFields: false as const,
+            // Timestamp is always shown above, so keep the add-field form collapsed.
+            autoOpenCreateFieldWhenEmpty: false as const,
+            allowedRootFieldTypes: DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES,
+            closeCreateFieldOnOutsideClick: false,
+            autoFocusCreateFieldType: false as const,
+            inlineOptionalDateFormatField: {
+              label: datasetWizardStrings.timestampMappingFormatLabel(),
+              helpText: datasetWizardStrings.timestampMappingFormatHelp(),
+              placeholder: datasetWizardStrings.timestampMappingFormatPlaceholder(),
+            },
+            sourceNameField: {
+              label: datasetWizardStrings.timestampMappingPathLabel(),
+              helpText: datasetWizardStrings.timestampMappingPathHelp(),
+              placeholder: datasetWizardStrings.timestampMappingPathPlaceholder(),
+              requiredErrorMessage: datasetWizardStrings.mappedFieldPathRequiredError(),
+            },
+          }
+        : {})}
+      afterFieldsDescription={timestampFieldMappingSection}
+      showFieldRename={isFlow396}
+      fieldSourceNames={mappedFieldSourceNames}
+      onFieldSourceNameChange={isFlow396 ? handleFieldSourceNameChange : undefined}
+      onChange={onMappingsChange}
+    />
   );
 
   return (
@@ -452,69 +482,37 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
         }
       `}
     >
-      <DatasetSettingsSectionAccordion
-        id={mappedFieldsAccordionId}
-        title={datasetWizardStrings.mappedFieldsTitle()}
-        contentLayout={isFlow396 ? 'indentedFullWidth' : 'plain'}
-        initialIsOpen={isFlow396 ? true : isMappedFieldsOpen}
-        forceState={isFlow396 ? undefined : isMappedFieldsOpen ? 'open' : 'closed'}
-        onToggle={isFlow396 ? undefined : setIsMappedFieldsOpen}
-        extraAction={
-          isFlow396 ? (
-            <EuiSwitch
-              compressed
-              label={datasetWizardStrings.mappedFieldsDynamicFieldsToggleLabel()}
-              checked={isDynamicEnabled}
-              onChange={(event) => {
-                dynamicFieldsEnabledField.onChange(event.target.checked);
-              }}
-              data-test-subj="datasetWizardDynamicFieldsEnabled"
-            />
-          ) : (
-            <div css={mappedFieldsHeaderCss}>{mappedFieldsAddFieldButton}</div>
-          )
-        }
-        dataTestSubj="datasetWizardMappedFieldsAccordion"
-        fieldsDataTestSubj="datasetWizardMappedFields"
-      >
-        <MappedFieldsEditorComponent
-          key={schemaEditorKey}
-          value={mappings}
-          compressed
-          fieldEditDisplay="inline"
-          {...(isFlow396
-            ? {
-                showFieldSearch: false as const,
-                allowMultiFields: false as const,
-                // Timestamp is always shown above, so keep the add-field form collapsed.
-                autoOpenCreateFieldWhenEmpty: false as const,
-                allowedRootFieldTypes: DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES,
-                closeCreateFieldOnOutsideClick: false,
-                autoFocusCreateFieldType: false as const,
-                inlineOptionalDateFormatField: {
-                  label: datasetWizardStrings.timestampMappingFormatLabel(),
-                  helpText: datasetWizardStrings.timestampMappingFormatHelp(),
-                  placeholder: datasetWizardStrings.timestampMappingFormatPlaceholder(),
-                },
-                sourceNameField: {
-                  label: datasetWizardStrings.timestampMappingPathLabel(),
-                  helpText: datasetWizardStrings.timestampMappingPathHelp(),
-                  placeholder: datasetWizardStrings.timestampMappingPathPlaceholder(),
-                  requiredErrorMessage: datasetWizardStrings.mappedFieldPathRequiredError(),
-                },
-              }
-            : {})}
-          fieldsDescription={fieldsDescription}
-          afterFieldsDescription={timestampFieldMappingSection}
-          showFieldRename={isFlow396}
-          fieldSourceNames={mappedFieldSourceNames}
-          onFieldSourceNameChange={isFlow396 ? handleFieldSourceNameChange : undefined}
-          onChange={onMappingsChange}
-        />
-        {isFlow396 ? (
-          <div css={mappedFieldsAddFieldFooterCss}>{mappedFieldsAddFieldButton}</div>
-        ) : null}
-      </DatasetSettingsSectionAccordion>
+      {isFlow396 ? (
+        <>
+          <SchemaInferenceModeCards control={control} />
+          <div data-test-subj="datasetWizardMappedFields">
+            {mappedFieldsEditor}
+            <div data-test-subj="datasetWizardAddFieldFooter">
+              <EuiSpacer size="m" />
+              {mappedFieldsAddFieldButton}
+              <EuiSpacer size="m" />
+              <div
+                css={fieldMappingsSectionDividerCss}
+                data-test-subj="datasetWizardFieldMappingsSectionBottomDivider"
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        <DatasetSettingsSectionAccordion
+          id={mappedFieldsAccordionId}
+          title={datasetWizardStrings.mappedFieldsTitle()}
+          contentLayout="plain"
+          initialIsOpen={isMappedFieldsOpen}
+          forceState={isMappedFieldsOpen ? 'open' : 'closed'}
+          onToggle={setIsMappedFieldsOpen}
+          extraAction={<div css={mappedFieldsHeaderCss}>{mappedFieldsAddFieldButton}</div>}
+          dataTestSubj="datasetWizardMappedFieldsAccordion"
+          fieldsDataTestSubj="datasetWizardMappedFields"
+        >
+          {mappedFieldsEditor}
+        </DatasetSettingsSectionAccordion>
+      )}
 
       {!isFlow396 ? (
         <>

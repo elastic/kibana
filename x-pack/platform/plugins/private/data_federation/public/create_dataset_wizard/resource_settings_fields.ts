@@ -16,7 +16,7 @@ import {
   isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
-import { SCHEMA_MAPPING_SETTINGS_FIELD_IDS } from './schema_mapping_settings_fields';
+import { FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS } from './schema_mapping_settings_fields';
 
 /**
  * Settings that describe the resource path rather than the contents of the files, so they are
@@ -37,7 +37,7 @@ export const getReviewAdditionalSettingsExcludeFieldIds = (
   flowVariant: DatasetWizardFlowVariant
 ): readonly DatasetSettingsFieldId[] => [
   ...getResourceOwnedSettingsFieldIds(flowVariant),
-  ...(isDatasetWizardFlow396(flowVariant) ? SCHEMA_MAPPING_SETTINGS_FIELD_IDS : []),
+  ...(isDatasetWizardFlow396(flowVariant) ? FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS : []),
 ];
 
 /**
