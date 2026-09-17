@@ -17,8 +17,9 @@ import {
   isTaskCurrentlyRunningError,
   chunkedTaskStateSchemaByVersion,
   isProductName,
-  nextChunkRunResult,
+  runInstallChunk,
   type ChunkedTaskState,
+  type InstallLockManager,
 } from './utils';
 
 export const INSTALL_ALL_TASK_TYPE = 'ProductDocBase:InstallAll';
@@ -28,9 +29,11 @@ export const INSTALL_ALL_TASK_ID_MULTILINGUAL = 'ProductDocBase:InstallAllMultil
 export const registerInstallAllTaskDefinition = ({
   getServices,
   taskManager,
+  lockManager,
 }: {
   getServices: () => InternalServices;
   taskManager: TaskManagerSetupContract;
+  lockManager: InstallLockManager;
 }) => {
   taskManager.registerTaskDefinitions({
     [INSTALL_ALL_TASK_TYPE]: {
@@ -42,15 +45,14 @@ export const registerInstallAllTaskDefinition = ({
         return {
           async run() {
             const { remaining } = taskInstance.state as ChunkedTaskState;
-            const [productName, ...rest] = (
-              remaining ?? Object.values(DocumentationProduct)
-            ).filter(isProductName);
-            if (!productName) {
-              return { state: {} };
-            }
             const { packageInstaller } = getServices();
-            await packageInstaller.installProduct({ productName, inferenceId });
-            return nextChunkRunResult(rest);
+            return runInstallChunk({
+              lockManager,
+              items: (remaining ?? Object.values(DocumentationProduct)).filter(isProductName),
+              install: (productName) =>
+                packageInstaller.installProduct({ productName, inferenceId }),
+              metadata: { taskType: INSTALL_ALL_TASK_TYPE, inferenceId },
+            });
           },
         };
       },

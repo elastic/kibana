@@ -7,21 +7,26 @@
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import { registerInstallAllTaskDefinition, INSTALL_ALL_TASK_TYPE } from './install_all';
+import { PRODUCT_DOC_INSTALL_LOCK_ID } from './utils';
 
 const allProducts = Object.values(DocumentationProduct);
 
 describe('InstallAll task', () => {
   let installProduct: jest.Mock;
+  let withLock: jest.Mock;
   let runTask: (state: Record<string, unknown>) => Promise<unknown>;
 
   beforeEach(() => {
     installProduct = jest.fn().mockResolvedValue(undefined);
+    withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
     const taskManager = taskManagerMock.createSetup();
     registerInstallAllTaskDefinition({
       taskManager,
+      lockManager: { withLock },
       getServices: () => ({ packageInstaller: { installProduct } } as unknown as InternalServices),
     });
     const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][INSTALL_ALL_TASK_TYPE];
@@ -75,5 +80,29 @@ describe('InstallAll task', () => {
     installProduct.mockRejectedValue(new Error('boom'));
 
     await expect(runTask({ remaining: ['kibana', 'security'] })).rejects.toThrow('boom');
+  });
+
+  it('installs each product under the shared install lock', async () => {
+    await runTask({ remaining: ['kibana'] });
+
+    expect(withLock).toHaveBeenCalledWith(
+      PRODUCT_DOC_INSTALL_LOCK_ID,
+      expect.any(Function),
+      expect.objectContaining({ metadata: expect.objectContaining({ item: 'kibana' }) })
+    );
+  });
+
+  it('defers the run without installing when another install holds the lock', async () => {
+    withLock.mockRejectedValue(new LockAcquisitionError('held'));
+    const before = Date.now();
+
+    const result = await runTask({ remaining: ['kibana', 'security'] });
+
+    expect(installProduct).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      state: { remaining: ['kibana', 'security'] },
+      runAt: expect.any(Date),
+    });
+    expect((result as { runAt: Date }).runAt.getTime()).toBeGreaterThan(before);
   });
 });

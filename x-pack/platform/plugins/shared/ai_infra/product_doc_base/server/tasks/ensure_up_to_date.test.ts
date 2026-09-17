@@ -7,25 +7,30 @@
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import type { InternalServices } from '../types';
 import {
   registerEnsureUpToDateTaskDefinition,
   ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
 } from './ensure_up_to_date';
+import { PRODUCT_DOC_INSTALL_LOCK_ID } from './utils';
 
 describe('EnsureUpToDate task', () => {
   let installProduct: jest.Mock;
   let getProductsToUpdate: jest.Mock;
   let ensureOpenApiSpecUpToDate: jest.Mock;
+  let withLock: jest.Mock;
   let runTask: (state: Record<string, unknown>) => Promise<unknown>;
 
   beforeEach(() => {
     installProduct = jest.fn().mockResolvedValue(undefined);
     getProductsToUpdate = jest.fn().mockResolvedValue(['kibana', 'security']);
     ensureOpenApiSpecUpToDate = jest.fn().mockResolvedValue(undefined);
+    withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
     const taskManager = taskManagerMock.createSetup();
     registerEnsureUpToDateTaskDefinition({
       taskManager,
+      lockManager: { withLock },
       getServices: () =>
         ({
           packageInstaller: { installProduct, getProductsToUpdate, ensureOpenApiSpecUpToDate },
@@ -79,5 +84,28 @@ describe('EnsureUpToDate task', () => {
     expect(installProduct).not.toHaveBeenCalled();
     expect(ensureOpenApiSpecUpToDate).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ state: {} });
+  });
+
+  it('runs each item under the shared install lock', async () => {
+    await runTask({ remaining: ['openapi'] });
+
+    expect(withLock).toHaveBeenCalledWith(
+      PRODUCT_DOC_INSTALL_LOCK_ID,
+      expect.any(Function),
+      expect.objectContaining({ metadata: expect.objectContaining({ item: 'openapi' }) })
+    );
+  });
+
+  it('defers the run and keeps the computed plan when another install holds the lock', async () => {
+    withLock.mockRejectedValue(new LockAcquisitionError('held'));
+
+    const result = await runTask({});
+
+    expect(installProduct).not.toHaveBeenCalled();
+    expect(ensureOpenApiSpecUpToDate).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      state: { remaining: ['kibana', 'security', 'openapi'] },
+      runAt: expect.any(Date),
+    });
   });
 });

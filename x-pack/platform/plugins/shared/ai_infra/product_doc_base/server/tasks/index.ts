@@ -11,17 +11,20 @@ import { registerEnsureUpToDateTaskDefinition } from './ensure_up_to_date';
 import { registerEnsureSecurityLabsUpToDateTaskDefinition } from './ensure_security_labs_up_to_date';
 import { registerInstallAllTaskDefinition } from './install_all';
 import { registerUninstallAllTaskDefinition } from './uninstall_all';
+import type { InstallLockManager } from './utils';
 
 export const registerTaskDefinitions = ({
   getServices,
   taskManager,
+  lockManager,
 }: {
   getServices: () => InternalServices;
   taskManager: TaskManagerSetupContract;
+  lockManager: InstallLockManager;
 }) => {
-  registerEnsureUpToDateTaskDefinition({ getServices, taskManager });
+  registerEnsureUpToDateTaskDefinition({ getServices, taskManager, lockManager });
   registerEnsureSecurityLabsUpToDateTaskDefinition({ getServices, taskManager });
-  registerInstallAllTaskDefinition({ getServices, taskManager });
+  registerInstallAllTaskDefinition({ getServices, taskManager, lockManager });
   registerUninstallAllTaskDefinition({ getServices, taskManager });
 };
 
@@ -40,4 +43,4 @@ export {
   UNINSTALL_ALL_TASK_ID,
   UNINSTALL_ALL_TASK_ID_MULTILINGUAL,
 } from './uninstall_all';
-export { waitUntilTaskCompleted, getTaskStatus } from './utils';
+export { waitUntilTaskCompleted, getTaskStatus, type InstallLockManager } from './utils';

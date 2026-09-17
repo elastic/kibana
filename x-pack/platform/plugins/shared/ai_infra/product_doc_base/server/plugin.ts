@@ -13,6 +13,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { isEisAvailableFromInferenceGet } from '@kbn/product-doc-common';
+import { LockManagerService } from '@kbn/lock-manager';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import type { ProductDocBaseConfig } from './config';
 import type {
@@ -72,6 +73,7 @@ export class ProductDocBasePlugin
     registerTaskDefinitions({
       taskManager,
       getServices,
+      lockManager: new LockManagerService(coreSetup, this.logger),
     });
 
     const router = coreSetup.http.createRouter();
@@ -195,7 +197,8 @@ export class ProductDocBasePlugin
       return;
     }
 
-    // Steps run one at a time so that at most one documentation install is in flight per pod
+    // Steps run one at a time so this node does not queue installs behind each other; the tasks
+    // themselves hold a cluster-wide lock so at most one documentation install runs at a time
     const waitOptions = { wait: true, waitTimeoutMs: STARTUP_TASK_WAIT_TIMEOUT_MS };
     await documentationManager
       .ensureDefaultProductDocumentation(waitOptions)

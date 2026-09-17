@@ -16,8 +16,9 @@ import {
   isTaskCurrentlyRunningError,
   chunkedTaskStateSchemaByVersion,
   isProductName,
-  nextChunkRunResult,
+  runInstallChunk,
   type ChunkedTaskState,
+  type InstallLockManager,
 } from './utils';
 
 export const ENSURE_DOC_UP_TO_DATE_TASK_TYPE = 'ProductDocBase:EnsureUpToDate';
@@ -30,9 +31,11 @@ const OPENAPI_SPEC_ITEM = 'openapi';
 export const registerEnsureUpToDateTaskDefinition = ({
   getServices,
   taskManager,
+  lockManager,
 }: {
   getServices: () => InternalServices;
   taskManager: TaskManagerSetupContract;
+  lockManager: InstallLockManager;
 }) => {
   taskManager.registerTaskDefinitions({
     [ENSURE_DOC_UP_TO_DATE_TASK_TYPE]: {
@@ -46,19 +49,22 @@ export const registerEnsureUpToDateTaskDefinition = ({
           async run() {
             const { packageInstaller } = getServices();
             const { remaining } = taskInstance.state as ChunkedTaskState;
-            const [item, ...rest] = remaining ?? [
+            const items = remaining ?? [
               ...(await packageInstaller.getProductsToUpdate({ inferenceId, forceUpdate })),
               OPENAPI_SPEC_ITEM,
             ];
-            if (!item) {
-              return { state: {} };
-            }
-            if (item === OPENAPI_SPEC_ITEM) {
-              await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId, forceUpdate });
-            } else if (isProductName(item)) {
-              await packageInstaller.installProduct({ productName: item, inferenceId });
-            }
-            return nextChunkRunResult(rest);
+            return runInstallChunk({
+              lockManager,
+              items,
+              install: async (item) => {
+                if (item === OPENAPI_SPEC_ITEM) {
+                  await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId, forceUpdate });
+                } else if (isProductName(item)) {
+                  await packageInstaller.installProduct({ productName: item, inferenceId });
+                }
+              },
+              metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },
+            });
           },
         };
       },

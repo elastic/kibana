@@ -8,7 +8,19 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
+import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
+
+export const PRODUCT_DOC_INSTALL_LOCK_ID = 'product_doc_base:install';
+export const INSTALL_LOCK_RETRY_DELAY_MS = 30_000;
+
+export interface InstallLockManager {
+  withLock<T>(
+    lockId: string,
+    callback: () => Promise<T>,
+    options?: { metadata?: Record<string, unknown> }
+  ): Promise<T>;
+}
 
 export const chunkedTaskStateSchema = schema.object({
   remaining: schema.maybe(schema.arrayOf(schema.string())),
@@ -32,6 +44,42 @@ export const isProductName = (value: string): value is ProductName =>
 // a capacity slot for one item and completed items are not redone when a later attempt fails.
 export const nextChunkRunResult = (remaining: string[]) =>
   remaining.length > 0 ? { state: { remaining }, runAt: new Date() } : { state: {} };
+
+/**
+ * Installs the first of `items` under the cluster-wide product doc install lock, so that at most one
+ * documentation install runs at a time across all tasks and Kibana nodes. When another install holds
+ * the lock the item is kept and the run is deferred instead of failing an attempt.
+ */
+export const runInstallChunk = async <T extends string>({
+  lockManager,
+  items,
+  install,
+  metadata,
+}: {
+  lockManager: InstallLockManager;
+  items: T[];
+  install: (item: T) => Promise<void>;
+  metadata?: Record<string, unknown>;
+}) => {
+  const [item, ...rest] = items;
+  if (!item) {
+    return { state: {} };
+  }
+  try {
+    await lockManager.withLock(PRODUCT_DOC_INSTALL_LOCK_ID, () => install(item), {
+      metadata: { ...metadata, item },
+    });
+  } catch (e) {
+    if (!isLockAcquisitionError(e)) {
+      throw e;
+    }
+    return {
+      state: { remaining: items },
+      runAt: new Date(Date.now() + INSTALL_LOCK_RETRY_DELAY_MS),
+    };
+  }
+  return nextChunkRunResult(rest);
+};
 
 export const getTaskStatus = async ({
   taskManager,
