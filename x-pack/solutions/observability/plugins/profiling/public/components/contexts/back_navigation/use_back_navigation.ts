@@ -5,27 +5,33 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { AppHeaderBack } from '@kbn/app-header';
-import { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
+import type { PathsOf } from '@kbn/typed-react-router-config';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
-import { BackNavigationContext, hasBackNavigation } from './back_navigation_context';
 import { useProfilingSetupStatus } from '../profiling_setup_status/use_profiling_setup_status';
+import type { ProfilingRoutes } from '../../../routing';
+
+// Routes that render a back button in AppHeader.
+// NOTE: This is compared against raw location.pathname, NOT via useProfilingRoutePath(), because
+// this provider renders above RedirectWithDefaultDateRange. Calling matchRoutes() at this level
+// throws a plain Error when rangeFrom/rangeTo are absent from the URL (they have no defaults in
+// the route codec).
+export const ROUTES_WITH_BACK_NAVIGATION = [
+  '/settings',
+  '/storage-explorer',
+  '/add-data-instructions',
+] as const satisfies ReadonlyArray<PathsOf<ProfilingRoutes>>;
+
+export const hasBackNavigation = (pathname: string): boolean =>
+  (ROUTES_WITH_BACK_NAVIGATION as readonly string[]).includes(pathname);
 
 /**
  * Returns the AppHeader `back` prop for the current route, or `undefined` when the current route
  * has no back button.
- *
- * When a back target is returned, it points at the last content route the user visited (preserving
- * path and query string). Falls back to the plugin root (/app/profiling) when nothing has
- * been recorded yet (e.g. cold deep link directly to /settings).
  */
 export const useBackNavigation = (): AppHeaderBack | undefined => {
-  const context = useContext(BackNavigationContext);
-  if (!context) {
-    throw new Error('BackNavigationContext not found');
-  }
-
   const { pathname } = useLocation();
   const {
     start: { core },
@@ -42,12 +48,10 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
     return undefined;
   }
 
-  const { lastVisitedRoute } = context;
-
-  if (lastVisitedRoute) {
-    return core.http.basePath.prepend('/app/profiling' + lastVisitedRoute);
-  }
-
-  // Fallback to plugin route if no last content route has been recorded yet (e.g. cold deep link directly to /settings).
-  return core.http.basePath.prepend('/app/profiling');
+  return {
+    href: core.http.basePath.prepend('/app/profiling'),
+    label: i18n.translate('xpack.profiling.header.backTargetLabel', {
+      defaultMessage: 'Universal Profiling',
+    }),
+  };
 };
