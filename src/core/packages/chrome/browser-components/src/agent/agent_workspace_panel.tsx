@@ -33,6 +33,8 @@ export interface AgentWorkspacePanelProps {
   width: number;
   navigationWidth: number;
   sidebarWidth: number;
+  applicationWorkspaceOpen?: boolean;
+  agentWorkspaceOpen?: boolean;
   onWidthChange: (width: number) => void;
   children: ReactNode;
 }
@@ -44,18 +46,26 @@ export function AgentWorkspacePanel({
   width,
   navigationWidth,
   sidebarWidth,
+  applicationWorkspaceOpen = true,
+  agentWorkspaceOpen = true,
   onWidthChange,
   children,
 }: AgentWorkspacePanelProps) {
+  const showResizeHandle = applicationWorkspaceOpen && agentWorkspaceOpen;
+
   return (
     <div css={wrapperStyles} data-test-subj="agentWorkspacePanel">
       <div css={contentStyles}>{children}</div>
-      <AgentWorkspaceResizeHandle
-        width={width}
-        navigationWidth={navigationWidth}
-        sidebarWidth={sidebarWidth}
-        onWidthChange={onWidthChange}
-      />
+      {showResizeHandle ? (
+        <AgentWorkspaceResizeHandle
+          width={width}
+          navigationWidth={navigationWidth}
+          sidebarWidth={sidebarWidth}
+          applicationWorkspaceOpen={applicationWorkspaceOpen}
+          agentWorkspaceOpen={agentWorkspaceOpen}
+          onWidthChange={onWidthChange}
+        />
+      ) : null}
     </div>
   );
 }

@@ -20,15 +20,15 @@ export interface LayoutAgentProps {
  * Agent workspace slot — a peer column beside the application workspace.
  */
 export const LayoutAgent = ({ children }: LayoutAgentProps) => {
-  const { appearance } = useLayoutConfig();
+  const { appearance, agentWorkspaceOpen = true } = useLayoutConfig();
 
   return (
-    <div css={styles.shell(appearance)} className="kbnChromeLayoutAgent">
-      <div
-        css={styles.scrollContainer}
-        data-test-subj="kbnChromeLayoutAgent"
-        tabIndex={-1}
-      >
+    <div
+      css={[styles.shell(appearance), !agentWorkspaceOpen && styles.closed]}
+      className="kbnChromeLayoutAgent"
+      aria-hidden={!agentWorkspaceOpen}
+    >
+      <div css={styles.scrollContainer} data-test-subj="kbnChromeLayoutAgent" tabIndex={-1}>
         <div css={styles.content}>{children}</div>
       </div>
     </div>

@@ -71,6 +71,8 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     applicationMarginRight: layoutConfig.applicationMarginRight ?? 0,
     applicationMarginBottom: layoutConfig.applicationMarginBottom ?? 0,
     agentMarginLeft: layoutConfig.agentMarginLeft ?? 0,
+    applicationWorkspaceOpen: layoutConfig.applicationWorkspaceOpen ?? true,
+    agentWorkspaceOpen: layoutConfig.agentWorkspaceOpen ?? true,
   };
 
   return <LayoutStateContext.Provider value={layoutState}>{children}</LayoutStateContext.Provider>;

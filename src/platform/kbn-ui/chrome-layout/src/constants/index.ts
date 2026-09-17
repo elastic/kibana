@@ -40,15 +40,22 @@ export const MAX_AGENT_VIEWPORT_WIDTH_RATIO = 0.5;
 
 export const getMaxAgentWorkspaceWidth = (
   navigationWidth: number,
-  sidebarWidth: number
+  sidebarWidth: number,
+  applicationWorkspaceOpen = true,
+  agentWorkspaceOpen = true
 ): number => {
+  if (!agentWorkspaceOpen) {
+    return MIN_AGENT_WIDTH;
+  }
+
   if (typeof window === 'undefined') {
     return MIN_AGENT_WIDTH;
   }
 
   const maxByViewport = Math.floor(window.innerWidth * MAX_AGENT_VIEWPORT_WIDTH_RATIO);
+  const reservedApplicationWidth = applicationWorkspaceOpen ? MIN_APPLICATION_WORKSPACE_WIDTH : 0;
   const maxByRemainingSpace =
-    window.innerWidth - navigationWidth - MIN_APPLICATION_WORKSPACE_WIDTH - sidebarWidth;
+    window.innerWidth - navigationWidth - reservedApplicationWidth - sidebarWidth;
 
   return Math.max(MIN_AGENT_WIDTH, Math.min(maxByViewport, maxByRemainingSpace));
 };
@@ -56,12 +63,46 @@ export const getMaxAgentWorkspaceWidth = (
 export const clampAgentWorkspaceWidth = (
   width: number,
   navigationWidth: number,
-  sidebarWidth: number
+  sidebarWidth: number,
+  applicationWorkspaceOpen = true,
+  agentWorkspaceOpen = true
 ): number =>
   Math.max(
     MIN_AGENT_WIDTH,
-    Math.min(getMaxAgentWorkspaceWidth(navigationWidth, sidebarWidth), Math.floor(width))
+    Math.min(
+      getMaxAgentWorkspaceWidth(
+        navigationWidth,
+        sidebarWidth,
+        applicationWorkspaceOpen,
+        agentWorkspaceOpen
+      ),
+      Math.floor(width)
+    )
   );
+
+/** Full-width agent column when the application workspace is hidden. */
+export const getSoloAgentWorkspaceWidth = ({
+  navigationWidth,
+  sidebarWidth,
+  agentMarginLeft = 0,
+  applicationMarginRight = 0,
+}: {
+  navigationWidth: number;
+  sidebarWidth: number;
+  agentMarginLeft?: number;
+  applicationMarginRight?: number;
+}): number => {
+  if (typeof window === 'undefined') {
+    return MIN_AGENT_WIDTH;
+  }
+
+  return Math.max(
+    MIN_AGENT_WIDTH,
+    Math.floor(
+      window.innerWidth - navigationWidth - sidebarWidth - agentMarginLeft - applicationMarginRight
+    )
+  );
+};
 
 /** Gutter between nav, agent, and application panels. */
 export const AGENT_FIRST_GAP = 8;

@@ -9,9 +9,9 @@
 
 import { AGENT_FIRST_FEATURE_FLAG_KEY } from './constants';
 
-type FeatureFlagsBooleanReader = {
+interface FeatureFlagsBooleanReader {
   getBooleanValue: (flagName: string, defaultValue: boolean) => boolean;
-};
+}
 
 /**
  * POC: agent-first chrome layout with a dedicated agent workspace column.

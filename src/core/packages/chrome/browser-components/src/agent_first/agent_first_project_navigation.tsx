@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useMemo } from 'react';
+import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
+import classnames from 'classnames';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import type { ChromeNavigationProps } from '../project/sidenav/navigation/navigation';
+import { useNavigationItems } from '../project/sidenav/navigation/navigation';
+
+export const AgentFirstProjectNavigation = (props: ChromeNavigationProps) => {
+  const state = useNavigationItems();
+  const onCustomizeNavigation = undefined;
+
+  const navItems = useMemo(() => {
+    if (!state) {
+      return null;
+    }
+
+    return {
+      ...state.navItems,
+      // Agent-first POC: solution logo in nav top controls replaces the Home item.
+      primaryItems: state.navItems.primaryItems.filter((item) => item.iconType !== 'home'),
+    };
+  }, [state]);
+
+  if (!state || !navItems) {
+    return null;
+  }
+
+  const { activeItemId, solutionId } = state;
+
+  return (
+    <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
+      <NavigationComponent
+        items={navItems}
+        isCollapsed={props.isCollapsed}
+        setWidth={props.setWidth}
+        onToggleCollapsed={props.onToggleCollapsed}
+        onCustomizeNavigation={onCustomizeNavigation}
+        activeItemId={activeItemId}
+        showTopSeparator={props.showTopSeparator ?? false}
+        navTopControls={props.navTopControls}
+        navFooterControls={props.navFooterControls}
+        data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
+      />
+    </KibanaSectionErrorBoundary>
+  );
+};

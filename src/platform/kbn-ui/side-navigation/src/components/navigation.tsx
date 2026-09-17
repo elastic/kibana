@@ -74,6 +74,15 @@ export interface NavigationProps {
    */
   showTopSeparator?: boolean;
   /**
+   * (optional) Chrome controls rendered at the top of the side nav, above primary items.
+   */
+  navTopControls?: ReactNode;
+  /**
+   * (optional) Chrome controls rendered at the bottom of the side nav footer,
+   * after solution footer items and before the collapse button.
+   */
+  navFooterControls?: ReactNode;
+  /**
    * (optional) Callback fired when the customize button is clicked.
    * When not provided, the button is hidden.
    */
@@ -94,6 +103,8 @@ export const Navigation = ({
   setWidth,
   showTopSeparator = true,
   sidePanelFooter,
+  navTopControls,
+  navFooterControls,
   ...rest
 }: NavigationProps) => {
   const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
@@ -160,6 +171,7 @@ export const Navigation = ({
     >
       <SideNav isCollapsed={isCollapsed}>
         {showTopSeparator && <div css={topSeparatorStyles} aria-hidden />}
+        {navTopControls}
 
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
           {({ mainNavigationInstructionsId }) => (
@@ -448,6 +460,7 @@ export const Navigation = ({
                   </SideNav.Popover>
                 );
               })}
+              {navFooterControls}
             </>
           )}
         </SideNav.Footer>

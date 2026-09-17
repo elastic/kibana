@@ -62,9 +62,7 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
     <LayoutNavigation>{renderSlot(props.navigation)}</LayoutNavigation>
   ) : null;
 
-  const agent = layoutState.hasAgent ? (
-    <LayoutAgent>{renderSlot(props.agent)}</LayoutAgent>
-  ) : null;
+  const agent = layoutState.hasAgent ? <LayoutAgent>{renderSlot(props.agent)}</LayoutAgent> : null;
 
   const application = (
     <LayoutApplication

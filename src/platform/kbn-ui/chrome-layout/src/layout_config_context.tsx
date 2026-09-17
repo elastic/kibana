@@ -32,6 +32,8 @@ export type LayoutConfig = Pick<
   | 'agentMarginLeft'
 > & {
   appearance?: LayoutAppearance;
+  applicationWorkspaceOpen?: boolean;
+  agentWorkspaceOpen?: boolean;
 };
 
 /** Update function type for layout config */

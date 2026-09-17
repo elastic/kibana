@@ -1,0 +1,86 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { isValidElement, useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiHorizontalRule, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useAgentWorkspaceOpen } from '@kbn/core-chrome-browser-hooks';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+import { ChromeNextGlobalHeaderLogo } from '../chrome_next/global_header/global_header_logo';
+import { useNavigationItems } from '../project/sidenav/navigation/navigation';
+import { useContextSwitcher } from '../shared/chrome_hooks';
+import { useChromeComponentsDeps } from '../context';
+import { AgentFirstAgentsNavItem } from './agent_first_agents_nav_item';
+
+export interface AgentFirstNavTopControlsProps {
+  isCollapsed: boolean;
+}
+
+export const AgentFirstNavTopControls = ({ isCollapsed }: AgentFirstNavTopControlsProps) => {
+  const { euiTheme } = useEuiTheme();
+  const chrome = useChromeService();
+  const agentWorkspaceOpen = useAgentWorkspaceOpen();
+  const { application } = useChromeComponentsDeps();
+  const showAgentsToggle = application.capabilities.agentBuilder?.show === true;
+  const switcher = useContextSwitcher();
+  const navigationState = useNavigationItems();
+  const solutionHomeHref = useMemo(
+    () => navigationState?.navItems.primaryItems.find((item) => item.iconType === 'home')?.href,
+    [navigationState]
+  );
+  const navSwitcher =
+    switcher && isValidElement(switcher)
+      ? React.cloneElement(switcher, { iconOnly: true })
+      : switcher;
+
+  const toggleAgentsWorkspace = useCallback(() => {
+    if (agentWorkspaceOpen) {
+      chrome.agentWorkspace.close();
+    } else {
+      chrome.agentWorkspace.open();
+    }
+  }, [agentWorkspaceOpen, chrome]);
+
+  return (
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+        width: 100%;
+        padding-top: ${euiTheme.size.s};
+      `}
+      data-test-subj="agentFirstNavTopControls"
+    >
+      {navSwitcher ? (
+        <div
+          css={css`
+            display: flex;
+            justify-content: center;
+            width: 100%;
+          `}
+          data-test-subj="agentFirstNavContextSwitcher"
+        >
+          {navSwitcher}
+        </div>
+      ) : null}
+      <ChromeNextGlobalHeaderLogo homeHref={solutionHomeHref} />
+      {showAgentsToggle ? (
+        <AgentFirstAgentsNavItem
+          isActive={agentWorkspaceOpen}
+          isCollapsed={isCollapsed}
+          onClick={toggleAgentsWorkspace}
+        />
+      ) : null}
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="none" size="half" />
+    </div>
+  );
+};

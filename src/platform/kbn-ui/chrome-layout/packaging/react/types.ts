@@ -65,6 +65,10 @@ export interface ChromeLayoutConfig {
   applicationMarginTop?: number;
   applicationMarginBottom?: number;
   applicationMarginRight?: number;
+  agentWidth?: number;
+  agentMarginLeft?: number;
+  applicationWorkspaceOpen?: boolean;
+  agentWorkspaceOpen?: boolean;
   appearance?: LayoutAppearance;
 }
 

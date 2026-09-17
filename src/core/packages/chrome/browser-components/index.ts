@@ -24,4 +24,4 @@ export {
   registerAgentWorkspaceContent,
   unregisterAgentWorkspaceContent,
 } from './src/agent/agent_slot_registry';
-
+export { AgentFirstProjectSideNav, AgentFirstApplicationWorkspaceBridge } from './src/agent_first';

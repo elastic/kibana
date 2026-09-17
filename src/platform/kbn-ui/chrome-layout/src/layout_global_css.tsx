@@ -84,7 +84,9 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('agent.top')}: ${headerAndBannerHeight}px;
     ${layoutVarName('agent.bottom')}: ${footerHeight}px;
     ${layoutVarName('agent.left')}: ${navigationWidth + agentMarginLeft}px;
-    ${layoutVarName('agent.right')}: calc(100vw - ${navigationWidth + agentWidth + agentMarginLeft}px);
+    ${layoutVarName('agent.right')}: calc(100vw - ${navigationWidth +
+    agentWidth +
+    agentMarginLeft}px);
     ${layoutVarName('agent.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
     ${layoutVarName('agent.width')}: ${agentWidth}px;
   `;

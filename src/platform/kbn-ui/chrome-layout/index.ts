@@ -21,6 +21,7 @@ export type { LayoutAppearance } from './src/layout.types';
 
 export { isAgentFirst } from './src/agent_first_flag';
 export { AGENT_FIRST_LAYOUT_OVERRIDES } from './src/agent_first/agent_first_layout';
+export { resolveAgentPanelTargetWidth } from './src/agent/resolve_agent_panel_target_width';
 
 export { LayoutDebugOverlay } from './src/debug/layout_debug_overlay';
 
@@ -41,6 +42,7 @@ export {
   MIN_AGENT_WIDTH,
   MIN_APPLICATION_WORKSPACE_WIDTH,
   clampAgentWorkspaceWidth,
+  getSoloAgentWorkspaceWidth,
   AGENT_FIRST_GAP,
   AGENT_FIRST_FEATURE_FLAG_KEY,
   euiIncludeSelectorInFocusTrap,

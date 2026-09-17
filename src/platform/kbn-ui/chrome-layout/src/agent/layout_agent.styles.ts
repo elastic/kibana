@@ -90,8 +90,18 @@ const content: EmotionFn = () => css`
   height: 100%;
 `;
 
+const closed = css`
+  width: 0;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+`;
+
 export const styles = {
   shell,
   scrollContainer,
   content,
+  closed,
 };

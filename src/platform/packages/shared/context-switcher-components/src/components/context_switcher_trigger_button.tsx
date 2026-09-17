@@ -10,7 +10,7 @@
 import React from 'react';
 import type { ReactElement } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { POPOVER_WIDTH_PX } from './types';
 
@@ -20,6 +20,7 @@ interface ContextSwitcherTriggerButtonProps {
   readonly spaceName: string;
   readonly onClick: () => void;
   readonly isSelected?: boolean;
+  readonly iconOnly?: boolean;
 }
 
 /**
@@ -32,8 +33,26 @@ export const ContextSwitcherTriggerButton = ({
   spaceName,
   onClick,
   isSelected,
+  iconOnly = false,
 }: ContextSwitcherTriggerButtonProps): ReactElement => {
   const { euiTheme } = useEuiTheme();
+
+  if (iconOnly) {
+    return (
+      <EuiToolTip content={label} disableScreenReaderOutput position="right" repositionOnScroll>
+        <EuiButtonIcon
+          aria-label={label}
+          color={isSelected ? 'primary' : 'text'}
+          data-space-name={spaceName}
+          data-test-subj="contextSwitcherTriggerButton"
+          display={isSelected ? 'base' : 'empty'}
+          iconType="apps"
+          onClick={onClick}
+          size="s"
+        />
+      </EuiToolTip>
+    );
+  }
 
   return (
     <EuiButtonEmpty

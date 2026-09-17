@@ -32,23 +32,33 @@ const logoLinkStyles = css`
   }
 `;
 
-export const ChromeNextGlobalHeaderLogo = React.memo(() => {
-  const basePath = useBasePath();
-  const homeHref = basePath.prepend(useProjectHome());
-  const { logo: customLogo } = useCustomBranding();
-  const styleVars = useHeaderButtonStyleVars();
+export interface ChromeNextGlobalHeaderLogoProps {
+  /** When set, overrides `useProjectHome()` (e.g. agent-first solution home nav href). */
+  homeHref?: string;
+}
 
-  return (
-    <a
-      href={homeHref}
-      aria-label={LOGO_ARIA_LABEL}
-      data-test-subj="nav-header-logo"
-      css={logoLinkStyles}
-      style={styleVars}
-    >
-      <LoadingIndicator customLogo={customLogo} elasticLogoColor={'text'} />
-    </a>
-  );
-});
+export const ChromeNextGlobalHeaderLogo = React.memo(
+  ({ homeHref: homeHrefOverride }: ChromeNextGlobalHeaderLogoProps) => {
+    const basePath = useBasePath();
+    const projectHome = useProjectHome();
+    const homeHref = homeHrefOverride
+      ? basePath.prepend(basePath.remove(homeHrefOverride))
+      : basePath.prepend(projectHome);
+    const { logo: customLogo } = useCustomBranding();
+    const styleVars = useHeaderButtonStyleVars();
+
+    return (
+      <a
+        href={homeHref}
+        aria-label={LOGO_ARIA_LABEL}
+        data-test-subj="nav-header-logo"
+        css={logoLinkStyles}
+        style={styleVars}
+      >
+        <LoadingIndicator customLogo={customLogo} elasticLogoColor={'text'} />
+      </a>
+    );
+  }
+);
 
 ChromeNextGlobalHeaderLogo.displayName = 'ChromeNextGlobalHeaderLogo';

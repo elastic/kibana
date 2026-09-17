@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConversationShareButton } from './conversation_share_button';
 import { ChatInfoButton } from './chat_info_button';
+import { ApplicationWorkspaceCollapseButton } from './application_workspace_collapse_button';
 import { useConversation } from '../../../hooks/use_conversation';
 
 const labels = {
@@ -38,6 +39,9 @@ export const ConversationRightActions = () => {
           <ChatInfoButton />
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        <ApplicationWorkspaceCollapseButton />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

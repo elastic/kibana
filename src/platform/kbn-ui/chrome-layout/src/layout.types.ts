@@ -42,6 +42,8 @@ export interface LayoutState extends LayoutDimensions {
   hasAgent: boolean;
   hasApplicationTopBar: boolean;
   hasApplicationBottomBar: boolean;
+  applicationWorkspaceOpen: boolean;
+  agentWorkspaceOpen: boolean;
 }
 
 /**
