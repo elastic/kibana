@@ -322,14 +322,15 @@ describe('replaceIdsInKibanaAsset', () => {
     const originalId = 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013';
     const newSpaceScopedId = 'a1b2c3d4-0000-0000-0000-000000000001';
 
-    const dashboardAsset = createAsset({
+    const dashboardAsset = {
       id: newSpaceScopedId,
       type: KibanaSavedObjectType.dashboard,
       originId: originalId,
       attributes: {
         description: `See [Pods](/app/dashboards#/view/${originalId})`,
       },
-    }) as any;
+      references: [],
+    } as any;
 
     const idReplacements = { [originalId]: newSpaceScopedId };
 
