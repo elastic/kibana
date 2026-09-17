@@ -125,7 +125,7 @@ describe('ruleTemplateDataSchema', () => {
 });
 
 describe('findRuleTemplatesRequestSchema', () => {
-  it('accepts an empty object', () => {
+  it('accepts an empty query', () => {
     expect(findRuleTemplatesRequestSchema.parse({})).toEqual({});
   });
 

@@ -74,11 +74,11 @@ export const findRuleTemplatesRequestSchema = z
         'Only return templates carrying at least one of these tags. Accepts a single tag or a repeated parameter.'
       ),
   })
+  .strict()
   .refine(
     ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
     { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
-  )
-  .strict();
+  );
 
 export type FindRuleTemplatesRequest = z.infer<typeof findRuleTemplatesRequestSchema>;
 
