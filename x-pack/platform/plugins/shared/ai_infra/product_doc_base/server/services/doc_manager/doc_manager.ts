@@ -461,8 +461,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
+    const { packageInstaller } = this;
     try {
-      await this.packageInstaller.uninstallSecurityLabs({ inferenceId });
+      await waitForInstallLock({
+        lockManager: this.lockManager,
+        run: () => packageInstaller.uninstallSecurityLabs({ inferenceId }),
+        metadata: { source: 'uninstallSecurityLabs', inferenceId },
+      });
     } catch (error) {
       this.logger.error(`Failed to uninstall Security Labs content: ${error.message}`);
       throw error;
@@ -484,8 +489,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
         },
       });
     }
+    const { packageInstaller } = this;
     try {
-      await this.packageInstaller.uninstallOpenAPISpec({ inferenceId });
+      await waitForInstallLock({
+        lockManager: this.lockManager,
+        run: () => packageInstaller.uninstallOpenAPISpec({ inferenceId }),
+        metadata: { source: 'uninstallOpenApiSpec', inferenceId },
+      });
     } catch (error) {
       this.logger.error(`Failed to uninstall OpenAPI Spec content: ${error.message}`);
       throw error;

@@ -62,6 +62,7 @@ describe('DocumentationManager', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let packageInstaller: {
     installSecurityLabs: jest.Mock;
+    uninstallSecurityLabs: jest.Mock;
     getSecurityLabsStatus: jest.Mock;
   };
 
@@ -86,6 +87,7 @@ describe('DocumentationManager', () => {
     });
     packageInstaller = {
       installSecurityLabs: jest.fn().mockResolvedValue(undefined),
+      uninstallSecurityLabs: jest.fn().mockResolvedValue(undefined),
       getSecurityLabsStatus: jest.fn().mockResolvedValue({ status: 'uninstalled' }),
     };
 
@@ -357,6 +359,28 @@ describe('DocumentationManager', () => {
         taskManager,
         taskId: INSTALL_ALL_TASK_ID,
         timeout: 1234,
+      });
+    });
+  });
+
+  describe('#uninstallSecurityLabs', () => {
+    it('uninstalls under the shared install lock', async () => {
+      let uninstalledUnderLock = false;
+      withLock.mockImplementation(async (_lockId: string, callback: () => Promise<unknown>) => {
+        await callback();
+        uninstalledUnderLock = packageInstaller.uninstallSecurityLabs.mock.calls.length === 1;
+      });
+
+      await docManager.uninstallSecurityLabs({ inferenceId: DEFAULT_INFERENCE_ID });
+
+      expect(withLock).toHaveBeenCalledWith(
+        PRODUCT_DOC_INSTALL_LOCK_ID,
+        expect.any(Function),
+        expect.anything()
+      );
+      expect(uninstalledUnderLock).toBe(true);
+      expect(packageInstaller.uninstallSecurityLabs).toHaveBeenCalledWith({
+        inferenceId: DEFAULT_INFERENCE_ID,
       });
     });
   });

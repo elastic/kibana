@@ -239,6 +239,23 @@ export class PackageInstaller {
   }
 
   /**
+   * Whether any of the given products is uninstalled, meaning an uninstall ran after they were installed.
+   */
+  async hasUninstalledProducts(params: {
+    productNames: ProductName[];
+    inferenceId: string;
+  }): Promise<boolean> {
+    const { productNames, inferenceId } = params;
+    if (productNames.length === 0) {
+      return false;
+    }
+    const installStatuses = await this.productDocClient.getInstallationStatus({ inferenceId });
+    return productNames.some(
+      (productName) => installStatuses[productName]?.status === 'uninstalled'
+    );
+  }
+
+  /**
    * Re-installs a product that was planned for update, unless it has been uninstalled since the plan was computed.
    */
   async updateProduct(params: { productName: ProductName; inferenceId: string }): Promise<void> {

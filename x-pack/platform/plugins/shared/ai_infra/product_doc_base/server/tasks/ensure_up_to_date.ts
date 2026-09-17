@@ -48,7 +48,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
         return {
           async run() {
             const { packageInstaller } = getServices();
-            const { remaining } = taskInstance.state as ChunkedTaskState;
+            const { remaining, installed } = taskInstance.state as ChunkedTaskState;
             const items = remaining ?? [
               ...(await packageInstaller.getProductsToUpdate({ inferenceId, forceUpdate })),
               OPENAPI_SPEC_ITEM,
@@ -56,6 +56,12 @@ export const registerEnsureUpToDateTaskDefinition = ({
             return runInstallChunk({
               lockManager,
               items,
+              installed,
+              isSuperseded: (handledItems) =>
+                packageInstaller.hasUninstalledProducts({
+                  productNames: handledItems.filter(isProductName),
+                  inferenceId,
+                }),
               install: async (item) => {
                 if (item === OPENAPI_SPEC_ITEM) {
                   await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId, forceUpdate });

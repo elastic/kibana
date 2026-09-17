@@ -17,17 +17,22 @@ const allProducts = Object.values(DocumentationProduct);
 
 describe('InstallAll task', () => {
   let installProduct: jest.Mock;
+  let hasUninstalledProducts: jest.Mock;
   let withLock: jest.Mock;
   let runTask: (state: Record<string, unknown>) => Promise<unknown>;
 
   beforeEach(() => {
     installProduct = jest.fn().mockResolvedValue(undefined);
+    hasUninstalledProducts = jest.fn().mockResolvedValue(false);
     withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
     const taskManager = taskManagerMock.createSetup();
     registerInstallAllTaskDefinition({
       taskManager,
       lockManager: { withLock },
-      getServices: () => ({ packageInstaller: { installProduct } } as unknown as InternalServices),
+      getServices: () =>
+        ({
+          packageInstaller: { installProduct, hasUninstalledProducts },
+        } as unknown as InternalServices),
     });
     const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][INSTALL_ALL_TASK_TYPE];
     runTask = (state) =>
@@ -47,16 +52,38 @@ describe('InstallAll task', () => {
       inferenceId: '.elser',
     });
     expect(result).toEqual({
-      state: { remaining: allProducts.slice(1) },
+      state: { remaining: allProducts.slice(1), installed: [allProducts[0]] },
       runAt: expect.any(Date),
     });
   });
 
   it('continues from the persisted remaining products', async () => {
-    const result = await runTask({ remaining: ['security', 'observability'] });
+    const result = await runTask({
+      remaining: ['security', 'observability'],
+      installed: ['kibana'],
+    });
 
+    expect(hasUninstalledProducts).toHaveBeenCalledWith({
+      productNames: ['kibana'],
+      inferenceId: '.elser',
+    });
     expect(installProduct).toHaveBeenCalledWith({ productName: 'security', inferenceId: '.elser' });
-    expect(result).toEqual({ state: { remaining: ['observability'] }, runAt: expect.any(Date) });
+    expect(result).toEqual({
+      state: { remaining: ['observability'], installed: ['kibana', 'security'] },
+      runAt: expect.any(Date),
+    });
+  });
+
+  it('stops without installing when a product installed earlier in this run was uninstalled', async () => {
+    hasUninstalledProducts.mockResolvedValue(true);
+
+    const result = await runTask({
+      remaining: ['security', 'observability'],
+      installed: ['kibana'],
+    });
+
+    expect(installProduct).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: {} });
   });
 
   it('completes without rescheduling after the last product', async () => {
@@ -100,7 +127,7 @@ describe('InstallAll task', () => {
 
     expect(installProduct).not.toHaveBeenCalled();
     expect(result).toEqual({
-      state: { remaining: ['kibana', 'security'] },
+      state: { remaining: ['kibana', 'security'], installed: [] },
       runAt: expect.any(Date),
     });
     expect((result as { runAt: Date }).runAt.getTime()).toBeGreaterThan(before);

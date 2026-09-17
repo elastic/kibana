@@ -19,6 +19,7 @@ describe('EnsureUpToDate task', () => {
   let updateProduct: jest.Mock;
   let getProductsToUpdate: jest.Mock;
   let ensureOpenApiSpecUpToDate: jest.Mock;
+  let hasUninstalledProducts: jest.Mock;
   let withLock: jest.Mock;
   let runTask: (state: Record<string, unknown>) => Promise<unknown>;
 
@@ -26,6 +27,7 @@ describe('EnsureUpToDate task', () => {
     updateProduct = jest.fn().mockResolvedValue(undefined);
     getProductsToUpdate = jest.fn().mockResolvedValue(['kibana', 'security']);
     ensureOpenApiSpecUpToDate = jest.fn().mockResolvedValue(undefined);
+    hasUninstalledProducts = jest.fn().mockResolvedValue(false);
     withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
     const taskManager = taskManagerMock.createSetup();
     registerEnsureUpToDateTaskDefinition({
@@ -33,7 +35,12 @@ describe('EnsureUpToDate task', () => {
       lockManager: { withLock },
       getServices: () =>
         ({
-          packageInstaller: { updateProduct, getProductsToUpdate, ensureOpenApiSpecUpToDate },
+          packageInstaller: {
+            updateProduct,
+            getProductsToUpdate,
+            ensureOpenApiSpecUpToDate,
+            hasUninstalledProducts,
+          },
         } as unknown as InternalServices),
     });
     const definition =
@@ -53,26 +60,39 @@ describe('EnsureUpToDate task', () => {
     expect(updateProduct).toHaveBeenCalledWith({ productName: 'kibana', inferenceId: '.elser' });
     expect(ensureOpenApiSpecUpToDate).not.toHaveBeenCalled();
     expect(result).toEqual({
-      state: { remaining: ['security', 'openapi'] },
+      state: { remaining: ['security', 'openapi'], installed: ['kibana'] },
       runAt: expect.any(Date),
     });
   });
 
   it('does not recompute the plan when remaining items are persisted', async () => {
-    await runTask({ remaining: ['security', 'openapi'] });
+    await runTask({ remaining: ['security', 'openapi'], installed: ['kibana'] });
 
     expect(getProductsToUpdate).not.toHaveBeenCalled();
     expect(updateProduct).toHaveBeenCalledWith({ productName: 'security', inferenceId: '.elser' });
   });
 
   it('updates the OpenAPI spec as the last item and completes', async () => {
-    const result = await runTask({ remaining: ['openapi'] });
+    const result = await runTask({ remaining: ['openapi'], installed: ['kibana', 'security'] });
 
+    expect(hasUninstalledProducts).toHaveBeenCalledWith({
+      productNames: ['kibana', 'security'],
+      inferenceId: '.elser',
+    });
     expect(updateProduct).not.toHaveBeenCalled();
     expect(ensureOpenApiSpecUpToDate).toHaveBeenCalledWith({
       inferenceId: '.elser',
       forceUpdate: true,
     });
+    expect(result).toEqual({ state: {} });
+  });
+
+  it('stops when a product updated earlier in this run was uninstalled', async () => {
+    hasUninstalledProducts.mockResolvedValue(true);
+
+    const result = await runTask({ remaining: ['openapi'], installed: ['kibana', 'security'] });
+
+    expect(ensureOpenApiSpecUpToDate).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {} });
   });
 
@@ -104,7 +124,7 @@ describe('EnsureUpToDate task', () => {
     expect(updateProduct).not.toHaveBeenCalled();
     expect(ensureOpenApiSpecUpToDate).not.toHaveBeenCalled();
     expect(result).toEqual({
-      state: { remaining: ['kibana', 'security', 'openapi'] },
+      state: { remaining: ['kibana', 'security', 'openapi'], installed: [] },
       runAt: expect.any(Date),
     });
   });

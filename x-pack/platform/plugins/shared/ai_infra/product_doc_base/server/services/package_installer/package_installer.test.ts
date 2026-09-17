@@ -427,6 +427,39 @@ describe('PackageInstaller', () => {
     });
   });
 
+  describe('hasUninstalledProducts', () => {
+    it('returns true when one of the products is uninstalled', async () => {
+      productDocClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.15' },
+        security: { status: 'uninstalled' },
+      } as never);
+
+      await expect(
+        packageInstaller.hasUninstalledProducts({
+          productNames: ['kibana', 'security'],
+          inferenceId: '.elser',
+        })
+      ).resolves.toBe(true);
+    });
+
+    it('returns false when all products are still installed', async () => {
+      productDocClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.15' },
+      } as never);
+
+      await expect(
+        packageInstaller.hasUninstalledProducts({ productNames: ['kibana'], inferenceId: '.elser' })
+      ).resolves.toBe(false);
+    });
+
+    it('returns false without querying when no products are given', async () => {
+      await expect(
+        packageInstaller.hasUninstalledProducts({ productNames: [], inferenceId: '.elser' })
+      ).resolves.toBe(false);
+      expect(productDocClient.getInstallationStatus).not.toHaveBeenCalled();
+    });
+  });
+
   describe('updateProduct', () => {
     it('re-installs a product that is still installed', async () => {
       productDocClient.getInstallationStatus.mockResolvedValue({

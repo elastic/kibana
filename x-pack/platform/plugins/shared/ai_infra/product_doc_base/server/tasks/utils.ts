@@ -19,11 +19,15 @@ export type { InstallLockManager };
 
 const allProductNames = Object.values(DocumentationProduct) as ProductName[];
 
-// Remaining items are at most every product plus the OpenAPI spec
+// Items are at most every product plus the OpenAPI spec
+const itemsSchema = schema.arrayOf(schema.string({ maxLength: 100 }), {
+  maxSize: allProductNames.length + 1,
+});
+
 export const chunkedTaskStateSchema = schema.object({
-  remaining: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: allProductNames.length + 1 })
-  ),
+  remaining: schema.maybe(itemsSchema),
+  // Items already handled by this task, used to detect an uninstall that ran between two chunks
+  installed: schema.maybe(itemsSchema),
 });
 
 export type ChunkedTaskState = TypeOf<typeof chunkedTaskStateSchema>;
@@ -40,8 +44,8 @@ export const isProductName = (value: string): value is ProductName =>
 
 // Returning `runAt` makes Task Manager run the task again for the next item, so a run only holds
 // a capacity slot for one item and completed items are not redone when a later attempt fails.
-export const nextChunkRunResult = (remaining: string[]) =>
-  remaining.length > 0 ? { state: { remaining }, runAt: new Date() } : { state: {} };
+export const nextChunkRunResult = (remaining: string[], installed: string[]) =>
+  remaining.length > 0 ? { state: { remaining, installed }, runAt: new Date() } : { state: {} };
 
 // Re-runs the task shortly without consuming an attempt, e.g. while another install holds the lock
 export const deferredRunResult = (state: Record<string, unknown>) => ({
@@ -68,29 +72,47 @@ export const runTaskUnderInstallLock = async ({
 /**
  * Installs the first of `items` under the cluster-wide install lock, so that at most one documentation
  * install runs at a time across all tasks and Kibana nodes. When another install holds the lock the
- * item is kept and the run is deferred instead of failing an attempt.
+ * item is kept and the run is deferred instead of failing an attempt. The lock is released between
+ * items, so before each item `isSuperseded` is checked (still under the lock) with the items handled
+ * so far: when an uninstall ran in between, the task stops instead of reinstalling the rest.
  */
 export const runInstallChunk = async <T extends string>({
   lockManager,
   items,
+  installed = [],
   install,
+  isSuperseded,
   metadata,
 }: {
   lockManager: InstallLockManager;
   items: T[];
+  installed?: T[];
   install: (item: T) => Promise<void>;
+  isSuperseded: (installedItems: T[]) => Promise<boolean>;
   metadata?: Record<string, unknown>;
 }) => {
   const [item, ...rest] = items;
   if (!item) {
     return { state: {} };
   }
+  let superseded = false;
   const acquired = await tryWithInstallLock({
     lockManager,
-    run: () => install(item),
+    run: async () => {
+      superseded = installed.length > 0 && (await isSuperseded(installed));
+      if (!superseded) {
+        await install(item);
+      }
+    },
     metadata: { ...metadata, item },
   });
-  return acquired ? nextChunkRunResult(rest) : deferredRunResult({ remaining: items });
+  if (!acquired) {
+    return deferredRunResult({ remaining: items, installed });
+  }
+  if (superseded) {
+    return { state: {} };
+  }
+  return nextChunkRunResult(rest, [...installed, item]);
 };
 
 export const getTaskStatus = async ({
