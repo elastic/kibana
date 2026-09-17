@@ -351,13 +351,15 @@ export class WorkflowEditorPage {
   }
 
   /** Returns a locator for a suggestion item by its label text.
-   * Monaco 0.54 sets role="option" on non-Windows and role="listitem" on Windows,
-   * so we match both to stay cross-platform.
+   * Monaco's suggest widget list rows are exposed with role="option" in some
+   * environments and role="listitem" in others (observed on Linux CI, where a captured
+   * failure snapshot showed `listbox "Suggest"` containing `listitem "consts, Property"`
+   * rows rather than `option` ones) — the ARIA role monaco applies isn't a stable
+   * cross-environment contract, so match either role to stay resilient to it.
    */
   public getYamlEditorSuggestionItem(name: string) {
-    return this.getYamlEditorSuggestWidget()
-      .locator('[role="option"], [role="listitem"]')
-      .filter({ hasText: name });
+    const widget = this.getYamlEditorSuggestWidget();
+    return widget.getByRole('option', { name }).or(widget.getByRole('listitem', { name }));
   }
 
   /**
