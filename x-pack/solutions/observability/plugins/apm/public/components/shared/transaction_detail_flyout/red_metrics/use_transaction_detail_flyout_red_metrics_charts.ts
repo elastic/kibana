@@ -6,6 +6,7 @@
  */
 
 import type { APIReturnType } from '@kbn/apm-api-shared';
+import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -185,7 +186,9 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
         data: throughputData.currentPeriod ?? [],
         type: 'linemark' as const,
         color: throughputColor,
-        title: 'Throughput',
+        title: i18n.translate('xpack.apm.transactionDetailFlyout.throughputSeriesTitle', {
+          defaultMessage: 'Throughput',
+        }),
       },
     ],
     [throughputColor, throughputData.currentPeriod]
@@ -197,7 +200,9 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
         data: errorRateData.currentPeriod?.timeseries ?? [],
         type: 'linemark' as const,
         color: errorRateColor,
-        title: 'Failed transaction rate (avg.)',
+        title: i18n.translate('xpack.apm.transactionDetailFlyout.errorRateSeriesTitle', {
+          defaultMessage: 'Failed transaction rate (avg.)',
+        }),
       },
     ],
     [errorRateColor, errorRateData.currentPeriod?.timeseries]

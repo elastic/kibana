@@ -76,13 +76,7 @@ export function TransactionDetailFlyoutTraceSampleTimeline({
           traceDocsTotal={traceDocsTotal}
           maxTraceItems={maxTraceItems}
           getServiceBadgeHref={getServiceBadgeHref}
-          onClick={
-            onNodeClick
-              ? () => {
-                  onNodeClick();
-                }
-              : undefined
-          }
+          onClick={onNodeClick}
           ebt={ebt}
         />
       </div>
