@@ -37,9 +37,10 @@ const ASSET_REQUIRED_PRIVILEGES: Partial<Record<KibanaAssetType, readonly string
   [KibanaAssetType.osquerySavedQuery]: ['osquery-writeSavedQueries'],
   [KibanaAssetType.osqueryPackAsset]: ['osquery-writePacks'],
   [KibanaAssetType.mlModule]: ['ml:canCreateJob'],
-  // 'rac' (Rules and Alerts Connector) is the API privilege granted by stackAlerts: all,
-  // the closest static Kibana privilege for alerting rule management.
-  [KibanaAssetType.alertingRuleTemplate]: ['rac'],
+  // alertingRuleTemplate: no user-facing write privilege exists for this hidden SO type.
+  // Both stackAlerts: all and stackAlerts: read grant api:['rac'], so no static action can
+  // distinguish write-capable callers. Packages containing these assets must come from the
+  // registry, not direct upload. Omitting the entry keeps this type fail-closed.
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]: ['cloud-security-posture-all'],
   [KibanaAssetType.sloTemplate]: ['slo_write'],
 };

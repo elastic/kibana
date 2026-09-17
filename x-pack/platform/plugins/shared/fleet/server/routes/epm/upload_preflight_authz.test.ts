@@ -169,15 +169,15 @@ describe('collectArchiveSignals', () => {
     expect(signals.blockedTypes).toHaveLength(0);
   });
 
-  it('detects alerting_rule_template as gated type', async () => {
+  it('places alerting_rule_template in blockedTypes (no user-facing write privilege)', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' }])
     );
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
-    expect(signals.gatedTypesFound.has('alerting_rule_template' as any)).toBe(true);
-    expect(signals.blockedTypes).toHaveLength(0);
+    expect(signals.gatedTypesFound.has('alerting_rule_template' as any)).toBe(false);
+    expect(signals.blockedTypes).toContain('alerting_rule_template');
   });
 });
 
@@ -248,16 +248,6 @@ describe('buildRequiredActions', () => {
     };
 
     expect(buildRequiredActions(signals, security as any)).toContain('api:slo_write');
-  });
-
-  it('returns rac for alerting_rule_template', () => {
-    const signals = {
-      gatedTypesFound: new Set(['alerting_rule_template'] as any),
-      blockedTypes: [],
-      hasMlSecurityRules: false,
-    };
-
-    expect(buildRequiredActions(signals, security as any)).toContain('api:rac');
   });
 
   it('accumulates actions for multiple gated types', () => {
@@ -610,34 +600,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
-  it('checks rac privilege for alerting_rule_template', async () => {
+  it('blocks upload containing alerting_rule_template regardless of caller privileges', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' }])
     );
 
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId
-    );
-
-    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
-    expect(atSpaces).toHaveBeenCalledWith(
-      [mockSpaceId],
-      expect.objectContaining({ kibana: expect.arrayContaining(['api:rac']) })
-    );
-  });
-
-  it('rejects alerting_rule_template upload when rac privilege is missing', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' }])
-    );
-
-    const security = makeSecurity(false, ['api:rac']);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
@@ -648,6 +616,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockSpaceId
       )
     ).rejects.toThrow(FleetUnauthorizedError);
+
+    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   });
 
   it('throws FleetUnauthorizedError when security plugin is unavailable (fail closed)', async () => {
