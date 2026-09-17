@@ -64,8 +64,11 @@ node scripts/build_rspack_bundles.js --dist
 # Development with watch mode
 node scripts/build_rspack_bundles.js --watch
 
-# Or via environment variable (dev mode)
-KBN_USE_RSPACK=true yarn start
+# Rspack is the default dev-mode optimizer
+pnpm start
+
+# Opt out to the legacy webpack optimizer
+KBN_USE_RSPACK=false pnpm start
 ```
 
 ### CLI Options

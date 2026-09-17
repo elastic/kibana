@@ -119,10 +119,10 @@ The trace waterfall UI lives in the standalone `@kbn/llm-trace-waterfall` packag
 
 ```bash
 # Plugin unit tests
-yarn test:jest --config=x-pack/platform/plugins/shared/evals/jest.config.js
+pnpm test:jest --config=x-pack/platform/plugins/shared/evals/jest.config.js
 
 # Shared query builders tests
-yarn test:jest --config=x-pack/platform/packages/shared/kbn-evals-common/jest.config.js
+pnpm test:jest --config=x-pack/platform/packages/shared/kbn-evals-common/jest.config.js
 ```
 
 ### Regenerating OpenAPI schemas
@@ -131,7 +131,7 @@ The Zod types in `@kbn/evals-common` are generated from OpenAPI `.schema.yaml` f
 
 ```bash
 cd x-pack/platform/packages/shared/kbn-evals-common
-yarn openapi:generate
+pnpm openapi:generate
 ```
 
 After regenerating, you may need to fix unused imports added by the generator:
