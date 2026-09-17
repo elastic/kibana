@@ -115,7 +115,9 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
   const handleSave = () => {
     if (!draft) return;
     setSaveErrorMessage(null);
-    updateMutation.mutate({ entries: draft.entries });
+    updateMutation.mutate({
+      entries: draft.entries.map(({ added_at, ...entry }) => entry),
+    });
   };
 
   const renderBody = () => {

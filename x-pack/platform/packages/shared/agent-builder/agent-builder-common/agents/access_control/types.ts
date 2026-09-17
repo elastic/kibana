@@ -66,6 +66,7 @@ export interface AgentAccessControlEntry {
   /** Case-sensitive Kibana username. Legacy; only present on entries written before `id`. */
   name?: string;
   role: AgentAccessControlRole;
+  added_at?: string;
 }
 
 /** Identity key for an entry: `id` when present, otherwise the legacy `name`. */

@@ -41,7 +41,7 @@ export const normalizeAccessControl = (
   entries: source.access_control?.entries ?? source.acl?.entries ?? [],
 });
 
-const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
+export const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
   source.created_by_name !== undefined
     ? { id: source.created_by_id, username: source.created_by_name }
     : undefined;

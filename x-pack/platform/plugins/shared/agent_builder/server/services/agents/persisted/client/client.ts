@@ -19,9 +19,15 @@ import {
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
+  getAccessControlEntryKey,
+  isAgentAccessControlRole,
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   type AgentAccessControl,
+  type AgentAccessControlEntry,
   type CurrentUser,
   type ToolSelection,
+  type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { getUserFromRequest } from '../../../utils';
@@ -65,7 +71,8 @@ import {
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
   buildReadAccessFilter,
-  validateAccessControlUpdate,
+  matchesAccessControlEntry,
+  sourceToOwner,
 } from '../../access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
 
@@ -599,14 +606,20 @@ class AgentClientImpl implements AgentClient {
     const document = await this.getDocumentWithAccess({ agentId, access: 'manageAccessControl' });
     const source = document._source;
 
-    const validationError = validateAccessControlUpdate(update.entries);
-    if (validationError) {
-      throw createBadRequestError(validationError);
-    }
+    const currentAccessControl = normalizeAccessControl(source);
+    const addedAtById = new Map(
+      currentAccessControl.entries.flatMap((entry) =>
+        entry.added_at !== undefined ? [[getAccessControlEntryKey(entry), entry.added_at]] : []
+      )
+    );
 
     const nextAccessControl: AgentAccessControl = {
-      ...normalizeAccessControl(source),
-      entries: update.entries,
+      ...currentAccessControl,
+      entries: validateAccessControlEntries({
+        entries: update.entries,
+        owner: sourceToOwner(source),
+        addedAtById,
+      }),
     };
 
     const next = accessControlUpdateToEs({
@@ -688,3 +701,76 @@ class AgentClientImpl implements AgentClient {
     return getAgentDocument({ storage: this.storage, space: this.space, agentId });
   }
 }
+
+const validatePrincipal = (entry: AgentAccessControlEntry): string | undefined => {
+  const hasId = entry.id !== undefined;
+  const hasName = entry.name !== undefined;
+  if (!hasId && !hasName) {
+    return 'Each ACL entry requires a non-empty id or name';
+  }
+
+  const field = hasId ? 'id' : 'name';
+  const value = hasId ? entry.id : entry.name;
+  if (typeof value !== 'string' || value.length === 0) {
+    return `Each ACL entry requires a non-empty ${field}`;
+  }
+  if (value.length > AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH) {
+    return `ACL principal ${field} exceeds maximum length of ${AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`;
+  }
+
+  return undefined;
+};
+
+export const validateAccessControlEntries = ({
+  entries,
+  owner,
+  addedAtById,
+}: {
+  entries: AgentAccessControlEntry[];
+  owner: UserIdAndName | undefined;
+  addedAtById: Map<string, string>;
+}): AgentAccessControlEntry[] => {
+  if (entries.length > AGENT_ACCESS_CONTROL_MAX_ENTRIES) {
+    throw createBadRequestError(
+      `ACL entries exceed maximum of ${AGENT_ACCESS_CONTROL_MAX_ENTRIES}`
+    );
+  }
+
+  const now = new Date().toISOString();
+  const seen = new Set<string>();
+  const normalizedEntries: AgentAccessControlEntry[] = [];
+
+  for (const entry of entries) {
+    if (!entry || entry.type !== 'user') {
+      throw createBadRequestError('Each ACL entry requires a type of "user"');
+    }
+
+    const principalError = validatePrincipal(entry);
+    if (principalError) {
+      throw createBadRequestError(principalError);
+    }
+
+    if (!isAgentAccessControlRole(entry.role)) {
+      throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
+    }
+
+    if (owner !== undefined && matchesAccessControlEntry(entry, owner)) {
+      continue;
+    }
+
+    const key = getAccessControlEntryKey(entry);
+    if (seen.has(key)) {
+      throw createBadRequestError(
+        `Duplicate ACL entry for ${entry.type} "${entry.id ?? entry.name}"`
+      );
+    }
+    seen.add(key);
+
+    normalizedEntries.push({
+      ...entry,
+      added_at: addedAtById.get(key) ?? now,
+    });
+  }
+
+  return normalizedEntries;
+};

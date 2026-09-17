@@ -44,6 +44,7 @@ const storageSettings = {
               // Legacy username; only present on entries written before `id` existed.
               name: types.keyword({}),
               role: types.keyword({}),
+              added_at: types.date({}),
             },
           }),
         },

@@ -6,11 +6,23 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { isAgentNotFoundError } from '@kbn/agent-builder-common';
+import {
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  AgentAccessControlRole,
+  isAgentNotFoundError,
+  type AgentAccessControlEntry,
+  type UserIdAndName,
+} from '@kbn/agent-builder-common';
 import { buildReadAccessFilter } from '../../access_control';
 import { getUserFromRequest } from '../../../utils';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
-import { createClient, createSystemClient, type AgentClient } from './client';
+import {
+  createClient,
+  createSystemClient,
+  validateAccessControlEntries,
+  type AgentClient,
+} from './client';
 
 const testSpace = 'default';
 const mockUser = { id: 'user-1', username: 'test-user', isAdmin: false };
@@ -572,5 +584,174 @@ describe('SystemAgentClient', () => {
         'mapping failure'
       );
     });
+  });
+});
+
+describe('validateAccessControlEntries', () => {
+  const entry = (over: Partial<AgentAccessControlEntry> = {}): AgentAccessControlEntry => ({
+    type: 'user',
+    id: 'u_alice',
+    role: AgentAccessControlRole.User,
+    ...over,
+  });
+
+  const validate = ({
+    entries,
+    owner,
+    addedAtById = new Map<string, string>(),
+  }: {
+    entries: AgentAccessControlEntry[];
+    owner?: UserIdAndName;
+    addedAtById?: Map<string, string>;
+  }) => validateAccessControlEntries({ entries, owner, addedAtById });
+
+  test('accepts an empty list', () => {
+    expect(validate({ entries: [] })).toEqual([]);
+  });
+
+  test('accepts a list of valid id-backed user entries', () => {
+    expect(
+      validate({
+        entries: [
+          entry({ id: 'u_alice', role: AgentAccessControlRole.Editor }),
+          entry({ id: 'u_bob', role: AgentAccessControlRole.User }),
+        ],
+      })
+    ).toEqual([
+      expect.objectContaining({ id: 'u_alice', role: AgentAccessControlRole.Editor }),
+      expect.objectContaining({ id: 'u_bob', role: AgentAccessControlRole.User }),
+    ]);
+  });
+
+  test('rejects entries past the maximum', () => {
+    const tooMany: AgentAccessControlEntry[] = Array.from(
+      { length: AGENT_ACCESS_CONTROL_MAX_ENTRIES + 1 },
+      (_, i) => entry({ id: `u_user${i}` })
+    );
+    expect(() => validate({ entries: tooMany })).toThrow(/maximum/);
+  });
+
+  test('rejects role-type entries (V1 supports user-only; V2 will add roles)', () => {
+    expect(() => validate({ entries: [{ ...entry(), type: 'role' as 'user' }] })).toThrow(
+      /type of "user"/
+    );
+  });
+
+  test('rejects unknown principal type', () => {
+    expect(() => validate({ entries: [{ ...entry(), type: 'group' as 'user' }] })).toThrow(
+      /type of "user"/
+    );
+  });
+
+  test('accepts legacy name-only entries so existing grants can be round-tripped', () => {
+    expect(
+      validate({
+        entries: [
+          { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
+          entry({ id: 'u_bob' }),
+        ],
+      })
+    ).toEqual([
+      expect.objectContaining({ name: 'alice' }),
+      expect.objectContaining({ id: 'u_bob' }),
+    ]);
+  });
+
+  test('rejects entries with neither id nor name', () => {
+    expect(() =>
+      validate({ entries: [{ type: 'user', role: AgentAccessControlRole.User }] })
+    ).toThrow(/non-empty id or name/);
+  });
+
+  test('rejects empty principal id', () => {
+    expect(() => validate({ entries: [entry({ id: '' })] })).toThrow(/non-empty id/);
+  });
+
+  test('rejects empty principal name', () => {
+    expect(() =>
+      validate({ entries: [{ type: 'user', name: '', role: AgentAccessControlRole.User }] })
+    ).toThrow(/non-empty name/);
+  });
+
+  test('rejects principal id longer than the maximum length', () => {
+    expect(() =>
+      validate({
+        entries: [
+          entry({ id: 'u_'.padEnd(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1, 'a') }),
+        ],
+      })
+    ).toThrow(/id exceeds maximum length/);
+  });
+
+  test('rejects principal name longer than the maximum length', () => {
+    expect(() =>
+      validate({
+        entries: [
+          {
+            type: 'user',
+            name: 'a'.repeat(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1),
+            role: AgentAccessControlRole.User,
+          },
+        ],
+      })
+    ).toThrow(/name exceeds maximum length/);
+  });
+
+  test('rejects unknown role', () => {
+    expect(() =>
+      validate({ entries: [{ ...entry(), role: 'super-admin' as AgentAccessControlRole }] })
+    ).toThrow(/Unknown ACL role/);
+  });
+
+  test('rejects duplicate (type, id) pairs', () => {
+    expect(() =>
+      validate({
+        entries: [
+          entry({ id: 'u_alice' }),
+          entry({ id: 'u_alice', role: AgentAccessControlRole.Manager }),
+        ],
+      })
+    ).toThrow(/Duplicate/);
+  });
+
+  test('rejects duplicate (type, name) pairs', () => {
+    expect(() =>
+      validate({
+        entries: [
+          { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
+          { type: 'user', name: 'alice', role: AgentAccessControlRole.Manager },
+        ],
+      })
+    ).toThrow(/Duplicate/);
+  });
+
+  test('drops an entry naming the owner by id', () => {
+    expect(
+      validate({
+        entries: [entry({ id: 'u_owner' }), entry({ id: 'u_bob' })],
+        owner: { id: 'u_owner', username: 'owner' },
+      })
+    ).toEqual([expect.objectContaining({ id: 'u_bob' })]);
+  });
+
+  test('drops a legacy name-only entry naming a legacy owner', () => {
+    expect(
+      validate({
+        entries: [{ type: 'user', name: 'owner', role: AgentAccessControlRole.User }],
+        owner: { username: 'owner' },
+      })
+    ).toEqual([]);
+  });
+
+  test('stamps added_at on new entries and preserves it for existing ones', () => {
+    const existing = '2020-01-01T00:00:00.000Z';
+    const result = validate({
+      entries: [entry({ id: 'u_alice' }), entry({ id: 'u_bob' })],
+      addedAtById: new Map([['user:id:u_alice', existing]]),
+    });
+
+    expect(result[0].added_at).toBe(existing);
+    expect(result[1].added_at).not.toBe(existing);
+    expect(Date.parse(String(result[1].added_at))).not.toBeNaN();
   });
 });
