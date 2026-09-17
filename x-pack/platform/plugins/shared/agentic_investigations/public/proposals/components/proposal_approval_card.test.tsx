@@ -245,7 +245,7 @@ describe('ProposalApprovalCard', () => {
     });
 
     it('renders an info callout for a dismissed proposal', () => {
-      setupMocks(baseProposal({ status: 'no_action' }));
+      setupMocks(baseProposal({ decision: 'dismissed', status: 'no_action' }));
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('info-callout')).toBeInTheDocument();
     });
@@ -284,7 +284,7 @@ describe('ProposalApprovalCard', () => {
 
   describe('executing proposal', () => {
     it('renders an info callout for an executing proposal', () => {
-      setupMocks(baseProposal({ status: 'executing' }));
+      setupMocks(baseProposal({ decision: 'approved', status: 'executing' }));
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('info-callout')).toBeInTheDocument();
     });

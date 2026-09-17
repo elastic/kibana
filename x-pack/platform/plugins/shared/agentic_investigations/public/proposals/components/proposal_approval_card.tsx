@@ -163,6 +163,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   // the deadline when no decision was reached. Without both, a proposal
   // settled early shows neither actions nor an explanation.
   const isExpired = liveProposal.expired || liveProposal.status === 'expired';
+  // The decision, not the status: a proposal stays `pending` while its
+  // approval is still travelling through the gate workflow, and an expired one
+  // is settled without anyone having decided anything.
   const decision = liveProposal.decision;
 
   const impact = liveProposal.action?.impact ?? liveProposal.impact;
