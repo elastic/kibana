@@ -43,7 +43,6 @@ describe('DENSE_VECTOR Validation', () => {
   describe('naming clauses', () => {
     it.each([
       'FROM index | DENSE_VECTOR vec = textField',
-      'FROM index | DENSE_VECTOR vec = textField, keywordField',
       'FROM index | DENSE_VECTOR vec = "some text"',
       'FROM index | DENSE_VECTOR suffix = "_dv" ON textField',
       'FROM index | DENSE_VECTOR suffix = "_dv" ON textField, keywordField',
@@ -63,6 +62,27 @@ describe('DENSE_VECTOR Validation', () => {
       denseVectorExpectErrors('FROM index | DENSE_VECTOR suffix = "_dv" ON integerField', [
         'DENSE_VECTOR only supports values of type text or keyword. Found "integerField" of type integer',
       ]);
+    });
+
+    it('reports a modifier keyword other than suffix', () => {
+      denseVectorExpectErrors('FROM index | DENSE_VECTOR foo = "_dv" ON textField', [
+        '[DENSE_VECTOR] Invalid modifier [foo], expected [suffix]',
+      ]);
+    });
+
+    it('accepts the suffix keyword regardless of case', () => {
+      denseVectorExpectErrors('FROM index | DENSE_VECTOR SUFFIX = "_dv" ON textField', []);
+    });
+
+    // A target names one output column, so it cannot cover a list.
+    it('reports several fields assigned to a single output name', () => {
+      denseVectorExpectErrors('FROM index | DENSE_VECTOR vec = textField, keywordField', [
+        '[DENSE_VECTOR] Output name [vec] accepts a single field. Use [suffix = "..." ON ...] to name the columns of several fields.',
+      ]);
+    });
+
+    it('does not confuse a target assignment with a suffix modifier', () => {
+      denseVectorExpectErrors('FROM index | DENSE_VECTOR vec = textField', []);
     });
   });
 

@@ -6,8 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstDenseVectorCommand, ESQLAstField } from '@elastic/esql/types';
-import { isColumn, isMap, isOptionNode } from '@elastic/esql';
+import type {
+  ESQLAstDenseVectorCommand,
+  ESQLAstField,
+  ESQLColumn,
+  ESQLFunction,
+  ESQLIdentifier,
+} from '@elastic/esql/types';
+import { isColumn, isFunctionExpression, isIdentifier, isMap, isOptionNode } from '@elastic/esql';
 
 /**
  * The keyword accepted by the `suffix = "..." ON ...` modifier. The grammar accepts any
@@ -136,6 +142,31 @@ export const canSuggestTargetAssignment = (
  */
 export const isPendingSuffixModifier = (command: ESQLAstDenseVectorCommand): boolean =>
   command.targetField?.name.toLowerCase() === DENSE_VECTOR_SUFFIX_KEYWORD;
+
+/**
+ * The identifier on the left of the naming assignment (`suffix = "_dv"`, `vec = field`), when
+ * the command has one.
+ *
+ * The parser accepts any identifier there and does not keep it on the command, so callers must
+ * check it against {@link DENSE_VECTOR_SUFFIX_KEYWORD} themselves — Elasticsearch rejects
+ * anything else in front of a suffix.
+ */
+export const getNamingKeyword = (
+  command: ESQLAstDenseVectorCommand
+): ESQLColumn | ESQLIdentifier | undefined => {
+  const assignment = command.args.find(
+    (arg): arg is ESQLFunction =>
+      !Array.isArray(arg) && isFunctionExpression(arg) && arg.name === '='
+  );
+
+  if (!assignment) {
+    return undefined;
+  }
+
+  const [left] = assignment.args;
+
+  return !Array.isArray(left) && (isColumn(left) || isIdentifier(left)) ? left : undefined;
+};
 
 /**
  * Names of the `dense_vector` columns the command generates. The source fields are kept, so

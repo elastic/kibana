@@ -15,6 +15,7 @@ import { getMessageFromId } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { validateMap } from '../../definitions/utils/validation/map';
 import type { ICommandContext, ICommandCallbacks } from '../types';
+import { DENSE_VECTOR_SUFFIX_KEYWORD, getNamingKeyword } from './utils';
 
 // `inference_id` is optional: Elasticsearch falls back to a built-in text embedding endpoint.
 const DENSE_VECTOR_MAP_DEFINITION =
@@ -39,7 +40,36 @@ export const validate = (
   const messages: ESQLMessage[] = [];
 
   const denseVectorCommand = command as ESQLAstDenseVectorCommand;
-  const { fields, namedParameters } = denseVectorCommand;
+  const { fields, namedParameters, suffix, targetField } = denseVectorCommand;
+
+  const namingKeyword = getNamingKeyword(denseVectorCommand);
+
+  // ES rejects any keyword other than `suffix` in front of a suffix, but the grammar accepts
+  // every identifier, so `foo = "_dv" ON title` parses without a syntax error.
+  if (
+    suffix !== undefined &&
+    namingKeyword !== undefined &&
+    namingKeyword.name.toLowerCase() !== DENSE_VECTOR_SUFFIX_KEYWORD
+  ) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'denseVectorInvalidSuffixModifier',
+        values: { keyword: namingKeyword.name },
+        locations: namingKeyword.location,
+      })
+    );
+  }
+
+  // An explicit output name produces a single column, so it cannot cover several fields.
+  if (targetField !== undefined && (fields ?? []).length > 1) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'denseVectorMultipleFieldsWithTarget',
+        values: { target: targetField.name },
+        locations: targetField.location,
+      })
+    );
+  }
 
   // Only string fields are embeddable.
   for (const field of fields ?? []) {
