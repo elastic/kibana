@@ -254,4 +254,55 @@ describe('checkUploadPackageAssetPrivileges', () => {
       })
     );
   });
+
+  it('rejects upload containing alerting_rule_template (gated, no checker yet)', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator(['mypackage-1.0.0/kibana/alerting_rule_template/my-rule.json'])
+    );
+
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(makeSecurity(true));
+
+    await expect(
+      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+    ).rejects.toThrow(FleetUnauthorizedError);
+  });
+
+  it('rejects upload containing csp_rule_template (gated, no checker yet)', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator(['mypackage-1.0.0/kibana/csp_rule_template/my-rule.json'])
+    );
+
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(makeSecurity(true));
+
+    await expect(
+      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+    ).rejects.toThrow(FleetUnauthorizedError);
+  });
+
+  it('rejects upload containing slo_template (gated, no checker yet)', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator(['mypackage-1.0.0/kibana/slo_template/my-slo.json'])
+    );
+
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(makeSecurity(true));
+
+    await expect(
+      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+    ).rejects.toThrow(FleetUnauthorizedError);
+  });
+
+  it('rejects upload containing mixed gated types where some have no checker', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([
+        'mypackage-1.0.0/kibana/security_rule/my-rule.json',
+        'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json',
+      ])
+    );
+
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(makeSecurity(true));
+
+    await expect(
+      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
+    ).rejects.toThrow(FleetUnauthorizedError);
+  });
 });
