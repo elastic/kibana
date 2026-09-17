@@ -8,7 +8,13 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
-import type { UpdateOriginResponse, VersionedAttachment } from '@kbn/agent-builder-common';
+import type {
+  AttachmentTimelineEvent,
+  Conversation,
+  UpdateOriginResponse,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common';
+import { isAttachmentEvent } from '@kbn/agent-builder-common';
 import type {
   CheckStaleAttachmentsResponse,
   CreateAttachmentResponse,
@@ -154,5 +160,140 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect((response.body as CheckStaleAttachmentsResponse).attachments).toStrictEqual([]);
     });
+
+    async function getAttachmentEvents(
+      asAdmin: AuthedApiClient,
+      conversationId: string
+    ): Promise<AttachmentTimelineEvent[]> {
+      const res = await asAdmin.get(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
+        { responseType: 'json' }
+      );
+      expect(res).toHaveStatusCode(200);
+      return ((res.body as Conversation).events ?? []).filter(isAttachmentEvent);
+    }
+
+    function attachmentUrl(conversationId: string, attachmentId: string) {
+      return `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(
+        conversationId
+      )}/attachments/${encodeURIComponent(attachmentId)}`;
+    }
+
+    apiTest('POST attachment persists an attachment_added event', async ({ asAdmin }) => {
+      const conversationId = await createConversation(asAdmin);
+      const response = await asAdmin.post(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}/attachments`,
+        {
+          body: { type: 'text', data: { content: 'inline me' }, render_inline: true },
+          responseType: 'json',
+        }
+      );
+      expect(response).toHaveStatusCode(200);
+      const { attachment } = response.body as CreateAttachmentResponse;
+
+      const events = await getAttachmentEvents(asAdmin, conversationId);
+      expect(events).toHaveLength(1);
+      expect(events[0].type).toBe('attachment_added');
+      expect(events[0].actor.type).toBe('user');
+      expect(events[0].data).toStrictEqual({
+        attachment_id: attachment.id,
+        attachment_type: 'text',
+        current_version: 1,
+        render_inline: true,
+        source: 'http_api',
+      });
+    });
+
+    apiTest('PUT with new content persists an attachment_updated event', async ({ asAdmin }) => {
+      const conversationId = await createConversation(asAdmin);
+      const attachment = await createTextAttachment(asAdmin, conversationId);
+
+      const response = await asAdmin.put(attachmentUrl(conversationId, attachment.id), {
+        body: { data: { content: 'changed content' } },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+
+      const events = await getAttachmentEvents(asAdmin, conversationId);
+      expect(events.map((e) => e.type)).toStrictEqual(['attachment_added', 'attachment_updated']);
+      expect(events[1].data).toStrictEqual({
+        attachment_id: attachment.id,
+        attachment_type: 'text',
+        previous_version: 1,
+        current_version: 2,
+        render_inline: false,
+        source: 'http_api',
+      });
+    });
+
+    apiTest('PUT with unchanged content persists no additional event', async ({ asAdmin }) => {
+      const conversationId = await createConversation(asAdmin);
+      const attachment = await createTextAttachment(asAdmin, conversationId);
+
+      const response = await asAdmin.put(attachmentUrl(conversationId, attachment.id), {
+        body: { data: { content: 'test content' }, description: 'renamed only' },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+
+      const events = await getAttachmentEvents(asAdmin, conversationId);
+      expect(events.map((e) => e.type)).toStrictEqual(['attachment_added']);
+    });
+
+    apiTest(
+      'DELETE persists an attachment_deleted event with hard_delete=false',
+      async ({ asAdmin }) => {
+        const conversationId = await createConversation(asAdmin);
+        const attachment = await createTextAttachment(asAdmin, conversationId);
+
+        const response = await asAdmin.delete(attachmentUrl(conversationId, attachment.id), {
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+
+        const events = await getAttachmentEvents(asAdmin, conversationId);
+        expect(events.map((e) => e.type)).toStrictEqual(['attachment_added', 'attachment_deleted']);
+        expect(events[1].data).toStrictEqual({
+          attachment_id: attachment.id,
+          attachment_type: 'text',
+          hard_delete: false,
+          source: 'http_api',
+        });
+      }
+    );
+
+    apiTest(
+      'DELETE ?permanent=true removes the attachment and persists hard_delete=true',
+      async ({ asAdmin }) => {
+        const conversationId = await createConversation(asAdmin);
+        const attachment = await createTextAttachment(asAdmin, conversationId);
+
+        const response = await asAdmin.delete(
+          `${attachmentUrl(conversationId, attachment.id)}?permanent=true`,
+          { responseType: 'json' }
+        );
+        expect(response).toHaveStatusCode(200);
+
+        const listResponse = await asAdmin.get(
+          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(
+            conversationId
+          )}/attachments?include_deleted=true`,
+          { responseType: 'json' }
+        );
+        expect(listResponse).toHaveStatusCode(200);
+        expect(
+          (listResponse.body as ListAttachmentsResponse).results.find((a) => a.id === attachment.id)
+        ).toBeUndefined();
+
+        const events = await getAttachmentEvents(asAdmin, conversationId);
+        expect(events.map((e) => e.type)).toStrictEqual(['attachment_added', 'attachment_deleted']);
+        expect(events[1].data).toStrictEqual({
+          attachment_id: attachment.id,
+          attachment_type: 'text',
+          hard_delete: true,
+          source: 'http_api',
+        });
+      }
+    );
   }
 );

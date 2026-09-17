@@ -1,5 +1,5 @@
 {
-  "sha1": "a983ecbe69f02cf7464a15c164b2e42814e2de5b",
+  "sha1": "b872a3bf7ba4773872c69b75336d71784f15c0d9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -66,6 +66,45 @@
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/inbox_view_details.spec.ts",
         "line": 81,
         "column": 82
+      }
+    },
+    {
+      "id": "7f75bff6a1b2961-72ec5b0a18137c1",
+      "title": "Observability Alerting - privilege-based page access user with logs read privilege sees the full inbox page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
+        "line": 231,
+        "column": 25
+      }
+    },
+    {
+      "id": "7f75bff6a1b2961-18df943f4f428d2",
+      "title": "Observability Alerting - privilege-based page access user with alerting_v2_alerts read privilege sees the full inbox page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
+        "line": 217,
+        "column": 24
+      }
+    },
+    {
+      "id": "7f75bff6a1b2961-ab1df2d53b456f0",
+      "title": "Observability Alerting - privilege-based page access user with no alerting privileges is blocked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
+        "line": 224,
+        "column": 24
       }
     },
     {
