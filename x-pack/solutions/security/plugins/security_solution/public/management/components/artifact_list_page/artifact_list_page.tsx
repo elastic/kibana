@@ -329,9 +329,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setSelectedItemForEdit(undefined);
     }, []);
 
-    const handleEnabledChangeSuccess = useCallback(() => {
+    const handleEnabledChangeSuccess = useCallback(async () => {
       if (isMounted()) {
-        refetchListData();
+        await refetchListData();
       }
     }, [isMounted, refetchListData]);
 

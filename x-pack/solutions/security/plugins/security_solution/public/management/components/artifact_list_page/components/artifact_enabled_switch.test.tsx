@@ -148,15 +148,53 @@ describe('ArtifactEnabledSwitch', () => {
     expect(renderResult.getByTestId('enabledSwitch')).toBeDisabled();
   });
 
-  it('shows a loading spinner while the artifact is being updated', () => {
+  it('keeps the switch mounted and shows a spinner while the artifact is being updated', () => {
     useWithArtifactEnableDisableMock.mockReturnValue({
       setArtifactEnabled,
       isLoading: true,
     });
     render();
 
+    expect(renderResult.getByTestId('enabledSwitch')).toBeInTheDocument();
     expect(renderResult.getByTestId('enabledSwitch-loading')).toBeInTheDocument();
-    expect(renderResult.queryByTestId('enabledSwitch')).not.toBeInTheDocument();
+  });
+
+  it('does not start another update while the switch is already loading', () => {
+    useWithArtifactEnableDisableMock.mockReturnValue({
+      setArtifactEnabled,
+      isLoading: true,
+    });
+    render();
+
+    fireEvent.click(renderResult.getByTestId('enabledSwitch'));
+
+    expect(setArtifactEnabled).not.toHaveBeenCalled();
+  });
+
+  it('keeps the switch busy until onSuccess settles', async () => {
+    let resolveSuccess: (() => void) | undefined;
+    onSuccess.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveSuccess = resolve;
+      })
+    );
+    render();
+
+    fireEvent.click(renderResult.getByTestId('enabledSwitch'));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalled();
+      expect(renderResult.getByTestId('enabledSwitch-loading')).toBeInTheDocument();
+    });
+
+    fireEvent.click(renderResult.getByTestId('enabledSwitch'));
+    expect(setArtifactEnabled).toHaveBeenCalledTimes(1);
+
+    resolveSuccess?.();
+
+    await waitFor(() => {
+      expect(renderResult.queryByTestId('enabledSwitch-loading')).not.toBeInTheDocument();
+    });
   });
 
   it('shows Enabled on hover when the artifact is enabled', async () => {

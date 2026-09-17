@@ -64,7 +64,7 @@ export interface ArtifactSimpleTableProps {
   allowCardDeleteAction?: boolean;
   showEnabledColumn?: boolean;
   apiClient: ExceptionsListApiClient;
-  onEnabledChangeSuccess?: () => void;
+  onEnabledChangeSuccess?: () => Promise<void>;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   sortableFields?: readonly string[];
@@ -232,7 +232,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
       if (showEnabledColumn) {
         tableColumns.push({
           name: labels.tableColumnEnabledLabel,
-          width: '80px',
+          width: '100px',
           render: (item: ExceptionListItemSchema) => (
             <ArtifactEnabledSwitch
               item={item}
