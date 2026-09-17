@@ -1981,7 +1981,7 @@ paths:
                         minLength: 1
                         type: string
                       role:
-                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.'
+                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent configuration; `manager` adds deleting the agent and managing its access control.'
                         enum:
                           - user
                           - editor
