@@ -16,10 +16,10 @@ import {
   getPolicyProtectionsReference,
   checkIfPopupMessagesContainCustomNotifications,
   resetCustomNotifications,
+  removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
   setCustomYaraSignatures,
-  disableCustomYaraSignatures,
 } from './policy_config_helpers';
 import { get, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -528,13 +528,16 @@ describe('Policy Config helpers', () => {
       expect(policy.linux.memory_protection.custom_yara_signatures).toBe(false);
     });
 
-    it('returns a copy with custom_yara_signatures disabled on all OSes', () => {
+    it('returns a copy with custom_yara_signatures removed on all OSes without mutating the input', () => {
       const policy = policyFactory();
-      const result = disableCustomYaraSignatures(policy);
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+      const result = removeCustomYaraSignatures(policy);
+
       expect(result).not.toBe(policy);
-      expect(result.windows.memory_protection.custom_yara_signatures).toBe(false);
-      expect(result.mac.memory_protection.custom_yara_signatures).toBe(false);
-      expect(result.linux.memory_protection.custom_yara_signatures).toBe(false);
+      expect(result.windows.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(result.mac.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(result.linux.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(policy).toEqual(originalPolicy);
       expect(policy.windows.memory_protection.custom_yara_signatures).toBe(true);
       expect(policy.mac.memory_protection.custom_yara_signatures).toBe(true);
       expect(policy.linux.memory_protection.custom_yara_signatures).toBe(true);

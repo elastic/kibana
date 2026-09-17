@@ -38,7 +38,6 @@ import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_act
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
-import { backfillCustomYaraSignatures } from './endpoint/migrations/backfill_custom_yara_signatures';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import {
@@ -1063,15 +1062,6 @@ export class Plugin implements ISecuritySolutionPlugin {
           );
 
           await turnOffAgentPolicyFeatures(fleetServices, productFeaturesService, logger);
-
-          await backfillCustomYaraSignatures(
-            core.elasticsearch.client.asInternalUser,
-            fleetServices,
-            productFeaturesService,
-            licenseService,
-            config.experimentalFeatures,
-            logger
-          );
 
           // Ensure policies have backing DOT indices (We don't need to `await` this.
           // It can run in the background)

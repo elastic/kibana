@@ -60,6 +60,7 @@ export const policyFactory = ({
       memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
+        // New policies default to enabled; existing policies are backfilled in the flag-removal PR.
         custom_yara_signatures: true,
       },
       behavior_protection: {

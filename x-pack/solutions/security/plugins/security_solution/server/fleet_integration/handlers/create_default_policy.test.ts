@@ -556,6 +556,12 @@ describe('Create Default Policy tests ', () => {
       }
     };
 
+    const expectCustomYaraSignaturesAbsent = (policy: PolicyConfig) => {
+      for (const os of osList) {
+        expect(policy[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
+      }
+    };
+
     it('should enable custom YARA signatures on all OSes when flag, product feature, and Enterprise license are on', async () => {
       licenseEmitter.next(Enterprise);
 
@@ -564,7 +570,7 @@ describe('Create Default Policy tests ', () => {
       expectCustomYaraSignatures(policy, true);
     });
 
-    it('should disable custom YARA signatures when the experimental flag is off', async () => {
+    it('should omit custom YARA signatures when the experimental flag is off', async () => {
       licenseEmitter.next(Enterprise);
       const experimentalFeaturesWithCysDisabled = {
         trustedDevices: true,
@@ -587,10 +593,10 @@ describe('Create Default Policy tests ', () => {
         experimentalFeaturesWithCysDisabled
       );
 
-      expectCustomYaraSignatures(policy, false);
+      expectCustomYaraSignaturesAbsent(policy);
     });
 
-    it('should disable custom YARA signatures when the endpointCustomYaraSignatures product feature is off', async () => {
+    it('should omit custom YARA signatures when the endpointCustomYaraSignatures product feature is off', async () => {
       licenseEmitter.next(Enterprise);
       productFeaturesService = createProductFeaturesServiceMock(
         ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_custom_yara_signatures')
@@ -598,7 +604,7 @@ describe('Create Default Policy tests ', () => {
 
       const policy = await createDefaultPolicyCallback(edrCompleteConfig);
 
-      expectCustomYaraSignatures(policy, false);
+      expectCustomYaraSignaturesAbsent(policy);
     });
 
     it('should disable custom YARA signatures for the Data Collection preset', async () => {
@@ -609,7 +615,7 @@ describe('Create Default Policy tests ', () => {
       expectCustomYaraSignatures(policy, false);
     });
 
-    it('should disable custom YARA signatures on Platinum license', async () => {
+    it('should persist custom YARA signatures as false on Platinum license', async () => {
       const policy = await createDefaultPolicyCallback(edrCompleteConfig);
 
       expectCustomYaraSignatures(policy, false);

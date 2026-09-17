@@ -468,35 +468,37 @@ export const setCustomYaraSignatures = (
 };
 
 /**
- * Returns a copy of the passed `PolicyConfig` with custom YARA signatures disabled
- * on Windows, Mac, and Linux memory protection.
+ * Returns a copy of the passed `PolicyConfig` with custom_yara_signatures removed
+ * from Windows, Mac, and Linux memory protection.
+ *
+ * Writing an explicit `false` while the feature flag is off would destroy the
+ * "never set" signal, making the future `??=` backfill a no-op and leaving
+ * existing customers permanently opted out.
  *
  * @param policy
- * @returns PolicyConfig with custom_yara_signatures set to false on all OSes
+ * @returns PolicyConfig without custom_yara_signatures
  */
-export const disableCustomYaraSignatures = (policy: PolicyConfig): PolicyConfig => {
+export const removeCustomYaraSignatures = (policy: PolicyConfig): PolicyConfig => {
+  const { custom_yara_signatures: windowsCustomYaraSignatures, ...windowsMemoryProtection } =
+    policy.windows.memory_protection;
+  const { custom_yara_signatures: macCustomYaraSignatures, ...macMemoryProtection } =
+    policy.mac.memory_protection;
+  const { custom_yara_signatures: linuxCustomYaraSignatures, ...linuxMemoryProtection } =
+    policy.linux.memory_protection;
+
   return {
     ...policy,
     windows: {
       ...policy.windows,
-      memory_protection: {
-        ...policy.windows.memory_protection,
-        custom_yara_signatures: false,
-      },
+      memory_protection: windowsMemoryProtection,
     },
     mac: {
       ...policy.mac,
-      memory_protection: {
-        ...policy.mac.memory_protection,
-        custom_yara_signatures: false,
-      },
+      memory_protection: macMemoryProtection,
     },
     linux: {
       ...policy.linux,
-      memory_protection: {
-        ...policy.linux.memory_protection,
-        custom_yara_signatures: false,
-      },
+      memory_protection: linuxMemoryProtection,
     },
   };
 };

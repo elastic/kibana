@@ -25,10 +25,10 @@ import {
   ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
 } from '../constants';
 import {
-  disableCustomYaraSignatures,
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
 } from '../../../common/endpoint/models/policy_config_helpers';
@@ -84,7 +84,7 @@ export const createDefaultPolicy = (
     !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
     !experimentalFeatures.customYaraSignaturesEnabled
   ) {
-    defaultPolicyPerType = disableCustomYaraSignatures(defaultPolicyPerType);
+    defaultPolicyPerType = removeCustomYaraSignatures(defaultPolicyPerType);
   }
 
   if (!experimentalFeatures.linuxDnsEvents) {

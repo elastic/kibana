@@ -43,8 +43,8 @@ import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeCustomYaraSignatures,
   removeDeviceControl,
-  disableCustomYaraSignatures,
 } from '../../common/endpoint/models/policy_config_helpers';
 import {
   ProtectionModes,
@@ -370,7 +370,7 @@ export const getPackagePolicyUpdateCallback = (
       !experimentalFeatures.customYaraSignaturesEnabled
     ) {
       // Use the current policy value so this strip composes with removeDeviceControl.
-      endpointIntegrationData.inputs[0].config.policy.value = disableCustomYaraSignatures(
+      endpointIntegrationData.inputs[0].config.policy.value = removeCustomYaraSignatures(
         endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
       );
     }

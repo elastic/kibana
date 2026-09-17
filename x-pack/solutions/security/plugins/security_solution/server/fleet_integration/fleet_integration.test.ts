@@ -1262,9 +1262,9 @@ describe('Fleet integrations', () => {
         }
       };
 
-      const expectCustomYaraSignatures = (policy: PolicyConfig, enabled: boolean) => {
+      const expectCustomYaraSignaturesAbsent = (policy: PolicyConfig) => {
         for (const os of osList) {
-          expect(policy[os].memory_protection.custom_yara_signatures).toBe(enabled);
+          expect(policy[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
         }
       };
 
@@ -1272,7 +1272,7 @@ describe('Fleet integrations', () => {
         licenseEmitter.next(Enterprise);
       });
 
-      it('should force custom YARA signatures off when the product feature is disabled', async () => {
+      it('should omit custom YARA signatures when the product feature is disabled', async () => {
         productFeaturesService = createProductFeaturesServiceMock(
           ALL_PRODUCT_FEATURE_KEYS.filter(
             (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
@@ -1300,10 +1300,10 @@ describe('Fleet integrations', () => {
           req
         );
 
-        expectCustomYaraSignatures(updatedPolicyConfig.inputs[0]!.config!.policy.value, false);
+        expectCustomYaraSignaturesAbsent(updatedPolicyConfig.inputs[0]!.config!.policy.value);
       });
 
-      it('should force custom YARA signatures off when the experimental flag is off', async () => {
+      it('should omit custom YARA signatures when the experimental flag is off', async () => {
         // @ts-expect-error write to readonly property for testing
         experimentalFeatures.customYaraSignaturesEnabled = false;
 
@@ -1328,7 +1328,7 @@ describe('Fleet integrations', () => {
           req
         );
 
-        expectCustomYaraSignatures(updatedPolicyConfig.inputs[0]!.config!.policy.value, false);
+        expectCustomYaraSignaturesAbsent(updatedPolicyConfig.inputs[0]!.config!.policy.value);
       });
 
       it('should preserve custom YARA signatures when both the product feature and experimental flag are enabled', async () => {

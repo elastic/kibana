@@ -263,9 +263,10 @@ describe('Policy Memory Protections Card', () => {
       expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
     });
 
-    it('should render the custom YARA signatures switch as unchecked when the field is absent', () => {
-      delete (formProps.policy.windows.memory_protection as { custom_yara_signatures?: boolean })
-        .custom_yara_signatures;
+    it('should render the custom YARA signatures switch as unchecked when the field is absent and enable it on all OSes when toggled on', async () => {
+      delete formProps.policy.windows.memory_protection.custom_yara_signatures;
+      delete formProps.policy.mac.memory_protection.custom_yara_signatures;
+      delete formProps.policy.linux.memory_protection.custom_yara_signatures;
       render();
 
       expect(
@@ -273,6 +274,15 @@ describe('Policy Memory Protections Card', () => {
           .getByTestId(testSubj.customYaraSignaturesEnableDisableSwitch)
           .getAttribute('aria-checked')
       ).toBe('false');
+
+      await userEvent.click(
+        renderResult.getByTestId(testSubj.customYaraSignaturesEnableDisableSwitch)
+      );
+
+      const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
+      expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
+      expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+      expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
     });
 
     describe('and license is lower than Enterprise', () => {
