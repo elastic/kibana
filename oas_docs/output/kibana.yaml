@@ -9725,7 +9725,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to delete. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9841,7 +9841,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: The ID of the action policy to get. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9995,7 +9995,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10177,7 +10177,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the action policy.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10400,7 +10400,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to disable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10570,7 +10570,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to enable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10740,7 +10740,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to snooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10920,7 +10920,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to unsnooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -11090,7 +11090,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy of the API key to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
