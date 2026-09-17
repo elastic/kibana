@@ -6,7 +6,7 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   ACTION_POLICY_ATTACHMENT_TYPE,
   actionPolicyAttachmentDataSchema,
@@ -76,14 +76,11 @@ export const createActionPolicySmlType = ({
       const attrs = so.attributes;
       const name = attrs?.name ?? originId;
       const description = attrs?.description ?? '';
-      const tags = attrs?.tags?.join(', ') ?? '';
       const matcher = PolicyMatcher.of(attrs?.matcher).toKql() ?? '';
       const groupingMode = attrs?.groupingMode ?? '';
       const destinations = attrs?.destinations?.map((d) => `${d.type}:${d.id}`).join(', ') ?? '';
 
-      const contentParts = [name, description, matcher, groupingMode, destinations, tags].filter(
-        Boolean
-      );
+      const contentParts = [name, description, matcher, groupingMode, destinations].filter(Boolean);
 
       return {
         type: ACTION_POLICY_KI_TYPE,
@@ -115,7 +112,7 @@ export const createActionPolicySmlType = ({
 
     try {
       const client = getScopedActionPolicyClient(context.request);
-      const policy = await client.getActionPolicy({ id: item.origin_id ?? '' });
+      const policy = await client.getActionPolicy({ id: getSmlOriginId(item) });
       return {
         type: ACTION_POLICY_ATTACHMENT_TYPE,
         data: actionPolicyAttachmentDataSchema.parse(policy),

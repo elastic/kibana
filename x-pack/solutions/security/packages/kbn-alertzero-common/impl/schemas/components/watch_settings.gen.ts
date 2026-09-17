@@ -287,21 +287,49 @@ export const WatchSettings = lazySchema(() =>
 export type WatchSettings = z.infer<typeof WatchSettings>;
 
 /**
- * Durable per-Worker settings stored as managed template values.
+ * Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the shared read/update path stays generic; each Worker declares a closed schema for its own extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates against that declaration, rejecting unknown or missing fields by name.
+ */
+export const WorkerSettingsExtras = lazySchema(() => z.object({}).catchall(z.unknown()));
+export type WorkerSettingsExtras = z.infer<typeof WorkerSettingsExtras>;
+
+/**
+ * Durable per-Worker settings stored as managed template values. Shared fields sit at the top level; Worker-specific fields live under `extras`. Unknown top-level keys are rejected.
  */
 export const WorkerSettings = lazySchema(() =>
-  z.object({
-    workerId: z.string(),
-    autonomy: WatchAutonomyLevel,
-    /**
-     * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
-     */
-    scheduleInterval: WorkerScheduleInterval.optional().describe(
-      'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
-    ),
-  })
+  z
+    .object({
+      workerId: z.string(),
+      autonomy: WatchAutonomyLevel,
+      /**
+       * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
+       */
+      scheduleInterval: WorkerScheduleInterval.optional().describe(
+        'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
+      ),
+      /**
+       * Omitted for Workers that declare no Worker-specific settings.
+       */
+      extras: WorkerSettingsExtras.optional().describe(
+        'Omitted for Workers that declare no Worker-specific settings.'
+      ),
+    })
+    .strict()
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;
+
+/**
+ * Settings patch; the editable subset of WorkerSettings with the same names and nesting. Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras` is whole-object: omitted keeps the stored extras, supplied must be the complete valid object for this Worker and replaces the stored one. There is no deep merge and `null` has no special meaning.
+ */
+export const WorkerSettingsWrite = lazySchema(() =>
+  z
+    .object({
+      autonomy: WatchAutonomyLevel.optional(),
+      scheduleInterval: WorkerScheduleInterval.optional(),
+      extras: WorkerSettingsExtras.optional(),
+    })
+    .strict()
+);
+export type WorkerSettingsWrite = z.infer<typeof WorkerSettingsWrite>;
 
 /**
  * A live registered Worker with Watch membership and durable settings.
