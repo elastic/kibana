@@ -6,7 +6,7 @@
  */
 
 import { SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID } from '@kbn/alertzero-common';
-import { RuleTuningSettings } from './detection_watch_settings';
+import { RuleTuningSettings } from './rule_tuning/rule_tuning_settings';
 import type { WorkerCustomSettingsComponent } from './types';
 
 /**
