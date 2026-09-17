@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useRef } from 'react';
 import {
   EuiBadge,
   EuiFilterGroup,
@@ -33,9 +33,8 @@ import {
   EntitySourceValue,
   toEntitySourceArray,
 } from '../../../flyout/entity_details/shared/components/entity_source_value';
-import { getEntityFilterTerms } from './use_entity_filters_param';
 import type { EntityFilters } from './use_entity_filters_param';
-import { combineFilters, useEntityFilterBarCounts } from './use_entity_filter_bar_counts';
+import { useEntityFilterBarCounts } from './use_entity_filter_bar_counts';
 export { combineFilters, toBucketMap } from './use_entity_filter_bar_counts';
 export type { EntityFilterBarCounts } from './use_entity_filter_bar_counts';
 
@@ -117,11 +116,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const baseFilter = useMemo(
-    () => combineFilters([esFilter, ...getEntityFilterTerms(filters)]),
-    [esFilter, filters]
-  );
-  const filterCounts = useEntityFilterBarCounts({ spaceId, view, filter: baseFilter });
+  const filterCounts = useEntityFilterBarCounts({ spaceId, view, filter: esFilter });
 
   // static options
   const entityTypeOptions = ENTITY_TYPE_OPTIONS.map((value) => ({
