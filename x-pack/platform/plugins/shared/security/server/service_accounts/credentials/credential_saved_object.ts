@@ -99,7 +99,7 @@ export const registerServiceAccountCredentialSavedObjectType = (
       properties: {
         // Answers "does this account have a credential, and which document is it?" without
         // re-deriving the ID.
-        serviceAccountId: { type: 'keyword' },
+        serviceAccountId: { type: 'keyword', ignore_above: 1024 },
         // Mapped now so credentials can later be reported on by age without a migration.
         createdAt: { type: 'date' },
         // `token` is deliberately unmapped: it is ciphertext, and nothing queries it.
