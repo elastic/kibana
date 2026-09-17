@@ -12,6 +12,7 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiStat,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -105,6 +106,7 @@ export function OverviewStatus({
 }) {
   const { statusFilter } = useGetUrlParams();
   const { application } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   const { status, error: statusError, loading } = useOverviewStatusState();
   const dispatch = useDispatch();
@@ -279,9 +281,10 @@ export function OverviewStatus({
         css={{
           display: 'grid',
           gridTemplateColumns: `repeat(${columns}, 1fr)`,
-          justifyItems: 'center',
+          justifyItems: 'start',
           alignContent: 'space-around',
           minHeight: STATS_AREA_HEIGHT,
+          paddingInlineStart: euiTheme.size.base,
         }}
       >
         {allStats.map((props) => (
