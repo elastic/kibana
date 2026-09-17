@@ -71,7 +71,6 @@ export const useInvestigateAlert = ({
     alertId && latestInvestigation
       ? application.getUrlForApp(NIGHTSHIFT_APP_ID, {
           path: `?${new URLSearchParams({
-            alertId,
             investigationId: latestInvestigation.investigation_id,
           }).toString()}`,
         })

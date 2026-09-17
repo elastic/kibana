@@ -17,11 +17,6 @@ export const NIGHTSHIFT_EVENT_ID_QUERY_PARAM = 'eventId';
 /** Query param that restores the open investigation detail flyout on load or from a shared link. */
 export const NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM = 'investigationId';
 
-export const NIGHTSHIFT_ALERT_ID_QUERY_PARAM = 'alertId';
-
-export const getNightshiftAlertIdFromSearch = (search: string): string | undefined =>
-  new URLSearchParams(search).get(NIGHTSHIFT_ALERT_ID_QUERY_PARAM) ?? undefined;
-
 export const getNightshiftEventIdFromSearch = (search: string): string | undefined =>
   new URLSearchParams(search).get(NIGHTSHIFT_EVENT_ID_QUERY_PARAM) ?? undefined;
 

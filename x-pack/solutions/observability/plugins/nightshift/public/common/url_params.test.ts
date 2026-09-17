@@ -9,12 +9,10 @@ import {
   buildNightshiftEventFlyoutShareUrl,
   clearNightshiftEventIdParam,
   clearNightshiftSeverityParam,
-  getNightshiftAlertIdFromSearch,
   getNightshiftEventIdFromSearch,
   getNightshiftSearchQueryFromSearch,
   getNightshiftSeverityFromSearch,
   NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
-  NIGHTSHIFT_ALERT_ID_QUERY_PARAM,
   NIGHTSHIFT_SEARCH_QUERY_PARAM,
   NIGHTSHIFT_SEVERITY_QUERY_PARAM,
   setNightshiftEventIdParam,
@@ -23,13 +21,6 @@ import {
 } from './url_params';
 
 describe('url_params', () => {
-  it('reads and decodes the alert id param', () => {
-    expect(getNightshiftAlertIdFromSearch(`?${NIGHTSHIFT_ALERT_ID_QUERY_PARAM}=alert%2F1`)).toBe(
-      'alert/1'
-    );
-    expect(getNightshiftAlertIdFromSearch('')).toBeUndefined();
-  });
-
   it('builds a share URL with the eventId query param', () => {
     window.history.pushState({}, '', '/app/observability/nightshift?filter=logs.web');
 

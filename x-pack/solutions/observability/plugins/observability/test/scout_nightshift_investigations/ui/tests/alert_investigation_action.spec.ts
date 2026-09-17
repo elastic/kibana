@@ -134,12 +134,10 @@ test.describe(
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       await pageObjects.alertsTablePage.clickViewInvestigation();
 
-      const requestUrl = new URL((await requestPromise).url());
+      await requestPromise;
       await expect
         .poll(() => page.url())
-        .toContain(`/app/nightshift?alertId=${alertId}&investigationId=investigation-1`);
-      expect(requestUrl.searchParams.get('concurrency_key')).toBe(alertId);
-      expect(requestUrl.searchParams.getAll('subject_types')).toStrictEqual(['alert']);
+        .toContain(`/app/nightshift?investigationId=investigation-1`);
       await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
     });
 
@@ -160,12 +158,10 @@ test.describe(
       });
       await pageObjects.alertPage.clickViewInvestigation();
 
-      const requestUrl = new URL((await requestPromise).url());
+      await requestPromise;
       await expect
         .poll(() => page.url())
-        .toContain(`/app/nightshift?alertId=${alertId}&investigationId=investigation-1`);
-      expect(requestUrl.searchParams.get('concurrency_key')).toBe(alertId);
-      expect(requestUrl.searchParams.getAll('subject_types')).toStrictEqual(['alert']);
+        .toContain(`/app/nightshift?investigationId=investigation-1`);
       await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
     });
   }

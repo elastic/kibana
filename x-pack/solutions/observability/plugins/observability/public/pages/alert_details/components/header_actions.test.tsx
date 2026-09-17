@@ -142,7 +142,7 @@ describe('Header Actions', () => {
       handleInvestigate: jest.fn(),
       isInvestigating: false,
       investigateActionLabel: 'Investigate',
-      viewInvestigationUrl: '/app/nightshift?alertId=alert-1',
+      viewInvestigationUrl: '/app/nightshift?investigationId=investigation-1',
       viewInvestigationActionLabel: 'View investigation',
     });
     useAlertSnoozeStateMock.mockReturnValue(snoozeStateWithoutInstance);
@@ -249,7 +249,7 @@ describe('Header Actions', () => {
 
       expect(await findByTestId('alertDetailsViewInvestigation')).toHaveAttribute(
         'href',
-        '/app/nightshift?alertId=alert-1'
+        '/app/nightshift?investigationId=investigation-1'
       );
     });
 

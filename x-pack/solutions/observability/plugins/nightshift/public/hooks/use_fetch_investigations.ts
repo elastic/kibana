@@ -22,7 +22,6 @@ export interface FetchInvestigationsParams {
   size: number;
   query?: string;
   severities?: Severity[];
-  alertId?: string;
 }
 
 export const useFetchInvestigations = ({
@@ -30,12 +29,11 @@ export const useFetchInvestigations = ({
   size,
   query,
   severities,
-  alertId,
 }: FetchInvestigationsParams): UseQueryResult<ListInvestigationsResponse, Error> => {
   const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
 
   return useQuery<ListInvestigationsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, page, size, query, severities, alertId],
+    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, page, size, query, severities],
     // investigationsClient is undefined when the plugin is unavailable (optional dep)
     enabled: investigationsClient != null,
     queryFn: async ({ signal }) => {
@@ -52,7 +50,6 @@ export const useFetchInvestigations = ({
             size,
             ...(query ? { query } : {}),
             ...(severities?.length ? { severities } : {}),
-            ...(alertId ? { concurrency_key: alertId, subject_types: ['alert'] as const } : {}),
           },
         },
         signal: signal ?? null,

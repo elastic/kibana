@@ -13,11 +13,12 @@ import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
 import { useFetchInvestigations } from '../hooks/use_fetch_investigations';
-import { useFetchSeverityCounts } from '../hooks/use_fetch_severity_counts';
 import { useKibana } from '../hooks/use_kibana';
 
 jest.mock('../hooks/use_fetch_investigations');
-jest.mock('../hooks/use_fetch_severity_counts');
+jest.mock('../hooks/use_fetch_severity_counts', () => ({
+  useFetchSeverityCounts: jest.fn(() => ({ data: undefined })),
+}));
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 
@@ -59,7 +60,6 @@ jest.mock('../investigation/investigation_detail_flyout', () => ({
 }));
 
 const mockUseFetchInvestigations = useFetchInvestigations as jest.Mock;
-const mockUseFetchSeverityCounts = useFetchSeverityCounts as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
 
@@ -112,7 +112,6 @@ describe('NightshiftApp', () => {
   beforeEach(() => {
     refetch.mockClear();
     mockUsePageReady.mockClear();
-    mockUseFetchSeverityCounts.mockReturnValue({ data: undefined });
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -142,27 +141,6 @@ describe('NightshiftApp', () => {
           value3: 1,
         }),
       })
-    );
-  });
-
-  it('passes the alert and existing URL filters to both data requests', () => {
-    renderApp({
-      initialEntries: ['/?alertId=alert%2F1&q=checkout&severity=80-critical'],
-    });
-
-    expect(mockUseFetchInvestigations).toHaveBeenCalledWith({
-      page: 1,
-      size: 20,
-      query: 'checkout',
-      severities: ['80-critical'],
-      alertId: 'alert/1',
-    });
-    expect(mockUseFetchSeverityCounts).toHaveBeenCalledWith({
-      query: 'checkout',
-      alertId: 'alert/1',
-    });
-    expect(screen.getByTestId('locationProbe')).toHaveTextContent(
-      '?alertId=alert%2F1&q=checkout&severity=80-critical'
     );
   });
 
