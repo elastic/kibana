@@ -3139,5 +3139,69 @@ describe('Output Service', () => {
 
       expect(output.ssl).toEqual(undefined);
     });
+
+    it('should use canonical output_id even when attributes contain a poisoned id field', () => {
+      const so = mockOutputSO('output-test', {
+        type: 'elasticsearch',
+        id: '../../../malicious-id',
+      });
+
+      const output = outputSavedObjectToOutput(so);
+
+      expect(output.id).toBe('output-test');
+    });
+
+    it('should use so.id as fallback when output_id is absent, not attributes.id', () => {
+      const so = {
+        id: 'uuid-fallback',
+        type: 'ingest-outputs',
+        references: [],
+        attributes: {
+          name: 'Test',
+          type: 'elasticsearch',
+          id: 'poisoned-id',
+        },
+      };
+
+      const output = outputSavedObjectToOutput(so as any);
+
+      expect(output.id).toBe('uuid-fallback');
+    });
+
+    it('OTLP branch: canonical output_id wins over poisoned attributes.id', () => {
+      const so = mockOutputSO('otlp-output-test', {
+        type: 'otlp',
+        id: 'poisoned-otlp-id',
+        otlp_exporter: {
+          endpoint: 'https://otel.example.com:4317',
+          protocol: 'grpc',
+        },
+      });
+
+      const output = outputSavedObjectToOutput(so);
+
+      expect(output.id).toBe('otlp-output-test');
+    });
+
+    it('OTLP branch: uses so.id fallback when output_id absent and attributes.id is poisoned', () => {
+      const so = {
+        id: 'otlp-uuid-fallback',
+        type: 'ingest-outputs',
+        references: [],
+        attributes: {
+          name: 'Test OTLP',
+          type: 'otlp',
+          id: 'poisoned-otlp-id',
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        },
+      };
+
+      const output = outputSavedObjectToOutput(so as any);
+
+      expect(output.id).toBe('otlp-uuid-fallback');
+    });
   });
 });

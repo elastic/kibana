@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { isMobileAgentName } from '../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../common/es_fields/apm';
+import { toAnyOfKuery } from '../../../../common/utils/kuery_utils';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -36,8 +37,14 @@ export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
       const item = traceItems?.find((i) => i.id === docId);
       if (!item) return;
 
-      const idField = item.docType === 'span' ? SPAN_ID : TRANSACTION_ID;
-      const kuery = `${TRACE_ID} : "${errorTraceId}" and ${idField} : "${docId}"`;
+      // OTel-native error documents carry `span.id` but no `transaction.id`, while classic APM
+      // errors populate both. The waterfall item id is itself `span.id ?? transaction.id`, so
+      // match either field instead of guessing one from the doc type.
+      const docIdKuery = toAnyOfKuery([
+        [SPAN_ID, docId],
+        [TRANSACTION_ID, docId],
+      ]);
+      const kuery = `${TRACE_ID} : "${errorTraceId}" and ${docIdKuery}`;
 
       const href = isMobileAgentName(item.agentName)
         ? apmRouter.link('/mobile-services/{serviceName}/errors-and-crashes', {

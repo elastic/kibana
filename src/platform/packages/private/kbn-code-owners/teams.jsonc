@@ -513,6 +513,14 @@
     ]
   },
   {
+    "id": "nightshift-sre-agent",
+    "name": "Nightshift SRE Agent Team",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift-sre-agent-team"
+    }
+  },
+  {
     "id": "obs-cloudnative-monitoring",
     "name": "Obs Cloudnative Monitoring",
     "areas": [
@@ -618,14 +626,37 @@
     ]
   },
   {
-    "id": "obs-sig-events-team",
-    "name": "Obs Sig Events Team",
+    "id": "obs-signals-metrics",
+    "name": "Observability signals: Metrics",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/obs-signals-metrics-team",
+      "label": "Team:obs-signals-metrics"
+    },
+    "responsibilities": [
+      "Infrastructure metrics",
+      "Hosts UI",
+      "Metrics Explorer",
+      "Metrics Experience"
+    ]
+  },
+  {
+    "id": "obs-signals-logs",
+    "name": "Obs UX: Signals & Logs",
     "areas": [
       "observability"
     ],
     "github": {
-      "team": "elastic/obs-sig-events-team"
-    }
+      "team": "elastic/obs-signals-logs-team",
+      "label": "Team:obs-signals-logs"
+    },
+    "responsibilities": [
+      "Logs Analytics and Skills",
+      "Logs Explorer / Logs Stream (legacy)",
+      "Left Nav & Classic Overview Page",
+      "Synthetics (Synthetics UI, Synthetics Recorder, Synthetics Service and Heartbeat)",
+      "eBPF + Profiling OTel"
+    ]
   },
   {
     "id": "obs-ux-management-team",

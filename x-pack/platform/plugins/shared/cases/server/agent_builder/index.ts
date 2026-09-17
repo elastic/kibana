@@ -14,7 +14,7 @@ import { searchCasesTool } from './tools/search_cases';
 import { manageCasesTool } from './tools/manage_cases';
 import { attachmentsTool } from './tools/attachment_tools';
 import { observablesTool } from './tools/observable_tools';
-import { casesSkill } from './skills/cases_skill';
+import { buildCasesSkill } from './skills/cases_skill';
 import { casesAnalyticsSkill } from './skills/cases_analytics_skill';
 import { createCaseAttachmentType } from './attachments/case_attachment_type';
 import { createCasesAttachmentType } from './attachments/cases_attachment_type';
@@ -49,7 +49,7 @@ export function registerCasesAgentBuilderTools(
     attachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
   agentBuilder.tools.register(observablesTool(getCasesClient));
-  agentBuilder.skills.register(casesSkill);
+  agentBuilder.skills.register(buildCasesSkill(templatesEnabled));
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {
     agentBuilder.skills.register(casesAnalyticsSkill);
