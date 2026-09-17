@@ -41,6 +41,7 @@ import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
+import { areStepExecutionsUnavailable } from '../../../../common';
 import { buildDiagnosisContextPackage } from '../lib/build_diagnosis_context_package';
 import { buildIterationVirtualId } from '../lib/build_iteration_pseudo_step';
 import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
@@ -1123,6 +1124,8 @@ const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSi
 
 export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
+  /** Paginated steps-list `total`; empty truncated state when a finished run loaded no rows. */
+  stepExecutionsTotal?: number;
   definition: WorkflowYaml | null;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
@@ -1144,6 +1147,7 @@ export interface WorkflowStepExecutionTreeProps {
 export const WorkflowStepExecutionTree = ({
   error,
   execution,
+  stepExecutionsTotal = 0,
   definition,
   onStepExecutionClick,
   selectedId,
@@ -1210,9 +1214,19 @@ export const WorkflowStepExecutionTree = ({
 
   const failedBeforeSteps =
     execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
+  const stepExecutionsUnavailable =
+    execution != null &&
+    areStepExecutionsUnavailable({
+      stepExecutionsTotal,
+      loadedCount: execution.stepExecutions.length,
+      isInProgress: isInProgressStatus(execution.status),
+    });
 
   const openNodes = useMemo(() => {
     if (!execution || !definition || error) return [] as OpenTreeNode[];
+    if (stepExecutionsUnavailable) {
+      return [] as OpenTreeNode[];
+    }
     if (
       execution.stepExecutions?.length === 0 &&
       !isInProgressStatus(execution.status) &&
@@ -1323,6 +1337,7 @@ export const WorkflowStepExecutionTree = ({
     onStepExecutionClick,
     onToggleGap,
     selectedId,
+    stepExecutionsUnavailable,
   ]);
 
   const defaultExpandedIds = useMemo(() => {
@@ -1380,6 +1395,34 @@ export const WorkflowStepExecutionTree = ({
           </h2>
         }
         body={<EuiText>{error.message}</EuiText>}
+      />
+    );
+  }
+
+  if (stepExecutionsUnavailable) {
+    const omittedCount = stepExecutionsTotal;
+    return (
+      <EuiEmptyPrompt
+        {...emptyPromptCommonProps}
+        data-test-subj="workflowStepExecutionTreeTruncatedEmpty"
+        icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.stepExecutionsTooLargeTitle"
+              defaultMessage="Unable to show step executions"
+            />
+          </h2>
+        }
+        body={
+          <EuiText>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.stepExecutionsTooLargeDescription"
+              defaultMessage="This execution has too much step data to load at once. {count, plural, one {# step execution was not loaded} other {# step executions were not loaded}}."
+              values={{ count: omittedCount }}
+            />
+          </EuiText>
+        }
       />
     );
   }
