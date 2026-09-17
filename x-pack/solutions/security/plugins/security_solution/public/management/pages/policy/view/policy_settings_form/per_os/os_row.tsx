@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useId } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, useEuiTheme } from '@elastic/eui';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
@@ -43,6 +43,9 @@ export const OsRow = memo<OsRowProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
+    // Every row renders the same control names, so the OS heading has to name the group or a
+    // screen reader cannot tell which operating system a control belongs to.
+    const osHeadingId = useId();
 
     const labelColumnCss = {
       flexBasis: OS_LABEL_COLUMN_WIDTH,
@@ -54,7 +57,7 @@ export const OsRow = memo<OsRowProps>(
     };
 
     return (
-      <div data-test-subj={dataTestSubj}>
+      <div data-test-subj={dataTestSubj} role="group" aria-labelledby={osHeadingId}>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem
             grow={false}
@@ -64,7 +67,7 @@ export const OsRow = memo<OsRowProps>(
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  <h5>{OS_TITLES[os]}</h5>
+                  <h5 id={osHeadingId}>{OS_TITLES[os]}</h5>
                 </EuiText>
               </EuiFlexItem>
               {labelAppend && <EuiFlexItem grow={false}>{labelAppend}</EuiFlexItem>}

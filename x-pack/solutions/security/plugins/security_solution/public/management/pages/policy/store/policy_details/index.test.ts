@@ -502,6 +502,46 @@ describe('policy details: ', () => {
       expect(loaded?.mac.popup.malware.message).toEqual('Custom macOS malware notification');
     });
 
+    it('defaults an empty macOS ransomware message when the flag is on', async () => {
+      setPerOsFlag(true);
+      const loadedPolicy = generateNewPolicyItemMock();
+      loadedPolicy.id = 'policy-1';
+      loadedPolicy.policy_ids = [];
+      loadedPolicy.inputs[0].config.policy.value.mac.popup.ransomware.message = '';
+
+      http.get.mockResolvedValueOnce({ item: loadedPolicy, success: true });
+      const serverReturnedPolicy = waitForAction('serverReturnedPolicyDetailsData');
+      (dispatch as Dispatch<AppAction>)({
+        type: 'userChangedUrl',
+        payload: { pathname: '/administration/policy/policy-1/settings', search: '', hash: '' },
+      });
+      await serverReturnedPolicy;
+
+      expect(
+        policyDetails(getState())?.inputs[0].config.policy.value.mac.popup.ransomware.message
+      ).toEqual(DefaultPolicyNotificationMessage);
+    });
+
+    it('loads a policy whose macOS ransomware popup branch is absent', async () => {
+      setPerOsFlag(true);
+      const loadedPolicy = generateNewPolicyItemMock();
+      loadedPolicy.id = 'policy-1';
+      loadedPolicy.policy_ids = [];
+      const macPopup = loadedPolicy.inputs[0].config.policy.value.mac.popup as Partial<
+        PolicyConfig['mac']['popup']
+      >;
+      delete macPopup.ransomware;
+
+      http.get.mockResolvedValueOnce({ item: loadedPolicy, success: true });
+      const serverReturnedPolicy = waitForAction('serverReturnedPolicyDetailsData');
+      (dispatch as Dispatch<AppAction>)({
+        type: 'userChangedUrl',
+        payload: { pathname: '/administration/policy/policy-1/settings', search: '', hash: '' },
+      });
+
+      await expect(serverReturnedPolicy).resolves.toBeDefined();
+    });
+
     it('defaults every OS from the Windows message when the flag is off', async () => {
       setPerOsFlag(false);
 

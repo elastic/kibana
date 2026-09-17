@@ -58,6 +58,15 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
               DefaultPolicyNotificationMessage;
           }
         }
+
+        // Only the per-OS form exposes the macOS ransomware notification, so its message is
+        // defaulted alongside it. Optional: a policy predating macOS ransomware has no popup
+        // branch to default.
+        const macRansomwarePopup = policyItem.inputs[0].config.policy.value.mac.popup.ransomware;
+
+        if (macRansomwarePopup?.message === '') {
+          macRansomwarePopup.message = DefaultPolicyNotificationMessage;
+        }
       } else if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.malware.message =
           DefaultPolicyNotificationMessage;

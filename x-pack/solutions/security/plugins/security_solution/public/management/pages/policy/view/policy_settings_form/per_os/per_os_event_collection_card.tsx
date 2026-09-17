@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { cloneDeep } from 'lodash';
-import { OS_TITLES } from '../../../../../common/translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type {
@@ -195,28 +194,28 @@ const PerOsEventCollectionRow = <OS extends OperatingSystem>({
     <OsRow
       os={os}
       primaryControl={
-        <EuiFormFieldset legend={{ children: OS_TITLES[os], display: 'hidden' }}>
-          {/* Horizontal, wrapping: EuiCheckbox is block-level, so a bare container stacks them. */}
-          <EuiFlexGroup
-            gutterSize="l"
-            alignItems="center"
-            wrap={true}
-            data-test-subj={getTestId('options')}
-          >
-            {options.map(({ name, protectionField }) => (
-              <EuiFlexItem grow={false} key={String(protectionField)}>
-                <EuiCheckbox
-                  id={`${inputIdPrefix}-${String(protectionField)}`}
-                  label={name}
-                  checked={Boolean(selection[protectionField])}
-                  onChange={(event) => onFieldChange(protectionField, event.target.checked)}
-                  disabled={!isEditMode}
-                  data-test-subj={getTestId(String(protectionField))}
-                />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFormFieldset>
+        // No fieldset here: OsRow already names this group after the operating system, and a
+        // second group with the same name would just be announced twice.
+        /* Horizontal, wrapping: EuiCheckbox is block-level, so a bare container stacks them. */
+        <EuiFlexGroup
+          gutterSize="l"
+          alignItems="center"
+          wrap={true}
+          data-test-subj={getTestId('options')}
+        >
+          {options.map(({ name, protectionField }) => (
+            <EuiFlexItem grow={false} key={String(protectionField)}>
+              <EuiCheckbox
+                id={`${inputIdPrefix}-${String(protectionField)}`}
+                label={name}
+                checked={Boolean(selection[protectionField])}
+                onChange={(event) => onFieldChange(protectionField, event.target.checked)}
+                disabled={!isEditMode}
+                data-test-subj={getTestId(String(protectionField))}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       }
       inlineControls={
         <EuiText size="s" color="subdued" data-test-subj={getTestId('selectedCount')}>

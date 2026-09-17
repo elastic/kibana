@@ -105,4 +105,16 @@ describe('OsRow', () => {
     expect(result.getByTestId('windowsRow-separator')).toBeInTheDocument();
     expect(result.queryByTestId('macRow-separator')).not.toBeInTheDocument();
   });
+
+  it.each([OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX])(
+    'exposes %s controls as a group named after the operating system',
+    (os) => {
+      const render = createAppRootMockRenderer();
+      const result = render.render(
+        <OsRow os={os} primaryControl={<button type="button">{'control'}</button>} />
+      );
+
+      expect(result.getByRole('group', { name: OS_TITLES[os] })).toBeInTheDocument();
+    }
+  );
 });
