@@ -30,9 +30,7 @@ interface UserPickerProps {
   isDisabled?: boolean;
 }
 
-interface UserOption extends EuiComboBoxOptionOption<string> {
-  profile: UserProfileWithAvatar;
-}
+type UserOption = EuiComboBoxOptionOption<UserProfileWithAvatar>;
 
 const SEARCH_DEBOUNCE_MS = 200;
 const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
@@ -51,9 +49,8 @@ const hiddenOptionIndicatorCss = css`
 
 const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
   label: getUserDisplayName(profile.user),
-  value: profile.uid,
+  value: profile,
   key: profile.uid,
-  profile,
 });
 
 export const UserPicker: React.FC<UserPickerProps> = ({
@@ -74,20 +71,19 @@ export const UserPicker: React.FC<UserPickerProps> = ({
     .map(profileToOption);
 
   const onChange = useCallback(
-    (selected: Array<EuiComboBoxOptionOption<string>>) => {
-      const selectedUid = selected[0]?.value;
-      if (!selectedUid) return;
-      const selectedProfile = (selected[0] as UserOption | undefined)?.profile;
-      if (selectedProfile) {
-        onAdd(selectedProfile);
-        setSearchValue('');
-      }
+    (selected: UserOption[]) => {
+      const selectedProfile = selected[0]?.value;
+      if (!selectedProfile) return;
+      onAdd(selectedProfile);
+      setSearchValue('');
     },
     [onAdd]
   );
 
-  const renderOption = useCallback((option: EuiComboBoxOptionOption<string>) => {
-    const { profile } = option as UserOption;
+  const renderOption = useCallback((option: UserOption) => {
+    const profile = option.value;
+    if (!profile) return null;
+
     const displayName = getUserDisplayName(profile.user);
     const secondary = profile.user.email ?? profile.user.username;
     const showSecondary = secondary && secondary !== displayName;
@@ -114,7 +110,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
         position: relative;
       `}
     >
-      <EuiComboBox<string>
+      <EuiComboBox<UserProfileWithAvatar>
         aria-label={accessFlyoutAddPeoplePlaceholder}
         placeholder={accessFlyoutAddPeoplePlaceholder}
         prepend="Add"
