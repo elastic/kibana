@@ -1068,6 +1068,31 @@ describe('#update', () => {
         );
       });
 
+      it('records omitted attributes as removed when mergeAttributes is false', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const existingDoc = getMockGetResponse(registry, { type, id });
+        (existingDoc._source as Record<string, unknown>)[type] = {
+          title: 'Testing',
+          description: 'only survives a merge',
+        };
+        client.get.mockResponseOnce(existingDoc, { statusCode: 200 });
+        client.index.mockResponseImplementation(
+          (params) =>
+            ({
+              body: { _id: params.id, ...mockVersionProps },
+            } as any)
+        );
+
+        await repository.update(type, id, { title: 'Replaced' } as any, { mergeAttributes: false });
+
+        const [call] = securityExtension.emitSavedObjectDiffAuditEvent.mock.calls;
+        expect(call[0].before).toEqual(
+          expect.objectContaining({ title: 'Testing', description: 'only survives a merge' })
+        );
+        expect(call[0].after).toEqual(expect.objectContaining({ title: 'Replaced' }));
+        expect(call[0].after).not.toHaveProperty('description');
+      });
+
       it('emits a diff for an upsert that creates the object', async () => {
         securityExtension.savedObjectDiffEnabled = true;
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));

@@ -12,6 +12,7 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { PluginInitializerContextMock } from '@kbn/core/server/mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -158,6 +159,48 @@ describe('Security Plugin', () => {
         savedObjectDiffTypesToInclude: [],
         savedObjectDiffFieldSizeLimit: 49152,
       });
+    });
+  });
+
+  describe('saved object diff start-time validation', () => {
+    it('warns when typesToInclude lists saved object types that are not registered', async () => {
+      const initializerContext = coreMock.createPluginInitializerContext(
+        ConfigSchema.validate(
+          {
+            session: { idleTimeout: 1500 },
+            authc: {
+              providers: ['saml', 'token'],
+              saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
+            },
+            encryptionKey: 'z'.repeat(32),
+            audit: {
+              enabled: true,
+              savedObjectDiff: { enabled: true, typesToInclude: ['dashboard', 'not-a-type'] },
+            },
+          },
+          { dist: true }
+        )
+      );
+      const securityPlugin = new SecurityPlugin(initializerContext);
+      mockCoreSetup.http.getServerInfo.mockReturnValue({
+        hostname: 'localhost',
+        name: 'kibana',
+        port: 80,
+        protocol: 'https',
+      });
+      await securityPlugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      const typeRegistry = typeRegistryMock.create();
+      typeRegistry.getType.mockImplementation((type) =>
+        type === 'dashboard' ? ({ name: 'dashboard' } as any) : undefined
+      );
+      mockCoreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
+
+      securityPlugin.start(mockCoreStart, mockStartDependencies);
+
+      const warnLogs = loggingSystemMock.collect(initializerContext.logger).warn;
+      expect(warnLogs).toContainEqual([expect.stringContaining('not-a-type')]);
+      expect(warnLogs).not.toContainEqual([expect.stringContaining('dashboard,')]);
     });
   });
 

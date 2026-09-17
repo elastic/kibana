@@ -920,6 +920,34 @@ describe('#bulkUpdate', () => {
           })
         );
       });
+
+      it('records omitted attributes as removed when mergeAttributes is false', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const replaceObj: SavedObjectsBulkUpdateObject = {
+          type: 'index-pattern',
+          id: 'replace-test',
+          attributes: { title: 'Replaced' },
+          mergeAttributes: false,
+        };
+        const mgetResponse = getMockMgetResponse(registry, [replaceObj]);
+        (mgetResponse.docs[0] as any)._source['index-pattern'] = {
+          title: 'Testing',
+          description: 'only survives a merge',
+        };
+        client.mget.mockResponseOnce(mgetResponse);
+        client.bulk.mockResponseOnce(
+          getMockBulkUpdateResponse(registry, [replaceObj]) as estypes.BulkResponse
+        );
+
+        await repository.bulkUpdate([replaceObj]);
+
+        const [call] = securityExtension.emitSavedObjectDiffAuditEvent.mock.calls;
+        expect(call[0].before).toEqual(
+          expect.objectContaining({ title: 'Testing', description: 'only survives a merge' })
+        );
+        expect(call[0].after).toEqual(expect.objectContaining({ title: 'Replaced' }));
+        expect(call[0].after).not.toHaveProperty('description');
+      });
     });
 
     describe('security', () => {

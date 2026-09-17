@@ -890,6 +890,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     before: Record<string, unknown>;
     after: Record<string, unknown>;
     attributesToRedact?: string[];
+    encryptionUnavailable?: boolean;
   }): void {
     // Only emit when the feature is enabled. The caller also gates on
     // `savedObjectDiffEnabled`, but checking here keeps the public method
@@ -910,7 +911,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     // `before`/`after` are the object's attributes (not the full SO), so there
     // are no system-managed root fields to filter out here.
     let savedObjectDiff: ExtendedJsonPatch | undefined;
-    if (this.shouldComputeSavedObjectDiff(type)) {
+    if (this.shouldComputeSavedObjectDiff(type) && params.encryptionUnavailable) {
+      // A client without the encryption extension may carry raw encrypted attributes that
+      // cannot be redacted, so the event is emitted without a diff rather than risk logging them.
+      this.logger?.warn(
+        `Skipping the saved object diff for the ${params.action} audit event of ${type} [id=${id}]: the saved objects client has no encryption extension, so encrypted attributes could not be redacted.`
+      );
+    } else if (this.shouldComputeSavedObjectDiff(type)) {
       try {
         savedObjectDiff = computeJsonPatch({
           a: params.before,

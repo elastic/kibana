@@ -1171,6 +1171,51 @@ describe('#bulkCreate', () => {
         );
       });
 
+      it('pairs before-state with the right object when single- and multi-namespace overwrites are mixed', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const multiObj = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
+        // Multi-namespace before-state comes from the preflight read...
+        mockPreflightCheckForCreate.mockResolvedValueOnce([
+          {
+            type: multiObj.type,
+            id: multiObj.id,
+            existingDocument: {
+              _id: multiObj.id,
+              _source: {
+                type: multiObj.type,
+                namespaces: ['default'],
+                [multiObj.type]: { title: 'multi-old' },
+              },
+            },
+          },
+        ]);
+        // ...single-namespace before-state from the dedicated mget (title 'Testing').
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1]));
+
+        await bulkCreateSuccess(client, repository, [obj1, multiObj], { overwrite: true });
+
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.mget).toHaveBeenCalledWith(
+          expect.objectContaining({
+            docs: [expect.objectContaining({ _source: [obj1.type] })],
+          }),
+          expect.anything()
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            before: expect.objectContaining({ title: 'Testing' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: multiObj.type, id: multiObj.id }),
+            before: { title: 'multi-old' },
+          })
+        );
+      });
+
       it('emits unknown-outcome events for every object when the bulk request fails', async () => {
         securityExtension.savedObjectDiffEnabled = true;
         client.bulk.mockImplementationOnce(() =>

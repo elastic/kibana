@@ -60,7 +60,24 @@ describe('SavedObjectAuditDiffRecorder', () => {
       before: {},
       after: {},
       attributesToRedact: undefined,
+      encryptionUnavailable: false,
     });
+  });
+
+  it('flags encryptionUnavailable when constructed without an encryption extension', () => {
+    setup();
+    const recorder = new SavedObjectAuditDiffRecorder({
+      action: 'saved_object_update',
+      securityExtension,
+      encryptionExtension: undefined,
+      logger,
+    });
+    recorder.track({ type: 'connector', id: '1' }).setAfter({ secrets: 'raw' });
+    recorder.flush();
+
+    expect(emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ encryptionUnavailable: true, attributesToRedact: undefined })
+    );
   });
 
   it('emits a success event with the recorded before/after attributes', () => {

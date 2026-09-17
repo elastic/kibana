@@ -148,6 +148,8 @@ export class SavedObjectAuditDiffRecorder {
           before,
           after,
           attributesToRedact: encryptedAttributes ? [...encryptedAttributes] : undefined,
+          // Without the encryption extension nothing can be redacted, so no diff is emitted.
+          encryptionUnavailable: this.encryptionExtension === undefined,
         });
       } catch (error) {
         // Use String(error) rather than error.message, which would throw if a

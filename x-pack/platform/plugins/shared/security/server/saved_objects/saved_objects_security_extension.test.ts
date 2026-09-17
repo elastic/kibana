@@ -7596,6 +7596,26 @@ describe('#emitSavedObjectDiffAuditEvent redaction (attributesToRedact)', () => 
     });
   });
 
+  it('emits the event without a diff and warns when the encryption extension is unavailable', () => {
+    const { securityExtension, auditLogger, logger } = setupForEmit();
+
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'connector', id: '1' },
+      outcome: 'success',
+      before: { secrets: 'cipher-old' },
+      after: { secrets: 'cipher-new' },
+      encryptionUnavailable: true,
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    const logged = auditLogger.log.mock.calls[0][0] as any;
+    expect(logged.event.outcome).toBe('success');
+    expect(logged.kibana.diff).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no encryption extension'));
+    expect(JSON.stringify(logged)).not.toContain('cipher');
+  });
+
   it('falls back to the tracked name when no attributes were recorded', () => {
     const { securityExtension, auditLogger } = setupForEmit(true, {
       includeSavedObjectNames: true,

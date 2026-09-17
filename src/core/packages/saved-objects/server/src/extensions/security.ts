@@ -627,6 +627,8 @@ export interface ISavedObjectsSecurityExtension {
     before: Record<string, unknown>;
     after: Record<string, unknown>;
     attributesToRedact?: string[];
+    /** True when the repository has no encryption extension; the event is emitted without a diff. */
+    encryptionUnavailable?: boolean;
   }) => void;
 
   /**
