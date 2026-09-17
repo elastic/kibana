@@ -25,6 +25,11 @@ export {
 export { INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ } from './src/playwright/constants/take_action';
 export { FULL_KIBANA_SECURITY_ROLE } from './src/playwright/constants/roles';
 export { ES as SECURITY_ARCHIVES } from './src/playwright/constants/archives';
+export {
+  ELASTIC_INTERNAL_ORIGIN_HEADER,
+  PUBLIC_API_HEADERS,
+  INTERNAL_API_HEADERS,
+} from './src/playwright/constants/api_headers';
 
 // Security-specific test enums
 export { AddExceptionButtonType } from './src/playwright/fixtures/test/page_objects';
@@ -51,6 +56,9 @@ export * from '@kbn/scout/src/playwright/eui_components';
 
 // re-exported CLI tools from @kbn/scout
 export { cli } from '@kbn/scout';
+
+// re-exported config-set constants from @kbn/scout
+export { ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from '@kbn/scout';
 
 // TYPE EXPORTS
 
