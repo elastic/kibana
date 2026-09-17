@@ -218,9 +218,7 @@ apiTest.describe(
     apiTest('returns 400 when id is supplied on an event (unknown key)', async ({ asAdmin }) => {
       const res = await asAdmin.post(ADD_EVENTS_PATH(conversationId), {
         body: {
-          events: [
-            { type: TEXT_NOTE_EVENT_TYPE, data: { text: 'hi' }, id: 'caller-supplied-id' },
-          ],
+          events: [{ type: TEXT_NOTE_EVENT_TYPE, data: { text: 'hi' }, id: 'caller-supplied-id' }],
         },
         headers: ADD_EVENTS_HEADERS,
         responseType: 'json',
