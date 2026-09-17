@@ -131,6 +131,10 @@ async function preprocessAlertEvent(
   spaceId: string,
   logger: Logger
 ): Promise<Record<string, unknown>> {
+  if (!event.querySelection && (!event.alertIds || event.alertIds.length === 0)) {
+    return inputs;
+  }
+
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
   const ruleTypeRegistryMap = (await context.alerting).listTypes();
 
@@ -153,7 +157,7 @@ async function preprocessAlertEvent(
     logger.debug(`Preprocessing ${event.alertIds.length} alert(s) for workflow execution`);
     rawHits = await fetchDocumentsByIds(event.alertIds, esClient, logger);
   } else {
-    // Nothing to expand (e.g. empty explicit selection) — leave inputs untouched.
+    // Nothing to expand (e.g. a malformed selection) — leave inputs untouched.
     return inputs;
   }
 
