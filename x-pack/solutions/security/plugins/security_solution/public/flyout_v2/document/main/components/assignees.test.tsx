@@ -201,6 +201,109 @@ describe('<Assignees />', () => {
     expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
   });
 
+  describe('sync from the alert doc after an optimistic Apply', () => {
+    // Regression test for the flaky Scout spec in
+    // x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/document_flyout.spec.ts
+    // (#285324). On Apply, `onSuccess` sets `assignedUserIds` optimistically and calls
+    // `onAlertUpdated`, which triggers a doc refetch. On serverless the alerts index refresh
+    // lag makes the first refetch return a doc that does not yet include the newly-assigned
+    // user, so keying the sync effect on `initialAssignedUserIds` (a fresh array reference
+    // every refetch) clobbered the optimistic avatar until a later refetch caught up. The
+    // component now only re-syncs when the *content* of the id list actually changes.
+
+    const setupWithMockUserProfiles = () => {
+      (useBulkGetUserProfiles as jest.Mock).mockImplementation(
+        ({ uids }: { uids: Set<string> | undefined }) => ({
+          isLoading: false,
+          data: mockUserProfiles.filter((user) => uids?.has(user.uid)),
+        })
+      );
+    };
+
+    it('preserves the optimistic avatar when a stale refetch returns the pre-Apply assignees', async () => {
+      setupWithMockUserProfiles();
+      const onAlertUpdated = jest.fn();
+
+      const { getByTestId, queryByTestId, rerender } = render(
+        <TestProviders>
+          <Assignees hit={createMockHit([])} onAlertUpdated={onAlertUpdated} />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+      fireEvent.click(getByTestId('mock-assignees-apply-panel'));
+
+      const onSuccess = setAlertAssigneesMock.mock.calls[0][2];
+      act(() => {
+        onSuccess();
+      });
+
+      await waitFor(() => {
+        expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+      });
+
+      // A doc refetch lands *before* the alerts index has refreshed, so it still reports the
+      // pre-Apply assignees — a fresh array reference with the same content. This used to
+      // clobber the optimistic `assignedUserIds` and hide the avatar.
+      rerender(
+        <TestProviders>
+          <Assignees hit={createMockHit([])} onAlertUpdated={onAlertUpdated} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+    });
+
+    it('picks up an external assignee change on the next refetch', async () => {
+      setupWithMockUserProfiles();
+
+      const { getByTestId, queryByTestId, rerender } = render(
+        <TestProviders>
+          <Assignees hit={createMockHit(['user-id-1'])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+
+      // Somebody else assigns `user-id-2` to the same alert; a refetch brings the fresh doc.
+      rerender(
+        <TestProviders>
+          <Assignees
+            hit={createMockHit(['user-id-1', 'user-id-2'])}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user2'))).toBeInTheDocument();
+      });
+      expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+    });
+
+    it('reflects an external removal on the next refetch', async () => {
+      setupWithMockUserProfiles();
+
+      const { getByTestId, queryByTestId, rerender } = render(
+        <TestProviders>
+          <Assignees hit={createMockHit(['user-id-1'])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+
+      rerender(
+        <TestProviders>
+          <Assignees hit={createMockHit([])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).not.toBeInTheDocument();
+      });
+    });
+  });
+
   it('disables the add-assignees button for a remote alert', () => {
     const { getByTestId } = renderAssignees({ hit: remoteAlertHit });
 
