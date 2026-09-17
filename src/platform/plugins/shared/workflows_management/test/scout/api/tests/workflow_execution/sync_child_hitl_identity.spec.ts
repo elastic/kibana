@@ -106,13 +106,15 @@ apiTest.describe(
   { tag: tags.deploymentAgnostic },
   () => {
     let workflowsApi: WorkflowsApiService;
+    // This suite runs in the shared default space, so teardown must only remove what it created.
+    const createdWorkflowIds: string[] = [];
 
     apiTest.beforeAll(async ({ kbnClient }) => {
       workflowsApi = new WorkflowsApiService('default', kbnClient);
     });
 
     apiTest.afterAll(async () => {
-      await workflowsApi.deleteAll();
+      await workflowsApi.bulkDelete(createdWorkflowIds);
     });
 
     apiTest(
@@ -149,9 +151,11 @@ apiTest.describe(
         expect(approverUsername).not.toBe(runnerUsername);
 
         const child = await workflowsApi.create(getChildYaml(`Scout HITL child ${Date.now()}`));
+        createdWorkflowIds.push(child.id);
         const parent = await workflowsApi.create(
           getParentYaml(`Scout HITL parent ${Date.now()}`, child.id)
         );
+        createdWorkflowIds.push(parent.id);
 
         const { workflowExecutionId: parentExecutionId } = await workflowsApi.run(parent.id, {});
 

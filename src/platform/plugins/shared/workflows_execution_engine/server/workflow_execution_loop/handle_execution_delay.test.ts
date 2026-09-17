@@ -18,6 +18,7 @@ import {
   handleExecutionDelay,
 } from './handle_execution_delay';
 import type { WorkflowExecutionLoopParams } from './types';
+import { DEFAULT_WORKFLOW_TIMEOUT } from '../default_workflow_settings';
 import {
   createMockWorkflowExecutionCursor,
   type MockWorkflowExecutionCursorOptions,
@@ -310,6 +311,40 @@ describe('handleExecutionDelay', () => {
       } finally {
         jest.useRealTimers();
       }
+    });
+
+    // Requestless parent wake-up can only ever reach a task that this branch armed. Every
+    // execution compiles with defaultWorkflowSettings, so the default workflow timeout alone must
+    // keep arming it even when the waiting step declares no deadline of its own; otherwise a plain
+    // sync parent would have no task to wake and would be fail-closed instead of resumed.
+    it('should arm the parent wake task from the default workflow timeout alone', async () => {
+      const params = makeParams();
+      (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue(
+        DEFAULT_WORKFLOW_TIMEOUT
+      );
+      (params.workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.RUNNING,
+      });
+
+      const stepRuntime = makeStepRuntime({
+        node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
+        stepExecution: {
+          status: ExecutionStatus.WAITING_FOR_CHILD,
+          state: { executionId: 'child-exec-1' },
+        } as any,
+      });
+
+      await handleExecutionDelay(params, stepRuntime);
+
+      expect(
+        params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
+      ).toHaveBeenCalledTimes(1);
+      // Reaching the handshake proves the task was armed: it only runs when scheduling returned.
+      expect(params.workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+        'child-exec-1',
+        'default'
+      );
     });
 
     it('should immediately wake the parent when the sync child is already terminal', async () => {
