@@ -375,15 +375,18 @@ export const AlertEpisodeDetailsFlyout = ({
                 data-test-subj="alertingV2EpisodeFlyoutAccordionInvestigation"
               >
                 <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                  <EuiPanel hasBorder paddingSize="m">
-                    <AlertEpisodeRunbookSection
-                      episodeId={episodeId}
-                      services={services}
-                      compressed
-                      showTitle
-                      onShowFullGuide={() => setIsRunbookOpen(true)}
-                    />
-                  </EuiPanel>
+                  {/* No rule means no runbook, so the panel goes too. */}
+                  {showRuleDependentTabs && (
+                    <EuiPanel hasBorder paddingSize="m">
+                      <AlertEpisodeRunbookSection
+                        episodeId={episodeId}
+                        services={services}
+                        compressed
+                        showTitle
+                        onShowFullGuide={() => setIsRunbookOpen(true)}
+                      />
+                    </EuiPanel>
+                  )}
                   <EuiPanel hasBorder paddingSize="m">
                     <AlertEpisodesRelatedSection
                       episodeId={episodeId}

@@ -86,8 +86,23 @@ export const RELATED_OTHER_GROUPS_EMPTY = i18n.translate(
   }
 );
 
-export const getRelatedEpisodeMissingRuleTitle = (episodeId: string) =>
-  i18n.translate('xpack.alertingV2EpisodesUi.details.related.missingRuleEpisodeTitle', {
-    defaultMessage: 'Episode ID: {episodeId}',
+/** Stands in for the rule name on a related episode whose rule is gone. */
+export const RELATED_EPISODE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.episodeLabel',
+  {
+    defaultMessage: 'Episode',
+  }
+);
+
+export const getCopyEpisodeIdTooltip = (episodeId: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.related.copyEpisodeIdTooltip', {
+    defaultMessage: 'Full episode ID: {episodeId}',
     values: { episodeId },
   });
+
+export const EPISODE_ID_COPIED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.episodeIdCopied',
+  {
+    defaultMessage: 'Episode ID copied',
+  }
+);

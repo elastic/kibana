@@ -8,6 +8,11 @@
 import React from 'react';
 import {
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiToolTip,
   EuiPanel,
   EuiSkeletonText,
   EuiSkeletonTitle,
@@ -23,6 +28,9 @@ import {
 } from '../../types/rule_state';
 import { AlertEpisodeRuleOverviewPanel } from './rule_overview_panel';
 import type { AlertEpisodeDetailsServices } from './types';
+import { CopyableShortId } from '../copyable_short_id';
+import { getPanelTextSize } from './panel_title_sizes';
+import * as cellI18n from '../translations';
 import * as i18n from './translations';
 
 export interface AlertEpisodeRuleOverviewPanelSectionProps {
@@ -80,8 +88,39 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     );
   }
 
+  // The rule is gone or not visible to us. Same treatment as the episodes table rule cell,
+  // so the id is still there to copy.
   if (!isRuleLoaded(ruleState)) {
-    return null;
+    return (
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeRuleUnavailable">
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={cellI18n.RULE_CELL_MISSING_RULE_TOOLTIP}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} tabIndex={0}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="linkSlash" size="s" color="subdued" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size={getPanelTextSize(compressed)} color="subdued">
+                    {cellI18n.RULE_CELL_MISSING_RULE_LABEL}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiToolTip>
+          </EuiFlexItem>
+          {ruleId && (
+            <EuiFlexItem grow={false}>
+              <CopyableShortId
+                id={ruleId}
+                copyTooltip={cellI18n.getRuleCellCopyRuleIdTooltip(ruleId)}
+                copiedTooltip={cellI18n.RULE_CELL_RULE_ID_COPIED}
+                data-test-subj="alertingV2EpisodeRuleUnavailableId"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
   }
 
   const resolvedRuleId = getRuleIdFromRuleState(ruleState);
