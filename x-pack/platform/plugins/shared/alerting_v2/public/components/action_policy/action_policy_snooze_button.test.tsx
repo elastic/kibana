@@ -19,7 +19,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   enabled: true,
   matcher: null,
   group_by: null,
-  tags: null,
   grouping_mode: null,
   throttle: null,
   snoozed_until: null,
