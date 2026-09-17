@@ -158,13 +158,32 @@ describe('ConversationsPage details flyout URL state', () => {
     expect(card).not.toHaveAttribute('aria-current');
   });
 
-  it('does not mark a card as current for a flyout opened by deep link', async () => {
+  it('marks the card as current on a fresh mount, so Back out of the chat keeps context', async () => {
+    // Opening a chat unmounts the page, so this is the state it comes back to: the URL
+    // still names the conversation. Deriving the highlight from it is what survives.
     renderPage('/?selectedConversationId=inv-1&show=overview');
     await screen.findByTestId('investigationDetailsFlyout');
 
     expect(
       screen.getByRole('button', { name: 'Impossible travel — exec account' })
-    ).not.toHaveAttribute('aria-current');
+    ).toHaveAttribute('aria-current', 'true');
+  });
+
+  it('marks every card of the open investigation, not just the clicked one', async () => {
+    const sibling: ProposalItem = { ...proposal, id: 'prop-2', comment: 'Second proposal.' };
+    mockUseProposalsList.mockReturnValue({
+      data: { groups: { investigate: [proposal, sibling] }, total: 2, truncated: false },
+      isLoading: false,
+      error: undefined,
+    });
+
+    renderPage('/?selectedConversationId=inv-1&show=overview');
+    await screen.findByTestId('investigationDetailsFlyout');
+
+    // Both rows belong to the investigation the flyout is showing.
+    const cards = screen.getAllByRole('button', { name: 'Impossible travel — exec account' });
+    expect(cards).toHaveLength(2);
+    cards.forEach((card) => expect(card).toHaveAttribute('aria-current', 'true'));
   });
 
   it('shows the investigation in the flyout rather than repeating the proposal', async () => {

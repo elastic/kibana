@@ -111,15 +111,11 @@ export const ConversationsPage: React.FC = () => {
   }, []);
 
   // Cards are keyed by proposal id, but the flyout addresses an investigation, so the
-  // click has to be translated through the proposal's conversation. The clicked id is
-  // kept locally because the URL carries the conversation, which no card matches.
-  const [clickedCardId, setClickedCardId] = useState<string | undefined>(undefined);
-
+  // click has to be translated through the proposal's conversation.
   const onClickCard = useCallback(
     (proposalId: Investigation['id']) => {
       const conversationId = proposalsById.get(proposalId)?.conversationId;
       if (conversationId) {
-        setClickedCardId(proposalId);
         selectConversation(conversationId);
       }
     },
@@ -187,15 +183,18 @@ export const ConversationsPage: React.FC = () => {
   // Both params are required: an id on its own leaves the flyout closed rather than guessing a tab.
   const flyoutConversationId = selectedConversationId && show ? selectedConversationId : undefined;
 
-  // The highlight belongs to the open flyout, not to the last click. Deriving it means
-  // Close, Back and the not-found dismiss all clear it for free; a stored id would keep a
-  // card marked `aria-current` with nothing open.
-  const selectedCardId = useMemo(
+  // Which cards are current is navigation state, so it comes from the URL rather than from
+  // remembering the click: opening a chat unmounts this page, and a remembered id would be
+  // gone on Back while the flyout reopened from the URL. Deriving also means Close and the
+  // not-found dismiss clear the highlight for free.
+  const selectedCardIds = useMemo(
     () =>
-      clickedCardId && proposalsById.get(clickedCardId)?.conversationId === flyoutConversationId
-        ? clickedCardId
-        : undefined,
-    [clickedCardId, flyoutConversationId, proposalsById]
+      flyoutConversationId
+        ? [...proposalsById.values()]
+            .filter(({ conversationId }) => conversationId === flyoutConversationId)
+            .map(({ id }) => id)
+        : [],
+    [flyoutConversationId, proposalsById]
   );
 
   // The flyout shows the investigation the proposal belongs to, not the proposal again: a
@@ -367,7 +366,7 @@ export const ConversationsPage: React.FC = () => {
                   onClickAction={onClickAction}
                   onClickCard={onClickCard}
                   onOpenChat={openChatForProposal}
-                  selectedId={selectedCardId}
+                  selectedIds={selectedCardIds}
                 />
               </EuiFlexItem>
             ))
