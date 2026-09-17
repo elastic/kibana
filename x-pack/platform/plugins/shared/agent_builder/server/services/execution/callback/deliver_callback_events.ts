@@ -18,7 +18,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import {
   isExecutionStartedEvent,
-  isExecutionTerminatedEvent,
+  isExecutionTerminalEvent,
   isMessageChunkEvent,
   isRoundCompleteEvent,
   type ChatEvent,
@@ -96,7 +96,10 @@ export const deliverCallbackEvents = ({
           (event) =>
             !isMessageChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
-            !isExecutionTerminatedEvent(event)
+            // Terminal timeline events (terminated / failed / aborted) are never delivered as
+            // events: the completion payload and the failure callback are the terminal
+            // representations a callback consumer gets.
+            !isExecutionTerminalEvent(event)
         ),
         concatMap((event) => {
           // Hold the terminal event back until the stream completes (persistence succeeded).
