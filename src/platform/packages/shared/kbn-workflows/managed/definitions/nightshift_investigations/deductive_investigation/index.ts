@@ -12,6 +12,9 @@ import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
 
+/** @deprecated Use {@link NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID}. */
+export const DEDUCTIVE_INVESTIGATION_WORKFLOW_ID = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
+
 export const DEDUCTIVE_INVESTIGATION_WORKFLOW = {
   id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',

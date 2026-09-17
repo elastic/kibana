@@ -115,7 +115,10 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
 export { NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW_ID } from './nightshift_investigations/alert_trigger';
-export { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/deductive_investigation';
+export {
+  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+} from './nightshift_investigations/deductive_investigation';
 export { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/cortex_hydrate';
 export { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/cortex_optimize';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';

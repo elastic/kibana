@@ -8,7 +8,11 @@
  */
 
 import { parse } from 'yaml';
-import { DEDUCTIVE_INVESTIGATION_WORKFLOW } from '.';
+import {
+  DEDUCTIVE_INVESTIGATION_WORKFLOW,
+  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+} from '.';
 
 interface WorkflowStep {
   name: string;
@@ -47,6 +51,7 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 describe('deductive investigation workflow', () => {
   it('is a lean persist-and-agent run without sig-events write-back', () => {
     expect(DEDUCTIVE_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
+    expect(DEDUCTIVE_INVESTIGATION_WORKFLOW_ID).toBe(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID);
     expect(DEDUCTIVE_INVESTIGATION_WORKFLOW.version).toBe(1);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([

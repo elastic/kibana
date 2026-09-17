@@ -54,10 +54,7 @@ const toAlertStartContext = (
   }
 
   return {
-    alerts: context.alerts.flatMap((alert) => {
-      const snapshot = snapshotFromAlertDocument(alert);
-      return snapshot ? [snapshot] : [];
-    }),
+    alerts: context.alerts.map((alert) => snapshotFromAlertDocument(alert) ?? alert),
   };
 };
 
