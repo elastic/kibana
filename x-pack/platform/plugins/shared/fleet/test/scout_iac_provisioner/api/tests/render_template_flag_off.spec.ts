@@ -42,11 +42,7 @@ apiTest.describe(
 
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-          body: {
-            provider: 'aws',
-            flow: 'cloud_connector',
-            integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
-          },
+          body: testData.VALID_RENDER_BODY,
           responseType: 'json',
         });
 

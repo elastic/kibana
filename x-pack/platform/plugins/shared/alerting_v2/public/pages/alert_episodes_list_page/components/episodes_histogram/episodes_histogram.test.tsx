@@ -69,6 +69,7 @@ mockUseEpisodesHistogramQuery.mockReturnValue({
   error: undefined,
   isCapHit: false,
   refetch: jest.fn(),
+  sourceErrors: [],
 });
 mockUseUnifiedHistogram.mockReturnValue({
   isInitialized: true,
@@ -86,6 +87,7 @@ afterEach(() => {
     error: undefined,
     isCapHit: false,
     refetch: jest.fn(),
+    sourceErrors: [],
   });
   mockUseUnifiedHistogram.mockReturnValue({
     isInitialized: true,
@@ -103,6 +105,7 @@ describe('EpisodesHistogram', () => {
       error: undefined,
       isCapHit: true,
       refetch: jest.fn(),
+      sourceErrors: [],
     });
     render(<EpisodesHistogram {...defaultProps} />);
     expect(screen.getByText(/Results may be incomplete/)).toBeInTheDocument();
@@ -120,8 +123,10 @@ describe('EpisodesHistogram', () => {
       error: new Error('ES|QL failed'),
       isCapHit: false,
       refetch: jest.fn(),
+      sourceErrors: [],
     });
     render(<EpisodesHistogram {...defaultProps} />);
+    expect(screen.getByTestId('episodesHistogramError')).toBeInTheDocument();
     expect(screen.getByText(/Failed to load histogram data/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument();
   });

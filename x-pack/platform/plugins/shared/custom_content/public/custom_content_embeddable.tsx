@@ -40,6 +40,7 @@ import {
   combineLatest,
   distinctUntilChanged,
   EMPTY,
+  finalize,
   from,
   map,
   merge,
@@ -124,6 +125,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
+    const isGenerating$ = new BehaviorSubject<boolean>(false);
+    const chatGeneratingCallbacks = {
+      onSubmit: () => isGenerating$.next(true),
+      onClose: () => {
+        if (isGenerating$.getValue()) isGenerating$.next(false);
+      },
+    };
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
@@ -237,6 +245,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               closeFlyout();
               agentBuilder.openChat({
                 newConversation: true,
+                ...chatGeneratingCallbacks,
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
@@ -370,6 +379,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlVariables,
           previewHtml,
           timeRange,
+          isGenerating,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
@@ -380,7 +390,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           filters$,
           esqlVariables$,
           previewHtml$,
-          effectiveTimeRange$
+          effectiveTimeRange$,
+          isGenerating$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
 
@@ -412,12 +423,26 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
           const sub = agentBuilder.events.ui.activeConversation$
             .pipe(
+              distinctUntilChanged((a, b) => a?.id === b?.id),
               switchMap((conversation) =>
-                conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
+                conversation?.id
+                  ? agentBuilder.events.getChatEvents$(conversation.id).pipe(
+                      catchError(() => {
+                        isGenerating$.next(false);
+                        return EMPTY;
+                      }),
+                      finalize(() => {
+                        if (isGenerating$.getValue()) isGenerating$.next(false);
+                      })
+                    )
+                  : EMPTY
               )
             )
             .subscribe((event) => {
               if (!isRoundCompleteEvent(event)) return;
+              if (isGenerating$.getValue()) {
+                isGenerating$.next(false);
+              }
 
               // A round can touch several attachments — the dashboard's, and one per custom content
               // panel. Scan every agent-authored ref instead of only the first, or an unrelated
@@ -472,6 +497,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
             newConversation: true,
+            ...chatGeneratingCallbacks,
             attachments: [
               buildCustomContentContextAttachment({
                 template: '',
@@ -505,6 +531,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               esqlVariables={esqlVariables}
               previewHtml={previewHtml}
               isAiAvailable={Boolean(agentBuilder)}
+              isGenerating={isGenerating}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

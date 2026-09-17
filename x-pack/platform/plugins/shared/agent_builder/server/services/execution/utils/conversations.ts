@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { forkJoin, switchMap, from, firstValueFrom, map } from 'rxjs';
+import { switchMap, from, firstValueFrom } from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
@@ -16,8 +16,6 @@ import type {
   ConversationRoundOrigin,
   ConverseInput,
   RoundCompleteEvent,
-  ConversationAction,
-  ConversationRound,
   ExecutionTerminatedEvent,
   TimelineEvent,
   UserIdAndName,
@@ -34,12 +32,12 @@ import {
 import type { ConversationClient } from '../../conversation';
 import {
   roundToEvents,
-  roundTerminatedEvent,
   userMessageEvent,
   promptResponseEvent,
   resumeExecutionToEvents,
   executionTerminatedEventId,
   nextResumeIndex,
+  resumeExecutionId,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -98,160 +96,6 @@ const emitPersistedTimelineThenLifecycle = ({
   if (terminated) events.push(terminated);
   events.push(lifecycle);
   return from<ChatEvent[]>(events);
-};
-
-const buildRoundsPathTerminatedFallback = (
-  round: ConversationRound,
-  conversation: Conversation
-): ExecutionTerminatedEvent | undefined => {
-  const terminated = roundTerminatedEvent(round, conversation);
-  return terminated && terminated.type === TimelineEventType.executionTerminated
-    ? (terminated as ExecutionTerminatedEvent)
-    : undefined;
-};
-
-/**
- * Persist a new conversation and emit the corresponding event
- */
-export const createConversation$ = ({
-  conversation,
-  conversationClient,
-  title$,
-  roundCompletedEvents$,
-}: {
-  conversation: Pick<
-    Conversation,
-    'id' | 'agent_id' | 'access_control' | 'origin' | 'user' | 'parent_conversation' | 'read_only'
-  >;
-  conversationClient: ConversationClient;
-  title$: Observable<string>;
-  roundCompletedEvents$: Observable<RoundCompleteEvent>;
-}): Observable<ChatEvent> => {
-  return forkJoin({
-    title: title$,
-    roundCompletedEvent: roundCompletedEvents$,
-  }).pipe(
-    switchMap(async ({ title, roundCompletedEvent }) => {
-      // Persistent sub-agent creations: link to the parent and snapshot the parent's user
-      const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
-      const hasResolvedParentUser =
-        Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
-
-      const round = roundCompletedEvent.data.round;
-      const created = await conversationClient.create({
-        id: conversation.id,
-        title,
-        agent_id: conversation.agent_id,
-        access_control: conversation.access_control,
-        origin: conversation.origin,
-        read_only: conversation.read_only,
-        state: roundCompletedEvent.data.conversation_state,
-        status: round.status,
-        rounds: [round],
-        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
-        ...(conversation.parent_conversation
-          ? { parent_conversation: conversation.parent_conversation }
-          : {}),
-        ...(roundCompletedEvent.data.attachments
-          ? { attachments: roundCompletedEvent.data.attachments }
-          : {}),
-        ...(roundCompletedEvent.data.workspace_id
-          ? { workspace_id: roundCompletedEvent.data.workspace_id }
-          : {}),
-      });
-
-      return { created, round };
-    }),
-    switchMap(({ created, round }) => {
-      const terminated = persistedTimelineEvent<ExecutionTerminatedEvent>({
-        persistedConversation: created,
-        eventId: executionTerminatedEventId(round.id, 0),
-        expectedType: TimelineEventType.executionTerminated,
-        fallback: buildRoundsPathTerminatedFallback(round, created),
-      });
-      return emitPersistedTimelineThenLifecycle({
-        terminated,
-        lifecycle: createConversationCreatedEvent(created),
-      });
-    })
-  );
-};
-
-/**
- * Update an existing conversation and emit the corresponding event.
- * When `title$` is provided, the generated title is persisted alongside the round upsert.
- */
-export const updateConversation$ = ({
-  conversationClient,
-  conversation,
-  roundCompletedEvents$,
-  action,
-  title$,
-}: {
-  conversation: Conversation;
-  roundCompletedEvents$: Observable<RoundCompleteEvent>;
-  conversationClient: ConversationClient;
-  action?: ConversationAction;
-  title$?: Observable<string>;
-}): Observable<ChatEvent> => {
-  return roundCompletedEvents$.pipe(
-    switchMap((roundCompletedEvent) => {
-      const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
-
-      // A resumed round keeps the pending round's id, so it is matched by id.
-      // Regenerate mints a new id, so it has to name the round it supersedes —
-      // an identity rather than stale data, so the snapshot is safe to read here.
-      const replacesRoundId =
-        action === 'regenerate' && !resumed
-          ? conversation.rounds[conversation.rounds.length - 1]?.id
-          : undefined;
-
-      const roundUpserted$ = conversationClient.upsertRound(
-        {
-          id: conversation.id,
-          round,
-          replacesRoundId,
-          state: conversation_state,
-          ...(roundCompletedEvent.data.attachments
-            ? {
-                attachments: {
-                  snapshot: conversation.attachments ?? [],
-                  produced: roundCompletedEvent.data.attachments,
-                },
-              }
-            : {}),
-          workspaceId: roundCompletedEvent.data.workspace_id,
-        },
-        { access: 'converse' }
-      );
-
-      const persisted$: Observable<Conversation> = title$
-        ? forkJoin({ updated: from(roundUpserted$), title: title$ }).pipe(
-            switchMap(({ title }) =>
-              // system-driven write of generated title, not a user-initiated rename,
-              // so converse access is the right check.
-              from(
-                conversationClient.update({ id: conversation.id, title }, { access: 'converse' })
-              )
-            )
-          )
-        : from(roundUpserted$);
-
-      return persisted$.pipe(map((persisted) => ({ persisted, round })));
-    }),
-    switchMap(({ persisted, round }) => {
-      const terminated = persistedTimelineEvent<ExecutionTerminatedEvent>({
-        persistedConversation: persisted,
-        eventId: executionTerminatedEventId(round.id, 0),
-        expectedType: TimelineEventType.executionTerminated,
-        fallback: buildRoundsPathTerminatedFallback(round, persisted),
-      });
-      return emitPersistedTimelineThenLifecycle({
-        terminated,
-        lifecycle: createConversationUpdatedEvent(persisted),
-      });
-    })
-  );
 };
 
 /**
@@ -344,7 +188,10 @@ export const appendRoundTerminated$ = ({
             workspace_id: workspaceId,
           } = roundCompletedEvent.data;
 
-          const events: TimelineEvent[] = roundToEvents(round, conversation);
+          const events: TimelineEvent[] = [
+            ...roundToEvents(round, conversation),
+            ...(roundCompletedEvent.data.attachment_events ?? []),
+          ];
 
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
 
@@ -459,12 +306,18 @@ export const appendResumeExecution$ = ({
             conversation,
           });
 
+          // Attachment events were stamped with the initial execution id at round-complete time;
+          // for a resume they belong to exec_k.
+          const attachmentEvents = (roundCompletedEvent.data.attachment_events ?? []).map(
+            (event) => ({ ...event, execution_id: resumeExecutionId(round.id, resumeIndex) })
+          );
+
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
 
           const persisted = await conversationClient.appendEvents(
             {
               id: conversation.id,
-              events: [promptResponse, ...executionEvents],
+              events: [promptResponse, ...executionEvents, ...attachmentEvents],
               status: round.status,
               ...(resolvedTitle !== undefined ? { title: resolvedTitle } : {}),
               ...(conversationState ? { state: conversationState } : {}),
