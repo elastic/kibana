@@ -161,7 +161,7 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
         configSchema: stepDefinition.configSchema,
         deprecation: stepDefinition.deprecation,
         summary: stepDefinition.label,
-        description: stepDefinition.description ?? null,
+        description: stepDefinition.description,
         documentation: stepDefinition.documentation?.url,
         examples: stepDefinition.documentation?.examples
           ? { snippet: stepDefinition.documentation.examples.join('\n') }
@@ -169,7 +169,7 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
       };
 
       // Editor handlers are the one field the server definition does not carry.
-      if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
+      if ('editorHandlers' in stepDefinition) {
         return { ...definition, editorHandlers: stepDefinition.editorHandlers };
       }
       return definition;

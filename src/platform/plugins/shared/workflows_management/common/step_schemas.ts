@@ -63,18 +63,6 @@ class StepSchemas {
   }
 
   /**
-   * Whether a step definition came from the public registry. Narrows on
-   * `editorHandlers`, which only the public definition declares; `label` and the
-   * other descriptive fields are required on BaseStepDefinition and so are
-   * present on both surfaces.
-   */
-  public isPublicStepDefinition(
-    stepDefinition: ServerStepDefinition | PublicStepDefinition
-  ): stepDefinition is PublicStepDefinition {
-    return 'editorHandlers' in stepDefinition;
-  }
-
-  /**
    * Output schema of a registered step, including the editor-only dynamic schema handler.
    */
   public getStepOutput(stepTypeId: string): RegisteredStepOutput | undefined {
@@ -82,9 +70,8 @@ class StepSchemas {
     if (!stepDefinition) {
       return undefined;
     }
-    const dynamicSchema = this.isPublicStepDefinition(stepDefinition)
-      ? stepDefinition.editorHandlers?.dynamicSchema
-      : undefined;
+    const dynamicSchema =
+      'editorHandlers' in stepDefinition ? stepDefinition.editorHandlers?.dynamicSchema : undefined;
     return {
       outputSchema: stepDefinition.outputSchema,
       getDynamicOutputSchema: dynamicSchema?.getOutputSchema?.bind(dynamicSchema),
