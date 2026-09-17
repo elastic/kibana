@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { proposalSchema } from '@kbn/agentic-investigations-plugin/common';
 import {
   MOCK_INVESTIGATIONS,
   MOCK_PROPOSALS,
@@ -12,17 +13,19 @@ import {
   WATCHES_SEED,
   WORKERS_SEED,
 } from '../samples';
-import type { Investigation, Proposal, Watch } from '.';
+import type { Investigation, Watch } from '.';
 import {
   GetInvestigationResponse,
   GetWatchResponse,
-  ListInvestigationProposalsResponse,
   ListInvestigationsResponse,
   ListWatchesResponse,
   WatchSkill,
   WatchWorker,
+  RuleTuningWorkerExtras,
+  UpdateWorkerRequestBody,
   Worker,
   WorkerSettings,
+  WorkerSettingsWrite,
 } from '.';
 
 describe('AlertZero schema smoke tests', () => {
@@ -74,6 +77,55 @@ describe('AlertZero schema smoke tests', () => {
     });
   });
 
+  it('rejects unknown top-level settings keys but leaves extras open on the wire', () => {
+    expect(
+      WorkerSettings.safeParse({
+        workerId: 'system-security-dark-continuous-threat-hunt',
+        autonomy: 'manual',
+        unknownField: true,
+      }).success
+    ).toBe(false);
+    expect(WorkerSettingsWrite.safeParse({ analysisWindowDays: 7 }).success).toBe(false);
+
+    // Per-Worker strictness is applied by the complete schema, not the generic wire schema.
+    expect(
+      WorkerSettings.safeParse({
+        workerId: 'system-security-detection-rule-tuning',
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 14 },
+      }).success
+    ).toBe(true);
+    expect(WorkerSettingsWrite.safeParse({ extras: { anything: true } }).success).toBe(true);
+  });
+
+  it('closes the Detection-owned Rule Tuning extras', () => {
+    expect(RuleTuningWorkerExtras.safeParse({}).success).toBe(false);
+    expect(RuleTuningWorkerExtras.safeParse({ analysisWindowDays: 14, extra: 1 }).success).toBe(
+      false
+    );
+    expect(RuleTuningWorkerExtras.safeParse({ analysisWindowDays: 14 }).success).toBe(true);
+  });
+
+  it.each([7.5, 0, 31])('rejects analysisWindowDays %s', (analysisWindowDays) => {
+    expect(RuleTuningWorkerExtras.safeParse({ analysisWindowDays }).success).toBe(false);
+  });
+
+  it('rejects leftover top-level settings fields on the update body', () => {
+    expect(
+      UpdateWorkerRequestBody.safeParse({
+        settingsRevision: 1,
+        autonomyLevel: 'assisted',
+      }).success
+    ).toBe(false);
+    expect(
+      UpdateWorkerRequestBody.safeParse({
+        settingsRevision: 1,
+        settings: { autonomy: 'assisted' },
+      }).success
+    ).toBe(true);
+  });
+
   it('parses seed skills through WatchSkill', () => {
     for (const { lastRunSecondsAgo, ...rest } of SKILLS_SEED) {
       const result = WatchSkill.parse({
@@ -115,15 +167,13 @@ describe('AlertZero schema smoke tests', () => {
     });
   });
 
-  it('parses mock proposals through ListInvestigationProposalsResponse', () => {
-    const result = ListInvestigationProposalsResponse.parse({
-      proposals: MOCK_PROPOSALS,
-      total: MOCK_PROPOSALS.length,
+  it('parses mock proposals through the proposals API schema', () => {
+    // MOCK_PROPOSALS is the shape the proposals API returns, so it is validated against
+    // that schema rather than this package's legacy `Proposal` component.
+    MOCK_PROPOSALS.forEach((proposal) => {
+      expect(() => proposalSchema.parse(proposal)).not.toThrow();
     });
-    expect(result.proposals.length).toBeGreaterThanOrEqual(8);
-    result.proposals.forEach((prop: Proposal) => {
-      expect(prop.template_id).toBe('proposal');
-    });
+    expect(MOCK_PROPOSALS.length).toBeGreaterThanOrEqual(8);
   });
 
   it('parses investigation detail through GetInvestigationResponse', () => {
