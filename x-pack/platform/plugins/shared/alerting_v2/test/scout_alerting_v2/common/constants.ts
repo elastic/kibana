@@ -18,8 +18,6 @@ export const POLL_INTERVAL_MS = 1_000;
 
 export const ACTION_POLICY_PER_PAGE_MAX = 100;
 export const ACTION_POLICY_SEARCH_MAX_LENGTH = 256;
-export const ACTION_POLICY_TAGS_MAX_COUNT = 10;
-export const ACTION_POLICY_TAG_MAX_LENGTH = 128;
 
 export { RULE_TEMPLATE_MAX_PER_PAGE as RULE_TEMPLATE_PER_PAGE_MAX } from '@kbn/alerting-v2-schemas';
 
