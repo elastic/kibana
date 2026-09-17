@@ -24,7 +24,13 @@ export class EngineDescriptorClient {
   constructor(
     private readonly soClient: SavedObjectsClientContract,
     private readonly namespace: string,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    /**
+     * Set to true when backed by an internal repository (createInternalRepository).
+     * Internal repos have no implicit space context so namespace must be passed explicitly on
+     * writes. Scoped clients derive namespace from the space extension and reject explicit overrides.
+     */
+    private readonly internalRepository: boolean = false
   ) {}
 
   async getAll(): Promise<EngineDescriptor[]> {
@@ -92,7 +98,7 @@ export class EngineDescriptorClient {
       {
         refresh: 'wait_for',
         mergeAttributes,
-        namespace: this.namespace,
+        ...(this.internalRepository ? { namespace: this.namespace } : {}),
       }
     );
 

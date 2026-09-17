@@ -117,7 +117,8 @@ async function bootstrapNonPriorityTask({
     const engineDescriptorClient = new EngineDescriptorClient(
       soClient as unknown as SavedObjectsClientContract,
       namespace,
-      logger
+      logger,
+      true
     );
     const descriptor = await engineDescriptorClient.findOrThrow(entityType);
 
@@ -167,7 +168,9 @@ async function runTask({
   // flipped while a task is already scheduled. Non-priority extraction only exists in dual-process
   // mode, so with the flag off this run does nothing rather than falling back to another mode.
   if (registeredExtractionMode === EXTRACTION_MODE.nonPriority && !dualProcessEnabled) {
-    logger.debug('Dual process is disabled, skipping non-priority extraction');
+    logger.info(
+      `[DUAL-PROCESS] NON-PRIORITY NO-OP: flag is off, skipping non-priority extraction for ${entityType} in ${namespace}`
+    );
     return { state: currentState };
   }
 
@@ -175,6 +178,10 @@ async function runTask({
     registeredExtractionMode === EXTRACTION_MODE.nonPriority
       ? registeredExtractionMode
       : resolveExtractionMode(dualProcessEnabled, entityType);
+
+  logger.info(
+    `[DUAL-PROCESS] PROCESS=${extractionMode} entity=${entityType} namespace=${namespace} dualProcessEnabled=${dualProcessEnabled}`
+  );
 
   if (
     await shouldDeleteOrphanedEntityStoreTask({
@@ -210,6 +217,12 @@ async function runTask({
       dualProcessEnabled,
       logger,
     });
+  }
+
+  if (registeredExtractionMode === EXTRACTION_MODE.nonPriority) {
+    logger.info(
+      `[DUAL-PROCESS] NON-PRIORITY ACTIVE: starting extraction for ${entityType} in ${namespace}`
+    );
   }
 
   let remote = false;
