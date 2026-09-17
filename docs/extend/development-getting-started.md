@@ -36,27 +36,27 @@ Install the latest version of [yarn v1](https://classic.yarnpkg.com/en/docs/inst
 Bootstrap {{kib}} and install all the dependencies:
 
 ```bash
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
-In case you don’t have an internet connection, the `yarn kbn bootstrap` command will fail. As it is likely you have the required node_modules in the offline mirror, you can try to run the step in offline mode by using:
+In case you don’t have an internet connection, the `pnpm kbn bootstrap` command will fail. As it is likely you have the required node_modules in the offline mirror, you can try to run the step in offline mode by using:
 
 ```bash
-yarn kbn bootstrap --offline
+pnpm kbn bootstrap --offline
 ```
 
 In any other circumstance where you want to force the node_modules install step you can use:
 
 ```bash
-yarn kbn bootstrap --force-install
+pnpm kbn bootstrap --force-install
 ```
 
-You can also run `yarn kbn` to see the other available commands.
+You can also run `pnpm kbn` to see the other available commands.
 
 When switching branches which use different versions of npm packages you may need to run:
 
 ```bash
-yarn kbn clean
+pnpm kbn clean
 ```
 
 ::::{note}
@@ -64,7 +64,7 @@ Running this command is only necessary in rare circumstance where you need to re
 ::::
 
 
-If you have failures during `yarn kbn bootstrap` you may have some corrupted packages in your yarn cache which you can clean with:
+If you have failures during `pnpm kbn bootstrap` you may have some corrupted packages in your yarn cache which you can clean with:
 
 ```bash
 yarn cache clean
@@ -97,10 +97,10 @@ Read about more options for [Running {{es}} during development](/extend/running-
 In another terminal window, start up {{kib}}. Include [developer examples](https://github.com/elastic/kibana/tree/master/examples) by adding an optional `--run-examples` flag.
 
 ```bash
-yarn start --run-examples
+pnpm start --run-examples
 ```
 
-View all available options by running `yarn start --help`
+View all available options by running `pnpm start --help`
 
 Read about more advanced options for [Running {{kib}}](/extend/running-kibana-advanced.md).
 

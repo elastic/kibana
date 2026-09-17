@@ -27,13 +27,13 @@ main () {
 
   report_main_step "Generate function definitions"
 
-  yarn make:defs $PARENT_DIR/elasticsearch
+  pnpm make:defs $PARENT_DIR/elasticsearch
 
   report_main_step "Generate inline function docs"
 
   cd "$KIBANA_DIR/$EDITOR_PACKAGE_DIR"
 
-  yarn make:docs $PARENT_DIR/elasticsearch
+  pnpm make:docs $PARENT_DIR/elasticsearch
 
   report_main_step "Run i18n check"
 

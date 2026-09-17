@@ -299,23 +299,23 @@ workflows_management/
 ### Local Development
 
 1. Enable the feature flag in `kibana.dev.yml`
-2. Start Elasticsearch: `yarn es snapshot`
-3. Start Kibana: `yarn start`
+2. Start Elasticsearch: `pnpm es snapshot`
+3. Start Kibana: `pnpm start`
 4. Navigate to `/app/workflows`
 
 ### Testing
 
 ```bash
 # Run unit tests
-yarn test:jest src/platform/plugins/shared/workflows_management
+pnpm test:jest src/platform/plugins/shared/workflows_management
 # Running a specific test
-yarn test:jest -- $path # (e.g. src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/insert_trigger_snippet.test.ts)
+pnpm test:jest -- $path # (e.g. src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/insert_trigger_snippet.test.ts)
 
 # Run integration tests
-yarn test:jest_integration src/platform/plugins/shared/workflows_management
+pnpm test:jest_integration src/platform/plugins/shared/workflows_management
 
 # Run FTR tests (if available)
-yarn test:ftr --config x-pack/test/workflows_management_api_integration/config.ts
+pnpm test:ftr --config x-pack/test/workflows_management_api_integration/config.ts
 ```
 
 ### Authentication & Authorization
