@@ -407,6 +407,42 @@ describe('getJobConfig', () => {
     expect(result.get('test-job')?.threatTechniques).toEqual(['UNKNOWN_TECHNIQUE']);
   });
 
+  it('still returns job configs when MITRE bucket resolution fails, falling back to raw IDs', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          custom_settings: {
+            security_app_display_name: 'Auth Spike',
+            threat_tactics: ['TA0006'],
+            threat_techniques: ['T1110'],
+          },
+        }),
+      ],
+    });
+
+    const failingList = jest.fn().mockRejectedValue(new Error('mitre service unavailable'));
+    const mitreDataClient: MitreAttackDataClient = { list: failingList, getById: jest.fn() };
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    // Job config must still be present despite the MITRE failure.
+    expect(result.size).toBe(1);
+    expect(result.get('test-job')).toMatchObject({
+      jobName: 'Auth Spike',
+      // IDs are unresolved because the name maps are empty.
+      threatTactics: ['TA0006'],
+      threatTechniques: ['T1110'],
+    });
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('mitre service unavailable'));
+  });
+
   it('returns entries for multiple jobs', async () => {
     mockJobsFn
       .mockResolvedValueOnce({ jobs: [makeJob({ job_id: 'job-a' })] })

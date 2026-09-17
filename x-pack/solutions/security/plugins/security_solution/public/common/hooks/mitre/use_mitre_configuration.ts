@@ -34,9 +34,8 @@ export const useMitreConfiguration = (
   const isManagedSourceEnabled = services.mitreAttack?.isEnabled ?? false;
 
   // Exactly one of the two queries below is enabled at a time.
-  // Both produce the same MitreEntitySummaryBuckets shape, so consumers never branch.
-  // Errors surface via isError — consumers render inline callouts; no toast here.
-  const managedQuery = useFetchMitreEntitiesQuery(params ?? {}, {
+  // Both produce the same MitreEntitySummaryBuckets shape, so consumers don't branch.
+  const managedQuery = useFetchMitreEntitiesQuery(services.http, params ?? {}, {
     enabled: isManagedSourceEnabled,
   });
 
@@ -48,12 +47,23 @@ export const useMitreConfiguration = (
 
   const activeQuery = isManagedSourceEnabled ? managedQuery : legacyQuery;
 
-  if (activeQuery.isError || !activeQuery.data) {
+  // On the managed path, a 200 response with zero tactics means population hasn't run
+  // (e.g. ES wasn't ready at startup). The Enterprise framework always has tactics, so
+  // empty is not a valid success state. This treats it as a failure so consumers get
+  // the same error behaviour (inline callout, mitreReady: false) without having to
+  // guard for this edge case themselves.
+  const isEmptyManagedResponse =
+    isManagedSourceEnabled &&
+    !managedQuery.isLoading &&
+    !managedQuery.isError &&
+    managedQuery.data?.tactics.length === 0;
+
+  if (activeQuery.isError || !activeQuery.data || isEmptyManagedResponse) {
     return {
       ...EMPTY_BUCKETS,
       frameworkVersion: undefined,
       isLoading: activeQuery.isLoading,
-      isError: activeQuery.isError,
+      isError: activeQuery.isError || isEmptyManagedResponse,
     };
   }
 

@@ -95,11 +95,24 @@ export const getJobConfig = async ({
           .then((resp) => resp.jobs ?? [])
       )
     );
-    const mitreBuckets = await resolveMitreBuckets(mitreDataClient);
-    const tacticNameById = new Map(mitreBuckets.tactics.map(({ id, name }) => [id, name]));
-    const techniqueNameById = new Map(
-      [...mitreBuckets.techniques, ...mitreBuckets.subtechniques].map(({ id, name }) => [id, name])
-    );
+    let tacticNameById = new Map<string, string>();
+    let techniqueNameById = new Map<string, string>();
+    try {
+      const mitreBuckets = await resolveMitreBuckets(mitreDataClient);
+      tacticNameById = new Map(mitreBuckets.tactics.map(({ id, name }) => [id, name]));
+      techniqueNameById = new Map(
+        [...mitreBuckets.techniques, ...mitreBuckets.subtechniques].map(({ id, name }) => [
+          id,
+          name,
+        ])
+      );
+    } catch (mitreErr) {
+      logger.debug(
+        `Failed to resolve MITRE buckets; job names will fall back to raw IDs: ${
+          mitreErr instanceof Error ? mitreErr.message : String(mitreErr)
+        }`
+      );
+    }
 
     const jobs = jobsSettled.flatMap((r) => {
       if (r.status === 'rejected') {

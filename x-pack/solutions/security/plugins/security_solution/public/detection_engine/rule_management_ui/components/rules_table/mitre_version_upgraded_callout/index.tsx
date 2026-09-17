@@ -16,6 +16,7 @@ import {
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetSecuritySolutionUrl } from '../../../../../common/components/link_to';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useMitreConfiguration } from '../../../../../common/hooks/mitre/use_mitre_configuration';
 import {
   MITRE_VERSION_UPGRADED_CALLOUT_TITLE,
   MITRE_VERSION_UPGRADED_CALLOUT_LEARN_MORE,
@@ -39,6 +40,10 @@ export const MitreVersionUpgradedCallout = React.memo(() => {
   const coverageOverviewHref = getSecuritySolutionUrl({
     deepLinkId: SecurityPageName.coverageOverview,
   });
+  const { frameworkVersion } = useMitreConfiguration();
+  // Normalize: the managed adapter strips the leading 'v', so re-add it at the display site.
+  // Fall back to the legacy constant when the managed version is not yet available.
+  const displayVersion = frameworkVersion ? `v${frameworkVersion}` : MITRE_ATTACK_VERSION;
   const [isDismissed, setIsDismissed] = useState(true);
 
   useEffect(() => {
@@ -59,7 +64,7 @@ export const MitreVersionUpgradedCallout = React.memo(() => {
       <EuiCallOut
         announceOnMount={false}
         data-test-subj="mitreVersionUpgradedCallout"
-        title={MITRE_VERSION_UPGRADED_CALLOUT_TITLE(MITRE_ATTACK_VERSION)}
+        title={MITRE_VERSION_UPGRADED_CALLOUT_TITLE(displayVersion)}
         color="primary"
         iconType="info"
         onDismiss={handleDismiss}
@@ -69,7 +74,7 @@ export const MitreVersionUpgradedCallout = React.memo(() => {
             id="xpack.securitySolution.rulesManagement.mitreVersionUpgradedCallout.body"
             defaultMessage="The MITRE ATT&CK® dataset bundled with Kibana was updated to {version}. Rules that reference IDs no longer present in {version} are flagged on the {coverageLink} and on the rule edit form. {learnMoreLink}"
             values={{
-              version: MITRE_ATTACK_VERSION,
+              version: displayVersion,
               coverageLink: (
                 <EuiLink
                   href={coverageOverviewHref}

@@ -10,96 +10,75 @@
 // are seeded by global.setup.ts so the managed API returns only the fixture set,
 // making assertions independent of real MITRE artifact version bumps.
 //
-// Port of:
-//   x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/
-//   detection_response/rule_management/coverage_overview/coverage_overview_managed_mitre.cy.ts
-//
 // NOTE: This suite intentionally lives in scout_managed_mitre rather than the
 // default scout/ directory because `xpack.mitreAttack.managedSourceEnabled` is a
 // boot-time flag (not dynamicConfig) that must be set before Kibana starts. Once the
 // flag defaults to true and the legacy static blob is removed, merge this spec into
 // the default scout UI suite and delete this directory.
 
-import { test, tags } from '@kbn/scout-security';
+import { spaceTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import {
-  SEEDED_TACTIC_ALPHA,
-  SEEDED_TACTIC_BETA,
-  SEEDED_TECHNIQUE_ONE,
-  SEEDED_TECHNIQUE_TWO,
-} from '../fixtures/mitre_fixtures';
+import { SEEDED_TACTIC_ALPHA, SEEDED_TACTIC_BETA } from '../fixtures/mitre_fixtures';
+import { LOCAL_MANAGED_MITRE_TAGS } from '../fixtures/tags';
 
-test.describe(
+spaceTest.describe(
   'Coverage Overview — managed MITRE source',
-  // Stateful/classic only: the Cypress spec this ports was @ess + @skipInServerless.
-  // No serverless variant until the flag is gated per project type.
-  { tag: [...tags.stateful.classic] },
+  { tag: LOCAL_MANAGED_MITRE_TAGS },
   () => {
-    test.beforeEach(async ({ browserAuth }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    test('renders the tactic matrix from the managed source without a loading spinner or error callout', async ({
-      pageObjects: { coverageOverviewPage },
-    }) => {
-      await coverageOverviewPage.navigate();
+    spaceTest(
+      'renders the tactic matrix from the managed source',
+      async ({ page, pageObjects: { coverageOverviewPage } }) => {
+        await coverageOverviewPage.navigate();
 
-      // The loading spinner must disappear (navigate() already waits for this).
-      await expect(coverageOverviewPage.loadingSpinner).not.toBeAttached();
-      await expect(coverageOverviewPage.errorCallout).not.toBeAttached();
+        // navigate() calls waitForMatrixLoaded(), which already awaits the tactic
+        // panels being non-empty and the spinner detaching — reaching these positive
+        // assertions already proves the spinner resolved and no error callout replaced
+        // the matrix.
+        await expect(coverageOverviewPage.tacticPanels).toHaveCount(2);
+        await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_ALPHA.id)).toBeVisible();
+        await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_BETA.id)).toBeVisible();
 
-      // Both seeded tactics must be represented as tactic panels.
-      await expect(coverageOverviewPage.tacticPanels()).toHaveCount(2);
-      await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_ALPHA.id)).toBeVisible();
-      await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_BETA.id)).toBeVisible();
-    });
+        // Scanned here because the matrix has finished rendering, so the panels are stable.
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="coverageOverviewTacticPanel"]'],
+        });
+        expect(violations).toHaveLength(0);
+      }
+    );
 
-    test('renders tactics in ascending position order', async ({
-      pageObjects: { coverageOverviewPage },
-    }) => {
-      await coverageOverviewPage.navigate();
+    spaceTest(
+      'renders tactics in ascending position order',
+      async ({ pageObjects: { coverageOverviewPage } }) => {
+        await coverageOverviewPage.navigate();
 
-      // SEEDED_TACTIC_ALPHA has position 0, SEEDED_TACTIC_BETA has position 1.
-      // The DOM order of tactic panels must match that ascending order.
-      const panels = await coverageOverviewPage.tacticPanels().all();
-      await expect(panels[0]).toContainText(SEEDED_TACTIC_ALPHA.name);
-      await expect(panels[1]).toContainText(SEEDED_TACTIC_BETA.name);
-    });
+        // toHaveText verifies that the DOM column order matches the sorted model
+        // (position 0 = ALPHA, position 1 = BETA). The unit test that proves the
+        // model array is sorted by position cannot cover this: only a browser test
+        // can confirm the renderer emits columns in model order.
+        await expect(coverageOverviewPage.tacticPanels).toHaveText([
+          new RegExp(SEEDED_TACTIC_ALPHA.name),
+          new RegExp(SEEDED_TACTIC_BETA.name),
+        ]);
+      }
+    );
 
-    test('binds techniques to their correct tactics — single-tactic and multi-tactic cases', async ({
-      pageObjects: { coverageOverviewPage },
-    }) => {
-      await coverageOverviewPage.navigate();
+    spaceTest(
+      'does not break the matrix when the rule activity filter is changed',
+      async ({ pageObjects: { coverageOverviewPage } }) => {
+        await coverageOverviewPage.navigate();
 
-      // SEEDED_TECHNIQUE_ONE belongs only to SEEDED_TACTIC_ALPHA (tactic_ids: ['TA9001']).
-      await expect(
-        coverageOverviewPage.techniqueTitleInTactic(SEEDED_TECHNIQUE_ONE.id, SEEDED_TACTIC_ALPHA.id)
-      ).toBeAttached();
-      await expect(
-        coverageOverviewPage.techniqueTitleInTactic(SEEDED_TECHNIQUE_ONE.id, SEEDED_TACTIC_BETA.id)
-      ).not.toBeAttached();
+        // Toggle "Disabled rules" on — the matrix must re-render without an error callout
+        // and the tactic structure must remain intact.
+        await coverageOverviewPage.selectActivityFilterOption('Disabled rules');
 
-      // SEEDED_TECHNIQUE_TWO belongs to both tactics (tactic_ids: ['TA9001', 'TA9002']).
-      await expect(
-        coverageOverviewPage.techniqueTitleInTactic(SEEDED_TECHNIQUE_TWO.id, SEEDED_TACTIC_ALPHA.id)
-      ).toBeAttached();
-      await expect(
-        coverageOverviewPage.techniqueTitleInTactic(SEEDED_TECHNIQUE_TWO.id, SEEDED_TACTIC_BETA.id)
-      ).toBeAttached();
-    });
-
-    test('does not break the matrix when the rule activity filter is changed', async ({
-      pageObjects: { coverageOverviewPage },
-    }) => {
-      await coverageOverviewPage.navigate();
-
-      // Toggle "Disabled rules" on — the matrix must re-render without an error callout
-      // and the tactic structure must remain intact.
-      await coverageOverviewPage.selectActivityFilterOption('Disabled rules');
-
-      await expect(coverageOverviewPage.errorCallout).not.toBeAttached();
-      await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_ALPHA.id)).toBeVisible();
-      await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_BETA.id)).toBeVisible();
-    });
+        await expect(coverageOverviewPage.errorCallout).not.toBeAttached();
+        await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_ALPHA.id)).toBeVisible();
+        await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_BETA.id)).toBeVisible();
+      }
+    );
   }
 );

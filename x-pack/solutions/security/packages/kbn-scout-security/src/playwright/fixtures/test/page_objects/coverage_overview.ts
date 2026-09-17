@@ -6,10 +6,8 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
-
-/** Timeout for the MITRE ATT&CK entities API call and rules query to resolve. */
-const MATRIX_LOAD_TIMEOUT_MS = 30_000;
 
 /**
  * Coverage Overview dashboard page — the MITRE ATT&CK matrix showing rule coverage.
@@ -24,6 +22,8 @@ export class CoverageOverviewPage {
   readonly activityFilterButton: Locator;
   /** Locator for the selectable option list inside the activity filter popover. */
   readonly activityFilterList: Locator;
+  /** Locator for all tactic header panels, in DOM (position) order. */
+  readonly tacticPanels: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.errorCallout = this.page.testSubj.locator('coverageOverviewMitreErrorCallout');
@@ -32,6 +32,7 @@ export class CoverageOverviewPage {
       'coverageOverviewRuleActivityFilterButton'
     );
     this.activityFilterList = this.page.testSubj.locator('coverageOverviewFilterList');
+    this.tacticPanels = this.page.testSubj.locator('coverageOverviewTacticPanel');
   }
 
   /** Navigates to the coverage overview page and waits for the matrix to load. */
@@ -43,26 +44,28 @@ export class CoverageOverviewPage {
   /**
    * Waits until the matrix has actually rendered.
    *
-   * Waiting only for the spinner to detach is not enough: while Kibana is still
-   * on its bootstrap splash screen the spinner has not rendered either, so a
-   * detached check resolves immediately against a page with no matrix on it.
-   * Wait for the page chrome (the activity filter, which renders independently
-   * of the matrix) before confirming the spinner is gone.
+   * Waiting only for the spinner to detach is not sufficient: before the
+   * dashboard mounts, neither the spinner nor the matrix elements exist, so a
+   * detached-spinner check resolves immediately against a blank page. The
+   * positive assertion on `tacticPanels` guarantees the matrix DOM is present
+   * before any further assertions run.
+   *
+   * spinner / error callout / matrix are mutually exclusive render branches in
+   * coverage_overview_dashboard.tsx, so the spinner-detach wait is redundant
+   * once `tacticPanels` have appeared. Racing against `errorCallout` lets a
+   * failed MITRE fetch fail fast with a diagnostic instead of timing out for
+   * the full APP_LOAD_TIMEOUT_MS.
    */
   async waitForMatrixLoaded(): Promise<void> {
-    await this.activityFilterButton.waitFor({
-      state: 'visible',
+    await expect(this.tacticPanels.or(this.errorCallout)).not.toHaveCount(0, {
       timeout: APP_LOAD_TIMEOUT_MS,
     });
-    await this.loadingSpinner.waitFor({
-      state: 'detached',
-      timeout: MATRIX_LOAD_TIMEOUT_MS,
-    });
-  }
 
-  /** Returns a locator for all tactic header panels, in DOM (position) order. */
-  tacticPanels(): Locator {
-    return this.page.testSubj.locator('coverageOverviewTacticPanel');
+    if (await this.errorCallout.isVisible()) {
+      throw new Error(
+        'Coverage overview MITRE data fetch failed: error callout is visible instead of the matrix'
+      );
+    }
   }
 
   /**
@@ -71,14 +74,6 @@ export class CoverageOverviewPage {
    */
   tacticGroup(tacticId: string): Locator {
     return this.page.testSubj.locator(`coverageOverviewTacticGroup-${tacticId}`);
-  }
-
-  /**
-   * Returns a locator for all technique panels inside the specified tactic column.
-   * Use this to count or enumerate techniques without targeting a specific one.
-   */
-  techniquesInTactic(tacticId: string): Locator {
-    return this.tacticGroup(tacticId).locator('[data-test-subj="coverageOverviewTechniquePanel"]');
   }
 
   /**
@@ -103,8 +98,11 @@ export class CoverageOverviewPage {
   async selectActivityFilterOption(optionLabel: string): Promise<void> {
     await this.activityFilterButton.click();
     await this.activityFilterList.getByText(optionLabel).click();
-    // Close the popover by clicking the toggle button again.
-    await this.activityFilterButton.click();
+    // Close the popover with Escape. This is idempotent: if EUI already closed
+    // the popover on option selection this is a no-op, whereas a second click on
+    // the toggle would re-open the popover and leave it over the matrix during
+    // the waitForMatrixLoaded() call below.
+    await this.page.keyboard.press('Escape');
     await this.waitForMatrixLoaded();
   }
 }

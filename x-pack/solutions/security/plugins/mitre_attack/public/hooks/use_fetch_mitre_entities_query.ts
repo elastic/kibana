@@ -7,8 +7,7 @@
 
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { HttpStart } from '@kbn/core/public';
 import type {
   GetMitreEntitiesRequestParams,
   GetMitreEntitiesResponse,
@@ -27,14 +26,17 @@ const DEFAULT_OPTIONS = {
 
 export const FETCH_MITRE_ENTITIES_QUERY_KEY = ['GET', GET_MITRE_ENTITIES_URL] as const;
 
+/**
+ * Fetches MITRE ATT&CK entities from the managed API.
+ */
 export const useFetchMitreEntitiesQuery = (
+  http: HttpStart,
   params: GetMitreEntitiesRequestParams = {},
   options?: UseQueryOptions<GetMitreEntitiesResponse>
 ) => {
-  const { services } = useKibana<CoreStart>();
   return useQuery<GetMitreEntitiesResponse>(
     [...FETCH_MITRE_ENTITIES_QUERY_KEY, params],
-    ({ signal }) => fetchMitreEntities({ http: services.http, ...params, signal }),
+    ({ signal }) => fetchMitreEntities({ http, ...params, signal }),
     {
       ...DEFAULT_OPTIONS,
       ...options,

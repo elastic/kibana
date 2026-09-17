@@ -179,6 +179,47 @@ describe('handleCoverageOverviewRequest', () => {
     expect(result.invalid_mitre_ids['rule-unmapped-id']).toBeUndefined();
   });
 
+  it('returns a normal coverage response with no invalid_mitre_ids when bucket resolution fails', async () => {
+    const ruleWithMitreIds: Rule = {
+      id: 'rule-with-mitre',
+      name: 'Some Rule',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: VALID_TACTIC_ID,
+              name: 'Defense Evasion',
+              reference: 'https://attack.mitre.org/tactics/TA0005/',
+            },
+            technique: [],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      total: 1,
+      page: 1,
+      perPage: 10000,
+      data: [ruleWithMitreIds],
+    });
+
+    const failingList = jest.fn().mockRejectedValue(new Error('SO unavailable'));
+    const mitreDataClient: MitreAttackDataClient = { list: failingList, getById: jest.fn() };
+
+    const result = await handleCoverageOverviewRequest({
+      params: {},
+      deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
+    });
+
+    // The rule should be present in rules_data and coverage, but invalid-ID
+    // detection is skipped entirely when bucket resolution fails.
+    expect(result.rules_data['rule-with-mitre']).toBeDefined();
+    expect(result.invalid_mitre_ids).toEqual({});
+  });
+
   it('sources MITRE data from the managed client when mitreDataClient is provided', async () => {
     const validIdSets: ValidMitreIdSets = buildValidMitreIdsFromBuckets({
       tactics: [{ id: VALID_TACTIC_ID }],

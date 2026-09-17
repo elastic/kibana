@@ -45,6 +45,8 @@ const mockLegacyData: MitreEntitySummaryBuckets = mockMitreEntitySummaryBuckets(
 const setupKibanaMock = (isEnabled: boolean) => {
   mockUseKibana.mockReturnValue({
     services: {
+      // http is passed straight through to useFetchMitreEntitiesQuery, which is mocked.
+      http: {},
       mitreAttack: { isEnabled },
     },
   });
@@ -77,7 +79,8 @@ describe('useMitreConfiguration', () => {
       renderHook(() => useMitreConfiguration());
 
       expect(mockUseFetchMitreEntitiesQuery).toHaveBeenCalledWith(
-        expect.any(Object),
+        expect.any(Object), // http
+        expect.any(Object), // params
         expect.objectContaining({ enabled: false })
       );
       expect(mockUseFetchLegacyMitreQuery).toHaveBeenCalledWith(
@@ -120,7 +123,8 @@ describe('useMitreConfiguration', () => {
       renderHook(() => useMitreConfiguration());
 
       expect(mockUseFetchMitreEntitiesQuery).toHaveBeenCalledWith(
-        expect.any(Object),
+        expect.any(Object), // http
+        expect.any(Object), // params
         expect.objectContaining({ enabled: true })
       );
       expect(mockUseFetchLegacyMitreQuery).toHaveBeenCalledWith(
@@ -165,6 +169,7 @@ describe('useMitreConfiguration', () => {
       renderHook(() => useMitreConfiguration({ types: ['tactic'] }));
 
       expect(mockUseFetchMitreEntitiesQuery).toHaveBeenCalledWith(
+        expect.any(Object), // http
         expect.objectContaining({ types: ['tactic'] }),
         expect.any(Object)
       );
@@ -219,15 +224,57 @@ describe('useMitreConfiguration', () => {
     });
   });
 
+  describe('empty managed response', () => {
+    it('surfaces isError:true and empty buckets when managed returns zero tactics', () => {
+      // Zero tactics on the managed path means population has not run (e.g. ES not ready).
+      // The Enterprise framework always has tactics, so empty is treated as a failure.
+      setupKibanaMock(true);
+      mockUseFetchMitreEntitiesQuery.mockReturnValue(
+        makeQueryResult({ ...mockManagedData, tactics: [] })
+      );
+
+      const { result } = renderHook(() => useMitreConfiguration());
+
+      expect(result.current.isError).toBe(true);
+      expect(result.current.tactics).toEqual([]);
+      expect(result.current.techniques).toEqual([]);
+      expect(result.current.subtechniques).toEqual([]);
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it('does not treat zero tactics as an error on the legacy path', () => {
+      // The zero-tactic guard only applies to managed; the legacy blob is always considered valid.
+      setupKibanaMock(false);
+      mockUseFetchLegacyMitreQuery.mockReturnValue(
+        makeQueryResult({ ...mockLegacyData, tactics: [] })
+      );
+
+      const { result } = renderHook(() => useMitreConfiguration());
+
+      expect(result.current.isError).toBe(false);
+    });
+
+    it('does not fire when managed returns non-empty tactics', () => {
+      setupKibanaMock(true);
+      mockUseFetchMitreEntitiesQuery.mockReturnValue(makeQueryResult(mockManagedData));
+
+      const { result } = renderHook(() => useMitreConfiguration());
+
+      expect(result.current.isError).toBe(false);
+      expect(result.current.tactics).toEqual(mockManagedData.tactics);
+    });
+  });
+
   describe('when mitreAttack service is absent', () => {
     it('defaults to the legacy hook', () => {
-      mockUseKibana.mockReturnValue({ services: {} });
+      mockUseKibana.mockReturnValue({ services: { http: {} } });
       mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(mockLegacyData));
 
       renderHook(() => useMitreConfiguration());
 
       expect(mockUseFetchMitreEntitiesQuery).toHaveBeenCalledWith(
-        expect.any(Object),
+        expect.any(Object), // http
+        expect.any(Object), // params
         expect.objectContaining({ enabled: false })
       );
       expect(mockUseFetchLegacyMitreQuery).toHaveBeenCalledWith(

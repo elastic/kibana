@@ -25,25 +25,37 @@ globalTeardownHook(
     );
 
     const seederClient = await createSystemIndicesEsClient(esClient, config);
-    await seederClient.deleteByQuery({
-      index: SEEDED_MITRE_INDEX,
-      refresh: true,
-      query: {
-        bool: {
-          must: [
-            { term: { type: 'mitre-attack-entity' } },
-            {
-              term: {
-                'mitre-attack-entity.framework_version': SEEDED_MITRE_FRAMEWORK_VERSION,
+    try {
+      const result = await seederClient.deleteByQuery({
+        index: SEEDED_MITRE_INDEX,
+        refresh: true,
+        query: {
+          bool: {
+            must: [
+              { term: { type: 'mitre-attack-entity' } },
+              {
+                term: {
+                  'mitre-attack-entity.framework_version': SEEDED_MITRE_FRAMEWORK_VERSION,
+                },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-    });
+      });
 
-    await deleteSystemIndicesEsUser(esClient);
+      // Assert a non-zero deletion count so silent cleanup failures are visible.
+      // If setup ran correctly and seeded 5 entities, teardown must delete at least 5.
+      if ((result.deleted ?? 0) === 0) {
+        throw new Error(
+          '[managed-mitre teardown] deleteByQuery removed 0 documents — seeded entities may not have been present or cleanup silently failed'
+        );
+      }
 
-    log.info('[managed-mitre teardown] Synthetic MITRE entities removed');
+      await deleteSystemIndicesEsUser(esClient);
+
+      log.info(`[managed-mitre teardown] Deleted ${result.deleted} synthetic MITRE entities`);
+    } finally {
+      await seederClient.close();
+    }
   }
 );

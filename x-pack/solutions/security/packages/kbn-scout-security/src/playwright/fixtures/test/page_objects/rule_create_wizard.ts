@@ -6,10 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
-
-/** Timeout for the MITRE ATT&CK entities API call to resolve. */
-const MITRE_LOAD_TIMEOUT_MS = 30_000;
+import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 
 /**
  * Custom query rule create wizard: Define → About → Schedule → Actions.
@@ -27,6 +24,8 @@ export class RuleCreateWizardPage {
   readonly mitreLoadingSpinner: Locator;
   readonly addMitreTacticButton: Locator;
   readonly addMitreTechniqueButton: Locator;
+  readonly addMitreSubtechniqueButton: Locator;
+  readonly mitreSubtechniqueSelect: Locator;
   readonly createAndEnable: Locator;
   readonly ruleDetailsTitle: Locator;
   readonly savedThreatTactics: Locator;
@@ -48,12 +47,14 @@ export class RuleCreateWizardPage {
       .locator('defineRuleFormStepQueryEditor')
       .locator('[data-test-subj="queryInput"]')
       .filter({ visible: true });
-    this.advancedSettingsToggle = this.page.locator(
-      '[data-test-subj="advancedSettings"] .euiAccordion__button'
-    );
+    // Uses the stable `advancedSettingsButton` test subject applied via
+    // EuiAccordion's `buttonProps` — avoids the EUI-internal `.euiAccordion__button` class.
+    this.advancedSettingsToggle = this.page.testSubj.locator('advancedSettingsButton');
     this.mitreLoadingSpinner = this.page.testSubj.locator('mitreAttackLoading');
     this.addMitreTacticButton = this.page.testSubj.locator('addMitreAttackTactic');
     this.addMitreTechniqueButton = this.page.testSubj.locator('addMitreAttackTechnique');
+    this.addMitreSubtechniqueButton = this.page.testSubj.locator('addMitreAttackSubtechnique');
+    this.mitreSubtechniqueSelect = this.page.testSubj.locator('mitreAttackSubtechnique');
     this.createAndEnable = this.page.testSubj.locator('create-enable');
     // Rule details page, reached after the rule is created.
     this.ruleDetailsTitle = this.page.testSubj.locator('header-page-title');
@@ -70,10 +71,16 @@ export class RuleCreateWizardPage {
     name,
     description = name,
     query,
+    onAboutStep,
   }: {
     name: string;
     description?: string;
     query: string;
+    /** Optional async callback invoked after the About fields are filled and
+     * before the About "Continue" button is clicked. Use it to interact with
+     * About-step controls (e.g. the MITRE picker) without duplicating the
+     * surrounding wizard navigation. */
+    onAboutStep?: () => Promise<void>;
   }): Promise<void> {
     // The rules table swaps `create-new-rule` for `create-rule-button` when AI
     // rule creation is available, so open the wizard URL directly.
@@ -94,6 +101,9 @@ export class RuleCreateWizardPage {
     await this.aboutRuleName.waitFor({ state: 'visible' });
     await this.aboutRuleName.fill(name);
     await this.aboutRuleDescription.fill(description);
+    if (onAboutStep) {
+      await onAboutStep();
+    }
     await this.aboutContinue.click();
 
     await this.scheduleContinue.waitFor({ state: 'visible' });
@@ -102,8 +112,14 @@ export class RuleCreateWizardPage {
     await this.createWithoutEnabling.waitFor({ state: 'visible' });
   }
 
+  /**
+   * Clicks "Create rule without enabling" and waits for the rule details page to load.
+   * Both create buttons navigate to the same rule details page; this variant leaves
+   * the rule disabled so it does not execute against the shared stack.
+   */
   async createWithoutEnablingRule(): Promise<void> {
     await this.createWithoutEnabling.click();
+    await this.ruleDetailsTitle.waitFor({ state: 'visible', timeout: DATA_LOAD_TIMEOUT_MS });
   }
 
   /** Expands the Advanced Settings accordion on the About step. */
@@ -123,11 +139,11 @@ export class RuleCreateWizardPage {
   async waitForMitreLoaded(): Promise<void> {
     await this.addMitreTacticButton.waitFor({
       state: 'visible',
-      timeout: MITRE_LOAD_TIMEOUT_MS,
+      timeout: DATA_LOAD_TIMEOUT_MS,
     });
     await this.mitreLoadingSpinner.waitFor({
       state: 'detached',
-      timeout: MITRE_LOAD_TIMEOUT_MS,
+      timeout: DATA_LOAD_TIMEOUT_MS,
     });
   }
 
@@ -148,6 +164,17 @@ export class RuleCreateWizardPage {
   async addAndSelectMitreTechniqueById(techniqueId: string): Promise<void> {
     await this.addMitreTechniqueButton.click();
     await this.page.components.superSelect('mitreAttackTechnique').selectOptionByValue(techniqueId);
+  }
+
+  /**
+   * Clicks "Add subtechnique", then selects the subtechnique in the newly-added
+   * subtechnique super-select by the subtechnique's `id` value (e.g. `'T9001.001'`).
+   */
+  async addAndSelectMitreSubtechniqueById(subtechniqueId: string): Promise<void> {
+    await this.addMitreSubtechniqueButton.click();
+    await this.page.components
+      .superSelect('mitreAttackSubtechnique')
+      .selectOptionByValue(subtechniqueId);
   }
 
   /** Clicks "Create and enable rule" and waits for the button to be removed. */

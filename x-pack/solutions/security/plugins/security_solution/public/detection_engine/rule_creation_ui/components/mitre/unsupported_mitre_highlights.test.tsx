@@ -309,7 +309,7 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
 
   it('renders a ghost option and form-row error when the technique was reassigned to a different tactic', async () => {
     // T002 lives under Tactic 2 (TA002) in the dataset but the rule still stores it
-    // under Tactic 1 (TA001) - this previously left the technique select blank.
+    // under Tactic 1 (TA001), so the select has no matching option to show.
     const threats: Threats = [
       {
         framework: MITRE_FRAMEWORK,
