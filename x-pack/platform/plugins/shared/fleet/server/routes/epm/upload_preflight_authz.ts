@@ -24,9 +24,10 @@ const GATED_ASSET_TYPES = new Set<KibanaAssetType>([
   KibanaAssetType.osquerySavedQuery,
   KibanaAssetType.osqueryPackAsset,
   KibanaAssetType.mlModule,
-  KibanaAssetType.alertingRuleTemplate,
   KibanaAssetType.cloudSecurityPostureRuleTemplate,
   KibanaAssetType.sloTemplate,
+  // alertingRuleTemplate: alerting uses per-ruleType / per-consumer authz via rulesClient
+  // with no single static API privilege. Add here once per-type authz is implemented.
 ]);
 
 // Maps each gated asset type to the Kibana API privilege actions required to install it.
@@ -37,8 +38,8 @@ const ASSET_REQUIRED_PRIVILEGES: Partial<Record<KibanaAssetType, readonly string
   [KibanaAssetType.osquerySavedQuery]: ['osquery-writeSavedQueries'],
   [KibanaAssetType.osqueryPackAsset]: ['osquery-writePacks'],
   [KibanaAssetType.mlModule]: ['ml:canCreateJob'],
-  // alertingRuleTemplate, cloudSecurityPostureRuleTemplate, sloTemplate:
-  // privilege checks require per-ruleType / per-consumer authz — not yet implemented.
+  [KibanaAssetType.cloudSecurityPostureRuleTemplate]: ['cloud-security-posture-all'],
+  [KibanaAssetType.sloTemplate]: ['slo_write'],
 };
 
 export interface ArchiveSignals {

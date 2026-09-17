@@ -137,35 +137,37 @@ describe('collectArchiveSignals', () => {
     expect(readBufferFn('mypackage-1.0.0/kibana/security_rule/my-rule.json')).toBe(true);
   });
 
-  it('puts alerting_rule_template in blockedTypes (no checker yet)', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' }])
-    );
-
-    const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
-
-    expect(signals.blockedTypes).toContain('alerting_rule_template');
-    expect(signals.gatedTypesFound.has('alerting_rule_template' as any)).toBe(false);
-  });
-
-  it('puts csp_rule_template in blockedTypes (no checker yet)', async () => {
+  it('detects csp_rule_template as gated type', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/csp_rule_template/my-rule.json' }])
     );
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
-    expect(signals.blockedTypes).toContain('csp_rule_template');
+    expect(signals.gatedTypesFound.has('csp_rule_template' as any)).toBe(true);
+    expect(signals.blockedTypes).toHaveLength(0);
   });
 
-  it('puts slo_template in blockedTypes (no checker yet)', async () => {
+  it('detects slo_template as gated type', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/slo_template/my-slo.json' }])
     );
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
-    expect(signals.blockedTypes).toContain('slo_template');
+    expect(signals.gatedTypesFound.has('slo_template' as any)).toBe(true);
+    expect(signals.blockedTypes).toHaveLength(0);
+  });
+
+  it('does not gate alerting_rule_template (no static privilege available)', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' }])
+    );
+
+    const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
+
+    expect(signals.gatedTypesFound.has('alerting_rule_template' as any)).toBe(false);
+    expect(signals.blockedTypes).toHaveLength(0);
   });
 });
 
@@ -214,6 +216,28 @@ describe('buildRequiredActions', () => {
     };
 
     expect(buildRequiredActions(signals, security as any)).toContain('api:elasticAssistant');
+  });
+
+  it('returns cloud-security-posture-all for csp_rule_template', () => {
+    const signals = {
+      gatedTypesFound: new Set(['csp_rule_template'] as any),
+      blockedTypes: [],
+      hasMlSecurityRules: false,
+    };
+
+    expect(buildRequiredActions(signals, security as any)).toContain(
+      'api:cloud-security-posture-all'
+    );
+  });
+
+  it('returns slo_write for slo_template', () => {
+    const signals = {
+      gatedTypesFound: new Set(['slo_template'] as any),
+      blockedTypes: [],
+      hasMlSecurityRules: false,
+    };
+
+    expect(buildRequiredActions(signals, security as any)).toContain('api:slo_write');
   });
 
   it('accumulates actions for multiple gated types', () => {
@@ -421,51 +445,79 @@ describe('checkUploadPackageAssetPrivileges', () => {
     );
   });
 
-  it('rejects upload containing alerting_rule_template (gated, no checker yet)', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' }])
-    );
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(makeSecurity(true));
-
-    await expect(
-      checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
-    ).rejects.toThrow(FleetUnauthorizedError);
-  });
-
-  it('rejects upload containing csp_rule_template (gated, no checker yet)', async () => {
+  it('checks cloud-security-posture-all for csp_rule_template package', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/csp_rule_template/my-rule.json' }])
     );
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(makeSecurity(true));
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      [mockSpaceId],
+      expect.objectContaining({ kibana: expect.arrayContaining(['api:cloud-security-posture-all']) })
+    );
+  });
+
+  it('throws FleetUnauthorizedError when caller lacks cloud-security-posture-all for csp_rule_template package', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/csp_rule_template/my-rule.json' }])
+    );
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(
+      makeSecurity(false, ['api:cloud-security-posture-all'])
+    );
 
     await expect(
       checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
-  it('rejects upload containing slo_template (gated, no checker yet)', async () => {
+  it('checks slo_write for slo_template package', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/slo_template/my-slo.json' }])
     );
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(makeSecurity(true));
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    await checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId);
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      [mockSpaceId],
+      expect.objectContaining({ kibana: expect.arrayContaining(['api:slo_write']) })
+    );
+  });
+
+  it('throws FleetUnauthorizedError when caller lacks slo_write for slo_template package', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/slo_template/my-slo.json' }])
+    );
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(
+      makeSecurity(false, ['api:slo_write'])
+    );
 
     await expect(
       checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
-  it('rejects mixed package containing a gated type with no checker', async () => {
+  it('allows upload containing alerting_rule_template (no static privilege — not gated)', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' },
-        { path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' },
-      ])
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' }])
     );
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(makeSecurity(true));
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
       checkUploadPackageAssetPrivileges(mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId)
-    ).rejects.toThrow(FleetUnauthorizedError);
+    ).resolves.toBeUndefined();
+
+    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   });
 
   it('throws FleetUnauthorizedError when security plugin is unavailable (fail closed)', async () => {
