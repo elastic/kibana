@@ -289,6 +289,39 @@ describe('TimeWindowButtons', () => {
     });
   });
 
+  describe('timePrecision', () => {
+    // A full calendar day: the `.999` end is what a display precision of
+    // seconds or minutes would truncate.
+    const start = '2025-01-01T00:00:00.000Z';
+    const end = '2025-01-01T23:59:59.999Z';
+
+    it.each(['none', 's'] as const)(
+      'keeps millisecond precision in the applied range when the display precision is %s',
+      async (timePrecision) => {
+        const { onChange } = renderPicker({
+          defaultValue: `${start} to ${end}`,
+          settings: { roundRelativeTime: false, timePrecision },
+        });
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('dateRangePickerNextButton'));
+        });
+
+        // Stepping forward shifts the window by its own duration
+        const windowMs = moment(end).diff(moment(start));
+        const expectedStart = end;
+        const expectedEnd = moment(end).add(windowMs, 'ms').toISOString();
+
+        expect(onChange).toHaveBeenCalledTimes(1);
+        const call = onChange.mock.calls[0][0];
+        expect(call.start).toBe(expectedStart);
+        expect(call.end).toBe(expectedEnd);
+        expect(call.startDate?.toISOString()).toBe(expectedStart);
+        expect(call.endDate?.toISOString()).toBe(expectedEnd);
+      }
+    );
+  });
+
   describe('zoomFactor', () => {
     it('throws for out-of-range values', () => {
       function renderPickerWithZoomFactor(zoomFactor: number | string) {

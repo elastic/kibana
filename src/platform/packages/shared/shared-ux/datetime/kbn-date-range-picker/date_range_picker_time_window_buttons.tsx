@@ -15,7 +15,7 @@ import { EuiButtonGroup, type EuiButtonGroupOptionProps } from '@elastic/eui';
 
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { durationToDisplayFullText } from './format';
-import { formatDateRange } from './utils';
+import { formatInputDateRange } from './utils';
 import { timeWindowButtonsTexts as translations } from './translations';
 
 /** Configuration for time window buttons. */
@@ -58,10 +58,8 @@ const BUTTON_ID_NEXT = 'next';
  * Provides step forward/backward and zoom out/in actions.
  */
 export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig }) {
-  const { timeRange, applyRange, compressed, disabled, readOnly, settings } =
-    useDateRangePickerContext();
+  const { timeRange, applyRange, compressed, disabled, readOnly } = useDateRangePickerContext();
   const isDisabled = disabled || readOnly;
-  const timePrecision = settings.timePrecision ?? 's';
   const {
     showShiftArrows = true,
     showZoomOut = true,
@@ -83,7 +81,7 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
     timeRange.startDate,
     timeRange.endDate,
     applyRange,
-    { zoomFactor, timePrecision }
+    { zoomFactor }
   );
 
   const onChange = useCallback(
@@ -230,7 +228,7 @@ function useTimeWindow(
   startDate: Date | null,
   endDate: Date | null,
   apply: (range: { start: string; end: string }, textOverride?: string) => void,
-  options: { zoomFactor: number | string; timePrecision: import('./types').TimePrecision }
+  options: { zoomFactor: number | string }
 ) {
   // Prefer pre-parsed dates when available to avoid passing non-standard date
   // strings (e.g. "Jan 2, 2025, 01:00:00") through dateMath.parse → moment(),
@@ -243,16 +241,15 @@ function useTimeWindow(
   const durationText = isInvalid ? '' : durationToDisplayFullText(min.toDate(), max.toDate());
   const zoomMultiplier = parseZoomFactor(options.zoomFactor);
   const zoomDelta = windowDuration * (zoomMultiplier / 2);
-  const { timePrecision } = options;
 
   const applyDates = useCallback(
     (s: moment.Moment, e: moment.Moment) => {
       apply(
         { start: s.toISOString(), end: e.toISOString() },
-        formatDateRange(s.toDate(), e.toDate(), timePrecision)
+        formatInputDateRange(s.toDate(), e.toDate())
       );
     },
-    [apply, timePrecision]
+    [apply]
   );
 
   const stepForward = useCallback(() => {
