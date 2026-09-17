@@ -62,6 +62,15 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
         : { score: null, label: 'N/A' }),
       metadata: {
         evidenceState: hasCompleteWorkflowEvidence ? 'complete' : 'incomplete',
+        // Which observable produced the count the comparison above used, so an
+        // `N/A` (or a surprise 0) is self-explaining from the score document
+        // alone: `none` means no source reported a number, `pipeline_*` means
+        // the product's Alert Retrieval phase did, and `agent_esql_retrieval`
+        // means the count came from the agent's OWN retrieval — the only source
+        // a `provided`-mode run (retrieval skipped by design) can have.
+        retrievedAlertCountSource: output.workflow.retrievedAlertCountSource ?? 'none',
+        alertRetrievalMode: output.workflow.retrievalEvidence?.alertRetrievalMode ?? null,
+        agentEsqlRowCounts: output.workflow.retrievalEvidence?.agentEsqlRowCounts ?? [],
         stages,
         expectedRetrievedAlertCount,
         expectedPassedAlertCount,

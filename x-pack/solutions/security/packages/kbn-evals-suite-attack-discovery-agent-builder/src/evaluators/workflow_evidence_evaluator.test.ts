@@ -11,6 +11,7 @@ import type {
   AttackDiscoveryAgentBuilderExpected,
   AttackDiscoveryAgentBuilderTaskOutput,
 } from '../types';
+import { EMPTY_RETRIEVAL_EVIDENCE } from '../types';
 
 interface Params {
   input: AttackDiscoveryAgentBuilderExample['input'];
@@ -28,8 +29,10 @@ const baseOutput = (
   workflow: {
     stages: [],
     retrievedAlertCount: null,
+    retrievedAlertCountSource: 'none',
     passedAlertCount: null,
     validatedDiscoveryCount: null,
+    retrievalEvidence: EMPTY_RETRIEVAL_EVIDENCE,
     ...overrides,
   },
 });
@@ -183,5 +186,56 @@ describe('createWorkflowEvidenceEvaluator', () => {
 
     expect(result.metadata?.evidenceState).toBe('complete');
     expect(result.score).toBe(1);
+  });
+
+  // The dense `provided`-mode shape: the pipeline reports no retrieved count (it
+  // skipped retrieval by design), so the count comes from the agent's own ES|QL
+  // retrieval. The score is no longer an `N/A`, and the metadata says which
+  // source produced the number that was compared.
+  it("scores a provided-mode run from the agent's own retrieval and names the source", async () => {
+    const expected = baseExpected({ expectedRetrievedAlertCount: 95 });
+    delete expected.expectedPassedAlertCount;
+    const params: Params = {
+      input: {} as Params['input'],
+      output: baseOutput({
+        retrievedAlertCount: 95,
+        retrievedAlertCountSource: 'agent_esql_retrieval',
+        passedAlertCount: 16,
+        retrievalEvidence: {
+          ...EMPTY_RETRIEVAL_EVIDENCE,
+          alertRetrievalMode: 'custom_query',
+          agentEsqlRowCounts: [95],
+        },
+      }),
+      expected,
+      metadata: {} as Params['metadata'],
+    };
+
+    const result = await evaluator.evaluate(params);
+
+    expect(result.metadata?.evidenceState).toBe('complete');
+    expect(result.score).toBe(1);
+    expect(result.metadata?.retrievedAlertCountSource).toBe('agent_esql_retrieval');
+    expect(result.metadata?.alertRetrievalMode).toBe('custom_query');
+    expect(result.metadata?.agentEsqlRowCounts).toEqual([95]);
+  });
+
+  // A future `N/A` must be explainable from the score document alone: an
+  // expectation that nothing observed reports `none` as the source rather than
+  // leaving the reader to reconstruct why the evidence was incomplete.
+  it('names the absence of a source when no observable reported a count', async () => {
+    const params: Params = {
+      input: {} as Params['input'],
+      output: baseOutput({ retrievedAlertCountSource: 'none' }),
+      expected: baseExpected({ expectedRetrievedAlertCount: 95 }),
+      metadata: {} as Params['metadata'],
+    };
+
+    const result = await evaluator.evaluate(params);
+
+    expect(result.metadata?.evidenceState).toBe('incomplete');
+    expect(result.label).toBe('N/A');
+    expect(result.metadata?.retrievedAlertCountSource).toBe('none');
+    expect(result.metadata?.agentEsqlRowCounts).toEqual([]);
   });
 });
