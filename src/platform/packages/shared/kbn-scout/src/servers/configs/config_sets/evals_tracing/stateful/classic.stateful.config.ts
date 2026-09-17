@@ -152,6 +152,7 @@ export const servers: ScoutServerConfig = {
             '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
             '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
             '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',
           ]
         : []),
     ],
