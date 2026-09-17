@@ -10,18 +10,3 @@ export { WORKERS_SEED } from './workers';
 export type { WatchWorkerSeed } from './workers';
 export { SKILLS_SEED } from './skills';
 export type { WatchSkillSeed } from './skills';
-
-export {
-  MOCK_INVESTIGATIONS,
-  MOCK_CLEAN_RUN_NOTE,
-  createMockInvestigation,
-  getMockInvestigationById,
-  getMockInvestigationsByWatchId,
-} from './investigations';
-
-export {
-  MOCK_PROPOSALS,
-  createMockProposal,
-  getMockProposalById,
-  getMockProposalsByInvestigationId,
-} from './proposals';

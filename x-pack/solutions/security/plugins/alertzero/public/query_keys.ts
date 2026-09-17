@@ -21,13 +21,6 @@ export const queryKeys = {
     all: ['alertzero', 'skills'] as const,
     list: () => [...queryKeys.skills.all, 'list'] as const,
   },
-  investigations: {
-    all: ['alertzero', 'investigations'] as const,
-    list: () => [...queryKeys.investigations.all, 'list'] as const,
-    detail: (id: string | undefined) => [...queryKeys.investigations.all, 'detail', id] as const,
-    proposals: (id: string | undefined) =>
-      [...queryKeys.investigations.all, 'proposals', id] as const,
-  },
   /** Durable proposals from the generic investigation proposals API. */
   proposals: {
     all: ['alertzero', 'investigation-proposals'] as const,
