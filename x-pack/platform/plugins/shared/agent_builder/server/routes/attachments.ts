@@ -99,6 +99,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         const result = await client.list({ conversationId, includeDeleted });
@@ -155,6 +156,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
@@ -316,6 +318,13 @@ export function registerAttachmentRoutes({
                   meta: { description: 'Whether the attachment should be hidden from the user.' },
                 })
               ),
+              render_inline: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.',
+                },
+              }),
             }),
           },
         },
@@ -335,6 +344,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
@@ -395,6 +405,13 @@ export function registerAttachmentRoutes({
                   meta: { description: 'Optional new description for the attachment.' },
                 })
               ),
+              render_inline: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.',
+                },
+              }),
             }),
           },
         },
@@ -414,6 +431,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
@@ -500,6 +518,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {

@@ -11,6 +11,7 @@ import type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
   AgenticInvestigationsPublicSetupDependencies,
+  AgenticInvestigationsPublicStartDependencies,
 } from './types';
 
 export class AgenticInvestigationsPublicPlugin implements Plugin<
@@ -25,7 +26,16 @@ export class AgenticInvestigationsPublicPlugin implements Plugin<
     return {};
   }
 
-  start(_core: CoreStart): AgenticInvestigationsPublicPluginStart {
+  start(
+    core: CoreStart,
+    startDeps: AgenticInvestigationsPublicStartDependencies
+  ): AgenticInvestigationsPublicPluginStart {
+    if (startDeps.agentBuilder) {
+      const agentBuilder = startDeps.agentBuilder;
+      void import('./proposals/attachments').then(({ registerProposalAttachmentTypes }) => {
+        registerProposalAttachmentTypes(agentBuilder);
+      });
+    }
     return {};
   }
 

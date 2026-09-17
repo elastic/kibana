@@ -217,6 +217,7 @@ export class AgentBuilderPlugin implements Plugin<
           attachmentsService: services.attachments,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'workflow',
         });
       },
       isExperimentalEnabled: this.isExperimentalEnabled,
@@ -452,6 +453,7 @@ export class AgentBuilderPlugin implements Plugin<
             attachmentsService: attachments,
             coreStart,
             spaces,
+            source: 'server_api',
           }),
       },
       conversationTemplates,

@@ -160,7 +160,7 @@ const toSummaryResult = (
   const source = aggregations?.last_doc?.hits?.hits?.[0]?._source as
     | {
         slo?: { groupings?: Groupings };
-        monitor?: { id?: string };
+        monitor?: { config_id?: string; id?: string };
         config_id?: string;
         observer?: { name?: string };
       }
@@ -361,7 +361,11 @@ function buildAggs(slo: SLODefinition) {
 
 function getMetaFields(
   slo: SLODefinition,
-  source: { monitor?: { id?: string }; config_id?: string; observer?: { name?: string } }
+  source: {
+    monitor?: { config_id?: string; id?: string };
+    config_id?: string;
+    observer?: { name?: string };
+  }
 ): Meta {
   const {
     indicator: { type },
@@ -372,7 +376,7 @@ function getMetaFields(
         synthetics: {
           monitorId: source.monitor?.id ?? '',
           locationId: source.observer?.name ?? '',
-          configId: source.config_id ?? '',
+          configId: source.monitor?.config_id ?? source.config_id ?? '',
         },
       };
     default:

@@ -597,25 +597,13 @@ export class ActionPolicyClient {
   }
 
   private buildFindFilter(params: FindActionPoliciesArgs): KueryNode | undefined {
-    const conditions: KueryNode[] = [];
     const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
 
     if (params.enabled !== undefined) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
+      return nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false');
     }
 
-    if (params.tags && params.tags.length > 0) {
-      const tagConditions = params.tags.map((tag) => nodeBuilder.is(`${attrPrefix}.tags`, tag));
-      conditions.push(
-        tagConditions.length === 1 ? tagConditions[0] : nodeBuilder.or(tagConditions)
-      );
-    }
-
-    if (conditions.length === 0) {
-      return undefined;
-    }
-
-    return conditions.length === 1 ? conditions[0] : nodeBuilder.and(conditions);
+    return undefined;
   }
 
   private mapSortField(sortField?: string): string | undefined {
@@ -630,12 +618,6 @@ export class ActionPolicyClient {
     };
 
     return sortFieldMap[sortField];
-  }
-
-  public async getTags(params?: { search?: string }): Promise<string[]> {
-    return this.actionPolicySavedObjectService.findTags({
-      search: params?.search,
-    });
   }
 
   /**
@@ -898,6 +880,8 @@ export class ActionPolicyClient {
     // PUT replaces every field accepted by createActionPolicyDataSchema. Audit
     // metadata (createdBy/createdAt) and operational state (enabled,
     // snoozedUntil) are not part of the create schema and are preserved here.
+    // Tags are also preserved: they are no longer part of the API contract but
+    // remain in the saved object so they can be re-exposed later.
     const replacementAttrs: ActionPolicySavedObjectAttributes = {
       ...buildCreateActionPolicyAttributes({
         data: parsed,
@@ -909,6 +893,7 @@ export class ActionPolicyClient {
       }),
       enabled: existingAttrs.enabled,
       snoozedUntil: existingAttrs.snoozedUntil,
+      tags: existingAttrs.tags,
     };
 
     let updated: { id: string; version?: string };

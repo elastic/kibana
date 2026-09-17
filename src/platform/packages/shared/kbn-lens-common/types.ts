@@ -257,6 +257,7 @@ export interface PublicAPIProps<T> {
   state: T;
   layerId: string;
   indexPatterns: IndexPatternMap;
+  activeDataTable?: Datatable;
 }
 
 export type FieldOnlyDataType =
@@ -507,12 +508,6 @@ export interface IndexPatternServiceAPI {
   ) => void;
 }
 
-export interface PublicAPIProps<T> {
-  state: T;
-  layerId: string;
-  indexPatterns: IndexPatternMap;
-}
-
 export interface EditorFrameProps {
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
@@ -667,6 +662,9 @@ export interface GetDropPropsArgs<T = unknown> {
   source?: DraggingIdentifier;
   target: DragDropOperation;
   indexPatterns: IndexPatternMap;
+  // Layer inspector tables. Lets datasources resolve column types against the
+  // Query Result Type overlay for drop decisions; datasources that don't need it can ignore it.
+  activeData?: TableInspectorAdapter;
 }
 
 export interface UserMessage {

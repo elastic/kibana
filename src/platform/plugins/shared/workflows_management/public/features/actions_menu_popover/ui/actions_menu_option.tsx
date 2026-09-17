@@ -21,6 +21,7 @@ import React from 'react';
 import type { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { getBaseConnectorType } from '@kbn/workflows-ui';
+import { getActionIconTileVariantStyle } from './action_icon_tile.styles';
 import type { componentStyles } from './actions_menu.styles';
 import { ActionsMenuAiIcon } from './ai_icon_tile';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
@@ -28,12 +29,13 @@ import { getIconGlyphColor } from '../lib/get_action_options';
 import { STEPS_PREFIX } from '../lib/use_display_options';
 import {
   type ActionOptionData,
+  type EditorCommand,
   getMenuItemData,
-  type IconVariant,
   isActionConnectorGroup,
   isActionConnectorOption,
   isActionGroup,
   isActionOption,
+  type JumpToStepEntry,
 } from '../types';
 
 export const KEYBOARD_ACTIVE_CLASS = 'actionsMenu-keyboardActive';
@@ -70,26 +72,266 @@ export function getOptionActionId(option: EuiSelectableOption): string | undefin
   return (option as { id?: string }).id;
 }
 
-function getIconOuterStyle(variant: IconVariant | undefined, styles: ActionsMenuStyles) {
-  switch (variant) {
-    case 'trigger':
-      return styles.iconOuterTrigger;
-    case 'external':
-    case 'neutral':
-      return styles.iconOuterAppLogo;
-    case 'flowControl':
-      return styles.iconOuterFlowControl;
-    case 'dataTransformation':
-      return styles.iconOuterDataTransformation;
-    case 'platform':
-      return styles.iconOuterPlatform;
-    case undefined:
-      return styles.iconOuterPlatform;
-    default: {
-      const exhaustiveCheck: never = variant;
-      return exhaustiveCheck;
-    }
+function getEffectiveSearch(searchTerm: string, searchValue: string): string {
+  const rawSearch = (searchTerm || searchValue).trim();
+  if (rawSearch.startsWith(STEPS_PREFIX)) {
+    return rawSearch.slice(STEPS_PREFIX.length).trim();
   }
+  if (rawSearch.startsWith('#')) {
+    return rawSearch.slice(1).trim();
+  }
+  return rawSearch;
+}
+
+function getKeyboardActiveClassName(
+  rawOption: EuiSelectableOption,
+  keyboardIndex: number | null,
+  actionableDisplayOptions: EuiSelectableOption[]
+): string | undefined {
+  const keyboardOption =
+    keyboardIndex != null ? actionableDisplayOptions[keyboardIndex] : undefined;
+  if (keyboardOption == null) {
+    return undefined;
+  }
+  const keyboardKey = getSelectableOptionKey(keyboardOption);
+  if (keyboardKey == null || keyboardKey !== getSelectableOptionKey(rawOption)) {
+    return undefined;
+  }
+  return KEYBOARD_ACTIVE_CLASS;
+}
+
+function ActionOptionIcon({
+  action,
+  styles,
+  glyphColor,
+}: {
+  action: ActionOptionData;
+  styles: ActionsMenuStyles;
+  glyphColor: string | undefined;
+}): React.ReactNode {
+  if (isActionConnectorGroup(action) || isActionConnectorOption(action)) {
+    if ('iconType' in action && action.iconType === 'sparkles') {
+      return <ActionsMenuAiIcon />;
+    }
+    return (
+      <StepIcon stepType={getBaseConnectorType(action.connectorType)} executionStatus={undefined} />
+    );
+  }
+  if (isActionGroup(action) || isActionOption(action)) {
+    if (action.iconType === 'sparkles') {
+      return <ActionsMenuAiIcon />;
+    }
+    return <EuiIcon type={action.iconType} size="m" color={glyphColor} aria-hidden={true} />;
+  }
+  return null;
+}
+
+function renderCommandOption({
+  command,
+  label,
+  effectiveSearch,
+  keyboardActiveClassName,
+  styles,
+  euiTheme,
+}: {
+  command: EditorCommand;
+  label: string;
+  effectiveSearch: string;
+  keyboardActiveClassName: string | undefined;
+  styles: ActionsMenuStyles;
+  euiTheme: EuiThemeComputed;
+}): React.ReactNode {
+  return (
+    <div css={styles.optionPad} className={keyboardActiveClassName} data-command-id={command.id}>
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false} css={[styles.tile, styles.command]}>
+          <span css={styles.iconInner}>
+            <EuiIcon
+              type={command.iconType}
+              size="m"
+              color={euiTheme.colors.textParagraph}
+              aria-hidden={true}
+            />
+          </span>
+        </EuiFlexItem>
+        <EuiFlexItem css={styles.optionInfo} grow>
+          <EuiTitle size="xxxs">
+            <h6>
+              <EuiHighlight search={effectiveSearch} highlightAll>
+                {label}
+              </EuiHighlight>
+            </h6>
+          </EuiTitle>
+          {command.description && (
+            <EuiText size="xs" color="subdued" css={styles.optionDescription}>
+              <EuiHighlight search={effectiveSearch} highlightAll>
+                {command.description}
+              </EuiHighlight>
+            </EuiText>
+          )}
+        </EuiFlexItem>
+        {command.shortcut && command.shortcut.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <span css={styles.shortcutContainer}>
+              {command.shortcut.map((key) => (
+                <kbd key={key}>{key}</kbd>
+              ))}
+            </span>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </div>
+  );
+}
+
+function renderJumpOption({
+  entry,
+  label,
+  effectiveSearch,
+  keyboardActiveClassName,
+  styles,
+}: {
+  entry: JumpToStepEntry;
+  label: string;
+  effectiveSearch: string;
+  keyboardActiveClassName: string | undefined;
+  styles: ActionsMenuStyles;
+}): React.ReactNode {
+  return (
+    <div css={styles.optionPad} className={keyboardActiveClassName} data-jump-id={entry.id}>
+      <EuiText size="s">
+        <EuiHighlight search={effectiveSearch} highlightAll>
+          {label}
+        </EuiHighlight>
+      </EuiText>
+    </div>
+  );
+}
+
+function renderNavOption({
+  label,
+  keyboardActiveClassName,
+  styles,
+}: {
+  label: string;
+  keyboardActiveClassName: string | undefined;
+  styles: ActionsMenuStyles;
+}): React.ReactNode {
+  return (
+    <div css={styles.optionPad} className={keyboardActiveClassName}>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="xs"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="primary">
+            {label}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="chevronSingleRight" size="s" color="primary" aria-hidden={true} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+}
+
+function renderStepActionOption({
+  action,
+  effectiveSearch,
+  keyboardActiveClassName,
+  styles,
+  euiTheme,
+}: {
+  action: ActionOptionData;
+  effectiveSearch: string;
+  keyboardActiveClassName: string | undefined;
+  styles: ActionsMenuStyles;
+  euiTheme: EuiThemeComputed;
+}): React.ReactNode {
+  const shouldUseGroupStyle = isActionGroup(action) || isActionConnectorGroup(action);
+  const glyphColor =
+    getIconGlyphColor(action.iconVariant, euiTheme) ??
+    ('iconColor' in action ? action.iconColor : undefined);
+
+  return (
+    <div
+      css={styles.optionPad}
+      className={['actionOptionWrapper', keyboardActiveClassName].filter(Boolean).join(' ')}
+      data-option-id={action.id}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem
+          grow={false}
+          css={[styles.tile, getActionIconTileVariantStyle(action.iconVariant, styles)]}
+        >
+          <span css={styles.iconInner}>
+            <ActionOptionIcon action={action} styles={styles} glyphColor={glyphColor} />
+          </span>
+        </EuiFlexItem>
+        <EuiFlexItem css={styles.optionInfo} grow>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxxs">
+                  <h6>
+                    <EuiHighlight search={effectiveSearch} highlightAll>
+                      {action.label}
+                    </EuiHighlight>
+                  </h6>
+                </EuiTitle>
+              </EuiFlexItem>
+              {action.stability === 'tech_preview' && (
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    iconType="flask"
+                    label={i18n.translate('workflows.actionsMenu.techPreviewBadge', {
+                      defaultMessage: 'Tech preview',
+                    })}
+                    size="s"
+                  />
+                </EuiFlexItem>
+              )}
+              {action.stability === 'beta' && (
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    label={i18n.translate('workflows.actionsMenu.betaBadge', {
+                      defaultMessage: 'Beta',
+                    })}
+                    size="s"
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            {action.instancesLabel ? (
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="xs">
+                  {action.instancesLabel}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+          <EuiText size="xs" color="subdued" css={styles.optionDescription}>
+            <EuiHighlight search={effectiveSearch} highlightAll>
+              {action.description || ''}
+            </EuiHighlight>
+          </EuiText>
+        </EuiFlexItem>
+        {shouldUseGroupStyle ? (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="chevronSingleRight" size="s" color="subdued" aria-hidden={true} />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    </div>
+  );
 }
 
 interface RenderActionOptionParams {
@@ -112,206 +354,50 @@ export function renderActionOption({
   euiTheme,
 }: RenderActionOptionParams): React.ReactNode {
   const itemData = getMenuItemData(rawOption);
-  const rawSearch = (searchTerm || searchValue).trim();
-  const effectiveSearch = rawSearch.startsWith(STEPS_PREFIX)
-    ? rawSearch.slice(STEPS_PREFIX.length).trim()
-    : rawSearch.startsWith('#')
-      ? rawSearch.slice(1).trim()
-      : rawSearch;
-
-  const keyboardOption =
-    keyboardIndex != null ? actionableDisplayOptions[keyboardIndex] : undefined;
-  const isKeyboardActive =
-    keyboardOption != null &&
-    getSelectableOptionKey(keyboardOption) != null &&
-    getSelectableOptionKey(keyboardOption) === getSelectableOptionKey(rawOption);
-  const keyboardActiveClassName = isKeyboardActive ? KEYBOARD_ACTIVE_CLASS : undefined;
+  const effectiveSearch = getEffectiveSearch(searchTerm, searchValue);
+  const keyboardActiveClassName = getKeyboardActiveClassName(
+    rawOption,
+    keyboardIndex,
+    actionableDisplayOptions
+  );
 
   if (itemData?.kind === 'command') {
-    const { command } = itemData;
-    return (
-      <div
-        css={styles.actionOptionWrapper}
-        className={keyboardActiveClassName}
-        data-command-id={command.id}
-      >
-        <EuiFlexGroup
-          alignItems="center"
-          css={styles.actionOption}
-          gutterSize="none"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false} css={[styles.iconOuter, styles.iconOuterCommand]}>
-            <span css={styles.actionIconInner}>
-              <EuiIcon
-                type={command.iconType}
-                size="m"
-                color={euiTheme.colors.textParagraph}
-                aria-hidden={true}
-              />
-            </span>
-          </EuiFlexItem>
-          <EuiFlexItem css={styles.actionInfo}>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiTitle size="xxxs" css={styles.actionTitle}>
-                  <h6>
-                    <EuiHighlight search={effectiveSearch} highlightAll>
-                      {rawOption.label}
-                    </EuiHighlight>
-                  </h6>
-                </EuiTitle>
-              </EuiFlexItem>
-              {command.description && (
-                <EuiFlexItem>
-                  <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
-                    <EuiHighlight search={effectiveSearch} highlightAll>
-                      {command.description}
-                    </EuiHighlight>
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {command.shortcut && command.shortcut.length > 0 && (
-            <EuiFlexItem grow={false} css={styles.shortcutContainer}>
-              {command.shortcut.map((key) => (
-                <kbd key={key} css={styles.shortcutKey}>
-                  {key}
-                </kbd>
-              ))}
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </div>
-    );
+    return renderCommandOption({
+      command: itemData.command,
+      label: rawOption.label,
+      effectiveSearch,
+      keyboardActiveClassName,
+      styles,
+      euiTheme,
+    });
   }
 
   if (itemData?.kind === 'jump') {
-    return (
-      <div
-        css={styles.compactOptionWrapper}
-        className={keyboardActiveClassName}
-        data-jump-id={itemData.entry.id}
-      >
-        <EuiText size="s">
-          <EuiHighlight search={effectiveSearch} highlightAll>
-            {rawOption.label}
-          </EuiHighlight>
-        </EuiText>
-      </div>
-    );
+    return renderJumpOption({
+      entry: itemData.entry,
+      label: rawOption.label,
+      effectiveSearch,
+      keyboardActiveClassName,
+      styles,
+    });
   }
 
   if (itemData?.kind === 'nav') {
-    return (
-      <div css={styles.compactOptionWrapper} className={keyboardActiveClassName}>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          gutterSize="xs"
-          css={styles.viewAllLink}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="primary">
-              {rawOption.label}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="chevronSingleRight" size="s" color="primary" aria-hidden={true} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    );
+    return renderNavOption({
+      label: rawOption.label,
+      keyboardActiveClassName,
+      styles,
+    });
   }
 
   const action =
     itemData?.kind === 'action' ? itemData.action : (rawOption as unknown as ActionOptionData);
-  const shouldUseGroupStyle = isActionGroup(action) || isActionConnectorGroup(action);
-  const glyphColor =
-    getIconGlyphColor(action.iconVariant, euiTheme) ??
-    ('iconColor' in action ? action.iconColor : undefined);
 
-  return (
-    <div
-      css={styles.actionOptionWrapper}
-      className={['actionOptionWrapper', keyboardActiveClassName].filter(Boolean).join(' ')}
-      data-option-id={action.id}
-    >
-      <EuiFlexGroup alignItems="center" css={styles.actionOption} gutterSize="none">
-        <EuiFlexItem
-          grow={false}
-          css={[styles.iconOuter, getIconOuterStyle(action.iconVariant, styles)]}
-        >
-          <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
-            {isActionConnectorGroup(action) || isActionConnectorOption(action) ? (
-              'iconType' in action && action.iconType === 'sparkles' ? (
-                <ActionsMenuAiIcon />
-              ) : (
-                <StepIcon
-                  stepType={getBaseConnectorType(action.connectorType)}
-                  executionStatus={undefined}
-                />
-              )
-            ) : isActionGroup(action) || isActionOption(action) ? (
-              action.iconType === 'sparkles' ? (
-                <ActionsMenuAiIcon />
-              ) : (
-                <EuiIcon type={action.iconType} size="m" color={glyphColor} aria-hidden={true} />
-              )
-            ) : null}
-          </span>
-        </EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="none" css={styles.actionInfo}>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiTitle size="xxxs" css={styles.actionTitle}>
-                  <h6>
-                    <EuiHighlight search={effectiveSearch} highlightAll>
-                      {action.label}
-                    </EuiHighlight>
-                  </h6>
-                </EuiTitle>
-                {action.stability === 'tech_preview' && (
-                  <EuiBetaBadge
-                    iconType="flask"
-                    label={i18n.translate('workflows.actionsMenu.techPreviewBadge', {
-                      defaultMessage: 'Tech preview',
-                    })}
-                    size="s"
-                    css={styles.techPreviewBadge}
-                  />
-                )}
-                {action.stability === 'beta' && (
-                  <EuiBetaBadge
-                    label={i18n.translate('workflows.actionsMenu.betaBadge', {
-                      defaultMessage: 'Beta',
-                    })}
-                    size="s"
-                    css={styles.techPreviewBadge}
-                  />
-                )}
-              </EuiFlexGroup>
-              <EuiText color="subdued" size="xs">
-                {action.instancesLabel}
-              </EuiText>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
-              <EuiHighlight search={effectiveSearch} highlightAll>
-                {action.description || ''}
-              </EuiHighlight>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {shouldUseGroupStyle ? (
-          <EuiFlexItem grow={false} css={styles.arrowContainer}>
-            <EuiIcon type="chevronSingleRight" size="s" css={styles.arrow} aria-hidden={true} />
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </div>
-  );
+  return renderStepActionOption({
+    action,
+    effectiveSearch,
+    keyboardActiveClassName,
+    styles,
+    euiTheme,
+  });
 }

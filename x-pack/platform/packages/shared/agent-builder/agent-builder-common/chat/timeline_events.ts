@@ -90,6 +90,10 @@ export enum TimelineEventType {
   executionTerminated = 'execution_terminated',
   executionFailed = 'execution_failed',
   executionAborted = 'execution_aborted',
+  // Attachment lifecycle
+  attachmentAdded = 'attachment_added',
+  attachmentUpdated = 'attachment_updated',
+  attachmentDeleted = 'attachment_deleted',
 }
 
 /** Fields the server fills in when an event is accepted; absent on producer input. */
@@ -239,6 +243,69 @@ export type ExecutionAbortedEvent = BaseTimelineEvent<
   ExecutionAbortedEventData
 >;
 
+/** What triggered an attachment mutation. */
+export type AttachmentEventSource =
+  | 'workflow'
+  | 'http_api'
+  | 'server_api'
+  | 'chat_input'
+  | 'execution';
+
+/** An attachment was created in the conversation. */
+export interface AttachmentAddedEventData {
+  attachment_id: string;
+  attachment_type: string;
+  /** Always 1 today; kept so consumers never special-case the first version. */
+  current_version: number;
+  /** When true, the UI should render the attachment automatically on open. */
+  render_inline: boolean;
+  source: AttachmentEventSource;
+}
+export type AttachmentAddedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentAdded,
+  AttachmentAddedEventData
+>;
+
+/** An attachment received a new content version. */
+export interface AttachmentUpdatedEventData {
+  attachment_id: string;
+  attachment_type: string;
+  previous_version: number;
+  current_version: number;
+  render_inline: boolean;
+  source: AttachmentEventSource;
+}
+export type AttachmentUpdatedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentUpdated,
+  AttachmentUpdatedEventData
+>;
+
+/** An attachment was soft- or hard-deleted. */
+export interface AttachmentDeletedEventData {
+  attachment_id: string;
+  attachment_type: string;
+  hard_delete: boolean;
+  source: AttachmentEventSource;
+}
+export type AttachmentDeletedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentDeleted,
+  AttachmentDeletedEventData
+>;
+
+export type AttachmentTimelineEvent =
+  | AttachmentAddedEvent
+  | AttachmentUpdatedEvent
+  | AttachmentDeletedEvent;
+
+const ATTACHMENT_EVENT_TYPES: ReadonlySet<string> = new Set([
+  TimelineEventType.attachmentAdded,
+  TimelineEventType.attachmentUpdated,
+  TimelineEventType.attachmentDeleted,
+]);
+
+export const isAttachmentEvent = (event: { type: string }): event is AttachmentTimelineEvent =>
+  ATTACHMENT_EVENT_TYPES.has(event.type);
+
 /** The discriminated union of all stored timeline events. */
 export type TimelineEvent =
   | UserMessageEvent
@@ -247,7 +314,10 @@ export type TimelineEvent =
   | ExecutionStepEvent
   | ExecutionTerminatedEvent
   | ExecutionFailedEvent
-  | ExecutionAbortedEvent;
+  | ExecutionAbortedEvent
+  | AttachmentAddedEvent
+  | AttachmentUpdatedEvent
+  | AttachmentDeletedEvent;
 
 /** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
 export type TimelineEventInput =
@@ -257,7 +327,10 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData>
   | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
-  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>;
+  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentAdded, AttachmentAddedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentUpdated, AttachmentUpdatedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>;
 
 /**
  * The run lock held on a conversation while an execution is active.
