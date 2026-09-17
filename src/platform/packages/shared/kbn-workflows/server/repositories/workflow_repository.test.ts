@@ -7,9 +7,86 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowRepository } from './workflow_repository';
 import { WORKFLOW_INDEX_NAME } from '../constants';
+
+describe('stored workflow ACLs', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const repository = new WorkflowRepository({
+    esClient,
+    logger: loggingSystemMock.create().get(),
+  });
+  const entry = {
+    type: 'user',
+    id: 'reader',
+    role: 'viewer',
+    added_at: '2026-09-17T00:00:00.000Z',
+  };
+
+  it.each([
+    { name: 'null', acl: null },
+    { name: 'false', acl: false },
+    { name: 'missing mode', acl: { entries: [] } },
+    { name: 'invalid mode', acl: { access_mode: 'privte', entries: [] } },
+    { name: 'missing entries', acl: { access_mode: 'private' } },
+    { name: 'non-array entries', acl: { access_mode: 'private', entries: {} } },
+    {
+      name: 'invalid role',
+      acl: { access_mode: 'private', entries: [{ ...entry, role: 'owner' }] },
+    },
+    {
+      name: 'missing timestamp',
+      acl: { access_mode: 'private', entries: [{ type: 'user', id: 'reader', role: 'viewer' }] },
+    },
+    {
+      name: 'too many entries',
+      acl: { access_mode: 'private', entries: Array.from({ length: 101 }, () => entry) },
+    },
+  ])('rejects $name in single and bulk reads', async ({ acl }) => {
+    esClient.search.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: {
+        hits: [{ _index: 'workflows', _id: 'workflow', _source: { access_control: acl } }],
+      },
+    });
+
+    await expect(repository.getWorkflow('workflow', 'default')).rejects.toThrow();
+    await expect(
+      repository.getWorkflowExecutionStates([{ workflowId: 'workflow', spaceId: 'default' }])
+    ).rejects.toThrow();
+  });
+
+  it.each([
+    { name: 'legacy', acl: undefined },
+    { name: 'public', acl: { access_mode: 'public', entries: [] } },
+    { name: 'private', acl: { access_mode: 'private', entries: [entry] } },
+  ])('preserves $name access in single and bulk reads', async ({ acl }) => {
+    esClient.search.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: {
+        hits: [
+          {
+            _index: 'workflows',
+            _id: 'workflow',
+            _source: { spaceId: 'default', enabled: true, access_control: acl },
+          },
+        ],
+      },
+    });
+
+    const workflow = await repository.getWorkflow('workflow', 'default');
+    const states = await repository.getWorkflowExecutionStates([
+      { workflowId: 'workflow', spaceId: 'default' },
+    ]);
+    expect(workflow?.access_control).toEqual(acl);
+    expect(states.get('default:workflow')).toEqual({ enabled: true, access_control: acl });
+  });
+});
 
 describe('WorkflowRepository.areWorkflowsEnabled', () => {
   let repository: WorkflowRepository;
@@ -21,6 +98,46 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
       esClient: esClient as any,
       logger: loggingSystemMock.create().get(),
     });
+  });
+
+  it('loads ACLs and enabled state together for global workflows', async () => {
+    const accessControl = { access_mode: 'private', entries: [] };
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'private',
+            _source: {
+              spaceId: '*',
+              enabled: true,
+              owner_id: 'owner',
+              access_control: accessControl,
+            },
+          },
+        ],
+      },
+    });
+    const result = await repository.getWorkflowExecutionStates(
+      [
+        { workflowId: 'private', spaceId: 'space-a' },
+        { workflowId: 'private', spaceId: 'space-b' },
+        { workflowId: 'missing', spaceId: 'space-a' },
+      ],
+      { includeGlobal: true }
+    );
+    const state = { enabled: true, owner_id: 'owner', access_control: accessControl };
+    expect([...result]).toEqual([
+      ['space-a:private', state],
+      ['space-b:private', state],
+      ['space-a:missing', { enabled: false }],
+    ]);
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
+        allow_partial_search_results: false,
+      })
+    );
   });
 
   it('returns an empty map without hitting ES when refs is empty', async () => {
@@ -48,7 +165,7 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: WORKFLOW_INDEX_NAME,
-        _source: ['enabled', 'spaceId'],
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
         size: 2,
         query: expect.objectContaining({
           bool: expect.objectContaining({
@@ -202,6 +319,37 @@ describe('WorkflowRepository.getWorkflow', () => {
     yaml: 'name: My workflow',
     tags: ['a'],
   };
+
+  it.each([false, true])(
+    'keeps deletion filtering explicit with includeDeleted=%s',
+    async (includeDeleted) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: { hits: [] },
+      });
+      const repository = new WorkflowRepository({
+        esClient,
+        logger: loggingSystemMock.create().get(),
+      });
+
+      await repository.getWorkflow('wf-1', 'default', { includeDeleted });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          allow_partial_search_results: false,
+          query: {
+            bool: {
+              must: [{ ids: { values: ['wf-1'] } }, { term: { spaceId: 'default' } }],
+              must_not: includeDeleted ? [] : [{ exists: { field: 'deleted_at' } }],
+            },
+          },
+        })
+      );
+    }
+  );
 
   it('maps snake_case timestamps from the workflow index to EsWorkflow dates', async () => {
     const esClient = {

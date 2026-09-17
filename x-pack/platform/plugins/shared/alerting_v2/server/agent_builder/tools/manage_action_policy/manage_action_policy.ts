@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { KibanaRequest } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -35,10 +36,12 @@ const manageActionPolicySchema = z.object({
 
 export interface ManageActionPolicyToolDeps {
   logger: LoggerServiceContract;
-  getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
+  getWorkflowClient: (request: KibanaRequest) => {
+    getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
+  };
   getAvailableConnectors: (
     spaceId: string,
-    request: import('@kbn/core/server').KibanaRequest
+    request: KibanaRequest
   ) => Promise<{
     connectorTypes: Record<string, { instances: Array<{ id: string; name: string }> }>;
   }>;
@@ -46,7 +49,7 @@ export interface ManageActionPolicyToolDeps {
 
 export const manageActionPolicyTool = ({
   logger,
-  getWorkflow,
+  getWorkflowClient,
   getAvailableConnectors,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
   id: ALERTING_TOOL_IDS.manageActionPolicy,
@@ -110,7 +113,7 @@ Use operations[] to:
 
         await validateDestinations(updatedData.destinations, {
           attachments,
-          workflowLookup: { getWorkflow },
+          workflowLookup: getWorkflowClient(request),
           connectorLookup: { findConnectorById },
           spaceId,
         });

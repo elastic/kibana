@@ -36,6 +36,7 @@ export const registerCreateProposalRoute = ({
       async (_context, request, response) => {
         try {
           const proposal = await getProposalsService().create(request.body, {
+            request,
             spaceId: getSpaceId(request),
             user: await resolveUser(request),
           });

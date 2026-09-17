@@ -430,10 +430,9 @@ const createWorkflowTriggerRoute = (
       // space so they appear in that space's Workflows UI.
       const executionSpaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-      const workflow = await wfMgmt.management.getWorkflow(
-        managedWorkflowId,
-        GLOBAL_WORKFLOW_SPACE_ID
-      );
+      const workflow = await wfMgmt.management
+        .getClient(request)
+        .getWorkflow(managedWorkflowId, GLOBAL_WORKFLOW_SPACE_ID);
       if (!workflow || !workflow.definition) {
         throw notFound(
           `Managed workflow "${managedWorkflowId}" not found. Kibana may still be starting up.`
@@ -530,7 +529,9 @@ const getMemoryWorkflowsEnabledRoute = createServerRoute({
     }
 
     const fetchedWorkflows = await Promise.all(
-      MEMORY_WORKFLOW_IDS.map((id) => wfMgmt.management.getWorkflow(id, GLOBAL_WORKFLOW_SPACE_ID))
+      MEMORY_WORKFLOW_IDS.map((id) =>
+        wfMgmt.management.getClient(request).getWorkflow(id, GLOBAL_WORKFLOW_SPACE_ID)
+      )
     );
     const workflows = MEMORY_WORKFLOW_IDS.map((id, index) => ({
       id,
@@ -580,10 +581,9 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
     const failures: string[] = [];
 
     for (const managedWorkflowId of MEMORY_WORKFLOW_IDS) {
-      const workflow = await wfMgmt.management.getWorkflow(
-        managedWorkflowId,
-        GLOBAL_WORKFLOW_SPACE_ID
-      );
+      const workflow = await wfMgmt.management
+        .getClient(request)
+        .getWorkflow(managedWorkflowId, GLOBAL_WORKFLOW_SPACE_ID);
       if (!workflow) {
         failures.push(`"${managedWorkflowId}" was not found`);
         continue;

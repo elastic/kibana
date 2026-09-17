@@ -35,7 +35,8 @@ export class ConversationProposalsService {
   ): Promise<GetProposalsListResponse> {
     const { proposals, truncated } = await this.proposalsService.listByWindow(
       { includeStatuses: ['pending'], decidedWithinHours: query.windowHours },
-      spaceId
+      spaceId,
+      request
     );
 
     const titles = await this.getTitles(

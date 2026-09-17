@@ -37,10 +37,9 @@ export const triggerMemorySynthesisWorkflow = async ({
   }
 
   const executionSpaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-  const workflow = await workflowsManagement.management.getWorkflow(
-    SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-    GLOBAL_WORKFLOW_SPACE_ID
-  );
+  const workflow = await workflowsManagement.management
+    .getClient(request)
+    .getWorkflow(SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID, GLOBAL_WORKFLOW_SPACE_ID);
 
   if (!workflow || !workflow.definition) {
     logger.warn(

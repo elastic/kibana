@@ -489,7 +489,9 @@ describe('verify_ki workflow step', () => {
 
       await runHandler({ title: 'x' }, { verifiers: [{ workflow_id: 'no-pii', timeout_sec: 15 }] });
 
-      expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('no-pii', 'space-a');
+      expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('no-pii', 'space-a', {
+        headers: {},
+      });
       expect(workflowsManagement.runWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'no-pii' }),
         'space-a',
@@ -629,7 +631,8 @@ describe('verify_ki workflow step', () => {
 
       expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
         'verifier-exec',
-        'space-a'
+        'space-a',
+        { request: { headers: {} } }
       );
       expect(thrown.type).toBe('InputValidationError');
       expect(thrown.message).toBe(

@@ -413,7 +413,11 @@ export class NightshiftInvestigationsClient {
     const spaceId = this.getSpaceId();
 
     const workflowId = workflowIdForSubject(subject);
-    const workflow = await this.workflowsManagement.management.getWorkflow(workflowId, spaceId);
+    const workflow = await this.workflowsManagement.management.getWorkflow(
+      workflowId,
+      spaceId,
+      this.request
+    );
 
     if (!workflow?.definition) {
       this.logger.error(
@@ -552,7 +556,7 @@ export class NightshiftInvestigationsClient {
     const execution = await this.workflowsManagement.management.getWorkflowExecution(
       investigationId,
       spaceId,
-      { includeOutput: false }
+      { includeOutput: false, request: this.request }
     );
 
     if (!execution || !isInvestigationWorkflowExecution(execution)) {

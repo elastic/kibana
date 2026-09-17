@@ -30,19 +30,26 @@ export interface WatchWorkflowsManagementClient {
       visibilityContext?: string[];
     },
     spaceId: string,
+    request: KibanaRequest,
     options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
   ): Promise<WorkflowListDto>;
 
-  getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null>;
+  getWorkflow(
+    id: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto | null>;
 
   getWorkflowExecutions(
     params: { workflowId: string; page?: number; size?: number },
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<WorkflowExecutionListDto>;
 
   getWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<WorkflowExecutionDto | null>;
 
   cancelAllActiveWorkflowExecutions(
@@ -78,9 +85,10 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
       visibilityContext?: string[];
     },
     spaceId: string,
+    request: KibanaRequest,
     options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
-    return this.management.getWorkflows(
+    return this.management.getClient(request).getWorkflows(
       {
         ...params,
         size: params.size ?? 100,
@@ -91,22 +99,28 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
     );
   }
 
-  getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
-    return this.management.getWorkflow(id, spaceId);
+  getWorkflow(
+    id: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto | null> {
+    return this.management.getClient(request).getWorkflow(id, spaceId);
   }
 
   getWorkflowExecutions(
     params: { workflowId: string; page?: number; size?: number },
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<WorkflowExecutionListDto> {
-    return this.management.getWorkflowExecutions(params, spaceId);
+    return this.management.getClient(request).getWorkflowExecutions(params, spaceId);
   }
 
   getWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<WorkflowExecutionDto | null> {
-    return this.management.getWorkflowExecution(workflowExecutionId, spaceId);
+    return this.management.getClient(request).getWorkflowExecution(workflowExecutionId, spaceId);
   }
 
   cancelAllActiveWorkflowExecutions(

@@ -10,7 +10,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import type { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowAccessSubject, WorkflowYaml } from '@kbn/workflows';
 import { workflowSystemIndex } from './indices';
 
 export const workflowIndexName = workflowSystemIndex('workflows');
@@ -20,6 +20,19 @@ const storageSettings = {
   schema: {
     properties: {
       // ONLY map fields we actively search/filter/aggregate on
+      owner_id: types.keyword({}),
+      access_control: types.object({
+        dynamic: false,
+        properties: {
+          access_mode: types.keyword({}),
+          entries: types.object({
+            dynamic: false,
+            properties: {
+              id: types.keyword({}),
+            },
+          }),
+        },
+      }),
       name: types.text({
         fields: {
           keyword: { type: 'keyword', ignore_above: 256 },
@@ -57,7 +70,7 @@ const storageSettings = {
   },
 } satisfies IndexStorageSettings;
 
-export interface WorkflowProperties {
+export interface WorkflowProperties extends WorkflowAccessSubject {
   // TODO: we can remove this name, since we use the WorkflowYaml object to get the name
   name: string;
   description?: string;

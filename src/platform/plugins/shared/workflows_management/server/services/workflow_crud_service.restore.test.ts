@@ -8,8 +8,7 @@
  */
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
-import type { CoreStart } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { UpdatedWorkflowResponseDto } from '@kbn/workflows';
 import { InvalidYamlSchemaError } from '@kbn/workflows-yaml';
@@ -336,7 +335,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
         getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
       } as unknown as WorkflowExecutionQueryService,
       validationService,
-      getCoreStart: () => ({} as CoreStart),
+      getCoreStart: () => coreMock.createStart(),
       changeHistoryService,
       workflowExecutionsDataClient: {
         deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),

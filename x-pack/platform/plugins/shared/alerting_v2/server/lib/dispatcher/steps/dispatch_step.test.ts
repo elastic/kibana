@@ -35,11 +35,29 @@ const getExecutionIds = (
 const getScheduledGroupCount = (result: Awaited<ReturnType<DispatchStep['execute']>>): number =>
   result.type === 'continue' ? result.data?.outcome?.scheduledGroupCount ?? 0 : 0;
 
-const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
-  ({
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
-    bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> => {
+  const getWorkflowsByIds = jest.fn().mockResolvedValue([]);
+  const bulkScheduleWorkflow = jest.fn().mockResolvedValue([]);
+  return {
+    getWorkflowsByIds,
+    getWorkflowsByIdsForRequests: jest.fn(
+      (
+        lookups: Parameters<
+          WorkflowsServerPluginSetup['management']['getWorkflowsByIdsForRequests']
+        >[0]
+      ) =>
+        Promise.allSettled(
+          lookups.map(({ ids, spaceId, request }) => getWorkflowsByIds(ids, spaceId, request))
+        )
+    ),
+    bulkScheduleWorkflow,
+    getClient: jest.fn((request) => ({
+      bulkScheduleWorkflow: (
+        items: Parameters<WorkflowsServerPluginSetup['management']['bulkScheduleWorkflow']>[0]
+      ) => bulkScheduleWorkflow(items, request),
+    })),
+  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
+};
 
 const createWorkflowDetailDto = (
   overrides: Partial<WorkflowDetailDto> = {}
@@ -107,7 +125,13 @@ describe('DispatchStep', () => {
     expect(getExecutionIds(result, 'g1')).toEqual(['exec-1']);
     expect(getScheduledGroupCount(result)).toBe(1);
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(1);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'default');
+    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-1'],
+      'default',
+      expect.objectContaining({
+        headers: expect.objectContaining({ authorization: `ApiKey ${API_KEY}` }),
+      })
+    );
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(
       [
@@ -209,7 +233,11 @@ describe('DispatchStep', () => {
     const result = await step.execute(state, loggerService);
 
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(1);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1', 'workflow-2'], 'default');
+    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-1', 'workflow-2'],
+      'default',
+      expect.anything()
+    );
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
     expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(2);
     expect(getExecutionIds(result, 'g1')).toEqual(['exec-1', 'exec-2']);
@@ -673,8 +701,16 @@ describe('DispatchStep', () => {
     );
 
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(2);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'space-a');
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'space-b');
+    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-1'],
+      'space-a',
+      expect.anything()
+    );
+    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-1'],
+      'space-b',
+      expect.anything()
+    );
   });
 
   it('issues one bulkScheduleWorkflow call per API key and never mixes keys', async () => {

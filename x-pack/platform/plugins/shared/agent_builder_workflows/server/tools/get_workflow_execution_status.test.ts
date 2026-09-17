@@ -64,6 +64,9 @@ describe('getWorkflowExecutionStatusTool', () => {
     const result = await tool.handler({ executionId: 'exec-1' }, mockContext as any);
 
     expect(result).toEqual({ results: [{ type: 'other', data: { execution } }] });
+    expect(getExecutionState).toHaveBeenCalledWith(
+      expect.objectContaining({ executionId: 'exec-1', request: mockContext.request })
+    );
   });
 
   it('should not read the execution and return not-found when the caller lacks readExecution', async () => {

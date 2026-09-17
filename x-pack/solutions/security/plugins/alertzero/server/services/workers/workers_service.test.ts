@@ -457,7 +457,11 @@ describe('WorkersService', () => {
     const { workers } = await service.list(request, SPACE);
     const triage = workers.find((w) => w.id === TRIAGE);
 
-    expect(harness.management.getWorkflow).toHaveBeenCalledWith(`${TRIAGE}-${SPACE}`, SPACE);
+    expect(harness.management.getWorkflow).toHaveBeenCalledWith(
+      `${TRIAGE}-${SPACE}`,
+      SPACE,
+      request
+    );
     expect(triage?.skills?.some((s) => s.id === 'test.installed.skill')).toBe(true);
   });
 

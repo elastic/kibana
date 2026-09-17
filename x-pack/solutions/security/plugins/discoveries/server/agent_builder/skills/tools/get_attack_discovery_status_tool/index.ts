@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -36,7 +36,7 @@ export interface WorkflowExecutionLookup {
   getWorkflowExecution: (
     executionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options: { includeInput?: boolean; includeOutput?: boolean; request: KibanaRequest }
   ) => Promise<WorkflowExecutionDto | null>;
 }
 
@@ -95,7 +95,7 @@ export const getAttackDiscoveryStatusTool = ({
   description: `Look up the current status of an Attack Discovery generation by its \`execution_uuid\`. Returns one of \`succeeded\`, \`running\`, \`failed\`, or \`not_found\`. When succeeded, includes the validated \`attack_discoveries\` so the agent can emit insights JSON. When running, includes the current \`phase\` (alert_retrieval, generation, or validation). Use this to resume a slow-path generation that returned only an \`execution_uuid\` because it exceeded the run step's soft deadline, and whenever the user asks about the status of a previously-started generation.`,
   handler: async (args, context) => {
     const { execution_uuid: executionUuid } = args;
-    const { esClient, logger, spaceId } = context;
+    const { esClient, logger, spaceId, request } = context;
 
     try {
       // Kill-switch backstop: even though the skill is not registered when the
@@ -150,7 +150,7 @@ export const getAttackDiscoveryStatusTool = ({
         const validationExecution = await workflowExecutionLookup.getWorkflowExecution(
           tracking.validation.workflowRunId,
           spaceId,
-          { includeOutput: true }
+          { includeOutput: true, request }
         );
 
         if (validationExecution == null) {
@@ -223,7 +223,8 @@ export const getAttackDiscoveryStatusTool = ({
       if (tracking.generation != null) {
         const generationExecution = await workflowExecutionLookup.getWorkflowExecution(
           tracking.generation.workflowRunId,
-          spaceId
+          spaceId,
+          { request }
         );
 
         if (generationExecution != null && isFailedStatus(generationExecution.status)) {

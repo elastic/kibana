@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { getExecutionState, toWorkflowExecutionState } from './get_execution_state';
@@ -17,6 +18,7 @@ jest.mock('./get_workflow_output', () => ({
 const getWorkflowOutputMock = jest.mocked(getWorkflowOutput);
 
 describe('getExecutionState', () => {
+  const request = httpServerMock.createKibanaRequest();
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -34,9 +36,14 @@ describe('getExecutionState', () => {
       executionId: 'exec-1',
       spaceId: 'default',
       workflowApi,
+      request,
     });
 
     expect(state).toBeNull();
+    expect(workflowApi.getWorkflowExecution).toHaveBeenCalledWith('exec-1', 'default', {
+      includeOutput: true,
+      request,
+    });
   });
 
   it('includes output for completed execution', async () => {
@@ -56,6 +63,7 @@ describe('getExecutionState', () => {
       executionId: 'exec-1',
       spaceId: 'default',
       workflowApi,
+      request,
     });
 
     expect(state).toEqual({
@@ -86,6 +94,7 @@ describe('getExecutionState', () => {
       executionId: 'exec-2',
       spaceId: 'default',
       workflowApi,
+      request,
     });
 
     expect(state).toEqual({
@@ -115,6 +124,7 @@ describe('getExecutionState', () => {
       executionId: 'exec-3',
       spaceId: 'default',
       workflowApi,
+      request,
     });
 
     expect(state).toEqual({
@@ -169,6 +179,7 @@ describe('getExecutionState', () => {
         executionId: 'exec-w1',
         spaceId: 'default',
         workflowApi,
+        request,
       });
 
       expect(state?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
@@ -216,6 +227,7 @@ describe('getExecutionState', () => {
         executionId: 'exec-w2',
         spaceId: 'default',
         workflowApi,
+        request,
       });
 
       expect(state?.waiting_input).toEqual({
@@ -261,6 +273,7 @@ describe('getExecutionState', () => {
         executionId: 'exec-w3',
         spaceId: 'default',
         workflowApi,
+        request,
       });
 
       expect(state?.waiting_input).toEqual({
@@ -305,6 +318,7 @@ describe('getExecutionState', () => {
         executionId: 'exec-loop',
         spaceId: 'default',
         workflowApi,
+        request,
       });
 
       expect(state?.waiting_input?.step_execution_id).toBe('step-exec-iter-1-waiting');
@@ -328,6 +342,7 @@ describe('getExecutionState', () => {
         executionId: 'exec-w4',
         spaceId: 'default',
         workflowApi,
+        request,
       });
 
       expect(state?.waiting_input).toBeUndefined();

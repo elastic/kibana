@@ -34,7 +34,11 @@ export const registerListProposalsRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const body = await getProposalsService().list(request.query, getSpaceId(request));
+          const body = await getProposalsService().list(
+            request.query,
+            getSpaceId(request),
+            request
+          );
           return response.ok({ body });
         } catch (error) {
           return handleRouteError(error, response, logger);

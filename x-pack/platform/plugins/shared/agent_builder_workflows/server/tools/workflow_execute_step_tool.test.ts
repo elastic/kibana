@@ -254,6 +254,10 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(data.executionId).toBe('exec-123');
       expect(data.status).toBe(ExecutionStatus.COMPLETED);
       expect(data.duration).toBe(150);
+      expect(mockApi.getWorkflowExecution).toHaveBeenCalledWith('exec-123', 'default', {
+        includeOutput: true,
+        request: context.request,
+      });
       expect(mockApi.testStep).toHaveBeenCalledWith(
         VALID_WORKFLOW_YAML,
         'log_step',

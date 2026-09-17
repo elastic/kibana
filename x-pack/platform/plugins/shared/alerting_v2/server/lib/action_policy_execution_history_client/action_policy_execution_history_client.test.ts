@@ -74,8 +74,10 @@ const createMocks = () => {
   const rulesClient = {
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 0 }),
   } as unknown as jest.Mocked<RulesClient>;
+  const getWorkflowsByIds = jest.fn().mockResolvedValue([]);
   const workflowsManagement = {
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
+    getWorkflowsByIds,
+    getClient: jest.fn(() => ({ getWorkflowsByIds })),
   };
   const spaces = {
     spacesService: {
@@ -166,6 +168,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'my-space' })
       );
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'my-space');
     });
 
@@ -187,6 +190,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         filter: expect.stringContaining(`id: "r-1"`),
         perPage: 1000,
       });
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'default');
     });
 
@@ -198,6 +202,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       expect(actionPolicyClient.getActionPolicies).toHaveBeenCalledWith({ ids: [] });
       expect(rulesClient.findRules).not.toHaveBeenCalled();
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith([], 'default');
     });
 

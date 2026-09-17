@@ -368,7 +368,8 @@ export function registerInternalToolsRoutes({
 
       const { results } = await workflowsManagement.management.getWorkflows(
         { page: request.query.page, size: request.query.limit },
-        currentSpace
+        currentSpace,
+        { request }
       );
 
       return response.ok<ListWorkflowsResponse>({
@@ -425,14 +426,16 @@ export function registerInternalToolsRoutes({
 
       const workflow = await workflowsManagement.management.getWorkflow(
         request.params.id,
-        currentSpace
+        currentSpace,
+        request
       );
 
+      if (!workflow) return response.notFound();
       return response.ok<GetWorkflowResponse>({
         body: {
-          id: workflow!.id,
-          name: workflow!.name,
-          description: workflow!.description,
+          id: workflow.id,
+          name: workflow.name,
+          description: workflow.description,
         },
       });
     })

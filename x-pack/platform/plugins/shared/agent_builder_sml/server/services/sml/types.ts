@@ -397,6 +397,8 @@ export type SmlIndexerParams = SmlIndexerOriginParams;
  * space it was written from.
  */
 export interface SmlIndexerDeleteAttachmentParams {
+  /** Waits for refresh and rejects failed or incomplete deletions. */
+  strict?: boolean;
   originId: string;
   attachmentType: string;
   /**

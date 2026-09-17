@@ -13,6 +13,7 @@ import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
+  WorkflowRepository,
 } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
@@ -20,6 +21,7 @@ import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
+import { hasWorkflowAccess } from '../lib/has_workflow_access';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -115,6 +117,45 @@ export async function runWorkflow({
     if (meteringService) {
       void meteringService.reportWorkflowExecution(execution, dependencies.cloudSetup);
     }
+    return;
+  }
+
+  const currentWorkflow = await new WorkflowRepository({
+    esClient: dependencies.coreStart.elasticsearch.client.asInternalUser,
+    logger,
+  }).getWorkflow(execution.workflowId, spaceId, { includeGlobal: true, includeDeleted: true });
+  // Older test executions have no isEphemeral flag and still require edit access.
+  const requiredPermission =
+    execution.isTestRun && execution.isEphemeral !== false ? 'edit' : 'execute';
+  if (
+    currentWorkflow &&
+    !(await hasWorkflowAccess(
+      currentWorkflow,
+      fakeRequest,
+      dependencies.coreStart,
+      requiredPermission
+    ))
+  ) {
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: workflowRunId,
+      status: ExecutionStatus.FAILED,
+      finishedAt: new Date().toISOString(),
+      error: {
+        type: 'WorkflowAccessDeniedError',
+        message: 'Workflow execution access was removed.',
+      },
+    });
+    await handlePostExecutionLoop({
+      workflowRunId,
+      spaceId,
+      logger,
+      fakeRequest,
+      workflowExecutionRepository,
+      internalResumeWorkflowExecution,
+      workflowTaskManager,
+      meteringService,
+      cloudSetup: dependencies.cloudSetup,
+    });
     return;
   }
 

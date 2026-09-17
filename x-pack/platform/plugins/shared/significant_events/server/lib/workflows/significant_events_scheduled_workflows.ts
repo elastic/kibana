@@ -75,11 +75,13 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   const getNonTerminalExecutions = async ({
     documentId,
     spaceId,
+    request,
   }: {
     documentId: string;
     spaceId: string;
+    request: KibanaRequest;
   }) => {
-    const { results, total } = await managementApi.getWorkflowExecutions(
+    const { results, total } = await managementApi.getClient(request).getWorkflowExecutions(
       {
         workflowId: documentId,
         statuses: [...NonTerminalExecutionStatuses],
@@ -99,7 +101,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
     request: KibanaRequest;
   }) => {
-    const { results } = await getNonTerminalExecutions({ documentId, spaceId });
+    const { results } = await getNonTerminalExecutions({ documentId, spaceId, request });
     if (results.length === 0) {
       return;
     }
@@ -114,7 +116,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
 
     await pollUntil(
-      () => getNonTerminalExecutions({ documentId, spaceId }),
+      () => getNonTerminalExecutions({ documentId, spaceId, request }),
       ({ total }) => total === 0
     );
   };
@@ -165,7 +167,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     request: KibanaRequest;
     spaceId: string;
   }) => {
-    const existing = await managementApi.getWorkflow(documentId, spaceId);
+    const existing = await managementApi.getClient(request).getWorkflow(documentId, spaceId);
 
     if (!existing) {
       if (enabled) {

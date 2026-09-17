@@ -39,10 +39,9 @@ export const createSyncWorkflowService = ({
 
   return {
     async ensureEnabled({ request }) {
-      const existing = await managementApi.getWorkflow(
-        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-        MANAGED_WORKFLOW_SPACE_ID
-      );
+      const existing = await managementApi
+        .getClient(request)
+        .getWorkflow(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID, MANAGED_WORKFLOW_SPACE_ID);
 
       if (!existing) {
         log.warn(

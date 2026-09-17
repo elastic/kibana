@@ -97,7 +97,7 @@ function getWorkflowsConnectorTypeArgs(
     // Return a function that will be called by the connector
     return async (workflowId: string, spaceId: string, inputs: Record<string, unknown>) => {
       // Get the workflow and validate it is in a runnable state
-      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
       validateWorkflowForExecution(workflow, workflowId);
 
       const workflowToRun: WorkflowExecutionEngineModel = toWorkflowExecutionEngineModel(workflow);
@@ -120,7 +120,7 @@ function getWorkflowsConnectorTypeArgs(
       }
 
       // Get the workflow and validate it is in a runnable state
-      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
       validateWorkflowForExecution(workflow, workflowId);
 
       const workflowToSchedule: WorkflowExecutionEngineModel =

@@ -177,7 +177,7 @@ describe('saveEvalExperimentTool', () => {
       )
     );
 
-    expect(workflowsApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
+    expect(workflowsApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default', expect.anything());
     expect(workflowsApi.updateWorkflow).toHaveBeenCalledWith(
       'wf-1',
       expect.objectContaining({ yaml: expect.any(String) }),

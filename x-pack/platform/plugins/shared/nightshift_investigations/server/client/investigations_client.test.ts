@@ -460,7 +460,8 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     expect(mockManagement.getWorkflow).toHaveBeenCalledWith(
       DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
-      SPACE_ID
+      SPACE_ID,
+      mockRequest
     );
     // The deductive workflow calls its own agent, so the pre-install must follow the split.
     expect(installDeductiveInvestigationAgentMock).toHaveBeenCalledWith({
@@ -594,7 +595,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       trigger_type: 'manual',
     });
 
-    expect(mockManagement.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID);
+    expect(mockManagement.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID, mockRequest);
   });
 
   it('persists an explicit trigger_type into the workflow context', async () => {

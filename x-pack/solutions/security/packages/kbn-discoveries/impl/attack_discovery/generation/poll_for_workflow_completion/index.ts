@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 
@@ -97,6 +97,7 @@ export const pollForWorkflowCompletion = async ({
   pollIntervalMs = DEFAULT_INITIAL_POLL_INTERVAL_MS,
   readinessTimeoutMs = DEFAULT_READINESS_TIMEOUT_MS,
   spaceId,
+  request,
   workflowsManagementApi,
 }: {
   executionId: string;
@@ -107,6 +108,7 @@ export const pollForWorkflowCompletion = async ({
   pollIntervalMs?: number;
   readinessTimeoutMs?: number;
   spaceId: string;
+  request: KibanaRequest;
   workflowsManagementApi: WorkflowsManagementApi;
 }): Promise<WorkflowExecutionDto> => {
   const startTime = Date.now();
@@ -114,6 +116,7 @@ export const pollForWorkflowCompletion = async ({
   const fetchExecution = async (includeOutput: boolean): Promise<WorkflowExecutionDto> => {
     const execution = await workflowsManagementApi.getWorkflowExecution(executionId, spaceId, {
       includeOutput,
+      request,
     });
 
     if (!execution) {

@@ -15,7 +15,7 @@ const workflow = { enabled: true, valid: true, definition: {} };
 const agentBuilder = {} as never;
 const workflowsExtensions = {} as never;
 const workflowsManagement = {
-  management: { getWorkflow: jest.fn().mockResolvedValue(workflow) },
+  management: { getClient: () => ({ getWorkflow: jest.fn().mockResolvedValue(workflow) }) },
 } as never;
 
 it('returns true when every start requirement is available', async () => {

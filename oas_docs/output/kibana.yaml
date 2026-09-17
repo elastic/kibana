@@ -84237,6 +84237,13 @@ paths:
           schema:
             example: 'true'
             type: string
+        - description: Confirm that permanent deletion removes workflow access controls.
+          in: query
+          name: acknowledgeAclLoss
+          required: false
+          schema:
+            default: false
+            type: boolean
         - description: When true, permanently deletes the workflows (hard delete) instead of soft-deleting them. The workflow IDs become available for reuse.
           in: query
           name: force
@@ -84294,11 +84301,11 @@ paths:
               -d '{
                 "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
               }'
-        - label: Hard delete (permanent)
+        - label: Hard delete (confirm ACL loss)
           lang: curl
           source: |
             curl \
-              -X DELETE "${KIBANA_URL}/api/workflows?force=true" \
+              -X DELETE "${KIBANA_URL}/api/workflows?force=true&acknowledgeAclLoss=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -84757,6 +84764,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: Include execution input data.
           in: query
@@ -84880,6 +84888,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -84918,6 +84927,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -84981,6 +84991,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: Filter logs by a specific step execution ID.
           in: query
@@ -85095,6 +85106,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -85591,6 +85603,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -86275,7 +86288,15 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
+        - description: Confirm that permanent deletion removes workflow access controls.
+          in: query
+          name: acknowledgeAclLoss
+          required: false
+          schema:
+            default: false
+            type: boolean
         - description: When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.
           in: query
           name: force
@@ -86297,11 +86318,11 @@ paths:
               -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
-        - label: Hard delete (permanent)
+        - label: Hard delete (confirm ACL loss)
           lang: curl
           source: |
             curl \
-              -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}?force=true" \
+              -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}?force=true&acknowledgeAclLoss=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
         - lang: Console
@@ -86327,6 +86348,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -86415,6 +86437,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -86531,6 +86554,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -86621,6 +86645,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -86702,6 +86727,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: Filter by execution status.
           in: query
@@ -86917,6 +86943,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -86955,6 +86982,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: Filter by step ID.
           in: query

@@ -42,7 +42,7 @@ export class SignificantEventsDiscoveryClient {
     executionId: string;
     isNew: boolean;
   }> {
-    const lastExecution = await this.workflowExecutionService.getLastExecution(spaceId);
+    const lastExecution = await this.workflowExecutionService.getLastExecution(spaceId, request);
     if (lastExecution && !isTerminalStatus(lastExecution.status)) {
       return { executionId: lastExecution.id, isNew: false };
     }
@@ -73,9 +73,11 @@ export class SignificantEventsDiscoveryClient {
 
   async getStatus({
     spaceId,
+    request,
   }: {
     spaceId: string;
+    request: KibanaRequest;
   }): Promise<SignificantEventsWorkflowStatusResult> {
-    return this.workflowExecutionService.getStatus({ spaceId });
+    return this.workflowExecutionService.getStatus({ spaceId, request });
   }
 }
