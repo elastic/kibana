@@ -16,9 +16,6 @@ import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
 import { registerUpdateWorkerRoute } from './workers/update_worker';
-import { registerListInvestigationsRoute } from './investigations/list_investigations';
-import { registerGetInvestigationRoute } from './investigations/get_investigation';
-import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
 import { registerGetProposalsRoute } from './proposals/get_proposals';
 import { registerListActionsRoute } from './actions/list_actions';
 
@@ -38,9 +35,6 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetWatchRoute(deps);
   registerListWorkersRoute(deps);
   registerUpdateWorkerRoute(deps);
-  registerListInvestigationsRoute(deps);
-  registerGetInvestigationRoute(deps);
-  registerListInvestigationProposalsRoute(deps);
   registerGetProposalsRoute(deps);
   registerListActionsRoute(deps);
 };

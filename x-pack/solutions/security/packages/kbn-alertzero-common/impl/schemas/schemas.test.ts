@@ -5,19 +5,10 @@
  * 2.0.
  */
 
+import { SKILLS_SEED, WATCHES_SEED, WORKERS_SEED } from '../samples';
+import type { Watch } from '.';
 import {
-  MOCK_INVESTIGATIONS,
-  MOCK_PROPOSALS,
-  SKILLS_SEED,
-  WATCHES_SEED,
-  WORKERS_SEED,
-} from '../samples';
-import type { Investigation, Proposal, Watch } from '.';
-import {
-  GetInvestigationResponse,
   GetWatchResponse,
-  ListInvestigationProposalsResponse,
-  ListInvestigationsResponse,
   ListWatchesResponse,
   WatchSkill,
   WatchWorker,
@@ -154,33 +145,5 @@ describe('AlertZero schema smoke tests', () => {
         expect(watchIds).toContain(watchId);
       }
     }
-  });
-
-  it('parses mock investigations through ListInvestigationsResponse', () => {
-    const result = ListInvestigationsResponse.parse({
-      investigations: MOCK_INVESTIGATIONS,
-      total: MOCK_INVESTIGATIONS.length,
-    });
-    expect(result.total).toBeGreaterThanOrEqual(8);
-    result.investigations.forEach((inv: Investigation) => {
-      expect(inv.template_id).toBe('investigation');
-    });
-  });
-
-  it('parses mock proposals through ListInvestigationProposalsResponse', () => {
-    const result = ListInvestigationProposalsResponse.parse({
-      proposals: MOCK_PROPOSALS,
-      total: MOCK_PROPOSALS.length,
-    });
-    expect(result.proposals.length).toBeGreaterThanOrEqual(8);
-    result.proposals.forEach((prop: Proposal) => {
-      expect(prop.template_id).toBe('proposal');
-    });
-  });
-
-  it('parses investigation detail through GetInvestigationResponse', () => {
-    const investigation = MOCK_INVESTIGATIONS[0];
-    const result = GetInvestigationResponse.parse({ investigation });
-    expect(result.investigation.id).toBe(investigation.id);
   });
 });

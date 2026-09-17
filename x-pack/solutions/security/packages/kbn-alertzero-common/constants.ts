@@ -34,12 +34,6 @@ export const buildWorkerUrl = (workerId: string) =>
 export const buildSkillUrl = (skillId: string) =>
   `${ALERTZERO_SKILLS_URL}/${encodeURIComponent(skillId)}`;
 
-export const ALERTZERO_INVESTIGATIONS_URL = `${ALERTZERO_INTERNAL_URL}/investigations` as const;
-export const ALERTZERO_INVESTIGATION_URL_TEMPLATE = `${ALERTZERO_INVESTIGATIONS_URL}/{id}` as const;
-
-export const buildInvestigationUrl = (id: string) =>
-  `${ALERTZERO_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
-
 /** Proposals grouped by category — AlertZero landing page. */
 export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
 
@@ -213,8 +207,8 @@ export const WORKER_SCHEDULE_UNITS = ['m', 'h', 'd'] as const;
 
 export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
 
+/** Agent Builder conversation template ids. Proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
-export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
 export const TEMPLATE_ID_INCIDENT = 'incident' as const;
 
 export const API_VERSIONS = {
