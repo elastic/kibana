@@ -51,6 +51,14 @@ interface AlertTriageOpts {
     request: KibanaRequest,
     workflowId: string
   ) => Promise<AlertTriageAttachmentService>;
+  /**
+   * Whether the Alert Analysis workflow will actually analyse anything in the caller's space.
+   * Distinct from its `enabled` flag: the workflow installs enabled, but its own guard also
+   * requires a per-space uiSetting that now defaults to off, and with that off it completes
+   * having classified nothing instead of failing. Injected rather than read here because the
+   * setting belongs to security_solution.
+   */
+  isAlertAnalysisRuntimeEnabled?: (request: KibanaRequest) => Promise<boolean>;
 }
 
 const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYaml | null => {
@@ -248,7 +256,7 @@ export class WorkersService {
         this.alertTriageOpts.getAttachmentService != null;
 
       if (isAlertTriageWorker && patch.enabled) {
-        const preflightError = await this.checkAlertAnalysisPreflight();
+        const preflightError = await this.checkAlertAnalysisPreflight(request);
         if (preflightError) {
           return { outcome: 'rejected', what: preflightError };
         }
@@ -280,12 +288,24 @@ export class WorkersService {
   }
 
   /**
-   * Returns an error message string if the standalone alert-analysis workflow is disabled,
-   * null if the preflight check passes. The Worker calling `workflow.execute` against a
-   * disabled workflow would produce a failing execution on every rule trigger, so we refuse
-   * the enable rather than silently setting up a broken state.
+   * Returns an error message if the Alert Analysis workflow cannot do the Worker's work, null
+   * if the enable may proceed. The Worker is a wrapper around that workflow (R8), so enabling
+   * it against an unusable one produces a Worker that triages nothing.
+   *
+   * Two independent things have to hold, and they fail differently:
+   *
+   * - the workflow must be `enabled`, or `workflow.execute` throws and every rule trigger
+   *   surfaces a failed execution
+   * - its per-space runtime config must have analysis switched on. This is the quieter of the
+   *   two and the reason the check cannot stop at the `enabled` flag: the workflow installs
+   *   enabled, but `securitySolution:alertAnalysisWorkflowEnabled` now defaults to false, and
+   *   with it off the workflow's own guard short-circuits and it returns an empty verdict set.
+   *   The Worker then completes successfully having classified, tagged and closed nothing.
+   *
+   * Refusing rather than switching it on is deliberate: that setting is `readonly` and owned
+   * by security_solution, so it is not ours to flip. See FOLLOW_UPS.md.
    */
-  private async checkAlertAnalysisPreflight(): Promise<string | null> {
+  private async checkAlertAnalysisPreflight(request: KibanaRequest): Promise<string | null> {
     const management = this.management;
     if (!management) return null;
     try {
@@ -303,6 +323,24 @@ export class WorkersService {
         }`
       );
     }
+
+    const { isAlertAnalysisRuntimeEnabled } = this.alertTriageOpts;
+    if (isAlertAnalysisRuntimeEnabled) {
+      try {
+        if (!(await isAlertAnalysisRuntimeEnabled(request))) {
+          return 'Alert Triage requires alert analysis to be turned on for this space. Enable it under Security → Manage → Alert analysis, then turn on the Alert Triage Worker.';
+        }
+      } catch (err) {
+        // Refusing on an unreadable setting would make the Worker un-enableable whenever the
+        // read fails for an unrelated reason, so this degrades to the checks above.
+        this.logger.warn(
+          `Alert Triage Worker: could not verify alert analysis runtime config: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
+
     return null;
   }
 

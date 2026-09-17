@@ -619,7 +619,8 @@ describe('WorkersService', () => {
     const makeService = (
       harness: ReturnType<typeof createPersistentHarness>,
       attachment: ReturnType<typeof makeAttachmentService> | null,
-      alertTriageWorkerEnabled = true
+      alertTriageWorkerEnabled = true,
+      isAlertAnalysisRuntimeEnabled?: () => Promise<boolean>
     ) =>
       new WorkersService(
         harness.management,
@@ -629,6 +630,7 @@ describe('WorkersService', () => {
         {
           alertTriageWorkerEnabled,
           getAttachmentService: attachment ? (jest.fn(async () => attachment) as any) : undefined,
+          isAlertAnalysisRuntimeEnabled,
         }
       );
 
@@ -656,6 +658,40 @@ describe('WorkersService', () => {
         what: expect.stringContaining('Alert Analysis workflow'),
       });
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    // The workflow's `enabled` flag is not sufficient on its own. It installs enabled, but
+    // `securitySolution:alertAnalysisWorkflowEnabled` now defaults to false, and with that off
+    // the workflow's own guard short-circuits: it completes having classified nothing, so the
+    // Worker reports success while triaging no alerts. Enabling into that state is worse than
+    // refusing, because nothing anywhere reports a problem.
+    it('runtime config off: rejects even though the workflow itself is enabled', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      const service = makeService(harness, attachment, true, async () => false);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toMatchObject({
+        outcome: 'rejected',
+        what: expect.stringContaining('alert analysis'),
+      });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      expect(attachment.updateRuleAttachments).not.toHaveBeenCalled();
+    });
+
+    // An unreadable setting must not make the Worker permanently un-enableable: a failed read
+    // is not evidence that analysis is off.
+    it('runtime config unreadable: falls through to the remaining checks', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      const service = makeService(harness, attachment, true, async () => {
+        throw new Error('uiSettings unavailable');
+      });
+
+      expect((await service.update(TRIAGE, { enabled: true }, SPACE, request)).outcome).toBe(
+        'updated'
+      );
     });
 
     it('attach-then-enable: attaches rules and enables Worker when preflight passes', async () => {
