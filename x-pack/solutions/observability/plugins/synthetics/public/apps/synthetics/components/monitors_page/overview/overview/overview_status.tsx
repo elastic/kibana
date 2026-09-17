@@ -67,6 +67,7 @@ export const MonitorStat = ({
 
   const statComponent = (
     <EuiStat
+      css={{ textAlign: 'start' }}
       data-test-subj={dataTestSubj}
       description={description}
       reverse
