@@ -254,7 +254,12 @@ export const resolveOrCreateAiIndex = async (
   }
 
   try {
-    await service.create(aiIndexId, spaceId, { dest, automations: [], sources: [] });
+    await service.create(aiIndexId, spaceId, {
+      dest,
+      automations: [],
+      sources: [],
+      traces: [],
+    });
   } catch (error) {
     if (error instanceof AiIndexAlreadyExistsError) {
       // Lost a concurrent creation race; the AI index exists now.

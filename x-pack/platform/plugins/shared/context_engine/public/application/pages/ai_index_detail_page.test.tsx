@@ -8,6 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
@@ -87,6 +88,14 @@ jest.mock('../hooks/use_feedback_loop_enabled', () => ({
   useFeedbackLoopEnabled: jest.fn(() => true),
 }));
 
+jest.mock('../hooks/use_agent_builder_agents', () => ({
+  useAgentBuilderAgents: () => ({
+    agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
+    isLoading: false,
+    error: undefined,
+  }),
+}));
+
 const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
 
 jest.mock('../hooks/use_signals', () => ({
@@ -105,13 +114,17 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
 
 const createServices = () => {
+  const data = dataPluginMock.createStartContract();
+  data.dataViews.getIndices = jest.fn().mockResolvedValue([]);
   const services = {
     ...coreMock.createStart(),
+    data,
     share: sharePluginMock.createStartContract(),
     history: scopedHistoryMock.create(),
     appChrome: createAppChromeMock(),
@@ -325,6 +338,49 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
   });
 
+  it('saves edited traces and refetches the AI index', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+
+    fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
+      target: { value: 'Loyalty' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Loyalty Support Agent')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Loyalty Support Agent'));
+    fireEvent.click(screen.getByTestId('contextTracesSaveButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [{ type: 'elastic_agent', value: 'agent-1' }],
+          }),
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
+    });
+    expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
   it('edits the description and refetches the AI index', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -349,6 +405,7 @@ describe('AiIndexDetailPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
             description: 'A brand new description',
           }),
         })
@@ -402,6 +459,7 @@ describe('AiIndexDetailPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
           }),
         })
       );
@@ -535,6 +593,7 @@ describe('AiIndexDetailPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [{ type: 'workflow', value: 'wf-created' }],
             sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
           }),
         })
       );
@@ -634,6 +693,7 @@ describe('AiIndexDetailPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
           }),
         })
       );

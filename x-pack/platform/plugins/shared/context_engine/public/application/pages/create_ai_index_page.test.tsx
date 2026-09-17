@@ -8,6 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -28,7 +29,26 @@ jest.mock('../hooks/use_data_connectors', () => ({
   }),
 }));
 
-const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
+jest.mock('../hooks/use_agent_builder_agents', () => ({
+  useAgentBuilderAgents: () => ({
+    agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
+    isLoading: false,
+    error: undefined,
+  }),
+}));
+
+const defaultDataStream = {
+  name: 'logs-genai-default',
+  tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
+  item: { name: 'logs-genai-default' },
+};
+
+const renderWithProviders = (
+  services: ReturnType<typeof coreMock.createStart>,
+  getIndices = jest.fn().mockResolvedValue([])
+) => {
+  const data = dataPluginMock.createStartContract();
+  data.dataViews.getIndices = getIndices;
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <ChromeServiceProvider value={{ chrome: services.chrome }}>
@@ -37,6 +57,7 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
           <KibanaContextProvider
             services={{
               ...services,
+              data,
               history: scopedHistoryMock.create(),
               appChrome: createAppChromeMock(),
             }}
@@ -130,6 +151,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );
@@ -156,6 +178,87 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
+          }),
+        })
+      );
+    });
+  });
+
+  it('includes a selected trace in the create request', async () => {
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+
+    typeId(VALID_ID);
+    fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
+      target: { value: 'Loyalty' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Loyalty Support Agent')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Loyalty Support Agent'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            id: VALID_ID,
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
+            automations: [],
+            sources: [],
+            traces: [{ type: 'elastic_agent', value: 'agent-1' }],
+          }),
+        })
+      );
+    });
+  });
+
+  it('includes a selected data stream trace in the create request', async () => {
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+    const getIndices = jest.fn().mockResolvedValue([defaultDataStream]);
+
+    renderWithProviders(services, getIndices);
+
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextTraceToggle-index'));
+
+    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
+    const input = comboBox.querySelector('input')!;
+    fireEvent.click(comboBox);
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'lo' } });
+
+    await waitFor(() => {
+      expect(getIndices).toHaveBeenCalledWith({
+        pattern: '*lo*',
+        isRollupIndex: expect.any(Function),
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('logs-genai-default'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            id: VALID_ID,
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
+            automations: [],
+            sources: [],
+            traces: [{ type: 'index', value: 'logs-genai-default' }],
           }),
         })
       );
@@ -180,6 +283,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );
@@ -209,6 +313,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );

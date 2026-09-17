@@ -14,6 +14,8 @@ import {
   MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
+  MAX_AI_INDEX_TRACES,
+  MAX_AI_INDEX_TRACE_VALUE_LENGTH,
 } from './constants';
 import type { AiIndexProperties } from './http_api/ai_indices';
 import { validateAiIndexId } from './validation';
@@ -43,11 +45,27 @@ export const aiIndexSourceSchema = z.discriminatedUnion('type', [
   aiIndexConnectorSourceSchema,
 ]);
 
+export const aiIndexTraceSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('elastic_agent'),
+    value: z.string().min(1).max(MAX_AI_INDEX_TRACE_VALUE_LENGTH),
+  }),
+  z.object({
+    type: z.literal('index'),
+    value: z.string().min(1).max(MAX_AI_INDEX_TRACE_VALUE_LENGTH),
+  }),
+  z.object({
+    type: z.literal('esql'),
+    value: z.string().min(1).max(MAX_AI_INDEX_TRACE_VALUE_LENGTH),
+  }),
+]);
+
 export const aiIndexPropertiesSchema = z.object({
   description: z.string().max(MAX_AI_INDEX_DESCRIPTION_LENGTH).optional(),
   dest: aiIndexDestSchema,
   sources: z.array(aiIndexSourceSchema).max(MAX_AI_INDEX_SOURCES),
   automations: z.array(aiIndexAutomationSchema).max(MAX_AI_INDEX_AUTOMATIONS),
+  traces: z.array(aiIndexTraceSchema).max(MAX_AI_INDEX_TRACES),
 });
 
 export const aiIndexIdFieldSchema = z
