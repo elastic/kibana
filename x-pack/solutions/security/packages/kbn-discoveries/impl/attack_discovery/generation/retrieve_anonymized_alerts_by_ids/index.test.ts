@@ -140,7 +140,7 @@ describe('retrieveAnonymizedAlertsByIds', () => {
       workflowsManagementApi,
     });
 
-    expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(workflowId, 'team-a');
+    expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(workflowId, 'team-a', request);
     expect((workflowsManagementApi.runWorkflow as jest.Mock).mock.calls[0][1]).toBe('team-a');
   });
 

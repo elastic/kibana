@@ -605,7 +605,7 @@ export const invokeGenerationWorkflow = async ({
 
   try {
     // Step 1: Get and validate the workflow
-    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
     const validatedWorkflow = validateWorkflow(rawWorkflow, workflowId);
     workflowName = validatedWorkflow.name;
 
@@ -720,6 +720,7 @@ export const invokeGenerationWorkflow = async ({
 
     // Step 4: Poll for completion
     const execution = await pollForWorkflowCompletion({
+      request,
       executionId: workflowRunId,
       isReady: (exec) => exec.stepExecutions.some((step) => step.stepType === GENERATION_STEP_TYPE),
       logger,

@@ -71,7 +71,8 @@ describe('ConversationProposalsService', () => {
 
     expect(proposalsService.listByWindow).toHaveBeenCalledWith(
       { includeStatuses: ['pending'], decidedWithinHours: query.windowHours },
-      spaceId
+      spaceId,
+      request
     );
   });
 

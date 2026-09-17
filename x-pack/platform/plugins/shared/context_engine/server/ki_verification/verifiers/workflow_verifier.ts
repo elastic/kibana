@@ -51,12 +51,14 @@ export const resolveKiVerifierChain = async ({
   parent,
   spaceId,
   workflowsManagement,
+  request,
 }: {
   workflowId: string;
   metadata: Record<string, unknown> | undefined;
   parent: { workflowId: string; executionId: string } | undefined;
   spaceId: string;
   workflowsManagement: Pick<KiVerifierWorkflowRunner, 'getWorkflowExecution'>;
+  request: KibanaRequest;
 }): Promise<string[]> => {
   const lineage: string[] = [];
   let caller = parent;
@@ -66,7 +68,9 @@ export const resolveKiVerifierChain = async ({
         `Cannot resolve the verifier workflow chain for '${workflowId}': more than ${MAX_LINEAGE_LOOKUPS} parent workflows`
       );
     }
-    const execution = await workflowsManagement.getWorkflowExecution(caller.executionId, spaceId);
+    const execution = await workflowsManagement.getWorkflowExecution(caller.executionId, spaceId, {
+      request,
+    });
     if (!execution) {
       throw new Error(
         `Cannot resolve the verifier workflow chain for '${workflowId}': parent workflow run '${caller.executionId}' is not readable`
@@ -93,7 +97,11 @@ const workflowVerifierOutputSchema = z.object({
 
 /** Defined here instead of importing from the workflows plugin to avoid a circular dependency. */
 export interface KiVerifierWorkflowRunner {
-  getWorkflow(workflowId: string, spaceId: string): Promise<WorkflowDetailDto | null>;
+  getWorkflow(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto | null>;
   runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
@@ -105,7 +113,7 @@ export interface KiVerifierWorkflowRunner {
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    options?: { includeOutput?: boolean }
+    options: { includeOutput?: boolean; request: KibanaRequest }
   ): Promise<WorkflowExecutionDto | null>;
   cancelWorkflowExecution(
     workflowExecutionId: string,
@@ -174,9 +182,9 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
 // Applies the same checks as workflow.execute would before running the workflow.
 const resolveRunnableWorkflow = async (
   workflowId: string,
-  { workflowsManagement, spaceId }: WorkflowVerifierDependencies
+  { workflowsManagement, spaceId, request }: WorkflowVerifierDependencies
 ): Promise<WorkflowExecutionEngineModel> => {
-  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
   if (!workflow) {
     throw new ExecutionError({
       type: 'NotFoundError',
@@ -288,7 +296,7 @@ export const createWorkflowVerifier = (
             execution = await workflowsManagement.getWorkflowExecution(
               workflowExecutionId,
               spaceId,
-              { includeOutput: true }
+              { includeOutput: true, request }
             );
           } catch (error) {
             // Reads can fail temporarily; keep polling until the deadline.

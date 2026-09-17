@@ -83,7 +83,7 @@ export const retrieveAnonymizedAlertsByIds = async ({
 }: RetrieveAnonymizedAlertsByIdsParams): Promise<RetrieveAnonymizedAlertsByIdsResult> => {
   logger.info(`Retrieving and anonymizing ${alertIds.length} curated alert(s) by _id`);
 
-  const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+  const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
   const validatedWorkflow = validateAlertRetrievalWorkflow(rawWorkflow, workflowId);
 
   // Build inputs with an Elasticsearch `ids` filter scoped to the curated set.
@@ -114,6 +114,7 @@ export const retrieveAnonymizedAlertsByIds = async ({
   );
 
   const execution = await pollForWorkflowCompletion({
+    request,
     executionId: workflowRunId,
     isReady: (exec) =>
       exec.stepExecutions.some(

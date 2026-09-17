@@ -107,7 +107,13 @@ describe('DispatchStep', () => {
     expect(getExecutionIds(result, 'g1')).toEqual(['exec-1']);
     expect(getScheduledGroupCount(result)).toBe(1);
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(1);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'default');
+    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-1'],
+      'default',
+      expect.objectContaining({
+        headers: expect.objectContaining({ authorization: `ApiKey ${API_KEY}` }),
+      })
+    );
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(
       [
@@ -209,7 +215,11 @@ describe('DispatchStep', () => {
     const result = await step.execute(state, loggerService);
 
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(1);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1', 'workflow-2'], 'default');
+    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-1', 'workflow-2'],
+      'default',
+      expect.anything()
+    );
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
     expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(2);
     expect(getExecutionIds(result, 'g1')).toEqual(['exec-1', 'exec-2']);
@@ -673,8 +683,70 @@ describe('DispatchStep', () => {
     );
 
     expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(2);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'space-a');
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(['workflow-1'], 'space-b');
+    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-1'],
+      'space-a',
+      expect.anything()
+    );
+    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-1'],
+      'space-b',
+      expect.anything()
+    );
+  });
+
+  it('isolates private workflow lookup by policy credentials', async () => {
+    const step = new DispatchStep(mockWfm);
+    const privateWorkflow = createWorkflowDetailDto({
+      id: 'private-workflow',
+      owner_id: 'owner-profile',
+      access_control: { access_mode: 'private', entries: [] },
+    });
+    const publicWorkflow = createWorkflowDetailDto({ id: 'public-workflow' });
+    mockWfm.getWorkflowsByIds.mockImplementation(async (_ids, _spaceId, request) =>
+      request?.headers.authorization === 'ApiKey owner-key'
+        ? [privateWorkflow, publicWorkflow]
+        : [publicWorkflow]
+    );
+    mockWfm.bulkScheduleWorkflow.mockImplementation(async (items) =>
+      items.map(({ workflow }) => scheduled(`execution-${workflow.id}`))
+    );
+    const groups = ['owner', 'other'].map((id) =>
+      createActionGroup({
+        id,
+        policyId: id,
+        destinations: [
+          { type: 'workflow', id: privateWorkflow.id },
+          { type: 'workflow', id: publicWorkflow.id },
+        ],
+      })
+    );
+    const result = await step.execute(
+      createDispatcherPipelineState({
+        dispatch: groups,
+        policies: new Map(
+          ['owner', 'other'].map((id) => [id, createActionPolicy({ id, apiKey: `${id}-key` })])
+        ),
+      }),
+      loggerService
+    );
+
+    expect(getExecutionIds(result, 'owner')).toStrictEqual([
+      'execution-private-workflow',
+      'execution-public-workflow',
+    ]);
+    expect(getExecutionIds(result, 'other')).toStrictEqual(['execution-public-workflow']);
+    expect(getFailures(result)).toStrictEqual([
+      expect.objectContaining({
+        actionGroupId: 'other',
+        workflowId: 'private-workflow',
+        reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
+      }),
+    ]);
+    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(2);
+    for (const [index, [, request]] of mockWfm.bulkScheduleWorkflow.mock.calls.entries()) {
+      expect(mockWfm.getWorkflowsByIds.mock.calls[index][2]).toBe(request);
+    }
   });
 
   it('issues one bulkScheduleWorkflow call per API key and never mixes keys', async () => {

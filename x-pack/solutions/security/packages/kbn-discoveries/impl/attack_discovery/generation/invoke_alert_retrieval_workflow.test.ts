@@ -1068,7 +1068,9 @@ describe('invokeAlertRetrievalWorkflow', () => {
       // we test the error handling behavior indirectly
 
       // Verify the API would return non-terminal status
-      const execution = await timeoutApi.getWorkflowExecution('test', 'default');
+      const execution = await timeoutApi.getWorkflowExecution('test', 'default', {
+        request: mockRequest,
+      });
 
       expect(execution?.status).toBe('pending');
 

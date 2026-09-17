@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -90,9 +91,11 @@ const toNotFoundSummary = (runId: string): NotFoundSummary => ({
 const fetchAndSummarize = async (
   runId: string,
   spaceId: string,
-  fetcher: WorkflowExecutionFetcher
+  fetcher: WorkflowExecutionFetcher,
+  request: KibanaRequest
 ): Promise<ExecutionSummary | NotFoundSummary> => {
   const execution = await fetcher.getWorkflowExecution(runId, spaceId, {
+    request,
     includeInput: false,
     includeOutput: false,
   });
@@ -122,19 +125,19 @@ export const getExecutionSummaryTool = (
     'Fetches workflow execution details and YAML for all Attack Discovery pipeline phases (alert retrieval, generation, validation) in a single call. Returns per-step status, errors, and timing without exposing step inputs or outputs.',
   handler: async (args, context) => {
     try {
-      const { spaceId } = context;
+      const { spaceId, request } = context;
 
       const alertRetrievalPromises = (args.alert_retrieval_run_ids ?? []).map(
-        ({ workflow_run_id }) => fetchAndSummarize(workflow_run_id, spaceId, fetcher)
+        ({ workflow_run_id }) => fetchAndSummarize(workflow_run_id, spaceId, fetcher, request)
       );
 
       const [alertRetrieval, generation, validation] = await Promise.all([
         Promise.all(alertRetrievalPromises),
         args.generation_run_id != null
-          ? fetchAndSummarize(args.generation_run_id, spaceId, fetcher)
+          ? fetchAndSummarize(args.generation_run_id, spaceId, fetcher, request)
           : null,
         args.validation_run_id != null
-          ? fetchAndSummarize(args.validation_run_id, spaceId, fetcher)
+          ? fetchAndSummarize(args.validation_run_id, spaceId, fetcher, request)
           : null,
       ]);
 

@@ -130,6 +130,11 @@ describe('getWorkflowHealthCheckTool', () => {
         const tool = getWorkflowHealthCheckTool(mockFetcher);
 
         const result = await tool.handler({ workflow_ids: ['wf-1'] }, mockContext);
+        expect(mockGetWorkflow).toHaveBeenCalledWith(
+          'wf-1',
+          mockContext.spaceId,
+          mockContext.request
+        );
 
         expect(result).toEqual({
           results: [

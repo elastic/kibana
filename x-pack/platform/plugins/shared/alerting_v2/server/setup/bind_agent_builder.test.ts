@@ -216,8 +216,12 @@ describe('bindAgentBuilder', () => {
       const deps = registerSkillsMock.mock.calls[0][1];
       const request = {} as never;
 
-      await deps.getWorkflow('workflow-1', 'space-1');
-      expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith('workflow-1', 'space-1');
+      await deps.getWorkflow('workflow-1', 'space-1', request);
+      expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
+        'workflow-1',
+        'space-1',
+        request
+      );
 
       await deps.getAvailableConnectors('space-1', request);
       expect(workflowsManagementApi.getAvailableConnectors).toHaveBeenCalledWith(

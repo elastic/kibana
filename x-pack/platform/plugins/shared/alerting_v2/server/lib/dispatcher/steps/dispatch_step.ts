@@ -113,11 +113,9 @@ export class DispatchStep implements DispatcherStep {
       return done();
     }
 
-    const { workflowsBySpace, failedSpaces } = await this.prefetchWorkflows(
-      [...groupsByApiKey.values()].flat()
-    );
-
     for (const [apiKey, groups] of groupsByApiKey) {
+      const request = this.craftFakeRequest(apiKey);
+      const { workflowsBySpace, failedSpaces } = await this.prefetchWorkflows(groups, request);
       const pending = this.buildPendingSchedules(
         groups,
         workflowsBySpace,
@@ -125,7 +123,6 @@ export class DispatchStep implements DispatcherStep {
         dispatchFailures,
         logger
       );
-      const request = this.craftFakeRequest(apiKey);
       for (let offset = 0; offset < pending.length; offset += DISPATCH_CHUNK_SIZE) {
         if (signal.aborted) {
           break;
@@ -159,7 +156,10 @@ export class DispatchStep implements DispatcherStep {
     );
   }
 
-  private async prefetchWorkflows(groups: ActionGroup[]): Promise<{
+  private async prefetchWorkflows(
+    groups: ActionGroup[],
+    request: KibanaRequest
+  ): Promise<{
     workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>;
     failedSpaces: Map<string, Error>;
   }> {
@@ -174,7 +174,11 @@ export class DispatchStep implements DispatcherStep {
     const failedSpaces = new Map<string, Error>();
     for (const [spaceId, ids] of idsBySpace) {
       try {
-        const workflows = await this.workflowsManagement.getWorkflowsByIds([...ids], spaceId);
+        const workflows = await this.workflowsManagement.getWorkflowsByIds(
+          [...ids],
+          spaceId,
+          request
+        );
         workflowsBySpace.set(
           spaceId,
           new Map(workflows.map((workflow) => [workflow.id, workflow]))

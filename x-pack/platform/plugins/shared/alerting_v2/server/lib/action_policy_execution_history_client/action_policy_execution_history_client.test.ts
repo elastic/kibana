@@ -166,7 +166,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'my-space' })
       );
-      expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'my-space');
+      expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(
+        ['w-1'],
+        'my-space',
+        request
+      );
     });
 
     it('bulk-fetches policies, rules and workflows from event refs', async () => {
@@ -187,7 +191,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         filter: expect.stringContaining(`id: "r-1"`),
         perPage: 1000,
       });
-      expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'default');
+      expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(
+        ['w-1'],
+        'default',
+        request
+      );
     });
 
     it('passes empty arrays to bulk getters when no events are returned', async () => {
@@ -198,7 +206,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       expect(actionPolicyClient.getActionPolicies).toHaveBeenCalledWith({ ids: [] });
       expect(rulesClient.findRules).not.toHaveBeenCalled();
-      expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith([], 'default');
+      expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith([], 'default', request);
     });
 
     it('populates response item names from the bulk-get results', async () => {

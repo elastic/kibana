@@ -162,7 +162,7 @@ describe('investigations.createProposal step', () => {
 
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({ workflowExecutionId: EXECUTION_ID }),
-      { spaceId: SPACE_ID, user: resolvedUser }
+      { spaceId: SPACE_ID, user: resolvedUser, request: FAKE_REQUEST }
     );
     // Identity comes from the execution's credentials, not from `executedBy`.
     expect(resolveUser).toHaveBeenCalledWith(FAKE_REQUEST);

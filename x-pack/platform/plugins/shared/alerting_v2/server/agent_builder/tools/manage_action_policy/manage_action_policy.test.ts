@@ -68,6 +68,7 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
+      expect(deps.getWorkflow).toHaveBeenCalledWith('wf-1', ctx.spaceId, ctx.request);
       expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
       expect(ctx.attachments.update).not.toHaveBeenCalled();
       const { results } = result as {

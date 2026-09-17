@@ -35,7 +35,11 @@ const manageActionPolicySchema = z.object({
 
 export interface ManageActionPolicyToolDeps {
   logger: LoggerServiceContract;
-  getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
+  getWorkflow: (
+    id: string,
+    spaceId: string,
+    request: import('@kbn/core/server').KibanaRequest
+  ) => Promise<{ id: string; name?: string } | null>;
   getAvailableConnectors: (
     spaceId: string,
     request: import('@kbn/core/server').KibanaRequest
@@ -110,7 +114,7 @@ Use operations[] to:
 
         await validateDestinations(updatedData.destinations, {
           attachments,
-          workflowLookup: { getWorkflow },
+          workflowLookup: { getWorkflow: (id, sid) => getWorkflow(id, sid, request) },
           connectorLookup: { findConnectorById },
           spaceId,
         });
