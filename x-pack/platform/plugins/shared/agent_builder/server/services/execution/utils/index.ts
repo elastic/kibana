@@ -18,6 +18,7 @@ export {
   type ConversationOperation,
   type ConversationWithOperation,
 } from './conversations';
-export { convertErrors } from './convert_errors';
+export { convertErrors, toClientError } from './convert_errors';
+export { serializeExecutionError } from './serialize_execution_error';
 export { resolveServices } from './resolve_services';
 export { executionStartedEvents$ } from './execution_started';

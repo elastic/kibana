@@ -8,10 +8,34 @@
 import type { OperatorFunction } from 'rxjs';
 import { catchError, throwError } from 'rxjs';
 import type { Logger } from '@kbn/logging';
+import type { AgentBuilderError, AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import { createInternalError, isAgentBuilderError } from '@kbn/agent-builder-common';
 import type { ModelProvider } from '@kbn/inference-common';
 import { getCurrentTraceId } from '../../../tracing';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
+
+/**
+ * Converts any error into the {@link AgentBuilderError} the client receives, stamping the current
+ * trace id on it. An `AgentBuilderError` is returned as the same instance (so its identity is kept
+ * for downstream `isRequestAbortedError`-style checks); anything else is wrapped as an internal
+ * error. Idempotent. Shared by {@link convertErrors} (the stream) and the interruption persister
+ * so the stored error is exactly the one the client saw.
+ */
+export const toClientError = (err: unknown): AgentBuilderError<AgentBuilderErrorCode> => {
+  const traceId = getCurrentTraceId();
+  if (isAgentBuilderError(err)) {
+    err.meta = {
+      ...err.meta,
+      traceId,
+    };
+    return err;
+  }
+  const message = err instanceof Error ? err.message : String(err);
+  return createInternalError(`Error executing agent: ${message}`, {
+    statusCode: 500,
+    traceId,
+  });
+};
 
 export function convertErrors<T>({
   agentId,
@@ -51,21 +75,7 @@ export function convertErrors<T>({
           modelProvider,
         });
 
-        return throwError(() => {
-          const traceId = getCurrentTraceId();
-          if (isAgentBuilderError(err)) {
-            err.meta = {
-              ...err.meta,
-              traceId,
-            };
-            return err;
-          } else {
-            return createInternalError(`Error executing agent: ${err.message}`, {
-              statusCode: 500,
-              traceId,
-            });
-          }
-        });
+        return throwError(() => toClientError(err));
       })
     );
   };

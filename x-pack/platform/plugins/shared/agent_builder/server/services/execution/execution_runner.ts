@@ -34,7 +34,6 @@ import {
   isRoundStartedEvent,
   isConversationCreatedEvent,
   isAgentBuilderError,
-  AgentBuilderErrorCode,
   AgentExecutionMode,
   ConversationRoundStatus,
   createInternalError,
@@ -44,7 +43,6 @@ import {
 import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { SerializedExecutionError } from '@kbn/agent-builder-common';
 import type {
   AgentExecution,
   ConversationAgentExecution,
@@ -76,6 +74,9 @@ import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
 
 import { EVENT_BATCH_INTERVAL_MS } from './constants';
+
+// Re-exported for the execution service, task handler and callback delivery.
+export { serializeExecutionError } from './utils';
 
 /**
  * Dependencies needed to build and run an agent event stream.
@@ -485,43 +486,6 @@ export const collectAndWriteEvents = ({
       },
     });
   });
-};
-
-/**
- * Converts an unknown error to a {@link SerializedExecutionError} for persistence.
- * - If the error is already an AgentBuilderError, serializes it using toJSON().
- * - Otherwise, wraps it as an internalError, preserving the HTTP status from
- *   Boom-style errors (or any error carrying a numeric `statusCode`) in
- *   `meta.statusCode` so the route layer can return the correct code.
- */
-export const serializeExecutionError = (error: unknown): SerializedExecutionError => {
-  if (isAgentBuilderError(error)) {
-    return { code: error.code as AgentBuilderErrorCode, message: error.message, meta: error.meta };
-  }
-  const message = error instanceof Error ? error.message : String(error);
-  const statusCode = getHttpStatusFromError(error);
-  return {
-    code: AgentBuilderErrorCode.internalError,
-    message,
-    ...(statusCode !== undefined ? { meta: { statusCode } } : {}),
-  };
-};
-
-const getHttpStatusFromError = (error: unknown): number | undefined => {
-  if (typeof error !== 'object' || error === null) return undefined;
-  const { output, statusCode } = error as {
-    output?: { statusCode?: unknown };
-    statusCode?: unknown;
-  };
-  const candidate =
-    typeof output?.statusCode === 'number'
-      ? output.statusCode
-      : typeof statusCode === 'number'
-      ? statusCode
-      : undefined;
-  return typeof candidate === 'number' && candidate >= 400 && candidate < 600
-    ? candidate
-    : undefined;
 };
 
 const conversationNeedsTitle = (conversation: { title?: string }): boolean =>

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   concat,
   lastValueFrom,
@@ -19,11 +18,9 @@ import {
 } from 'rxjs';
 import {
   AgentExecutionMode,
-  AgentBuilderErrorCode,
   ChatEventType,
   ConversationAccessControlMode,
   ConversationOriginType,
-  createBadRequestError,
   TimelineEventType,
   type ChatAgentEvent,
   type ChatEvent,
@@ -33,12 +30,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserAttributes } from '@kbn/inference-tracing';
-import {
-  collectAndWriteEvents,
-  handleAgentExecution,
-  serializeExecutionError,
-  setUserAttributes,
-} from './execution_runner';
+import { collectAndWriteEvents, handleAgentExecution, setUserAttributes } from './execution_runner';
 import {
   createConversationClientMock,
   createEmptyConversation,
@@ -858,53 +850,5 @@ describe('collectAndWriteEvents', () => {
     ).resolves.toBeUndefined();
 
     expect(executionClient.appendEvents).toHaveBeenCalledWith('execution-1', [event]);
-  });
-});
-
-describe('serializeExecutionError', () => {
-  it('passes through AgentBuilderError code, message, and meta', () => {
-    const err = createBadRequestError('bad input', { foo: 'bar' });
-
-    expect(serializeExecutionError(err)).toEqual({
-      code: AgentBuilderErrorCode.badRequest,
-      message: 'bad input',
-      meta: expect.objectContaining({ statusCode: 400, foo: 'bar' }),
-    });
-  });
-
-  it('preserves the HTTP status from a Boom error in meta.statusCode', () => {
-    const err = Boom.forbidden('Unauthorized to get actions');
-
-    expect(serializeExecutionError(err)).toEqual({
-      code: AgentBuilderErrorCode.internalError,
-      message: 'Unauthorized to get actions',
-      meta: { statusCode: 403 },
-    });
-  });
-
-  it('preserves the HTTP status from a plain error carrying statusCode', () => {
-    const err = Object.assign(new Error('nope'), { statusCode: 401 });
-
-    expect(serializeExecutionError(err)).toEqual({
-      code: AgentBuilderErrorCode.internalError,
-      message: 'nope',
-      meta: { statusCode: 401 },
-    });
-  });
-
-  it('omits meta for plain errors with no status', () => {
-    expect(serializeExecutionError(new Error('boom'))).toEqual({
-      code: AgentBuilderErrorCode.internalError,
-      message: 'boom',
-    });
-  });
-
-  it('ignores out-of-range status codes', () => {
-    const err = Object.assign(new Error('weird'), { statusCode: 200 });
-
-    expect(serializeExecutionError(err)).toEqual({
-      code: AgentBuilderErrorCode.internalError,
-      message: 'weird',
-    });
   });
 });
