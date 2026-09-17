@@ -10,23 +10,13 @@ import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  AGENT_BUILDER_UI_EBT,
-  ConversationRoundStatus,
-  isToolCallStep,
-} from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
-import { useAgentId, useConversationReadOnly } from '../../../../hooks/use_conversation';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
 import { RoundMetadataPopover } from './round_metadata_popover';
 import { RoundTraceButton } from './round_trace_button';
-import { useFeedback } from './feedback_controls/use_feedback';
-import { ThumbButton } from './feedback_controls/thumb_button';
-import { FeedbackModal } from './feedback_controls/feedback_modal';
-import { UpInvite } from './feedback_controls/up_invite';
-import { FeedbackSubmitted } from './feedback_controls/feedback_submitted';
 
 const copyLabels = {
   response: {
@@ -47,15 +37,6 @@ const copyLabels = {
   },
 } as const;
 
-// Round feedback is not modelled in the events timeline yet — it lives only on the
-// round (`ConversationRoundFeedback`) and is dropped when rounds are projected from
-// events, so a vote can't round-trip and a submitted vote would silently vanish on
-// the next projection. Hide the control until feedback becomes a first-class
-// timeline event. Typed `boolean` (not the `false` literal) so the gated render
-// paths don't read as statically unreachable.
-// TODO(agent-builder): re-enable once round feedback is captured as a timeline event.
-const ROUND_FEEDBACK_ENABLED: boolean = false;
-
 interface RoundResponseActionsProps {
   content: string;
   isVisible: boolean;
@@ -72,8 +53,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
 }) => {
   const { addSuccessToast } = useToasts();
   const isTracingEnabled = useTracingEnabled();
-  const agentId = useAgentId();
-  const { isReadOnly, isLoading: isConversationReadOnlyLoading } = useConversationReadOnly();
 
   const { action: copyLabel, success: copySuccessLabel } = copyLabels[copyTarget];
 
@@ -92,133 +71,45 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     return Array.isArray(id) ? id[0] : id;
   }, [rawRound?.trace_id]);
 
-  const ebtContext = useMemo(
-    () => ({
-      traceId,
-      connectorId: rawRound?.model_usage?.connector_id,
-      model: rawRound?.model_usage?.model,
-      agentId: agentId ?? undefined,
-      toolNames: rawRound?.steps?.filter(isToolCallStep).map((s) => s.tool_id),
-      inputTokens: rawRound?.model_usage?.input_tokens,
-      outputTokens: rawRound?.model_usage?.output_tokens,
-      llmCalls: rawRound?.model_usage?.llm_calls,
-    }),
-    [
-      traceId,
-      agentId,
-      rawRound?.model_usage?.connector_id,
-      rawRound?.model_usage?.model,
-      rawRound?.model_usage?.input_tokens,
-      rawRound?.model_usage?.output_tokens,
-      rawRound?.model_usage?.llm_calls,
-      rawRound?.steps,
-    ]
-  );
-
-  const feedback = useFeedback(rawRound?.id ?? '', rawRound?.feedback, ebtContext);
-
   const showTraceButton = isTracingEnabled && Boolean(traceId);
-  const isEditable = !isReadOnly && !isConversationReadOnlyLoading;
-  const showFeedback =
-    ROUND_FEEDBACK_ENABLED &&
-    Boolean(rawRound) &&
-    rawRound?.status === ConversationRoundStatus.completed &&
-    isEditable;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+    <EuiFlexGroup
+      direction="row"
+      justifyContent="flexStart"
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      css={css`
+        opacity: ${isVisible ? 1 : 0};
+        transition: opacity 0.2s ease;
+      `}
+    >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          direction="row"
-          justifyContent="flexStart"
-          gutterSize="xs"
-          alignItems="center"
-          responsive={false}
-          css={css`
-            opacity: ${isVisible ? 1 : 0};
-            transition: opacity 0.2s ease;
-          `}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={copyLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="copy"
-                aria-label={copyLabel}
-                onClick={handleCopy}
-                color="text"
-                data-test-subj="roundResponseCopyButton"
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: AGENT_BUILDER_UI_EBT.action.conversation.COPY_RESPONSE,
-                  detail: 'conversation',
-                })}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          {showTraceButton && traceId && (
-            <EuiFlexItem grow={false}>
-              <RoundTraceButton traceId={traceId} />
-            </EuiFlexItem>
-          )}
-          {rawRound && (
-            <EuiFlexItem grow={false}>
-              <RoundMetadataPopover rawRound={rawRound} />
-            </EuiFlexItem>
-          )}
-          {showFeedback && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <ThumbButton
-                    direction="up"
-                    isActive={feedback.vote === 'up'}
-                    isDisabled={feedback.isSubmitting}
-                    onClick={() => feedback.setVote('up')}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ThumbButton
-                    direction="down"
-                    isActive={feedback.vote === 'down'}
-                    isDisabled={feedback.isSubmitting}
-                    onClick={() => feedback.setVote('down')}
-                  />
-                </EuiFlexItem>
-                {(feedback.submitted || (feedback.vote === 'up' && feedback.inviteVisible)) && (
-                  <EuiFlexItem
-                    grow={false}
-                    css={css`
-                      opacity: ${feedback.submittedFading ? 0 : 1};
-                      transition: opacity ${feedback.submittedFading ? '0.5s' : '0s'} ease;
-                    `}
-                  >
-                    {feedback.submitted ? (
-                      <FeedbackSubmitted />
-                    ) : (
-                      <UpInvite
-                        onTellUsMore={feedback.openModal}
-                        onDismiss={feedback.dismissInvite}
-                      />
-                    )}
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <EuiToolTip content={copyLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="copy"
+            aria-label={copyLabel}
+            onClick={handleCopy}
+            color="text"
+            data-test-subj="roundResponseCopyButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.COPY_RESPONSE,
+              detail: 'conversation',
+            })}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
-
-      {showFeedback && feedback.vote !== null && feedback.modalOpen && (
-        <FeedbackModal
-          vote={feedback.vote}
-          chips={feedback.chips}
-          comment={feedback.comment}
-          isSubmitting={feedback.isSubmitting}
-          onToggleChip={feedback.toggleChip}
-          onCommentChange={feedback.setComment}
-          onSubmit={feedback.submit}
-          onClose={feedback.closeModal}
-        />
+      {showTraceButton && traceId && (
+        <EuiFlexItem grow={false}>
+          <RoundTraceButton traceId={traceId} />
+        </EuiFlexItem>
+      )}
+      {rawRound && (
+        <EuiFlexItem grow={false}>
+          <RoundMetadataPopover rawRound={rawRound} />
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );
