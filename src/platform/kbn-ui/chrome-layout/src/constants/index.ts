@@ -20,6 +20,9 @@ export { layoutLevels } from './levels';
 
 export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
 
+/** Agent workspace column; Chat info flyouts measure against this instead of `#app-main-scroll`. */
+export const AGENT_MAIN_CONTAINER_ID = 'kbn-chrome-layout-agent';
+
 export const FLYOUT_SELECTOR = '.euiFlyout[role="dialog"]';
 
 export const MAIN_CONTENT_SELECTORS = ['main', '[role="main"]', `#${APP_MAIN_SCROLL_CONTAINER_ID}`];

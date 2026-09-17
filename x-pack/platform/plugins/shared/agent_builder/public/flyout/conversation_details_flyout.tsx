@@ -25,10 +25,12 @@ import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import { BUILTIN_TAB_IDS } from '@kbn/agent-builder-browser';
+import { AGENT_MAIN_CONTAINER_ID, layoutVar } from '@kbn/ui-chrome-layout';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
+import { useIsAgentWorkspaceMount } from '../application/hooks/use_navigation';
 
 const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Chat info',
@@ -225,6 +227,15 @@ export interface ConversationDetailsFlyoutProps {
   onClose: () => void;
 }
 
+/** Pin Chat info to the agent column so it does not push or cover the application workspace. */
+const agentPanelFlyoutStyles = css`
+  top: ${layoutVar('application.top', '0px')} !important;
+  bottom: ${layoutVar('application.bottom', '0px')} !important;
+  right: ${layoutVar('agent.right', '0px')} !important;
+  height: auto !important;
+  max-height: none !important;
+`;
+
 /** Live variant backed by the active conversation cache. */
 export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyoutProps) => {
   const titleId = useGeneratedHtmlId({
@@ -232,6 +243,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   });
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
 
   return (
     <EuiFlyout
@@ -240,11 +252,16 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       flyoutMenuDisplayMode="always"
       flyoutMenuProps={{}}
       size="s"
-      type="push"
+      type={isAgentWorkspaceMount ? 'overlay' : 'push'}
+      hasAnimation={false}
+      container={isAgentWorkspaceMount ? `#${AGENT_MAIN_CONTAINER_ID}` : undefined}
+      ownFocus={!isAgentWorkspaceMount}
+      outsideClickCloses={false}
       paddingSize="m"
       role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationDetailsFlyout-live"
+      css={isAgentWorkspaceMount ? agentPanelFlyoutStyles : undefined}
     >
       {conversation ? (
         <ConversationDetailsFlyoutContent

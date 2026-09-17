@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import { AGENT_MAIN_CONTAINER_ID } from '../constants';
 import { useLayoutConfig } from '../layout_config_context';
 import { styles } from './layout_agent.styles';
 
@@ -24,6 +25,7 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
 
   return (
     <div
+      id={AGENT_MAIN_CONTAINER_ID}
       css={[styles.shell(appearance), !agentWorkspaceOpen && styles.closed]}
       className="kbnChromeLayoutAgent"
       aria-hidden={!agentWorkspaceOpen}
