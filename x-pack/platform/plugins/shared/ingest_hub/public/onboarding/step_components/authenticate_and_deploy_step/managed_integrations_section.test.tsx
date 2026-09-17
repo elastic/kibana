@@ -514,6 +514,10 @@ describe('ManagedIntegrationsSection', () => {
       setupMocks({ setConnectorId, connectorId: 'connector-1' });
       const { rerender } = renderSection({ showIdentityFederation: true });
       expect(screen.getByTestId('identity-federation')).toBeInTheDocument();
+      // Federation reported ready before coverage arrived — the flip must
+      // reset readiness, not carry it into the access-keys form.
+      fireEvent.click(screen.getByText('mark-ready'));
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
 
       // Resolve coverage arrives asynchronously and marks federation non-deployable.
       act(() => {
@@ -540,6 +544,19 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByTestId('static-keys')).toBeInTheDocument();
       // The stale connector must not survive into deploy — useDeploy selects
       // the identity-federation path whenever a connectorId is set.
+      expect(setConnectorId).toHaveBeenCalledWith(undefined);
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+
+    it('clears a persisted connector when mounting with federation already unavailable', () => {
+      // Coverage usually lands before the user reaches this step, so the
+      // section can mount with federation revoked while a connector from an
+      // earlier visit is still persisted.
+      const setConnectorId = jest.fn();
+      setupMocks({ setConnectorId, connectorId: 'connector-1' });
+      renderSection({ showIdentityFederation: false });
+
+      expect(screen.getByTestId('static-keys')).toBeInTheDocument();
       expect(setConnectorId).toHaveBeenCalledWith(undefined);
     });
   });
