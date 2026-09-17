@@ -167,15 +167,12 @@ describe('SignificantEventFlyout actions menu', () => {
     expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
   });
 
-  it('omits Dismiss when the event is already dismissed', () => {
+  it('does not expose actions for an already dismissed event', () => {
     render(
       <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={jest.fn()} />
     );
 
-    fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
-
-    expect(screen.queryByText('Dismiss significant event')).not.toBeInTheDocument();
-    expect(screen.getByTestId('sigEventCloseButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('sigEventFlyoutActionsButton')).not.toBeInTheDocument();
   });
 });
 

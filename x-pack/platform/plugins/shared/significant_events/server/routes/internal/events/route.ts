@@ -352,13 +352,14 @@ const eventsGetRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { hits: uuidHits } = await getEventClient().findByEventUuid(params.path.id);
+    const eventClient = await getEventClient();
+    const { hits: uuidHits } = await eventClient.findByEventUuid(params.path.id);
     if (uuidHits.length === 0) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
 
     const { event_id: eventId } = uuidHits[0];
-    const { hits: versionHits } = await getEventClient().findByEventId(eventId);
+    const { hits: versionHits } = await eventClient.findByEventId(eventId);
     if (versionHits.length === 0) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }

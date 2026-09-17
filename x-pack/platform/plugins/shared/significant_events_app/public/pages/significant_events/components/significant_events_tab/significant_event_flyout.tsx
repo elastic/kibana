@@ -227,7 +227,6 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   });
 
   const isOpen = latestEvent.status === 'open';
-  const isDismissed = latestEvent.status === 'dismissed';
 
   useInterval(
     refetchLifecycle,
@@ -275,22 +274,18 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             >
               <EuiContextMenuPanel
                 items={[
-                  ...(!isDismissed
-                    ? [
-                        <EuiContextMenuItem
-                          key="dismiss-event"
-                          icon="eyeSlash"
-                          color="primary"
-                          disabled={isUpdating}
-                          onClick={() => {
-                            setIsActionsMenuOpen(false);
-                            setIsDismissModalOpen(true);
-                          }}
-                        >
-                          {DISMISS_EVENT_LABEL}
-                        </EuiContextMenuItem>,
-                      ]
-                    : []),
+                  <EuiContextMenuItem
+                    key="dismiss-event"
+                    icon="eyeSlash"
+                    color="primary"
+                    disabled={isUpdating}
+                    onClick={() => {
+                      setIsActionsMenuOpen(false);
+                      setIsDismissModalOpen(true);
+                    }}
+                  >
+                    {DISMISS_EVENT_LABEL}
+                  </EuiContextMenuItem>,
                   <EuiContextMenuItem
                     key="close-event"
                     icon="cross"
