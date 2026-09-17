@@ -78,14 +78,22 @@ export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
     frameworks: ['jest', 'ftr', 'cypress', 'playwright'],
     classifications: ['flaky'],
   },
-  thresholds: { minBuilds: 10, minFailedBuilds: 2, maxTests: 200 },
+  thresholds: {
+    minBuilds: 10,
+    minFailedBuilds: 2,
+    minFailRate: 0,
+    maxTests: 200,
+    lastRunWithinHours: 24,
+  },
   summary: {
     totalFlaky: flaky.length,
     totalConsistentlyFailing: 0,
     flakyByFramework: { playwright: flaky.length },
+    flakyByBranch: { main: flaky.length },
   },
   flaky,
   consistentlyFailing: [],
+  files: [],
 });
 
 export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }): GithubIssue => ({
