@@ -245,7 +245,7 @@ export function getDataStateContainer({
 
   // The main subscription to handle state changes
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
-  // ES|QL state cleanup is handled by Redux listener middleware (resetOnSavedSearchChange action)
+  // ES|QL source cleanup runs in esqlFetchSubscribe when the query is no longer ES|QL
 
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
@@ -303,7 +303,13 @@ export function getDataStateContainer({
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
           const existingSource = currentDataSource$.getValue();
-          const esqlSource = existingSource?.kind === 'esql' ? existingSource : undefined;
+          const dataView = currentDataView$.getValue();
+          const lookedUp = dataView ? services.dataSourceService.fromDataView(dataView) : undefined;
+          const source = lookedUp ?? existingSource;
+          if (source && source.kind !== existingSource?.kind) {
+            currentDataSource$.next(source);
+          }
+          const esqlSource = source?.kind === 'esql' ? source : undefined;
           const esqlTimeFieldName = esqlSource?.timeFieldName;
 
           let searchSessionId: string;

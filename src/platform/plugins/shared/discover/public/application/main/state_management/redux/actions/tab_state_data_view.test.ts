@@ -9,11 +9,17 @@
 
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState, selectTab } from '..';
 import { createDataViewDataSource } from '../../../../../../common/data_sources';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  dataViewMockWithTimeField,
+  buildDataViewMock,
+} from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import {
   dataViewAdHoc,
@@ -71,6 +77,61 @@ const setup = async ({ dataView = dataViewMockWithTimeField }: { dataView?: Data
 describe('tab_state_data_view actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('setDataView', () => {
+    it('keeps a registered EsqlSource instead of wrapping the shim as DataViewSource', async () => {
+      const { internalState, tabId, runtimeStateManager, services } = await setup();
+      const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+      (esqlSource as { id: string }).id = 'esql-from-logs';
+      services.dataSourceService.registerEsqlSource(esqlSource);
+
+      const shim = buildDataViewMock({
+        id: 'esql-from-logs',
+        title: 'logs-*',
+        type: ESQL_TYPE,
+        timeFieldName: '@timestamp',
+        isPersisted: false,
+      });
+
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView: shim,
+        })
+      );
+
+      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.getValue()).toBe(
+        esqlSource
+      );
+    });
+
+    it('does not wrap an unregistered ES|QL shim as DataViewSource', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const previous = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataSource$.getValue();
+
+      const shim = buildDataViewMock({
+        id: 'esql-unregistered',
+        title: 'logs-*',
+        type: ESQL_TYPE,
+        timeFieldName: '@timestamp',
+        isPersisted: false,
+      });
+
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView: shim,
+        })
+      );
+
+      const next = selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.getValue();
+      expect(next).toBe(previous);
+      expect(next?.id).not.toBe('esql-unregistered');
+    });
   });
 
   describe('assignNextDataView', () => {

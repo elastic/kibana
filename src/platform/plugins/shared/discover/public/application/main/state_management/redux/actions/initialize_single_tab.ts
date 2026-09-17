@@ -184,7 +184,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     let dataView: DataView;
     let esqlSource: EsqlSource | undefined;
-    let updateDataSource = true;
 
     if (isOfAggregateQueryType(initialQuery)) {
       const initialTimeRange =
@@ -197,10 +196,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         esqlVariables: esqlControls ? extractEsqlVariables(esqlControls) : undefined,
         timeRange: initialTimeRange,
       }));
-      // Set currentDataSource$ to the real EsqlSource before setDataView runs,
-      // and tell setDataView not to overwrite it with DataViewSource(dataView).
-      selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(esqlSource);
-      updateDataSource = false;
     } else {
       // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
@@ -217,7 +212,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dataView = result.dataView;
     }
 
-    dispatch(setDataView({ tabId, dataView, updateDataSource }));
+    dispatch(setDataView({ tabId, dataView }));
 
     if (!isEsqlMode && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));

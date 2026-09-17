@@ -109,8 +109,13 @@ export const buildEsqlFetchSubscribe = ({
       return;
     }
 
-    // EsqlSource is always present on PARTIAL — created eagerly before the fetch fires.
+    // Always promote PARTIAL → COMPLETE so fetch_all and the cancel button can
+    // settle. Column-default URL updates need EsqlSource; skip them if missing.
     if (next.dataSource?.kind !== 'esql') {
+      dataSubjects.documents$.next({
+        ...next,
+        fetchStatus: FetchStatus.COMPLETE,
+      });
       return;
     }
 

@@ -16,6 +16,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
 import { DataViewSource } from '@kbn/data-source';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -41,10 +42,10 @@ import { fetchData } from './tab_state';
  * Set the data view in the tab's runtime state
  */
 export const setDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView; updateDataSource?: boolean }>]
+  [TabActionPayload<{ dataView: DataView }>]
 > =
-  ({ tabId, dataView, updateDataSource = true }) =>
-  (dispatch, _, { runtimeStateManager }) => {
+  ({ tabId, dataView }) =>
+  (dispatch, _, { runtimeStateManager, services }) => {
     const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
       runtimeStateManager,
       tabId
@@ -55,7 +56,12 @@ export const setDataView: InternalStateThunkActionCreator<
     }
 
     currentDataView$.next(dataView);
-    if (updateDataSource) {
+    const resolved = services.dataSourceService.fromDataView(dataView);
+    if (resolved) {
+      currentDataSource$.next(resolved);
+    } else if (dataView.type !== ESQL_TYPE) {
+      // Unregistered ES|QL shims must not become DataViewSource. Classic
+      // DataViews wrap as usual.
       currentDataSource$.next(new DataViewSource(dataView));
     }
   };

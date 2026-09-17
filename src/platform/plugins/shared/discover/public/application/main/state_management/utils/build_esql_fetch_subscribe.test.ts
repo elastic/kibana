@@ -14,6 +14,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../../types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -162,6 +163,23 @@ describe('buildEsqlFetchSubscribe', () => {
       tabId,
       appState: { columns: ['field1', 'field2'] },
     });
+  });
+
+  test('PARTIAL without EsqlSource still completes so loading can settle', async () => {
+    const { replaceUrlState, dataState } = await setupTest();
+
+    replaceUrlState.mockClear();
+
+    dataState.data$.documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: msgComplete.result,
+      query,
+    });
+
+    await waitFor(() => {
+      expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+    expect(replaceUrlState).not.toHaveBeenCalled();
   });
 
   test('should not change viewMode to undefined (default) if it was AGGREGATED_LEVEL', async () => {

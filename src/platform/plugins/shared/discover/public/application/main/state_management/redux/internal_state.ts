@@ -36,11 +36,7 @@ import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
-import {
-  type RuntimeStateManager,
-  selectTabRuntimeInternalState,
-  selectTabRuntimeState,
-} from './runtime_state';
+import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
 import { createContextAwarenessToolkit } from './context_awareness_toolkit';
 import {
   PROFILE_APP_STATE_DEFAULT_FIELDS,
@@ -691,19 +687,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit]);
-    },
-  });
-
-  startListening({
-    actionCreator: internalStateSlice.actions.resetOnSavedSearchChange,
-    effect: (action, listenerApi) => {
-      const { runtimeStateManager } = listenerApi.extra;
-      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
-      const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
-
-      if (dataStateContainer?.cleanupEsql) {
-        dataStateContainer.cleanupEsql();
-      }
     },
   });
 
