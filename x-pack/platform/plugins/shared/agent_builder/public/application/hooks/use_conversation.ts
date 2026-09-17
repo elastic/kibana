@@ -70,8 +70,12 @@ export const useConversation = () => {
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
     // Shared conversations can be written to by other participants, so poll for their rounds.
+    // Do not poll while this client streams: the poll would show the saved copy of the pending
+    // message before `execution_started` supplies the id that lets the timeline match the two.
     refetchInterval: (data) =>
-      isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
+      isSharedConversation(data?.access_control) && !isThisConversationStreaming
+        ? POLL_INTERVAL_MS
+        : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };

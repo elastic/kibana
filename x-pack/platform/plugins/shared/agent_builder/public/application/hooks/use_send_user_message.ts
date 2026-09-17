@@ -25,7 +25,7 @@ export const useSendUserMessage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: mutationKeys.sendUserMessage,
+    mutationKey: mutationKeys.sendUserMessage(conversationId),
     mutationFn: (message: string) => {
       if (!conversationId) {
         return Promise.reject(new Error('Cannot send a user message without a conversation id'));
