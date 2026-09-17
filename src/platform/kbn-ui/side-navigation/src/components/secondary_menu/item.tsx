@@ -60,6 +60,7 @@ export const SecondaryMenuItemComponent = ({
     iconType: isExternal ? 'external' : iconType,
     ...(isExternal && { target: '_blank' }),
   };
+  const submenuIconClassName = `${NAVIGATION_SELECTOR_PREFIX}-submenuIcon`;
 
   const buttonStyles = css`
     font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
@@ -71,7 +72,7 @@ export const SecondaryMenuItemComponent = ({
       justify-content: ${iconSide === 'left' ? 'flex-start' : 'space-between'};
     }
 
-    svg:not(.euiBetaBadge__icon) {
+    svg:not(.euiBetaBadge__icon):not(.${submenuIconClassName}) {
       color: ${iconSide === 'right' ? euiTheme.colors.textDisabled : 'inherit'};
     }
 
@@ -97,7 +98,10 @@ export const SecondaryMenuItemComponent = ({
   `;
 
   const submenuIconStyles = css`
+    color: ${euiTheme.colors.textDisabled};
     flex-shrink: 0;
+    margin-left: auto;
+    opacity: 0.6;
   `;
 
   /* Always show non-new badges. Show new ones if isNew check allows it
@@ -117,7 +121,8 @@ export const SecondaryMenuItemComponent = ({
       {hasSubmenu && (
         <EuiIcon
           aria-hidden={true}
-          color="textDisabled"
+          className={submenuIconClassName}
+          color={euiTheme.colors.textDisabled}
           css={submenuIconStyles}
           size="m"
           type="chevronSingleRight"
