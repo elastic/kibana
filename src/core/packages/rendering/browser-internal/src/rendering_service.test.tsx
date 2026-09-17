@@ -49,6 +49,7 @@ jest.mock('@kbn/core-chrome-browser-components', () => ({
   HeaderTopBanner: () => <div>Banner!</div>,
   ChromelessHeader: () => <div>Chromeless!</div>,
   Sidebar: () => <div>Sidebar!</div>,
+  AgentWorkspaceSlot: () => null,
   useHasInlineAppHeader: () => false,
   useHasChromeAppHeaderContent: () => false,
 }));
@@ -87,6 +88,7 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { RenderingService } from './rendering_service';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 
@@ -111,6 +113,7 @@ describe('RenderingService', () => {
     http: httpServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
   });
 
   beforeEach(() => {

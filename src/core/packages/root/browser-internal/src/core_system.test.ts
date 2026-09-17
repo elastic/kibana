@@ -506,6 +506,7 @@ describe('#start()', () => {
         http: expect.any(Object),
         docLinks: expect.any(Object),
         customBranding: expect.any(Object),
+        featureFlags: expect.any(Object),
       },
       expect.any(HTMLElement)
     );

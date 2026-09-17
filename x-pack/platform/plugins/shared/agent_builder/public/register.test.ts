@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildAgentBuilderDeepLinks } from './register';
+import { buildAgentBuilderAppUpdate, buildAgentBuilderDeepLinks } from './register';
 
 describe('buildAgentBuilderDeepLinks', () => {
   it('omits plugins and connectors when experimental features are disabled', () => {
@@ -16,5 +16,16 @@ describe('buildAgentBuilderDeepLinks', () => {
   it('includes plugins and connectors when experimental features are enabled', () => {
     const links = buildAgentBuilderDeepLinks(true);
     expect(links.map((l) => l.id)).toEqual(['agents', 'skills', 'plugins', 'connectors', 'tools']);
+  });
+});
+
+describe('buildAgentBuilderAppUpdate', () => {
+  it('hides Agent Builder from nav when agent-first chrome is on', () => {
+    expect(
+      buildAgentBuilderAppUpdate({
+        experimentalFeaturesEnabled: false,
+        isAgentFirstChrome: true,
+      }).visibleIn
+    ).toEqual([]);
   });
 });

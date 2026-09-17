@@ -81,6 +81,7 @@ jest.mock('./register', () => ({
   registerApp: jest.fn(),
   registerAnalytics: jest.fn(),
   buildAgentBuilderDeepLinks: jest.fn(() => []),
+  buildAgentBuilderAppUpdate: jest.fn(() => ({})),
 }));
 
 jest.mock('./locator/register_locators', () => ({
@@ -99,6 +100,15 @@ jest.mock('./sidebar', () => ({
 
 jest.mock('./components/nav_control/lazy_agent_builder_nav_control', () => ({
   AgentBuilderNavControlInitiator: () => null,
+}));
+
+jest.mock('./agent_workspace/register_agent_workspace', () => ({
+  registerAgentWorkspaceSlot: jest.fn(),
+  unregisterAgentWorkspaceSlot: jest.fn(),
+}));
+
+jest.mock('@kbn/ui-chrome-layout', () => ({
+  isAgentFirst: jest.fn(() => false),
 }));
 
 const createMockInitializerContext = (): PluginInitializerContext<ConfigSchema> =>
@@ -152,9 +162,10 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
       },
     },
     chrome: {
-      sidebar: { getApp: jest.fn(() => sidebarApp) },
+      sidebar: { getApp: jest.fn(() => sidebarApp), hasApp: jest.fn(() => true) },
       controls: { aiButton: { register: jest.fn() } },
     },
+    featureFlags: { getBooleanValue: jest.fn(() => false) },
     uiSettings: {
       get$: jest.fn(() => new BehaviorSubject(false)),
     },

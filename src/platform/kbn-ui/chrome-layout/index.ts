@@ -19,6 +19,9 @@ export {
 
 export type { LayoutAppearance } from './src/layout.types';
 
+export { isAgentFirst } from './src/agent_first_flag';
+export { AGENT_FIRST_LAYOUT_OVERRIDES } from './src/agent_first/agent_first_layout';
+
 export { LayoutDebugOverlay } from './src/debug/layout_debug_overlay';
 
 export {
@@ -34,6 +37,9 @@ export {
   FLYOUT_SELECTOR,
   MAIN_CONTENT_SELECTORS,
   SIDE_PANEL_CONTENT_GAP,
+  DEFAULT_AGENT_WIDTH,
+  AGENT_FIRST_GAP,
+  AGENT_FIRST_FEATURE_FLAG_KEY,
   euiIncludeSelectorInFocusTrap,
 } from './src/constants';
 export type {

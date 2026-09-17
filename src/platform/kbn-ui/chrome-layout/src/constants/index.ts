@@ -26,6 +26,14 @@ export const MAIN_CONTENT_SELECTORS = ['main', '[role="main"]', `#${APP_MAIN_SCR
 
 export const SIDE_PANEL_CONTENT_GAP = 8;
 
+/** Default width of the agent workspace column in agent-first chrome (POC). */
+export const DEFAULT_AGENT_WIDTH = 800;
+
+/** Gutter between nav, agent, and application panels. */
+export const AGENT_FIRST_GAP = 8;
+
+export const AGENT_FIRST_FEATURE_FLAG_KEY = 'core.chrome.agentFirst';
+
 export const euiIncludeSelectorInFocusTrap = {
   prop: {
     'data-eui-includes-in-flyout-focus-trap': true,

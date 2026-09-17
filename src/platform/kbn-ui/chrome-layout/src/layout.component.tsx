@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { LayoutApplication } from './application';
+import { LayoutAgent } from './agent';
 import { LayoutBanner } from './banner';
 import { LayoutNavigation } from './navigation';
 import { LayoutFooter } from './footer';
@@ -61,6 +62,10 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
     <LayoutNavigation>{renderSlot(props.navigation)}</LayoutNavigation>
   ) : null;
 
+  const agent = layoutState.hasAgent ? (
+    <LayoutAgent>{renderSlot(props.agent)}</LayoutAgent>
+  ) : null;
+
   const application = (
     <LayoutApplication
       topBar={renderSlot(props.applicationTopBar)}
@@ -71,10 +76,11 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
   );
 
   return (
-    <div css={styles.css} style={styles.style}>
+    <div className="kbnChromeLayout" css={styles.css} style={styles.style}>
       {banner}
       {header}
       {navigation}
+      {agent}
       {application}
       {footer}
       {sidebar}

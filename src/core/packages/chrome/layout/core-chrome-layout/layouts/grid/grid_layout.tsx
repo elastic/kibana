@@ -10,8 +10,15 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
 import {
+  AGENT_FIRST_LAYOUT_OVERRIDES,
+  ChromeLayout,
+  ChromeLayoutConfigProvider,
+  DEFAULT_AGENT_WIDTH,
+  isAgentFirst,
+} from '@kbn/ui-chrome-layout';
+import {
+  AgentWorkspaceSlot,
   ChromeComponentsProvider,
   ClassicHeader,
   ChromeNextGlobalHeader,
@@ -72,10 +79,11 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, overlays, http, docLinks, customBranding } = this.deps;
+    const { application, overlays, http, docLinks, customBranding, featureFlags } = this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
+    const agentFirstEnabled = isAgentFirst(featureFlags);
 
     const componentDeps: ChromeComponentsDeps = {
       application,
@@ -95,9 +103,13 @@ export class GridLayout implements LayoutService {
       const navigationWidth = useSideNavWidth();
 
       const layoutConfigKey = chromeStyle === 'classic' ? 'classic' : 'project';
+      const showAgentWorkspace =
+        agentFirstEnabled && chromeVisible && chromeStyle === 'project';
 
       const layoutConfig = {
         ...layoutConfigs[layoutConfigKey],
+        ...(showAgentWorkspace ? AGENT_FIRST_LAYOUT_OVERRIDES : {}),
+        ...(showAgentWorkspace ? { agentWidth: DEFAULT_AGENT_WIDTH } : {}),
         sidebarWidth,
         navigationWidth,
       };
@@ -107,10 +119,14 @@ export class GridLayout implements LayoutService {
       let navigation: ReactNode;
       let banner: ReactNode;
       let applicationTopBar: ReactNode;
+      let agent: ReactNode;
 
       if (chromeVisible) {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
+        } else if (showAgentWorkspace) {
+          navigation = <GridLayoutProjectSideNav />;
+          agent = <AgentWorkspaceSlot />;
         } else {
           header = <ChromeNextGlobalHeader />;
           if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
@@ -131,6 +147,7 @@ export class GridLayout implements LayoutService {
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}
+              agent={agent}
               sidebar={<Sidebar />}
               footer={footer}
               navigation={navigation}

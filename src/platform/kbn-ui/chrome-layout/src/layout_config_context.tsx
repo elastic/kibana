@@ -22,12 +22,14 @@ export type LayoutConfig = Pick<
   | 'headerHeight'
   | 'footerHeight'
   | 'navigationWidth'
+  | 'agentWidth'
   | 'sidebarWidth'
   | 'applicationTopBarHeight'
   | 'applicationBottomBarHeight'
   | 'applicationMarginTop'
   | 'applicationMarginBottom'
   | 'applicationMarginRight'
+  | 'agentMarginLeft'
 > & {
   appearance?: LayoutAppearance;
 };

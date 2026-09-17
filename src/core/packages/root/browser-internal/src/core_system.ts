@@ -478,6 +478,7 @@ export class CoreSystem {
           http,
           docLinks,
           customBranding,
+          featureFlags,
         },
         coreUiTargetDomElement
       );

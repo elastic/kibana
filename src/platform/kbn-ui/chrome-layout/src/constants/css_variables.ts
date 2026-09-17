@@ -14,6 +14,7 @@ export type LayoutComponent =
   | 'header'
   | 'footer'
   | 'navigation'
+  | 'agent'
   | 'sidebar'
   | 'application';
 export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content';
@@ -28,6 +29,7 @@ export type LayoutProperty = keyof Pick<
   | 'marginBottom'
   | 'marginRight'
   | 'marginTop'
+  | 'marginLeft'
 >;
 
 export type LayoutVarName = `${LayoutComponent}.${LayoutProperty}`;
