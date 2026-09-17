@@ -5,14 +5,13 @@ exports[`schema_to_skill_docs generateActionPolicyOperationsDoc matches the revi
 
 #### \`operation: \\"set_metadata\\"\`
 
-Use \`set_metadata\` to name the action policy and add a description or tags so the user can filter by it later.
+Use \`set_metadata\` to name the action policy and add a description.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_metadata\\" | required |  |
 | \`name\` | string | optional | The action policy name. (min length: 1, max length: 256) |
 | \`description\` | string | optional | A description of the action policy. (max length: 1024) |
-| \`tags\` | string[] | optional | Tags for categorizing the action policy. (max items: 20) |
 
 #### \`operation: \\"set_destinations\\"\`
 
@@ -50,7 +49,7 @@ Use \`set_throttle\` to limit how often notifications fire so the user is not fl
 |---|---|---|---|
 | \`operation\` | \\"set_throttle\\" | required |  |
 | \`strategy\` | \\"on_status_change\\" \\\\| \\"per_status_interval\\" \\\\| \\"time_interval\\" \\\\| \\"every_time\\" | optional | The throttle strategy. |
-| \`interval\` | string | optional | The throttle interval (e.g. 5m, 1h). |
+| \`interval\` | string | optional | The throttle interval (e.g. 5m, 1h). (max length: 32) |
 
 #### \`operation: \\"validate\\"\`
 
@@ -73,7 +72,6 @@ exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed
 | \`destinations\` | { type: \\"workflow\\", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |
 | \`matcher\` | object | optional | Selects the alerts this policy applies to. Set \`tags\` to match alerts from rules with those tags. Set \`expression\` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both \`tags\` and \`expression\`, an alert must match the tags and the expression for the policy to apply. When \`matcher\` is \`null\`, or when both \`tags\` and \`expression\` are empty, the policy applies to all alerts. |
 | \`group_by\` | string[] | optional | The fields used to group alerts. (max items: 16) |
-| \`tags\` | string[] | optional | Tags for categorizing the action policy. (max items: 20) |
 | \`grouping_mode\` | \\"per_episode\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode for alert notifications. |
 | \`throttle\` | object | optional | The throttle configuration for notifications. |"
 `;
@@ -348,8 +346,8 @@ Use \`set_schedule\` to control how often the rule runs (\`every\`) and how far 
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`every\` | string | optional | Execution interval, e.g. 1m, 5m, 1h. |
-| \`lookback\` | string | optional | Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES\\\\|QL. |
+| \`every\` | string | optional | Execution interval, e.g. 1m, 5m, 1h. (max length: 32) |
+| \`lookback\` | string | optional | Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES\\\\|QL. (max length: 32) |
 | \`operation\` | \\"set_schedule\\" | required |  |
 
 #### \`operation: \\"set_query\\"\`
@@ -379,9 +377,9 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`pending_count\` | integer | optional | Number of consecutive matches required before the alert becomes \`active\`. (min: 0, max: 1000) |
-| \`pending_timeframe\` | string | optional | Time window used with \`pending_count\`, for example \`5m\` or \`15m\`. |
+| \`pending_timeframe\` | string | optional | Time window used with \`pending_count\`, for example \`5m\` or \`15m\`. (max length: 32) |
 | \`recovering_count\` | integer | optional | Number of consecutive recoveries required before the alert becomes \`inactive\`. (min: 0, max: 1000) |
-| \`recovering_timeframe\` | string | optional | Time window used with \`recovering_count\`, for example \`5m\` or \`15m\`. |
+| \`recovering_timeframe\` | string | optional | Time window used with \`recovering_count\`, for example \`5m\` or \`15m\`. (max length: 32) |
 | \`operation\` | \\"set_state_transition\\" | required |  |
 
 #### \`operation: \\"set_dashboards\\"\`
