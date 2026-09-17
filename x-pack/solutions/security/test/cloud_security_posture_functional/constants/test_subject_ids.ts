@@ -27,6 +27,8 @@ export const testSubjectIds = {
     'cloudSecurityGraphGraphInvestigationShowActionsOnEntity',
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEntityDetails',
+  GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID:
+    'cloudSecurityGraphGraphInvestigationShowGroupedEntities',
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEntityRelationships',
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphLabelExpandPopover',

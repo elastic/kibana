@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import type { Proposal } from '@kbn/alertzero-common';
+import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { PendingProposalsPanel } from '../../components/pending_proposals';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
@@ -29,7 +29,7 @@ import * as i18n from './translations';
  * Mock-backed proposal summary. Decisions are made on durable proposals, which
  * are rendered by `PendingProposalsPanel` above this list.
  */
-const ProposalRow: React.FC<{ proposal: Proposal; isSelected: boolean }> = ({
+const ProposalRow: React.FC<{ proposal: ProposalWithMetadata; isSelected: boolean }> = ({
   proposal,
   isSelected,
 }) => (
@@ -40,9 +40,9 @@ const ProposalRow: React.FC<{ proposal: Proposal; isSelected: boolean }> = ({
   >
     <EuiText size="s">
       <p>
-        <strong>{proposal.summary}</strong>
+        <strong>{proposal.action?.name ?? proposal.actionWorkflowId}</strong>
       </p>
-      <p>{proposal.recommendation}</p>
+      <p>{proposal.comment}</p>
     </EuiText>
   </EuiPanel>
 );
