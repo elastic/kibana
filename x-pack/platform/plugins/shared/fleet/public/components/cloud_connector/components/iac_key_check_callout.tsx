@@ -107,7 +107,7 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
       text={text}
       actionProps={{
         primary: {
-          iconType: 'popout',
+          iconType: 'rocket',
           isLoading: isUpdating,
           onClick: onUpdateStack,
           'data-test-subj': CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON,

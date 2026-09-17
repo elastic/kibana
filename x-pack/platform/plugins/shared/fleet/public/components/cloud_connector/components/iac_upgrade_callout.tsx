@@ -96,7 +96,7 @@ export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
       text={text}
       actionProps={{
         primary: {
-          iconType: 'popout',
+          iconType: 'rocket',
           isDisabled: !canUpdate,
           isLoading: isUpdating,
           onClick: onUpdateStack,

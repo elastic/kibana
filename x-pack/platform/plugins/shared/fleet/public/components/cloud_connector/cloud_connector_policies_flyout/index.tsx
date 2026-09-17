@@ -539,7 +539,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                       <>
                         <EuiButton
                           size="s"
-                          iconType="popout"
+                          iconType="rocket"
                           isLoading={isGeneratingTemplate}
                           onClick={() => launchTemplate('redeploy_clicked')}
                           data-test-subj={
