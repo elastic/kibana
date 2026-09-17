@@ -331,6 +331,7 @@ export const performBulkActionRoute = (
 
               errors.push(...bulkDeleteResult.errors);
               deleted = bulkDeleteResult.rules;
+              skipped = bulkDeleteResult.skipped;
               break;
             }
             case BulkActionTypeEnum.duplicate: {

@@ -180,6 +180,7 @@ describe('Perform bulk action route', () => {
       clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
         rules: [mockRule],
         errors: [],
+        skipped: [],
       });
 
       const response = await server.inject(
@@ -205,6 +206,32 @@ describe('Perform bulk action route', () => {
       expect(response.body.attributes.results.deleted[0].id).toEqual(mockRule.id);
     });
 
+    it('returns 200 with skipped rules when rules were not found', async () => {
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [],
+        errors: [],
+        skipped: [
+          { id: mockRule.id, name: mockRule.name, skip_reason: 'RULE_NOT_FOUND' },
+        ],
+      });
+
+      const response = await server.inject(
+        getBulkDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 0,
+        skipped: 1,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(response.body.attributes.results.skipped).toEqual([
+        { id: mockRule.id, name: mockRule.name, skip_reason: 'RULE_NOT_FOUND' },
+      ]);
+    });
+
     it('returns 500 when deletion fails with a non-404 error', async () => {
       clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
         rules: [],
@@ -215,6 +242,7 @@ describe('Perform bulk action route', () => {
             rule: { id: mockRule.id, name: mockRule.name },
           },
         ],
+        skipped: [],
       });
 
       const response = await server.inject(

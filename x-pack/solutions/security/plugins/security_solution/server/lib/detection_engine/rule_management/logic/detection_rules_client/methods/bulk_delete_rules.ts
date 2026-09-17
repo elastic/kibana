@@ -7,6 +7,7 @@
 
 import { chunk } from 'lodash';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { BulkDeleteActionSkipResult } from '@kbn/alerting-plugin/common';
 import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleAlertType } from '../../../../rule_schema';
 
@@ -21,16 +22,23 @@ interface BulkDeleteRulesParams {
   changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
+interface BulkDeleteRulesResult {
+  rules: RuleAlertType[];
+  errors: BulkOperationError[];
+  skipped: BulkDeleteActionSkipResult[];
+}
+
 export const bulkDeleteRules = async ({
   rulesClient,
   rules,
   changeTracking,
-}: BulkDeleteRulesParams): Promise<{ rules: RuleAlertType[]; errors: BulkOperationError[] }> => {
+}: BulkDeleteRulesParams): Promise<BulkDeleteRulesResult> => {
   const ruleIds = rules.map((rule) => rule.id);
   const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
   const chunks = chunk(ruleIds, CHUNK_SIZE);
   const allRules: RuleAlertType[] = [];
   const allErrors: BulkOperationError[] = [];
+  const allSkipped: BulkDeleteActionSkipResult[] = [];
 
   for (const idsChunk of chunks) {
     const result = await rulesClient.bulkDeleteRules({
@@ -39,19 +47,18 @@ export const bulkDeleteRules = async ({
     });
     allRules.push(...(result.rules as RuleAlertType[]));
 
-    // A 404 on delete means the rule was already gone (e.g. concurrent bulk
-    // delete). The desired end state is reached, so count it as deleted.
     for (const error of result.errors) {
-      if (error.status === 404) {
-        const alreadyDeleted = rulesById.get(error.rule.id);
-        if (alreadyDeleted) {
-          allRules.push(alreadyDeleted);
-          continue;
-        }
+      if (error.status === 404 && rulesById.has(error.rule.id)) {
+        allSkipped.push({
+          id: error.rule.id,
+          name: error.rule.name,
+          skip_reason: 'RULE_NOT_FOUND',
+        });
+        continue;
       }
       allErrors.push(error);
     }
   }
 
-  return { rules: allRules, errors: allErrors };
+  return { rules: allRules, errors: allErrors, skipped: allSkipped };
 };
