@@ -456,11 +456,11 @@ describe('Custom YARA signatures form', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('customYaraSignatures-form-validation-error')).toHaveTextContent(
-          'Line 2: syntax error'
+          'Error on line 2: syntax error'
         );
       });
       expect(screen.getByTestId('customYaraSignatures-form-validation-warning')).toHaveTextContent(
-        'Line 4: unused identifier'
+        'Warning on line 4: unused identifier'
       );
     });
 
@@ -507,7 +507,7 @@ describe('Custom YARA signatures form', () => {
       await waitFor(() => {
         expect(
           screen.getByTestId('customYaraSignatures-form-validation-requestError')
-        ).toHaveTextContent('Unable to validate YARA signature. Please try again.');
+        ).toHaveTextContent('Unable to validate YARA signature.');
       });
     });
 
@@ -613,7 +613,7 @@ describe('Custom YARA signatures form', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('customYaraSignatures-form-validation-error')).toHaveTextContent(
-          'Line 2: syntax error'
+          'Error on line 2: syntax error'
         );
       });
       expect(mockedContext.coreStart.http.post).toHaveBeenCalledTimes(1);
@@ -642,7 +642,7 @@ describe('Custom YARA signatures form', () => {
       );
 
       expect(screen.getByTestId('customYaraSignatures-form-validation-error')).toHaveTextContent(
-        'Line 2: syntax error'
+        'Error on line 2: syntax error'
       );
       expect(mockedContext.coreStart.http.post).toHaveBeenCalledTimes(1);
     });

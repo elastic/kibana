@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ValidateCustomYaraSignatureDiagnostic } from '../../../../../../common/api/endpoint/custom_yara_signatures';
 
 export const FORM_TITLE = i18n.translate(
   'xpack.securitySolution.customYaraSignatures.form.createTitle',
@@ -93,31 +94,32 @@ export const SIGNATURE_EDITOR_ARIA_LABEL = i18n.translate(
 export const VALIDATION_REQUEST_ERROR = i18n.translate(
   'xpack.securitySolution.customYaraSignatures.form.validationRequestErrorMessage',
   {
-    defaultMessage: 'Unable to validate YARA signature. Please try again.',
+    defaultMessage: 'Unable to validate YARA signature.',
   }
 );
 
-/**
- * @param {number} line Line number of the diagnostic. 0 means no line number.
- * @param {string} message
- * @returns
- */
+/** User-facing validation diagnostic, including a severity prefix for assistive technology. */
 export const getValidationDiagnosticMessage = ({
   line,
   message,
-}: {
-  line: number;
-  message: string;
-}): string => {
+  severity,
+}: ValidateCustomYaraSignatureDiagnostic): string => {
   if (line > 0) {
     return i18n.translate(
       'xpack.securitySolution.customYaraSignatures.form.validationDiagnosticWithLineMessage',
       {
-        defaultMessage: 'Line {line}: {message}',
-        values: { line, message },
+        defaultMessage:
+          '{severity, select, error {Error on line {line}: {message}} other {Warning on line {line}: {message}}}',
+        values: { severity, line, message },
       }
     );
   }
 
-  return message;
+  return i18n.translate(
+    'xpack.securitySolution.customYaraSignatures.form.validationDiagnosticMessage',
+    {
+      defaultMessage: '{severity, select, error {Error: {message}} other {Warning: {message}}}',
+      values: { severity, message },
+    }
+  );
 };
