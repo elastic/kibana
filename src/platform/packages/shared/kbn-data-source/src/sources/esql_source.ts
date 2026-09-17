@@ -37,9 +37,8 @@ export interface EsqlSourceArgs {
    */
   projectRouting?: string;
   /**
-   * When provided, the factory calls `/internal/esql/source_info` to resolve
-   * both the time field and the result schema in a single round trip, populating
-   * `resultColumns` with correct `isComputedColumn` metadata.
+   * When provided, the factory resolves the time field (`getESQLTimeField`) and
+   * the result schema (`getESQLSourceInfo` / LIMIT 0) in parallel.
    */
   http?: HttpStart;
   /**
@@ -65,9 +64,11 @@ interface EsqlSourceConstructorArgs {
 /**
  * `DataSource` implementation for ES|QL queries.
  *
- * Built directly from `(query, resultColumns)` — does not require or create a
- * `DataView`. Identity is derived from the FROM clause's target string and the
- * (caller-provided) time field name; columns come from the query response.
+ * Does not require or create a `DataView`. Identity is derived from the query,
+ * optional project routing, and time field name. When `http` is provided,
+ * {@link EsqlSource.create} resolves the time field and LIMIT 0 schema in
+ * parallel; `resultColumns` can still be supplied to skip or override schema
+ * discovery.
  *
  * Construct via the async {@link EsqlSource.create} factory; the constructor
  * is private because id derivation uses `crypto.subtle.digest` (async).

@@ -267,14 +267,12 @@ describe('test fetchAll', () => {
     fetchAll({
       ...deps,
       esqlTimeFieldName: '@timestamp',
-      fullEsqlSourcePromise: Promise.resolve(mockEsqlSource),
+      esqlSource: mockEsqlSource,
     });
     await waitForNextTick();
 
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, query },
-      // fullEsqlSourcePromise resolves → LOADING re-emitted with dataSource for sidebar
       {
         fetchStatus: FetchStatus.LOADING,
         query,

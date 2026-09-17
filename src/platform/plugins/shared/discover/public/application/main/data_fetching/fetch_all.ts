@@ -52,7 +52,7 @@ export interface CommonFetchParams {
   scopedEbtManager: ScopedDiscoverEBTManager;
   getCurrentTab: () => TabState;
   esqlTimeFieldName?: string;
-  fullEsqlSourcePromise?: Promise<EsqlSource>;
+  esqlSource?: EsqlSource;
 }
 
 /**
@@ -81,7 +81,7 @@ export function fetchAll(
     getCurrentTab,
     onFetchRecordsComplete,
     esqlTimeFieldName,
-    fullEsqlSourcePromise,
+    esqlSource,
   } = params;
   const { data, expressions } = services;
 
@@ -106,30 +106,21 @@ export function fetchAll(
       });
     }
 
+    const loadingDataSource = isEsqlQuery
+      ? esqlSource
+      : dataView.id
+      ? new DataViewSource(dataView)
+      : undefined;
+
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
     sendLoadingMsg(dataSubjects.documents$, {
       query,
-      ...(!isEsqlQuery && dataView.id ? { dataSource: new DataViewSource(dataView) } : {}),
+      ...(loadingDataSource ? { dataSource: loadingDataSource } : {}),
     });
     sendLoadingMsg(dataSubjects.totalHits$, {
       result: dataSubjects.totalHits$.getValue().result,
     });
-
-    // When the full EsqlSource (with columns) resolves, update the LOADING
-    // emit so the sidebar shows the real field list while the table is still
-    // fetching.
-    if (isEsqlQuery && fullEsqlSourcePromise) {
-      fullEsqlSourcePromise
-        .then((fullSource) => {
-          if (abortController.signal.aborted) return;
-          const current = dataSubjects.documents$.getValue();
-          if (current.fetchStatus === FetchStatus.LOADING) {
-            dataSubjects.documents$.next({ ...current, dataSource: fullSource });
-          }
-        })
-        .catch(() => {});
-    }
 
     const response: Promise<RecordsFetchResponse> = isEsqlQuery
       ? fetchEsql({
@@ -155,7 +146,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(async ({ records, interceptedWarnings = [], esqlHeaderWarning, esqlColumns }) => {
+      .then(({ records, interceptedWarnings = [], esqlHeaderWarning, esqlColumns }) => {
         fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
         if (isEsqlQuery) {
@@ -194,17 +185,10 @@ export function fetchAll(
          */
         const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
-        // For ES|QL, ensure the PARTIAL emit carries the full EsqlSource updated
-        // with the actual query columns (correct isNull values for the sidebar).
-        // getESQLSourceInfo (LIMIT 0) always resolves before the full table fetch
-        // completes, so this await is effectively instant.
-        const baseEsqlSource = isEsqlQuery
-          ? await fullEsqlSourcePromise?.catch(() => undefined)
-          : undefined;
+        // Overlay table `isNull` flags onto the resolved EsqlSource. Query columns
+        // already come from LIMIT 0 at resolve time; this only updates nullability.
         const latestEsqlSource =
-          baseEsqlSource && esqlColumns?.length
-            ? baseEsqlSource.withColumns(esqlColumns)
-            : baseEsqlSource;
+          esqlSource && esqlColumns?.length ? esqlSource.withColumns(esqlColumns) : esqlSource;
 
         dataSubjects.documents$.next({
           fetchStatus,

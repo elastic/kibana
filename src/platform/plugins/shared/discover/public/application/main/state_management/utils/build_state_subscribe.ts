@@ -8,6 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   internalStateActions,
   type InternalStateDispatch,
@@ -29,6 +30,7 @@ import {
   isDataSourceType,
 } from '../../../../../common/data_sources';
 import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
+import { resolveEsqlSource } from '../../data_fetching/resolve_esql_source';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
@@ -79,6 +81,27 @@ export const buildStateSubscribe =
       if (!isEsqlModePrev) {
         dataState.reset();
       }
+    }
+
+    if (isEsqlMode && queryChanged && isOfAggregateQueryType(nextState.query)) {
+      const tabId = getCurrentTab().id;
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const previousSource = currentDataSource$.getValue();
+      const { esqlSource, dataView } = await resolveEsqlSource({
+        esql: nextState.query.esql,
+        services,
+        esqlVariables: getCurrentTab().esqlVariables,
+        timeRange: services.data.query.timefilter.timefilter.getTime(),
+        previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+      });
+      currentDataSource$.next(esqlSource);
+      dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView,
+          updateDataSource: false,
+        })
+      );
     }
 
     const { sampleSize, sort, dataSource, esqlApproximation } = prevState;

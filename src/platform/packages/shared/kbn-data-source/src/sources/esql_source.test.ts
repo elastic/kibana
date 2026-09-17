@@ -287,6 +287,30 @@ describe('EsqlSource', () => {
     });
   });
 
+  describe('withColumns', () => {
+    it('returns a new instance with the same identity and updated result columns', async () => {
+      const originalCols = [makeColumn('message', 'string')];
+      const original = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: originalCols,
+        timeFieldName: '@timestamp',
+      });
+      const updatedCols = [
+        { ...makeColumn('message', 'string'), isNull: true },
+        makeColumn('bytes', 'number', 'long'),
+      ];
+      const updated = original.withColumns(updatedCols);
+
+      expect(updated).not.toBe(original);
+      expect(updated.id).toBe(original.id);
+      expect(updated.query).toBe(original.query);
+      expect(updated.timeFieldName).toBe('@timestamp');
+      expect(updated.resultColumns).toEqual(updatedCols);
+      expect(original.resultColumns).toEqual(originalCols);
+      expect(updated.getColumns().map((column) => column.name)).toEqual(['message', 'bytes']);
+    });
+  });
+
   describe('serialize', () => {
     it('returns identity-only kind = "esql" form', async () => {
       const source = await EsqlSource.create({

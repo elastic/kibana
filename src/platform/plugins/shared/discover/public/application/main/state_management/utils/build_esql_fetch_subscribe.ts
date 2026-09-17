@@ -12,7 +12,7 @@ import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/e
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { isEqual } from 'lodash';
 import type { DataSourceService, EsqlSource } from '@kbn/data-source';
-import { registerEsqlSourceInDataViewsCache, unregisterFromDataViewsCache } from '@kbn/data-source';
+import { unregisterFromDataViewsCache } from '@kbn/data-source';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
@@ -26,11 +26,11 @@ const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
 
 /*
  * Takes care of ES|QL state transformations when a new result is returned.
- * Decides which columns to display in the grid and registers the EsqlSource.
+ * Decides which columns to display in the grid.
  *
- * Column discovery uses EsqlSource.getColumns() — the source runs a LIMIT 0
- * query eagerly and provides the result columns before any fetch fires.
- * This function only decides WHICH of those known columns to display.
+ * Column discovery uses EsqlSource.getColumns() — the source is resolved
+ * before fetch (tab init or query change) and provides result columns from
+ * LIMIT 0. This function only decides WHICH of those known columns to display.
  */
 export const buildEsqlFetchSubscribe = ({
   internalState,
@@ -82,14 +82,16 @@ export const buildEsqlFetchSubscribe = ({
     }
 
     if (next.fetchStatus === FetchStatus.LOADING) {
+      if (next.dataSource?.kind === 'esql') {
+        registeredEsqlSourceId = next.dataSource.id;
+      }
+
       const appStateQuery = getCurrentTab().appState.query;
 
-      if (isOfAggregateQueryType(appStateQuery)) {
-        // On initial fetch prevEsqlSource is undefined — compare against current query (no change).
-        const prevQuery = prevEsqlSource?.query ?? appStateQuery.esql;
+      if (isOfAggregateQueryType(appStateQuery) && prevEsqlSource) {
         const indexPatternChanged =
           getIndexPatternFromESQLQuery(appStateQuery.esql) !==
-          getIndexPatternFromESQLQuery(prevQuery);
+          getIndexPatternFromESQLQuery(prevEsqlSource.query);
 
         if (indexPatternChanged) {
           internalState.dispatch(
@@ -152,6 +154,7 @@ export const buildEsqlFetchSubscribe = ({
 
     // Commit the new source as "previous" before any async work below.
     prevEsqlSource = esqlSource;
+    registeredEsqlSourceId = esqlSource.id;
 
     if (indexPatternChanged || changeDefaultColumns || changeSelectedColumns || changeViewMode) {
       prevDefaultColumns = nextDefaultColumns;
@@ -181,10 +184,6 @@ export const buildEsqlFetchSubscribe = ({
       ...next,
       fetchStatus: FetchStatus.COMPLETE,
     });
-
-    dataSourceService.registerEsqlSource(esqlSource);
-    registeredEsqlSourceId = esqlSource.id;
-    await registerEsqlSourceInDataViewsCache(dataViews, esqlSource);
   };
 
   return { esqlFetchSubscribe, cleanupEsql };

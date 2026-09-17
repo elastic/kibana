@@ -12,16 +12,15 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { EsqlSource } from './sources/esql_source';
-import { columnToFieldBase } from './to_column';
-import type { Column } from './types';
 
 /**
  * Transitional shim. Registers a thin DataView in the `dataViewsService` cache so that
  * consumers still calling `dataViewsService.get(id)` for ES|QL ids keep resolving.
  * Delete this file once all such consumers migrate to `DataSourceService.get()`.
  *
- * Uses `skipFetchFields: true` — fields come from the `EsqlSource`'s columns, no `_field_caps`.
- * The cache is cleared first so re-registration picks up fresh columns when the query changes.
+ * Uses `skipFetchFields: true` — never call `_field_caps`. Query columns live on
+ * `EsqlSource`; the shim only injects `timeFieldName` so `DataView.isTimeBased()`
+ * stays true. The cache is cleared first so re-registration picks up a new time field.
  */
 export async function registerEsqlSourceInDataViewsCache(
   dataViews: DataViewsPublicPluginStart,
@@ -34,7 +33,7 @@ export async function registerEsqlSourceInDataViewsCache(
       title: source.title,
       type: ESQL_TYPE,
       timeFieldName: source.timeFieldName,
-      fields: makeFieldsSpec(source.getColumns(), source.timeFieldName),
+      fields: makeTimeFieldSpec(source.timeFieldName),
     },
     true // skipFetchFields — never call _field_caps for ES|QL adapter DVs
   );
@@ -48,25 +47,23 @@ export function unregisterFromDataViewsCache(
   dataViews.clearInstanceCache(id);
 }
 
-function makeFieldsSpec(columns: readonly Column[], timeFieldName?: string) {
-  const spec = Object.fromEntries(
-    columns.map((col) => [
-      col.name,
-      { ...columnToFieldBase(col), searchable: true, aggregatable: true },
-    ])
-  );
-  // DataView.isTimeBased() requires the time field to exist in the fields list
-  // (not just timeFieldName being set on the spec). Transformational commands like
-  // STATS remove the time field from result columns, so we inject a minimal entry
-  // to keep the timepicker enabled.
-  if (timeFieldName && !spec[timeFieldName]) {
-    spec[timeFieldName] = {
+/**
+ * `DataView.isTimeBased()` requires the time field to exist in `fields`, not just
+ * `timeFieldName` on the spec. Query result columns are not copied — they belong
+ * on `EsqlSource.getColumns()`.
+ */
+function makeTimeFieldSpec(timeFieldName?: string) {
+  if (!timeFieldName) {
+    return {};
+  }
+
+  return {
+    [timeFieldName]: {
       name: timeFieldName,
       type: KBN_FIELD_TYPES.DATE,
       esTypes: ['date'],
       searchable: true,
       aggregatable: true,
-    };
-  }
-  return spec;
+    },
+  };
 }

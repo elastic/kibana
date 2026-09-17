@@ -33,20 +33,15 @@ import {
   getTableHidden,
   getSidebarHidden,
 } from '@kbn/discover-utils';
-import type { DataSource, EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import {
-  getESQLStatsQueryMeta,
-  getESQLTimeField,
-  getProjectRoutingFromEsqlQuery,
-} from '@kbn/esql-utils';
+import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
-import { createEsqlSource } from '../data_fetching/create_esql_source';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getProfileAppStateDefaults } from './utils/profile_app_state_defaults';
@@ -307,42 +302,9 @@ export function getDataStateContainer({
           } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
-          let esqlTimeFieldName: string | undefined;
-          let fullEsqlSourcePromise: Promise<EsqlSource> | undefined;
-
-          if (isOfAggregateQueryType(appState.query)) {
-            const esql = appState.query.esql;
-            const projectRoutingFallback = services.cps?.cpsManager?.getProjectRouting();
-            const projectRouting =
-              getProjectRoutingFromEsqlQuery(esql) ?? projectRoutingFallback ?? undefined;
-
-            const existingSource = currentDataSource$.getValue();
-            const canReuseSource = existingSource?.kind === 'esql' && existingSource.query === esql;
-
-            if (canReuseSource && existingSource.kind === 'esql') {
-              esqlTimeFieldName = existingSource.timeFieldName;
-              fullEsqlSourcePromise = Promise.resolve(existingSource);
-            } else {
-              esqlTimeFieldName = await getESQLTimeField({
-                query: esql,
-                http: services.http,
-                projectRouting,
-              });
-
-              fullEsqlSourcePromise = createEsqlSource({
-                esql,
-                http: services.http,
-                projectRoutingFallback,
-                timeRange: timefilter.getTime(),
-                esqlVariables: getCurrentTab().esqlVariables ?? undefined,
-                timeFieldName: esqlTimeFieldName,
-              });
-
-              fullEsqlSourcePromise
-                .then((fullSource) => currentDataSource$.next(fullSource))
-                .catch(() => {});
-            }
-          }
+          const existingSource = currentDataSource$.getValue();
+          const esqlSource = existingSource?.kind === 'esql' ? existingSource : undefined;
+          const esqlTimeFieldName = esqlSource?.timeFieldName;
 
           let searchSessionId: string;
           let isSearchSessionRestored: boolean;
@@ -374,7 +336,7 @@ export function getDataStateContainer({
             scopedEbtManager,
             getCurrentTab,
             esqlTimeFieldName,
-            fullEsqlSourcePromise,
+            esqlSource,
           };
 
           cancel(AbortReason.REPLACED);
@@ -502,13 +464,12 @@ export function getDataStateContainer({
             }
           }
 
-          const dataView = currentDataView$.getValue();
           const resolvedProfileAppStateDefaults =
-            shouldApplyProfileAppStateDefaults && dataView
+            shouldApplyProfileAppStateDefaults && existingSource
               ? getProfileAppStateDefaults({
                   scopedProfilesManager,
                   profileAppStateDefaults: appliedProfileAppStateDefaults,
-                  dataView,
+                  dataSource: existingSource,
                 })
               : undefined;
           const preFetchStateUpdate = resolvedProfileAppStateDefaults?.getPreFetchState();
@@ -524,29 +485,12 @@ export function getDataStateContainer({
           }
 
           abortController = new AbortController();
-          const fetchAbortController = abortController;
 
           const query = getCurrentTab().appState.query;
           const isEsqlQuery = isOfAggregateQueryType(query);
 
           // Trigger chart fetching in parallel with the main request.
-          // For ES|QL, wait for fullEsqlSourcePromise so currentDataSource$ is
-          // already populated when the histogram reads it. For non-ES|QL, trigger immediately.
-          if (isEsqlQuery && fullEsqlSourcePromise) {
-            fullEsqlSourcePromise
-              .then(() => {
-                if (!fetchAbortController.signal.aborted) {
-                  fetchChart$.next({ abortController: fetchAbortController });
-                }
-              })
-              .catch(() => {
-                if (!fetchAbortController.signal.aborted) {
-                  fetchChart$.next({ abortController: fetchAbortController });
-                }
-              });
-          } else {
-            fetchChart$.next({ abortController });
-          }
+          fetchChart$.next({ abortController });
 
           // Cascade groups are derived purely from the query structure — update them synchronously
           // before fetchAll fires so they're already committed when main$ reaches COMPLETE.
@@ -608,7 +552,7 @@ export function getDataStateContainer({
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = resolvedProfileAppStateDefaults?.getPostFetchState({
                 defaultColumns,
-                esqlQueryColumns: dataSource?.getColumns(),
+                dataSource: dataSource ?? existingSource,
               });
 
               if (postFetchStateUpdate) {

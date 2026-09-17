@@ -13,10 +13,7 @@ import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { EsqlSource } from '@kbn/data-source';
-import { registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
-import { getESQLTimeField } from '@kbn/esql-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
@@ -37,10 +34,9 @@ import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
-import type { DiscoverServices } from '../../../../../build_services';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
-import { createEsqlSource } from '../../../data_fetching/create_esql_source';
+import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
 
 export interface InitializeSingleTabsParams {
   customizationService: ConnectedCustomizationService;
@@ -195,12 +191,12 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         urlGlobalState?.time ??
         tabInitialGlobalState?.timeRange ??
         services.data.query.timefilter.timefilter.getTime();
-      ({ esqlSource, dataView } = await initializeEsqlDataSource(
-        initialQuery.esql,
+      ({ esqlSource, dataView } = await resolveEsqlSource({
+        esql: initialQuery.esql,
         services,
-        esqlControls ? extractEsqlVariables(esqlControls) : undefined,
-        initialTimeRange
-      ));
+        esqlVariables: esqlControls ? extractEsqlVariables(esqlControls) : undefined,
+        timeRange: initialTimeRange,
+      }));
       // Set currentDataSource$ to the real EsqlSource before setDataView runs,
       // and tell setDataView not to overwrite it with DataViewSource(dataView).
       selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(esqlSource);
@@ -365,30 +361,3 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     return { showNoDataPage: false };
   }
 );
-
-async function initializeEsqlDataSource(
-  esql: string,
-  services: DiscoverServices,
-  esqlVariables?: ESQLControlVariable[],
-  timeRange?: { from: string; to: string }
-): Promise<{ esqlSource: EsqlSource; dataView: DataView }> {
-  const projectRoutingFallback = services.cps?.cpsManager?.getProjectRouting();
-  const timeFieldName = await getESQLTimeField({
-    query: esql,
-    http: services.http,
-    projectRouting: projectRoutingFallback,
-  });
-  const esqlSource = await createEsqlSource({
-    esql,
-    http: services.http,
-    projectRoutingFallback,
-    timeRange: timeRange ?? services.data.query.timefilter.timefilter.getTime(),
-    esqlVariables,
-    timeFieldName,
-  });
-
-  services.dataSourceService.registerEsqlSource(esqlSource);
-  const dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
-
-  return { esqlSource, dataView };
-}
