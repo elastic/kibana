@@ -17,7 +17,7 @@ import {
   getFieldListExpressions,
   canSuggestSuffixModifier,
   canSuggestTargetAssignment,
-  isPendingSuffixModifier,
+  isAwaitingSuffixOn,
   DENSE_VECTOR_SUFFIX_KEYWORD,
   DENSE_VECTOR_DEFAULT_SUFFIX,
 } from './utils';
@@ -27,6 +27,8 @@ import {
   withMapCompleteItem,
   buildMapValueCompleteItem,
   newLineAndPipeCompleteItems,
+  newLineCompleteItem,
+  pipeCompleteItem,
 } from '../complete_items';
 import { createInferenceEndpointToCompletionItem } from '../../definitions/utils/autocomplete/helpers';
 import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
@@ -92,6 +94,17 @@ export async function autocomplete(
 
   switch (position) {
     case CaretPosition.FIELD_LIST: {
+      // A half-typed `suffix = "..."` clause is indistinguishable from an empty command in the
+      // AST, so it lands here. `ON <fields>` is the only thing that can follow it.
+      if (isAwaitingSuffixOn(query, denseVectorCommand, cursorPosition)) {
+        return [onCompleteItem];
+      }
+
+      // `target = field` names one output column, so the list cannot go on — offering a comma
+      // would only lead to `denseVectorMultipleFieldsWithTarget`. The shared option covers the
+      // newline and pipe too, so those are re-added by hand.
+      const namesSingleField = denseVectorCommand.targetField !== undefined;
+
       const suggestions = await suggestFieldsList(
         query,
         command,
@@ -101,7 +114,10 @@ export async function autocomplete(
         context,
         cursorPosition,
         {
-          afterCompleteSuggestions: [withCompleteItem],
+          afterCompleteSuggestions: namesSingleField
+            ? [withCompleteItem, newLineCompleteItem, pipeCompleteItem]
+            : [withCompleteItem],
+          includePipeAndCommaSuggestions: !namesSingleField,
           allowSingleColumnFields: true,
           // `col0 = field` names the output column, but only as the first item of the list.
           disableNewColumnSuggestion: !canSuggestTargetAssignment(
@@ -119,22 +135,6 @@ export async function autocomplete(
       }
 
       return suggestions;
-    }
-
-    case CaretPosition.AFTER_LITERAL_INPUT: {
-      // `suffix = "_dv"` is the suffix form mid-typing: it still needs `ON <fields>`, so
-      // offering anything that ends the command here would build an invalid query.
-      if (isPendingSuffixModifier(denseVectorCommand)) {
-        return [onCompleteItem];
-      }
-
-      // Any other literal is a complete input on its own, but when an assignment introduced it
-      // the clause may still become `<name> = "..." ON ...`, so `ON` stays available.
-      return [
-        ...(denseVectorCommand.targetField !== undefined ? [onCompleteItem] : []),
-        withCompleteItem,
-        ...newLineAndPipeCompleteItems,
-      ];
     }
 
     case CaretPosition.SUFFIX_ON_FIELD_LIST: {

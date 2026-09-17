@@ -12,7 +12,7 @@ import type { ESQLColumnData } from '../types';
 import { columnsAfter } from './columns_after';
 
 /**
- * Built from the real parser rather than a hand-rolled object: the four naming forms are
+ * Built from the real parser rather than a hand-rolled object: the three naming forms are
  * distinguished by which AST fields the parser populates, so a fake would be free to disagree
  * with it.
  */
@@ -35,6 +35,18 @@ describe('DENSE_VECTOR > columnsAfter', () => {
       expect(result.every(({ type, userDefined }) => type === 'dense_vector' && !userDefined)).toBe(
         true
       );
+    });
+
+    // `ROW some_text = "..." | DENSE_VECTOR some_text` — the input does not have to be an
+    // index field.
+    it('embeds a column computed earlier in the pipeline', () => {
+      const previous: ESQLColumnData[] = [
+        { name: 'some_text', type: 'keyword', userDefined: true, location: { min: 0, max: 10 } },
+      ];
+      const result = columnsAfter(parseCommand('DENSE_VECTOR some_text'), previous);
+
+      expect(namesOf(result)).toEqual(['some_text', 'some_text_dense_vector']);
+      expect(result[1].type).toBe('dense_vector');
     });
 
     it('preserves the source fields and appends after them', () => {
@@ -73,12 +85,6 @@ describe('DENSE_VECTOR > columnsAfter', () => {
       expect(result[0].type).toBe('dense_vector');
     });
 
-    it('names the column after the target for a literal input too', () => {
-      const result = columnsAfter(parseCommand('DENSE_VECTOR vec = "some text"'), []);
-
-      expect(namesOf(result)).toEqual(['vec']);
-    });
-
     it('replaces an existing column of the same name', () => {
       const previous: ESQLColumnData[] = [{ name: 'vec', type: 'keyword', userDefined: false }];
       const result = columnsAfter(parseCommand('DENSE_VECTOR vec = description'), previous);
@@ -92,15 +98,6 @@ describe('DENSE_VECTOR > columnsAfter', () => {
     it('leaves the columns untouched when no field is given', () => {
       const previous: ESQLColumnData[] = [{ name: 'count', type: 'integer', userDefined: false }];
       const result = columnsAfter(parseCommand('DENSE_VECTOR'), previous);
-
-      expect(namesOf(result)).toEqual(['count']);
-    });
-
-    // The design doc does not say what a bare literal's output column is called, so none is
-    // reported. Revisit once Elasticsearch settles it.
-    it('leaves the columns untouched for an unnamed literal input', () => {
-      const previous: ESQLColumnData[] = [{ name: 'count', type: 'integer', userDefined: false }];
-      const result = columnsAfter(parseCommand('DENSE_VECTOR "some text"'), previous);
 
       expect(namesOf(result)).toEqual(['count']);
     });

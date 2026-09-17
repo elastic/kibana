@@ -61,7 +61,11 @@ export const validate = (
   }
 
   // An explicit output name produces a single column, so it cannot cover several fields.
-  if (targetField !== undefined && (fields ?? []).length > 1) {
+  // Count only named fields: a trailing comma leaves an empty placeholder column behind, and
+  // reporting on `target = field,` would flag the query before a second field even exists.
+  const namedFieldCount = (fields ?? []).filter(({ name }) => name).length;
+
+  if (targetField !== undefined && namedFieldCount > 1) {
     messages.push(
       getMessageFromId({
         messageId: 'denseVectorMultipleFieldsWithTarget',

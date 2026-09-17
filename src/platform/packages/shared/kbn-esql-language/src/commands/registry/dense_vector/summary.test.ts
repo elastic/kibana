@@ -40,17 +40,7 @@ describe('DENSE_VECTOR > summary', () => {
     });
   });
 
-  it('reports the target name for a literal input', () => {
-    expect(summaryOf('DENSE_VECTOR vec = "some text"')).toEqual({
-      newColumns: new Set(['vec']),
-    });
-  });
-
   it('reports nothing when no field is given', () => {
     expect(summaryOf('DENSE_VECTOR')).toEqual({ newColumns: new Set() });
-  });
-
-  it('reports nothing for an unnamed literal input', () => {
-    expect(summaryOf('DENSE_VECTOR "some text"')).toEqual({ newColumns: new Set() });
   });
 });

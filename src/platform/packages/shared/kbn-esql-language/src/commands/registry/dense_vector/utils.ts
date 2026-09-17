@@ -27,7 +27,6 @@ export const DENSE_VECTOR_DEFAULT_SUFFIX = '_dense_vector';
 
 export enum CaretPosition {
   FIELD_LIST, // After DENSE_VECTOR: the field list, optionally opened by `target =`
-  AFTER_LITERAL_INPUT, // After a string literal input: `ON` (to make it a suffix), WITH or pipe
   SUFFIX_ON_FIELD_LIST, // After `suffix = "..." ON`: the field list
   AFTER_WITH_KEYWORD, // After WITH but before the opening brace: suggest the map opener
   WITHIN_MAP_EXPRESSION, // Within WITH { ... }: suggest map parameters
@@ -35,22 +34,20 @@ export enum CaretPosition {
 }
 
 /**
- * The command has four surface forms, which the parser disambiguates for us:
+ * The command has three surface forms, which the parser disambiguates for us:
  *
- * - `DENSE_VECTOR f1, f2`           → `fields`
- * - `DENSE_VECTOR target = f1`      → `targetField` + `fields`
- * - `DENSE_VECTOR target = "text"`  → `targetField` + `literalInput`
+ * - `DENSE_VECTOR f1, f2`                   → `fields`
+ * - `DENSE_VECTOR target = f1`              → `targetField` + `fields`
  * - `DENSE_VECTOR suffix = "_dv" ON f1, f2` → `suffix` + `fields`
  *
- * Note `suffix` is only populated once `ON` is typed; until then `suffix = "_dv"` looks
- * exactly like the literal-input form, which is why {@link CaretPosition.AFTER_LITERAL_INPUT}
- * offers `ON`.
+ * `suffix` is only populated once `ON` is parsed, so the first two positions cover everything
+ * typed before it.
  */
 export function getPosition(
   command: ESQLAstDenseVectorCommand,
   cursorPosition: number
 ): CaretPosition {
-  const { namedParameters, suffix, literalInput } = command;
+  const { namedParameters, suffix } = command;
 
   if (namedParameters !== undefined) {
     const map = isMap(namedParameters) ? namedParameters : undefined;
@@ -69,10 +66,6 @@ export function getPosition(
 
   if (suffix !== undefined) {
     return CaretPosition.SUFFIX_ON_FIELD_LIST;
-  }
-
-  if (literalInput !== undefined) {
-    return CaretPosition.AFTER_LITERAL_INPUT;
   }
 
   return CaretPosition.FIELD_LIST;
@@ -120,6 +113,27 @@ export const canSuggestSuffixModifier = (
   command.targetField === undefined &&
   getTextAfterCommandKeyword(query, command, cursorPosition).trim() === '';
 
+/** A complete `suffix = "..."` clause with nothing typed after it. */
+const AWAITING_SUFFIX_ON_REGEX = new RegExp(
+  `^\\s*${DENSE_VECTOR_SUFFIX_KEYWORD}\\s*=\\s*"[^"]*"\\s*$`,
+  'i'
+);
+
+/**
+ * Whether the cursor sits after a `suffix = "..."` clause that still needs its `ON <fields>`.
+ *
+ * The parser only populates {@link ESQLAstDenseVectorCommand.suffix} once `ON` is present, and
+ * builds nothing at all before that, so this state is invisible in the AST and has to be read
+ * from the text. Without it the field list would be suggested, which would produce
+ * `DENSE_VECTOR suffix = "_dv" field`.
+ */
+export const isAwaitingSuffixOn = (
+  query: string,
+  command: ESQLAstDenseVectorCommand,
+  cursorPosition: number
+): boolean =>
+  AWAITING_SUFFIX_ON_REGEX.test(getTextAfterCommandKeyword(query, command, cursorPosition));
+
 /**
  * Whether a `col0 = ` suggestion is valid at the cursor. The grammar only accepts an assignment
  * as the first item of the list — `DENSE_VECTOR a, col0 = b` is a syntax error.
@@ -131,17 +145,6 @@ export const canSuggestTargetAssignment = (
 ): boolean =>
   command.targetField === undefined &&
   !getTextAfterCommandKeyword(query, command, cursorPosition).includes(',');
-
-/**
- * Whether a string literal assigned to a name is the start of the `suffix = "..." ON` form
- * rather than a literal input.
- *
- * `suffix = "_dv"` only becomes {@link ESQLAstDenseVectorCommand.suffix} once `ON` is parsed,
- * so until then the two forms look identical. When the name is the reserved `suffix` keyword
- * the user is writing the suffix form, and the command is not complete without `ON <fields>`.
- */
-export const isPendingSuffixModifier = (command: ESQLAstDenseVectorCommand): boolean =>
-  command.targetField?.name.toLowerCase() === DENSE_VECTOR_SUFFIX_KEYWORD;
 
 /**
  * The identifier on the left of the naming assignment (`suffix = "_dv"`, `vec = field`), when
@@ -172,11 +175,7 @@ export const getNamingKeyword = (
  * Names of the `dense_vector` columns the command generates. The source fields are kept, so
  * these are always additional — unlike the sibling TEXT command, which replaces them.
  *
- * One name per input field, suffixed. `target = <input>` instead names a single output column,
- * whatever the input is.
- *
- * A bare string literal (`DENSE_VECTOR "some text"`) generates a column whose name is not
- * specified by the design doc, so none is reported rather than guessing one.
+ * One name per input field, suffixed. `target = <field>` instead names a single output column.
  */
 export const getDenseVectorColumnNames = (command: ESQLAstDenseVectorCommand): string[] => {
   const { targetField, suffix, fields } = command;

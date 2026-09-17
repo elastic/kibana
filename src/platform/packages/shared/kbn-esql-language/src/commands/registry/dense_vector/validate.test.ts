@@ -36,6 +36,21 @@ describe('DENSE_VECTOR Validation', () => {
     it('does not report errors for several fields', () => {
       denseVectorExpectErrors('FROM index | DENSE_VECTOR textField, keywordField', []);
     });
+
+    // The input does not have to be an index field. `prompt` is a user-defined keyword column
+    // in the fixtures, standing in for one computed by an earlier ROW or EVAL.
+    it('accepts a column computed earlier in the pipeline', () => {
+      denseVectorExpectErrors(
+        'FROM index | EVAL prompt = "the quick brown fox" | DENSE_VECTOR prompt',
+        []
+      );
+    });
+
+    it('still checks the type of a computed column', () => {
+      denseVectorExpectErrors('FROM index | EVAL integerPrompt = 1 | DENSE_VECTOR integerPrompt', [
+        'DENSE_VECTOR only supports values of type text or keyword. Found "integerPrompt" of type integer',
+      ]);
+    });
   });
 
   // The naming clauses put an `=` node in the command args, so `=` has to be allowed at
@@ -43,7 +58,6 @@ describe('DENSE_VECTOR Validation', () => {
   describe('naming clauses', () => {
     it.each([
       'FROM index | DENSE_VECTOR vec = textField',
-      'FROM index | DENSE_VECTOR vec = "some text"',
       'FROM index | DENSE_VECTOR suffix = "_dv" ON textField',
       'FROM index | DENSE_VECTOR suffix = "_dv" ON textField, keywordField',
       'FROM index | DENSE_VECTOR suffix = "_dv" ON textField WITH { "inference_id": "e5" }',
@@ -79,6 +93,15 @@ describe('DENSE_VECTOR Validation', () => {
       denseVectorExpectErrors('FROM index | DENSE_VECTOR vec = textField, keywordField', [
         '[DENSE_VECTOR] Output name [vec] accepts a single field. Use [suffix = "..." ON ...] to name the columns of several fields.',
       ]);
+    });
+
+    // A trailing comma leaves an empty placeholder column in `fields`; reporting on it would
+    // flag the query while the second field is still being typed.
+    it.each([
+      'FROM index | DENSE_VECTOR vec = textField,',
+      'FROM index | DENSE_VECTOR vec = textField, ',
+    ])('does not report a half-typed field list: %s', (query) => {
+      denseVectorExpectErrors(query, []);
     });
 
     it('does not confuse a target assignment with a suffix modifier', () => {
