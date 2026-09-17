@@ -62,6 +62,27 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
+  const attachedAlertId = postCommentAlertReq.alertId as string;
+  const attachedAlertIndex = postCommentAlertReq.index as string;
+
+  // A selected alert is re-fetched server-side during trigger preprocessing and the alert event is
+  // built from the rule fields on the fetched source, so the document has to really exist.
+  const seedAttachedAlert = () =>
+    es.index({
+      index: attachedAlertIndex,
+      id: attachedAlertId,
+      document: {
+        '@timestamp': new Date().toISOString(),
+        'kibana.alert.uuid': attachedAlertId,
+        'kibana.alert.rule.uuid': 'test-rule-id',
+        'kibana.alert.rule.name': 'test-rule',
+        'kibana.alert.rule.rule_type_id': 'siem.queryRule',
+        'kibana.alert.rule.consumer': 'siem',
+        'kibana.alert.rule.producer': 'siem',
+      },
+      refresh: true,
+    });
+
   describe('run workflow', () => {
     let enabledWorkflowId: string;
     let disabledWorkflowId: string;
@@ -101,6 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteAllCaseItems(es);
+      await es.indices.delete({ index: attachedAlertIndex, ignore_unavailable: true });
     });
 
     // -----------------------------------------------------------------------
@@ -231,6 +253,8 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: superUser, space: 'space1' },
         });
 
+        await seedAttachedAlert();
+
         const result = await runCaseWorkflow({
           supertest: supertestWithoutAuth,
           workflowId: enabledWorkflowId,
@@ -238,7 +262,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseIds: [theCase.id],
             inputs: {
               event: {
-                alertIds: [{ _id: postCommentAlertReq.alertId, _index: postCommentAlertReq.index }],
+                alertIds: [{ _id: attachedAlertId, _index: attachedAlertIndex }],
               },
             },
             origin: {
