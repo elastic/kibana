@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, type UseEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -51,7 +50,7 @@ const typedOverlayStyles = css`
   white-space: nowrap;
 `;
 
-const getTypedTextStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+const typedTextStyles = ({ euiTheme }: UseEuiTheme) => css`
   color: ${euiTheme.colors.primary};
   display: inline-grid;
   justify-items: start;
@@ -59,7 +58,7 @@ const getTypedTextStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   vertical-align: baseline;
 `;
 
-const getCaretStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+const caretStyles = ({ euiTheme }: UseEuiTheme) => css`
   display: inline-block;
   width: 2px;
   height: 0.85em;
@@ -73,7 +72,7 @@ const getCaretStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   }
 `;
 
-const getCenterFlexItemStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+const centerFlexItemStyles = ({ euiTheme }: UseEuiTheme) => css`
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -81,7 +80,7 @@ const getCenterFlexItemStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   padding: 0 ${euiTheme.size.base};
 `;
 
-const getInputPaddingStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+const inputPaddingStyles = ({ euiTheme }: UseEuiTheme) => css`
   padding-bottom: ${euiTheme.size.base};
 `;
 
@@ -89,34 +88,27 @@ const TypedCapability: React.FC<{ messages: readonly string[]; enabled?: boolean
   messages,
   enabled = true,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const caretStyle = getCaretStyles(euiTheme);
   const typedText = useTypewriterLoop({ messages, enabled });
 
   return (
-    <span
-      css={getTypedTextStyles(euiTheme)}
-      aria-hidden="true"
-      data-test-subj="agentBuilderWelcomeTypedText"
-    >
+    <span css={typedTextStyles} aria-hidden="true" data-test-subj="agentBuilderWelcomeTypedText">
       <span css={reservedWidthStyles}>
         {messages.map((message) => (
           <span key={message} css={reservedMessageStyles}>
             {message}
-            <span css={caretStyle} />
+            <span css={caretStyles} />
           </span>
         ))}
       </span>
       <span css={typedOverlayStyles}>
         {typedText}
-        <span css={caretStyle} />
+        <span css={caretStyles} />
       </span>
     </span>
   );
 };
 
 export const NewConversationPrompt: React.FC<{}> = () => {
-  const { euiTheme } = useEuiTheme();
   const { isEmbeddedContext, greetingMessage } = useConversationContext();
   const {
     services: { plugins },
@@ -142,18 +134,14 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       css={conversationElementWidthStyles}
       data-test-subj="agentBuilderWelcomePage"
     >
-      <EuiFlexItem grow={isEmbeddedContext} css={getCenterFlexItemStyles(euiTheme)}>
+      <EuiFlexItem grow={isEmbeddedContext} css={centerFlexItemStyles}>
         <EuiTitle size="m">
           <h2>{greeting}</h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
-        css={[
-          conversationElementWidthStyles,
-          conversationElementPaddingStyles,
-          getInputPaddingStyles(euiTheme),
-        ]}
+        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
       >
         <ConversationInput />
       </EuiFlexItem>
