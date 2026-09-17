@@ -81,28 +81,3 @@ export const CANCEL = i18n.translate('xpack.alertzero.pendingProposals.cancel', 
 export const DECISION_FAILED = i18n.translate('xpack.alertzero.pendingProposals.decisionFailed', {
   defaultMessage: 'The decision could not be recorded. Reload the queue and try again.',
 });
-
-export const DISMISS_REASON_LABELS: Record<string, string> = {
-  wrong: i18n.translate('xpack.alertzero.pendingProposals.dismissReason.wrong', {
-    defaultMessage: 'Wrong',
-  }),
-  duplicate: i18n.translate('xpack.alertzero.pendingProposals.dismissReason.duplicate', {
-    defaultMessage: 'Duplicate',
-  }),
-  insufficient_evidence: i18n.translate(
-    'xpack.alertzero.pendingProposals.dismissReason.insufficientEvidence',
-    { defaultMessage: 'Insufficient evidence' }
-  ),
-  low_value: i18n.translate('xpack.alertzero.pendingProposals.dismissReason.lowValue', {
-    defaultMessage: 'Low value',
-  }),
-  out_of_scope: i18n.translate('xpack.alertzero.pendingProposals.dismissReason.outOfScope', {
-    defaultMessage: 'Out of scope',
-  }),
-  already_handled: i18n.translate('xpack.alertzero.pendingProposals.dismissReason.alreadyHandled', {
-    defaultMessage: 'Already handled',
-  }),
-  other: i18n.translate('xpack.alertzero.pendingProposals.dismissReason.other', {
-    defaultMessage: 'Other',
-  }),
-};

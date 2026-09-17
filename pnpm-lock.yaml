@@ -1868,6 +1868,9 @@ importers:
       '@kbn/esql':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/esql
+      '@kbn/esql-browser':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/esql/kbn-esql-browser
       '@kbn/esql-composer':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-esql-composer
@@ -7644,6 +7647,8 @@ importers:
   src/platform/packages/shared/deeplinks/workflows: {}
 
   src/platform/packages/shared/deeplinks/workplace_ai: {}
+
+  src/platform/packages/shared/esql/kbn-esql-browser: {}
 
   src/platform/packages/shared/home/sample_data_card: {}
 

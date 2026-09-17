@@ -48,7 +48,7 @@
     "es": "node scripts/es",
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
-    "lint": "yarn run lint:es && yarn run lint:style",
+    "lint": "node scripts/eslint_all_files && node scripts/stylelint",
     "lint:es": "node scripts/eslint_all_files",
     "lint:oxc": "node scripts/lint",
     "lint:style": "node scripts/stylelint",
@@ -77,8 +77,7 @@
   },
   "engines": {
     "node": "24.21.0",
-    "pnpm": "~11.21.0",
-    "yarn": "1.22.22"
+    "pnpm": "~11.21.0"
   },
   "resolutions": {
     "**/@babel/core": "7.29.7",
@@ -717,6 +716,7 @@
     "@kbn/eso-model-version-example": "workspace:*",
     "@kbn/eso-plugin": "workspace:*",
     "@kbn/esql": "workspace:*",
+    "@kbn/esql-browser": "workspace:*",
     "@kbn/esql-composer": "workspace:*",
     "@kbn/esql-datagrid": "workspace:*",
     "@kbn/esql-editor": "workspace:*",
