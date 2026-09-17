@@ -62,6 +62,9 @@ export function EdgesTable({ edges }: EdgesTableProps) {
       items={edges}
       columns={columns}
       tableLayout="auto"
+      tableCaption={i18n.translate('xpack.significantEventsApp.decisionTrees.edges.tableCaption', {
+        defaultMessage: 'Decision tree edges',
+      })}
       data-test-subj="nightshiftDecisionTreeEdgesTable"
     />
   );

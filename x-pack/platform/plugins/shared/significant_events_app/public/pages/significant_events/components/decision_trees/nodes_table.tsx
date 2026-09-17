@@ -63,6 +63,9 @@ export function NodesTable({ nodes }: NodesTableProps) {
       items={nodes}
       columns={columns}
       tableLayout="auto"
+      tableCaption={i18n.translate('xpack.significantEventsApp.decisionTrees.nodes.tableCaption', {
+        defaultMessage: 'Decision tree nodes',
+      })}
       data-test-subj="nightshiftDecisionTreeNodesTable"
     />
   );

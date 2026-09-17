@@ -102,6 +102,10 @@ export function DecisionTreeSidebar({
           options={statusOptions}
           value={statusFilter}
           onChange={(event) => onStatusFilterChange(event.target.value as DecisionTreeStatusFilter)}
+          aria-label={i18n.translate(
+            'xpack.significantEventsApp.decisionTrees.sidebar.statusFilterAriaLabel',
+            { defaultMessage: 'Filter decision trees by status' }
+          )}
           data-test-subj="nightshiftDecisionTreeStatusFilter"
         />
       </EuiFlexItem>

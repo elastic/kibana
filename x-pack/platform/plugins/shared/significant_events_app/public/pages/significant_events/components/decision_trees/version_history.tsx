@@ -86,6 +86,10 @@ export function VersionHistory({
       items={versions}
       columns={columns}
       tableLayout="auto"
+      tableCaption={i18n.translate(
+        'xpack.significantEventsApp.decisionTrees.versions.tableCaption',
+        { defaultMessage: 'Decision tree version history' }
+      )}
       rowProps={(version: DecisionTreeVersionSummary) => ({
         onClick: () => onSelectVersion(version.version),
         isSelected: version.version === selectedVersion,
