@@ -153,8 +153,7 @@ const toCount = (value: number | string | undefined, fallback = 0): number => {
 const toStatus = (value: string | undefined): DecisionTreeStatus =>
   value === 'established' || value === 'archived' || value === 'tentative' ? value : 'tentative';
 
-const toBool = (value: boolean | string | undefined): boolean =>
-  value === true || value === 'true';
+const toBool = (value: boolean | string | undefined): boolean => value === true || value === 'true';
 
 const headToSummary = (source: DecisionTreeHeadSource): DecisionTreeSummary => ({
   tree_id: source.attributes?.tree_id ?? '',
