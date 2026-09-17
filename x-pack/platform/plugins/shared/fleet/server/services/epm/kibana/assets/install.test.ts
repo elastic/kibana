@@ -121,6 +121,95 @@ describe('installKibanaSavedObjects', () => {
     expect(mockImporter.import).toHaveBeenCalledTimes(1);
     expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(1);
   });
+
+  it('resolves ambiguous_conflict by calling resolveImportErrors with the most-recently-updated destinationId', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: { hello: 'world' } });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [
+          { id: 'dest-older', updatedAt: '2024-01-01T00:00:00.000Z' },
+          { id: 'dest-newer', updatedAt: '2025-06-01T00:00:00.000Z' },
+        ],
+      },
+    };
+    const ambiguousResponse = createImportResponse([ambiguousError]);
+    const successResponse = createImportResponse([], [createImportSuccess(asset)]);
+
+    mockImporter.import.mockResolvedValueOnce(ambiguousResponse);
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(successResponse);
+
+    await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [asset],
+    });
+
+    expect(mockImporter.import).toHaveBeenCalledTimes(1);
+    expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(1);
+    // Should pick the newer destination
+    expect(mockImporter.resolveImportErrors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        retries: expect.arrayContaining([
+          expect.objectContaining({ id: asset.id, destinationId: 'dest-newer' }),
+        ]),
+      })
+    );
+  });
+
+  it('throws if resolveImportErrors itself fails on ambiguous_conflict', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-1', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+    const ambiguousResponse = createImportResponse([ambiguousError]);
+    // resolveImportErrors itself returns an error
+    const resolveFailResponse = createImportResponse([createImportError(asset, 'conflict')]);
+
+    mockImporter.import.mockResolvedValueOnce(ambiguousResponse);
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(resolveFailResponse);
+
+    await expect(
+      installKibanaSavedObjects({
+        savedObjectsImporter: mockImporter,
+        logger: mockLogger,
+        kibanaAssets: [asset],
+      })
+    ).rejects.toThrow(/resolving ambiguous conflicts/);
+  });
+
+  it('does not throw on empty destinations array in ambiguous_conflict error', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: { type: 'ambiguous_conflict', destinations: [] },
+    };
+    const ambiguousResponse = createImportResponse([ambiguousError]);
+    // resolveImportErrors is still called; it may fail or succeed
+    const successResponse = createImportResponse([], [createImportSuccess(asset)]);
+    mockImporter.import.mockResolvedValueOnce(ambiguousResponse);
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(successResponse);
+
+    // Should not throw on the reduce() call
+    await expect(
+      installKibanaSavedObjects({
+        savedObjectsImporter: mockImporter,
+        logger: mockLogger,
+        kibanaAssets: [asset],
+      })
+    ).resolves.toBeDefined();
+  });
 });
 
 describe('createSavedObjectKibanaAsset', () => {
@@ -225,5 +314,67 @@ describe('replaceIdsInKibanaAsset', () => {
         },
       ]
     `);
+  });
+
+  it('preserves top-level id and originId even when the replacement map contains the originId value', () => {
+    // Regression test: the old implementation serialized the whole SO and did a global
+    // replace, which clobbered `originId` when the replacement map contained its value.
+    const originalId = 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013';
+    const newSpaceScopedId = 'a1b2c3d4-0000-0000-0000-000000000001';
+
+    const dashboardAsset = createAsset({
+      id: newSpaceScopedId,
+      type: KibanaSavedObjectType.dashboard,
+      originId: originalId,
+      attributes: {
+        description: `See [Pods](/app/dashboards#/view/${originalId})`,
+      },
+    }) as any;
+
+    const idReplacements = { [originalId]: newSpaceScopedId };
+
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(dashboardAsset, idReplacements);
+
+    expect(updated).toBe(true);
+    // Identity fields must be untouched.
+    expect(updatedAsset.id).toBe(newSpaceScopedId);
+    expect(updatedAsset.originId).toBe(originalId);
+    // The attribute content should have the replacement applied.
+    expect((updatedAsset.attributes as any).description).toBe(
+      `See [Pods](/app/dashboards#/view/${newSpaceScopedId})`
+    );
+  });
+
+  it('handles ids containing regex metacharacters without throwing', () => {
+    const idWithDots = 'some.id.with.dots+and[brackets]';
+    const replacedId = 'safe-new-id';
+
+    const dashboardAsset = createAsset({
+      id: 'dashboard-meta',
+      type: KibanaSavedObjectType.dashboard,
+      attributes: { description: `ref to ${idWithDots}` },
+    }) as any;
+
+    const idReplacements = { [idWithDots]: replacedId };
+
+    expect(() => replaceIdsInKibanaAsset(dashboardAsset, idReplacements)).not.toThrow();
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(dashboardAsset, idReplacements);
+    expect(updated).toBe(true);
+    expect((updatedAsset.attributes as any).description).toBe(`ref to ${replacedId}`);
+  });
+
+  it('returns updated=false and the original asset when no replacements match', () => {
+    const dashboardAsset = createAsset({
+      id: 'dashboard-no-match',
+      type: KibanaSavedObjectType.dashboard,
+      attributes: { description: 'nothing to replace here' },
+    }) as any;
+
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(dashboardAsset, {
+      'non-existent-id': 'new-id',
+    });
+
+    expect(updated).toBe(false);
+    expect(updatedAsset).toBe(dashboardAsset);
   });
 });

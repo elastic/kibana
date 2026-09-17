@@ -44,10 +44,13 @@ import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 200;
 
-// SO types that are "multiple-isolated" and can accumulate orphaned UUID copies when
-// installs fail or two install operations race in the same space. These orphans cause
-// "ambiguous_conflict" errors on the next import attempt (checkOriginConflicts.ts).
+// SO types for which Fleet runs orphan cleanup before each import. These are the types that
+// Fleet deliberately rewrites to UUID-based ids in additional spaces (dashboard,
+// alertingRuleTemplate) plus tag, which the SO importer always treats as multiple-isolated.
+// Orphans accumulate when installs fail after a UUID copy is allocated but before refs are
+// flushed to installed_kibana; they trigger "ambiguous_conflict" on the next import attempt.
 const MULTIPLE_ISOLATED_KIBANA_SO_TYPES: ReadonlySet<KibanaSavedObjectType> = new Set([
+  KibanaSavedObjectType.dashboard,
   KibanaSavedObjectType.tag,
   KibanaSavedObjectType.alertingRuleTemplate,
 ]);
@@ -732,17 +735,97 @@ async function installKibanaSavedObjectsChunk({
     allSuccessResults = importSuccessResults;
   }
 
-  const [referenceErrors, otherErrors] = partition(
+  const [referenceErrors, nonReferenceErrors] = partition(
     importErrors,
     (e) => e?.error?.type === 'missing_references'
   );
 
+  const [ambiguousConflictErrors, otherErrors] = partition(
+    nonReferenceErrors,
+    (e) => e?.error?.type === 'ambiguous_conflict'
+  );
+
   if (otherErrors?.length) {
+    logger.error(
+      `[Fleet] Failed to import ${otherErrors.length} saved object(s) in space '${
+        options?.spaceId ?? DEFAULT_SPACE_ID
+      }' (installAsAdditionalSpace=${
+        options?.installAsAdditionalSpace ?? false
+      }): ${formatImportErrorsForLog(otherErrors)}`
+    );
     throw new KibanaSOReferenceError(
       `Encountered ${otherErrors.length} errors creating saved objects: ${formatImportErrorsForLog(
         otherErrors
       )}`
     );
+  }
+
+  // ambiguous_conflict means the SO importer found 2+ existing copies sharing the same
+  // originId. Orphan cleanup (deleteOrphanedMultipleIsolatedAssets) normally prevents this,
+  // but if any slipped through (e.g. created outside Fleet's control), resolve by picking
+  // the most-recently-updated destination rather than aborting the whole install.
+  if (ambiguousConflictErrors.length) {
+    logger.warn(
+      `[Fleet] Encountered ${
+        ambiguousConflictErrors.length
+      } ambiguous_conflict error(s) in space '${
+        options?.spaceId ?? DEFAULT_SPACE_ID
+      }'. Resolving by picking the most-recently-updated destination for each. Run the orphan cleanup manually if this recurs: ${formatImportErrorsForLog(
+        ambiguousConflictErrors
+      )}`
+    );
+
+    const ambiguousRetries = toBeSavedObjects.map(({ id, type }) => {
+      const conflictError = ambiguousConflictErrors.find(({ id: errId }) => errId === id);
+      if (conflictError && conflictError.error.type === 'ambiguous_conflict') {
+        // Pick the destination with the most recent updatedAt; fall back to first if dates missing.
+        // A destinationId is required: without it checkOriginConflicts will not skip the origin
+        // search and resolveImportErrors will raise ambiguous_conflict again.
+        const destinations = conflictError.error.destinations ?? [];
+        const best = destinations.length
+          ? destinations.reduce((prev, cur) =>
+              (cur.updatedAt ?? '') > (prev.updatedAt ?? '') ? cur : prev
+            )
+          : undefined;
+        if (!best?.id) {
+          // No resolvable destination — fall through to the error accumulator below.
+          return { id, type, overwrite: true, replaceReferences: [] };
+        }
+        return {
+          id,
+          type,
+          overwrite: true,
+          replaceReferences: [],
+          destinationId: best.id,
+        };
+      }
+      return { id, type, overwrite: true, replaceReferences: [] };
+    });
+
+    const { successResults: ambiguousSuccessResults = [], errors: ambiguousResolveErrors = [] } =
+      await savedObjectsImporter.resolveImportErrors({
+        readStream: createListStream(toBeSavedObjects),
+        createNewCopies: false,
+        managed: true,
+        retries: ambiguousRetries,
+      });
+
+    if (ambiguousResolveErrors?.length) {
+      logger.error(
+        `[Fleet] Failed to resolve ${
+          ambiguousResolveErrors.length
+        } ambiguous_conflict error(s) in space '${
+          options?.spaceId ?? DEFAULT_SPACE_ID
+        }': ${formatImportErrorsForLog(ambiguousResolveErrors)}`
+      );
+      throw new KibanaSOReferenceError(
+        `Encountered ${
+          ambiguousResolveErrors.length
+        } errors resolving ambiguous conflicts: ${formatImportErrorsForLog(ambiguousResolveErrors)}`
+      );
+    }
+
+    allSuccessResults = allSuccessResults.concat(ambiguousSuccessResults);
   }
 
   /*
@@ -903,14 +986,20 @@ export function replaceIdsInKibanaAsset(
   kibanaAsset: SavedObjectToBe,
   idReplacements: Record<string, string>
 ): { updated: boolean; updatedAsset: SavedObjectToBe } {
-  let assetStr = JSON.stringify(kibanaAsset);
-  const originalAssetStr = assetStr;
+  // Only replace ids inside the attribute payload. Replacing over the full serialized SO
+  // would corrupt the top-level `id` and `originId` identity fields, which breaks origin
+  // tracking and manufactures the exact `ambiguous_conflict` we're trying to prevent.
+  let attrsStr = JSON.stringify(kibanaAsset.attributes);
+  const originalAttrsStr = attrsStr;
 
   for (const [originId, newId] of Object.entries(idReplacements)) {
-    const regex = new RegExp(`${originId}`, 'g');
-    assetStr = assetStr.replace(regex, newId);
+    // Escape regex metacharacters so UUID hyphens and dots are matched literally.
+    const escapedId = originId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapedId, 'g');
+    attrsStr = attrsStr.replace(regex, newId);
   }
 
-  const updatedAsset = JSON.parse(assetStr);
-  return { updated: originalAssetStr !== assetStr, updatedAsset };
+  const updated = attrsStr !== originalAttrsStr;
+  const updatedAsset = updated ? { ...kibanaAsset, attributes: JSON.parse(attrsStr) } : kibanaAsset;
+  return { updated, updatedAsset };
 }
