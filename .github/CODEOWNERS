@@ -545,7 +545,7 @@ src/platform/packages/shared/kbn-bench @elastic/kibana-core
 src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/nightshift-sre-agent-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-dashboards
-src/platform/packages/shared/kbn-cases-components @elastic/security-investigations
+src/platform/packages/shared/kbn-cases-components @elastic/kibana-cases
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting
 src/platform/packages/shared/kbn-change-point-chart-viewer @elastic/search-ml-ux
@@ -1235,7 +1235,7 @@ x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
 x-pack/platform/plugins/shared/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-signals-traces-team
 x-pack/platform/plugins/shared/automatic_import @elastic/siem-conduit
-x-pack/platform/plugins/shared/cases @elastic/security-investigations
+x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/connector_events_bridge @elastic/workflows-eng
@@ -1307,16 +1307,16 @@ x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/res
 x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
-x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/security-investigations
-x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/security-investigations
-x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/security-investigations
+x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/kibana-cases
+x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/kibana-cases
+x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/kibana-cases
 x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
-x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/security-investigations
+x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/kibana-cases
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
