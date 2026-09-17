@@ -66,7 +66,9 @@ export interface UseNodeExpandGraphPopoverReturn {
    * popover-close wrapping. Intended for consumers (e.g. NodeToolbar) that render
    * actions directly as buttons rather than inside a popover.
    */
-  itemsFn?: (node: NodeProps) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
+  itemsFn?: (
+    node: NodeProps
+  ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
 }
 
 export const useNodeExpandPopover = ({
