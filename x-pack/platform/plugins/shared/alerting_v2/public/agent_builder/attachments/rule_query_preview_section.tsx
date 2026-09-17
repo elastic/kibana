@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type {
@@ -24,9 +23,7 @@ import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { i18n } from '@kbn/i18n';
 import { useRuleSummary } from '../../components/rule/rule_summary';
 
-const queryClient = new QueryClient();
-
-const RuleQueryPreviewSectionInner: React.FC = () => {
+export const RuleQueryPreviewSection: React.FC = () => {
   const rule = useRuleSummary();
   const query = rule.query ? getRootEsqlQuery(rule.query) : '';
   const timeField = rule.time_field ?? '@timestamp';
@@ -73,9 +70,3 @@ const RuleQueryPreviewSectionInner: React.FC = () => {
     </FlyoutAccordion>
   );
 };
-
-export const RuleQueryPreviewSection: React.FC = () => (
-  <QueryClientProvider client={queryClient}>
-    <RuleQueryPreviewSectionInner />
-  </QueryClientProvider>
-);

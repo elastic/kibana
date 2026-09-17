@@ -21,11 +21,6 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   RuleFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-jest.mock('@kbn/react-query', () => ({
-  QueryClient: jest.fn().mockImplementation(() => ({})),
-  QueryClientProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
   useService: (token: unknown) => {

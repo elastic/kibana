@@ -15,6 +15,8 @@ const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
 const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
+const mockLocator = { useUrl: jest.fn(() => '/action-policies') };
+const mockShare = { url: { locators: { get: jest.fn(() => mockLocator) } } };
 
 jest.mock('@kbn/core-di-browser', () => ({
   Context: {
@@ -31,8 +33,15 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
+    if (token === 'plugin:share') {
+      return mockShare;
+    }
     return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
   },
+}));
+
+jest.mock('@kbn/core-di', () => ({
+  PluginStart: (key: string) => `plugin:${key}`,
 }));
 
 jest.mock('../../services/rules_api', () => ({

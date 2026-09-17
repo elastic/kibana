@@ -12,9 +12,12 @@ import {
   type AttachmentRenderProps,
   type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   RuleSummaryAboutSection,
   RuleSummaryActionPoliciesSection,
@@ -22,6 +25,8 @@ import {
   RuleSummaryBody,
   RuleSummaryInvestigationSection,
 } from '../../components/rule/rule_summary';
+import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
+import { LocatorProvider } from '../../application/locator_context';
 import { paths } from '../../constants';
 import { RulesApi } from '../../services/rules_api';
 import type { RuleAttachment } from './rule_attachment_definition';
@@ -40,6 +45,9 @@ export const RuleCanvasContent = ({
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
   const notifications = useService(CoreStart('notifications'));
+  const share = useService<SharePluginStart>(PluginStart('share'));
+  const locators = useMemo(() => getAlertingV2Locators(share), [share]);
+  const [queryClient] = React.useState(() => new QueryClient());
 
   const { data, origin: savedObjectId } = attachment;
   const isPersisted = isPersistedSavedObject(savedObjectId);
@@ -130,15 +138,19 @@ export const RuleCanvasContent = ({
   ]);
 
   return (
-    <EuiPanel paddingSize="l" hasShadow={false}>
-      <RuleSummaryBody rule={summaryRule}>
-        <RuleSummaryAboutSection />
-        <RuleSummaryInvestigationSection />
-        <RuleQueryPreviewSection />
-        <RuleSummaryActionPoliciesSection />
-        <RuleSummaryArtifactsSection />
-      </RuleSummaryBody>
-    </EuiPanel>
+    <QueryClientProvider client={queryClient}>
+      <LocatorProvider locators={locators}>
+        <EuiPanel paddingSize="l" hasShadow={false}>
+          <RuleSummaryBody rule={summaryRule}>
+            <RuleSummaryAboutSection />
+            <RuleSummaryInvestigationSection />
+            <RuleQueryPreviewSection />
+            <RuleSummaryActionPoliciesSection />
+            <RuleSummaryArtifactsSection />
+          </RuleSummaryBody>
+        </EuiPanel>
+      </LocatorProvider>
+    </QueryClientProvider>
   );
 };
 

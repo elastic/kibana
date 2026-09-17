@@ -15,6 +15,12 @@ const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
 const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
+const mockLocator = { useUrl: jest.fn(() => '/action-policies') };
+const mockShare = { url: { locators: { get: jest.fn(() => mockLocator) } } };
+const mockUseQueryClient = jest.requireActual('@kbn/react-query').useQueryClient;
+const mockUseAlertingLocators = jest.requireActual(
+  '../../application/locator_context'
+).useAlertingLocators;
 let capturedSummaryRule: Record<string, unknown> = {};
 
 jest.mock('@kbn/core-di-browser', () => ({
@@ -29,8 +35,15 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
+    if (token === 'plugin:share') {
+      return mockShare;
+    }
     return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
   },
+}));
+
+jest.mock('@kbn/core-di', () => ({
+  PluginStart: (key: string) => `plugin:${key}`,
 }));
 
 jest.mock('../../components/rule/rule_summary', () => ({
@@ -46,8 +59,21 @@ jest.mock('../../components/rule/rule_summary', () => ({
   },
   RuleSummaryAboutSection: () => <div data-test-subj="mockAboutSection" />,
   RuleSummaryInvestigationSection: () => <div data-test-subj="mockInvestigationSection" />,
-  RuleSummaryActionPoliciesSection: () => <div data-test-subj="mockActionPoliciesSection" />,
-  RuleSummaryArtifactsSection: () => <div data-test-subj="mockArtifactsSection" />,
+  RuleSummaryActionPoliciesSection: () => {
+    const locators = mockUseAlertingLocators();
+    return (
+      <div
+        data-test-subj="mockActionPoliciesSection"
+        data-has-action-policy-locator={Boolean(locators.actionPolicyLocators)}
+      />
+    );
+  },
+  RuleSummaryArtifactsSection: () => {
+    const queryClient = mockUseQueryClient();
+    return (
+      <div data-test-subj="mockArtifactsSection" data-has-query-client={Boolean(queryClient)} />
+    );
+  },
 }));
 
 jest.mock('./rule_query_preview_section', () => ({
@@ -117,15 +143,18 @@ describe('RuleCanvasContent', () => {
   });
 
   describe('rendering', () => {
-    it('renders the Agent Builder summary composition', () => {
+    it('renders the unpersisted summary with its required providers', () => {
       const { getByTestId } = renderCanvas();
 
       expect(getByTestId('mockRuleSummaryBody')).toBeDefined();
       expect(getByTestId('mockAboutSection')).toBeDefined();
       expect(getByTestId('mockInvestigationSection')).toBeDefined();
       expect(getByTestId('mockQueryPreviewSection')).toBeDefined();
-      expect(getByTestId('mockActionPoliciesSection')).toBeDefined();
-      expect(getByTestId('mockArtifactsSection')).toBeDefined();
+      expect(getByTestId('mockActionPoliciesSection')).toHaveAttribute(
+        'data-has-action-policy-locator',
+        'true'
+      );
+      expect(getByTestId('mockArtifactsSection')).toHaveAttribute('data-has-query-client', 'true');
     });
 
     it('does not expose a proposed data id as a persisted summary id', () => {
