@@ -7,7 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDuration } from './parse-duration';
+import { DURATION_REGEX, isValidDuration, parseDuration } from './duration';
+
+describe('isValidDuration', () => {
+  it.each(['1ms', '30s', '5m', '2h', '1d', '1w', '1h30m', '1w2d3h4m5s6ms', '1h500ms', '0s'])(
+    'accepts %s',
+    (duration) => {
+      expect(isValidDuration(duration)).toBe(true);
+      expect(DURATION_REGEX.test(duration)).toBe(true);
+    }
+  );
+
+  it.each(['', 'soon', '1m1h', '5h 30m', '1.5s', '1s1w', null, undefined, 123])(
+    'rejects %p',
+    (duration) => {
+      expect(isValidDuration(duration)).toBe(false);
+    }
+  );
+});
 
 describe('parseDuration', () => {
   describe('valid duration formats', () => {
@@ -87,43 +104,39 @@ describe('parseDuration', () => {
 
   describe('invalid duration formats', () => {
     test.each([
-      // Invalid format
       'invalid-duration',
-      '5ss', // double unit
-      '10m5ss', // double unit
-      '1s1w', // wrong order
-      '3d4w', // wrong order
-      '2h1d', // wrong order
-      '5m10h', // wrong order
-      '1ms1s', // wrong order
-      '30s5m', // wrong order
-      '12h1d', // wrong order
-      '2d1w', // wrong order
-      // Invalid values
-      '-1s', // negative
-      '0', // no unit
-      '', // empty string
-      '  ', // whitespace only
-      '1.5s', // decimal
-      '1,000s', // comma
-      's5', // unit before number
-      'ms500', // unit before number
-      '5x', // invalid unit
-      '10y', // invalid unit
-      '15z', // invalid unit
-      // Missing parts
-      'w', // no number
-      's', // no number
-      'm', // no number
-      'h', // no number
-      'd', // no number
-      'ms', // no number
-      // Mixed invalid
-      '1w2x3h', // invalid unit in middle
-      '1h2m3', // missing unit at end
-      '5h 30m', // space between units
-      '1h,30m', // comma between units
-      '2h+30m', // plus between units
+      '5ss',
+      '10m5ss',
+      '1s1w',
+      '3d4w',
+      '2h1d',
+      '5m10h',
+      '1ms1s',
+      '30s5m',
+      '12h1d',
+      '2d1w',
+      '-1s',
+      '0',
+      '',
+      '  ',
+      '1.5s',
+      '1,000s',
+      's5',
+      'ms500',
+      '5x',
+      '10y',
+      '15z',
+      'w',
+      's',
+      'm',
+      'h',
+      'd',
+      'ms',
+      '1w2x3h',
+      '1h2m3',
+      '5h 30m',
+      '1h,30m',
+      '2h+30m',
     ])('should throw error for invalid format: %s', (invalidDuration) => {
       expect(() => parseDuration(invalidDuration)).toThrow(
         `Invalid duration format: ${invalidDuration}. Use format like "1w2d3h4m5s6ms" with units in descending order.`
@@ -187,15 +200,12 @@ describe('parseDuration', () => {
       expect(() => parseDuration(input)).toThrow(expectedError);
     });
 
-    test.each([
-      '1w1h', // skip days
-      '1d1m', // skip hours
-      '1h1s', // skip minutes
-      '1m1ms', // skip seconds
-      '1w1ms', // skip multiple units
-    ])('should allow skipping units while maintaining order: %s', (input) => {
-      expect(() => parseDuration(input)).not.toThrow();
-    });
+    test.each(['1w1h', '1d1m', '1h1s', '1m1ms', '1w1ms'])(
+      'should allow skipping units while maintaining order: %s',
+      (input) => {
+        expect(() => parseDuration(input)).not.toThrow();
+      }
+    );
   });
 
   describe('unit conversion accuracy', () => {

@@ -13,6 +13,7 @@ import {
   ConcurrencySettingsSchema,
   DataSetStepSchema,
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  DurationSchema,
   ElasticsearchStepSchema,
   EventTimestampSchema,
   IfStepSchema,
@@ -1263,6 +1264,19 @@ describe('`if` condition on step schemas', () => {
   });
 });
 
+describe('DurationSchema', () => {
+  it.each(['1ms', '30s', '5m', '2h', '1d', '1w', '1h30m', '1w2d3h4m5s6ms', '1h500ms'])(
+    'accepts %s',
+    (duration) => {
+      expect(DurationSchema.safeParse(duration).success).toBe(true);
+    }
+  );
+
+  it.each(['', 'soon', '1m1h', '5h 30m', '1.5s'])('rejects %s', (duration) => {
+    expect(DurationSchema.safeParse(duration).success).toBe(false);
+  });
+});
+
 describe('dynamic timeout schema', () => {
   const approval = { name: 's', type: 'waitForApproval' as const };
   const input = { name: 's', type: 'waitForInput' as const };
@@ -1275,6 +1289,9 @@ describe('dynamic timeout schema', () => {
     );
     expect(WaitForInputStepSchema.safeParse({ ...input, timeout: '30s' }).success).toBe(true);
     expect(WaitForInputStepSchema.safeParse({ ...input, timeout: templated }).success).toBe(true);
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: '1h30m' }).success).toBe(
+      true
+    );
   });
 
   it('rejects a non-duration, non-template timeout on HITL steps', () => {
@@ -1289,5 +1306,6 @@ describe('dynamic timeout schema', () => {
   it('does not accept templates on connector TimeoutPropSchema', () => {
     expect(TimeoutPropSchema.safeParse({ timeout: templated }).success).toBe(false);
     expect(TimeoutPropSchema.safeParse({ timeout: '5m' }).success).toBe(true);
+    expect(TimeoutPropSchema.safeParse({ timeout: '1h30m' }).success).toBe(true);
   });
 });

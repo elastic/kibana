@@ -10,9 +10,9 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   computeHitlWaitDeadlineMs,
+  DYNAMIC_TIMEOUT_STATE_KEY,
   getHitlIdleDeadlineMsForStep,
   hasHitlWaitExpired,
-  DYNAMIC_TIMEOUT_STATE_KEY,
   persistResolvedDynamicTimeout,
   resolveDynamicTimeout,
 } from './hitl_timeout_helpers';
@@ -70,6 +70,10 @@ describe('hitl_timeout_helpers', () => {
       expect(() => resolveDynamicTimeout('{{ inputs.expiresIn }}', '24h', () => 'soon')).toThrow(
         'Invalid duration format: soon'
       );
+    });
+
+    it('accepts compound durations', () => {
+      expect(resolveDynamicTimeout('{{ inputs.expiresIn }}', '24h', () => '1h30m')).toBe('1h30m');
     });
   });
 

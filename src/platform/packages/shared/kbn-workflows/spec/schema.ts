@@ -27,8 +27,9 @@ import {
   MAX_HITL_MESSAGE_LENGTH,
   MAX_HITL_SLACK_CHANNEL_LENGTH,
 } from '../common/hitl';
+import { DURATION_REGEX } from '../common/utils/duration/duration';
 
-export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
+export const DurationSchema = z.string().regex(DURATION_REGEX, 'Invalid duration format');
 
 export const ByteSizeSchema = z
   .string()
@@ -46,10 +47,7 @@ export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
   condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
-  delay: z
-    .string()
-    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
-    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+  delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
   /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
   strategy: RetryDelayStrategySchema.optional(),
   /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
@@ -278,7 +276,7 @@ export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
 export const WaitStepInputSchema = z.object({
   duration: DurationSchema.describe(
-    'Duration to wait, e.g. "5s", "1m", "2h". Format: number + unit (ms/s/m/h/d/w)'
+    'Duration to wait, e.g. "5s", "1h30m". Units in descending order (w/d/h/m/s/ms).'
   ),
 });
 export const WaitStepSchema = BaseStepSchema.extend({
