@@ -14,7 +14,8 @@ export interface ShardingAgentE2eWorkerFixtures {
 
 /**
  * Two lightweight `elastic-agent` enrollments on one scalable private location.
- * Browser journeys are out of scope — HTTP is enough to prove assignment + failover.
+ * Browser journeys are out of scope — HTTP is enough to prove rebalance
+ * failover, data-plane veto, and recovery against real Heartbeat.
  */
 export const apiTest = baseApiTest.extend<{}, ShardingAgentE2eWorkerFixtures>({
   agentStack: [
@@ -33,6 +34,6 @@ export const apiTest = baseApiTest.extend<{}, ShardingAgentE2eWorkerFixtures>({
       await use(stack);
       await stop();
     },
-    { scope: 'worker', timeout: 30 * 60 * 1000 },
+    { scope: 'worker', timeout: 50 * 60 * 1000 },
   ],
 });

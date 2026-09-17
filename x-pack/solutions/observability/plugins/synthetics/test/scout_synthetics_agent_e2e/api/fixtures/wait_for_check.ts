@@ -66,6 +66,56 @@ const searchLatest = async (
   return res.hits.hits[0]?._source;
 };
 
+const checkFilters = ({
+  type,
+  configId,
+  agentId,
+  since,
+}: {
+  type: SyntheticsMonitorType;
+  configId: string;
+  agentId?: string;
+  since?: string;
+}): Array<Record<string, unknown>> => {
+  // Lightweight http/tcp/icmp docs do not set synthetics.type. Browser
+  // journeys do — restrict to heartbeat/summary so we skip journey/start.
+  const filters: Array<Record<string, unknown>> = [{ term: { config_id: configId } }];
+  if (type === 'browser') {
+    filters.push({ term: { 'synthetics.type': 'heartbeat/summary' } });
+  }
+  if (agentId) {
+    filters.push({ term: { 'agent.id': agentId } });
+  }
+  if (since) {
+    filters.push({ range: { '@timestamp': { gte: since } } });
+  }
+  return filters;
+};
+
+export async function findSyntheticsCheck(
+  esClient: EsClient,
+  {
+    type,
+    configId,
+    testRunId,
+    agentId,
+    since,
+  }: {
+    type: SyntheticsMonitorType;
+    configId: string;
+    testRunId?: string;
+    agentId?: string;
+    since?: string;
+  }
+): Promise<SyntheticsCheckDoc | undefined> {
+  return searchLatest(
+    esClient,
+    SYNTHETICS_INDEX_BY_TYPE[type],
+    checkFilters({ type, configId, agentId, since }),
+    testRunId
+  );
+}
+
 export async function waitForSyntheticsCheck(
   esClient: EsClient,
   {
@@ -73,6 +123,7 @@ export async function waitForSyntheticsCheck(
     configId,
     testRunId,
     agentId,
+    since,
     expectStatus = 'up',
     timeoutMs = 180_000,
   }: {
@@ -80,6 +131,7 @@ export async function waitForSyntheticsCheck(
     configId: string;
     testRunId?: string;
     agentId?: string;
+    since?: string;
     expectStatus?: 'up' | 'down';
     timeoutMs?: number;
   }
@@ -89,17 +141,13 @@ export async function waitForSyntheticsCheck(
   return tryForTime(
     timeoutMs,
     async () => {
-      // Lightweight http/tcp/icmp docs do not set synthetics.type. Browser
-      // journeys do — restrict to heartbeat/summary so we skip journey/start.
-      const filters: Array<Record<string, unknown>> = [{ term: { config_id: configId } }];
-      if (type === 'browser') {
-        filters.push({ term: { 'synthetics.type': 'heartbeat/summary' } });
-      }
-      if (agentId) {
-        filters.push({ term: { 'agent.id': agentId } });
-      }
-
-      const source = await searchLatest(esClient, index, filters, testRunId);
+      const source = await findSyntheticsCheck(esClient, {
+        type,
+        configId,
+        testRunId,
+        agentId,
+        since,
+      });
 
       if (!source) {
         throw new Error(

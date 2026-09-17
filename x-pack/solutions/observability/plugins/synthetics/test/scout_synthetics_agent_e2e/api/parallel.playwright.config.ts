@@ -8,7 +8,7 @@
 import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
 /**
- * Real Elastic Agent sharding/failover suite. Uses two lightweight
+ * Real Elastic Agent shard-rebalance suite. Uses two lightweight
  * `elastic-agent` containers (not `-complete`) and HTTP monitors only.
  * `parallel.playwright.config.ts` is the Scout dual-config filename so this
  * job does not share Fleet Server :8220 with the complete-image monitor-types

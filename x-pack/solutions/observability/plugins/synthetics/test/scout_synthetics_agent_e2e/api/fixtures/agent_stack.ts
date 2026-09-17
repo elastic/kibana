@@ -16,6 +16,7 @@ import {
   publishedHostPort,
   pullImage,
   removeContainer,
+  startContainer,
   startDetachedContainer,
   stopContainer,
 } from './docker';
@@ -36,6 +37,8 @@ export interface AgentStack {
   agents: EnrolledAgent[];
   /** Stops the agent's Docker container without unregistering it from Fleet. */
   stopAgentContainer: (agentId: string) => void;
+  /** Starts a previously stopped agent container (same Fleet agent id). */
+  startAgentContainer: (agentId: string) => void;
 }
 
 export interface StartAgentStackOptions {
@@ -391,12 +394,20 @@ export async function startAgentStack({
       }
     }
 
-    const stopAgentContainer = (agentId: string) => {
+    const enrolledById = (agentId: string): EnrolledAgent => {
       const enrolled = enrolledAgents.find((agent) => agent.id === agentId);
       if (!enrolled) {
         throw new Error(`Unknown agent id ${agentId}`);
       }
-      stopContainer(enrolled.container);
+      return enrolled;
+    };
+
+    const stopAgentContainer = (agentId: string) => {
+      stopContainer(enrolledById(agentId).container);
+    };
+
+    const startAgentContainer = (agentId: string) => {
+      startContainer(enrolledById(agentId).container);
     };
 
     return {
@@ -406,6 +417,7 @@ export async function startAgentStack({
         runId,
         agents: enrolledAgents,
         stopAgentContainer,
+        startAgentContainer,
       },
       stop,
     };

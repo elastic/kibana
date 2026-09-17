@@ -51,6 +51,11 @@ export const stopContainer = (name: string): void => {
   spawnSync('docker', ['stop', '-t', '10', name], { encoding: 'utf8' });
 };
 
+/** Restarts a previously stopped container (same enrollment / agent id). */
+export const startContainer = (name: string): void => {
+  runDocker(['start', name]);
+};
+
 export const publishedHostPort = (name: string, containerPort: number): number => {
   const mapping = runDocker(['port', name, String(containerPort)]);
   const match = mapping.match(/:(\d+)\s*$/m);
