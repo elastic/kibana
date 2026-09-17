@@ -14,6 +14,7 @@ import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import {
+  fetchAlertsByQuery,
   fetchDocumentsByIds,
   fetchDocumentsByQuery,
   MAX_TRIGGER_EVENT_DOCS,
@@ -26,6 +27,9 @@ import type {
 } from '../../../../../common/types/document_types';
 import { buildAlertEvent } from '../../../../../common/utils/build_alert_event';
 import type { TriggerInputPreprocessingContext } from '../../../workflows_management_api';
+
+const formatTrackedTotal = (total: number, relation: 'eq' | 'gte'): string =>
+  `${relation === 'gte' ? 'at least ' : ''}${total}`;
 
 /**
  * Extracts rule information from an alert's _source
@@ -137,24 +141,31 @@ async function preprocessAlertEvent(
 
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
   const ruleTypeRegistryMap = (await context.alerting).listTypes();
+  const alertsClient = await (await context.rac).getAlertsClient();
 
   let rawHits: RawDocumentHit[];
   if (event.querySelection) {
     const { query, index } = event.querySelection;
     logger.debug(`Preprocessing alerts for workflow execution from a query selection`);
-    const { hits, total, truncated } = await fetchDocumentsByQuery(
+    const { hits, total, totalRelation, truncated } = await fetchAlertsByQuery(
       { query, index },
-      esClient,
+      alertsClient,
       logger
     );
     if (truncated) {
       logger.warn(
-        `Alert selection truncated to ${hits.length} of ${total} matching alerts (maxDocs=${MAX_TRIGGER_EVENT_DOCS}).`
+        `Alert selection truncated to ${hits.length} of ${formatTrackedTotal(
+          total,
+          totalRelation
+        )} matching alerts (maxDocs=${MAX_TRIGGER_EVENT_DOCS}).`
       );
     }
     rawHits = hits;
   } else if (event.alertIds && event.alertIds.length > 0) {
     logger.debug(`Preprocessing ${event.alertIds.length} alert(s) for workflow execution`);
+    await alertsClient.ensureAllAlertsAuthorizedRead({
+      alerts: event.alertIds.map(({ _id, _index }) => ({ id: _id, index: _index })),
+    });
     rawHits = await fetchDocumentsByIds(event.alertIds, esClient, logger);
   } else {
     // Nothing to expand (e.g. a malformed selection) — leave inputs untouched.
@@ -224,14 +235,17 @@ async function preprocessDocumentEvent(
   if (event.querySelection) {
     const { query, index } = event.querySelection;
     logger.debug(`Preprocessing documents for workflow execution from a query selection`);
-    const { hits, total, truncated } = await fetchDocumentsByQuery(
+    const { hits, total, totalRelation, truncated } = await fetchDocumentsByQuery(
       { query, index },
       esClient,
       logger
     );
     if (truncated) {
       logger.warn(
-        `Document selection truncated to ${hits.length} of ${total} matching documents (maxDocs=${MAX_TRIGGER_EVENT_DOCS}).`
+        `Document selection truncated to ${hits.length} of ${formatTrackedTotal(
+          total,
+          totalRelation
+        )} matching documents (maxDocs=${MAX_TRIGGER_EVENT_DOCS}).`
       );
     }
     rawHits = hits;

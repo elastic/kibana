@@ -43,7 +43,10 @@ import type {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
-import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type {
+  RacApiRequestHandlerContext,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import type {
   AlertingApiRequestHandlerContext,
   AlertingServerSetup,
@@ -111,6 +114,7 @@ export interface CaseRequestContext {
 export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
   cases: CaseRequestContext;
   alerting: AlertingApiRequestHandlerContext;
+  rac: RacApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;
 }>;
 

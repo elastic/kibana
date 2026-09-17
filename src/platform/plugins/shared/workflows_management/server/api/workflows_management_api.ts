@@ -17,6 +17,7 @@ import type {
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
@@ -213,8 +214,11 @@ export interface BulkScheduleWorkflowItem {
 }
 
 export type TriggerInputPreprocessingContext = Pick<
-  CustomRequestHandlerContext<{ alerting: AlertingApiRequestHandlerContext }>,
-  'core' | 'alerting'
+  CustomRequestHandlerContext<{
+    alerting: AlertingApiRequestHandlerContext;
+    rac: RacApiRequestHandlerContext;
+  }>,
+  'core' | 'alerting' | 'rac'
 >;
 
 export interface RunWorkflowWithPreprocessingParams {

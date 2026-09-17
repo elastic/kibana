@@ -10,6 +10,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  fetchAlertsByQuery,
   fetchDocumentsByIds,
   fetchDocumentsByQuery,
   MAX_TRIGGER_EVENT_BYTES,
@@ -23,6 +24,7 @@ describe('fetch_event_documents', () => {
     search: jest.Mock;
     closePointInTime: jest.Mock;
   };
+  let mockAlertsClient: { find: jest.Mock };
   let logger: ReturnType<typeof loggerMock.create>;
 
   const asEsClient = () => mockEsClient as unknown as ElasticsearchClient;
@@ -34,6 +36,7 @@ describe('fetch_event_documents', () => {
       search: jest.fn(),
       closePointInTime: jest.fn().mockResolvedValue({ succeeded: true }),
     };
+    mockAlertsClient = { find: jest.fn() };
     logger = loggerMock.create();
   });
 
@@ -126,7 +129,7 @@ describe('fetch_event_documents', () => {
         { _shard_doc: 'asc' },
       ]);
       expect(mockEsClient.search.mock.calls[0][0].allow_partial_search_results).toBe(false);
-      expect(mockEsClient.search.mock.calls[0][0].track_total_hits).toBe(true);
+      expect(mockEsClient.search.mock.calls[0][0].track_total_hits).toBe(1001);
       expect(mockEsClient.search.mock.calls[1][0].track_total_hits).toBe(false);
       expect(mockEsClient.search.mock.calls[0][1]).toEqual({
         maxResponseSize: MAX_TRIGGER_EVENT_BYTES,
@@ -136,6 +139,7 @@ describe('fetch_event_documents', () => {
       expect(mockEsClient.search.mock.calls[1][0].search_after).toEqual(['b']);
       expect(result.hits.map((h) => h._id)).toEqual(['a', 'b', 'c']);
       expect(result.total).toBe(3);
+      expect(result.totalRelation).toBe('eq');
       expect(result.truncated).toBe(false);
       expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
     });
@@ -151,10 +155,38 @@ describe('fetch_event_documents', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
       expect(mockEsClient.search.mock.calls[0][0].size).toBe(2);
+      expect(mockEsClient.search.mock.calls[0][0].track_total_hits).toBe(3);
       expect(result.hits).toHaveLength(2);
       expect(result.total).toBe(10);
+      expect(result.totalRelation).toBe('eq');
       expect(result.truncated).toBe(true);
       expect(mockEsClient.closePointInTime).toHaveBeenCalled();
+    });
+
+    it('preserves an inexact tracked total when reporting truncation', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        ...page(['a', 'b'], 3),
+        hits: {
+          ...page(['a', 'b'], 3).hits,
+          total: { value: 3, relation: 'gte' },
+        },
+      });
+
+      const result = await fetchDocumentsByQuery(
+        { query: { match_all: {} }, index: 'idx', maxDocs: 2 },
+        asEsClient(),
+        logger
+      );
+
+      expect(result).toEqual({
+        hits: [
+          { _id: 'a', _index: 'idx', _source: { id: 'a' } },
+          { _id: 'b', _index: 'idx', _source: { id: 'b' } },
+        ],
+        total: 3,
+        totalRelation: 'gte',
+        truncated: true,
+      });
     });
 
     it('counts source-less search hits toward maxDocs', async () => {
@@ -176,7 +208,12 @@ describe('fetch_event_documents', () => {
       );
 
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ hits: [], total: 10, truncated: true });
+      expect(result).toEqual({
+        hits: [],
+        total: 10,
+        totalRelation: 'eq',
+        truncated: true,
+      });
     });
 
     it('rejects accumulated document sources that exceed maxBytes', async () => {
@@ -229,6 +266,78 @@ describe('fetch_event_documents', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to fetch documents by query')
       );
+    });
+  });
+
+  describe('fetchAlertsByQuery', () => {
+    const page = (ids: string[], total: number, relation: 'eq' | 'gte' = 'eq') => ({
+      hits: {
+        total: { value: total, relation },
+        hits: ids.map((id) => ({
+          _id: id,
+          _index: '.alerts-test-default',
+          _source: { id },
+          sort: [`2026-01-01T00:00:00.000Z`, id],
+        })),
+      },
+    });
+
+    it('pages through the authorized alerts client with bounded total tracking', async () => {
+      mockAlertsClient.find
+        .mockResolvedValueOnce(page(['a', 'b'], 3))
+        .mockResolvedValueOnce(page(['c'], 3));
+
+      const result = await fetchAlertsByQuery(
+        {
+          query: { match_all: {} },
+          index: ['.alerts-test-default', '.alerts-observability-default'],
+          maxDocs: 1000,
+          pageSize: 2,
+        },
+        mockAlertsClient,
+        logger
+      );
+
+      expect(mockAlertsClient.find.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          query: { match_all: {} },
+          index: '.alerts-test-default,.alerts-observability-default',
+          size: 2,
+          track_total_hits: 1001,
+          search_after: undefined,
+        })
+      );
+      expect(mockAlertsClient.find.mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          track_total_hits: false,
+          search_after: ['2026-01-01T00:00:00.000Z', 'b'],
+        })
+      );
+      expect(result).toEqual({
+        hits: [
+          { _id: 'a', _index: '.alerts-test-default', _source: { id: 'a' } },
+          { _id: 'b', _index: '.alerts-test-default', _source: { id: 'b' } },
+          { _id: 'c', _index: '.alerts-test-default', _source: { id: 'c' } },
+        ],
+        total: 3,
+        totalRelation: 'eq',
+        truncated: false,
+      });
+    });
+
+    it('preserves the lower-bound relation when the authorized result is capped', async () => {
+      mockAlertsClient.find.mockResolvedValueOnce(page(['a', 'b'], 3, 'gte'));
+
+      const result = await fetchAlertsByQuery(
+        { query: { match_all: {} }, index: '.alerts-test-default', maxDocs: 2 },
+        mockAlertsClient,
+        logger
+      );
+
+      expect(mockAlertsClient.find.mock.calls[0][0].track_total_hits).toBe(3);
+      expect(result.total).toBe(3);
+      expect(result.totalRelation).toBe('gte');
+      expect(result.truncated).toBe(true);
     });
   });
 });

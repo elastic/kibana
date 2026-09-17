@@ -9,7 +9,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { MAX_TRIGGER_EVENT_BYTES } from './fetch_event_documents';
+import { MAX_TRIGGER_EVENT_BYTES, MAX_TRIGGER_EVENT_DOCS } from './fetch_event_documents';
 import { preprocessTriggerInputs } from './preprocess_trigger_inputs';
 import type { WorkflowsRequestHandlerContext } from '../../../../types';
 
@@ -19,6 +19,10 @@ describe('preprocessTriggerInputs', () => {
     openPointInTime: jest.Mock;
     search: jest.Mock;
     closePointInTime: jest.Mock;
+  };
+  let mockAlertsClient: {
+    find: jest.Mock;
+    ensureAllAlertsAuthorizedRead: jest.Mock;
   };
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockContext: WorkflowsRequestHandlerContext;
@@ -45,6 +49,10 @@ describe('preprocessTriggerInputs', () => {
       search: jest.fn(),
       closePointInTime: jest.fn().mockResolvedValue({ succeeded: true }),
     };
+    mockAlertsClient = {
+      find: jest.fn(),
+      ensureAllAlertsAuthorizedRead: jest.fn().mockResolvedValue(undefined),
+    };
 
     mockLogger = loggerMock.create();
 
@@ -62,6 +70,9 @@ describe('preprocessTriggerInputs', () => {
       }),
       alerting: Promise.resolve({
         listTypes: jest.fn(() => mockRuleTypeRegistryMap),
+      }),
+      rac: Promise.resolve({
+        getAlertsClient: jest.fn().mockResolvedValue(mockAlertsClient),
       }),
     } as any;
   });
@@ -183,6 +194,12 @@ describe('preprocessTriggerInputs', () => {
 
       const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
+      expect(mockAlertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({
+        alerts: [
+          { id: 'alert-1', index: '.alerts-test-default' },
+          { id: 'alert-2', index: '.alerts-test-default' },
+        ],
+      });
       expect(mockEsClient.mget).toHaveBeenCalledWith(
         {
           docs: [
@@ -207,6 +224,28 @@ describe('preprocessTriggerInputs', () => {
       expect(event.rule.id).toBe('rule-uuid-123');
       expect(event.rule.name).toBe('Test Rule');
       expect(event.spaceId).toBe('default');
+    });
+
+    it('should reject alert IDs before fetching when alert read authorization fails', async () => {
+      mockAlertsClient.ensureAllAlertsAuthorizedRead.mockRejectedValue(
+        new Error('Unauthorized to read alert')
+      );
+
+      await expect(
+        preprocessTriggerInputs(
+          {
+            event: {
+              triggerType: 'alert',
+              alertIds: [{ _id: 'alert-1', _index: '.alerts-test-default' }],
+            },
+          },
+          mockContext,
+          'default',
+          mockLogger
+        )
+      ).rejects.toThrow('Unauthorized to read alert');
+
+      expect(mockEsClient.mget).not.toHaveBeenCalled();
     });
 
     it('should handle alerts from multiple rules and use the first rule', async () => {
@@ -603,6 +642,7 @@ describe('preprocessTriggerInputs', () => {
           alerting: Promise.resolve({
             listTypes: jest.fn(() => mockRuleTypeRegistryWithoutFormat),
           }),
+          rac: mockContext.rac,
         } as any;
 
         // Alert with flat ECS-style keys
@@ -696,25 +736,24 @@ describe('preprocessTriggerInputs', () => {
     describe('when using a query selection', () => {
       const buildSearchResponse = (
         hits: Array<{ _id: string; _index: string; _source: Record<string, unknown> }>,
-        total: number
+        total: number,
+        relation: 'eq' | 'gte' = 'eq'
       ) => ({
         pit_id: 'test-pit-id',
         hits: {
-          total: { value: total, relation: 'eq' },
+          total: { value: total, relation },
           hits: hits.map((hit) => ({ ...hit, sort: [hit._id] })),
         },
       });
 
-      it('should expand alerts from a query using a point in time and search_after', async () => {
+      it('should expand alerts through the authorized alerts client', async () => {
         const alertSource = createMockAlertSource();
-        mockEsClient.search
-          .mockResolvedValueOnce(
-            buildSearchResponse(
-              [{ _id: 'alert-1', _index: '.alerts-test-default', _source: alertSource }],
-              1
-            )
+        mockAlertsClient.find.mockResolvedValueOnce(
+          buildSearchResponse(
+            [{ _id: 'alert-1', _index: '.alerts-test-default', _source: alertSource }],
+            1
           )
-          .mockResolvedValueOnce(buildSearchResponse([], 1));
+        );
 
         const inputs = {
           event: {
@@ -728,19 +767,56 @@ describe('preprocessTriggerInputs', () => {
 
         const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
-        expect(mockEsClient.openPointInTime).toHaveBeenCalledWith(
-          expect.objectContaining({ index: '.alerts-security.alerts-default' })
+        expect(mockAlertsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: { bool: { must: [] } },
+            index: '.alerts-security.alerts-default',
+            track_total_hits: MAX_TRIGGER_EVENT_DOCS + 1,
+          })
         );
+        expect(mockEsClient.search).not.toHaveBeenCalled();
+        expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
         expect(mockEsClient.mget).not.toHaveBeenCalled();
-        expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
 
         const event = result.event as { alerts: unknown[]; rule: { id: string } };
         expect(event.alerts.length).toBe(1);
         expect(event.rule.id).toBe('rule-uuid-123');
       });
 
+      it('should preserve an inexact total in the truncation warning', async () => {
+        const alertSource = createMockAlertSource();
+        mockAlertsClient.find.mockResolvedValueOnce(
+          buildSearchResponse(
+            [{ _id: 'alert-1', _index: '.alerts-test-default', _source: alertSource }],
+            MAX_TRIGGER_EVENT_DOCS + 1,
+            'gte'
+          )
+        );
+
+        await preprocessTriggerInputs(
+          {
+            event: {
+              triggerType: 'alert',
+              querySelection: {
+                query: { match_all: {} },
+                index: '.alerts-security.alerts-default',
+              },
+            },
+          },
+          mockContext,
+          'default',
+          mockLogger
+        );
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          `Alert selection truncated to 1 of at least ${
+            MAX_TRIGGER_EVENT_DOCS + 1
+          } matching alerts (maxDocs=${MAX_TRIGGER_EVENT_DOCS}).`
+        );
+      });
+
       it('should throw when the query matches no alerts', async () => {
-        mockEsClient.search.mockResolvedValueOnce(buildSearchResponse([], 0));
+        mockAlertsClient.find.mockResolvedValueOnce(buildSearchResponse([], 0));
 
         const inputs = {
           event: {
@@ -755,7 +831,7 @@ describe('preprocessTriggerInputs', () => {
         await expect(
           preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
         ).rejects.toThrow('No alerts found with the provided selection');
-        expect(mockEsClient.closePointInTime).toHaveBeenCalled();
+        expect(mockEsClient.search).not.toHaveBeenCalled();
       });
     });
   });

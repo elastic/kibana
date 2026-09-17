@@ -13,6 +13,7 @@ import type {
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import type { DocumentSelection } from '../../../../../common/types/document_types';
 
@@ -36,8 +37,9 @@ interface FetchByQueryParams {
 
 interface FetchByQueryResult {
   hits: RawDocumentHit[];
-  /** Total number of documents matching the query (may exceed `hits.length`). */
+  /** Tracked number of matching documents; a lower bound when `totalRelation` is `gte`. */
   total: number;
+  totalRelation: 'eq' | 'gte';
   /** True when `total` exceeded `maxDocs` and the result was capped. */
   truncated: boolean;
 }
@@ -127,6 +129,7 @@ export async function fetchDocumentsByQuery(
   let sourceBytes = 0;
   let scannedHits = 0;
   let total = 0;
+  let totalRelation: FetchByQueryResult['totalRelation'] = 'eq';
   let pitId: string | undefined;
 
   try {
@@ -146,7 +149,7 @@ export async function fetchDocumentsByQuery(
           query,
           size: pageSize,
           allow_partial_search_results: false,
-          track_total_hits: searchAfter === undefined,
+          track_total_hits: searchAfter === undefined ? maxDocs + 1 : false,
           // Newest first, so a capped selection keeps the most recent docs. `_shard_doc` is a
           // stable tiebreaker only available with a point in time.
           sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }, { _shard_doc: 'asc' }],
@@ -171,7 +174,13 @@ export async function fetchDocumentsByQuery(
       }
 
       const totalHits = response.hits.total;
-      total = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? total;
+      if (typeof totalHits === 'number') {
+        total = totalHits;
+        totalRelation = 'eq';
+      } else if (totalHits) {
+        total = totalHits.value;
+        totalRelation = totalHits.relation;
+      }
 
       const pageHits = response.hits.hits;
       if (pageHits.length === 0) {
@@ -201,7 +210,12 @@ export async function fetchDocumentsByQuery(
       }
     }
 
-    return { hits, total, truncated: total > scannedHits };
+    return {
+      hits,
+      total,
+      totalRelation,
+      truncated: totalRelation === 'gte' || total > scannedHits,
+    };
   } catch (error) {
     logger.error(
       `Failed to fetch documents by query: ${
@@ -219,5 +233,105 @@ export async function fetchDocumentsByQuery(
         );
       }
     }
+  }
+}
+
+/**
+ * Fetches alerts through the Rule Registry client so every page is space-filtered,
+ * privilege-filtered, post-validated, and audited by the alerting framework.
+ */
+export async function fetchAlertsByQuery(
+  params: FetchByQueryParams,
+  alertsClient: Pick<AlertsClient, 'find'>,
+  logger: Logger
+): Promise<FetchByQueryResult> {
+  const { query, index } = params;
+  const maxDocs = params.maxDocs ?? MAX_TRIGGER_EVENT_DOCS;
+  const maxBytes = params.maxBytes ?? MAX_TRIGGER_EVENT_BYTES;
+  const maxPageSize = params.pageSize ?? SEARCH_PAGE_SIZE;
+  const hits: RawDocumentHit[] = [];
+  let sourceBytes = 0;
+  let scannedHits = 0;
+  let total = 0;
+  let totalRelation: FetchByQueryResult['totalRelation'] = 'eq';
+  let searchAfter: Array<string | number> | undefined;
+
+  try {
+    while (scannedHits < maxDocs) {
+      const pageSize = Math.min(maxPageSize, maxDocs - scannedHits);
+      const response = await alertsClient.find({
+        query,
+        index: Array.isArray(index) ? index.join(',') : index,
+        size: pageSize,
+        track_total_hits: searchAfter === undefined ? maxDocs + 1 : false,
+        sort: [
+          { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
+          { 'kibana.alert.uuid': { order: 'asc', unmapped_type: 'keyword' } },
+        ],
+        search_after: searchAfter,
+      });
+
+      if (response.timed_out || (response._shards?.failed ?? 0) > 0) {
+        throw new Error(
+          `Incomplete alert query response (timed_out=${
+            response.timed_out ?? false
+          }, shards_failed=${response._shards?.failed ?? 0})`
+        );
+      }
+
+      const totalHits = response.hits.total;
+      if (typeof totalHits === 'number') {
+        total = totalHits;
+        totalRelation = 'eq';
+      } else if (totalHits) {
+        total = totalHits.value;
+        totalRelation = totalHits.relation;
+      }
+
+      const pageHits = response.hits.hits;
+      if (pageHits.length === 0) {
+        break;
+      }
+
+      for (const hit of pageHits) {
+        scannedHits++;
+        if (hit._source) {
+          const source = hit._source as Record<string, unknown>;
+          const hitSourceBytes = getDocumentSourceBytes(source);
+          if (sourceBytes + hitSourceBytes > maxBytes) {
+            throw createSizeLimitError(maxBytes);
+          }
+          sourceBytes += hitSourceBytes;
+          hits.push({
+            _id: hit._id as string,
+            _index: hit._index,
+            _source: source,
+          });
+        }
+      }
+
+      const lastHit = pageHits[pageHits.length - 1];
+      const lastSort = lastHit.sort;
+      searchAfter = lastSort?.every(
+        (value): value is string | number => typeof value === 'string' || typeof value === 'number'
+      )
+        ? lastSort
+        : undefined;
+      if (pageHits.length < pageSize || !searchAfter) {
+        break;
+      }
+    }
+
+    return {
+      hits,
+      total,
+      totalRelation,
+      truncated: totalRelation === 'gte' || total > scannedHits,
+    };
+  } catch (error) {
+    logger.error(
+      `Failed to fetch alerts by query: ${error instanceof Error ? error.message : String(error)}`
+    );
+    throw error;
   }
 }
