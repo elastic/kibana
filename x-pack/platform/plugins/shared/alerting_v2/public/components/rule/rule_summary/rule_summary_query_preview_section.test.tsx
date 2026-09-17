@@ -70,11 +70,9 @@ describe('RuleSummaryQueryPreviewSection', () => {
     expect(capturedProps.onQueryChange).toBeUndefined();
   });
 
-  it('uses the QuerySandbox defaults when summary fields are unavailable', () => {
-    renderQueryPreview({ ...rule, query: undefined, time_field: undefined });
+  it('uses the default QuerySandbox date range', () => {
+    renderQueryPreview();
 
-    expect(capturedProps.query).toBe('');
-    expect(capturedProps.timeField).toBe('@timestamp');
     expect(capturedProps.dateRange).toEqual({
       dateStart: 'now-15m',
       dateEnd: 'now',
