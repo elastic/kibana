@@ -31,12 +31,12 @@ export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> 
   hasSubmenu?: boolean;
   href?: string;
   iconType?: IconType;
-  isContentItem?: boolean;
   isCurrent?: boolean;
   isHighlighted: boolean;
   isNew?: boolean;
   onClick?: () => void;
   testSubjPrefix?: string;
+  truncation?: 'middle';
 }
 
 /**
@@ -50,12 +50,12 @@ export const SecondaryMenuItemComponent = ({
   href,
   iconType,
   id,
-  isContentItem = false,
   isCurrent,
   isExternal,
   isHighlighted,
   isNew = false,
   testSubjPrefix,
+  truncation,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -125,7 +125,7 @@ export const SecondaryMenuItemComponent = ({
   };
 
   const label =
-    isContentItem && typeof children === 'string' ? (
+    truncation === 'middle' && typeof children === 'string' ? (
       <EuiTextTruncate
         text={children}
         truncation="middle"
