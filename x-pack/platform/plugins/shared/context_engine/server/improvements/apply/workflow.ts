@@ -96,9 +96,7 @@ export const addWorkflow = async ({
     if (error instanceof ApplyImprovementError) {
       throw error;
     }
-    throw new ApplyImprovementError(
-      error instanceof Error ? error.message : String(error)
-    );
+    throw new ApplyImprovementError(error instanceof Error ? error.message : String(error));
   }
 };
 
