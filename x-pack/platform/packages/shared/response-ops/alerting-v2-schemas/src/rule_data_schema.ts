@@ -788,10 +788,10 @@ export const findRulesRequestSchema = z
   .object({
     page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
       .optional()
-      .describe('The page number to return. Defaults to 1.'),
+      .describe(`The page number to return. Defaults to 1. \`page * per_page\` cannot exceed ${FIND_MAX_RESULT_WINDOW}.`),
     per_page: queryIntSchema({ min: 1, max: 1000 })
       .optional()
-      .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}`),
+      .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}.`),
     filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
     sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
     sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
