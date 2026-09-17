@@ -16,6 +16,7 @@ import type {
   ConversationRoundOrigin,
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import type { ActiveExecutionDraft } from '../../../../services/events/active_execution_reducer';
 
@@ -34,6 +35,10 @@ export interface AgentTurnItem {
   terminal?: ExecutionTerminatedEvent | ExecutionFailedEvent | ExecutionAbortedEvent;
   pendingPrompts?: PromptRequest[];
   timeToFirstToken?: number;
+  /** Highest version of every attachment referenced up to and including this turn's trigger. */
+  attachmentRefs?: AttachmentVersionRef[];
+  /** The trigger message's own refs, including attachments the agent created in this turn. */
+  triggerAttachmentRefs?: AttachmentVersionRef[];
 }
 
 export type TimelineItem =
@@ -47,7 +52,22 @@ interface ExecutionAccumulator {
   triggerEventId?: string;
   steps: ConversationRoundStep[];
   terminal?: ExecutionTerminatedEvent | ExecutionFailedEvent | ExecutionAbortedEvent;
+  attachmentRefs?: AttachmentVersionRef[];
 }
+
+// Keeps the highest version seen per attachment, so a later turn resolves an attachment the way
+// the agent last saw it.
+const foldAttachmentRefs = (
+  seen: Map<string, AttachmentVersionRef>,
+  refs: AttachmentVersionRef[] | undefined
+): void => {
+  for (const ref of refs ?? []) {
+    const existing = seen.get(ref.attachment_id);
+    if (!existing || ref.version > existing.version) {
+      seen.set(ref.attachment_id, ref);
+    }
+  }
+};
 
 const resolveStatus = (terminal: ExecutionAccumulator['terminal']): AgentTurnStatus => {
   if (!terminal) return 'running';
@@ -60,10 +80,11 @@ const accumulatorToItem = (
   acc: ExecutionAccumulator,
   eventsById: Map<string, TimelineEvent>
 ): AgentTurnItem => {
-  const { executionId, startedAt, triggerEventId, steps, terminal } = acc;
-  const origin: ConversationRoundOrigin | undefined = triggerEventId
-    ? eventsById.get(triggerEventId)?.actor.origin
-    : undefined;
+  const { executionId, startedAt, triggerEventId, steps, terminal, attachmentRefs } = acc;
+  const trigger = triggerEventId ? eventsById.get(triggerEventId) : undefined;
+  const origin: ConversationRoundOrigin | undefined = trigger?.actor.origin;
+  const triggerAttachmentRefs =
+    trigger?.type === TimelineEventType.userMessage ? trigger.data.attachment_refs : undefined;
   const status = resolveStatus(terminal);
   const item: AgentTurnItem = {
     kind: 'agentTurn',
@@ -76,6 +97,8 @@ const accumulatorToItem = (
   if (triggerEventId) item.triggerEventId = triggerEventId;
   if (origin) item.origin = origin;
   if (terminal) item.terminal = terminal;
+  if (attachmentRefs?.length) item.attachmentRefs = attachmentRefs;
+  if (triggerAttachmentRefs?.length) item.triggerAttachmentRefs = triggerAttachmentRefs;
   if (
     status === 'completed' &&
     terminal?.type === TimelineEventType.executionTerminated &&
@@ -138,6 +161,7 @@ export const groupTimelineEvents = (
 ): TimelineItem[] => {
   const ordered: Array<UserEntry | ExecutionAccumulator> = [];
   const accMap = new Map<string, ExecutionAccumulator>();
+  const seenAttachmentRefs = new Map<string, AttachmentVersionRef>();
 
   const getOrCreateAcc = (
     executionId: string,
@@ -146,7 +170,13 @@ export const groupTimelineEvents = (
   ): ExecutionAccumulator => {
     let acc = accMap.get(executionId);
     if (!acc) {
-      acc = { executionId, startedAt: createdAt, triggerEventId, steps: [] };
+      acc = {
+        executionId,
+        startedAt: createdAt,
+        triggerEventId,
+        steps: [],
+        attachmentRefs: Array.from(seenAttachmentRefs.values()),
+      };
       accMap.set(executionId, acc);
       ordered.push(acc);
     }
@@ -156,10 +186,12 @@ export const groupTimelineEvents = (
   for (const event of events) {
     switch (event.type) {
       case TimelineEventType.userMessage:
+        foldAttachmentRefs(seenAttachmentRefs, event.data.attachment_refs);
         ordered.push({ kind: 'userMessage', key: event.id, event });
         break;
 
       case TimelineEventType.promptResponse:
+        foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
         ordered.push({ kind: 'promptResponse', key: event.id, event });
         break;
 
