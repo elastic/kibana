@@ -7,10 +7,10 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { PageLoader } from '../../common/components/page_loader';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import { PageLoader } from '../../common/components/page_loader';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { EntitySearchBar } from '../components/home/entity_search_bar';

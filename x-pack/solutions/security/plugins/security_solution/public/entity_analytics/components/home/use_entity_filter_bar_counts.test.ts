@@ -47,18 +47,14 @@ describe('buildEntityFilterCountsRequest', () => {
   it('omits the caller filter when not provided', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
     // only the entity type allowlist filter (and the resolved-view exclusion)
-    const hasExtraTerms = req.query.bool.filter.some(
-      (f) => !('terms' in f) && !('bool' in f)
-    );
+    const hasExtraTerms = req.query.bool.filter.some((f) => !('terms' in f) && !('bool' in f));
     expect(hasExtraTerms).toBe(false);
   });
 
   it('includes the resolved-view exclusion when view is resolved', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
     const hasResolutionExclusion = req.query.bool.filter.some(
-      (f) =>
-        'bool' in f &&
-        'must_not' in (f as { bool: Record<string, unknown> }).bool
+      (f) => 'bool' in f && 'must_not' in (f as { bool: Record<string, unknown> }).bool
     );
     expect(hasResolutionExclusion).toBe(true);
   });
@@ -66,9 +62,7 @@ describe('buildEntityFilterCountsRequest', () => {
   it('omits the resolved-view exclusion when view is raw', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'raw' });
     const hasResolutionExclusion = req.query.bool.filter.some(
-      (f) =>
-        'bool' in f &&
-        'must_not' in (f as { bool: Record<string, unknown> }).bool
+      (f) => 'bool' in f && 'must_not' in (f as { bool: Record<string, unknown> }).bool
     );
     expect(hasResolutionExclusion).toBe(false);
   });
