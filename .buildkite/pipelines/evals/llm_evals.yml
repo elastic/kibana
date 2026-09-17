@@ -618,7 +618,7 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 3
-
+      - label: 'Evals: Skill Selection Benchmark'
       - label: 'Evals: Skill Selection Benchmark'
         key: kbn-evals-weekly-skill-selection-benchmark
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
