@@ -331,7 +331,9 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             return;
           }
         } catch {
-          setSourceInsight(null);
+          if (isMounted()) {
+            setSourceInsight(null);
+          }
         }
 
         if (isMounted()) {
@@ -361,8 +363,16 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
           setShowConfirmModal(true);
         } else if (createOrUpdateArtifact) {
           createOrUpdateArtifact(itemToSubmit, formState.additionalEntries)
-            .then((createdOrUpdatedItems) => handleSuccess(createdOrUpdatedItems[0]))
-            .catch((err) => setSubmitError(err));
+            .then((createdOrUpdatedItems) => {
+              if (isMounted()) {
+                return handleSuccess(createdOrUpdatedItems[0]);
+              }
+            })
+            .catch((err) => {
+              if (isMounted()) {
+                setSubmitError(err);
+              }
+            });
         }
       },
       [
@@ -370,6 +380,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         formState.additionalEntries,
         handleSuccess,
         createOrUpdateArtifact,
+        isMounted,
       ]
     );
 
@@ -400,9 +411,23 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     const confirmModalOnSuccess = useCallback(
       () =>
         createOrUpdateArtifact?.(formState.item, formState.additionalEntries)
-          .then((createdOrUpdatedItems) => handleSuccess(createdOrUpdatedItems[0]))
-          .catch((err) => setSubmitError(err)),
-      [createOrUpdateArtifact, formState.additionalEntries, formState.item, handleSuccess]
+          .then((createdOrUpdatedItems) => {
+            if (isMounted()) {
+              return handleSuccess(createdOrUpdatedItems[0]);
+            }
+          })
+          .catch((err) => {
+            if (isMounted()) {
+              setSubmitError(err);
+            }
+          }),
+      [
+        createOrUpdateArtifact,
+        formState.additionalEntries,
+        formState.item,
+        handleSuccess,
+        isMounted,
+      ]
     );
 
     const confirmModal = useMemo(() => {
