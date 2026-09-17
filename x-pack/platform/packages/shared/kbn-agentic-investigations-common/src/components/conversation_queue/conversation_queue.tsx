@@ -29,8 +29,14 @@ interface ConversationQueueProps {
   briefingList: Investigation[];
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
+  onOpenChat: (id: Investigation['id']) => void;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   isFiltered?: boolean;
+  /**
+   * Ids of the cards belonging to the open details flyout, highlighted in the list. A
+   * plural because the flyout shows an investigation, which several rows can share.
+   */
+  selectedIds?: readonly string[];
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -56,6 +62,8 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     onClickAction,
     onClickCard,
     onClickRecommendedAction,
+    onOpenChat,
+    selectedIds,
   }) => {
     const { euiTheme } = useEuiTheme();
     const buttonContent = (
@@ -107,8 +115,10 @@ export const ConversationQueue = memo<ConversationQueueProps>(
                   <ConversationCard
                     investigation={investigation}
                     hasBorder={i < briefingList.length - 1}
+                    isSelected={selectedIds?.includes(investigation.id)}
                     onClickAction={onClickAction}
                     onClickCard={onClickCard}
+                    onOpenChat={onOpenChat}
                     onClickRecommendedAction={onClickRecommendedAction}
                   />
                 </EuiFlexItem>
