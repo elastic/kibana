@@ -159,7 +159,7 @@ export const useImportJsonFlyoutState = <SanitizedState>({
     isValidating,
     isImporting,
     fileSelectionId,
-    canImport: Boolean(sanitizedState) && !isValidating && !filePickerError && !serverError,
+    canImport: Boolean(sanitizedState) && !isValidating && !isImporting && !filePickerError && !serverError,
     onFileChange,
     onImport,
   };
