@@ -177,7 +177,7 @@ node scripts/functional_test_runner --config=x-pack/solutions/observability/test
 ### Start
 
 ```
-yarn storybook apm
+pnpm storybook apm
 ```
 
 All files with a .stories.tsx extension will be loaded. You can access the development environment at http://localhost:9001.

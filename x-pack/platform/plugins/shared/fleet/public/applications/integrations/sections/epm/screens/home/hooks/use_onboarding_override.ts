@@ -22,7 +22,28 @@ const AWS_DESCRIPTION = i18n.translate('xpack.fleet.onboardingOverride.awsDescri
   defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
 });
 
-const HIDDEN_TILE_NAMES = new Set(['aws']);
+// hiding tiles that are included in the AWS onboarding flow: https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ingest_hub/public/onboarding/aws_service_matrix.ts#L188
+const HIDDEN_TILE_NAMES = new Set([
+  'aws',
+  'aws_bedrock',
+  'aws_bedrock_agentcore',
+  'aws_cloudwatch_input_otel',
+  'aws_logs',
+  'aws_mq',
+  'awsfargate',
+  'awsfirehose',
+  'aws_securityhub',
+  'aws_cloudtrail_otel',
+  'aws_ec2_otel',
+  'aws_ecs_otel',
+  'aws_elb_metrics_otel',
+  'aws_elb_otel',
+  'aws_lambda_otel',
+  'aws_rds_otel',
+  'aws_sqs_otel',
+  'aws_vpcflow_otel',
+  'aws_waf_otel',
+]);
 const HIDDEN_TILE_IDS = new Set(['epr:aws']);
 
 export function useOnboardingOverride() {
