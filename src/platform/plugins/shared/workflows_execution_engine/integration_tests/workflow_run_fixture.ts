@@ -21,6 +21,8 @@ import { mockContextDependencies } from '../server/execution_functions/__mock__/
 import { createMockWorkflowExecutionEngineConfig } from '../server/execution_functions/execution_functions_test_utils';
 import { runWorkflow } from '../server/execution_functions/run_workflow';
 import { workflowsExecutionEngineMock } from '../server/mocks';
+import type { StepExecutionRepository } from '../server/repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../server/repositories/workflow_execution_repository';
 
 // Mock the repository classes so setupDependencies uses our mocks
 jest.mock('../server/repositories/workflow_execution_repository');
@@ -49,6 +51,10 @@ export class WorkflowRunFixture {
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();
+  private readonly workflowExecutionRepository = this
+    .workflowExecutionRepositoryMock as unknown as WorkflowExecutionRepository;
+  private readonly stepExecutionRepository = this
+    .stepExecutionRepositoryMock as unknown as StepExecutionRepository;
   public readonly taskManagerMock = TaskManagerMock.create();
   public readonly workflowsExecutionEngineMock = workflowsExecutionEngineMock.createStart();
   public readonly internalResumeWorkflowExecutionMock = jest.fn().mockResolvedValue(undefined);
@@ -122,7 +128,20 @@ export class WorkflowRunFixture {
       fakeRequest: this.fakeKibanaRequest,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
     });
+  }
+
+  public async resumeWorkflowAtScheduledTime() {
+    const resumeTask = this.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
+    if (!resumeTask?.runAt) throw new Error('Expected a scheduled wait deadline');
+    jest.useFakeTimers({ now: new Date(resumeTask.runAt) });
+    try {
+      return await this.resumeWorkflow();
+    } finally {
+      jest.useRealTimers();
+    }
   }
 
   public resumeWorkflow() {
@@ -136,6 +155,8 @@ export class WorkflowRunFixture {
       dependencies: this.dependencies,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
     });
   }
 
@@ -180,6 +201,8 @@ export class WorkflowRunFixture {
       fakeRequest: this.fakeKibanaRequest,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
     });
   }
 

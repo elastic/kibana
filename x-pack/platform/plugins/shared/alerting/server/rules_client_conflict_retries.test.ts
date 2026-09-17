@@ -96,23 +96,28 @@ async function update(success: boolean) {
     });
   } catch (err) {
     // only checking the warn messages in this test
-    expect(logger.warn).lastCalledWith(`rulesClient.update('rule-id') conflict, exceeded retries`);
+    expect(logger.warn).toHaveBeenLastCalledWith(
+      `rulesClient.update('rule-id') conflict, exceeded retries`
+    );
     return expectConflict(success, err, 'create');
   }
   expectSuccess(success, 2, 'create');
 
   // only checking the debug messages in this test
-  expect(logger.debug).nthCalledWith(1, `rulesClient.update('rule-id') conflict, retrying ...`);
+  expect(logger.debug).toHaveBeenNthCalledWith(
+    1,
+    `rulesClient.update('rule-id') conflict, retrying ...`
+  );
 }
 
 async function updateApiKey(success: boolean) {
   try {
     await rulesClient.updateRuleApiKey({ id: MockRuleId });
   } catch (err) {
-    return expectConflict(success, err);
+    return expectConflict(success, err, 'create');
   }
 
-  expectSuccess(success);
+  expectSuccess(success, 2, 'create');
 }
 
 async function enable(success: boolean) {
@@ -121,12 +126,12 @@ async function enable(success: boolean) {
   try {
     await rulesClient.enableRule({ id: MockRuleId });
   } catch (err) {
-    return expectConflict(success, err);
+    return expectConflict(success, err, 'create');
   }
 
-  // a successful enable call makes 1 call to update, so with
+  // a successful enable call makes 1 call to create, so with
   // conflict, we would expect 1 on conflict, 1 on success
-  expectSuccess(success, 2);
+  expectSuccess(success, 2, 'create');
 }
 
 async function disable(success: boolean) {
@@ -202,8 +207,8 @@ function expectConflict(success: boolean, err: Error, method: 'update' | 'create
   expect(success).toBe(false);
   expect(unsecuredSavedObjectsClient[method]).toHaveBeenCalledTimes(ConflictAfterRetries);
   // message content checked in the update test
-  expect(logger.debug).toBeCalledTimes(RetryForConflictsAttempts);
-  expect(logger.warn).toBeCalledTimes(1);
+  expect(logger.debug).toHaveBeenCalledTimes(RetryForConflictsAttempts);
+  expect(logger.warn).toHaveBeenCalledTimes(1);
 }
 
 // wrapper to call the test function with a it's own name

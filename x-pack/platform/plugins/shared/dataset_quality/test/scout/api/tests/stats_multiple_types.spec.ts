@@ -112,7 +112,15 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       const stats: DataStreamStat[] = response.body.dataStreamsStats;
-      expect(stats).toHaveLength(2);
+
+      // The request is not scoped with `datasetQuery`, so the response lists every
+      // logs and synthetics data stream on the cluster, including the ones other
+      // suites sharing the test server leave behind. Assert on the type filter and on
+      // the streams this suite owns instead of on the total count.
+      expect(stats.length).toBeGreaterThanOrEqual(2);
+      for (const { name } of stats) {
+        expect(name).toMatch(/^(logs|synthetics)-/);
+      }
 
       for (const name of [LOGS_DATA_STREAM, SYNTHETICS_DATA_STREAM]) {
         const stat = findStat(stats, name);

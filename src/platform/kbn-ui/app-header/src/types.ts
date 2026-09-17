@@ -12,8 +12,10 @@ import type { IconType } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/ui-app-menu';
 import type { FavoriteButtonStatus } from '@kbn/ui-favorite-button';
 
-export type AppHeaderBack = string | AppHeaderBackTarget;
-
+/**
+ * Single back target. Points at the IA parent of the page, or at an explicit
+ * satellite origin. Never `history.back()`.
+ */
 export interface AppHeaderBackTarget {
   href: string;
   /**
@@ -21,9 +23,14 @@ export interface AppHeaderBackTarget {
    * Do not use it to navigate to `href`; Kibana handles same-origin links as SPA navigation.
    */
   onClick?: MouseEventHandler;
-  /** Destination name for accessibility (e.g. "Back to {label}"). */
-  label?: string;
+  /**
+   * Names the destination (parent page or satellite origin), never a category
+   * or the current page. Used as "Back to {label}".
+   */
+  label: string;
 }
+
+export type AppHeaderBack = AppHeaderBackTarget;
 
 export interface AppHeaderBadge {
   label: string;
@@ -220,6 +227,16 @@ export interface AppHeaderShareAction {
 }
 
 /**
+ * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+ * Not a stable App Header contract.
+ */
+export interface AppHeaderExperimentalDashboardAiAction {
+  onClick: (context: { returnFocus: () => void }) => void;
+  isDisabled?: boolean;
+  testId?: string;
+}
+
+/**
  * Plain-text page description. Use the object form to add a URL rendered with a fixed
  * "Learn more" label.
  */
@@ -239,8 +256,14 @@ interface AppHeaderConfigBase {
   favorite?: AppHeaderFavoriteAction;
   share?: AppHeaderShareAction;
   /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
+  /**
    * Defaults to `standard`, except a sparse header (no title, badges, tabs, description, metadata,
-   * title append, favorite, or share) defaults to `compact`. An explicit value always wins.
+   * title append, favorite, share, or experimental dashboard AI action) defaults to `compact`.
+   * An explicit value always wins.
    */
   spacing?: AppHeaderSpacing;
 }

@@ -266,6 +266,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                           rrule_schedule: rruleSchedule,
                         },
                         isRruleFeatureEnabled,
+                        fallbackStartDate: packSO.attributes.created_at,
                       }
                     );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {

@@ -14,6 +14,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
+import { PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import type { TLSRuleInspect } from '../../../common/runtime_types/alert_rules/common';
@@ -66,6 +67,7 @@ export class TLSRuleExecutor {
     this.esClient = new SyntheticsEsClient(this.soClient, scopedClient, {
       heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
       uiSettingsClient,
+      ...(server.isCpsEnabled ? { projectRouting: PROJECT_ROUTING_ORIGIN } : {}),
     });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;

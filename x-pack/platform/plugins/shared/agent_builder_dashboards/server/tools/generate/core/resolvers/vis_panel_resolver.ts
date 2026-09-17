@@ -140,7 +140,6 @@ export const createVisPanelResolver = ({
         esql,
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
-        includeTimeRange: false,
         modelProvider,
         logger,
         events,

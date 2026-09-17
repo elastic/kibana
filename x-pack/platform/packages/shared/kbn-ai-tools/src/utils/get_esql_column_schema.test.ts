@@ -105,6 +105,32 @@ describe('getEsqlColumnSchema', () => {
     ]);
   });
 
+  it('parses the suggested cast for conflicting fields', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce({
+      columns: [
+        {
+          name: 'host.name',
+          type: 'unsupported',
+          original_types: ['ip', 'keyword'],
+          suggested_cast: 'keyword',
+        },
+      ],
+      values: [],
+    });
+
+    const schema = await getEsqlColumnSchema({ esClient, signal, index: 'logs-*' });
+
+    expect(schema).toEqual([
+      {
+        name: 'host.name',
+        type: 'unsupported',
+        originalTypes: ['ip', 'keyword'],
+        suggestedCast: 'keyword',
+      },
+    ]);
+  });
+
   it('filters the no-fields placeholder column', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce({

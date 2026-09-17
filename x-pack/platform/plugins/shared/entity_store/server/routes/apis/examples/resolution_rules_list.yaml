@@ -9,11 +9,33 @@ responses:
             description: Lists the managed resolution rules and their enabled state in the current space.
             value:
               rules:
-                - id: related_user_alias_resolution
-                  kind: related_user_alias_resolution
-                  managed: true
-                  enabled: false
                 - id: email_exact_match
-                  kind: email_exact_match
+                  kind: same_field
+                  description: Links user entities that share the same email address, compared case-insensitively, across identity providers. Disable if shared mailboxes or role accounts produce false links.
                   managed: true
                   enabled: true
+                - id: windows_sid_bridge
+                  kind: same_field
+                  description: Links Windows and system account-management (IAM) entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.
+                  managed: true
+                  enabled: true
+                - id: entra_guid_bridge
+                  kind: same_field
+                  description: Links Microsoft Defender (`m365_defender`) identities to Entra ID by GUID-shaped `user.id`. Needs Defender identity events and Entra entity analytics. Disable if Defender SID IAM events leak through the GUID gate.
+                  managed: true
+                  enabled: true
+                - id: crowdstrike_sid_bridge
+                  kind: same_field
+                  description: Links CrowdStrike user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). Needs CrowdStrike FDR IAM events and Active Directory entity analytics. Disable if CrowdStrike SID coverage is noisy in your tenant.
+                  managed: true
+                  enabled: true
+                - id: upn_cross_field_bridge
+                  kind: cross_field
+                  description: Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit user-lifecycle events and Entra entity analytics. Covers admins who perform AAD user operations; disable if that population should stay separate.
+                  managed: true
+                  enabled: true
+                - id: related_user_alias_resolution
+                  kind: related_user_alias_resolution
+                  description: Related user alias resolution across identity providers
+                  managed: true
+                  enabled: false

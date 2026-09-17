@@ -203,7 +203,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid priority \\"23\\". Priority must be one of Low => 1,NormalLongRunning => 40,Normal => 50"`
+        `"Invalid priority \\"23\\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100"`
       );
     });
   });
@@ -225,7 +225,7 @@ describe('taskTypeDictionary', () => {
         foo: {
           title: 'foo',
           maxConcurrency: 2,
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
           createTaskRunner: jest.fn(),
         },
       });
@@ -251,7 +251,7 @@ describe('taskTypeDictionary', () => {
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
-        `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Low => 1,NormalLongRunning => 40,Normal => 50`
+        `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100`
       );
       expect(definitions.get('foo')).toEqual(undefined);
     });

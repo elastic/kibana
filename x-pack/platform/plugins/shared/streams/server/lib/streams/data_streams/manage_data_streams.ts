@@ -56,7 +56,7 @@ interface UpdateDataStreamsMappingsOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
   name: string;
-  mappings: StreamsMappingProperties;
+  mappings: StreamsMappingProperties | undefined;
 }
 
 interface UpdateDefaultIngestPipelineOptions {
@@ -141,16 +141,21 @@ export async function updateDataStreamsMappings({
   name,
   mappings,
 }: UpdateDataStreamsMappingsOptions) {
-  // update the mappings on the data stream level
+  // An empty body clears the data stream level override entirely (including _meta),
+  // so template mappings apply again on the next rollover.
+  const body = mappings
+    ? {
+        properties: mappings,
+        _meta: {
+          managed_by: 'streams',
+        },
+      }
+    : {};
+
   const response = (await esClient.transport.request({
     method: 'PUT',
     path: `/_data_stream/${name}/_mappings`,
-    body: {
-      properties: mappings,
-      _meta: {
-        managed_by: 'streams',
-      },
-    },
+    body,
   })) as DataStreamMappingsUpdateResponse;
   if (response.data_streams.length === 0) {
     throw new Error(`Data stream ${name} not found`);

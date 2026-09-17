@@ -7,6 +7,7 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { EsClient } from '@kbn/scout';
+import type { AgentAccessControlMode } from '@kbn/agent-builder-common';
 
 import { AGENT_BUILDER_PUBLIC_API_HEADERS } from './kbn_public_api_headers';
 
@@ -31,6 +32,7 @@ export async function createAgentViaKbn(
     name: string;
     description?: string;
     labels?: string[];
+    accessMode?: AgentAccessControlMode;
   }
 ): Promise<void> {
   await kbnClient.request({
@@ -49,6 +51,7 @@ export async function createAgentViaKbn(
       name: agent.name,
       description: agent.description ?? `Agent for testing ${agent.id}`,
       labels: agent.labels ?? [],
+      ...(agent.accessMode ? { access_control: { access_mode: agent.accessMode } } : {}),
       configuration: {
         instructions: 'Run this agent',
         tools: [{ tool_ids: ['*'] }],

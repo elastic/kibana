@@ -38,7 +38,7 @@ import {
  * Handles special cases (IN, IS NULL) or delegates to generic operator logic
  */
 export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
-  const { expressionRoot, context, isExpressionRootParenthesized } = ctx;
+  const { expressionRoot, context, parenthesizedExpressionPosition } = ctx;
 
   if (!expressionRoot) {
     return [];
@@ -48,7 +48,8 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
   const getExprType = (expression: ESQLAstItem) =>
     getExpressionType(expression, context?.columns, context?.unmappedFieldsStrategy);
   const reason = getIncompleteOperatorReason(rightmostOperator, getExprType);
-  const shouldDispatchSpecialOperator = reason !== undefined || !isExpressionRootParenthesized;
+  const shouldDispatchSpecialOperator =
+    reason !== undefined || parenthesizedExpressionPosition !== 'after';
 
   if (shouldDispatchSpecialOperator) {
     // If we don't pass rightmostOperator, for "field IN (x) AND field NOT IN (y"

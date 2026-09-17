@@ -21,6 +21,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
+import type { VegaByValueState } from '../../server';
 
 const bodyCss = css({
   '.euiFlyoutBody__overflowContent': {
@@ -29,6 +30,20 @@ const bodyCss = css({
     '.vgaEditor': { minHeight: 0 },
   },
 });
+
+const specFromEditor = (
+  text: string,
+  format: VegaByValueState['spec']['format']
+): VegaByValueState['spec'] => {
+  if (format === 'json') {
+    try {
+      return { format: 'json', value: JSON.parse(text) };
+    } catch {
+      return { format: 'hjson', value: text };
+    }
+  }
+  return { format: 'hjson', value: text };
+};
 
 export const VegaEditorFlyout = ({
   ariaLabelledBy,
@@ -41,19 +56,22 @@ export const VegaEditorFlyout = ({
 }: {
   ariaLabelledBy: string;
   closeFlyout: () => void;
-  initialSpec: string;
+  initialSpec: VegaByValueState['spec'];
 
   isNewPanel?: boolean;
-  onPreview: (spec: string) => void;
+  onPreview: (spec: VegaByValueState['spec']) => void;
   onRevert: () => void;
-  onSave: (spec: string) => void;
+  onSave: (spec: VegaByValueState['spec']) => void;
 }) => {
-  const [spec, setSpec] = useState(initialSpec);
-  const [previewedSpec, setPreviewedSpec] = useState(initialSpec);
+  const initialEditorValue =
+    initialSpec.format === 'json' ? JSON.stringify(initialSpec.value, null, 2) : initialSpec.value;
+  const [spec, setSpec] = useState(initialEditorValue);
+  const [previewedSpec, setPreviewedSpec] = useState(initialEditorValue);
+  const [format, setFormat] = useState<VegaByValueState['spec']['format']>(initialSpec.format);
   const canPreview = spec !== previewedSpec;
-  const canSave = isNewPanel || spec !== initialSpec;
+  const canSave = isNewPanel || spec !== initialEditorValue;
   const previewChanges = () => {
-    onPreview(spec);
+    onPreview(specFromEditor(spec, format));
     setPreviewedSpec(spec);
   };
 
@@ -73,7 +91,7 @@ export const VegaEditorFlyout = ({
 
   const handleSave = () => {
     saved.current = true;
-    onSave(spec);
+    onSave(specFromEditor(spec, format));
     closeFlyout();
   };
   return (
@@ -84,7 +102,12 @@ export const VegaEditorFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={bodyCss}>
-        <VegaSpecEditor editorValue={spec} onChange={setSpec} />
+        <VegaSpecEditor
+          editorValue={spec}
+          initialFormat={initialSpec.format}
+          onChange={setSpec}
+          onFormatChange={setFormat}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>

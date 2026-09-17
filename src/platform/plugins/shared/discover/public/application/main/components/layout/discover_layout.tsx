@@ -70,6 +70,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { DiscoverDocumentFlyout } from '../document_flyout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 import { useIsChromeNextProjectHeader } from '../chrome_app_header';
@@ -301,6 +302,8 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
+  const isSidebarHidden = resultState === 'uninitialized';
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -401,19 +404,20 @@ export function DiscoverLayout() {
         onCancelClick={onCancelClick}
       />
       <EuiPageBody css={styles.pageBody}>
+        <SavedSearchURLConflictCallout
+          discoverSession={discoverSession}
+          spaces={spaces}
+          history={history}
+        />
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
             </EuiDelayRender>
           )}
-          <SavedSearchURLConflictCallout
-            discoverSession={discoverSession}
-            spaces={spaces}
-            history={history}
-          />
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
+            isSidebarHidden={isSidebarHidden}
             sidebarPanel={
               <SidebarMemoized
                 columns={sidebarColumns}
@@ -482,6 +486,13 @@ export function DiscoverLayout() {
           />
         </div>
       </EuiPageBody>
+      <DiscoverDocumentFlyout
+        dataView={dataView}
+        columns={currentColumns}
+        onAddColumn={onAddColumnWithTracking}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddFilter={onAddFilter}
+      />
     </EuiPage>
   );
 }

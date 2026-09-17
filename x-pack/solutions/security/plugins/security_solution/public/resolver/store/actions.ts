@@ -83,6 +83,10 @@ export const appReceivedNewExternalProperties = actionCreator<{
    */
   readonly databaseDocumentID: string;
   /**
+   * The `@timestamp` (in milliseconds since epoch) of the analyzed document itself.
+   */
+  readonly databaseDocumentTimestamp?: number;
+  /**
    * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
    */
   readonly resolverComponentInstanceID: string;

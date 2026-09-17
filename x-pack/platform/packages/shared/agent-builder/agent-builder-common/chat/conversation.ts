@@ -402,6 +402,48 @@ export enum ConversationDisplayStatus {
 }
 
 /**
+ * Stable identifier for a feedback chip. These values are stored in Elasticsearch;
+ * the display label is resolved at render time via i18n so feedback data is
+ * locale-independent and safe to use in cross-locale analytics.
+ */
+export type FeedbackChipId =
+  | 'inaccurate'
+  | 'incomplete'
+  | 'didnt_follow_instructions'
+  | 'accurate'
+  | 'useful'
+  | 'well_explained';
+
+/**
+ * User feedback submitted for a conversation round.
+ *
+ * Note: each new submission overwrites the previous one.
+ */
+export interface ConversationRoundFeedback {
+  /** Thumbs up or thumbs down */
+  vote: 'up' | 'down';
+  /**
+   * Stable chip IDs selected by the user. Stored as IDs (not display labels)
+   * so they are locale-independent and safe to use in cross-locale analytics.
+   */
+  chips?: FeedbackChipId[];
+  /** Optional free-text comment */
+  comment?: string;
+  /** ISO timestamp when the feedback was (most recently) submitted */
+  submitted_at: string;
+  /**
+   * Connector ID from the round's model_usage at submission time.
+   * Present whenever model_usage is available on the round.
+   */
+  connector_id?: string;
+  /**
+   * Model identifier. Only populated when the LLM provider returns the model
+   * in its response — many connectors omit it.
+   */
+  model?: string;
+}
+
+/**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
@@ -436,6 +478,8 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+  /** User feedback for this round, if submitted. */
+  feedback?: ConversationRoundFeedback;
 }
 
 export interface ConversationOrigin {
@@ -451,6 +495,20 @@ export interface ConversationRoundAuthor {
   /** Optional display name. */
   full_name?: string;
 }
+
+export const getConversationRoundAuthorDisplayName = (
+  author?: ConversationRoundAuthor
+): string | undefined => {
+  if (!author) {
+    return undefined;
+  }
+
+  if (author.full_name) {
+    return author.full_name;
+  }
+
+  return author.username;
+};
 
 /** External system the message comes from, for example Slack or GitHub. */
 export enum ConversationOriginType {
@@ -519,6 +577,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
 
+/** Maximum accepted length for a conversation metadata key */
+export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
+
 /**
  * Main structure representing a conversation with an agent.
  */
@@ -581,6 +642,8 @@ export interface Conversation {
   read_only?: boolean;
   /** Coarse event timeline for this conversation, derived from `rounds` on read.*/
   events?: TimelineEvent[];
+  /** Schema version of the stored events. */
+  schema_version?: number;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -612,9 +675,16 @@ export interface ConversationInternalState {
   /** Active todo list for the current conversation. Replaced wholesale on each write. */
   todos?: TodoItem[];
   /**
-   * Map of persistent sub-agent name → child conversation id.
+   * Map of persistent sub-agent name → sub agent entry describing the sub agent/run.
    */
-  subagents?: Record<string, string>;
+  subagents?: Record<string, SubagentEntry>;
+}
+
+export interface SubagentEntry {
+  /** ID of the child conversation. */
+  conversation_id: string;
+  /** Agent id backing this persistent sub-agent — either a real agent id or `SELF_AGENT_ID`. */
+  agent_id: string;
 }
 
 export interface BackgroundExecutionCompletedAt {
@@ -637,8 +707,41 @@ export interface BackgroundExecutionState {
   completed_at?: BackgroundExecutionCompletedAt;
 }
 
-export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+/**
+ * Identity of one attachment, without any of its version content.
+ */
+export type ConversationAttachmentSummary = Pick<VersionedAttachment, 'id' | 'type'>;
 
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds' | 'attachments'> & {
+  /**
+   * The conversation's active attachments, narrowed to their id and type: rows returned without
+   * rounds exclude attachment content from the query's `_source`
+   */
+  attachments?: ConversationAttachmentSummary[];
+};
+
+export interface ConversationPermissions {
+  rename: boolean;
+  delete: boolean;
+  update_access_control: boolean;
+}
+
+export type ConversationWithPermissions = Conversation & {
+  permissions: ConversationPermissions;
+};
+
+export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
+  permissions: ConversationPermissions;
+};
+
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
+}
+
+/**
+ * @deprecated The regenerate capability has been removed.
+ */
 export type ConversationAction = 'regenerate';
 
 // Compaction summary types

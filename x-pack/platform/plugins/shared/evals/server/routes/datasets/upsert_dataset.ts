@@ -21,10 +21,12 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
-import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
+import { DatasetAlreadyExistsError } from '../../storage/datasets/dataset_already_exists_error';
 import { resolveTargetSpaces, withoutSpaceIds } from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
+
+const DATASET_UPSERT_PAYLOAD_CAP_BYTES = 5 * 1024 * 1024;
 
 export const registerUpsertDatasetRoute = ({
   router,
@@ -39,6 +41,11 @@ export const registerUpsertDatasetRoute = ({
     .post({
       path: EVALS_DATASET_UPSERT_URL,
       access: INTERNAL_API_ACCESS,
+      options: {
+        body: {
+          maxBytes: DATASET_UPSERT_PAYLOAD_CAP_BYTES,
+        },
+      },
       security: {
         authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },

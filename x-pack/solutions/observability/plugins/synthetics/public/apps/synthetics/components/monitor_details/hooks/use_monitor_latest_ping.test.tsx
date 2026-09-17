@@ -40,6 +40,11 @@ jest.mock('../../../hooks', () => ({
   useGetUrlParams: () => mockUrlParams(),
 }));
 
+const mockUseParams = jest.fn();
+jest.mock('react-router-dom', () => ({
+  useParams: () => mockUseParams(),
+}));
+
 const mockUseSelectedMonitor = jest.fn();
 jest.mock('./use_selected_monitor', () => ({
   useSelectedMonitor: () => mockUseSelectedMonitor(),
@@ -90,6 +95,7 @@ const remoteMonitor = {
 describe('useMonitorLatestPing', () => {
   beforeEach(() => {
     mockUrlParams.mockReturnValue({});
+    mockUseParams.mockReturnValue({ monitorId: 'url-config-id' });
     mockUseSelectedLocation.mockReturnValue({ label: 'US East' });
     mockLatestPingState.mockReturnValue({ data: undefined, loading: false, loaded: false });
     useFetcherMock.mockReturnValue({
@@ -240,24 +246,33 @@ describe('useMonitorLatestPing', () => {
       expect(result.current.loaded).toBe(true);
     });
 
-    it('keeps loaded=false while useSelectedMonitor has not yet resolved the remote monitor', () => {
-      mockUseSelectedMonitor.mockReturnValue({ monitor: undefined });
-
-      const { result } = renderHook(() => useMonitorLatestPing());
-
-      expect(result.current.loading).toBe(true);
-      expect(result.current.loaded).toBe(false);
-      expect(result.current.latestPing).toBeUndefined();
-    });
-
-    it('does not call the route when the monitor has not yet been resolved', () => {
+    it('queries the route with the URL monitorId before the synthesized monitor resolves', () => {
       mockUseSelectedMonitor.mockReturnValue({ monitor: undefined });
 
       renderHook(() => useMonitorLatestPing());
 
       const fetchCallback = useFetcherMock.mock.calls[0][0];
       fetchCallback();
-      expect(fetchLatestTestRunMock).not.toHaveBeenCalled();
+      expect(fetchLatestTestRunMock).toHaveBeenCalledWith({
+        monitorId: 'url-config-id',
+        locationLabel: 'US East',
+        remoteName: 'remote-a',
+      });
+    });
+
+    it('marks the remote probe loaded once the route settles even if the monitor is still unresolved', () => {
+      mockUseSelectedMonitor.mockReturnValue({ monitor: undefined });
+      useFetcherMock.mockReturnValue({
+        data: { ping: undefined },
+        status: FETCH_STATUS.SUCCESS,
+        loading: false,
+      });
+
+      const { result } = renderHook(() => useMonitorLatestPing());
+
+      expect(result.current.loaded).toBe(true);
+      expect(result.current.loading).toBe(false);
+      expect(result.current.latestPing).toBeUndefined();
     });
 
     it('propagates loading=true from the fetcher', () => {
