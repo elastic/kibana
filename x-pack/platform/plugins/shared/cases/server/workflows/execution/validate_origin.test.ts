@@ -10,8 +10,9 @@ import type { Case } from '../../../common/types/domain';
 import { getAlertInfoFromComments } from '../../common/utils';
 import {
   getTriggerSelectionType,
-  parseProcessedSelectionPairs,
   parseSelectedAlertPairs,
+  parseSelectedTriggerPairs,
+  rejectQuerySelection,
   validateSelectionMembership,
   validateOrigin as validateOriginWithAttachments,
 } from './validate_origin';
@@ -366,28 +367,12 @@ describe('parseSelectedAlertPairs', () => {
     expect(parseSelectedAlertPairs({ event: { alertIds: undefined } })).toEqual([]);
   });
 
-  it('leaves query and document selections for post-preprocessing validation', () => {
-    expect(
-      parseSelectedAlertPairs({
-        event: {
-          triggerType: 'alert',
-          querySelection: { index: '.alerts-*', query: { match_all: {} } },
-        },
-      })
-    ).toEqual([]);
+  it('ignores document selections', () => {
     expect(
       parseSelectedAlertPairs({
         event: {
           triggerType: 'document',
           documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
-        },
-      })
-    ).toEqual([]);
-    expect(
-      parseSelectedAlertPairs({
-        event: {
-          triggerType: 'document',
-          querySelection: { index: 'logs-*', query: { match_all: {} } },
         },
       })
     ).toEqual([]);
@@ -462,22 +447,49 @@ describe('parseSelectedAlertPairs', () => {
   });
 });
 
-describe('processed trigger selection membership', () => {
+describe('trigger selection membership', () => {
   it('detects alert and document trigger selections', () => {
     expect(getTriggerSelectionType({ event: { triggerType: 'alert' } })).toBe('alert');
     expect(getTriggerSelectionType({ event: { triggerType: 'document' } })).toBe('document');
     expect(getTriggerSelectionType({ event: { triggerType: 'manual' } })).toBeUndefined();
   });
 
-  it('parses the concrete alert and document pairs produced by preprocessing', () => {
+  it('rejects query-based selections', () => {
+    expect(() =>
+      rejectQuerySelection({
+        event: { querySelection: { index: '.alerts-*', query: { match_all: {} } } },
+      })
+    ).toThrow('Query-based trigger selections are not supported for case workflows.');
+  });
+
+  it('parses explicit alert and document IDs', () => {
     expect(
-      parseProcessedSelectionPairs(
+      parseSelectedTriggerPairs(
+        { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
+        'alert'
+      )
+    ).toEqual([{ id: 'alert-1', index: '.alerts' }]);
+    expect(
+      parseSelectedTriggerPairs(
+        {
+          event: {
+            documentIds: [{ _id: 'event-1', _index: 'logs-default' }],
+          },
+        },
+        'document'
+      )
+    ).toEqual([{ id: 'event-1', index: 'logs-default' }]);
+  });
+
+  it('parses pre-expanded alert and document selections', () => {
+    expect(
+      parseSelectedTriggerPairs(
         { event: { alerts: [{ _id: 'alert-1', _index: '.alerts' }] } },
         'alert'
       )
     ).toEqual([{ id: 'alert-1', index: '.alerts' }]);
     expect(
-      parseProcessedSelectionPairs(
+      parseSelectedTriggerPairs(
         {
           event: {
             documents: [{ id: 'event-1', index: 'logs-default', data: {} }],
@@ -487,7 +499,7 @@ describe('processed trigger selection membership', () => {
       )
     ).toEqual([{ id: 'event-1', index: 'logs-default' }]);
     expect(
-      parseProcessedSelectionPairs(
+      parseSelectedTriggerPairs(
         {
           event: {
             documents: [{ _id: 'legacy-event-1', _index: 'logs-default' }],
@@ -498,7 +510,13 @@ describe('processed trigger selection membership', () => {
     ).toEqual([{ id: 'legacy-event-1', index: 'logs-default' }]);
   });
 
-  it('rejects a processed selection containing a document outside the case', () => {
+  it('rejects an empty trigger selection', () => {
+    expect(() => parseSelectedTriggerPairs({ event: { documentIds: [] } }, 'document')).toThrow(
+      'Case workflow document selection cannot be empty.'
+    );
+  });
+
+  it('rejects a selection containing a document outside the case', () => {
     expect(() =>
       validateSelectionMembership({
         selectionType: 'document',
@@ -514,7 +532,7 @@ describe('processed trigger selection membership', () => {
     ).toThrow('All selected documents must belong to the case.');
   });
 
-  it('accepts a processed selection when every pair is attached', () => {
+  it('accepts a selection when every pair is attached', () => {
     expect(() =>
       validateSelectionMembership({
         selectionType: 'alert',

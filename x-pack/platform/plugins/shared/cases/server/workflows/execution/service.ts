@@ -17,20 +17,16 @@ import {
   CASES_WORKFLOW_EXECUTION_SOURCE,
 } from '../../../common/constants';
 import { CasesWorkflowExecutionMetadataSchema } from '../../../common/types/api/workflow/v1';
-import type {
-  DocumentResponse,
-  RunCaseWorkflowRequest,
-  RunCaseWorkflowResponse,
-} from '../../../common/types/api';
+import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../common/types/api';
 import { AttachmentType } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
 import type { CasesRequestHandlerContext } from '../../types';
 import {
   getTriggerSelectionType,
-  parseProcessedSelectionPairs,
   parseSelectedAlertPairs,
+  parseSelectedTriggerPairs,
+  rejectQuerySelection,
   validateOrigin,
-  validateOriginContext,
   validateSelectionMembership,
 } from './validate_origin';
 import type { EnsureAuthorizedToRunWorkflowParams } from './authorize_workflow_run';
@@ -130,13 +126,15 @@ export class CasesWorkflowRunService {
     const { ensureAuthorizedToRunWorkflow } = await this.getWorkflowRunAuthorizer(request);
     await ensureAuthorizedToRunWorkflow({ ids: caseIds });
 
-    // Parse explicit alert IDs eagerly so malformed input fails before any case or ES fetch.
-    // Query and document selections are normalized by Workflows, then checked against the case
-    // attachments by validateProcessedInputs before execution is scheduled.
+    // Cases only accepts concrete trigger selections so membership can be validated before any
+    // document is fetched or workflow execution is scheduled.
+    rejectQuerySelection(body.inputs);
     const selectedAlerts = parseSelectedAlertPairs(body.inputs);
     const triggerSelectionType = getTriggerSelectionType(body.inputs);
-    let attachedSelectionDocuments: DocumentResponse = [];
-    let validateProcessedInputs: ((processedInputs: Record<string, unknown>) => void) | undefined;
+    const selectedTargets =
+      triggerSelectionType !== undefined
+        ? parseSelectedTriggerPairs(body.inputs, triggerSelectionType)
+        : [];
 
     if (origin === undefined) {
       if (selectedAlerts.length > 0 || triggerSelectionType !== undefined) {
@@ -149,7 +147,6 @@ export class CasesWorkflowRunService {
         );
       }
       const theCase = await casesClient.cases.get({ id: caseIds[0] });
-      validateOriginContext({ origin, caseId: caseIds[0], theCase });
 
       const attachedAlerts =
         selectedAlerts.length > 0 || triggerSelectionType === 'alert'
@@ -159,47 +156,31 @@ export class CasesWorkflowRunService {
             })
           : [];
 
-      if (triggerSelectionType === 'alert') {
-        attachedSelectionDocuments = attachedAlerts;
-      } else if (triggerSelectionType === 'document') {
-        attachedSelectionDocuments = await casesClient.attachments.getAllDocumentsAttachedToCase({
-          caseId: caseIds[0],
-          attachmentTypes: [AttachmentType.event],
-        });
-      }
+      const attachedEvents =
+        triggerSelectionType === 'document'
+          ? await casesClient.attachments.getAllDocumentsAttachedToCase({
+              caseId: caseIds[0],
+              attachmentTypes: [AttachmentType.event],
+            })
+          : [];
 
-      if (selectedAlerts.length > 0 || triggerSelectionType === undefined) {
-        validateOrigin({
-          origin,
-          caseId: caseIds[0],
-          selectedAlerts,
-          theCase,
-          attachedAlerts,
-        });
-      }
+      validateOrigin({
+        origin,
+        caseId: caseIds[0],
+        selectedAlerts:
+          triggerSelectionType === 'alert'
+            ? selectedTargets.map(({ id, index }) => ({ _id: id, _index: index }))
+            : selectedAlerts,
+        theCase,
+        attachedAlerts,
+      });
 
-      if (triggerSelectionType !== undefined) {
-        validateProcessedInputs = (processedInputs) => {
-          const selectedTargets = parseProcessedSelectionPairs(
-            processedInputs,
-            triggerSelectionType
-          );
-          validateSelectionMembership({
-            selectionType: triggerSelectionType,
-            selectedTargets,
-            attachedDocuments: attachedSelectionDocuments,
-          });
-          validateOrigin({
-            origin,
-            caseId: caseIds[0],
-            selectedAlerts:
-              triggerSelectionType === 'alert'
-                ? selectedTargets.map(({ id, index }) => ({ _id: id, _index: index }))
-                : [],
-            theCase,
-            attachedAlerts: triggerSelectionType === 'alert' ? attachedSelectionDocuments : [],
-          });
-        };
+      if (triggerSelectionType === 'document') {
+        validateSelectionMembership({
+          selectionType: 'document',
+          selectedTargets,
+          attachedDocuments: attachedEvents,
+        });
       }
     }
 
@@ -245,7 +226,6 @@ export class CasesWorkflowRunService {
       request,
       preprocessingContext: context,
       metadata,
-      ...(validateProcessedInputs !== undefined ? { validateProcessedInputs } : {}),
       eventOverrides: { caseIds },
     });
 

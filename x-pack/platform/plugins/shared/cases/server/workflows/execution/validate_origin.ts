@@ -83,27 +83,56 @@ export const getTriggerSelectionType = (
   return triggerType === 'alert' || triggerType === 'document' ? triggerType : undefined;
 };
 
+export const rejectQuerySelection = (inputs: Record<string, unknown>): void => {
+  const { querySelection } = getRecord(inputs.event) ?? {};
+  if (querySelection !== undefined) {
+    throw Boom.badRequest('Query-based trigger selections are not supported for case workflows.');
+  }
+};
+
 /**
- * Reads the concrete pairs produced by trigger preprocessing. Document events accept both the
- * normalized `id`/`index` shape and the legacy `_id`/`_index` shape used by attachment surfaces.
+ * Reads the concrete alert or document pairs supplied to a case workflow.
  */
-export const parseProcessedSelectionPairs = (
+export const parseSelectedTriggerPairs = (
   inputs: Record<string, unknown>,
   selectionType: TriggerSelectionType
 ): WorkflowSelectionTarget[] => {
   const event = getRecord(inputs.event);
-  const selection = event?.[selectionType === 'alert' ? 'alerts' : 'documents'];
+  if (selectionType === 'alert') {
+    const alertIds = parseSelectedAlertPairs(inputs);
+    if (alertIds.length > 0) {
+      return alertIds.map(({ _id, _index }) => ({ id: _id, index: _index }));
+    }
+  }
+
+  const preExpandedSelection = event?.[selectionType === 'alert' ? 'alerts' : 'documents'];
+  const explicitDocumentIds = selectionType === 'document' ? event?.documentIds : undefined;
+  const selection =
+    Array.isArray(preExpandedSelection) && preExpandedSelection.length > 0
+      ? preExpandedSelection
+      : explicitDocumentIds ?? preExpandedSelection;
 
   if (!Array.isArray(selection)) {
-    throw Boom.badRequest(`Processed ${selectionType} selection must be an array.`);
+    throw Boom.badRequest(`Case workflow ${selectionType} selection must be an array.`);
+  }
+  if (selection.length === 0) {
+    throw Boom.badRequest(`Case workflow ${selectionType} selection cannot be empty.`);
   }
 
   return selection.map((entry) => {
     const record = getRecord(entry);
-    const id = selectionType === 'alert' ? record?._id : record?.id ?? record?._id;
-    const index = selectionType === 'alert' ? record?._index : record?.index ?? record?._index;
+    const usesExplicitDocumentIds = selection === explicitDocumentIds;
+    const id =
+      selectionType === 'alert' || usesExplicitDocumentIds
+        ? record?._id
+        : record?.id ?? record?._id;
+    const index =
+      selectionType === 'alert' || usesExplicitDocumentIds
+        ? record?._index
+        : record?.index ?? record?._index;
     const hasConflictingDocumentIdentity =
       selectionType === 'document' &&
+      !usesExplicitDocumentIds &&
       ((record?.id !== undefined && record?._id !== undefined && record.id !== record._id) ||
         (record?.index !== undefined &&
           record?._index !== undefined &&
@@ -111,7 +140,7 @@ export const parseProcessedSelectionPairs = (
 
     if (typeof id !== 'string' || typeof index !== 'string' || hasConflictingDocumentIdentity) {
       throw Boom.badRequest(
-        `Every processed ${selectionType} must contain string id and index properties.`
+        `Every selected ${selectionType} must contain string id and index properties.`
       );
     }
 
@@ -167,9 +196,8 @@ export const validateSelectionMembership = ({
  * cannot bypass it by using a `cases.case` or `cases.observable` origin type while
  * still injecting arbitrary alert documents into the workflow via `inputs.event.alertIds`.
  *
- * `selectedAlerts` must come from `parseSelectedAlertPairs` — it is the only reader of
- * `inputs.event.alertIds`, which keeps the validated set identical to the set that alert
- * preprocessing later fetches.
+ * `selectedAlerts` must come from the selection parsers above so malformed identities cannot be
+ * skipped during membership validation.
  */
 export const validateOrigin = ({
   origin,
@@ -186,10 +214,8 @@ export const validateOrigin = ({
 }): void => {
   validateOriginContext({ origin, caseId, theCase });
 
-  // Step 2 — alert-membership check: applied whenever alertIds appear in inputs,
-  // regardless of origin type, using (id, index) pairs for precise matching.
-  // `selectedAlerts` comes from `parseSelectedAlertPairs` — the same parsed set that alert
-  // preprocessing will later fetch, so the validated set and the fetched set are identical.
+  // Step 2 — alert-membership check: applied whenever alerts appear in inputs, regardless of
+  // origin type, using (id, index) pairs for precise matching.
   if (selectedAlerts.length > 0) {
     validateSelectionMembership({
       selectionType: 'alert',
