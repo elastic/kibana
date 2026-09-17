@@ -83,7 +83,7 @@ describe('investigation proposals routes', () => {
     }
   });
 
-  it('should write over HTTP only through the two decision routes', () => {
+  it('should never expose a create route, even indirectly, over HTTP', () => {
     const router = httpServiceMock.createRouter();
     (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
     (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
@@ -197,6 +197,65 @@ describe('investigation proposals routes', () => {
     );
 
     expect(response.forbidden).toHaveBeenCalled();
+  });
+
+  it('should gate revisions on the manage privilege, since revising writes without a gate', () => {
+    const { posts, byPath } = registerAndCollect({});
+
+    expect(byPath(posts, '/revisions').config.security?.authz?.requiredPrivileges).toEqual([
+      PROPOSALS_API_PRIVILEGE_MANAGE,
+    ]);
+  });
+
+  it('should pass the params id and body overrides straight through to revise()', async () => {
+    const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
+    const { posts, byPath } = registerAndCollect({ revise });
+    const response = httpServerMock.createResponseFactory();
+
+    await byPath(posts, '/revisions').handler(
+      {},
+      httpServerMock.createKibanaRequest({
+        params: { proposalId: 'proposal-1' },
+        body: { comment: 'Tightened the match', confidence: 'high' },
+      }),
+      response
+    );
+
+    expect(revise).toHaveBeenCalledWith(
+      { id: 'proposal-1', comment: 'Tightened the match', confidence: 'high' },
+      'default'
+    );
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { proposalId: 'proposal-2', revision: 2, status: 'pending' },
+    });
+  });
+
+  it('should map a conflicting revision (already superseded or decided) to 409', async () => {
+    const revise = jest.fn().mockRejectedValue(new ProposalConflictError('already superseded'));
+    const { posts, byPath } = registerAndCollect({ revise });
+    const response = httpServerMock.createResponseFactory();
+
+    await byPath(posts, '/revisions').handler(
+      {},
+      httpServerMock.createKibanaRequest({ params: { proposalId: 'proposal-1' }, body: {} }),
+      response
+    );
+
+    expect(response.conflict).toHaveBeenCalled();
+  });
+
+  it('should map revising a missing proposal to 404', async () => {
+    const revise = jest.fn().mockRejectedValue(new ProposalNotFoundError('proposal-1'));
+    const { posts, byPath } = registerAndCollect({ revise });
+    const response = httpServerMock.createResponseFactory();
+
+    await byPath(posts, '/revisions').handler(
+      {},
+      httpServerMock.createKibanaRequest({ params: { proposalId: 'proposal-1' }, body: {} }),
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalled();
   });
 
   it('should map a missing proposal to 404', async () => {

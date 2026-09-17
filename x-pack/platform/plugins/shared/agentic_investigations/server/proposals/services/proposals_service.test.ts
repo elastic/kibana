@@ -1149,6 +1149,234 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('revise', () => {
+    it('creates a new pending revision and marks the original superseded', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const result = await service.revise(
+        { id: 'proposal-1', comment: 'Tightened the match' },
+        SPACE_ID
+      );
+
+      expect(result).toEqual({ proposalId: expect.any(String), revision: 2 });
+      expect(result.proposalId).not.toBe('proposal-1');
+
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: result.proposalId,
+          op_type: 'create',
+          document: expect.objectContaining({
+            rootProposalId: 'proposal-1',
+            supersedes: 'proposal-1',
+            revision: 2,
+            status: 'pending',
+            comment: 'Tightened the match',
+            supersededBy: undefined,
+            decision: undefined,
+          }),
+        })
+      );
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'proposal-1',
+          document: expect.objectContaining({
+            status: 'superseded',
+            supersededBy: result.proposalId,
+          }),
+        })
+      );
+    });
+
+    it('creates the new revision before marking the original, mirroring clone()', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+
+      const newRevisionCallOrder = storage.index.mock.invocationCallOrder[0];
+      const supersedeCallOrder = storage.index.mock.invocationCallOrder[1];
+      expect(newRevisionCallOrder).toBeLessThan(supersedeCallOrder);
+    });
+
+    it('inherits createdAt and expiresAt from the original unchanged (provisional per issue #19289)', async () => {
+      const storage = createStorage(
+        baseDocument({
+          createdAt: '2026-09-01T00:00:00.000Z',
+          expiresAt: '2026-09-08T00:00:00.000Z',
+        })
+      );
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            createdAt: '2026-09-01T00:00:00.000Z',
+            expiresAt: '2026-09-08T00:00:00.000Z',
+          }),
+        })
+      );
+    });
+
+    it('carries rootProposalId forward unchanged across a multi-hop chain', async () => {
+      // Revision 3 of a chain whose root is proposal-1 — revising it must not
+      // start a new root, only extend the existing chain.
+      const storage = createStorage(
+        baseDocument({ rootProposalId: 'proposal-1', supersedes: 'proposal-2', revision: 3 })
+      );
+      const { service } = createService(storage);
+
+      const result = await service.revise({ id: 'proposal-3' }, SPACE_ID);
+
+      expect(result.revision).toBe(4);
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            rootProposalId: 'proposal-1',
+            supersedes: 'proposal-3',
+            revision: 4,
+          }),
+        })
+      );
+    });
+
+    it('treats an undefined revision on the original as revision 1 (pre-existing records)', async () => {
+      const storage = createStorage(
+        baseDocument({ revision: undefined, rootProposalId: undefined })
+      );
+      const { service } = createService(storage);
+
+      const result = await service.revise({ id: 'proposal-1' }, SPACE_ID);
+
+      expect(result.revision).toBe(2);
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ rootProposalId: 'proposal-1', revision: 2 }),
+        })
+      );
+    });
+
+    it('rejects revising a proposal that is already superseded', async () => {
+      const storage = createStorage(
+        baseDocument({ status: 'superseded', supersededBy: 'proposal-2' })
+      );
+      const { service } = createService(storage);
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects revising a proposal that already has a decision', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
+      const { service } = createService(storage);
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects revising a proposal that is not pending (e.g. executing)', async () => {
+      const storage = createStorage(baseDocument({ status: 'executing' }));
+      const { service } = createService(storage);
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('does not resume or release the waitForApproval gate', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
+
+      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getLatestRevision', () => {
+    it('returns the proposal itself when it is the live revision', async () => {
+      const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));
+      const { service } = createService(storage);
+
+      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
+
+      expect(result).toEqual({
+        proposalId: 'proposal-1',
+        revision: 1,
+        status: 'pending',
+        decision: undefined,
+      });
+    });
+
+    it('resolves to the current live revision when asked about an older, superseded one', async () => {
+      // The document keyed by the id in storage.search's hit determines the
+      // "live" answer, independent of which id in the chain was asked about —
+      // this is what makes the query O(1) instead of a supersededBy walk.
+      const liveDocument = baseDocument({
+        rootProposalId: 'proposal-1',
+        supersedes: 'proposal-1',
+        revision: 2,
+        status: 'pending',
+      });
+      const storage = createStorage(
+        baseDocument({ rootProposalId: 'proposal-1', supersededBy: 'proposal-2' })
+      );
+      storage.search.mockResolvedValue({
+        hits: { hits: [searchHit(liveDocument, 'proposal-2')], total: { value: 1 } },
+      });
+      const { service } = createService(storage);
+
+      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
+
+      expect(result).toEqual({
+        proposalId: 'proposal-2',
+        revision: 2,
+        status: 'pending',
+        decision: undefined,
+      });
+      expect(storage.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ term: { rootProposalId: 'proposal-1' } }]),
+              must_not: [{ exists: { field: 'supersededBy' } }],
+            }),
+          }),
+        })
+      );
+    });
+
+    it('falls back to the asked-about proposal if the chain query finds no live revision', async () => {
+      const document = baseDocument({ rootProposalId: 'proposal-1', revision: 1 });
+      const storage = createStorage(document);
+      // First call is the internal load(); second is the chain query — only
+      // the chain query should come back empty, otherwise this is testing a
+      // different failure (load() itself finding nothing).
+      storage.search
+        .mockResolvedValueOnce({
+          hits: { hits: [searchHit(document, 'proposal-1')], total: { value: 1 } },
+        })
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
+      const { service } = createService(storage);
+
+      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
+
+      expect(result).toEqual({
+        proposalId: 'proposal-1',
+        revision: 1,
+        status: 'pending',
+        decision: undefined,
+      });
+    });
+  });
+
   describe('resolveActionMetadata', () => {
     it('should ignore metadata that does not match the schema', async () => {
       const storage = createStorage();

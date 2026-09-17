@@ -11,7 +11,10 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ALERTZERO_PROPOSALS_REVISE_TOOL_ID } from '@kbn/alertzero-common';
-import { proposalConfidenceSchema, proposalImpactSchema } from '@kbn/agentic-investigations-plugin/common';
+import {
+  proposalConfidenceSchema,
+  proposalImpactSchema,
+} from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 
 const reviseProposalSchema = z.object({
@@ -26,7 +29,9 @@ const reviseProposalSchema = z.object({
     .string()
     .max(8192)
     .optional()
-    .describe("Override for the proposal's analyst-facing comment, rendered as markdown. Omit to keep the original."),
+    .describe(
+      "Override for the proposal's analyst-facing comment, rendered as markdown. Omit to keep the original."
+    ),
   actionInput: z
     .record(z.string(), z.unknown())
     .optional()
@@ -57,7 +62,7 @@ export const reviseProposalTool = (
   id: ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    "Replace a pending investigation proposal with a modified copy — appends a new revision to its chain and marks the original 'superseded'. Use when an analyst asks for a change to a proposal that has not been decided yet (e.g. \"change the impact to high\" or \"add this context to the comment\"). Returns the new proposal's id and its 1-based revision number. Does NOT release the original's approval gate — a fresh decision is required on the new revision.",
+    'Replace a pending investigation proposal with a modified copy — appends a new revision to its chain and marks the original \'superseded\'. Use when an analyst asks for a change to a proposal that has not been decided yet (e.g. "change the impact to high" or "add this context to the comment"). Returns the new proposal\'s id and its 1-based revision number. Does NOT release the original\'s approval gate — a fresh decision is required on the new revision.',
   annotations: {
     title: 'Revise AlertZero Proposal',
     readOnlyHint: false,
