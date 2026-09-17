@@ -94,7 +94,9 @@ export interface FeedbackAnalysisScheduleService {
  * request-scoped space would let an enable in one space and a disable in another address different
  * instances, leaving a run nobody can stop.
  */
-const SCHEDULE_SPACE_ID = DEFAULT_SPACE_ID;
+// Importing DEFAULT_SPACE_ID from @kbn/spaces-plugin would close a project reference cycle through
+// Agent Builder; hardcode the well-known value instead.
+const SCHEDULE_SPACE_ID = 'default';
 
 /**
  * What the execution engine marks a run it refused to start. Compared as a string rather than
@@ -238,7 +240,7 @@ export const createFeedbackAnalysisScheduleService = ({
         CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
         {
           spaceId: SCHEDULE_SPACE_ID,
-          workflowIdSuffix: aiIndexId,
+          workflowIdSuffix: workflowIdSuffixFor(aiIndexId, SCHEDULE_SPACE_ID),
           triggeredBy: 'manual',
         }
       );

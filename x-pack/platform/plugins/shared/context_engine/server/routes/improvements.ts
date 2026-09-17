@@ -128,7 +128,7 @@ export interface ImprovementRouteDeps {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
   /** Request-scoped: the improvements store is a user-owned index, authorized per call by ES. */
-  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getImprovementsService: (esClient: ElasticsearchClient, spaceId: string) => ImprovementsServiceApi;
   /** Absent until `contextEngineAgentBuilder` registers it, which rules out the workflow actions. */
   getWorkflowProvider: () => WorkflowProvider | undefined;
   getScheduleService: () => FeedbackAnalysisScheduleService;
@@ -185,9 +185,10 @@ export const registerImprovementRoutes = ({
       },
       gate(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         const { status, from, size } = request.query;
 
-        const body: ListImprovementsResponse = await getImprovementsService(esClient).list({
+        const body: ListImprovementsResponse = await getImprovementsService(esClient, spaceId).list({
           aiIndexId: request.params.aiIndexId,
           status: (status ?? OPEN_IMPROVEMENT_STATUSES) as ImprovementStatus[],
           from,
@@ -227,7 +228,8 @@ export const registerImprovementRoutes = ({
             })
           );
 
-        const improvements = getImprovementsService(esClient);
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const improvements = getImprovementsService(esClient, spaceId);
         const improvement = await improvements.get(improvementId);
 
         if (!improvement || improvement.ai_index_id !== aiIndexId) {
@@ -253,7 +255,7 @@ export const registerImprovementRoutes = ({
             aiIndexService: getAiIndexService(),
             workflows: getWorkflowProvider(),
             actions: await getActions(),
-            spaceId: resolveSpaceId(await getSpaces(), request),
+            spaceId,
             request,
             logger,
           });
@@ -315,7 +317,8 @@ export const registerImprovementRoutes = ({
         const auditLogger = core.security.audit.logger;
         const { aiIndexId, improvementId } = request.params;
 
-        const improvements = getImprovementsService(esClient);
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const improvements = getImprovementsService(esClient, spaceId);
         const improvement = await improvements.get(improvementId);
 
         if (!improvement || improvement.ai_index_id !== aiIndexId) {
