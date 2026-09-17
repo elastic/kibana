@@ -208,12 +208,12 @@ export const CreateAiIndexPage = () => {
 
         <EuiSpacer size="l" />
 
-        <EuiPanel hasBorder paddingSize="l">
+        <EuiPanel hasBorder paddingSize="l" data-test-subj="contextCreateAiIndexTracesPanel">
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.traces.title"
-                defaultMessage="Agent Traces"
+                id="xpack.contextEngine.createAiIndex.traces.title"
+                defaultMessage="Agent traces"
               />
             </h2>
           </EuiTitle>
@@ -221,7 +221,7 @@ export const CreateAiIndexPage = () => {
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.traces.description"
+                id="xpack.contextEngine.createAiIndex.traces.description"
                 defaultMessage="Traces this AI index learns from. Knowledge Indicators are tuned against the questions agents actually ask."
               />
             </p>

@@ -37,6 +37,12 @@ export const ElasticAgentField = ({ value, onChange }: ElasticAgentFieldProps) =
     onChange(next ? { type: 'elastic_agent', value: next } : undefined);
   };
 
+  const errorMessage = error
+    ? i18n.translate('xpack.contextEngine.traceSelector.agentField.loadError', {
+        defaultMessage: 'Unable to load Agent Builder agents.',
+      })
+    : undefined;
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.contextEngine.traceSelector.agentField.label', {
@@ -46,12 +52,12 @@ export const ElasticAgentField = ({ value, onChange }: ElasticAgentFieldProps) =
         defaultMessage:
           'Agents registered in Agent Builder. Traces are matched on gen_ai.agent.id.',
       })}
-      error={error?.message}
-      isInvalid={error !== undefined}
+      error={errorMessage}
+      isInvalid={Boolean(errorMessage)}
       fullWidth
     >
       <EuiComboBox
-        isInvalid={error !== undefined}
+        isInvalid={Boolean(errorMessage)}
         singleSelection={{ asPlainText: true }}
         fullWidth
         isLoading={isLoading}

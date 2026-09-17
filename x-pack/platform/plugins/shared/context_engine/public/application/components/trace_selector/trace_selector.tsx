@@ -26,7 +26,9 @@ export const TraceSelector = ({ value, onChange }: TraceSelectorProps) => {
   const [mode, setMode] = useState<TraceMode>(() => getTraceMode(value));
 
   useEffect(() => {
-    setMode(getTraceMode(value));
+    if (value !== undefined) {
+      setMode(getTraceMode(value));
+    }
   }, [value]);
 
   const handleModeChange = (id: string) => {
@@ -50,17 +52,17 @@ export const TraceSelector = ({ value, onChange }: TraceSelectorProps) => {
           {
             id: 'elastic_agent',
             label: i18n.translate('xpack.contextEngine.traceSelector.elasticAgentsToggle', {
-              defaultMessage: 'Elastic Agents',
+              defaultMessage: 'Elastic agents',
             }),
-            iconType: 'crosshairs',
+            iconType: 'productAgent',
             'data-test-subj': 'contextTraceToggle-elastic_agent',
           },
           {
             id: 'index',
             label: i18n.translate('xpack.contextEngine.traceSelector.genAiLibrariesToggle', {
-              defaultMessage: 'GenAI Libraries',
+              defaultMessage: 'GenAI libraries',
             }),
-            iconType: 'list',
+            iconType: 'listBullet',
             'data-test-subj': 'contextTraceToggle-index',
           },
         ]}
