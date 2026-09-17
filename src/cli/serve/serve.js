@@ -339,7 +339,7 @@ export default function (program) {
       runExamples: !!opts.runExamples,
       // We want to run without base path when the `--run-examples` flag is given so that we can use local
       // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
-      // We can tell users they only have to run with `yarn start --run-examples` to get those
+      // We can tell users they only have to run with `pnpm start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
       // Serverless Kibana does not support a custom `server.basePath`, so we also disable the
