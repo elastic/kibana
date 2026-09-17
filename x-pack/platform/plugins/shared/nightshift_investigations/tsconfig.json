@@ -43,6 +43,7 @@
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/i18n-react",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/es-errors"
   ]
 }
