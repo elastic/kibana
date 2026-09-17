@@ -170,9 +170,17 @@ export class AnnotationsClient {
     };
   }
 
-  /** Adds the exported comments, overwriting existing ones with the same id; the whole import is refused when the new ones would not fit. */
-  public async importAll({ annotations }: AnnotationsExport): Promise<AnnotationsImportResult> {
+  /**
+   * Adds the exported comments, overwriting existing ones with the same id; the
+   * whole import is refused when the new ones would not fit. An id that appears
+   * more than once is written once, with its last version, so that the quota
+   * accounts for each new comment exactly once.
+   */
+  public async importAll(payload: AnnotationsExport): Promise<AnnotationsImportResult> {
     await this.ensureIndex();
+    const annotations = Array.from(
+      new Map(payload.annotations.map((annotation) => [annotation.id, annotation])).values()
+    );
     if (annotations.length === 0) {
       return { imported: 0, skipped: 0, failed: 0 };
     }

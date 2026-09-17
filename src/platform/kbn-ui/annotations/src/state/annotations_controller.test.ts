@@ -279,8 +279,9 @@ describe('createAnnotationsController', () => {
       const controller = createAnnotationsController(services);
       controller.start();
 
+      // The URL parser strips the tab and reads `//evil.example/app`.
       await controller.guideTo(
-        annotation('evil', { route: { pageKey: '/app/two', path: '//evil.example/app' } })
+        annotation('evil', { route: { pageKey: '/app/two', path: '/\t/evil.example/app' } })
       );
       expect(services.navigateToPath).not.toHaveBeenCalled();
       expect(controller.store.getState().guideId).toBeNull();

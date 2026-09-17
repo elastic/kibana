@@ -265,10 +265,21 @@ describe('AnnotationsClient', () => {
       esClient.mget.mockResponseOnce(mget);
       esClient.bulk.mockResponseOnce(bulk);
 
-      const result = await client().importAll({ version: 2, exportedAt: '', annotations });
+      // A repeated id is written once, as its last version, so its slot is claimed once.
+      const result = await client().importAll({
+        version: 2,
+        exportedAt: '',
+        annotations: [...annotations, { ...annotations[1], text: 'Newer b' }],
+      });
 
       expect(result).toEqual({ imported: 2, skipped: 0, failed: 1 });
       expect(quotaCalls()).toEqual([2, -1]);
+      expect(esClient.mget).toHaveBeenCalledWith(expect.objectContaining({ ids: ['a', 'b', 'c'] }));
+      expect(esClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operations: expect.arrayContaining([expect.objectContaining({ text: 'Newer b' })]),
+        })
+      );
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('[c] bad field'));
     });
 

@@ -36,12 +36,17 @@ describe('newAnnotationSchema', () => {
     expect(() => newAnnotationSchema.validate(valid)).not.toThrow();
   });
 
-  it.each(['//evil.example/app', '/\\evil.example', 'https://evil.example/', 'app/one', ''])(
-    'rejects the path %s',
-    (path) => {
-      expect(() => newAnnotationSchema.validate(withRoute(path))).toThrow();
-    }
-  );
+  it.each([
+    '//evil.example/app',
+    '/\\evil.example',
+    '/\t/evil.example/app',
+    '/\r\n\\evil.example',
+    'https://evil.example/',
+    'app/one',
+    '',
+  ])('rejects the path %s', (path) => {
+    expect(() => newAnnotationSchema.validate(withRoute(path))).toThrow();
+  });
 
   it('rejects timestamps Elasticsearch would not store and the reserved id', () => {
     const reply = valid.replies[0];

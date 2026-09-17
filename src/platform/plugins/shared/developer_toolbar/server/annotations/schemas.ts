@@ -9,7 +9,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import {
-  SAFE_PATH_PATTERN,
+  isSafeRelativePath,
   routeFromLocation,
   type Annotation,
   type AnnotationRoute,
@@ -62,7 +62,7 @@ const pathSchema = schema.string({
   minLength: 1,
   maxLength: PATH_MAX_LENGTH,
   validate: (path) =>
-    SAFE_PATH_PATTERN.test(path) ? undefined : 'must be a path starting with a single "/"',
+    isSafeRelativePath(path) ? undefined : 'must be a path within this deployment',
 });
 
 const authorSchema = schema.object({ username: nameSchema, displayName: nameSchema });

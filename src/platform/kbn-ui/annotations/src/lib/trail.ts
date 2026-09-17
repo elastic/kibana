@@ -12,9 +12,9 @@ import { buildAnchor, isIgnored, labelOf } from './anchor';
 import type { AnnotationsLocationService, TrailStep } from '../types';
 
 /**
- * Controls whose activation discloses UI or navigates: open a flyout or menu,
- * switch tabs, expand a row, follow a link. A reader can repeat those without
- * changing any data, which is why only they make it into a trail.
+ * Controls that may disclose UI or navigate: open a flyout or menu, switch
+ * tabs, expand a row, follow a link. Whether a click on one did so is only
+ * known afterwards (see `DISCLOSED_SELECTOR`).
  */
 const CONTROL_SELECTOR = [
   'a[href]',
@@ -43,15 +43,50 @@ const EXCLUDED_SELECTOR = [
   '[role="gridcell"]',
 ].join(', ');
 
+/**
+ * What a click that disclosed UI leaves behind: the control expanded or
+ * selected, or a dialog, menu, listbox or tab panel that was not there before.
+ * Only such clicks are recorded. A button that changed data instead (deleted,
+ * acknowledged, enabled something) reveals nothing, and is never asked for.
+ */
+const DISCLOSED_SELECTOR = [
+  '[aria-expanded="true"]',
+  '[aria-selected="true"]',
+  '[aria-current]:not([aria-current="false"])',
+  'details[open]',
+  '[role="dialog"]',
+  '[role="alertdialog"]',
+  '[role="menu"]',
+  '[role="listbox"]',
+  '[role="tabpanel"]',
+].join(', ');
+
+/** UI loaded on first use (a flyout fetched with its code) takes a moment to appear after the click. */
+const DISCLOSURE_WAIT_MS = 500;
+
 /** A `<button>` without `type` submits the form it is in. */
 const isDefaultSubmit = (element: Element) =>
   element.tagName === 'BUTTON' && !element.hasAttribute('type') && element.closest('form') !== null;
 
-/** Whether repeating a click on the element is safe enough to ask a reader for it; imported trails are checked with it as well. */
+/** Whether the element is a control a reader could be asked to click; imported trails are checked with it as well. */
 export const isTrailControl = (element: Element): boolean =>
   element.matches(CONTROL_SELECTOR) &&
   !element.matches(EXCLUDED_SELECTOR) &&
   !isDefaultSubmit(element);
+
+const disclosed = (): ReadonlySet<Element> =>
+  new Set(document.querySelectorAll(DISCLOSED_SELECTOR));
+
+/** Whether something is disclosed now that was not `before` the click. */
+const hasNewDisclosure = (before: ReadonlySet<Element>): boolean =>
+  Array.from(document.querySelectorAll(DISCLOSED_SELECTOR)).some((element) => !before.has(element));
+
+interface Candidate {
+  control: Element;
+  step: TrailStep;
+  /** What was disclosed before the click. */
+  before: ReadonlySet<Element>;
+}
 
 export interface TrailRecorder {
   start(): void;
@@ -73,12 +108,34 @@ export const createTrailRecorder = ({
   let steps: TrailStep[] = [];
   let pageKey = location.getPageKey();
   let unsubscribe: (() => void) | undefined;
-  let candidate: { control: Element; step: TrailStep } | undefined;
+  let candidate: Candidate | undefined;
+  /** A click whose UI has not shown up yet; it gets one more look. */
+  let awaited: { candidate: Candidate; timer: ReturnType<typeof setTimeout> } | undefined;
+
+  /** Records the step if the click disclosed UI and its control is still there; false when neither is the case yet. */
+  const record = ({ control, step, before }: Candidate): boolean => {
+    if (!control.isConnected || !hasNewDisclosure(before)) {
+      return false;
+    }
+    steps = [...steps, step].slice(-TRAIL_MAX_STEPS);
+    return true;
+  };
+
+  const settleAwaited = ({ finalLook }: { finalLook: boolean }) => {
+    if (!awaited) {
+      return;
+    }
+    clearTimeout(awaited.timer);
+    if (finalLook) {
+      record(awaited.candidate);
+    }
+    awaited = undefined;
+  };
 
   // The step is described before the page handles the click (labels and text can
   // change with it) and recorded after: a click that the page swallowed never
-  // reaches the bubbling phase, and a control that is gone by then was dismissed
-  // rather than opened, so there is nothing to repeat.
+  // reaches the bubbling phase, a control that is gone by then was dismissed
+  // rather than opened, and a click that disclosed nothing changed data instead.
   const onClickCapture = ({ target }: MouseEvent) => {
     candidate = undefined;
     if (!isRecording() || !(target instanceof Element) || isIgnored(target, ignoreSelectors)) {
@@ -86,7 +143,11 @@ export const createTrailRecorder = ({
     }
     const control = target.closest(CONTROL_SELECTOR);
     if (control && isTrailControl(control)) {
-      candidate = { control, step: { anchor: buildAnchor(control), label: labelOf(control) } };
+      candidate = {
+        control,
+        step: { anchor: buildAnchor(control), label: labelOf(control) },
+        before: disclosed(),
+      };
     }
   };
 
@@ -94,10 +155,15 @@ export const createTrailRecorder = ({
     if (!candidate) {
       return;
     }
-    const { control, step } = candidate;
+    const current = candidate;
     candidate = undefined;
-    if (control.isConnected) {
-      steps = [...steps, step].slice(-TRAIL_MAX_STEPS);
+    // The previous click gets its last look first, so that steps stay in click order.
+    settleAwaited({ finalLook: true });
+    if (!record(current)) {
+      awaited = {
+        candidate: current,
+        timer: setTimeout(() => settleAwaited({ finalLook: true }), DISCLOSURE_WAIT_MS),
+      };
     }
   };
 
@@ -106,6 +172,7 @@ export const createTrailRecorder = ({
     if (next !== pageKey) {
       pageKey = next;
       steps = [];
+      settleAwaited({ finalLook: false });
     }
   };
 
@@ -124,6 +191,7 @@ export const createTrailRecorder = ({
       unsubscribe?.();
       unsubscribe = undefined;
       candidate = undefined;
+      settleAwaited({ finalLook: false });
     },
     steps: () => steps,
   };

@@ -7,9 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/** Any origin does: what matters is whether resolving the path leaves it. */
+const ORIGIN = 'https://relative.invalid';
+
 /**
- * True for paths that stay on the host's origin once resolved: a single leading
- * `/`, so neither `//host/...` (protocol-relative) nor `/\host/...` nor a scheme.
- * Comments may be imported from anywhere, so their paths are checked before use.
+ * True for paths that stay on the host's origin once resolved: a leading `/`
+ * and nothing that a URL parser turns into another origin or a scheme, such as
+ * `//host/...`, `/\host/...` or the tabs and newlines it strips before looking
+ * again. Comments may be imported from anywhere, so their paths are checked
+ * before use, by the same parser that resolves them.
  */
-export const isSafeRelativePath = (path: string): boolean => /^\/(?![/\\])/.test(path);
+export const isSafeRelativePath = (path: string): boolean => {
+  if (!path.startsWith('/')) {
+    return false;
+  }
+  try {
+    return new URL(path, ORIGIN).origin === ORIGIN;
+  } catch {
+    return false;
+  }
+};

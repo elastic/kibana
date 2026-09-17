@@ -59,9 +59,23 @@ describe('trail', () => {
     recorder.start();
   });
 
-  afterEach(() => recorder.stop());
+  afterEach(() => {
+    recorder.stop();
+    jest.useRealTimers();
+  });
 
   const labels = () => recorder.steps().map(({ label }) => label);
+
+  /** The page's reaction to a click: the control expands, or a dialog opens. */
+  const expandOnClick = (selector: string) => {
+    const control = query(selector);
+    control.addEventListener('click', () => control.setAttribute('aria-expanded', 'true'));
+  };
+  const openDialog = () => {
+    const dialog = document.createElement('div');
+    dialog.setAttribute('role', 'dialog');
+    document.body.append(dialog);
+  };
 
   it('tells disclosure controls from form and selection controls', () => {
     render(`
@@ -86,9 +100,12 @@ describe('trail', () => {
   });
 
   it('records a control once the page has handled the click, from the state before it', () => {
-    render(`<button type="button" data-test-subj="details"><span>Show details</span></button>`);
+    render(
+      `<button type="button" aria-expanded="false" data-test-subj="details"><span>Show details</span></button>`
+    );
     const button = query('button');
     button.addEventListener('click', () => {
+      button.setAttribute('aria-expanded', 'true');
       button.textContent = 'Hide details';
     });
 
@@ -104,6 +121,28 @@ describe('trail', () => {
     ]);
   });
 
+  it('records only clicks that disclosed something, right away or once lazily loaded UI appears', () => {
+    jest.useFakeTimers();
+    render(`
+      <button type="button" id="flyout">Open flyout</button>
+      <button type="button" id="acknowledge">Acknowledge</button>
+      <button type="button" id="lazy">Open lazy flyout</button>
+    `);
+    query('#flyout').addEventListener('click', openDialog);
+    query('#acknowledge').addEventListener('click', (event) => {
+      (event.target as Element).textContent = 'Acknowledged';
+    });
+    query('#lazy').addEventListener('click', () => setTimeout(openDialog, 300));
+
+    query('#flyout').click();
+    query('#acknowledge').click();
+    query('#lazy').click();
+    expect(labels()).toEqual(['Open flyout']);
+
+    jest.advanceTimersByTime(500);
+    expect(labels()).toEqual(['Open flyout', 'Open lazy flyout']);
+  });
+
   it('skips clicks the page swallowed, clicks that removed the control, and clicks on excluded UI', () => {
     render(`
       <button type="button" id="swallowed">Swallowed</button>
@@ -111,8 +150,16 @@ describe('trail', () => {
       <div id="host"><button type="button">Host action</button></div>
       <div ${IGNORE_ATTR}="true"><button type="button">Layer action</button></div>
     `);
-    query('#swallowed').addEventListener('click', (event) => event.stopPropagation());
-    query('#closing').addEventListener('click', (event) => (event.target as Element).remove());
+    query('#swallowed').addEventListener('click', (event) => {
+      event.stopPropagation();
+      openDialog();
+    });
+    query('#closing').addEventListener('click', (event) => {
+      (event.target as Element).remove();
+      openDialog();
+    });
+    query('#host button').addEventListener('click', openDialog);
+    query(`[${IGNORE_ATTR}] button`).addEventListener('click', openDialog);
 
     query('#swallowed').click();
     query('#closing').click();
@@ -123,12 +170,16 @@ describe('trail', () => {
   });
 
   it('records nothing while not recording and forgets the steps on page change', () => {
-    render(`<button type="button">First</button><a href="#second">Second</a>`);
+    render(
+      `<button type="button" id="first">First</button><button type="button" id="second">Second</button>`
+    );
+    expandOnClick('#first');
+    expandOnClick('#second');
 
     recording = false;
-    query('button').click();
+    query('#first').click();
     recording = true;
-    query('a').click();
+    query('#second').click();
     expect(labels()).toEqual(['Second']);
 
     navigate('/app/two');
@@ -137,6 +188,7 @@ describe('trail', () => {
 
   it('listens once no matter how often it is started', () => {
     render(`<button type="button">Once</button>`);
+    expandOnClick('button');
 
     recorder.start();
     recorder.start();

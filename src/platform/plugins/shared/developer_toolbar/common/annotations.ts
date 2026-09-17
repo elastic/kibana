@@ -23,8 +23,25 @@ export type {
   TrailStep,
 } from '@kbn/ui-annotations';
 
-/** Paths within this deployment start with a single `/`: neither another origin (`//host`) nor a scheme. */
-export const SAFE_PATH_PATTERN = /^\/(?![/\\])/;
+/** Any origin does: what matters is whether resolving the path leaves it. */
+const ORIGIN = 'https://relative.invalid';
+
+/**
+ * Whether a path stays within this deployment once resolved: a leading `/` and
+ * nothing that a URL parser turns into another origin or a scheme (`//host`,
+ * `/\host`, tabs and newlines it strips before looking again). Same check as
+ * `isSafeRelativePath` in `@kbn/ui-annotations`, which the server cannot import.
+ */
+export const isSafeRelativePath = (path: string): boolean => {
+  if (!path.startsWith('/')) {
+    return false;
+  }
+  try {
+    return new URL(path, ORIGIN).origin === ORIGIN;
+  } catch {
+    return false;
+  }
+};
 
 /**
  * A comment's route from a location whose pathname has had the base path (and
