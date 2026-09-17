@@ -349,6 +349,12 @@ export enum Location {
    * In the DENSE_VECTOR command field list
    */
   DENSE_VECTOR = 'dense_vector',
+
+  /**
+   * In the DENSE_VECTOR command `suffix = "..." ON` field list. Only used to give that list the
+   * same suggestion ordering as the top-level one, which the sorting context keys per option.
+   */
+  DENSE_VECTOR_ON = 'dense_vector_on',
 }
 
 export enum UnmappedFieldsStrategy {

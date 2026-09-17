@@ -17,6 +17,7 @@ import {
   getFieldListExpressions,
   canSuggestSuffixModifier,
   canSuggestTargetAssignment,
+  isPendingSuffixModifier,
   DENSE_VECTOR_SUFFIX_KEYWORD,
   DENSE_VECTOR_DEFAULT_SUFFIX,
 } from './utils';
@@ -121,8 +122,14 @@ export async function autocomplete(
     }
 
     case CaretPosition.AFTER_LITERAL_INPUT: {
-      // A literal is a complete input on its own. When it was introduced by an assignment it
-      // may still turn out to be the `suffix = "..." ON ...` form, so `ON` stays available.
+      // `suffix = "_dv"` is the suffix form mid-typing: it still needs `ON <fields>`, so
+      // offering anything that ends the command here would build an invalid query.
+      if (isPendingSuffixModifier(denseVectorCommand)) {
+        return [onCompleteItem];
+      }
+
+      // Any other literal is a complete input on its own, but when an assignment introduced it
+      // the clause may still become `<name> = "..." ON ...`, so `ON` stays available.
       return [
         ...(denseVectorCommand.targetField !== undefined ? [onCompleteItem] : []),
         withCompleteItem,

@@ -38,6 +38,34 @@ describe('DENSE_VECTOR Validation', () => {
     });
   });
 
+  // The naming clauses put an `=` node in the command args, so `=` has to be allowed at
+  // Location.DENSE_VECTOR or every one of these reports "Function = not allowed".
+  describe('naming clauses', () => {
+    it.each([
+      'FROM index | DENSE_VECTOR vec = textField',
+      'FROM index | DENSE_VECTOR vec = textField, keywordField',
+      'FROM index | DENSE_VECTOR vec = "some text"',
+      'FROM index | DENSE_VECTOR suffix = "_dv" ON textField',
+      'FROM index | DENSE_VECTOR suffix = "_dv" ON textField, keywordField',
+      'FROM index | DENSE_VECTOR suffix = "_dv" ON textField WITH { "inference_id": "e5" }',
+      'FROM index | DENSE_VECTOR vec = textField WITH { "inference_id": "e5" }',
+    ])('does not report errors for %s', (query) => {
+      denseVectorExpectErrors(query, []);
+    });
+
+    it('reports the field type through a target assignment', () => {
+      denseVectorExpectErrors('FROM index | DENSE_VECTOR vec = integerField', [
+        'DENSE_VECTOR only supports values of type text or keyword. Found "integerField" of type integer',
+      ]);
+    });
+
+    it('reports the field type through a suffix clause', () => {
+      denseVectorExpectErrors('FROM index | DENSE_VECTOR suffix = "_dv" ON integerField', [
+        'DENSE_VECTOR only supports values of type text or keyword. Found "integerField" of type integer',
+      ]);
+    });
+  });
+
   describe('field type validation', () => {
     it('reports an error when a field is not text or keyword', () => {
       denseVectorExpectErrors('FROM index | DENSE_VECTOR integerField', [

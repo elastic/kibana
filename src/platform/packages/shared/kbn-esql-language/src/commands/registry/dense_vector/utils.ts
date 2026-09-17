@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAstDenseVectorCommand, ESQLAstField } from '@elastic/esql/types';
-import { isMap, isOptionNode } from '@elastic/esql';
+import { isColumn, isMap, isOptionNode } from '@elastic/esql';
 
 /**
  * The keyword accepted by the `suffix = "..." ON ...` modifier. The grammar accepts any
@@ -78,7 +78,13 @@ export function getPosition(
  * which `suggestFieldsList` unwraps on its own.
  */
 export const getFieldListExpressions = (command: ESQLAstDenseVectorCommand): ESQLAstField[] =>
-  command.args.filter((arg) => Array.isArray(arg) || !isOptionNode(arg)) as ESQLAstField[];
+  command.args.filter((arg) => {
+    if (Array.isArray(arg)) {
+      return true;
+    }
+
+    return !isOptionNode(arg) && !(isColumn(arg) && !arg.name);
+  }) as ESQLAstField[];
 
 /** Matches the leading `DENSE_VECTOR` keyword, so it can be stripped from the command text. */
 const COMMAND_KEYWORD_REGEX = /^\s*dense_vector\b/i;
@@ -119,3 +125,14 @@ export const canSuggestTargetAssignment = (
 ): boolean =>
   command.targetField === undefined &&
   !getTextAfterCommandKeyword(query, command, cursorPosition).includes(',');
+
+/**
+ * Whether a string literal assigned to a name is the start of the `suffix = "..." ON` form
+ * rather than a literal input.
+ *
+ * `suffix = "_dv"` only becomes {@link ESQLAstDenseVectorCommand.suffix} once `ON` is parsed,
+ * so until then the two forms look identical. When the name is the reserved `suffix` keyword
+ * the user is writing the suffix form, and the command is not complete without `ON <fields>`.
+ */
+export const isPendingSuffixModifier = (command: ESQLAstDenseVectorCommand): boolean =>
+  command.targetField?.name.toLowerCase() === DENSE_VECTOR_SUFFIX_KEYWORD;

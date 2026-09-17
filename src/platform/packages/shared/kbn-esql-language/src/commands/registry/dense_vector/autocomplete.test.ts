@@ -184,17 +184,20 @@ describe('DENSE_VECTOR Autocomplete', () => {
       );
     });
 
-    // Until ON is typed, `suffix = "_dv"` is indistinguishable from the literal-input form,
-    // so ON has to stay on offer here.
-    test('suggests ON after a quoted value assigned to a name', async () => {
+    // The clause still needs `ON <fields>`, so nothing that would end the command belongs
+    // here — `DENSE_VECTOR suffix = "_dv" WITH { ... }` parses but fails on the server.
+    test('suggests only ON while the suffix modifier is incomplete', async () => {
       await expectDenseVectorSuggestions(
         'from a | dense_vector suffix = "_dv" ',
-        [
-          onCompleteItem.text,
-          withCompleteItem.text,
-          newLineCompleteItem.text,
-          pipeCompleteItem.text,
-        ],
+        [onCompleteItem.text],
+        mockCallbacks
+      );
+    });
+
+    test('recognizes the suffix keyword regardless of case', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector SUFFIX = "_dv" ',
+        [onCompleteItem.text],
         mockCallbacks
       );
     });
@@ -235,6 +238,21 @@ describe('DENSE_VECTOR Autocomplete', () => {
       await expectDenseVectorSuggestions(
         'from a | dense_vector "some text" ',
         [withCompleteItem.text, newLineCompleteItem.text, pipeCompleteItem.text],
+        mockCallbacks
+      );
+    });
+
+    // Any name other than `suffix` makes this a complete literal input, which `ON` can still
+    // turn into the suffix form.
+    test('suggests ON, WITH and pipe after a literal assigned to a target name', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector vec = "some text" ',
+        [
+          onCompleteItem.text,
+          withCompleteItem.text,
+          newLineCompleteItem.text,
+          pipeCompleteItem.text,
+        ],
         mockCallbacks
       );
     });
