@@ -20,6 +20,9 @@ const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as con
 
 const INVESTIGATIONS_PAGE_SIZE = 10;
 
+/** How long a section's pages stay fresh, which bounds how often a refocus can refetch it. */
+const SECTION_STALE_TIME_MS = 30_000;
+
 export interface FetchInvestigationsParams {
   statuses: InvestigationStatus[];
   severities?: Severity[];
@@ -64,8 +67,14 @@ const flattenInvestigationPages = (
   return items;
 };
 
-const getInvestigationsNextPageParam = (lastPage: ListInvestigationsResponse): number | undefined =>
-  lastPage.page * lastPage.size < lastPage.total ? lastPage.page + 1 : undefined;
+export const MAX_INVESTIGATIONS_PAGE = 100;
+
+export const getInvestigationsNextPageParam = (
+  lastPage: ListInvestigationsResponse
+): number | undefined =>
+  lastPage.page < MAX_INVESTIGATIONS_PAGE && lastPage.page * lastPage.size < lastPage.total
+    ? lastPage.page + 1
+    : undefined;
 
 export const useFetchInvestigations = ({
   statuses,
@@ -112,9 +121,8 @@ export const useFetchInvestigations = ({
     },
     getNextPageParam: getInvestigationsNextPageParam,
     refetchInterval,
-    // Default staleTime is 0, so a window-focus after DevTools refetches every section.
-    // In-progress already polls; the others refetch when that total shrinks.
-    refetchOnWindowFocus: false,
+    staleTime: SECTION_STALE_TIME_MS,
+    refetchOnWindowFocus: true,
     keepPreviousData: true,
     // Deviates from the app's convention of not setting `retry`. Without this, an
     // unavailable-API 404 leaves the homepage spinning for ~7s (v4 default: 3 retries

@@ -52,6 +52,7 @@ const investigation: ListInvestigationItem = {
 
 const criticalInvestigation: ListInvestigationItem = {
   investigation_id: 'investigation-critical',
+  title: 'Critical checkout outage',
   status: 'completed',
   created_at: '2026-09-11T09:00:00.000Z',
   subject: { type: 'significant_event', id: 'event-2', summary: 'Critical checkout outage' },
@@ -61,6 +62,7 @@ const criticalInvestigation: ListInvestigationItem = {
 
 const highInvestigation: ListInvestigationItem = {
   investigation_id: 'investigation-high',
+  title: 'High latency',
   status: 'completed',
   created_at: '2026-09-11T09:00:00.000Z',
   subject: { type: 'significant_event', id: 'event-3', summary: 'High latency' },

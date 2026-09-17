@@ -18,7 +18,8 @@ import {
 } from './investigation_section';
 
 export interface InvestigationListHandle {
-  scrollToSeverity: (severity: Severity) => void;
+  /** Scrolls to a tier's section, reporting `false` when the list is not rendering one. */
+  scrollToSeverity: (severity: Severity) => boolean;
 }
 
 export interface InvestigationListProps {
@@ -39,12 +40,13 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
       scrollToSeverity: (severity: Severity) => {
         const section = document.getElementById(getInvestigationSectionAnchorId(severity));
         if (section == null) {
-          return;
+          return false;
         }
         section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         // Scrolling alone leaves keyboard and screen reader users where they were, so move focus
         // to the section too. `preventScroll` keeps the smooth scroll above from being cut short.
         section.focus({ preventScroll: true });
+        return true;
       },
     }));
 

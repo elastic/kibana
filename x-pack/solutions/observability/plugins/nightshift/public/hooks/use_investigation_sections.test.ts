@@ -32,6 +32,7 @@ const sectionResult = ({
       ? [
           {
             investigation_id: `${status}-1`,
+            title: `${status} investigation`,
             status,
             created_at: '2026-09-11T09:00:00.000Z',
             subject: { type: 'significant_event' as const, id: 'event-1', summary: status },
@@ -261,6 +262,7 @@ describe('useInvestigationSections', () => {
           ...sectionResult({ total: ids.length, isPreviousData }),
           investigations: ids.map((id) => ({
             investigation_id: id,
+            title: `${id} investigation`,
             status: 'pending' as const,
             created_at: '2026-09-11T09:00:00.000Z',
             subject: { type: 'significant_event' as const, id: 'event-1', summary: 'pending' },

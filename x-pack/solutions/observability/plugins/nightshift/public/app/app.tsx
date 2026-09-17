@@ -53,7 +53,7 @@ export function NightshiftApp(): React.ReactElement {
   const history = useHistory();
   const { search } = useLocation();
   const sectionsRef = useRef<InvestigationListHandle>(null);
-  const didScrollFromUrl = useRef(false);
+  const scrolledToSeverity = useRef<Severity | undefined>(undefined);
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
@@ -127,19 +127,24 @@ export function NightshiftApp(): React.ReactElement {
       const params = new URLSearchParams(history.location.search);
       setNightshiftSeverityParam(params, severity);
       history.replace({ search: params.toString() });
-      sectionsRef.current?.scrollToSeverity(severity);
-      didScrollFromUrl.current = true;
+      if (sectionsRef.current?.scrollToSeverity(severity)) {
+        scrolledToSeverity.current = severity;
+      }
     },
     [history]
   );
 
+  // A deep link can name a tier the list is not rendering yet, so the jump counts as done only
+  // once it lands, and is retried as sections appear. Keying on the severity rather than a flag
+  // lets a later `?severity=` in the same mounted app scroll too.
   useEffect(() => {
-    if (!activeSeverity || didScrollFromUrl.current || isInitialLoading) {
+    if (!activeSeverity || scrolledToSeverity.current === activeSeverity) {
       return;
     }
-    sectionsRef.current?.scrollToSeverity(activeSeverity);
-    didScrollFromUrl.current = true;
-  }, [activeSeverity, isInitialLoading]);
+    if (sectionsRef.current?.scrollToSeverity(activeSeverity)) {
+      scrolledToSeverity.current = activeSeverity;
+    }
+  }, [activeSeverity, scrollableSeverities]);
 
   // Only treat a load failure as fatal when there is nothing to show; a failed
   // background refetch that still has cached data degrades to a non-blocking warning.
