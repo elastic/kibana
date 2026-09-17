@@ -7,36 +7,25 @@
 
 import type { errors } from '@elastic/elasticsearch';
 import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
-import { isResponseError } from '@kbn/es-errors';
+import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 
-interface EsErrorBody {
-  error?: { type?: string; reason?: string };
-}
+const getEsError = (error: errors.ResponseError): ElasticsearchErrorDetails['error'] =>
+  (error.body as ElasticsearchErrorDetails | undefined)?.error;
 
-const getEsError = (error: errors.ResponseError): EsErrorBody['error'] =>
-  (error.body as EsErrorBody | undefined)?.error;
-
-/** The human-readable reason ES attached to the failure, falling back to the client message. */
-export const getEsErrorReason = (error: errors.ResponseError): string =>
-  getEsError(error)?.reason ?? error.message;
-
-/** A 400 raised by the ES|QL analyzer: unknown index, unknown column, type mismatch and the like. */
 export const isEsqlVerificationError = (error: unknown): error is errors.ResponseError =>
   isResponseError(error) &&
   error.statusCode === 400 &&
   getEsError(error)?.type === 'verification_exception';
 
-// ES|QL reports a concrete index name that does not exist as a `verification_exception` whose
-// reason reads `Unknown index [<name>]`, not as a 404.
+// ES|QL reports a missing concrete index as `verification_exception` / `Unknown index`, not 404.
 export const isEsqlUnknownIndexError = (error: unknown): boolean =>
   isEsqlVerificationError(error) && (getEsError(error)?.reason ?? '').includes('Unknown index');
 
-/** Maps an ES client failure to a Boom error so the HTTP layer keeps the ES status code. */
 export const toBoom = (error: unknown, prefix?: string): Error => {
   if (!isResponseError(error)) {
     return error instanceof Error ? error : new Error(String(error));
   }
-  const reason = getEsErrorReason(error);
+  const reason = getEsError(error)?.reason ?? error.message;
   const message = prefix ? `${prefix}: ${reason}` : reason;
   switch (error.statusCode) {
     case 400:

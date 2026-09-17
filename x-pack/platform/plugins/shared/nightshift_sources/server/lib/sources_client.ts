@@ -12,7 +12,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-// AST-normalized comparison from Streams; formatting-only differences are treated as equal.
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
   getNightshiftSourceViewName,
@@ -40,26 +39,14 @@ const HEALTH_CHECK_CONCURRENCY = 10;
 // `description`) must be removed rather than merged over the stored value.
 const FULL_UPDATE = { mergeAttributes: false } as const;
 
-export type SourceSavedObjectsClient = Pick<
-  SavedObjectsClientContract,
-  'create' | 'get' | 'update' | 'delete' | 'find'
->;
-
 export type SourceViewsClient = Pick<EsqlViewsClient, 'putView' | 'getView' | 'deleteView'>;
 
-export interface SourcesClientDependencies {
-  soClient: SourceSavedObjectsClient;
+interface SourcesClientDependencies {
+  soClient: SavedObjectsClientContract;
   viewsClient: SourceViewsClient;
-  /** Client used to run ES|QL against the data behind a source (validation and health probes). */
   dataEsClient: ElasticsearchClient;
   logger: Logger;
   username: string;
-}
-
-export interface ListSourcesParams {
-  page: number;
-  perPage: number;
-  enabled?: boolean;
 }
 
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
@@ -67,13 +54,13 @@ const toSource = (id: string, attributes: NightshiftSourceAttributes): Nightshif
   ...attributes,
 });
 
-/** Space-scoped CRUD for Nightshift sources plus the ES|QL view that materialises each one. */
 export class SourcesClient {
   constructor(private readonly deps: SourcesClientDependencies) {}
 
   async create(input: SourceInput): Promise<NightshiftSource> {
     const { soClient, viewsClient, username } = this.deps;
-    await this.validate(input.esql);
+    validateSourceQuery(input.esql);
+    await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: input.esql });
 
     const id = uuidv4();
     const now = new Date().toISOString();
@@ -103,15 +90,13 @@ export class SourcesClient {
     return toSource(id, attributes);
   }
 
-  /** Full replacement of the editable fields; the view is always re-put so a `PUT` doubles as repair. */
   async update(id: string, input: SourceInput): Promise<NightshiftSource> {
     const { soClient, viewsClient } = this.deps;
     const { attributes: previous } = await this.getSavedObject(id);
     const esqlChanged = !hasSameEsql(input.esql, previous.esql);
+    validateSourceQuery(input.esql);
     if (esqlChanged) {
-      await this.validate(input.esql);
-    } else {
-      validateSourceQuery(input.esql);
+      await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: input.esql });
     }
 
     const now = new Date().toISOString();
@@ -147,7 +132,15 @@ export class SourcesClient {
     return { source, health: await this.getHealth(source, { checkResolvable: true }) };
   }
 
-  async list({ page, perPage, enabled }: ListSourcesParams): Promise<ListSourcesResponse> {
+  async list({
+    page,
+    perPage,
+    enabled,
+  }: {
+    page: number;
+    perPage: number;
+    enabled?: boolean;
+  }): Promise<ListSourcesResponse> {
     const response = await this.deps.soClient.find<NightshiftSourceAttributes>({
       type: NIGHTSHIFT_SOURCE_SO_TYPE,
       page,
@@ -246,11 +239,6 @@ export class SourcesClient {
       logger.debug(`Could not probe sources of ${source.id}: ${error}`);
       return 'unknown';
     }
-  }
-
-  private async validate(esql: string): Promise<void> {
-    validateSourceQuery(esql);
-    await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql });
   }
 
   private async getSavedObject(id: string): Promise<SavedObject<NightshiftSourceAttributes>> {

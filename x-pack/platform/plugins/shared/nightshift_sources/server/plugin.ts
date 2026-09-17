@@ -19,7 +19,10 @@ import { registerRoutes } from '@kbn/server-route-repository';
 import { EsqlViewsClient } from './lib/esql_views_client';
 import { SourcesClient } from './lib/sources_client';
 import { nightshiftSourcesRouteRepository } from './routes';
-import { NIGHTSHIFT_SOURCE_SO_TYPE, nightshiftSourceSavedObjectType } from './saved_objects';
+import {
+  NIGHTSHIFT_SOURCE_SO_TYPE,
+  nightshiftSourceSavedObjectType,
+} from './saved_objects/nightshift_source_saved_object';
 import type {
   GetSourcesClient,
   NightshiftSourcesServerSetup,

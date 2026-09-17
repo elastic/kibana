@@ -9,18 +9,14 @@ import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { NightshiftSourcesRepositoryClient } from './api';
 import { createNightshiftSourcesRepositoryClient } from './api';
 
-export type NightshiftSourcesPublicPluginSetup = Record<string, never>;
-
 export interface NightshiftSourcesPublicPluginStart {
   nightshiftSourcesRepositoryClient: NightshiftSourcesRepositoryClient;
 }
 
 export class NightshiftSourcesPublicPlugin
-  implements Plugin<NightshiftSourcesPublicPluginSetup, NightshiftSourcesPublicPluginStart>
+  implements Plugin<void, NightshiftSourcesPublicPluginStart>
 {
-  setup(): NightshiftSourcesPublicPluginSetup {
-    return {};
-  }
+  setup(): void {}
 
   start(core: CoreStart): NightshiftSourcesPublicPluginStart {
     return {

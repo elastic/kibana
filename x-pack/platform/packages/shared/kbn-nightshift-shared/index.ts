@@ -41,34 +41,18 @@ export function getNightshiftCapabilities(
 
 export {
   NIGHTSHIFT_SOURCE_VIEW_PREFIX,
-  getNightshiftSourceIdFromViewName,
   getNightshiftSourceViewName,
 } from './src/sources/view_name';
 
 export {
-  DEFAULT_SOURCES_PER_PAGE,
-  MAX_SOURCES_PER_PAGE,
-  MAX_SOURCE_DESCRIPTION_LENGTH,
-  MAX_SOURCE_ESQL_LENGTH,
-  MAX_SOURCE_TAGS,
-  MAX_SOURCE_TAG_LENGTH,
-  MAX_SOURCE_TITLE_LENGTH,
-  SOURCE_HEALTH_VALUES,
   createSourceRequestSchema,
   listSourcesQuerySchema,
-  nightshiftSourceSchema,
-  sourceHealthSchema,
-  updateSourceRequestSchema,
   type CreateSourceRequest,
   type DeleteSourceResponse,
-  type GetSourceResponse,
-  type ListSourcesQuery,
   type ListSourcesResponse,
   type NightshiftSource,
-  type Source,
   type SourceHealth,
   type SourceInput,
   type SourceMutationResponse,
   type SourceWithHealth,
-  type UpdateSourceRequest,
 } from './src/sources/schema';

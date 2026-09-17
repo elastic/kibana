@@ -12,9 +12,6 @@ import { getSourceCommandQuery } from './validate_source_query';
 // ES|QL answers a wildcard that matches nothing with a single placeholder column of this name.
 const ESQL_EMPTY_RELATION_COLUMN = '<no-fields>';
 
-const isEmptyRelation = ({ columns = [] }: { columns?: Array<{ name: string }> }): boolean =>
-  columns.every((column) => column.name === ESQL_EMPTY_RELATION_COLUMN);
-
 /**
  * True when nothing exists yet behind the query's source command. A concrete name that does not
  * exist fails with "Unknown index"; a wildcard that matches nothing succeeds with an empty
@@ -30,11 +27,11 @@ export const hasNoIndicesBehind = async ({
   esql: string;
 }): Promise<boolean> => {
   try {
-    const response = await esClient.esql.query({
+    const { columns = [] } = await esClient.esql.query({
       query: `${getSourceCommandQuery(esql)}\n| LIMIT 0`,
       format: 'json',
     });
-    return isEmptyRelation(response);
+    return columns.every((column) => column.name === ESQL_EMPTY_RELATION_COLUMN);
   } catch (error) {
     if (isEsqlVerificationError(error)) {
       return isEsqlUnknownIndexError(error);

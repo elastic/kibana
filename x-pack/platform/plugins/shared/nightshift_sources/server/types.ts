@@ -13,6 +13,5 @@ export type GetSourcesClient = (params: { request: KibanaRequest }) => Promise<S
 export type NightshiftSourcesServerSetup = void;
 
 export interface NightshiftSourcesServerStart {
-  /** Space-scoped client for the current request; the only supported way to read or write sources. */
   getSourcesClient: GetSourcesClient;
 }

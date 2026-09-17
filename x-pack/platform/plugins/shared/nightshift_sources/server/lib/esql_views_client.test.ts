@@ -15,7 +15,7 @@ const VIEW_NAME = '$.nightshift.sources.a';
 describe('EsqlViewsClient', () => {
   const setup = () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    const client = new EsqlViewsClient(esClient, { baseDelayMs: 1 });
+    const client = new EsqlViewsClient(esClient, 1);
     return { esClient, client };
   };
 

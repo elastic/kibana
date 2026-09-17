@@ -6,18 +6,11 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { SourceWithHealth } from '@kbn/nightshift-shared';
+import type { CreateSourceRequest, SourceWithHealth } from '@kbn/nightshift-shared';
 import type { ApiClientFixture, ApiClientResponse, EsClient } from '@kbn/scout';
 import { COMMON_HEADERS, SOURCES_PATH, TEST_INDEX_PREFIX } from './constants';
 
 type CookieHeader = Record<string, string>;
-
-export interface SourceBody {
-  title: string;
-  description?: string;
-  tags?: string[];
-  esql: string;
-}
 
 /** A per-run suffix so repeated runs against a shared deployment cannot collide. */
 export const uniqueSuffix = (): string => randomUUID().slice(0, 8);
@@ -32,7 +25,7 @@ const withHeaders = (cookieHeader: CookieHeader) => ({
 export const createSource = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
-  body: SourceBody
+  body: CreateSourceRequest
 ): Promise<ApiClientResponse> =>
   apiClient.post(SOURCES_PATH, { ...withHeaders(cookieHeader), body });
 
@@ -53,7 +46,7 @@ export const updateSource = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
   id: string,
-  body: SourceBody
+  body: CreateSourceRequest
 ): Promise<ApiClientResponse> =>
   apiClient.put(`${SOURCES_PATH}/${id}`, { ...withHeaders(cookieHeader), body });
 
@@ -79,13 +72,11 @@ interface ListBody {
   sources: SourceWithHealth[];
 }
 
-/** The list entry for a source id, `undefined` when the page does not contain it. */
 export const findListed = (body: ListBody, id: string): SourceWithHealth | undefined =>
   body.sources.find((entry) => entry.source.id === id);
 
 export const listedIds = (body: ListBody): string[] => body.sources.map((entry) => entry.source.id);
 
-/** Creates a small index with a known mapping so ES can validate field references. */
 export const createTestIndex = async (esClient: EsClient, index: string): Promise<void> => {
   await esClient.indices.delete({ index }, { ignore: [404] });
   await esClient.indices.create({
@@ -108,7 +99,6 @@ export const createTestIndex = async (esClient: EsClient, index: string): Promis
 export const deleteTestIndex = (esClient: EsClient, index: string): Promise<unknown> =>
   esClient.indices.delete({ index }, { ignore: [404] });
 
-/** Reads a view definition as superuser; `undefined` when ES reports it missing. */
 export const readView = async (
   esClient: EsClient,
   name: string
@@ -119,7 +109,6 @@ export const readView = async (
   return Array.isArray(body.views) ? body.views[0] : undefined;
 };
 
-/** Deletes every source in the current space whose title starts with the prefix. */
 export const cleanupSources = async (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,

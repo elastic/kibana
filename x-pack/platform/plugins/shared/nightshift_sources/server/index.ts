@@ -20,6 +20,6 @@ export type {
   NightshiftSourcesServerStart,
 } from './types';
 
-export type { SourcesClient, ListSourcesParams } from './lib/sources_client';
+export type { SourcesClient } from './lib/sources_client';
 
 export type { NightshiftSourcesRouteRepository } from './routes';

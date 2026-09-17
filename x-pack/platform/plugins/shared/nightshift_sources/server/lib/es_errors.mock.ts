@@ -8,7 +8,6 @@
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 
-/** Builds the `ResponseError` the ES client throws for a failed request, with the given ES error body. */
 export const createEsResponseError = (
   statusCode: number,
   type: string,

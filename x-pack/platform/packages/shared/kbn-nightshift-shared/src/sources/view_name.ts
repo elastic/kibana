@@ -12,12 +12,5 @@
  */
 export const NIGHTSHIFT_SOURCE_VIEW_PREFIX = '$.nightshift.sources.';
 
-/** Returns the ES|QL view name backing the source with the given saved object id. */
 export const getNightshiftSourceViewName = (sourceId: string): string =>
   `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}${sourceId}`;
-
-/** Inverse of `getNightshiftSourceViewName`; `undefined` when the name is not a source view. */
-export const getNightshiftSourceIdFromViewName = (viewName: string): string | undefined =>
-  viewName.startsWith(NIGHTSHIFT_SOURCE_VIEW_PREFIX)
-    ? viewName.slice(NIGHTSHIFT_SOURCE_VIEW_PREFIX.length)
-    : undefined;

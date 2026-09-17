@@ -10,11 +10,10 @@ import {
   NIGHTSHIFT_API_PRIVILEGES,
   createSourceRequestSchema,
   listSourcesQuerySchema,
-  updateSourceRequestSchema,
   type DeleteSourceResponse,
-  type GetSourceResponse,
   type ListSourcesResponse,
   type SourceMutationResponse,
+  type SourceWithHealth,
 } from '@kbn/nightshift-shared';
 import { createNightshiftSourcesServerRoute } from '../create_server_route';
 
@@ -84,7 +83,7 @@ const getSourceRoute = createNightshiftSourcesServerRoute({
   params: z.object({
     path: sourceIdPathSchema,
   }),
-  handler: async ({ params, request, getSourcesClient }): Promise<GetSourceResponse> => {
+  handler: async ({ params, request, getSourcesClient }): Promise<SourceWithHealth> => {
     const client = await getSourcesClient({ request });
     return client.get(params.path.sourceId);
   },
@@ -105,7 +104,7 @@ const updateSourceRoute = createNightshiftSourcesServerRoute({
   },
   params: z.object({
     path: sourceIdPathSchema,
-    body: updateSourceRequestSchema,
+    body: createSourceRequestSchema,
   }),
   handler: async ({ params, request, getSourcesClient }): Promise<SourceMutationResponse> => {
     const client = await getSourcesClient({ request });
