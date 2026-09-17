@@ -55,7 +55,7 @@ const DISPLAY_OPTION_ROWS: DisplayOptionRowConfig[] = [
       'xpack.searchInferenceEndpoints.eisModelsPage.displayOptions.outsideRegionPreferencesDescription',
       {
         defaultMessage:
-          'Models unavailable within your region preferences are not available for use.',
+          'Models that you can't use until you update your region preferences.',
       }
     ),
     hideId: 'eisDisplayOptionsOutsideRegionPreferencesHide',
