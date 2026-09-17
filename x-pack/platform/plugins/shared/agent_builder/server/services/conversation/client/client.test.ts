@@ -3022,6 +3022,136 @@ describe('ConversationClient', () => {
       ]);
     });
 
+    describe('skipIfTerminalExistsFor (atomic terminal guard)', () => {
+      const terminated = (roundId: string): TimelineEvent =>
+        ({
+          id: `${roundId}::execution_terminated`,
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: `${roundId}::execution`,
+          trigger_event_id: `${roundId}::user_message`,
+          data: {
+            model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+            time_to_first_token: 1,
+            time_to_last_token: 1,
+            outcome: { type: 'responded', response: { message: 'ok' } },
+          },
+        } as TimelineEvent);
+      const failed = (roundId: string): TimelineEvent =>
+        ({
+          id: `${roundId}::execution_failed`,
+          type: TimelineEventType.executionFailed,
+          created_at: '2025-08-04T07:42:31.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: `${roundId}::execution`,
+          trigger_event_id: `${roundId}::user_message`,
+          data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
+        } as TimelineEvent);
+
+      it('replaceRoundEvents skips the write and returns the stored document when a terminal exists for the execution', async () => {
+        const stored = [...startTimelineEvents('round-1'), terminated('round-1')];
+        mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: stored }));
+
+        const result = await client.replaceRoundEvents({
+          id: 'conversation-1',
+          roundId: 'round-1',
+          events: [...startTimelineEvents('round-1'), failed('round-1')],
+          skipIfTerminalExistsFor: 'round-1::execution',
+        });
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+        expect(result.events?.map((event) => event.id)).toEqual(stored.map((event) => event.id));
+      });
+
+      it('appendEvents skips the write when a terminal exists for the execution', async () => {
+        const stored = [...startTimelineEvents('round-1'), terminated('round-1')];
+        mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: stored }));
+
+        const result = await client.appendEvents({
+          id: 'conversation-1',
+          events: [failed('round-1')],
+          skipIfTerminalExistsFor: 'round-1::execution',
+        });
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+        expect(result.events?.map((event) => event.id)).toEqual(stored.map((event) => event.id));
+      });
+
+      it('writes when no terminal exists for the execution', async () => {
+        mockGetDocumentResponse(
+          createConversationDocument({ schemaVersion: 1, events: startTimelineEvents('round-1') })
+        );
+
+        await client.appendEvents({
+          id: 'conversation-1',
+          events: [failed('round-1')],
+          skipIfTerminalExistsFor: 'round-1::execution',
+        });
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+        const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+          document: { events?: Array<{ id: string }> };
+        };
+        expect(indexed.events?.map((event) => event.id)).toContain('round-1::execution_failed');
+      });
+
+      it("another execution's terminal does not block the write", async () => {
+        mockGetDocumentResponse(
+          createConversationDocument({
+            schemaVersion: 1,
+            events: [...startTimelineEvents('round-1'), terminated('round-1')],
+          })
+        );
+
+        await client.appendEvents({
+          id: 'conversation-1',
+          events: [failed('round-2')],
+          skipIfTerminalExistsFor: 'round-2::execution',
+        });
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not notify attachment events on a skipped write', async () => {
+        const onAttachmentEvents = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          eventEmitter: {
+            emitMetadataPatched: jest.fn(),
+            emitAttachmentEvents: onAttachmentEvents,
+          },
+        });
+        mockGetDocumentResponse(
+          createConversationDocument({
+            schemaVersion: 1,
+            events: [...startTimelineEvents('round-1'), terminated('round-1')],
+          })
+        );
+
+        await clientWithCb.appendEvents({
+          id: 'conversation-1',
+          events: [
+            {
+              id: 'att-evt-1',
+              type: TimelineEventType.attachmentAdded,
+              created_at: '2025-08-04T07:42:32.000Z',
+              actor: { type: EventActorType.user, id: 'user-1' },
+              execution_id: 'round-1::execution',
+              data: { attachment_id: 'a1', attachment_type: 'text', current_version: 1 },
+            } as TimelineEvent,
+          ],
+          skipIfTerminalExistsFor: 'round-1::execution',
+        });
+
+        expect(onAttachmentEvents).not.toHaveBeenCalled();
+      });
+    });
+
     it('replaceRoundEvents drops every stored event for the round (including stale live-streamed steps) and appends the fresh batch, leaving other rounds and additive events untouched', async () => {
       const storedRound1UserMessage = {
         id: 'round-1::user_message',
