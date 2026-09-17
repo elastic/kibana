@@ -26,7 +26,7 @@ export const DisplayOptionsTour = ({ isOpen, onDismiss, children }: DisplayOptio
           <p>
             <FormattedMessage
               id="xpack.searchInferenceEndpoints.eisModelsPage.displayOptionsTourDescription"
-              defaultMessage="Toggle the visibility of models that are currently unavailable based on your region preferences."
+              defaultMessage="Use the model display options to show models that aren't available in the locations allowed by your region preferences."
             />
           </p>
         </EuiText>
