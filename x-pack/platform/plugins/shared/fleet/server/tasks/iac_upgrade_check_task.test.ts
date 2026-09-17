@@ -11,8 +11,8 @@ import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
 import {
-  compareIacKey,
   getCloudConnectorIntegrationSelections,
+  getIacKeyOutcome,
 } from '../services/cloud_connectors';
 import { reportIacProvisionerUpgradeCheckCompleted } from '../services/telemetry/iac_provisioner_telemetry';
 import { isIacProvisionerEnabled } from '../services/utils/iac_provisioner';
@@ -21,17 +21,17 @@ import { runIacUpgradeCheckTask } from './iac_upgrade_check_task';
 
 jest.mock('../services/utils/iac_provisioner');
 jest.mock('../services/telemetry/iac_provisioner_telemetry');
-// compareIacKey calls checkIacTemplate internally (same module) — Jest module mocks cannot
-// intercept intra-module references, so we stub compareIacKey at the barrel level directly.
+// getIacKeyOutcome is stubbed at the barrel level so this test drives the task's bookkeeping
+// without mocking IaCP or the package registry.
 jest.mock('../services/cloud_connectors', () => ({
   ...jest.requireActual('../services/cloud_connectors'),
   getCloudConnectorIntegrationSelections: jest.fn(),
-  compareIacKey: jest.fn(),
+  getIacKeyOutcome: jest.fn(),
 }));
 
 const mockedEnabled = jest.mocked(isIacProvisionerEnabled);
 const mockedSelections = jest.mocked(getCloudConnectorIntegrationSelections);
-const mockedCompareIacKey = jest.mocked(compareIacKey);
+const mockedGetIacKeyOutcome = jest.mocked(getIacKeyOutcome);
 
 const makeConnector = (id: string, attributes: Record<string, unknown>) => ({
   id,
@@ -81,7 +81,7 @@ describe('iac_upgrade_check_task', () => {
       finderFor([[makeConnector('legacy', {}), makeConnector('current', { iac_key: 'sha256:a' })]])
     );
     // legacy: no stored key → no_key; current: keys match → matches
-    mockedCompareIacKey.mockResolvedValueOnce('no_key').mockResolvedValueOnce('matches');
+    mockedGetIacKeyOutcome.mockResolvedValueOnce('no_key').mockResolvedValueOnce('matches');
     mockSoClient.update.mockResolvedValue({});
 
     const counts = await runIacUpgradeCheckTask(signal);
@@ -108,7 +108,7 @@ describe('iac_upgrade_check_task', () => {
         durationMs: expect.any(Number),
       })
     );
-    expect(mockedCompareIacKey).toHaveBeenCalledWith(
+    expect(mockedGetIacKeyOutcome).toHaveBeenCalledWith(
       mockSoClient,
       expect.objectContaining({ cloudProvider: 'aws' }),
       [{ name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] }],
@@ -118,7 +118,7 @@ describe('iac_upgrade_check_task', () => {
 
   it('leaves status untouched when the current key cannot be determined (IaCP down)', async () => {
     mockSoClient.createPointInTimeFinder.mockReturnValue(finderFor([[makeConnector('c1', {})]]));
-    mockedCompareIacKey.mockResolvedValue('key_unavailable');
+    mockedGetIacKeyOutcome.mockResolvedValue('key_unavailable');
 
     const counts = await runIacUpgradeCheckTask(signal);
 
@@ -131,11 +131,11 @@ describe('iac_upgrade_check_task', () => {
       finderFor([[makeConnector('unused', {})]])
     );
     mockedSelections.mockResolvedValue([]);
-    mockedCompareIacKey.mockResolvedValue('no_integrations');
+    mockedGetIacKeyOutcome.mockResolvedValue('no_integrations');
 
     const counts = await runIacUpgradeCheckTask(signal);
 
-    expect(mockedCompareIacKey).toHaveBeenCalledWith(
+    expect(mockedGetIacKeyOutcome).toHaveBeenCalledWith(
       mockSoClient,
       expect.anything(),
       [],
@@ -153,7 +153,7 @@ describe('iac_upgrade_check_task', () => {
       .mockResolvedValueOnce([
         { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
       ]);
-    mockedCompareIacKey.mockResolvedValue('matches');
+    mockedGetIacKeyOutcome.mockResolvedValue('matches');
     mockSoClient.update.mockResolvedValue({});
 
     const counts = await runIacUpgradeCheckTask(signal);
@@ -187,7 +187,7 @@ describe('iac_upgrade_check_task', () => {
         ],
       ])
     );
-    mockedCompareIacKey.mockResolvedValue('matches');
+    mockedGetIacKeyOutcome.mockResolvedValue('matches');
     mockSoClient.update.mockRejectedValueOnce(new Error('ES write failed')).mockResolvedValue({});
 
     const counts = await runIacUpgradeCheckTask(signal);
@@ -208,7 +208,7 @@ describe('iac_upgrade_check_task', () => {
           [makeConnector('c1', { iac_key: 'sha256:a', iac_upgrade_status: 'upgrade_available' })],
         ])
       );
-      mockedCompareIacKey.mockResolvedValue('matches');
+      mockedGetIacKeyOutcome.mockResolvedValue('matches');
       mockSoClient.update.mockResolvedValue({});
 
       await runIacUpgradeCheckTask(signal);
@@ -224,7 +224,7 @@ describe('iac_upgrade_check_task', () => {
           [makeConnector('c1', { iac_key: 'sha256:a', iac_upgrade_status: 'up_to_date' })],
         ])
       );
-      mockedCompareIacKey.mockResolvedValue('matches');
+      mockedGetIacKeyOutcome.mockResolvedValue('matches');
       mockSoClient.update.mockResolvedValue({});
 
       await runIacUpgradeCheckTask(signal);

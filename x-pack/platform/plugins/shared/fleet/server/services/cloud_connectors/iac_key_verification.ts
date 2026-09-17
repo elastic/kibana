@@ -20,11 +20,15 @@ import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector
 import type { IacUpgradeStatus } from '../../../common/types/models/cloud_connector';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import type { CloudConnectorSOAttributes } from '../../types/so_attributes';
-import { IacProvisionerRequestError, IacProvisionerUnavailableError } from '../../errors';
+import {
+  IacProvisionerRequestError,
+  IacProvisionerUnavailableError,
+  PackageNotFoundError,
+} from '../../errors';
 import { getErrorMessage } from '../../errors/utils';
 import { appContextService } from '../app_context';
 import { iacProvisionerService } from '../iac_provisioner';
-import { buildIacProvisionerIntegrations } from '../iac_provisioner_integrations';
+import { buildIacProvisionerIntegrations, isBuildError } from '../iac_provisioner_integrations';
 import {
   reportIacProvisionerKeyVerificationCompleted,
   reportIacProvisionerRenderCompleted,
@@ -52,7 +56,7 @@ export interface IacKeyVerification {
   integrations: IacIntegrationSelection[];
 }
 
-export interface CheckIacTemplateOptions {
+export interface IacKeyOutcomeOptions {
   /** Telemetry flow for the render_requested/completed events. */
   flow: IacProvisionerRenderFlow;
   /** Short label for log lines, e.g. `connector cc-1`. */
@@ -60,69 +64,43 @@ export interface CheckIacTemplateOptions {
 }
 
 /**
- * IaCP's verdict on the stored digest for this integration set, or undefined when it cannot be
- * determined (provider unreachable, invalid provider body, unknown package, nothing renderable).
- * Undefined always means "fail open" for callers.
- * Callers must already have checked `isIacProvisionerSupportedFor` (an IaCP-disabled config error
- * would otherwise be reported as a failed render) and must hold a digest to compare — a connector
- * without one is `no_key`, which `compareIacKey` answers without a provider call.
+ * The decision both the verify route and the daily upgrade task run for a connector's integration
+ * set. Nothing here compares keys: IaCP does, answering `render` for the stored `iac_key` (its
+ * `templateSha`). In order:
+ * - `unsupported_provider`: not AWS, or IaCP is not enabled for it.
+ * - `no_integrations`: the set is empty.
+ * - `key_unavailable` (fail open): the set does not resolve against the package manifests, or
+ *   IaCP could not answer. The daily task leaves the stored status alone on this outcome.
+ * - `no_key`: no stored digest, so the static template is deployed. Reported without asking
+ *   IaCP, but only once the saved set is known to be renderable, so the Update the callout offers
+ *   can actually succeed.
+ * - `key_mismatch` / `matches`: IaCP's `render` verdict.
+ * Never throws for IaCP or registry problems; SO errors from the caller's own reads propagate
+ * before this runs.
  */
-export const checkIacTemplate = async (
+export const getIacKeyOutcome = async (
   soClient: SavedObjectsClientContract,
-  provider: typeof AWS_CLOUD_PROVIDER,
+  {
+    cloudProvider,
+    iac_key: storedKey,
+  }: Pick<CloudConnectorSOAttributes, 'cloudProvider' | 'iac_key'>,
   selections: IacIntegrationSelection[],
-  storedSha: string,
-  { flow, contextForLog }: CheckIacTemplateOptions
-): Promise<{ render: boolean; templateSha: string } | undefined> => {
+  { flow, contextForLog }: IacKeyOutcomeOptions
+): Promise<IacKeyVerificationOutcome> => {
+  // The literal comparison narrows the provider for the render call; the gate adds the
+  // "IaCP enabled" half.
+  if (
+    cloudProvider !== AWS_CLOUD_PROVIDER ||
+    !(await isIacProvisionerSupportedFor(cloudProvider))
+  ) {
+    return 'unsupported_provider';
+  }
+  if (selections.length === 0) {
+    return 'no_integrations';
+  }
   const logger = appContextService.getLogger().get('IacKeyVerification');
   const startTime = Date.now();
-  try {
-    // Lenient mode returns a package that no longer exists in `skipped` instead of throwing.
-    const { integrations, skipped, dropped } = await buildIacProvisionerIntegrations({
-      savedObjectsClient: soClient,
-      requestedIntegrations: selections,
-      mode: 'lenient',
-    });
-    // The render route (strict) rejects any set with a skipped package or a dropped template or
-    // input, so a digest computed over the survivors could never describe what the user deployed
-    // — and an "upgrade available" verdict would send the browser into a render that 400s.
-    // Cannot compare → fail open.
-    if (integrations.length === 0 || skipped.length > 0 || dropped.length > 0) {
-      const detail = `renderable: ${integrations.length}, skipped: ${
-        skipped.join(',') || 'none'
-      }, dropped: ${dropped.join(',') || 'none'}`;
-      if (dropped.length > 0) {
-        logger.warn(
-          `IaC template check skipped for ${contextForLog} (fail open): the connector's policies enable entries its packages no longer declare (${detail})`
-        );
-      } else {
-        logger.debug(
-          `No comparable ${provider} integration set for ${contextForLog} (${detail}); nothing to compare`
-        );
-      }
-      return undefined;
-    }
-    reportIacProvisionerRenderRequested({ flow, integrationCount: integrations.length });
-    // The client rejects a body without render/templateSha (IacProvisionerUnavailableError),
-    // so a resolved response always carries the verdict.
-    const { render, templateSha } = await iacProvisionerService.renderTemplate({
-      provider,
-      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
-      integrations,
-      templateSha: storedSha,
-    });
-    reportIacProvisionerRenderCompleted({
-      flow,
-      success: true,
-      httpStatus: 200,
-      errorCodes: [],
-      latencyMs: Date.now() - startTime,
-    });
-    logger.debug(
-      `Provider compared ${contextForLog}: stored ${storedSha}, current ${templateSha}, render=${render}`
-    );
-    return { render, templateSha };
-  } catch (error) {
+  const failOpen = (error: unknown): IacKeyVerificationOutcome => {
     // Mirror the render route's telemetry mapping: provider status when we have one, 500 for
     // anything else; 0 is reserved for "no response".
     const httpStatus =
@@ -140,56 +118,71 @@ export const checkIacTemplate = async (
     logger.warn(
       `IaC template check skipped for ${contextForLog} (fail open): ${getErrorMessage(error)}`
     );
-    return undefined;
-  }
-};
+    return 'key_unavailable';
+  };
 
-/**
- * The shared comparison both the verify route and the daily upgrade task run: gate the provider,
- * then let IaCP compare the connector's stored `iac_key` (IaCP's `templateSha`) with what it would
- * render now. Never throws for IaCP problems (`key_unavailable` = fail open); SO errors from the
- * caller's own reads propagate before this runs.
- */
-export const compareIacKey = async (
-  soClient: SavedObjectsClientContract,
-  {
-    cloudProvider,
-    iac_key: storedKey,
-  }: Pick<CloudConnectorSOAttributes, 'cloudProvider' | 'iac_key'>,
-  integrations: IacIntegrationSelection[],
-  { flow, contextForLog }: CheckIacTemplateOptions
-): Promise<IacKeyVerificationOutcome> => {
-  // The literal comparison narrows the provider for the render call; the gate adds the
-  // "IaCP enabled" half.
-  if (
-    cloudProvider !== AWS_CLOUD_PROVIDER ||
-    !(await isIacProvisionerSupportedFor(cloudProvider))
-  ) {
-    return 'unsupported_provider';
+  // The browser's render route rejects any set with a package, template or input the manifests
+  // do not declare, so an "upgrade available" verdict computed over the surviving entries would
+  // send the user into a render that 400s. A stale connector therefore cannot be compared at
+  // all: fail open without a render. This runs before the `no_key` answer for the same reason.
+  let built: Awaited<ReturnType<typeof buildIacProvisionerIntegrations>>;
+  try {
+    built = await buildIacProvisionerIntegrations({
+      savedObjectsClient: soClient,
+      requestedIntegrations: selections,
+    });
+  } catch (error) {
+    if (error instanceof PackageNotFoundError) {
+      logger.debug(
+        `No comparable ${cloudProvider} integration set for ${contextForLog}: a package of the connector is not installed or in the registry; nothing to compare`
+      );
+      return 'key_unavailable';
+    }
+    return failOpen(error);
   }
-  if (integrations.length === 0) {
-    return 'no_integrations';
+  if (isBuildError(built)) {
+    logger.warn(
+      `IaC template check skipped for ${contextForLog} (fail open): the connector's policies enable entries its packages no longer declare: ${built.errorMessage}`
+    );
+    return 'key_unavailable';
   }
-  const logger = appContextService.getLogger().get('IacKeyVerification');
-  // No stored digest means the static template is deployed — a fact about this connector
-  // that holds whether or not IaCP is reachable, so it is reported without asking.
+  // Non-empty selections either all resolve or fail above, so `integrations` is never empty here.
+  const { integrations } = built;
+
   if (!storedKey?.trim()) {
     logger.debug(`No stored IaC key for ${contextForLog}; static template deployed`);
     return 'no_key';
   }
+  const storedSha = storedKey.trim();
   logger.debug(
-    `Comparing stored key ${storedKey} for ${contextForLog} against integration set ${JSON.stringify(
-      integrations
+    `Comparing stored key ${storedSha} for ${contextForLog} against integration set ${JSON.stringify(
+      selections
     )}`
   );
-  const result = await checkIacTemplate(soClient, cloudProvider, integrations, storedKey.trim(), {
-    flow,
-    contextForLog,
-  });
-  if (result === undefined) {
-    return 'key_unavailable';
+  try {
+    reportIacProvisionerRenderRequested({ flow, integrationCount: integrations.length });
+    // The client rejects a body without render/templateSha (IacProvisionerUnavailableError),
+    // so a resolved response always carries the verdict.
+    const { render, templateSha } = await iacProvisionerService.renderTemplate({
+      provider: cloudProvider,
+      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
+      integrations,
+      templateSha: storedSha,
+    });
+    reportIacProvisionerRenderCompleted({
+      flow,
+      success: true,
+      httpStatus: 200,
+      errorCodes: [],
+      latencyMs: Date.now() - startTime,
+    });
+    logger.debug(
+      `Provider compared ${contextForLog}: stored ${storedSha}, current ${templateSha}, render=${render}`
+    );
+    return render ? 'key_mismatch' : 'matches';
+  } catch (error) {
+    return failOpen(error);
   }
-  return result.render ? 'key_mismatch' : 'matches';
 };
 
 /**
@@ -323,7 +316,7 @@ export const verifyCloudConnectorIacKey = async (
     return { matches: !reason, reason, outcome, deploymentId, region, integrations };
   };
 
-  const outcome = await compareIacKey(soClient, attributes, integrations, {
+  const outcome = await getIacKeyOutcome(soClient, attributes, integrations, {
     flow: IAC_KEY_CHECK_FLOW,
     contextForLog: `connector ${cloudConnectorId}`,
   });

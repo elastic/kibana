@@ -20,8 +20,8 @@ import type { IacUpgradeStatus } from '../../common/types/models/cloud_connector
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import { appContextService } from '../services';
 import {
-  compareIacKey,
   getCloudConnectorIntegrationSelections,
+  getIacKeyOutcome,
   toUpgradeStatus,
 } from '../services/cloud_connectors';
 import { reportIacProvisionerUpgradeCheckCompleted } from '../services/telemetry/iac_provisioner_telemetry';
@@ -160,13 +160,13 @@ const checkConnector = async (
   logger: Logger
 ): Promise<ConnectorOutcome> => {
   const selections = await getCloudConnectorIntegrationSelections(soClient, id);
-  const outcome = await compareIacKey(soClient, attributes, selections, {
+  const outcome = await getIacKeyOutcome(soClient, attributes, selections, {
     flow: IAC_UPGRADE_TASK_FLOW,
     contextForLog: `connector ${id}`,
   });
   const status = toUpgradeStatus(outcome);
   if (status === undefined) {
-    // checkIacTemplate already warned for key_unavailable; the other two are expected states.
+    // getIacKeyOutcome already warned for key_unavailable; the other two are expected states.
     logger.debug(`${IAC_UPGRADE_CHECK_TASK} Connector ${id} not comparable (${outcome}), skipping`);
     return 'skipped';
   }

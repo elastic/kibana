@@ -58,7 +58,6 @@ export const renderIacTemplateHandler: FleetRequestHandler<
     const built = await buildIacProvisionerIntegrations({
       savedObjectsClient: internalSoClient,
       requestedIntegrations,
-      mode: 'strict',
     });
     if (isBuildError(built)) {
       return response.badRequest({ body: { message: built.errorMessage } });

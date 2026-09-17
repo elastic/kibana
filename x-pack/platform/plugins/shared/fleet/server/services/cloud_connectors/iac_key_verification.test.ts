@@ -9,7 +9,11 @@ import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mock
 
 import type { CloudConnectorSOAttributes } from '../../types/so_attributes';
 
-import { IacProvisionerRequestError, IacProvisionerUnavailableError } from '../../errors';
+import {
+  IacProvisionerRequestError,
+  IacProvisionerUnavailableError,
+  PackageNotFoundError,
+} from '../../errors';
 import { appContextService } from '../app_context';
 import { iacProvisionerService } from '../iac_provisioner';
 import {
@@ -23,15 +27,14 @@ import { buildIacProvisionerIntegrations } from '../iac_provisioner_integrations
 import { IAC_UPGRADE_TASK_FLOW } from '../../../common/telemetry/iac_provisioner_events';
 
 import { getCloudConnectorIntegrationSelections } from './iac_integrations';
-import {
-  checkIacTemplate,
-  compareIacKey,
-  verifyCloudConnectorIacKey,
-} from './iac_key_verification';
+import { getIacKeyOutcome, verifyCloudConnectorIacKey } from './iac_key_verification';
 
 jest.mock('../app_context');
 jest.mock('../iac_provisioner', () => ({ iacProvisionerService: { renderTemplate: jest.fn() } }));
-jest.mock('../iac_provisioner_integrations');
+jest.mock('../iac_provisioner_integrations', () => ({
+  ...jest.requireActual('../iac_provisioner_integrations'),
+  buildIacProvisionerIntegrations: jest.fn(),
+}));
 jest.mock('../utils/iac_provisioner');
 jest.mock('../telemetry/iac_provisioner_telemetry');
 jest.mock('./iac_integrations', () => ({
@@ -44,11 +47,10 @@ const mockedSupported = jest.mocked(isIacProvisionerSupportedFor);
 const mockedSelections = jest.mocked(getCloudConnectorIntegrationSelections);
 const mockedResolve = jest.mocked(buildIacProvisionerIntegrations);
 
-/** The lenient call `checkIacTemplate` makes for a merged selection set. */
-const lenientBuild = (requestedIntegrations: unknown) => ({
+/** The resolver call `getIacKeyOutcome` makes for a merged selection set. */
+const resolveCall = (requestedIntegrations: unknown) => ({
   savedObjectsClient: soClient,
   requestedIntegrations,
-  mode: 'lenient',
 });
 
 const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/s/uuid';
@@ -62,8 +64,11 @@ const RESOLVED_AWS = {
       policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }],
     },
   ],
-  skipped: [] as string[],
-  dropped: [] as string[],
+};
+
+/** The resolver's answer for a connector whose policies enable an input the package dropped. */
+const STALE_BUILD_ERROR = {
+  errorMessage: 'aws policy template cloudtrail has no inputs named aws-old',
 };
 
 /** The provider's answer: `render` is its verdict on the digest we sent. */
@@ -83,24 +88,81 @@ const connector = (attributes: Partial<CloudConnectorSOAttributes>) =>
     attributes: { name: 'c', cloudProvider: 'aws', vars: {}, ...attributes },
   } as any);
 
-describe('checkIacTemplate', () => {
+describe('getIacKeyOutcome', () => {
   const selections = [
     { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
   ];
-  const opts = { flow: IAC_UPGRADE_TASK_FLOW, contextForLog: 'connector x' } as const;
+  const opts = { flow: IAC_UPGRADE_TASK_FLOW, contextForLog: 'connector cc-1' } as const;
+  const keyed = { cloudProvider: 'aws', iac_key: 'sha256:stored' } as const;
+  const keyless = { cloudProvider: 'aws', iac_key: undefined } as const;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
+    mockedSupported.mockResolvedValue(true);
     mockedResolve.mockResolvedValue(RESOLVED_AWS);
   });
 
-  it('sends the stored digest and returns the provider verdict, reporting telemetry', async () => {
+  it('returns unsupported_provider for a non-AWS connector without resolving or rendering', async () => {
+    const result = await getIacKeyOutcome(
+      soClient,
+      { cloudProvider: 'azure', iac_key: 'sha256:stored' },
+      selections,
+      opts
+    );
+
+    expect(result).toBe('unsupported_provider');
+    expect(mockedSupported).not.toHaveBeenCalled();
+    expect(mockedResolve).not.toHaveBeenCalled();
+    expect(mockedRender).not.toHaveBeenCalled();
+  });
+
+  it('returns unsupported_provider when IaCP is not enabled for the provider', async () => {
+    mockedSupported.mockResolvedValue(false);
+
+    const result = await getIacKeyOutcome(soClient, keyed, selections, opts);
+
+    expect(result).toBe('unsupported_provider');
+    expect(mockedResolve).not.toHaveBeenCalled();
+    expect(mockedRender).not.toHaveBeenCalled();
+  });
+
+  it('returns no_integrations when the selection list is empty', async () => {
+    const result = await getIacKeyOutcome(soClient, keyed, [], opts);
+
+    expect(result).toBe('no_integrations');
+    expect(mockedResolve).not.toHaveBeenCalled();
+    expect(mockedRender).not.toHaveBeenCalled();
+  });
+
+  it('returns no_key without asking the provider once the set resolves and nothing is stored', async () => {
+    const result = await getIacKeyOutcome(soClient, keyless, selections, opts);
+
+    expect(result).toBe('no_key');
+    expect(mockedResolve).toHaveBeenCalledWith(resolveCall(selections));
+    expect(mockedRender).not.toHaveBeenCalled();
+    expect(reportIacProvisionerRenderRequested).not.toHaveBeenCalled();
+  });
+
+  it('returns key_unavailable, not no_key, for a keyless connector whose set no longer resolves', async () => {
+    // The flyout's Update would otherwise send this very set through the strict render route,
+    // which rejects it: a permanent callout the user could never clear.
+    mockedResolve.mockResolvedValueOnce(STALE_BUILD_ERROR);
+
+    const result = await getIacKeyOutcome(soClient, keyless, selections, opts);
+
+    expect(result).toBe('key_unavailable');
+    expect(mockedRender).not.toHaveBeenCalled();
+    expect(reportIacProvisionerRenderRequested).not.toHaveBeenCalled();
+    expect(reportIacProvisionerRenderCompleted).not.toHaveBeenCalled();
+  });
+
+  it('returns matches when the provider says the stored digest still holds, reporting telemetry', async () => {
     mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:stored'));
 
-    const result = await checkIacTemplate(soClient, 'aws', selections, 'sha256:stored', opts);
+    const result = await getIacKeyOutcome(soClient, keyed, selections, opts);
 
-    expect(result).toEqual({ render: false, templateSha: 'sha256:stored' });
+    expect(result).toBe('matches');
     expect(mockedRender).toHaveBeenCalledWith({
       provider: 'aws',
       workflow: 'federated_identity',
@@ -115,64 +177,22 @@ describe('checkIacTemplate', () => {
     );
   });
 
-  it('returns render:true when the provider says the template must be applied', async () => {
-    mockedRender.mockResolvedValueOnce(rendered(true));
+  it('returns key_mismatch when the provider says the template must be applied', async () => {
+    mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
 
-    const result = await checkIacTemplate(soClient, 'aws', selections, 'sha256:stored', opts);
+    const result = await getIacKeyOutcome(soClient, keyed, selections, opts);
 
-    expect(result).toEqual({ render: true, templateSha: 'sha256:current' });
+    expect(result).toBe('key_mismatch');
   });
 
-  it('fails open when the provider answers without render/templateSha', async () => {
-    // A provider predating the contract cannot tell us whether the digest still holds; the
-    // client rejects such a body as an availability problem.
-    mockedRender.mockRejectedValueOnce(
-      new IacProvisionerUnavailableError('provider returned an invalid render body')
-    );
-
-    const result = await checkIacTemplate(soClient, 'aws', selections, 'sha256:stored', opts);
-
-    expect(result).toBeUndefined();
-    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, httpStatus: 0 })
-    );
-  });
-
-  it('fails open when nothing is renderable for the provider', async () => {
-    mockedResolve.mockResolvedValueOnce({ integrations: [], skipped: ['aws'], dropped: [] });
-
-    const result = await checkIacTemplate(soClient, 'aws', selections, 'sha256:stored', opts);
-
-    expect(result).toBeUndefined();
-    expect(mockedRender).not.toHaveBeenCalled();
-  });
-
-  it('fails open when the resolver dropped a template or input, without rendering the survivors', async () => {
-    // A digest over the reduced set would say "upgrade available", but the strict render route
-    // the browser then calls rejects the very input that was dropped — a dead end.
-    const logger = loggingSystemMock.createLogger();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
-    mockedResolve.mockResolvedValueOnce({
-      ...RESOLVED_AWS,
-      dropped: ['aws/cloudtrail/aws-old'],
-    });
-
-    const result = await checkIacTemplate(soClient, 'aws', selections, 'sha256:stored', opts);
-
-    expect(result).toBeUndefined();
-    expect(mockedRender).not.toHaveBeenCalled();
-    expect(reportIacProvisionerRenderRequested).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('aws/cloudtrail/aws-old'));
-  });
-
-  it('fails open and reports the provider status and codes on a render error', async () => {
+  it('fails open with the provider status and codes when IaCP rejects the render', async () => {
     mockedRender.mockRejectedValueOnce(
       new IacProvisionerRequestError('rejected', 422, ['render.blueprint_not_found'])
     );
 
-    const result = await checkIacTemplate(soClient, 'aws', selections, 'sha256:stored', opts);
+    const result = await getIacKeyOutcome(soClient, keyed, selections, opts);
 
-    expect(result).toBeUndefined();
+    expect(result).toBe('key_unavailable');
     expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
@@ -182,12 +202,57 @@ describe('checkIacTemplate', () => {
     );
   });
 
-  it('reports httpStatus 500 for an unexpected failure', async () => {
-    mockedRender.mockRejectedValueOnce(new Error('boom'));
+  it('fails open with httpStatus 0 when the provider answers without render/templateSha', async () => {
+    // A provider predating the contract cannot tell us whether the digest still holds; the
+    // client rejects such a body as an availability problem with no status.
+    mockedRender.mockRejectedValueOnce(
+      new IacProvisionerUnavailableError('provider returned an invalid render body')
+    );
 
-    expect(
-      await checkIacTemplate(soClient, 'aws', selections, 'sha256:stored', opts)
-    ).toBeUndefined();
+    const result = await getIacKeyOutcome(soClient, keyed, selections, opts);
+
+    expect(result).toBe('key_unavailable');
+    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, httpStatus: 0 })
+    );
+  });
+
+  it('fails open without render telemetry when a package of the connector is not found', async () => {
+    mockedResolve.mockRejectedValueOnce(new PackageNotFoundError('[aws] package not found'));
+
+    const result = await getIacKeyOutcome(soClient, keyed, selections, opts);
+
+    expect(result).toBe('key_unavailable');
+    expect(mockedRender).not.toHaveBeenCalled();
+    expect(reportIacProvisionerRenderRequested).not.toHaveBeenCalled();
+    expect(reportIacProvisionerRenderCompleted).not.toHaveBeenCalled();
+  });
+
+  it('fails open without rendering when a policy enables an entry its package no longer declares', async () => {
+    // The render route the browser then calls rejects that very entry, so an "upgrade available"
+    // verdict over the surviving entries would be a dead end.
+    const logger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
+    mockedResolve.mockResolvedValueOnce(STALE_BUILD_ERROR);
+
+    const result = await getIacKeyOutcome(soClient, keyed, selections, opts);
+
+    expect(result).toBe('key_unavailable');
+    expect(mockedRender).not.toHaveBeenCalled();
+    expect(reportIacProvisionerRenderRequested).not.toHaveBeenCalled();
+    expect(reportIacProvisionerRenderCompleted).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(STALE_BUILD_ERROR.errorMessage)
+    );
+  });
+
+  it('fails open with failed-render telemetry when the resolver fails for another reason', async () => {
+    mockedResolve.mockRejectedValueOnce(new Error('registry unavailable'));
+
+    const result = await getIacKeyOutcome(soClient, keyed, selections, opts);
+
+    expect(result).toBe('key_unavailable');
+    expect(mockedRender).not.toHaveBeenCalled();
     expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ success: false, httpStatus: 500 })
     );
@@ -242,7 +307,7 @@ describe('verifyCloudConnectorIacKey', () => {
         ],
       },
     ];
-    expect(mockedResolve).toHaveBeenCalledWith(lenientBuild(merged));
+    expect(mockedResolve).toHaveBeenCalledWith(resolveCall(merged));
     expect(result).toEqual({
       matches: true,
       outcome: 'matches',
@@ -284,7 +349,7 @@ describe('verifyCloudConnectorIacKey', () => {
         policyTemplates: [{ name: 'generic', enabledInputs: ['aws-s3'] }],
       },
     ];
-    expect(mockedResolve).toHaveBeenCalledWith(lenientBuild(merged));
+    expect(mockedResolve).toHaveBeenCalledWith(resolveCall(merged));
     expect(result.integrations).toEqual(merged);
     expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ surface: 'onboarding', outcome: 'matches', integrationCount: 2 })
@@ -302,7 +367,7 @@ describe('verifyCloudConnectorIacKey', () => {
 
     expect(result.matches).toBe(true);
     expect(mockedResolve).toHaveBeenCalledWith(
-      lenientBuild([
+      resolveCall([
         { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
       ])
     );
@@ -397,9 +462,9 @@ describe('verifyCloudConnectorIacKey', () => {
     );
   });
 
-  it('fails open when nothing is renderable for the provider', async () => {
+  it('fails open when a package of the connector is not installed or in the registry', async () => {
     soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
-    mockedResolve.mockResolvedValueOnce({ integrations: [], skipped: ['aws'], dropped: [] });
+    mockedResolve.mockRejectedValueOnce(new PackageNotFoundError('[aws] package not found'));
 
     const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
 
@@ -432,24 +497,11 @@ describe('verifyCloudConnectorIacKey', () => {
     );
   });
 
-  it('fails open when any attached package has no inputs to render from', async () => {
-    soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
-    mockedResolve.mockResolvedValueOnce({ ...RESOLVED_AWS, skipped: ['other_pkg'] });
-
-    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
-
-    expect(result.matches).toBe(true);
-    expect(mockedRender).not.toHaveBeenCalled();
-    expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ outcome: 'key_unavailable' })
-    );
-  });
-
-  it('fails open when a package still renders but lost a template or input', async () => {
+  it('fails open when a policy enables an entry its package no longer declares', async () => {
     soClient.get.mockResolvedValueOnce(
       connector({ iac_key: 'sha256:old', iac_upgrade_status: 'up_to_date' })
     );
-    mockedResolve.mockResolvedValueOnce({ ...RESOLVED_AWS, dropped: ['aws/guardduty'] });
+    mockedResolve.mockResolvedValueOnce(STALE_BUILD_ERROR);
 
     const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
 
@@ -676,89 +728,5 @@ describe('verifyCloudConnectorIacKey', () => {
         'Failed to store IaC upgrade status for connector cc-1: so is down'
       );
     });
-  });
-});
-
-describe('compareIacKey', () => {
-  const selections = [
-    { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
-  ];
-  const opts = { flow: IAC_UPGRADE_TASK_FLOW, contextForLog: 'connector cc-1' } as const;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
-    mockedSupported.mockResolvedValue(true);
-    mockedResolve.mockResolvedValue(RESOLVED_AWS);
-  });
-
-  it('returns unsupported_provider when IaCP does not support the provider', async () => {
-    mockedSupported.mockResolvedValue(false);
-    const result = await compareIacKey(
-      soClient,
-      { cloudProvider: 'aws', iac_key: 'sha256:old' },
-      selections,
-      opts
-    );
-    expect(result).toBe('unsupported_provider');
-    expect(mockedRender).not.toHaveBeenCalled();
-  });
-
-  it('returns no_integrations when the selection list is empty', async () => {
-    const result = await compareIacKey(
-      soClient,
-      { cloudProvider: 'aws', iac_key: 'sha256:old' },
-      [],
-      opts
-    );
-    expect(result).toBe('no_integrations');
-    expect(mockedRender).not.toHaveBeenCalled();
-  });
-
-  it('returns no_key without asking the provider when nothing is stored', async () => {
-    const result = await compareIacKey(
-      soClient,
-      { cloudProvider: 'aws', iac_key: undefined },
-      selections,
-      opts
-    );
-    expect(result).toBe('no_key');
-    expect(mockedRender).not.toHaveBeenCalled();
-  });
-
-  it('returns key_unavailable when IaCP cannot render (fail open)', async () => {
-    mockedResolve.mockResolvedValueOnce({ integrations: [], skipped: ['aws'], dropped: [] });
-    const result = await compareIacKey(
-      soClient,
-      { cloudProvider: 'aws', iac_key: 'sha256:old' },
-      selections,
-      opts
-    );
-    expect(result).toBe('key_unavailable');
-  });
-
-  it('returns key_mismatch when the provider says the template must be applied', async () => {
-    mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
-    const result = await compareIacKey(
-      soClient,
-      { cloudProvider: 'aws', iac_key: 'sha256:old' },
-      selections,
-      opts
-    );
-    expect(result).toBe('key_mismatch');
-    expect(mockedRender).toHaveBeenCalledWith(
-      expect.objectContaining({ templateSha: 'sha256:old' })
-    );
-  });
-
-  it('returns matches when the provider says the stored digest still holds', async () => {
-    mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
-    const result = await compareIacKey(
-      soClient,
-      { cloudProvider: 'aws', iac_key: 'sha256:same' },
-      selections,
-      opts
-    );
-    expect(result).toBe('matches');
   });
 });

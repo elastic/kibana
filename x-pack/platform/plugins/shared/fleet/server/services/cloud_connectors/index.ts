@@ -22,10 +22,9 @@ export {
 } from './iac_integrations';
 
 export {
-  checkIacTemplate,
-  compareIacKey,
+  getIacKeyOutcome,
   toUpgradeStatus,
   verifyCloudConnectorIacKey,
-  type CheckIacTemplateOptions,
+  type IacKeyOutcomeOptions,
   type IacKeyVerification,
 } from './iac_key_verification';
