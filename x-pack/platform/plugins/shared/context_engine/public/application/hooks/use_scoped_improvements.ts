@@ -37,9 +37,9 @@ export const useScopedImprovements = ({
 /**
  * Past decisions (applied and rejected) for one panel's actions.
  *
- * Fetched lazily: the query only fires when `enabled` is true, so history is not loaded until
- * the user opens the history accordion. The result is cached by react-query so reopening the
- * accordion does not re-fetch.
+ * Fetched eagerly when `enabled` is true (tied to the feedback loop feature flag, not to the
+ * accordion being opened). The result is cached by react-query so reopening the accordion does
+ * not re-fetch.
  */
 export const useScopedImprovementsHistory = ({
   aiIndexId,
