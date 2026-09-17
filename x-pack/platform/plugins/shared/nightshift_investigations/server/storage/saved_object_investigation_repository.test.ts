@@ -17,6 +17,7 @@ import type { InvestigationAttributes } from './types';
 const TYPE = NIGHTSHIFT_INVESTIGATION_SO_TYPE;
 
 const attributes: InvestigationAttributes = {
+  title: 'Test rule',
   status: 'running',
   subject_type: 'alert',
   subject_id: 'alert-1',
@@ -278,7 +279,7 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'checkout latency',
-          searchFields: ['subject_summary', 'summary', 'conclusion'],
+          searchFields: ['title', 'subject_summary', 'summary', 'conclusion'],
         })
       );
     });
@@ -387,7 +388,7 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'checkout',
-          searchFields: ['subject_summary', 'summary', 'conclusion'],
+          searchFields: ['title', 'subject_summary', 'summary', 'conclusion'],
         })
       );
     });
