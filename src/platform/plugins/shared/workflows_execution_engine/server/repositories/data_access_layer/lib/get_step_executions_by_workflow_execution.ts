@@ -25,6 +25,7 @@ export interface GetStepExecutionsByWorkflowExecutionParams {
  * Fetches all step executions for a workflow execution.
  * Uses mget (real-time, O(1)) when stepExecutionIds are available,
  * falls back to search for backward compatibility with older executions.
+ * Search uses start order (`startedAt:asc`) to match mget of the id list.
  */
 export const getStepExecutionsByWorkflowExecution = async ({
   stepExecutionsDataClient,
@@ -44,7 +45,8 @@ export const getStepExecutionsByWorkflowExecution = async ({
       match: { workflowRunId: workflowExecutionId },
     },
     ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
-    sort: 'startedAt:desc',
+    // Start order so the first `maxSteps` match mget of `stepExecutionIds`.
+    sort: 'startedAt:asc',
     size: maxSteps ?? DEFAULT_SEARCH_SIZE,
   });
 

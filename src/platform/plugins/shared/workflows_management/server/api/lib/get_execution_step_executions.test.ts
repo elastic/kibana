@@ -208,6 +208,7 @@ describe('getExecutionStepExecutions', () => {
     expect(mockStepDataClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         _source: { excludes: ['input', 'output'] },
+        sort: 'startedAt:asc',
       })
     );
     expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();

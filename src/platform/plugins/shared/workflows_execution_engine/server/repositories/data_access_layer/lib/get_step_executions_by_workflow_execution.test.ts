@@ -73,6 +73,7 @@ describe('getStepExecutionsByWorkflowExecution', () => {
     expect(stepExecutionsDataClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         size: 5000,
+        sort: 'startedAt:asc',
       })
     );
     expect(result.map((step) => step.id)).toEqual(['legacy']);
@@ -92,6 +93,7 @@ describe('getStepExecutionsByWorkflowExecution', () => {
     expect(stepExecutionsDataClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         size: 10_000,
+        sort: 'startedAt:asc',
       })
     );
   });

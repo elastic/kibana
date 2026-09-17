@@ -42,6 +42,11 @@ export interface SearchStepExecutionsParams {
   sourceIncludes?: string[];
   page?: number;
   size?: number;
+  /**
+   * Defaults to newest-first for workflow-level search. Single-run lists
+   * (execution detail) pass `startedAt:asc` so page 1 matches mget of `stepExecutionIds`.
+   */
+  sort?: 'startedAt:asc' | 'startedAt:desc';
   /** Datemath lower bound for filtering by startedAt. */
   startedAfter?: string;
   /** Datemath upper bound for filtering by startedAt. */
@@ -108,6 +113,7 @@ export const searchStepExecutions = async ({
   sourceIncludes,
   page,
   size,
+  sort = 'startedAt:desc',
   startedAfter,
   startedBefore,
 }: SearchStepExecutionsParams): Promise<StepExecutionListResult> => {
@@ -142,7 +148,7 @@ export const searchStepExecutions = async ({
     const response = await stepExecutionsDataClient.search({
       query: { bool: { must: mustQueries } },
       ...(sourceFilter ? { _source: sourceFilter } : {}),
-      sort: 'startedAt:desc',
+      sort,
       from,
       size: pageSize,
       track_total_hits: isPaginated,

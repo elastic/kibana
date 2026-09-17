@@ -66,6 +66,7 @@ const toResult = (
 /**
  * Lists step executions for a single workflow run, without input or output.
  * Uses `_mget` by `stepExecutionIds` when present; falls back to search for legacy docs.
+ * Both paths return start order (id-list order / `startedAt:asc`) so page 1 is the beginning of the run.
  */
 export const getExecutionStepExecutions = async ({
   workflowExecutionsDataClient,
@@ -129,6 +130,8 @@ export const getExecutionStepExecutions = async ({
         sourceExcludes: STEP_METADATA_SOURCE_EXCLUDES,
         page,
         size,
+        // Start order so page 1 matches mget of stepExecutionIds (append-on-start).
+        sort: 'startedAt:asc',
       })
     );
   } catch (error) {

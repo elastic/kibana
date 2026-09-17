@@ -113,6 +113,7 @@ describe('searchStepExecutions', () => {
         },
         from: 0,
         size: 50,
+        sort: 'startedAt:desc',
         track_total_hits: true,
       })
     );
@@ -136,11 +137,34 @@ describe('searchStepExecutions', () => {
       expect.objectContaining({
         from: 50,
         size: 50,
+        sort: 'startedAt:desc',
         track_total_hits: true,
       })
     );
     expect(result.total).toBe(3);
     expect(result.page).toBe(2);
     expect(result.size).toBe(50);
+  });
+
+  it('uses startedAt:asc when the caller passes sort', async () => {
+    mockStepDataClient.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 0 } },
+    } as any);
+
+    await searchStepExecutions({
+      ...baseParams,
+      stepExecutionsDataClient: mockStepDataClient,
+      logger: mockLogger,
+      workflowExecutionId: 'run-1',
+      page: 1,
+      size: 100,
+      sort: 'startedAt:asc',
+    });
+
+    expect(mockStepDataClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: 'startedAt:asc',
+      })
+    );
   });
 });
