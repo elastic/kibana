@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DISPLAY_NAME_STORAGE_KEY } from '../constants';
+import { DISPLAY_NAME_STORAGE_KEY, IGNORE_ATTR } from '../constants';
 import { buildAnchor } from '../lib/anchor';
 import { isSafeRelativePath } from '../lib/route';
 import { createSnapshot } from '../lib/snapshot';
@@ -68,7 +68,7 @@ export interface CommentsController {
   ignoreSelectors: readonly string[];
   start(): void;
   dispose(): void;
-  /** Leaving comment mode drops any comment being written. */
+  /** Leaving comment mode drops any comment being written; while one is being saved, the mode cannot be changed. */
   setActive(active: boolean): void;
   toggleActive(): void;
   setPanelMinimized(minimized: boolean): void;
@@ -106,6 +106,8 @@ const downloadJson = (filename: string, value: unknown) => {
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
+  // Layer UI: in comment mode, clicks on anything else are swallowed before they act.
+  link.setAttribute(IGNORE_ATTR, 'true');
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -280,7 +282,12 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     void load();
   };
 
-  const setActive = (active: boolean) =>
+  // Every way out of comment mode (toolbar button, panel, shortcut) ends here; a
+  // draft being saved must not be dropped by any of them, so the mode waits for it.
+  const setActive = (active: boolean) => {
+    if (store.getState().pending?.saving) {
+      return;
+    }
     store.setState({
       active,
       pending: null,
@@ -289,6 +296,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       guideId: null,
       ...(active ? {} : { panelMinimized: false }),
     });
+  };
 
   const endGuide = (guideId: string) => {
     if (store.getState().guideId === guideId) {

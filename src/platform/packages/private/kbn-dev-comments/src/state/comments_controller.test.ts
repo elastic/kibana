@@ -172,6 +172,7 @@ describe('createCommentsController', () => {
       controller.start();
       await flush();
 
+      controller.setActive(true);
       controller.pick(target(), { x: 5, y: 5 });
       const saving = controller.save('Hello', { attachScreenshot: false, displayName: 'Dana' });
       await flush();
@@ -184,10 +185,18 @@ describe('createCommentsController', () => {
         })
       );
 
-      // Neither moving nor discarding is possible meanwhile; Escape and the page keep the draft.
+      // Neither moving nor discarding is possible meanwhile: Escape keeps the draft,
+      // and comment mode cannot be left (toolbar button, panel, shortcut).
       controller.pick(target(), { x: 50, y: 5 });
       controller.cancelPending();
-      expect(controller.store.getState().pending?.saving).toBe(true);
+      controller.setActive(false);
+      controller.toggleActive();
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({
+          active: true,
+          pending: expect.objectContaining({ saving: true }),
+        })
+      );
 
       // The page changes under the save; the draft is dropped but the result is still added.
       await services.navigateToPath('/app/two');
@@ -196,6 +205,35 @@ describe('createCommentsController', () => {
       await saving;
       expect(controller.store.getState().comments.map(({ id }) => id)).toEqual(['created']);
       expect(controller.store.getState().activeThreadId).toBeNull();
+
+      controller.setActive(false);
+      expect(controller.store.getState().active).toBe(false);
+    });
+
+    it('lets comment mode be left once the save has settled, and reports failures while keeping the draft', async () => {
+      const { api, services } = createHost();
+      const controller = createCommentsController(services);
+      const create = deferred<Comment>();
+      api.create.mockReturnValueOnce(create.promise);
+      controller.start();
+
+      controller.setActive(true);
+      controller.pick(target(), { x: 5, y: 5 });
+      const saving = controller.save('Hello', { attachScreenshot: false, displayName: 'Dana' });
+      await flush();
+      controller.setActive(false);
+      expect(controller.store.getState().active).toBe(true);
+
+      create.reject(new Error('offline'));
+      await saving;
+      // The failed draft is back in the composer, and can now be given up with the mode.
+      expect(controller.store.getState().pending).toEqual(
+        expect.objectContaining({ element: target(), saving: false })
+      );
+      controller.setActive(false);
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ active: false, pending: null })
+      );
     });
 
     it('opens the new comment with its pin focused, and reports failures while keeping the draft', async () => {

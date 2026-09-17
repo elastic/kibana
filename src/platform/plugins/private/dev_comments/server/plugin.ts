@@ -9,6 +9,7 @@
 
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ConfigSchema } from './config';
+import { registerCommentsRoutes } from './routes';
 
 export class DevCommentsServerPlugin implements Plugin {
   private readonly logger: Logger;
@@ -22,19 +23,20 @@ export class DevCommentsServerPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup) {
-    // The storage code (hidden index, internal-user client, routes without
-    // authorization) is only ever loaded in dev mode.
+    // Nothing of the storage (hidden index, internal-user client, routes without
+    // authorization) exists outside dev mode. The routes are registered here and
+    // now, so they are in place before the browser can call them; the storage
+    // code itself is loaded once Kibana has started, the handlers wait for it.
     if (this.isEnabled && this.isDev) {
-      const router = core.http.createRouter();
       const client = core.getStartServices().then(async ([{ elasticsearch }]) => {
         const { CommentsClient } = await import('./comments_client');
         return new CommentsClient(elasticsearch.client.asInternalUser, this.logger);
       });
-      import('./routes')
-        .then(({ registerCommentsRoutes }) => registerCommentsRoutes(router, client))
-        .catch((error) => {
-          this.logger.error(`Failed to register the dev comments routes: ${error}`);
-        });
+      // Every request is answered with the failure again; this only keeps it from going unhandled meanwhile.
+      client.catch((error) => {
+        this.logger.error(`Failed to load the dev comments storage: ${error}`);
+      });
+      registerCommentsRoutes(core.http.createRouter(), client);
     }
     return {};
   }

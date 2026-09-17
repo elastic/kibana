@@ -122,6 +122,37 @@ describe('CommentModeOverlay', () => {
     expect(pageHandler).toHaveBeenCalledTimes(4);
   });
 
+  it('lets the download an export starts through', async () => {
+    // The Jest setup stubs `URL.createObjectURL` but not `revokeObjectURL`; jsdom cannot
+    // navigate, so the click is recorded and stopped at the window.
+    if (typeof URL.revokeObjectURL !== 'function') {
+      (URL as unknown as Record<string, unknown>).revokeObjectURL = () => {};
+    }
+    const clicks: Array<{ download: string; defaultPrevented: boolean }> = [];
+    const onWindowClick = (event: Event) => {
+      if (event.target instanceof HTMLAnchorElement) {
+        clicks.push({ download: event.target.download, defaultPrevented: event.defaultPrevented });
+      }
+      event.preventDefault();
+    };
+    window.addEventListener('click', onWindowClick);
+    jest.useFakeTimers();
+    const controller = renderOverlay();
+
+    try {
+      await controller.exportAll();
+      jest.runOnlyPendingTimers();
+    } finally {
+      jest.useRealTimers();
+      window.removeEventListener('click', onWindowClick);
+    }
+
+    expect(controller.store.getState().notice).toBeNull();
+    expect(clicks).toEqual([
+      { download: expect.stringMatching(/^comments-.*\.json$/), defaultPrevented: false },
+    ]);
+  });
+
   it('does not select the document body and leaves the layer and excluded UI alone', () => {
     const controller = renderOverlay();
     const hostHandler = jest.fn();

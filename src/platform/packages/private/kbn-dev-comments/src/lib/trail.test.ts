@@ -16,6 +16,14 @@ const render = (html: string) => {
   document.body.replaceChildren(...Array.from(parsed.body.childNodes));
 };
 
+// jsdom has no layout: elements get a box from `data-rect="x,y,width,height"` (default 10,10,100,20).
+const rectOf = (element: Element): DOMRect => {
+  const [x, y, width, height] = (element.getAttribute('data-rect') ?? '10,10,100,20')
+    .split(',')
+    .map(Number);
+  return { x, y, width, height, left: x, top: y, right: x + width, bottom: y + height } as DOMRect;
+};
+
 const query = (selector: string): HTMLElement => {
   const element = document.querySelector<HTMLElement>(selector);
   if (!element) {
@@ -48,6 +56,18 @@ describe('trail', () => {
   let recording = true;
   let recorder: TrailRecorder;
   const { location, navigate } = createLocation();
+
+  beforeAll(() => {
+    jest
+      .spyOn(Element.prototype, 'getBoundingClientRect')
+      .mockImplementation(function getBoundingClientRect(this: Element) {
+        return rectOf(this);
+      });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
   beforeEach(() => {
     recording = true;
@@ -141,6 +161,22 @@ describe('trail', () => {
 
     jest.advanceTimersByTime(500);
     expect(labels()).toEqual(['Open flyout', 'Open lazy flyout']);
+  });
+
+  it('records a control that showed a dialog kept mounted while hidden, not one that left it hidden', () => {
+    render(`
+      <button type="button" id="show">Show</button>
+      <button type="button" id="noop">Nothing</button>
+      <div role="dialog" data-rect="0,0,0,0">Kept in the DOM while hidden</div>
+    `);
+    const dialog = query('[role="dialog"]');
+    query('#show').addEventListener('click', () => dialog.setAttribute('data-rect', '0,0,300,200'));
+
+    query('#noop').click();
+    expect(labels()).toEqual([]);
+
+    query('#show').click();
+    expect(labels()).toEqual(['Show']);
   });
 
   it('does not credit a click with what a later click disclosed', () => {

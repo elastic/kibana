@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useContext, useEffect, type PropsWithChildren } from 'react';
-import { resolveAnchor, type ResolvedAnchor } from '../lib/anchor';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+  type PropsWithChildren,
+} from 'react';
+import type { ResolvedAnchor } from '../lib/anchor';
+import { createAnchorResolver } from '../lib/anchor_resolver';
 import { usePageComments } from './comments_context';
 import { layoutTracker, useLayoutTick } from './hooks';
 
@@ -21,15 +29,26 @@ const ResolvedAnchorsContext = createContext<ResolvedAnchors>(new Map());
  * Resolves the current page's anchors once per layout change for pins, panel
  * and guide alike, and has the layout tracker watch the elements found, so a
  * resize of one of them (an image loading, a panel growing) moves its pin.
+ * Elements found are kept while they are there; only anchors without one
+ * need a document search, and those are spaced out (see `AnchorResolver`).
  */
 export const ResolvedAnchorsProvider = ({ children }: PropsWithChildren) => {
   const comments = usePageComments();
   // Every layout tick re-renders the provider: the DOM may have changed under the anchors.
-  useLayoutTick();
+  const tick = useLayoutTick();
+  const [resolver] = useState(createAnchorResolver);
+  const [, retry] = useReducer((retries: number) => retries + 1, 0);
 
-  const resolved: ResolvedAnchors = new Map(
-    comments.map(({ id, anchor }) => [id, resolveAnchor(anchor)])
-  );
+  const { resolved, retryAt } = resolver.resolve(comments, { tick, now: Date.now() });
+
+  // Searches put off for being too frequent are made once their time has come, even on a page that went quiet.
+  useEffect(() => {
+    if (retryAt === undefined) {
+      return;
+    }
+    const timer = setTimeout(retry, Math.max(0, retryAt - Date.now()));
+    return () => clearTimeout(timer);
+  }, [retryAt]);
 
   // After every render, so the watched set follows what resolved; the tracker only diffs.
   useEffect(() => {

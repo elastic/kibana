@@ -18,7 +18,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { NewComment } from '../common';
-import { CommentsClient } from './comments_client';
+import { CommentsClient, RESERVATION_GRACE_MS } from './comments_client';
 import { COMMENTS_INDEX } from './ensure_index';
 import { CommentsLimitError } from './limit_error';
 import { MAX_COMMENTS, QUOTA_ID, REPLIES_MAX } from './schemas';
@@ -107,7 +107,9 @@ describe('CommentsClient', () => {
         expect.objectContaining({
           id: QUOTA_ID,
           retry_on_conflict: 5,
-          script: expect.objectContaining({ params: { increment: 1, max: MAX_COMMENTS } }),
+          script: expect.objectContaining({
+            params: { increment: 1, max: MAX_COMMENTS, now: expect.any(String) },
+          }),
         }),
         { ignore: [404], meta: true }
       );
@@ -166,7 +168,7 @@ describe('CommentsClient', () => {
         {
           index: COMMENTS_INDEX,
           id: QUOTA_ID,
-          document: { count: 4 },
+          document: { count: 4, reservedAt: expect.any(String) },
           if_seq_no: 7,
           if_primary_term: 2,
         },
@@ -179,6 +181,38 @@ describe('CommentsClient', () => {
           document: expect.objectContaining(input),
         })
       );
+    });
+
+    it('does not recount while room claimed moments ago may still be unwritten', async () => {
+      // Another writer claimed the last slot and has not indexed its comment yet: the
+      // count would not include it, and correcting the quota from it would hand out its room.
+      const claimedAt = (msAgo: number) => new Date(Date.now() - msAgo).toISOString();
+      esClient.update.mockResponseOnce(updateResponse('noop'));
+      esClient.count.mockResponseOnce(countResponse(MAX_COMMENTS - 1));
+      esClient.get.mockResponseOnce({
+        ...quotaResponse,
+        _source: { count: MAX_COMMENTS, reservedAt: claimedAt(RESERVATION_GRACE_MS / 2) },
+      });
+      await expect(client().create(input)).rejects.toThrow(CommentsLimitError);
+      expect(esClient.index).not.toHaveBeenCalled();
+
+      // Once every claim is old enough to have been written or given up, the count is trusted.
+      esClient.update.mockResponseOnce(updateResponse('noop'));
+      esClient.count.mockResponseOnce(countResponse(MAX_COMMENTS - 1));
+      esClient.get.mockResponseOnce({
+        ...quotaResponse,
+        _source: { count: MAX_COMMENTS, reservedAt: claimedAt(RESERVATION_GRACE_MS) },
+      });
+      await client().create(input);
+      expect(esClient.index).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: QUOTA_ID,
+          document: { count: MAX_COMMENTS, reservedAt: expect.any(String) },
+        }),
+        expect.anything()
+      );
+      expect(esClient.index).toHaveBeenCalledTimes(2);
     });
 
     it('claims again when another writer corrected the quota first', async () => {

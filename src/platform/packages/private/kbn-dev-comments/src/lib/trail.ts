@@ -8,7 +8,7 @@
  */
 
 import { TRAIL_MAX_STEPS } from '../constants';
-import { buildAnchor, isIgnored, labelOf } from './anchor';
+import { buildAnchor, isIgnored, isVisible, labelOf } from './anchor';
 import type { CommentsLocationService, TrailStep } from '../types';
 
 /**
@@ -45,7 +45,8 @@ const EXCLUDED_SELECTOR = [
 
 /**
  * What a click that disclosed UI leaves behind: the control expanded or
- * selected, or a dialog, menu, listbox or tab panel that was not there before.
+ * selected, or a dialog, menu, listbox or tab panel that was not showing
+ * before, whether it was added to the page or was already there hidden.
  * Only such clicks are recorded. A button that changed data instead (deleted,
  * acknowledged, enabled something) reveals nothing, and is never asked for.
  */
@@ -74,12 +75,15 @@ export const isTrailControl = (element: Element): boolean =>
   !element.matches(EXCLUDED_SELECTOR) &&
   !isDefaultSubmit(element);
 
+/** The disclosure elements showing right now; hidden ones (an inactive panel, a closed dialog kept mounted) do not count. */
 const disclosed = (): ReadonlySet<Element> =>
-  new Set(document.querySelectorAll(DISCLOSED_SELECTOR));
+  new Set(Array.from(document.querySelectorAll(DISCLOSED_SELECTOR)).filter(isVisible));
 
-/** Whether something is disclosed now that was not `before` the click. */
+/** Whether something is showing now that was not `before` the click. */
 const hasNewDisclosure = (before: ReadonlySet<Element>): boolean =>
-  Array.from(document.querySelectorAll(DISCLOSED_SELECTOR)).some((element) => !before.has(element));
+  Array.from(document.querySelectorAll(DISCLOSED_SELECTOR)).some(
+    (element) => !before.has(element) && isVisible(element)
+  );
 
 interface Candidate {
   control: Element;

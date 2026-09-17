@@ -30,11 +30,20 @@ type StoredComment = Omit<Comment, 'id' | 'trail' | 'route'> & {
 };
 
 interface QuotaDocument {
+  /** Comments stored, plus room claimed for comments that are being written. */
   count: number;
+  /** When room was last claimed; absent from documents written before it was recorded. */
+  reservedAt?: string;
 }
 
 const SNAPSHOT_IMAGE_FIELD = 'snapshot.image';
 const RETRY_ON_CONFLICT = 5;
+/**
+ * How long room claimed in the quota may stay unwritten: a write is either
+ * indexed or has failed well within this (the request itself times out sooner).
+ * The quota is only recounted once no claim can be in flight.
+ */
+export const RESERVATION_GRACE_MS = 60_000;
 /** The quota document lives in the same index and is never a comment. */
 const COMMENTS_QUERY = { bool: { must_not: { ids: { values: [QUOTA_ID] } } } };
 
@@ -60,12 +69,15 @@ const PATCH_SCRIPT = `
   }
 `;
 
-/** Moves the comment count by `increment` unless that would exceed `max`; a no-op result means it would. */
+/** Moves the comment count by `increment` unless that would exceed `max`; a no-op result means it would. Claims are timestamped. */
 const QUOTA_SCRIPT = `
   if (params.increment > 0 && ctx._source.count + params.increment > params.max) {
     ctx.op = 'noop';
   } else {
     ctx._source.count = Math.max(0, ctx._source.count + params.increment);
+    if (params.increment > 0) {
+      ctx._source.reservedAt = params.now;
+    }
   }
 `;
 
@@ -288,7 +300,7 @@ export class CommentsClient {
         script: {
           lang: 'painless',
           source: QUOTA_SCRIPT,
-          params: { increment, max: MAX_COMMENTS },
+          params: { increment, max: MAX_COMMENTS, now: new Date().toISOString() },
         },
         retry_on_conflict: RETRY_ON_CONFLICT,
       },
@@ -321,6 +333,10 @@ export class CommentsClient {
    * number of comments plus `count`, provided nobody changed the document in
    * the meantime, so that two writers cannot both claim the same room. False
    * when another writer got there first; throws when the store really is full.
+   *
+   * The comments are only counted once every claim is old enough to have been
+   * written or given up: a comment claimed moments ago may not be indexed yet,
+   * and a count taken then would hand its room out again.
    */
   private async reconcileQuota(count: number): Promise<boolean> {
     const [{ count: stored }, quota] = await Promise.all([
@@ -335,11 +351,18 @@ export class CommentsClient {
     if (!quota.found) {
       return false;
     }
+    const now = Date.now();
+    const reservedAt = Date.parse(quota._source?.reservedAt ?? '') || 0;
+    if (now - reservedAt < RESERVATION_GRACE_MS) {
+      throw new CommentsLimitError(
+        `At most ${MAX_COMMENTS} comments can be stored, and comments are still being written; try again in a minute.`
+      );
+    }
     const { statusCode } = await this.esClient.index<QuotaDocument>(
       {
         index: COMMENTS_INDEX,
         id: QUOTA_ID,
-        document: { count: stored + count },
+        document: { count: stored + count, reservedAt: new Date(now).toISOString() },
         if_seq_no: quota._seq_no,
         if_primary_term: quota._primary_term,
       },
