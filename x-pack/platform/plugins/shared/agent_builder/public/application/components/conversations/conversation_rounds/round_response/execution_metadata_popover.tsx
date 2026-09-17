@@ -21,16 +21,16 @@ import { i18n } from '@kbn/i18n';
 import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { RoundJsonFlyout } from './round_json_flyout';
+import { ExecutionJsonFlyout } from './execution_json_flyout';
 
 const MIN_WIDTH = 260;
 
 const labels = {
   triggerAriaLabel: i18n.translate('xpack.agentBuilder.round.metadataPopover.triggerAriaLabel', {
-    defaultMessage: 'Show round details',
+    defaultMessage: 'Show execution details',
   }),
   popoverAriaLabel: i18n.translate('xpack.agentBuilder.round.metadataPopover.popoverAriaLabel', {
-    defaultMessage: 'Round details',
+    defaultMessage: 'Execution details',
   }),
   execution: i18n.translate('xpack.agentBuilder.round.metadataPopover.execution', {
     defaultMessage: 'Execution',
@@ -46,12 +46,12 @@ const labels = {
   }),
 };
 
-interface RoundMetadataPopoverProps {
+interface ExecutionMetadataPopoverProps {
   executionTerminatedEvent: ExecutionTerminatedEvent;
   steps?: ConversationRoundStep[];
 }
 
-export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({
+export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> = ({
   executionTerminatedEvent,
   steps,
 }) => {
@@ -86,7 +86,7 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({
       color="text"
       onClick={togglePopover}
       aria-label={labels.triggerAriaLabel}
-      data-test-subj="roundMetadataPopoverTrigger"
+      data-test-subj="executionMetadataPopoverTrigger"
       {...getEbtProps({
         element: AGENT_BUILDER_UI_EBT.element.pageContent,
         action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_ROUND_METADATA,
@@ -133,7 +133,7 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({
               size="s"
               color="text"
               onClick={openJsonFlyout}
-              data-test-subj="roundMetadataPopoverViewJsonButton"
+              data-test-subj="executionMetadataViewJsonButton"
               {...getEbtProps({
                 element: AGENT_BUILDER_UI_EBT.element.pageContent,
                 action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_JSON,
@@ -146,7 +146,7 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({
         </EuiFlexGroup>
       </EuiPopover>
       {isJsonFlyoutOpen && (
-        <RoundJsonFlyout
+        <ExecutionJsonFlyout
           executionTerminatedEvent={executionTerminatedEvent}
           steps={steps}
           onClose={closeJsonFlyout}

@@ -20,9 +20,9 @@ import type {
 import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
-import { RoundResponseActions } from './round_response_actions';
+import { ResponseActions } from './response_actions';
 
-export interface RoundResponseProps {
+export interface ResponseMessageProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
@@ -33,7 +33,7 @@ export interface RoundResponseProps {
   executionTerminatedEvent?: ExecutionTerminatedEvent;
 }
 
-export const RoundResponse: React.FC<RoundResponseProps> = ({
+export const ResponseMessage: React.FC<ResponseMessageProps> = ({
   hasError,
   response,
   steps,
@@ -55,7 +55,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
         defaultMessage: 'Assistant response',
       })}
-      data-test-subj="agentBuilderRoundResponse"
+      data-test-subj="agentBuilderResponseMessage"
       css={css`
         position: relative;
       `}
@@ -81,7 +81,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       </EuiFlexItem>
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
-          <RoundResponseActions
+          <ResponseActions
             content={response.message}
             isVisible
             executionTerminatedEvent={executionTerminatedEvent}

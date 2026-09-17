@@ -12,7 +12,7 @@ import type {
   ConversationRoundStep,
   ExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
-import { RoundResponse } from '../conversation_rounds/round_response/round_response';
+import { ResponseMessage } from '../conversation_rounds/round_response/response_message';
 import { RoundEvents } from '../conversation_rounds/round_events/round_events';
 
 interface AgentResponseProps {
@@ -37,7 +37,7 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
       </EuiFlexItem>
     )}
     <EuiFlexItem grow={false}>
-      <RoundResponse
+      <ResponseMessage
         response={response}
         steps={steps}
         isLoading={isLoading}

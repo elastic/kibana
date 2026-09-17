@@ -15,8 +15,8 @@ import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
-import { RoundMetadataPopover } from './round_metadata_popover';
-import { RoundTraceButton } from './round_trace_button';
+import { ExecutionMetadataPopover } from './execution_metadata_popover';
+import { TraceButton } from './trace_button';
 
 const copyLabels = {
   response: {
@@ -37,17 +37,17 @@ const copyLabels = {
   },
 } as const;
 
-interface RoundResponseActionsProps {
+interface ResponseActionsProps {
   content: string;
   isVisible: boolean;
   /** Present for a completed execution; enables the trace button and the metadata popover. */
   executionTerminatedEvent?: ExecutionTerminatedEvent;
   steps?: ConversationRoundStep[];
-  /** Which side of the round `content` comes from, so the copy wording matches it. */
+  /** Which side of the exchange `content` comes from, so the copy wording matches it. */
   copyTarget?: keyof typeof copyLabels;
 }
 
-export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
+export const ResponseActions: React.FC<ResponseActionsProps> = ({
   content,
   isVisible,
   executionTerminatedEvent,
@@ -67,7 +67,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   }, [content, addSuccessToast, copySuccessLabel]);
 
   // Normalise trace_id — backend models it as `string | string[]` to keep the
-  // door open for multi-trace rounds; only the first id is meaningful today.
+  // door open for multi-trace executions; only the first id is meaningful today.
   const traceId = useMemo(() => {
     const id = executionTerminatedEvent?.data.trace_id;
     if (!id) return undefined;
@@ -95,7 +95,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
             aria-label={copyLabel}
             onClick={handleCopy}
             color="text"
-            data-test-subj="roundResponseCopyButton"
+            data-test-subj="responseCopyButton"
             {...getEbtProps({
               element: AGENT_BUILDER_UI_EBT.element.pageContent,
               action: AGENT_BUILDER_UI_EBT.action.conversation.COPY_RESPONSE,
@@ -106,12 +106,15 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
       </EuiFlexItem>
       {showTraceButton && traceId && (
         <EuiFlexItem grow={false}>
-          <RoundTraceButton traceId={traceId} />
+          <TraceButton traceId={traceId} />
         </EuiFlexItem>
       )}
       {executionTerminatedEvent && (
         <EuiFlexItem grow={false}>
-          <RoundMetadataPopover executionTerminatedEvent={executionTerminatedEvent} steps={steps} />
+          <ExecutionMetadataPopover
+            executionTerminatedEvent={executionTerminatedEvent}
+            steps={steps}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

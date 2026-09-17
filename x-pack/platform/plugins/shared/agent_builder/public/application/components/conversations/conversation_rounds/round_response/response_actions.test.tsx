@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createExecutionTerminatedEvent } from '../../timeline/items/execution_terminated_event.factory';
-import { RoundResponseActions } from './round_response_actions';
+import { ResponseActions } from './response_actions';
 import { useToasts } from '../../../../hooks/use_toasts';
 
 jest.mock('copy-to-clipboard');
@@ -28,7 +28,7 @@ const copyMock = copy as jest.MockedFunction<typeof copy>;
 const useToastsMock = useToasts as jest.MockedFunction<typeof useToasts>;
 const addSuccessToast = jest.fn();
 
-describe('RoundResponseActions', () => {
+describe('ResponseActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     copyMock.mockReturnValue(true);
@@ -36,7 +36,7 @@ describe('RoundResponseActions', () => {
   });
 
   it('labels the copy action for the agent response by default', async () => {
-    render(<RoundResponseActions content="the answer" isVisible />);
+    render(<ResponseActions content="the answer" isVisible />);
 
     const copyButton = screen.getByRole('button', { name: 'Copy response' });
     await userEvent.click(copyButton);
@@ -46,7 +46,7 @@ describe('RoundResponseActions', () => {
   });
 
   it('labels the copy action for the user prompt when copyTarget is prompt', async () => {
-    render(<RoundResponseActions content="my question" isVisible copyTarget="prompt" />);
+    render(<ResponseActions content="my question" isVisible copyTarget="prompt" />);
 
     const copyButton = screen.getByRole('button', { name: 'Copy prompt' });
     await userEvent.click(copyButton);
@@ -62,7 +62,7 @@ describe('RoundResponseActions', () => {
     const steps = [{ type: ConversationRoundStepType.reasoning, reasoning: 'thinking' } as never];
 
     render(
-      <RoundResponseActions
+      <ResponseActions
         content="the answer"
         isVisible
         executionTerminatedEvent={terminated}
@@ -70,17 +70,17 @@ describe('RoundResponseActions', () => {
       />
     );
 
-    expect(screen.getByTestId('roundMetadataPopoverTrigger')).toHaveTextContent('4s');
-    await userEvent.click(screen.getByTestId('roundMetadataPopoverTrigger'));
+    expect(screen.getByTestId('executionMetadataPopoverTrigger')).toHaveTextContent('4s');
+    await userEvent.click(screen.getByTestId('executionMetadataPopoverTrigger'));
     expect(screen.getByText('100')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('roundMetadataPopoverViewJsonButton'));
+    await userEvent.click(screen.getByTestId('executionMetadataViewJsonButton'));
     expect(screen.getByText(/"execution_id": "execution-1"/)).toBeInTheDocument();
     expect(screen.getByText(/"reasoning": "thinking"/)).toBeInTheDocument();
   });
 
   it('keeps copy available without regeneration', () => {
-    render(<RoundResponseActions content="the answer" isVisible />);
+    render(<ResponseActions content="the answer" isVisible />);
 
     expect(screen.getByRole('button', { name: 'Copy response' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Regenerate response' })).not.toBeInTheDocument();

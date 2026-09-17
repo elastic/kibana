@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { createExecutionTerminatedEvent } from '../../timeline/items/execution_terminated_event.factory';
-import { RoundResponseActions } from './round_response_actions';
-import { RoundResponse } from './round_response';
+import { ResponseActions } from './response_actions';
+import { ResponseMessage } from './response_message';
 
 jest.mock('./chat_message_text', () => ({
   ChatMessageText: jest.fn(() => null),
@@ -19,22 +19,22 @@ jest.mock('./streaming_text', () => ({
   StreamingText: jest.fn(() => null),
 }));
 
-jest.mock('./round_response_actions', () => ({
-  RoundResponseActions: jest.fn(() => null),
+jest.mock('./response_actions', () => ({
+  ResponseActions: jest.fn(() => null),
 }));
 
-const roundResponseActionsMock = jest.mocked(RoundResponseActions);
+const roundResponseActionsMock = jest.mocked(ResponseActions);
 
 const terminated = createExecutionTerminatedEvent();
 
-describe('RoundResponse', () => {
+describe('ResponseMessage', () => {
   beforeEach(() => {
     roundResponseActionsMock.mockClear();
   });
 
   it('renders response actions after a completed response', () => {
     render(
-      <RoundResponse
+      <ResponseMessage
         hasError={false}
         response={{ message: 'hi' }}
         steps={[]}
@@ -56,7 +56,7 @@ describe('RoundResponse', () => {
 
   it('does not render response actions while loading', () => {
     render(
-      <RoundResponse
+      <ResponseMessage
         hasError={false}
         response={{ message: 'hi' }}
         steps={[]}

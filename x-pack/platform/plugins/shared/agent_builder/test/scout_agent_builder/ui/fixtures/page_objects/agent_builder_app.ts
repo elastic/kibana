@@ -115,7 +115,7 @@ export class AgentBuilderApp {
     // has painted on resource-constrained CI runs.
     await this.page.waitForFunction(
       (expected: string) => {
-        const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
+        const els = document.querySelectorAll('[data-test-subj="agentBuilderResponseMessage"]');
         if (els.length === 0) {
           return false;
         }
@@ -149,13 +149,13 @@ export class AgentBuilderApp {
       response: expectedResponse,
       continueConversation: true,
     });
-    const existingCount = await this.page.testSubj.locator('agentBuilderRoundResponse').count();
+    const existingCount = await this.page.testSubj.locator('agentBuilderResponseMessage').count();
     await this.typeMessage(userMessage);
     await this.sendMessage();
     await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
     await this.page.waitForFunction(
       (prev) => {
-        const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
+        const els = document.querySelectorAll('[data-test-subj="agentBuilderResponseMessage"]');
         return els.length > prev;
       },
       existingCount,

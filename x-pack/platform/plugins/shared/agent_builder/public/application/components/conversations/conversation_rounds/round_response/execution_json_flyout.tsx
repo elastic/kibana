@@ -16,14 +16,14 @@ const title = i18n.translate('xpack.agentBuilder.round.jsonFlyout.title', {
   defaultMessage: 'Raw response',
 });
 
-interface RoundJsonFlyoutProps {
+interface ExecutionJsonFlyoutProps {
   executionTerminatedEvent: ExecutionTerminatedEvent;
   /** The execution's steps, which the saved event omits because they are stored as separate events. */
   steps?: ConversationRoundStep[];
   onClose: () => void;
 }
 
-export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({
+export const ExecutionJsonFlyout: React.FC<ExecutionJsonFlyoutProps> = ({
   executionTerminatedEvent,
   steps,
   onClose,
@@ -40,7 +40,7 @@ export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({
   return (
     <EuiFlyout
       onClose={onClose}
-      aria-labelledby="agentBuilderRoundJsonFlyoutTitle"
+      aria-labelledby="agentBuilderExecutionJsonFlyoutTitle"
       size="m"
       ownFocus={false}
       css={css`
@@ -49,7 +49,7 @@ export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="agentBuilderRoundJsonFlyoutTitle">{title}</h2>
+          <h2 id="agentBuilderExecutionJsonFlyoutTitle">{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
