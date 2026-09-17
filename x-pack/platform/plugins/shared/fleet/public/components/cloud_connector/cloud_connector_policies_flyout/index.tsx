@@ -53,7 +53,7 @@ import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { useUpdateCloudConnector, updateCloudConnector } from '../hooks/use_update_cloud_connector';
 import { useDeleteCloudConnector } from '../hooks/use_delete_cloud_connector';
 import { useVerifyIacKey } from '../hooks/use_verify_iac_key';
-import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/iac_provisioner';
+import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/cloud_connector';
 import {
   useCloudConnectorTemplate,
   type TemplateRendered,

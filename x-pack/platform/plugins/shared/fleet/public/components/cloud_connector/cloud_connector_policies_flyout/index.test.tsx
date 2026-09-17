@@ -27,7 +27,7 @@ import {
   type TemplateRendered,
 } from '../hooks/use_cloud_connector_template';
 import { useGetPackageInfoByKeyQuery, useIacProvisioner, useStartServices } from '../../../hooks';
-import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/iac_provisioner';
+import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/cloud_connector';
 import { getAnyCloudConnectorIacTemplateUrl } from '../utils';
 
 import { CloudConnectorPoliciesFlyout } from '.';
@@ -40,7 +40,7 @@ jest.mock('../hooks/use_update_cloud_connector', () => ({
 }));
 jest.mock('../hooks/use_delete_cloud_connector');
 jest.mock('../hooks/use_verify_iac_key');
-jest.mock('../../../hooks/use_request/iac_provisioner', () => ({
+jest.mock('../../../hooks/use_request/cloud_connector', () => ({
   sendVerifyCloudConnectorIacKey: jest.fn(() => Promise.resolve({ data: {}, error: undefined })),
 }));
 jest.mock('../hooks/use_cloud_connector_template');

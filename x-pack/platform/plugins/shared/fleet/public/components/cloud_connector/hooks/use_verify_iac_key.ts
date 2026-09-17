@@ -9,7 +9,7 @@ import { useQuery } from '@kbn/react-query';
 
 import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { VerifyCloudConnectorIacKeyResponse } from '../../../../common/types/rest_spec/cloud_connector';
-import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/iac_provisioner';
+import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/cloud_connector';
 
 export interface UseVerifyIacKeyParams {
   cloudConnectorId: string | undefined;

@@ -9,11 +9,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 
-import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/iac_provisioner';
+import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/cloud_connector';
 
 import { VERIFY_IAC_KEY_QUERY_KEY, useVerifyIacKey } from './use_verify_iac_key';
 
-jest.mock('../../../hooks/use_request/iac_provisioner');
+jest.mock('../../../hooks/use_request/cloud_connector');
 
 const mockSendVerify = sendVerifyCloudConnectorIacKey as jest.MockedFunction<
   typeof sendVerifyCloudConnectorIacKey
