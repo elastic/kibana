@@ -20,7 +20,7 @@ const LIFECYCLE_FILTERS = [
 const kiViewQuery = ({ type, value }: AiIndexDest): string =>
   (type === 'data_stream'
     ? [
-        `FROM ${value} METADATA _id`,
+        `FROM ${value} METADATA _id, _index, _score`,
         'EVAL id = COALESCE(id, _id)',
         'INLINE STATS latest = MAX(@timestamp) BY id',
         'WHERE @timestamp == latest',
@@ -29,7 +29,7 @@ const kiViewQuery = ({ type, value }: AiIndexDest): string =>
         'DROP latest, latest_doc',
         ...LIFECYCLE_FILTERS,
       ]
-    : [`FROM ${value}`, ...LIFECYCLE_FILTERS]
+    : [`FROM ${value} METADATA _id, _index, _score`, ...LIFECYCLE_FILTERS]
   ).join('\n| ');
 
 /** Creates or replaces the view for an AI index. */

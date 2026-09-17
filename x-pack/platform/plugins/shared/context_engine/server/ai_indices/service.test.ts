@@ -218,7 +218,7 @@ describe('AiIndexService', () => {
       expect(esClient.esql.putView).toHaveBeenCalledWith({
         name: 'v-ai-index-customer_support',
         query: [
-          'FROM ai-index-ds-customer_support* METADATA _id',
+          'FROM ai-index-ds-customer_support* METADATA _id, _index, _score',
           'EVAL id = COALESCE(id, _id)',
           'INLINE STATS latest = MAX(@timestamp) BY id',
           'WHERE @timestamp == latest',
@@ -247,7 +247,7 @@ describe('AiIndexService', () => {
       expect(esClient.esql.putView).toHaveBeenCalledWith({
         name: 'v-ai-index-logs_app',
         query: [
-          'FROM ai-index-idx-logs-app',
+          'FROM ai-index-idx-logs-app METADATA _id, _index, _score',
           'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
           'WHERE expires_at IS NULL OR expires_at > NOW()',
           'DROP governance.*',
@@ -352,7 +352,9 @@ describe('AiIndexService', () => {
 
       expect(esClient.esql.putView).toHaveBeenCalledWith({
         name: 'v-ai-index-customer_support',
-        query: expect.stringContaining('FROM ai-index-ds-customer_support_v2 METADATA _id'),
+        query: expect.stringContaining(
+          'FROM ai-index-ds-customer_support_v2 METADATA _id, _index, _score'
+        ),
       });
     });
 

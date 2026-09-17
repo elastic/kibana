@@ -89,7 +89,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
 
         const { views } = await esClient.esql.getView({ name: VIEW_NAME });
         expect(views).toHaveLength(1);
-        expect(views[0].query).toContain(`FROM ${DEST}`);
+        expect(views[0].query).toContain(`FROM ${DEST} METADATA _id, _index, _score`);
       });
 
       await apiTest.step('writes active, deleted, and expired KIs', async () => {
@@ -120,6 +120,16 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
           .map((column) => column.name)
           .filter((name) => name.startsWith('governance.'));
         expect(governanceColumns).toStrictEqual([]);
+      });
+
+      await apiTest.step('the view scores a match', async () => {
+        const response = await esClient.esql.query({
+          query: `FROM ${VIEW_NAME} | WHERE title:"active" | KEEP id, _score`,
+        });
+        expect(response.values).toHaveLength(1);
+        const [[id, score]] = response.values;
+        expect(id).toBe('active');
+        expect(typeof score).toBe('number');
       });
 
       await apiTest.step('deleting the AI index removes the view', async () => {
