@@ -15,7 +15,7 @@ import type {
 } from '@kbn/nightshift-investigations-plugin/common';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
-import type { GoldenExample, GoldenTaskOutput, TrajectoryStep } from './types';
+import type { InvestigationExample, GoldenTaskOutput, TrajectoryStep } from './types';
 import { DOORDASH_ALERT_EVAL_CONSTRAINTS } from './prompts';
 
 /** Adapts persisted tool calls to the Deductive grader's trajectory format. */
@@ -104,14 +104,21 @@ export const getConversationTraceId = (
     .filter(Boolean)
     .at(-1);
 
-/** Runs the manual product investigation and returns the evidence shared with Deductive's golden runner. */
+/**
+ * Runs the manual product investigation and returns the evidence shared with Deductive's golden
+ * runner. `constraints` is the eval-only suffix appended to the question (DoorDash by default).
+ */
 export const runGoldenInvestigation = async (
   fetch: HttpHandler,
-  example: GoldenExample
+  example: InvestigationExample,
+  constraints: string = DOORDASH_ALERT_EVAL_CONSTRAINTS
 ): Promise<GoldenTaskOutput> => {
   const started = Date.now();
   const output: GoldenTaskOutput = {
-    test_id: example.metadata.case_id || example.metadata.langsmith_example_id,
+    test_id:
+      example.metadata.case_id ||
+      example.metadata.langsmith_example_id ||
+      example.input.question.slice(0, 80),
     query: example.input.question,
     max_latency_seconds: Number(example.metadata.max_latency_seconds),
     metrics: {},
@@ -139,7 +146,7 @@ export const runGoldenInvestigation = async (
         method: 'POST',
         body: JSON.stringify({
           subject: { type: 'manual' },
-          message: example.input.question + DOORDASH_ALERT_EVAL_CONSTRAINTS,
+          message: example.input.question + constraints,
         }),
       }
     );

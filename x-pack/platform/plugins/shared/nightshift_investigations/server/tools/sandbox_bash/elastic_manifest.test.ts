@@ -33,6 +33,24 @@ describe('renderElasticManifest', () => {
 
     expect(content).toContain('`logs-*`, `metrics-*`, `traces-*`');
     expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query"');
+    expect(content).toContain('`@timestamp` range to every query');
+  });
+
+  it('documents a preconfigured Authorization header without embedding it', () => {
+    const content = renderElasticManifest('remote-telemetry', 'header');
+
+    expect(content).toContain('-H "Authorization: $CONNECTOR_SECRET_HEADER_AUTHORIZATION"');
+    expect(content).not.toContain('CONNECTOR_SECRET_PASSWORD');
+    expect(content).not.toContain('ApiKey $');
+  });
+
+  it('replaces the readable-index hint with the configured guidance', () => {
+    const content = renderElasticManifest('remote-telemetry', 'header', {
+      readableIndices: 'Readable remotes: `logging-azure-eastus2:logs-*`.\n',
+    });
+
+    expect(content).toContain('Readable remotes: `logging-azure-eastus2:logs-*`.');
+    expect(content).not.toContain('`logs-*`, `metrics-*`, `traces-*`');
   });
 });
 

@@ -28,6 +28,18 @@ const exporters: Array<{ http?: { url: string; headers?: Record<string, string> 
   ? JSON.parse(exporterArg.slice(exporterPrefix.length))
   : [];
 
+// Telemetry defaults to the ephemeral Scout Elasticsearch. Setting the URL and an API key
+// points the investigator's sandbox at a remote cluster instead (the Capability Baseline setup).
+const telemetryUrl =
+  process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL ??
+  `http://host.docker.internal:${tracing.servers.elasticsearch.port}`;
+const telemetryApiKey = process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY;
+const readableIndices = process.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES;
+if (telemetryApiKey && !process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL)
+  throw new Error(
+    'NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY requires NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL.'
+  );
+
 export const servers: ScoutServerConfig = {
   ...tracing,
   kbnTestServer: {
@@ -41,24 +53,27 @@ export const servers: ScoutServerConfig = {
         sandbox_api_port: Number(process.env.SANDBOX_API_PORT ?? 9090),
         sandbox_api_key: sandboxKey,
         telemetry_connector_id: 'nightshift-evals-telemetry',
+        ...(readableIndices ? { telemetry_readable_indices: readableIndices } : {}),
       })}`,
       `${connectorPrefix}${JSON.stringify({
         ...connectors,
-        'nightshift-evals-telemetry': {
-          name: 'Scout Elasticsearch telemetry',
-          actionTypeId: '.webhook',
-          config: {
-            url:
-              process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL ??
-              `http://host.docker.internal:${tracing.servers.elasticsearch.port}`,
-            method: 'post',
-            hasAuth: true,
-          },
-          secrets: {
-            user: tracing.servers.kibana.username,
-            password: tracing.servers.kibana.password,
-          },
-        },
+        'nightshift-evals-telemetry': telemetryApiKey
+          ? {
+              // A remote cluster: the sandbox sends the API key as an Authorization header.
+              name: 'Remote Elasticsearch telemetry',
+              actionTypeId: '.webhook',
+              config: { url: telemetryUrl, method: 'post', hasAuth: false, authType: null },
+              secrets: { secretHeaders: { Authorization: `ApiKey ${telemetryApiKey}` } },
+            }
+          : {
+              name: 'Scout Elasticsearch telemetry',
+              actionTypeId: '.webhook',
+              config: { url: telemetryUrl, method: 'post', hasAuth: true },
+              secrets: {
+                user: tracing.servers.kibana.username,
+                password: tracing.servers.kibana.password,
+              },
+            },
       })}`,
       `--xpack.agentBuilder.tracing.exporters=${JSON.stringify(
         exporters.flatMap(({ http }) => (http ? [http] : []))

@@ -15,7 +15,7 @@ import { GOLDEN_SOURCE_DATASET, readGoldenDataset } from './datasets';
 
 /** Snapshots the approved source dataset before Playwright synchronously collects the golden spec. */
 async function setupGoldenDataset(): Promise<(() => void) | undefined> {
-  if (process.env.NIGHTSHIFT_DATASETS === 'synthetic-smoke') return;
+  if (['synthetic-smoke', 'remote'].includes(process.env.NIGHTSHIFT_DATASETS ?? '')) return;
   const url = process.env.EVAL_KBN_URL;
   if (!url)
     throw new Error(

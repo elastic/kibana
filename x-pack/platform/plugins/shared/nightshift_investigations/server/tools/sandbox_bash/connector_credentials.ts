@@ -71,11 +71,21 @@ export const buildConnectorEnv = ({
     const envValue = toEnvValue(value);
     if (envValue !== undefined) env[`${CONNECTOR_ENV_PREFIX}CONFIG_${toEnvKey(key)}`] = envValue;
   }
-  for (const [key, value] of Object.entries(secrets)) {
+  const addSecret = (key: string, value: unknown) => {
     const envValue = toEnvValue(value);
-    if (envValue === undefined) continue;
+    if (envValue === undefined) return;
     env[`${CONNECTOR_ENV_PREFIX}SECRET_${toEnvKey(key)}`] = envValue;
     if (envValue.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(envValue);
+  };
+  for (const [key, value] of Object.entries(secrets)) {
+    addSecret(key, value);
+    // Webhook-style secret headers are also flattened so a command can pass one header
+    // without parsing JSON, e.g. CONNECTOR_SECRET_HEADER_AUTHORIZATION.
+    if (key === 'secretHeaders' && value && typeof value === 'object') {
+      for (const [header, headerValue] of Object.entries(value as Record<string, unknown>)) {
+        addSecret(`header_${header}`, headerValue);
+      }
+    }
   }
 
   return { env, secretValues };
