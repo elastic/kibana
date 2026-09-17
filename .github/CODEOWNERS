@@ -1450,9 +1450,9 @@ x-pack/solutions/security/packages/security-mitre-attack-common @elastic/securit
 x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering
 x-pack/solutions/security/packages/side-nav @elastic/security-pds-deployment
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
-x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
+x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
-x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting
+x-pack/solutions/security/packages/upselling @elastic/security-investigations
 x-pack/solutions/security/plugins/alertzero @elastic/security-solution
 x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
@@ -2889,7 +2889,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/solutions/security/plugins/security_solution/public/app/home @elastic/security-solution
 
 # GenAI in Security Solution
-/x-pack/solutions/security/plugins/security_solution/public/common/components/visualization_actions/lens_attributes/ai @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/public/common/components/visualization_actions/lens_attributes/ai @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/assistant @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/discoveries @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/attack_discovery @elastic/security-threat-hunting
@@ -3075,7 +3075,7 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/public/resolver @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/flyout_prev_next_nav @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/public/threat_intelligence@elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/public/threat_intelligence @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/timelines @elastic/security-investigations
 
 /x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ @elastic/security-threat-hunting
