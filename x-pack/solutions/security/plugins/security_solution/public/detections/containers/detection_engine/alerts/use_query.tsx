@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import type { Dispatch, SetStateAction } from 'react';
 import { useMemo, useEffect, useState } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   fetchQueryAttacks,
   fetchQueryUnifiedAlerts,
@@ -45,6 +46,12 @@ export interface AlertsQueryParams {
    * The query name is used for performance monitoring with APM
    */
   queryName: AlertsQueryName;
+  /**
+   * Optional Kibana execution context forwarded to `http.fetch` (surfaced as `x-opaque-id` in ES
+   * slow logs and as APM trace labels) so the alert query can be attributed to the calling
+   * page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -84,6 +91,7 @@ export const useQueryAlerts = <Hit, Aggs>({
   indexName,
   skip,
   queryName,
+  executionContext,
 }: AlertsQueryParams): ReturnQueryAlerts<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
   const [alerts, setAlerts] = useState<
@@ -110,6 +118,7 @@ export const useQueryAlerts = <Hit, Aggs>({
         const alertResponse = await fetchAlerts<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
+          context: executionContext,
         });
 
         if (isSubscribed) {
@@ -154,7 +163,7 @@ export const useQueryAlerts = <Hit, Aggs>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query, indexName, skip, fetchAlerts]);
+  }, [query, indexName, skip, fetchAlerts, executionContext]);
 
   return { loading, ...alerts };
 };

@@ -38,7 +38,7 @@ export const usePrivilegedMonitoringHealth = (options?: UsePrivilegedMonitoringH
 
   const { data, isLoading, isError, error } = useQuery<PrivMonHealthResponse, SecurityAppError>({
     queryKey: ['GET', 'PRIVILEGED_MONITORING_HEALTH'],
-    queryFn: fetchPrivilegeMonitoringEngineStatus,
+    queryFn: () => fetchPrivilegeMonitoringEngineStatus(),
     retry: 0,
     enabled: options?.enabled,
     refetchInterval: 30000, // Refresh every 30 seconds to keep user count current
@@ -65,9 +65,11 @@ export const usePrivilegedMonitoringEngineStatus = () => {
 
 // Hook specifically for user limit functionality
 export const useUserLimitStatus = (options?: UsePrivilegedMonitoringHealthOptions) => {
+  const { fetchPrivilegeMonitoringEngineStatus } = useEntityAnalyticsRoutes();
+
   const { data, isLoading, isError, error } = useQuery<PrivMonHealthResponse, SecurityAppError>({
     queryKey: ['GET', 'PRIVILEGED_MONITORING_HEALTH'],
-    queryFn: useEntityAnalyticsRoutes().fetchPrivilegeMonitoringEngineStatus,
+    queryFn: () => fetchPrivilegeMonitoringEngineStatus(),
     retry: 0,
     enabled: options?.enabled,
     refetchInterval: 30000,
