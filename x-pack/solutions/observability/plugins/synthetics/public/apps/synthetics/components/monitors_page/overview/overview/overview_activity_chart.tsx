@@ -9,8 +9,10 @@ import { EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ClientPluginsStart } from '../../../../../../plugin';
+import { useSyntheticsRefreshContext } from '../../../../contexts';
+import { useUrlParams } from '../../../../hooks';
 import { useOverviewRefreshedRange } from '../../common/use_overview_date_range';
 import { useAlertsUrl } from '../../../monitor_details/monitor_summary/alert_actions';
 import { ERRORS_LABEL } from '../../../monitor_details/monitor_summary/monitor_errors_count';
@@ -53,6 +55,7 @@ export const OverviewActivityChart = () => {
   const { from, to } = useOverviewRefreshedRange();
 
   const {
+    data,
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
@@ -69,6 +72,26 @@ export const OverviewActivityChart = () => {
   );
 
   const annotationLayers = useOverviewAlertsAnnotations();
+
+  const [, updateUrlParams] = useUrlParams();
+  const { refreshApp } = useSyntheticsRefreshContext();
+
+  // Lets users drag-select a window on the chart to zoom the whole overview
+  // into it, the same way the page-level date picker's `onTimeChange` does.
+  const onBrushEnd = useCallback(
+    ({ range }: { range: number[] }) => {
+      if (range?.length !== 2) {
+        return;
+      }
+      const dateRangeStart = new Date(range[0]).toISOString();
+      const dateRangeEnd = new Date(range[1]).toISOString();
+
+      data?.query.timefilter.timefilter.setTime({ from: dateRangeStart, to: dateRangeEnd });
+      updateUrlParams({ dateRangeStart, dateRangeEnd });
+      refreshApp();
+    },
+    [data, updateUrlParams, refreshApp]
+  );
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -87,6 +110,7 @@ export const OverviewActivityChart = () => {
           dslFilters={queryFilters}
           dataTypesIndexPatterns={dataTypesIndexPatterns}
           annotationLayers={annotationLayers}
+          onBrushEnd={onBrushEnd}
           attributes={[
             {
               time,
