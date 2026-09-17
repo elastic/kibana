@@ -116,8 +116,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
@@ -4573,13 +4571,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -4641,8 +4639,8 @@ importers:
         specifier: 2.2.0
         version: 2.2.0
       strip-ansi:
-        specifier: 6.0.1
-        version: 6.0.1
+        specifier: 7.2.0
+        version: 7.2.0
       styled-components:
         specifier: 5.3.11
         version: 5.3.11(@babel/core@7.29.7(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react-is@18.3.1)(react@18.2.0)
@@ -5899,8 +5897,8 @@ importers:
         specifier: 12.0.5
         version: 12.0.5
       '@types/has-ansi':
-        specifier: 3.0.0
-        version: 3.0.0
+        specifier: 5.0.2
+        version: 5.0.2
       '@types/he':
         specifier: 1.2.3
         version: 1.2.3
@@ -6319,8 +6317,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       has-ansi:
-        specifier: 3.0.0
-        version: 3.0.0
+        specifier: 6.0.2
+        version: 6.0.2
       hdr-histogram-js:
         specifier: 3.0.1
         version: 3.0.1
@@ -14875,8 +14873,8 @@ packages:
   '@types/hapi__cookie@12.0.5':
     resolution: {integrity: sha512-rZNcJRDuutoSLHVHNSoIACabeGZEhjYFKqdW9vmucpUgE50YfPbtGPREzXEKOf2/1RR6d+jrSkNRwxUEaUIfsQ==}
 
-  '@types/has-ansi@3.0.0':
-    resolution: {integrity: sha512-H3vFOwfLlFEC0MOOrcSkus8PCnMCzz4N0EqUbdJZCdDhBTfkAu86aRYA+MTxjKW6jCpUvxcn4715US8g+28BMA==}
+  '@types/has-ansi@5.0.2':
+    resolution: {integrity: sha512-umJQ393eDf2R9eBdRxZTyXlRDq82ZVT9/tNfF3H3d2GDIBQILq/LZXHSvwXaH2OSvaSHVe2BX3s+IdoFHQ8zmg==}
 
   '@types/hast@2.3.10':
     resolution: {integrity: sha512-McWspRw8xx8J9HurkVBfYj0xKoE25tOFlHGdx4MJ5xORQrMGZNqJhVQWaIbm6Oyla5kYOXtDiopzKRJzEOkwJw==}
@@ -15875,10 +15873,6 @@ packages:
   ansi-regex@2.1.1:
     resolution: {integrity: sha512-TIGnTpdo+E3+pCyAluZvtED5p5wCqLdezCyhPZzKPcxvFplEt4i+W7OONCKgeZFT3+y5NZZfOOS/Bdcanm1MYA==}
     engines: {node: '>=0.10.0'}
-
-  ansi-regex@3.0.1:
-    resolution: {integrity: sha512-+O9Jct8wf++lXxxFc4hc8LsjaSq0HFzzL7cVsw8pRDIPdjKD2mT4ytDZlLuSBZ4cLKZFXIrMGO7DbQCtMJJMKw==}
-    engines: {node: '>=4'}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -19231,9 +19225,9 @@ packages:
     resolution: {integrity: sha512-C8vBJ8DwUCx19vhm7urhTuUsr4/IyP6l4VzNQDv+ryHQObW3TTTp9yB68WpYgRe2bbaGuZ/se74IqFeVnMnLZg==}
     engines: {node: '>=0.10.0'}
 
-  has-ansi@3.0.0:
-    resolution: {integrity: sha512-5JRDTvNq6mVkaMHQVXrGnaCXHD6JfqxwCy8LA/DQSqLLqePR9uaJVm2u3Ek/UziJFQz+d1ul99RtfIhE2aorkQ==}
-    engines: {node: '>=4'}
+  has-ansi@6.0.2:
+    resolution: {integrity: sha512-vAyM+6+jAYwSwz0/M0jYKfU9AvAMCz0kH791RsUhvMKGUHXled/3FjcQB3YiQ4Astj5srHdb6B2FHGIfZkOQNg==}
+    engines: {node: '>=18'}
 
   has-bigints@1.1.0:
     resolution: {integrity: sha512-R3pbpkcIqv2Pm3dUwgjclDRVmWpTJW2DcMzcIhEXEx1oh/CEMObMm3KLmRJOdvhM7o4uQBnwr8pzRK2sJWIqfg==}
@@ -23276,12 +23270,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -30999,7 +30997,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -32391,7 +32389,7 @@ snapshots:
       '@types/node': 24.10.13
       joi: 17.13.8
 
-  '@types/has-ansi@3.0.0': {}
+  '@types/has-ansi@5.0.2': {}
 
   '@types/hast@2.3.10':
     dependencies:
@@ -33484,8 +33482,6 @@ snapshots:
   ansi-html-community@0.0.8: {}
 
   ansi-regex@2.1.1: {}
-
-  ansi-regex@3.0.1: {}
 
   ansi-regex@5.0.1: {}
 
@@ -37513,9 +37509,9 @@ snapshots:
     dependencies:
       ansi-regex: 2.1.1
 
-  has-ansi@3.0.0:
+  has-ansi@6.0.2:
     dependencies:
-      ansi-regex: 3.0.1
+      ansi-regex: 6.3.0
 
   has-bigints@1.1.0: {}
 
@@ -42454,17 +42450,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
