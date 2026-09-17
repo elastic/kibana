@@ -1,0 +1,126 @@
+{
+  "sha1": "55aa2c869d99f01dcfc47d94e2df097ec82681c6",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "073133c41ab0114-ff98c325a01212e",
+      "title": "Remote clusters API does not list clusters it has not registered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 47,
+        "column": 11
+      }
+    },
+    {
+      "id": "073133c41ab0114-564f61f8bbe3020",
+      "title": "Remote clusters API adds a remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 56,
+        "column": 52
+      }
+    },
+    {
+      "id": "073133c41ab0114-c98e826bc31dfb6",
+      "title": "Remote clusters API rejects a write from a role without the manage cluster privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 77,
+        "column": 15
+      }
+    },
+    {
+      "id": "073133c41ab0114-0f95275350da297",
+      "title": "Remote clusters API rejects a cluster whose name already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 94,
+        "column": 68
+      }
+    },
+    {
+      "id": "073133c41ab0114-102164ec505bbb1",
+      "title": "Remote clusters API updates an existing remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 118,
+        "column": 15
+      }
+    },
+    {
+      "id": "073133c41ab0114-0eeacef66462bab",
+      "title": "Remote clusters API lists a registered cluster once it is connected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 148,
+        "column": 24
+      }
+    },
+    {
+      "id": "073133c41ab0114-2703c96a3564eb6",
+      "title": "Remote clusters API deletes a remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 188,
+        "column": 24
+      }
+    },
+    {
+      "id": "073133c41ab0114-f63f23afb590cb6",
+      "title": "Remote clusters API deletes multiple remote clusters in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 204,
+        "column": 58
+      }
+    },
+    {
+      "id": "073133c41ab0114-d5cc7059fa5e064",
+      "title": "Remote clusters API reports clusters that could not be deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 217,
+        "column": 12
+      }
+    }
+  ]
+}
