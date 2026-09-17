@@ -175,6 +175,8 @@ describe('skipped_on_main.sh', () => {
         TARGET_SHA,
         '--base-ref',
         '1111111111111111111111111111111111111111',
+        '--head-ref',
+        'HEAD',
         '--junit-file',
         'target/junit/job/report-1.xml',
         'target/junit/job/report-2.xml',
@@ -239,6 +241,28 @@ describe('skipped_on_main.sh', () => {
 
     expect(status).toBe(1);
     expect(output).toContain('evaluator returned invalid JSON');
+    expect(sandbox.calls('agent')).toBeUndefined();
+  });
+
+  it.each([
+    ['an empty knownSkipped list', { knownSkipped: [], real: [] }],
+    [
+      'a real failure despite exit 0',
+      {
+        knownSkipped: [{ failure: { kind: 'ftr', file: 'a.ts', fullTitle: 'x' } }],
+        real: [{ kind: 'ftr', file: 'a.ts', fullTitle: 'y' }],
+      },
+    ],
+    ['an object without the classification fields', {}],
+    ['a JSON value that is not an object', [1, 2]],
+  ])('keeps failures when the evaluator exits 0 but reports %s', (_name, evaluation) => {
+    sandbox.writeReport('target/junit/job/report.xml');
+    sandbox.stubNode({ stdout: JSON.stringify(evaluation), exitCode: 0 });
+
+    const { status, output } = forgiveFtr(sandbox);
+
+    expect(status).toBe(1);
+    expect(output).toContain('does not classify every failure as known skipped');
     expect(sandbox.calls('agent')).toBeUndefined();
   });
 

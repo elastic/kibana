@@ -12,7 +12,12 @@ import Os from 'os';
 import Path from 'path';
 
 import type { EvaluableFailure, RefFileReader } from './evaluate';
-import { collectJUnitFailures, collectScoutFailures, evaluateFailures } from './evaluate';
+import {
+  collectJUnitFailures,
+  collectScoutFailures,
+  evaluateFailures,
+  mergeFileContents,
+} from './evaluate';
 
 const fixture = (name: string) =>
   Fs.readFileSync(Path.resolve(__dirname, '__fixtures__', `${name}.ts.txt`), 'utf8');
@@ -39,20 +44,26 @@ const readerFor = (files: Record<string, string | undefined>): RefFileReader => 
   return (ref, file) => files[`${ref}:${file}`];
 };
 
+const evaluate = (failures: EvaluableFailure[], readFile: RefFileReader) =>
+  evaluateFailures(failures, { mainRef: 'main', baseRef: 'base', headRef: 'head', readFile });
+
+/** A mocha file with one runnable `s c` test, padded so edits far apart merge cleanly. */
+const PADDING = Array.from({ length: 8 }, (_, i) => `// line ${i}`).join('\n');
+const SUITE_BEFORE = `describe('s', () => {\n  it('c', () => {});\n});\n${PADDING}\n`;
+const SUITE_SKIPPED = SUITE_BEFORE.replace("it('c'", "it.skip('c'");
+
 describe('evaluateFailures', () => {
   it('marks failures as known skipped when the skip exists on main but not at the merge base', () => {
     const readFile = readerFor({
       [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
       [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`head:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
       [`main:${SCOUT_FILE}`]: fixture('scout_ai_indices.after'),
       [`base:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
+      [`head:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
     });
 
-    const result = evaluateFailures([casesFailure, scoutFailure], {
-      mainRef: 'main',
-      baseRef: 'base',
-      readFile,
-    });
+    const result = evaluate([casesFailure, scoutFailure], readFile);
 
     expect(result.real).toEqual([]);
     expect(result.knownSkipped).toEqual([
@@ -61,13 +72,29 @@ describe('evaluateFailures', () => {
     ]);
   });
 
+  it('still forgives when the PR changed the failing file elsewhere and the merge is clean', () => {
+    const readFile = readerFor({
+      [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
+      [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`head:${CASES_FILE}`]: `${fixture(
+        'ftr_cases_configure_legacy.before'
+      )}\n// touched by the PR\n`,
+    });
+
+    const result = evaluate([casesFailure], readFile);
+
+    expect(result.real).toEqual([]);
+    expect(result.knownSkipped).toHaveLength(1);
+  });
+
   it('keeps the failure when the skip is already present at the merge base (PR un-skips it)', () => {
     const readFile = readerFor({
       [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
       [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
+      [`head:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
     });
 
-    const result = evaluateFailures([casesFailure], { mainRef: 'main', baseRef: 'base', readFile });
+    const result = evaluate([casesFailure], readFile);
 
     expect(result.knownSkipped).toEqual([]);
     expect(result.real).toEqual([casesFailure]);
@@ -77,59 +104,80 @@ describe('evaluateFailures', () => {
     const readFile = readerFor({
       [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
       [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`head:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`base:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
+      [`head:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
     });
 
-    const notSkipped = evaluateFailures([casesFailure], {
-      mainRef: 'main',
-      baseRef: 'base',
-      readFile,
-    });
-    expect(notSkipped.real).toEqual([casesFailure]);
-
-    const missing = evaluateFailures([scoutFailure], {
-      mainRef: 'main',
-      baseRef: 'base',
-      readFile,
-    });
-    expect(missing.real).toEqual([scoutFailure]);
+    expect(evaluate([casesFailure], readFile).real).toEqual([casesFailure]);
+    expect(evaluate([scoutFailure], readFile).real).toEqual([scoutFailure]);
   });
 
   it('keeps the failure when the file is absent at the merge base (PR and main both added it)', () => {
-    const readFile = readerFor({ [`main:${SCOUT_FILE}`]: fixture('scout_ai_indices.after') });
+    const readFile = readerFor({
+      [`main:${SCOUT_FILE}`]: fixture('scout_ai_indices.after'),
+      [`head:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
+    });
 
-    const result = evaluateFailures([scoutFailure], { mainRef: 'main', baseRef: 'base', readFile });
+    const result = evaluate([scoutFailure], readFile);
 
     expect(result.knownSkipped).toHaveLength(0);
     expect(result.real).toEqual([scoutFailure]);
   });
 
-  it('keeps the failure when the test is absent from the file at the merge base (PR added or renamed it)', () => {
+  it('keeps the failure when the PR and main changed the same lines (merge conflict)', () => {
     const readFile = readerFor({
       [`main:${SCOUT_FILE}`]: fixture('scout_ai_indices.after'),
       [`base:${SCOUT_FILE}`]: 'apiTest.describe("context engine AI indices API", () => {});',
+      [`head:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
     });
 
-    const result = evaluateFailures([scoutFailure], { mainRef: 'main', baseRef: 'base', readFile });
+    const result = evaluate([scoutFailure], readFile);
 
     expect(result.knownSkipped).toHaveLength(0);
     expect(result.real).toEqual([scoutFailure]);
   });
 
-  it('keeps the failure when the merge base already skipped one of several same-titled occurrences', () => {
-    const failure: EvaluableFailure = { kind: 'ftr', file: CASES_FILE, fullTitle: 'a c' };
+  it('keeps the failure when the PR added a same-titled test next to the one main skipped', () => {
+    const failure: EvaluableFailure = { kind: 'ftr', file: CASES_FILE, fullTitle: 's c' };
     const readFile = readerFor({
-      [`main:${CASES_FILE}`]: `
-        describe.skip('a', () => { it('c', () => {}); });
-        describe.skip('a', () => { it('c', () => {}); });
-      `,
-      // The PR may have un-skipped the first occurrence; a rebase keeps it runnable.
-      [`base:${CASES_FILE}`]: `
-        describe.skip('a', () => { it('c', () => {}); });
-        describe('a', () => { it('c', () => {}); });
-      `,
+      [`base:${CASES_FILE}`]: SUITE_BEFORE,
+      [`main:${CASES_FILE}`]: SUITE_SKIPPED,
+      // Merges cleanly: the merged file has the skipped original plus the PR's runnable copy.
+      [`head:${CASES_FILE}`]: `${SUITE_BEFORE}describe('s', () => {\n  it('c', () => {});\n});\n`,
     });
 
-    const result = evaluateFailures([failure], { mainRef: 'main', baseRef: 'base', readFile });
+    const result = evaluate([failure], readFile);
+
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([failure]);
+  });
+
+  it('keeps the failure when the PR un-skipped one of several same-titled occurrences', () => {
+    const failure: EvaluableFailure = { kind: 'ftr', file: CASES_FILE, fullTitle: 's c' };
+    const readFile = readerFor({
+      [`base:${CASES_FILE}`]: `${SUITE_SKIPPED}${SUITE_BEFORE}`,
+      [`main:${CASES_FILE}`]: `${SUITE_SKIPPED}${SUITE_SKIPPED}`,
+      // The PR un-skipped the first occurrence; the merge keeps it runnable.
+      [`head:${CASES_FILE}`]: `${SUITE_BEFORE}${SUITE_BEFORE}`,
+    });
+
+    const result = evaluate([failure], readFile);
+
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([failure]);
+  });
+
+  it('keeps the failure when the test does not resolve as runnable at the PR head', () => {
+    // The test ran and failed, so a head lookup that finds it skipped means the file was misread.
+    const failure: EvaluableFailure = { kind: 'ftr', file: CASES_FILE, fullTitle: 's c' };
+    const readFile = readerFor({
+      [`base:${CASES_FILE}`]: SUITE_SKIPPED,
+      [`main:${CASES_FILE}`]: SUITE_SKIPPED,
+      [`head:${CASES_FILE}`]: SUITE_SKIPPED,
+    });
+
+    const result = evaluate([failure], readFile);
 
     expect(result.knownSkipped).toHaveLength(0);
     expect(result.real).toEqual([failure]);
@@ -137,26 +185,32 @@ describe('evaluateFailures', () => {
 
   it('keeps failures without a file location', () => {
     const failure: EvaluableFailure = { kind: 'ftr', file: '', fullTitle: 'something' };
-    const result = evaluateFailures([failure], {
-      mainRef: 'main',
-      baseRef: 'base',
-      readFile: () => {
-        throw new Error('should not be called');
-      },
+    const result = evaluate([failure], () => {
+      throw new Error('should not be called');
     });
     expect(result.real).toEqual([failure]);
   });
 
-  it('reads each ref:file pair only once', () => {
+  it('reads and merges each file only once', () => {
     const readFile = jest.fn(
-      readerFor({ [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after') })
+      readerFor({
+        [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
+        [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+        [`head:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      })
     );
-    evaluateFailures([casesFailure, { ...casesFailure, fullTitle: 'Cases other test' }], {
-      mainRef: 'main',
-      baseRef: 'base',
-      readFile,
-    });
-    expect(readFile).toHaveBeenCalledTimes(2);
+    evaluate([casesFailure, { ...casesFailure, fullTitle: 'Cases other test' }], readFile);
+    expect(readFile).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('mergeFileContents', () => {
+  it('applies non-overlapping edits from both sides', () => {
+    expect(mergeFileContents('a\nb\nc\n', 'A\nb\nc\n', 'a\nb\nC\n')).toBe('A\nb\nC\n');
+  });
+
+  it('returns undefined on conflict', () => {
+    expect(mergeFileContents('a\n', 'b\n', 'c\n')).toBeUndefined();
   });
 });
 
@@ -225,14 +279,11 @@ describe('failure adapters', () => {
     );
 
     const failures = collectScoutFailures([ndjsonPath]);
-    const evaluation = evaluateFailures(failures, {
-      mainRef: 'main',
-      baseRef: 'base',
-      readFile: (ref) =>
-        ref === 'main'
-          ? 'test.describe.skip("suite a", () => { test("test a", () => {}) })'
-          : 'test.describe("suite a", () => { test("test a", () => {}) })',
-    });
+    const evaluation = evaluate(failures, (ref) =>
+      ref === 'main'
+        ? 'test.describe.skip("suite a", () => { test("test a", () => {}) })'
+        : 'test.describe("suite a", () => { test("test a", () => {}) })'
+    );
 
     expect(evaluation.real).toEqual([
       { kind: 'scout', file: '', suite: 'Scout runner', title: 'global teardown threw' },

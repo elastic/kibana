@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFileSync } from 'child_process';
+import { execFileSync, spawnSync } from 'child_process';
 import Fs from 'fs';
+import Os from 'os';
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -110,29 +111,83 @@ export function collectScoutFailures(ndjsonPaths: string[]): EvaluableFailure[] 
 }
 
 /**
- * Classifies each failure as "known skipped" when the test resolves to a skipped suite/test in
- * the file as it exists on `mainRef` but not on `baseRef` (the PR's merge base). Skips already
- * present at the merge base are not new to the PR, so removing them in the PR keeps the failure.
- * A file absent at the merge base was added by the PR itself, so a skip on `mainRef` comes from an
- * independent add of the same path; rebasing would conflict rather than apply it, so the failure
- * stays real. Likewise a test absent from the merge base was added (or renamed) by the PR, so a
- * same-titled skip on `mainRef` is an independent addition that a rebase cannot be assumed to
- * apply to the PR's test. When the title occurs more than once, every occurrence at the merge
- * base must be runnable: a mix of skipped and unskipped occurrences means the PR may have
- * un-skipped one of them, which a rebase would keep runnable.
+ * Three-way merges the PR head version of a file (`ours`) with the target branch version
+ * (`theirs`) over their common ancestor `base`, exactly as a rebase would. Returns undefined when
+ * the merge conflicts or `git merge-file` fails.
+ */
+export const mergeFileContents = (
+  base: string,
+  ours: string,
+  theirs: string
+): string | undefined => {
+  const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'skipped-on-main-merge-'));
+  try {
+    const write = (name: string, content: string) => {
+      const path = Path.join(dir, name);
+      Fs.writeFileSync(path, content);
+      return path;
+    };
+    const oursPath = write('ours', ours);
+    const basePath = write('base', base);
+    const theirsPath = write('theirs', theirs);
+    // exit status is the number of conflicts, or 255 on error
+    const result = spawnSync('git', ['merge-file', '-p', oursPath, basePath, theirsPath], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    return result.status === 0 ? result.stdout : undefined;
+  } finally {
+    Fs.rmSync(dir, { recursive: true, force: true });
+  }
+};
+
+export interface EvaluateOptions {
+  /** Target branch tip (e.g. FETCH_HEAD after fetching main). */
+  mainRef: string;
+  /** Merge base of the PR and the target branch. */
+  baseRef: string;
+  /** The PR head the failing run was executed against. */
+  headRef: string;
+  readFile: RefFileReader;
+}
+
+/**
+ * Classifies each failure as "known skipped" when the test would not run had the PR been rebased
+ * onto `mainRef`: the failing file is three-way merged (`baseRef` -> `headRef` vs `mainRef`) and
+ * the test must resolve to a skipped suite/test in the merged file. Everything the merge cannot
+ * settle keeps the failure real: a file missing at any of the three refs, a conflicting merge (the
+ * PR and `mainRef` touched the same lines), or a same-titled test the PR added or un-skipped,
+ * which survives the merge runnable next to the skipped one.
+ *
+ * As a guard against misreading the file, the failed test must also resolve as runnable at
+ * `headRef`: it ran there, so a lookup that finds it skipped or unresolvable cannot be trusted.
  */
 export function evaluateFailures(
   failures: EvaluableFailure[],
-  { mainRef, baseRef, readFile }: { mainRef: string; baseRef: string; readFile: RefFileReader }
+  { mainRef, baseRef, headRef, readFile }: EvaluateOptions
 ): SkippedOnMainEvaluation {
-  const trees = new Map<string, SuiteNode[] | undefined>();
-  const getTree = (ref: string, file: string): SuiteNode[] | undefined => {
-    const key = `${ref}:${file}`;
-    if (!trees.has(key)) {
-      const source = readFile(ref, file);
-      trees.set(key, source === undefined ? undefined : parseSuiteTree(source, file));
+  interface FileTrees {
+    head: SuiteNode[];
+    merged: SuiteNode[];
+  }
+  const trees = new Map<string, FileTrees | undefined>();
+  const getTrees = (file: string): FileTrees | undefined => {
+    if (trees.has(file)) {
+      return trees.get(file);
     }
-    return trees.get(key);
+    let result: FileTrees | undefined;
+    const head = readFile(headRef, file);
+    const base = head === undefined ? undefined : readFile(baseRef, file);
+    const main = base === undefined ? undefined : readFile(mainRef, file);
+    if (head !== undefined && base !== undefined && main !== undefined) {
+      const merged = mergeFileContents(base, head, main);
+      if (merged !== undefined) {
+        result = { head: parseSuiteTree(head, file), merged: parseSuiteTree(merged, file) };
+      }
+    }
+    trees.set(file, result);
+    return result;
   };
 
   const findSkip = (tree: SuiteNode[], failure: EvaluableFailure): SkipLookup =>
@@ -140,29 +195,21 @@ export function evaluateFailures(
       ? findSkipForFullTitle(tree, failure.fullTitle)
       : findSkipForScoutFailure(tree, failure.suite, failure.title, failure.file);
 
-  /** The skip on `mainRef` that explains `failure`, if the test was runnable at `baseRef`. */
-  const findNewSkipOnMain = (failure: EvaluableFailure): SuiteNode | undefined => {
+  /** The skip that would cover `failure` after rebasing the PR onto `mainRef`, if any. */
+  const findSkipAfterRebase = (failure: EvaluableFailure): SuiteNode | undefined => {
     if (!failure.file) {
       return undefined;
     }
-    const mainTree = getTree(mainRef, failure.file);
-    const baseTree = getTree(baseRef, failure.file);
-    if (!mainTree || !baseTree) {
+    const fileTrees = getTrees(failure.file);
+    if (!fileTrees || !findSkip(fileTrees.head, failure).allUnskipped) {
       return undefined;
     }
-    const { skip: skipOnMain } = findSkip(mainTree, failure);
-    if (!skipOnMain) {
-      return undefined;
-    }
-    if (!findSkip(baseTree, failure).allUnskipped) {
-      return undefined;
-    }
-    return skipOnMain;
+    return findSkip(fileTrees.merged, failure).skip;
   };
 
   const evaluation: SkippedOnMainEvaluation = { knownSkipped: [], real: [] };
   for (const failure of failures) {
-    const skip = findNewSkipOnMain(failure);
+    const skip = findSkipAfterRebase(failure);
     if (skip) {
       evaluation.knownSkipped.push({ failure, issue: skip.issue });
     } else {

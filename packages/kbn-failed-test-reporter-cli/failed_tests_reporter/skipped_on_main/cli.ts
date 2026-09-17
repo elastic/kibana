@@ -27,6 +27,7 @@ export function runSkippedOnMainCli() {
     async ({ flagsReader }) => {
       const mainRef = flagsReader.requiredString('main-ref');
       const baseRef = flagsReader.requiredString('base-ref');
+      const headRef = flagsReader.requiredString('head-ref');
       const junitFiles = flagsReader.arrayOfPaths('junit-file') ?? [];
       const scoutFiles = flagsReader.arrayOfPaths('scout-failures') ?? [];
 
@@ -41,6 +42,7 @@ export function runSkippedOnMainCli() {
       const evaluation = evaluateFailures(failures, {
         mainRef,
         baseRef,
+        headRef,
         readFile: readFileFromGit,
       });
 
@@ -54,20 +56,22 @@ export function runSkippedOnMainCli() {
         summary = `${evaluation.real.length} of ${failures.length} failure(s) are not skipped on ${mainRef}`;
         process.exitCode = 1;
       } else {
-        summary = `all ${failures.length} failure(s) are skipped on ${mainRef} but not ${baseRef}`;
+        summary = `all ${failures.length} failure(s) would be skipped after rebasing onto ${mainRef}`;
       }
       process.stderr.write(`${summary}\n`);
     },
     {
       description: `
-        Checks whether failed tests are skipped on the PR target branch but not at the PR merge
-        base, i.e. the failures would not exist had the PR been rebased.
+        Checks whether failed tests would be skipped had the PR been rebased onto its target
+        branch: each failing file is three-way merged (merge base -> PR head vs target branch)
+        and the test must resolve to a skip in the merged file.
       `,
       flags: {
-        string: ['main-ref', 'base-ref', 'junit-file', 'scout-failures'],
+        string: ['main-ref', 'base-ref', 'head-ref', 'junit-file', 'scout-failures'],
         help: `
           --main-ref        git ref of the target branch (e.g. FETCH_HEAD after fetching main)
           --base-ref        git ref of the PR merge base
+          --head-ref        git ref of the PR head the tests ran against (e.g. HEAD)
           --junit-file      FTR JUnit XML file to read failures from (repeatable)
           --scout-failures  Scout scout-failures-*.ndjson file to read failures from (repeatable)
         `,

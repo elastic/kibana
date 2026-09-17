@@ -1,7 +1,8 @@
 # Sourced by ftr_configs.sh and the Scout runners — do not execute directly.
 #
-# Forgives test failures for tests that are skipped on the PR target branch but were not
-# skipped at the PR merge base: had the PR been rebased, those tests would not have run.
+# Forgives test failures for tests that would be skipped had the PR been rebased onto its target
+# branch: the failing file is three-way merged (merge base -> PR head vs target branch) and the
+# test must be skipped in the result.
 # Applies to every PR build; disabled for flaky-test-runner builds.
 
 SKIPPED_ON_MAIN_TARGET_SHA=""
@@ -66,12 +67,21 @@ forgive_skipped_on_main_reports() {
   if ! evaluation=$(node scripts/check_skipped_on_main \
     --main-ref "$SKIPPED_ON_MAIN_TARGET_SHA" \
     --base-ref "$GITHUB_PR_MERGE_BASE" \
+    --head-ref HEAD \
     "${report_args[@]}"); then
     echo "[skipped-on-main] keeping failures for $context"
     return 1
   fi
-  if ! echo "$evaluation" | jq -e . >/dev/null; then
+  if ! echo "$evaluation" | jq -e . >/dev/null 2>&1; then
     echo "[skipped-on-main] evaluator returned invalid JSON; keeping failures for $context"
+    return 1
+  fi
+  # The exit code alone does not flip the step: the classification itself must say every failure
+  # is known skipped (at least one, none real) before the caller may treat the run as passed.
+  if ! echo "$evaluation" | jq -e \
+    '(.knownSkipped | type == "array" and length > 0) and (.real | type == "array" and length == 0)' \
+    >/dev/null; then
+    echo "[skipped-on-main] evaluator output does not classify every failure as known skipped; keeping failures for $context"
     return 1
   fi
 
