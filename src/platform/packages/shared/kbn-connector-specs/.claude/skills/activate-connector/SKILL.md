@@ -9,7 +9,7 @@ argument-hint: [connector-type]
 
 This skill creates a live connector instance in a running Kibana by calling the Actions API. The user wants to activate a **$ARGUMENTS** connector.
 
-When `agentBuilder:experimentalFeatures` is enabled, creating a connector automatically indexes it into the Semantic Metadata Layer (SML), making its sub-actions discoverable by AI agents.
+Connector sub-actions are callable by agents as soon as the connector is created. When `agentBuilder:experimentalFeatures` is also enabled, creating a connector additionally indexes it into the Semantic Metadata Layer (SML), improving discoverability for AI agents.
 
 **CRITICAL: Never read, log, or display the contents of any credentials file. Credentials must only flow through the bundled scripts.**
 
@@ -144,5 +144,5 @@ Show the user the newly created connector entry. If it appears, report success. 
 - **Auto-detection** tries http/https on localhost:5601 with both `elastic:changeme` (standard) and `elastic_serverless:changeme` (serverless) credentials
 - **Credentials are never seen by Claude** — they flow through the file -> script -> API pipeline only
 - **The credentials file is deleted immediately** after the script reads it
-- **Connector sub-actions become available to agents** when `agentBuilder:experimentalFeatures` is true in Kibana settings
+- **Connector sub-actions are available to agents as soon as the connector is created** — `agentBuilder:experimentalFeatures` only affects SML-based discoverability, not whether sub-actions are callable
 - To override auto-detection, set `KIBANA_URL` and/or `KIBANA_AUTH` environment variables, or pass `--kibana-url` to the scripts
