@@ -1894,5 +1894,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Back to {previousPage}',
         values: { previousPage },
       }),
+    'euiKeyboardShortcuts.cmd': i18n.translate('core.euiKeyboardShortcuts.cmd', {
+      defaultMessage: 'Cmd',
+    }),
+    'euiKeyboardShortcuts.copyDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.copyDescription',
+      {
+        defaultMessage: 'Copy the focused cell value',
+      }
+    ),
+    'euiKeyboardShortcuts.copyTitle': i18n.translate('core.euiKeyboardShortcuts.copyTitle', {
+      defaultMessage: 'C',
+    }),
   };
 };
