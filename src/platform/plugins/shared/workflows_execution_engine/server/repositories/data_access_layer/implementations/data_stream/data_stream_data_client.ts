@@ -285,6 +285,8 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const pendingIds = new Map<string, number>();
     const dataStreamMetadata = this.deps.metadataManager.getMeta();
 
+    // DataStream requires @timestamp to be set on create and update.
+    // We inject the @timestamp into the document from the date field.
     const withTimestamp = (item: BulkPlainItem<TExecution>): BulkPlainItem<TExecution> => {
       if (!this.deps.dateField) return item;
       const ts = item.document[this.deps.dateField];
@@ -309,7 +311,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
           });
         } else {
           sendable.push({
-            item: { ...withTimestamp(item), index: dataStreamMetadata.writableIndex },
+            item: { ...withTimestamp(item), index: this.deps.dataStreamName },
             originalIndex: i,
           });
         }
@@ -340,7 +342,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
               item: {
                 ...withTimestamp(item),
                 operation: 'create',
-                index: dataStreamMetadata.writableIndex,
+                index: this.deps.dataStreamName,
               },
               originalIndex: i,
             });
