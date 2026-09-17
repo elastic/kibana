@@ -97,7 +97,7 @@ describe('SeveritySection', () => {
     expect(screen.getByText(/Multiple severity levels are not available/i)).toBeInTheDocument();
   });
 
-  it('shows the inherited operator and threshold per level in multi mode', () => {
+  it('shows the inherited operator as a prepend and the threshold per level in multi mode', () => {
     renderSection({
       alertConditions: [condition()],
       severity: {
@@ -109,7 +109,9 @@ describe('SeveritySection', () => {
         ],
       },
     });
-    expect(screen.getByTestId('ruleBuilderSeverityOperator-0')).toHaveValue('>');
+    // The comparator is inherited from the condition and rendered as a read-only prepend.
+    expect(screen.getAllByText('>').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('ruleBuilderSeverityThreshold-0')).toHaveValue(0.8);
     expect(screen.getByTestId('ruleBuilderSeverityThreshold-1')).toHaveValue(0.95);
   });
 

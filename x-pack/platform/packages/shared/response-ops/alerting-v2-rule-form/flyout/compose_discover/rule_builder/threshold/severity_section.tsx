@@ -14,12 +14,9 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiFieldNumber,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
-  EuiPanel,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -226,14 +223,18 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                 <>
                   {severity.levels.map((level, idx) => (
                     <React.Fragment key={level.id}>
-                      <EuiPanel paddingSize="s" hasBorder>
-                        <EuiFlexGroup gutterSize="s" alignItems="flexEnd" wrap>
+                      {idx > 0 && <EuiSpacer size="s" />}
+                      <EuiFlexGroup gutterSize="s" alignItems="flexEnd" wrap>
                           <EuiFlexItem grow={2}>
                             <EuiFormRow
-                              label={i18n.translate(
-                                'xpack.alertingV2.ruleBuilder.severity.levelLabel',
-                                { defaultMessage: 'Severity level' }
-                              )}
+                              label={
+                                idx === 0
+                                  ? i18n.translate(
+                                      'xpack.alertingV2.ruleBuilder.severity.levelLabel',
+                                      { defaultMessage: 'Severity level' }
+                                    )
+                                  : undefined
+                              }
                               fullWidth
                             >
                               <EuiSelect
@@ -252,47 +253,22 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                           </EuiFlexItem>
                           <EuiFlexItem grow={1}>
                             <EuiFormRow
-                              label={i18n.translate(
-                                'xpack.alertingV2.ruleBuilder.severity.operatorLabel',
-                                { defaultMessage: 'Operator' }
-                              )}
-                              labelAppend={
-                                <EuiIconTip
-                                  position="top"
-                                  type="question"
-                                  content={i18n.translate(
-                                    'xpack.alertingV2.ruleBuilder.severity.operatorTooltip',
-                                    {
-                                      defaultMessage:
-                                        'The comparison operator is inherited from the alert condition and cannot be changed per severity level.',
-                                    }
-                                  )}
-                                  data-test-subj={`ruleBuilderSeverityOperatorTooltip-${idx}`}
-                                />
+                              label={
+                                idx === 0
+                                  ? i18n.translate(
+                                      'xpack.alertingV2.ruleBuilder.severity.thresholdLabel',
+                                      { defaultMessage: 'Threshold' }
+                                    )
+                                  : undefined
                               }
                               fullWidth
                             >
-                              {/* Operator is inherited from the alert condition and cannot differ. */}
-                              <EuiFieldText
-                                fullWidth
-                                compressed
-                                readOnly
-                                value={condition?.comparator ?? ''}
-                                data-test-subj={`ruleBuilderSeverityOperator-${idx}`}
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={1}>
-                            <EuiFormRow
-                              label={i18n.translate(
-                                'xpack.alertingV2.ruleBuilder.severity.thresholdLabel',
-                                { defaultMessage: 'Threshold' }
-                              )}
-                              fullWidth
-                            >
+                              {/* Operator is inherited from the alert condition and shown as a
+                                  read-only prepend — it cannot differ per severity level. */}
                               <EuiFieldNumber
                                 fullWidth
                                 compressed
+                                prepend={condition?.comparator ?? ''}
                                 value={level.threshold}
                                 onChange={(e) =>
                                   updateLevel(idx, { threshold: parseFloat(e.target.value) || 0 })
@@ -323,11 +299,10 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                               </EuiToolTip>
                             </EuiFlexItem>
                           )}
-                        </EuiFlexGroup>
-                      </EuiPanel>
-                      <EuiSpacer size="s" />
+                      </EuiFlexGroup>
                     </React.Fragment>
                   ))}
+                  <EuiSpacer size="s" />
                   <EuiButtonEmpty
                     size="s"
                     iconType="plusCircle"
