@@ -1,5 +1,5 @@
 {
-  "sha1": "08b96053db2acad4d9be1395d004fb1a518e5e14",
+  "sha1": "a848b028e8c0e8932feba7fad8bac41b0aa254f7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1008,8 +1008,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
-        "line": 20,
-        "column": 8
+        "line": 27,
+        "column": 27
       }
     },
     {
@@ -1022,8 +1022,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
-        "line": 24,
+        "line": 32,
         "column": 78
+      }
+    },
+    {
+      "id": "15dbcb23bd3138a-66b543a5f91ddfd",
+      "title": "Manage regions privileges feature-read user sees a read-only Restricted regions badge when a policy is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
+        "line": 37,
+        "column": 11
+      }
+    },
+    {
+      "id": "15dbcb23bd3138a-a92eef18ac85a0d",
+      "title": "Manage regions privileges feature-privileged user can edit from the Restricted regions popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
+        "line": 52,
+        "column": 9
       }
     },
     {
