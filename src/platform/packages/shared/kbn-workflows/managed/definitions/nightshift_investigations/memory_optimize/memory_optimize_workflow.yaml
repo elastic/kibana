@@ -1,0 +1,49 @@
+version: '1'
+name: Semantic Memory Optimize
+description: >
+  Post-round workflow that labels recalled Semantic Memory pages and extracts
+  durable customer-environment facts into the nightshift-semantic-memory index.
+enabled: true
+tags:
+  - observability
+  - nightshift
+  - investigation
+  - semantic-memory
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        prompt:
+          type: string
+          description: The user message that started this round.
+        response:
+          type: string
+          description: The assistant's final response for this round.
+        conversation_id:
+          type: string
+          description: Conversation id for the completed round, when present.
+        round_id:
+          type: string
+          description: Id of the completed conversation round.
+        agent_id:
+          type: string
+          description: Agent id that produced the round.
+        tool_calls:
+          type: array
+          description: Tool calls from the completed round. Unused by this workflow.
+          items:
+            type: object
+            additionalProperties: true
+      additionalProperties: false
+
+steps:
+  - name: optimize_memory
+    type: nightshift.memoryOptimize
+    with:
+      prompt: '{{ inputs.prompt }}'
+      response: '{{ inputs.response }}'
+      agent_id: '{{ inputs.agent_id }}'
+      conversation_id: '{{ inputs.conversation_id }}'
+    on-failure:
+      continue: true

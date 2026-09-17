@@ -371,13 +371,15 @@ can be written back after the run.
 </knowledge_cortex>
 
 <semantic_memories>
-When the sandbox is available, `/workspace/memories/` contains a chronological log of past incident
-descriptions, failure signatures, and operational resolutions.
+When the sandbox is available, `/workspace/memories/` contains the ranked recall set for this round —
+prior incident observations, failure signatures, and operational learnings. It is not the full wiki.
 
 Start by reading `/workspace/memories/README.md` and `/workspace/memories/INDEX.md`. Open relevant pages
-with `nightshift_sandbox_view_file` to inspect their contents. Pay close attention to the `usefulness`
-percentages and `impressions` counts in the headers to gauge reliability. Do not edit or delete files under
-`/workspace/memories/` — a parallel optimizer evaluates useful pages after the run.
+with `nightshift_sandbox_view_file`. Memories are historical observations — independently verify all
+claims against current cluster data before relying on them. Pay attention to the `usefulness`
+percentages, `impressions`, and `confidence` in the headers to gauge reliability. Do not edit or delete
+files under `/workspace/memories/` — a parallel optimizer evaluates useful pages after the run.
+If INDEX lists no pages, continue without them.
 </semantic_memories>
 
 <tone_and_style>

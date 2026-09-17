@@ -15,6 +15,7 @@ const createPlugin = () =>
       enabled: true,
       sandbox: undefined,
       cortex: { enabled: false },
+      memory: { enabled: false },
     })
   );
 

@@ -9,49 +9,72 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
+import type { SandboxConnectionManager } from '../tools/sandbox_bash/grpc_client';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
+import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { withTimeout } from './with_timeout';
+
+/** Caps beforeAgent so a stuck sandbox allocate cannot stall the investigation. */
+const HYDRATE_TIMEOUT_MS = 20_000;
 
 export const memoryHydrateStepDefinition = ({
   getConnectionManager,
   logger,
 }: {
-  getConnectionManager: () => { apiClient: SandboxApiClient } | undefined;
+  getConnectionManager: () => SandboxConnectionManager | undefined;
   logger: Logger;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.memoryHydrate',
-    label: 'Hydrate Nightshift Semantic Memory',
-    category: StepCategory.System,
+    label: 'Hydrate Nightshift Semantic Memory into Sandbox',
+    category: StepCategory.Ai,
     description:
-      'Pre-execution workflow that materializes the Semantic Memory wiki into the ' +
-      'investigator sandbox before each agent round.',
+      'Writes ranked Semantic Memory pages into /workspace/memories for the given conversation. ' +
+      'Uses the raw sandbox client so workspace restore still runs on the first tool call.',
     inputSchema: z.object({
-      conversation_id: z.string().max(1024).describe('The sandbox conversation workspace id.'),
+      conversation_id: z
+        .string()
+        .min(1)
+        .max(1024)
+        .describe('Conversation id that namespaces the sandbox.'),
+      prompt: z
+        .string()
+        .max(65_536)
+        .optional()
+        .describe('The user message for this round, used as a memory search query when present.'),
     }),
     outputSchema: z.object({
-      status: z.literal('ok').describe('The materializer finished without throwing.'),
+      conversation_id: z.string().describe('Conversation id that was hydrated.'),
     }),
     handler: async (context) => {
-      const connectionManager = getConnectionManager();
-      if (!connectionManager) {
-        logger.debug('Memory hydration skipped — sandbox unavailable');
-        return { output: { status: 'ok' as const } };
+      const { conversation_id: conversationId, prompt } = context.input;
+      const manager = getConnectionManager();
+
+      if (!manager) {
+        throw new Error(
+          'The Nightshift sandbox is not configured — ' +
+            'set xpack.nightshift_investigations.sandbox in kibana.yml.'
+        );
       }
 
-      const esClient = context.contextManager.getScopedEsClient();
-      const spaceId = context.contextManager.getContext().workflow.spaceId ?? DEFAULT_SPACE_ID;
+      const { spaceId } = context.contextManager.getContext().workflow;
+      const scopedConversationId = scopeConversationId(spaceId, conversationId);
 
-      await hydrateMemoryWorkspace({
-        apiClient: connectionManager.apiClient,
-        conversationId: context.input.conversation_id,
-        esClient,
-        spaceId,
-        signal: context.abortSignal,
-        logger,
-      });
+      await withTimeout(
+        (signal) =>
+          hydrateMemoryWorkspace({
+            apiClient: manager.apiClient,
+            conversationId: scopedConversationId,
+            esClient: context.contextManager.getScopedEsClient(),
+            spaceId,
+            query: prompt,
+            signal,
+            logger,
+          }),
+        HYDRATE_TIMEOUT_MS,
+        `Memory hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+      );
 
-      return { output: { status: 'ok' as const } };
+      return { output: { conversation_id: scopedConversationId } };
     },
   });

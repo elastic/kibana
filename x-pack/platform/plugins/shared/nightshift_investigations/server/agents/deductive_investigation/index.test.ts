@@ -45,14 +45,24 @@ describe('deductive investigation agent type', () => {
 
   it('carries a standalone sandbox prompt and no Elastic tools', () => {
     const base = staticBase(
-      getDeductiveInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
+      getDeductiveInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        memoryEnabled: true,
+      })
     );
 
     expect(base).toMatchObject({
       enable_elastic_capabilities: false,
       skill_ids: [],
-      workflow_ids: ['system-nightshift-cortex-hydrate'],
-      post_execution_workflow_ids: ['system-nightshift-cortex-optimize'],
+      workflow_ids: [
+        'system-nightshift-cortex-hydrate',
+        'system-nightshift-semantic-memory-hydrate',
+      ],
+      post_execution_workflow_ids: [
+        'system-nightshift-cortex-optimize',
+        'system-nightshift-semantic-memory-optimize',
+      ],
     });
     expect(base.tools?.[0]?.tool_ids).toEqual([
       platformSignificantEventsTools.reportInvestigationProgress,
@@ -61,10 +71,12 @@ describe('deductive investigation agent type', () => {
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/elastic.md');
+    expect(base.instructions).toContain('independently verify');
+    expect(base.instructions).not.toContain('chronological log');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
   });
 
-  it('drops both cortex workflows when cortex is disabled', () => {
+  it('drops cortex and memory workflows when both are disabled', () => {
     const base = staticBase(
       getDeductiveInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })
     );
@@ -73,13 +85,35 @@ describe('deductive investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 
-  it('drops the hydrate workflow when cortex is on but the sandbox is not configured', () => {
+  it('keeps memory workflows when cortex is off', () => {
     const base = staticBase(
-      getDeductiveInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true })
+      getDeductiveInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: false,
+        memoryEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual(['system-nightshift-semantic-memory-hydrate']);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-semantic-memory-optimize',
+    ]);
+  });
+
+  it('drops hydrate workflows when the sandbox is not configured', () => {
+    const base = staticBase(
+      getDeductiveInvestigationAgentType({
+        sandboxEnabled: false,
+        cortexEnabled: true,
+        memoryEnabled: true,
+      })
     );
 
     expect(base.workflow_ids).toBeUndefined();
-    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-cortex-optimize']);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-cortex-optimize',
+      'system-nightshift-semantic-memory-optimize',
+    ]);
     expect(base.tools?.[0]?.tool_ids).toEqual([
       platformSignificantEventsTools.reportInvestigationProgress,
     ]);
@@ -90,6 +124,7 @@ describe('deductive investigation agent type', () => {
       getDeductiveInvestigationAgentType({
         sandboxEnabled: true,
         cortexEnabled: true,
+        memoryEnabled: true,
         telemetryConnectorId: 'elasticsearch-telemetry',
       })
     );
