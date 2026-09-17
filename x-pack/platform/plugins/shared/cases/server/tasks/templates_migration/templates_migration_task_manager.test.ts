@@ -28,7 +28,12 @@ import {
   CASES_TEMPLATES_MIGRATION_TASK_TYPE,
   CASES_TEMPLATES_MIGRATION_TASK_ID,
 } from './constants';
-import { CASE_BACKFILL_RESCHEDULE_DELAY_MS, MAX_CASE_BACKFILL_FAILED_RUNS } from './types';
+import {
+  CASE_BACKFILL_PAGE_SIZE,
+  CASE_BACKFILL_RESCHEDULE_DELAY_MS,
+  CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS,
+  MAX_CASE_BACKFILL_FAILED_RUNS,
+} from './types';
 
 const createSavedObjectsRepositoryMock = () => ({
   find: jest.fn(),
@@ -171,27 +176,25 @@ describe('TemplatesMigrationTaskManager', () => {
     repo.closePointInTime.mockResolvedValue({});
   });
 
-  // The task runner now receives a RunContext ({ taskInstance, abortController }). Tests that need
-  // to seed resume state or inspect scheduling pass through here.
   const runTask = async (
     manager: TemplatesMigrationTaskManager,
-    { state }: { state?: Record<string, unknown> } = {}
+    { state, signal }: { state?: Record<string, unknown>; signal?: AbortSignal } = {}
   ) => {
     const call = taskManagerSetupMock.registerTaskDefinitions.mock.calls[0];
     const taskDef = call[0][CASES_TEMPLATES_MIGRATION_TASK_TYPE];
     const runner = taskDef.createTaskRunner({
       taskInstance: { state: state ?? {} },
-      signal: new AbortController().signal,
+      signal: signal ?? new AbortController().signal,
     } as unknown as RunContext);
     return runner.run();
   };
 
-  const getTaskRunner = (manager: TemplatesMigrationTaskManager) => {
+  const getTaskRunner = (manager: TemplatesMigrationTaskManager, signal?: AbortSignal) => {
     const call = taskManagerSetupMock.registerTaskDefinitions.mock.calls[0];
     const taskDefs = call[0];
     const taskDef = taskDefs[CASES_TEMPLATES_MIGRATION_TASK_TYPE];
     return taskDef.createTaskRunner({
-      signal: new AbortController().signal,
+      signal: signal ?? new AbortController().signal,
     } as unknown as RunContext);
   };
 
@@ -2463,6 +2466,364 @@ describe('TemplatesMigrationTaskManager', () => {
       const result = await getTaskRunner(manager).run();
 
       expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+  });
+
+  describe('migration cancellation (Task Manager timeout / shutdown)', () => {
+    const abortFullPage = (sortValue: number) => ({
+      saved_objects: Array.from({ length: CASE_BACKFILL_PAGE_SIZE }, (_, i) => ({
+        id: `case-abort-${sortValue}-${i}`,
+        type: CASE_SAVED_OBJECT,
+        references: [],
+        attributes: { owner: 'cases', customFields: [], extended_fields: null },
+        sort: [sortValue],
+      })),
+      total: CASE_BACKFILL_PAGE_SIZE,
+      pit_id: `pit-${sortValue}`,
+    });
+
+    const abortFullPageWithLegacyField = (sortValue: number) => ({
+      saved_objects: Array.from({ length: CASE_BACKFILL_PAGE_SIZE }, (_, i) => ({
+        id: `case-abort-${sortValue}-${i}`,
+        type: CASE_SAVED_OBJECT,
+        references: [],
+        attributes: {
+          owner: 'cases',
+          customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v' }],
+          extended_fields: null,
+        },
+        sort: [sortValue],
+      })),
+      total: CASE_BACKFILL_PAGE_SIZE,
+      pit_id: `pit-${sortValue}`,
+    });
+
+    const routeWithAbort = (
+      configSO: unknown,
+      controller: AbortController,
+      {
+        abortAfterPage = 1,
+        pageFactory = abortFullPage,
+      }: {
+        abortAfterPage?: number;
+        pageFactory?: (n: number) => unknown;
+      } = {}
+    ) => {
+      let casePageCount = 0;
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [buildFieldDefinitionSOForKey('cf_text')] });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          casePageCount++;
+          if (casePageCount === abortAfterPage) {
+            controller.abort();
+          }
+          return Promise.resolve(pageFactory(casePageCount));
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+    };
+
+    it('stops scanning at the next page boundary once the signal is aborted', async () => {
+      const controller = new AbortController();
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      // Abort fires during page 1's find call — the signal is checked (and honoured) at the top
+      // of the next loop iteration, so page 2 is never fetched.
+      routeWithAbort(configSO, controller, { abortAfterPage: 1 });
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager, controller.signal).run();
+
+      const caseFinds = repo.find.mock.calls.filter((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      // Exactly 1 page fetched: the run stops before page 2, not after the full budget (25 pages).
+      expect(caseFinds).toHaveLength(1);
+    });
+
+    it('pauses cleanly: persists the resume cursor, leaves the space unflagged, keeps the PIT open', async () => {
+      const controller = new AbortController();
+      const configSO = buildConfigureSO({
+        id: 'cfg-abort',
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      // Abort fires during page 2's find — cursor reflects page 2's pit_id and searchAfter.
+      routeWithAbort(configSO, controller, { abortAfterPage: 2 });
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager, controller.signal).run();
+
+      // Canceled run is indistinguishable from a budget-paused run: no throw, normal reschedule.
+      expect(result).toMatchObject({
+        runAt: expect.any(Date),
+        state: {
+          caseBackfill: {
+            configureId: 'cfg-abort',
+            owner: 'cases',
+            namespace: 'default',
+            pitId: 'pit-2',
+            searchAfter: [2],
+          },
+        },
+      });
+      expect(result).not.toHaveProperty('shouldDeleteTask');
+      // Space must stay unflagged so the next run re-scans it.
+      expect(repo.update).not.toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        'cfg-abort',
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      // PIT is kept alive for the resumed run — closing it here would make resume impossible.
+      expect(repo.closePointInTime).not.toHaveBeenCalled();
+    });
+
+    it('resumes from the aborted run cursor and finishes the space', async () => {
+      // ── Run 1: abort after two pages ───────────────────────────────────────────────
+      const controller = new AbortController();
+      const configSO = buildConfigureSO({
+        id: 'cfg-resume',
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      routeWithAbort(configSO, controller, { abortAfterPage: 2 });
+
+      const manager = await buildAndSchedule();
+      const run1Result = (await getTaskRunner(manager, controller.signal).run()) as {
+        state: Record<string, unknown>;
+      };
+      const resumeState = run1Result.state;
+
+      // ── Run 2: resume with an empty final page — the space exhausts and completes ──
+      repo.find.mockReset();
+      repo.find.mockImplementation(
+        (opts: { type: string; pit?: { id: string }; searchAfter?: unknown }) => {
+          if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+            return Promise.resolve({ saved_objects: [configSO], total: 1 });
+          }
+          if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+            return Promise.resolve({ saved_objects: [buildFieldDefinitionSOForKey('cf_text')] });
+          }
+          if (opts.type === CASE_SAVED_OBJECT) {
+            // Partial (empty) page: space exhausted.
+            return Promise.resolve({ saved_objects: [], total: 0, pit_id: 'pit-2' });
+          }
+          return Promise.resolve({ saved_objects: [], total: 0 });
+        }
+      );
+      repo.openPointInTimeForType.mockClear();
+
+      const run2Result = await runTask(manager, { state: resumeState });
+
+      // Run 2 reused the existing PIT — no new openPointInTime call.
+      expect(repo.openPointInTimeForType).not.toHaveBeenCalled();
+      // Find carried the persisted cursor from run 1.
+      const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFind?.[0]).toEqual(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-2' }),
+          searchAfter: [2],
+        })
+      );
+      // Space is now fully backfilled: flagged complete, PIT closed, task deleted.
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        'cfg-resume',
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      expect(repo.closePointInTime).toHaveBeenCalled();
+      expect(run2Result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
+    it('keeps the work done before the abort and does not count the run as a failure', async () => {
+      const controller = new AbortController();
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      // Pages where every case has a legacy field; abort after page 1.  The page-1 bulkUpdate
+      // runs before the abort check fires, so the writes are complete and must not be lost.
+      routeWithAbort(configSO, controller, {
+        abortAfterPage: 1,
+        pageFactory: abortFullPageWithLegacyField,
+      });
+
+      const manager = await buildAndSchedule();
+      const before = Date.now();
+      const result = (await getTaskRunner(manager, controller.signal).run()) as {
+        state: { failedRuns?: number };
+        runAt: Date;
+      };
+
+      // Page-1 updates were written before the abort check.
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      // No failure recorded — a cancellation is a clean pause, not a broken run.
+      expect(result.state.failedRuns).toBeUndefined();
+      // Uses the normal reschedule delay, not the longer failure backoff.
+      const delay = result.runAt.getTime() - before;
+      expect(delay).toBeGreaterThanOrEqual(0);
+      expect(delay).toBeLessThan(CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS);
+    });
+
+    it('aborting between spaces leaves the remaining space untouched and restarts cleanly next run', async () => {
+      const cfgA = buildConfigureSO({
+        id: 'cfg-space-a',
+        owner: 'cases',
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      const cfgB = buildConfigureSO({
+        id: 'cfg-space-b',
+        owner: 'securitySolution',
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+
+      const controller = new AbortController();
+
+      // cfgA: empty case page → exhausts immediately and is flagged complete.
+      // cfgB: would have cases but is never reached.
+      repo.find.mockImplementation((opts: { type: string; filter?: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [cfgA, cfgB], total: 2 });
+        }
+        if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [buildFieldDefinitionSOForKey('cf_text')] });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [], total: 0, pit_id: 'pit-a' });
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+
+      // Abort after cfgA is flagged — the signal fires inside the setCasesMigratedFlag update,
+      // so the between-spaces check at the top of cfgB's iteration catches it.
+      repo.update.mockImplementation((type: string, id: string, attrs: unknown) => {
+        if (id === 'cfg-space-a') {
+          controller.abort();
+        }
+        return Promise.resolve({ id, attributes: attrs, references: [], type });
+      });
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager, controller.signal).run();
+
+      // cfgA was fully processed and flagged.
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        'cfg-space-a',
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      // cfgB was never touched.
+      expect(repo.update).not.toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        'cfg-space-b',
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      // Between-spaces abort drops the cursor (next run restarts from the first pending space —
+      // safe because backfill only fills absent keys and cfgA is now flagged complete).
+      expect(result).toMatchObject({ runAt: expect.any(Date), state: {} });
+      expect(result).not.toHaveProperty('shouldDeleteTask');
+    });
+
+    it('does not fire the analytics reconciliation hook or delete the task when cancelled', async () => {
+      const controller = new AbortController();
+      const hook = jest.fn().mockResolvedValue(undefined);
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      routeWithAbort(configSO, controller, { abortAfterPage: 1 });
+
+      const manager = new TemplatesMigrationTaskManager(
+        taskManagerSetupMock,
+        logger,
+        undefined,
+        hook
+      );
+      await manager.scheduleMigrationTask(
+        taskManagerStartMock as unknown as TaskManagerStartContract,
+        core as unknown as CoreStart
+      );
+      const result = await getTaskRunner(manager, controller.signal).run();
+
+      // A cancelled run is not a terminal state — the hook must not fire.
+      expect(hook).not.toHaveBeenCalled();
+      expect(result).not.toHaveProperty('shouldDeleteTask');
+    });
+
+    it('an already-aborted signal skips the case backfill entirely while Phase 1 still completes', async () => {
+      // Phase 1 (the pMap loop over configure SOs) has no abort check — it is intentionally
+      // unguarded because it is fast (bounded per space), idempotent, and already in-flight by
+      // the time Task Manager cancels us. Only Phase 2 (the unbounded case scan) checks the signal.
+      const controller = new AbortController();
+      controller.abort(); // signal is aborted before the run even begins
+
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        templates: [buildLegacyTemplate('My Template', ['cf_text'])],
+        // Neither migration flag is set — Phase 1 has real work to do.
+      });
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 }) // configure SOs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }) // existing field-defs (none)
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // existing templates (none)
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager, controller.signal).run();
+
+      // Phase 1 ran: a field definition and a template were created.
+      expect(repo.create).toHaveBeenCalled();
+      // Phase 2 was skipped: no PIT opened, no case find issued.
+      expect(repo.openPointInTimeForType).not.toHaveBeenCalled();
+      const caseFinds = repo.find.mock.calls.filter((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFinds).toHaveLength(0);
+      // Reschedules (backfill is now pending after Phase 1), task not deleted.
+      expect(result).toMatchObject({ runAt: expect.any(Date) });
+      expect(result).not.toHaveProperty('shouldDeleteTask');
+    });
+
+    it('skips no case when the abort fires during a page fetch (cursor advances past the fetched page)', async () => {
+      // The abort check fires at the TOP of the next loop iteration — after the current page's
+      // find AND bulkUpdate have both completed. So a page whose find triggers abort is fully
+      // written before the loop yields; its searchAfter is in the cursor, preventing any re-visit.
+      const controller = new AbortController();
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      // Pages with backfillable cases; abort fires during page 2's find call.
+      routeWithAbort(configSO, controller, {
+        abortAfterPage: 2,
+        pageFactory: abortFullPageWithLegacyField,
+      });
+
+      const manager = await buildAndSchedule();
+      const result = (await getTaskRunner(manager, controller.signal).run()) as {
+        state: { caseBackfill?: { searchAfter?: unknown } };
+      };
+
+      // Both page 1 and page 2 were written — no case is silently skipped.
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(2);
+      // Cursor is past page 2 so the resumed run starts from page 3, not page 2 again.
+      expect(result.state.caseBackfill).toMatchObject({ searchAfter: [2] });
     });
   });
 });
