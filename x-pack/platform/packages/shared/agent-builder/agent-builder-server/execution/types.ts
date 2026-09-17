@@ -12,7 +12,6 @@ import type {
   ConverseInput,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
-  ConversationAction,
   ConversationAccessControl,
   ConversationRoundOrigin,
   ConversationOrigin,
@@ -97,8 +96,6 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   };
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];
-  /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
-  action?: ConversationAction;
   /**
    * Used to establish the parent linkage and add subagent-specific metadata
    * to the newly-created child conversation.

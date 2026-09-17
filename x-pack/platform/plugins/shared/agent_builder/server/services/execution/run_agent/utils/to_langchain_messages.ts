@@ -43,7 +43,10 @@ import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
   groupTimelineRounds,
+  groupTimelineEntries,
   isAwaitingPrompt,
+  isTimelineRound,
+  isTimelineStandaloneUserMessage,
   roundResponse,
   type ProcessedTimelineEvent,
   type TimelineRound,
@@ -96,7 +99,7 @@ export const prepareMessages = async ({
   const attachmentTypeInstructionsProvided = new Set<string>();
 
   const previousRounds = groupTimelineRounds(conversation.timeline);
-  let rounds = previousRounds;
+  let entries = groupTimelineEntries(conversation.timeline);
   let input = conversation.nextInput;
   let inputTimestamp = conversationTimestamp;
 
@@ -104,7 +107,7 @@ export const prepareMessages = async ({
   // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
   const lastRound = previousRounds[previousRounds.length - 1];
   if (lastRound && isAwaitingPrompt(lastRound)) {
-    rounds = rounds.slice(0, rounds.length - 1);
+    entries = entries.filter((entry) => !isTimelineRound(entry) || entry.id !== lastRound.id);
     input = lastRound.userMessage.data;
     inputTimestamp = lastRound.userMessage.created_at;
   }
@@ -125,9 +128,20 @@ export const prepareMessages = async ({
     }
   }
 
-  for (const round of rounds) {
+  for (const entry of entries) {
+    if (isTimelineStandaloneUserMessage(entry)) {
+      messages.push(
+        formatUserInput({
+          input: entry.userMessage.data,
+          timestamp: entry.userMessage.created_at,
+          attachmentTypes: conversation.attachmentTypes,
+          attachmentTypeInstructionsProvided,
+        })
+      );
+      continue;
+    }
     messages.push(
-      ...(await roundToLangchain(round, {
+      ...(await roundToLangchain(entry, {
         resultTransformer,
         ignoreSteps,
         attachmentTypes: conversation.attachmentTypes,
@@ -137,7 +151,7 @@ export const prepareMessages = async ({
   }
 
   messages.push(
-    formatRoundInput({
+    formatUserInput({
       input,
       timestamp: inputTimestamp,
       attachmentTypes: conversation.attachmentTypes,
@@ -168,7 +182,7 @@ export const roundToLangchain = async (
 
   // user message
   messages.push(
-    formatRoundInput({
+    formatUserInput({
       input: round.userMessage.data,
       timestamp: round.userMessage.created_at,
       attachmentTypes,
@@ -225,7 +239,7 @@ export const roundToLangchain = async (
   return messages;
 };
 
-const formatRoundInput = ({
+export const formatUserInput = ({
   input,
   timestamp,
   attachmentTypes,
