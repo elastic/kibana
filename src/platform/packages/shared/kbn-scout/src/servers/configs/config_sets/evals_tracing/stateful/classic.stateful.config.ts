@@ -141,6 +141,17 @@ export const servers: ScoutServerConfig = {
             '--telemetry.tracing.enabled=true',
             '--telemetry.tracing.sample_rate=1',
             `--telemetry.tracing.exporters=${exporters}`,
+            /* Disable tracing redaction so exported spans carry real prompt/response and
+             * tool-call content when inspecting eval runs in Phoenix or Kibana's Tracing UI.
+             * Every config set that extends this one (agent-builder, security, workflows,
+             * entity-analytics, etc.) inherits these overrides, so `Skill Invoked` / `Tool Calls`
+             * evaluators stop reading empty tool-call attributes across the board. See #<PR_NUMBER>. */
+            '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeLlmResponses=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
+            '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
           ]
         : []),
     ],
