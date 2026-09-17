@@ -57,7 +57,6 @@ export interface CreateDatasetDetailsFieldsProps {
   existingDataSetNames?: readonly string[];
   isEditMode?: boolean;
   initialIdNormalized?: string;
-  autoFocusName?: boolean;
   loadDataSources: () => Promise<void>;
 }
 
@@ -67,7 +66,6 @@ export function CreateDatasetDetailsFields({
   existingDataSetNames = [],
   isEditMode = false,
   initialIdNormalized = '',
-  autoFocusName = false,
   loadDataSources,
 }: CreateDatasetDetailsFieldsProps) {
   const { euiTheme } = useEuiTheme();
@@ -226,7 +224,6 @@ export function CreateDatasetDetailsFields({
       >
         <EuiFieldText
           data-test-subj="createDatasetName"
-          autoFocus={autoFocusName}
           fullWidth
           placeholder={createDatasetFormStrings.namePlaceholder()}
           isInvalid={Boolean(nameFieldState.error)}

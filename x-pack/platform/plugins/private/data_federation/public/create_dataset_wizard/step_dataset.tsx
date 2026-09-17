@@ -71,7 +71,6 @@ export function StepDataset({
         existingDataSetNames={existingDataSetNames}
         isEditMode={isEditMode}
         initialIdNormalized={initialIdNormalized}
-        autoFocusName={!isEditMode}
         loadDataSources={loadDataSources}
       />
       <EuiSpacer size="m" />
