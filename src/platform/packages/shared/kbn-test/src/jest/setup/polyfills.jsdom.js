@@ -139,6 +139,7 @@ if (!Object.hasOwn(global.navigator, 'clipboard')) {
       write: () => Promise.resolve(),
       read: () => Promise.resolve([]),
     },
+    writable: true,
     configurable: true,
   });
 }
