@@ -86,6 +86,7 @@ const onClickValue = jest.fn();
 const onClickMultiValue = jest.fn();
 const layerCellValueActions: LayerCellValueActions = [];
 const onSelectRange = jest.fn();
+const onAnnotationClick = jest.fn();
 
 describe('XYChart component', () => {
   let formatFactorySpy: jest.Mock;
@@ -177,6 +178,7 @@ describe('XYChart component', () => {
       onClickMultiValue,
       layerCellValueActions,
       onSelectRange,
+      onAnnotationClick,
       syncColors: false,
       syncTooltips: false,
       syncCursor: true,
@@ -3359,6 +3361,75 @@ describe('XYChart component', () => {
         fill: getResolvedAnnotationColor({ color: undefined, isDarkMode: true, isRange: true }),
         opacity: 1,
       });
+    });
+
+    test('onAnnotationClick returns original annotation ids for line and range markers', () => {
+      const { args } = sampleArgsWithAnnotations([
+        createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
+      ]);
+      const wrapper = mount(<XYChart {...defaultProps} args={args} />);
+      const lineId = wrapper.find(LineAnnotation).first().prop('id') as string;
+      const rangeId = wrapper.find(RectAnnotation).last().prop('id') as string;
+
+      wrapper.find(Settings).first().prop('onAnnotationClick')!({
+        lines: [{ id: lineId, datum: { dataValue: defaultLineStaticAnnotation.time } }],
+        rects: [
+          {
+            id: rangeId,
+            datum: { coordinates: { x0: 1, x1: 2, y0: null, y1: null } },
+          },
+        ],
+      });
+
+      expect(onAnnotationClick).toHaveBeenCalledWith({
+        annotations: [
+          {
+            id: 'annotation',
+            type: 'point',
+            time: defaultLineStaticAnnotation.time,
+            label: 'Annotation',
+          },
+          {
+            id: 'range_annotation',
+            type: 'range',
+            time: defaultRangeStaticAnnotation.time,
+            endTime: defaultRangeStaticAnnotation.endTime,
+            label: 'Event range',
+          },
+        ],
+      });
+    });
+
+    test('onAnnotationClick includes query extra fields', () => {
+      const { args } = sampleArgsWithAnnotations();
+      args.annotations.datatable.rows = [
+        {
+          ...configToRowHelper(defaultLineStaticAnnotation),
+          'field:kibana.alert.uuid': 'alert-1',
+        },
+      ];
+      const wrapper = mount(<XYChart {...defaultProps} args={args} />);
+      const lineId = wrapper.find(LineAnnotation).first().prop('id') as string;
+
+      wrapper.find(Settings).first().prop('onAnnotationClick')!({
+        lines: [{ id: lineId, datum: { dataValue: defaultLineStaticAnnotation.time } }],
+        rects: [],
+      });
+
+      expect(onAnnotationClick).toHaveBeenCalledWith({
+        annotations: [
+          expect.objectContaining({
+            id: 'annotation',
+            extras: { 'kibana.alert.uuid': 'alert-1' },
+          }),
+        ],
+      });
+    });
+
+    test('onAnnotationClick is not set on non-interactive mode', () => {
+      const { args } = sampleArgsWithAnnotations();
+      const wrapper = mount(<XYChart {...defaultProps} interactive={false} args={args} />);
+      expect(wrapper.find(Settings).first().prop('onAnnotationClick')).toBeUndefined();
     });
   });
 
