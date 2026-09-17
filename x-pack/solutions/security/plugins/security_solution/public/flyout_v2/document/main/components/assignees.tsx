@@ -7,7 +7,7 @@
 
 import { noop } from 'lodash';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -106,7 +106,22 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const searchInputId = useGeneratedHtmlId({ prefix: 'searchInput' });
 
+  // Sync from the alert doc when the *content* of its assignee ids actually changes, not on
+  // every new `initialAssignedUserIds` array reference. `initialAssignedUserIds` is memoised on
+  // `hit`, so every doc refetch produces a new reference even when the assignees are unchanged;
+  // syncing on that reference would clobber the optimistic value set in `onSuccess` below with
+  // a not-yet-refreshed refetch (see #285324: on serverless the alerts index refresh lag makes
+  // the first post-Apply refetch return a doc that does not yet include the assignee, which
+  // used to make the just-added avatar disappear from the header until a later refresh caught
+  // up). External changes to the same alert are still picked up on the next refetch, because
+  // the key derived below reflects the actual id set the server reports.
+  const lastSyncedAssigneeIdsKey = useRef<string | null>(null);
   useEffect(() => {
+    const nextKey = initialAssignedUserIds.slice().sort().join(',');
+    if (nextKey === lastSyncedAssigneeIdsKey.current) {
+      return;
+    }
+    lastSyncedAssigneeIdsKey.current = nextKey;
     setAssignedUserIds(initialAssignedUserIds);
   }, [initialAssignedUserIds]);
 
