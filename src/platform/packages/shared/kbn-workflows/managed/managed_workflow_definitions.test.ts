@@ -15,6 +15,10 @@ import {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
+  ALERTZERO_RULE_WORKFLOW_IDS,
   ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
@@ -112,6 +116,17 @@ const managedTemplateDefinitionsById: Array<[string, RegistryTemplateManagedWork
     (definitionEntry): definitionEntry is [string, RegistryTemplateManagedWorkflowDefinition] =>
       hasYamlTemplate(definitionEntry[1])
   );
+
+const alertZeroWorkflowIds = new Set<string>([
+  ...ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
+  ...ALERTZERO_RULE_WORKFLOW_IDS,
+  ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ...ALERTZERO_ACTION_WORKFLOW_IDS,
+]);
+
+const alertZeroDefinitionsById = managedDefinitionsById.filter(([id]) =>
+  alertZeroWorkflowIds.has(id)
+);
 
 function hasYamlTemplate(
   definition: ManagedWorkflowDefinition
@@ -211,6 +226,38 @@ function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): voi
   }
 }
 
+const AI_AGENT_STEP_TYPE = 'ai.agent';
+const CONNECTOR_ID_BY_FEATURE = 'connector-id-by-feature';
+
+/**
+ * Collects `ai.agent` steps from anywhere in a parsed workflow, walking the whole tree rather than
+ * the step containers known today so nesting added later (`foreach`, `if`/`else`, `parallel`
+ * branches, `switch` cases) is covered without touching this.
+ */
+function collectAiAgentSteps(
+  node: unknown,
+  collected: Array<Record<string, unknown>> = []
+): Array<Record<string, unknown>> {
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      collectAiAgentSteps(item, collected);
+    }
+    return collected;
+  }
+
+  if (node !== null && typeof node === 'object') {
+    const candidate = node as Record<string, unknown>;
+    if (candidate.type === AI_AGENT_STEP_TYPE) {
+      collected.push(candidate);
+    }
+    for (const value of Object.values(candidate)) {
+      collectAiAgentSteps(value, collected);
+    }
+  }
+
+  return collected;
+}
+
 describe('managedWorkflowDefinitions', () => {
   it('contains unique workflow ids', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
@@ -284,6 +331,23 @@ describe('managedWorkflowDefinitions', () => {
       // the token keys can cause this, and nothing else would catch it.
       expect(renderedYaml.match(UNREPLACED_TOKEN_PATTERN) ?? []).toEqual([]);
       assertWorkflowYamlIsValid(id, renderedYaml);
+    }
+  );
+
+  // An ai.agent step naming no model is accepted by the schema and runs on whatever the
+  // deployment-wide default is, so the operator's tier choice is silently ignored and nothing
+  // else fails. Requiring the pin here is deliberately stricter than the schema: a step that
+  // genuinely must take its connector elsewhere has to change this test, which puts the
+  // exception in front of a reviewer instead of leaving it invisible.
+  it.each(alertZeroDefinitionsById)(
+    '%s resolves every ai.agent step through an inference feature',
+    (id, definition) => {
+      const aiAgentSteps = collectAiAgentSteps(parse(renderWorkflowYaml(definition)));
+      const unpinnedStepNames = aiAgentSteps
+        .filter((step) => typeof step[CONNECTOR_ID_BY_FEATURE] !== 'string')
+        .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
+
+      expect(unpinnedStepNames).toEqual([]);
     }
   );
 });
