@@ -80,7 +80,7 @@ const floorWorkers: Worker[] = [
 
 const forensicsWorker = createWorker({
   id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-  name: 'Endpoint Forensic Analysis',
+  name: 'Endpoint Analysis',
   watchIds: [SYSTEM_SECURITY_WATCH_FORENSICS_ID],
 });
 
@@ -287,7 +287,7 @@ describe('WatchDetailPage', () => {
   it('shows Forensics Watch with one Worker that has enablement and autonomy', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, [
       ...floorWorkers,
-      darkWorker,
+      huntWorker,
       ...detectionWorkers,
       forensicsWorker,
     ]);

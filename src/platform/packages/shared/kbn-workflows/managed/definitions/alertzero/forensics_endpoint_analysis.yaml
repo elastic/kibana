@@ -1,9 +1,9 @@
 version: "1"
-name: Endpoint Forensic Analysis
+name: Endpoint analysis
 description: >
-  Forensics Watch investigation worker: given an attack discovery alert id it
-  extracts the affected host, runs endpoint-forensic-analysis, and suggests
-  recommended response-action remediation.
+  Runs a deep forensics pass on an investigation: builds a timeline, extracts
+  indicators of compromise, and records its rationale. Triggered by the investigation
+  workflow. Powers the Run Forensic analysis option on Attack Discovery proposals.
 enabled: false
 tags:
   - watch

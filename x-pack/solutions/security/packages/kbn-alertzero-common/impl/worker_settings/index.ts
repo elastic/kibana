@@ -9,6 +9,7 @@ import type { z } from '@kbn/zod/v4';
 import type { WatchAutonomyLevel, WorkerSettings } from '../schemas';
 import { buildCompleteWorkerSettingsSchema, buildDefaultWorkerSettings } from './contract';
 import { RULE_CREATION_SETTINGS, RULE_TUNING_SETTINGS } from './detection_watch';
+import { ENDPOINT_ANALYSIS_SETTINGS } from './forensics_watch';
 import { ALERT_TRIAGE_SETTINGS, ATTACK_DISCOVERY_SETTINGS } from './floor_watch';
 import { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 import type { WorkerSettingsDeclaration } from './types';
@@ -18,6 +19,7 @@ export const WORKER_SETTINGS_DECLARATIONS: readonly WorkerSettingsDeclaration[] 
   ALERT_TRIAGE_SETTINGS,
   ATTACK_DISCOVERY_SETTINGS,
   CONTINUOUS_THREAT_HUNT_SETTINGS,
+  ENDPOINT_ANALYSIS_SETTINGS,
   RULE_TUNING_SETTINGS,
   RULE_CREATION_SETTINGS,
 ];

@@ -111,7 +111,7 @@ export const WORKER_NAMES: Record<string, string> = {
   ),
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.forensicsEndpointAnalysis.name',
-    { defaultMessage: 'Endpoint Forensic Analysis' }
+    { defaultMessage: 'Endpoint Analysis' }
   ),
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.huntContinuousThreatHunt.name',

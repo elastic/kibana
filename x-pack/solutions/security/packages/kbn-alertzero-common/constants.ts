@@ -217,7 +217,7 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
   },
   {
     id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-    name: 'Endpoint Forensic Analysis',
+    name: 'Endpoint Analysis',
     watchId: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
     watchTag: WATCH_FORENSICS_TAG,
   },
