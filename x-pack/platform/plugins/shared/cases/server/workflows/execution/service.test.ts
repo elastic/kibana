@@ -245,6 +245,81 @@ describe('CasesWorkflowRunService', () => {
       });
     });
 
+    it('refetches pre-expanded alerts using their validated identities', async () => {
+      const body: RunCaseWorkflowRequest = {
+        caseIds: ['case-1'],
+        inputs: {
+          event: {
+            alerts: [
+              {
+                _id: 'alert-1',
+                _index: '.alerts',
+                'kibana.alert.rule.name': 'Forged rule name',
+              },
+            ],
+          },
+        },
+        origin: { type: 'cases.alerts', caseId: 'case-1' },
+      };
+      casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
+        createAttachedAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' })
+      );
+
+      await expect(run(body)).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+      expect(management.runWorkflowWithPreprocessing).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputs: {
+            event: {
+              triggerType: 'alert',
+              alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+            },
+          },
+        })
+      );
+    });
+
+    it('refetches pre-expanded documents using their validated identities', async () => {
+      const body: RunCaseWorkflowRequest = {
+        caseIds: ['case-1'],
+        inputs: {
+          event: {
+            documents: [
+              {
+                id: 'event-1',
+                index: 'logs-default',
+                timestamp: '2026-09-16T00:00:00.000Z',
+                data: { message: 'forged document content' },
+              },
+            ],
+            query: 'host.name: server-1',
+            dataView: 'logs-*',
+          },
+        },
+        origin: { type: 'cases.case', caseId: 'case-1' },
+      };
+      casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([
+        {
+          id: 'event-1',
+          index: 'logs-default',
+          attached_at: '2026-09-16T00:00:00.000Z',
+        },
+      ]);
+
+      await expect(run(body)).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+      expect(management.runWorkflowWithPreprocessing).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputs: {
+            event: {
+              triggerType: 'document',
+              documentIds: [{ _id: 'event-1', _index: 'logs-default' }],
+              query: 'host.name: server-1',
+              dataView: 'logs-*',
+            },
+          },
+        })
+      );
+    });
+
     it('rejects an explicit document selection when a document is not attached', async () => {
       const body: RunCaseWorkflowRequest = {
         caseIds: ['case-1'],
@@ -366,6 +441,20 @@ describe('CasesWorkflowRunService', () => {
             event: {
               triggerType: 'document',
               documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
+            },
+          },
+        })
+      ).rejects.toThrow('Trigger selections can only be used with a single case.');
+      expect(management.runWorkflowWithPreprocessing).not.toHaveBeenCalled();
+    });
+
+    it('rejects pre-expanded selections without a trigger type when origin is absent', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: {
+            event: {
+              documents: [{ id: 'doc-1', index: 'logs-default', data: {} }],
             },
           },
         })

@@ -76,11 +76,46 @@ export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): Docume
   });
 };
 
+/** Resolves a Cases trigger selection from its discriminator or selection fields. */
 export const getTriggerSelectionType = (
   inputs: Record<string, unknown>
 ): TriggerSelectionType | undefined => {
-  const { triggerType } = getRecord(inputs.event) ?? {};
-  return triggerType === 'alert' || triggerType === 'document' ? triggerType : undefined;
+  const event = getRecord(inputs.event);
+  if (!event) {
+    return undefined;
+  }
+
+  const hasAlertSelection = event.alertIds != null || event.alerts != null;
+  const hasDocumentSelection = event.documentIds != null || event.documents != null;
+
+  if (hasAlertSelection && hasDocumentSelection) {
+    throw Boom.badRequest('Case workflow inputs cannot mix alert and document selections.');
+  }
+
+  let inferredSelectionType: TriggerSelectionType | undefined;
+  if (hasAlertSelection) {
+    inferredSelectionType = 'alert';
+  } else if (hasDocumentSelection) {
+    inferredSelectionType = 'document';
+  }
+  const { triggerType } = event;
+
+  if (triggerType === 'alert' || triggerType === 'document') {
+    if (inferredSelectionType !== undefined && inferredSelectionType !== triggerType) {
+      throw Boom.badRequest(
+        `Case workflow ${inferredSelectionType} selection does not match triggerType "${triggerType}".`
+      );
+    }
+    return triggerType;
+  }
+
+  if (triggerType !== undefined && inferredSelectionType !== undefined) {
+    throw Boom.badRequest(
+      `Case workflow ${inferredSelectionType} selection requires triggerType "${inferredSelectionType}".`
+    );
+  }
+
+  return inferredSelectionType;
 };
 
 export const rejectQuerySelection = (inputs: Record<string, unknown>): void => {

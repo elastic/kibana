@@ -23,11 +23,12 @@ import type { CasesClient } from '../../client';
 import type { CasesRequestHandlerContext } from '../../types';
 import {
   getTriggerSelectionType,
-  parseSelectedAlertPairs,
   parseSelectedTriggerPairs,
   rejectQuerySelection,
+  type TriggerSelectionType,
   validateOrigin,
   validateSelectionMembership,
+  type WorkflowSelectionTarget,
 } from './validate_origin';
 import type { EnsureAuthorizedToRunWorkflowParams } from './authorize_workflow_run';
 
@@ -48,6 +49,25 @@ interface CasesWorkflowRunServiceDeps {
     ensureAuthorizedToRunWorkflow: (params: EnsureAuthorizedToRunWorkflowParams) => Promise<void>;
   }>;
 }
+
+const buildTrustedTriggerInputs = (
+  inputs: Record<string, unknown>,
+  selectionType: TriggerSelectionType,
+  selectedTargets: WorkflowSelectionTarget[]
+): Record<string, unknown> => {
+  const event = isPlainObject(inputs.event) ? (inputs.event as Record<string, unknown>) : {};
+  const selectionKey = selectionType === 'alert' ? 'alertIds' : 'documentIds';
+  const selection = selectedTargets.map(({ id, index }) => ({ _id: id, _index: index }));
+
+  return {
+    ...inputs,
+    event: {
+      ...omit(event, ['alerts', 'documents', 'alertIds', 'documentIds', 'querySelection']),
+      triggerType: selectionType,
+      [selectionKey]: selection,
+    },
+  };
+};
 
 export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
@@ -129,7 +149,6 @@ export class CasesWorkflowRunService {
     // Cases only accepts concrete trigger selections so membership can be validated before any
     // document is fetched or workflow execution is scheduled.
     rejectQuerySelection(body.inputs);
-    const selectedAlerts = parseSelectedAlertPairs(body.inputs);
     const triggerSelectionType = getTriggerSelectionType(body.inputs);
     const selectedTargets =
       triggerSelectionType !== undefined
@@ -137,7 +156,7 @@ export class CasesWorkflowRunService {
         : [];
 
     if (origin === undefined) {
-      if (selectedAlerts.length > 0 || triggerSelectionType !== undefined) {
+      if (triggerSelectionType !== undefined) {
         throw Boom.badRequest('Trigger selections can only be used with a single case.');
       }
     } else {
@@ -149,7 +168,7 @@ export class CasesWorkflowRunService {
       const theCase = await casesClient.cases.get({ id: caseIds[0] });
 
       const attachedAlerts =
-        selectedAlerts.length > 0 || triggerSelectionType === 'alert'
+        triggerSelectionType === 'alert'
           ? await casesClient.attachments.getAllDocumentsAttachedToCase({
               caseId: caseIds[0],
               attachmentTypes: [AttachmentType.alert],
@@ -170,7 +189,7 @@ export class CasesWorkflowRunService {
         selectedAlerts:
           triggerSelectionType === 'alert'
             ? selectedTargets.map(({ id, index }) => ({ _id: id, _index: index }))
-            : selectedAlerts,
+            : [],
         theCase,
         attachedAlerts,
       });
@@ -197,7 +216,13 @@ export class CasesWorkflowRunService {
 
     // Strip any client-supplied event.caseIds so the client cannot pre-seed the value;
     // the server re-injects the authorized set via eventOverrides after preprocessing.
-    const { event: rawEvent, ...otherInputs } = body.inputs;
+    // Pre-expanded selections are reduced to their validated identities so preprocessing refetches
+    // authoritative document sources instead of trusting client-supplied event content.
+    const trustedInputs =
+      triggerSelectionType !== undefined
+        ? buildTrustedTriggerInputs(body.inputs, triggerSelectionType, selectedTargets)
+        : body.inputs;
+    const { event: rawEvent, ...otherInputs } = trustedInputs;
     const strippedEvent = isPlainObject(rawEvent)
       ? omit(rawEvent as Record<string, unknown>, 'caseIds')
       : rawEvent;

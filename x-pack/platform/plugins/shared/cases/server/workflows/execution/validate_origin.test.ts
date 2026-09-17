@@ -451,7 +451,36 @@ describe('trigger selection membership', () => {
   it('detects alert and document trigger selections', () => {
     expect(getTriggerSelectionType({ event: { triggerType: 'alert' } })).toBe('alert');
     expect(getTriggerSelectionType({ event: { triggerType: 'document' } })).toBe('document');
+    expect(
+      getTriggerSelectionType({
+        event: { alerts: [{ _id: 'alert-1', _index: '.alerts' }] },
+      })
+    ).toBe('alert');
+    expect(
+      getTriggerSelectionType({
+        event: { documents: [{ id: 'event-1', index: 'logs-default', data: {} }] },
+      })
+    ).toBe('document');
     expect(getTriggerSelectionType({ event: { triggerType: 'manual' } })).toBeUndefined();
+  });
+
+  it('rejects conflicting trigger selection types', () => {
+    expect(() =>
+      getTriggerSelectionType({
+        event: {
+          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+          documentIds: [{ _id: 'event-1', _index: 'logs-default' }],
+        },
+      })
+    ).toThrow('Case workflow inputs cannot mix alert and document selections.');
+    expect(() =>
+      getTriggerSelectionType({
+        event: {
+          triggerType: 'manual',
+          documents: [{ id: 'event-1', index: 'logs-default', data: {} }],
+        },
+      })
+    ).toThrow('Case workflow document selection requires triggerType "document".');
   });
 
   it('rejects query-based selections', () => {

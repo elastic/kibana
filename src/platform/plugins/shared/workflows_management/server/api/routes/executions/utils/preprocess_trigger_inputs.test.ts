@@ -105,6 +105,33 @@ describe('preprocessTriggerInputs', () => {
       expect(result).toEqual(inputs);
       expect(mockEsClient.mget).not.toHaveBeenCalled();
     });
+
+    it.each([
+      ['empty alertIds', { triggerType: 'alert', alertIds: [] }],
+      [
+        'pre-expanded alerts',
+        {
+          triggerType: 'alert',
+          alerts: [{ _id: 'alert-1', _index: '.alerts', message: 'already expanded' }],
+        },
+      ],
+    ])(
+      'should pass through %s without accessing the optional Alerting plugin',
+      async (_, event) => {
+        const inputs = { event };
+        const contextWithoutAlerting = {
+          core: mockContext.core,
+          get alerting(): never {
+            throw new Error('Alerting plugin is unavailable');
+          },
+        } as unknown as WorkflowsRequestHandlerContext;
+
+        await expect(
+          preprocessTriggerInputs(inputs, contextWithoutAlerting, 'default', mockLogger)
+        ).resolves.toEqual(inputs);
+        expect(mockEsClient.mget).not.toHaveBeenCalled();
+      }
+    );
   });
 
   describe('when inputs are alert trigger type', () => {
