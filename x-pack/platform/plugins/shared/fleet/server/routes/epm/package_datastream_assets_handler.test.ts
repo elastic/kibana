@@ -477,11 +477,23 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     mockedGetCustomDatasetStreams.mockReturnValue([
       { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
     ]);
-    mockedIsInputPackageDatasetUsedByMultiplePolicies.mockReturnValue(true);
+    // Return true only when conflict-policy-page-2 is present in the accumulator.
+    // If the handler stops after page 1, the policy won't be there, the mock returns false,
+    // no error is thrown, and the test fails — proving both pages are consumed.
+    mockedIsInputPackageDatasetUsedByMultiplePolicies.mockImplementation(
+      (allPackagePolicies: Array<{ id: string }>) =>
+        allPackagePolicies.some((p) => p.id === 'conflict-policy-page-2')
+    );
 
     await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
       `Datastreams matching custom are in use by other package policies and cannot be removed`
     );
     expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+    expect(mockedIsInputPackageDatasetUsedByMultiplePolicies).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ id: 'conflict-policy-page-2' })]),
+      'custom',
+      'logs',
+      'policy1'
+    );
   });
 });
