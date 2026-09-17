@@ -4,7 +4,8 @@ description: >
   Finds pending `security.analyze_endpoint` knowledge indicators created in this
   space and starts at most one Endpoint analysis run. Skips the sweep's dispatch
   when an analysis is already in flight. Does not write to indicators. One run
-  is one sweep.
+  is one sweep. This worker owns the per-space cadence; the child stays
+  manual-only.
 enabled: false
 tags:
   - watch
@@ -17,6 +18,11 @@ settings:
     strategy: drop
     max: 1
 triggers:
+  # This worker is the single scheduler for the space. Keep manual so a sweep
+  # can be kicked on demand without waiting for the next interval.
+  - type: scheduled
+    with:
+      every: "__WORKER_SCHEDULE_INTERVAL__"
   - type: manual
     inputs:
       properties:
@@ -56,6 +62,7 @@ consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
   ai_index_id: security-investigations
   max_open_checks: 1
   batch_size: 1

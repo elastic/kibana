@@ -13,7 +13,7 @@ import {
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW,
 } from '.';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
-import { renderCommonWorkerYaml } from './worker_template_values';
+import { renderScheduledWorkerYaml } from './worker_template_values';
 
 interface YamlStep {
   name: string;
@@ -22,9 +22,10 @@ interface YamlStep {
   steps?: YamlStep[];
 }
 
-const yaml = renderCommonWorkerYaml(FORENSICS_ENDPOINT_ANALYSIS_YAML, {
+const yaml = renderScheduledWorkerYaml(FORENSICS_ENDPOINT_ANALYSIS_YAML, {
   settingsVersion: 1,
   autonomyLevel: 'manual',
+  scheduleInterval: '15m',
 });
 const definition = parse(yaml) as {
   tags?: string[];
@@ -38,12 +39,12 @@ const flatten = (steps: YamlStep[]): YamlStep[] =>
 const startRun = flatten(definition.steps).find((step) => step.name === 'start_run');
 
 describe('Endpoint analysis worker (sweep)', () => {
-  it('stays a Watch-tagged worker with a manual trigger', () => {
+  it('stays a Watch-tagged worker that owns the per-space schedule', () => {
     expect(ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW.id).toBe(
       'system-security-forensics-endpoint-analysis'
     );
     expect(definition.tags).toEqual(expect.arrayContaining(['watch', 'watch-forensics']));
-    expect(definition.triggers?.map(({ type }) => type)).toEqual(['manual']);
+    expect(definition.triggers?.map(({ type }) => type)).toEqual(['scheduled', 'manual']);
   });
 
   it('dispatches the global analysis run and does not write indicators', () => {

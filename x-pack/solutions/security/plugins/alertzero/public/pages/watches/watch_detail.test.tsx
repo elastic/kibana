@@ -82,6 +82,11 @@ const forensicsWorker = createWorker({
   id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   name: 'Endpoint Analysis',
   watchIds: [SYSTEM_SECURITY_WATCH_FORENSICS_ID],
+  settings: {
+    workerId: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+    autonomy: 'manual',
+    scheduleInterval: '15m',
+  },
 });
 
 const huntWorker = createWorker({
@@ -284,7 +289,7 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows Forensics Watch with one Worker that has enablement and autonomy', () => {
+  it('shows Forensics Watch with one Worker that has enablement, autonomy, and a schedule', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, [
       ...floorWorkers,
       huntWorker,
@@ -307,7 +312,8 @@ describe('WatchDetailPage', () => {
       )
     ).toBeInTheDocument();
     expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
-    expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
+    expect(within(section).getByTestId('alertZeroScheduleIntervalValue')).toHaveValue(15);
+    expect(within(section).getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('m');
   });
 
   it('shows the analysis window only on Rule Tuning and does not write while editing', () => {

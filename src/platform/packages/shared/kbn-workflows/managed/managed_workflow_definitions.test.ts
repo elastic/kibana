@@ -75,8 +75,9 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     scheduleInterval: '24h',
   },
   [ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID]: {
-    settingsVersion: 1,
+    settingsVersion: 2,
     autonomyLevel: 'manual',
+    scheduleInterval: '15m',
   },
   [ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -171,7 +172,7 @@ it.each([
   [
     ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
     FORENSICS_ENDPOINT_ANALYSIS_YAML,
-    '3:c86876b9',
+    '4:d87bead6',
   ],
   [
     ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID,
