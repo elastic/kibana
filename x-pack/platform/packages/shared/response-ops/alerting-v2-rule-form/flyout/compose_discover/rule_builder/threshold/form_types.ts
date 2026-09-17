@@ -235,7 +235,7 @@ export const DEFAULT_RECOVERY_CONDITION: Omit<RecoveryCondition, 'id'> = {
 let idCounter = 0;
 export const generateId = (): string => `_${Date.now()}_${++idCounter}`;
 
-export const DEFAULT_SINGLE_SEVERITY_LEVEL: AlertEventSeverity = 'high';
+export const DEFAULT_SINGLE_SEVERITY_LEVEL: AlertEventSeverity = 'info';
 
 /** Severity requires exactly one alert condition. */
 export const isSeveritySupported = (alertConditions: AlertCondition[]): boolean =>
