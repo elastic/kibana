@@ -136,4 +136,25 @@ describe('connectors_selection', () => {
 
     expect(screen.getByRole('combobox', { name: 'Test connector' })).toBeInTheDocument();
   });
+
+  it('prefers an explicitly provided aria-labelledby', () => {
+    render(
+      <KibanaThemeProvider {...core}>
+        <>
+          <span id="customLabel">{'Custom connector label'}</span>
+          <ConnectorsSelection
+            aria-labelledby="customLabel"
+            accordionIndex={0}
+            actionItem={actionItem}
+            actionTypesIndex={actionTypeIndex}
+            actionTypeRegistered={actionType}
+            connectors={connectors}
+            onConnectorSelected={jest.fn()}
+          />
+        </>
+      </KibanaThemeProvider>
+    );
+
+    expect(screen.getByRole('combobox', { name: 'Custom connector label' })).toBeInTheDocument();
+  });
 });
