@@ -7,13 +7,10 @@
 
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import type { Filter } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '../../../lib/get_es_query_config';
 import { getAlertsDataViewBase } from '../../../lib/get_alerts_data_view_base';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
 import type { MaintenanceWindowClientContext } from '../../../../common';
-import { getScopedQueryErrorMessage } from '../../../../common';
 import type { MaintenanceWindow } from '../../types';
 import type { CreateMaintenanceWindowParams } from './types';
 import {
@@ -22,7 +19,7 @@ import {
 } from '../../transforms';
 import { createMaintenanceWindowSo } from '../../../data';
 import { createMaintenanceWindowParamsSchema } from './schemas';
-import { getMaintenanceWindowExpirationDate } from '../../lib';
+import { getMaintenanceWindowExpirationDate, resolveScope } from '../../lib';
 
 export async function createMaintenanceWindow(
   context: MaintenanceWindowClientContext,
@@ -39,32 +36,14 @@ export async function createMaintenanceWindow(
     throw Boom.badRequest(`Error validating create maintenance window data - ${error.message}`);
   }
 
-  let scopedQueryWithGeneratedValue = scope?.alerting;
-  const indexPattern = getAlertsDataViewBase();
-
-  try {
-    if (scope?.alerting) {
-      const dsl = JSON.stringify(
-        buildEsQuery(
-          indexPattern,
-          [{ query: scope.alerting.kql, language: 'kuery' }],
-          scope.alerting.filters as Filter[],
-          esQueryConfig
-        )
-      );
-
-      scopedQueryWithGeneratedValue = {
-        ...scope.alerting,
-        dsl,
-      };
-    }
-  } catch (error) {
-    throw Boom.badRequest(
-      `Error validating create maintenance window data - ${getScopedQueryErrorMessage(
-        error.message
-      )}`
-    );
-  }
+  // Back-compat: a caller that omits `scope` gets today's behaviour (v1 selected, no filter).
+  const effectiveScope = scope ?? { alerting: { enabled: true } };
+  const resolvedScope = resolveScope({
+    scope: effectiveScope,
+    esQueryConfig,
+    indexPattern: getAlertsDataViewBase(),
+    errorPrefix: 'Error validating create maintenance window data',
+  });
 
   const id = SavedObjectsUtils.generateId();
 
@@ -78,19 +57,21 @@ export async function createMaintenanceWindow(
     schedule: schedule.custom,
     expirationDate,
   });
+
+  // scopedQuery mirrors scope.alerting for the v1 alerting consumer and telemetry.
   const maintenanceWindowAttributes = transformMaintenanceWindowToMaintenanceWindowAttributes({
     title,
     enabled,
     expirationDate,
     categoryIds,
-    scopedQuery: scopedQueryWithGeneratedValue,
+    scopedQuery: resolvedScope.alerting?.enabled && resolvedScope.alerting.kql
+      ? resolvedScope.alerting
+      : null,
     rRule,
     duration,
     events,
     schedule,
-    ...(scopedQueryWithGeneratedValue
-      ? { scope: { alerting: scopedQueryWithGeneratedValue } }
-      : {}),
+    scope: resolvedScope,
     ...modificationMetadata,
   });
 

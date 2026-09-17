@@ -97,13 +97,16 @@ function findMatchingMaintenanceWindow(
   for (const mw of candidates) {
     if (!isEventTimestampWithinWindow(mw, eventTime)) continue;
 
-    const kql = mw.scope?.alertingV2?.kql;
-    if (!kql) {
+    const alertingV2 = mw.scope?.alertingV2;
+    // enabled absent or false → v2 not selected; skip this MW entirely for v2 suppression.
+    if (!alertingV2?.enabled) continue;
+    // enabled=true, no kql → no filter; suppress unconditionally.
+    if (!alertingV2.kql) {
       return mw;
     }
 
     context ??= createMatcherContext(episode, rule);
-    if (evaluateKql(kql, context)) {
+    if (evaluateKql(alertingV2.kql, context)) {
       return mw;
     }
   }

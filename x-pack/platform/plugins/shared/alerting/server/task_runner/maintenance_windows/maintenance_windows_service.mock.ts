@@ -47,6 +47,8 @@ export const getMockMaintenanceWindow = (
     createdBy: 'test-user',
     updatedBy: 'test-user',
     expirationDate: new Date().toISOString(),
+    // Post-MV5 default: v1 selected, no filter. Existing MWs are backfilled to this state.
+    scope: { alerting: { enabled: true } },
     ...overwrites,
   };
 };

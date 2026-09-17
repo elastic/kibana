@@ -19,6 +19,18 @@ export const transformMaintenanceWindowResponse = (
     rRule: response.r_rule,
     ...(response.category_ids !== undefined ? { categoryIds: response.category_ids } : {}),
     ...(response.scoped_query !== undefined ? { scopedQuery: response.scoped_query } : {}),
+    ...(response.scope !== undefined
+      ? {
+          scope: {
+            ...(response.scope.alerting !== undefined
+              ? { alerting: response.scope.alerting }
+              : {}),
+            ...(response.scope.alerting_v2 !== undefined
+              ? { alertingV2: response.scope.alerting_v2 }
+              : {}),
+          },
+        }
+      : {}),
     createdBy: response.created_by,
     updatedBy: response.updated_by,
     createdAt: response.created_at,

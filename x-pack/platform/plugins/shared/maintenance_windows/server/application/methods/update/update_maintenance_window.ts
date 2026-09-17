@@ -7,10 +7,7 @@
 
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import type { Filter } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../common';
-import { getScopedQueryErrorMessage } from '../../../../common';
 import { getEsQueryConfig } from '../../../lib/get_es_query_config';
 import { getAlertsDataViewBase } from '../../../lib/get_alerts_data_view_base';
 import type { MaintenanceWindow } from '../../types';
@@ -19,6 +16,7 @@ import {
   shouldRegenerateEvents,
   mergeEvents,
   getMaintenanceWindowExpirationDate,
+  resolveScope,
 } from '../../lib';
 import { retryIfConflicts } from '../../../lib/retry_if_conflicts';
 import {
@@ -57,30 +55,16 @@ async function updateWithOCC(
     throw Boom.badRequest(`Error validating update maintenance window data - ${error.message}`);
   }
 
-  let scopedQueryWithGeneratedValue = scope?.alerting;
-  const indexPattern = getAlertsDataViewBase();
-  try {
-    if (scope?.alerting) {
-      const dsl = JSON.stringify(
-        buildEsQuery(
-          indexPattern,
-          [{ query: scope.alerting.kql, language: 'kuery' }],
-          scope.alerting.filters as Filter[],
-          esQueryConfig
-        )
-      );
-      scopedQueryWithGeneratedValue = {
-        ...scope.alerting,
-        dsl,
-      };
-    }
-  } catch (error) {
-    throw Boom.badRequest(
-      `Error validating update maintenance window data - ${getScopedQueryErrorMessage(
-        error.message
-      )}`
-    );
-  }
+  // Only resolve the scope when it's explicitly provided; omitted scope leaves stored scope intact.
+  const resolvedScope =
+    scope === undefined
+      ? undefined
+      : resolveScope({
+          scope,
+          esQueryConfig,
+          indexPattern: getAlertsDataViewBase(),
+          errorPrefix: 'Error validating update maintenance window data',
+        });
 
   try {
     const {
@@ -119,9 +103,6 @@ async function updateWithOCC(
         ...(title ? { title } : {}),
         ...(rRule ? { rRule: rRule as MaintenanceWindow['rRule'] } : {}),
         ...(categoryIds !== undefined ? { categoryIds } : {}),
-        ...(scopedQueryWithGeneratedValue !== undefined
-          ? { scopedQuery: scopedQueryWithGeneratedValue }
-          : {}),
         ...(typeof duration === 'number' ? { duration } : {}),
         ...(typeof enabled === 'boolean' ? { enabled } : {}),
         expirationDate,
@@ -129,8 +110,16 @@ async function updateWithOCC(
         updatedBy: modificationMetadata.updatedBy,
         updatedAt: modificationMetadata.updatedAt,
         ...(schedule ? { schedule } : {}),
-        ...(scopedQueryWithGeneratedValue !== undefined
-          ? { scope: { alerting: scopedQueryWithGeneratedValue } }
+        // scopedQuery mirrors scope.alerting for the v1 alerting consumer and telemetry.
+        // Both are tied together: updating scope clears the old scopedQuery too.
+        ...(resolvedScope !== undefined
+          ? {
+              scope: resolvedScope,
+              scopedQuery:
+                resolvedScope.alerting?.enabled && resolvedScope.alerting.kql
+                  ? resolvedScope.alerting
+                  : null,
+            }
           : {}),
       });
 

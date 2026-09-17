@@ -3051,7 +3051,8 @@ describe('Alerts Client', () => {
           maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
             maintenanceWindows: [
               ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
-              { id: 'mw3' } as unknown as MaintenanceWindow,
+              // scope.alerting = null → v1 selected, no filter → goes into the no-filter bucket.
+              { id: 'mw3', scope: { alerting: null } } as unknown as MaintenanceWindow,
             ],
             maintenanceWindowsWithoutScopedQueryIds: [],
           });

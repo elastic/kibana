@@ -16,13 +16,26 @@ export const transformCreateBody = (
     rRule: createBody.r_rule,
     duration: createBody.duration,
   });
+  // Pass scope through from the request body. The application layer applies defaults and
+  // validation. scopedQuery is kept for back-compat with existing callers that only send it.
+  const scopedQuery = createBody.scoped_query;
+  const scope = createBody.scope;
   return {
     title: createBody.title,
     duration: createBody.duration,
     rRule: createBody.r_rule,
     categoryIds: createBody.category_ids,
-    scopedQuery: createBody.scoped_query,
+    scopedQuery,
     schedule: { custom: schedule },
-    ...(createBody.scoped_query ? { scope: { alerting: createBody.scoped_query } } : {}),
+    ...(scope !== undefined
+      ? {
+          scope: {
+            ...(scope.alerting !== undefined ? { alerting: scope.alerting } : {}),
+            ...(scope.alerting_v2 !== undefined ? { alertingV2: scope.alerting_v2 } : {}),
+          },
+        }
+      : scopedQuery != null
+      ? { scope: { alerting: { enabled: true, kql: scopedQuery.kql, filters: scopedQuery.filters } } }
+      : {}),
   };
 };

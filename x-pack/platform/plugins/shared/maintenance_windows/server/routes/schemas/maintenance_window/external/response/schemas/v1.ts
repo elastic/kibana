@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
 import { scheduleResponseSchemaV1 } from '../../../../schedule';
+import { maintenanceWindowScopeSchemaV1 } from '../../scope_schema_v1';
 
 export const maintenanceWindowResponseSchema = schema.object(
   {
@@ -67,23 +68,7 @@ export const maintenanceWindowResponseSchema = schema.object(
       }
     ),
 
-    scope: schema.maybe(
-      schema.object(
-        {
-          alerting: schema.object({
-            query: schema.object({
-              kql: schema.string({
-                meta: {
-                  description:
-                    'A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.',
-                },
-              }),
-            }),
-          }),
-        },
-        { meta: { id: 'maintenance_window_scope' } }
-      )
-    ),
+    scope: schema.maybe(maintenanceWindowScopeSchemaV1),
 
     schedule: schema.object({
       custom: scheduleResponseSchemaV1,

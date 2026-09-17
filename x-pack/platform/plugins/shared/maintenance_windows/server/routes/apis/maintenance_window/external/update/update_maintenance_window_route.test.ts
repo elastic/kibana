@@ -130,6 +130,7 @@ describe('updateMaintenanceWindowRoute', () => {
           until: '2022-05-17T05:05:00.000Z',
         },
         scopedQuery: {
+          enabled: true,
           filters: [],
           kql: "_id: '1234'",
         },
@@ -142,6 +143,7 @@ describe('updateMaintenanceWindowRoute', () => {
         },
         scope: {
           alerting: {
+            enabled: true,
             kql: "_id: '1234'",
             filters: [],
           },

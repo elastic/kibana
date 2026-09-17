@@ -28,13 +28,35 @@ export const convertFromMaintenanceWindowToForm = (
   const endDate = moment(startDate).add(maintenanceWindow.duration);
   // maintenance window is considered recurring if interval is defined
   const recurring = has(maintenanceWindow, 'rRule.interval');
+  // When scope is explicitly set, read selection via the enabled flag.
+  // When scope is absent (pre-MV5 docs that bypassed backfill), fall back to the legacy
+  // scopedQuery field.
+  const hasExplicitScope = maintenanceWindow.scope !== undefined;
+  const isV1Selected = maintenanceWindow.scope?.alerting?.enabled === true;
+  const isV2Selected = maintenanceWindow.scope?.alertingV2?.enabled === true;
+
+  const rawAlerting = maintenanceWindow.scope?.alerting;
+  const legacyScopedQuery = maintenanceWindow.scopedQuery;
+  const scopedQuery: FormProps['scopedQuery'] = hasExplicitScope
+    ? (isV1Selected && rawAlerting?.kql
+      ? { kql: rawAlerting.kql, filters: rawAlerting.filters ?? [] }
+      : isV1Selected
+      ? null   // selected but no filter
+      : undefined)
+    : legacyScopedQuery != null
+    ? { kql: legacyScopedQuery.kql ?? '', filters: legacyScopedQuery.filters ?? [] }
+    : legacyScopedQuery; // null or undefined
+
+  const scopeAlertingV2 = isV2Selected ? maintenanceWindow.scope!.alertingV2 : undefined;
+
   const form: FormProps = {
     title: maintenanceWindow.title,
     startDate,
     endDate: endDate.toISOString(),
     timezone: [maintenanceWindow.rRule.tzid],
     recurring,
-    scopedQuery: maintenanceWindow.scopedQuery,
+    scopedQuery,
+    ...(scopeAlertingV2 !== undefined ? { scopeAlertingV2 } : {}),
   };
   if (!recurring) return form;
 

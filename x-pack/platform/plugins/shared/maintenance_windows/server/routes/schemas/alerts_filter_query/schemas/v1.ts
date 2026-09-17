@@ -7,14 +7,38 @@
 
 import { schema } from '@kbn/config-schema';
 import { FilterStateStore } from '@kbn/es-query';
+import { MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
+
+export const alertingV2ScopeSchema = schema.object(
+  {
+    enabled: schema.boolean({
+      meta: { description: 'Whether the maintenance window applies to alerting v2 episodes.' },
+    }),
+    kql: schema.maybe(
+      schema.string({
+        maxLength: MAX_KQL_LENGTH,
+        meta: {
+          description:
+            'A filter written in Kibana Query Language (KQL). Evaluated in memory against the alerting v2 episode context (episode_id, episode_status, rule.*, data.*).',
+        },
+      })
+    ),
+  },
+  { meta: { id: 'maintenance_window_alerting_v2_scope' } }
+);
 
 export const alertsFilterQuerySchema = schema.object(
   {
-    kql: schema.string({
-      maxLength: 10000,
-      meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+    enabled: schema.boolean({
+      meta: { description: 'Whether the maintenance window applies to alerting v1 alerts.' },
     }),
-    filters: schema.arrayOf(
+    kql: schema.maybe(
+      schema.string({
+        maxLength: 10000,
+        meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+      })
+    ),
+    filters: schema.maybe(schema.arrayOf(
       schema.object({
         query: schema.maybe(
           schema.recordOf(
@@ -59,7 +83,7 @@ export const alertsFilterQuerySchema = schema.object(
             'A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.',
         },
       }
-    ),
+    )),
     dsl: schema.maybe(
       schema.string({
         maxLength: 10000,

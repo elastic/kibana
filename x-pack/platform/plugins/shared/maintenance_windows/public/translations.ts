@@ -127,6 +127,83 @@ export const CREATE_FORM_TIMEFRAME_DESCRIPTION = i18n.translate(
   }
 );
 
+export const SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope.title', {
+  defaultMessage: 'Scope',
+});
+
+export const SCOPE_DESCRIPTION = i18n.translate('xpack.maintenanceWindows.scope.description', {
+  defaultMessage:
+    'Select the scope of this maintenance window by choosing what to suppress during maintenance',
+});
+
+export const ALERTS_SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope.alerts.title', {
+  defaultMessage: 'Alerts',
+});
+
+export const ALERTS_SCOPE_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.scope.alerts.description',
+  {
+    defaultMessage: 'Suppress alert notifications during maintenance',
+  }
+);
+
+export const FILTER_ALERTS_SUBTITLE = i18n.translate(
+  'xpack.maintenanceWindows.scope.alerts.filterAlertsSubtitle',
+  {
+    defaultMessage: 'Filter alerts',
+  }
+);
+
+export const ALERTING_V2_SCOPE_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.scope.alertingV2.title',
+  {
+    defaultMessage: 'Episodes',
+  }
+);
+
+export const ALERTING_V2_SCOPE_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.scope.alertingV2.description',
+  {
+    defaultMessage: 'Suppress alert episode notifications during maintenance',
+  }
+);
+
+export const FILTER_ALERTING_V2_SUBTITLE = i18n.translate(
+  'xpack.maintenanceWindows.scope.alertingV2.filterEpisodesSubtitle',
+  {
+    defaultMessage: 'Filter episodes',
+  }
+);
+
+export const CREATE_FORM_ALERTING_V2_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2Query.emptyErrorMessage',
+  {
+    defaultMessage: 'Episode filter is required.',
+  }
+);
+
+export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+export const CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2FiltersPlaceholder',
+  {
+    defaultMessage: 'Episode filters (e.g. data.host.name:"my-host" or data.severity:"low")',
+  }
+);
+
+export const CREATE_FORM_ALERTINGV2_FILTERS_TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2FiltersTechnicalPreviewTooltip',
+  {
+    defaultMessage:
+      'This feature is in technical preview and may change or be removed in future releases.',
+  }
+);
+
 export const CREATE_FORM_SOLUTION_SELECTION_TITLE = i18n.translate(
   'xpack.maintenanceWindows.createForm.solutionSelection.title',
   {
@@ -445,7 +522,7 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.maintenanceWindows.searc
 export const SAVE_WITHOUT_FILTERS_MODAL_TITLE = i18n.translate(
   'xpack.maintenanceWindows.saveWithoutFiltersModal.title',
   {
-    defaultMessage: 'Save maintenance window without filters?',
+    defaultMessage: 'Save maintenance window without a scope?',
   }
 );
 
@@ -453,14 +530,14 @@ export const SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE = i18n.translate(
   'xpack.maintenanceWindows.saveWithoutFiltersModal.subtitle',
   {
     defaultMessage:
-      'This maintenance window will apply to all rules. Only use this if you intend to suppress notifications for every rule during the maintenance period.',
+      'No scope is selected, so this maintenance window will not suppress any notifications. Enable at least one scope to start suppressing alerts or episodes.',
   }
 );
 
 export const SAVE_WITHOUT_FILTERS_MODAL_CONFIRM = i18n.translate(
   'xpack.maintenanceWindows.saveWithoutFiltersModal.confirm',
   {
-    defaultMessage: 'Save without filters',
+    defaultMessage: 'Save without scope',
   }
 );
 

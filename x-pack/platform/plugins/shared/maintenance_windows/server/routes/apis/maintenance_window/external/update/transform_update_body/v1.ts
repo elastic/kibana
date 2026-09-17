@@ -19,7 +19,7 @@ import type { UpdateMaintenanceWindowParams } from '../../../../../../applicatio
 export const transformUpdateBody = (
   updateBody: UpdateMaintenanceWindowRequestBodyV1
 ): UpdateMaintenanceWindowParams['data'] => {
-  const kql = updateBody?.scope?.alerting.query.kql;
+  const requestScope = updateBody.scope;
   let customSchedule;
 
   if (updateBody.schedule?.custom) {
@@ -29,13 +29,37 @@ export const transformUpdateBody = (
     ? getDurationInMilliseconds(updateBody.schedule.custom.duration)
     : undefined;
 
+  const alertingKql = requestScope?.alerting?.query?.kql;
+  const alertingV2Kql = requestScope?.alerting_v2?.query?.kql;
+  const scope =
+    requestScope !== undefined
+      ? {
+          ...(requestScope.alerting !== undefined
+            ? {
+                alerting: {
+                  enabled: requestScope.alerting.enabled ?? true,
+                  ...(alertingKql ? { kql: alertingKql, filters: [] } : {}),
+                },
+              }
+            : {}),
+          ...(requestScope.alerting_v2 !== undefined
+            ? {
+                alertingV2: {
+                  enabled: requestScope.alerting_v2.enabled ?? true,
+                  ...(alertingV2Kql ? { kql: alertingV2Kql } : {}),
+                },
+              }
+            : {}),
+        }
+      : undefined;
+
   return {
     ...(updateBody.title && { title: updateBody.title }),
     ...(updateBody.enabled !== undefined && { enabled: updateBody.enabled }),
     ...(durationInMilliseconds && { duration: durationInMilliseconds }),
     ...(customSchedule?.rRule && { rRule: customSchedule.rRule }),
-    ...(kql && { scopedQuery: { kql, filters: [] } }),
+    ...(alertingKql ? { scopedQuery: { enabled: true, kql: alertingKql, filters: [] } } : {}),
     ...(updateBody.schedule && { schedule: updateBody.schedule }),
-    ...(kql && { scope: { alerting: { kql, filters: [] } } }),
+    ...(scope !== undefined ? { scope } : {}),
   };
 };

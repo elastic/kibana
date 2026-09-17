@@ -202,8 +202,8 @@ describe('MaintenanceWindowClient - create', () => {
         rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
         schedule: mockMaintenanceWindow.schedule,
         categoryIds: ['securitySolution'],
-        scopedQuery: query,
-        scope: { alerting: query },
+        scopedQuery: { enabled: true, ...query },
+        scope: { alerting: { enabled: true, ...query } },
       },
     });
 
@@ -229,7 +229,7 @@ describe('MaintenanceWindowClient - create', () => {
     ).toEqual(`_id: '1234'`);
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters[0]
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters![0]
     ).toEqual({
       $state: { store: 'appState' },
       meta: {
@@ -292,6 +292,7 @@ describe('MaintenanceWindowClient - create', () => {
           schedule: mockMaintenanceWindow.schedule,
           scope: {
             alerting: {
+              enabled: true,
               kql: `kibana.alert.rule.name: ${kqlPattern}`,
               filters: [],
             },
@@ -338,6 +339,7 @@ describe('MaintenanceWindowClient - create', () => {
           categoryIds: ['observability', 'securitySolution'],
           scope: {
             alerting: {
+              enabled: true,
               kql: 'invalid: ',
               filters: [],
             },
@@ -406,6 +408,7 @@ describe('MaintenanceWindowClient - create', () => {
         schedule: mockMaintenanceWindow.schedule,
         scope: {
           alerting: {
+            enabled: true,
             kql: '',
             filters: [
               {

@@ -21,13 +21,41 @@ export const transformCreateBody = (
 ): CreateMaintenanceWindowParams['data'] => {
   const { rRule } = transformCustomScheduleToRRule(createBody.schedule.custom);
   const duration = getDurationInMilliseconds(createBody.schedule.custom.duration);
-  const kql = createBody.scope?.alerting.query.kql;
+  const requestScope = createBody.scope;
+
+  // External API scope → internal scope. `enabled` defaults to true when the sub-object is present.
+  // Back-compat: omitting scope entirely is handled by `create_maintenance_window.ts`
+  // (defaults to `{ alerting: { enabled: true } }`).
+  const alertingKql = requestScope?.alerting?.query?.kql;
+  const alertingV2Kql = requestScope?.alerting_v2?.query?.kql;
+  const scope =
+    requestScope !== undefined
+      ? {
+          ...(requestScope.alerting !== undefined
+            ? {
+                alerting: {
+                  enabled: requestScope.alerting.enabled ?? true,
+                  ...(alertingKql ? { kql: alertingKql, filters: [] } : {}),
+                },
+              }
+            : {}),
+          ...(requestScope.alerting_v2 !== undefined
+            ? {
+                alertingV2: {
+                  enabled: requestScope.alerting_v2.enabled ?? true,
+                  ...(alertingV2Kql ? { kql: alertingV2Kql } : {}),
+                },
+              }
+            : {}),
+        }
+      : undefined;
 
   return {
     title: createBody.title,
     enabled: createBody.enabled,
-    ...(kql && { scopedQuery: { kql, filters: [] } }),
-    ...(kql && { scope: { alerting: { kql, filters: [] } } }),
+    // scopedQuery mirrors scope.alerting for the v1 alerting consumer and telemetry.
+    ...(alertingKql ? { scopedQuery: { enabled: true, kql: alertingKql, filters: [] } } : {}),
+    ...(scope !== undefined ? { scope } : {}),
     duration,
     schedule: createBody.schedule,
     rRule,

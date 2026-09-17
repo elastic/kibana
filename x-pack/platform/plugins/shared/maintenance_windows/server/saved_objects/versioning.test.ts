@@ -178,4 +178,104 @@ describe('Maintenance Window Model Version Migrations', () => {
       });
     });
   });
+
+  describe('Scope backfill from v4 to v5', () => {
+    it('backfills scope.alerting = { enabled: true } when scope is absent', () => {
+      const doc = {
+        id: 'test-id',
+        type: 'maintenance-window',
+        attributes: {
+          title: 'No scope',
+          enabled: true,
+          schedule: {
+            custom: {
+              duration: '60m',
+              start: '2026-01-08T12:01:17.327Z',
+              timezone: 'Europe/London',
+            },
+          },
+        },
+        references: [],
+      };
+
+      const migrated = migrator.migrate({ document: doc, fromVersion: 4, toVersion: 5 });
+
+      expect(migrated.attributes).toMatchObject({ scope: { alerting: { enabled: true } } });
+    });
+
+    it('is a no-op when scope.alerting already has enabled: true', () => {
+      const doc = {
+        id: 'test-id',
+        type: 'maintenance-window',
+        attributes: {
+          title: 'Already enabled',
+          enabled: true,
+          schedule: {
+            custom: {
+              duration: '60m',
+              start: '2026-01-08T12:01:17.327Z',
+              timezone: 'Europe/London',
+            },
+          },
+          scope: { alerting: { enabled: true } },
+        },
+        references: [],
+      };
+
+      const migrated = migrator.migrate({ document: doc, fromVersion: 4, toVersion: 5 });
+
+      expect(migrated.attributes).toMatchObject({ scope: { alerting: { enabled: true } } });
+    });
+
+    it('upgrades legacy scope.alerting object by adding enabled: true', () => {
+      const filter = { kql: 'severity: "critical"', filters: [], dsl: '{}' };
+      const doc = {
+        id: 'test-id',
+        type: 'maintenance-window',
+        attributes: {
+          title: 'Has filter',
+          enabled: true,
+          schedule: {
+            custom: {
+              duration: '60m',
+              start: '2026-01-08T12:01:17.327Z',
+              timezone: 'Europe/London',
+            },
+          },
+          scope: { alerting: filter },
+        },
+        references: [],
+      };
+
+      const migrated = migrator.migrate({ document: doc, fromVersion: 4, toVersion: 5 });
+
+      expect(migrated.attributes).toMatchObject({
+        scope: { alerting: { enabled: true, kql: 'severity: "critical"', dsl: '{}' } },
+      });
+    });
+
+    it('repairs empty-filter bug to scope.alerting = { enabled: true }', () => {
+      const doc = {
+        id: 'test-id',
+        type: 'maintenance-window',
+        attributes: {
+          title: 'Empty filter bug',
+          enabled: true,
+          schedule: {
+            custom: {
+              duration: '60m',
+              start: '2026-01-08T12:01:17.327Z',
+              timezone: 'Europe/London',
+            },
+          },
+          scope: { alerting: { kql: '', filters: [], dsl: '' } },
+        },
+        references: [],
+      };
+
+      const migrated = migrator.migrate({ document: doc, fromVersion: 4, toVersion: 5 });
+
+      expect(migrated.attributes).toMatchObject({ scope: { alerting: { enabled: true } } });
+    });
+  });
 });

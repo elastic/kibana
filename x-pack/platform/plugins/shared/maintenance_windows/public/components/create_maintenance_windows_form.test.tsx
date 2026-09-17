@@ -280,7 +280,7 @@ describe('CreateMaintenanceWindowForm', () => {
       await fillTitleAndSubmit();
 
       const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
-      await user.click(within(modal).getByRole('button', { name: 'Save without filters' }));
+      await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);

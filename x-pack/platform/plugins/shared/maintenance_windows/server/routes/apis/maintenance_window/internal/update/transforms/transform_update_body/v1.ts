@@ -19,6 +19,7 @@ export const transformUpdateBody = (
     r_rule: rRule,
     category_ids: categoryIds,
     scoped_query: scopedQuery,
+    scope,
   } = updateBody;
 
   const schedule =
@@ -29,6 +30,18 @@ export const transformUpdateBody = (
         })
       : undefined;
 
+  // Determine scope to forward. Explicit `scope` from body takes precedence over legacy
+  // `scoped_query`; when neither is provided, omit scope so the stored value is kept.
+  const resolvedScope =
+    scope !== undefined
+      ? {
+          ...(scope.alerting !== undefined ? { alerting: scope.alerting } : {}),
+          ...(scope.alerting_v2 !== undefined ? { alertingV2: scope.alerting_v2 } : {}),
+        }
+      : scopedQuery != null
+      ? { alerting: { enabled: true, kql: scopedQuery.kql, filters: scopedQuery.filters } }
+      : undefined;
+
   return {
     ...(title !== undefined ? { title } : {}),
     ...(enabled !== undefined ? { enabled } : {}),
@@ -37,6 +50,6 @@ export const transformUpdateBody = (
     ...(categoryIds !== undefined ? { categoryIds } : {}),
     ...(scopedQuery !== undefined ? { scopedQuery } : {}),
     ...(schedule !== undefined ? { schedule: { custom: schedule } } : {}),
-    ...(scopedQuery !== undefined ? { scope: { alerting: scopedQuery } } : {}),
+    ...(resolvedScope !== undefined ? { scope: resolvedScope } : {}),
   };
 };

@@ -252,6 +252,7 @@ describe('filterMaintenanceWindows', () => {
       id: 'test-id1',
       scope: {
         alerting: {
+          enabled: true,
           kql: "_id: '1234'",
           filters: [
             {
@@ -322,6 +323,7 @@ describe('filterMaintenanceWindowsIds', () => {
       id: 'test-id1',
       scope: {
         alerting: {
+          enabled: true,
           kql: "_id: '1234'",
           filters: [
             {

@@ -32,6 +32,7 @@ describe('transformCreateBody', () => {
       title: 'test-maintenance-window',
       enabled: false,
       scopedQuery: {
+        enabled: true,
         filters: [],
         kql: "_id: '1234'",
       },
@@ -56,6 +57,7 @@ describe('transformCreateBody', () => {
       },
       scope: {
         alerting: {
+          enabled: true,
           filters: [],
           kql: "_id: '1234'",
         },
