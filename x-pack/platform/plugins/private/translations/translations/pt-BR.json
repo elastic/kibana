@@ -51315,8 +51315,6 @@
     "xpack.significantEvents.inferenceFeature.kiQueryGenerationName": "Geração de consulta de indicador de conhecimento",
     "xpack.significantEvents.inferenceFeature.significantEventsParentDescription": "Modelos de IA utilizados para eventos significativos de Streams (indicadores de conhecimento, consultas, descoberta).",
     "xpack.significantEvents.inferenceFeature.significantEventsParentName": "Eventos significativos de Streams",
-    "xpack.significantEvents.memory.workflowUpdateFailedErrorMessage": "Não foi possível atualizar o fluxo de trabalho \"{workflowId}\"",
-    "xpack.significantEvents.memory.workflowUpdateFailedWithDetailErrorMessage": "Não foi possível atualizar o fluxo de trabalho \"{workflowId}\": {detail}",
     "xpack.significantEvents.scheduledSigEventsDiscoveryDetectionIntervalMinutesDescription": "A frequência com que a detecção de eventos significativos agendados é executada neste espaço do Kibana.",
     "xpack.significantEvents.scheduledSigEventsDiscoveryDetectionIntervalMinutesName": "Intervalo de detecção de eventos significativos programados (minutos)",
     "xpack.significantEvents.scheduledSigEventsDiscoveryDiscoveryBatchSizeDescription": "Número máximo de detecções enviadas para cada passagem de descoberta agendada neste espaço do Kibana.",
