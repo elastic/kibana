@@ -12,11 +12,13 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   fetch$,
+  getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
   useFetchContext,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -192,6 +194,8 @@ export const getOverviewEmbeddableFactory = ({
       },
     });
 
+    const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
     const fetchSubscription = fetch$(api)
       .pipe()
       .subscribe((next) => {
@@ -201,13 +205,14 @@ export const getOverviewEmbeddableFactory = ({
     return {
       api,
       Component: () => {
-        const [sloId, sloInstanceId, overviewMode, groupFilters, remoteName] =
+        const [sloId, sloInstanceId, overviewMode, groupFilters, remoteName, viewMode] =
           useBatchedPublishingSubjects(
             singleSloManager.api.sloId$,
             singleSloManager.api.sloInstanceId$,
             overviewMode$,
             groupSloManager.api.groupFilters$,
-            singleSloManager.api.remoteName$
+            singleSloManager.api.remoteName$,
+            viewMode$
           );
 
         useEffect(() => {
@@ -245,6 +250,7 @@ export const getOverviewEmbeddableFactory = ({
                     dashboardFilters={dashboardFilters}
                     remoteName={remoteName}
                     reloadSubject={reload$}
+                    previewMode={viewMode === 'preview'}
                   />
                 </QueryClientProvider>
               </PluginContext.Provider>

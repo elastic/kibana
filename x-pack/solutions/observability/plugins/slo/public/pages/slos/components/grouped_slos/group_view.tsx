@@ -23,6 +23,7 @@ interface Props {
   filters?: Filter[];
   lastRefreshTime?: number;
   groupsFilter?: string[];
+  previewMode?: boolean;
 }
 
 export function GroupView({
@@ -34,6 +35,7 @@ export function GroupView({
   groupsFilter,
   filters,
   lastRefreshTime,
+  previewMode = false,
 }: Props) {
   const { state, onStateChange } = useUrlSearchState();
   const { tagsFilter, statusFilter, page, perPage, lastRefresh } = state;
@@ -88,6 +90,7 @@ export function GroupView({
             direction={direction}
             summary={result.summary}
             filters={filters}
+            previewMode={previewMode}
           />
         ))}
 

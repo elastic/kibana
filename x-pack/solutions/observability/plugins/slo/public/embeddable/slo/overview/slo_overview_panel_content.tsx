@@ -32,12 +32,14 @@ export interface GroupOverviewPanelProps {
   groupFilters: GroupFilters;
   dashboardFilters?: Filter[];
   reloadSubject: Subject<boolean>;
+  previewMode: boolean;
 }
 
 export function GroupOverviewPanel({
   groupFilters,
   dashboardFilters = [],
   reloadSubject,
+  previewMode,
 }: GroupOverviewPanelProps) {
   return (
     <div
@@ -64,6 +66,7 @@ export function GroupOverviewPanel({
             kqlQuery={groupFilters.kql_query ?? ''}
             filters={[...(toStoredFilters(groupFilters.filters) ?? []), ...dashboardFilters]}
             reloadSubject={reloadSubject}
+            previewMode={previewMode}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -71,10 +74,20 @@ export function GroupOverviewPanel({
   );
 }
 
-export function SingleOverviewCardList({ sloId }: { sloId: string }) {
+export function SingleOverviewCardList({
+  sloId,
+  previewMode,
+}: {
+  sloId: string;
+  previewMode: boolean;
+}) {
   return (
     <div data-test-subj="sloSingleOverviewPanel" style={{ width: '100%' }}>
-      <SloCardChartList data-test-subj="sloSingleOverviewPanel" sloId={sloId} />
+      <SloCardChartList
+        data-test-subj="sloSingleOverviewPanel"
+        sloId={sloId}
+        previewMode={previewMode}
+      />
     </div>
   );
 }
@@ -87,6 +100,7 @@ export interface SloOverviewPanelContentProps {
   dashboardFilters?: Filter[];
   remoteName: string | undefined;
   reloadSubject: Subject<boolean>;
+  previewMode: boolean;
 }
 
 export function SloOverviewPanelContent({
@@ -97,6 +111,7 @@ export function SloOverviewPanelContent({
   dashboardFilters,
   remoteName,
   reloadSubject,
+  previewMode,
 }: SloOverviewPanelContentProps) {
   const { data: sloDetails } = useFetchSloDetails({
     sloId: sloId ?? undefined,
@@ -105,18 +120,19 @@ export function SloOverviewPanelContent({
   const hasGroupBy = sloDetails ? hasSloGroupBy(sloDetails.groupBy) : false;
   const showCardList =
     overviewMode === 'single' && sloInstanceId === ALL_VALUE && hasGroupBy && Boolean(sloId);
-
+  console.log({ previewMode, overviewMode, showCardList });
   if (overviewMode === 'groups') {
     return (
       <GroupOverviewPanel
         groupFilters={groupFilters!}
         dashboardFilters={dashboardFilters}
         reloadSubject={reloadSubject}
+        previewMode={previewMode}
       />
     );
   }
   if (showCardList && sloId) {
-    return <SingleOverviewCardList sloId={sloId} />;
+    return <SingleOverviewCardList sloId={sloId} previewMode={previewMode} />;
   }
   return (
     <SloOverview
@@ -124,6 +140,7 @@ export function SloOverviewPanelContent({
       sloInstanceId={sloInstanceId}
       reloadSubject={reloadSubject}
       remoteName={remoteName}
+      previewMode={previewMode}
     />
   );
 }

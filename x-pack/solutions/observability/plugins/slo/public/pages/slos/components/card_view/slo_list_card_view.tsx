@@ -24,6 +24,7 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
+  previewMode?: boolean;
 }
 
 const useColumns = () => {
@@ -43,7 +44,7 @@ const useColumns = () => {
   }
 };
 
-export function SloListCardView({ sloList, loading, error }: Props) {
+export function SloListCardView({ sloList, loading, error, previewMode = false }: Props) {
   const sloIdsAndInstanceIds = sloList.map((slo) => [slo.id, slo.instanceId] as [string, string]);
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
@@ -59,7 +60,7 @@ export function SloListCardView({ sloList, loading, error }: Props) {
   if (loading && sloList.length === 0) {
     return <LoadingSloGrid gridSize={columns} />;
   }
-
+  console.log({ previewMode });
   return (
     <EuiFlexGrid columns={columns} gutterSize="m">
       {sloList
@@ -81,6 +82,7 @@ export function SloListCardView({ sloList, loading, error }: Props) {
               }
               historicalSummaryLoading={historicalSummaryLoading}
               refetchRules={refetchRules}
+              previewMode={previewMode}
             />
           </EuiFlexItem>
         ))}

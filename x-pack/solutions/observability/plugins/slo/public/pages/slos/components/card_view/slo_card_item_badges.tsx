@@ -25,16 +25,23 @@ interface Props {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<BurnRateRuleParams>> | undefined;
   handleCreateRule?: () => void;
+  previewMode?: boolean;
 }
 
-export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }: Props) {
+export function SloCardItemBadges({
+  slo,
+  activeAlerts,
+  rules,
+  handleCreateRule,
+  previewMode = false,
+}: Props) {
   const { onStateChange } = useUrlSearchState();
 
   const handleTagClick = (tag: string) =>
     onStateChange({
       kqlQuery: `slo.tags: "${tag}"`,
     });
-
+  console.log({ previewMode });
   return (
     <div
       css={({ euiTheme }) => css`
@@ -54,9 +61,17 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
             <SloStateBadge slo={slo} />
             <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
             <SLOCardItemInstanceBadge slo={slo} />
-            <SloRulesBadge rules={rules} onClick={handleCreateRule} isRemote={!!slo.remote} />
+            <SloRulesBadge
+              rules={rules}
+              onClick={previewMode ? undefined : handleCreateRule}
+              isRemote={!!slo.remote}
+            />
             <SloRemoteBadge slo={slo} />
-            <SloTagsBadge slo={slo} onClick={handleTagClick} defaultVisibleTags={1} />
+            <SloTagsBadge
+              slo={slo}
+              onClick={previewMode ? undefined : handleTagClick}
+              defaultVisibleTags={1}
+            />
           </>
         )}
       </EuiFlexGroup>

@@ -25,9 +25,16 @@ interface Props {
   sloInstanceId: string | undefined;
   remoteName?: string;
   reloadSubject?: Subject<boolean>;
+  previewMode: boolean;
 }
 
-export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }: Props) {
+export function SloOverview({
+  sloId,
+  sloInstanceId,
+  remoteName,
+  reloadSubject,
+  previewMode,
+}: Props) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -105,10 +112,22 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
       <SloCardChart
         slo={slo}
         historicalSliData={historicalSliData ?? []}
-        onClick={() => {
-          setSelectedSlo(slo);
-        }}
-        badges={<SloCardItemBadges slo={slo} rules={rules} activeAlerts={activeAlerts} />}
+        onClick={
+          previewMode
+            ? undefined
+            : () => {
+                setSelectedSlo(slo);
+              }
+        }
+        badges={
+          <SloCardItemBadges
+            slo={slo}
+            rules={rules}
+            activeAlerts={activeAlerts}
+            previewMode={previewMode}
+          />
+        }
+        previewMode={previewMode}
       />
       <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />
     </div>
