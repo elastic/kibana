@@ -70,6 +70,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
           canDeleteHostIsolationExceptions: false,
           canReadTrustedApplications: false,
           canReadEndpointExceptions: false,
+          canReadCustomYaraSignatures: false,
         }),
       });
 
@@ -119,6 +120,9 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   });
 
   it('should hide yara signatures card when feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: false,
+    });
     render();
 
     expect(renderResult.queryByTestId('customYaraSignatures-fleetCard')).toBeNull();
@@ -169,6 +173,9 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   });
 
   it('should show no privileges when yara signatures is the only artifact privilege and the feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: false,
+    });
     useUserPrivilegesMock.mockReturnValue({
       ...getUserPrivilegesMockDefaultValue(),
       endpointPrivileges: getEndpointPrivilegesInitialStateMock({
