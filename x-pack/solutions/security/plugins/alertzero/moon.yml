@@ -46,7 +46,6 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
-  - '@kbn/std'
   - '@kbn/core-security-server'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-server'
