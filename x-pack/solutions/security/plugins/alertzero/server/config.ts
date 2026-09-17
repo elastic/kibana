@@ -11,7 +11,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   ui: schema.object({
-    useMockData: schema.boolean({ defaultValue: true }),
+    useMockData: schema.boolean({ defaultValue: false }),
   }),
 });
 
