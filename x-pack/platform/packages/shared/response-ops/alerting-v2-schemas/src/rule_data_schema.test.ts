@@ -6,6 +6,7 @@
  */
 
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
+import { z } from '@kbn/zod/v4';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
@@ -1588,6 +1589,27 @@ describe('updateRuleBodySchema', () => {
 
   it('rejects a version longer than 256 characters', () => {
     expect(() => updateRuleBodySchema.parse({ version: 'x'.repeat(257) })).toThrow();
+  });
+
+  it('documents PATCH omission for time_field, recovery_strategy, and no_data_strategy', () => {
+    const json = z.toJSONSchema(updateRuleBodySchema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    }) as {
+      properties?: Record<string, { description?: string }>;
+    };
+
+    expect({
+      time_field: json.properties?.time_field?.description,
+      recovery_strategy: json.properties?.recovery_strategy?.description,
+      no_data_strategy: json.properties?.no_data_strategy?.description,
+    }).toMatchInlineSnapshot(`
+      Object {
+        "no_data_strategy": "How the rule behaves when it finds no data for a group. If omitted, the existing value is kept. Set to \`null\` to clear it (those runs are then ignored). If you set \`last_known_status\` or \`recover\`, a standalone query (\`query.format: standalone\`) must include \`query.no_data\`. A composed query (\`query.format: composed\`) uses \`query.base\` to detect whether data is present. The \`emit\` value is not accepted when creating or updating rules.",
+        "recovery_strategy": "The condition that marks an alert recovered. If omitted, the existing value is kept. Set to \`null\` to clear it (recovery is then disabled). Set to \`no_breach\` to recover when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`. With \`none\`, the alert stays \`active\`, even after the breach query stops returning matches. \`state_transition.recovering_count\` and \`recovering_timeframe\` require an explicit \`recovery_strategy\` other than \`none\`.",
+        "time_field": "Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.",
+      }
+    `);
   });
 });
 

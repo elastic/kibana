@@ -69,7 +69,7 @@ See the YAML block above.
 
 The **Security - Attack discovery - Run example** workflow is the recommended way to desk-test the pipeline end-to-end.
 
-1. Start Kibana and Elasticsearch (`yarn es snapshot --license trial`, then `yarn start`).
+1. Start Kibana and Elasticsearch (`pnpm es snapshot --license trial`, then `pnpm start`).
 2. Navigate to **http://localhost:5601/app/workflows**.
 3. Managed workflows are hidden from the list view by default — go directly to:
    `http://localhost:5601/app/workflows/system-attack-discovery-run-example`
