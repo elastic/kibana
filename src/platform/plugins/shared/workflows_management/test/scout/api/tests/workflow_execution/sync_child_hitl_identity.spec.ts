@@ -10,7 +10,7 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/latest';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows/types/latest';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import { WorkflowsApiService } from '../../../common/apis/workflows';
 
@@ -74,6 +74,14 @@ const stepById = (
   stepExecutions: WorkflowStepExecutionDto[] | undefined,
   stepId: string
 ): WorkflowStepExecutionDto | undefined => stepExecutions?.find((step) => step.stepId === stepId);
+
+const childExecutionIdOf = (execution: WorkflowExecutionDto): string | undefined => {
+  const executionId = asRecord(stepById(execution.stepExecutions, 'run_child')?.state)?.executionId;
+  return typeof executionId === 'string' && executionId.length > 0 ? executionId : undefined;
+};
+
+const hasStepOutputs = (execution: WorkflowExecutionDto, stepIds: readonly string[]): boolean =>
+  stepIds.every((stepId) => asRecord(stepById(execution.stepExecutions, stepId)?.output) != null);
 
 const usernameFromWhoamiStep = (
   stepExecutions: WorkflowStepExecutionDto[] | undefined,
@@ -143,23 +151,26 @@ apiTest.describe(
           workflowExecutionId: parentExecutionId,
           status: ExecutionStatus.WAITING_FOR_CHILD,
           timeout: WAITING_TIMEOUT,
+          until: (execution) => childExecutionIdOf(execution) !== undefined,
         });
-        const childExecutionId = asRecord(
-          stepById(pausedParent.stepExecutions, 'run_child')?.state
-        )?.executionId;
-        expect(typeof childExecutionId).toBe('string');
-        expect((childExecutionId as string).length).toBeGreaterThan(0);
+        const childExecutionId = childExecutionIdOf(pausedParent);
+        if (childExecutionId === undefined) {
+          throw new Error(
+            `Parent execution ${parentExecutionId} did not expose a child execution id`
+          );
+        }
 
         const pausedChild = await workflowsApi.waitForStatus({
-          workflowExecutionId: childExecutionId as string,
+          workflowExecutionId: childExecutionId,
           status: ExecutionStatus.WAITING_FOR_INPUT,
           timeout: WAITING_TIMEOUT,
+          until: (execution) => (stepById(execution.stepExecutions, 'hitl')?.id ?? '').length > 0,
         });
         const hitlStepId = stepById(pausedChild.stepExecutions, 'hitl')?.id ?? '';
         expect(hitlStepId.length).toBeGreaterThan(0);
 
         const resumeResponse = await workflowsApi.rawResume(
-          childExecutionId as string,
+          childExecutionId,
           { approved: true },
           {
             stepExecutionId: hitlStepId,
@@ -169,10 +180,11 @@ apiTest.describe(
         expect(resumeResponse.status).toBe(200);
 
         const completedChild = await workflowsApi.waitForStatus({
-          workflowExecutionId: childExecutionId as string,
+          workflowExecutionId: childExecutionId,
           status: ExecutionStatus.COMPLETED,
           timeout: TERMINAL_TIMEOUT,
           includeOutput: true,
+          until: (execution) => hasStepOutputs(execution, ['child_before', 'child_after', 'hitl']),
         });
         expect(usernameFromWhoamiStep(completedChild.stepExecutions, 'child_before')).toBe(
           runnerUsername
@@ -188,6 +200,7 @@ apiTest.describe(
           status: ExecutionStatus.COMPLETED,
           timeout: TERMINAL_TIMEOUT,
           includeOutput: true,
+          until: (execution) => hasStepOutputs(execution, ['parent_before', 'parent_after']),
         });
         expect(usernameFromWhoamiStep(completedParent.stepExecutions, 'parent_before')).toBe(
           runnerUsername
