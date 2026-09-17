@@ -54,8 +54,7 @@ const DISPLAY_OPTION_ROWS: DisplayOptionRowConfig[] = [
     helpText: i18n.translate(
       'xpack.searchInferenceEndpoints.eisModelsPage.displayOptions.outsideRegionPreferencesDescription',
       {
-        defaultMessage:
-          'Models that you can't use until you update your region preferences.',
+        defaultMessage: "Models that you can't use until you update your region preferences.",
       }
     ),
     hideId: 'eisDisplayOptionsOutsideRegionPreferencesHide',
@@ -71,7 +70,7 @@ const DISPLAY_OPTION_ROWS: DisplayOptionRowConfig[] = [
     helpText: i18n.translate(
       'xpack.searchInferenceEndpoints.eisModelsPage.displayOptions.endOfLifeModelsDescription',
       {
-        defaultMessage: 'Models that you can't use because they have reached end of life.',
+        defaultMessage: "Models that you can't use because they have reached end of life.",
       }
     ),
     hideId: 'eisDisplayOptionsEndOfLifeModelsHide',

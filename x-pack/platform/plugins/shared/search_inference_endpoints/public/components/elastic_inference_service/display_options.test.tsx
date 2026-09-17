@@ -40,11 +40,14 @@ describe('DisplayOptions', () => {
       'true'
     );
     expect(getByTestId('eisDisplayOptionsOutsideRegionPreferences')).toHaveTextContent(
-      'Models unavailable within your region preferences are not available for use.'
+      'Models outside your region preferences'
+    );
+    expect(getByTestId('eisDisplayOptionsOutsideRegionPreferences')).toHaveTextContent(
+      "Models that you can't use until you update your region preferences."
     );
     expect(getByTestId('eisDisplayOptionsEndOfLifeModels')).toHaveTextContent('End-of-life models');
     expect(getByTestId('eisDisplayOptionsEndOfLifeModels')).toHaveTextContent(
-      'Models past their end-of-life date are not available for use.'
+      "Models that you can't use because they have reached end of life."
     );
     expect(getByTestId('eisDisplayOptionsPreviewModels')).toHaveTextContent(
       'Models in preview are not recommended for production use.'
