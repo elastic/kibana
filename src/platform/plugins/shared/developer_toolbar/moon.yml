@@ -25,10 +25,13 @@ dependsOn:
   - '@kbn/core-chrome-browser-internal-types'
   - '@kbn/core-theme-browser-internal-types'
   - '@kbn/design-tools'
+  - '@kbn/ui-annotations'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
   - group-undefined
+  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -37,4 +40,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}
