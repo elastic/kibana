@@ -21,7 +21,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   destinations: [],
   matcher: null,
   group_by: null,
-  tags: null,
   grouping_mode: null,
   throttle: null,
   snoozed_until: null,
