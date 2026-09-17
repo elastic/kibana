@@ -34,11 +34,14 @@ export const SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID =
 const SYNTHETICS_SERVICE_CLEAN_UP_INTERVAL_DEFAULT = '60m';
 const DELETE_BROWSER_MINUTES = 15;
 const DELETE_LIGHTWEIGHT_MINUTES = 2;
+/** 20m bump retries before falling back to the leftover 24h cadence. */
+export const MAX_FAILED_BUMP_FAST_RETRIES = 3;
 
 export { getFilterForTestNowRun };
 
 export interface CleanUpPackagePoliciesTaskState {
   failedAgentPolicyBumps?: string[];
+  failedBumpFastRetries?: number;
 }
 
 const getFailedAgentPolicyBumps = (state: ConcreteTaskInstance['state']): string[] => {
@@ -47,6 +50,28 @@ const getFailedAgentPolicyBumps = (state: ConcreteTaskInstance['state']): string
     return [];
   }
   return value.filter((id): id is string => typeof id === 'string' && id.length > 0);
+};
+
+const getFailedBumpFastRetries = (state: ConcreteTaskInstance['state']): number => {
+  const value = state.failedBumpFastRetries;
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    return 0;
+  }
+  return Math.min(MAX_FAILED_BUMP_FAST_RETRIES, Math.floor(value));
+};
+
+const nextCleanupSchedule = (
+  remainingTestNow: number,
+  failedAgentPolicyBumps: string[],
+  failedBumpFastRetries: number
+): '20m' | '24h' => {
+  if (remainingTestNow > 0) {
+    return '20m';
+  }
+  if (failedAgentPolicyBumps.length > 0 && failedBumpFastRetries > 0) {
+    return '20m';
+  }
+  return '24h';
 };
 
 export const registerCleanUpTask = (
@@ -100,23 +125,53 @@ export async function runCleanUpPackagePoliciesTask(
       esClient,
     });
 
-    let failedAgentPolicyBumps = getFailedAgentPolicyBumps(state);
+    const previousFailedBumps = getFailedAgentPolicyBumps(state);
+    let failedAgentPolicyBumps = previousFailedBumps;
+    let failedBumpFastRetries = getFailedBumpFastRetries(state);
+    const skipLeftoverScan =
+      remainingTestNow === 0 && previousFailedBumps.length > 0 && failedBumpFastRetries > 0;
+
     try {
-      failedAgentPolicyBumps = await cleanUpLeftoverPrivateLocationPolicies(
-        serverSetup,
-        soClient,
-        esClient,
-        failedAgentPolicyBumps
-      );
+      if (skipLeftoverScan) {
+        failedAgentPolicyBumps = await bumpAgentPolicyRevisions(
+          previousFailedBumps,
+          soClient,
+          esClient,
+          serverSetup
+        );
+        failedBumpFastRetries =
+          failedAgentPolicyBumps.length === 0 ? 0 : Math.max(0, failedBumpFastRetries - 1);
+      } else {
+        failedAgentPolicyBumps = await cleanUpLeftoverPrivateLocationPolicies(
+          serverSetup,
+          soClient,
+          esClient,
+          previousFailedBumps
+        );
+        const previousFailed = new Set(previousFailedBumps);
+        if (failedAgentPolicyBumps.length === 0) {
+          failedBumpFastRetries = 0;
+        } else if (failedAgentPolicyBumps.some((id) => !previousFailed.has(id))) {
+          failedBumpFastRetries = MAX_FAILED_BUMP_FAST_RETRIES;
+        } else {
+          failedBumpFastRetries = 0;
+        }
+      }
     } catch (e) {
       logger.error(e);
     }
 
-    const nextState = { ...state, failedAgentPolicyBumps };
-    if (remainingTestNow === 0 && failedAgentPolicyBumps.length === 0) {
-      return { state: nextState, schedule: { interval: '24h' } };
-    }
-    return { state: nextState, schedule: { interval: '20m' } };
+    const nextState = { ...state, failedAgentPolicyBumps, failedBumpFastRetries };
+    return {
+      state: nextState,
+      schedule: {
+        interval: nextCleanupSchedule(
+          remainingTestNow,
+          failedAgentPolicyBumps,
+          failedBumpFastRetries
+        ),
+      },
+    };
   } catch (e) {
     logger.error(e);
   }
