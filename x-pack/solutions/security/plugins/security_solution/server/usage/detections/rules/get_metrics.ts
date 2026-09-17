@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { RuleVersionSpecifier } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_versions/rule_version_specifier';
 import type { RuleAdoption } from './types';
 
 import { updateRuleUsage } from './update_usage';
@@ -42,6 +43,7 @@ import {
   getRuleCustomizationMissingBaseVersionStatus,
 } from './get_rule_customization_status';
 import { getRuleBaseVersionStatus } from './get_rule_base_version_status';
+import { getRuleVersionKey } from './transform_utils/get_rule_version_key';
 
 export interface GetRuleMetricsOptions {
   signalsIndex: string;
@@ -121,19 +123,32 @@ export const getRuleMetrics = async ({
       ruleResults,
     });
 
+    // checks which installed prebuilt rules still have their base version asset available
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+    const baseVersionAssetsPromise = ruleAssetsClient.fetchAssetsByVersion(
+      getInstalledPrebuiltRuleVersions(ruleResults),
+      { fields: ['rule_id', 'version'] }
+    );
+
     const [
       detectionAlertsResp,
       caseComments,
       legacyRuleActions,
       eventLogMetricsTypeStatus,
       changesHistoryUsage,
+      baseVersionAssets,
     ] = await Promise.all([
       detectionAlertsRespPromise,
       caseCommentsPromise,
       legacyRuleActionsPromise,
       eventLogMetricsTypeStatusPromise,
       changesHistoryUsagePromise,
+      baseVersionAssetsPromise,
     ]);
+
+    const installedBaseVersions = new Set(
+      baseVersionAssets.assets.map((asset) => getRuleVersionKey(asset.rule_id, asset.version))
+    );
 
     // create in-memory maps for correlation
     const legacyNotificationRuleIds = getRuleIdToEnabledMap(legacyRuleActions);
@@ -146,9 +161,9 @@ export const getRuleMetrics = async ({
       legacyNotificationRuleIds,
       casesRuleIds,
       alertsCounts,
+      installedBaseVersions,
     });
 
-    const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
     const latestRuleVersions = await ruleAssetsClient.fetchLatestVersions();
     const latestRuleVersionsMap = new Map(latestRuleVersions.map((rule) => [rule.rule_id, rule]));
 
@@ -186,25 +201,17 @@ export const getRuleMetrics = async ({
       return acc;
     }, getInitialAiCreatedRulesUsage());
 
-    const externalRuleSources = getExternalRuleSourceInfoList(ruleResults);
+    const externalRuleSources = getExternalRuleSourceInfoList(ruleResults, installedBaseVersions);
 
     return {
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
       elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
-      elastic_detection_rule_customization_status:
-        externalRuleSources.length === 0
-          ? getInitialRuleCustomizationStatus()
-          : getRuleCustomizationStatus(externalRuleSources),
+      elastic_detection_rule_customization_status: getRuleCustomizationStatus(externalRuleSources),
       elastic_detection_rule_customization_status_missing_base_version:
-        externalRuleSources.length === 0
-          ? getInitialRuleCustomizationStatus()
-          : getRuleCustomizationMissingBaseVersionStatus(externalRuleSources),
-      elastic_detection_rule_base_version_status:
-        externalRuleSources.length === 0
-          ? getInitialRuleBaseVersionStatus()
-          : getRuleBaseVersionStatus(externalRuleSources),
+        getRuleCustomizationMissingBaseVersionStatus(externalRuleSources),
+      elastic_detection_rule_base_version_status: getRuleBaseVersionStatus(externalRuleSources),
       elastic_detection_rule_deprecated_status: { total: numDeprecated },
       ai_created_rules: aiCreatedRulesUsage,
       spaces_usage: getSpacesUsage(ruleResults),
@@ -232,11 +239,26 @@ export const getRuleMetrics = async ({
   }
 };
 
-function getExternalRuleSourceInfoList(
+function getInstalledPrebuiltRuleVersions(
   ruleResults: Awaited<ReturnType<typeof getDetectionRules>>
+): RuleVersionSpecifier[] {
+  return ruleResults.flatMap((ruleResult): RuleVersionSpecifier[] => {
+    const params = ruleResult.attributes?.params;
+    if (params?.immutable !== true) {
+      return [];
+    }
+
+    return [{ rule_id: params.ruleId, version: params.version }];
+  });
+}
+
+function getExternalRuleSourceInfoList(
+  ruleResults: Awaited<ReturnType<typeof getDetectionRules>>,
+  installedBaseVersions: ReadonlySet<string>
 ): ExternalRuleSourceInfo[] {
   return ruleResults.flatMap((ruleResult): ExternalRuleSourceInfo[] => {
-    const ruleSource = ruleResult.attributes?.params?.ruleSource;
+    const params = ruleResult.attributes?.params;
+    const ruleSource = params?.ruleSource;
     if (
       !ruleSource ||
       ruleSource?.type !== 'external' ||
@@ -249,7 +271,9 @@ function getExternalRuleSourceInfoList(
       {
         is_customized: ruleSource.isCustomized,
         customized_fields: ruleSource.customizedFields ?? [],
-        has_base_version: ruleSource.hasBaseVersion ?? true,
+        has_base_version: installedBaseVersions.has(
+          getRuleVersionKey(params.ruleId, params.version)
+        ),
       },
     ];
   });

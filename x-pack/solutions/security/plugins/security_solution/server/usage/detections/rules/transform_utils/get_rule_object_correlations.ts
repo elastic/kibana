@@ -11,6 +11,7 @@ import type { RuleSearchResult } from '../../../types';
 import { getAlertSuppressionUsage } from '../usage_utils/get_alert_suppression_usage';
 import { getThreatMatchUsage } from '../usage_utils/get_threat_match_usage';
 import { getResponseActionsUsage } from '../usage_utils/get_response_actions_usage';
+import { getRuleVersionKey } from './get_rule_version_key';
 
 export interface RuleObjectCorrelationsOptions {
   ruleResults: Array<SavedObjectsFindResult<RuleSearchResult>>;
@@ -22,6 +23,8 @@ export interface RuleObjectCorrelationsOptions {
   >;
   casesRuleIds: Map<string, number>;
   alertsCounts: Map<string, number>;
+  /** Keys of installed prebuilt rule versions whose base asset is currently available, see `getRuleVersionKey`. */
+  installedBaseVersions: ReadonlySet<string>;
 }
 
 export const getRuleObjectCorrelations = ({
@@ -29,6 +32,7 @@ export const getRuleObjectCorrelations = ({
   legacyNotificationRuleIds,
   casesRuleIds,
   alertsCounts,
+  installedBaseVersions,
 }: RuleObjectCorrelationsOptions): RuleMetric[] => {
   return ruleResults.map((result) => {
     const ruleId = result.id;
@@ -64,8 +68,10 @@ export const getRuleObjectCorrelations = ({
         attributes.params.ruleSource?.type === 'external' &&
         attributes.params.ruleSource?.isCustomized === true,
       has_base_version:
-        attributes.params.ruleSource?.type !== 'external' ||
-        attributes.params.ruleSource?.hasBaseVersion !== false,
+        attributes.params.immutable === true &&
+        installedBaseVersions.has(
+          getRuleVersionKey(attributes.params.ruleId, attributes.params.version)
+        ),
       // if rule immutable, it's Elastic/prebuilt
       elastic_rule: attributes.params.immutable,
       created_on: attributes.createdAt,

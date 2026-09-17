@@ -40,11 +40,14 @@ import { getDetectionsMetrics } from './get_metrics';
 import {
   getInitialChangesHistoryUsage,
   getInitialRuleUpgradeStatus,
+  getInitialRuleCustomizationStatus,
   getInitialRulesUsage,
   initialAlertSuppression,
   initialResponseActionsUsage,
 } from './rules/get_initial_usage';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
+import type { RuleVersionSpecifier } from '../../lib/detection_engine/prebuilt_rules/logic/rule_versions/rule_version_specifier';
+import { getPrebuiltRuleMock } from '../../lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.mock';
 
 let mockPrebuiltRuleAssetsClient: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
 
@@ -67,6 +70,12 @@ describe('Detections Usage and Metrics', () => {
       savedObjectsClient = savedObjectsClientMock.create();
       mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
       mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValue([]);
+      // by default every installed prebuilt rule has its base version asset available
+      mockPrebuiltRuleAssetsClient.fetchAssetsByVersion.mockImplementation(
+        async (versions: RuleVersionSpecifier[]) => ({
+          assets: versions.map((version) => getPrebuiltRuleMock(version)),
+        })
+      );
     });
 
     it('returns zeroed counts if calls are empty', async () => {
@@ -1707,6 +1716,102 @@ describe('Detections Usage and Metrics', () => {
         expect(result).toHaveProperty(
           'detection_rules.detection_rule_usage.threat_match_custom.has_does_not_match_condition',
           0
+        );
+      });
+
+      it('reports base version status for prebuilt rules', async () => {
+        savedObjectsClient.find.mockResolvedValueOnce(
+          getMockThreatMatchRuleSearchResponse([
+            getMockThreatMatchRuleSO({
+              ruleId: 'customized-with-base',
+              isElastic: true,
+              isCustomized: true,
+            }),
+            getMockThreatMatchRuleSO({
+              ruleId: 'customized-without-base',
+              isElastic: true,
+              isCustomized: true,
+            }),
+            getMockThreatMatchRuleSO({ ruleId: 'noncustomized-with-base-1', isElastic: true }),
+            getMockThreatMatchRuleSO({ ruleId: 'noncustomized-with-base-2', isElastic: true }),
+            getMockThreatMatchRuleSO({ ruleId: 'noncustomized-without-base', isElastic: true }),
+            // custom rules are excluded from the aggregates
+            getMockThreatMatchRuleSO({ ruleId: 'custom-rule' }),
+          ])
+        );
+        savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+        mockPrebuiltRuleAssetsClient.fetchLatestVersions.mockResolvedValueOnce([]);
+        mockPrebuiltRuleAssetsClient.fetchAssetsByVersion.mockResolvedValueOnce({
+          assets: [
+            getPrebuiltRuleMock({ rule_id: 'customized-with-base', version: 1 }),
+            getPrebuiltRuleMock({ rule_id: 'noncustomized-with-base-1', version: 1 }),
+            getPrebuiltRuleMock({ rule_id: 'noncustomized-with-base-2', version: 1 }),
+          ],
+        });
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(mockPrebuiltRuleAssetsClient.fetchAssetsByVersion).toHaveBeenCalledWith(
+          [
+            { rule_id: 'customized-with-base', version: 1 },
+            { rule_id: 'customized-without-base', version: 1 },
+            { rule_id: 'noncustomized-with-base-1', version: 1 },
+            { rule_id: 'noncustomized-with-base-2', version: 1 },
+            { rule_id: 'noncustomized-without-base', version: 1 },
+          ],
+          { fields: ['rule_id', 'version'] }
+        );
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_base_version_status',
+          {
+            customized_with_base_version: 1,
+            customized_without_base_version: 1,
+            noncustomized_with_base_version: 2,
+            noncustomized_without_base_version: 1,
+          }
+        );
+        // customized mock rules have `tags`, `name` and `description` customized
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_customization_status',
+          {
+            ...getInitialRuleCustomizationStatus(),
+            tags: 2,
+            name: 2,
+            description: 2,
+          }
+        );
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_customization_status_missing_base_version',
+          {
+            ...getInitialRuleCustomizationStatus(),
+            tags: 1,
+            name: 1,
+            description: 1,
+          }
+        );
+        expect(result).toHaveProperty('detection_rules.detection_rule_detail.length', 5);
+        expect(result).toHaveProperty(
+          'detection_rules.detection_rule_detail',
+          expect.arrayContaining([
+            expect.objectContaining({ rule_id: 'customized-with-base', has_base_version: true }),
+            expect.objectContaining({
+              rule_id: 'customized-without-base',
+              has_base_version: false,
+            }),
+            expect.objectContaining({
+              rule_id: 'noncustomized-with-base-1',
+              has_base_version: true,
+            }),
+            expect.objectContaining({
+              rule_id: 'noncustomized-with-base-2',
+              has_base_version: true,
+            }),
+            expect.objectContaining({
+              rule_id: 'noncustomized-without-base',
+              has_base_version: false,
+            }),
+          ])
         );
       });
     });

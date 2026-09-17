@@ -401,10 +401,12 @@ export const getMockRuleSearchResponse = (
   } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
 
 export const getMockThreatMatchRuleSO = ({
+  ruleId = 'a6261241-b236-4f5b-ac09-deab86330b3a',
   isElastic = false,
   isCustomized = false,
   hasNegateThreatMapping = false,
 }: {
+  ruleId?: string;
   isElastic?: boolean;
   isCustomized?: boolean;
   hasNegateThreatMapping?: boolean;
@@ -423,9 +425,9 @@ export const getMockThreatMatchRuleSO = ({
         description: 'mock',
         falsePositives: [],
         from: 'now-5001h',
-        ruleId: 'a6261241-b236-4f5b-ac09-deab86330b3a',
+        ruleId,
         immutable: isElastic,
-        ruleSource: isCustomized
+        ruleSource: isElastic
           ? {
               type: 'external',
               isCustomized,

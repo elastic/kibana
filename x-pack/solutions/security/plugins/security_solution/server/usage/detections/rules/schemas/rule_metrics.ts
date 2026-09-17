@@ -35,7 +35,8 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
   has_base_version: {
     type: 'boolean',
     _meta: {
-      description: 'Whether this prebuilt rule still has its base (original) prebuilt version',
+      description:
+        'Whether the base (original) version of this prebuilt rule is available among the installed prebuilt rule assets',
     },
   },
   elastic_rule: {
