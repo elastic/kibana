@@ -7,234 +7,167 @@
 
 import type {
   CompactionSummary,
-  ConversationAction,
-  ConversationRound,
+  ConversationRoundAuthor,
   ConverseInput,
   RoundInput,
+  MetadataFieldValue,
+  SubagentEntry,
+  TimelineEvent,
 } from '@kbn/agent-builder-common';
-import { createBadRequestError, createInternalError } from '@kbn/agent-builder-common';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  getLatestVersion,
-  getContentKey,
-} from '@kbn/agent-builder-common/attachments';
-import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import { TimelineEventType } from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type {
-  AttachmentFormatContext,
   AttachmentResolveContext,
   AttachmentStateManager,
+  AttachmentValidateContext,
 } from '@kbn/agent-builder-server/attachments';
-import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
-import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
-import {
-  prepareAttachmentPresentation,
-  type AttachmentPresentation,
-} from './attachment_presentation';
-
-export interface ProcessedAttachmentType {
-  type: string;
-  description?: string;
-}
-
-export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
-  input: ProcessedRoundInput;
-};
+import { mergeAttachmentInputs } from '../../../attachments/merge_attachment_inputs';
+import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
+import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
+import { formatAttachmentsMetadata } from './attachment_presentation';
+import type { ProcessedTimelineEvent, ProcessedUserMessageEvent } from './context_timeline';
+import { groupTimelineRounds, groupTimelineEntries, isTimelineRound } from './context_timeline';
 
 export interface ProcessedConversation {
-  previousRounds: ProcessedConversationRound[];
+  /**
+   * The agent-context timeline: the previous rounds' events in order, with each `user_message`
+   * payload processed. Compaction drops the events of summarized rounds.
+   */
+  timeline: ProcessedTimelineEvent[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
-  attachments: ProcessedAttachment[];
   attachmentStateManager: AttachmentStateManager;
-  /** Presentation configuration for versioned attachments (inline vs summary mode) */
-  versionedAttachmentPresentation?: AttachmentPresentation;
   /** Compaction summary covering older rounds that were replaced by this summary */
   compactionSummary?: CompactionSummary;
+  /** Persistent sub-agent roster */
+  subagentRosterFallback?: Record<string, SubagentEntry>;
+  /**
+   * Deserialized metadata from the active conversation template.
+   * Populated from `conversation.metadata` at prepare time so prompt factories
+   * receive it via `processedConversation` rather than as a separate parameter.
+   */
+  metadata?: Record<string, MetadataFieldValue>;
+  /** ID of the template applied to this conversation, used to look up field definitions. */
+  template_id?: string;
 }
 
-const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
-  return {
-    request: agentContext.request,
-    spaceId: agentContext.spaceId,
-  };
-};
-
-/**
- * Promote legacy per-round attachments into conversation-level versioned attachments.
- **/
-const mergeInputAttachmentsIntoAttachmentState = async (
-  attachmentStateManager: AttachmentStateManager,
-  inputs: AttachmentInput[],
-  options: { updateOriginSnapshot?: boolean; resolveContext: AttachmentResolveContext }
-) => {
-  if (inputs.length === 0) return;
-
-  const existingByContentKey = new Map<string, string>(); // contentKey -> attachmentId
-
-  for (const existing of attachmentStateManager.getAll()) {
-    const latest = getLatestVersion(existing);
-    if (!latest) continue;
-    existingByContentKey.set(`${existing.type}:${latest.content_hash}`, existing.id);
-  }
-
-  for (const input of inputs) {
-    // Prefer stable IDs (if provided)
-    if (input.id) {
-      const existing = attachmentStateManager.getAttachmentRecord(input.id);
-      if (existing) {
-        await attachmentStateManager.update(
-          input.id,
-          {
-            data: input.data,
-            ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-          },
-          ATTACHMENT_REF_ACTOR.user
-        );
-        if (options?.updateOriginSnapshot && existing.origin !== undefined) {
-          await attachmentStateManager.updateOrigin(
-            input.id,
-            existing.origin,
-            ATTACHMENT_REF_ACTOR.user
-          );
-        }
-        continue;
-      }
-    }
-
-    const contentKey = getContentKey(input, 'unknown');
-    if (existingByContentKey.has(contentKey)) {
-      // already present (same content), nothing to do
-      continue;
-    }
-
-    const created = await attachmentStateManager.add(
-      {
-        ...(input.id ? { id: input.id } : {}),
-        type: input.type,
-        data: input.data,
-        ...(input.origin !== undefined ? { origin: input.origin } : {}),
-        ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-        ...(input.description !== undefined ? { description: input.description } : {}),
-        ...(input.group_id !== undefined ? { group_id: input.group_id } : {}),
-      },
-      ATTACHMENT_REF_ACTOR.user,
-      options.resolveContext
-    );
-
-    const latest = getLatestVersion(created);
-    if (latest) {
-      existingByContentKey.set(`${created.type}:${latest.content_hash}`, created.id);
-    }
-  }
-};
-
-/**
- * Prepare conversation rounds and input based on the action.
- * - 'regenerate': Strip the last round and use its input for re-execution
- * - Default: Use rounds and input as provided
- */
-const prepareForAction = ({
-  action,
-  previousRounds,
-  nextInput,
-}: {
-  action?: ConversationAction;
-  previousRounds: ConversationRound[];
-  nextInput: ConverseInput;
-}): { effectiveRounds: ConversationRound[]; effectiveNextInput: ConverseInput } => {
-  // Regenerate: strip the last round and use its original input
-  if (action === 'regenerate') {
-    if (previousRounds.length === 0) {
-      throw createBadRequestError('Cannot regenerate: conversation has no rounds');
-    }
-    const lastRound = previousRounds[previousRounds.length - 1];
-    // Faithfully replay the original request by copying the full stored input shape
-    const regenerateInput: ConverseInput = { ...lastRound.input };
-    // Strip the last round from previous rounds
-    return {
-      effectiveRounds: previousRounds.slice(0, -1),
-      effectiveNextInput: regenerateInput,
-    };
-  }
-
-  // Default: use rounds and input as provided
-  return { effectiveRounds: previousRounds, effectiveNextInput: nextInput };
-};
-
 export const prepareConversation = async ({
-  previousRounds,
+  timeline,
   nextInput,
+  nextInputAuthor,
   context,
-  action,
+  metadata,
+  templateId,
 }: {
-  previousRounds: ConversationRound[];
+  /** The conversation's normalized context timeline (see `eventsForContext`). */
+  timeline: TimelineEvent[];
   nextInput: ConverseInput;
+  nextInputAuthor?: ConversationRoundAuthor;
   context: AgentHandlerContext;
-  action?: ConversationAction;
+  metadata?: Record<string, MetadataFieldValue>;
+  templateId?: string;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
-  const formatContext = createFormatContext(context);
   const resolveContext: AttachmentResolveContext = {
     request: context.request,
     spaceId: context.spaceId,
     savedObjectsClient: context.savedObjectsClient,
   };
+  const validateContext: AttachmentValidateContext = {
+    request: context.request,
+  };
 
-  // Handle regenerate action: use last round's input and strip it from previous rounds
-  const { effectiveRounds, effectiveNextInput } = prepareForAction({
-    action,
-    previousRounds,
-    nextInput,
-  });
+  const effectiveRounds = groupTimelineRounds(timeline);
+  const effectiveNextInput = nextInput;
 
-  // Promote any legacy per-round attachments into conversation-level versioned attachments.
-  // We merge both previous rounds and next input, then strip per-round attachments so the LLM
-  // only sees the v2 conversation-level attachments (via attachment presentation/tools).
-  const previousAttachments = effectiveRounds.flatMap(
-    (round) => round.input.attachments ?? []
-  ) as AttachmentInput[];
-  const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
+  // Process complete executions and independent messages in order so attachment versions
+  // resolve consistently. Incomplete execution inputs remain outside the model history.
+  const processedInputs: ProcessedRoundInput[] = [];
+  const processedTimeline: ProcessedTimelineEvent[] = [];
+  const includedRounds = new Set(effectiveRounds.map((round) => round.id));
+  for (const round of groupTimelineEntries(timeline)) {
+    if (isTimelineRound(round) && !includedRounds.has(round.id)) continue;
+    attachmentStateManager.clearAccessTracking();
+    const input = round.userMessage.data;
+    if (input.attachments && input.attachments.length > 0) {
+      await mergeAttachmentInputs({
+        stateManager: attachmentStateManager,
+        inputs: input.attachments,
+        actor: ATTACHMENT_REF_ACTOR.user,
+        resolveContext,
+        validateContext,
+      });
+    }
+    const attachmentRefs = mergeAttachmentRefs(
+      input.attachment_refs,
+      attachmentStateManager.getAccessedRefs()
+    );
+    const processedInput = prepareRoundInput({
+      input: { ...input, attachments: [], attachment_refs: attachmentRefs },
+      author: authorAndOrigin(round.userMessage).author,
+      attachmentStateManager,
+    });
+    processedInputs.push(processedInput);
 
-  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments, {
-    resolveContext,
-  });
+    const processedUserMessage: ProcessedUserMessageEvent = {
+      ...round.userMessage,
+      data: processedInput,
+    };
+    const events = isTimelineRound(round) ? round.events : [round.userMessage];
+
+    for (const event of events) {
+      if (event.id === round.userMessage.id) {
+        processedTimeline.push(processedUserMessage);
+      } else if (event.type !== TimelineEventType.userMessage) {
+        processedTimeline.push(event);
+      }
+    }
+  }
+
   attachmentStateManager.clearAccessTracking();
-  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments, {
-    updateOriginSnapshot: true,
+  // History re-migration above is idempotent bookkeeping, not a user action: drop its changes so
+  // only the next input's attachments surface as chat_input attachment events.
+  attachmentStateManager.clearChanges();
+  const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
+  await mergeAttachmentInputs({
+    stateManager: attachmentStateManager,
+    inputs: nextInputAttachments,
+    actor: ATTACHMENT_REF_ACTOR.user,
     resolveContext,
+    validateContext,
+    updateOriginSnapshot: true,
   });
-
-  const strippedNextInput: ConverseInput = { ...effectiveNextInput, attachments: [] };
-  const processedNextInput = await prepareRoundInput({
-    input: strippedNextInput,
-    attachmentsService,
-    formatContext,
-  });
-
-  const processedRounds = await Promise.all(
-    effectiveRounds.map((round) => {
-      const strippedRound: ConversationRound = {
-        ...round,
-        input: { ...round.input, attachments: [] },
-      };
-      return prepareRound({ round: strippedRound, attachmentsService, formatContext });
-    })
+  const nextInputAccessedRefs = attachmentStateManager.getAccessedRefs();
+  const mergedNextInputRefs = mergeAttachmentRefs(
+    effectiveNextInput.attachment_refs,
+    nextInputAccessedRefs
   );
 
-  const allAttachments = [
-    ...processedNextInput.attachments,
-    ...processedRounds.flatMap((round) => round.input.attachments),
-  ];
+  const strippedNextInput: ConverseInput = {
+    ...effectiveNextInput,
+    attachments: [],
+    ...(mergedNextInputRefs ? { attachment_refs: mergedNextInputRefs } : {}),
+  };
+  const processedNextInput = prepareRoundInput({
+    input: strippedNextInput,
+    author: nextInputAuthor,
+    attachmentStateManager,
+  });
+
+  const roundAttachmentTypes = [
+    ...(processedNextInput.attachment_refs ?? []),
+    ...processedInputs.flatMap((input) => input.attachment_refs ?? []),
+  ]
+    .map((ar) => ar.type)
+    .filter((type): type is string => !!type);
 
   const conversationAttachmentTypes = attachmentStateManager.getActive().map((a) => a.type);
   const attachmentTypeIds = [
-    ...new Set<string>([
-      ...conversationAttachmentTypes,
-      ...allAttachments.map((attachment) => attachment.attachment.type),
-    ]),
+    ...new Set<string>([...conversationAttachmentTypes, ...roundAttachmentTypes]),
   ];
 
   const attachmentTypes = await Promise.all(
@@ -248,146 +181,47 @@ export const prepareConversation = async ({
     })
   );
 
-  const allVersionedAttachments = attachmentStateManager.getAll();
-
-  const versionedAttachmentPresentation = await prepareAttachmentPresentation(
-    allVersionedAttachments,
-    {
-      resolveMaxContentLength: (attachment) =>
-        attachmentsService.getTypeDefinition(attachment.type)?.maxContentLength,
-    },
-    async (attachment, data) => {
-      const definition = attachmentsService.getTypeDefinition(attachment.type);
-      if (!definition) {
-        return undefined;
-      }
-
-      try {
-        const typeReadonly = definition.isReadonly ?? false;
-        const isReadonly = typeReadonly || attachment.readonly === true;
-        if (!isReadonly) {
-          return undefined;
-        }
-        const formatted = await definition.format(
-          {
-            id: attachment.id,
-            type: attachment.type,
-            data,
-          },
-          formatContext
-        );
-        if (!formatted?.getRepresentation) {
-          return undefined;
-        }
-        const representation = await formatted.getRepresentation();
-        return representation?.type === 'text' ? representation.value : undefined;
-      } catch {
-        return undefined;
-      }
-    }
-  );
-
   return {
     nextInput: processedNextInput,
-    previousRounds: processedRounds,
+    timeline: processedTimeline,
     attachmentTypes,
-    attachments: allAttachments,
     attachmentStateManager,
-    versionedAttachmentPresentation,
+    ...(metadata !== undefined ? { metadata } : {}),
+    ...(templateId !== undefined ? { template_id: templateId } : {}),
   };
 };
 
-const prepareRound = async ({
-  round,
-  attachmentsService,
-  formatContext,
-}: {
-  round: ConversationRound;
-  attachmentsService: AttachmentsService;
-  formatContext: AttachmentFormatContext;
-}): Promise<ProcessedConversationRound> => {
-  return {
-    ...round,
-    input: await prepareRoundInput({ input: round.input, attachmentsService, formatContext }),
-  };
-};
-
-const prepareRoundInput = async ({
+const prepareRoundInput = ({
   input,
-  attachmentsService,
-  formatContext,
+  author,
+  attachmentStateManager,
 }: {
   input: RoundInput | ConverseInput;
-  attachmentsService: AttachmentsService;
-  formatContext: AttachmentFormatContext;
-}): Promise<ProcessedRoundInput> => {
-  let attachments: ProcessedAttachment[] = [];
-  if (input.attachments?.length) {
-    attachments = await Promise.all(
-      input.attachments.map((attachment) => {
-        return prepareAttachment({ attachment, attachmentsService, formatContext });
-      })
-    );
+  author?: ConversationRoundAuthor;
+  attachmentStateManager: AttachmentStateManager;
+}): ProcessedRoundInput => {
+  const inputAttachments: Partial<ProcessedRoundInput> = {};
+  if (input.attachment_refs) {
+    inputAttachments.attachment_refs = input.attachment_refs.map((ref) => ({
+      ...ref,
+      type: attachmentStateManager.getAttachmentRecord(ref.attachment_id)?.type,
+    }));
+    if ('attachment_context' in input && input.attachment_context) {
+      inputAttachments.attachment_context = input.attachment_context;
+    } else {
+      inputAttachments.attachment_context = formatAttachmentsMetadata(
+        input.attachment_refs,
+        attachmentStateManager
+      );
+    }
   }
+
   return {
     message: input.message ?? '',
-    attachments,
+    // attachments are always stripped before this function. this is here to satisfy the type
+    // for legacy compatibility
+    attachments: [],
+    ...(author !== undefined ? { author } : {}),
+    ...inputAttachments,
   };
-};
-
-const prepareAttachment = async ({
-  attachment: input,
-  attachmentsService,
-  formatContext,
-}: {
-  attachment: AttachmentInput;
-  attachmentsService: AttachmentsService;
-  formatContext: AttachmentFormatContext;
-}): Promise<ProcessedAttachment> => {
-  const definition = attachmentsService.getTypeDefinition(input.type);
-  if (!definition) {
-    throw createInternalError(`Found attachment with unknown type: "${input.type}"`);
-  }
-
-  const attachment = inputToFinal(input);
-
-  try {
-    const formatted = await definition.format(attachment, formatContext);
-    const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
-    if (!formatted.getRepresentation) {
-      return {
-        attachment,
-        representation: { type: 'text', value: JSON.stringify(attachment.data) },
-        tools,
-      };
-    }
-    const representation = await formatted.getRepresentation();
-
-    return {
-      attachment,
-      representation,
-      tools,
-    };
-  } catch (e) {
-    return {
-      attachment,
-      representation: { type: 'text', value: JSON.stringify(attachment.data) },
-      tools: [],
-    };
-  }
-};
-
-const inputToFinal = (input: AttachmentInput): Attachment => {
-  if (input.data === undefined) {
-    throw createInternalError(
-      'Attachment is missing data; by-reference attachments must be resolved before formatting'
-    );
-  }
-  return {
-    id: input.id ?? getToolResultId(),
-    type: input.type,
-    data: input.data,
-    hidden: input.hidden,
-    origin: input.origin,
-  } as Attachment;
 };

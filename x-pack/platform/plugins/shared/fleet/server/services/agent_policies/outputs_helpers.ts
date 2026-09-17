@@ -13,7 +13,10 @@ import {
 } from '../../../common/services/output_helpers';
 
 import type { AgentPolicySOAttributes, AgentPolicy, PackagePolicy } from '../../types';
-import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common/constants';
+import {
+  LICENCE_FOR_PER_POLICY_OUTPUT,
+  AGENTLESS_MANAGED_BULK_OUTPUT_IDS,
+} from '../../../common/constants';
 import { policyHasFleetServer, policyHasSyntheticsIntegration } from '../../../common/services';
 import { appContextService } from '..';
 import { outputService } from '../output';
@@ -50,8 +53,21 @@ export async function validateOutputForPolicy(
   soClient: SavedObjectsClientContract,
   newData: Partial<AgentPolicySOAttributes>,
   existingData: Partial<AgentPolicySOAttributes> = {},
-  allowedOutputTypeForPolicy: string[] = Object.values(outputType)
+  allowedOutputTypeForPolicy: string[]
 ) {
+  const data = { ...existingData, ...newData };
+
+  if (!data.supports_agentless) {
+    const managedBulkOutputId = [data.data_output_id, data.monitoring_output_id].find(
+      (outputId) => outputId && AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(outputId)
+    );
+    if (managedBulkOutputId) {
+      throw new OutputInvalidError(
+        `Output "${managedBulkOutputId}" can only be used with an agentless agent policy.`
+      );
+    }
+  }
+
   if (
     Object.keys(existingData).length !== 0 &&
     newData.data_output_id === existingData.data_output_id &&
@@ -60,26 +76,16 @@ export async function validateOutputForPolicy(
     return;
   }
 
-  const data = { ...existingData, ...newData };
-
-  const isOutputTypeRestricted =
-    allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
-
-  if (isOutputTypeRestricted) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
-      if (err instanceof OutputNotFoundError) {
-        return;
-      }
-      throw err;
-    });
-    if (!dataOutput) {
+  const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
+    if (err instanceof OutputNotFoundError) {
       return;
     }
-    if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
-      throw new OutputInvalidError(
-        `Output of type "${dataOutput.type}" is not usable with policy "${data.name}".`
-      );
-    }
+    throw err;
+  });
+  if (dataOutput && !allowedOutputTypeForPolicy.includes(dataOutput.type)) {
+    throw new OutputInvalidError(
+      `Output of type "${dataOutput.type}" is not usable with policy "${data.name}".`
+    );
   }
 
   if (!data.data_output_id && !data.monitoring_output_id) {
@@ -122,29 +128,24 @@ export async function validateAgentPolicyOutputForIntegration(
     allowedOutputTypeForPackagePolicy.includes(type)
   );
 
-  const isOutputTypeRestricted =
-    allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
-
-  if (isOutputTypeRestricted) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy).catch((err) => {
-      if (err instanceof OutputNotFoundError) {
-        return;
-      }
-      throw err;
-    });
-    if (!dataOutput) {
+  const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy).catch((err) => {
+    if (err instanceof OutputNotFoundError) {
       return;
     }
-    if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
-      if (isNewPackagePolicy) {
-        throw new OutputInvalidError(
-          `Integration "${packageName}" cannot be added to agent policy "${agentPolicy.name}" because it uses output type "${dataOutput.type}".`
-        );
-      } else {
-        throw new OutputInvalidError(
-          `Agent policy "${agentPolicy.name}" uses output type "${dataOutput.type}" which cannot be used for integration "${packageName}".`
-        );
-      }
+    throw err;
+  });
+  if (!dataOutput) {
+    return;
+  }
+  if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
+    if (isNewPackagePolicy) {
+      throw new OutputInvalidError(
+        `Integration "${packageName}" cannot be added to agent policy "${agentPolicy.name}" because it uses output type "${dataOutput.type}".`
+      );
+    } else {
+      throw new OutputInvalidError(
+        `Agent policy "${agentPolicy.name}" uses output type "${dataOutput.type}" which cannot be used for integration "${packageName}".`
+      );
     }
   }
 }

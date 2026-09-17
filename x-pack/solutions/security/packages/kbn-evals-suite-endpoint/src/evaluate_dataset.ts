@@ -6,13 +6,14 @@
  */
 
 import type {
+  AgentBuilderClient,
   DefaultEvaluators,
   EvaluationDataset,
   Evaluator,
   EvalsExecutorClient,
   Example,
 } from '@kbn/evals';
-import type { SecurityEvalChatClient } from './chat_client';
+import { converseQuestionToTaskOutput } from './converse_task';
 
 export interface SecurityDatasetExample extends Example {
   input: {
@@ -39,6 +40,7 @@ export function createEndpointCriteriaEvaluator({
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
+    direction: 'maximize',
     evaluate: async ({ expected, ...rest }) => {
       const criteria: string[] = (expected as SecurityDatasetExample['output'])?.criteria ?? [];
       return evaluators.criteria(criteria).evaluate({ expected, ...rest });
@@ -49,11 +51,11 @@ export function createEndpointCriteriaEvaluator({
 export function createEvaluateSecurityDataset({
   evaluators,
   executorClient,
-  chatClient,
+  agentBuilderClient,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
-  chatClient: SecurityEvalChatClient;
+  agentBuilderClient: AgentBuilderClient;
 }): EvaluateSecurityDataset {
   return async function evaluateSecurityDataset({
     dataset: { name, description, examples },
@@ -73,16 +75,7 @@ export function createEvaluateSecurityDataset({
     await executorClient.runExperiment(
       {
         datasets: [dataset],
-        task: async ({ input }) => {
-          const response = await chatClient.converse({ message: input.question });
-
-          return {
-            messages: response.messages,
-            steps: response.steps,
-            errors: response.errors,
-            traceId: response.traceId,
-          };
-        },
+        task: async ({ input }) => converseQuestionToTaskOutput(agentBuilderClient, input.question),
       },
       [createEndpointCriteriaEvaluator({ evaluators })]
     );

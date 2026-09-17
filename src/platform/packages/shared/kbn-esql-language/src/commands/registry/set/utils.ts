@@ -72,10 +72,22 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       text: UnmappedFieldsStrategy.LOAD,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
-        defaultMessage: 'Attempts to load the fields from the source',
+        defaultMessage:
+          'Attempts to load the fields from the source that are explicitly mentioned in the query',
       }),
       category: SuggestionCategory.CONSTANT_VALUE,
     },
+    // Currently LOAD_ALL is only supported in snapshots.
+    // {
+    //   label: UnmappedFieldsStrategy.LOAD_ALL,
+    //   text: UnmappedFieldsStrategy.LOAD_ALL,
+    //   kind: 'Value',
+    //   detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadAllDoc', {
+    //     defaultMessage:
+    //       'Attempts to load all the fields from the source, even if they are not mentioned in the query',
+    //   }),
+    //   category: SuggestionCategory.CONSTANT_VALUE,
+    // },
   ];
 };
 

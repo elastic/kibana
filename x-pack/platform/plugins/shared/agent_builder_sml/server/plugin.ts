@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import type {
   AgentBuilderSmlPluginSetup,
   AgentBuilderSmlPluginStart,
@@ -18,6 +19,7 @@ import { registerUISettings } from './ui_settings';
 import { registerSearchRoute } from './routes/search';
 import { registerAutocompleteRoute } from './routes/autocomplete';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
+import { smlAiIndexDescription, smlIndexName } from './services/sml/sml_storage';
 import {
   registerSmlCrawlerTaskDefinition,
   scheduleSmlCrawlerTasks,
@@ -89,6 +91,13 @@ export class AgentBuilderSmlPlugin
       coreSetup,
       logger: this.logger,
       getSmlService,
+    });
+
+    setupDeps.contextEngine?.registerAiIndex(agentBuilderDefaultAiIndexId, {
+      description: smlAiIndexDescription,
+      dest: { type: 'index', value: smlIndexName },
+      automations: [],
+      sources: [],
     });
 
     return {

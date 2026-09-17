@@ -19,6 +19,7 @@ import { HostIsolationExceptionsValidator } from '../../lists_integration/endpoi
 import { EventFilterValidator } from '../../lists_integration/endpoint/validators/event_filter_validator';
 import { BlocklistValidator } from '../../lists_integration/endpoint/validators/blocklist_validator';
 import { EndpointExceptionsValidator } from '../../lists_integration/endpoint/validators/endpoint_exceptions_validator';
+import { CustomYaraSignaturesValidator } from '../../lists_integration/endpoint/validators/custom_yara_signatures_validator';
 
 /**
  * A read-only, request-scoped client for querying endpoint artifact exception lists.
@@ -87,6 +88,11 @@ export class ScopedEndpointArtifactListClient {
       ).validatePreSingleListFind();
     } else if (BlocklistValidator.isBlocklist({ listId })) {
       await new BlocklistValidator(endpointAppContextService, request).validatePreSingleListFind();
+    } else if (CustomYaraSignaturesValidator.isCustomYaraSignature({ listId })) {
+      await new CustomYaraSignaturesValidator(
+        endpointAppContextService,
+        request
+      ).validatePreSingleListFind();
     } else if (EndpointExceptionsValidator.isEndpointException({ listId })) {
       await new EndpointExceptionsValidator(
         endpointAppContextService,

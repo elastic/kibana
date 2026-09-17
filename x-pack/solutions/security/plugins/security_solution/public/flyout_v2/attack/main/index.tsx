@@ -22,6 +22,7 @@ import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { cellActionRenderer } from '../../shared/components/cell_actions';
 import { useSharedToolsFlyoutApi } from '../../shared/tools/use_shared_tools_flyout_api';
 import { useTabs } from '../../shared/hooks/use_tabs';
+import { FLYOUT_TYPE } from '../../../common/lib/telemetry';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
@@ -84,6 +85,7 @@ export const AttackFlyout = memo(
     const { selectedTabId, setSelectedTabId } = useTabs<AttackFlyoutTabId>({
       validTabIds: VALID_TAB_IDS,
       storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+      flyoutType: FLYOUT_TYPE.ATTACK,
     });
 
     const onShowNotes = useCallback(() => {

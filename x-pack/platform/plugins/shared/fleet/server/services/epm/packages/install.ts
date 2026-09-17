@@ -19,7 +19,7 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-types';
 import { addSpanLabels } from '@kbn/apm-utils';
@@ -92,8 +92,10 @@ import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agen
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
 import { formatVerificationResultForSO } from './package_verification';
+import { brandInstallationSpaceId } from './brand_installation_space_id';
 import { getInstallation, getInstallationObject } from './get';
 import { getPackageSavedObjects } from './get';
+import { validatePackageUpload } from './validate_package_upload';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -408,6 +410,7 @@ interface InstallRegistryPackageParams {
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
+  allowOutdatedVersion?: boolean;
   neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
   prerelease?: boolean;
@@ -496,6 +499,7 @@ async function installPackageFromRegistry({
   spaceId,
   request,
   force = false,
+  allowOutdatedVersion = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
   prerelease = false,
@@ -560,9 +564,9 @@ async function installPackageFromRegistry({
     telemetryEvent.discoveryDatasets = packageInfo.discovery?.datasets;
     telemetryEvent.automaticInstall = automaticInstall;
 
-    // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
+    // let the user install if using the force flag, allow_outdated_version flag, or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
-      force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
+      force || allowOutdatedVersion || ['reinstall', 'reupdate', 'rollback'].includes(installType);
 
     // if the requested version is out-of-date of the latest package version, check if we allow it
     // if we don't allow it, return an error
@@ -574,7 +578,11 @@ async function installPackageFromRegistry({
       }
       logger.debug(
         `${pkgkey} is out-of-date, installing anyway due to ${
-          force ? 'force flag' : `install type ${installType}`
+          force
+            ? 'force flag'
+            : allowOutdatedVersion
+            ? 'allow_outdated_version flag'
+            : `install type ${installType}`
         }`
       );
     }
@@ -937,9 +945,26 @@ async function installPackageByUpload({
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
       pkgName,
+      failOnUnexpectedError: !isBundledPackage,
     });
 
     installType = getInstallType({ pkgVersion, installedPkg });
+
+    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
+      archiveBuffer,
+      contentType,
+      useStreaming,
+    });
+
+    if (!isBundledPackage) {
+      await validatePackageUpload({
+        packageInfo,
+        paths,
+        installedPkg,
+        savedObjectsClient,
+        esClient,
+      });
+    }
 
     // as we do not verify uploaded packages, we must invalidate the verification cache
     deleteVerificationResult(packageInfo);
@@ -948,12 +973,6 @@ async function installPackageByUpload({
       name: pkgName,
       version: pkgVersion,
       packageInfo,
-    });
-
-    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
-      archiveBuffer,
-      contentType,
-      useStreaming,
     });
 
     const packageInstallContext: PackageInstallContext = {
@@ -1020,6 +1039,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     const {
       pkgkey,
       force,
+      allowOutdatedVersion,
       ignoreConstraints,
       spaceId,
       neverIgnoreVerificationError,
@@ -1067,6 +1087,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       esClient,
       spaceId,
       force,
+      allowOutdatedVersion,
       neverIgnoreVerificationError,
       ignoreConstraints,
       prerelease,
@@ -1318,7 +1339,7 @@ export async function createInstallation(options: {
   const typedStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME).filter(
     (ds): ds is RegistryDataStream => !!ds.type
   );
-  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams);
+  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams, packageInfo);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
@@ -1331,7 +1352,7 @@ export async function createInstallation(options: {
 
   let savedObject: Installation = {
     installed_kibana: [],
-    installed_kibana_space_id: options.spaceId,
+    installed_kibana_space_id: brandSpaceId(options.spaceId),
     installed_kibana_version: appContextService.getKibanaVersion(),
     installed_es: [],
     package_assets: [],
@@ -1362,13 +1383,10 @@ export async function createInstallation(options: {
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  const created = await savedObjectsClient.create<Installation>(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    savedObject,
-    { id: pkgName, overwrite: true }
-  );
-
-  return created;
+  return savedObjectsClient.create<Installation>(PACKAGES_SAVED_OBJECT_TYPE, savedObject, {
+    id: pkgName,
+    overwrite: true,
+  });
 }
 
 export const kibanaAssetsToAssetsRef = (
@@ -1398,17 +1416,20 @@ export const saveKibanaAssetsRefs = async (
   // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
   await pRetry(
     async () => {
-      const installation =
-        saveAsAdditionnalSpace || append
-          ? await savedObjectsClient
-              .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-              .catch((e) => {
-                if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-                  return undefined;
-                }
-                throw e;
-              })
+      let installation: SavedObject<Installation> | undefined;
+      if (saveAsAdditionnalSpace || append) {
+        const installationSo = await savedObjectsClient
+          .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+          .catch((e) => {
+            if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+              return undefined;
+            }
+            throw e;
+          });
+        installation = installationSo
+          ? { ...installationSo, attributes: brandInstallationSpaceId(installationSo.attributes) }
           : undefined;
+      }
 
       if (saveAsAdditionnalSpace) {
         const primarySpaceId = installation?.attributes?.installed_kibana_space_id;

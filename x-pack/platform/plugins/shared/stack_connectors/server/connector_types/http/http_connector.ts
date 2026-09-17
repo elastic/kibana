@@ -29,6 +29,7 @@ import {
 } from '@kbn/connector-schemas/http';
 import { AuthType } from '@kbn/connector-schemas/common/auth';
 import { z } from '@kbn/zod/v4';
+import type { QueryParamValue } from '@kbn/connector-schemas/http/schemas/v1';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
 import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
 import { safeJsonStringify } from '@kbn/std';
@@ -166,9 +167,17 @@ function renderParameterTemplates(
   }
 
   if (params.query) {
-    const renderedQuery: Record<string, string> = {};
+    const renderedQuery: Record<string, QueryParamValue> = {};
     for (const [key, value] of Object.entries(params.query)) {
-      renderedQuery[key] = renderMustacheString(logger, value, variables, 'json');
+      if (Array.isArray(value)) {
+        renderedQuery[key] = value.map((v) =>
+          typeof v === 'string' ? renderMustacheString(logger, v, variables, 'json') : v
+        );
+      } else if (typeof value === 'string') {
+        renderedQuery[key] = renderMustacheString(logger, value, variables, 'json');
+      } else {
+        renderedQuery[key] = value;
+      }
     }
     renderedParams.query = renderedQuery;
   }
@@ -188,20 +197,57 @@ function combineUrl(basePath: string, path?: string): string {
   if (!path) return basePath;
   const url = new URL(basePath);
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  url.pathname = url.pathname.replace(/\/$/, '') + normalizedPath;
+  const queryIndex = normalizedPath.indexOf('?');
+  const pathname = queryIndex === -1 ? normalizedPath : normalizedPath.slice(0, queryIndex);
+  const pathQuery = queryIndex === -1 ? undefined : normalizedPath.slice(queryIndex + 1);
+  const baseQueryKeys = new Set(url.searchParams.keys());
+
+  // Keep the query out of URL.pathname, which would encode its `?` delimiter as `%3F`.
+  url.pathname = url.pathname.replace(/\/$/, '') + pathname;
+  if (pathQuery) {
+    const filteredPathQuery = pathQuery
+      .split('&')
+      .filter((queryPart) => {
+        const [key] = new URLSearchParams(queryPart).keys();
+        return key === undefined || !baseQueryKeys.has(key);
+      })
+      .join('&');
+
+    if (filteredPathQuery) {
+      const baseQuery = url.search.slice(1);
+      url.search = baseQuery ? `?${baseQuery}&${filteredPathQuery}` : `?${filteredPathQuery}`;
+    }
+  }
+
   return url.toString();
 }
 
-function appendQueryString(baseUrl: string, query?: Record<string, string>): string {
+function appendQueryString(baseUrl: string, query?: Record<string, QueryParamValue>): string {
   if (!query || Object.keys(query).length === 0) {
     return baseUrl;
   }
   const url = new URL(baseUrl);
-  for (const [key, value] of Object.entries(query)) {
-    if (!url.searchParams.has(key)) {
-      url.searchParams.set(key, value);
+  const existingQueryKeys = new Set(url.searchParams.keys());
+  const appendedQuery = new URLSearchParams();
+
+  for (const [key, val] of Object.entries(query)) {
+    if (!existingQueryKeys.has(key)) {
+      const values = Array.isArray(val) ? val : [val];
+      for (const v of values) {
+        appendedQuery.append(key, String(v));
+      }
     }
   }
+
+  const appendedQueryString = appendedQuery.toString();
+  if (appendedQueryString) {
+    // Avoid reserializing existing parameters, which would normalize their raw encoding.
+    const existingQuery = url.search.slice(1);
+    url.search = existingQuery
+      ? `?${existingQuery}&${appendedQueryString}`
+      : `?${appendedQueryString}`;
+  }
+
   return url.toString();
 }
 

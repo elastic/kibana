@@ -105,9 +105,11 @@ function mergeTrailingSameColorStep(steps: ColorByValueStep[]): ColorByValueStep
  * - `rangeType`: `percent` by default, or `number` when `useNumericRange` is `true`. Named
  *   palettes color a percentage domain; single-value charts (single-value metric charts and
  * legacy metric) opt into a numeric one.
- * - `continuity`: always `none`. Continuity is meaningless for a distributed palette — the
- *   palette's colors are spread across the entire domain, and the recalculated `min`/`max`
- *   act as the range bounds.
+ * - `continuity`: always `all`. A distributed palette spreads its colors across the whole
+ *   domain, but the range bounds it colors against are not always the recalculated data
+ *   min/max: charts like `metric` with a user-defined max use that max as the 100% bound, so
+ *   values can fall above (or below) it. Opening both ends (`all`) ensures those out-of-range
+ *   values still receive the nearest band color instead of being left uncolored.
  */
 function buildNamedPaletteLensState({
   palette,
@@ -126,8 +128,10 @@ function buildNamedPaletteLensState({
       progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
       rangeType: useNumericRange ? 'number' : 'percent',
-      // distributed palettes span the full domain; the recalculated min/max act as bounds
-      continuity: 'none',
+      // distributed palettes span the full domain; the recalculated min/max act as bounds except for the cases
+      // where we use a user-defined max or min. In those cases, we need to open both ends to ensure that
+      // values outside the range are still colored.
+      continuity: 'all',
       steps: numberOfBands,
       maxSteps: Math.max(DEFAULT_COLOR_STEPS, numberOfBands),
     },
@@ -136,7 +140,8 @@ function buildNamedPaletteLensState({
 
 /**
  * API -> Lens state for a `distributed_palette` or the deprecated `legacy_dynamic`.
- * - `continuity` is always `none`; the recalculated `min`/`max` act as the range bounds.
+ * - `continuity` is always `all`; opening both bounds keeps values outside the effective range
+ *   (e.g. above a metric's user-defined max) colored with the nearest band.
  * - `numberOfBands` is the per-chart default band count used to split the domain.
  * - `useNumericRange` defaults to `false` (`percent`). Single-value charts (metric without
  *   a max or breakdown, and legacy metric) pass `true` (`number`) instead, since they color a

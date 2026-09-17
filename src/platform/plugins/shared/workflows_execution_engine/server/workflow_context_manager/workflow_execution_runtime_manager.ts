@@ -10,20 +10,28 @@
 import agent from 'elastic-apm-node';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
-import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, SerializedError, StackFrame } from '@kbn/workflows';
 import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import { getAlertingRuleId, getTraceId, setCurrentTransaction } from './apm_internal';
+import {
+  getActiveOtelSpanId,
+  getActiveOtelTraceId,
+  getAlertingRuleId,
+  getTraceId,
+  setCurrentTransaction,
+} from './apm_internal';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
+import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
@@ -33,7 +41,8 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: WorkflowRuntimeGraph;
+  workflowExecutionCursor: WorkflowExecutionCursor;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
   dependencies?: ContextDependencies;
@@ -64,21 +73,19 @@ export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
+  private readonly workflowExecutionCursor: WorkflowExecutionCursor;
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
-  private workflowGraph: WorkflowGraph;
-  private nextNodeId: string | undefined;
+  private workflowGraph: WorkflowRuntimeGraph;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
   private telemetryReported: boolean = false;
-  private get topologicalOrder(): string[] {
-    return this.workflowGraph.topologicalOrder;
-  }
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
+    this.workflowExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
 
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
@@ -116,40 +123,27 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentNode(): GraphNodeUnion | null {
-    if (!this.workflowExecution.currentNodeId) {
-      return null;
-    }
-
-    return this.workflowGraph.getNode(this.workflowExecution.currentNodeId as string);
+    return this.workflowExecutionCursor.currentNode;
   }
 
   public navigateToNode(nodeId: string): void {
-    if (!this.workflowGraph.getNode(nodeId)) {
-      throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
-    }
-
-    this.nextNodeId = nodeId;
+    this.workflowExecutionCursor.navigateToNode(nodeId);
   }
 
   public navigateToNextNode(): void {
-    const currentNodeId = this.workflowExecution.currentNodeId;
-    this.nextNodeId = this.nodeAfter(currentNodeId);
+    this.workflowExecutionCursor.navigateToNextNode();
   }
 
   public navigateToAfterNode(nodeId: string): void {
-    this.nextNodeId = this.nodeAfter(nodeId);
+    this.workflowExecutionCursor.navigateToAfterNode(nodeId);
   }
 
-  private nodeAfter(nodeId: string | undefined): string | undefined {
-    const index = this.topologicalOrder.findIndex((id) => id === nodeId);
-    if (index >= 0 && index < this.topologicalOrder.length - 1) {
-      return this.topologicalOrder[index + 1];
-    }
-    return undefined;
+  public navigateToSynthetic(params: { stepId: string; stepType: string }): void {
+    this.workflowExecutionCursor.navigateToSynthetic(params);
   }
 
   public getCurrentNodeScope(): StackFrame[] {
-    return [...this.workflowExecution.scopeStack];
+    return this.workflowExecutionCursor.currentStackFrames;
   }
 
   /**
@@ -181,63 +175,7 @@ export class WorkflowExecutionRuntimeManager {
    * maintaining the integrity of the execution context hierarchy.
    */
   public enterScope(subScopeId?: string): void {
-    const currentNode = this.getCurrentNode();
-
-    if (!currentNode?.type.startsWith('enter-')) {
-      return;
-    }
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).enterScope({
-        nodeId: currentNode.id,
-        nodeType: currentNode.type,
-        stepId: currentNode.stepId,
-        scopeId: subScopeId,
-      }).stackFrames,
-    });
-  }
-
-  /**
-   * Exits the current scope in the workflow execution context.
-   *
-   * This method pops the top scope frame from the scope stack, returning to the previous
-   * execution context. This is typically called when leaving nested workflow operations
-   * such as loops, conditionals, or sub-workflows.
-   *
-   * @remarks
-   * This method includes multiple guard conditions that prevent scope exit if the current
-   * execution state is not appropriate. The scope update will be silently ignored if:
-   * - The current node type does not start with 'exit' (e.g., 'exit-foreach', 'exit-if', etc)
-   * - The current node's corresponding enter type doesn't match the current scope's node type
-   *   (e.g., trying to exit a loop scope from a conditional exit node)
-   *
-   * These guards ensure that scopes are only exited at the correct workflow execution points
-   * and maintain proper nesting hierarchy, preventing scope stack corruption and ensuring
-   * the integrity of the execution context.
-   */
-  public exitScope(): void {
-    const currentNode = this.getCurrentNode();
-
-    if (!currentNode?.type.startsWith('exit-')) {
-      return;
-    }
-
-    const scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
-
-    if (scopeStack.isEmpty()) {
-      return;
-    }
-
-    const entered = currentNode.type.replace(/^exit-/, 'enter-');
-
-    if (entered !== scopeStack.getCurrentScope().nodeType) {
-      return;
-    }
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
-        .stackFrames,
-    });
+    this.workflowExecutionCursor.setCurrentScopeId(subScopeId);
   }
 
   public setWorkflowOutputs(outputs: Record<string, unknown>): void {
@@ -251,6 +189,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public setWorkflowStatus(status: ExecutionStatus): void {
     this.workflowExecutionState.updateWorkflowExecution({ status });
+
+    if (isTerminalStatus(status)) {
+      this.workflowExecutionCursor.stop();
+    }
   }
 
   /**
@@ -265,12 +207,16 @@ export class WorkflowExecutionRuntimeManager {
       cancelledAt,
       cancelledBy: 'workflow',
     });
+    this.workflowExecutionCursor.stop();
   }
 
   /**
-   * Pops scopes from the scope stack, finishing each one, until {@link shouldStop}
-   * returns true for the current scope (or the stack is exhausted when no predicate
-   * is provided).
+   * Finishes ancestor enter-node step executions by walking a local copy of the scope
+   * stack. Does **not** mutate the execution cursor stack; scope position is reconciled
+   * by navigation and {@link WorkflowExecutionCursor.commitPendingNavigation}.
+   *
+   * The local {@link WorkflowScopeStack.exitScope} calls exist only to compute the
+   * correct `stackFrames` when creating each ancestor's `StepExecutionRuntime`.
    *
    * @param inclusive — when true the scope that matches {@link shouldStop} is also
    *   popped and finished. Defaults to false (stop *before* the matching scope).
@@ -278,14 +224,15 @@ export class WorkflowExecutionRuntimeManager {
    * Used by:
    * - loop.break — stop at and *include* the enclosing loop enter node (inclusive)
    * - loop.continue — stop *before* the enclosing loop enter node (exclusive)
-   * - workflow.output / workflow.fail — unwind the entire stack (no predicate)
    */
   public unwindScopes(
     stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     shouldStop?: (scope: ScopeData) => boolean,
     { inclusive = false }: { inclusive?: boolean } = {}
   ): void {
-    let scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+    let scopeStack = WorkflowScopeStack.fromStackFrames(
+      this.workflowExecutionCursor.currentStackFrames
+    );
 
     while (!scopeStack.isEmpty()) {
       const currentScope = scopeStack.getCurrentScope();
@@ -308,19 +255,28 @@ export class WorkflowExecutionRuntimeManager {
         break;
       }
     }
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      scopeStack: scopeStack.stackFrames,
-    });
   }
 
-  public setWorkflowError(error: Error | undefined): void {
-    const executionError = error ? ExecutionError.fromError(error) : undefined;
-    const serializedError = executionError ? executionError.toSerializableObject() : undefined;
+  /**
+   * @deprecated Temporary bridge for node implementations. Prefer reading
+   * `workflowExecutionCursor.error` directly once nodes receive cursor access.
+   */
+  public getWorkflowErrorSerialized(): SerializedError | undefined {
+    return this.workflowExecutionCursor.error
+      ? ExecutionError.fromError(this.workflowExecutionCursor.error).toSerializableObject()
+      : undefined;
+  }
 
-    this.workflowExecutionState.updateWorkflowExecution({
-      error: serializedError,
-    });
+  /**
+   * @deprecated Temporary bridge for node implementations. Prefer writing
+   * `workflowExecutionCursor.error` directly once nodes receive cursor access.
+   */
+  public setWorkflowError(error: Error | undefined): void {
+    if (error) {
+      this.workflowExecutionCursor.captureError(error);
+    } else {
+      this.workflowExecutionCursor.clearError();
+    }
   }
 
   public markWorkflowTimeouted(): void {
@@ -331,6 +287,7 @@ export class WorkflowExecutionRuntimeManager {
       duration:
         new Date(finishedAt).getTime() - new Date(this.workflowExecution.startedAt).getTime(),
     });
+    this.workflowExecutionCursor.stop();
   }
 
   public async start(): Promise<void> {
@@ -394,8 +351,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Workflow transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the workflow transaction
-        const realTraceId = getTraceId(workflowTransaction);
+        // Capture trace ID from the workflow transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(workflowTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from workflow transaction', {
@@ -420,7 +378,7 @@ export class WorkflowExecutionRuntimeManager {
         };
 
         const { triggeredBy } = this.workflowExecution;
-        if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
           taskManagerLabels.event_trigger_id = triggeredBy;
         }
 
@@ -440,8 +398,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Task transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the task transaction
-        const realTraceId = getTraceId(existingTransaction);
+        // Capture trace ID from the task transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(existingTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from task transaction', {
@@ -457,15 +416,53 @@ export class WorkflowExecutionRuntimeManager {
       // It will be overridden if the workflow fails
       existingTransaction.outcome = 'success';
     } else {
-      // Fallback if no task transaction exists - proceed without tracing
-      this.workflowLogger?.logWarn(
-        'No active Task Manager transaction found, proceeding without APM tracing'
-      );
+      // No APM transaction. Under EDOT-only instrumentation this is the normal path rather
+      // than an error: spans are exported by OTEL, there is just no APM agent to read them
+      // from. Read the trace id from the active OTEL span context so the execution stays
+      // linkable to its own trace.
+      const otelTraceId = getActiveOtelTraceId();
+
+      if (otelTraceId) {
+        this.workflowLogger?.logDebug('Captured OTEL trace ID (no APM transaction)', {
+          trace: { trace_id: otelTraceId },
+        });
+        this.workflowExecutionState.updateWorkflowExecution({
+          traceId: otelTraceId,
+          entryTransactionId: getActiveOtelSpanId(),
+        });
+
+        // Mirror the APM branches: addTransactionLabels also writes to the
+        // active OTEL span, keeping trace -> execution lookup searchable.
+        // Under EDOT-only instrumentation there is no APM transaction, so
+        // alert-triggered executions land here too; attribute them via the
+        // execution's `triggeredBy` instead of mislabeling them as task manager.
+        const { triggeredBy } = this.workflowExecution;
+        const isTriggeredByAlerting = triggeredBy === 'alert';
+
+        const otelLabels: Record<string, string | number | boolean> = {
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          service_name: 'kibana',
+          transaction_hierarchy: isTriggeredByAlerting
+            ? 'alerting->workflow->steps'
+            : 'task->steps',
+          triggered_by: isTriggeredByAlerting ? 'alerting' : 'task_manager',
+        };
+
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
+          otelLabels.event_trigger_id = triggeredBy;
+        }
+
+        addTransactionLabels(otelLabels);
+      } else {
+        this.workflowLogger?.logWarn(
+          'No active Task Manager transaction or OTEL span found, proceeding without tracing'
+        );
+      }
     }
 
-    this.nextNodeId = this.topologicalOrder[0];
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.nextNodeId,
+      currentNodeId: this.workflowExecutionCursor.currentNode?.id,
       scopeStack: [],
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
@@ -476,9 +473,15 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async resume(): Promise<void> {
+    if (!this.workflowExecution.currentNodeId) {
+      throw new Error(
+        'Execution can`t be resummed because current node ID is not set in execution state'
+      );
+    }
     await this.stepIoService.load();
     this.stepIoService.evictCompletedLoopsOnResume(this.workflowGraph);
-    this.nextNodeId = this.workflowExecution.currentNodeId;
+    this.workflowExecutionCursor.navigateToNode(this.workflowExecution.currentNodeId);
+    this.workflowExecutionCursor.commitPendingNavigation();
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };
@@ -488,16 +491,38 @@ export class WorkflowExecutionRuntimeManager {
   public async saveState(): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.nextNodeId,
+      currentNodeId: this.workflowExecutionCursor.currentNode?.id,
+      scopeStack: this.workflowExecutionCursor.currentStackFrames,
     };
 
     if (isTerminalStatus(workflowExecution.status)) {
+      // Preserve a terminal status already written by cancel/timeout paths.
+      // A stale cursor error must not downgrade CANCELLED → FAILED.
       workflowExecutionUpdate.status = workflowExecution.status;
-    } else if (workflowExecution.error) {
+      // When the status is FAILED (e.g. set by workflow.fail via setWorkflowStatus),
+      // the cursor error was captured separately and must also be persisted.
+      if (
+        workflowExecution.status === ExecutionStatus.FAILED &&
+        this.workflowExecutionCursor.error
+      ) {
+        workflowExecutionUpdate.error = ExecutionError.fromError(
+          this.workflowExecutionCursor.error
+        ).toSerializableObject();
+      }
+    } else if (this.workflowExecutionCursor.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
-      workflowExecutionUpdate.error = workflowExecution.error;
-    } else if (!this.nextNodeId) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      workflowExecutionUpdate.error = ExecutionError.fromError(
+        this.workflowExecutionCursor.error
+      ).toSerializableObject();
+    } else if (!this.workflowExecutionCursor.currentNode) {
+      // Parked waits must stay WAITING*; COMPLETED here races TM resume.
+      const isParkedWait =
+        workflowExecution.status === ExecutionStatus.WAITING ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_CHILD;
+      if (!isParkedWait) {
+        workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      }
     }
 
     if (
@@ -508,6 +533,9 @@ export class WorkflowExecutionRuntimeManager {
       const finishDate = new Date();
       workflowExecutionUpdate.finishedAt = finishDate.toISOString();
       workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
+      // Persist the stored context, not the Liquid render alias. Minting a
+      // typeless `event` here makes the execution tree label the trigger
+      // `document` instead of `manual`.
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,

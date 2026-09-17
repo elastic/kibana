@@ -24,7 +24,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -45,13 +45,13 @@ import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import { getDefaultProfileState } from './utils/default_profile_state';
+import { getProfileAppStateDefaults } from './utils/profile_app_state_defaults';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectCurrentProfileUrlState, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import { createSearchSource } from './utils/create_search_source';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
-import type { ProfileStateMap } from '../../../context_awareness';
+import type { ProfileStateMap } from '../../../../common/context_awareness';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -192,6 +192,9 @@ export function getDataStateContainer({
    */
   const refetch$ = new Subject<DataRefetchMsg>();
   const getInitialFetchStatus = () => {
+    if (getCurrentTab().skipInitialFetch || isEmptyEsqlQuery(getCurrentTab().appState.query)) {
+      return FetchStatus.UNINITIALIZED;
+    }
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
       internalState.getState().persistedDiscoverSession?.id !== undefined ||
@@ -288,11 +291,19 @@ export function getDataStateContainer({
           const tabState = getCurrentTab();
           const {
             id: currentTabId,
-            defaultProfileState,
+            profileAppStateDefaults,
             dataRequestParams,
             appState,
             globalState,
           } = tabState;
+
+          // Timefilter changes fetch via getFetch$(), not fetchQuery(). Skip empty
+          // ES|QL so changing the date picker does not execute an invalid query.
+          if (isEmptyEsqlQuery(appState.query)) {
+            autoRefreshDone?.();
+            autoRefreshDone = undefined;
+            return;
+          }
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
@@ -399,32 +410,32 @@ export function getDataStateContainer({
             }
           }
 
-          let shouldApplyDefaultProfileState = true;
-          let appliedDefaultProfileState = defaultProfileState;
+          let shouldApplyProfileAppStateDefaults = true;
+          let appliedProfileAppStateDefaults = profileAppStateDefaults;
 
           // If the data source profile changed, we may need to restore previous profile state
           if (didProfileChange) {
             const profileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
-            const profileStateSnapshot =
-              getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
-            const hasProfileStateSnapshot =
-              profileStateSnapshot && Object.keys(profileStateSnapshot).length > 0;
+            const profileAppStateSnapshot =
+              getCurrentTab().profileAppStateDefaults.snapshotsByProfileId[profileId];
+            const hasProfileAppStateSnapshot =
+              profileAppStateSnapshot && Object.keys(profileAppStateSnapshot).length > 0;
 
-            // Only apply the default profile state if we have no profile state to restore
-            shouldApplyDefaultProfileState = !hasProfileStateSnapshot;
+            // Only apply the profile app state defaults if we have no profile state to restore
+            shouldApplyProfileAppStateDefaults = !hasProfileAppStateSnapshot;
 
-            if (hasProfileStateSnapshot) {
+            if (hasProfileAppStateSnapshot) {
               await withSkipNextFetch(() =>
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
-                    appState: profileStateSnapshot,
+                    appState: profileAppStateSnapshot,
                   })
                 )
               );
             } else {
               // If it's not the first profile resolution (i.e. page load or tab init),
               // and there's no profile state to restore, fall back to shared layout state
-              // and ensure any applicable default profile state gets applied
+              // and ensure any applicable profile app state defaults get applied
               if (!isFirstResolution) {
                 await withSkipNextFetch(async () =>
                   internalState.dispatch(
@@ -440,27 +451,30 @@ export function getDataStateContainer({
                   )
                 );
 
-                appliedDefaultProfileState = { ...defaultProfileState, fieldsToReset: 'all' };
+                appliedProfileAppStateDefaults = {
+                  ...profileAppStateDefaults,
+                  fieldsToReset: 'all',
+                };
               }
 
               // If there is no profile state yet, sync a snapshot of the current
               // state so it can be restored when switching back to this profile
               internalState.dispatch(
-                injectCurrentTab(internalStateActions.syncProfileStateSnapshot)({})
+                injectCurrentTab(internalStateActions.syncProfileAppStateSnapshot)({})
               );
             }
           }
 
           const dataView = currentDataView$.getValue();
-          const resolvedDefaultProfileState =
-            shouldApplyDefaultProfileState && dataView
-              ? getDefaultProfileState({
+          const resolvedProfileAppStateDefaults =
+            shouldApplyProfileAppStateDefaults && dataView
+              ? getProfileAppStateDefaults({
                   scopedProfilesManager,
-                  defaultProfileState: appliedDefaultProfileState,
+                  profileAppStateDefaults: appliedProfileAppStateDefaults,
                   dataView,
                 })
               : undefined;
-          const preFetchStateUpdate = resolvedDefaultProfileState?.getPreFetchState();
+          const preFetchStateUpdate = resolvedProfileAppStateDefaults?.getPreFetchState();
 
           if (preFetchStateUpdate) {
             await withSkipNextFetch(() =>
@@ -546,15 +560,15 @@ export function getDataStateContainer({
                 );
               }
 
-              const { defaultProfileState: currentDefaultProfileState } = getCurrentTab();
+              const { profileAppStateDefaults: currentProfileAppStateDefaults } = getCurrentTab();
 
-              if (currentDefaultProfileState.resetId !== defaultProfileState.resetId) {
+              if (currentProfileAppStateDefaults.resetId !== profileAppStateDefaults.resetId) {
                 return;
               }
 
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
-              const postFetchStateUpdate = resolvedDefaultProfileState?.getPostFetchState({
+              const postFetchStateUpdate = resolvedProfileAppStateDefaults?.getPostFetchState({
                 defaultColumns,
                 esqlQueryColumns,
               });
@@ -567,15 +581,23 @@ export function getDataStateContainer({
                 );
               }
 
-              // Clear the profile state field-reset flags after data fetching
+              // Clear the profile app state default field-reset flags after data fetching
               // is done so refetches don't reset the state again
               internalState.dispatch(
-                injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+                injectCurrentTab(internalStateActions.setProfileAppStateDefaultFieldsToReset)({
                   fieldsToReset: 'none',
                 })
               );
             },
           });
+
+          if (!abortController.signal.aborted) {
+            internalState.dispatch(
+              injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
+                isWarningCalloutDismissed: false,
+              })
+            );
+          }
 
           fetchAllTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
@@ -603,6 +625,17 @@ export function getDataStateContainer({
 
   const fetchQuery = async () => {
     const query = getCurrentTab().appState.query;
+    if (isEmptyEsqlQuery(query)) {
+      return;
+    }
+
+    if (getCurrentTab().skipInitialFetch) {
+      // The tab has been initialized by an explicit search; later query-language
+      // switches should fetch normally instead of returning to the empty state.
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setSkipInitialFetch)({ skipInitialFetch: false })
+      );
+    }
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
     const currentDataView = currentDataView$.getValue();
 

@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod/v4';
 import type { PromptsConfigAttributes } from '@kbn/streams-plugin/server';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { StatusError } from '../../../lib/errors/status_error';
 import { createServerRoute } from '../../create_server_route';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 
 export const setStreamsPromptRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_prompts',
@@ -21,14 +21,13 @@ export const setStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({
     body: z.object({
       featurePromptOverride: z.string().max(50_000).optional(),
       significantEventsPromptOverride: z.string().max(50_000).optional(),
-      descriptionPromptOverride: z.string().max(50_000).optional(),
     }),
   }),
   handler: async ({
@@ -61,7 +60,7 @@ export const resetStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({}),
@@ -87,7 +86,7 @@ export const getStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),

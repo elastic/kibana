@@ -37,7 +37,7 @@ const INLINE_DEFS = [
   {
     id: 'email',
     label: 'Email',
-    iconType: 'email',
+    iconType: 'mail',
     connectorTypeId: '.email',
     paramsTemplate: 'to: ""\n',
   },
@@ -74,8 +74,8 @@ jest.mock('./components/matcher_input', () => ({
   ),
 }));
 
-jest.mock('../../../hooks/use_fetch_data_fields', () => ({
-  useFetchDataFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
+jest.mock('../../../hooks/use_fetch_rule_event_fields', () => ({
+  useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_rules', () => ({
@@ -84,10 +84,6 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
 
 jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: () => ({ data: [], isLoading: false }),
-}));
-
-jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
@@ -128,11 +124,6 @@ describe('ActionPolicyForm', () => {
   beforeEach(() => {
     mockWorkflowsEnabled = true;
     jest.clearAllMocks();
-  });
-
-  it('renders tags input', () => {
-    renderForm();
-    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
   });
 
   it('shows required errors for name on blur', async () => {

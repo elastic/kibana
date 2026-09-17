@@ -6,26 +6,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
 import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
 import { useFetchSameRuleEpisodesQuery } from '../../../hooks/use_fetch_same_rule_episodes_query';
+import { AlertEpisodeCardListSkeleton } from '../section_skeletons';
 import { RelatedAlertEpisodesList } from './related_list';
 import * as i18n from './translations';
 
@@ -110,19 +101,7 @@ export function RelatedEpisodesRuleSubsection({
   }
 
   return (
-    <div
-      data-test-subj="alertingV2RelatedEpisodesRuleSubsection"
-      css={
-        compressed
-          ? css`
-              padding-bottom: ${euiTheme.size.m};
-            `
-          : css`
-              padding-inline: ${euiTheme.size.m};
-              padding-bottom: ${euiTheme.size.m};
-            `
-      }
-    >
+    <div data-test-subj="alertingV2RelatedEpisodesRuleSubsection">
       <EuiTitle size={compressed ? 'xxs' : 'xs'}>
         <h4>
           {currentGroupHash ? i18n.RELATED_OTHER_GROUPS_TITLE : i18n.RELATED_RULE_ONLY_LIST_TITLE}
@@ -139,11 +118,7 @@ export function RelatedEpisodesRuleSubsection({
       </EuiText>
       <EuiSpacer size="s" />
       {isLoadingOtherGroupRows ? (
-        <EuiFlexGroup justifyContent="center" data-test-subj="alertingV2RelatedEpisodesRuleLoading">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <AlertEpisodeCardListSkeleton data-test-subj="alertingV2RelatedEpisodesRuleLoading" />
       ) : otherGroupRows.length === 0 ? (
         <EuiPanel
           color="subdued"

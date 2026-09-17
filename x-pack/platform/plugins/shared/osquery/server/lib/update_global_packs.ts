@@ -38,6 +38,16 @@ export const updateGlobalPacksCreateCallback = async (
 
   const packsContainingShardForPolicy: PackSavedObject[] = [];
   allPacks.map((pack) => {
+    // Never (re)attach a disabled global pack to a newly created package policy;
+    // otherwise enrolling a new agent silently re-schedules a pack the user
+    // already turned off. Fail closed on a falsy `enabled` — an unset
+    // (`undefined`) `enabled` is intentionally treated as "do not attach",
+    // matching how create_pack_route (`if (enabled && ...)`) and the reconciler
+    // (`pack.attributes.enabled && ...`) gate wire writes.
+    if (!pack.enabled) {
+      return;
+    }
+
     const shards = convertShardsToObject(pack.shards);
 
     return map(shards, (shard, shardName) => {
@@ -84,6 +94,7 @@ export const updateGlobalPacksCreateCallback = async (
             rrule_schedule: pack.rrule_schedule,
           },
           isRruleFeatureEnabled,
+          fallbackStartDate: pack.created_at,
         });
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,

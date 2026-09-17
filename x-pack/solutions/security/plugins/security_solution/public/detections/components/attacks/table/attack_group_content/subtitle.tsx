@@ -19,6 +19,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { UserAvatar } from '@kbn/user-profile-components';
 import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { getOriginalAlertIds } from '../../../../../attack_discovery/helpers';
+import { FIELD_TOKEN_REGEX } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter/attack_discovery_markdown_parser/helpers';
 import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 import { useDateFormat } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
@@ -47,17 +48,21 @@ export const UNKNOWN_USER_LABEL = i18n.translate(
  * Converts attack discovery field markdown (`{{ field.value }}`) to plain text for tooltips.
  */
 export const getSummaryPlainText = (markdown: string): string =>
-  markdown.replace(/\{\{\s*\S+\s+(.*?)\s*\}\}/g, '$1');
+  markdown.replace(FIELD_TOKEN_REGEX, '$2');
 
-const truncatedSummaryCss = css`
+/**
+ * Constrains the entity summary to a single truncated line.
+ * The gradient fade on the right edge prevents any chip from being hard-clipped.
+ */
+const summaryCss = css`
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
 
   .euiMarkdownFormat {
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
 
     > * {
@@ -159,7 +164,12 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
               <EuiFlexItem grow={false}>
                 {attack.userId ? (
                   <UserAvatar
-                    user={runByProfile?.user}
+                    // Fall back to a synthetic user object when the profile is still loading
+                    // or the UID has no matching profile, so initials are shown instead of "?".
+                    user={
+                      runByProfile?.user ??
+                      (attack.userName ? { username: attack.userName } : undefined)
+                    }
                     avatar={runByProfile?.data?.avatar}
                     size="s"
                     data-test-subj="attack-run-by-avatar"
@@ -190,7 +200,7 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
             data-test-subj="attack-subtitle-summary"
           >
             <EuiToolTip content={summaryPlainText} display="block" anchorClassName="eui-fullWidth">
-              <div css={truncatedSummaryCss}>
+              <div css={summaryCss} data-test-subj="attack-subtitle-summary-text" tabIndex={0}>
                 <AttackDiscoveryMarkdownFormatter
                   scopeId={TableId.alertsOnAttacksPage}
                   disableActions={showAnonymized}

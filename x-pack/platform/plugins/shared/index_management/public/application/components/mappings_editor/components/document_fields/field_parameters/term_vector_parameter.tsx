@@ -8,7 +8,8 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { UseField, Field, FormDataProvider } from '../../../shared_imports';
 import type { NormalizedField } from '../../../types';
@@ -57,10 +58,9 @@ export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
             {formData.term_vector === 'with_positions_offsets' && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
                   size="s"
-                  color="warning"
                   title={i18n.translate(
                     'xpack.idxMgmt.mappingsEditor.termVectorFieldWarningMessage',
                     {

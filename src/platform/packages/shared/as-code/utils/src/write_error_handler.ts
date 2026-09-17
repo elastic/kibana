@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ValidationError } from '@kbn/config-schema';
+import { ZodError, prettifyError } from '@kbn/zod';
 import { logRequest } from './log_request';
 
 export function writeErrorHandler(
@@ -31,6 +32,12 @@ export function writeErrorHandler(
   if (error instanceof ValidationError) {
     logRequest(logger, req, 'warn', error.message);
     return response.badRequest({ body: { message: error.message } });
+  }
+
+  if (error instanceof ZodError) {
+    const message = prettifyError(error);
+    logRequest(logger, req, 'warn', message);
+    return response.badRequest({ body: { message } });
   }
 
   if (SavedObjectsErrorHelpers.isConflictError(error)) {

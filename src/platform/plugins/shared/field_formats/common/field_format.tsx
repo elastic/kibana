@@ -10,7 +10,12 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
-import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
+import {
+  EMPTY_LABEL,
+  getEmptyOrMissingLabel,
+  MISSING_TOKEN,
+  NULL_LABEL,
+} from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
 import { asPrettyString, formatReactArray, formatTextArray } from './utils';
 import type {
@@ -26,6 +31,7 @@ import type {
   ReactConvertFunction,
   TextContextTypeConvert,
 } from './types';
+import { emptyValueStyles } from './field_format_styles';
 
 export abstract class FieldFormat {
   /**
@@ -224,20 +230,15 @@ export abstract class FieldFormat {
   }
 
   protected checkForMissingValueText(val: unknown): string | void {
-    if (val === '') {
-      return EMPTY_LABEL;
-    }
-    if (val == null || val === MISSING_TOKEN) {
-      return NULL_LABEL;
-    }
+    return getEmptyOrMissingLabel(val);
   }
 
-  protected checkForMissingValueReact(val: unknown): ReactNode | void {
+  protected checkForMissingValueReact(val: unknown): ReactNode | undefined {
     if (val === '') {
-      return <span className="ffString__emptyValue">{EMPTY_LABEL}</span>;
+      return <span css={emptyValueStyles}>{EMPTY_LABEL}</span>;
     }
     if (val == null || val === MISSING_TOKEN) {
-      return <span className="ffString__emptyValue">{NULL_LABEL}</span>;
+      return <span css={emptyValueStyles}>{NULL_LABEL}</span>;
     }
   }
 }

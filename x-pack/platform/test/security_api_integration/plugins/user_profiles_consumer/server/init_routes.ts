@@ -12,6 +12,23 @@ import type { PluginStartDependencies } from '.';
 
 export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
   const router = core.http.createRouter();
+  router.get(
+    {
+      path: '/internal/user_profiles_consumer/_current_profile_id',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    async (context, request, response) => {
+      const [, pluginDeps] = await core.getStartServices();
+      const profileId = await pluginDeps.security.userProfiles.getCurrentProfileId({ request });
+      return response.ok({ body: { profileId } });
+    }
+  );
   router.post(
     {
       path: '/internal/user_profiles_consumer/_suggest',

@@ -504,6 +504,19 @@ describe('getTemplateDefinitionJsonSchema', () => {
       expect((markdown!.body.metadata as JsonSchemaObject).content).toBeDefined();
     });
 
+    it('includes type on every field-control snippet (the schema requires it for all inline controls)', () => {
+      // The generated schema marks `type` required on every control branch (incl. MARKDOWN, whose
+      // Zod default doesn't drop it from `required`). A control snippet that omits `type` inserts a
+      // field the editor immediately flags "missing property type" — this guards that regression.
+      const controlSnippets = getFieldSnippets().filter(
+        ({ body }) => typeof body.control === 'string'
+      );
+      expect(controlSnippets.length).toBeGreaterThan(0);
+      for (const { body } of controlSnippets) {
+        expect(body.type).toBeDefined();
+      }
+    });
+
     it('exposes $ref as a completable key on a field entry', () => {
       const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
       const fieldsSchema = (schema.properties as JsonSchemaObject)?.fields as JsonSchemaObject;

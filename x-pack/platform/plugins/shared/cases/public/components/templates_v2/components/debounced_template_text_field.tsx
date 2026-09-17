@@ -18,6 +18,8 @@ interface DebouncedTemplateTextFieldProps {
   onChange: (value: string) => void;
   dataTestSubj: string;
   multiline?: boolean;
+  /** Commit each keystroke immediately instead of waiting for the debounce delay. */
+  commitOnChange?: boolean;
   isInvalid?: boolean;
   error?: ReactNode;
   helpText?: ReactNode;
@@ -34,17 +36,29 @@ export const DebouncedTemplateTextField: React.FC<DebouncedTemplateTextFieldProp
   onChange,
   dataTestSubj,
   multiline = false,
+  commitOnChange = false,
   isInvalid = false,
   error,
   helpText,
 }) => {
-  const { value: localValue, setValue, flush } = useDebouncedFieldValue<string>(value, onChange);
+  const {
+    value: localValue,
+    setValue,
+    flush,
+    onFocus,
+    onBlur,
+  } = useDebouncedFieldValue<string>(value, onChange);
 
   const sharedProps = {
     value: localValue,
-    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setValue(event.target.value),
-    onBlur: flush,
+    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setValue(event.target.value);
+      if (commitOnChange) {
+        flush();
+      }
+    },
+    onFocus,
+    onBlur,
     isInvalid,
     fullWidth: true,
     'data-test-subj': dataTestSubj,

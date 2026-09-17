@@ -8,20 +8,15 @@
 import React, { useState, useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageHeader,
-  EuiSpacer,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiPageTemplate,
-} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 
 import { getListPath } from '../../services/navigation';
-import { PipelineForm } from '../../components';
+import { PipelineForm, PipelineAppHeader } from '../../components';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
 import { getErrorText } from '../utils';
 import { normalizePipelineNameFromParams } from '../../lib/normalize_pipeline_name_from_params';
@@ -31,9 +26,7 @@ interface MatchParams {
 }
 
 const ManagedPipelineCallout = () => (
-  <EuiCallOut
-    color="danger"
-    iconType="warning"
+  <KbnDangerCallout
     data-test-subj="managedPipelineCallout"
     title={
       <FormattedMessage
@@ -41,18 +34,17 @@ const ManagedPipelineCallout = () => (
         defaultMessage="Editing a managed pipeline can break Kibana."
       />
     }
-  >
-    <FormattedMessage
-      id="xpack.ingestPipelines.edit.managedCalloutDescription"
-      defaultMessage="Managed pipelines are critical for internal operations."
-    />
-  </EuiCallOut>
+    text={
+      <FormattedMessage
+        id="xpack.ingestPipelines.edit.managedCalloutDescription"
+        defaultMessage="Managed pipelines are critical for internal operations."
+      />
+    }
+  />
 );
 
 const DeprecatedPipelineCallout = () => (
-  <EuiCallOut
-    color="warning"
-    iconType="warning"
+  <KbnWarningCallout
     data-test-subj="deprecatedPipelineCallout"
     title={
       <FormattedMessage
@@ -60,12 +52,13 @@ const DeprecatedPipelineCallout = () => (
         defaultMessage="This pipeline is deprecated"
       />
     }
-  >
-    <FormattedMessage
-      id="xpack.ingestPipelines.edit.deprecatedCalloutDescription"
-      defaultMessage="This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one."
-    />
-  </EuiCallOut>
+    text={
+      <FormattedMessage
+        id="xpack.ingestPipelines.edit.deprecatedCalloutDescription"
+        defaultMessage="This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one."
+      />
+    }
+  />
 );
 
 export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -113,8 +106,9 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
     services.breadcrumbs.setBreadcrumbs('edit');
   }, [services.breadcrumbs]);
 
+  let body: React.ReactNode;
   if (isLoading) {
-    return (
+    body = (
       <SectionLoading>
         <FormattedMessage
           id="xpack.ingestPipelines.edit.loadingPipelinesDescription"
@@ -122,10 +116,8 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
         />
       </SectionLoading>
     );
-  }
-
-  if (error) {
-    return (
+  } else if (error) {
+    body = (
       <EuiPageTemplate.EmptyPrompt
         color="danger"
         iconType="warning"
@@ -149,60 +141,45 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
         }
       />
     );
+  } else {
+    body = (
+      <>
+        {pipeline?.isManaged && (
+          <>
+            <ManagedPipelineCallout />
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {pipeline?.deprecated && (
+          <>
+            <DeprecatedPipelineCallout />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        <PipelineForm
+          onSave={onSave}
+          onCancel={onCancel}
+          isSaving={isSaving}
+          saveError={saveError}
+          defaultValue={pipeline as Pipeline}
+          isEditing={true}
+        />
+      </>
+    );
   }
 
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.ingestPipelines.edit.pageTitle"
-              defaultMessage="Edit pipeline ''{name}''"
-              values={{ name: decodedPipelineName }}
-            />
-          </span>
-        }
-        rightSideItems={[
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={services.documentation.getCreatePipelineUrl()}
-            target="_blank"
-            iconType="question"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.ingestPipelines.edit.docsButtonLabel"
-              defaultMessage="Edit pipeline docs"
-            />
-          </EuiButtonEmpty>,
-        ]}
+      <PipelineAppHeader
+        title={i18n.translate('xpack.ingestPipelines.edit.pageTitle', {
+          defaultMessage: "Edit pipeline ''{name}''",
+          values: { name: decodedPipelineName },
+        })}
+        history={history}
+        docLink={services.documentation.getCreatePipelineUrl()}
       />
-
-      <EuiSpacer size="l" />
-      {pipeline?.isManaged && (
-        <>
-          <ManagedPipelineCallout />
-          <EuiSpacer size="l" />
-        </>
-      )}
-      {pipeline?.deprecated && (
-        <>
-          <DeprecatedPipelineCallout />
-          <EuiSpacer size="l" />
-        </>
-      )}
-
-      <PipelineForm
-        onSave={onSave}
-        onCancel={onCancel}
-        isSaving={isSaving}
-        saveError={saveError}
-        defaultValue={pipeline as Pipeline}
-        isEditing={true}
-      />
+      {body}
       {services.consolePlugin?.EmbeddableConsole ? (
         <services.consolePlugin.EmbeddableConsole />
       ) : null}

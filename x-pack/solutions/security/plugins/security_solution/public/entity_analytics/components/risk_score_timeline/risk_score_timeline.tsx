@@ -10,6 +10,7 @@ import {
   AnnotationDomainType,
   Axis,
   Chart,
+  ColorVariant,
   CurveType,
   LineAnnotation,
   LineSeries,
@@ -61,6 +62,7 @@ export interface RiskScoreTimelineProps {
 const CHART_HEIGHT = 180;
 const X_DOMAIN_RIGHT_PADDING = 0.03;
 const MAX_RECENTLY_USED_RANGES = 9;
+const POINT_HIGHLIGHT_RADIUS = 5;
 
 interface QuickRange {
   from: string;
@@ -70,7 +72,7 @@ interface QuickRange {
 
 // Used only to floor the chart's x-domain `minInterval` so buckets keep a
 // sensible minimum spacing; moment's calendar-unit approximations are fine here.
-const intervalToMs = (interval: string | undefined): number | undefined =>
+export const intervalToMs = (interval: string | undefined): number | undefined =>
   interval === undefined ? undefined : parseInterval(interval)?.asMilliseconds();
 
 export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
@@ -93,6 +95,7 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
 
   const entries = useMemo(() => data?.entries ?? [], [data?.entries]);
   const minInterval = useMemo(() => intervalToMs(data?.interval), [data?.interval]);
+  const { euiTheme } = useEuiTheme();
 
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>([]);
   const [quickRanges] = useUiSetting$<QuickRange[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
@@ -131,15 +134,16 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
         'xpack.securitySolution.entityAnalytics.riskScoreTimeline.ariaLabel',
         { defaultMessage: 'Risk score history timeline' }
       )}
+      css={{ paddingBlock: euiTheme.size.s }}
     >
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h4>
+          <EuiTitle size="xs">
+            <h3>
               {i18n.translate('xpack.securitySolution.entityAnalytics.riskScoreTimeline.title', {
                 defaultMessage: 'Risk score history',
               })}
-            </h4>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -158,8 +162,8 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <TimelineBody
+      <EuiSpacer size="m" />
+      <RiskScoreTimelineChart
         entries={entries}
         isLoading={isLoading}
         isError={error !== undefined}
@@ -186,7 +190,11 @@ interface TimelineBodyProps {
   onPointSelect: (timestamp: string | undefined) => void;
 }
 
-const TimelineBody: React.FC<TimelineBodyProps> = ({
+/**
+ * Presentational risk-history chart body used by the flyout timeline and the
+ * Agent Builder `security.entity_risk_score_history` attachment preview.
+ */
+export const RiskScoreTimelineChart: React.FC<TimelineBodyProps> = ({
   entries,
   isLoading,
   isError,
@@ -252,7 +260,7 @@ const TimelineBody: React.FC<TimelineBodyProps> = ({
   );
 };
 
-TimelineBody.displayName = 'TimelineBody';
+RiskScoreTimelineChart.displayName = 'RiskScoreTimelineChart';
 
 interface TimelineChartProps {
   entries: RiskScoreHistoryEntry[];
@@ -317,15 +325,36 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
 
   const pointStyleAccessor = useCallback<PointStyleAccessor>(
     ({ x }) =>
-      x === selectedMs ? { fill: euiTheme.colors.primary, stroke: euiTheme.colors.primary } : null,
-    [selectedMs, euiTheme.colors.primary]
+      x === selectedMs
+        ? {
+            fill: ColorVariant.Series,
+            stroke: ColorVariant.Series,
+            radius: POINT_HIGHLIGHT_RADIUS,
+            opacity: 1,
+          }
+        : null,
+    [selectedMs]
   );
 
   return (
     <Chart size={{ height: CHART_HEIGHT }}>
       <Settings
         baseTheme={baseTheme}
-        theme={{ lineSeriesStyle: { point: { visible: 'always' } } }}
+        theme={{
+          lineSeriesStyle: { point: { visible: 'always' } },
+          crosshair: {
+            line: {
+              stroke: euiTheme.colors.borderBasePlain,
+              strokeWidth: 1,
+              dash: [4, 4],
+            },
+            crossLine: {
+              stroke: euiTheme.colors.borderBasePlain,
+              strokeWidth: 1,
+              dash: [4, 4],
+            },
+          },
+        }}
         xDomain={xDomain}
         onProjectionClick={handleProjectionClick}
       />
@@ -358,9 +387,22 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
           id="riskScoreTimelineSelection"
           domainType={AnnotationDomainType.XDomain}
           dataValues={[{ dataValue: selectedMs, details: selectedTimestamp }]}
-          marker={<EuiIcon type="dot" data-test-subj="riskScoreTimeline-SelectedPoint" />}
+          marker={
+            <EuiIcon
+              type="dot"
+              data-test-subj="riskScoreTimeline-SelectedPoint"
+              aria-hidden={true}
+            />
+          }
           markerPosition={Position.Top}
-          style={{ line: { strokeWidth: 2, stroke: euiTheme.colors.primary } }}
+          style={{
+            line: {
+              strokeWidth: 2,
+              stroke: euiTheme.colors.borderBaseProminent,
+              dash: [4, 4],
+              opacity: 1,
+            },
+          }}
         />
       )}
       <LineSeries
@@ -368,7 +410,7 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
         name={i18n.translate(
           'xpack.securitySolution.entityAnalytics.riskScoreTimeline.seriesName',
           {
-            defaultMessage: 'Risk score',
+            defaultMessage: 'Max risk score',
           }
         )}
         xScaleType={ScaleType.Time}
@@ -378,6 +420,7 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
         data={chartData}
         curve={CurveType.CURVE_STEP_AFTER}
         pointStyleAccessor={pointStyleAccessor}
+        tickFormat={(value) => Number(value).toFixed(2)}
       />
     </Chart>
   );

@@ -7,244 +7,123 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { asCodeIdSchema, asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { optionsListESQLControlSchema } from '@kbn/controls-schemas';
+import { z } from '@kbn/zod';
 import {
-  CONTROL_WIDTH_LARGE,
-  CONTROL_WIDTH_MEDIUM,
-  CONTROL_WIDTH_SMALL,
-  DEFAULT_PINNED_CONTROL_STATE,
-  ESQL_CONTROL,
-} from '@kbn/controls-constants';
-import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { timeRangeSchema } from '@kbn/es-query-server';
-import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
+  asCodeMetaSchema,
+  asCodePaginationResponseMetaSchema,
+  asCodeSearchRequestSchema,
+  getAsCodeTagsSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
+import type { discoverSessionControlPanelsSchema } from '@kbn/as-code-discover-schema';
+import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
+import {
+  MAX_DISCOVER_SESSION_TAGS,
+  MAX_SEARCH_QUERY_LENGTH,
+} from '@kbn/discover-session-constants';
 
-export const MAX_SESSION_TITLE_LENGTH = 256;
-export const MAX_SESSION_DESCRIPTION_LENGTH = 1000;
-export const MAX_TAB_LABEL_LENGTH = 120;
-export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
-export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
-export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
+export const discoverSessionApiResponseSchema = z
+  .object({
+    id: z.string().meta({ description: 'The Discover session ID.' }),
+    data: discoverSessionApiDataSchema,
+    meta: asCodeMetaSchema,
+  })
+  .strict();
 
-const validateUniqueIds = (ids: string[], message: string): string | undefined => {
-  if (new Set(ids).size !== ids.length) {
-    return message;
-  }
-};
-
-const visContextSchema = schema.object({
-  suggestion_type: schema.oneOf(
-    [
-      schema.literal(UnifiedHistogramSuggestionType.lensSuggestion),
-      schema.literal(UnifiedHistogramSuggestionType.histogramForESQL),
-      schema.literal(UnifiedHistogramSuggestionType.histogramForDataView),
-    ],
-    {
-      meta: {
-        description:
-          'Chart suggestion type used by Discover to generate this histogram configuration.',
-      },
-    }
-  ),
-  attributes: schema.recordOf(
-    schema.string({ maxLength: MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH }),
-    schema.any(),
-    {
-      meta: {
-        description: 'Chart configuration payload for the selected `suggestion_type`.',
-      },
-    }
-  ),
+/* Shared context for warnings produced while transforming a Discover session tab. */
+const discoverSessionWarningBaseSchema = z.object({
+  message: z.string().meta({ description: 'Why stored content was omitted from the response.' }),
+  tab_id: z.string().meta({ description: 'The ID of the affected tab.' }),
 });
 
-const discoverSessionControlWidthSchema = schema.oneOf(
-  [
-    schema.literal(CONTROL_WIDTH_SMALL),
-    schema.literal(CONTROL_WIDTH_MEDIUM),
-    schema.literal(CONTROL_WIDTH_LARGE),
-  ],
-  {
-    defaultValue: DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM,
-    meta: {
-      description: 'Minimum width of the control panel.',
-    },
-  }
-);
+/* Reports one invalid panel while allowing the other panels in the tab to be returned. */
+const discoverSessionDroppedPanelWarningSchema = discoverSessionWarningBaseSchema
+  .extend({
+    type: z.literal('dropped_panel'),
+    panel_id: z.string().meta({ description: 'The ID of the omitted control panel.' }),
+  })
+  .strict();
 
-const discoverSessionControlPanelSchema = schema.object(
-  {
-    id: schema.string({
-      minLength: 1,
-      meta: { description: 'The unique ID of the control.' },
-    }),
-    type: schema.literal(ESQL_CONTROL),
-    width: discoverSessionControlWidthSchema,
-    grow: schema.boolean({
-      defaultValue: DEFAULT_PINNED_CONTROL_STATE.grow,
-      meta: {
-        description:
-          'When `true`, the control expands to fill any available horizontal space. ' +
-          'Defaults to `false`.',
-      },
-    }),
-    config: optionsListESQLControlSchema,
-  },
-  {
-    meta: {
-      id: 'kbn-discover-session-api-esql-control-panel',
-      title: ESQL_CONTROL,
+/* Reports a tab property that could not be returned as a whole. */
+const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSchema
+  .extend({
+    type: z.literal('dropped_property'),
+    key: z.string().meta({ description: 'The name of the property omitted from the response.' }),
+  })
+  .strict();
+
+/* Allows GET responses to preserve valid session data while reporting what was dropped. */
+export const discoverSessionWarningsSchema = z
+  .array(
+    z.union([discoverSessionDroppedPanelWarningSchema, discoverSessionDroppedPropertyWarningSchema])
+  )
+  .meta({
+    description:
+      'Warnings generated when stored Discover session content cannot be fully represented in the API response.',
+  });
+
+export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema.extend({
+  warnings: discoverSessionWarningsSchema.optional(),
+});
+
+export const discoverSessionSanitizeResponseSchema = z
+  .object({
+    data: discoverSessionApiDataSchema,
+    warnings: discoverSessionWarningsSchema.optional(),
+  })
+  .strict();
+
+export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
+  query: z
+    .string()
+    .max(MAX_SEARCH_QUERY_LENGTH)
+    .meta({
       description:
-        'An ES|QL variable control whose selected value is injected into Discover ES|QL ' +
-        'queries using the `?variable_name` syntax.',
-    },
-  }
-);
-
-export const discoverSessionControlPanelsSchema = schema.arrayOf(
-  discoverSessionControlPanelSchema,
-  {
-    defaultValue: [],
-    maxSize: MAX_DISCOVER_SESSION_CONTROL_PANELS,
-    validate(value) {
-      return validateUniqueIds(
-        value.map((panel) => panel.id),
-        'control_panels must have unique ids'
-      );
-    },
-    meta: {
-      description: 'An array of Discover ES|QL control panels.',
-    },
-  }
-);
-
-const discoverSessionTabPresentationSchema = schema.object({
-  hide_chart: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'When `true`, the chart is hidden.' },
-  }),
-  hide_table: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'When `true`, the data table is hidden.' },
-  }),
-  hide_aggregated_preview: schema.maybe(
-    schema.boolean({
-      meta: { description: 'When `true`, aggregated preview panels are hidden.' },
+        'Full-text search (`simple_query_string`) over `title` and `description`. All terms must match.',
     })
-  ),
-  breakdown_field: schema.maybe(
-    schema.string({
-      maxLength: MAX_BREAKDOWN_FIELD_LENGTH,
-      meta: { description: 'Field name used to split chart data into series.' },
-    })
-  ),
-  chart_interval: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal('auto'),
-        schema.literal('ms'),
-        schema.literal('s'),
-        schema.literal('m'),
-        schema.literal('h'),
-        schema.literal('d'),
-        schema.literal('w'),
-        schema.literal('M'),
-        schema.literal('y'),
-      ],
-      {
-        meta: {
-          description: 'Time interval for the chart histogram on this tab.',
-        },
-      }
-    )
-  ),
-  time_restore: schema.boolean({
-    defaultValue: false,
-    meta: {
-      description:
-        "When `true`, Discover applies this tab's `time_range` and `refresh_interval`. When `false`, those fields are ignored and global time settings are used.",
-    },
-  }),
-  time_range: schema.maybe(timeRangeSchema),
-  refresh_interval: schema.maybe(refreshIntervalSchema),
-  vis_context: schema.maybe(visContextSchema),
-  control_panels: schema.maybe(discoverSessionControlPanelsSchema),
+    .optional(),
 });
 
-const discoverSessionTabIdentitySchema = schema.object({
-  id: asCodeIdSchema,
-  label: schema.string({
-    maxLength: MAX_TAB_LABEL_LENGTH,
-    meta: { description: 'Tab label.' },
-  }),
-});
+const discoverSessionSearchItemSchema = z
+  .object({
+    id: z.string().meta({ description: 'The Discover session ID.' }),
+    data: z
+      .object({
+        title: z.string().meta({ description: 'Discover session title.' }),
+        description: z.string().optional().meta({ description: 'Discover session description.' }),
+        tags: getAsCodeTagsSchema(
+          'Tag IDs associated with this Discover session.',
+          MAX_DISCOVER_SESSION_TAGS
+        ).optional(),
+      })
+      .strict(),
+    meta: asCodeMetaSchema,
+  })
+  .strict();
 
-const discoverSessionClassicTabSchema = schema.object({
-  ...discoverSessionTabIdentitySchema.getPropSchemas(),
-  ...classicTabSchema.getPropSchemas(),
-  ...discoverSessionTabPresentationSchema.getPropSchemas(),
-});
+export const discoverSessionSearchResponseSchema = z
+  .object({
+    data: z
+      .array(discoverSessionSearchItemSchema)
+      // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
+      .max(PAGINATION_MAX_SIZE)
+      .meta({
+        description: 'List of matching Discover sessions (summaries, not the full session state).',
+      }),
+    meta: asCodePaginationResponseMetaSchema,
+  })
+  .strict();
 
-const discoverSessionEsqlTabSchema = schema.object({
-  ...discoverSessionTabIdentitySchema.getPropSchemas(),
-  ...esqlTabSchema.getPropSchemas(),
-  ...discoverSessionTabPresentationSchema.getPropSchemas(),
-});
+export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
+export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
+export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;
+export type DiscoverSessionSanitizeResponse = z.output<
+  typeof discoverSessionSanitizeResponseSchema
+>;
+export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSchema>[number];
+export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
+export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;
+export type DiscoverSessionControlPanels = z.output<typeof discoverSessionControlPanelsSchema>;
 
-const discoverSessionApiTabSchema = schema.oneOf([
-  discoverSessionClassicTabSchema,
-  discoverSessionEsqlTabSchema,
-]);
-
-export const discoverSessionApiDataSchema = schema.object(
-  {
-    title: schema.string({
-      minLength: 1,
-      maxLength: MAX_SESSION_TITLE_LENGTH,
-      meta: { description: 'Discover session title.' },
-    }),
-    description: schema.string({
-      defaultValue: '',
-      maxLength: MAX_SESSION_DESCRIPTION_LENGTH,
-      meta: { description: 'Discover session description.' },
-    }),
-    tabs: schema.arrayOf(discoverSessionApiTabSchema, {
-      minSize: 1,
-      maxSize: MAX_DISCOVER_SESSION_TABS,
-      validate(value) {
-        return validateUniqueIds(
-          value.map((tab) => tab.id),
-          'tabs must have unique ids'
-        );
-      },
-      meta: {
-        description:
-          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID because Dashboard panels and Discover links can reference it.',
-      },
-    }),
-  },
-  {
-    meta: {
-      id: 'kbn-discover-session-data',
-      title: 'Discover session data',
-      description: 'Configuration data for a Discover session.',
-    },
-  }
-);
-
-export const discoverSessionApiResponseSchema = schema.object({
-  id: asCodeIdSchema,
-  data: discoverSessionApiDataSchema,
-  meta: asCodeMetaSchema,
-});
-
-export type DiscoverSessionApiData = TypeOf<typeof discoverSessionApiDataSchema>;
-export type DiscoverSessionApiResponse = TypeOf<typeof discoverSessionApiResponseSchema>;
-export type DiscoverSessionApiClassicTab = TypeOf<typeof discoverSessionClassicTabSchema>;
-export type DiscoverSessionApiEsqlTab = TypeOf<typeof discoverSessionEsqlTabSchema>;
-export type DiscoverSessionApiTab = TypeOf<typeof discoverSessionApiTabSchema>;
-export type DiscoverSessionControlPanels = TypeOf<typeof discoverSessionControlPanelsSchema>;
+// Input types (shape accepted by the API, before defaults applied)
+export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataSchema>;

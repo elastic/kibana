@@ -86,8 +86,8 @@ describe('actions', () => {
         })),
       });
 
-      expect(mockedAuditLoggingService.writeCustomAuditLog).toBeCalledTimes(2);
-      expect(mockedAuditLoggingService.writeCustomAuditLog).lastCalledWith({
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledTimes(2);
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenLastCalledWith({
         message: `User created Fleet action [id=${actions[1].action_id}, user_id=${actions[1].user_id}, input_type=foo]`,
       });
     });
@@ -137,7 +137,7 @@ describe('actions', () => {
           ),
       });
 
-      expect(mockedAuditLoggingService.writeCustomAuditLog).toBeCalledTimes(2);
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledTimes(2);
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenNthCalledWith(1, {
         message: `User created Fleet action [id=${successActions[0].action_id}, user_id=elastic, input_type=foo]`,
       });

@@ -79,6 +79,28 @@ describe('useTimelineConfig', () => {
     });
   });
 
+  describe('when the active timeline is a Super Timeline', () => {
+    it('returns undefined so the "Attach to current Timeline" callout and Save button are never shown', () => {
+      // WHY: Super Timelines are transient and read-only. Showing "Save current Timeline" would
+      // persist the Super Timeline as a new saved object, defeating the never-persisted contract.
+      const superTimelineStore = createMockStore({
+        ...mockGlobalStateWithSavedTimeline,
+        timeline: {
+          ...mockGlobalStateWithSavedTimeline.timeline,
+          timelineById: {
+            ...mockGlobalStateWithSavedTimeline.timeline.timelineById,
+            [TimelineId.active]: {
+              ...mockGlobalStateWithSavedTimeline.timeline.timelineById[TimelineId.active],
+              isSuperTimeline: true,
+            },
+          },
+        },
+      });
+      const { result } = renderUseTimelineConfig(EVENT_ID, true, superTimelineStore);
+      expect(result.current).toBeUndefined();
+    });
+  });
+
   describe('when in the timeline flyout', () => {
     it('returns a config object', () => {
       const { result } = renderUseTimelineConfig();

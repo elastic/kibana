@@ -17,9 +17,12 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED, FIELD_MIN_VALUE, FIELD_MAX_VALUE } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type InputNumberProps = z.infer<typeof InputNumberFieldSchema> & ConditionRenderProps;
+type InputNumberProps = z.infer<typeof InputNumberFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const isEmptyNumeric = (value: unknown): boolean => {
   if (value === undefined || value === null) return true;
@@ -33,18 +36,21 @@ export const InputNumber = ({
   name,
   type,
   isRequired,
+  isRequiredOnClose,
   min,
   max,
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }: InputNumberProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   const rules = useMemo(() => {
     const validate: Record<string, (value: unknown) => true | string> = {};
@@ -85,7 +91,7 @@ export const InputNumber = ({
           <>
             <EuiFormRow
               label={label}
-              labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
               isInvalid={Boolean(fieldState.error)}
               error={fieldState.error?.message}
               fullWidth

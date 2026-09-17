@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexItem,
@@ -24,28 +24,45 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ensureApproximationLicense } from '@kbn/esql-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 const POPOVER_WIDTH = 320;
 
 const getLabels = (
+  invalidLicense: boolean,
   disabled: boolean | undefined,
   isApproximate: boolean,
-  additionalText?: string
+  additionalText?: string,
+  disabledTooltip?: string
 ) => {
-  if (disabled) {
+  if (invalidLicense || disabled) {
     const ariaLabel = i18n.translate('unifiedSearch.esqlApproximationToggle.unavailable', {
       defaultMessage: 'Fast mode unavailable',
     });
+    if (disabledTooltip) {
+      return {
+        tooltipContent: disabledTooltip,
+        ariaLabel,
+        switchLabel: i18n.translate('unifiedSearch.esqlApproximationToggle.switch.off', {
+          defaultMessage: 'OFF',
+        }),
+      };
+    }
+    const additionalDisabledText = invalidLicense
+      ? i18n.translate('unifiedSearch.esqlApproximationToggle.invalidLicenseText', {
+          defaultMessage: 'Upgrade to Enterprise license to enable fast mode.',
+        })
+      : additionalText;
     return {
       tooltipContent: (
         <>
           <strong>{ariaLabel}</strong>
-          {additionalText && (
+          {additionalDisabledText && (
             <>
               <br />
               <br />
-              {additionalText}
+              {additionalDisabledText}
             </>
           )}
         </>
@@ -89,6 +106,7 @@ interface EsqlApproximationToggleProps {
   onChange: (isApproximate: boolean) => void;
   additionalText?: string;
   disabled?: boolean;
+  disabledReason?: string;
 }
 
 export const EsqlApproximationToggle = ({
@@ -96,17 +114,39 @@ export const EsqlApproximationToggle = ({
   onChange,
   additionalText,
   disabled,
+  disabledReason,
 }: EsqlApproximationToggleProps) => {
+  const isDisabled = Boolean(disabled) || Boolean(disabledReason);
+  const disabledTooltip = disabledReason;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana<IUnifiedSearchPluginServices>();
-  const learnMoreUrl = services.docLinks.links.query.queryESQLApproximateResults;
+  const {
+    services: { docLinks, licensing },
+  } = useKibana<IUnifiedSearchPluginServices>();
+  const learnMoreUrl = docLinks.links.query.queryESQLApproximateResults;
 
-  const { tooltipContent, ariaLabel, switchLabel } = getLabels(
-    disabled,
-    isApproximate,
-    additionalText
-  );
+  const [invalidLicense, setInvalidLicense] = useState<boolean>(false);
+  useEffect(() => {
+    if (!licensing) {
+      setInvalidLicense(true);
+      return;
+    }
+
+    let cancelled = false;
+    licensing.getLicense().then((license) => {
+      if (!cancelled) {
+        setInvalidLicense(!ensureApproximationLicense(license));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [licensing]);
+
+  const { tooltipContent, ariaLabel, switchLabel } = useMemo(() => {
+    return getLabels(invalidLicense, isDisabled, isApproximate, additionalText, disabledTooltip);
+  }, [isDisabled, disabledTooltip, isApproximate, additionalText, invalidLicense]);
 
   return (
     <EuiFlexItem grow={false}>
@@ -119,7 +159,7 @@ export const EsqlApproximationToggle = ({
               size="s"
               color={isApproximate ? 'success' : 'text'}
               display="base"
-              disabled={disabled}
+              disabled={invalidLicense || isDisabled}
               data-test-subj="esqlApproximationToggleButton"
               onClick={() => setIsPopoverOpen((open) => !open)}
             />

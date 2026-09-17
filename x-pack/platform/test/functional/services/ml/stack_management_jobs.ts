@@ -68,9 +68,9 @@ export function MachineLearningStackManagementJobsProvider(
       return SAVED_OBJ_TYPE_TO_DATA_TEST_SUBJ[mlSavedObjectType];
     },
     async openSyncFlyout() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.click('mlStackMgmtSyncButton', 1000);
-        await testSubjects.existOrFail('mlJobMgmtSyncFlyout');
+      await retry.tryForTime(30000, async () => {
+        await this.openAppMenuItem('mlStackMgmtSyncButton');
+        await testSubjects.existOrFail('mlJobMgmtSyncFlyout', { timeout: 5000 });
       });
     },
 
@@ -252,17 +252,26 @@ export function MachineLearningStackManagementJobsProvider(
       });
     },
 
+    async openAppMenuItem(testSubj: string) {
+      // Import/export (and other) actions may live in the app menu overflow ("More") popover.
+      if (!(await testSubjects.exists(testSubj, { timeout: 1000 }))) {
+        await testSubjects.click('app-menu-overflow-button', 1000);
+        await testSubjects.existOrFail(testSubj, { timeout: 5000 });
+      }
+      await testSubjects.click(testSubj, 1000);
+    },
+
     async openImportFlyout() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.click('mlJobsImportButton', 1000);
-        await testSubjects.existOrFail('mlJobMgmtImportJobsFlyout');
+      await retry.tryForTime(30000, async () => {
+        await this.openAppMenuItem('mlJobsImportButton');
+        await testSubjects.existOrFail('mlJobMgmtImportJobsFlyout', { timeout: 5000 });
       });
     },
 
     async openExportFlyout() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.click('mlJobsExportButton', 1000);
-        await testSubjects.existOrFail('mlJobMgmtExportJobsFlyout');
+      await retry.tryForTime(30000, async () => {
+        await this.openAppMenuItem('mlJobsExportButton');
+        await testSubjects.existOrFail('mlJobMgmtExportJobsFlyout', { timeout: 5000 });
       });
     },
 

@@ -54,7 +54,11 @@ describe('useFieldTableColumns', () => {
     });
 
     const { container, getByTestId } = render(
-      <EuiInMemoryTable items={[fieldItem]} columns={columns} />,
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
       {
         wrapper: TestProviders,
       }
@@ -74,7 +78,11 @@ describe('useFieldTableColumns', () => {
     });
 
     const { container, queryByTestId } = render(
-      <EuiInMemoryTable items={[fieldItem]} columns={columns} />,
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
       {
         wrapper: TestProviders,
       }
@@ -94,7 +102,11 @@ describe('useFieldTableColumns', () => {
     });
 
     const { container, queryByTestId } = render(
-      <EuiInMemoryTable items={[{ ...fieldItem, isRuntime: false }]} columns={columns} />,
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[{ ...fieldItem, isRuntime: false }]}
+        columns={columns}
+      />,
       {
         wrapper: TestProviders,
       }
@@ -113,9 +125,16 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     getByTestId('actionEditRuntimeField').click();
     expect(mockOnHide).toHaveBeenCalledTimes(1);
@@ -131,9 +150,16 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     getByTestId('actionEditRuntimeField').click();
     expect(mockOpenFieldEditor).toHaveBeenCalledTimes(1);
@@ -148,9 +174,16 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     getByTestId('actionDeleteRuntimeField').click();
     expect(mockOpenDeleteFieldModal).toHaveBeenCalledTimes(1);

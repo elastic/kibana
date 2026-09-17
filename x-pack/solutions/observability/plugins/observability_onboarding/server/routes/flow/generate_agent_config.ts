@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import type { Output } from '@kbn/fleet-plugin/common/types';
 import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import type { InstalledIntegration } from '../types';
@@ -13,14 +13,10 @@ import { makeTar, type Entry } from './make_tar';
 
 export function generateAgentConfigTar(
   output: Output,
-  installedIntegrations: InstalledIntegration[],
-  writeToLogsStreams: boolean = false
+  installedIntegrations: InstalledIntegration[]
 ) {
   const now = new Date();
   const outputConfig = transformOutputToFullPolicyOutput(output, undefined, true);
-  if (writeToLogsStreams) {
-    outputConfig._write_to_logs_streams = true;
-  }
 
   return makeTar([
     {
@@ -28,7 +24,7 @@ export function generateAgentConfigTar(
       path: 'elastic-agent.yml',
       mode: 0o644,
       mtime: now,
-      data: dump({
+      data: stringify({
         outputs: {
           default: outputConfig,
         },

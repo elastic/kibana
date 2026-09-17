@@ -20,7 +20,9 @@ import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const disablePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .post({
@@ -28,7 +30,7 @@ export const disablePrivilegeMonitoringEngineRoute = (
       path: MONITORING_ENGINE_DISABLE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics-manage`],
         },
       },
       options: {
@@ -42,6 +44,17 @@ export const disablePrivilegeMonitoringEngineRoute = (
       {
         version: API_VERSIONS.public.v1,
         validate: {},
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       withMinimumLicense(
         async (

@@ -7,10 +7,17 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { OSQUERY_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { Ecs } from '@kbn/cases-plugin/common';
 
 import { AddToCaseButton } from './add_to_cases_button';
+import { AlertAttachmentContext } from '../common/contexts';
 import { TestProvidersWithServices } from '../__test_helpers__/create_mock_kibana_services';
+
+const mockEcsData = {
+  _id: 'alert-id-1',
+  _index: 'alert-index-1',
+} as Ecs;
 
 const mockOpen = jest.fn();
 const mockCanUseCases = jest.fn();
@@ -146,7 +153,7 @@ describe('AddToCaseButton', () => {
       fireEvent.click(screen.getByText('Add to Case'));
 
       const [{ getAttachments }] = mockOpen.mock.calls[0];
-      expect(getAttachments()).toEqual([
+      expect(getAttachments({ theCase: { owner: 'securitySolution' } })).toEqual([
         {
           type: OSQUERY_ATTACHMENT_TYPE,
           attachmentId: 'test-action-id',
@@ -159,6 +166,57 @@ describe('AddToCaseButton', () => {
           },
         },
       ]);
+    });
+
+    it('should build a unified `security.alert` attachment alongside the osquery attachment when rendered with alert context', () => {
+      render(
+        <TestProvidersWithServices>
+          <AlertAttachmentContext.Provider value={mockEcsData}>
+            <AddToCaseButton actionId="test-action-id" />
+          </AlertAttachmentContext.Provider>
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('Add to Case'));
+
+      const [{ getAttachments }] = mockOpen.mock.calls[0];
+      const attachments = getAttachments({ theCase: { owner: 'securitySolution' } });
+
+      expect(attachments).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: 'alert-id-1',
+          }),
+        ])
+      );
+    });
+
+    it('should keep the alert attachment when theCase is undefined, defaulting to the security owner', () => {
+      // regression test: `useCheckDocumentAttachments` calls getAttachments with
+      // `theCase: undefined` to collect ids for disabling cases that already contain
+      // them; the alert must not be dropped just because no case is selected yet.
+      render(
+        <TestProvidersWithServices>
+          <AlertAttachmentContext.Provider value={mockEcsData}>
+            <AddToCaseButton actionId="test-action-id" />
+          </AlertAttachmentContext.Provider>
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('Add to Case'));
+
+      const [{ getAttachments }] = mockOpen.mock.calls[0];
+      const attachments = getAttachments({ theCase: undefined });
+
+      expect(attachments).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: 'alert-id-1',
+          }),
+        ])
+      );
     });
 
     it('should not open case modal on click when permissions are denied', () => {

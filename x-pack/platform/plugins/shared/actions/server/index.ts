@@ -30,12 +30,29 @@ export type {
 } from './types';
 
 export type {
+  ConnectorEventEmitParams,
+  ConnectorEventEmitter,
+  DispatchConnectorEventsResult,
+} from './inbound';
+
+export type {
   ConnectorWithExtraFindData as FindActionResult,
   Connector,
   ConnectorType,
 } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
+export { RelayRequestError } from './lib/relay';
+export type {
+  RelayBinding,
+  RelayCallbackResponse,
+  RelayClaimResponse,
+  RelayClientContract,
+  RelayInstallRequest,
+  RelayInstallResponse,
+  RelayTriggerInput,
+  RelayTriggerResponse,
+} from './lib/relay';
 
 export {
   asSavedObjectExecutionSource,
@@ -64,6 +81,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     email: { domain_allowlist: true, recipient_allowlist: false, services: { enabled: true } },
     webhook: { ssl: { pfx: { enabled: true } } },
     auth: { ears: { enabled: true, enableExperimental: true } },
+    inboundEvents: { enabled: true },
   },
 };
 

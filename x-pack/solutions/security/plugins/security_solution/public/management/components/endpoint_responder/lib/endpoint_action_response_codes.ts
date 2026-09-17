@@ -85,6 +85,19 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
+  'ra_suspend-process_success_no-action': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.successNoAction',
+    {
+      defaultMessage:
+        'Action completed. The provided process was not found or was already suspended',
+    }
+  ),
+
+  'ra_suspend-process_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.successDone',
+    { defaultMessage: 'Action completed. The provided process was suspended' }
+  ),
+
   /**
    * Code will be used whenever you provide an entity_id or pid that isn't found.
    * suspend_process will always be an error because the process was not found to be suspended
@@ -103,9 +116,34 @@ const CODES = Object.freeze({
     { defaultMessage: 'The provided process cannot be suspended' }
   ),
 
+  'ra_suspend-process_error_not-supported': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.notSupported',
+    { defaultMessage: 'Suspend process is not supported for the provided process' }
+  ),
+
+  'ra_suspend-process_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.failure',
+    { defaultMessage: 'Failed to suspend the process' }
+  ),
+
+  'ra_suspend-process_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.invalidInput',
+    { defaultMessage: 'Invalid input provided' }
+  ),
+
   // -----------------------------------------------------------------
   // KILL-PROCESS CODES
   // -----------------------------------------------------------------
+  'ra_kill-process_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.successDone',
+    { defaultMessage: 'Killed' }
+  ),
+
+  'ra_kill-process_success_partial-descendants': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.successPartialDescendants',
+    { defaultMessage: 'Action completed successfully, but some descendants were not killed' }
+  ),
+
   /**
    * Code will be used whenever you provide an entity_id that isn't found. Since entity_id is
    * unique, we can guarantee that it was legitimately not found and not just that the process
@@ -133,6 +171,60 @@ const CODES = Object.freeze({
   'ra_kill-process_error_not-permitted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.notPermittedSuccess',
     { defaultMessage: 'The provided process cannot be killed' }
+  ),
+
+  'ra_kill-process_error_not-supported': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.notSupported',
+    { defaultMessage: 'Kill process is not supported for the provided process' }
+  ),
+
+  'ra_kill-process_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.invalidInput',
+    { defaultMessage: 'Invalid input provided' }
+  ),
+
+  'ra_kill-process_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.failure',
+    { defaultMessage: 'Failed to kill the process' }
+  ),
+
+  // ---------------[ Codes for kill-process descendant processes ]------------ \\
+
+  'ra_kill-process_descendant_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantSuccessDone',
+    { defaultMessage: 'Killed' }
+  ),
+
+  /**
+   * Used with descendant processes. The Process was identified as a descendant of the provided root
+   * process but was not found when Endpoint attempted to terminate it. We should not show this one
+   * as an error in the UI - just regular text.
+   */
+  'ra_kill-process_descendant_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantNotFound',
+    { defaultMessage: 'Process was not found (may have terminated prior to action being taken)' }
+  ),
+
+  'ra_kill-process_descendant_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantFailureGeneric',
+    { defaultMessage: 'Failed to kill process' }
+  ),
+
+  'ra_kill-process_descendant_error_not-permitted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantErrorNotPermitted',
+    { defaultMessage: 'Process cannot be killed' }
+  ),
+
+  'ra_kill-process_descendant_error_not-supported': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantErrorNotSupported',
+    { defaultMessage: 'Process is not supported by kill-process' }
+  ),
+
+  'ra_kill-process_descendant_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.descendantErrorInvalidInput',
+    {
+      defaultMessage: 'Invalid input',
+    }
   ),
 
   // -----------------------------------------------------------------

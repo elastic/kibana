@@ -6,26 +6,29 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  toEsqlQueryState,
+  type CustomContentState,
+} from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import { getErrorMessage } from '../utils';
 import {
   PANEL_TYPE_DEFINITIONS,
   editPanelItemSchema,
   type EditPanelItem,
   type EditPanelRequestInput,
 } from './panels';
+import { mergeAndResolveCustomContentEdit } from './panel_creation';
 import { defineOperation } from './types';
 
-/**
- * An edit that passed validation. `existingPanel` is only carried for
- * `source: 'request'` edits (the resolver needs it); `source: 'config'` edits
- * don't have one.
- */
+/** An edit that passed validation, always carrying the existing panel snapshot. */
 interface ValidEdit {
   panelInput: EditPanelItem;
-  existingPanel?: AttachmentPanel;
+  existingPanel: AttachmentPanel;
 }
 
 const missingPanelResolverError =
@@ -38,7 +41,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer) and markdown panels (source: "config", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -90,7 +93,7 @@ export const editPanelsOperation = defineOperation({
           recordFailure(panelInput.panelId, validation.error);
           continue;
         }
-        validEdits.push({ panelInput });
+        validEdits.push({ panelInput, existingPanel });
         continue;
       }
 
@@ -120,7 +123,6 @@ export const editPanelsOperation = defineOperation({
             nlQuery: panelInput.query,
             chartType: panelInput.chartType,
             esql: panelInput.esql,
-            renderer: panelInput.renderer,
             existingPanel,
           })
         )
@@ -132,11 +134,32 @@ export const editPanelsOperation = defineOperation({
 
     // Apply valid edits in input order so state changes remain deterministic.
     let nextDashboardData = dashboardData;
-    for (const { panelInput } of validEdits) {
+    for (const { panelInput, existingPanel } of validEdits) {
       if (panelInput.source === 'config') {
-        const panelContent = PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(
-          panelInput.config
-        );
+        let resolvedConfig: typeof panelInput.config | CustomContentState;
+        try {
+          resolvedConfig =
+            panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE && existingPanel
+              ? context.resolveCustomContentTemplate
+                ? await mergeAndResolveCustomContentEdit(
+                    panelInput.config,
+                    existingPanel.config as CustomContentState,
+                    context.resolveCustomContentTemplate
+                  )
+                : {
+                    ...(existingPanel.config as CustomContentState),
+                    ...(panelInput.config.esqlQuery !== undefined
+                      ? { esql_query: toEsqlQueryState(panelInput.config.esqlQuery ?? undefined) }
+                      : {}),
+                  }
+              : panelInput.config;
+        } catch (err) {
+          recordFailure(panelInput.panelId, getErrorMessage(err));
+          continue;
+        }
+
+        const panelContent =
+          PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(resolvedConfig);
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
           panelId: panelInput.panelId,
@@ -174,6 +197,12 @@ export const editPanelsOperation = defineOperation({
       }
 
       nextDashboardData = updateResult.dashboardData;
+      if (attempt.authoringNote) {
+        context.panelAuthoringNotes.push({
+          panelId: panelInput.panelId,
+          authoringNote: attempt.authoringNote,
+        });
+      }
     }
 
     return nextDashboardData;

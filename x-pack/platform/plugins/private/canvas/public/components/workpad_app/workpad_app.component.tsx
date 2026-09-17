@@ -6,7 +6,9 @@
  */
 
 import type { FC, MouseEventHandler } from 'react';
-import React, { useRef, useCallback, useEffect, useMemo } from 'react';
+import React, { useContext, useRef, useCallback, useEffect, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useEuiScrollBar, useEuiTheme } from '@elastic/eui';
 import { CANVAS } from '../../../i18n';
 import { Sidebar } from '../sidebar';
 import { Toolbar } from '../toolbar';
@@ -15,6 +17,7 @@ import { WorkpadHeader } from '../workpad_header';
 import { CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR } from '../../../common/lib/constants';
 import type { CanvasWorkpad, CommitFn } from '../../../types';
 import { getUntitledWorkpadLabel } from '../../lib/doc_title';
+import { WorkpadRoutingContext } from '../../routes/workpad';
 
 export const WORKPAD_CONTAINER_ID = 'canvasWorkpadContainer';
 
@@ -25,6 +28,29 @@ export interface Props {
 }
 
 export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad }) => {
+  const { isFullscreen } = useContext(WorkpadRoutingContext);
+  const { euiTheme } = useEuiTheme();
+  const scrollBarStyles = useEuiScrollBar();
+  const styles = useMemo(
+    () => ({
+      // Theme-dependent chrome styling lives here (instead of workpad_app.scss)
+      // so Canvas reacts to reload-less light/dark color-mode toggles.
+      layout: css({
+        background: isFullscreen ? euiTheme.colors.plainDark : euiTheme.colors.body,
+      }),
+      stageHeader: css({
+        background: euiTheme.colors.lightestShade,
+        borderBottom: euiTheme.border.thin,
+      }),
+      sidebar: css({
+        background: euiTheme.colors.lightestShade,
+        borderLeft: euiTheme.border.thin,
+      }),
+      footer: css({ backgroundColor: euiTheme.colors.body }),
+    }),
+    [euiTheme, isFullscreen]
+  );
+
   const interactivePageLayout = useRef<CommitFn | null>(null); // future versions may enable editing on multiple pages => use array then
   const workpadTitle = useRef<HTMLHeadingElement>(null); // future versions may enable editing on multiple pages => use array then
 
@@ -50,11 +76,11 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad })
   const untitledWorkpadLabel = useMemo(() => getUntitledWorkpadLabel(), []);
 
   return (
-    <div className="canvasLayout">
+    <div className="canvasLayout" css={styles.layout}>
       <div className="canvasLayout__rows">
         <div className="canvasLayout__cols">
           <div className="canvasLayout__stage">
-            <div className="canvasLayout__stageHeader">
+            <div className="canvasLayout__stageHeader" css={styles.stageHeader}>
               <h1
                 id="canvasWorkpadTitle"
                 className="euiScreenReaderOnly"
@@ -72,6 +98,7 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad })
               <div
                 id={WORKPAD_CONTAINER_ID}
                 className="canvasWorkpadContainer canvasLayout__stageContentOverflow"
+                css={scrollBarStyles}
               >
                 <Workpad registerLayout={registerLayout} unregisterLayout={unregisterLayout} />
               </div>
@@ -79,13 +106,13 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad })
           </div>
 
           {isWriteable && (
-            <div className="canvasLayout__sidebar hide-for-sharing">
+            <div className="canvasLayout__sidebar hide-for-sharing" css={styles.sidebar}>
               <Sidebar commit={commit} />
             </div>
           )}
         </div>
 
-        <div className="canvasLayout__footer hide-for-sharing">
+        <div className="canvasLayout__footer hide-for-sharing" css={styles.footer}>
           <Toolbar />
         </div>
       </div>

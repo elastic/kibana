@@ -9,16 +9,25 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
-import { groupBy, omit } from 'lodash';
+import { omit } from 'lodash';
 import {
-  type BulkCreateAlertActionItemBody,
+  ALERT_EPISODE_ACTION_TYPE,
+  type BulkCreateEpisodeAlertActionItemBody,
+  type BulkCreateSeriesAlertActionItemBody,
+  type BulkResponse,
   type CreateAlertActionBody,
+  type CreateEpisodeAlertActionBody,
+  type CreateSeriesAlertActionBody,
+  type EpisodeAlertActionType,
 } from '@kbn/alerting-v2-schemas';
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
-} from '../../resources/datastreams/alert_actions';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
+  getAlertEpisodeNotFoundMessage,
+  getAlertSeriesNotFoundMessage,
+  getEpisodeNotLatestMessage,
+} from '../errors/alert_error_messages';
+import type { AlertAction } from '../../resources/datastreams/alert_actions';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -28,12 +37,72 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import {
-  bulkLoadLatestAlertEvents,
-  loadLastAlertEventOrThrow,
+  loadLastEpisodeAlertEventOrThrow,
+  loadLastSeriesAlertEventOrThrow,
+  loadLatestAlertEventsByEpisodeId,
+  loadLatestAlertEventsByGroupHash,
 } from './context_loaders/load_latest_alert_events';
 import type { AlertEventRecord } from './types';
 import type { PreparedAction } from './handler';
 import { ACTION_HANDLERS, prepareWithHandler } from './handlers';
+
+/** A single per-item error in a bulk create alert actions response. */
+type BulkAlertActionError = BulkResponse['errors'][number];
+
+/** Structured `data` carried by alert-action precondition Boom errors. */
+interface AlertActionBoomData {
+  code?: string;
+  details?: Record<string, unknown>;
+}
+
+/**
+ * Builds a per-item bulk error keyed by the item's own identifier —
+ * `group_hash` for series-level items, `episode_id` for episode-level items.
+ * Handler-supplied context (e.g. `episode_status`) is carried in `details`.
+ */
+const toBulkActionError = (
+  id: string,
+  error: { code: string; message: string; details?: Record<string, unknown> }
+): BulkAlertActionError => ({
+  id,
+  error: {
+    code: error.code,
+    message: error.message,
+    ...(error.details && Object.keys(error.details).length > 0 ? { details: error.details } : {}),
+  },
+});
+
+/**
+ * Converts an expected per-item precondition Boom error into a bulk-error
+ * entry keyed by the item's identifier. The handler-thrown `code`/`details`
+ * (e.g. `episode_status`) are preserved so a client can tell *which*
+ * precondition failed; handlers without a `code` fall back to the generic
+ * `INTERNAL_SERVER_ERROR`.
+ */
+const boomToBulkActionError = (id: string, error: Boom.Boom): BulkAlertActionError => {
+  // `error.data` is `unknown` on a caught Boom; the alert-action handlers only
+  // ever attach the `{ code, details }` shape, so this structural read is safe.
+  const data: AlertActionBoomData =
+    error.data != null && typeof error.data === 'object' ? (error.data as AlertActionBoomData) : {};
+
+  return toBulkActionError(id, {
+    code: data.code ?? ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
+    message: error.message,
+    details: data.details,
+  });
+};
+
+/**
+ * Lifecycle actions (`activate` / `deactivate`) write a synthetic
+ * `.rule-events` doc with `@timestamp: now`; applied to a superseded episode
+ * that doc would make the old episode the group's latest and hijack the
+ * director's group-level state machine, so they are guarded to the latest
+ * episode of the series. The other episode actions are pure audit records
+ * and may target any existing episode.
+ */
+const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
+  actionType === ALERT_EPISODE_ACTION_TYPE.ACTIVATE ||
+  actionType === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
 
 @injectable()
 export class AlertActionsClient {
@@ -47,23 +116,81 @@ export class AlertActionsClient {
     private readonly eventPublisher: AlertActionEventPublisher
   ) {}
 
-  public async createAction(params: {
+  /**
+   * Creates a series-level action (`tag` / `snooze` / `unsnooze`) for the
+   * series identified by `groupHash`. The series' latest event is still
+   * resolved — it fills `rule_id`, `source` and `last_series_event_timestamp`
+   * on the audit doc — but both the persisted `.alert-actions` document and
+   * the emitted domain event carry `episode_id: null`: the action targets
+   * the series as a whole, not whichever episode happened to be current.
+   */
+  public async createSeriesAction(params: {
     groupHash: string;
-    action: CreateAlertActionBody;
+    action: CreateSeriesAlertActionBody;
   }): Promise<void> {
     const { groupHash, action } = params;
 
     const [userProfileUid, alertEvent] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
-      loadLastAlertEventOrThrow({
+      loadLastSeriesAlertEventOrThrow({
         queryService: this.queryService,
         spaceId: this.spaceId,
         groupHash,
-        episodeId: 'episode_id' in action ? action.episode_id : undefined,
       }),
     ]);
 
-    const prepared = this.prepareAction({ action, alertEvent, userProfileUid });
+    const prepared = this.prepareAction({ action, alertEvent, userProfileUid, docEpisodeId: null });
+
+    await this.persistPreparedActions([prepared]);
+    this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
+  }
+
+  /**
+   * Creates an episode-level action (`ack` / `unack` / `assign` /
+   * `activate` / `deactivate`) for the episode identified by `episodeId`.
+   * The episode's own latest event provides the audit anchors, including
+   * `group_hash` — the caller never supplies it.
+   *
+   * Lifecycle actions additionally require the episode to be the latest of
+   * its series (see {@link isLifecycleActionType}); an old episode is
+   * rejected with a 404 `ALERT_EPISODE_NOT_LATEST`.
+   */
+  public async createEpisodeAction(params: {
+    episodeId: string;
+    action: CreateEpisodeAlertActionBody;
+  }): Promise<void> {
+    const { episodeId, action } = params;
+
+    const [userProfileUid, alertEvent] = await Promise.all([
+      this.userService.getCurrentUserProfileUid(),
+      loadLastEpisodeAlertEventOrThrow({
+        queryService: this.queryService,
+        spaceId: this.spaceId,
+        episodeId,
+      }),
+    ]);
+
+    if (isLifecycleActionType(action.action_type)) {
+      const [latestOfGroup] = await loadLatestAlertEventsByGroupHash({
+        queryService: this.queryService,
+        spaceId: this.spaceId,
+        groupHashes: [alertEvent.group_hash],
+      });
+
+      if (latestOfGroup?.episode_id !== episodeId) {
+        throw Boom.notFound(getEpisodeNotLatestMessage(episodeId, alertEvent.group_hash), {
+          code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
+          details: { episode_id: episodeId, group_hash: alertEvent.group_hash },
+        });
+      }
+    }
+
+    const prepared = this.prepareAction({
+      action,
+      alertEvent,
+      userProfileUid,
+      docEpisodeId: alertEvent.episode_id,
+    });
 
     await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
@@ -76,10 +203,9 @@ export class AlertActionsClient {
    * Throws on precondition failure with the same Boom error each route
    * surface relies on.
    *
-   * Shared between {@link AlertActionsClient.createAction} (which lets
-   * the throw bubble back to the route) and
-   * {@link AlertActionsClient.createBulkActions} (which converts
-   * expected Boom 400 / 404 rejections into silent skips so the rest of
+   * Shared between the single-action paths (which let the throw bubble
+   * back to the route) and the bulk paths (which convert expected Boom
+   * 400 / 404 rejections into per-item `errors[]` entries so the rest of
    * the batch still gets persisted). All I/O the prep would have needed
    * has already happened by the time this is called.
    */
@@ -87,9 +213,19 @@ export class AlertActionsClient {
     action: CreateAlertActionBody;
     alertEvent: AlertEventRecord;
     userProfileUid: string | null;
+    /**
+     * `episode_id` to persist on the audit doc: the resolved event's episode
+     * id for episode-scoped actions, `null` for series-scoped actions.
+     */
+    docEpisodeId: string | null;
   }): PreparedAction {
-    const { action, alertEvent, userProfileUid } = params;
-    const alertActionDoc = this.buildAlertActionDocument({ action, alertEvent, userProfileUid });
+    const { action, alertEvent, userProfileUid, docEpisodeId } = params;
+    const alertActionDoc = this.buildAlertActionDocument({
+      action,
+      alertEvent,
+      userProfileUid,
+      docEpisodeId,
+    });
 
     return prepareWithHandler({ action, alertEvent, alertActionDoc }, ACTION_HANDLERS);
   }
@@ -121,125 +257,182 @@ export class AlertActionsClient {
   }
 
   /**
-   * Bulk equivalent of {@link AlertActionsClient.createAction}. Each item is
-   * dispatched through the same {@link AlertActionsClient.prepareAction}
-   * helper as the single route, so lifecycle actions (`deactivate` /
-   * `activate`) get their preconditions and synthetic `.rule-events` doc
-   * just like in the single-route flow.
-   *
-   * Per-item failure handling matches the existing bulk UX: if an item's
-   * latest alert event cannot be located (404) or its lifecycle precondition
-   * fails (400), the item is silently skipped — it does not count toward
-   * `processed`, no doc is written, and no event is emitted for it. Any
-   * other error (5xx, ES outage, …) bubbles up and fails the whole batch
-   * so the caller sees the real problem instead of a misleadingly silent
-   * "0 processed" response.
-   *
-   * Successful items are written in a single ES `_bulk` round-trip via
-   * {@link AlertActionsClient.persistPreparedActions} and emitted as a
-   * single batch of domain events. Bulk requests that contain only audit
-   * actions (e.g. `ack` / `tag` / `snooze`) keep the previous one-call
-   * behaviour; bulk requests with mixed lifecycle + audit items still
-   * write everything in one round-trip thanks to `bulkIndexDocsAcrossIndices`.
+   * Bulk equivalent of {@link AlertActionsClient.createSeriesAction}: one
+   * latest-event query for every series referenced in the batch, per-item
+   * `errors[]` for missing series, and `episode_id: null` on every persisted
+   * audit doc and emitted domain event.
    */
-  public async createBulkActions(
-    actions: BulkCreateAlertActionItemBody[]
-  ): Promise<{ processed: number; total: number }> {
-    // Stage 1: resolve the user identity + the latest alert event per group
-    // referenced in the batch. Two queries, in parallel, regardless of
-    // batch size.
+  public async createBulkSeriesActions(
+    items: BulkCreateSeriesAlertActionItemBody[]
+  ): Promise<BulkResponse> {
     const [userProfileUid, latestEvents] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
-      bulkLoadLatestAlertEvents({
+      loadLatestAlertEventsByGroupHash({
         queryService: this.queryService,
         spaceId: this.spaceId,
-        actions,
+        groupHashes: items.map((item) => item.group_hash),
       }),
     ]);
 
-    const latestEventsByGroupHash = groupBy(latestEvents, (event) => event.group_hash);
-    const actionsWithLatestAlertEvents = this.pairActionsWithLatestEvents(
-      actions,
-      latestEventsByGroupHash
-    );
+    const latestEventByGroupHash = new Map(latestEvents.map((event) => [event.group_hash, event]));
 
-    // Stage 2: synchronous per-action prep. The `try/catch` here is
-    // the *only* place per-item precondition errors are tolerated —
-    // Boom 400 / 404 become silent skips (preserving the bulk UX),
-    // anything else propagates and fails the whole batch loudly.
+    const errors: BulkAlertActionError[] = [];
     const prepared: PreparedAction[] = [];
-    for (const { action, alertEvent } of actionsWithLatestAlertEvents) {
+
+    for (const item of items) {
+      const alertEvent = latestEventByGroupHash.get(item.group_hash);
+
+      if (!alertEvent) {
+        errors.push(
+          toBulkActionError(item.group_hash, {
+            code: ALERTING_ERROR_CODES.ALERT_GROUP_NOT_FOUND,
+            message: getAlertSeriesNotFoundMessage(item.group_hash),
+          })
+        );
+        continue;
+      }
+
       try {
-        prepared.push(this.prepareAction({ action, alertEvent, userProfileUid }));
+        prepared.push(
+          this.prepareAction({
+            action: item,
+            alertEvent,
+            userProfileUid,
+            docEpisodeId: null,
+          })
+        );
       } catch (error) {
         if (
           Boom.isBoom(error) &&
           (error.output.statusCode === 400 || error.output.statusCode === 404)
         ) {
+          errors.push(boomToBulkActionError(item.group_hash, error));
           continue;
         }
         throw error;
       }
     }
 
-    if (prepared.length === 0) {
-      return { processed: 0, total: actions.length };
+    if (prepared.length > 0) {
+      await this.persistPreparedActions(prepared);
+      this.eventPublisher.emitEpisodeActions(
+        this.request,
+        prepared.map((p) => p.alertActionDoc)
+      );
     }
 
-    await this.persistPreparedActions(prepared);
-    this.eventPublisher.emitEpisodeActions(
-      this.request,
-      prepared.map((p) => p.alertActionDoc)
-    );
-
-    return { processed: prepared.length, total: actions.length };
+    return { affected_count: prepared.length, errors };
   }
 
   /**
-   * Pairs each bulk item with the {@link AlertEventRecord} it should write
-   * against. Items whose group has no event, or whose targeted `episode_id`
-   * is not the group's latest episode, are silently dropped — same skip
-   * semantics the bulk path has always had for `ack` / `tag` / etc.
+   * Bulk equivalent of {@link AlertActionsClient.createEpisodeAction}: one
+   * latest-event query for every episode referenced in the batch, plus — for
+   * lifecycle items only — one latest-event query over their series to
+   * enforce the latest-episode guard. Missing or superseded episodes are
+   * reported per item; the rest of the batch still runs.
    */
-  private pairActionsWithLatestEvents(
-    actions: readonly BulkCreateAlertActionItemBody[],
-    latestEventsByGroupHash: Record<string, AlertEventRecord[]>
-  ): Array<{ action: BulkCreateAlertActionItemBody; alertEvent: AlertEventRecord }> {
-    const resolved: Array<{
-      action: BulkCreateAlertActionItemBody;
-      alertEvent: AlertEventRecord;
-    }> = [];
-    for (const action of actions) {
-      // The loader groups `STATS … BY group_hash, space_id`, so each
-      // bucket is length-≤1: at most one "latest" row per group.
-      const [alertEvent] = latestEventsByGroupHash[action.group_hash] ?? [];
+  public async createBulkEpisodeActions(
+    items: BulkCreateEpisodeAlertActionItemBody[]
+  ): Promise<BulkResponse> {
+    const [userProfileUid, episodeEvents] = await Promise.all([
+      this.userService.getCurrentUserProfileUid(),
+      loadLatestAlertEventsByEpisodeId({
+        queryService: this.queryService,
+        spaceId: this.spaceId,
+        episodeIds: items.map((item) => item.episode_id),
+      }),
+    ]);
+
+    const eventByEpisodeId = new Map(episodeEvents.map((event) => [event.episode_id, event]));
+
+    // Latest-episode guard for lifecycle items: resolve the latest episode of
+    // every series a lifecycle item points at (see isLifecycleActionType).
+    const lifecycleGroupHashes = items
+      .filter((item) => isLifecycleActionType(item.action_type))
+      .map((item) => eventByEpisodeId.get(item.episode_id)?.group_hash)
+      .filter((groupHash): groupHash is string => groupHash !== undefined);
+    const latestOfGroups = await loadLatestAlertEventsByGroupHash({
+      queryService: this.queryService,
+      spaceId: this.spaceId,
+      groupHashes: lifecycleGroupHashes,
+    });
+    const latestEpisodeIdByGroupHash = new Map(
+      latestOfGroups.map((event) => [event.group_hash, event.episode_id])
+    );
+
+    const errors: BulkAlertActionError[] = [];
+    const prepared: PreparedAction[] = [];
+
+    for (const item of items) {
+      const alertEvent = eventByEpisodeId.get(item.episode_id);
 
       if (!alertEvent) {
+        errors.push(
+          toBulkActionError(item.episode_id, {
+            code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
+            message: getAlertEpisodeNotFoundMessage(item.episode_id),
+          })
+        );
         continue;
       }
 
-      // Supersession guard: an item that narrowed to a specific
-      // `episode_id` must not be paired with a newer episode of the same
-      // group. This mirrors the activate handler's precondition ("cannot
-      // act on an episode that has been superseded"), applied silently
-      // for the bulk path.
-      if ('episode_id' in action && alertEvent.episode_id !== action.episode_id) {
+      if (
+        isLifecycleActionType(item.action_type) &&
+        latestEpisodeIdByGroupHash.get(alertEvent.group_hash) !== item.episode_id
+      ) {
+        errors.push(
+          toBulkActionError(item.episode_id, {
+            code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
+            message: getEpisodeNotLatestMessage(item.episode_id, alertEvent.group_hash),
+            details: { group_hash: alertEvent.group_hash },
+          })
+        );
         continue;
       }
 
-      resolved.push({ action, alertEvent });
+      try {
+        prepared.push(
+          this.prepareAction({
+            action: item,
+            alertEvent,
+            userProfileUid,
+            docEpisodeId: alertEvent.episode_id,
+          })
+        );
+      } catch (error) {
+        if (
+          Boom.isBoom(error) &&
+          (error.output.statusCode === 400 || error.output.statusCode === 404)
+        ) {
+          errors.push(boomToBulkActionError(item.episode_id, error));
+          continue;
+        }
+        throw error;
+      }
     }
 
-    return resolved;
+    if (prepared.length > 0) {
+      await this.persistPreparedActions(prepared);
+      this.eventPublisher.emitEpisodeActions(
+        this.request,
+        prepared.map((p) => p.alertActionDoc)
+      );
+    }
+
+    return { affected_count: prepared.length, errors };
   }
 
   private buildAlertActionDocument(params: {
     action: CreateAlertActionBody;
     alertEvent: AlertEventRecord;
     userProfileUid: string | null;
+    docEpisodeId: string | null;
   }): AlertAction {
-    const { action, alertEvent, userProfileUid } = params;
-    const actionData = omit(action, ['episode_id', 'action_type']);
+    const { action, alertEvent, userProfileUid, docEpisodeId } = params;
+    // Strip the identifiers bulk items carry alongside the action payload
+    // (`group_hash` on series items, `episode_id` on episode items) — the
+    // doc's own identifier fields below are authoritative.
+    const actionData = omit(action, ['group_hash', 'episode_id', 'action_type']);
 
     return {
       '@timestamp': new Date().toISOString(),
@@ -247,8 +440,9 @@ export class AlertActionsClient {
       action_type: action.action_type,
       last_series_event_timestamp: alertEvent['@timestamp'],
       rule_id: alertEvent.rule_id,
+      source: alertEvent.source,
       group_hash: alertEvent.group_hash,
-      episode_id: alertEvent.episode_id,
+      episode_id: docEpisodeId,
       space_id: alertEvent.space_id,
       ...actionData,
     };

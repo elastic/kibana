@@ -17,7 +17,9 @@ import {
   ChatCompletionEventType,
   isChatCompletionChunkEvent,
   MessageRole,
+  InferenceConnectorType,
 } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
@@ -83,9 +85,19 @@ describe('openAIAdapter', () => {
   };
 
   const logger = loggerMock.create();
+  const connector: InferenceConnector = {
+    type: InferenceConnectorType.OpenAI,
+    name: 'OpenAI connector',
+    connectorId: 'test-connector-id',
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
+  };
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
+    executorMock.getConnector.mockReset().mockReturnValue(connector);
     isNativeFunctionCallingSupportedMock.mockReset().mockReturnValue(true);
 
     executorMock.invoke.mockImplementation(async () => {
@@ -261,19 +273,72 @@ describe('openAIAdapter', () => {
             {
               type: 'image_url',
               image_url: {
-                url: 'aaaaaa',
+                url: 'data:image/png;base64,aaaaaa',
               },
             },
             {
               type: 'image_url',
               image_url: {
-                url: 'bbbbbb',
+                url: 'data:image/png;base64,bbbbbb',
               },
             },
           ],
           role: 'user',
         },
       ]);
+    });
+
+    it('injects a dummy tool when history has tool use and tools are omitted', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: {
+                bar: 'foo',
+              },
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(pick(getRequest().body, 'tools')).toEqual({
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'doNotCallThisTool',
+              description: 'Do not call this tool, it is strictly forbidden',
+              parameters: {
+                type: 'object',
+                properties: {},
+              },
+            },
+          },
+        ],
+      });
     });
 
     it('correctly formats tools and tool choice', () => {

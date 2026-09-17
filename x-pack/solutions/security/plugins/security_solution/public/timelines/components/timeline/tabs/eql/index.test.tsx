@@ -33,6 +33,7 @@ import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expand
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const SPECIAL_TEST_TIMEOUT = 30000;
 
@@ -44,10 +45,6 @@ jest.mock('../../../../containers/details', () => ({
 }));
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-
-jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
@@ -64,6 +61,10 @@ jest.mock('../../../../../common/components/user_privileges');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
+
+jest.mock('../../body/unified_timeline_body', () => ({
+  UnifiedTimelineBody: ({ header }: { header: React.ReactNode }) => header,
+}));
 
 let useTimelineEventsMock = jest.fn();
 
@@ -100,6 +101,148 @@ const TestComponent = (props: Partial<ComponentProps<typeof EqlTabContentCompone
   return <EqlTabContentComponent {...testComponentDefaultProps} {...props} />;
 };
 
+describe('EQL partial results callout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useTimelineEventsMock = jest.fn(() => [
+      false,
+      {
+        events: mockTimelineData.slice(0, 1),
+        rawEvents: [],
+        isPartial: false,
+        shardFailures: [],
+        timedOut: false,
+        pageInfo: {
+          activePage: 0,
+          totalPages: 10,
+        },
+      },
+    ]);
+    (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
+
+    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+      (feature: keyof ExperimentalFeatures) => {
+        return allowedExperimentalValues[feature];
+      }
+    );
+
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      notesPrivileges: { read: true },
+    });
+
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
+    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+
+    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+      return {
+        width: 1000,
+        height: 1000,
+        x: 0,
+        y: 0,
+      } as DOMRect;
+    });
+  });
+
+  it(
+    'renders the incomplete results callout when the EQL response is partial',
+    async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          rawEvents: [],
+          pageInfo: { activePage: 0, totalPages: 10 },
+          totalCount: 1,
+          isPartial: true,
+          shardFailures: [
+            {
+              index: 'logs-test',
+              shard: 0,
+              reason: { type: 'script_exception', reason: 'boom' },
+            },
+          ],
+          timedOut: false,
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
+        </TestProviders>
+      );
+
+      expect(await screen.findByTestId('eql-partial-results-warning')).toBeVisible();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'renders shard failure details when the EQL response is partial',
+    async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          rawEvents: [],
+          pageInfo: { activePage: 0, totalPages: 10 },
+          totalCount: 1,
+          isPartial: true,
+          shardFailures: [
+            {
+              index: 'logs-test',
+              shard: 0,
+              reason: { type: 'script_exception', reason: 'boom' },
+            },
+          ],
+          timedOut: false,
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
+        </TestProviders>
+      );
+
+      expect(await screen.findByTestId('eql-partial-results-warning-details')).toHaveTextContent(
+        'logs-test'
+      );
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'hides the incomplete results callout when the EQL response is complete',
+    async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          rawEvents: [],
+          pageInfo: { activePage: 0, totalPages: 10 },
+          totalCount: 1,
+          isPartial: false,
+          shardFailures: [],
+          timedOut: false,
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
+        </TestProviders>
+      );
+      await screen.findByTestId('timelineHeader');
+
+      expect(screen.queryByTestId('eql-partial-results-warning')).toBeNull();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+});
+
 // Failing: See https://github.com/elastic/kibana/issues/277361
 describe.skip('EQL Tab', () => {
   const props = {} as EqlTabContentComponentProps;
@@ -125,6 +268,9 @@ describe.skip('EQL Tab', () => {
       {
         events: mockTimelineData.slice(0, 1),
         rawEvents: [],
+        isPartial: false,
+        shardFailures: [],
+        timedOut: false,
         pageInfo: {
           activePage: 0,
           totalPages: 10,
@@ -206,6 +352,9 @@ describe.skip('EQL Tab', () => {
               activePage: 0,
               totalPages: 10,
             },
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
           },
         ]);
 
@@ -243,6 +392,9 @@ describe.skip('EQL Tab', () => {
              * This helps in testing `sampleSize` and `loadMore`
              */
             totalCount: 50,
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
             loadPage: loadPageMock,
           },
         ]);
@@ -405,6 +557,9 @@ describe.skip('EQL Tab', () => {
             activePage: 0,
             totalPages: 10,
           },
+          isPartial: false,
+          shardFailures: [],
+          timedOut: false,
         },
       ]);
     });
@@ -461,6 +616,7 @@ describe.skip('EQL Tab', () => {
         await waitFor(() => {
           expect(flyoutApi.openNotes).toHaveBeenCalledWith({
             hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+            origin: FLYOUT_ORIGIN.TIMELINE,
           });
         });
         expect(mockOpenFlyout).not.toHaveBeenCalled();

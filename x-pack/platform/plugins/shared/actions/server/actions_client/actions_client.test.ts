@@ -54,6 +54,8 @@ import { getConnectorType } from '../fixtures';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
 import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { encodeApiKey } from '../inbound/event_identity/encode_api_key';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -104,6 +106,7 @@ let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let authTypeRegistry: AuthTypeRegistry;
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
+const securityService = securityServiceMock.createStart();
 
 const actionTypeIdFromSavedObjectMock = (actionTypeId = 'my-connector-type') => {
   return {
@@ -156,6 +159,7 @@ beforeEach(() => {
     encryptedSavedObjectsClient,
     isESOCanEncrypt,
     getAxiosInstanceWithAuth,
+    securityService,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -548,6 +552,11 @@ describe('create()', () => {
             callback: { lookbackWindow: '1h', limit: 100 },
           },
         },
+      },
+      inboundEvents: {
+        enabled: false,
+        maxBodyBytes: new ByteSizeValue(1024 * 1024),
+        maxEmitted: 25,
       },
     });
 
@@ -1903,6 +1912,21 @@ describe('delete()', () => {
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
+    test('revokes tokens before deleting the saved object', async () => {
+      const callOrder: string[] = [];
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      unsecuredSavedObjectsClient.delete.mockImplementationOnce(async () => {
+        callOrder.push('soDelete');
+        return {};
+      });
+
+      await actionsClient.delete({ id: '1' });
+
+      expect(callOrder).toEqual(['deleteConnectorTokens', 'soDelete']);
+    });
+
     describe('when connector has authMode per-user', () => {
       beforeEach(() => {
         unsecuredSavedObjectsClient.get.mockReset();
@@ -1959,8 +1983,50 @@ describe('delete()', () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to delete auth tokens for connector "1" after delete: Fail`
+        `Failed to delete auth tokens for connector "1": Fail`
       );
+    });
+
+    test('evicts clients before deleting connector tokens', async () => {
+      const callOrder: string[] = [];
+      const evictClientPool = jest.fn().mockImplementation(async () => {
+        callOrder.push('evictClientPoolStarted');
+        await Promise.resolve();
+        callOrder.push('evictClientPoolFinished');
+      });
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        evictClientPool,
+      });
+
+      await client.delete({ id: '1' });
+
+      expect(evictClientPool).toHaveBeenCalledWith('1');
+      expect(callOrder).toEqual([
+        'evictClientPoolStarted',
+        'evictClientPoolFinished',
+        'deleteConnectorTokens',
+      ]);
     });
   });
 
@@ -2176,6 +2242,49 @@ describe('delete()', () => {
       ]
     `);
   });
+
+  test('invalidates the last-saver API key before deleting an inbound connector', async () => {
+    const expectedResult = Symbol();
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.get.mockReset();
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        name: 'ingress',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+        apiKey: encodeApiKey('old-id', 'old-secret'),
+      },
+      references: [],
+    } as never);
+    securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+      invalidated_api_keys: ['old-id'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    });
+
+    const result = await actionsClient.delete({ id: 'inbound-1' });
+
+    expect(result).toEqual(expectedResult);
+    expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+      ids: ['old-id'],
+    });
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', 'inbound-1');
+  });
 });
 
 describe('update()', () => {
@@ -2270,6 +2379,7 @@ describe('update()', () => {
         expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'per-user',
+          skipRevocation: true,
         });
       });
     });
@@ -2309,6 +2419,7 @@ describe('update()', () => {
         expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'shared',
+          skipRevocation: true,
         });
       });
     });
@@ -3298,6 +3409,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3344,6 +3456,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3392,6 +3505,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3438,6 +3552,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,

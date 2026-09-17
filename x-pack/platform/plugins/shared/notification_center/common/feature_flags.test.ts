@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { NOTIFICATION_REGISTRY } from './notification_registry';
 import { NOTIFICATION_TYPE_ENABLED_DEFAULT, NOTIFICATION_TYPE_FLAGS } from './feature_flags';
 
-describe('notification type flag registry', () => {
-  it('declares every flag key as a static literal string', () => {
-    for (const key of Object.values(NOTIFICATION_TYPE_FLAGS)) {
-      expect(typeof key).toBe('string');
-      expect(key).toMatch(/^notificationCenter\./);
+describe('notification type flags', () => {
+  it('derives one entry per flagged type, keyed by <namespace>.<typeId>', () => {
+    const flaggedTypeCount = Object.values(NOTIFICATION_REGISTRY)
+      .flatMap((namespace) => Object.values(namespace.types))
+      .filter((type) => type.feature_flag !== undefined).length;
+
+    const entries = Object.entries(NOTIFICATION_TYPE_FLAGS);
+    expect(entries).toHaveLength(flaggedTypeCount);
+    for (const [key, flag] of entries) {
+      expect(flag).toBe(`notificationCenter.types.${key}`);
     }
   });
 

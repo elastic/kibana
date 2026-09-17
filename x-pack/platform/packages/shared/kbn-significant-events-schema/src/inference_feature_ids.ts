@@ -24,9 +24,6 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
 export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
   'significant_events_investigation' as const;
 
-/** Triage/judging of discovery candidates. */
-export const SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID = 'significant_events_triage' as const;
-
 /**
  * Background memory upkeep for Streams Significant Events: scraping durable knowledge out of
  * chat conversations, synthesizing knowledge indicators into wiki pages, consolidating the wiki
@@ -35,3 +32,23 @@ export const SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID = 'significant_event
  * background curation tasks over the same memory wiki.
  */
 export const SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID = 'significant_events_memory' as const;
+
+/** Memory wiki synthesis (telemetry and cost bucketing). */
+export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID =
+  'significant_events_memory_synthesis' as const;
+
+/** Memory conversation scraper (telemetry and cost bucketing). */
+export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID =
+  'significant_events_memory_conversation_scraper' as const;
+
+/** Memory gap detection (telemetry and cost bucketing). */
+export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_INFERENCE_FEATURE_ID =
+  'significant_events_memory_gap_detection' as const;
+
+/** Memory wiki consolidation (telemetry and cost bucketing). */
+export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID =
+  'significant_events_memory_consolidation' as const;
+
+/** Memory investigation-gap reconciliation (telemetry and cost bucketing). */
+export const SIGNIFICANT_EVENTS_MEMORY_INVESTIGATION_GAPS_INFERENCE_FEATURE_ID =
+  'significant_events_memory_investigation_gaps' as const;

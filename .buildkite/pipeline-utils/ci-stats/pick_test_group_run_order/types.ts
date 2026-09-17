@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TestGroupRunOrderResponse } from '../client';
+import type { TestGroupRunOrderResponse } from '../client.ts';
 
 export type RunGroup = TestGroupRunOrderResponse['types'][0];
-
-export interface FtrConfigsManifest {
-  defaultQueue?: string;
-  disabled?: string[];
-  enabled?: Array<string | { [configPath: string]: { queue: string } }>;
-}
 
 export interface FunctionalGroup {
   title: string;

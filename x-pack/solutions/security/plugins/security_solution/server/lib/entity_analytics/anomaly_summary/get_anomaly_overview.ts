@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { EntityType } from '@kbn/entity-store/common';
+import type { Entity, EntityType } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
@@ -43,6 +43,7 @@ interface OverviewAggs {
 interface GetEntityAnomalyOverviewParams {
   entityId: string;
   entityType: EntityType;
+  entityRecord: Entity;
   fromMs?: number;
   toMs?: number;
   scoreRanges?: AnomalyScoreRange[];
@@ -80,6 +81,7 @@ interface AnomalyOverview {
 export const getEntityAnomalyOverview = async ({
   entityId,
   entityType,
+  entityRecord,
   fromMs,
   toMs,
   scoreRanges,
@@ -115,15 +117,30 @@ export const getEntityAnomalyOverview = async ({
     soClient,
   });
 
-  let resolvedJobIds = allSecurityJobIds;
+  // getJobConfig uses the space-aware anomalyDetectorsProvider and silently drops any job
+  // not installed in the current space, so its keys are the installed security job IDs.
+  // Using template IDs from getSecurityMlJobIds directly would match anomaly records from
+  // other spaces whose jobs share the same template-defined IDs.
+  const installedSecurityJobIds = [...allJobConfigs.keys()];
+  if (installedSecurityJobIds.length === 0) return empty;
+
+  let resolvedJobIds = installedSecurityJobIds;
   if (threatTactics && threatTactics.length > 0) {
-    const tacticMatchedIds = allSecurityJobIds.filter((id) =>
+    const tacticMatchedIds = installedSecurityJobIds.filter((id) =>
       allJobConfigs.get(id)?.threatTactics.some((t) => threatTactics.includes(t))
     );
     resolvedJobIds = tacticMatchedIds;
   }
 
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
+
+  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
+  if (!entityFilter) {
+    logger.warn(
+      `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`
+    );
+    return empty;
+  }
 
   let aggs: OverviewAggs | undefined;
   let rawHits: RawAnomalyRecord[] = [];
@@ -134,9 +151,6 @@ export const getEntityAnomalyOverview = async ({
       {
         size: NUM_RECENT_ANOMALIES,
         track_total_hits: true,
-        runtime_mappings: {
-          entity_id: euid.painless.getEuidRuntimeMapping(entityType),
-        },
         query: {
           bool: {
             filter: [
@@ -144,7 +158,7 @@ export const getEntityAnomalyOverview = async ({
               { term: { is_interim: false } },
               buildScoreRangeFilter(scoreRanges),
               { range: { timestamp: { gte: effectiveFromMs, lte: effectiveToMs } } },
-              { term: { entity_id: entityId } },
+              entityFilter,
               ...(resolvedJobIds.length > 0 ? [{ terms: { job_id: resolvedJobIds } }] : []),
             ],
           },

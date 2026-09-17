@@ -163,11 +163,14 @@ describe('InsightsSection', () => {
       },
     } as unknown as ReturnType<typeof useRuleWithFallback>);
     mockGetColumns.mockReturnValue([]);
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     mockUseKibana.mockReturnValue({
       services: {
         overlays: {
           openSystemFlyout: mockOpenSystemFlyout,
         },
+        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
+        telemetry: { reportEvent: jest.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });

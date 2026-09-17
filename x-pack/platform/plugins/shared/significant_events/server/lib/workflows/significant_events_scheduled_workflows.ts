@@ -7,20 +7,16 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
 import { pollUntil } from './poll_until';
 
 const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
-
-const SCHEDULED_WORKFLOW_IDS = [
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-] as const;
 
 export interface SignificantEventsScheduledWorkflowsConfig {
   detectionIntervalMinutes: number;
@@ -29,8 +25,10 @@ export interface SignificantEventsScheduledWorkflowsConfig {
   targetCoverageMinutes: number;
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
-  triageBatchSize: number;
   maxReviewPasses: number;
+  flakyRuleDetectionThreshold: number;
+  flakyRuleProbeAfterMinutes: number;
+  flakyRuleExemptSeverityScore: number;
 }
 
 export interface SignificantEventsScheduledWorkflowsService {
@@ -147,8 +145,10 @@ export const createSignificantEventsScheduledWorkflowsService = ({
         values: {
           reviewIntervalMinutes: config.reviewIntervalMinutes,
           discoveryBatchSize: config.discoveryBatchSize,
-          triageBatchSize: config.triageBatchSize,
           maxReviewPasses: config.maxReviewPasses,
+          flakyRuleDetectionThreshold: config.flakyRuleDetectionThreshold,
+          flakyRuleProbeAfterMinutes: config.flakyRuleProbeAfterMinutes,
+          flakyRuleExemptSeverityScore: config.flakyRuleExemptSeverityScore,
         },
       }),
     ]);
@@ -191,7 +191,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
   }) => {
     await Promise.all(
-      SCHEDULED_WORKFLOW_IDS.map((workflowId) =>
+      SCHEDULED_DISCOVERY_WORKFLOW_IDS.map((workflowId) =>
         setManagedEnabled({
           documentId: getWorkflowDocumentId(workflowId, spaceId),
           enabled,
@@ -210,7 +210,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
   }) => {
     await Promise.all(
-      SCHEDULED_WORKFLOW_IDS.map((workflowId) =>
+      SCHEDULED_DISCOVERY_WORKFLOW_IDS.map((workflowId) =>
         cancelAndAwaitTermination({
           documentId: getWorkflowDocumentId(workflowId, spaceId),
           spaceId,

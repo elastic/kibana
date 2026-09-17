@@ -18,6 +18,7 @@ import type {
   CheckUserProfilesPrivilegesResponse,
   UserProfileBulkGetParams,
   UserProfileGetCurrentParams,
+  UserProfileGetCurrentProfileIdParams,
   UserProfileRequiredPrivileges,
   UserProfileServiceStart,
   UserProfileSuggestParams,
@@ -108,6 +109,24 @@ function parseUserProfileWithSecurity<D extends UserProfileData>(
   };
 }
 
+interface GetCurrentTelemetry {
+  profileActivationRequired?: boolean;
+  apiKeyRetrievalRequired?: boolean;
+  fakeRequestProfileResolution?: boolean;
+}
+
+interface ResolvedCurrentUserProfileId {
+  profileId?: string;
+  sessionId?: string;
+  // Only set when the profile was resolved via Basic auth activation, since activation returns the full profile.
+  // `getCurrent` uses it to avoid a redundant `getUserProfile` re-fetch; `getCurrentProfileId` ignores it.
+  activatedProfile?: UserProfileWithSecurity;
+  telemetry: GetCurrentTelemetry;
+  // Set when a user profile isn't applicable for this request (security disabled, or an `es-security-runas-user`
+  // proxy header is present) so the caller should return `null` without recording failure telemetry.
+  notApplicable?: boolean;
+}
+
 export class UserProfileService {
   private authz?: AuthorizationServiceSetupInternal;
   private license?: SecurityLicense;
@@ -122,6 +141,12 @@ export class UserProfileService {
     return {
       activate: this.activate.bind(this, clusterClient),
       getCurrent: this.getCurrent.bind(this, clusterClient, session, getCurrentUser),
+      getCurrentProfileId: this.getCurrentProfileId.bind(
+        this,
+        clusterClient,
+        session,
+        getCurrentUser
+      ),
       bulkGet: this.bulkGet.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
@@ -317,11 +342,7 @@ export class UserProfileService {
     }
   }
 
-  private recordGetCurrentSuccess(params: {
-    profileActivationRequired?: boolean;
-    apiKeyRetrievalRequired?: boolean;
-    fakeRequestProfileResolution?: boolean;
-  }) {
+  private recordGetCurrentSuccess(params: GetCurrentTelemetry) {
     securityTelemetry.recordGetCurrentProfileInvocation({
       profileActivationRequired: params.profileActivationRequired,
       apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
@@ -330,11 +351,7 @@ export class UserProfileService {
     });
   }
 
-  private recordGetCurrentFailure(params: {
-    profileActivationRequired?: boolean;
-    apiKeyRetrievalRequired?: boolean;
-    fakeRequestProfileResolution?: boolean;
-  }) {
+  private recordGetCurrentFailure(params: GetCurrentTelemetry) {
     securityTelemetry.recordGetCurrentProfileInvocation({
       profileActivationRequired: params.profileActivationRequired,
       apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
@@ -343,20 +360,46 @@ export class UserProfileService {
     });
   }
 
+  private recordGetCurrentProfileIdSuccess(params: GetCurrentTelemetry) {
+    securityTelemetry.recordGetCurrentProfileIdInvocation({
+      profileActivationRequired: params.profileActivationRequired,
+      apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      fakeRequestProfileResolution: params.fakeRequestProfileResolution,
+      outcome: 'success',
+    });
+  }
+
+  private recordGetCurrentProfileIdFailure(params: GetCurrentTelemetry) {
+    securityTelemetry.recordGetCurrentProfileIdInvocation({
+      profileActivationRequired: params.profileActivationRequired,
+      apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      fakeRequestProfileResolution: params.fakeRequestProfileResolution,
+      outcome: 'failure',
+    });
+  }
+
   /**
-   * See {@link UserProfileServiceStart} for documentation.
+   * Resolves the profile identifier of the current user extracted from the specified request, without fetching the
+   * full user profile document from Elasticsearch. Shared by {@link getCurrent} and {@link getCurrentProfileId}.
+   * @param clusterClient The cluster client
+   * @param session Session service instance
+   * @param getCurrentUser Function that returns the `AuthenticatedUser` bound to the request, if any
+   * @param request The HTTP request
+   * @param recordFailure Callback used to record the caller's own failure telemetry. Only invoked when the Basic
+   * auth activation step throws, since that's the one path that can fail before a `profileId` is determined.
    */
-  private async getCurrent<D extends UserProfileData>(
+  private async resolveCurrentUserProfileId(
     clusterClient: IClusterClient,
     session: PublicMethodsOf<Session>,
     getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null,
-    { request, dataPath }: UserProfileGetCurrentParams
-  ) {
+    request: KibanaRequest,
+    recordFailure: (telemetry: GetCurrentTelemetry) => void
+  ): Promise<ResolvedCurrentUserProfileId> {
     if (!this.license?.isEnabled()) {
       this.logger.debug(
         'Skipping user profile retrieval: security features are disabled in Elasticsearch.'
       );
-      return null;
+      return { telemetry: {}, notApplicable: true };
     }
 
     // Fake requests carry a bound `profile_uid` instead of an HTTP auth state,
@@ -367,6 +410,7 @@ export class UserProfileService {
 
     let profileId: string | undefined;
     let sessionId: string | undefined;
+    let activatedProfile: UserProfileWithSecurity | undefined;
     let profileActivationRequired: boolean | undefined;
     let apiKeyRetrievalRequired: boolean | undefined;
     let fakeRequestProfileResolution: boolean | undefined;
@@ -390,7 +434,7 @@ export class UserProfileService {
       this.logger.debug(
         `Skipping user profile retrieval for request with 'es-security-runas-user' header.`
       );
-      return null;
+      return { telemetry: {}, notApplicable: true };
     } else if (!profileId) {
       const authType = this.getAuthHeaderType(request.headers.authorization);
 
@@ -401,11 +445,10 @@ export class UserProfileService {
           `Request to get current user profile is authenticated via Basic credentials [fake=${!!fakeRequestProfileResolution}].`
         );
 
-        let activatedProfile: UserProfileWithSecurity | undefined;
         try {
           activatedProfile = await this.activateProfileViaBasicAuth(clusterClient, request);
         } catch (error) {
-          this.recordGetCurrentFailure({
+          recordFailure({
             profileActivationRequired,
             apiKeyRetrievalRequired,
             fakeRequestProfileResolution,
@@ -416,16 +459,6 @@ export class UserProfileService {
           throw error;
         }
 
-        // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
-        // we will need to re-fetch the profile like in the other cases (session, API key).
-        if (activatedProfile && !dataPath) {
-          this.recordGetCurrentSuccess({
-            profileActivationRequired,
-            apiKeyRetrievalRequired,
-            fakeRequestProfileResolution,
-          });
-          return activatedProfile;
-        }
         profileId = activatedProfile?.uid;
       } else if (authType === 'apikey') {
         apiKeyRetrievalRequired = true;
@@ -436,18 +469,56 @@ export class UserProfileService {
       }
     }
 
-    if (!profileId) {
-      this.recordGetCurrentFailure({
+    return {
+      profileId,
+      sessionId,
+      activatedProfile,
+      telemetry: {
         profileActivationRequired,
         apiKeyRetrievalRequired,
         fakeRequestProfileResolution,
-      });
+      },
+    };
+  }
+
+  /**
+   * See {@link UserProfileServiceStart} for documentation.
+   */
+  private async getCurrent<D extends UserProfileData>(
+    clusterClient: IClusterClient,
+    session: PublicMethodsOf<Session>,
+    getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null,
+    { request, dataPath }: UserProfileGetCurrentParams
+  ) {
+    const resolved = await this.resolveCurrentUserProfileId(
+      clusterClient,
+      session,
+      getCurrentUser,
+      request,
+      (telemetry) => this.recordGetCurrentFailure(telemetry)
+    );
+
+    if (resolved.notApplicable) {
+      return null;
+    }
+
+    const { profileId, sessionId, activatedProfile, telemetry } = resolved;
+
+    // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
+    // we will need to re-fetch the profile like in the other cases (session, API key).
+    if (activatedProfile && !dataPath) {
+      this.recordGetCurrentSuccess(telemetry);
+      return activatedProfile;
+    }
+
+    if (!profileId) {
+      this.recordGetCurrentFailure(telemetry);
       return null;
     }
 
     const requestDescriptor = sessionId
       ? ` [sid=${getPrintableSessionId(sessionId)}]`
-      : ` [fake=${!!fakeRequestProfileResolution}]`;
+      : ` [fake=${!!telemetry.fakeRequestProfileResolution}]`;
 
     let body;
     try {
@@ -456,11 +527,7 @@ export class UserProfileService {
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });
     } catch (error) {
-      this.recordGetCurrentFailure({
-        profileActivationRequired,
-        apiKeyRetrievalRequired,
-        fakeRequestProfileResolution,
-      });
+      this.recordGetCurrentFailure(telemetry);
       this.logger.error(
         `Failed to retrieve user profile for the current user${requestDescriptor}: ${getDetailedErrorMessage(
           error
@@ -470,22 +537,46 @@ export class UserProfileService {
     }
 
     if (body.profiles.length === 0) {
-      this.recordGetCurrentFailure({
-        profileActivationRequired,
-        apiKeyRetrievalRequired,
-        fakeRequestProfileResolution,
-      });
+      this.recordGetCurrentFailure(telemetry);
       this.logger.error(`The user profile for the current user${requestDescriptor} is not found.`);
       throw new Error(`User profile is not found.`);
     }
 
-    this.recordGetCurrentSuccess({
-      profileActivationRequired,
-      apiKeyRetrievalRequired,
-      fakeRequestProfileResolution,
-    });
+    this.recordGetCurrentSuccess(telemetry);
     this.logger.debug(`Returning current user profile.`);
     return parseUserProfileWithSecurity<D>(body.profiles[0]);
+  }
+
+  /**
+   * See {@link UserProfileServiceStart} for documentation.
+   */
+  private async getCurrentProfileId(
+    clusterClient: IClusterClient,
+    session: PublicMethodsOf<Session>,
+    getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null,
+    { request }: UserProfileGetCurrentProfileIdParams
+  ): Promise<string | null> {
+    const resolved = await this.resolveCurrentUserProfileId(
+      clusterClient,
+      session,
+      getCurrentUser,
+      request,
+      (telemetry) => this.recordGetCurrentProfileIdFailure(telemetry)
+    );
+
+    if (resolved.notApplicable) {
+      return null;
+    }
+
+    const { profileId, telemetry } = resolved;
+    if (!profileId) {
+      this.recordGetCurrentProfileIdFailure(telemetry);
+      return null;
+    }
+
+    this.recordGetCurrentProfileIdSuccess(telemetry);
+    this.logger.debug(`Returning current user profile id.`);
+    return profileId;
   }
 
   /**

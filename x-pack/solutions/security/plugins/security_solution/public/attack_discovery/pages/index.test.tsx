@@ -16,7 +16,6 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { TestProviders } from '../../common/mock';
 import { ATTACK_DISCOVERY_PATH, SECURITY_FEATURE_ID } from '../../../common/constants';
-import { useIsAlertsAndAttacksAlignmentEnabled } from '../../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
@@ -26,9 +25,6 @@ import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
-import { CALLOUT_TEST_DATA_ID } from './moving_attacks_callout';
-import { useMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout';
-import { mockUseMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout.mock';
 
 const mockConnectors: unknown[] = [
   {
@@ -100,13 +96,6 @@ jest.mock('./use_attack_discovery', () => ({
     isLoading: false,
   }),
 }));
-
-jest.mock('../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => ({
-  useIsAlertsAndAttacksAlignmentEnabled: jest.fn().mockReturnValue(true),
-}));
-
-jest.mock('./moving_attacks_callout/use_moving_attacks_callout');
-const useMovingAttacksCalloutMock = useMovingAttacksCallout as jest.Mock;
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -228,8 +217,6 @@ describe('AttackDiscovery', () => {
       isFetched: true,
       data: mockConnectors,
     });
-
-    useMovingAttacksCalloutMock.mockReturnValue(mockUseMovingAttacksCallout());
   });
 
   describe('page layout', () => {
@@ -321,31 +308,15 @@ describe('AttackDiscovery', () => {
     });
   });
 
-  describe('`enableAlertsAndAttacksAlignment` feature', () => {
-    it('does not render callout about new Attacks page when feature is disabled', () => {
-      (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-
-      expect(screen.queryByTestId(CALLOUT_TEST_DATA_ID)).not.toBeInTheDocument();
-    });
-  });
-
   describe('workflows insufficient privileges callout', () => {
     afterEach(() => {
       mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockReturnValue(false);
     });
 
     it('renders the insufficient privileges callout when workflows are enabled but privileges are missing', async () => {
       mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockReturnValue(true);
 
       render(
         <TestProviders>

@@ -29,6 +29,10 @@ export const EXTERNAL_LINK = {
   },
 };
 
+export const KBN_ARCHIVES = {
+  TAGS: 'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/tags.json',
+} as const;
+
 /** Minimal valid request body for creating a links library item */
 export const MINIMAL_LINKS_BODY = {
   title: 'Test Links Panel',

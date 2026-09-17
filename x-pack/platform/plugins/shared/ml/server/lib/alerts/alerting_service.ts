@@ -62,7 +62,7 @@ import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/al
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
-import { assertUserError } from './utils';
+import { assertUserError, buildAnomalyAlertTimeFilter } from './utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -893,7 +893,9 @@ export function alertingServiceProvider(
    * @param params - Alert params
    */
   const fetchResult = async (
-    params: AnomalyESQueryParams
+    params: AnomalyESQueryParams,
+    previousStartedAt: Date | null,
+    startedAt: Date
   ): Promise<AggResultsResponse | undefined> => {
     const {
       resultType,
@@ -922,14 +924,11 @@ export function alertingServiceProvider(
                 result_type: Object.values(ML_ANOMALY_RESULT_TYPE) as string[],
               },
             },
-            {
-              range: {
-                timestamp: {
-                  gte: `now-${lookBackTimeInterval}`,
-                  lte: 'now',
-                },
-              },
-            },
+            buildAnomalyAlertTimeFilter({
+              lastRunTime: previousStartedAt,
+              startedAt,
+              lookbackInterval: lookBackTimeInterval,
+            }),
             ...(!includeInterimResults
               ? [
                   {
@@ -1051,7 +1050,9 @@ export function alertingServiceProvider(
     execute: async (
       params: MlAnomalyDetectionAlertParams,
       spaceId: SpaceId,
-      state?: AnomalyDetectionRuleState
+      state: AnomalyDetectionRuleState | undefined,
+      previousStartedAt: Date | null,
+      startedAt: Date
     ): Promise<
       | {
           payload: AnomalyDetectionAlertPayload;
@@ -1064,7 +1065,7 @@ export function alertingServiceProvider(
     > => {
       const queryParams = await getQueryParams(params).catch(assertUserError);
 
-      const result = await fetchResult(queryParams);
+      const result = await fetchResult(queryParams, previousStartedAt, startedAt);
 
       if (state && isPopulatedObject(state?.contextFieldFormatters)) {
         contextFieldFormatters = state.contextFieldFormatters;

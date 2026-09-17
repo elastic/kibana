@@ -10,12 +10,12 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useApplicationConnectionsService } from './use_application_connections_service';
 import { queryKeys } from '../constants/query_keys';
 import type {
+  BulkConnectionTarget,
   BulkRevokeConnectionsResponse,
-  BulkRevokeConnectionTarget,
 } from '../service/application_connections_api_client';
 
-interface RevokeConnectionsVariables {
-  connections: BulkRevokeConnectionTarget[];
+interface RevokeConnectionsParams {
+  connections: BulkConnectionTarget[];
   reason?: string;
 }
 
@@ -26,7 +26,7 @@ export const useRevokeConnections = () => {
   const { mutateAsync, isLoading } = useMutation<
     BulkRevokeConnectionsResponse,
     Error,
-    RevokeConnectionsVariables
+    RevokeConnectionsParams
   >({
     mutationFn: ({ connections, reason }) => apiClient.bulkRevokeConnections(connections, reason),
     onSettled: () => {

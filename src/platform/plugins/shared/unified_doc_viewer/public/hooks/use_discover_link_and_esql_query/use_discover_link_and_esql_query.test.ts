@@ -8,7 +8,8 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { from, where } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
+import { esqlEquals } from '../../utils/esql_expressions';
 import { useDiscoverLinkAndEsqlQuery } from '.';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
 
@@ -35,18 +36,70 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     expect(generateDiscoverLink).not.toHaveBeenCalled();
   });
 
-  it('returns discoverUrl and esqlQueryString when inputs are provided', () => {
+  it('returns the raw esqlQueryString without SET prefix when no unmappedFieldsPolicy is provided', () => {
     const DISCOVER_URL = 'http://discover/url';
     const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const indexPattern = 'traces-*';
-    const whereClause = where('trace.id == ?traceId', { traceId: 'abc123' });
+    const whereClause = esql.exp`${esql.col(['trace', 'id'])} == ${esql.str('abc123')}`;
 
     const { result } = renderHook(() => useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause }));
 
     expect(generateDiscoverLink).toHaveBeenCalledWith(whereClause);
     expect(result.current.discoverUrl).toBe(DISCOVER_URL);
-    expect(result.current.esqlQueryString).toBe(from(indexPattern).pipe(whereClause).toString());
+    expect(result.current.esqlQueryString).not.toContain('SET unmapped_fields');
+    expect(result.current.esqlQueryString).toBe('FROM traces-*\n  | WHERE trace.id == "abc123"');
+  });
+
+  it('prepends the SET directive when unmappedFieldsPolicy is provided', () => {
+    const DISCOVER_URL = 'http://discover/url';
+    const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
+    mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
+
+    const indexPattern = 'logs-*';
+    const whereClause = esql.exp`${esql.col(['trace', 'id'])} == ${esql.str('abc123')}`;
+
+    const { result } = renderHook(() =>
+      useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause, unmappedFieldsPolicy: 'NULLIFY' })
+    );
+
+    expect(result.current.esqlQueryString).toBe(
+      'SET unmapped_fields = "NULLIFY"; FROM logs-*\n  | WHERE trace.id == "abc123"'
+    );
+    expect(result.current.esqlQueryString).toContain('SET unmapped_fields = "NULLIFY";');
+  });
+
+  it('nullifies unmapped error.* columns in the in-tab query (#281060)', () => {
+    const generateDiscoverLink = jest.fn(() => 'http://discover/url');
+    mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
+
+    const indexPattern = 'logs-*';
+    const whereClause = esql.exp`${esql.col(['service', 'name'])} == ${esql.str(
+      'payment'
+    )} AND ${esql.col(['error', 'culprit'])} == ${esql.str('charge')}`;
+
+    const { result } = renderHook(() =>
+      useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause, unmappedFieldsPolicy: 'NULLIFY' })
+    );
+
+    expect(result.current.esqlQueryString).toBe(
+      'SET unmapped_fields = "NULLIFY"; FROM logs-*\n  | WHERE service.name == "payment" AND error.culprit == "charge"'
+    );
+  });
+
+  it('preserves backslashes in the where clause without double-escaping', () => {
+    const generateDiscoverLink = jest.fn(() => 'http://discover/url');
+    mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
+
+    const indexPattern = 'logs-*';
+    const whereClause = esqlEquals('error.culprit', String.raw`handlers\windows\run.cs`);
+
+    const { result } = renderHook(() => useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause }));
+
+    expect(result.current.esqlQueryString).toBe(
+      String.raw`FROM logs-*
+  | WHERE error.culprit == "handlers\\windows\\run.cs"`
+    );
   });
 });

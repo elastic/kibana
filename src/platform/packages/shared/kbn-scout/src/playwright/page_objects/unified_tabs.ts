@@ -97,6 +97,11 @@ export class UnifiedTabs {
     return this.getTabs().and(this.page.locator('[aria-selected="true"]'));
   }
 
+  /** Currently selected tab button. */
+  getActiveTab(): Locator {
+    return this.activeTabLocator;
+  }
+
   /**
    * Navigates to a tab by its visible label text and waits for it to become active.
    */
@@ -207,7 +212,9 @@ export class UnifiedTabs {
 
   /**
    * Clicks the "New tab" button and waits for the newly created tab to become
-   * the active one.
+   * the active one. Discover new tabs stay uninitialized (no auto-fetch); use
+   * `discover.createNewTabAndSearch()` when the test needs results, the sidebar,
+   * histogram, or DocViewer or perform a search manually after createNewTab().
    */
   async createNewTab() {
     await this.clickNewTabButton();
@@ -223,10 +230,12 @@ export class UnifiedTabs {
   }
 
   private async closeTabsBarMenu() {
-    await this.page.keyboard.press('Escape');
-    await this.page.testSubj
-      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuPanel)
-      .waitFor({ state: 'hidden' });
+    // Press Escape on the panel itself so focus is inside the popover's focus
+    // trap (which owns the Escape-to-close handler) when the key fires. A bare
+    // page-level keypress misses when focus has drifted off the panel.
+    const panel = this.page.testSubj.locator(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuPanel);
+    await panel.press('Escape');
+    await panel.waitFor({ state: 'hidden' });
   }
 
   private getRecentlyClosedTabs(): Locator {
@@ -328,9 +337,11 @@ export class UnifiedTabs {
     }
 
     const tabId = tabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+    const closedTab = this.page.testSubj.locator(tabTestSubj);
+
     await tab.hover();
     await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.closeTabBtnPrefix}${tabId}`);
-    await tab.waitFor({ state: 'hidden' });
+    await closedTab.waitFor({ state: 'hidden' });
     await this.hideTabPreview();
   }
 

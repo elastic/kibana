@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnComboBoxObject, KibanaUrl, ScoutPage, Locator } from '@kbn/scout-oblt';
+import type { EuiComboBoxObject, KibanaUrl, ScoutPage, Locator } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
@@ -16,7 +16,7 @@ export class DashboardsTab extends ServiceDetailsTab {
   public readonly tab: Locator;
 
   public readonly addServiceDashboardButton: Locator;
-  public readonly dashboardComboBox: KbnComboBoxObject;
+  public readonly dashboardComboBox: EuiComboBoxObject;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);

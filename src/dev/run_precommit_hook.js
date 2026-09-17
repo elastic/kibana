@@ -10,6 +10,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import * as Eslint from './eslint';
+import * as Oxlint from './oxlint';
 import * as Stylelint from './stylelint';
 import {
   LinterCheck,
@@ -20,6 +21,10 @@ import {
   getFilesForCommit,
 } from './precommit_hook';
 
+// oxlint and ESLint both autofix the same JS/TS files, so oxlint runs alone before the
+// parallel checks (matching the CI order in .buildkite/scripts/steps/lint.sh).
+const OXLINT_CHECK = new LinterCheck('oxlint', Oxlint);
+
 const PRECOMMIT_CHECKS = [
   new FileCasingCheck(),
   new LinterCheck('ESLint', Eslint),
@@ -28,6 +33,13 @@ const PRECOMMIT_CHECKS = [
   new MoonConfigGenerationCheck(),
   new SemverRangesCheck(),
 ];
+
+async function runTimed(check, log, files, options) {
+  const startTime = Date.now();
+  const result = await check.runSafely(log, files, options);
+  log.verbose(`${check.name} completed in ${Date.now() - startTime}ms`);
+  return result;
+}
 
 run(
   async ({ log, flags }) => {
@@ -54,27 +66,22 @@ run(
     }
 
     log.verbose('Running pre-commit checks...');
-    const checksToRun = PRECOMMIT_CHECKS.filter((check) =>
-      check.shouldExecute({
-        files,
-        deletedFiles,
-        fix: flags.fix,
-        flags: flags._,
-      })
-    );
+    const options = { fix: flags.fix, stage: flags.stage };
+    const context = {
+      files,
+      deletedFiles,
+      fix: flags.fix,
+      flags: flags._,
+    };
 
-    const results = await Promise.all(
-      checksToRun.map(async (check) => {
-        log.verbose(`Starting ${check.name}...`);
-        const startTime = Date.now();
-        const result = await check.runSafely(log, allFiles, {
-          fix: flags.fix,
-          stage: flags.stage,
-        });
-        const duration = Date.now() - startTime;
-        log.verbose(`${check.name} completed in ${duration}ms`);
-        return result;
-      })
+    const results = [];
+    if (OXLINT_CHECK.shouldExecute(context)) {
+      results.push(await runTimed(OXLINT_CHECK, log, allFiles, options));
+    }
+
+    const checksToRun = PRECOMMIT_CHECKS.filter((check) => check.shouldExecute(context));
+    results.push(
+      ...(await Promise.all(checksToRun.map((check) => runTimed(check, log, allFiles, options))))
     );
     const failedChecks = results.filter((result) => !result.succeeded);
 

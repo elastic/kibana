@@ -33,6 +33,7 @@ interface Opts {
 
 interface MWOpts {
   savedObjectsClient: ISavedObjectsRepository;
+  maintenanceWindowsEnabled: boolean;
   logger: Logger;
   maxDocuments?: number;
 }
@@ -642,10 +643,20 @@ export async function getTotalCountInUse({
 
 export async function getMWTelemetry({
   savedObjectsClient,
+  maintenanceWindowsEnabled,
   logger,
   maxDocuments = TELEMETRY_MW_COUNT_LIMIT,
 }: MWOpts): Promise<GetMWTelemetryResults> {
   try {
+    if (!maintenanceWindowsEnabled) {
+      return {
+        hasErrors: false,
+        count_mw_total: 0,
+        count_mw_with_repeat_toggle_on: 0,
+        count_mw_with_filter_alert_toggle_on: 0,
+      };
+    }
+
     const mwFinder = savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],

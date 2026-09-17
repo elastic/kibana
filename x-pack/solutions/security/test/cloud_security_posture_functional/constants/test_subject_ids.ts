@@ -11,6 +11,7 @@ export const testSubjectIds = {
   EVENTS_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="events-viewer-panel"] .euiDataGridRow',
   VISUALIZATIONS_SECTION_HEADER_TEST_ID: 'securitySolutionFlyoutVisualizationsHeader',
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID: 'securitySolutionFlyoutVisualizationsContent',
+  GRAPH_PREVIEW_TEST_ID: 'securitySolutionFlyoutGraphPreview',
   GRAPH_PREVIEW_CONTENT_TEST_ID: 'securitySolutionFlyoutGraphPreviewContent',
   GRAPH_PREVIEW_LOADING_TEST_ID: 'securitySolutionFlyoutGraphPreviewLoading',
   GRAPH_PREVIEW_TITLE_LINK_TEST_ID: 'securitySolutionFlyoutGraphPreviewTitleLink',
@@ -26,6 +27,8 @@ export const testSubjectIds = {
     'cloudSecurityGraphGraphInvestigationShowActionsOnEntity',
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEntityDetails',
+  GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID:
+    'cloudSecurityGraphGraphInvestigationShowGroupedEntities',
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEntityRelationships',
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphLabelExpandPopover',

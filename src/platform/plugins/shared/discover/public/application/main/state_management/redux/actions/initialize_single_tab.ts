@@ -8,7 +8,7 @@
  */
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
@@ -28,8 +28,7 @@ import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
-import type { ProfileStateMap } from '../../../../../context_awareness';
-import { ProfileStateType } from '../../../../../context_awareness';
+import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
@@ -44,6 +43,7 @@ export interface InitializeSingleTabsParams {
   dataViewSpec: DataViewSpec | undefined;
   esqlControls: ControlPanelsState<OptionsListESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
+  profileState?: ProfileStateMap;
 }
 
 export const initializeSingleTab = createInternalStateAsyncThunk(
@@ -57,6 +57,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         dataViewSpec,
         esqlControls,
         defaultUrlState,
+        profileState,
       },
     }: TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>,
     {
@@ -122,6 +123,10 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       profileStateMap: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY) ?? undefined,
       stateTypes: [ProfileStateType.Url],
     });
+    const defaultPersistentProfileState = services.profileStateRegistry.pickStateByType({
+      profileStateMap: profileState,
+      stateTypes: [ProfileStateType.Persistent],
+    });
 
     const discoverTabLoadTracker = scopedEbtManager$
       .getValue()
@@ -142,9 +147,13 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       : undefined;
 
     const persistedTabDataView = persistedTabSearchSource?.getField('index');
+    const initialDataViewId =
+      typeof initialDataViewIdOrSpec === 'string'
+        ? initialDataViewIdOrSpec
+        : initialAdHocDataViewSpec?.id;
     const dataViewId = isDataViewSource(urlAppState?.dataSource)
       ? urlAppState?.dataSource.dataViewId
-      : persistedTabDataView?.id;
+      : persistedTabDataView?.id ?? initialDataViewId;
 
     const tabHasInitialAdHocDataViewSpec =
       dataViewId && initialAdHocDataViewSpec?.id === dataViewId;
@@ -166,7 +175,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       profileDataViewsExist ||
       locationStateHasDataViewSpec;
 
-    if (!initializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
+    if (!initializationState.hasDataView && !canAccessWithoutPersistedDataView) {
       return { showNoDataPage: true };
     }
 
@@ -176,7 +185,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     let dataView: DataView;
 
-    if (isOfAggregateQueryType(initialQuery)) {
+    if (isOfAggregateQueryType(initialQuery) && !isEmptyEsqlQuery(initialQuery)) {
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
@@ -184,7 +193,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         services
       );
     } else {
-      // Load the requested data view if one exists, or a fallback otherwise
+      // Load the requested data view if one exists, or a fallback otherwise.
+      // For empty ES|QL, updateTabs stores the previous tab's view on
+      // initialInternalState so dataViewId above is set and we skip the default.
       const result = await loadAndResolveDataView({
         dataViewId,
         locationDataViewSpec: dataViewSpec,
@@ -305,6 +316,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // Initialize app and profile state together
     const mergedProfileState = services.profileStateRegistry.mergeState(
       tabState.profileState,
+      defaultPersistentProfileState,
       urlProfileState
     );
     const initialProfileState = services.profileStateRegistry.pickStateByType({
@@ -328,12 +340,35 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // Begin syncing the state and trigger the initial fetch
     // if this is still the current tab, otherwise mark the
     // tab to fetch when selected
+
+    // Skip the initial fetch for fresh "+" tabs and empty ES|QL queries.
+    // skipInitialFetch is in-memory only and is lost on refresh. Empty ES|QL is
+    // the persisted signal — restore the flag so a later switch to classic does
+    // not treat the tab as search-on-page-load and get stuck in LOADING.
+    const shouldSkipInitialFetch =
+      tabState.skipInitialFetch || isEmptyEsqlQuery(initialAppState.query);
+
+    if (shouldSkipInitialFetch && !tabState.skipInitialFetch) {
+      dispatch(
+        internalStateSlice.actions.setSkipInitialFetch({
+          tabId,
+          skipInitialFetch: true,
+        })
+      );
+    }
+
     if (isCurrentTabActive()) {
       dispatch(initializeAndSync({ tabId }));
-      dispatch(fetchData({ tabId, initial: true }));
+
+      if (!shouldSkipInitialFetch) {
+        dispatch(fetchData({ tabId, initial: true }));
+      }
     } else {
       dispatch(
-        internalStateSlice.actions.setForceFetchOnSelect({ tabId, forceFetchOnSelect: true })
+        internalStateSlice.actions.setForceFetchOnSelect({
+          tabId,
+          forceFetchOnSelect: !shouldSkipInitialFetch,
+        })
       );
     }
 

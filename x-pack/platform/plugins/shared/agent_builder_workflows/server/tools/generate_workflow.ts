@@ -15,8 +15,8 @@ import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/u
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
+import { workflowTools } from '../../common/constants';
 import { emitWorkflowDiff, extractConversationId } from './utils/workflow_attachments';
 
 const generateWorkflowSchema = z.object({
@@ -93,8 +93,8 @@ And you should **not**:
 ## Usage notes
 
 — If all you need is to generate a workflow, you do *NOT* need to read the "workflow-authoring" skill first, you can call this tool directly.
-— The tool creates (or updates) a workflow attachment and emits a diff card in chat.
-— Render the diff with "<render_attachment id="{diffAttachmentId}"/>" and the workflow with "<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>".
+— Called by an Agent Builder, the tool returns workflow attachment references plus the instructions for presenting them.
+— Called via MCP server, the tool returns the generated workflow YAML.
 
 ## Alert-triggered workflows
 
@@ -106,6 +106,13 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
 
     `),
     schema: generateWorkflowSchema,
+    annotations: {
+      title: 'Generate Workflow',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     handler: async (
       { query, attachmentId, context: workflowContext, instructions, workflowId },
       toolContext
@@ -115,8 +122,20 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
 
       const sourceAttachment = attachmentId ? attachments.get(attachmentId) : undefined;
       if (attachmentId && !sourceAttachment) {
+        const workflowAttachmentIds = attachments
+          .getActive()
+          .filter((attachment) => attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE)
+          .map((attachment) => attachment.id);
+        const existingAttachmentHint =
+          workflowAttachmentIds.length > 0
+            ? ` Conversation workflow attachment ids: ${workflowAttachmentIds.join(', ')}.`
+            : '';
         return {
-          results: [errorResult(`Attachment with ID '${attachmentId}' not found.`)],
+          results: [
+            errorResult(
+              `Attachment with ID '${attachmentId}' not found.${existingAttachmentHint} To edit a saved workflow that is not yet in the conversation, call \`${workflowTools.getWorkflow}\` with \`attach: true\` first, then pass the returned \`attachmentId\` to this tool. Workflow ids from automation lists are not conversation attachment ids until attached.`
+            ),
+          ],
         };
       }
       if (sourceAttachment && sourceAttachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {
@@ -139,7 +158,11 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
       }
 
       try {
-        const { workflow, response: generationComment } = await generateWorkflow({
+        const {
+          workflow,
+          yaml: afterYaml,
+          response: generationComment,
+        } = await generateWorkflow({
           nlQuery: query,
           workflow: workflowDef,
           additionalContext: workflowContext,
@@ -152,7 +175,6 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
         });
 
         const beforeYaml = sourceData?.yaml ?? '';
-        const afterYaml = stringifyWorkflowDefinition(workflow);
         const proposalId = v4();
 
         const {
@@ -176,15 +198,27 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
           isCreation: !sourceAttachment,
         });
 
+        // Only an Agent Builder agent can resolve attachment IDs and render attachment
+        // tags. Every other caller (MCP clients, the public `tools/_execute` API, the
+        // CLI) gets the YAML itself.
+        const isAgentBuilderCall = toolContext.callContext.callSource === 'agent';
+
         return {
           results: [
             otherResult({
-              attachment_id: workflowAttachmentId,
-              attachment_version: attachmentVersion,
-              proposal_id: proposalId,
-              diff_attachment_id: diffAttachmentId,
               comment: generationComment,
               success: true,
+              ...(isAgentBuilderCall
+                ? {
+                    // In Agent Builder the YAML lives in the attachment, so keep it out
+                    // of the model context — only the IDs to reference it are returned.
+                    attachment_id: workflowAttachmentId,
+                    attachment_version: attachmentVersion,
+                    proposal_id: proposalId,
+                    diff_attachment_id: diffAttachmentId,
+                    presentation: `Render the diff with "<render_attachment id="${diffAttachmentId}"/>" and the workflow with "<render_attachment id="${workflowAttachmentId}" version="${attachmentVersion}"/>".`,
+                  }
+                : { yaml: afterYaml }),
               ...(sourceAttachment ? { updated: true } : { created: true }),
             }),
           ],

@@ -143,12 +143,12 @@ export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> 
       <KibanaPageTemplate.EmptyPrompt
         iconType="error"
         title={
-          <h1>
+          <h2>
             <FormattedMessage
               id="xpack.security.management.apiKeysEmptyPrompt.readOnlyEmptyTitle"
               defaultMessage="You do not have permission to create API keys"
             />
-          </h1>
+          </h2>
         }
         body={
           <p>
@@ -166,12 +166,12 @@ export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> 
     <KibanaPageTemplate.EmptyPrompt
       iconType="managementApp"
       title={
-        <h1>
+        <h2 data-test-subj="apiKeysEmptyPromptTitle">
           <FormattedMessage
             id="xpack.security.management.apiKeysEmptyPrompt.emptyTitle"
             defaultMessage="Create your first API key"
           />
-        </h1>
+        </h2>
       }
       body={
         <p>

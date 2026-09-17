@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from '@kbn/scout';
-import type { ScoutPage } from '@kbn/scout';
+import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
 
 export type InspectorView = 'Requests' | 'Data';
 
@@ -18,9 +17,12 @@ const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
 };
 
 export class Inspector {
+  private readonly appMenu: AppMenu;
   public readonly panel: Locator;
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
+  public readonly tablePaginationPopoverButton: Locator;
+  public readonly searchSessionId: Locator;
 
   public readonly requests: {
     readonly requestChooser: Locator;
@@ -33,9 +35,12 @@ export class Inspector {
   };
 
   constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
     this.panel = page.testSubj.locator('inspectorPanel');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
+    this.tablePaginationPopoverButton = page.testSubj.locator('tablePaginationPopoverButton');
+    this.searchSessionId = page.testSubj.locator('inspectorRequestSearchSessionId');
 
     this.requests = {
       requestChooser: page.testSubj.locator('inspectorRequestChooser'),
@@ -48,9 +53,26 @@ export class Inspector {
     };
   }
 
-  async open() {
-    await this.page.testSubj.click('openInspectorButton');
+  async open(openButtonTestSubj: string = 'openInspectorButton') {
+    await this.appMenu.clickItem(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
+  }
+
+  async setTablePageSize(size: number) {
+    await this.tablePaginationPopoverButton.click();
+    const option = this.page.testSubj.locator(`tablePagination-${size}-rows`);
+    await option.click();
+    // Wait for the page-size popover to close before callers read the table.
+    await option.waitFor({ state: 'hidden' });
+  }
+
+  /** Switches the inspector table to the given 0-based page and waits until it is current. */
+  async goToTablePage(pageIndex: number) {
+    const pageButton = this.page.testSubj.locator(`pagination-button-${pageIndex}`);
+    await pageButton.click();
+    await this.page
+      .locator(`[data-test-subj="pagination-button-${pageIndex}"][aria-current="page"]`)
+      .waitFor({ state: 'visible' });
   }
 
   async close() {
@@ -65,23 +87,51 @@ export class Inspector {
 
   async openInspectorView(view: InspectorView) {
     await this.panel.waitFor({ state: 'visible' });
-    const viewChooserOption = this.page.testSubj.locator(VIEW_CHOOSER_TEST_SUBJECTS[view]);
-
-    if (!(await viewChooserOption.isVisible())) {
-      await this.viewChooser.click();
-    }
-
-    await viewChooserOption.click();
+    await this.viewChooser.click();
+    await this.page.testSubj.click(VIEW_CHOOSER_TEST_SUBJECTS[view]);
   }
 
   async openInspectorRequestsView() {
-    await this.panel.waitFor({ state: 'visible' });
-
-    if (!(await this.viewChooser.isVisible())) {
-      return;
-    }
-
     await this.openInspectorView('Requests');
+  }
+
+  /**
+   * The search session id surfaced by the open inspector's Requests view.
+   * Switches to the Requests view, reads the id, then closes the inspector.
+   * Throws if no id is present — a missing id means the assertion would be meaningless.
+   */
+  async getSearchSessionId(): Promise<string> {
+    await this.openInspectorRequestsView();
+    const sessionId = await this.searchSessionId.getAttribute('data-search-session-id');
+    await this.close();
+    if (!sessionId) {
+      throw new Error('No search session id exposed by the inspector');
+    }
+    return sessionId;
+  }
+
+  /**
+   * The names of the requests listed by the open inspector's request chooser,
+   * in the order they are offered. Leaves the chooser closed, since its open
+   * list covers the request detail tabs.
+   */
+  async getRequestNames(): Promise<string[]> {
+    const names = await this.page.components
+      .comboBox('inspectorRequestChooser')
+      .getAllVisibleOptions();
+    await this.page.keyboard.press('Escape');
+    return names;
+  }
+
+  /** The selected request's total time, in milliseconds, as the Requests view reports it. */
+  async getRequestTotalTime(): Promise<number> {
+    const badge = this.page.testSubj.locator('inspectorRequestTotalTime');
+    await badge.waitFor({ state: 'visible' });
+    return parseFloat((await badge.innerText()).replace('ms', ''));
+  }
+
+  async openRequestsStatisticsTab() {
+    await this.requests.statisticsTab.click();
   }
 
   async getTableData(): Promise<string[][]> {

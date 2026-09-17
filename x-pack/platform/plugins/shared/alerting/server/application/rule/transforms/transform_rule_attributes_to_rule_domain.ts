@@ -194,6 +194,9 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     apiKeyOwner: esRule.apiKeyOwner,
     apiKeyCreatedByUser: esRule.apiKeyCreatedByUser,
     ...(esRule.uiamApiKey !== undefined ? { uiamApiKey: esRule.uiamApiKey } : {}),
+    ...(esRule.uiamApiKeyExternal !== undefined
+      ? { uiamApiKeyExternal: esRule.uiamApiKeyExternal }
+      : {}),
     throttle: esRule.throttle,
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,

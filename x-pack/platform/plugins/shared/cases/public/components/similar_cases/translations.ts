@@ -26,3 +26,7 @@ export const NO_CASES_BODY = i18n.translate('xpack.cases.similarCaseTable.noCase
 export const SIMILARITY_REASON = i18n.translate('xpack.cases.similarCaseTable.similarities.title', {
   defaultMessage: 'Similar observable values',
 });
+
+export const TABLE_CAPTION = i18n.translate('xpack.cases.similarCaseTable.tableCaption', {
+  defaultMessage: 'Similar cases',
+});

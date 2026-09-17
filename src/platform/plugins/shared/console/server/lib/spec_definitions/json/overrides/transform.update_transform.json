@@ -1,7 +1,6 @@
 {
   "transform.update_transform": {
     "data_autocomplete_rules": {
-      "description": "",
       "dest": {
         "__template": {
           "index": ""

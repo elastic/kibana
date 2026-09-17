@@ -156,7 +156,7 @@ describe('verify_permissions_task', () => {
       return registeredDef.createTaskRunner(
         taskManagerMock.createRunContext({
           taskInstance: {} as any,
-          ...(abortCtrl !== undefined && { abortController: abortCtrl }),
+          ...(abortCtrl !== undefined && { signal: abortCtrl.signal }),
         })
       );
     };

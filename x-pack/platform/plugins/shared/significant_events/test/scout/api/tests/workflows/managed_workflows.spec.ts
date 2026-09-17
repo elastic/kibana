@@ -16,7 +16,6 @@ import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
 const MANAGED_WORKFLOW_IDS = [
   // Base significant events workflows (installed when significant events is available)
   'system-significant-events-discovery',
-  'system-significant-events-triage',
   // Memory workflows (installed when the memory feature flag is enabled)
   'system-significant-events-memory-synthesis',
   'system-significant-events-memory-consolidation',

@@ -8,15 +8,17 @@
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import {
+  asEsqlRows,
   buildEpisodesQuery,
+  PAGE_SIZE_ESQL_VARIABLE,
   type AlertEpisodeEsqlRow,
   type EpisodesFilterState,
   type EpisodesSortState,
-} from '../queries/episodes_query';
-import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
+} from '@kbn/alerting-v2-common-queries';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_time_range_filter';
 
 export interface FetchAlertingEpisodesOptions {
   spaceId: string;
@@ -46,7 +48,7 @@ export const fetchAlertingEpisodes = ({
   const input: {
     type: 'kibana_context';
     esqlVariables: ESQLControlVariable[];
-    timeRange?: TimeRange;
+    filters?: Filter[];
   } = {
     type: 'kibana_context',
     esqlVariables: [
@@ -54,14 +56,15 @@ export const fetchAlertingEpisodes = ({
     ],
   };
 
-  if (timeRange) {
-    input.timeRange = timeRange;
+  const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
+  if (timeRangeFilter) {
+    input.filters = [timeRangeFilter];
   }
 
-  return executeEsqlQuery<AlertEpisodeEsqlRow>({
+  return executeEsqlQuery({
     expressions,
     query: query.print('basic'),
     input,
     abortSignal,
-  });
+  }).then((rows) => asEsqlRows(query, rows));
 };

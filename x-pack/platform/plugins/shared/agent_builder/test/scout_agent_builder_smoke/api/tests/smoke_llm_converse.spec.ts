@@ -5,20 +5,30 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import { isToolCallStep, platformCoreTools } from '@kbn/agent-builder-common';
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import { getAvailableConnectors, takeRandomLlmSample } from '@kbn/gen-ai-functional-testing';
+import type {
+  AvailableConnectorWithId,
+  LlmSmokeFailureEvidence,
+} from '@kbn/gen-ai-functional-testing';
+import {
+  MAX_LLM_SMOKE_JUDGES,
+  getAvailableConnectors,
+  takeRandomLlmSample,
+} from '@kbn/gen-ai-functional-testing';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../../../common/http_api/chat';
 
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER } from '../fixtures/constants';
+import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import {
   enableCcmForScoutSmokeTests,
   getPreDiscoveredEisModelsForScout,
   type DiscoveredEisModel,
 } from '../../lib/eis_smoke_for_scout_tests';
+import { triageLlmSmokeFailure } from '../../lib/llm_smoke_triage';
 
 const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
 
@@ -59,9 +69,7 @@ const expectListIndicesToolCalled = (body: ChatResponse) => {
   expect(toolCalls[0].tool_id).toBe(platformCoreTools.listIndices);
 };
 
-const ensureEisCcmIfNeeded = async (
-  esClient: Parameters<typeof enableCcmForScoutSmokeTests>[0]
-) => {
+const ensureEisCcmIfNeeded = async (esClient: Client) => {
   if (allEisModels.length === 0 || eisCcmConfigured) {
     return;
   }
@@ -71,6 +79,70 @@ const ensureEisCcmIfNeeded = async (
   }
   await enableCcmForScoutSmokeTests(esClient, apiKey);
   eisCcmConfigured = true;
+};
+
+/** Backup judge endpoints for failure triage, excluding the model under test. */
+const judgeInferenceIdsFor = (excludeModelId?: string): string[] =>
+  allEisModels
+    .filter((model) => model.modelId !== excludeModelId)
+    .map((model) => model.inferenceId)
+    .slice(0, MAX_LLM_SMOKE_JUDGES);
+
+/**
+ * Sends a converse request and runs the standard assertions. On failure, an LLM judge
+ * (invoked directly against ES inference endpoints, bypassing Kibana) classifies the
+ * failure: provider-side failures skip the test instead of failing CI, anything else
+ * rethrows the original failure.
+ */
+const judgedConverse = async (
+  client: AuthedApiClient,
+  esClient: Client,
+  {
+    target,
+    scenario,
+    payload,
+    judgeExcludeModelId,
+    extraAssert,
+  }: {
+    target: string;
+    scenario: string;
+    payload: ChatRequestBodyPayload;
+    judgeExcludeModelId?: string;
+    extraAssert?: (body: ChatResponse) => void;
+  }
+): Promise<ChatResponse> => {
+  let response: Awaited<ReturnType<AuthedApiClient['post']>> | undefined;
+  try {
+    response = await client.post(`${API_AGENT_BUILDER}/converse`, {
+      body: payload,
+      responseType: 'json',
+    });
+    expect(response).toHaveStatusCode(200);
+    const body = response.body as ChatResponse;
+    expectNonEmptyReply(body);
+    extraAssert?.(body);
+    return body;
+  } catch (error) {
+    const evidence: LlmSmokeFailureEvidence = {
+      target,
+      scenario,
+      statusCode: response?.statusCode,
+      responseBody: response ? JSON.stringify(response.body) : undefined,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    };
+    const judgement = await triageLlmSmokeFailure({
+      esClient,
+      evidence,
+      judgeInferenceIds: judgeInferenceIdsFor(judgeExcludeModelId),
+      ensureJudgeReady: () => ensureEisCcmIfNeeded(esClient),
+    });
+    // eslint-disable-next-line playwright/no-skipped-test
+    apiTest.skip(
+      judgement.verdict === 'provider',
+      `LLM provider failure (judged by ${judgement.judgeInferenceId}): ${judgement.reason}`
+    );
+    throw error;
+  }
 };
 
 apiTest.describe(
@@ -101,63 +173,68 @@ apiTest.describe(
     });
 
     for (const connector of allStaticConnectors) {
-      apiTest(`static connector ${connector.id} — simple message`, async ({ asAdmin }) => {
-        apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
-        const response = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-          body: {
-            input: 'Hello',
-            connector_id: connector.id,
-          } satisfies ChatRequestBodyPayload,
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-        expectNonEmptyReply(response.body as ChatResponse);
-      });
+      apiTest(
+        `static connector ${connector.id} — simple message`,
+        async ({ asAdmin, esClient }) => {
+          apiTest.skip(
+            !selectedStaticConnectorIds.has(connector.id),
+            'not in FTR_GEN_AI_LLM_SAMPLE'
+          );
+          await judgedConverse(asAdmin, esClient, {
+            target: connector.id,
+            scenario: 'simple message',
+            payload: {
+              input: 'Hello',
+              connector_id: connector.id,
+            } satisfies ChatRequestBodyPayload,
+          });
+        }
+      );
 
-      apiTest(`static connector ${connector.id} — tool call`, async ({ asAdmin }) => {
+      apiTest(`static connector ${connector.id} — tool call`, async ({ asAdmin, esClient }) => {
         // eslint-disable-next-line playwright/no-skipped-test
         apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
-        const response = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-          body: {
+        await judgedConverse(asAdmin, esClient, {
+          target: connector.id,
+          scenario: 'tool call',
+          payload: {
             input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
             connector_id: connector.id,
           } satisfies ChatRequestBodyPayload,
-          responseType: 'json',
+          extraAssert: expectListIndicesToolCalled,
         });
-        expect(response).toHaveStatusCode(200);
-        const body = response.body as ChatResponse;
-        expectNonEmptyReply(body);
-        expectListIndicesToolCalled(body);
       });
 
-      apiTest(`static connector ${connector.id} — conversation continue`, async ({ asAdmin }) => {
-        // eslint-disable-next-line playwright/no-skipped-test
-        apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
-        const id = connector.id;
-        const response1 = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-          body: {
-            input: 'Please say "hello"',
-            connector_id: id,
-          } satisfies ChatRequestBodyPayload,
-          responseType: 'json',
-        });
-        expect(response1).toHaveStatusCode(200);
-        expectNonEmptyReply(response1.body as ChatResponse);
+      apiTest(
+        `static connector ${connector.id} — conversation continue`,
+        async ({ asAdmin, esClient }) => {
+          // eslint-disable-next-line playwright/no-skipped-test
+          apiTest.skip(
+            !selectedStaticConnectorIds.has(connector.id),
+            'not in FTR_GEN_AI_LLM_SAMPLE'
+          );
+          const id = connector.id;
+          const body1 = await judgedConverse(asAdmin, esClient, {
+            target: id,
+            scenario: 'conversation continue — first message',
+            payload: {
+              input: 'Please say "hello"',
+              connector_id: id,
+            } satisfies ChatRequestBodyPayload,
+          });
 
-        const response2 = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-          body: {
-            conversation_id: (response1.body as ChatResponse).conversation_id,
-            input: 'Please say it again.',
-            connector_id: id,
-          } satisfies ChatRequestBodyPayload,
-          responseType: 'json',
-        });
-        expect(response2).toHaveStatusCode(200);
-        expectNonEmptyReply(response2.body as ChatResponse);
-        expect((response2.body as ChatResponse).conversation_id).toBe(
-          (response1.body as ChatResponse).conversation_id
-        );
-      });
+          const body2 = await judgedConverse(asAdmin, esClient, {
+            target: id,
+            scenario: 'conversation continue — follow-up',
+            payload: {
+              conversation_id: body1.conversation_id,
+              input: 'Please say it again.',
+              connector_id: id,
+            } satisfies ChatRequestBodyPayload,
+          });
+          expect(body2.conversation_id).toBe(body1.conversation_id);
+        }
+      );
     }
 
     if (allEisModels.length === 0) {
@@ -178,61 +255,58 @@ apiTest.describe(
           // eslint-disable-next-line playwright/no-skipped-test
           apiTest.skip(!selectedEisModelIds.has(model.modelId), 'not in FTR_GEN_AI_LLM_SAMPLE');
           await ensureEisCcmIfNeeded(esClient);
-          const response = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-            body: {
+          await judgedConverse(asAdmin, esClient, {
+            target: connectorId,
+            scenario: 'simple message',
+            judgeExcludeModelId: model.modelId,
+            payload: {
               input: 'Hello',
               connector_id: connectorId,
             } satisfies ChatRequestBodyPayload,
-            responseType: 'json',
           });
-          expect(response).toHaveStatusCode(200);
-          expectNonEmptyReply(response.body as ChatResponse);
         });
 
         apiTest(`EIS ${model.modelId} — tool call`, async ({ asAdmin, esClient }) => {
           // eslint-disable-next-line playwright/no-skipped-test
           apiTest.skip(!selectedEisModelIds.has(model.modelId), 'not in FTR_GEN_AI_LLM_SAMPLE');
           await ensureEisCcmIfNeeded(esClient);
-          const response = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-            body: {
+          await judgedConverse(asAdmin, esClient, {
+            target: connectorId,
+            scenario: 'tool call',
+            judgeExcludeModelId: model.modelId,
+            payload: {
               input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
               connector_id: connectorId,
             } satisfies ChatRequestBodyPayload,
-            responseType: 'json',
+            extraAssert: expectListIndicesToolCalled,
           });
-          expect(response).toHaveStatusCode(200);
-          const body = response.body as ChatResponse;
-          expectNonEmptyReply(body);
-          expectListIndicesToolCalled(body);
         });
 
         apiTest(`EIS ${model.modelId} — conversation continue`, async ({ asAdmin, esClient }) => {
           // eslint-disable-next-line playwright/no-skipped-test
           apiTest.skip(!selectedEisModelIds.has(model.modelId), 'not in FTR_GEN_AI_LLM_SAMPLE');
           await ensureEisCcmIfNeeded(esClient);
-          const response1 = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-            body: {
+          const body1 = await judgedConverse(asAdmin, esClient, {
+            target: connectorId,
+            scenario: 'conversation continue — first message',
+            judgeExcludeModelId: model.modelId,
+            payload: {
               input: 'Please say "hello"',
               connector_id: connectorId,
             } satisfies ChatRequestBodyPayload,
-            responseType: 'json',
           });
-          expect(response1).toHaveStatusCode(200);
-          expectNonEmptyReply(response1.body as ChatResponse);
 
-          const response2 = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-            body: {
-              conversation_id: (response1.body as ChatResponse).conversation_id,
+          const body2 = await judgedConverse(asAdmin, esClient, {
+            target: connectorId,
+            scenario: 'conversation continue — follow-up',
+            judgeExcludeModelId: model.modelId,
+            payload: {
+              conversation_id: body1.conversation_id,
               input: 'Please say it again.',
               connector_id: connectorId,
             } satisfies ChatRequestBodyPayload,
-            responseType: 'json',
           });
-          expect(response2).toHaveStatusCode(200);
-          expectNonEmptyReply(response2.body as ChatResponse);
-          expect((response2.body as ChatResponse).conversation_id).toBe(
-            (response1.body as ChatResponse).conversation_id
-          );
+          expect(body2.conversation_id).toBe(body1.conversation_id);
         });
       }
     }

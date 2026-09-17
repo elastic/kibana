@@ -34,10 +34,10 @@ export function registerAgentlessDeploymentSyncTask(
       maxAttempts: 1,
       createTaskRunner: ({
         taskInstance,
-        abortController,
+        signal,
       }: {
         taskInstance: ConcreteTaskInstance;
-        abortController: AbortController;
+        signal: AbortSignal;
       }) => {
         const logger = appContextService.getLogger().get('agentless');
 
@@ -53,7 +53,7 @@ export function registerAgentlessDeploymentSyncTask(
                 },
                 {
                   dryRun: config?.agentless?.enabled && config?.agentless?.backgroundSync?.dryRun,
-                  abortController,
+                  signal,
                 }
               );
             } catch (error) {

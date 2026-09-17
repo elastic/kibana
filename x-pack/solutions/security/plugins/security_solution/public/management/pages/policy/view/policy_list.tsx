@@ -128,10 +128,10 @@ export const PolicyList = memo(() => {
   }, [getAppUrl, policyListPath]);
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
-    'fleet',
+    'integrations',
     {
       path: pagePathGetters.add_integration_to_policy({
-        pkgkey: endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : '',
+        pkgkey: endpointPackageInfo ? `endpoint-${endpointPackageInfo?.version}` : 'endpoint',
       })[1],
       state: {
         onCancelNavigateTo: [

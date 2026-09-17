@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/core-ui-settings-server'
 tags:
   - plugin
   - prod

@@ -16,3 +16,9 @@ export { getCloudProviderIcon } from './src/components/cloud_provider_icon/get_c
 export type { CloudProvider } from './src/components/cloud_provider_icon/get_cloud_provider_icon';
 export { CloudProviderIcon } from './src/components/cloud_provider_icon';
 export type { CloudProviderIconProps } from './src/components/cloud_provider_icon';
+
+export {
+  anthropicIcon,
+  cursorIcon,
+  visualStudioCodeIcon,
+} from './src/components/brand_icon/brand_icons';

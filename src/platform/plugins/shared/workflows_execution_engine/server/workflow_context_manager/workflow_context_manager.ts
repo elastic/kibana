@@ -18,11 +18,12 @@ import {
   type StepContext,
   type WorkflowContext,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import { buildWorkflowContext } from './build_workflow_context';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import { buildWorkflowRenderContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import {
   callKibanaApi,
@@ -36,7 +37,7 @@ import { isSerializedError } from '../utils/errors';
 export interface ContextManagerInit {
   // New properties for logging
   templateEngine: WorkflowTemplatingEngine;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: RuntimeGraphView;
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   node: GraphNodeUnion;
@@ -57,7 +58,7 @@ type ContextPathSegment = string | number;
 type ContextPath = ContextPathSegment[];
 
 export class WorkflowContextManager {
-  private workflowExecutionGraph: WorkflowGraph;
+  private workflowExecutionGraph: RuntimeGraphView;
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
   private esClient: ElasticsearchClient;
@@ -303,9 +304,8 @@ export class WorkflowContextManager {
    * request for authentication and propagating event-chain headers so the receiving handler
    * keeps the same chain-depth context.
    *
-   * The transport (currently `fetch`) is an implementation detail; the public surface is
-   * intentionally narrow so it can be swapped to an in-process call later without affecting
-   * callers. Throws on non-2xx responses.
+   * The transport (Core's HTTP self client) is an implementation detail; the public surface is
+   * intentionally narrow so it can change without affecting callers. Throws on non-2xx responses.
    */
   public async callKibanaApi<T = unknown>(
     params: CallKibanaApiParams
@@ -314,8 +314,8 @@ export class WorkflowContextManager {
       {
         fakeRequest: this.fakeRequest,
         coreStart: this.coreStart,
-        cloudSetup: this.dependencies.cloudSetup,
         workflowRunId: this.workflowExecutionState.getWorkflowExecution().id,
+        spaceId: this.getWorkflowSpaceId(),
       },
       params
     );
@@ -340,7 +340,7 @@ export class WorkflowContextManager {
 
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
+    return buildWorkflowRenderContext(workflowExecution, this.coreStart, this.dependencies);
   }
 
   private getRenderingContext(value: unknown): StepContext {
@@ -514,6 +514,11 @@ export class WorkflowContextManager {
         ...(contextOverride.workflow || {}),
       };
 
+      stepContext.variables = {
+        ...stepContext.variables,
+        ...(contextOverride.variables || {}),
+      };
+
       if (!stepContext.foreach) {
         stepContext.foreach = contextOverride.foreach;
       }
@@ -527,9 +532,7 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
-    let scopeStack = WorkflowScopeStack.fromStackFrames(
-      this.workflowExecutionState.getWorkflowExecution().scopeStack
-    );
+    let scopeStack = WorkflowScopeStack.fromStackFrames(this.stackFrames);
 
     const executionId = this.workflowExecutionState.getWorkflowExecution().id;
     const scopeEntries: Array<ScopeEntry> = [];

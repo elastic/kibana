@@ -5,72 +5,111 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiBadge,
-  EuiDescriptionList,
-  EuiEmptyPrompt,
+  EuiButton,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiProgress,
+  EuiScreenReaderOnly,
   useEuiTheme,
 } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { useSelector } from '@xstate/react';
 import {
-  Background,
-  Controls,
-  ReactFlow,
-  ReactFlowProvider,
   useEdgesState,
   useNodesState,
-  type Edge,
-  type Node,
+  type NodeChange,
   type NodeMouseHandler,
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { buildClassicStreamsGraph } from './build_graph';
-import { CanvasContextMenu, type ContextMenuPosition } from './canvas_context_menu';
-import { canvasEdgeTypes, canvasNodeTypes } from './registry';
-import type { ClassicCanvasNode } from './types';
+import {
+  CanvasContextMenu,
+  type CanvasContextMenuTarget,
+  type ContextMenuPosition,
+} from './canvas_context_menu';
+import { CanvasEmptyState } from './canvas_empty_state';
+import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
+import { CanvasToolbar } from './canvas_toolbar';
+import { applyLayout } from './layout';
+import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
+import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
+import { useCanvasHistory } from './use_canvas_history';
+import { StreamFlyout, type StreamFlyoutTabId } from '../../../stream_flyout';
+import {
+  DESTINATION_NODE_TYPE,
+  SOURCE_NODE_TYPE,
+  type ClassicCanvasGraph,
+  type ClassicCanvasNode,
+  type SourceNode,
+} from './types';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
+import {
+  CanvasStateContextProvider,
+  useCanvasEvents,
+  useCanvasHasUnsavedChanges,
+  useCanvasIsInitializing,
+  useCanvasIsSaving,
+  useCanvasIsUnitUnavailable,
+  useCanvasNodePositions,
+  useCanvasSourcesRef,
+  useCanvasUrlRef,
+} from './state_management';
+import {
+  useSourceApiKeyGenerationDeps,
+  useSourceEnvironmentLoader,
+  useSources,
+} from '../../../streams_layout/sources/sources_context';
+import type { SourceType, SourceViewModel } from '../../../streams_layout/sources/types';
+import { SOURCE_TYPE_CONFIG_BY_TYPE } from '../../../streams_layout/sources/source_type_config';
+import { CreateSourceModal } from '../../../streams_layout/sources/create_source_modal';
+import { SourceDetailsFlyout } from '../../../streams_layout/sources/source_details_flyout';
 
-interface StreamDetailCanvasProps {
-  definition: Streams.ingest.all.GetResponse;
+const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
+// Temporarily hidden until users can create sources (endpoints), pipelines, destinations...
+const SHOW_TOOLBAR = false;
+const SOURCE_TYPE_ICONS: Record<SourceType, IconType> = {
+  async_bulk: 'logoElasticsearch',
+  bulk: 'logoElasticsearch',
+  otlp: 'logoObservability',
+  es_otlp: 'logoObservability',
+  prometheus_remote_write: 'logoPrometheus',
+  es_prometheus_remote_write: 'logoPrometheus',
+};
+
+interface CanvasContextMenuState {
+  position: ContextMenuPosition;
+  target: CanvasContextMenuTarget;
 }
-
-const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
-  position: relative;
-  height: calc(100vh - 230px);
-  min-height: 520px;
-  background: ${euiTheme.colors.backgroundBaseSubdued};
-`;
 
 /**
- * For classic streams the canvas renders every classic stream as an inferred
- * source -> destination pair, so the content is the same regardless of which
- * classic stream's tab is open. Wired (and any other) streams keep the mock
- * canvas until their topology is wired to real data.
+ * Renders every classic stream as an inferred source -> destination pair. Wired
+ * streams are not represented yet and will join the graph once their topology is
+ * wired to real data.
  */
-export function StreamDetailCanvas({ definition }: StreamDetailCanvasProps) {
-  if (Streams.ClassicStream.GetResponse.is(definition)) {
-    return <ClassicStreamsCanvas />;
-  }
+export function StreamsCanvas() {
+  const { core } = useKibana();
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
+  const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
+  const loadSourceEnvironment = useSourceEnvironmentLoader();
 
-  return <MockStreamCanvas streamName={definition.stream.name} />;
+  return (
+    <CanvasStateContextProvider
+      core={core}
+      urlStateStorageContainer={urlStateStorageContainer}
+      apiKeyGenerationDeps={apiKeyGenerationDeps}
+      loadSourceEnvironment={loadSourceEnvironment}
+    >
+      <StreamsCanvasInner />
+    </CanvasStateContextProvider>
+  );
 }
 
-function ClassicStreamsCanvas() {
+function StreamsCanvasInner() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
@@ -79,42 +118,283 @@ function ClassicStreamsCanvas() {
       },
     },
   } = useKibana();
+  const { flyoutName } = useCanvasUrlRef();
+  const { openFlyout, closeFlyout, selectTab, updateNodePositions, saveUnit } = useCanvasEvents();
+  const hasUnsavedChanges = useCanvasHasUnsavedChanges();
+  const isSaving = useCanvasIsSaving();
+  const isInitializing = useCanvasIsInitializing();
+  const isUnitUnavailable = useCanvasIsUnitUnavailable();
+  const nodePositions = useCanvasNodePositions();
+  const nodePositionsRef = useRef(nodePositions);
+  useEffect(() => {
+    nodePositionsRef.current = nodePositions;
+  }, [nodePositions]);
+  const sourcesActorRef = useCanvasSourcesRef();
+  const isSourceEnvironmentLoading = useSelector(sourcesActorRef, (state) =>
+    state.matches({ environment: 'loading' })
+  );
+  const hasReceivedUnit = useSelector(sourcesActorRef, (state) => state.context.hasReceivedUnit);
+  const sourcesController = useSources({ sourcesActorRef });
+  const {
+    sources,
+    selectedSource,
+    isCreateModalOpen,
+    unconfiguredNodeIds,
+    openCreateModal,
+    closeCreateModal,
+    openSourceFlyout,
+    closeSourceFlyout,
+  } = sourcesController;
 
-  const { value, loading } = useStreamsAppFetch(
+  const { value, loading, refresh } = useStreamsAppFetch(
     ({ signal }) => streamsRepositoryClient.fetch('GET /internal/streams/classic', { signal }),
     [streamsRepositoryClient]
   );
 
-  const graph = useMemo(() => buildClassicStreamsGraph(value?.streams ?? []), [value]);
+  const openFlyoutTab = useCallback(
+    (name: string, initialTab: StreamFlyoutTabId = 'overview') => {
+      openFlyout(name);
+      selectTab(initialTab);
+    },
+    [openFlyout, selectTab]
+  );
+
+  const graph = useMemo<ClassicCanvasGraph>(() => {
+    const nextGraph = buildClassicStreamsGraph(value?.streams ?? []);
+    const configuredSourceNodes = sources.map(buildConfiguredSourceNode);
+    const unconfiguredSourceNodes = unconfiguredNodeIds.map(buildUnconfiguredSourceNode);
+    const graphNodes = [
+      ...configuredSourceNodes,
+      ...unconfiguredSourceNodes,
+      ...nextGraph.nodes.map(
+        (node): ClassicCanvasNode =>
+          node.type === DESTINATION_NODE_TYPE
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  onProcessingClick: (streamName: string) =>
+                    openFlyoutTab(streamName, 'processing'),
+                },
+              }
+            : node
+      ),
+    ];
+    return {
+      ...nextGraph,
+      nodes: applyLayout(graphNodes, nextGraph.edges),
+    };
+  }, [openFlyoutTab, sources, unconfiguredNodeIds, value]);
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
-  // Positions reset to the inferred layout whenever the fetched streams change.
-  const [nodes, setNodes, onNodesChange] = useNodesState(graph.nodes);
+  // Positions and undo history reset only when the set of node ids changes
+  // (streams or configured sources added/removed). Metadata-only updates
+  // (e.g. hasProcessing after a save) are merged onto the live nodes so a
+  // user's in-progress tidy or keyboard move is not wiped.
+  const [nodes, setNodes, applyNodesChange] = useNodesState(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
+  const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
+  const { record, undo, redo, reset, canUndo, canRedo } = useCanvasHistory({
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+  });
+  const graphNodeIdsRef = useRef('');
 
   useEffect(() => {
-    setNodes(graph.nodes);
+    const nextNodeIds = getGraphNodeIds(graph.nodes);
+    if (graphNodeIdsRef.current === nextNodeIds) {
+      setNodes((current) => syncCanvasNodeMetadata(current, graph.nodes));
+      return;
+    }
+    graphNodeIdsRef.current = nextNodeIds;
+
+    setNodes(
+      graph.nodes.map((node) => {
+        const storedPosition = nodePositionsRef.current[node.id];
+        return storedPosition ? { ...node, position: storedPosition } : node;
+      })
+    );
     setEdges(graph.edges);
-  }, [graph, setNodes, setEdges]);
+    reset();
+  }, [graph, setNodes, setEdges, reset]);
 
-  const [contextMenuPosition, setContextMenuPosition] = useState<ContextMenuPosition | null>(null);
+  // Tracks whether a pointer drag is in progress so we snapshot each gesture
+  // exactly once.
+  const isPointerDraggingRef = useRef(false);
 
-  const closeContextMenu = useCallback(() => setContextMenuPosition(null), []);
+  const onNodesChange = useCallback(
+    (changes: Array<NodeChange<ClassicCanvasNode>>) => {
+      const positionChanges = changes.filter((change) => change.type === 'position');
+      const isDragStart = positionChanges.some((change) => 'dragging' in change && change.dragging);
+      const isDragEnd = positionChanges.some(
+        (change) => 'dragging' in change && change.dragging === false
+      );
 
-  const onNodeContextMenu = useCallback<NodeMouseHandler<ClassicCanvasNode>>((event) => {
-    event.preventDefault();
-    setContextMenuPosition({ x: event.clientX, y: event.clientY });
-  }, []);
+      let shouldRecord = false;
+      if (isDragStart) {
+        // First move of a pointer drag: snapshot the pre-drag state once.
+        if (!isPointerDraggingRef.current) {
+          isPointerDraggingRef.current = true;
+          shouldRecord = true;
+        }
+      } else if (isDragEnd) {
+        if (isPointerDraggingRef.current) {
+          // Ends a pointer drag; already snapshotted at drag start.
+          isPointerDraggingRef.current = false;
+        } else {
+          // A keyboard-driven move with no preceding drag.
+          shouldRecord = true;
+        }
+      }
 
-  const onPaneContextMenu = useCallback(
-    (event: MouseEvent | React.MouseEvent) => {
+      if (shouldRecord) {
+        record();
+      }
+      const completedPositions = Object.fromEntries(
+        positionChanges.flatMap((change) =>
+          'position' in change && change.position && change.dragging === false
+            ? [[change.id, change.position]]
+            : []
+        )
+      );
+      if (Object.keys(completedPositions).length > 0) {
+        updateNodePositions(completedPositions);
+      }
+      applyNodesChange(changes);
+    },
+    [applyNodesChange, record, updateNodePositions]
+  );
+
+  const closeContextMenu = useCallback(() => setContextMenu(null), []);
+
+  // A single node has no tidy action, so suppress the native menu without
+  // opening ours. Should be updated once we have more actions
+  const onNodeContextMenu = useCallback<NodeMouseHandler<ClassicCanvasNode>>(
+    (event) => {
       event.preventDefault();
       closeContextMenu();
     },
     [closeContextMenu]
   );
 
-  if (loading && !value) {
+  const onPaneContextMenu = useCallback((event: MouseEvent | React.MouseEvent) => {
+    event.preventDefault();
+    setContextMenu({ position: { x: event.clientX, y: event.clientY }, target: 'pane' });
+  }, []);
+
+  // React Flow fires this (instead of onNodeContextMenu) when the right-click
+  // lands on the multi-selection overlay. Only offer "Tidy up selection" for a
+  // genuine multi-selection (two or more nodes).
+  const onSelectionContextMenu = useCallback(
+    (event: React.MouseEvent, selectedNodes: ClassicCanvasNode[]) => {
+      event.preventDefault();
+      if (selectedNodes.length < 2) {
+        closeContextMenu();
+        return;
+      }
+      setContextMenu({ position: { x: event.clientX, y: event.clientY }, target: 'selection' });
+    },
+    [closeContextMenu]
+  );
+
+  const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>(
+    (event, node) => {
+      if (node.type === SOURCE_NODE_TYPE && node.data.sourceId && !event.shiftKey) {
+        event.preventDefault();
+        openSourceFlyout(node.data.sourceId);
+        return;
+      }
+      if (node.type === SOURCE_NODE_TYPE && node.data.unconfiguredNodeId && !event.shiftKey) {
+        event.preventDefault();
+        openCreateModal(node.data.unconfiguredNodeId);
+        return;
+      }
+      if (node.type === 'destination' && !event.shiftKey) {
+        event.preventDefault();
+        openFlyoutTab(node.data.streamName);
+      }
+    },
+    [openCreateModal, openFlyoutTab, openSourceFlyout]
+  );
+
+  const reopenContextMenu = useCallback(
+    (position: ContextMenuPosition) => setContextMenu({ position, target: 'pane' }),
+    []
+  );
+
+  // Tidy the whole graph (pane) or just the current multi-selection, snapshotting
+  // first so it undoes as one step.
+  const onTidyUp = useCallback(() => {
+    if (!contextMenu) {
+      return;
+    }
+    const { target } = contextMenu;
+    record();
+    setNodes((current) => {
+      if (target === 'pane') {
+        return applyLayout(current, edges);
+      }
+      const selectedIds = new Set(current.filter((node) => node.selected).map((node) => node.id));
+      return applyLayout(current, edges, { onlyIds: selectedIds });
+    });
+    closeContextMenu();
+  }, [contextMenu, record, setNodes, edges, closeContextMenu]);
+
+  // Guarded so keyboard shortcuts do not fire when there is nothing to undo/redo.
+  const handleUndo = useCallback(() => {
+    if (!canUndo) {
+      return;
+    }
+    undo();
+  }, [canUndo, undo]);
+
+  const handleRedo = useCallback(() => {
+    if (!canRedo) {
+      return;
+    }
+    redo();
+  }, [canRedo, redo]);
+
+  // Escape closes the context menu and clears any node selection.
+  const onEscape = useCallback(() => {
+    closeContextMenu();
+    setNodes((current) =>
+      current.some((node) => node.selected)
+        ? current.map((node) => (node.selected ? { ...node, selected: false } : node))
+        : current
+    );
+  }, [closeContextMenu, setNodes]);
+
+  const onEnter = useCallback(() => {
+    const selected = nodes.filter((node) => node.selected);
+    // Disregard if more than one node is selected for whatever reason.
+    if (selected.length === 1) {
+      const selectedNode = selected[0];
+      if (selectedNode.type === SOURCE_NODE_TYPE && selectedNode.data.sourceId) {
+        openSourceFlyout(selectedNode.data.sourceId);
+      }
+      if (selectedNode.type === SOURCE_NODE_TYPE && selectedNode.data.unconfiguredNodeId) {
+        openCreateModal(selectedNode.data.unconfiguredNodeId);
+      }
+      if (selectedNode.type === 'destination') {
+        openFlyoutTab(selectedNode.data.streamName);
+      }
+    }
+  }, [nodes, openCreateModal, openFlyoutTab, openSourceFlyout]);
+
+  useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
+
+  // Hold the spinner until classic streams, the unit, the source environment,
+  // and the first unit.loaded sync have all settled. Otherwise the graph
+  // remounts mid-interaction and undo history is wiped.
+  if (
+    (loading && !value) ||
+    isInitializing ||
+    isSourceEnvironmentLoading ||
+    (!hasReceivedUnit && !isUnitUnavailable)
+  ) {
     return (
       <EuiFlexGroup
         justifyContent="center"
@@ -126,235 +406,141 @@ function ClassicStreamsCanvas() {
     );
   }
 
-  if (graph.nodes.length === 0) {
-    return (
-      <EuiEmptyPrompt
-        iconType="graphApp"
-        data-test-subj="streamsCanvasEmptyPrompt"
-        title={
-          <h2>
-            {i18n.translate('xpack.streams.canvas.noClassicStreamsTitle', {
-              defaultMessage: 'No classic streams',
+  return (
+    <div
+      css={css`
+        display: flex;
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+        flex-direction: column;
+      `}
+    >
+      {SHOW_TOOLBAR && (
+        <EuiFlexGroup
+          responsive={false}
+          justifyContent="flexEnd"
+          css={css`
+            flex: 0 0 auto;
+            padding: ${euiTheme.size.m};
+            border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+            background: ${euiTheme.colors.backgroundBasePlain};
+          `}
+        >
+          <EuiButton
+            size="s"
+            fill
+            onClick={saveUnit}
+            isDisabled={!hasUnsavedChanges || isSaving}
+            isLoading={isSaving}
+            data-test-subj="streamsCanvasSaveChanges"
+          >
+            {i18n.translate('xpack.streams.canvas.saveChangesButtonLabel', {
+              defaultMessage: 'Save changes',
             })}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate('xpack.streams.canvas.noClassicStreamsBody', {
-              defaultMessage: 'Classic streams appear here as source to destination flows.',
+          </EuiButton>
+        </EuiFlexGroup>
+      )}
+      <CanvasShell<ClassicCanvasNode>
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onNodeClick={onNodeClick}
+        onNodeContextMenu={onNodeContextMenu}
+        onPaneContextMenu={onPaneContextMenu}
+        onSelectionContextMenu={onSelectionContextMenu}
+        ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {
+          defaultMessage: 'Streams canvas',
+        })}
+        ariaDescribedById={KEYBOARD_INSTRUCTIONS_ID}
+      >
+        {loading && (
+          <EuiProgress
+            size="xs"
+            color="primary"
+            position="absolute"
+            data-test-subj="streamsCanvasRefreshing"
+            aria-label={i18n.translate('xpack.streams.canvas.refreshingLabel', {
+              defaultMessage: 'Refreshing streams',
+            })}
+          />
+        )}
+        {nodes.length === 0 && <CanvasEmptyState />}
+        {flyoutName && (
+          <StreamFlyout name={flyoutName} onClose={closeFlyout} refreshStreams={refresh} />
+        )}
+        {selectedSource && (
+          <SourceDetailsFlyout
+            sources={sourcesController}
+            source={selectedSource}
+            onClose={closeSourceFlyout}
+          />
+        )}
+        {isCreateModalOpen && (
+          <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
+        )}
+        <EuiScreenReaderOnly>
+          <p id={KEYBOARD_INSTRUCTIONS_ID}>
+            {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
+              defaultMessage:
+                'Use Tab to move between nodes. Use the arrow keys to reposition the focused node. Press Control or Command plus Z to undo, add Shift to redo. Press Escape to close menus and clear the selection.',
             })}
           </p>
-        }
-      />
-    );
-  }
-
-  return (
-    <ReactFlowProvider>
-      <EuiPanel
-        hasShadow={false}
-        hasBorder={false}
-        paddingSize="none"
-        css={getCanvasContainerStyles(euiTheme)}
-        data-test-subj="streamsCanvasTab"
-      >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodeContextMenu={onNodeContextMenu}
-          onPaneContextMenu={onPaneContextMenu}
-          nodeTypes={canvasNodeTypes}
-          edgeTypes={canvasEdgeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-          nodesConnectable={false}
-        >
-          <Background />
-          <Controls showInteractive={false} />
-        </ReactFlow>
-        <CanvasContextMenu position={contextMenuPosition} onClose={closeContextMenu} />
-      </EuiPanel>
-    </ReactFlowProvider>
+        </EuiScreenReaderOnly>
+        <CanvasToolbar
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          onAddSource={openCreateModal}
+          canUndo={canUndo}
+          canRedo={canRedo}
+        />
+        <CanvasContextMenu
+          position={contextMenu?.position ?? null}
+          target={contextMenu?.target ?? 'pane'}
+          onTidyUp={onTidyUp}
+          onReopen={reopenContextMenu}
+          onClose={closeContextMenu}
+        />
+      </CanvasShell>
+    </div>
   );
 }
 
-type MockCanvasNodeType = 'source' | 'pipeline' | 'route' | 'destination';
-
-interface MockCanvasNodeData extends Record<string, unknown> {
-  label: string;
-  type: MockCanvasNodeType;
-  description: string;
-  status: string;
-}
-
-type MockCanvasNode = Node<MockCanvasNodeData>;
-type MockCanvasEdge = Edge;
-
-const nodeTypeLabels: Record<MockCanvasNodeType, string> = {
-  source: i18n.translate('xpack.streams.canvas.nodeType.source', {
-    defaultMessage: 'Source',
+const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => ({
+  id: `configured-source-${source.id}`,
+  type: SOURCE_NODE_TYPE,
+  position: { x: 0, y: 0 },
+  ariaLabel: i18n.translate('xpack.streams.canvas.configuredSourceNode.ariaLabel', {
+    defaultMessage: 'Source: {name}, {type}',
+    values: { name: source.name ?? source.id, type: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].label },
   }),
-  pipeline: i18n.translate('xpack.streams.canvas.nodeType.pipeline', {
-    defaultMessage: 'Pipeline',
+  data: {
+    sourceId: source.id,
+    title: source.name ?? source.id,
+    subtitle: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].shortLabel,
+    iconType: SOURCE_TYPE_ICONS[source.type],
+  },
+});
+
+const buildUnconfiguredSourceNode = (nodeId: string): SourceNode => ({
+  id: nodeId,
+  type: SOURCE_NODE_TYPE,
+  position: { x: 0, y: 0 },
+  ariaLabel: i18n.translate('xpack.streams.canvas.unconfiguredSourceNode.ariaLabel', {
+    defaultMessage: 'New source. Click to configure.',
   }),
-  route: i18n.translate('xpack.streams.canvas.nodeType.route', {
-    defaultMessage: 'Route',
-  }),
-  destination: i18n.translate('xpack.streams.canvas.nodeType.destination', {
-    defaultMessage: 'Destination',
-  }),
-};
-
-function MockStreamCanvas({ streamName }: { streamName: string }) {
-  const { euiTheme } = useEuiTheme();
-  const [selectedNode, setSelectedNode] = useState<MockCanvasNode | null>(null);
-
-  const nodes = useMemo<MockCanvasNode[]>(
-    () => [
+  data: {
+    unconfiguredNodeId: nodeId,
+    configurationLabel: i18n.translate(
+      'xpack.streams.canvas.unconfiguredSourceNode.configurationLabel',
       {
-        id: 'source-default',
-        position: { x: 0, y: 120 },
-        data: {
-          label: 'Default source',
-          type: 'source',
-          description: i18n.translate('xpack.streams.canvas.mockSourceDescription', {
-            defaultMessage: 'Managed input endpoint where data enters the topology.',
-          }),
-          status: i18n.translate('xpack.streams.canvas.mockStatus.live', {
-            defaultMessage: 'Live',
-          }),
-        },
-      },
-      {
-        id: 'pipeline-default',
-        position: { x: 280, y: 120 },
-        data: {
-          label: 'Processing',
-          type: 'pipeline',
-          description: i18n.translate('xpack.streams.canvas.mockPipelineDescription', {
-            defaultMessage:
-              'Streamlang processing placement for this stream. This will house what used to be the Processing tab.',
-          }),
-          status: i18n.translate('xpack.streams.canvas.mockStatus.mocked', {
-            defaultMessage: 'Mocked',
-          }),
-        },
-      },
-      {
-        id: 'route-default',
-        position: { x: 560, y: 120 },
-        data: {
-          label: 'Routing',
-          type: 'route',
-          description: i18n.translate('xpack.streams.canvas.mockRouteDescription', {
-            defaultMessage:
-              'Conditional path selection or fan-out rules. This will house what used to be the Partitioning tab.',
-          }),
-          status: i18n.translate('xpack.streams.canvas.mockStatus.mocked', {
-            defaultMessage: 'Mocked',
-          }),
-        },
-      },
-      {
-        id: 'destination-default',
-        position: { x: 840, y: 120 },
-        data: {
-          label: streamName,
-          type: 'destination',
-          description: i18n.translate('xpack.streams.canvas.mockDestinationDescription', {
-            defaultMessage: 'Elasticsearch destination (v0) for indexed data.',
-          }),
-          status: i18n.translate('xpack.streams.canvas.mockStatus.active', {
-            defaultMessage: 'Active',
-          }),
-        },
-      },
-    ],
-    [streamName]
-  );
-
-  const edges = useMemo<MockCanvasEdge[]>(
-    () => [
-      { id: 'source-pipeline', source: 'source-default', target: 'pipeline-default' },
-      { id: 'pipeline-route', source: 'pipeline-default', target: 'route-default' },
-      { id: 'route-destination', source: 'route-default', target: 'destination-default' },
-    ],
-    []
-  );
-
-  const handleNodeClick = useCallback<NodeMouseHandler<MockCanvasNode>>((_event, node) => {
-    setSelectedNode(node);
-  }, []);
-
-  return (
-    <ReactFlowProvider>
-      <EuiPanel
-        hasShadow={false}
-        hasBorder={false}
-        paddingSize="none"
-        css={getCanvasContainerStyles(euiTheme)}
-        data-test-subj="streamsCanvasTab"
-      >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-          onNodeClick={handleNodeClick}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          elementsSelectable
-        >
-          <Background />
-          <Controls />
-        </ReactFlow>
-      </EuiPanel>
-      {selectedNode && (
-        <EuiFlyout
-          onClose={() => setSelectedNode(null)}
-          size="s"
-          data-test-subj="streamsCanvasNodeFlyout"
-          aria-labelledby="streamsCanvasNodeFlyoutTitle"
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h2 id="streamsCanvasNodeFlyoutTitle">{selectedNode.data.label}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{nodeTypeLabels[selectedNode.data.type]}</EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiText size="s">
-              <p>{selectedNode.data.description}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiDescriptionList
-              type="column"
-              listItems={[
-                {
-                  title: i18n.translate('xpack.streams.canvas.nodeFlyout.typeLabel', {
-                    defaultMessage: 'Type',
-                  }),
-                  description: nodeTypeLabels[selectedNode.data.type],
-                },
-                {
-                  title: i18n.translate('xpack.streams.canvas.nodeFlyout.statusLabel', {
-                    defaultMessage: 'Status',
-                  }),
-                  description: selectedNode.data.status,
-                },
-              ]}
-            />
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      )}
-    </ReactFlowProvider>
-  );
-}
+        defaultMessage: 'Click to configure',
+      }
+    ),
+    title: i18n.translate('xpack.streams.canvas.unconfiguredSourceNode.title', {
+      defaultMessage: 'New source',
+    }),
+    subtitle: '---',
+  },
+});

@@ -6,9 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, type FC, type PropsWithChildren } from 'react';
-import { configureStore, createSlice } from 'redux-toolkit-v1';
-import { useDispatch, Provider } from 'react-redux-v7';
-import { bindActionCreators } from 'redux-v4';
+import { configureStore, createSlice, bindActionCreators } from '@reduxjs/toolkit';
+import { useDispatch, Provider } from 'react-redux';
 import useMount from 'react-use/lib/useMount';
 
 import type { TransformConfigUnion } from '../../../../../common/types/transform';

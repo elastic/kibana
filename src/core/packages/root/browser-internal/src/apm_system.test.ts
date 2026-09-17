@@ -15,6 +15,8 @@ import { init, apm, type Transaction } from '@elastic/apm-rum';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { ApmSystem } from './apm_system';
+import { ebtSpanFilter } from './filters/ebt_span_filter';
+import { ignoredErrorsFilter } from './filters/ignored_errors_filter';
 
 const initMock = init as jest.Mocked<typeof init>;
 const apmMock = apm as DeeplyMockedKeys<typeof apm>;
@@ -42,6 +44,13 @@ describe('ApmSystem', () => {
       const apmSystem = new ApmSystem({ active: true, globalLabels: { alpha: 'one' } });
       await apmSystem.setup();
       expect(apm.addLabels).toHaveBeenCalledWith({ alpha: 'one' });
+    });
+
+    it('registers the payload filters', async () => {
+      const apmSystem = new ApmSystem({ active: true });
+      await apmSystem.setup();
+      expect(apmMock.addFilter).toHaveBeenCalledWith(ebtSpanFilter);
+      expect(apmMock.addFilter).toHaveBeenCalledWith(ignoredErrorsFilter);
     });
 
     describe('manages the page load transaction', () => {
@@ -160,6 +169,10 @@ describe('ApmSystem', () => {
       });
 
       it('sets a low-cardinality name on the page load transaction when closing it', async () => {
+        const locationSpy = jest.spyOn(window, 'location', 'get').mockReturnValue({
+          pathname: '/app/myapp/some/raw/path',
+        } as Location);
+
         const apmSystem = new ApmSystem({ active: true });
         const currentAppId$ = new Subject<string>();
         const mockTransaction: MockedKeys<Transaction> = {
@@ -182,6 +195,41 @@ describe('ApmSystem', () => {
         currentAppId$.next('myapp');
 
         expect(mockTransaction.name).toBe('/app/myapp');
+
+        locationSpy.mockRestore();
+      });
+
+      it('closes non-app page loads with a stable pathname-based name', async () => {
+        const locationSpy = jest.spyOn(window, 'location', 'get').mockReturnValue({
+          pathname: '/login',
+        } as Location);
+
+        const apmSystem = new ApmSystem({ active: true });
+        const currentAppId$ = new Subject<string>();
+        const mockTransaction: MockedKeys<Transaction> = {
+          type: 'page-load',
+          name: '/login',
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          mark: jest.fn(),
+          end: jest.fn(),
+          addLabels: jest.fn(),
+        };
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$,
+          } as any as InternalApplicationStart,
+          executionContext: executionContextServiceMock.createInternalStartContract(),
+        });
+
+        await new Promise<void>((resolve) => queueMicrotask(() => resolve()));
+
+        expect(mockTransaction.name).toBe('/login');
+        expect(mockTransaction.end).toHaveBeenCalledTimes(1);
+
+        locationSpy.mockRestore();
       });
     });
 

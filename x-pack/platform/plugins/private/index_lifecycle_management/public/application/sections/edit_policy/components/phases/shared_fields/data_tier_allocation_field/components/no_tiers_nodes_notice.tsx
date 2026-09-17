@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useKibana } from '../../../../../../../../shared_imports';
 import {
@@ -22,20 +22,22 @@ export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () =
   } = useKibana();
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       data-test-subj="noTiersAvailableUsingNodeAttributesNotice"
       title={noCustomAttributesTitle}
-      color="warning"
-    >
-      <p>
-        {i18n.translate(
-          'xpack.indexLifecycleMgmt.dataTier.noTiersAvailableUsingNodeAttributesDescription',
-          {
-            defaultMessage: 'Unable to allocate data: no available data nodes.',
-          }
-        )}
-      </p>
-      {nodeAllocationMigrationGuidance({ docLinks })}
-    </EuiCallOut>
+      text={
+        <>
+          <p>
+            {i18n.translate(
+              'xpack.indexLifecycleMgmt.dataTier.noTiersAvailableUsingNodeAttributesDescription',
+              {
+                defaultMessage: 'Unable to allocate data: no available data nodes.',
+              }
+            )}
+          </p>
+          {nodeAllocationMigrationGuidance({ docLinks })}
+        </>
+      }
+    />
   );
 };

@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type {
-  PrimitiveRuntimeFieldTypes,
-  RuntimeFieldCompositeType,
-} from '@kbn/data-views-plugin/common';
+import { z } from '@kbn/zod';
 
-export const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
+export const RUNTIME_FIELD_COMPOSITE_TYPE = 'composite' as const;
+export type RuntimeFieldCompositeType = typeof RUNTIME_FIELD_COMPOSITE_TYPE;
+
+export const PRIMITIVE_RUNTIME_FIELD_TYPES = [
   'keyword',
   'long',
   'double',
@@ -22,33 +20,25 @@ export const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
   'ip',
   'boolean',
   'geo_point',
-];
+] as const;
+export type PrimitiveRuntimeFieldTypes = typeof PRIMITIVE_RUNTIME_FIELD_TYPES;
 
-export const RUNTIME_FIELD_COMPOSITE_TYPE: RuntimeFieldCompositeType = 'composite';
+export const RUNTIME_FIELD_TYPES = [
+  ...PRIMITIVE_RUNTIME_FIELD_TYPES,
+  RUNTIME_FIELD_COMPOSITE_TYPE,
+] as const;
 
 export const MAX_NAME_LENGTH = 1000;
 
-export const scriptSchema = schema.maybe(
-  schema.string({
-    minLength: 1,
-    meta: {
-      id: 'kbn-runtime-field-script',
-      title: 'Script',
-      description:
-        "The script that defines the runtime field. This should be a painless script that computes the field value at query time. Runtime fields without a script retrieve values from _source. If the field doesn't exist in _source, a search request returns no value.",
-    },
-  })
-);
+export const scriptSchema = z.string().min(1).optional().meta({
+  id: 'kbn-runtime-field-script',
+  title: 'Script',
+  description:
+    "The script that defines the runtime field. This should be a painless script that computes the field value at query time. Runtime fields without a script retrieve values from _source. If the field doesn't exist in _source, a search request returns no value.",
+});
 
-export const primitiveTypeSchema = schema.oneOf(
-  PRIMITIVE_RUNTIME_FIELD_TYPES.map((type) => schema.literal(type)) as [
-    Type<(typeof PRIMITIVE_RUNTIME_FIELD_TYPES)[number]>
-  ],
-  {
-    meta: {
-      id: 'kbn-runtime-field-type',
-      title: 'Type',
-      description: 'The type of the runtime field (e.g., "keyword", "long", "date").',
-    },
-  }
-);
+export const primitiveTypeSchema = z.enum(PRIMITIVE_RUNTIME_FIELD_TYPES).meta({
+  id: 'kbn-runtime-field-type',
+  title: 'Type',
+  description: 'The type of the runtime field (e.g., "keyword", "long", "date").',
+});

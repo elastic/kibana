@@ -9,12 +9,19 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertAction } from '../../../../server/resources/datastreams/alert_actions';
-import { ALERT_ACTIONS_DATA_STREAM, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
+import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
 
 export interface AlertActionsFilter {
   ruleId?: string;
+  source?: string;
+  groupHash?: string;
   actionTypes?: ReadonlyArray<AlertAction['action_type']>;
+}
+
+export interface AlertActionsCleanUpFilter {
+  ruleId?: string;
 }
 
 /**
@@ -31,8 +38,11 @@ export interface AlertActionsEventsService {
   find: (filter?: AlertActionsFilter) => Promise<AlertAction[]>;
   /** Polls `find(...)` until at least `min` matching actions exist. */
   waitForAtLeast: (min: number, filter?: AlertActionsFilter) => Promise<void>;
-  /** Removes every document from the `.alert-actions` data stream. */
-  cleanUp: () => Promise<void>;
+  /**
+   * Removes documents from the `.alert-actions` data stream.
+   * Pass `ruleId` to delete only that run's actions; omit it to wipe the stream.
+   */
+  cleanUp: (filter?: AlertActionsCleanUpFilter) => Promise<void>;
 }
 
 export const getAlertActionsEventsService = ({
@@ -48,6 +58,8 @@ export const getAlertActionsEventsService = ({
 
       const must: object[] = [];
       if (filter.ruleId) must.push({ term: { rule_id: filter.ruleId } });
+      if (filter.source) must.push({ term: { source: filter.source } });
+      if (filter.groupHash) must.push({ term: { group_hash: filter.groupHash } });
       if (filter.actionTypes) must.push({ terms: { action_type: [...filter.actionTypes] } });
 
       const result = await esClient.search<AlertAction>({
@@ -79,12 +91,12 @@ export const getAlertActionsEventsService = ({
       })
       .toBeGreaterThanOrEqual(min);
 
-  const cleanUp: AlertActionsEventsService['cleanUp'] = () =>
+  const cleanUp: AlertActionsEventsService['cleanUp'] = (filter = {}) =>
     measurePerformanceAsync(log, `dataStream[${ALERT_ACTIONS_DATA_STREAM}].cleanUp`, async () => {
       await esClient.deleteByQuery(
         {
           index: ALERT_ACTIONS_DATA_STREAM,
-          query: { match_all: {} },
+          query: filter.ruleId ? { term: { rule_id: filter.ruleId } } : { match_all: {} },
           refresh: true,
           wait_for_completion: true,
           conflicts: 'proceed',

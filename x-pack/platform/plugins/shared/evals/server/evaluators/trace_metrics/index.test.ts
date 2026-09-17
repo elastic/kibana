@@ -99,12 +99,14 @@ describe('trace metrics evaluators', () => {
     });
   });
 
-  it('returns tool call count from filter aggregation doc_count', async () => {
+  it('returns distinct TOOL span count from the cardinality sub-aggregation', async () => {
     const { esClient, searchMock } = createEsClient();
     searchMock.mockResolvedValue({
       hits: { hits: [] },
       aggregations: {
-        tool_calls: { doc_count: 3 },
+        // 6 raw docs but 3 distinct span ids (spans are mirror-written to multiple
+        // traces data streams); the evaluator must count distinct spans, not docs.
+        tool_calls: { doc_count: 6, distinct_spans: { value: 3 } },
       },
     });
 

@@ -29,7 +29,8 @@ describe('Navigation Tree', () => {
     expect(body.length).toBeGreaterThan(0);
     const homeNode = body[0];
     expect(homeNode).toMatchObject({
-      title: 'Elasticsearch',
+      title: 'Home',
+      icon: 'home',
       link: 'searchHomepage',
     });
   });
@@ -37,6 +38,11 @@ describe('Navigation Tree', () => {
   it('has agent_builder as the first item after home', () => {
     const { body } = createNavigationTree(mockApplication);
     expect(body[1]).toMatchObject({ link: 'agent_builder' });
+  });
+
+  it('has context_engine right after agent_builder', () => {
+    const { body } = createNavigationTree(mockApplication);
+    expect(body[2]).toMatchObject({ link: 'context_engine' });
   });
 
   it('includes Manage jobs link to Stack Management anomaly detection jobs list under ML nav', () => {
@@ -51,6 +57,20 @@ describe('Navigation Tree', () => {
         link: 'management:anomaly_detection',
         title: 'Manage jobs',
       })
+    );
+  });
+
+  it('includes Stack Alerts in Admin and Settings > Alerts and insights', () => {
+    const { footer } = createNavigationTree(mockApplication);
+    const adminAndSettingsNode = footer?.find(
+      (item: { id?: string }) => item.id === 'admin_and_settings'
+    );
+    const alertsSection = adminAndSettingsNode?.children?.find(
+      (item: { id?: string }) => item.id === 'settings_alerts'
+    );
+
+    expect(alertsSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:triggersActionsAlerts' })
     );
   });
 

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, act } from '@testing-library/react';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
 const flushPromises = async () => {
@@ -74,10 +75,9 @@ const defaultData = {
   name: 'My Policy',
   description: 'A test policy',
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
-  matcher: 'rule.id: "abc"',
+  matcher: { tags: ['abc'] },
   groupingMode: 'per_episode' as const,
   throttle: { strategy: 'on_status_change' as const },
-  tags: ['tag1'],
 };
 
 const createAttachment = ({
@@ -85,7 +85,7 @@ const createAttachment = ({
   data,
 }: { origin?: string; data?: Record<string, unknown> } = {}) => ({
   id: 'att-1',
-  type: 'action_policy' as const,
+  type: ACTION_POLICY_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   origin,
@@ -293,17 +293,6 @@ describe('ActionPolicyCanvasContent', () => {
       expect(createButton.disabledReason).toBeDefined();
     });
 
-    it('disables the save button when the matched rule does not exist', async () => {
-      mockGetWorkflow.mockResolvedValue({ id: 'wf-1', name: 'Workflow' });
-      mockGetRule.mockRejectedValue(new Error('Not found'));
-
-      const { registerActionButtons } = await renderCanvas();
-      const buttons = getLastRegisteredButtons(registerActionButtons);
-      const createButton = buttons.find((b) => b.label === 'Create policy')!;
-      expect(createButton.disabled).toBe(true);
-      expect(createButton.disabledReason).toBeDefined();
-    });
-
     it('enables the save button when there are no workflow destinations and no matcher rule', async () => {
       const { registerActionButtons } = await renderCanvas({
         data: { destinations: [], matcher: null },
@@ -328,28 +317,6 @@ describe('ActionPolicyCanvasContent', () => {
       expect(mockGetWorkflow).toHaveBeenCalledWith('wf-1');
       expect(mockGetWorkflow).toHaveBeenCalledWith('wf-2');
       expect(mockGetWorkflow).toHaveBeenCalledTimes(2);
-    });
-
-    it('checks the rule referenced in the matcher via RulesApi.getRule', async () => {
-      await renderCanvas({ data: { matcher: 'rule.id: "my-rule-id"' } });
-
-      expect(mockGetRule).toHaveBeenCalledWith('my-rule-id', expect.any(AbortSignal));
-      expect(mockGetRule).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not check a rule when the matcher has no rule.id clause', async () => {
-      await renderCanvas({ data: { matcher: 'rule.tags: "production"' } });
-
-      expect(mockGetRule).not.toHaveBeenCalled();
-    });
-
-    it('extracts the rule id from the matcher rule.id clause', async () => {
-      await renderCanvas({
-        data: { matcher: 'rule.id: "from-matcher"' },
-      });
-
-      expect(mockGetRule).toHaveBeenCalledWith('from-matcher', expect.any(AbortSignal));
-      expect(mockGetRule).toHaveBeenCalledTimes(1);
     });
   });
 

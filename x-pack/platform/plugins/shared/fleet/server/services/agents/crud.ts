@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
@@ -21,8 +21,8 @@ import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
 import {
-  buildPolicyIdsOrVariantsEsFilter,
   removeVersionSuffixFromPolicyId,
+  buildPolicyBaseIdsWithFallbackEsFilter,
 } from '../../../common/services/version_specific_policies_utils';
 import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 import {
@@ -163,10 +163,12 @@ export async function getAgentTags(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
+    spaceId?: string;
   }
 ): Promise<string[]> {
-  const { kuery, showInactive = false } = options;
-  const filters = [];
+  const { kuery, showInactive = false, spaceId } = options;
+  const namespaceFilters = await getSpaceAwarenessFilterForAgents(spaceId);
+  const filters = [...namespaceFilters];
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -264,18 +266,25 @@ export async function getAgentsByKuery(
 
   // Hides agents enrolled in agentless policies by excluding the first 1000 agentless policy IDs
   // from the search. This limitation is to avoid hitting the `max_clause_count` limit.
-  // In the future, we should hopefully be able to filter agentless agents using metadata:
-  // https://github.com/elastic/elastic-agent/issues/7946
+  // The exclusion is built as an ES DSL `must_not` (using `terms` queries) rather than a KQL
+  // string so that the clause count stays constant (~4 clauses) regardless of how many policy
+  // IDs are in the list. KQL compiles field:(v1 or v2 or …) to N individual `term` clauses,
+  // which would double to ~2001 at the 1000-policy cap.
+  let agentlessExcludeFilter: ReturnType<typeof buildPolicyBaseIdsWithFallbackEsFilter> | null =
+    null;
   if (showAgentless === false) {
     const agentlessPolicies = await agentPolicyService.list(soClient, {
       perPage: 1000,
       kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
     });
     if (agentlessPolicies.items.length > 0) {
-      filters.push(
-        `NOT policy_id: (${agentlessPolicies.items
-          .map((policy) => `"${escapeQuotes(policy.id)}"`)
-          .join(' or ')})`
+      // Use the policy_base_id-with-fallback ES DSL filter so agents whose policy_id carries a
+      // version suffix (e.g. "<uuid>#9.6") are still excluded. The fallback branch covers
+      // agents enrolled by an older fleet-server that did not yet write policy_base_id.
+      // Using buildPolicyBaseIdsWithFallbackEsFilter (terms queries) rather than the KQL
+      // equivalent keeps the clause count at ~4 instead of ~2N.
+      agentlessExcludeFilter = buildPolicyBaseIdsWithFallbackEsFilter(
+        agentlessPolicies.items.map((policy) => policy.id)
       );
     }
   }
@@ -355,7 +364,16 @@ export async function getAgentsByKuery(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort,
-      query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
+      query: (() => {
+        const baseQuery = kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
+        if (!agentlessExcludeFilter) return baseQuery;
+        return {
+          bool: {
+            ...(baseQuery ? { filter: [baseQuery] } : {}),
+            must_not: [agentlessExcludeFilter],
+          },
+        };
+      })(),
       ...(currentPitId
         ? {
             pit: {
@@ -471,6 +489,15 @@ export async function fetchAllAgentsByKuery(
     spaceId?: string;
     runtimeFields?: estypes.SearchRequest['runtime_mappings'];
     showInactive?: boolean;
+    /**
+     * Optional ES `_source` filtering, passed through verbatim.
+     * WARNING: when set, `searchHitToAgent` can only populate the requested fields, so every
+     * other `Agent` property is `undefined` despite its non-optional type. Only use this when
+     * you know exactly which fields the caller reads.
+     */
+    _source?: estypes.SearchRequest['_source'];
+    /** Overrides the ES `fields` param. Defaults to all runtime field keys. */
+    fetchFields?: string[];
   }
 ): Promise<AsyncIterable<Agent[]>> {
   const {
@@ -510,7 +537,8 @@ export async function fetchAllAgentsByKuery(
         rest_total_hits_as_int: true,
         track_total_hits: true,
         runtime_mappings: runtimeFields,
-        fields: Object.keys(runtimeFields),
+        fields: options.fetchFields ?? Object.keys(runtimeFields),
+        ...(options._source !== undefined ? { _source: options._source } : {}),
         sort,
         ...query,
       },
@@ -706,9 +734,7 @@ export async function getAgentVersionsForAgentPolicyIds(
       >({
         query: {
           bool: {
-            // Also matches agents on version-specific variants of the given policies
-            // (e.g. `id#9.2`), which would otherwise be missed by an exact terms match.
-            filter: [buildPolicyIdsOrVariantsEsFilter(agentPolicyIds)],
+            filter: [buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds)],
           },
         },
         index: AGENTS_INDEX,
@@ -716,9 +742,13 @@ export async function getAgentVersionsForAgentPolicyIds(
       })
     );
 
-    // Group by base policy id so version-specific variants roll up under their parent policy.
-    const groupedHits = groupBy(hits, (hit) =>
-      hit._source?.policy_id ? removeVersionSuffixFromPolicyId(hit._source.policy_id) : undefined
+    const groupedHits = groupBy(
+      hits,
+      (hit) =>
+        hit._source?.policy_base_id ??
+        (hit._source?.policy_id
+          ? removeVersionSuffixFromPolicyId(hit._source.policy_id)
+          : undefined)
     );
 
     for (const [policyId, policyHits] of Object.entries(groupedHits)) {
@@ -908,4 +938,36 @@ export async function getSpaceAwarenessFilterForAgents(spaceId: string | undefin
   } else {
     return [`namespaces:"${spaceId}" or namespaces:"${ALL_SPACES_ID}"`];
   }
+}
+
+export async function filterAgentIdsByNamespace(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentIds: string[]
+): Promise<string[]> {
+  if (agentIds.length === 0) {
+    return [];
+  }
+  const spaceId = getCurrentNamespace(soClient);
+  const namespaceFilters = await getSpaceAwarenessFilterForAgents(spaceId);
+  if (namespaceFilters.length === 0) {
+    return agentIds;
+  }
+  const namespaceKueryNode = _joinFilters(namespaceFilters);
+  const result = await retryTransientEsErrors(() =>
+    esClient.search({
+      index: AGENTS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            { terms: { _id: agentIds } },
+            ...(namespaceKueryNode ? [toElasticsearchQuery(namespaceKueryNode)] : []),
+          ],
+        },
+      },
+      _source: false,
+      size: agentIds.length,
+    })
+  );
+  return result.hits.hits.map((hit) => hit._id!);
 }

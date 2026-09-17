@@ -9,9 +9,9 @@
 
 import { once } from 'lodash';
 
+import { z } from '@kbn/zod';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -34,6 +34,9 @@ export function registerUpdateRoute(
     path: `${basePath}/{id}`,
     ...routeConfig,
     summary: `Upsert a dashboard`,
+    // Only the public route carries a curated ID. The dashboard-app route is
+    // internal and keeps its derived one.
+    ...(isDashboardAppRequest ? {} : { operationId: 'upsert-dashboard' }),
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -52,15 +55,15 @@ export function registerUpdateRoute(
       },
       validate: () => ({
         request: {
-          params: schema.object({
-            // Can not validate id at route level
-            // existing dashboards may have invalid "as code" ids
-            id: schema.string({
-              meta: {
+          params: z
+            .object({
+              // Can not validate id at route level
+              // existing dashboards may have invalid "as code" ids
+              id: z.string().meta({
                 description: 'The unique ID of the dashboard to be created or updated',
-              },
-            }),
-          }),
+              }),
+            })
+            .strict(),
           body: getDashboardStateSchema(isDashboardAppRequest),
         },
         response: {
@@ -85,7 +88,7 @@ export function registerUpdateRoute(
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const { body, operation } = await update(
             ctx,
