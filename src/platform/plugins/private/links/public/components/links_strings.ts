@@ -68,14 +68,6 @@ export const LinksStrings = {
         i18n.translate('links.panelEditor.applyButtonLabel', {
           defaultMessage: 'Apply',
         }),
-      getOpenPreviewButtonLabel: () =>
-        i18n.translate('links.panelEditor.openPreviewButtonLabel', {
-          defaultMessage: 'Open preview',
-        }),
-      getRunPreviewButtonLabel: () =>
-        i18n.translate('links.panelEditor.runPreviewButtonLabel', {
-          defaultMessage: 'Run preview',
-        }),
       getSaveToLibraryButtonLabel: () =>
         i18n.translate('links.panelEditor.saveToLibraryButtonLabel', {
           defaultMessage: 'Save to library',

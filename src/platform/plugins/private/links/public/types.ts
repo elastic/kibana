@@ -37,13 +37,11 @@ export type LinksParentApi = HasSerializedChildState<LinksEmbeddableState> &
   PublishesSavedObjectId &
   PublishesTitle &
   PublishesDescription &
-  PublishesUnifiedSearch & {
+  PublishesUnifiedSearch &
+  PresentationContainer &
+  HasType<typeof DASHBOARD_API_TYPE> & {
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
   };
-
-export type LinksDashboardParentApi = LinksParentApi &
-  PresentationContainer &
-  HasType<typeof DASHBOARD_API_TYPE>;
 
 export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   DefaultEmbeddableApi<LinksEmbeddableState> &

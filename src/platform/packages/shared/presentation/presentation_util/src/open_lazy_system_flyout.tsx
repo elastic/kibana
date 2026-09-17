@@ -14,12 +14,13 @@ import { htmlIdGenerator } from '@elastic/eui';
 import {
   createLazyFlyoutLifecycle,
   LazyFlyoutContent,
+  resolvePanelFlyoutDefaults,
   type LoadContentArgs,
 } from './lazy_flyout_common';
 
 const htmlId = htmlIdGenerator('systemFlyoutTitleId');
 
-interface OpenLazySystemFlyoutParams {
+export interface OpenLazySystemFlyoutParams {
   core: CoreStart;
   parentApi?: unknown;
   returnFocus?: () => void;
@@ -32,11 +33,12 @@ export const openLazySystemFlyout = (params: OpenLazySystemFlyoutParams) => {
   const { core, parentApi, returnFocus, loadContent, flyoutProps: allFlyoutProps } = params;
   const { focusedPanelId, ...flyoutProps } = allFlyoutProps ?? {};
   const ariaLabelledBy = flyoutProps['aria-labelledby'] ?? htmlId();
-  const { closeFlyout, setFlyoutRef } = createLazyFlyoutLifecycle({
+  const { closeFlyout, overlayTracker, setFlyoutRef } = createLazyFlyoutLifecycle({
     focusedPanelId,
     parentApi,
     returnFocus,
   });
+  const { type, ownFocus } = resolvePanelFlyoutDefaults(overlayTracker, flyoutProps);
 
   const flyoutRef = core.overlays.openSystemFlyout(
     <LazyFlyoutContent
@@ -48,9 +50,10 @@ export const openLazySystemFlyout = (params: OpenLazySystemFlyoutParams) => {
     />,
     {
       size: 500,
+      type,
       paddingSize: 'm',
       maxWidth: 800,
-      ownFocus: true,
+      ownFocus,
       isResizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazySystemFlyout',

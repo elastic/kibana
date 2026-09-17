@@ -71,10 +71,6 @@ export interface LinksEditorProps {
   isByReference: boolean;
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
   onDraftChange?: (links: ResolvedLink[], layout: LinksLayoutType) => void;
-  isPreviewOpen?: boolean;
-  onOpenPreview?: () => void;
-  onPreview?: (links: ResolvedLink[], layout: LinksLayoutType) => void;
-  isPreviewable?: boolean;
   onCancelEdit?: () => void;
 }
 
@@ -88,10 +84,6 @@ export const LinksEditor = ({
   isByReference,
   flyoutId,
   onDraftChange,
-  isPreviewOpen = true,
-  onOpenPreview,
-  onPreview,
-  isPreviewable,
   onCancelEdit,
 }: LinksEditorProps) => {
   const toasts = coreServices.notifications.toasts;
@@ -105,10 +97,6 @@ export const LinksEditor = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isSaveMenuOpen, setIsSaveMenuOpen] = useState(false);
   const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>(initialLinks ?? []);
-  const [previewedState, setPreviewedState] = useState({
-    links: initialLinks ?? [],
-    layout: initialLayout ?? LINKS_VERTICAL_LAYOUT,
-  });
 
   const isEditingExisting = initialLinks || isByReference;
   const hasChanges = !deepEqual(
@@ -118,8 +106,6 @@ export const LinksEditor = ({
     },
     { links: orderedLinks, layout: currentLayout }
   );
-  const canPreview =
-    isPreviewable ?? !deepEqual(previewedState, { links: orderedLinks, layout: currentLayout });
 
   const saveToLibrary = async () => {
     setIsSaving(true);
@@ -215,28 +201,13 @@ export const LinksEditor = ({
     <>
       <div css={styles.flyoutStyles} ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s" data-test-subj="links--panelEditor--title">
-              <h2>
-                {isEditingExisting
-                  ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
-                  : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {!isPreviewOpen && onOpenPreview ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="inspect"
-                onClick={onOpenPreview}
-                data-test-subj="linksPanelEditorOpenPreviewButton"
-              >
-                {LinksStrings.editor.panelEditor.getOpenPreviewButtonLabel()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+        <EuiTitle size="s" data-test-subj="links--panelEditor--title">
+          <h2>
+            {isEditingExisting
+              ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
+              : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
+          </h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={styles.bodyStyles}>
         <EuiForm fullWidth>
@@ -315,22 +286,6 @@ export const LinksEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              {onPreview ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="success"
-                    data-test-subj="linksPanelEditorRunPreviewButton"
-                    disabled={!canPreview}
-                    iconType="play"
-                    onClick={() => {
-                      onPreview(orderedLinks, currentLayout);
-                      setPreviewedState({ links: orderedLinks, layout: currentLayout });
-                    }}
-                  >
-                    {LinksStrings.editor.panelEditor.getRunPreviewButtonLabel()}
-                  </EuiButton>
-                </EuiFlexItem>
-              ) : null}
               <EuiFlexItem grow={false}>
                 {isByReference ? (
                   <EuiButton

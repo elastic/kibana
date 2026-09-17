@@ -92,9 +92,6 @@ export interface MarkdownFooterProps {
   saveButtonLabel?: string;
   saveDisabledTooltip?: string;
   helpText?: string;
-  onPreview?: () => void;
-  isPreviewable?: boolean;
-  previewButtonLabel?: string;
 }
 
 export const MarkdownFooter = ({
@@ -107,9 +104,6 @@ export const MarkdownFooter = ({
   saveButtonLabel = strings.applyButton,
   saveDisabledTooltip = strings.applyButtonDisabledTooltip,
   helpText = strings.markdownFooterHelpText,
-  onPreview,
-  isPreviewable,
-  previewButtonLabel,
 }: MarkdownFooterProps) => {
   const [saveInProgress, setSaveInProgress] = React.useState(false);
   const styles = useMemoCss(footerStyles);
@@ -150,20 +144,6 @@ export const MarkdownFooter = ({
             {cancelButtonLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        {onPreview && previewButtonLabel ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="success"
-              data-test-subj="markdownEditorRunPreviewButton"
-              disabled={!isPreviewable}
-              iconType="play"
-              onClick={onPreview}
-              size="s"
-            >
-              {previewButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
-        ) : null}
         <EuiFlexItem grow={false}>
           <EuiToolTip content={!isSaveable && !saveInProgress ? saveDisabledTooltip : undefined}>
             <SaveButton

@@ -7,18 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { focusFirstFocusable, getPanelContextMenuTriggerId } from './focus_helpers';
@@ -49,6 +40,22 @@ const resolveAttachedElement = (element: HTMLElement | null): HTMLElement | null
     if (refreshedElement) return refreshedElement;
   }
   return document.body.contains(element) ? element : null;
+};
+
+/**
+ * Resolves the `type` and `ownFocus` flyout props from the overlay tracker (when the flyout is
+ * opened from a dashboard panel) so that both `openLazyFlyout` and `openLazySystemFlyout` produce
+ * consistent push-vs-overlay behaviour without duplicating the logic.
+ */
+export const resolvePanelFlyoutDefaults = (
+  overlayTracker: ReturnType<typeof createLazyFlyoutLifecycle>['overlayTracker'],
+  flyoutProps?: Pick<OverlayFlyoutOpenOptions, 'type' | 'ownFocus'>
+) => {
+  const panelFlyoutType = overlayTracker?.panelFlyoutType;
+  return {
+    type: flyoutProps?.type ?? panelFlyoutType ?? 'push',
+    ownFocus: flyoutProps?.ownFocus ?? panelFlyoutType !== 'overlay',
+  } as const;
 };
 
 export const createLazyFlyoutLifecycle = ({

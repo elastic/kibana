@@ -87,14 +87,8 @@ export interface MarkdownEditorProps {
   onChange?: (value: string) => void;
   footerLabels?: Pick<
     MarkdownFooterProps,
-    | 'cancelButtonLabel'
-    | 'saveButtonLabel'
-    | 'saveDisabledTooltip'
-    | 'helpText'
-    | 'previewButtonLabel'
+    'cancelButtonLabel' | 'saveButtonLabel' | 'saveDisabledTooltip' | 'helpText'
   >;
-  onPreview?: () => void;
-  isPreviewable?: boolean;
   showFooter?: boolean;
 }
 
@@ -109,8 +103,6 @@ export const MarkdownEditor = ({
   uiPlugins = [],
   onChange: onValueChange,
   footerLabels,
-  onPreview,
-  isPreviewable,
   showFooter = true,
 }: MarkdownEditorProps) => {
   const styles = useMemoCss(componentStyles);
@@ -192,8 +184,6 @@ export const MarkdownEditor = ({
           isPreview={isPreview}
           cancelButtonRef={cancelButtonRef}
           isSaveable={isSaveable}
-          onPreview={onPreview}
-          isPreviewable={isPreviewable}
           {...footerLabels}
         />
       ) : null}

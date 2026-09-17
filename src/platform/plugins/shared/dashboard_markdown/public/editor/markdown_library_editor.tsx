@@ -10,22 +10,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
   euiMarkdownLinkValidator,
   getDefaultEuiMarkdownPlugins,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { HasSerializedChildState } from '@kbn/presentation-publishing';
-import { EmbeddableEditorPreview } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableEditorPreview, ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
 import type { MarkdownEmbeddableState, MarkdownByValueState } from '../../server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '../../common';
 import type { MarkdownEditorApi } from '../types';
@@ -38,17 +32,11 @@ const strings = {
   editFlyoutTitle: i18n.translate('dashboardMarkdown.libraryEditor.editFlyoutTitle', {
     defaultMessage: 'Edit markdown',
   }),
-  openPreviewButtonLabel: i18n.translate('dashboardMarkdown.libraryEditor.openPreviewButtonLabel', {
-    defaultMessage: 'Open preview',
-  }),
   cancelButtonLabel: i18n.translate('dashboardMarkdown.libraryEditor.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
   saveButtonLabel: i18n.translate('dashboardMarkdown.libraryEditor.saveButtonLabel', {
     defaultMessage: 'Save',
-  }),
-  runPreviewButtonLabel: i18n.translate('dashboardMarkdown.libraryEditor.runPreviewButtonLabel', {
-    defaultMessage: 'Run preview',
   }),
   saveErrorMessage: i18n.translate('dashboardMarkdown.libraryEditor.saveErrorMessage', {
     defaultMessage: 'Unable to save markdown',
@@ -68,8 +56,6 @@ export const MarkdownLibraryEditor = ({
   };
   closeFlyout: () => void;
 }) => {
-  const isNarrowScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(!isNarrowScreen);
   const [isSaving, setIsSaving] = useState(false);
   const [content, setContent] = useState(initialState.content);
   const settings$ = useMemo(
@@ -78,16 +64,6 @@ export const MarkdownLibraryEditor = ({
   );
   const isInlinePreview$ = useMemo(() => new BehaviorSubject(false), []);
   const [settings, setSettings] = useState(initialState.settings);
-  const [previewState, setPreviewState] = useState<MarkdownByValueState>({
-    content: initialState.content,
-    settings: initialState.settings,
-    title: initialState.title,
-    description: initialState.description,
-  });
-
-  useEffect(() => {
-    if (isNarrowScreen) setIsPreviewOpen(false);
-  }, [isNarrowScreen]);
 
   useEffect(() => {
     const subscription = settings$.subscribe(setSettings);
@@ -115,18 +91,20 @@ export const MarkdownLibraryEditor = ({
     return plugins;
   }, [settings.open_links_in_new_tab]);
 
-  const draftState: MarkdownByValueState = {
-    content,
-    settings,
-    title: initialState.title,
-    description: initialState.description,
-  };
+  // Memoized so that EmbeddableEditorPreview only sees a new object when content actually changes.
+  const draftState = useMemo<MarkdownByValueState>(
+    () => ({
+      content,
+      settings,
+      title: initialState.title,
+      description: initialState.description,
+    }),
+    [content, settings, initialState.title, initialState.description]
+  );
+
   const hasChanges =
     content !== initialState.content ||
     settings.open_links_in_new_tab !== initialState.settings.open_links_in_new_tab;
-  const hasUnpreviewedChanges =
-    content !== previewState.content ||
-    settings.open_links_in_new_tab !== previewState.settings.open_links_in_new_tab;
 
   const save = async () => {
     setIsSaving(true);
@@ -149,24 +127,9 @@ export const MarkdownLibraryEditor = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2>{strings.editFlyoutTitle}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {!isPreviewOpen ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="inspect"
-                onClick={() => setIsPreviewOpen(true)}
-                data-test-subj="markdownLibraryEditorOpenPreviewButton"
-              >
-                {strings.openPreviewButtonLabel}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+        <EuiTitle size="s">
+          <h2>{strings.editFlyoutTitle}</h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         css={css({
@@ -187,50 +150,22 @@ export const MarkdownLibraryEditor = ({
           showFooter={false}
         />
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout} flush="left">
-              {strings.cancelButtonLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="success"
-                  data-test-subj="markdownEditorRunPreviewButton"
-                  disabled={!hasUnpreviewedChanges}
-                  iconType="play"
-                  onClick={() => setPreviewState(draftState)}
-                >
-                  {strings.runPreviewButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="markdownEditorApplyButton"
-                  disabled={!hasChanges || isSaving}
-                  fill
-                  isLoading={isSaving}
-                  onClick={save}
-                >
-                  {strings.saveButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      <ManagedEditorFooter
+        onCancel={closeFlyout}
+        cancelButtonLabel={strings.cancelButtonLabel}
+        onSave={save}
+        saveButtonLabel={strings.saveButtonLabel}
+        isSaveDisabled={!hasChanges}
+        isSaving={isSaving}
+        saveButtonDataTestSubj="markdownEditorApplyButton"
+      />
       <EmbeddableEditorPreview<
         MarkdownEmbeddableState,
         MarkdownEditorApi,
         HasSerializedChildState<MarkdownEmbeddableState>
       >
         type={MARKDOWN_EMBEDDABLE_TYPE}
-        serializedState={previewState}
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
+        serializedState={draftState}
       />
     </>
   );

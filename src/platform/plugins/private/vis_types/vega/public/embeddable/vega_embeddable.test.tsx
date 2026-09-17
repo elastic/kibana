@@ -12,7 +12,7 @@ import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { openLazySystemFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -28,7 +28,7 @@ import { reportVegaRender } from '../lib/vega_render_telemetry';
 import type { VegaByValueState } from '../../server';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
-jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
+jest.mock('@kbn/presentation-util', () => ({ openLazySystemFlyout: jest.fn() }));
 jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
 jest.mock('../lib/extract_index_pattern', () => ({
   extractIndexPatternsFromSpec: jest.fn(async (): Promise<never[]> => []),
@@ -56,7 +56,7 @@ jest.mock('../async_services', () => ({
   },
 }));
 
-const mockOpenLazyFlyout = jest.mocked(openLazyFlyout);
+const mockOpenLazyFlyout = jest.mocked(openLazySystemFlyout);
 const mockReportVegaRender = jest.mocked(reportVegaRender);
 
 describe('vegaEmbeddableFactory', () => {

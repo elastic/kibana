@@ -13,6 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   createLazyFlyoutLifecycle,
   LazyFlyoutContent,
+  resolvePanelFlyoutDefaults,
   type LoadContentArgs,
 } from './lazy_flyout_common';
 
@@ -57,9 +58,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     parentApi,
     returnFocus,
   });
-  const panelFlyoutTypeFromParent = overlayTracker?.panelFlyoutType;
-  const type = flyoutProps?.type ?? panelFlyoutTypeFromParent ?? 'push';
-  const ownFocus = flyoutProps?.ownFocus ?? panelFlyoutTypeFromParent !== 'overlay';
+  const { type, ownFocus } = resolvePanelFlyoutDefaults(overlayTracker, flyoutProps);
 
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(

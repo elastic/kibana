@@ -14,13 +14,19 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import type { HasSerializedChildState, HasSerializableState } from '@kbn/presentation-publishing';
+import { useSearchApi } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { coreServices } from '../services/kibana_services';
 
 export interface EmbeddableEditorPreviewProps<
   SerializedState extends object,
@@ -30,11 +36,22 @@ export interface EmbeddableEditorPreviewProps<
   type: string;
   serializedState: SerializedState;
   getParentApi?: () => ParentApi;
-  isOpen: boolean;
-  onClose: () => void;
   title?: string;
   verticalAlignment?: 'stretch' | 'top';
+  /** When true, renders a preview-local time picker above the embeddable. */
+  showTimePicker?: boolean;
+  /**
+   * Seeds the preview-local time range. The caller should pass
+   * `savedItem.time_range ?? timefilter.getTime()`. Required when `showTimePicker` is set.
+   */
+  initialTimeRange?: TimeRange;
 }
+
+/** Derives a type-safe config object that callers can co-locate with each editor entry point. */
+export type ManagedEditorPreviewConfig = Pick<
+  EmbeddableEditorPreviewProps<never, never, never>,
+  'type' | 'showTimePicker' | 'verticalAlignment'
+>;
 
 const defaultPreviewTitle = i18n.translate('presentationUtil.embeddableEditorPreview.flyoutTitle', {
   defaultMessage: 'Preview',
@@ -49,10 +66,10 @@ export const EmbeddableEditorPreview = <
   type,
   serializedState,
   getParentApi,
-  isOpen,
-  onClose,
   title = defaultPreviewTitle,
   verticalAlignment = 'stretch',
+  showTimePicker,
+  initialTimeRange,
 }: EmbeddableEditorPreviewProps<SerializedState, Api, ParentApi>) => {
   const titleId = useGeneratedHtmlId({ prefix: 'embeddableEditorPreviewTitle' });
   const latestStateRef = useRef(serializedState);
@@ -61,12 +78,30 @@ export const EmbeddableEditorPreview = <
   const [updateError, setUpdateError] = useState<Error>();
   const updateQueueRef = useRef(Promise.resolve());
 
+  // Preview-local time range — seeds from the caller-supplied initial value and never writes back.
+  const [timeRange, setTimeRange] = useState<TimeRange | undefined>(initialTimeRange);
+  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<
+    Array<{ start: string; end: string }>
+  >([]);
+
+  // Stable search subjects for the child embeddable. `useSearchApi` creates them once;
+  // `EmbeddableRenderer` latches `getParentApi()` on mount so subjects must not be recreated.
+  const searchApi = useSearchApi({ timeRange: showTimePicker ? timeRange : undefined });
+
   const parentApi = useMemo(() => {
-    const baseParentApi: HasSerializedChildState<SerializedState> = {
-      getSerializedStateForChild: () => latestStateRef.current,
+    const baseApi: HasSerializedChildState<SerializedState> & Record<string, unknown> = {
+      ...(getParentApi?.() ?? {}),
+      ...searchApi,
+      // When the time picker is shown, override the child's own time_range so that the picker
+      // wins over any per-item saved time_range (fetch.ts resolves `local ?? parent`).
+      getSerializedStateForChild: () =>
+        showTimePicker && timeRange
+          ? ({ ...latestStateRef.current, time_range: timeRange } as SerializedState)
+          : latestStateRef.current,
     };
-    return getParentApi ? getParentApi() : (baseParentApi as ParentApi);
-  }, [getParentApi]);
+    return baseApi as ParentApi;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getParentApi, searchApi]);
 
   useEffect(() => {
     if (!api) return;
@@ -78,17 +113,22 @@ export const EmbeddableEditorPreview = <
       .catch((error: Error) => setUpdateError(error));
   }, [api, serializedState]);
 
-  useEffect(() => {
-    if (!isOpen) setApi(undefined);
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+  const quickRanges = useMemo(() => {
+    return coreServices.uiSettings
+      .get<Array<{ from: string; to: string; display: string }>>('timepicker:quickRanges', [])
+      .map(({ from, to, display }) => ({ start: from, end: to, label: display }));
+  }, []);
+  const dateFormat = coreServices.uiSettings.get<string>(
+    'dateFormat',
+    'MMM D, YYYY @ HH:mm:ss.SSS'
+  );
 
   return (
     <EuiFlyout
       aria-labelledby={titleId}
       data-test-subj="embeddableEditorPreviewFlyout"
-      onClose={onClose}
+      hideCloseButton
+      onClose={() => {}}
       ownFocus={false}
       resizable
       session="inherit"
@@ -96,9 +136,40 @@ export const EmbeddableEditorPreview = <
       flyoutMenuProps={{ title }}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 id={titleId}>{title}</h2>
-        </EuiTitle>
+        {showTimePicker ? (
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2 id={titleId}>{title}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSuperDatePicker
+                compressed
+                start={timeRange?.from ?? 'now-15m'}
+                end={timeRange?.to ?? 'now'}
+                dateFormat={dateFormat}
+                commonlyUsedRanges={quickRanges}
+                recentlyUsedRanges={recentlyUsedRanges}
+                updateButtonProps={{ iconOnly: true, fill: false }}
+                onTimeChange={({ start, end, isInvalid }) => {
+                  if (isInvalid) return;
+                  const next = { from: start, to: end };
+                  setTimeRange(next);
+                  setRecentlyUsedRanges((prev) => [
+                    { start, end },
+                    ...prev.filter((r) => r.start !== start || r.end !== end).slice(0, 9),
+                  ]);
+                }}
+                data-test-subj="embeddableEditorPreviewDatePicker"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiTitle size="s">
+            <h2 id={titleId}>{title}</h2>
+          </EuiTitle>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         css={css({

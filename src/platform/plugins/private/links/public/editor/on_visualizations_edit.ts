@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { openLazySystemFlyout } from '@kbn/presentation-util';
-import type { LinksByValueState } from '../../server';
 import { LinksStrings } from '../components/links_strings';
 import { loadFromLibrary } from '../links_client/load_from_library';
 import { resolveLinks } from '../lib/resolve_links';
@@ -19,7 +17,7 @@ export async function onVisualizationsEdit(refId: string) {
   openLazySystemFlyout({
     core: coreServices,
     loadContent: async ({ closeFlyout }) => {
-      let linksState: LinksByValueState | undefined;
+      let linksState;
       try {
         linksState = await loadFromLibrary(refId);
       } catch (error) {
@@ -27,8 +25,8 @@ export async function onVisualizationsEdit(refId: string) {
         return;
       }
 
-      const { LinksLibraryEditor } = await import('./links_library_editor');
-      return React.createElement(LinksLibraryEditor, {
+      const { getEditorFlyout } = await import('./get_editor_flyout');
+      return getEditorFlyout({
         initialState: {
           refId,
           ...linksState,

@@ -33,10 +33,6 @@ export function getEditorFlyout({
   onCompleteEdit,
   closeFlyout,
   onDraftChange,
-  isPreviewOpen,
-  onOpenPreview,
-  onPreview,
-  isPreviewable,
   onCancelEdit,
 }: {
   initialState?: EditorState;
@@ -44,10 +40,6 @@ export function getEditorFlyout({
   onCompleteEdit?: (newState?: EditorState) => void;
   closeFlyout: () => void;
   onDraftChange?: (links: ResolvedLink[], layout: LinksLayoutType) => void;
-  isPreviewOpen?: boolean;
-  onOpenPreview?: () => void;
-  onPreview?: (links: ResolvedLink[], layout: LinksLayoutType) => void;
-  isPreviewable?: boolean;
   onCancelEdit?: () => void;
 }) {
   const flyoutId = `linksEditorFlyout-${uuidv4()}`;
@@ -106,10 +98,6 @@ export function getEditorFlyout({
       }
       isByReference={Boolean(initialState?.refId)}
       onDraftChange={onDraftChange}
-      isPreviewOpen={isPreviewOpen}
-      onOpenPreview={onOpenPreview}
-      onPreview={onPreview}
-      isPreviewable={isPreviewable}
       onCancelEdit={onCancelEdit}
     />
   );

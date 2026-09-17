@@ -75,15 +75,11 @@ it('calls onSave with current value when Apply clicked', async () => {
 
 it('publishes draft content and supports flyout-specific footer labels', async () => {
   const onChange = jest.fn();
-  const onPreview = jest.fn();
   renderMarkdownEditor({
     onChange,
-    onPreview,
-    isPreviewable: true,
     footerLabels: {
       cancelButtonLabel: 'Cancel',
       saveButtonLabel: 'Save',
-      previewButtonLabel: 'Run preview',
       saveDisabledTooltip: 'No changes',
       helpText: 'Save or cancel.',
     },
@@ -94,8 +90,6 @@ it('publishes draft content and supports flyout-specific footer labels', async (
   expect(onChange).toHaveBeenLastCalledWith(`${testedContent} draft`);
   expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
-  await userEvent.click(screen.getByRole('button', { name: 'Run preview' }));
-  expect(onPreview).toHaveBeenCalledTimes(1);
 });
 
 it('enables Apply when only the open links in new tab setting changes', async () => {

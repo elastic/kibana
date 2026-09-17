@@ -19,7 +19,7 @@ import {
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import type { LinksDashboardParentApi, LinksParentApi } from '../types';
+import type { LinksParentApi } from '../types';
 import type { LinksEmbeddableState } from '../../common';
 import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
@@ -28,22 +28,20 @@ import { getEditorFlyout } from '../editor/get_editor_flyout';
 import { serializeResolvedLinks } from '../lib/resolve_links';
 
 export const isLinksParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
+  apiIsPresentationContainer(parentApi) &&
   apiPublishesSavedObjectId(parentApi) &&
   apiPublishesTitle(parentApi) &&
   apiPublishesDescription(parentApi) &&
   apiPublishesUnifiedSearch(parentApi) &&
   typeof (parentApi as LinksParentApi)?.getSerializedStateForChild === 'function';
 
-export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksDashboardParentApi =>
-  apiIsPresentationContainer(parentApi) && isLinksParentApiCompatible(parentApi);
-
 export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   id: ADD_LINKS_PANEL_ACTION_ID,
   getIconType: () => APP_ICON,
   order: 10,
-  isCompatible: async ({ embeddable }) => isParentApiCompatible(embeddable),
+  isCompatible: async ({ embeddable }) => isLinksParentApiCompatible(embeddable),
   execute: async ({ embeddable, returnFocus }) => {
-    if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
+    if (!isLinksParentApiCompatible(embeddable)) throw new IncompatibleActionError();
 
     openLazyFlyout({
       core: coreServices,

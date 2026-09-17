@@ -25,7 +25,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { openLazySystemFlyout } from '@kbn/presentation-util';
 
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
 import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
@@ -158,7 +158,7 @@ export const getLinksEmbeddableFactory = () => {
         canUnlinkFromLibrary: async () => isByReference,
         hasLibraryItemWithTitle,
         onEdit: async () => {
-          openLazyFlyout({
+          openLazySystemFlyout({
             core: coreServices,
             parentApi,
             loadContent: async ({ closeFlyout }) => {
@@ -175,7 +175,7 @@ export const getLinksEmbeddableFactory = () => {
                   refId,
                 },
                 parentDashboard: parentApi,
-                onPreview: (links, layout) => {
+                onDraftChange: (links, layout) => {
                   layout$.next(layout);
                   resolvedLinks$.next(links);
                 },

@@ -104,33 +104,18 @@ describe('LinksEditor', () => {
     });
   });
 
-  test('publishes the current draft and can reopen a closed preview', async () => {
+  test('fires onDraftChange immediately on mount and again on layout change', async () => {
     const onDraftChange = jest.fn();
-    const onOpenPreview = jest.fn();
-    const onPreview = jest.fn();
-    renderEditor({
-      initialLinks: someLinks,
-      onDraftChange,
-      isPreviewOpen: false,
-      onOpenPreview,
-      onPreview,
-      isPreviewable: true,
-    });
+    renderEditor({ initialLinks: someLinks, onDraftChange });
 
     await waitFor(() =>
       expect(onDraftChange).toHaveBeenLastCalledWith(someLinks, LINKS_VERTICAL_LAYOUT)
     );
-    await userEvent.click(screen.getByTestId('linksPanelEditorOpenPreviewButton'));
-    expect(onOpenPreview).toHaveBeenCalledTimes(1);
-    await userEvent.click(screen.getByTestId('linksPanelEditorRunPreviewButton'));
-    expect(onPreview).toHaveBeenCalledTimes(1);
-    expect(onPreview).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
-  });
 
-  test('disables Run preview until the initial state changes', () => {
-    renderEditor({ initialLinks: someLinks, onPreview: jest.fn() });
-
-    expect(screen.getByTestId('linksPanelEditorRunPreviewButton')).toBeDisabled();
+    await userEvent.click(screen.getByTestId('links--panelEditor--horizontalLayoutBtn'));
+    await waitFor(() =>
+      expect(onDraftChange).toHaveBeenLastCalledWith(someLinks, LINKS_HORIZONTAL_LAYOUT)
+    );
   });
 
   test('reverts an uncommitted edit when the flyout content unmounts', () => {
