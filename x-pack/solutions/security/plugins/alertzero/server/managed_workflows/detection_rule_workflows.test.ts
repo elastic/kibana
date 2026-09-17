@@ -86,6 +86,10 @@ describe('detection rule workflows', () => {
         ['run_rule_tuning', 'workflow.executeAsync'],
       ]);
       expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID);
+      expect(calls[0].with?.inputs).toEqual({
+        autonomy_level: '{{ consts.worker_settings.autonomy }}',
+        analysis_window_days: 14,
+      });
     });
   });
 
@@ -242,9 +246,10 @@ describe('detection rule workflows', () => {
       }
     });
 
-    // The review parks in WAITING_FOR_CHILD while the gate holds the decision for up
-    // to 72h (80h with the gate's own margin); the engine's default 6h workflow
-    // timeout would cancel it under the analyst.
+    // The review parks in WAITING_FOR_CHILD while the gate holds the decision —
+    // up to 72h per park, and the gate's ceiling allows for a second park before
+    // it settles. The engine's default 6h workflow timeout would cancel the
+    // review under the analyst.
     it('outlives the proposal gate it waits on', () => {
       const review = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
@@ -496,7 +501,7 @@ describe('detection rule workflows', () => {
         expect(acknowledged.if).toContain(
           "steps.diagnose_rule.output.structured_output.change_type == 'manual'"
         );
-        expect(acknowledged.if).toContain("steps.propose_manual.output.status == 'approved'");
+        expect(acknowledged.if).toContain("steps.propose_manual.output.decision == 'approved'");
         expect(acknowledged.if).not.toContain('review_tuning');
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
@@ -507,11 +512,12 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // The applied tag must mean the gate actually ran the edit-rule action: it
-      // reports `succeeded` only after the action completed, `approved` for a manual
-      // proposal, `dismissed` otherwise. A run that never proposed matches none of
-      // them, so its alerts stay untagged and a later sweep can retry them.
-      it('derives every decision flag from the gate status', () => {
+      // The applied tag must mean the gate actually ran the edit-rule action, so it
+      // reads `status == 'succeeded'`. What the analyst concluded is a separate axis:
+      // `decision` is `approved` or `dismissed`, and is absent until someone decides
+      // — so a run that never proposed matches none of these, leaving its alerts
+      // untagged for a later sweep to retry.
+      it('derives every decision flag from the gate outcome', () => {
         const decision = reviewSteps.find(
           ({ name }) => name === 'record_proposal_action_decision'
         )!;
@@ -524,13 +530,13 @@ describe('detection rule workflows', () => {
           "steps.propose_action.output.status == 'succeeded'"
         );
         expect(String(flags.approved)).toContain(
-          "steps.propose_manual.output.status == 'approved'"
+          "steps.propose_manual.output.decision == 'approved'"
         );
         expect(String(flags.dismissed)).toContain(
-          "steps.propose_action.output.status == 'dismissed'"
+          "steps.propose_action.output.decision == 'dismissed'"
         );
         expect(String(flags.dismissed)).toContain(
-          "steps.propose_manual.output.status == 'dismissed'"
+          "steps.propose_manual.output.decision == 'dismissed'"
         );
 
         // record_outcome reads from record_apply_results to avoid Liquid parentheses;

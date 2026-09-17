@@ -340,7 +340,7 @@ export class AuthenticationService {
       // credentials — is deliberately left to its owner.
       if (request.isFakeRequest) {
         const authHeaders = await getServiceAccounts()
-          ?.reauthenticateFakeRequest(request)
+          ?.backend.reauthenticateFakeRequest(request)
           .catch(() => null);
         return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
       }
