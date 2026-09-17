@@ -127,6 +127,30 @@ apiTest.describe(
     );
 
     apiTest(
+      'accepts exactly the render limit of integrations and reaches the handler',
+      async ({ apiClient, samlAuth }) => {
+        // The boundary itself must pass schema validation: a stale lower cap would answer 400
+        // here, while a payload of unknown packages that reaches the handler answers 404.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
+
+        const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
+          headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+          body: {
+            ...VALID_RENDER_BODY,
+            integrations: Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS }, (_, i) => ({
+              name: `this_package_does_not_exist_${i}`,
+              policyTemplates: [{ name: 'tpl', enabledInputs: ['input'] }],
+            })),
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(404);
+        expect(response.body.message).toContain('this_package_does_not_exist');
+      }
+    );
+
+    apiTest(
       'returns 404 for an authorized request naming an unknown package',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
