@@ -88,7 +88,7 @@ describe('ImportJsonFlyoutContent', () => {
     expect(screen.getByTestId('testFilePicker')).toBeInTheDocument();
     expect(screen.getByTestId('testTechnicalPreviewBadge')).toBeInTheDocument();
     expect(screen.getByText(/exported from Test application/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'here' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'the Saved Objects page' })).toHaveAttribute(
       'href',
       '/app/management/kibana/objects'
     );
@@ -218,7 +218,7 @@ describe('ImportJsonFlyoutContent', () => {
     await pickFile(VALID_FILE);
     await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
     expect(screen.getByText(/Unsupported properties were removed/)).toBeInTheDocument();
-    expect(screen.getByText(/1 item removed from the imported JSON/)).toBeInTheDocument();
+    expect(screen.getByText(/1 item removed from the imported file/)).toBeInTheDocument();
     expect(screen.queryByTestId('testWarningsList')).not.toBeInTheDocument();
 
     await user.click(screen.getByText('Show details'));
@@ -250,7 +250,7 @@ describe('ImportJsonFlyoutContent', () => {
     expect(screen.getByText('Review import warnings')).toBeInTheDocument();
     expect(
       screen.getByText(
-        /This import references 123 related items. Please ensure these items exist in this cluster or space/
+        /This import references 123 related items. Make sure that these items exist in this cluster or space/
       )
     ).toBeInTheDocument();
     expect(screen.getByText('Showing the first 2.')).toBeInTheDocument();
@@ -258,7 +258,7 @@ describe('ImportJsonFlyoutContent', () => {
 
     await user.click(within(screen.getByTestId('testRelatedItemsAccordion')).getByRole('button'));
     expect(screen.getAllByTestId('testRelatedItemsList')[0]).toBeInTheDocument();
-    expect(screen.getAllByRole('columnheader', { name: 'Item Type' })[0]).toBeInTheDocument();
+    expect(screen.getAllByRole('columnheader', { name: 'Item type' })[0]).toBeInTheDocument();
     expect(screen.getAllByRole('columnheader', { name: 'Item ID' })[0]).toBeInTheDocument();
     expect(screen.getAllByText('data view')[0]).toBeInTheDocument();
     expect(screen.getAllByText('data-view-1')[0]).toBeInTheDocument();
@@ -279,10 +279,10 @@ describe('ImportJsonFlyoutContent', () => {
 
     await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
     expect(screen.getAllByTestId('testWarnings')).toHaveLength(1);
-    expect(screen.getByText(/1 item removed from the imported JSON/)).toBeInTheDocument();
+    expect(screen.getByText(/1 item removed from the imported file/)).toBeInTheDocument();
     expect(
       screen.getByText(
-        /This import references 1 related item. Please ensure these items exist in this cluster or space/
+        /This import references 1 related item. Make sure that these items exist in this cluster or space/
       )
     ).toBeInTheDocument();
 
