@@ -26,6 +26,7 @@ import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installCortexWorkflows } from './lib/managed_workflows/install_cortex_workflows';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
+import { installMemoryWorkflows } from './lib/managed_workflows/install_memory_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
@@ -96,6 +97,7 @@ export class NightshiftInvestigationsPlugin
   private security?: CoreStart['security'];
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
+  private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
 
@@ -112,8 +114,11 @@ export class NightshiftInvestigationsPlugin
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
+    this.memoryEnabled = this.ctx.config.get().memory.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+    }
+    if (this.memoryEnabled) {
       registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
     }
 
@@ -153,6 +158,7 @@ export class NightshiftInvestigationsPlugin
       registerInvestigationAgentType(plugins.agentBuilder, {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
+        memoryEnabled: this.memoryEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
         telemetryConnectorId,
       });
@@ -249,22 +255,25 @@ export class NightshiftInvestigationsPlugin
             })
           );
           plugins.workflowsExtensions.registerStepDefinition(
-            memoryHydrateStepDefinition({
-              getConnectionManager: () => this.sandboxConnectionManager,
-              logger: this.logger.get('memory'),
-            })
-          );
-          plugins.workflowsExtensions.registerStepDefinition(
             cortexOptimizeStepDefinition({
               getInference: () => this.inference,
               getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
               logger: this.logger.get('cortex'),
             })
           );
+        }
+        if (this.memoryEnabled) {
+          plugins.workflowsExtensions.registerStepDefinition(
+            memoryHydrateStepDefinition({
+              getConnectionManager: () => this.sandboxConnectionManager,
+              logger: this.logger.get('memory'),
+            })
+          );
           plugins.workflowsExtensions.registerStepDefinition(
             memoryOptimizeStepDefinition({
               getInference: () => this.inference,
               getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+              getConnectionManager: () => this.sandboxConnectionManager,
               logger: this.logger.get('memory'),
             })
           );
@@ -496,6 +505,9 @@ export class NightshiftInvestigationsPlugin
     }
     if (this.decisionTreesEnabled) {
       await installDecisionTreeWorkflows({ client });
+    }
+    if (this.memoryEnabled) {
+      await installMemoryWorkflows({ client });
     }
     await client.ready();
   }

@@ -38,12 +38,19 @@ const decisionTreesConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
+const memoryConfigSchema = schema.object({
+  // Governs Semantic Memory independently of Cortex: AI index registration, hydrate/
+  // optimize hooks on the deductive agent, and the matching managed workflows.
+  enabled: schema.boolean({ defaultValue: false }),
+});
+
 const configSchema = schema.object({
   // Reserved: Core skips loading this plugin entirely when false.
   enabled: schema.boolean({ defaultValue: true }),
   sandbox: schema.maybe(sandboxConfigSchema),
   cortex: cortexConfigSchema,
   decision_trees: decisionTreesConfigSchema,
+  memory: memoryConfigSchema,
 });
 
 export type NightshiftInvestigationsConfig = TypeOf<typeof configSchema>;
