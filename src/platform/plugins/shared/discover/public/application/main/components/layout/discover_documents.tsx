@@ -433,7 +433,6 @@ function DiscoverDocumentsComponent({
     [renderViewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveToDashboardButton]
   );
 
-
   const [expandedDoc$] = useState(() => new BehaviorSubject(expandedDoc));
   const [expandedDocOwner$] = useState(() => new BehaviorSubject(expandedDocOwner));
 
@@ -593,7 +592,14 @@ function DiscoverDocumentsComponent({
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
-            externalAdditionalControls={<span style={{ marginRight: 4 }}><ApproximationBadge isApproximationApplied={Boolean(approximationApplied)} data-test-subj="discoverApproximationApplied" /></span>}
+            externalAdditionalControls={
+              <span style={{ marginRight: 4 }}>
+                <ApproximationBadge
+                  isApproximationApplied={Boolean(approximationApplied)}
+                  data-test-subj="discoverApproximationApplied"
+                />
+              </span>
+            }
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}

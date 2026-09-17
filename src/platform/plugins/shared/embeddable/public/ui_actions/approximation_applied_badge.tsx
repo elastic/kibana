@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext, PublishesEsql } from '@kbn/presentation-publishing';
 import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
@@ -40,10 +39,7 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
       : undefined;
   },
   MenuItem: ({ dataTestSubj }: { context: EmbeddableApiContext; dataTestSubj?: string }) => (
-    <ApproximationBadge
-      isApproximationApplied
-      data-test-subj={dataTestSubj}
-    />
+    <ApproximationBadge isApproximationApplied data-test-subj={dataTestSubj} />
   ),
   execute: async ({ embeddable }: EmbeddableApiContext) => {
     return;

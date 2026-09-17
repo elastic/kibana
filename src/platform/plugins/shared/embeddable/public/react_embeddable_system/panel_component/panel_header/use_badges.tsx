@@ -88,10 +88,7 @@ export const useBadges = <
             })
           )
           .subscribe(async (isCompatible) => {
-            handleActionCompatibilityChange(
-              isCompatible,
-              badge as Action<EmbeddableApiContext>
-            );
+            handleActionCompatibilityChange(isCompatible, badge as Action<EmbeddableApiContext>);
           });
         subscriptions.add(compatibilitySubject);
       }

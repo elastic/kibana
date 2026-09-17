@@ -99,7 +99,7 @@ function mapResponseToDatatable(
   const hasEmptyColumns = body.all_columns && body.all_columns?.length > body.columns.length;
   const lookup = new Set(hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []);
   const indexPattern = getIndexPatternFromESQLQuery(query);
-  //const approximationApplied = body.approximation_applied;
+  // const approximationApplied = body.approximation_applied;
   const approximationApplied = true;
 
   const appliedTimeRange = input?.timeRange
