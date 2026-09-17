@@ -73,10 +73,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-          },
+          query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
         },
       ];
 
@@ -87,8 +84,7 @@ describe('executeRuleOperations', () => {
         format: 'json',
       });
       expect(result.data.query).toEqual({
-        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-        format: 'standalone',
+        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
       });
       expect(result.queryColumns).toEqual([
         { name: 'host.name', type: 'keyword' },
@@ -109,10 +105,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
         },
       ];
 
@@ -134,10 +127,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
         },
       ];
 
@@ -159,7 +149,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+          query: { base: 'FROM metrics-* | STATS avg(cpu)' },
         },
       ];
 
@@ -183,7 +173,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+          query: { base: 'FROM metrics-* | STATS avg(cpu)' },
         },
       ];
 
@@ -206,7 +196,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+          query: { base: 'FROM metrics-* | STATS avg(cpu)' },
         },
       ];
 
@@ -224,10 +214,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM nonexistent-* | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM nonexistent-* | STATS COUNT(*)' },
         },
       ];
 
@@ -240,109 +227,129 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.query).toEqual({
-        breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
-        format: 'standalone',
-      });
+      expect(result.data.query).toEqual({ base: 'FROM metrics-* | STATS COUNT(*)' });
       expect(result.queryColumns).toBeUndefined();
     });
 
-    it('stores recovery_strategy: "no_breach" on the rule data', async () => {
+    it('stores a no_breach recovery on the rule data', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
-          recovery_strategy: 'no_breach',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'no_breach' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.recovery_strategy).toBe('no_breach');
+      expect(result.data.recovery).toEqual({ strategy: 'no_breach' });
     });
 
-    it('stores recovery_strategy: "query" and recovery block on the rule data', async () => {
+    it('stores a query recovery with its own ES|QL', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-          },
-          recovery_strategy: 'query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          recovery: { strategy: 'query', query: 'FROM metrics-* | WHERE cpu < 0.5' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.recovery_strategy).toBe('query');
-      expect((result.data.query as { recovery?: { query: string } }).recovery).toEqual({
+      expect(result.data.recovery).toEqual({
+        strategy: 'query',
         query: 'FROM metrics-* | WHERE cpu < 0.5',
       });
     });
 
-    it('stores no_data_strategy and no_data block on the rule data', async () => {
+    it('stores a condition recovery with its segment', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
-          },
-          no_data_strategy: 'last_known_status',
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.no_data_strategy).toBe('last_known_status');
-      expect((result.data.query as { no_data?: { query: string } }).no_data).toEqual({
+      expect(result.data.recovery).toEqual({
+        strategy: 'condition',
+        segment: 'WHERE cpu < 0.5',
+      });
+    });
+
+    it('stores a no_data object with its presence query', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          no_data: {
+            strategy: 'keep_last',
+            query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.no_data).toEqual({
+        strategy: 'keep_last',
         query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
       });
     });
 
-    it('does not set recovery_strategy when omitted from set_query', async () => {
+    it('stores the alert no-data strategy', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          no_data: { strategy: 'alert' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.recovery_strategy).toBeUndefined();
-      expect(result.data.no_data_strategy).toBeUndefined();
+      expect(result.data.no_data).toEqual({ strategy: 'alert' });
     });
 
-    it('preserves existing recovery_strategy when a subsequent set_query omits it', async () => {
-      const existing: Partial<RuleAttachmentData> = { recovery_strategy: 'no_breach' };
+    it('does not set recovery or no_data when omitted from set_query', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.recovery).toBeUndefined();
+      expect(result.data.no_data).toBeUndefined();
+    });
+
+    it('preserves an existing recovery when a subsequent set_query omits it', async () => {
+      const existing: Partial<RuleAttachmentData> = { recovery: { strategy: 'no_breach' } };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
         },
       ];
 
       const result = await executeRuleOperations(existing, ops);
 
-      expect(result.data.recovery_strategy).toBe('no_breach');
+      expect(result.data.recovery).toEqual({ strategy: 'no_breach' });
     });
   });
 
-  describe('set_query with composed format', () => {
-    it('validates composed query using base for the LIMIT 0 call', async () => {
+  describe('set_query with a breach segment', () => {
+    it('validates the base query alone in the LIMIT 0 call', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
         columns: [
@@ -356,7 +363,6 @@ describe('executeRuleOperations', () => {
         {
           operation: 'set_query',
           query: {
-            format: 'composed',
             base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
             breach: { segment: 'WHERE avg_cpu > 0.9' },
           },
@@ -370,7 +376,6 @@ describe('executeRuleOperations', () => {
         format: 'json',
       });
       expect(result.data.query).toEqual({
-        format: 'composed',
         base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
         breach: { segment: 'WHERE avg_cpu > 0.9' },
       });
@@ -380,155 +385,144 @@ describe('executeRuleOperations', () => {
       ]);
     });
 
-    it('stores composed query with recovery segment and recovery_strategy', async () => {
+    it('stores a breach segment alongside a condition recovery segment', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
           query: {
-            format: 'composed',
             base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
             breach: { segment: 'WHERE avg_cpu > 0.9' },
-            recovery: { segment: 'WHERE avg_cpu < 0.5' },
           },
-          recovery_strategy: 'query',
+          recovery: { strategy: 'condition', segment: 'WHERE avg_cpu < 0.5' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.recovery_strategy).toBe('query');
-      expect((result.data.query as { recovery?: { segment: string } }).recovery).toEqual({
+      expect(result.data.query).toEqual({
+        base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+        breach: { segment: 'WHERE avg_cpu > 0.9' },
+      });
+      expect(result.data.recovery).toEqual({
+        strategy: 'condition',
         segment: 'WHERE avg_cpu < 0.5',
       });
     });
   });
 
   describe('set_query recovery cross-field validation', () => {
-    it('throws when recovery block is present but recovery_strategy is not "query"', async () => {
+    it('throws when a condition recovery has no breach segment to contrast with', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-          },
-          recovery_strategy: 'no_breach',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
         },
       ];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'query.recovery is only allowed when recovery_strategy is "query"'
+        'recovery.strategy "condition" requires query.breach'
       );
     });
 
-    it('throws when recovery block is present with no recovery_strategy on existing rule', async () => {
-      const existing: Partial<RuleAttachmentData> = { recovery_strategy: 'no_breach' };
+    it('throws when a later set_query drops the breach a stored condition recovery needs', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+      };
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-          },
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
         },
       ];
 
       await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
-        'query.recovery is only allowed when recovery_strategy is "query"'
+        'recovery.strategy "condition" requires query.breach'
       );
-    });
-
-    it('throws when recovery_strategy is "query" but no recovery block is provided', async () => {
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-          },
-          recovery_strategy: 'query',
-        },
-      ];
-
-      const promise = executeRuleOperations({}, ops);
-      await expect(promise).rejects.toThrow('recovery_strategy "query" requires a recovery block');
-      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
+      await expect(executeRuleOperations(existing, ops)).rejects.toBeInstanceOf(
         RuleOperationValidationError
       );
     });
 
-    it('passes when recovery_strategy is "query" and recovery block is provided', async () => {
+    it('rejects a query recovery with no ES|QL at the operation schema', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_query',
+        query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+        recovery: { strategy: 'query' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a condition recovery with no segment at the operation schema', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_query',
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+        recovery: { strategy: 'condition' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('passes when a condition recovery accompanies a breach segment', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-          },
-          recovery_strategy: 'query',
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
-      expect(result.data.recovery_strategy).toBe('query');
+      expect(result.data.recovery).toEqual({
+        strategy: 'condition',
+        segment: 'WHERE cpu < 0.5',
+      });
     });
   });
 
   describe('set_query no_data cross-field validation', () => {
-    it('throws when a no_data block is present but no_data_strategy is not set', async () => {
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
-          },
-        },
-      ];
+    it('rejects a presence query on the ignore strategy at the operation schema', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_query',
+        query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+        no_data: { strategy: 'ignore', query: 'FROM heartbeat-*' },
+      });
 
-      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'query.no_data is only allowed when no_data_strategy is set to a non-"none" value'
-      );
+      expect(result.success).toBe(false);
     });
 
-    it('throws when a no_data_strategy is set but no no_data block is provided (standalone)', async () => {
+    it('accepts a classifying strategy with no presence query, falling back to the base query', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-          },
-          no_data_strategy: 'last_known_status',
-        },
-      ];
-
-      const promise = executeRuleOperations({}, ops);
-      await expect(promise).rejects.toThrow('requires a no_data block in the query');
-      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
-        RuleOperationValidationError
-      );
-    });
-
-    it('passes when no_data_strategy is set and a no_data block is provided', async () => {
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
-          },
-          no_data_strategy: 'last_known_status',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          no_data: { strategy: 'keep_last' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
-      expect(result.data.no_data_strategy).toBe('last_known_status');
+
+      expect(result.data.no_data).toEqual({ strategy: 'keep_last' });
+    });
+
+    it('passes when a classifying strategy carries its own presence query', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          no_data: {
+            strategy: 'keep_last',
+            query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+      expect(result.data.no_data).toEqual({
+        strategy: 'keep_last',
+        query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
+      });
     });
   });
 
@@ -546,10 +540,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-          },
+          query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
         },
         { operation: 'set_grouping', fields: ['host.name'] },
       ];
@@ -572,10 +563,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-          },
+          query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
         },
         { operation: 'set_grouping', fields: ['service.name'] },
       ];
@@ -694,10 +682,8 @@ describe('executeRuleOperations', () => {
         { operation: 'set_kind', kind: 'signal' },
         {
           operation: 'set_state_transition',
-          pending_count: 3,
-          pending_timeframe: '5m',
-          recovering_count: 2,
-          recovering_timeframe: '5m',
+          pending: { count: 3, timeframe: '5m' },
+          recovering: { count: 2, timeframe: '5m' },
         },
       ];
 
@@ -706,69 +692,92 @@ describe('executeRuleOperations', () => {
       );
     });
 
-    it('throws when a recovering delay is set while recovery is disabled', async () => {
+    it('throws when a recovering delay is set under manual recovery', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_kind', kind: 'alert' },
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
         },
-        { operation: 'set_state_transition', pending_count: 0, recovering_count: 2 },
+        {
+          operation: 'set_state_transition',
+          pending: { count: 0 },
+          recovering: { count: 2 },
+        },
       ];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled'
+        'state_transition.recovering has no effect when recovery.strategy is "manual"'
       );
       await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
         RuleOperationValidationError
       );
     });
 
-    it('throws when recovering_count 0 is set while recovery is disabled', async () => {
+    it('throws when a recovering count of 0 is set under manual recovery', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_kind', kind: 'alert' },
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
         },
-        { operation: 'set_state_transition', pending_count: 0, recovering_count: 0 },
+        {
+          operation: 'set_state_transition',
+          pending: { count: 0 },
+          recovering: { count: 0 },
+        },
       ];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled'
+        'state_transition.recovering has no effect when recovery.strategy is "manual"'
       );
       await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
         RuleOperationValidationError
       );
     });
 
-    it('throws when signal rule uses composed query format', async () => {
+    it('allows a pending delay under manual recovery', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'alert' },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
+        },
+        { operation: 'set_state_transition', pending: { count: 2 } },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.state_transition).toEqual({ pending: { count: 2 } });
+    });
+
+    it('throws when a signal rule sets no_data', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_kind', kind: 'signal' },
         {
           operation: 'set_query',
-          query: {
-            format: 'composed',
-            base: 'FROM logs-*',
-            breach: { segment: 'WHERE error == true' },
-          },
+          query: { base: 'FROM logs-*' },
+          no_data: { strategy: 'alert' },
         },
       ];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'kind "signal" requires query.format "standalone"'
+        'Signal rules cannot set recovery or no_data'
       );
     });
 
-    it('throws when signal rule has recovery_strategy set', async () => {
+    it('throws when a signal rule has recovery set', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'signal' }];
       const initial: Partial<RuleAttachmentData> = {
-        recovery_strategy: 'query',
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
+        query: { base: 'FROM logs-* | LIMIT 1' },
       };
 
       await expect(executeRuleOperations(initial, ops)).rejects.toThrow(
-        'Signal rules cannot set recovery_strategy or no_data_strategy'
+        'Signal rules cannot set recovery or no_data'
       );
     });
   });
@@ -787,7 +796,7 @@ describe('executeRuleOperations', () => {
           [
             {
               operation: 'set_query',
-              query: { format: 'standalone', breach: { query: 'FROM x' } },
+              query: { base: 'FROM x' },
             },
           ],
           esClient
@@ -807,7 +816,7 @@ describe('executeRuleOperations', () => {
           [
             {
               operation: 'set_query',
-              query: { format: 'standalone', breach: { query: 'FROM x' } },
+              query: { base: 'FROM x' },
             },
             { operation: 'set_grouping', fields: ['bar'] },
           ],
@@ -832,33 +841,29 @@ describe('executeRuleOperations', () => {
       await expectValidationError(
         executeRuleOperations({}, [
           { operation: 'set_kind', kind: 'signal' },
-          { operation: 'set_state_transition', pending_count: 1 },
+          { operation: 'set_state_transition', pending: { count: 1 } },
         ])
       );
     });
 
-    it('wraps composed query on signal kind', async () => {
+    it('wraps a condition recovery without a breach segment', async () => {
       await expectValidationError(
         executeRuleOperations({}, [
-          { operation: 'set_kind', kind: 'signal' },
           {
             operation: 'set_query',
-            query: {
-              format: 'composed',
-              base: 'FROM logs-*',
-              breach: { segment: 'WHERE error == true' },
-            },
+            query: { base: 'FROM logs-*' },
+            recovery: { strategy: 'condition', segment: 'WHERE error == false' },
           },
         ])
       );
     });
 
-    it('wraps recovery_strategy error on signal kind', async () => {
+    it('wraps a lifecycle object on signal kind', async () => {
       await expectValidationError(
         executeRuleOperations(
           {
-            recovery_strategy: 'query',
-            query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+            recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
+            query: { base: 'FROM logs-* | LIMIT 1' },
           },
           [{ operation: 'set_kind', kind: 'signal' }]
         )
@@ -871,7 +876,7 @@ describe('executeRuleOperations', () => {
       kind: 'alert',
       metadata: { name: 'Test Rule', description: 'A test rule' },
       schedule: { every: '5m', lookback: '10m' },
-      query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+      query: { base: 'FROM metrics-* | STATS COUNT(*)' },
       time_field: '@timestamp',
       state_transition: null,
     };
@@ -891,7 +896,7 @@ describe('executeRuleOperations', () => {
         { operation: 'set_schedule', every: '1m', lookback: '5m' },
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS COUNT(*)' } },
+          query: { base: 'FROM logs-* | STATS COUNT(*)' },
         },
         { operation: 'validate' },
       ];
@@ -966,42 +971,52 @@ describe('executeRuleOperations', () => {
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(RuleOperationValidationError);
     });
 
-    it('passes validation for a rule with recovery_strategy: "query"', async () => {
+    it('passes validation for a rule with a query recovery', async () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
       const result = await executeRuleOperations(
         {
           ...validRule,
-          recovery_strategy: 'query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
-            recovery: { query: 'FROM metrics-* | WHERE ok == true' },
-          },
+          recovery: { strategy: 'query', query: 'FROM metrics-* | WHERE ok == true' },
         },
         ops
       );
 
-      expect(result.data.recovery_strategy).toBe('query');
+      expect(result.data.recovery).toEqual({
+        strategy: 'query',
+        query: 'FROM metrics-* | WHERE ok == true',
+      });
     });
 
-    it('passes validation for a rule with a no_data_strategy', async () => {
+    it('passes validation for a rule with a classifying no_data strategy', async () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
       const result = await executeRuleOperations(
         {
           ...validRule,
-          no_data_strategy: 'last_known_status',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
-            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+          no_data: {
+            strategy: 'keep_last',
+            query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
           },
         },
         ops
       );
 
-      expect(result.data.no_data_strategy).toBe('last_known_status');
+      expect(result.data.no_data).toEqual({
+        strategy: 'keep_last',
+        query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
+      });
+    });
+
+    it('passes validation for a rule that alerts on no data', async () => {
+      const ops: RuleOperation[] = [{ operation: 'validate' }];
+
+      const result = await executeRuleOperations(
+        { ...validRule, no_data: { strategy: 'alert' } },
+        ops
+      );
+
+      expect(result.data.no_data).toEqual({ strategy: 'alert' });
     });
   });
 

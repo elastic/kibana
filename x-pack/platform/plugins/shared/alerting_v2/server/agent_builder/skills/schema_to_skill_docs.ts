@@ -13,9 +13,10 @@ import {
   alertEventSeveritySchema,
   alertEpisodeStatusSchema,
   ruleKindSchema,
-  recoveryStrategySchema,
+  recoverySchema,
   recoveryStrategy,
-  noDataStrategySchema,
+  noDataSchema,
+  noDataStrategy,
   groupingModeSchema,
   throttleStrategySchema,
   MATCHER_CONTEXT_FIELDS,
@@ -321,6 +322,28 @@ function formatFieldTable(fields: FieldInfo[]): string {
   return ['| Field | Type | Required | Description |', '|---|---|---|---|', ...rows].join('\n');
 }
 
+/**
+ * Renders an object's field table followed by one table per nested object
+ * property, so fields a single table would flatten to `object` — `pending.count`,
+ * `query.base` — stay visible to the agent.
+ */
+function formatObjectTables(node: JsonSchemaNode, nestedHeading: string): string {
+  const fields = jsonSchemaToFieldTable(node);
+  if (fields.length === 0) return '';
+
+  const properties = (node.properties ?? {}) as JsonSchemaNode;
+  const nestedTables = fields.flatMap(({ name }) => {
+    const child = properties[name] as JsonSchemaNode | undefined;
+    if (child?.type !== 'object') return [];
+    const childFields = jsonSchemaToFieldTable(child);
+    return childFields.length > 0
+      ? [`${nestedHeading} \`${name}\`\n\n${formatFieldTable(childFields)}`]
+      : [];
+  });
+
+  return [formatFieldTable(fields), ...nestedTables].join('\n\n');
+}
+
 function formatVariantSchemas(jsonSchema: unknown): string {
   if (!jsonSchema || typeof jsonSchema !== 'object') return '';
   const schema = jsonSchema as JsonSchemaNode;
@@ -346,13 +369,13 @@ function formatVariantSchemas(jsonSchema: unknown): string {
         ? `\`${discriminatorKey}: "${discriminatorValue}"\``
         : variant.description ?? 'Variant';
 
-    const fields = jsonSchemaToFieldTable(variant);
-    if (fields.length > 0) {
+    const tables = formatObjectTables(variant, '#####');
+    if (tables) {
       const description =
         typeof variant.description === 'string' && variant.description.trim().length > 0
           ? `${variant.description}\n\n`
           : '';
-      sections.push(`#### ${label}\n\n${description}${formatFieldTable(fields)}`);
+      sections.push(`#### ${label}\n\n${description}${tables}`);
     }
   }
   return sections.join('\n\n');
@@ -404,11 +427,23 @@ export const generateRuleSchemaDoc = (): string =>
     schema: createRuleDataBaseSchema,
     extraSections: (jsonSchema) => {
       const props = (jsonSchema as JsonSchemaNode).properties as JsonSchemaNode | undefined;
-      if (!props?.query) {
+      if (!props) {
         return undefined;
       }
-      const queryVariants = formatVariantSchemas(props.query as JsonSchemaNode);
-      return queryVariants ? [{ heading: 'Query Formats', content: queryVariants }] : undefined;
+      return [
+        {
+          heading: 'Query',
+          content: formatObjectTables(props.query as JsonSchemaNode, '####'),
+        },
+        {
+          heading: 'Recovery Strategies',
+          content: formatVariantSchemas(props.recovery as JsonSchemaNode),
+        },
+        {
+          heading: 'No-Data Strategies',
+          content: formatVariantSchemas(props.no_data as JsonSchemaNode),
+        },
+      ];
     },
   });
 
@@ -492,46 +527,78 @@ export const getDescribedEnumValues = (
   return values;
 };
 
+/**
+ * Reads per-variant `.describe()` copy from a discriminated union, keyed by the
+ * discriminator literal. The enum counterpart of {@link getDescribedEnumValues}
+ * for unions whose members carry a payload alongside the discriminator.
+ */
+export const getDescribedVariants = (
+  schema: z.ZodType,
+  discriminator: string,
+  schemaName: string
+): DescribedEnumValue[] => {
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
+  const variants = (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined;
+  if (!variants) {
+    throw new SchemaTranslationError(
+      `${schemaName} is not a discriminated union. Use z.discriminatedUnion('${discriminator}', ...) with .describe(...) on each member.`
+    );
+  }
+
+  const missing: string[] = [];
+  const values: DescribedEnumValue[] = [];
+  for (const variant of variants) {
+    const properties = variant.properties as JsonSchemaNode | undefined;
+    const discriminatorNode = properties?.[discriminator] as JsonSchemaNode | undefined;
+    const value =
+      (discriminatorNode?.const as string | undefined) ??
+      (discriminatorNode?.enum as string[] | undefined)?.[0];
+    if (typeof value !== 'string') {
+      missing.push(`(variant with no "${discriminator}" literal)`);
+      continue;
+    }
+    const description = (variant.description as string | undefined)?.trim() ?? '';
+    if (!description) {
+      missing.push(value);
+      continue;
+    }
+    values.push({ value, description });
+  }
+
+  throwIfMissingDescribes(missing, `${schemaName} variant(s)`);
+  return values;
+};
+
 export const getEpisodeStatusValues = (): string[] =>
   getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema').map(
     ({ value }) => value
   );
 
-/** Returns the user-facing state transition field names from the operation schema (excludes internal operator fields and `operation`). */
+/** Returns the state transition phase names from the operation schema. */
 const getStateTransitionFields = (): string[] =>
   Object.keys(setStateTransitionOperationSchema.shape).filter((k) => k !== 'operation');
 
 /**
- * Builds a markdown table from a schema's described literal values.
+ * Builds a markdown table from described enum values or union variants.
  */
 const generateEnumTable = ({
   header,
-  schema,
-  schemaName,
+  values,
 }: {
   header: [string, string];
-  schema: z.ZodType;
-  schemaName: string;
+  values: DescribedEnumValue[];
 }): string => {
-  const rows = getDescribedEnumValues(schema, schemaName).map(
+  const rows = values.map(
     ({ value, description }) => `| \`${value}\` | ${escapeTableCell(description)} |`
   );
   return [`| ${header[0]} | ${header[1]} |`, '|---|---|', ...rows].join('\n');
 };
 
 /**
- * Builds a markdown bullet list from a schema's described literal values.
+ * Builds a markdown bullet list from described enum values or union variants.
  */
-const generateEnumList = ({
-  schema,
-  schemaName,
-}: {
-  schema: z.ZodType;
-  schemaName: string;
-}): string =>
-  getDescribedEnumValues(schema, schemaName)
-    .map(({ value, description }) => `- \`${value}\`: ${description}`)
-    .join('\n');
+const generateEnumList = (values: DescribedEnumValue[]): string =>
+  values.map(({ value, description }) => `- \`${value}\`: ${description}`).join('\n');
 
 /** Formats enum values as an inline comma-separated backtick list. */
 export const formatEnumValuesList = (values: readonly string[]): string =>
@@ -547,10 +614,9 @@ const formatStrategySet = (strategies: Set<string>): string =>
  * `STRATEGIES_REQUIRING_INTERVAL`.
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
-  const groupingModesList = generateEnumList({
-    schema: groupingModeSchema,
-    schemaName: 'groupingModeSchema',
-  });
+  const groupingModesList = generateEnumList(
+    getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema')
+  );
 
   const perEpisodeOnlyStrategies = [...PER_EPISODE_STRATEGIES].filter(
     (strategy) => !AGGREGATE_STRATEGIES.has(strategy)
@@ -663,19 +729,29 @@ export const generateNotificationsOverviewDoc = (): string => {
 
 /** Generates the State Transition section with heading, field list from schema, and constraints. */
 export const generateStateTransitionDoc = (): string => {
-  const fields = getStateTransitionFields();
   const jsonSchema = zodToJsonSchema(setStateTransitionOperationSchema) as JsonSchemaNode;
   const properties = (jsonSchema.properties ?? {}) as JsonSchemaNode;
 
-  const bullets = fields.map((f) => {
-    const prop = properties[f] as JsonSchemaNode | undefined;
-    const description = prop?.description as string | undefined;
+  const describeField = (path: string, node: JsonSchemaNode | undefined): string => {
+    const description = node?.description as string | undefined;
     if (!description) {
       throw new SchemaTranslationError(
-        `Missing .describe() on set_state_transition field "${f}". Add .describe() to that field on setStateTransitionOperationSchema.`
+        `Missing .describe() on set_state_transition field "${path}". Add .describe() to that field on setStateTransitionOperationSchema.`
       );
     }
-    return `- \`${f}\` — ${description}`;
+    return description;
+  };
+
+  const bullets = getStateTransitionFields().flatMap((phase) => {
+    const phaseNode = properties[phase] as JsonSchemaNode | undefined;
+    const phaseProperties = (phaseNode?.properties ?? {}) as JsonSchemaNode;
+    return [
+      `- \`${phase}\` — ${describeField(phase, phaseNode)}`,
+      ...Object.entries(phaseProperties).map(
+        ([name, node]) =>
+          `  - \`${phase}.${name}\` — ${describeField(`${phase}.${name}`, node as JsonSchemaNode)}`
+      ),
+    ];
   });
 
   return [
@@ -693,8 +769,7 @@ export const generateStateTransitionDoc = (): string => {
 export const generateEpisodeLifecycleDoc = (): string => {
   const table = generateEnumTable({
     header: ['Status', 'Meaning'],
-    schema: alertEpisodeStatusSchema,
-    schemaName: 'alertEpisodeStatusSchema',
+    values: getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema'),
   });
 
   return [
@@ -736,42 +811,39 @@ export const generateSeverityDoc = (): string => {
 /** Generates standalone markdown for no-data strategy: values, wiring, and kind constraints. */
 export const generateNoDataStrategyDoc = (): string => {
   const table = generateEnumTable({
-    header: ['Value', 'Behaviour'],
-    schema: noDataStrategySchema,
-    schemaName: 'noDataStrategySchema',
+    header: ['Strategy', 'Behaviour'],
+    values: getDescribedVariants(noDataSchema, 'strategy', 'noDataSchema'),
   });
 
   return [
     '# No-Data Strategy',
     '',
-    '`no_data_strategy` is a **top-level rule field** that controls behaviour when no data is present.',
+    `\`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour. Omitting it on an alert rule stores \`{ strategy: '${noDataStrategy.ignore}' }\`.`,
     '',
     table,
     '',
-    "When setting `no_data_strategy` to anything other than `'none'`, add a `no_data` block to the standalone query:",
-    "`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }`. For composed query format, the `base` query is used as the data query.",
+    `Every strategy except \`${noDataStrategy.ignore}\` may carry its own presence query:`,
+    `\`no_data: { strategy: '${noDataStrategy.keep_last}', query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`.`,
+    'Omit `query` to use `query.base` to decide whether a group has data.',
     '',
-    'Signal rules cannot set `no_data_strategy` ([rule-kind reference](./rule-kind.md)).',
+    'Signal rules cannot set `no_data` ([rule-kind reference](./rule-kind.md)).',
   ].join('\n');
 };
 
 /** Generates standalone markdown for recovery strategy: values, wiring, and kind constraints. */
 export const generateRecoveryStrategyDoc = (): string => {
-  const list = generateEnumList({
-    schema: recoveryStrategySchema,
-    schemaName: 'recoveryStrategySchema',
-  });
+  const list = generateEnumList(getDescribedVariants(recoverySchema, 'strategy', 'recoverySchema'));
 
   return [
     '# Recovery Strategy',
     '',
-    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Signal rules (`kind: signal`) cannot set `recovery_strategy` ([rule-kind reference](./rule-kind.md)).',
+    `\`recovery\` is a **top-level rule field** (not inside the query). It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour, and it controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Omitting it on an alert rule stores \`{ strategy: '${recoveryStrategy.no_breach}' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).`,
     '',
     list,
     '',
-    `When using \`recovery_strategy: '${recoveryStrategy.query}'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:`,
-    "- **Composed**: `recovery: { segment: 'WHERE cpu < 0.5' }`",
-    "- **Standalone**: `recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }`",
+    'The two query-backed strategies carry their own ES|QL:',
+    `- \`recovery: { strategy: '${recoveryStrategy.condition}', segment: 'WHERE avg_cpu < 0.6' }\` — the segment is appended to \`query.base\`. This requires \`query.breach\`: without a breach segment every row of \`base\` already breaches, so the recovery condition could only return groups that are breaching and the rule would never recover.`,
+    `- \`recovery: { strategy: '${recoveryStrategy.query}', query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu < 0.6' }\` — an independent full query, usable with or without \`query.breach\`.`,
   ].join('\n');
 };
 
@@ -810,10 +882,7 @@ export const generateMatcherContextDoc = (): string => {
 
 /** Generates standalone markdown for action-policy grouping modes. */
 export const generateGroupingModesDoc = (): string => {
-  const list = generateEnumList({
-    schema: groupingModeSchema,
-    schemaName: 'groupingModeSchema',
-  });
+  const list = generateEnumList(getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema'));
 
   return [
     '# Grouping Modes',
@@ -826,10 +895,9 @@ export const generateGroupingModesDoc = (): string => {
 
 /** Generates standalone markdown for action-policy throttle strategies. */
 export const generateThrottleStrategiesDoc = (): string => {
-  const list = generateEnumList({
-    schema: throttleStrategySchema,
-    schemaName: 'throttleStrategySchema',
-  });
+  const list = generateEnumList(
+    getDescribedEnumValues(throttleStrategySchema, 'throttleStrategySchema')
+  );
 
   return [
     '# Throttle Strategies',

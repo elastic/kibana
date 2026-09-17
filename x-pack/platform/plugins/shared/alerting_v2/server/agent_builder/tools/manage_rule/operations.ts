@@ -24,19 +24,15 @@ import {
   ruleKindSchema,
   scheduleSchema,
   querySchema,
-  recoveryStrategySchema,
-  noDataStrategySchema,
+  recoverySchema,
+  noDataSchema,
   getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
   isStateTransitionAllowed,
-  isSignalUsingStandaloneFormat,
-  isSignalQueryBreachOnly,
+  isLifecycleConfigAllowedForKind,
+  isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
-  isRecoveryQueryConsistentWithStrategy,
-  isRecoveryQueryProvidedForStrategy,
-  isNoDataQueryConsistentWithStrategy,
-  isNoDataQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
@@ -166,8 +162,8 @@ export const setQueryOperationSchema = z
   .object({
     operation: z.literal('set_query'),
     query: querySchema,
-    recovery_strategy: recoveryStrategySchema.optional(),
-    no_data_strategy: noDataStrategySchema.optional(),
+    recovery: recoverySchema.optional(),
+    no_data: noDataSchema.optional(),
   })
   .describe(
     'Use `set_query` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.'
@@ -182,9 +178,6 @@ export const setGroupingOperationSchema = groupingSchema
   );
 
 export const setStateTransitionOperationSchema = stateTransitionSchema
-  .unwrap()
-  .unwrap()
-  .omit({ pending_operator: true, recovering_operator: true })
   .extend({ operation: z.literal('set_state_transition') })
   .describe(
     'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
@@ -404,32 +397,14 @@ export const executeRuleOperations = async (
           ...next,
           query: op.query,
           ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
-          ...(op.recovery_strategy !== undefined
-            ? { recovery_strategy: op.recovery_strategy }
-            : {}),
-          ...(op.no_data_strategy !== undefined ? { no_data_strategy: op.no_data_strategy } : {}),
+          ...(op.recovery !== undefined ? { recovery: op.recovery } : {}),
+          ...(op.no_data !== undefined ? { no_data: op.no_data } : {}),
         };
 
-        if (!isRecoveryQueryConsistentWithStrategy(next)) {
+        if (!isRecoveryConditionUsableWithBreach(next)) {
           throw new RuleOperationValidationError(
-            'query.recovery is only allowed when recovery_strategy is "query".'
-          );
-        }
-        if (!isRecoveryQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'recovery_strategy "query" requires a recovery block in the query ' +
-              '(recovery: { segment } for composed, recovery: { query } for standalone).'
-          );
-        }
-        if (!isNoDataQueryConsistentWithStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.'
-          );
-        }
-        if (!isNoDataQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'no_data_strategy (other than "none") requires a no_data block in the query ' +
-              'for standalone-format rules.'
+            'recovery.strategy "condition" requires query.breach. Without a breach segment ' +
+              'every row of the base query breaches, so the rule could never recover.'
           );
         }
         break;
@@ -458,14 +433,8 @@ export const executeRuleOperations = async (
           ...next,
           state_transition: {
             ...next.state_transition,
-            ...(op.pending_count !== undefined ? { pending_count: op.pending_count } : {}),
-            ...(op.pending_timeframe !== undefined
-              ? { pending_timeframe: op.pending_timeframe }
-              : {}),
-            ...(op.recovering_count !== undefined ? { recovering_count: op.recovering_count } : {}),
-            ...(op.recovering_timeframe !== undefined
-              ? { recovering_timeframe: op.recovering_timeframe }
-              : {}),
+            ...(op.pending !== undefined ? { pending: op.pending } : {}),
+            ...(op.recovering !== undefined ? { recovering: op.recovering } : {}),
           },
         };
         break;
@@ -561,19 +530,13 @@ export const executeRuleOperations = async (
     );
   }
 
-  if (!isSignalUsingStandaloneFormat(next)) {
-    throw new RuleOperationValidationError('kind "signal" requires query.format "standalone".');
-  }
-
-  if (!isSignalQueryBreachOnly(next)) {
-    throw new RuleOperationValidationError(
-      'Signal rules cannot set recovery_strategy or no_data_strategy.'
-    );
+  if (!isLifecycleConfigAllowedForKind(next)) {
+    throw new RuleOperationValidationError('Signal rules cannot set recovery or no_data.');
   }
 
   if (!isRecoveryTransitionConsistentWithStrategy(next)) {
     throw new RuleOperationValidationError(
-      'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).'
+      'state_transition.recovering has no effect when recovery.strategy is "manual".'
     );
   }
 
