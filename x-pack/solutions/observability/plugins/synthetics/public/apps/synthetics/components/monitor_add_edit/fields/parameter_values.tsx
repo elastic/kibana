@@ -11,8 +11,10 @@ import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { maskMonitorParams } from '../../../../../../common/utils/mask_monitor_params';
+import { canRevealParameterValues } from '../../../../../../common/utils/can_reveal_parameter_values';
 import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
 import { useGetUrlParams } from '../../../hooks';
 import { useIsEditFlow } from '../hooks';
@@ -43,12 +45,17 @@ export const ParameterValuesEditor = ({
 
 export const ParameterValuesVisibilityToggle = (): React.ReactElement | null => {
   const isEditFlow = useIsEditFlow();
+  const { application } = useKibana().services;
   const { monitorId } = useParams<{ monitorId: string }>();
   const { spaceId } = useGetUrlParams();
   const { setValue } = useFormContext();
   const { hideParameterValues, revealParameterValues, setHideParameterValues } =
     useParameterValues();
   const [isLoading, setIsLoading] = useState(false);
+  const canRevealParams = canRevealParameterValues({
+    canSave: Boolean(application?.capabilities.uptime.save),
+    canReadParamValues: Boolean(application?.capabilities.uptime.canReadParamValues),
+  });
 
   const onChange = async (event: EuiSwitchEvent) => {
     if (event.target.checked) {
@@ -72,7 +79,7 @@ export const ParameterValuesVisibilityToggle = (): React.ReactElement | null => 
     }
   };
 
-  return isEditFlow ? (
+  return isEditFlow && canRevealParams ? (
     <EuiSwitch
       compressed
       checked={hideParameterValues}

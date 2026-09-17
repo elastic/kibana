@@ -20,6 +20,13 @@ import { ParameterValuesProvider } from '../form/parameter_values_context';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
 
+const mockUseKibana = jest.fn();
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: () => mockUseKibana(),
+}));
+
 jest.mock('./code_editor', () => ({
   CodeEditor: ({ readOnly, value }: { readOnly?: boolean; value: string }) => (
     <input data-test-subj="parameterValuesEditor" readOnly={readOnly} value={value} />
@@ -44,6 +51,21 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('ParameterValuesEditor', () => {
+  beforeEach(() => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            uptime: {
+              save: true,
+              canReadParamValues: true,
+            },
+          },
+        },
+      },
+    });
+  });
+
   it('masks parameter values and makes the editor read-only by default', () => {
     const { getByTestId } = render(
       <ParameterValuesProvider hideParameterValuesByDefault>
@@ -98,6 +120,25 @@ describe('ParameterValuesEditor', () => {
     await waitFor(() => {
       expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"changeme"}');
     });
+  });
+
+  it('does not render the toggle without both required privileges', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            uptime: {
+              save: true,
+              canReadParamValues: false,
+            },
+          },
+        },
+      },
+    });
+
+    const { queryByRole } = render(<ParameterValuesToggleForm />);
+
+    expect(queryByRole('switch', { name: 'Hide parameter values' })).not.toBeInTheDocument();
   });
 });
 
