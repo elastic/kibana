@@ -28,6 +28,10 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
         columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+        },
       },
     },
     {
@@ -43,6 +47,10 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price) BY BUCKET(order_date, 1 hour)`,
         columnNames: ['AVG(taxful_total_price)', 'BUCKET(order_date, 1 hour)'],
+        expectedSourceIds: {
+          'AVG(taxful_total_price)': ['col2'],
+          'BUCKET(order_date, 1 hour)': ['col1'],
+        },
       },
     },
     {
@@ -58,6 +66,10 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
         columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+        },
       },
     },
     {
@@ -74,6 +86,10 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 1 hour)`,
         columnNames: ['COUNT(*)', 'BUCKET(order_date, 1 hour)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          'BUCKET(order_date, 1 hour)': ['col1'],
+        },
       },
     },
     {
@@ -89,6 +105,10 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)`,
         columnNames: ['COUNT(*)', 'BUCKET(order_date, 30 minutes)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          'BUCKET(order_date, 30 minutes)': ['col1'],
+        },
       },
     },
     {
@@ -104,6 +124,10 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 1 day)`,
         columnNames: ['COUNT(*)', 'BUCKET(order_date, 1 day)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          'BUCKET(order_date, 1 day)': ['col1'],
+        },
       },
     },
     {

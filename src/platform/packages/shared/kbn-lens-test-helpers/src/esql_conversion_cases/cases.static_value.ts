@@ -30,6 +30,11 @@ export const buildStaticValueCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend) | EVAL static_value = 100`,
         columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)', 'static_value'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+          static_value: ['col3'],
+        },
       },
     },
     {
@@ -42,6 +47,7 @@ export const buildStaticValueCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | EVAL static_value = 50`,
         columnNames: ['static_value'],
+        expectedSourceIds: { static_value: ['col1'] },
         allowAdditionalColumns: true,
       },
     },
@@ -59,6 +65,7 @@ export const buildStaticValueCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | STATS COUNT(*) | EVAL static_max_value = 100`,
         columnNames: ['COUNT(*)', 'static_max_value'],
+        expectedSourceIds: { 'COUNT(*)': ['col1'], static_max_value: ['col2'] },
       },
     },
     {
@@ -74,6 +81,7 @@ export const buildStaticValueCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | EVAL static_value_0 = 100, static_value_1 = 200`,
         columnNames: ['static_value_0', 'static_value_1'],
+        expectedSourceIds: { static_value_0: ['col1'], static_value_1: ['col2'] },
         allowAdditionalColumns: true,
       },
     },
@@ -94,6 +102,7 @@ export const buildStaticValueCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | STATS SUM(taxful_total_price), max_value = MAX(taxful_total_price) WHERE KQL("taxful_total_price > 100")`,
         columnNames: ['SUM(taxful_total_price)', 'max_value'],
+        expectedSourceIds: { 'SUM(taxful_total_price)': ['col1'], max_value: ['col2'] },
         expectedLabels: { max_value: 'Maximum of taxful_total_price' },
       },
     },
@@ -117,6 +126,10 @@ export const buildStaticValueCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price) | EVAL static_max_value = 100`,
         columnNames: ['AVG(taxful_total_price)', 'static_max_value'],
+        expectedSourceIds: {
+          'AVG(taxful_total_price)': ['col1'],
+          static_max_value: ['col2'],
+        },
       },
     },
   ];

@@ -34,6 +34,7 @@ export interface EsqlConversionSuccess {
   readonly success: true;
   readonly esql: string;
   readonly columnNames: readonly string[];
+  readonly expectedSourceIds: Readonly<Record<string, readonly string[]>>;
   readonly expectedFormats?: Readonly<Record<string, unknown>>;
   readonly expectedLabels?: Readonly<Record<string, string>>;
   /** EVAL-only queries preserve source columns in addition to generated columns. */

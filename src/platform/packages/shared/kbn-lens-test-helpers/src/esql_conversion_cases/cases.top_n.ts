@@ -32,6 +32,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${logsFrom} | ${logsWhere} | STATS AVG(bytes) BY host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
       },
     },
     {
@@ -47,6 +48,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${logsFrom} | ${logsWhere} | STATS AVG(bytes) BY host.keyword | SORT host.keyword ASC | LIMIT 5`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
       },
     },
     {
@@ -66,6 +68,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${logsFrom} | ${logsWhere} | STATS avg_bytes = AVG(bytes) BY host.keyword | SORT avg_bytes DESC | LIMIT 5`,
         columnNames: ['avg_bytes', 'host.keyword'],
+        expectedSourceIds: { avg_bytes: ['col2'], 'host.keyword': ['col1'] },
       },
     },
     {

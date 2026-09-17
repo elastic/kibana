@@ -59,10 +59,13 @@ const runCase = (conversionCase: EsqlConversionCase) => {
       expect(Object.keys(result.esAggsIdMap).sort()).toEqual(
         [...conversionCase.expected.columnNames].sort()
       );
-      for (const originalColumns of Object.values(result.esAggsIdMap)) {
-        expect(originalColumns).not.toHaveLength(0);
-        expect(conversionCase.columnOrder).toContain(originalColumns[0].id);
-      }
+      const sourceIdsByOutputColumn = Object.fromEntries(
+        Object.entries(result.esAggsIdMap).map(([columnName, originalColumns]) => [
+          columnName,
+          originalColumns.map(({ id }) => id),
+        ])
+      );
+      expect(sourceIdsByOutputColumn).toEqual(conversionCase.expected.expectedSourceIds);
       for (const [columnName, format] of Object.entries(
         conversionCase.expected.expectedFormats ?? {}
       )) {

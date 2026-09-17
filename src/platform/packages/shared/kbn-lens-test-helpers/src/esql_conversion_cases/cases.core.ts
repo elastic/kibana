@@ -26,6 +26,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*)`,
         columnNames: ['COUNT(*)'],
+        expectedSourceIds: { 'COUNT(*)': ['col1'] },
       },
     },
     {
@@ -38,6 +39,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price)`,
         columnNames: ['AVG(taxful_total_price)'],
+        expectedSourceIds: { 'AVG(taxful_total_price)': ['col1'] },
       },
     },
     {
@@ -59,6 +61,11 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
           'MAX(total_quantity)',
           'MEDIAN(`products.base_price`)',
         ],
+        expectedSourceIds: {
+          'AVG(taxful_total_price)': ['col1'],
+          'MAX(total_quantity)': ['col2'],
+          'MEDIAN(`products.base_price`)': ['col3'],
+        },
       },
     },
     {
@@ -79,6 +86,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT_DISTINCT(customer_id)`,
         columnNames: ['COUNT_DISTINCT(customer_id)'],
+        expectedSourceIds: { 'COUNT_DISTINCT(customer_id)': ['col1'] },
       },
     },
     {
@@ -100,6 +108,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS PERCENTILE(taxful_total_price, 95)`,
         columnNames: ['PERCENTILE(taxful_total_price, 95)'],
+        expectedSourceIds: { 'PERCENTILE(taxful_total_price, 95)': ['col1'] },
       },
     },
     {
@@ -114,6 +123,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) WHERE KQL("taxful_total_price >= 20")`,
         columnNames: ['COUNT(*) WHERE KQL("taxful_total_price >= 20")'],
+        expectedSourceIds: { 'COUNT(*) WHERE KQL("taxful_total_price >= 20")': ['col1'] },
       },
     },
     {
@@ -132,6 +142,10 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
           'COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"")',
           'BUCKET(order_date, 75, ?_tstart, ?_tend)',
         ],
+        expectedSourceIds: {
+          'COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"")': ['col2'],
+          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+        },
       },
     },
     {
@@ -147,6 +161,10 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
         columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+        },
       },
     },
     {
@@ -164,6 +182,10 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS SUM(taxful_total_price) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
         columnNames: ['SUM(taxful_total_price)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        expectedSourceIds: {
+          'SUM(taxful_total_price)': ['col2'],
+          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+        },
         expectedFormats: {
           'SUM(taxful_total_price)': {
             id: 'currency',
@@ -187,6 +209,10 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
         columnNames: ['AVG(taxful_total_price)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        expectedSourceIds: {
+          'AVG(taxful_total_price)': ['col2'],
+          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+        },
         expectedFormats: {
           'AVG(taxful_total_price)': { id: 'bytes', params: { decimals: 2 } },
         },
