@@ -8,81 +8,59 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { ScoutWorkerFixtures } from '@kbn/scout';
-import { tags } from '@kbn/scout';
+import { tags, type ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../../../common/ui/fixtures';
 
-const createSavedSearch = async (
-  kbnClient: ScoutWorkerFixtures['kbnClient'],
-  searchId: string,
-  searchTitle: string,
-  dataViewId: string,
-  tabs?: Array<{
-    id: string;
-    label: string;
-    attributes: {
-      columns: string[];
-      sort: Array<[string, 'asc' | 'desc']>;
-      kibanaSavedObjectMeta: { searchSourceJSON: string };
-    };
-  }>
-) =>
-  await kbnClient.savedObjects.create({
-    type: 'search',
-    id: searchId,
-    overwrite: false,
-    attributes: {
-      title: searchTitle,
-      description: '',
-      columns: ['agent', 'bytes', 'clientip'],
-      sort: [['@timestamp', 'desc']],
-      kibanaSavedObjectMeta: {
-        searchSourceJSON:
-          '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-      },
-      ...(tabs?.length ? { tabs } : {}),
-    },
-    references: [
+const createDefaultSession = async (apiServices: ApiServicesFixture, title: string) =>
+  await apiServices.discover.create({
+    title,
+    tabs: [
       {
-        id: dataViewId,
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
+        id: 'default-tab',
+        label: 'Default tab',
+        data_source: {
+          type: 'data_view_reference',
+          ref_id: testData.DEFAULT_DATA_VIEW,
+        },
+        column_order: ['agent', 'bytes', 'clientip'],
+        sort: [{ name: '@timestamp', direction: 'desc' }],
+        query: { language: 'lucene', expression: '' },
+        filters: [],
       },
     ],
   });
 
-const createTabbedSavedSearch = async (
-  kbnClient: ScoutWorkerFixtures['kbnClient'],
-  searchId: string,
-  searchTitle: string
-) =>
-  await createSavedSearch(kbnClient, searchId, searchTitle, testData.DEFAULT_DATA_VIEW, [
-    {
-      id: 'default-tab',
-      label: 'Default tab',
-      attributes: {
-        columns: ['@timestamp', 'agent'],
-        sort: [['@timestamp', 'desc']],
-        kibanaSavedObjectMeta: {
-          searchSourceJSON:
-            '{"highlightAll":true,"version":true,"query":{"language":"kuery","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+const createTabbedSession = async (apiServices: ApiServicesFixture, title: string) =>
+  await apiServices.discover.create({
+    title,
+    tabs: [
+      {
+        id: 'default-tab',
+        label: 'Default tab',
+        data_source: {
+          type: 'data_view_reference',
+          ref_id: testData.DEFAULT_DATA_VIEW,
         },
+        column_order: ['@timestamp', 'agent'],
+        sort: [{ name: '@timestamp', direction: 'desc' }],
+        query: { language: 'kql', expression: '' },
+        filters: [],
       },
-    },
-    {
-      id: 'filtered-tab',
-      label: 'Filtered tab',
-      attributes: {
-        columns: ['bytes', 'clientip'],
-        sort: [['bytes', 'asc']],
-        kibanaSavedObjectMeta: {
-          searchSourceJSON:
-            '{"highlightAll":true,"version":true,"query":{"language":"kuery","query":"bytes > 5000"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      {
+        id: 'filtered-tab',
+        label: 'Filtered tab',
+        data_source: {
+          type: 'data_view_reference',
+          ref_id: testData.DEFAULT_DATA_VIEW,
         },
+        column_order: ['bytes', 'clientip'],
+        sort: [{ name: 'bytes', direction: 'asc' }],
+        query: { language: 'kql', expression: 'bytes > 5000' },
+        filters: [],
       },
-    },
-  ]);
+    ],
+  });
 
 const getCurrentDashboardId = (url: string) => {
   const dashboardId = new URL(url).hash.match(/\/view\/([^?]+)/)?.[1];
@@ -123,16 +101,16 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
   });
 
   test('should allow removing the dashboard panel after the underlying saved search has been deleted', async ({
+    apiServices,
     kbnClient,
     page,
     pageObjects,
   }) => {
-    const savedSearchId = randomUUID().replace(/-/g, '');
-    const savedSearchTitle = `TempSearch ${savedSearchId}`;
-    const dashboardTitle = `Dashboard with deleted saved search ${savedSearchId}`;
+    const savedSearchTitle = `TempSearch ${randomUUID().replace(/-/g, '')}`;
+    const dashboardTitle = `Dashboard with deleted saved search ${randomUUID()}`;
 
     await pageObjects.dashboard.openNewDashboard();
-    await createSavedSearch(kbnClient, savedSearchId, savedSearchTitle, testData.DEFAULT_DATA_VIEW);
+    const savedSearchId = await createDefaultSession(apiServices, savedSearchTitle);
     await pageObjects.dashboard.addPanelFromLibrary(savedSearchTitle);
     await page.testSubj.locator('savedSearchTotalDocuments').waitFor({
       state: 'visible',
@@ -159,18 +137,17 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     ).toBeHidden();
   });
 
-  test('should support URL drilldown', async ({ kbnClient, page, pageObjects }) => {
+  test('should support URL drilldown', async ({ apiServices, page, pageObjects }) => {
     const drilldownName = `URL drilldown ${randomUUID()}`;
     const dashboardTitle = `Dashboard URL drilldown ${randomUUID()}`;
-    const searchId = randomUUID().replace(/-/g, '');
-    const searchTitle = `URL drilldown saved search ${searchId}`;
+    const searchTitle = `URL drilldown saved search ${randomUUID().replace(/-/g, '')}`;
     const urlTemplate =
       "{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{context.panel.timeRange.from}}',to:'{{context.panel.timeRange.to}}'))" +
       "&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto," +
       "query:(language:{{context.panel.query.language}},query:'clientip:239.190.189.77'),sort:!())";
 
     await pageObjects.dashboard.openNewDashboard();
-    await createSavedSearch(kbnClient, searchId, searchTitle, testData.DEFAULT_DATA_VIEW);
+    const searchId = await createDefaultSession(apiServices, searchTitle);
     createdSavedObjects.push({ type: 'search', id: searchId });
     await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
     await page.testSubj.locator('savedSearchTotalDocuments').waitFor({ state: 'visible' });
@@ -200,14 +177,13 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
   });
 
   test('should apply data, columns and sorting from selected Discover tab', async ({
-    kbnClient,
+    apiServices,
     page,
     pageObjects,
   }) => {
-    const searchId = randomUUID().replace(/-/g, '');
-    const searchTitle = `Discover embeddable multi tab ${searchId}`;
+    const searchTitle = `Discover embeddable multi tab ${randomUUID().replace(/-/g, '')}`;
 
-    await createTabbedSavedSearch(kbnClient, searchId, searchTitle);
+    const searchId = await createTabbedSession(apiServices, searchTitle);
     createdSavedObjects.push({ type: 'search', id: searchId });
     await pageObjects.dashboard.openNewDashboard();
     await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
@@ -238,15 +214,14 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
   });
 
   test('should recover a deleted selected tab through inline editing', async ({
-    kbnClient,
+    apiServices,
     page,
     pageObjects,
   }) => {
-    const searchId = randomUUID().replace(/-/g, '');
-    const searchTitle = `Discover embeddable deleted tab ${searchId}`;
-    const dashboardTitle = `Dashboard deleted tab ${searchId}`;
+    const searchTitle = `Discover embeddable deleted tab ${randomUUID().replace(/-/g, '')}`;
+    const dashboardTitle = `Dashboard deleted tab ${randomUUID()}`;
 
-    await createTabbedSavedSearch(kbnClient, searchId, searchTitle);
+    const searchId = await createTabbedSession(apiServices, searchTitle);
     createdSavedObjects.push({ type: 'search', id: searchId });
     await pageObjects.dashboard.openNewDashboard();
     await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
