@@ -246,17 +246,8 @@ covering set of source ids: enough to trace every claim, no more.
 
 Signals are derived from raw OTel spans. When you need to go deeper — to read the actual user
 prompt that drove a retrieval, the full tool-call sequence in a conversation, or the model response
-that followed an empty retrieval — **load `agent-builder-traces`** before querying.
-
-Raw traces live in `traces-agent_builder.otel-<space>` (the skill resolves the space automatically
-when you use its `traces_esql` tool rather than querying the index directly). The spans that matter
-most for improving an AI index are:
-
-| span.name pattern | What it holds |
-|---|---|
-| `chat *` | LLM requests — token counts, model, and (if enabled) `attributes.gen_ai.input.messages` / `attributes.gen_ai.output.messages` |
-| `execute_tool *` | Individual tool calls — name, arguments, result |
-| `invoke_agent *` with `span.kind == CHAIN` | One conversation turn |
+that followed an empty retrieval — **load `agent-builder-traces`** before querying. It handles
+locating the right index and provides the `traces_esql` tool that resolves the space automatically.
 
 When a signal carries a `trace_id`, use it to pull the full span sequence for that call and read
 what the agent actually asked for and what it got back. That is the evidence that turns "retrieval
