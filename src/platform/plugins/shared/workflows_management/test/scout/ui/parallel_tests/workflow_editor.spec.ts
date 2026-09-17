@@ -173,7 +173,7 @@ test.describe(
       await expect(suggestWidget).toBeVisible();
 
       await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('consts')).toBeVisible();
-      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('inputs')).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('tags')).toBeVisible();
       await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('outputs')).toBeVisible();
     });
 
