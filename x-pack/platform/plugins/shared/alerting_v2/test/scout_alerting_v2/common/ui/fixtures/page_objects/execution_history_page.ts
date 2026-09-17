@@ -17,7 +17,7 @@ export class ExecutionHistoryPage {
   public readonly policyDetailsFlyout: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.emptyPrompt = this.page.getByRole('cell').getByTestId('ruleExecutionHistoryEmptyPrompt');
+    this.emptyPrompt = this.page.testSubj.locator('ruleExecutionHistoryEmptyPrompt');
     this.retryButton = this.page.testSubj.locator('executionHistoryRetryButton');
     this.rulesTab = this.page.testSubj.locator('executionHistoryRulesTab');
     this.actionPoliciesTab = this.page.testSubj.locator('executionHistoryPoliciesTab');
