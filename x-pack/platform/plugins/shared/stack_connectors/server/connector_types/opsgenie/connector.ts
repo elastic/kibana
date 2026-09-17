@@ -25,6 +25,7 @@ import type {
   FailureResponseType,
   Secrets,
 } from '@kbn/connector-schemas/opsgenie';
+import { truncateMessage as truncateToMaxLength } from '../lib/truncate_message';
 import * as i18n from './translations';
 
 export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
@@ -113,14 +114,15 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   }
 
   private truncateMessage(message: string): string {
-    if (message.length <= MESSAGE_MAX_LENGTH) {
-      return message;
+    const { originalLength, truncated, value } = truncateToMaxLength(message, MESSAGE_MAX_LENGTH);
+
+    if (truncated) {
+      this.logger.warn(
+        `connector "${this.connector.id}" message length ${originalLength} exceeds ${MESSAGE_MAX_LENGTH} and has been truncated`
+      );
     }
 
-    this.logger.warn(
-      `connector "${this.connector.id}" message length ${message.length} exceeds ${MESSAGE_MAX_LENGTH} and has been truncated`
-    );
-    return message.slice(0, MESSAGE_MAX_LENGTH);
+    return value;
   }
 
   private static createAlias(alias: string) {
