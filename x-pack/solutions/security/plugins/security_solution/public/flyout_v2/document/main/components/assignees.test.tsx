@@ -268,10 +268,7 @@ describe('<Assignees />', () => {
       // Somebody else assigns `user-id-2` to the same alert; a refetch brings the fresh doc.
       rerender(
         <TestProviders>
-          <Assignees
-            hit={createMockHit(['user-id-1', 'user-id-2'])}
-            onAlertUpdated={jest.fn()}
-          />
+          <Assignees hit={createMockHit(['user-id-1', 'user-id-2'])} onAlertUpdated={jest.fn()} />
         </TestProviders>
       );
 
