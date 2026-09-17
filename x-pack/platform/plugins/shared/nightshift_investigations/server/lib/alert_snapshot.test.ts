@@ -67,7 +67,7 @@ describe('parseAlertSnapshot', () => {
 });
 
 describe('snapshotFromAlertDocument', () => {
-  const expected = expect.objectContaining({
+  const expectedSnapshot = {
     id: 'alert-1',
     rule_id: 'rule-1',
     rule_name: 'Test rule',
@@ -75,7 +75,8 @@ describe('snapshotFromAlertDocument', () => {
     rule_category: 'Test category',
     status: 'active',
     start: '2026-09-02T10:00:00.000Z',
-  });
+  } as const;
+  const expected = expect.objectContaining(expectedSnapshot);
 
   it('passes through an already-valid snapshot', () => {
     expect(
@@ -109,16 +110,40 @@ describe('snapshotFromAlertDocument', () => {
             start: '2026-09-02T10:00:00.000Z',
             flapping: false,
             group: [{ field: 'host.name', value: 'host-1' }],
+            grouping: { service: { name: 'checkout' } },
             rule: {
               uuid: 'rule-1',
               name: 'Test rule',
               rule_type_id: 'test.rule',
               category: 'Test category',
+              parameters: { threshold: 1000 },
             },
           },
         },
       })
-    ).toEqual(expected);
+    ).toEqual(
+      expect.objectContaining({
+        ...expectedSnapshot,
+        grouping: { service: { name: 'checkout' } },
+        rule_parameters: { threshold: 1000 },
+      })
+    );
+  });
+
+  it('keeps grouping and rule parameters on a flattened AAD document', () => {
+    expect(
+      snapshotFromAlertDocument({
+        ...alert,
+        'kibana.alert.grouping': { service: { name: 'checkout' } },
+        'kibana.alert.rule.parameters': { threshold: 1000 },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        ...expectedSnapshot,
+        grouping: { service: { name: 'checkout' } },
+        rule_parameters: { threshold: 1000 },
+      })
+    );
   });
 
   it('reads uuid from _id when the nested document omits kibana.alert.uuid', () => {

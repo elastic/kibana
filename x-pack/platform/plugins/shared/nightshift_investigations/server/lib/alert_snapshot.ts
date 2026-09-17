@@ -41,6 +41,13 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   value != null && typeof value === 'object' && !Array.isArray(value);
 
 /**
+ * Object-valued AAD fields that {@link parseAlertSnapshot} reads whole. Recursing into them would
+ * shred `{ service: { name: 'checkout' } }` into `kibana.alert.grouping.service.name` and drop the
+ * snapshot enrichment. Evaluation is flattened on purpose: parse reads the leaf dotted keys.
+ */
+const OBJECT_VALUED_AAD_FIELDS = new Set([ALERT_GROUPING, ALERT_RULE_PARAMETERS]);
+
+/**
  * AAD documents arrive nested (`kibana: { alert: { uuid } }`) from v1 rule-action events and
  * flattened (`'kibana.alert.uuid'` as a single key) from RAC. Flatten nested objects so
  * {@link parseAlertSnapshot} can read the same dotted field names in both cases. Arrays stay intact.
@@ -52,7 +59,7 @@ const flattenAlertFields = (
   const flattened: Record<string, unknown> = {};
   for (const [key, nested] of Object.entries(value)) {
     const path = prefix ? `${prefix}.${key}` : key;
-    if (isPlainObject(nested)) {
+    if (isPlainObject(nested) && !OBJECT_VALUED_AAD_FIELDS.has(path)) {
       Object.assign(flattened, flattenAlertFields(nested, path));
     } else {
       flattened[path] = nested;
