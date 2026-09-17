@@ -71,4 +71,79 @@ describe('deleteIngressCredentialForConnector', () => {
       { type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE, id: 'old-cred' },
     ]);
   });
+
+  it('does not delete keepCredentialId', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'old-cred',
+          type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+          attributes: {
+            connectorId: 'connector-1',
+            ingestTokenHash: 'b'.repeat(64),
+            createdAt: '2026-01-01T00:00:00.000Z',
+          },
+          references: [],
+        },
+        {
+          id: 'new-cred',
+          type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+          attributes: {
+            connectorId: 'connector-1',
+            ingestTokenHash: 'c'.repeat(64),
+            createdAt: '2026-01-02T00:00:00.000Z',
+          },
+          references: [],
+        },
+      ],
+      total: 2,
+      page: 1,
+      per_page: 10,
+    } as never);
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'old-cred', type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE, success: true },
+      ],
+    } as never);
+
+    await deleteIngressCredentialForConnector({
+      unsecuredSavedObjectsClient,
+      connectorId: 'connector-1',
+      logger,
+      keepCredentialId: 'new-cred',
+    });
+
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+      { type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE, id: 'old-cred' },
+    ]);
+  });
+
+  it('returns without bulkDelete when only keepCredentialId remains', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'new-cred',
+          type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+          attributes: {
+            connectorId: 'connector-1',
+            ingestTokenHash: 'c'.repeat(64),
+            createdAt: '2026-01-02T00:00:00.000Z',
+          },
+          references: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 10,
+    } as never);
+
+    await deleteIngressCredentialForConnector({
+      unsecuredSavedObjectsClient,
+      connectorId: 'connector-1',
+      logger,
+      keepCredentialId: 'new-cred',
+    });
+
+    expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+  });
 });

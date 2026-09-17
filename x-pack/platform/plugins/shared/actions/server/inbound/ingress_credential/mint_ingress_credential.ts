@@ -36,12 +36,6 @@ export const mintIngressCredential = async ({
   auditLogger?: AuditLogger;
   logger: Logger;
 }): Promise<{ ingestToken: string; credentialId: string }> => {
-  await deleteIngressCredentialForConnector({
-    unsecuredSavedObjectsClient,
-    connectorId,
-    logger,
-  });
-
   const credentialId = SavedObjectsUtils.generateId();
   const secret = generateIngestToken();
   const ingestToken = composeIngestToken(credentialId, secret);
@@ -82,6 +76,13 @@ export const mintIngressCredential = async ({
     );
     throw error;
   }
+
+  await deleteIngressCredentialForConnector({
+    unsecuredSavedObjectsClient,
+    connectorId,
+    logger,
+    keepCredentialId: credentialId,
+  });
 
   auditLogger?.log(
     ingressCredentialAuditEvent({

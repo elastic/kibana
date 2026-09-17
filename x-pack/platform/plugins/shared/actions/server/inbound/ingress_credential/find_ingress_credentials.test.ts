@@ -53,6 +53,12 @@ describe('findIngressCredentialsForConnector', () => {
     expect(result).toHaveLength(12);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        filter: `${CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE}.attributes.connectorId:"connector-1"`,
+      })
+    );
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ page: 2, perPage: 10 })
     );

@@ -14,22 +14,27 @@ export const deleteIngressCredentialForConnector = async ({
   unsecuredSavedObjectsClient,
   connectorId,
   logger,
+  keepCredentialId,
 }: {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   connectorId: string;
   logger: Logger;
+  keepCredentialId?: string;
 }): Promise<void> => {
   const credentials = await findIngressCredentialsForConnector({
     unsecuredSavedObjectsClient,
     connectorId,
   });
+  const toDelete = keepCredentialId
+    ? credentials.filter((credential) => credential.id !== keepCredentialId)
+    : credentials;
 
-  if (credentials.length === 0) {
+  if (toDelete.length === 0) {
     return;
   }
 
   const result = await unsecuredSavedObjectsClient.bulkDelete(
-    credentials.map((credential) => ({
+    toDelete.map((credential) => ({
       type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
       id: credential.id,
     }))

@@ -283,19 +283,22 @@ describe('ingestInboundEvent', () => {
     expectOutcome('debug', 'auth_fail');
   });
 
-  it('returns 404 for a bad token', async () => {
-    getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
-    );
-    const { response: res } = await run({ query: { token: 'wrong' } });
-    expect(res.notFound).toHaveBeenCalled();
-    expect(emitConnectorEvents).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(
-      CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
-      'unparseable'
-    );
-    expectOutcome('debug', 'auth_fail');
-  });
+  it.each(['wrong', 'opaque-preview-token'])(
+    'returns 404 without loading a credential for unparseable token %j',
+    async (badToken) => {
+      getConnectorSpecMock.mockReturnValue(
+        createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+      );
+      const { response: res } = await run({ query: { token: badToken } });
+      expect(res.notFound).toHaveBeenCalled();
+      expect(emitConnectorEvents).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalledWith(
+        CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+        expect.anything()
+      );
+      expectOutcome('debug', 'auth_fail');
+    }
+  );
 
   it('returns 404 for the previous token after rotate', async () => {
     const rotatedCredentialId = 'cred-2';

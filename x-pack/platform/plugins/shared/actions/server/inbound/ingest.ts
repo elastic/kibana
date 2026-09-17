@@ -28,8 +28,6 @@ import { loadIngressCredential, parseIngestToken } from './ingress_credential';
 import { loadInboundConnector } from './load_inbound_connector';
 import { validateSpokeHttpHeaders } from './spoke_http';
 
-const UNPARSEABLE_INGEST_CREDENTIAL_ID = 'unparseable';
-
 export type IngestInboundEventResult =
   | { status: 'forbidden'; body: string }
   | { status: 'not_found' }
@@ -144,16 +142,17 @@ export async function ingestInboundEvent({
     headers,
   });
   const parsedToken = providedToken ? parseIngestToken(providedToken) : undefined;
-  const credential = providedToken
-    ? await loadIngressCredential({
-        unsecuredSavedObjectsClient,
-        credentialId: parsedToken?.credentialId ?? UNPARSEABLE_INGEST_CREDENTIAL_ID,
-        connectorId,
-      })
-    : undefined;
+  if (!providedToken || !parsedToken) {
+    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
+    return { status: 'not_found' };
+  }
+
+  const credential = await loadIngressCredential({
+    unsecuredSavedObjectsClient,
+    credentialId: parsedToken.credentialId,
+    connectorId,
+  });
   if (
-    !providedToken ||
-    !parsedToken ||
     !credential ||
     !verifyIngestToken({
       connectorId,

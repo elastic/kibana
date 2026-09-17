@@ -13,8 +13,6 @@ import type { RawConnectorIngressCredential } from './types';
 const FIND_PAGE_SIZE = 10;
 const FIND_MAX_PAGES = 20;
 
-const escapeKueryValue = (value: string): string => value.replace(/[\\():<>"*]/g, '\\$&');
-
 export const findIngressCredentialsForConnector = async ({
   unsecuredSavedObjectsClient,
   connectorId,
@@ -23,7 +21,7 @@ export const findIngressCredentialsForConnector = async ({
   connectorId: string;
 }): Promise<Array<SavedObject<RawConnectorIngressCredential>>> => {
   const type = CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE;
-  const filter = `${type}.attributes.connectorId:"${escapeKueryValue(connectorId)}"`;
+  const filter = `${type}.attributes.connectorId:"${connectorId}"`;
   const collected: Array<SavedObject<RawConnectorIngressCredential>> = [];
   let total = 0;
 
