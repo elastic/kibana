@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { NULL_TOKEN } from '@kbn/field-formats-common';
+import { NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     })();
 
     // The datatable renders null values as a dash, which is identical in every locale.
-    return (term, field) => (term === 'null' ? NULL_TOKEN : translate(term, field));
+    return (term, field) => (term === 'null' ? NULL_PLACEHOLDER : translate(term, field));
   }
 
   describe('lens smokescreen tests', () => {

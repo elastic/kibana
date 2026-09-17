@@ -8,7 +8,7 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { isMissingValue, NULL_TOKEN } from '@kbn/field-formats-common';
+import { isMissingValue, NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { createEscapeValue } from './escape_value';
 
@@ -53,10 +53,10 @@ export function datatableToCSV(
       const value = row[id];
 
       // Export what the table shows, and the table renders missing values as a dash. Returned
-      // before escaping: NULL_TOKEN is our own constant rather than document content, so the
+      // before escaping: NULL_PLACEHOLDER is our own constant rather than document content, so the
       // formula guard would only turn a leading "-" into "'-" for nothing.
       if (!raw && isMissingValue(value)) {
-        return NULL_TOKEN;
+        return NULL_PLACEHOLDER;
       }
 
       return escapeValues(raw ? value : formatters[id].convertToText(value));

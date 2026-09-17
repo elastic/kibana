@@ -9,7 +9,7 @@
 
 import { render } from '@testing-library/react';
 import { isValidElement, type ReactNode } from 'react';
-import { NULL_LABEL, NULL_TOKEN, EMPTY_LABEL } from '@kbn/field-formats-common';
+import { NULL_LABEL, NULL_PLACEHOLDER, EMPTY_LABEL } from '@kbn/field-formats-common';
 
 export const renderReactNode = (node: ReactNode) => render(node).container;
 
@@ -21,13 +21,13 @@ export const renderReactNode = (node: ReactNode) => render(node).container;
 export const expectReactElementWithNull = (element: React.ReactNode) => {
   expect(isValidElement(element)).toBe(true);
   const container = renderReactNode(element);
-  expect(container.textContent).toContain(NULL_TOKEN);
+  expect(container.textContent).toContain(NULL_PLACEHOLDER);
   expect(container.textContent).toContain(NULL_LABEL);
   const titled = container.querySelector('[title]');
   expect(titled).not.toBeNull();
   expect(titled).toHaveAttribute('title', NULL_LABEL);
   expect(titled).toHaveAttribute('aria-hidden', 'true');
-  expect(titled).toHaveTextContent(NULL_TOKEN);
+  expect(titled).toHaveTextContent(NULL_PLACEHOLDER);
 };
 
 /**

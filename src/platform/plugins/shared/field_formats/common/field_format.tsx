@@ -10,7 +10,12 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
-import { EMPTY_LABEL, isMissingValue, NULL_LABEL, NULL_TOKEN } from '@kbn/field-formats-common';
+import {
+  EMPTY_LABEL,
+  isMissingValue,
+  NULL_LABEL,
+  NULL_PLACEHOLDER,
+} from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
 import { asPrettyString, formatReactArray, formatTextArray } from './utils';
 import type {
@@ -247,7 +252,7 @@ export abstract class FieldFormat {
       return (
         <span css={emptyValueStyles}>
           <span aria-hidden="true" title={NULL_LABEL}>
-            {NULL_TOKEN}
+            {NULL_PLACEHOLDER}
           </span>
           <span className="euiScreenReaderOnly">{NULL_LABEL}</span>
         </span>

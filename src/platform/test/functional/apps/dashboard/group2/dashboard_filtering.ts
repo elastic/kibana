@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { NULL_TOKEN } from '@kbn/field-formats-common';
+import { NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('metric value shows no data', async () => {
-        await dashboardExpect.metricValuesExist([NULL_TOKEN]);
+        await dashboardExpect.metricValuesExist([NULL_PLACEHOLDER]);
       });
 
       it('tag cloud values are filtered', async () => {
