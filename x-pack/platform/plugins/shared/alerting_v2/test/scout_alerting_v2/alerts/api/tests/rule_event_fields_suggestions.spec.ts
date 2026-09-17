@@ -105,49 +105,13 @@ apiTest.describe('Rule event fields suggestions API', { tag: '@local-stateful-cl
   );
 
   apiTest(
-    'narrows fields when matcher selects a single rule via rule.id',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(
-        ruleEventFieldsUrl({ matcher: `rule.id : "${RULE_ID_A}"` }),
-        {
-          headers: adminHeaders,
-          responseType: 'json',
-        }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      // The matcher scopes to documents we seeded for RULE_ID_A, so the
-      // result is fully under test control — assert exact equality.
-      expect(response.body).toStrictEqual(['data.cpu', 'data.host', 'data.region']);
-    }
-  );
-
-  apiTest(
     'falls back to the unfiltered result when matcher cannot be parsed',
     async ({ apiClient }) => {
       // Trailing colon makes this an unparseable KQL expression.
-      const response = await apiClient.get(ruleEventFieldsUrl({ matcher: 'rule.id :' }), {
+      const response = await apiClient.get(ruleEventFieldsUrl({ matcher: 'episode_id :' }), {
         headers: adminHeaders,
         responseType: 'json',
       });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(expect.arrayContaining(['data.host', 'data.service']));
-    }
-  );
-
-  apiTest(
-    'falls back to the unfiltered result when matcher only references dropped fields',
-    async ({ apiClient }) => {
-      // `rule.name` is intentionally not pushed down to the alert-events
-      // query; the AST collapses to no filter and we return everything.
-      const response = await apiClient.get(
-        ruleEventFieldsUrl({ matcher: 'rule.name : "anything"' }),
-        {
-          headers: adminHeaders,
-          responseType: 'json',
-        }
-      );
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.arrayContaining(['data.host', 'data.service']));

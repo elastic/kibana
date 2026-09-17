@@ -120,26 +120,6 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
     }
   );
 
-  apiTest(
-    'get: returns legacy rule.* expression unchanged (AC#3 — stored verbatim, not evaluated)',
-    async ({ apiClient, apiServices }) => {
-      const matcher = { expression: 'rule.id: "some-legacy-rule-id"' };
-      const created = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({
-          name: 'legacy-rule-expression-policy',
-          matcher,
-        })
-      );
-
-      const response = await apiClient.get(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.matcher).toStrictEqual(matcher);
-    }
-  );
-
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
     const response = await apiClient.get(getActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },

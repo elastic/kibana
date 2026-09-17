@@ -83,10 +83,10 @@ describe('MatcherInput', () => {
       window.HTMLInputElement.prototype,
       'value'
     )!.set!;
-    nativeInputValueSetter.call(input, 'rule.name : "test"');
+    nativeInputValueSetter.call(input, 'episode_status: "active"');
     input.dispatchEvent(new Event('change', { bubbles: true }));
 
-    expect(onChange).toHaveBeenCalledWith('rule.name : "test"');
+    expect(onChange).toHaveBeenCalledWith('episode_status: "active"');
   });
 
   it('passes placeholder and data-test-subj props through', () => {

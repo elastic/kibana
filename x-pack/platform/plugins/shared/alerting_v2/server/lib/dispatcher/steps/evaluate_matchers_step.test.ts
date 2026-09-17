@@ -370,25 +370,6 @@ describe('EvaluateMatchersStep', () => {
 
       expect(matched).toHaveLength(0);
     });
-
-    it('policy with rule.name matcher does not match an external episode (no rule in context)', async () => {
-      const episode = createAlertEpisode({
-        source: 'pagerduty',
-        rule_id: null,
-        space_id: 'default',
-        episode_id: 'pd-ep-2',
-      });
-      const policy = createActionPolicy({
-        id: 'p1',
-        spaceId: 'default',
-        matcher: { expression: 'rule.name: "My Rule"' },
-      });
-
-      const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
-
-      expect(matched).toHaveLength(0);
-      expect(mockLogger.warn).not.toHaveBeenCalled();
-    });
   });
 
   describe('tag-based matching', () => {

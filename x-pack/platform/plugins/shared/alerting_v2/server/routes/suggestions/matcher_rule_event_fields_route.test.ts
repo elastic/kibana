@@ -34,7 +34,7 @@ describe('MatcherRuleEventFieldsRoute', () => {
   it('forwards the matcher query param to getDataFieldNames', async () => {
     const { ctx } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({
-      query: { matcher: 'rule.id : "abc"' },
+      query: { matcher: 'episode_id: "abc"' },
     });
     const suggestionsService = createSuggestionsService();
     suggestionsService.getDataFieldNames.mockResolvedValue([]);
@@ -43,7 +43,7 @@ describe('MatcherRuleEventFieldsRoute', () => {
 
     await route.handle();
 
-    expect(suggestionsService.getDataFieldNames).toHaveBeenCalledWith('rule.id : "abc"');
+    expect(suggestionsService.getDataFieldNames).toHaveBeenCalledWith('episode_id: "abc"');
     expect(ctx.response.ok).toHaveBeenCalledWith({ body: [] });
   });
 

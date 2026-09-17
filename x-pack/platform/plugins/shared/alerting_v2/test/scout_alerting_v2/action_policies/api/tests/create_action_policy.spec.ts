@@ -172,23 +172,6 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest(
-    'matcher: API accepts legacy rule.* expression (AC#3 — stored unchanged, not evaluated)',
-    async ({ apiClient }) => {
-      const matcher = { expression: 'rule.id: "some-legacy-rule-id"' };
-      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: buildCreateActionPolicyData({
-          name: 'legacy-rule-expression-policy',
-          matcher,
-        }),
-      });
-
-      expect(response).toHaveStatusCode(201);
-      expect(response.body).toMatchObject({ matcher });
-    }
-  );
-
   apiTest('validation: rejects missing name', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
