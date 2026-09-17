@@ -6,10 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { INVESTIGATION_TRIGGER_TYPES } from '../../common';
+import { snapshotFromAlertDocument } from '../lib/alert_snapshot';
 import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
@@ -17,6 +18,11 @@ const inputSchema = z.object({
     .enum(['significant_event', 'alert'])
     .describe('The type of entity being investigated'),
   subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
+  title: z
+    .string()
+    .min(1)
+    .max(MAX_TITLE_LENGTH)
+    .describe('Human-readable headline for the investigation, e.g. the event title or rule name'),
   trigger_type: z
     .enum(INVESTIGATION_TRIGGER_TYPES)
     .optional()
@@ -36,9 +42,24 @@ const inputSchema = z.object({
     .record(z.string(), z.unknown())
     .optional()
     .describe(
-      'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
+      'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots or v1 AAD documents, or the investigation is rejected.'
     ),
 });
+
+const toAlertStartContext = (
+  context: Record<string, unknown> | undefined
+): Record<string, unknown> | undefined => {
+  if (context == null || !Array.isArray(context.alerts)) {
+    return context;
+  }
+
+  return {
+    alerts: context.alerts.flatMap((alert) => {
+      const snapshot = snapshotFromAlertDocument(alert);
+      return snapshot ? [snapshot] : [];
+    }),
+  };
+};
 
 export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient
@@ -68,9 +89,11 @@ export const triggerInvestigationStepDefinition = (
           id: input.subject_id,
           summary: input.summary,
         },
+        title: input.title,
         trigger_type: input.trigger_type ?? 'automatic',
         concurrency_key: input.concurrency_key,
-        context: input.context,
+        context:
+          input.subject_type === 'alert' ? toAlertStartContext(input.context) : input.context,
       });
       return { output: result };
     },
