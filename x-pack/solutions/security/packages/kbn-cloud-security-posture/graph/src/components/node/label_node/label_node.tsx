@@ -84,7 +84,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             css={css`
               display: flex;
               align-items: center;
-              justify-content: space-between;
+              justify-content: center;
               width: 100%;
               gap: ${euiTheme.size.xs};
             `}
@@ -97,6 +97,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
                 text-overflow: ellipsis;
                 font-weight: ${euiTheme.font.weight.semiBold};
                 font-size: ${euiTheme.font.scale.xs * 10.5}px;
+                text-align: center;
               `}
             >
               <EuiTextTruncate

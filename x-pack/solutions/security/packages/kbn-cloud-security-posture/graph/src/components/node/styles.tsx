@@ -192,16 +192,16 @@ export const getLabelColors = (
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   if (color === 'danger') {
     return {
-      backgroundColor: euiTheme.colors.danger,
+      backgroundColor: euiTheme.colors.backgroundLightDanger,
       borderColor: euiTheme.colors.danger,
-      textColor: euiTheme.colors.textInverse,
+      textColor: euiTheme.colors.danger,
     };
   }
 
   return {
-    backgroundColor: euiTheme.colors.backgroundBasePrimary,
-    borderColor: euiTheme.colors.borderStrongPrimary,
-    textColor: euiTheme.colors.textPrimary,
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    borderColor: euiTheme.colors.borderBasePlain,
+    textColor: euiTheme.colors.textHeading,
   };
 };
 
