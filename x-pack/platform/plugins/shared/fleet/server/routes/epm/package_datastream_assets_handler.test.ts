@@ -299,7 +299,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
-  it('should throw error if the datastreams exist on other package policies on different namespaces', async () => {
+  it('should skip removal and return success when dataset is used by other package policies', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       name: 'logs',
       version: '1.0.0',
@@ -331,15 +331,10 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     mockedGetCustomDatasetStreams.mockReturnValue([
       { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
     ]);
-    mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
-      existingDataStreams: [],
-      dataStream: {},
-    } as any);
     mockedIsInputPackageDatasetUsedByMultiplePolicies.mockReturnValue(true);
 
-    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
-      `Datastreams matching custom are in use by other package policies and cannot be removed`
-    );
-    await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+    await deletePackageDatastreamAssetsHandler(context, request, response);
+    expect(response.ok).toHaveBeenCalledWith({ body: { success: true } });
+    expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 });
