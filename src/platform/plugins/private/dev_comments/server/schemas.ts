@@ -7,21 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
-import {
-  isSafeRelativePath,
-  routeFromLocation,
-  type Comment,
-  type CommentRoute,
-  type CommentsExport,
-} from '../common';
+import { schema } from '@kbn/config-schema';
+import { isSafeRelativePath, routeFromLocation, type CommentRoute } from '../common';
 
-/** Most comments stored, and so listed, exported or imported at once. */
+/** Most comments stored, and so listed or exported at once. */
 export const MAX_COMMENTS = 1000;
 /** Most replies on one comment. */
 export const REPLIES_MAX = 200;
-/** Exports are kept below this so that they can always be imported again. */
-export const IMPORT_MAX_BYTES = 25 * 1024 * 1024;
 /** Id of the document in the comments index that holds the comment count; never a comment id. */
 export const QUOTA_ID = 'quota';
 
@@ -113,12 +105,10 @@ const routeSchema = schema.object({
 });
 
 /** Route as stored by the first version of the layer: base-path-free pathname plus the absolute URL. */
-const legacyRouteSchema = schema.object({
-  pathname: pathSchema,
-  url: schema.string({ minLength: 1, maxLength: PATH_MAX_LENGTH }),
-});
-
-export type LegacyRoute = TypeOf<typeof legacyRouteSchema>;
+export interface LegacyRoute {
+  pathname: string;
+  url: string;
+}
 
 /** Rewrites a first-version route; the pathname alone identifies the page when the URL cannot be parsed. */
 export const routeFromLegacy = ({ pathname, url }: LegacyRoute): CommentRoute => {
@@ -152,42 +142,3 @@ export const commentPatchSchema = schema.object({
 });
 
 export const idParamsSchema = schema.object({ id: idSchema });
-
-/** Each exported comment is validated on its own by `parseImport`. */
-export const importBodySchema = schema.object({
-  version: schema.oneOf([schema.literal(1), schema.literal(2)]),
-  exportedAt: timestampSchema,
-  comments: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
-    maxSize: MAX_COMMENTS,
-  }),
-});
-
-/** Exports may come from another version of the layer: properties this one does not know are dropped, first-version routes are rewritten. */
-const importedCommentSchema = newCommentSchema
-  .extends({
-    id: idSchema,
-    createdAt: timestampSchema,
-    updatedAt: timestampSchema,
-    route: schema.oneOf([routeSchema, legacyRouteSchema]),
-  })
-  .extendsDeep({ unknowns: 'ignore' });
-
-/** Validates each exported comment on its own, so that one this version cannot read is skipped instead of failing the whole import. */
-export const parseImport = ({
-  exportedAt,
-  comments,
-}: TypeOf<typeof importBodySchema>): { payload: CommentsExport; skipped: number } => {
-  const readable: Comment[] = [];
-  for (const item of comments) {
-    try {
-      const { route, ...comment } = importedCommentSchema.validate(item);
-      readable.push({ ...comment, route: normalizeRoute(route) });
-    } catch {
-      // written by an incompatible version of the layer
-    }
-  }
-  return {
-    payload: { version: 2, exportedAt, comments: readable },
-    skipped: comments.length - readable.length,
-  };
-};

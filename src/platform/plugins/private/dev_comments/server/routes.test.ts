@@ -19,7 +19,6 @@ describe('comments routes', () => {
   const client = {
     create: jest.fn(),
     update: jest.fn(),
-    importAll: jest.fn(),
   } as unknown as jest.Mocked<CommentsClient>;
   registerCommentsRoutes(router, Promise.resolve(client));
 
@@ -46,17 +45,6 @@ describe('comments routes', () => {
     const response = await call('post', COMMENTS_API_PATH, {});
 
     expect(response.badRequest).toHaveBeenCalledWith({ body: { message: 'Store is full' } });
-  });
-
-  it('adds the records the import could not read to those it could not write', async () => {
-    client.importAll.mockResolvedValueOnce({ imported: 1, skipped: 0, failed: 1 });
-    const response = await call('post', `${COMMENTS_API_PATH}/import`, {
-      version: 2,
-      exportedAt: '2026-01-01T00:00:00.000Z',
-      comments: [{}, {}, {}],
-    });
-
-    expect(response.ok).toHaveBeenCalledWith({ body: { imported: 1, skipped: 3, failed: 1 } });
   });
 
   it('lets other failures through', async () => {

@@ -15,10 +15,9 @@ import {
   type CommentSnapshot,
   type CommentsApi,
   type CommentsExport,
-  type CommentsImportResult,
 } from '../common';
 
-/** Fetch errors carry the server's explanation (limits, rejected records) in their body; the layer shows it to the user. */
+/** Fetch errors carry the server's explanation (limits) in their body; the layer shows it to the user. */
 const explained = async <T>(request: Promise<T>): Promise<T> => {
   try {
     return await request;
@@ -45,11 +44,4 @@ export const createCommentsApi = (http: HttpSetup): CommentsApi => ({
     ),
 
   exportAll: () => explained(http.get<CommentsExport>(`${COMMENTS_API_PATH}/export`)),
-
-  importAll: (payload) =>
-    explained(
-      http.post<CommentsImportResult>(`${COMMENTS_API_PATH}/import`, {
-        body: JSON.stringify(payload),
-      })
-    ),
 });

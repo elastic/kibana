@@ -22,7 +22,6 @@ export type {
   CommentSnapshot,
   CommentsApi,
   CommentsExport,
-  CommentsImportResult,
   CommentsHostServices,
   CommentsLocationService,
   CommentsUser,

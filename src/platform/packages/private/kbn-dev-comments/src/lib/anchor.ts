@@ -86,7 +86,7 @@ const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
 const attributeSelector = (name: string, value: string): string =>
   `[${name}="${value.replace(/["\\]/g, '\\$&')}"]`;
 
-/** Selectors may come from imported comments, so an invalid one is a miss rather than an exception. */
+/** Selectors come from stored comments, which anyone with access to the store can have written, so an invalid one is a miss rather than an exception. */
 const queryAll = (root: ParentNode, selector: string): Element[] => {
   try {
     return Array.from(root.querySelectorAll(selector));

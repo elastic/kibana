@@ -41,8 +41,8 @@ interface GuideStep {
 
 /**
  * Latest click of the trail that has not been repeated yet and whose element can
- * be clicked right now. Trails may have been imported, so each step is held to
- * the same standard as when recording: a disclosure control on the page itself.
+ * be clicked right now. Trails are stored data, so each step is held to the
+ * same standard as when recording: a disclosure control on the page itself.
  */
 const findStep = (
   comment: Comment,

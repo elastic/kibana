@@ -8,11 +8,9 @@
  */
 
 import type {
-  BulkResponse,
   CountResponse,
   GetResponse,
   IndexResponse,
-  MgetResponse,
   SearchResponse,
   UpdateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -285,89 +283,29 @@ describe('CommentsClient', () => {
     });
   });
 
-  describe('importAll', () => {
-    it('claims room for the comments that are new and gives back that of those that failed', async () => {
-      const comments = ['a', 'b', 'c'].map((id) => ({
-        ...input,
-        id,
-        createdAt: '2026-01-01T00:00:00.000Z',
-        updatedAt: '2026-01-01T00:00:00.000Z',
-      }));
-      const mget: MgetResponse = {
-        docs: [
-          { _index: COMMENTS_INDEX, _id: 'a', found: true },
-          { _index: COMMENTS_INDEX, _id: 'b', found: false },
-          { _index: COMMENTS_INDEX, _id: 'c', found: false },
-        ],
-      };
-      const bulk: BulkResponse = {
-        errors: true,
-        took: 1,
-        items: [
-          { index: { _index: COMMENTS_INDEX, _id: 'a', status: 200 } },
-          { index: { _index: COMMENTS_INDEX, _id: 'b', status: 200 } },
-          {
-            index: {
-              _index: COMMENTS_INDEX,
-              _id: 'c',
-              status: 400,
-              error: { type: 'mapper_parsing_exception', reason: 'bad field' },
-            },
-          },
-        ],
-      };
-      esClient.mget.mockResponseOnce(mget);
-      esClient.bulk.mockResponseOnce(bulk);
-
-      // A repeated id is written once, as its last version, so its slot is claimed once.
-      const result = await client().importAll({
-        version: 2,
-        exportedAt: '',
-        comments: [...comments, { ...comments[1], text: 'Newer b' }],
-      });
-
-      expect(result).toEqual({ imported: 2, skipped: 0, failed: 1 });
-      expect(quotaCalls()).toEqual([2, -1]);
-      expect(esClient.mget).toHaveBeenCalledWith(expect.objectContaining({ ids: ['a', 'b', 'c'] }));
-      expect(esClient.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({
-          operations: expect.arrayContaining([expect.objectContaining({ text: 'Newer b' })]),
-        })
-      );
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('[c] bad field'));
-    });
-
-    it('refuses the whole import when the new comments would not fit', async () => {
-      esClient.mget.mockResponseOnce({
-        docs: [{ _index: COMMENTS_INDEX, _id: 'a', found: false }],
-      });
-      esClient.update.mockResponseOnce(updateResponse('noop'));
-      esClient.count.mockResponseOnce(countResponse(MAX_COMMENTS));
-
-      await expect(
-        client().importAll({
-          version: 2,
-          exportedAt: '',
-          comments: [{ ...input, id: 'a', createdAt: '', updatedAt: '' }],
-        })
-      ).rejects.toThrow(CommentsLimitError);
-      expect(esClient.bulk).not.toHaveBeenCalled();
-    });
-  });
-
   describe('list and exportAll', () => {
-    it('reads comments without the quota document or screenshot images, rewriting first-version records', async () => {
+    it('reads comments without the quota document, rewriting first-version records; only the export has the screenshot images', async () => {
       esClient.search.mockResponse(searchResponse([{ _id: 'a', _source: legacyStored }]));
 
       const [listed] = await client().list();
       const exported = await client().exportAll();
 
-      expect(esClient.search).toHaveBeenCalledWith(
+      const query = { bool: { must_not: { ids: { values: [QUOTA_ID] } } } };
+      expect(esClient.search).toHaveBeenNthCalledWith(
+        1,
         expect.objectContaining({
           size: MAX_COMMENTS,
-          query: { bool: { must_not: { ids: { values: [QUOTA_ID] } } } },
+          query,
           _source_excludes: ['snapshot.image'],
         })
+      );
+      expect(esClient.search).toHaveBeenNthCalledWith(
+        2,
+        expect.not.objectContaining({ _source_excludes: expect.anything() })
+      );
+      expect(esClient.search).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ size: MAX_COMMENTS, query })
       );
       expect(listed).toEqual(
         expect.objectContaining({
@@ -377,7 +315,13 @@ describe('CommentsClient', () => {
         })
       );
       expect(exported.version).toBe(2);
-      expect(exported.comments[0]).not.toHaveProperty('snapshot');
+      expect(exported.comments[0]).toEqual(
+        expect.objectContaining({
+          id: 'a',
+          route: { pageKey: '/app/x#/view/y', path: '/app/x?q=1#/view/y?_g=(a:b)' },
+          snapshot: legacyStored.snapshot,
+        })
+      );
     });
   });
 });

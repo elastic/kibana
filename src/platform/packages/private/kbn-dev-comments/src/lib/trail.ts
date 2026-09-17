@@ -69,7 +69,7 @@ const DISCLOSURE_WAIT_MS = 500;
 const isDefaultSubmit = (element: Element) =>
   element.tagName === 'BUTTON' && !element.hasAttribute('type') && element.closest('form') !== null;
 
-/** Whether the element is a control a reader could be asked to click; imported trails are checked with it as well. */
+/** Whether the element is a control a reader could be asked to click; stored trails are checked with it again before they are. */
 export const isTrailControl = (element: Element): boolean =>
   element.matches(CONTROL_SELECTOR) &&
   !element.matches(EXCLUDED_SELECTOR) &&

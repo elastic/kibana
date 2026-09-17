@@ -60,7 +60,6 @@ const createHost = () => {
       })
     ),
     exportAll: jest.fn(async () => ({ version: 2 as const, exportedAt: '', comments: [] })),
-    importAll: jest.fn(async (_payload) => ({ imported: 0, skipped: 0, failed: 0 })),
   };
   const services: CommentsHostServices = {
     api,
@@ -343,21 +342,6 @@ describe('createCommentsController', () => {
       expect(controller.store.getState()).toEqual(
         expect.objectContaining({ guideId: null, activeThreadId: 'a', focusPinId: 'a' })
       );
-    });
-  });
-
-  it('reports import results, including records that could not be written', async () => {
-    const { api, services } = createHost();
-    const controller = createCommentsController(services);
-    api.importAll.mockResolvedValueOnce({ imported: 2, skipped: 1, failed: 1 });
-    controller.start();
-
-    await controller.importFile(new File(['{"comments":[]}'], 'x.json'));
-
-    expect(controller.store.getState().notice).toEqual({
-      type: 'success',
-      message:
-        'Imported 2 comments, skipped 1 that this version cannot read, 1 could not be written.',
     });
   });
 });

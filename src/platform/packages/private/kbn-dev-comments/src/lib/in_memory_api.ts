@@ -12,14 +12,12 @@ import type { Comment, CommentsApi } from '../types';
 const withoutImage = (comment: Comment): Comment =>
   comment.snapshot ? { ...comment, snapshot: { ...comment.snapshot, image: undefined } } : comment;
 
-const withoutSnapshot = ({ snapshot, ...comment }: Comment): Comment => comment;
-
 /** In-memory `CommentsApi` for Storybook and tests; mirrors a host's semantics. */
 export const createInMemoryCommentsApi = (initial: Comment[] = []): CommentsApi => {
   const comments = new Map(initial.map((comment) => [comment.id, comment]));
   let counter = 0;
 
-  /** Sequential ids that skip anything seeded or imported under the same scheme. */
+  /** Sequential ids that skip anything seeded under the same scheme. */
   const nextId = (prefix: string): string => {
     const taken = new Set([
       ...comments.keys(),
@@ -75,11 +73,7 @@ export const createInMemoryCommentsApi = (initial: Comment[] = []): CommentsApi 
     exportAll: async () => ({
       version: 2,
       exportedAt: new Date().toISOString(),
-      comments: Array.from(comments.values()).map(withoutSnapshot),
+      comments: Array.from(comments.values()),
     }),
-    importAll: async (payload) => {
-      payload.comments.forEach((comment) => comments.set(comment.id, comment));
-      return { imported: payload.comments.length, skipped: 0, failed: 0 };
-    },
   };
 };

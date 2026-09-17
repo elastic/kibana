@@ -30,7 +30,7 @@ const seeded: Comment = {
 };
 
 describe('createInMemoryCommentsApi', () => {
-  it('never hands out an id that a seeded or imported comment already uses', async () => {
+  it('never hands out an id that a seeded comment already uses', async () => {
     const api = createInMemoryCommentsApi([seeded]);
 
     const created = await api.create(input);
@@ -43,13 +43,15 @@ describe('createInMemoryCommentsApi', () => {
     expect((await api.list()).map(({ id }) => id)).toEqual(['comment-1', 'comment-2']);
   });
 
-  it('exports without screenshots, in the current format', async () => {
+  it('lists without screenshot images, and exports with them', async () => {
     const api = createInMemoryCommentsApi([seeded]);
 
+    const [listed] = await api.list();
     const exported = await api.exportAll();
 
-    expect(exported.version).toBe(2);
-    expect(exported.comments[0]).not.toHaveProperty('snapshot');
+    expect(listed.snapshot).toEqual({ ...seeded.snapshot, image: undefined });
     expect(await api.getSnapshot(seeded.id)).toEqual(seeded.snapshot);
+    expect(exported.version).toBe(2);
+    expect(exported.comments[0].snapshot).toEqual(seeded.snapshot);
   });
 });

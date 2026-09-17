@@ -14,8 +14,9 @@ const ORIGIN = 'https://relative.invalid';
  * True for paths that stay on the host's origin once resolved: a leading `/`
  * and nothing that a URL parser turns into another origin or a scheme, such as
  * `//host/...`, `/\host/...` or the tabs and newlines it strips before looking
- * again. Comments may be imported from anywhere, so their paths are checked
- * before use, by the same parser that resolves them.
+ * again. Comments are shared through a store that anyone with access to it
+ * can write to, so their paths are checked before use, by the same parser
+ * that resolves them.
  */
 export const isSafeRelativePath = (path: string): boolean => {
   if (!path.startsWith('/')) {

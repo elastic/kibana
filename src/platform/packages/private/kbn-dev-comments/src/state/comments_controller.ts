@@ -89,8 +89,8 @@ export interface CommentsController {
   /** Ends the guide; with `found`, opens the comment it led to. */
   stopGuide(found?: boolean): void;
   setOverlayOpen(open: boolean): void;
+  /** Downloads every comment, screenshots included, as JSON. */
   exportAll(): Promise<void>;
-  importFile(file: File): Promise<void>;
   dismissNotice(): void;
 }
 
@@ -506,29 +506,6 @@ export const createCommentsController = (services: CommentsHostServices): Commen
           'error',
           i18n.translate('devComments.notice.exportFailed', {
             defaultMessage: 'Export failed: {message}',
-            values: { message: errorMessage(error) },
-          })
-        );
-      }
-    },
-
-    async importFile(file) {
-      try {
-        const { imported, skipped, failed } = await api.importAll(JSON.parse(await file.text()));
-        notify(
-          imported === 0 && skipped + failed > 0 ? 'error' : 'success',
-          i18n.translate('devComments.notice.imported', {
-            defaultMessage:
-              'Imported {imported, plural, one {# comment} other {# comments}}{skipped, plural, =0 {} other {, skipped # that this version cannot read}}{failed, plural, =0 {} other {, # could not be written}}.',
-            values: { imported, skipped, failed },
-          })
-        );
-        await load();
-      } catch (error) {
-        notify(
-          'error',
-          i18n.translate('devComments.notice.importFailed', {
-            defaultMessage: 'Import failed: {message}',
             values: { message: errorMessage(error) },
           })
         );

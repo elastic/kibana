@@ -11,14 +11,7 @@ import type { IRouter, KibanaResponseFactory } from '@kbn/core/server';
 import { COMMENTS_API_PATH } from '../common';
 import type { CommentsClient } from './comments_client';
 import { CommentsLimitError } from './limit_error';
-import {
-  IMPORT_MAX_BYTES,
-  commentPatchSchema,
-  idParamsSchema,
-  importBodySchema,
-  newCommentSchema,
-  parseImport,
-} from './schemas';
+import { commentPatchSchema, idParamsSchema, newCommentSchema } from './schemas';
 
 const security = {
   authz: {
@@ -46,40 +39,7 @@ export const registerCommentsRoutes = (router: IRouter, client: Promise<Comments
 
   router.get(
     { path: `${COMMENTS_API_PATH}/export`, security, options: access, validate: false },
-    async (_context, _request, response) => {
-      const payload = await (await client).exportAll();
-      // An export the import route would refuse is of no use; better not to hand it out.
-      const bytes = Buffer.byteLength(JSON.stringify(payload));
-      if (bytes > IMPORT_MAX_BYTES) {
-        return response.customError({
-          statusCode: 413,
-          body: {
-            message: `The export is ${Math.ceil(bytes / 1024 / 1024)} MB; imports accept at most ${
-              IMPORT_MAX_BYTES / 1024 / 1024
-            } MB.`,
-          },
-        });
-      }
-      return response.ok({ body: payload });
-    }
-  );
-
-  router.post(
-    {
-      path: `${COMMENTS_API_PATH}/import`,
-      security,
-      options: { ...access, body: { maxBytes: IMPORT_MAX_BYTES } },
-      validate: { body: importBodySchema },
-    },
-    async (_context, request, response) => {
-      const { payload, skipped } = parseImport(request.body);
-      try {
-        const result = await (await client).importAll(payload);
-        return response.ok({ body: { ...result, skipped: result.skipped + skipped } });
-      } catch (error) {
-        return rejectOrRethrow(response, error);
-      }
-    }
+    async (_context, _request, response) => response.ok({ body: await (await client).exportAll() })
   );
 
   router.get(

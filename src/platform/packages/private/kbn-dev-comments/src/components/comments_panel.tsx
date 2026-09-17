@@ -190,23 +190,6 @@ const PanelRow = ({
   );
 };
 
-const pickJsonFile = (): Promise<File | null> =>
-  new Promise((resolve) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'application/json,.json';
-    input.setAttribute(IGNORE_ATTR, 'true');
-    input.style.display = 'none';
-    const finish = () => {
-      resolve(input.files?.[0] ?? null);
-      input.remove();
-    };
-    input.addEventListener('change', finish);
-    input.addEventListener('cancel', finish);
-    document.body.appendChild(input);
-    input.click();
-  });
-
 const HeaderButton = ({
   iconType,
   label,
@@ -229,7 +212,7 @@ const HeaderButton = ({
   </EuiToolTip>
 );
 
-/** "⋯" menu of the panel header: export / import. */
+/** "⋯" menu of the panel header: export. */
 const PanelMenu = () => {
   const controller = useComments();
   const zIndex = useLayerZIndex();
@@ -258,13 +241,6 @@ const PanelMenu = () => {
   const run = (action: () => unknown) => () => {
     setIsOpen(false);
     void action();
-  };
-
-  const importFile = async () => {
-    const file = await pickJsonFile();
-    if (file) {
-      await controller.importFile(file);
-    }
   };
 
   const label = i18n.translate('devComments.panel.menu', {
@@ -298,14 +274,6 @@ const PanelMenu = () => {
             data-test-subj="devCommentsExport"
           >
             {i18n.translate('devComments.panel.export', { defaultMessage: 'Export all' })}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            key="import"
-            icon="upload"
-            onClick={run(importFile)}
-            data-test-subj="devCommentsImport"
-          >
-            {i18n.translate('devComments.panel.import', { defaultMessage: 'Import…' })}
           </EuiContextMenuItem>,
         ]}
       />

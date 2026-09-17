@@ -15,7 +15,6 @@ import type {
   CommentRoute,
   CommentSnapshot,
   CommentsExport,
-  CommentsImportResult,
   NewComment,
   TrailStep,
 } from '../common';
@@ -91,8 +90,6 @@ const fromStored = (id: string, { route, trail, ...stored }: StoredComment): Com
 const withoutImage = (comment: Comment): Comment =>
   comment.snapshot ? { ...comment, snapshot: { ...comment.snapshot, image: undefined } } : comment;
 
-const withoutSnapshot = ({ snapshot, ...comment }: Comment): Comment => comment;
-
 export class CommentsClient {
   private indexReady: Promise<void> | undefined;
 
@@ -113,7 +110,7 @@ export class CommentsClient {
 
   public async create(input: NewComment): Promise<Comment> {
     await this.ensureIndex();
-    await this.reserve(1);
+    await this.reserve();
     const now = new Date().toISOString();
     const id = uuidv4();
     const document: StoredComment = { ...input, createdAt: now, updatedAt: now };
@@ -126,7 +123,7 @@ export class CommentsClient {
       // (a conservative quota is corrected when it next reports the store full).
       const stored = await this.isStored(id);
       if (stored === false) {
-        await this.release(1);
+        await this.release();
       }
       if (!stored) {
         throw error;
@@ -170,57 +167,13 @@ export class CommentsClient {
     return updated ? withoutImage(fromStored(id, updated)) : undefined;
   }
 
-  /** Every comment without its screenshot, so that the export stays small enough to be imported again. */
+  /** Every comment with its screenshot. */
   public async exportAll(): Promise<CommentsExport> {
-    const comments = await this.search({ excludeImage: true });
     return {
       version: 2,
       exportedAt: new Date().toISOString(),
-      comments: comments.map(withoutSnapshot),
+      comments: await this.search({ excludeImage: false }),
     };
-  }
-
-  /**
-   * Adds the exported comments, overwriting existing ones with the same id; the
-   * whole import is refused when the new ones would not fit. An id that appears
-   * more than once is written once, with its last version, so that the quota
-   * accounts for each new comment exactly once.
-   */
-  public async importAll(payload: CommentsExport): Promise<CommentsImportResult> {
-    await this.ensureIndex();
-    const comments = Array.from(
-      new Map(payload.comments.map((comment) => [comment.id, comment])).values()
-    );
-    if (comments.length === 0) {
-      return { imported: 0, skipped: 0, failed: 0 };
-    }
-    const existing = await this.esClient.mget({
-      index: COMMENTS_INDEX,
-      ids: comments.map(({ id }) => id),
-      _source: false,
-    });
-    const newIds = new Set(
-      existing.docs.flatMap((doc) => ('found' in doc && doc.found ? [] : [doc._id]))
-    );
-    await this.reserve(newIds.size);
-
-    const response = await this.esClient.bulk<StoredComment>({
-      index: COMMENTS_INDEX,
-      refresh: 'wait_for',
-      operations: comments.flatMap(({ id, ...document }) => [{ index: { _id: id } }, document]),
-    });
-    const failures = response.items.flatMap(({ index }) =>
-      index?.error ? [{ id: index._id, reason: index.error.reason ?? index.error.type }] : []
-    );
-    if (failures.length > 0) {
-      await this.release(failures.filter(({ id }) => id && newIds.has(id)).length);
-      this.logger.warn(
-        `Failed to import ${failures.length} comments: ${failures
-          .map(({ id, reason }) => `[${id}] ${reason}`)
-          .join('; ')}`
-      );
-    }
-    return { imported: comments.length - failures.length, skipped: 0, failed: failures.length };
   }
 
   private async search({ excludeImage }: { excludeImage: boolean }): Promise<Comment[]> {
@@ -238,18 +191,15 @@ export class CommentsClient {
   }
 
   /**
-   * Claims room for `count` more comments in the quota document, atomically, so
+   * Claims room for one more comment in the quota document, atomically, so
    * concurrent writers cannot take the store past `MAX_COMMENTS` together.
    * The document mirrors the index: it is created from the comments already
    * stored when missing, and when it says the store is full the comments are
    * recounted first, in case some were removed by hand.
    */
-  private async reserve(count: number): Promise<void> {
-    if (count === 0) {
-      return;
-    }
+  private async reserve(): Promise<void> {
     for (let attempt = 0; attempt <= RETRY_ON_CONFLICT; attempt++) {
-      const result = await this.adjustQuota(count);
+      const result = await this.adjustQuota(1);
       if (result === 'applied') {
         return;
       }
@@ -257,11 +207,11 @@ export class CommentsClient {
         await this.bootstrapQuota();
         continue;
       }
-      if (await this.reconcileQuota(count)) {
+      if (await this.reconcileQuota()) {
         return;
       }
     }
-    throw new Error(`Could not claim room for ${count} comments: the quota kept changing.`);
+    throw new Error('Could not claim room for the comment: the quota kept changing.');
   }
 
   /** Whether a comment with that id is in the index; undefined when Elasticsearch could not say. */
@@ -274,16 +224,13 @@ export class CommentsClient {
     }
   }
 
-  /** Gives back room claimed for comments that were not written after all; a failure here only makes the quota conservative. */
-  private async release(count: number): Promise<void> {
-    if (count === 0) {
-      return;
-    }
+  /** Gives back the room claimed for a comment that was not written after all; a failure here only makes the quota conservative. */
+  private async release(): Promise<void> {
     try {
       // Nothing to give back when the document is missing: it will be recreated from the index.
-      await this.adjustQuota(-count);
+      await this.adjustQuota(-1);
     } catch (error) {
-      this.logger.warn(`Failed to release ${count} comment slots: ${error}`);
+      this.logger.warn(`Failed to release a comment slot: ${error}`);
     }
   }
 
@@ -330,22 +277,23 @@ export class CommentsClient {
 
   /**
    * Replaces a quota document that says the store is full with the actual
-   * number of comments plus `count`, provided nobody changed the document in
-   * the meantime, so that two writers cannot both claim the same room. False
-   * when another writer got there first; throws when the store really is full.
+   * number of comments plus the one being written, provided nobody changed the
+   * document in the meantime, so that two writers cannot both claim the same
+   * room. False when another writer got there first; throws when the store
+   * really is full.
    *
    * The comments are only counted once every claim is old enough to have been
    * written or given up: a comment claimed moments ago may not be indexed yet,
    * and a count taken then would hand its room out again.
    */
-  private async reconcileQuota(count: number): Promise<boolean> {
+  private async reconcileQuota(): Promise<boolean> {
     const [{ count: stored }, quota] = await Promise.all([
       this.esClient.count({ index: COMMENTS_INDEX, query: COMMENTS_QUERY }),
       this.esClient.get<QuotaDocument>({ index: COMMENTS_INDEX, id: QUOTA_ID }, { ignore: [404] }),
     ]);
-    if (stored + count > MAX_COMMENTS) {
+    if (stored >= MAX_COMMENTS) {
       throw new CommentsLimitError(
-        `At most ${MAX_COMMENTS} comments can be stored; ${stored} are, and ${count} more would be added.`
+        `At most ${MAX_COMMENTS} comments can be stored; ${stored} are.`
       );
     }
     if (!quota.found) {
@@ -362,7 +310,7 @@ export class CommentsClient {
       {
         index: COMMENTS_INDEX,
         id: QUOTA_ID,
-        document: { count: stored + count, reservedAt: new Date(now).toISOString() },
+        document: { count: stored + 1, reservedAt: new Date(now).toISOString() },
         if_seq_no: quota._seq_no,
         if_primary_term: quota._primary_term,
       },

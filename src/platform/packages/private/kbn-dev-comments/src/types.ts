@@ -102,25 +102,17 @@ export interface CommentPatch {
   reply?: { author: CommentAuthor; text: string };
 }
 
-/** Comments as a JSON document; screenshots are left out so that any export can be imported again. */
+/** Every comment as one JSON document, screenshots included. */
 export interface CommentsExport {
   version: 2;
   exportedAt: string;
   comments: Comment[];
 }
 
-export interface CommentsImportResult {
-  imported: number;
-  /** Comments this version of the layer cannot read. */
-  skipped: number;
-  /** Comments that could be read but not written; the host logs why. */
-  failed: number;
-}
-
 /**
- * Persistence implemented by the host. Comments are resolved, never deleted;
- * an import adds or overwrites comments by id. Hosts reject writes beyond
- * their limits with an error whose message can be shown to the user.
+ * Persistence implemented by the host. Comments are resolved, never deleted.
+ * Hosts reject writes beyond their limits with an error whose message can be
+ * shown to the user.
  */
 export interface CommentsApi {
   /** Every comment, oldest first, without screenshot images. */
@@ -128,8 +120,8 @@ export interface CommentsApi {
   getSnapshot(id: string): Promise<CommentSnapshot | undefined>;
   create(input: NewComment): Promise<Comment>;
   update(id: string, patch: CommentPatch): Promise<Comment>;
+  /** Every comment with its screenshot image. */
   exportAll(): Promise<CommentsExport>;
-  importAll(payload: CommentsExport): Promise<CommentsImportResult>;
 }
 
 export interface CommentsLocationService {

@@ -11,7 +11,7 @@ Development-only in-page comments for reviewing Kibana UI: comments pinned to el
 ## How it works
 
 - `public/`: registers the button with the `developerToolbar` plugin (an optional dependency). The layer mounts with the toolbar item rather than on first use, so that the clicks that reveal UI are recorded before comment mode is ever switched on; only the screenshot library (`dom-to-image-more`) loads on first capture. `host_services.ts` implements the layer's host services on top of core: location and navigation relative to the base path, the current user, viewport capture and the internal API client.
-- `server/`: only in dev mode, registers `/internal/dev_comments` routes backed by a hidden, cluster-global index (`.kibana-dev-comments`) written as the internal user. Comments are never deleted, only resolved; creates go through an atomic quota (1000 comments), replies through an atomic append (200 per comment); exports leave screenshots out and imports report what could not be read or written.
+- `server/`: only in dev mode, registers `/internal/dev_comments` routes backed by a hidden, cluster-global index (`.kibana-dev-comments`) written as the internal user. Comments are never deleted, only resolved; creates go through an atomic quota (1000 comments), replies through an atomic append (200 per comment); an export returns every comment with its screenshot.
 
 ## Configuration
 

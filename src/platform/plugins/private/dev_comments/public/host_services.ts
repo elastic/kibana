@@ -46,8 +46,8 @@ export const createCommentsHostServices = ({
     },
   },
 
-  // Paths come from stored, possibly imported comments: only paths within this
-  // deployment are opened, never another origin (`//host`) or scheme.
+  // Paths come from stored comments, shared by everyone on the deployment: only
+  // paths within it are opened, never another origin (`//host`) or scheme.
   navigateToPath: async (path) => {
     if (!isSafeRelativePath(path)) {
       throw new Error(`Refusing to navigate outside of this deployment: ${path}`);
