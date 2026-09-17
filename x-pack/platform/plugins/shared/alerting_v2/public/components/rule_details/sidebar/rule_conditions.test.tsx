@@ -31,10 +31,7 @@ const baseRule: RuleApiResponse = {
   metadata: { name: 'Test Events Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | STATS count() BY host.name' },
-  },
+  query: { base: 'FROM logs-* | STATS count() BY host.name' },
   created_by: 'alice@example.com',
   created_at: '2026-03-01T12:00:00.000Z',
   updated_by: 'bob@example.com',
@@ -46,14 +43,11 @@ const alertRule: RuleApiResponse = {
   id: 'rule-2',
   kind: 'alert',
   metadata: { name: 'Test Alert Rule', version: 1 },
-  recovery_strategy: 'query',
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-    recovery: { query: 'FROM metrics-* | WHERE avg(cpu) < 0.5' },
-  },
+  query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+  recovery: { strategy: 'query', query: 'FROM metrics-* | WHERE avg(cpu) < 0.5' },
+  no_data: { strategy: 'ignore' },
   grouping: { fields: ['host.name', 'service.name'] },
-  state_transition: { pending_count: 3, pending_timeframe: '5m' },
+  state_transition: { pending: { count: 3, timeframe: '5m' } },
 };
 
 const renderConditions = (rule: RuleApiResponse, variant?: 'full' | 'summary') =>
@@ -92,7 +86,7 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders Custom recovery with the recovery condition snippet in its own row when recovery_strategy is query', () => {
+  it('renders Custom recovery with the recovery condition snippet in its own row when the recovery strategy is query', () => {
     renderConditions(alertRule);
     expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Custom');
     expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).not.toHaveAttribute('colspan');
@@ -105,15 +99,14 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders only the recovery segment (not recomposed with base) for a composed query', () => {
+  it('renders only the recovery segment (not recomposed with base) for a condition recovery', () => {
     renderConditions({
       ...alertRule,
       query: {
-        format: 'composed',
         base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
         breach: { segment: 'WHERE avg(cpu) > 0.9' },
-        recovery: { segment: 'WHERE avg(cpu) < 0.5' },
       },
+      recovery: { strategy: 'condition', segment: 'WHERE avg(cpu) < 0.5' },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).toHaveTextContent(
       'WHERE avg(cpu) < 0.5'
@@ -123,14 +116,10 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders Default recovery with a dash for the condition row when recovery_strategy is not query', () => {
+  it('renders Default recovery with a dash for the condition row when the recovery strategy runs no query', () => {
     renderConditions({
       ...alertRule,
-      recovery_strategy: 'no_breach',
-      query: {
-        format: 'standalone',
-        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-      },
+      recovery: { strategy: 'no_breach' },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Default');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
@@ -139,54 +128,46 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders a dash for recovery and the condition row when recovery_strategy is absent', () => {
+  it('renders a dash for recovery and the condition row when recovery is absent', () => {
     renderConditions({
       ...alertRule,
-      recovery_strategy: undefined,
-      query: {
-        format: 'standalone',
-        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-      },
+      recovery: undefined,
     });
     expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
   });
 
-  it('renders No recovery with a dash for the condition row when recovery_strategy is none', () => {
+  it('renders Manual only with a dash for the condition row when the recovery strategy is manual', () => {
     renderConditions({
       ...alertRule,
-      recovery_strategy: 'none',
-      query: {
-        format: 'standalone',
-        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-      },
+      recovery: { strategy: 'manual' },
     });
-    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('No recovery');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Manual only');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
   });
 
   it('renders Immediate for alert and recovery delay when counts are zero', () => {
     renderConditions({
       ...alertRule,
-      state_transition: { pending_count: 0, recovering_count: 0 },
+      state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('Immediate');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('Immediate');
   });
 
-  it('renders alert delay with count when pending_count is set', () => {
+  it('renders alert delay with count when the pending count is set', () => {
     renderConditions({
       ...alertRule,
-      state_transition: { pending_count: 3, recovering_count: 0 },
+      state_transition: { pending: { count: 3 }, recovering: { count: 0 } },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 3');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('Immediate');
   });
 
-  it('renders recovery delay with count when recovering_count is set', () => {
+  it('renders recovery delay with count when the recovering count is set', () => {
     renderConditions({
       ...alertRule,
-      state_transition: { pending_count: 0, recovering_count: 5 },
+      state_transition: { pending: { count: 0 }, recovering: { count: 5 } },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('Immediate');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('After 5');
@@ -195,7 +176,7 @@ describe('RuleConditions', () => {
   it('renders alert delay with timeframe only', () => {
     renderConditions({
       ...alertRule,
-      state_transition: { pending_timeframe: '10m', recovering_count: 0 },
+      state_transition: { pending: { timeframe: '10m' }, recovering: { count: 0 } },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 10m');
   });
@@ -203,7 +184,7 @@ describe('RuleConditions', () => {
   it('renders recovery delay with timeframe only', () => {
     renderConditions({
       ...alertRule,
-      state_transition: { pending_count: 0, recovering_timeframe: '15m' },
+      state_transition: { pending: { count: 0 }, recovering: { timeframe: '15m' } },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('After 15m');
   });
@@ -212,10 +193,8 @@ describe('RuleConditions', () => {
     renderConditions({
       ...alertRule,
       state_transition: {
-        pending_count: 3,
-        pending_timeframe: '5m',
-        pending_operator: 'AND',
-        recovering_count: 0,
+        pending: { count: 3, timeframe: '5m', operator: 'AND' },
+        recovering: { count: 0 },
       },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent(
@@ -227,10 +206,8 @@ describe('RuleConditions', () => {
     renderConditions({
       ...alertRule,
       state_transition: {
-        pending_count: 0,
-        recovering_count: 4,
-        recovering_timeframe: '20m',
-        recovering_operator: 'OR',
+        pending: { count: 0 },
+        recovering: { count: 4, timeframe: '20m', operator: 'OR' },
       },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent(
@@ -239,28 +216,28 @@ describe('RuleConditions', () => {
   });
 
   it('renders no data behavior label for each strategy value', () => {
-    renderConditions({ ...alertRule, no_data_strategy: 'last_known_status' });
+    renderConditions({ ...alertRule, no_data: { strategy: 'keep_last' } });
     expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
       'Keep last known status'
     );
   });
 
-  it('renders "Use no data status" for emit strategy', () => {
-    renderConditions({ ...alertRule, no_data_strategy: 'emit' });
+  it('renders "Alert on no data" for alert strategy', () => {
+    renderConditions({ ...alertRule, no_data: { strategy: 'alert' } });
     expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
-      'Use no data status'
+      'Alert on no data'
     );
   });
 
-  it('renders "Recover immediately" for recover strategy', () => {
-    renderConditions({ ...alertRule, no_data_strategy: 'recover' });
+  it('renders "Recover immediately" for resolve strategy', () => {
+    renderConditions({ ...alertRule, no_data: { strategy: 'resolve' } });
     expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
       'Recover immediately'
     );
   });
 
-  it('renders "Do nothing" for none strategy', () => {
-    renderConditions({ ...alertRule, no_data_strategy: 'none' });
+  it('renders "Do nothing" for ignore strategy', () => {
+    renderConditions({ ...alertRule, no_data: { strategy: 'ignore' } });
     expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
       'Do nothing'
     );
@@ -322,7 +299,7 @@ describe('RuleConditions', () => {
   it('renders fallback values for missing optional fields', () => {
     renderConditions({
       ...baseRule,
-      query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+      query: { base: 'FROM logs-*' },
       grouping: undefined,
       schedule: { every: '5m' },
     });

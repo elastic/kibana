@@ -113,7 +113,7 @@ const baseRule: RuleApiResponse = {
   metadata: { name: 'Test Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
+  query: { base: 'FROM logs-*' },
   created_by: 'alice@example.com',
   created_at: '2026-03-01T12:00:00.000Z',
   updated_by: 'bob@example.com',

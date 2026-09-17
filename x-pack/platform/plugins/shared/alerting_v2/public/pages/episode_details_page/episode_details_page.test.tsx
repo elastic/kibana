@@ -177,7 +177,7 @@ const fetchRuleResult = {
     enabled: true,
     metadata: { name: 'Rule A', description: 'Rule description' },
     grouping: { fields: ['host.name'] },
-    query: { format: 'standalone', breach: 'from index-*' },
+    query: { base: 'from index-*' },
     artifacts: [],
   },
   isLoading: false,

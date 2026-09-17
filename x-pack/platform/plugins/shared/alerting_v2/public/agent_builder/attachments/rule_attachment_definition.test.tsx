@@ -66,7 +66,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     metadata: { name: 'My Rule', tags: ['tag1'], description: 'A test rule' },
     schedule: { every: '5m' },
     time_field: '@timestamp',
-    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+    query: { base: 'FROM logs-*' },
     state_transition: null,
     enabled: overrides.enabled,
   } as any,

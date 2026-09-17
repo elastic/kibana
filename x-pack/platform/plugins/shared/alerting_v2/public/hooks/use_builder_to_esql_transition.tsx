@@ -53,9 +53,7 @@ export const useBuilderToEsqlTransition = ({
         return 'esql';
       }
       const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
-      const recoveryQuery = rule.query
-        ? getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
-        : undefined;
+      const recoveryQuery = rule.query ? getRecoverEsqlQuery(rule.query, rule.recovery) : undefined;
       const state = query
         ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
         : null;
