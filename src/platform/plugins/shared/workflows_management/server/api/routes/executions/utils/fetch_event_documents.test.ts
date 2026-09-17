@@ -270,37 +270,55 @@ describe('fetch_event_documents', () => {
   });
 
   describe('fetchAlertsByQuery', () => {
-    const page = (ids: string[], total: number, relation: 'eq' | 'gte' = 'eq') => ({
+    const ALERTS_INDEX = '.alerts-test-default';
+
+    const page = (
+      ids: Array<string | { id: string; sort: unknown[] }>,
+      total: number,
+      relation: 'eq' | 'gte' = 'eq'
+    ) => ({
       hits: {
         total: { value: total, relation },
-        hits: ids.map((id) => ({
-          _id: id,
-          _index: '.alerts-test-default',
-          _source: { id },
-          sort: [`2026-01-01T00:00:00.000Z`, id],
-        })),
+        hits: ids.map((entry) => {
+          const { id, sort } =
+            typeof entry === 'string'
+              ? { id: entry, sort: ['2026-01-01T00:00:00.000Z', entry] }
+              : entry;
+          return { _id: id, _index: ALERTS_INDEX, sort };
+        }),
       },
     });
+
+    const mgetDocs = (ids: string[]) =>
+      mockEsClient.mget.mockResolvedValue({
+        docs: ids.map((id) => ({ found: true, _id: id, _index: ALERTS_INDEX, _source: { id } })),
+      });
 
     it('pages through the authorized alerts client with bounded total tracking', async () => {
       mockAlertsClient.find
         .mockResolvedValueOnce(page(['a', 'b'], 3))
         .mockResolvedValueOnce(page(['c'], 3));
+      mgetDocs(['a', 'b', 'c']);
 
       const result = await fetchAlertsByQuery(
         {
           query: { match_all: {} },
-          index: ['.alerts-test-default', '.alerts-observability-default'],
+          index: [ALERTS_INDEX, '.alerts-observability-default'],
           maxDocs: 1000,
           pageSize: 2,
         },
         mockAlertsClient,
+        asEsClient(),
         logger
       );
 
       expect(mockAlertsClient.find.mock.calls[0][0]).toEqual(
         expect.objectContaining({
-          query: { match_all: {} },
+          query: {
+            bool: {
+              filter: [{ match_all: {} }, { exists: { field: 'kibana.alert.uuid' } }],
+            },
+          },
           index: '.alerts-test-default,.alerts-observability-default',
           size: 2,
           track_total_hits: 1001,
@@ -315,9 +333,9 @@ describe('fetch_event_documents', () => {
       );
       expect(result).toEqual({
         hits: [
-          { _id: 'a', _index: '.alerts-test-default', _source: { id: 'a' } },
-          { _id: 'b', _index: '.alerts-test-default', _source: { id: 'b' } },
-          { _id: 'c', _index: '.alerts-test-default', _source: { id: 'c' } },
+          { _id: 'a', _index: ALERTS_INDEX, _source: { id: 'a' } },
+          { _id: 'b', _index: ALERTS_INDEX, _source: { id: 'b' } },
+          { _id: 'c', _index: ALERTS_INDEX, _source: { id: 'c' } },
         ],
         total: 3,
         totalRelation: 'eq',
@@ -325,12 +343,32 @@ describe('fetch_event_documents', () => {
       });
     });
 
+    it('pages ids only and hydrates the sources under a bounded mget', async () => {
+      mockAlertsClient.find.mockResolvedValueOnce(page(['a'], 1));
+      mgetDocs(['a']);
+
+      await fetchAlertsByQuery(
+        { query: { match_all: {} }, index: ALERTS_INDEX, maxBytes: 4096 },
+        mockAlertsClient,
+        asEsClient(),
+        logger
+      );
+
+      expect(mockAlertsClient.find.mock.calls[0][0]._source).toBe(false);
+      expect(mockEsClient.mget).toHaveBeenCalledWith(
+        { docs: [{ _id: 'a', _index: ALERTS_INDEX }] },
+        { maxResponseSize: 4096 }
+      );
+    });
+
     it('preserves the lower-bound relation when the authorized result is capped', async () => {
       mockAlertsClient.find.mockResolvedValueOnce(page(['a', 'b'], 3, 'gte'));
+      mgetDocs(['a', 'b']);
 
       const result = await fetchAlertsByQuery(
-        { query: { match_all: {} }, index: '.alerts-test-default', maxDocs: 2 },
+        { query: { match_all: {} }, index: ALERTS_INDEX, maxDocs: 2 },
         mockAlertsClient,
+        asEsClient(),
         logger
       );
 
@@ -338,6 +376,59 @@ describe('fetch_event_documents', () => {
       expect(result.total).toBe(3);
       expect(result.totalRelation).toBe('gte');
       expect(result.truncated).toBe(true);
+    });
+
+    it('rejects a full page whose sort cursor cannot be resumed', async () => {
+      mockAlertsClient.find.mockResolvedValueOnce(
+        page(
+          [
+            { id: 'a', sort: ['2026-01-01T00:00:00.000Z', 'a'] },
+            { id: 'b', sort: ['2026-01-01T00:00:00.000Z', null] },
+          ],
+          10
+        )
+      );
+
+      await expect(
+        fetchAlertsByQuery(
+          { query: { match_all: {} }, index: ALERTS_INDEX, maxDocs: 10, pageSize: 2 },
+          mockAlertsClient,
+          asEsClient(),
+          logger
+        )
+      ).rejects.toThrow('no usable sort cursor');
+      expect(mockEsClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('rejects hydrated alert sources that exceed maxBytes', async () => {
+      mockAlertsClient.find.mockResolvedValueOnce(page(['a'], 1));
+      mgetDocs(['a']);
+
+      await expect(
+        fetchAlertsByQuery(
+          { query: { match_all: {} }, index: ALERTS_INDEX, maxBytes: 5 },
+          mockAlertsClient,
+          asEsClient(),
+          logger
+        )
+      ).rejects.toThrow('Trigger event document sources exceed the 5 byte limit');
+    });
+
+    it.each([
+      ['times out', { timed_out: true }],
+      ['has failed shards', { _shards: { failed: 1 } }],
+    ])('rejects an incomplete response that %s', async (_description, incompleteResponse) => {
+      mockAlertsClient.find.mockResolvedValueOnce({ ...page(['a'], 1), ...incompleteResponse });
+
+      await expect(
+        fetchAlertsByQuery(
+          { query: { match_all: {} }, index: ALERTS_INDEX },
+          mockAlertsClient,
+          asEsClient(),
+          logger
+        )
+      ).rejects.toThrow('Incomplete alert query response');
+      expect(mockEsClient.mget).not.toHaveBeenCalled();
     });
   });
 });
