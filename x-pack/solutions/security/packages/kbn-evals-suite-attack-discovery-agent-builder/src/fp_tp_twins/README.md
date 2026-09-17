@@ -56,8 +56,7 @@ Load **one** twin at a time (they share alert and attack ids).
 
    The seeder calls Entity Store install. You can also open **Entity Analytics → Entity Store** once.
 3. Open **Attack Discovery** once so `.adhoc.alerts-security.attack.discovery.alerts-default` exists.
-4. If Kibana uses `server.basePath` (for example `/sbb`), pass `--kibanaUrl http://127.0.0.1:5601/sbb`.
-5. The sample workflow uses `alertzero-thin-agent`. Change `agent-id` if that agent is not installed.
+4. The sample workflow uses `alertzero-thin-agent`. Change `agent-id` if that agent is not installed.
 
 ### Seed
 
