@@ -21,20 +21,31 @@ export type { TypedEsqlQuery } from './typed_esql_query';
 
 export {
   ALERT_EPISODE_FIELDS,
+  ALERT_EPISODE_LIST_FIELDS,
   DURATION_LOWER_BOUND_FIELD,
   buildEpisodesBaseQuery,
   buildEpisodesQuery,
+  buildEpisodesListQuery,
   addEpisodeAggregation,
+  addEpisodeDataExtraction,
   applyFilterState,
+  episodesFilterNeedsActions,
 } from './episodes_query';
 export type {
   AlertEpisodeEsqlRow,
+  EpisodeAggregationOptions,
   EpisodesBaseFilterState,
+  EpisodesListRow,
   EpisodesFilterState,
   EpisodesSortState,
 } from './episodes_query';
 
 export { buildEpisodeQuery, buildEpisodeGroupHashQuery } from './episode_query';
+export {
+  buildEpisodeActionStateQuery,
+  buildEpisodeDetailsQuery,
+} from './episodes_page_lookups_query';
+export type { EpisodeActionStateRow, EpisodeDetailsRow } from './episodes_page_lookups_query';
 export type { EpisodeGroupHashEsqlRow } from './episode_query';
 
 export { buildEpisodeEventsQuery, ALERT_EPISODE_EVENT_FIELDS } from './episode_events_query';

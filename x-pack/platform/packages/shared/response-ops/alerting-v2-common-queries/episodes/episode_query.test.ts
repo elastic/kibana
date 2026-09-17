@@ -32,6 +32,18 @@ describe('buildEpisodeQuery', () => {
     expect(queryString).toContain('LIMIT 1');
   });
 
+  it('extracts episode_data from _source only after the limit', () => {
+    const queryString = buildEpisodeQuery(SPACE_ID, 'ep-1', GROUP_HASH).print('basic');
+    const limitIndex = queryString.indexOf('LIMIT 1');
+    const extractionIndex = queryString.indexOf(
+      'EVAL episode_data = JSON_EXTRACT(_source, "data")'
+    );
+
+    expect(queryString).toContain('WHERE @timestamp == COALESCE(data_timestamp, last_timestamp)');
+    expect(extractionIndex).toBeGreaterThan(limitIndex);
+    expect(queryString).toMatch(/KEEP .*episode_data/);
+  });
+
   it('joins both data streams', () => {
     const queryString = buildEpisodeQuery(SPACE_ID, 'ep-1', GROUP_HASH).print('basic');
     expect(queryString).toContain(ALERT_EVENTS_DATA_STREAM);

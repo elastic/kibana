@@ -52,6 +52,10 @@ describe('finishRelatedEpisodesQuery', () => {
     expect(queryString).toContain(TIME_FIELD);
     expect(queryString).toMatch(/sort.*desc/i);
     expect(queryString).toContain('LIMIT 5');
+    expect(queryString).toContain('WHERE @timestamp == COALESCE(data_timestamp, last_timestamp)');
+    expect(
+      queryString.indexOf('EVAL episode_data = JSON_EXTRACT(_source, "data")')
+    ).toBeGreaterThan(queryString.indexOf('LIMIT 5'));
     for (const field of RELATED_EPISODE_FIELDS) {
       expect(queryString).toContain(field);
     }
