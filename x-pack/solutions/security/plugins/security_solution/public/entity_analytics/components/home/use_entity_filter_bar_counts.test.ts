@@ -16,17 +16,17 @@ import { CriticalityLevelsForBulkUpload } from '../../../../common/entity_analyt
 // ─── buildEntityFilterCountsRequest ─────────────────────────────────────────
 
 describe('buildEntityFilterCountsRequest', () => {
-  it('targets the space-specific entity-latest alias', () => {
+  it('uses the space-specific index alias', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'my-space', view: 'resolved' });
     expect(req.index).toEqual(['entities-latest-my-space']);
   });
 
-  it('requests size 0 (agg-only, no hits)', () => {
+  it('fetches no hits (size 0)', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
     expect(req.size).toBe(0);
   });
 
-  it('always includes an entity type allowlist filter', () => {
+  it('filters to known entity types', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
     const filters = req.query.bool.filter;
     expect(filters).toContainEqual({
@@ -34,7 +34,7 @@ describe('buildEntityFilterCountsRequest', () => {
     });
   });
 
-  it('includes the caller-supplied filter when provided', () => {
+  it('applies the caller filter when provided', () => {
     const esFilter = { term: { 'host.name': 'foo' } };
     const req = buildEntityFilterCountsRequest({
       spaceId: 'default',
@@ -44,7 +44,7 @@ describe('buildEntityFilterCountsRequest', () => {
     expect(req.query.bool.filter).toContainEqual(esFilter);
   });
 
-  it('omits the caller-supplied filter when not provided', () => {
+  it('omits the caller filter when not provided', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
     // only the entity type allowlist filter (and the resolved-view exclusion)
     const hasExtraTerms = req.query.bool.filter.some(
@@ -53,7 +53,7 @@ describe('buildEntityFilterCountsRequest', () => {
     expect(hasExtraTerms).toBe(false);
   });
 
-  it('adds the resolved-view exclusion filter when view is resolved', () => {
+  it('includes the resolved-view exclusion when view is resolved', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
     const hasResolutionExclusion = req.query.bool.filter.some(
       (f) =>
@@ -63,7 +63,7 @@ describe('buildEntityFilterCountsRequest', () => {
     expect(hasResolutionExclusion).toBe(true);
   });
 
-  it('omits the resolved-view exclusion filter when view is raw', () => {
+  it('omits the resolved-view exclusion when view is raw', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'raw' });
     const hasResolutionExclusion = req.query.bool.filter.some(
       (f) =>
@@ -73,7 +73,7 @@ describe('buildEntityFilterCountsRequest', () => {
     expect(hasResolutionExclusion).toBe(false);
   });
 
-  it('includes all five expected aggregation fields', () => {
+  it('has all five agg fields', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
     expect(req.aggs).toMatchObject({
       entity_types: { terms: { field: 'entity.EngineMetadata.Type' } },
@@ -84,12 +84,12 @@ describe('buildEntityFilterCountsRequest', () => {
     });
   });
 
-  it('sets missing: Unknown for risk_levels so unscored entities are counted', () => {
+  it('counts unscored entities via missing: Unknown on risk_levels', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
     expect(req.aggs.risk_levels.terms.missing).toBe(RiskSeverity.Unknown);
   });
 
-  it('sets missing: unassigned for asset_criticality so unassigned entities are counted', () => {
+  it('counts unassigned entities via missing: unassigned on asset_criticality', () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
     expect(req.aggs.asset_criticality.terms.missing).toBe(
       CriticalityLevelsForBulkUpload.UNASSIGNED
@@ -100,7 +100,7 @@ describe('buildEntityFilterCountsRequest', () => {
 // ─── parseEntityFilterCountsResponse ────────────────────────────────────────
 
 describe('parseEntityFilterCountsResponse', () => {
-  it('returns empty maps when aggs is undefined', () => {
+  it('returns empty maps for undefined aggs', () => {
     const result = parseEntityFilterCountsResponse(undefined);
     expect(result).toEqual({
       entity_types: {},
@@ -111,7 +111,7 @@ describe('parseEntityFilterCountsResponse', () => {
     });
   });
 
-  it('maps bucket keys and doc_counts for each agg', () => {
+  it('maps buckets to key/count pairs for each agg', () => {
     const aggs = {
       entity_types: { buckets: [{ key: 'host', doc_count: 10 }] },
       risk_levels: { buckets: [{ key: 'Critical', doc_count: 3 }] },
