@@ -6,8 +6,7 @@
  */
 
 import { expect } from '@playwright/test';
-import { tags, selectEvaluators, getEvaluationsKbnClient } from '@kbn/evals';
-import { GetEvaluationExperimentDatasetExamplesResponse } from '@kbn/evals-common';
+import { tags, selectEvaluators } from '@kbn/evals';
 import { getConnectorModel } from '@kbn/inference-common';
 import { evaluate } from '../../src/evaluate';
 import { getGoldenSourceDatasetName, readGoldenDataset } from './datasets';
@@ -38,8 +37,6 @@ evaluate.describe(
         evaluators,
         evalsClient,
         traceEsClient,
-        kbnClient,
-        log,
       }) => {
         await fetch('/internal/search_inference_endpoints/settings', {
           method: 'PUT',
@@ -93,18 +90,12 @@ evaluate.describe(
             timeout: 60_000,
           })
           .toBe(Object.keys(experiment.runs).length * selected.length);
-        const evaluationsKbn = getEvaluationsKbnClient({ kbnClient, log });
         // Bulk score summaries omit task output and metadata; the dataset detail route retains them.
-        const detailedScores = await evaluationsKbn.request({
-          path: `/internal/evals/experiments/${encodeURIComponent(
-            experiment.id
-          )}/datasets/${encodeURIComponent(experiment.datasetId)}/examples`,
-          method: 'GET',
-          headers: { 'elastic-api-version': '1' },
-        });
-        const scores = GetEvaluationExperimentDatasetExamplesResponse.parse(
-          detailedScores.data
-        ).examples.flatMap((example) => example.scores);
+        const detailedScores = await evalsClient.getExperimentDatasetExamples(
+          experiment.id,
+          experiment.datasetId
+        );
+        const scores = detailedScores.examples.flatMap((example) => example.scores);
         for (const run of Object.values(experiment.runs)) {
           const output = run.output as GoldenTaskOutput;
           const exampleScores = scores.filter(
