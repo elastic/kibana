@@ -12,8 +12,17 @@ import {
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { SEARCH_API_BASE_URL } from '@kbn/data-plugin/server/search/routes';
 import {
+  type DateRange,
+  type FormBasedLayer,
+  type GenericIndexPatternColumn,
+  generateEsqlQuery,
+  type IndexPattern,
+} from '@kbn/lens-common';
+import {
   buildEsqlConversionCasesByGroup,
+  createEsqlConversionInput,
   ESQL_CONVERSION_DATE_RANGE,
+  type EsqlConversionCase,
 } from '@kbn/lens-test-helpers';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -26,6 +35,26 @@ const INTERNAL_HEADERS = {
   [ELASTIC_HTTP_VERSION_HEADER]: '1',
 } as const;
 
+const generateQueryForCase = (conversionCase: EsqlConversionCase): string => {
+  const { esAggEntries, layer, indexPattern, uiSettings, dateRange, now, columnRoles } =
+    createEsqlConversionInput(conversionCase);
+  const result = generateEsqlQuery(
+    esAggEntries as unknown as Array<readonly [string, GenericIndexPatternColumn]>,
+    layer as unknown as FormBasedLayer,
+    indexPattern as unknown as IndexPattern,
+    uiSettings,
+    dateRange as unknown as DateRange,
+    now,
+    columnRoles
+  );
+
+  if (!result.success) {
+    throw new Error(`Expected successful conversion for: ${conversionCase.description}`);
+  }
+
+  return result.esql;
+};
+
 // Only success cases execute against ES; failure cases are covered by the
 // unit consumer of the shared matrix (@kbn/lens-common). Groups mirror the
 // legacy per-topic unit test files (core, date_histogram, top_n, static_value).
@@ -37,9 +66,8 @@ const EXECUTABLE_CASES = Object.entries(buildEsqlConversionCasesByGroup()).flatM
         ? [
             {
               group,
-              description: conversionCase.description,
-              timeField: conversionCase.dataset.timeField,
-              esql: conversionCase.expected.esql,
+              conversionCase,
+              expectedEsql: conversionCase.expected.esql,
               columnNamesMatcher: conversionCase.expected.allowAdditionalColumns
                 ? expect.arrayContaining([...conversionCase.expected.columnNames])
                 : [...conversionCase.expected.columnNames],
@@ -67,12 +95,14 @@ apiTest.describe(
     // test-title prefixes instead of nested describe blocks.
     for (const queryCase of EXECUTABLE_CASES) {
       apiTest(
-        `${queryCase.group}: executes converted query: ${queryCase.description}`,
+        `${queryCase.group}: executes converted query: ${queryCase.conversionCase.description}`,
         async ({ apiClient }) => {
-          // Generated-string assertions live in the unit consumer of the shared
-          // case matrix; this layer pins the same strings in the matrix and
-          // verifies execution against real Elasticsearch.
-          const { esql, columnNamesMatcher, timeField } = queryCase;
+          // Keep the exact query assertion close to execution so this layer verifies
+          // the converter output that it sends to Elasticsearch.
+          const { conversionCase, expectedEsql, columnNamesMatcher } = queryCase;
+          const { timeField } = conversionCase.dataset;
+          const esql = generateQueryForCase(conversionCase);
+          expect(esql).toBe(expectedEsql);
 
           const response = await apiClient.post(`${SEARCH_API_BASE_URL}/${ESQL_SEARCH_STRATEGY}`, {
             headers: { ...INTERNAL_HEADERS, ...cookieHeader },

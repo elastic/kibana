@@ -12,6 +12,7 @@ export {
   buildEsqlConversionCasesByGroup,
   type EsqlConversionCaseGroup,
   createEsqlConversionIndexPattern,
+  createEsqlConversionInput,
   createEsqlConversionUiSettings,
   ESQL_CONVERSION_DATE_RANGE,
   ESQL_CONVERSION_DATASETS,
@@ -20,4 +21,8 @@ export {
   type EsqlConversionColumn,
   type EsqlConversionDataset,
   type EsqlConversionDatasetId,
+  type FailedEsqlConversionCase,
+  isFailedEsqlConversionCase,
+  type SuccessfulEsqlConversionCase,
+  isSuccessfulEsqlConversionCase,
 } from './src/esql_conversion_cases';

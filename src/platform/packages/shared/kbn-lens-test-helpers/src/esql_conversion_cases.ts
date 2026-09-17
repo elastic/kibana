@@ -15,6 +15,7 @@ import type { EsqlConversionCase, EsqlConversionCaseGroup } from './esql_convers
 
 export {
   createEsqlConversionIndexPattern,
+  createEsqlConversionInput,
   createEsqlConversionUiSettings,
   ESQL_CONVERSION_DATASETS,
   ESQL_CONVERSION_DATE_RANGE,
@@ -26,6 +27,12 @@ export type {
   EsqlConversionColumn,
   EsqlConversionDataset,
   EsqlConversionDatasetId,
+  FailedEsqlConversionCase,
+  SuccessfulEsqlConversionCase,
+} from './esql_conversion_cases/types';
+export {
+  isFailedEsqlConversionCase,
+  isSuccessfulEsqlConversionCase,
 } from './esql_conversion_cases/types';
 
 export const buildEsqlConversionCasesByGroup = (): Record<

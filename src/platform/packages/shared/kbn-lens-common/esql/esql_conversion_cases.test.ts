@@ -9,67 +9,35 @@
 
 import {
   buildEsqlConversionCasesByGroup,
-  createEsqlConversionIndexPattern,
-  createEsqlConversionUiSettings,
-  ESQL_CONVERSION_DATE_RANGE,
-  ESQL_CONVERSION_NOW,
+  createEsqlConversionInput,
   type EsqlConversionCase,
+  type FailedEsqlConversionCase,
+  isFailedEsqlConversionCase,
+  type SuccessfulEsqlConversionCase,
+  isSuccessfulEsqlConversionCase,
 } from '@kbn/lens-test-helpers';
 import type { DateRange, IndexPattern } from '../types';
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 import { generateEsqlQuery } from './generate_esql_query';
 
-const uiSettings = createEsqlConversionUiSettings();
-
 // Cases bind to the same sample-data indices the Scout API layer installs,
 // so unit and API layers pin the exact same queries.
-type SuccessfulConversionCase = EsqlConversionCase & {
-  expected: Extract<EsqlConversionCase['expected'], { success: true }>;
-};
-type FailedConversionCase = EsqlConversionCase & {
-  expected: Extract<EsqlConversionCase['expected'], { success: false }>;
-};
-
-const isSuccessfulConversionCase = (
-  conversionCase: EsqlConversionCase
-): conversionCase is SuccessfulConversionCase => conversionCase.expected.success;
-
-const isFailedConversionCase = (
-  conversionCase: EsqlConversionCase
-): conversionCase is FailedConversionCase => !conversionCase.expected.success;
-
 const generateQueryForCase = (conversionCase: EsqlConversionCase) => {
-  const indexPattern = createEsqlConversionIndexPattern(
-    conversionCase.dataset
-  ) as unknown as IndexPattern;
-  const columns = conversionCase.columns as unknown as Record<string, GenericIndexPatternColumn>;
-  const layer = {
-    indexPatternId: conversionCase.dataset.index,
-    columns,
-    columnOrder: [...conversionCase.columnOrder],
-  } as unknown as FormBasedLayer;
-  const esAggEntries = conversionCase.columnOrder.map((colId) => [colId, columns[colId]] as const);
+  const { esAggEntries, layer, indexPattern, uiSettings, dateRange, now, columnRoles } =
+    createEsqlConversionInput(conversionCase);
 
-  // omitDateRange models a detached time picker (auto date histograms fall
-  // back to a 1h fixed interval).
-  const dateRange = conversionCase.omitDateRange
-    ? ({ fromDate: undefined, toDate: undefined } as unknown as DateRange)
-    : ESQL_CONVERSION_DATE_RANGE;
-
-  const result = generateEsqlQuery(
-    esAggEntries,
-    layer,
-    indexPattern,
+  return generateEsqlQuery(
+    esAggEntries as unknown as Array<readonly [string, GenericIndexPatternColumn]>,
+    layer as unknown as FormBasedLayer,
+    indexPattern as unknown as IndexPattern,
     uiSettings,
-    dateRange,
-    ESQL_CONVERSION_NOW,
-    conversionCase.columnRoles ? { ...conversionCase.columnRoles } : undefined
+    dateRange as unknown as DateRange,
+    now,
+    columnRoles
   );
-
-  return result;
 };
 
-const runSuccessfulCase = (conversionCase: SuccessfulConversionCase) => {
+const runSuccessfulCase = (conversionCase: SuccessfulEsqlConversionCase) => {
   const result = generateQueryForCase(conversionCase);
 
   expect(result).toMatchObject({ success: true, esql: conversionCase.expected.esql });
@@ -99,7 +67,7 @@ const runSuccessfulCase = (conversionCase: SuccessfulConversionCase) => {
   }
 };
 
-const runFailedCase = (conversionCase: FailedConversionCase) => {
+const runFailedCase = (conversionCase: FailedEsqlConversionCase) => {
   const result = generateQueryForCase(conversionCase);
 
   expect(result).toMatchObject({ success: false, reason: conversionCase.expected.reason });
@@ -110,8 +78,8 @@ const casesByGroup = buildEsqlConversionCasesByGroup();
 describe('form-based → ES|QL conversion case matrix (generation assertions)', () => {
   for (const [group, cases] of Object.entries(casesByGroup)) {
     describe(group, () => {
-      const successfulCases = cases.filter(isSuccessfulConversionCase);
-      const failedCases = cases.filter(isFailedConversionCase);
+      const successfulCases = cases.filter(isSuccessfulEsqlConversionCase);
+      const failedCases = cases.filter(isFailedEsqlConversionCase);
 
       for (const conversionCase of successfulCases) {
         it(`converts: ${conversionCase.description}`, () => {

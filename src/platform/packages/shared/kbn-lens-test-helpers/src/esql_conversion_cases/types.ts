@@ -46,6 +46,14 @@ export interface EsqlConversionFailure {
   readonly reason: string;
 }
 
+export type SuccessfulEsqlConversionCase = EsqlConversionCase & {
+  readonly expected: EsqlConversionSuccess;
+};
+
+export type FailedEsqlConversionCase = EsqlConversionCase & {
+  readonly expected: EsqlConversionFailure;
+};
+
 export type EsqlConversionCaseGroup = 'core' | 'date_histogram' | 'top_n' | 'static_value';
 
 export interface EsqlConversionCase {
@@ -59,3 +67,11 @@ export interface EsqlConversionCase {
   readonly omitDateRange?: true;
   readonly expected: EsqlConversionSuccess | EsqlConversionFailure;
 }
+
+export const isSuccessfulEsqlConversionCase = (
+  conversionCase: EsqlConversionCase
+): conversionCase is SuccessfulEsqlConversionCase => conversionCase.expected.success;
+
+export const isFailedEsqlConversionCase = (
+  conversionCase: EsqlConversionCase
+): conversionCase is FailedEsqlConversionCase => !conversionCase.expected.success;

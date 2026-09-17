@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsqlConversionDataset, EsqlConversionDatasetId } from './types';
+import type { EsqlConversionCase, EsqlConversionDataset, EsqlConversionDatasetId } from './types';
 
 export const ESQL_CONVERSION_DATASETS: Record<EsqlConversionDatasetId, EsqlConversionDataset> = {
   ecommerce: {
@@ -67,6 +67,28 @@ export const createEsqlConversionIndexPattern = (dataset: EsqlConversionDataset)
   },
   getFormatterForField: () => ({ convertToText: (value: unknown) => String(value) }),
 });
+
+export const createEsqlConversionInput = (conversionCase: EsqlConversionCase) => {
+  const columns = conversionCase.columns;
+
+  return {
+    esAggEntries: conversionCase.columnOrder.map(
+      (columnId) => [columnId, columns[columnId]] as const
+    ),
+    layer: {
+      indexPatternId: conversionCase.dataset.index,
+      columns,
+      columnOrder: [...conversionCase.columnOrder],
+    },
+    indexPattern: createEsqlConversionIndexPattern(conversionCase.dataset),
+    uiSettings: createEsqlConversionUiSettings(),
+    dateRange: conversionCase.omitDateRange
+      ? { fromDate: undefined, toDate: undefined }
+      : ESQL_CONVERSION_DATE_RANGE,
+    now: ESQL_CONVERSION_NOW,
+    columnRoles: conversionCase.columnRoles ? { ...conversionCase.columnRoles } : undefined,
+  };
+};
 
 export const createEsqlConversionCaseContext = () => {
   const ecommerce = ESQL_CONVERSION_DATASETS.ecommerce;
