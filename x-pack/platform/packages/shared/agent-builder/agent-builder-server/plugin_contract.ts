@@ -12,6 +12,7 @@ import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
+import type { ConversationEventTypeDefinition } from './conversation_events';
 import type { SkillDefinition } from './skills';
 import type { SkillRegistry } from './skills/registry';
 import type {
@@ -248,6 +249,12 @@ export interface TopSnippetsConfig {
 /**
  * Setup contract of the agentBuilder plugin.
  */
+/** AgentBuilder conversation events setup contract. */
+export interface ConversationEventsSetup {
+  /** Register a custom conversation event type. */
+  register(definition: ConversationEventTypeDefinition): void;
+}
+
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.
@@ -269,6 +276,10 @@ export interface AgentBuilderPluginSetup {
    * Renderers setup contract, which can be used to register renderer types.
    */
   renderers: RenderersSetup;
+  /**
+   * Conversation events setup contract, which can be used to register custom event types.
+   */
+  conversationEvents: ConversationEventsSetup;
   /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */
