@@ -60,6 +60,7 @@ import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
 import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import { ES_CLIENT_AUTHENTICATION_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
 import {
   HTTPAuthorizationHeader,
   isUiamCredential,
@@ -614,10 +615,11 @@ export class Server {
     const uiam = securityStart.authc.apiKeys.uiam;
     if (uiam) {
       httpStart.setSelfClientAuthHeaderAugmenter((request, outboundHeaders) => {
-        // The attestation is bound to the credential it travels with, and the receiving side
-        // recomputes it from the credential that arrives. Derive it from the outbound header, not
-        // the inbound request: authentication may have swapped the caller's credential for another
-        // one, and an attestation minted for a credential that is not sent can never validate.
+        const inboundHasClientSecret = (value: string | string[] | undefined) =>
+          typeof value === 'string'
+            ? value.length > 0
+            : Array.isArray(value) && value.some((entry) => entry.length > 0);
+
         const authorization = outboundHeaders.get('authorization');
         const credential = authorization
           ? HTTPAuthorizationHeader.parseFromValue(authorization)
@@ -625,12 +627,10 @@ export class Server {
         if (!credential || !isUiamCredential(credential)) {
           return undefined;
         }
-
-        // A user-created (external) UIAM key must not be attested: the receiving Kibana would honor
-        // the attestation and attach the UIAM shared secret, and UIAM rejects external keys
-        // presented with client authentication. The marker is only ever set on fake requests, where
-        // the inbound and outbound credentials are the same one.
         if (isExternalUiamCredential(request)) {
+          return undefined;
+        }
+        if (inboundHasClientSecret(request.headers[ES_CLIENT_AUTHENTICATION_HEADER])) {
           return undefined;
         }
 

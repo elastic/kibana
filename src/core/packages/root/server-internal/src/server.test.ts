@@ -44,6 +44,7 @@ import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { ES_CLIENT_AUTHENTICATION_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
@@ -547,6 +548,73 @@ describe('self client UIAM auth header augmenter', () => {
 
     expect(augmenter(request, outboundHeaders)).toBeUndefined();
     expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('does not attest an upstream-relayed UIAM token that arrived with client authentication', async () => {
+    const uiam = getUiamMock();
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: {
+        authorization: 'Bearer essu_upstream',
+        [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-secret',
+      },
+    });
+    const outboundHeaders = new Headers({ authorization: 'Bearer essu_upstream' });
+
+    expect(augmenter(request, outboundHeaders)).toBeUndefined();
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('does not attest when inbound client authentication arrives as a non-empty array', async () => {
+    const uiam = getUiamMock();
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_upstream' },
+    });
+    (request.headers as Record<string, string | string[]>)[ES_CLIENT_AUTHENTICATION_HEADER] = [
+      'upstream-secret',
+    ];
+    const outboundHeaders = new Headers({ authorization: 'Bearer essu_upstream' });
+
+    expect(augmenter(request, outboundHeaders)).toBeUndefined();
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('still attests a Kibana-minted UIAM credential with no inbound client authentication', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION);
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_inbound' },
+    });
+    const outboundHeaders = new Headers({ authorization: 'Bearer essu_ephemeral' });
+
+    expect(augmenter(request, outboundHeaders)).toEqual(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_ephemeral' })
+    );
+  });
+
+  it('does not treat an empty inbound client authentication header as a relay', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION);
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: {
+        authorization: 'Bearer essu_inbound',
+        [ES_CLIENT_AUTHENTICATION_HEADER]: '',
+      },
+    });
+    const outboundHeaders = new Headers({ authorization: 'Bearer essu_outbound' });
+
+    expect(augmenter(request, outboundHeaders)).toEqual(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_outbound' })
+    );
   });
 
   it('attests a cookie-authenticated UIAM session from the outbound credential', async () => {
