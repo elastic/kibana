@@ -31,7 +31,7 @@ export const isEsqlVerificationError = (error: unknown): error is errors.Respons
 export const isEsqlUnknownIndexError = (error: unknown): boolean =>
   isEsqlVerificationError(error) && (getEsError(error)?.reason ?? '').includes('Unknown index');
 
-/** Re-throws ES client failures as Boom errors so the HTTP layer keeps the ES status code. */
+/** Maps an ES client failure to a Boom error so the HTTP layer keeps the ES status code. */
 export const toBoom = (error: unknown, prefix?: string): Error => {
   if (!isResponseError(error)) {
     return error instanceof Error ? error : new Error(String(error));

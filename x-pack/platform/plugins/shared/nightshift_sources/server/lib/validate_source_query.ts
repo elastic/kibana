@@ -73,7 +73,7 @@ export const validateSourceQuery = (esql: string): void => {
 
 /**
  * The source command alone (`FROM a, b*` or `TS ...`), used to probe whether any index exists
- * behind an already validated query.
+ * behind an already validated query. Only safe to call after `validateSourceQuery` has succeeded.
  */
 export const getSourceCommandQuery = (esql: string): string => {
   const { root } = Parser.parse(esql);

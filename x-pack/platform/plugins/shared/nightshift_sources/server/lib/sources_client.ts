@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+// AST-normalized comparison from Streams; formatting-only differences are treated as equal.
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
   getNightshiftSourceViewName,
@@ -106,7 +107,12 @@ export class SourcesClient {
   async update(id: string, input: SourceInput): Promise<NightshiftSource> {
     const { soClient, viewsClient } = this.deps;
     const { attributes: previous } = await this.getSavedObject(id);
-    await this.validate(input.esql);
+    const esqlChanged = !hasSameEsql(input.esql, previous.esql);
+    if (esqlChanged) {
+      await this.validate(input.esql);
+    } else {
+      validateSourceQuery(input.esql);
+    }
 
     const now = new Date().toISOString();
     // Assign the editable fields one by one: an omitted `description` must clear the stored one,
@@ -118,7 +124,7 @@ export class SourcesClient {
       tags: input.tags,
       esql: input.esql,
       updated_at: now,
-      esql_updated_at: hasSameEsql(input.esql, previous.esql) ? previous.esql_updated_at : now,
+      esql_updated_at: esqlChanged ? now : previous.esql_updated_at,
     };
 
     await soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, FULL_UPDATE);
