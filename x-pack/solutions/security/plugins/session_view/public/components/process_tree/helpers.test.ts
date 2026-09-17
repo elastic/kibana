@@ -23,6 +23,8 @@ import {
   buildProcessTree,
   searchProcessTree,
   autoExpandProcessTree,
+  collapseProcessTree,
+  expandProcessTree,
 } from './helpers';
 
 const SESSION_ENTITY_ID = '3d0192c6-7c54-5ee6-a110-3539a7cf42bc';
@@ -79,6 +81,23 @@ describe('process tree hook helpers tests', () => {
     processMap = autoExpandProcessTree(processMap, SEARCH_RESULT_PROCESS_ID);
     // session leader should have autoExpand to be true
     expect(processMap[SESSION_ENTITY_ID].autoExpand).toBeTruthy();
+  });
+
+  it('collapseProcessTree and expandProcessTree toggle autoExpand on every descendant', () => {
+    processMap = cloneDeep(mockProcessMap);
+    // mock what buildProcessTree does
+    const childProcesses = Object.values(processMap).filter(
+      (process) => process.id !== SESSION_ENTITY_ID
+    );
+    const sessionLeader = processMap[SESSION_ENTITY_ID];
+    sessionLeader.children = childProcesses;
+    sessionLeader.autoExpand = true;
+
+    expandProcessTree(sessionLeader);
+    expect(childProcesses.every(({ autoExpand }) => autoExpand)).toBe(true);
+
+    collapseProcessTree(sessionLeader);
+    expect(childProcesses.some(({ autoExpand }) => autoExpand)).toBe(false);
   });
 
   it('updateAlertEventStatus works', () => {
