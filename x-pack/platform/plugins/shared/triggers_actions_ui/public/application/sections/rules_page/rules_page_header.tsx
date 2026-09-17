@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
 export interface RulesPageHeaderProps {
-  back: { href: string; label: string };
+  back?: { href: string; label: string };
   tabs: AppHeaderTab[];
   menu: AppMenuConfig;
   docLink: string;

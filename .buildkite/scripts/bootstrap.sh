@@ -37,9 +37,9 @@ fi
 # But only for agents not mounting the workspace on a local ssd or in memory
 # It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
 if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
-  if [[ -d ~/.cache/kibana/pnpm/node_modules ]]; then
-    echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
-    mv ~/.cache/kibana/pnpm/node_modules ./
+  if [[ -d ~/.cache/kibana/pnpm/node_modules ]] && [[ ! -d ./node_modules ]]; then
+      echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
+      mv ~/.cache/kibana/pnpm/node_modules ./
   fi
   if [[ -d ~/.cache/kibana/pnpm/.pnpm-store ]]; then
     echo "Using ~/.cache/kibana/pnpm/.pnpm-store as a starting point"
@@ -56,7 +56,8 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi
 elif [[ "$(pwd)" == "/dev/shm"* ]]; then
-  yarn config set cache-folder /dev/shm/yarn-cache > /dev/null
+  # pnpm store on tmpfs so the install doesn't fill the small root disk
+  export npm_config_store_dir=/dev/shm/pnpm-store
   if [[ -f ~/.kibana/node_modules.tar.zst ]]; then
     echo "Extracting ~/.kibana/node_modules.tar.zst"
     tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./

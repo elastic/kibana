@@ -24,6 +24,8 @@ import { useOnboardingFlow } from '../onboarding_flow_context';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
+import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
+import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
 import {
@@ -104,13 +106,60 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     }
   }, [handleDeploy, failedInstances]);
 
+  const isAgentBased = deploymentMethod === 'agent_based';
+
   const miServiceIds = useMemo(
     () =>
-      selectedServiceIds.filter((id) =>
-        awsServicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'managed_integration')
-      ),
-    [selectedServiceIds, awsServicesMap]
+      isAgentBased
+        ? [] // suppress MI section in agent-based mode
+        : selectedServiceIds.filter((id) =>
+            awsServicesMap
+              ?.get(id)
+              ?.deploymentMethods.some((dm) => dm.method === 'managed_integration')
+          ),
+    [isAgentBased, selectedServiceIds, awsServicesMap]
   );
+
+  // ── Agent-based ─────────────────────────────────────────────────────────────
+  const {
+    targets: agentTargets,
+    isDeploying: isAgentDeploying,
+    failedInstances: agentFailedInstances,
+    isAlreadyDeployed: isAgentAlreadyDeployed,
+    handleDeploy: handleAgentDeploy,
+    setAgentCredentials,
+  } = useAgentBasedDeploy();
+
+  const [agentDeployAttempted, setAgentDeployAttempted] = useState(false);
+  const [isAgentNextReady, setIsAgentNextReady] = useState(false);
+  const isAgentDone =
+    isAgentAlreadyDeployed ||
+    (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0);
+  // Unlike MI's hasFailed, this IS gated on agentDeployAttempted. failedInstances is a single
+  // shared session key that the MI path also writes, so an un-gated check would surface a stale
+  // MI failure (or one from a previous session) as an agent-based "Deployment failed" callout.
+  // The agent-based path has no equivalent of MI's "persisted failure must survive remount"
+  // requirement, because agentPolicyId is its durable success flag.
+  const agentHasFailed =
+    agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length > 0;
+
+  const handleAgentDeployClick = useCallback(
+    (instanceIds?: string[]) => {
+      setAgentDeployAttempted(true);
+      if (instanceIds && instanceIds.length > 0) {
+        handleAgentDeploy(instanceIds);
+      } else {
+        handleAgentDeploy();
+      }
+    },
+    [handleAgentDeploy]
+  );
+
+  // Used by handleNext to await the deploy result and decide whether to navigate.
+  const handleAgentDeployForNext = useCallback(async (): Promise<{ failed: boolean }> => {
+    setAgentDeployAttempted(true);
+    return handleAgentDeploy();
+  }, [handleAgentDeploy]);
 
   const showIdentityFederation = useMemo(() => {
     if (miServiceIds.length === 0) return true;
@@ -120,12 +169,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   }, [miServiceIds, awsServicesMap]);
 
   // ── Elastic Cloud Forwarder ───────────────────────────────────────────────────
+  // ECF is suppressed in agent-based mode — agent-based services are deployed via the agent policy,
+  // not via CloudFormation. Passing an empty instance list makes useEcfDeployment return
+  // hasAnyEcf=false so the section is hidden and Next is not gated on ECF completion.
   const {
     hasAnyEcf,
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
   } = useEcfDeployment({
-    instances: ecfInstances,
+    instances: isAgentBased ? [] : ecfInstances,
     serviceVars,
     globalRegion,
     otlpEndpoint,
@@ -134,6 +186,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // ── ECF-only SO persistence ───────────────────────────────────────────────────
   const [isSavingSO, setIsSavingSO] = useState(false);
+
+  // Defined before handleNext so they can be referenced in the callback and dependency array.
+  const showMiSection = !isAgentBased && miServiceIds.length > 0;
+  const showAgentSection = isAgentBased && agentTargets.length > 0;
 
   const handleNext = useCallback(async () => {
     const defaultNames: Record<string, string> = {
@@ -202,10 +258,30 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       return;
     }
 
+    // Agent-based: deploy on Next, then navigate only if succeeded.
+    if (showAgentSection) {
+      // Short-circuit if already deployed (e.g. user went Back then Next again) to avoid
+      // creating duplicate package policies on the same agent policy.
+      if (isAgentDone) {
+        onContinue();
+        return;
+      }
+      const result = await handleAgentDeployForNext();
+      if (result.failed) {
+        // Deploy failed — stay on step 3, error callout is already shown by the section.
+        return;
+      }
+      onContinue();
+      return;
+    }
+
     onContinue();
   }, [
     miServiceIds.length,
     hasAnyEcf,
+    showAgentSection,
+    isAgentDone,
+    handleAgentDeployForNext,
     ecfSectionProps,
     selectedServiceIds,
     serviceVars,
@@ -223,23 +299,47 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // ── Next button gating ────────────────────────────────────────────────────────
   // Disabled until every active deployment section reports done.
+  // Agent enrolment is non-blocking, but the deploy itself now happens here on Next.
+  // The section stays visible with the error callout if deploy fails.
   const isNextDisabled =
-    (miServiceIds.length > 0 && !isMiDone) || (hasAnyEcf && !isEcfDone) || isSavingSO;
+    (showMiSection && !isMiDone) ||
+    (hasAnyEcf && !isEcfDone) ||
+    isSavingSO ||
+    (showAgentSection && isAgentDeploying) ||
+    (showAgentSection && !isAgentDone && !isAgentNextReady);
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
       <DeploymentMethodCard selectedMethod={deploymentMethod} onChange={setDeploymentMethod} />
 
-      {miServiceIds.length > 0 && <EuiHorizontalRule margin="l" />}
+      {showMiSection && <EuiHorizontalRule margin="l" />}
 
-      {miServiceIds.length > 0 && (
+      {showMiSection && (
         <ManagedIntegrationsSection
           serviceCount={miServiceIds.length}
+          serviceIds={miServiceIds}
+          serviceVars={serviceVars}
           showIdentityFederation={showIdentityFederation}
           onDeploy={handleDeployClick}
           isDeploying={isDeploying}
           isDone={isMiDone}
           hasFailed={hasFailed}
+        />
+      )}
+
+      {showAgentSection && <EuiHorizontalRule margin="l" />}
+
+      {showAgentSection && (
+        <AgentBasedSection
+          serviceCount={agentTargets.reduce((sum, g) => sum + g.instanceIds.length, 0)}
+          onDeploy={handleAgentDeployClick}
+          onCredentialsChange={setAgentCredentials}
+          onNextReadyChange={setIsAgentNextReady}
+          isDeploying={isAgentDeploying}
+          isDone={isAgentDone}
+          hasFailed={agentHasFailed}
+          failedInstances={agentFailedInstances}
+          deployErrors={detectAndReviewStep.deployErrors}
         />
       )}
 
@@ -265,7 +365,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
             fill
             onClick={handleNext}
             isDisabled={isNextDisabled}
-            isLoading={isSavingSO}
+            isLoading={isSavingSO || isAgentDeploying}
             data-test-subj="authenticateAndDeployStep-nextButton"
           >
             <FormattedMessage
