@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import { KibanaAssetType } from '../../../common/types/models/epm';
 import { FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../../services';
 import { createArchiveIterator } from '../../services/epm/archive/archive_iterator';
@@ -142,7 +143,7 @@ describe('collectArchiveSignals', () => {
     await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
     const traverseCall = iterator.traverseEntries.mock.calls[0];
-    const readBufferFn = traverseCall[1];
+    const readBufferFn = traverseCall[1]!;
     expect(readBufferFn('mypackage-1.0.0/kibana/security_ai_prompt/my-prompt.json')).toBe(false);
     expect(readBufferFn('mypackage-1.0.0/kibana/security_rule/my-rule.json')).toBe(true);
   });
@@ -186,7 +187,7 @@ describe('buildRequiredActions', () => {
 
   it('returns rules-all for security_rule type', () => {
     const signals = {
-      gatedTypesFound: new Set(['security_rule'] as any),
+      gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityRule]),
       blockedTypes: [],
       hasMlSecurityRules: false,
     };
@@ -196,7 +197,7 @@ describe('buildRequiredActions', () => {
 
   it('adds ml:canCreateJob when hasMlSecurityRules is true', () => {
     const signals = {
-      gatedTypesFound: new Set(['security_rule'] as any),
+      gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityRule]),
       blockedTypes: [],
       hasMlSecurityRules: true,
     };
@@ -208,7 +209,7 @@ describe('buildRequiredActions', () => {
 
   it('does not add ml:canCreateJob for non-ML security_rule', () => {
     const signals = {
-      gatedTypesFound: new Set(['security_rule'] as any),
+      gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityRule]),
       blockedTypes: [],
       hasMlSecurityRules: false,
     };
@@ -220,7 +221,7 @@ describe('buildRequiredActions', () => {
 
   it('returns elasticAssistant for security_ai_prompt', () => {
     const signals = {
-      gatedTypesFound: new Set(['security_ai_prompt'] as any),
+      gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityAIPrompt]),
       blockedTypes: [],
       hasMlSecurityRules: false,
     };
@@ -230,7 +231,7 @@ describe('buildRequiredActions', () => {
 
   it('returns cloud-security-posture-all for csp_rule_template', () => {
     const signals = {
-      gatedTypesFound: new Set(['csp_rule_template'] as any),
+      gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.cloudSecurityPostureRuleTemplate]),
       blockedTypes: [],
       hasMlSecurityRules: false,
     };
@@ -242,7 +243,7 @@ describe('buildRequiredActions', () => {
 
   it('returns slo_write for slo_template', () => {
     const signals = {
-      gatedTypesFound: new Set(['slo_template'] as any),
+      gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.sloTemplate]),
       blockedTypes: [],
       hasMlSecurityRules: false,
     };
@@ -252,11 +253,11 @@ describe('buildRequiredActions', () => {
 
   it('accumulates actions for multiple gated types', () => {
     const signals = {
-      gatedTypesFound: new Set([
-        'security_rule',
-        'security_ai_prompt',
-        'osquery_saved_query',
-      ] as any),
+      gatedTypesFound: new Set<KibanaAssetType>([
+        KibanaAssetType.securityRule,
+        KibanaAssetType.securityAIPrompt,
+        KibanaAssetType.osquerySavedQuery,
+      ]),
       blockedTypes: [],
       hasMlSecurityRules: true,
     };
