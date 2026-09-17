@@ -23,8 +23,7 @@ const API_HEADERS = {
   'elastic-api-version': '2023-10-31',
 };
 
-// Mirrors the `ai-index@mappings` fields the view filters on, so the test does
-// not depend on the component template version of the snapshot under test.
+// The `ai-index@mappings` fields the view filters on.
 const MAPPINGS = {
   properties: {
     '@timestamp': { type: 'date' },

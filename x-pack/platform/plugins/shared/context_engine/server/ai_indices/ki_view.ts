@@ -8,9 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 
-export const KI_VIEW_PREFIX = 'v-ai-index-';
-
-export const kiViewName = (aiIndexId: string): string => `${KI_VIEW_PREFIX}${aiIndexId}`;
+const kiViewName = (aiIndexId: string): string => `v-ai-index-${aiIndexId}`;
 
 const LIFECYCLE_FILTERS = [
   'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
@@ -19,7 +17,7 @@ const LIFECYCLE_FILTERS = [
 ];
 
 /** The retrieval view of an AI index: the current, active, unexpired KIs without governance fields. */
-export const kiViewQuery = ({ type, value }: AiIndexDest): string =>
+const kiViewQuery = ({ type, value }: AiIndexDest): string =>
   (type === 'data_stream'
     ? [
         `FROM ${value} METADATA _id`,
@@ -34,18 +32,16 @@ export const kiViewQuery = ({ type, value }: AiIndexDest): string =>
     : [`FROM ${value}`, ...LIFECYCLE_FILTERS]
   ).join('\n| ');
 
-interface KiViewOptions {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  aiIndexId: string;
-}
-
 /** Creates or replaces the view for an AI index. */
 export const putKiView = async ({
   esClient,
   aiIndexId,
   dest,
-}: Omit<KiViewOptions, 'logger'> & { dest: AiIndexDest }): Promise<void> => {
+}: {
+  esClient: ElasticsearchClient;
+  aiIndexId: string;
+  dest: AiIndexDest;
+}): Promise<void> => {
   await esClient.esql.putView({ name: kiViewName(aiIndexId), query: kiViewQuery(dest) });
 };
 
@@ -54,7 +50,11 @@ export const deleteKiView = async ({
   esClient,
   logger,
   aiIndexId,
-}: KiViewOptions): Promise<void> => {
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  aiIndexId: string;
+}): Promise<void> => {
   const name = kiViewName(aiIndexId);
   try {
     await esClient.esql.deleteView({ name }, { ignore: [404] });
