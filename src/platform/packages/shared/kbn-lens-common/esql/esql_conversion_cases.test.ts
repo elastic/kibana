@@ -26,6 +26,9 @@ const generateQueryForCase = (conversionCase: EsqlConversionCase) => {
   const { esAggEntries, layer, indexPattern, uiSettings, dateRange, now, columnRoles } =
     createEsqlConversionInput(conversionCase);
 
+  // Shared test helpers intentionally model only the fields these cases need and stay
+  // independent of Lens production types to avoid a package dependency cycle. Cast through
+  // unknown because these limited fixture types do not implement the full Lens contracts.
   return generateEsqlQuery(
     esAggEntries as unknown as Array<readonly [string, GenericIndexPatternColumn]>,
     layer as unknown as FormBasedLayer,
