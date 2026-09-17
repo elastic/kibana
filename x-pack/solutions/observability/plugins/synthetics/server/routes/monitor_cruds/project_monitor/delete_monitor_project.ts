@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { routeId } from '../../zod_query';
+import { asRouteSchema, maxArraySizeMessage, routeId } from '../../zod_query';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -20,9 +20,13 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
-    body: z.object({
-      monitors: z.array(routeId).max(MAX_MONITORS_TO_DELETE),
-    }),
+    body: asRouteSchema(
+      z.object({
+        monitors: z
+          .array(routeId)
+          .max(MAX_MONITORS_TO_DELETE, { error: maxArraySizeMessage(MAX_MONITORS_TO_DELETE) }),
+      })
+    ),
     params: z.object({
       projectName: routeId,
     }),

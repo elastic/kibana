@@ -5,15 +5,71 @@
  * 2.0.
  */
 
+import type { RouteValidationFunction } from '@kbn/core-http-server';
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 export const MAX_ROUTE_ID_LENGTH = 1024;
 export const MAX_ROUTE_STRING_LENGTH = 4096;
 export const MAX_DATE_RANGE_LENGTH = 256;
+// Params hold PEM chains / keys; 10KB 400s those. 1MB is a DoS cap, not a product limit.
+export const MAX_PARAM_VALUE_LENGTH = 1_000_000;
 
 export const queryNumber = z.coerce.number();
 export const queryBoolean = BooleanFromString;
 export const routeId = z.string().min(1).max(MAX_ROUTE_ID_LENGTH);
 export const optionalRouteId = z.string().max(MAX_ROUTE_ID_LENGTH).optional();
 export const optionalQueryString = z.string().max(MAX_ROUTE_STRING_LENGTH).optional();
+
+/** Match config-schema `schema.string({ minLength })` 400 copy. */
+export const minLengthMessage = (minLength: number) => (issue: { input?: unknown }) => {
+  const length = String(issue.input ?? '').length;
+  return `value has length [${length}] but it must have a minimum length of [${minLength}].`;
+};
+
+/** Match config-schema `schema.arrayOf(..., { maxSize })` 400 copy. */
+export const maxArraySizeMessage = (maxSize: number) => (issue: { input?: unknown }) => {
+  const size = Array.isArray(issue.input) ? issue.input.length : 0;
+  return `array size is [${size}], but cannot be greater than [${maxSize}]`;
+};
+
+/**
+ * config-schema `arrayOf` JSON-parses query strings (`spaces=["*"]`). Cap the
+ * raw string so a huge payload never reaches `JSON.parse`.
+ */
+export const jsonArrayFromString = <T extends z.ZodType>(item: T, maxSize: number) =>
+  z.preprocess((value: unknown) => {
+    if (typeof value !== 'string') {
+      return value;
+    }
+    if (value.length > MAX_ROUTE_STRING_LENGTH) {
+      return value;
+    }
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }, z.array(item).max(maxSize));
+
+/**
+ * Pass the failing path into `badRequest` so core prefixes `[request body.x]:`
+ * the way config-schema did. Raw `schema.parse()` otherwise 400s with Zod JSON.
+ */
+export const asRouteSchema = <T extends z.ZodType>(
+  schema: T
+): RouteValidationFunction<z.infer<T>> => {
+  const fn: RouteValidationFunction<z.infer<T>> = (input, { ok, badRequest }) => {
+    const result = schema.safeParse(input);
+    if (result.success) {
+      return ok(result.data);
+    }
+    const issue = result.error.issues[0];
+    return badRequest(
+      issue?.message ?? 'Invalid input',
+      (issue?.path ?? []).map((segment) => String(segment))
+    );
+  };
+  (fn as RouteValidationFunction<z.infer<T>> & { _sourceSchema: unknown })._sourceSchema = schema;
+  return fn;
+};

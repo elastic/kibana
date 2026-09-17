@@ -7,7 +7,7 @@
 import { z } from '@kbn/zod';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { queryBoolean, routeId } from '../zod_query';
+import { jsonArrayFromString, queryBoolean, routeId } from '../zod_query';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { generateProjectAPIKey } from '../../synthetics_service/get_api_key';
@@ -22,7 +22,7 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY,
   validate: {
     query: z.object({
-      spaces: z.array(routeId).max(100).optional(),
+      spaces: jsonArrayFromString(routeId, 100).optional(),
       accessToElasticManagedLocations: queryBoolean.optional(),
     }),
   },
