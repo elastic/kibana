@@ -44,6 +44,9 @@ describe('useActionTypeModel', () => {
       string,
       unknown
     >,
+    is_testable: true,
+    is_inbound_only: false,
+    actions: {},
   };
 
   const createWrapper = (): FC<PropsWithChildren<unknown>> => {

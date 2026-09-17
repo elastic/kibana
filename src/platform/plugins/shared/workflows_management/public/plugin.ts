@@ -48,10 +48,7 @@ import type {
   WorkflowsServices,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import {
-  ensureConnectorSpecsCatalogLoaded,
-  type SerializedConnectorSpecCatalogEntry,
-} from '../common/connector_specs_catalog';
+import { ensureConnectorSpecsCatalogLoaded } from '../common/connector_specs_catalog';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
@@ -193,14 +190,12 @@ export class WorkflowsPlugin
     if (!this.catalogLoadPromise) {
       this.catalogLoadPromise = ensureConnectorSpecsCatalogLoaded(async () => {
         const specs = await fetchConnectorSpecs({ http });
-        return specs.map(
-          ({ id, isInboundOnly, actions, events }): SerializedConnectorSpecCatalogEntry => ({
-            id,
-            isInboundOnly,
-            actions,
-            ...(events !== undefined ? { events } : {}),
-          })
-        );
+        return specs.map((spec) => ({
+          id: spec.metadata.id,
+          isInboundOnly: spec.isInboundOnly,
+          actions: spec.actions,
+          ...(spec.events !== undefined ? { events: spec.events } : {}),
+        }));
       })
         .then((catalog) => {
           if (this.connectorEventTriggers) {

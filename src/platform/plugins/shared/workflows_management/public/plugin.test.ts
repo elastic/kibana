@@ -165,7 +165,6 @@ describe('WorkflowsPlugin', () => {
       setupDeps.actions.isInboundEventsEnabled = true;
       mockFetchConnectorSpecs.mockResolvedValue([
         {
-          id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
           metadata: {
             id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
             displayName: 'Inbound webhook',
@@ -173,6 +172,8 @@ describe('WorkflowsPlugin', () => {
             minimumLicense: 'gold',
             supportedFeatureIds: ['workflows'],
           },
+          schema: {},
+          isTestable: false,
           isInboundOnly: true,
           actions: {},
           events: {
@@ -181,7 +182,7 @@ describe('WorkflowsPlugin', () => {
                 eventId: 'inboundWebhook.received',
                 title: 'Received',
                 description: 'Inbound payload',
-                eventJsonSchema: { type: 'object' },
+                eventSchema: { type: 'object' },
               },
             ],
           },

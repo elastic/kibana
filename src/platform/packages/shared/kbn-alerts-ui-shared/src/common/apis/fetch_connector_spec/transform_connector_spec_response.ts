@@ -26,6 +26,36 @@ export interface ConnectorSpecWireResponse {
   };
   schema: Record<string, unknown>;
   is_testable: boolean;
+  is_inbound_only: boolean;
+  actions: Record<
+    string,
+    {
+      description?: string;
+      is_tool?: boolean;
+      input: Record<string, unknown>;
+    }
+  >;
+  events?: {
+    definitions: Array<{
+      event_id: string;
+      title: string;
+      description: string;
+      event_schema: Record<string, unknown>;
+    }>;
+  };
+}
+
+export interface ConnectorSpecAction {
+  description?: string;
+  isTool?: boolean;
+  input: Record<string, unknown>;
+}
+
+export interface ConnectorSpecEventDefinition {
+  eventId: string;
+  title: string;
+  description: string;
+  eventSchema: Record<string, unknown>;
 }
 
 /** Client-side connector spec after normalising API casing. */
@@ -33,6 +63,9 @@ export interface ConnectorSpecResponse {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
   isTestable: boolean;
+  isInboundOnly: boolean;
+  actions: Record<string, ConnectorSpecAction>;
+  events?: { definitions: ConnectorSpecEventDefinition[] };
 }
 
 export function transformConnectorSpecResponse(
@@ -62,5 +95,28 @@ export function transformConnectorSpecResponse(
     },
     schema: wire.schema,
     isTestable: wire.is_testable,
+    isInboundOnly: Boolean(wire.is_inbound_only),
+    actions: Object.fromEntries(
+      Object.entries(wire.actions ?? {}).map(([name, action]) => [
+        name,
+        {
+          ...(action.description !== undefined ? { description: action.description } : {}),
+          ...(action.is_tool !== undefined ? { isTool: action.is_tool } : {}),
+          input: action.input,
+        },
+      ])
+    ),
+    ...(wire.events
+      ? {
+          events: {
+            definitions: wire.events.definitions.map((definition) => ({
+              eventId: definition.event_id,
+              title: definition.title,
+              description: definition.description,
+              eventSchema: definition.event_schema,
+            })),
+          },
+        }
+      : {}),
   };
 }

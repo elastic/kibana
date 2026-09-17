@@ -10,18 +10,18 @@
 import type { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
 import {
-  transformConnectorSpecsResponse,
-  type ConnectorSpecCatalogEntry,
-  type ConnectorSpecCatalogWireResponse,
-} from './transform_connector_specs_response';
+  transformConnectorSpecResponse,
+  type ConnectorSpecResponse,
+  type ConnectorSpecWireResponse,
+} from '../fetch_connector_spec/transform_connector_spec_response';
 
 export const fetchConnectorSpecs = async ({
   http,
 }: {
   http: HttpSetup;
-}): Promise<ConnectorSpecCatalogEntry[]> => {
-  const wire = await http.get<ConnectorSpecCatalogWireResponse>(
+}): Promise<ConnectorSpecResponse[]> => {
+  const wire = await http.get<ConnectorSpecWireResponse[]>(
     `${INTERNAL_BASE_ACTION_API_PATH}/connector_types/specs`
   );
-  return transformConnectorSpecsResponse(wire);
+  return wire.map(transformConnectorSpecResponse);
 };

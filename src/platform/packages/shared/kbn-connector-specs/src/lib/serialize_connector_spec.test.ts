@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import * as connectorsSpecs from '../all_specs';
 import * as generateSecretsModule from './generate_secrets_schema_from_spec';
 import { serializeConnectorSpec } from './serialize_connector_spec';
@@ -470,6 +471,95 @@ describe('serializeConnectorSpec', () => {
 
       expect(authTypes).toContain('bearer');
       expect(authTypes).not.toContain('ears');
+    });
+  });
+
+  describe('actions and events', () => {
+    it('serializes action input JSON Schema without handler-like keys', () => {
+      const spec = {
+        metadata: {
+          id: '.test-catalog',
+          displayName: 'Test Catalog',
+          description: 'Test',
+          minimumLicense: 'basic' as const,
+          supportedFeatureIds: ['workflows' as const],
+        },
+        actions: {
+          lookup: {
+            isTool: true,
+            description: 'Look up an indicator',
+            input: z.object({
+              indicator: z.string().describe('Indicator value'),
+              section: z.string().optional(),
+            }),
+            scope: 'read' as const,
+            handler: async () => ({ ok: true }),
+          },
+        },
+        test: { handler: async () => ({}), enabled: false },
+      };
+
+      const result = serializeConnectorSpec(spec);
+
+      expect(result.isInboundOnly).toBe(false);
+      expect(result.actions.lookup.isTool).toBe(true);
+      expect(result.actions.lookup.description).toBe('Look up an indicator');
+      expect(JSON.stringify(result)).not.toMatch(/handler/);
+      expect(result.actions.lookup).not.toHaveProperty('handler');
+    });
+
+    it('round-trips a real spec action input through fromJSONSchema', () => {
+      const spec = connectorsSpecs.AlienVaultOTXConnector;
+      const serialized = serializeConnectorSpec(spec);
+      const getIndicator = serialized.actions.getIndicator;
+      expect(getIndicator).toBeDefined();
+
+      const rehydrated = fromJSONSchema(getIndicator.input, { preserveMeta: true });
+      expect(rehydrated).toBeInstanceOf(z.ZodObject);
+
+      const shape = (rehydrated as z.ZodObject).shape;
+      expect(Object.keys(shape)).toEqual(expect.arrayContaining(['indicatorType', 'indicator']));
+
+      const jsonSchema = getIndicator.input as {
+        required?: string[];
+        properties?: Record<string, { description?: string }>;
+      };
+      expect(jsonSchema.required).toEqual(expect.arrayContaining(['indicatorType', 'indicator']));
+      expect(jsonSchema.properties?.indicator?.description).toBe('Indicator value');
+    });
+
+    it('serializes inbound event definitions without handleEvents', () => {
+      const spec = {
+        metadata: {
+          id: '.inbound-catalog',
+          displayName: 'Inbound',
+          description: 'Events only',
+          minimumLicense: 'gold' as const,
+          supportedFeatureIds: ['workflows' as const],
+        },
+        actions: {},
+        test: { handler: async () => ({}), enabled: false },
+        events: {
+          definitions: {
+            received: {
+              eventId: 'inbound.received',
+              title: 'Received',
+              description: 'Inbound payload received',
+              eventSchema: z.object({
+                body: z.unknown().describe('Raw request body'),
+              }),
+            },
+          },
+          handleEvents: async () => ({ type: 'http' as const, httpResponse: { status: 200 } }),
+        },
+      };
+
+      const result = serializeConnectorSpec(spec);
+
+      expect(result.isInboundOnly).toBe(true);
+      expect(result.events?.definitions).toHaveLength(1);
+      expect(result.events?.definitions[0].eventId).toBe('inbound.received');
+      expect(JSON.stringify(result)).not.toMatch(/handleEvents/);
     });
   });
 });

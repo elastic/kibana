@@ -19,7 +19,7 @@ export interface SerializedConnectorSpecCatalogEntry {
     {
       description?: string;
       isTool?: boolean;
-      inputJsonSchema: Record<string, unknown>;
+      input: Record<string, unknown>;
     }
   >;
   events?: {
@@ -27,7 +27,7 @@ export interface SerializedConnectorSpecCatalogEntry {
       eventId: string;
       title: string;
       description: string;
-      eventJsonSchema: Record<string, unknown>;
+      eventSchema: Record<string, unknown>;
     }>;
   };
 }
@@ -78,7 +78,7 @@ export function rehydrateConnectorSpecsCatalog(
         {
           ...(action.description !== undefined ? { description: action.description } : {}),
           ...(action.isTool !== undefined ? { isTool: action.isTool } : {}),
-          input: fromJSONSchema(action.inputJsonSchema, { preserveMeta: true }) ?? z.any(),
+          input: fromJSONSchema(action.input, { preserveMeta: true }) ?? z.any(),
         },
       ])
     ),
@@ -89,7 +89,7 @@ export function rehydrateConnectorSpecsCatalog(
               eventId: definition.eventId,
               title: definition.title,
               description: definition.description,
-              eventSchema: toZodObject(definition.eventJsonSchema),
+              eventSchema: toZodObject(definition.eventSchema),
             })),
           },
         }

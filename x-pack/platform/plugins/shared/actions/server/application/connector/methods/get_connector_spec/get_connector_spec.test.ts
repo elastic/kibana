@@ -115,6 +115,21 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result.metadata).toHaveProperty('displayName');
     expect(result.metadata).toHaveProperty('supportedFeatureIds');
     expect(result).toHaveProperty('schema');
+    expect(result).toHaveProperty('actions');
+    expect(result).toHaveProperty('isInboundOnly', false);
+    expect(result.actions.getIndicator).toBeDefined();
+    expect(JSON.stringify(result)).not.toMatch(/"handler"/);
+  });
+
+  it('includes inbound event definitions for inbound-only specs', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.inboundWebhook',
+      configurationUtilities,
+    });
+    expect(result.isInboundOnly).toBe(true);
+    expect(result.events?.definitions.length).toBeGreaterThan(0);
+    expect(JSON.stringify(result)).not.toMatch(/handleEvents/);
   });
 
   it('returns isTestable true when the spec opts in to testing', async () => {

@@ -103,6 +103,8 @@ describe('getConnectorSpecRoute', () => {
       },
       schema: clientResult.schema,
       is_testable: true,
+      is_inbound_only: false,
+      actions: {},
     };
     actionsClient.getConnectorSpec.mockResolvedValue(clientResult as never);
 

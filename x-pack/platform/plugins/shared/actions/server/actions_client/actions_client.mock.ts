@@ -22,7 +22,6 @@ const createActionsClientMock = () => {
     getAllSystemConnectors: jest.fn(),
     getAuthStatus: jest.fn(),
     getConnectorSpec: jest.fn(),
-    getConnectorSpecs: jest.fn(),
     getBulk: jest.fn(),
     getOAuthAccessToken: jest.fn(),
     execute: jest.fn(),

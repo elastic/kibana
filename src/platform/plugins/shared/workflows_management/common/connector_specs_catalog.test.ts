@@ -37,7 +37,7 @@ describe('connector specs catalog', () => {
         actions: {
           getIndicator: {
             description: 'Get indicator',
-            inputJsonSchema: {
+            input: {
               type: 'object',
               properties: {
                 indicator: { type: 'string', description: 'Indicator value' },
@@ -74,7 +74,7 @@ describe('connector specs catalog', () => {
                 eventId: 'inboundWebhook.received',
                 title: 'Received',
                 description: 'Inbound payload',
-                eventJsonSchema: {
+                eventSchema: {
                   type: 'object',
                   properties: { body: {} },
                 },
@@ -96,7 +96,7 @@ describe('connector specs catalog', () => {
         isInboundOnly: false,
         actions: {
           postMessage: {
-            inputJsonSchema: {
+            input: {
               type: 'object',
               properties: { text: { type: 'string' } },
               required: ['text'],

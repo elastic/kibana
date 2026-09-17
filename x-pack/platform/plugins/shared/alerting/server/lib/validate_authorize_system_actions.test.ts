@@ -90,9 +90,6 @@ describe('validateAndAuthorizeSystemActions', () => {
         allowMultipleSystemActions: false,
         source: 'stack',
         isTestable: false,
-        hasEvents: false,
-        isInboundOnly: false,
-        isEarsExperimental: false,
       },
     ]);
 
@@ -135,9 +132,6 @@ describe('validateAndAuthorizeSystemActions', () => {
         allowMultipleSystemActions: false,
         source: 'stack',
         isTestable: false,
-        hasEvents: false,
-        isInboundOnly: false,
-        isEarsExperimental: false,
       },
     ]);
 
@@ -179,9 +173,6 @@ describe('validateAndAuthorizeSystemActions', () => {
         allowMultipleSystemActions: false,
         source: 'stack',
         isTestable: false,
-        hasEvents: false,
-        isInboundOnly: false,
-        isEarsExperimental: false,
       },
     ]);
 
@@ -231,9 +222,6 @@ describe('validateAndAuthorizeSystemActions', () => {
         allowMultipleSystemActions: false,
         source: 'stack',
         isTestable: false,
-        hasEvents: false,
-        isInboundOnly: false,
-        isEarsExperimental: false,
       },
     ]);
 
@@ -283,9 +271,6 @@ describe('validateAndAuthorizeSystemActions', () => {
         allowMultipleSystemActions: true,
         source: 'stack',
         isTestable: false,
-        hasEvents: false,
-        isInboundOnly: false,
-        isEarsExperimental: false,
       },
     ]);
 
@@ -351,9 +336,6 @@ describe('validateAndAuthorizeSystemActions', () => {
         allowMultipleSystemActions: false,
         source: 'stack',
         isTestable: false,
-        hasEvents: false,
-        isInboundOnly: false,
-        isEarsExperimental: false,
       },
     ]);
 
@@ -430,9 +412,6 @@ describe('validateAndAuthorizeSystemActions', () => {
         allowMultipleSystemActions: false,
         source: 'stack',
         isTestable: false,
-        hasEvents: false,
-        isInboundOnly: false,
-        isEarsExperimental: false,
       },
       {
         id: '.test-2',
@@ -447,9 +426,6 @@ describe('validateAndAuthorizeSystemActions', () => {
         allowMultipleSystemActions: false,
         source: 'stack',
         isTestable: false,
-        hasEvents: false,
-        isInboundOnly: false,
-        isEarsExperimental: false,
       },
     ]);
 

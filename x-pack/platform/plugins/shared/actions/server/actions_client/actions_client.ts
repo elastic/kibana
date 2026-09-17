@@ -33,7 +33,6 @@ import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
 import { getAuthStatus } from '../application/connector/methods/get_auth_status';
 import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
-import { getConnectorSpecsAsJsonSchema } from '../application/connector/methods/get_connector_specs';
 import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
 import { rotateInboundIngress } from '../application/connector/methods/rotate_inbound_ingress';
@@ -299,13 +298,6 @@ export class ActionsClient {
       configurationUtilities,
     });
   }
-
-  public async getConnectorSpecs() {
-    return getConnectorSpecsAsJsonSchema({
-      context: this.context,
-    });
-  }
-
 
   /**
    * Get bulk actions with in-memory list

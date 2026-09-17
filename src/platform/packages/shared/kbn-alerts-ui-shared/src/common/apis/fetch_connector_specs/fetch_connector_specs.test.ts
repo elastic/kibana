@@ -17,32 +17,32 @@ describe('fetchConnectorSpecs', () => {
     jest.resetAllMocks();
   });
 
-  it('calls the bulk specs catalog API', async () => {
-    http.get.mockResolvedValueOnce({
-      specs: [
-        {
+  it('calls the bulk specs catalog API and reuses transformConnectorSpecResponse', async () => {
+    http.get.mockResolvedValueOnce([
+      {
+        metadata: {
           id: '.alienvault-otx',
-          metadata: {
-            id: '.alienvault-otx',
-            display_name: 'AlienVault OTX',
-            description: 'Threat intel',
-            minimum_license: 'gold',
-            supported_feature_ids: ['workflows'],
-          },
-          is_inbound_only: false,
-          actions: {
-            getIndicator: {
-              input_json_schema: { type: 'object' },
-            },
+          display_name: 'AlienVault OTX',
+          description: 'Threat intel',
+          minimum_license: 'gold',
+          supported_feature_ids: ['workflows'],
+        },
+        schema: { type: 'object' },
+        is_testable: true,
+        is_inbound_only: false,
+        actions: {
+          getIndicator: {
+            input: { type: 'object' },
           },
         },
-      ],
-    });
+      },
+    ]);
 
     const result = await fetchConnectorSpecs({ http });
 
     expect(http.get).toHaveBeenCalledWith('/internal/actions/connector_types/specs');
-    expect(result[0].id).toBe('.alienvault-otx');
-    expect(result[0].actions.getIndicator.inputJsonSchema).toEqual({ type: 'object' });
+    expect(result[0].metadata.id).toBe('.alienvault-otx');
+    expect(result[0].actions.getIndicator.input).toEqual({ type: 'object' });
+    expect(result[0].isInboundOnly).toBe(false);
   });
 });

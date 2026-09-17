@@ -24,6 +24,8 @@ describe('transformConnectorSpecResponse', () => {
       },
       schema: { type: 'object', properties: {} },
       is_testable: true,
+      is_inbound_only: false,
+      actions: {},
     });
 
     expect(result.metadata).toEqual({
@@ -38,6 +40,8 @@ describe('transformConnectorSpecResponse', () => {
     });
     expect(result.schema).toEqual({ type: 'object', properties: {} });
     expect(result.isTestable).toBe(true);
+    expect(result.isInboundOnly).toBe(false);
+    expect(result.actions).toEqual({});
   });
 
   it('omits optional metadata fields when absent on the wire', () => {
@@ -51,6 +55,8 @@ describe('transformConnectorSpecResponse', () => {
       },
       schema: {},
       is_testable: false,
+      is_inbound_only: false,
+      actions: {},
     });
 
     expect(result.metadata).toEqual({
@@ -61,5 +67,50 @@ describe('transformConnectorSpecResponse', () => {
       supportedFeatureIds: ['cases'],
     });
     expect(result.isTestable).toBe(false);
+  });
+
+  it('maps action and event JSON Schema fields', () => {
+    const result = transformConnectorSpecResponse({
+      metadata: {
+        id: '.inboundWebhook',
+        display_name: 'Inbound webhook',
+        description: 'Inbound',
+        minimum_license: 'gold',
+        supported_feature_ids: ['workflows'],
+      },
+      schema: {},
+      is_testable: false,
+      is_inbound_only: true,
+      actions: {
+        getIndicator: {
+          is_tool: true,
+          description: 'Look up',
+          input: { type: 'object', properties: { indicator: { type: 'string' } } },
+        },
+      },
+      events: {
+        definitions: [
+          {
+            event_id: 'inboundWebhook.received',
+            title: 'Received',
+            description: 'Inbound payload',
+            event_schema: { type: 'object' },
+          },
+        ],
+      },
+    });
+
+    expect(result.isInboundOnly).toBe(true);
+    expect(result.actions.getIndicator).toEqual({
+      isTool: true,
+      description: 'Look up',
+      input: { type: 'object', properties: { indicator: { type: 'string' } } },
+    });
+    expect(result.events?.definitions[0]).toEqual({
+      eventId: 'inboundWebhook.received',
+      title: 'Received',
+      description: 'Inbound payload',
+      eventSchema: { type: 'object' },
+    });
   });
 });

@@ -49,8 +49,7 @@ export async function getConnectorSpecAsJsonSchema({
       isEarsExperimentalEnabled,
     });
     return {
-      metadata: serialized.metadata,
-      schema: serialized.schema,
+      ...serialized,
       isTestable: Boolean(spec.test.enabled),
     };
   } catch (error) {

@@ -8,8 +8,3 @@
  */
 
 export { fetchConnectorSpecs } from './fetch_connector_specs';
-export {
-  transformConnectorSpecsResponse,
-  type ConnectorSpecCatalogEntry,
-  type ConnectorSpecCatalogWireResponse,
-} from './transform_connector_specs_response';

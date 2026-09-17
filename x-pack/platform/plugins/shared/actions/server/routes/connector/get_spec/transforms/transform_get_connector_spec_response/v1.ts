@@ -12,7 +12,36 @@ export interface GetConnectorSpecServiceResult {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
   isTestable: boolean;
+  isInboundOnly: boolean;
+  actions: Record<
+    string,
+    {
+      description?: string;
+      isTool?: boolean;
+      input: Record<string, unknown>;
+    }
+  >;
+  events?: {
+    definitions: Array<{
+      eventId: string;
+      title: string;
+      description: string;
+      eventSchema: Record<string, unknown>;
+    }>;
+  };
 }
+
+const transformActions = (actions: GetConnectorSpecServiceResult['actions']) =>
+  Object.fromEntries(
+    Object.entries(actions).map(([name, action]) => [
+      name,
+      {
+        ...(action.description !== undefined ? { description: action.description } : {}),
+        ...(action.isTool !== undefined ? { is_tool: action.isTool } : {}),
+        input: action.input,
+      },
+    ])
+  );
 
 export const transformGetConnectorSpecResponse = (
   spec: GetConnectorSpecServiceResult
@@ -31,4 +60,18 @@ export const transformGetConnectorSpecResponse = (
   },
   schema: spec.schema,
   is_testable: spec.isTestable,
+  is_inbound_only: Boolean(spec.isInboundOnly),
+  actions: transformActions(spec.actions ?? {}),
+  ...(spec.events
+    ? {
+        events: {
+          definitions: spec.events.definitions.map((definition) => ({
+            event_id: definition.eventId,
+            title: definition.title,
+            description: definition.description,
+            event_schema: definition.eventSchema,
+          })),
+        },
+      }
+    : {}),
 });
