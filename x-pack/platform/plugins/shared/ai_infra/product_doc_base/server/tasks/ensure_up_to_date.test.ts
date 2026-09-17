@@ -24,7 +24,7 @@ describe('EnsureUpToDate task', () => {
   let runTask: (state: Record<string, unknown>) => Promise<unknown>;
 
   beforeEach(() => {
-    updateProduct = jest.fn().mockResolvedValue(undefined);
+    updateProduct = jest.fn().mockResolvedValue(true);
     getProductsToUpdate = jest.fn().mockResolvedValue(['kibana', 'security']);
     ensureOpenApiSpecUpToDate = jest.fn().mockResolvedValue(undefined);
     hasUninstalledProducts = jest.fn().mockResolvedValue(false);
@@ -85,6 +85,17 @@ describe('EnsureUpToDate task', () => {
       forceUpdate: true,
     });
     expect(result).toEqual({ state: {} });
+  });
+
+  it('does not track a product skipped by updateProduct', async () => {
+    updateProduct.mockResolvedValueOnce(false);
+
+    const result = await runTask({ remaining: ['security', 'openapi'], installed: ['kibana'] });
+
+    expect(result).toEqual({
+      state: { remaining: ['openapi'], installed: ['kibana'] },
+      runAt: expect.any(Date),
+    });
   });
 
   it('stops when a product updated earlier in this run was uninstalled', async () => {

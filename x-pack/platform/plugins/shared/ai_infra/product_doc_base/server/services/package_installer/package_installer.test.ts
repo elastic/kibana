@@ -407,7 +407,7 @@ describe('PackageInstaller', () => {
       });
       jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
 
-      await packageInstaller.installProduct({ productName: 'kibana' });
+      await expect(packageInstaller.installProduct({ productName: 'kibana' })).resolves.toBe(true);
 
       expect(packageInstaller.installPackage).toHaveBeenCalledTimes(1);
       expect(packageInstaller.installPackage).toHaveBeenCalledWith({
@@ -420,7 +420,7 @@ describe('PackageInstaller', () => {
       fetchArtifactVersionsMock.mockResolvedValue({ kibana: [] });
       jest.spyOn(packageInstaller, 'installPackage');
 
-      await packageInstaller.installProduct({ productName: 'kibana' });
+      await expect(packageInstaller.installProduct({ productName: 'kibana' })).resolves.toBe(false);
 
       expect(packageInstaller.installPackage).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith('No version found for product [kibana]');
@@ -428,8 +428,16 @@ describe('PackageInstaller', () => {
   });
 
   describe('hasUninstalledProducts', () => {
+    it('propagates status read failures instead of reporting an uninstall', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockRejectedValue(new Error('es unavailable'));
+
+      await expect(
+        packageInstaller.hasUninstalledProducts({ productNames: ['kibana'], inferenceId: '.elser' })
+      ).rejects.toThrow('es unavailable');
+    });
+
     it('returns true when one of the products is uninstalled', async () => {
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.15' },
         security: { status: 'uninstalled' },
       } as never);
@@ -443,7 +451,7 @@ describe('PackageInstaller', () => {
     });
 
     it('returns false when all products are still installed', async () => {
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.15' },
       } as never);
 
@@ -456,18 +464,20 @@ describe('PackageInstaller', () => {
       await expect(
         packageInstaller.hasUninstalledProducts({ productNames: [], inferenceId: '.elser' })
       ).resolves.toBe(false);
-      expect(productDocClient.getInstallationStatus).not.toHaveBeenCalled();
+      expect(productDocClient.getInstallationStatusOrThrow).not.toHaveBeenCalled();
     });
   });
 
   describe('updateProduct', () => {
     it('re-installs a product that is still installed', async () => {
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.15' },
       } as never);
-      jest.spyOn(packageInstaller, 'installProduct').mockResolvedValue(undefined);
+      jest.spyOn(packageInstaller, 'installProduct').mockResolvedValue(true);
 
-      await packageInstaller.updateProduct({ productName: 'kibana', inferenceId: '.elser' });
+      await expect(
+        packageInstaller.updateProduct({ productName: 'kibana', inferenceId: '.elser' })
+      ).resolves.toBe(true);
 
       expect(packageInstaller.installProduct).toHaveBeenCalledWith({
         productName: 'kibana',
@@ -476,14 +486,24 @@ describe('PackageInstaller', () => {
     });
 
     it('skips a product that was uninstalled after the update was planned', async () => {
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'uninstalled' },
       } as never);
       jest.spyOn(packageInstaller, 'installProduct');
 
-      await packageInstaller.updateProduct({ productName: 'kibana', inferenceId: '.elser' });
+      await expect(
+        packageInstaller.updateProduct({ productName: 'kibana', inferenceId: '.elser' })
+      ).resolves.toBe(false);
 
       expect(packageInstaller.installProduct).not.toHaveBeenCalled();
+    });
+
+    it('propagates status read failures instead of skipping the product', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockRejectedValue(new Error('es unavailable'));
+
+      await expect(
+        packageInstaller.updateProduct({ productName: 'kibana', inferenceId: '.elser' })
+      ).rejects.toThrow('es unavailable');
     });
   });
 

@@ -22,7 +22,7 @@ describe('InstallAll task', () => {
   let runTask: (state: Record<string, unknown>) => Promise<unknown>;
 
   beforeEach(() => {
-    installProduct = jest.fn().mockResolvedValue(undefined);
+    installProduct = jest.fn().mockResolvedValue(true);
     hasUninstalledProducts = jest.fn().mockResolvedValue(false);
     withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
     const taskManager = taskManagerMock.createSetup();
@@ -72,6 +72,33 @@ describe('InstallAll task', () => {
       state: { remaining: ['observability'], installed: ['kibana', 'security'] },
       runAt: expect.any(Date),
     });
+  });
+
+  it('does not track a product the installer skipped, so later products still install', async () => {
+    installProduct.mockResolvedValueOnce(false);
+
+    const first = await runTask({ remaining: ['kibana', 'security'] });
+    expect(first).toEqual({
+      state: { remaining: ['security'], installed: [] },
+      runAt: expect.any(Date),
+    });
+
+    const second = await runTask({ remaining: ['security'], installed: [] });
+    expect(hasUninstalledProducts).not.toHaveBeenCalled();
+    expect(installProduct).toHaveBeenLastCalledWith({
+      productName: 'security',
+      inferenceId: '.elser',
+    });
+    expect(second).toEqual({ state: {} });
+  });
+
+  it('propagates status read failures so Task Manager retries instead of completing', async () => {
+    hasUninstalledProducts.mockRejectedValue(new Error('es unavailable'));
+
+    await expect(
+      runTask({ remaining: ['security', 'observability'], installed: ['kibana'] })
+    ).rejects.toThrow('es unavailable');
+    expect(installProduct).not.toHaveBeenCalled();
   });
 
   it('stops without installing when a product installed earlier in this run was uninstalled', async () => {

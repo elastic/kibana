@@ -35,6 +35,25 @@ describe('ProductDocInstallClient', () => {
   });
 
   describe('getInstallationStatus', () => {
+    it('reports every product as uninstalled when the saved objects cannot be read', async () => {
+      soClient.find.mockRejectedValue(new Error('es unavailable'));
+
+      const installStatus = await service.getInstallationStatus({ inferenceId });
+
+      expect(Object.values(installStatus).every(({ status }) => status === 'uninstalled')).toBe(
+        true
+      );
+      expect(log.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('propagates read failures from getInstallationStatusOrThrow', async () => {
+      soClient.find.mockRejectedValue(new Error('es unavailable'));
+
+      await expect(service.getInstallationStatusOrThrow({ inferenceId })).rejects.toThrow(
+        'es unavailable'
+      );
+    });
+
     it('returns the installation status based on existing entries', async () => {
       soClient.find.mockResolvedValue({
         saved_objects: [

@@ -73,8 +73,9 @@ export const runTaskUnderInstallLock = async ({
  * Installs the first of `items` under the cluster-wide install lock, so that at most one documentation
  * install runs at a time across all tasks and Kibana nodes. When another install holds the lock the
  * item is kept and the run is deferred instead of failing an attempt. The lock is released between
- * items, so before each item `isSuperseded` is checked (still under the lock) with the items handled
- * so far: when an uninstall ran in between, the task stops instead of reinstalling the rest.
+ * items, so before each item `isSuperseded` is checked (still under the lock) with the items that
+ * `install` reported as actually installed: when an uninstall ran in between, the task stops instead
+ * of reinstalling the rest.
  */
 export const runInstallChunk = async <T extends string>({
   lockManager,
@@ -87,7 +88,7 @@ export const runInstallChunk = async <T extends string>({
   lockManager: InstallLockManager;
   items: T[];
   installed?: T[];
-  install: (item: T) => Promise<void>;
+  install: (item: T) => Promise<boolean>;
   isSuperseded: (installedItems: T[]) => Promise<boolean>;
   metadata?: Record<string, unknown>;
 }) => {
@@ -96,12 +97,13 @@ export const runInstallChunk = async <T extends string>({
     return { state: {} };
   }
   let superseded = false;
+  let didInstall = false;
   const acquired = await tryWithInstallLock({
     lockManager,
     run: async () => {
       superseded = installed.length > 0 && (await isSuperseded(installed));
       if (!superseded) {
-        await install(item);
+        didInstall = await install(item);
       }
     },
     metadata: { ...metadata, item },
@@ -112,7 +114,7 @@ export const runInstallChunk = async <T extends string>({
   if (superseded) {
     return { state: {} };
   }
-  return nextChunkRunResult(rest, [...installed, item]);
+  return nextChunkRunResult(rest, didInstall ? [...installed, item] : installed);
 };
 
 export const getTaskStatus = async ({

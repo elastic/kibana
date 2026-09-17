@@ -212,9 +212,13 @@ export class PackageInstaller {
 
   /**
    * Installs the version of a single product selected for this deployment, falling back to
-   * previous versions when the selected artifact is not available.
+   * previous versions when the selected artifact is not available. Resolves to `false` when the
+   * repository has no version for the product and nothing was installed.
    */
-  async installProduct(params: { productName: ProductName; inferenceId?: string }): Promise<void> {
+  async installProduct(params: {
+    productName: ProductName;
+    inferenceId?: string;
+  }): Promise<boolean> {
     const { productName, inferenceId } = params;
     const [repositoryVersions, inferenceInfo] = await Promise.all([
       fetchArtifactVersions(this.getArtifactRepositoryOptions()),
@@ -223,7 +227,7 @@ export class PackageInstaller {
     const availableVersions = repositoryVersions[productName];
     if (!availableVersions || !availableVersions.length) {
       this.log.warn(`No version found for product [${productName}]`);
-      return;
+      return false;
     }
     const selectedVersion = selectVersion(
       this.currentVersion,
@@ -236,10 +240,12 @@ export class PackageInstaller {
       availableVersions,
       customInference: inferenceInfo,
     });
+    return true;
   }
 
   /**
    * Whether any of the given products is uninstalled, meaning an uninstall ran after they were installed.
+   * Status read failures are propagated so that they are not mistaken for an uninstall.
    */
   async hasUninstalledProducts(params: {
     productNames: ProductName[];
@@ -249,25 +255,30 @@ export class PackageInstaller {
     if (productNames.length === 0) {
       return false;
     }
-    const installStatuses = await this.productDocClient.getInstallationStatus({ inferenceId });
+    const installStatuses = await this.productDocClient.getInstallationStatusOrThrow({
+      inferenceId,
+    });
     return productNames.some(
       (productName) => installStatuses[productName]?.status === 'uninstalled'
     );
   }
 
   /**
-   * Re-installs a product that was planned for update, unless it has been uninstalled since the plan was computed.
+   * Re-installs a product that was planned for update, unless it has been uninstalled since the plan
+   * was computed. Resolves to `false` when nothing was installed.
    */
-  async updateProduct(params: { productName: ProductName; inferenceId: string }): Promise<void> {
+  async updateProduct(params: { productName: ProductName; inferenceId: string }): Promise<boolean> {
     const { productName, inferenceId } = params;
-    const installStatuses = await this.productDocClient.getInstallationStatus({ inferenceId });
+    const installStatuses = await this.productDocClient.getInstallationStatusOrThrow({
+      inferenceId,
+    });
     if (installStatuses[productName]?.status === 'uninstalled') {
       this.log.info(
         `Skipping update of product [${productName}] for inference ID [${inferenceId}]: no longer installed`
       );
-      return;
+      return false;
     }
-    await this.installProduct({ productName, inferenceId });
+    return this.installProduct({ productName, inferenceId });
   }
 
   /**
