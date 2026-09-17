@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataStreamDefinition } from '@kbn/data-streams';
+import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 
