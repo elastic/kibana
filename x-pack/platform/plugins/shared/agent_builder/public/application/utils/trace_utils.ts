@@ -41,10 +41,10 @@ export const parseTraceSpansFromFile = async (file: File): Promise<TraceSpan[] |
 
   if (!Array.isArray(spans)) return null;
 
-  const firstItem = (spans as unknown[])[0];
-  const isValid =
-    firstItem === undefined ||
-    (typeof firstItem === 'object' && firstItem !== null && 'span_id' in firstItem);
+  const isSpan = (item: unknown): boolean =>
+    typeof item === 'object' && item !== null && 'span_id' in item;
 
-  return isValid ? (spans as TraceSpan[]) : null;
+  if (!(spans as unknown[]).every(isSpan)) return null;
+
+  return spans as TraceSpan[];
 };

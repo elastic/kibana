@@ -86,7 +86,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const isExperimentalEnabled = useExperimentalFeatures();
   const { conversation } = useConversation();
   const conversationRounds = useConversationRounds();
-  const { agent } = useAgentBuilderAgentById(agentId ?? undefined);
+  const { agent, isLoading: isAgentLoading } = useAgentBuilderAgentById(agentId ?? undefined);
   const { openFilePicker, isFlyoutOpen, loadedSpans, closeFlyout, fileInputRef, handleFileChange } =
     useLoadTraceFromFile();
 
@@ -215,6 +215,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           <EuiContextMenuItem
             key="downloadConversation"
             icon="download"
+            disabled={isAgentLoading}
             data-test-subj="agentBuilderDownloadConversationButton"
             onClick={handleDownloadConversation}
           >
