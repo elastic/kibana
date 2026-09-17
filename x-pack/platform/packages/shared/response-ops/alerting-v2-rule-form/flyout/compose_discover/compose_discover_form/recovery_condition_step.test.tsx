@@ -7,15 +7,19 @@
 
 import React from 'react';
 import { useForm, FormProvider, type UseFormReturn } from 'react-hook-form';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { createTestQueryClient, createMockServices } from '../../../test_utils';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createInitialState } from '../use_compose_discover_state';
 import type { ComposeDiscoverState } from '../types';
-import type { FormValues, RuleQuery } from '../../../form/types';
-import { RecoveryConditionStep } from './recovery_condition_step';
+import type { FormValues, RuleQuery, RuleRecovery } from '../../../form/types';
+import {
+  RecoveryConditionStep,
+  RECOVERY_CONDITION_REQUIRES_BREACH_ERROR,
+} from './recovery_condition_step';
 import { EsqlRecoveryContent } from './esql_recovery_content';
 
 const BASE_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
@@ -32,7 +36,7 @@ const BASE_COMPOSE_VALUES: FormValues = {
   metadata: { name: '', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', breach: { segment: '' } },
+  query: { base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
 };
@@ -42,13 +46,13 @@ let formMethodsRef: UseFormReturn<FormValues> | undefined;
 const createComposeFormWrapper = (
   queryOverride?: RuleQuery,
   services: RuleFormServices = createMockServices(),
-  recoveryStrategy?: FormValues['recoveryStrategy']
+  recovery?: RuleRecovery
 ) => {
   const queryClient = createTestQueryClient();
   const defaultValues: FormValues = {
     ...BASE_COMPOSE_VALUES,
     ...(queryOverride ? { query: queryOverride } : {}),
-    ...(recoveryStrategy !== undefined ? { recoveryStrategy } : {}),
+    ...(recovery ? { recovery } : {}),
   };
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -70,15 +74,18 @@ const createComposeFormWrapper = (
   return Wrapper;
 };
 
-const CUSTOM_RECOVERY_QUERY: RuleQuery = {
-  format: 'composed',
+const SPLIT_QUERY: RuleQuery = {
   base: BASE_QUERY,
   breach: { segment: ALERT_SEGMENT },
-  recovery: { segment: RECOVERY_SEGMENT },
+};
+
+const CONDITION_RECOVERY: RuleRecovery = {
+  strategy: recoveryStrategy.condition,
+  segment: RECOVERY_SEGMENT,
 };
 
 const renderRecoveryStep = (
-  recoveryStrategy: FormValues['recoveryStrategy'],
+  recovery?: RuleRecovery,
   stateOverrides: Partial<ComposeDiscoverState> = {},
   queryOverride?: RuleQuery
 ) => {
@@ -97,7 +104,7 @@ const renderRecoveryStep = (
       onRecoveryTypeChange={onRecoveryTypeChange}
       renderCustomRecovery={EsqlRecoveryContent}
     />,
-    { wrapper: createComposeFormWrapper(queryOverride, services, recoveryStrategy) }
+    { wrapper: createComposeFormWrapper(queryOverride, services, recovery) }
   );
 
   return { dispatch, state, onRecoveryTypeChange, view, services };
@@ -105,21 +112,21 @@ const renderRecoveryStep = (
 
 describe('RecoveryConditionStep', () => {
   it('renders the recovery type selector in default mode', () => {
-    renderRecoveryStep('no_breach');
+    renderRecoveryStep({ strategy: recoveryStrategy.no_breach });
 
     expect(screen.getByTestId('composeDiscoverRecoveryType')).toBeInTheDocument();
   });
 
   it('does not render query summaries or edit button in default mode', () => {
-    renderRecoveryStep('no_breach');
+    renderRecoveryStep({ strategy: recoveryStrategy.no_breach });
 
     expect(screen.queryByText('Base query')).not.toBeInTheDocument();
     expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
     expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
   });
 
-  it('does not render custom recovery content when recovery type is none', () => {
-    renderRecoveryStep('none');
+  it('does not render custom recovery content when recovery type is manual', () => {
+    renderRecoveryStep({ strategy: recoveryStrategy.manual });
 
     expect(screen.queryByText('Base query')).not.toBeInTheDocument();
     expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
@@ -127,25 +134,25 @@ describe('RecoveryConditionStep', () => {
   });
 
   it('renders the recovery delay field when recovery type is default', () => {
-    renderRecoveryStep('no_breach');
+    renderRecoveryStep({ strategy: recoveryStrategy.no_breach });
 
     expect(screen.getByTestId('recoveryDelayFormRow')).toBeInTheDocument();
   });
 
-  it('renders the recovery delay field when recovery type is custom', () => {
-    renderRecoveryStep('query', {}, CUSTOM_RECOVERY_QUERY);
+  it('renders the recovery delay field when recovery type is a custom condition', () => {
+    renderRecoveryStep(CONDITION_RECOVERY, {}, SPLIT_QUERY);
 
     expect(screen.getByTestId('recoveryDelayFormRow')).toBeInTheDocument();
   });
 
-  it('hides the recovery delay field when recovery type is none (delay is inert)', () => {
-    renderRecoveryStep('none');
+  it('hides the recovery delay field when recovery type is manual (delay is inert)', () => {
+    renderRecoveryStep({ strategy: recoveryStrategy.manual });
 
     expect(screen.queryByTestId('recoveryDelayFormRow')).not.toBeInTheDocument();
   });
 
   it('renders query summaries and edit button in custom mode', () => {
-    renderRecoveryStep('query', {}, CUSTOM_RECOVERY_QUERY);
+    renderRecoveryStep(CONDITION_RECOVERY, {}, SPLIT_QUERY);
 
     expect(screen.getByText('Base query')).toBeInTheDocument();
     expect(screen.getByText('Recovery condition')).toBeInTheDocument();
@@ -153,16 +160,16 @@ describe('RecoveryConditionStep', () => {
   });
 
   it('disables the edit button when the child flyout is open', () => {
-    renderRecoveryStep('query', { childOpen: true }, CUSTOM_RECOVERY_QUERY);
+    renderRecoveryStep(CONDITION_RECOVERY, { childOpen: true }, SPLIT_QUERY);
 
     expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeDisabled();
   });
 
   it('dispatches OPEN_CHILD_FOR_STEP on edit button click', () => {
     const { dispatch, state } = renderRecoveryStep(
-      'query',
+      CONDITION_RECOVERY,
       { childOpen: false, step: 1 },
-      CUSTOM_RECOVERY_QUERY
+      SPLIT_QUERY
     );
 
     fireEvent.click(screen.getByTestId('composeDiscoverEditRecovery'));
@@ -175,14 +182,36 @@ describe('RecoveryConditionStep', () => {
     });
   });
 
+  it('rejects a custom recovery condition when the query has no breach segment', async () => {
+    renderRecoveryStep(CONDITION_RECOVERY, {}, { base: BASE_QUERY, breach: { segment: '' } });
+
+    await act(async () => {
+      await formMethodsRef?.trigger('recovery');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(RECOVERY_CONDITION_REQUIRES_BREACH_ERROR)).toBeInTheDocument();
+    });
+  });
+
+  it('accepts a custom recovery condition when the query has a breach segment', async () => {
+    renderRecoveryStep(CONDITION_RECOVERY, {}, SPLIT_QUERY);
+
+    await act(async () => {
+      await formMethodsRef?.trigger('recovery');
+    });
+
+    expect(screen.queryByText(RECOVERY_CONDITION_REQUIRES_BREACH_ERROR)).not.toBeInTheDocument();
+  });
+
   it('toggles custom recovery content without a hooks-order warning', () => {
     // React reports a mismatched hook count as a console.error, not a thrown
     // exception — assert on the former; `.not.toThrow()` would pass either way.
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    renderRecoveryStep('no_breach', {}, CUSTOM_RECOVERY_QUERY);
+    renderRecoveryStep({ strategy: recoveryStrategy.no_breach }, {}, SPLIT_QUERY);
 
     act(() => {
-      formMethodsRef?.setValue('recoveryStrategy', 'query', { shouldDirty: true });
+      formMethodsRef?.setValue('recovery', CONDITION_RECOVERY, { shouldDirty: true });
     });
 
     expect(consoleErrorSpy).not.toHaveBeenCalled();

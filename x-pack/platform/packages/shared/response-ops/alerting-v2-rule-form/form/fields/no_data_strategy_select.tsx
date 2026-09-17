@@ -9,8 +9,9 @@ import React from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NoDataStrategy } from '@kbn/alerting-v2-schemas';
+import { noDataStrategy } from '@kbn/alerting-v2-schemas';
 
-export const DEFAULT_NO_DATA_STRATEGY: NoDataStrategy = 'last_known_status';
+export const DEFAULT_NO_DATA_STRATEGY: NoDataStrategy = noDataStrategy.ignore;
 
 interface NoDataStrategySelectProps {
   value: NoDataStrategy;
@@ -24,12 +25,12 @@ const LABEL_TEXT = i18n.translate('xpack.alertingV2.ruleForm.noDataStrategyField
   defaultMessage: 'No data behavior',
 });
 
-const LAST_KNOWN_STATUS_TITLE = i18n.translate(
+const KEEP_LAST_TITLE = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.lastKnownStatus.title',
   { defaultMessage: 'Keep last known status' }
 );
 
-const LAST_KNOWN_STATUS_DESCRIPTION = i18n.translate(
+const KEEP_LAST_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.lastKnownStatus.description',
   {
     defaultMessage:
@@ -37,70 +38,58 @@ const LAST_KNOWN_STATUS_DESCRIPTION = i18n.translate(
   }
 );
 
-const RECOVER_TITLE = i18n.translate(
+const RESOLVE_TITLE = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.recover.title',
   { defaultMessage: 'Recover immediately' }
 );
 
-const RECOVER_DESCRIPTION = i18n.translate(
+const RESOLVE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.recover.description',
   {
     defaultMessage: 'Resolve the alert episode on the first no-data run.',
   }
 );
 
-const NONE_TITLE = i18n.translate('xpack.alertingV2.ruleForm.noDataStrategyField.none.title', {
+const ALERT_TITLE = i18n.translate('xpack.alertingV2.ruleForm.noDataStrategyField.alert.title', {
+  defaultMessage: 'Alert on no data',
+});
+
+const ALERT_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleForm.noDataStrategyField.alert.description',
+  {
+    defaultMessage: 'Activate the alert episode when no data is received during a check.',
+  }
+);
+
+const IGNORE_TITLE = i18n.translate('xpack.alertingV2.ruleForm.noDataStrategyField.none.title', {
   defaultMessage: 'Do nothing',
 });
 
-const NONE_DESCRIPTION = i18n.translate(
+const IGNORE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.none.description',
   {
     defaultMessage: 'Take no action when no data is received. No-data detection is disabled.',
   }
 );
 
-const NO_DATA_STRATEGY_OPTIONS: Array<{
-  value: NoDataStrategy;
-  inputDisplay: string;
-  dropdownDisplay: React.ReactNode;
-}> = [
-  {
-    value: 'last_known_status',
-    inputDisplay: LAST_KNOWN_STATUS_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{LAST_KNOWN_STATUS_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{LAST_KNOWN_STATUS_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
-  },
-  {
-    value: 'recover',
-    inputDisplay: RECOVER_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{RECOVER_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{RECOVER_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
-  },
-  {
-    value: 'none',
-    inputDisplay: NONE_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{NONE_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{NONE_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
-  },
+const buildOption = (value: NoDataStrategy, title: string, description: string) => ({
+  value,
+  inputDisplay: title,
+  dropdownDisplay: (
+    <>
+      <strong>{title}</strong>
+      <EuiText size="s" color="subdued">
+        <p>{description}</p>
+      </EuiText>
+    </>
+  ),
+});
+
+const NO_DATA_STRATEGY_OPTIONS = [
+  buildOption(noDataStrategy.keep_last, KEEP_LAST_TITLE, KEEP_LAST_DESCRIPTION),
+  buildOption(noDataStrategy.resolve, RESOLVE_TITLE, RESOLVE_DESCRIPTION),
+  buildOption(noDataStrategy.alert, ALERT_TITLE, ALERT_DESCRIPTION),
+  buildOption(noDataStrategy.ignore, IGNORE_TITLE, IGNORE_DESCRIPTION),
 ];
 
 export const NoDataStrategySelect = ({

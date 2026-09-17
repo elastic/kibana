@@ -41,7 +41,7 @@ const BASE_COMPOSE_VALUES: FormValues = {
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', breach: { segment: '' } },
+  query: { base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -388,7 +388,7 @@ describe('shell shared fields', () => {
   it('renders Outcome kind cards without alert-only fields for signal kind', () => {
     renderShell(
       { step: 1 },
-      { kind: 'signal', query: { format: 'standalone', breach: { query: 'FROM logs-*' } } }
+      { kind: 'signal', query: { base: 'FROM logs-*', breach: { segment: '' } } }
     );
 
     expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();

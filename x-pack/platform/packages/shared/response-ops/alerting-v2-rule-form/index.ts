@@ -54,9 +54,11 @@ export type {
   RuleRequestCommon,
   RuleNotificationsValue,
   RuleQuery,
-  ComposedQuery,
-  StandaloneQuery,
+  RuleRecovery,
+  RuleNoData,
   RuleKind,
+  RecoveryStrategy,
+  NoDataStrategy,
 } from './form';
 
 export {

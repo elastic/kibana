@@ -160,7 +160,7 @@ describe('AlertDelayField', () => {
       {
         wrapper: createFormWrapper({
           kind: 'alert',
-          recoveryStrategy: 'no_breach',
+          recovery: { strategy: 'no_breach' },
           stateTransitionAlertDelayMode: 'breaches',
           stateTransitionRecoveryDelayMode: 'recoveries',
           stateTransition: {
@@ -183,8 +183,8 @@ describe('AlertDelayField', () => {
     expect(values.stateTransition?.recoveringCount).toBe(3);
 
     expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
-      pending_count: 0,
-      recovering_count: 3,
+      pending: { count: 0 },
+      recovering: { count: 3 },
     });
   });
 });

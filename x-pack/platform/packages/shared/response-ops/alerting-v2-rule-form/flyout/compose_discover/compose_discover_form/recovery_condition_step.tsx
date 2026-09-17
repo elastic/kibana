@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { useWatch } from 'react-hook-form';
+import { useController, useFormContext } from 'react-hook-form';
 import { EuiFormRow, EuiHorizontalRule, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type {
   ComposeDiscoverAction,
   ComposeDiscoverState,
@@ -49,69 +50,59 @@ const noRecoveryDescription = i18n.translate(
   }
 );
 
-const RECOVERY_TYPE_OPTIONS: Array<{
-  value: RecoveryStrategy;
-  inputDisplay: string;
-  dropdownDisplay: React.ReactNode;
-}> = [
+export const RECOVERY_CONDITION_REQUIRES_BREACH_ERROR = i18n.translate(
+  'xpack.alertingV2.composeDiscover.recoveryCondition.requiresAlertConditionError',
   {
-    value: 'no_breach',
-    inputDisplay: defaultRecoveryLabel,
-    dropdownDisplay: (
-      <>
-        <strong>{defaultRecoveryLabel}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{defaultRecoveryDescription}</p>
-        </EuiText>
-      </>
-    ),
-  },
-  {
-    value: 'query',
-    inputDisplay: customRecoveryLabel,
-    dropdownDisplay: (
-      <>
-        <strong>{customRecoveryLabel}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{customRecoveryDescription}</p>
-        </EuiText>
-      </>
-    ),
-  },
-  {
-    value: 'none',
-    inputDisplay: noRecoveryLabel,
-    dropdownDisplay: (
-      <>
-        <strong>{noRecoveryLabel}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{noRecoveryDescription}</p>
-        </EuiText>
-      </>
-    ),
-  },
+    defaultMessage:
+      'A custom recovery condition requires an alert condition. Without one, every row of the base query breaches and the alert could never recover.',
+  }
+);
+
+const buildOption = (value: RecoveryStrategy, label: string, description: string) => ({
+  value,
+  inputDisplay: label,
+  dropdownDisplay: (
+    <>
+      <strong>{label}</strong>
+      <EuiText size="s" color="subdued">
+        <p>{description}</p>
+      </EuiText>
+    </>
+  ),
+});
+
+/** `query` is deliberately absent — the form has no editor for a full independent recovery query. */
+const RECOVERY_TYPE_OPTIONS = [
+  buildOption(recoveryStrategy.no_breach, defaultRecoveryLabel, defaultRecoveryDescription),
+  buildOption(recoveryStrategy.condition, customRecoveryLabel, customRecoveryDescription),
+  buildOption(recoveryStrategy.manual, noRecoveryLabel, noRecoveryDescription),
 ];
 
 interface RecoveryTypeSelectorProps {
-  recoveryStrategy: RecoveryStrategy;
+  strategy: RecoveryStrategy;
+  error?: string;
   onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
 }
 
 const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
-  recoveryStrategy,
+  strategy,
+  error,
   onRecoveryTypeChange,
 }) => (
   <EuiFormRow
     label={i18n.translate('xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeLabel', {
       defaultMessage: 'Recovery',
     })}
+    isInvalid={Boolean(error)}
+    error={error}
     fullWidth
   >
     <EuiSuperSelect
       compressed
       options={RECOVERY_TYPE_OPTIONS}
-      valueOfSelected={recoveryStrategy}
-      onChange={(val) => onRecoveryTypeChange(val as RecoveryStrategy)}
+      valueOfSelected={strategy}
+      onChange={onRecoveryTypeChange}
+      isInvalid={Boolean(error)}
       fullWidth
       data-test-subj="composeDiscoverRecoveryType"
     />
@@ -131,14 +122,29 @@ export function RecoveryConditionStep({
   onRecoveryTypeChange,
   renderCustomRecovery,
 }: RecoveryConditionStepProps) {
-  const recoveryStrategy =
-    useWatch<FormValues, 'recoveryStrategy'>({ name: 'recoveryStrategy' }) ?? 'none';
-  const isCustom = recoveryStrategy === 'query';
+  const { control, getValues } = useFormContext<FormValues>();
+  const {
+    field: { value: recovery },
+    fieldState: { error },
+  } = useController<FormValues, 'recovery'>({
+    name: 'recovery',
+    control,
+    rules: {
+      validate: (value) =>
+        value?.strategy !== recoveryStrategy.condition ||
+        Boolean(getValues('query').breach.segment.trim()) ||
+        RECOVERY_CONDITION_REQUIRES_BREACH_ERROR,
+    },
+  });
+
+  const strategy = recovery?.strategy ?? recoveryStrategy.manual;
+  const isCustom = strategy === recoveryStrategy.condition;
 
   return (
     <>
       <RecoveryTypeSelector
-        recoveryStrategy={recoveryStrategy}
+        strategy={strategy}
+        error={error?.message}
         onRecoveryTypeChange={onRecoveryTypeChange}
       />
 
@@ -151,7 +157,7 @@ export function RecoveryConditionStep({
         </>
       )}
 
-      {recoveryStrategy !== 'none' && (
+      {strategy !== recoveryStrategy.manual && (
         <>
           <EuiSpacer size="m" />
           <RecoveryDelayField />

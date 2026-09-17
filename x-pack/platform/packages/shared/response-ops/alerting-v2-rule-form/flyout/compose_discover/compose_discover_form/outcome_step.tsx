@@ -17,7 +17,10 @@ import type {
 import type { FormValues, RecoveryStrategy } from '../../../form/types';
 import { KindSelect } from '../../../form/fields/kind_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
-import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
+import {
+  DEFAULT_NO_DATA_STRATEGY,
+  NoDataStrategySelect,
+} from '../../../form/fields/no_data_strategy_select';
 import { RecoveryConditionStep } from './recovery_condition_step';
 
 interface OutcomeStepProps {
@@ -40,7 +43,7 @@ export function OutcomeStep({
   const { setValue } = useFormContext<FormValues>();
   const kind = useWatch<FormValues, 'kind'>({ name: 'kind' });
   const isAlert = kind === 'alert';
-  const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
+  const noData = useWatch<FormValues, 'noData'>({ name: 'noData' });
 
   return (
     <>
@@ -67,8 +70,10 @@ export function OutcomeStep({
           <AlertDelayField />
           <EuiSpacer size="m" />
           <NoDataStrategySelect
-            value={noDataStrategy ?? 'none'}
-            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+            value={noData?.strategy ?? DEFAULT_NO_DATA_STRATEGY}
+            onChange={(strategy) =>
+              setValue('noData', { ...noData, strategy }, { shouldDirty: true })
+            }
             compressed
             data-test-subj="composeDiscoverNoDataStrategy"
           />

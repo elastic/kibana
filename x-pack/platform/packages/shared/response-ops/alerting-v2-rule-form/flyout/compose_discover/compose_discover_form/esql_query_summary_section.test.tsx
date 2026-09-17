@@ -18,21 +18,9 @@ import {
 const BASE = 'FROM logs-*';
 const ALERT_SEGMENT = '| WHERE count > 100';
 
-const composedQuery = (
-  base: string,
-  segment: string,
-  recovery?: { segment: string }
-): RuleQuery => ({
-  format: 'composed',
+const ruleQuery = (base: string, segment: string): RuleQuery => ({
   base,
   breach: { segment },
-  ...(recovery ? { recovery } : {}),
-});
-
-const standaloneQuery = (query: string, recovery?: { query: string }): RuleQuery => ({
-  format: 'standalone',
-  breach: { query },
-  ...(recovery ? { recovery } : {}),
 });
 
 describe('getEsqlSummaryState', () => {
@@ -45,43 +33,31 @@ describe('getEsqlSummaryState', () => {
     {
       description: 'before_apply when query is not committed',
       queryCommitted: false,
-      query: composedQuery(BASE, ALERT_SEGMENT),
+      query: ruleQuery(BASE, ALERT_SEGMENT),
       expected: 'before_apply',
     },
     {
-      description: 'success for composed base + breach segment',
+      description: 'success for base + breach segment',
       queryCommitted: true,
-      query: composedQuery(BASE, ALERT_SEGMENT),
+      query: ruleQuery(BASE, ALERT_SEGMENT),
       expected: 'success',
     },
     {
-      description: 'no_alert_condition for composed base without breach segment',
+      description: 'no_alert_condition for a base without a breach segment',
       queryCommitted: true,
-      query: composedQuery(BASE, ''),
+      query: ruleQuery(BASE, ''),
       expected: 'no_alert_condition',
     },
     {
-      description: 'split_failed for composed breach segment without base',
+      description: 'split_failed for a breach segment without a base',
       queryCommitted: true,
-      query: composedQuery('', ALERT_SEGMENT),
+      query: ruleQuery('', ALERT_SEGMENT),
       expected: 'split_failed',
     },
     {
-      description: 'empty for composed query with neither base nor segment',
+      description: 'empty for a query with neither base nor segment',
       queryCommitted: true,
-      query: composedQuery('', ''),
-      expected: 'empty',
-    },
-    {
-      description: 'no_alert_condition for standalone with breach query (every row is a breach)',
-      queryCommitted: true,
-      query: standaloneQuery(BASE),
-      expected: 'no_alert_condition',
-    },
-    {
-      description: 'empty for standalone with empty breach query',
-      queryCommitted: true,
-      query: standaloneQuery(''),
+      query: ruleQuery('', ''),
       expected: 'empty',
     },
   ];
@@ -96,11 +72,11 @@ describe('getEsqlSummaryState', () => {
    * state wins when multiple partial conditions could apply.
    */
   it('prefers empty over split_failed when both base and segment are blank', () => {
-    expect(getEsqlSummaryState(true, composedQuery('', ''))).toBe('empty');
+    expect(getEsqlSummaryState(true, ruleQuery('', ''))).toBe('empty');
   });
 
   it('prefers split_failed over no_alert_condition when base is missing but segment exists', () => {
-    expect(getEsqlSummaryState(true, composedQuery('', ALERT_SEGMENT))).toBe('split_failed');
+    expect(getEsqlSummaryState(true, ruleQuery('', ALERT_SEGMENT))).toBe('split_failed');
   });
 });
 
@@ -129,12 +105,12 @@ describe('EsqlQuerySummarySection callouts', () => {
   }> = [
     {
       state: 'empty',
-      query: composedQuery('', ''),
+      query: ruleQuery('', ''),
       testSubj: 'esqlSummaryEmptyCallout',
     },
     {
       state: 'no_alert_condition',
-      query: composedQuery(BASE, ''),
+      query: ruleQuery(BASE, ''),
       testSubj: 'esqlSummaryNoAlertConditionCallout',
     },
   ];
@@ -145,16 +121,16 @@ describe('EsqlQuerySummarySection callouts', () => {
   });
 
   it('does not render a warning callout for success', () => {
-    renderSection(true, composedQuery(BASE, ALERT_SEGMENT));
+    renderSection(true, ruleQuery(BASE, ALERT_SEGMENT));
     expect(screen.queryByTestId('esqlSummaryEmptyCallout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
   });
 
   it('hides alert-condition subtitle and callout for signal kind', () => {
-    renderSection(true, standaloneQuery(BASE), 'signal');
+    renderSection(true, ruleQuery(BASE, ''), 'signal');
 
     expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
-    expect(screen.getByText('Query')).toBeInTheDocument();
+    expect(screen.getByText('Base query')).toBeInTheDocument();
     expect(
       screen.queryByText('Base query defined — no separate alert condition')
     ).not.toBeInTheDocument();

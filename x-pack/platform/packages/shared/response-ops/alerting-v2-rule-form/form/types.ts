@@ -21,24 +21,31 @@ export const DELAY_MODE = {
 export type StateTransitionDelayMode = (typeof DELAY_MODE)[keyof typeof DELAY_MODE];
 
 // ---------------------------------------------------------------------------
-// RuleQuery — composed/standalone query schema matching the API.
+// Query / recovery / no-data — form mirrors of the API blocks.
 // ---------------------------------------------------------------------------
 
-export interface ComposedQuery {
-  format: 'composed';
+/** Form state mirrors the API shape but keeps `breach.segment` always present; '' means "no breach condition". */
+export interface RuleQuery {
   base: string;
   breach: { segment: string };
-  recovery?: { segment: string };
 }
 
-export interface StandaloneQuery {
-  format: 'standalone';
-  no_data?: { query: string };
-  breach: { query: string };
-  recovery?: { query: string };
+/**
+ * Widened form state for the API's `recovery` discriminated union: RHF cannot
+ * narrow a union in place, so every member's field is kept and the mapper
+ * projects the one the strategy needs.
+ */
+export interface RuleRecovery {
+  strategy: RecoveryStrategy;
+  segment?: string;
+  query?: string;
 }
 
-export type RuleQuery = ComposedQuery | StandaloneQuery;
+/** Widened form state for the API's `no_data` discriminated union. */
+export interface RuleNoData {
+  strategy: NoDataStrategy;
+  query?: string;
+}
 
 // ---------------------------------------------------------------------------
 // Shared sub-types
@@ -81,9 +88,10 @@ export interface StateTransition {
 // ---------------------------------------------------------------------------
 // FormValues — the single canonical form type for rule creation/editing.
 //
-// Matches the API schema structurally (same `query` discriminated union,
-// same field semantics). Only diverges in casing (camelCase for RHF) and
-// UI-only fields (delay modes, metadata.enabled, split artifact arrays).
+// Matches the API schema structurally (same blocks, same field semantics).
+// Only diverges in casing (camelCase for RHF), in widening the `recovery` and
+// `no_data` unions so RHF can hold a partially-filled member, and in UI-only
+// fields (delay modes, metadata.enabled, split artifact arrays).
 // ---------------------------------------------------------------------------
 
 export interface FormValues {
@@ -92,8 +100,8 @@ export interface FormValues {
   timeField: string;
   schedule: RuleSchedule;
   query: RuleQuery;
-  recoveryStrategy?: RecoveryStrategy;
-  noDataStrategy?: NoDataStrategy;
+  recovery?: RuleRecovery;
+  noData?: RuleNoData;
   grouping?: RuleGrouping;
   stateTransition?: StateTransition;
   stateTransitionAlertDelayMode: StateTransitionDelayMode;

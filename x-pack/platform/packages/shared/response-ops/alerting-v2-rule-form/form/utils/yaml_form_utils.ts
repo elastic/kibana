@@ -7,22 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 import { isPlainObject } from 'lodash';
-import type { Query } from '@kbn/alerting-v2-schemas';
-import { noDataStrategy as noDataStrategyEnum } from '@kbn/alerting-v2-schemas';
-import { parse, stringify } from 'yaml';
 import type {
-  FormValues,
-  StateTransition,
-  RuleQuery,
-  RecoveryStrategy,
-  NoDataStrategy,
-} from '../types';
+  NoData,
+  Query,
+  Recovery,
+  StateTransition as ApiStateTransition,
+} from '@kbn/alerting-v2-schemas';
+import {
+  noDataStrategy,
+  noDataStrategySchema,
+  recoveryStrategy,
+  recoveryStrategySchema,
+} from '@kbn/alerting-v2-schemas';
+import { parse, stringify } from 'yaml';
+import type { FormValues, StateTransition, RuleQuery, RuleNoData, RuleRecovery } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from './state_transition_helpers';
 import { ruleQueryToApiQuery } from './query_mappers';
-import { resolveRecoveryStrategy } from './rule_request_mappers';
+import { formNoDataToApiNoData, formRecoveryToApiRecovery } from './lifecycle_mappers';
 import { mergeArtifactsByType, splitArtifactsByType } from './artifact_mappers';
 
 export type YamlParseResult = { values: FormValues; error: null } | { values: null; error: string };
@@ -46,33 +50,33 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   return parsedArtifacts.length ? parsedArtifacts : undefined;
 };
 
-interface YamlStateTransition {
-  pending_count?: number;
-  pending_timeframe?: string;
-  recovering_count?: number;
-  recovering_timeframe?: string;
-}
-
 interface YamlRuleObject {
   kind: string;
   metadata: { name: string; description?: string; owner?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback: string };
   query: Query;
-  recovery_strategy?: string;
-  no_data_strategy?: string;
+  recovery?: Recovery;
+  no_data?: NoData;
   grouping?: { fields: string[] };
-  state_transition?: YamlStateTransition;
+  state_transition?: ApiStateTransition;
   artifacts?: Array<{ id: string; type: string; data: Record<string, any> }>;
 }
 
-const serializeStateTransition = (st?: StateTransition): YamlStateTransition | undefined => {
+const serializeStateTransition = (st?: StateTransition): ApiStateTransition | undefined => {
   if (!st) return undefined;
-  const out: YamlStateTransition = {};
-  if (st.pendingCount != null) out.pending_count = st.pendingCount;
-  if (st.pendingTimeframe != null) out.pending_timeframe = st.pendingTimeframe;
-  if (st.recoveringCount != null) out.recovering_count = st.recoveringCount;
-  if (st.recoveringTimeframe != null) out.recovering_timeframe = st.recoveringTimeframe;
+  const pending = {
+    ...(st.pendingCount != null ? { count: st.pendingCount } : {}),
+    ...(st.pendingTimeframe != null ? { timeframe: st.pendingTimeframe } : {}),
+  };
+  const recovering = {
+    ...(st.recoveringCount != null ? { count: st.recoveringCount } : {}),
+    ...(st.recoveringTimeframe != null ? { timeframe: st.recoveringTimeframe } : {}),
+  };
+  const out: ApiStateTransition = {
+    ...(Object.keys(pending).length ? { pending } : {}),
+    ...(Object.keys(recovering).length ? { recovering } : {}),
+  };
   return Object.keys(out).length ? out : undefined;
 };
 
@@ -87,7 +91,8 @@ const serializeStateTransition = (st?: StateTransition): YamlStateTransition | u
 export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const st = serializeStateTransition(values.stateTransition);
   const allArtifacts = mergeArtifactsByType(values);
-  const recoveryStrategy = resolveRecoveryStrategy(values);
+  const recovery = formRecoveryToApiRecovery(values);
+  const noData = formNoDataToApiNoData(values);
 
   return {
     kind: values.kind,
@@ -103,8 +108,8 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
       lookback: values.schedule.lookback,
     },
     query: ruleQueryToApiQuery(values.query),
-    ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
-    ...(values.noDataStrategy ? { no_data_strategy: values.noDataStrategy } : {}),
+    ...(recovery ? { recovery } : {}),
+    ...(noData ? { no_data: noData } : {}),
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(values.kind === 'alert' && st ? { state_transition: st } : {}),
     ...(allArtifacts?.length && { artifacts: allArtifacts }),
@@ -124,33 +129,50 @@ const extractNestedString = (value: unknown, key: 'query' | 'segment'): string =
   return '';
 };
 
-const parseQuery = (queryObj: Record<string, unknown> | undefined): RuleQuery => {
-  if (!queryObj) {
-    return { format: 'standalone', breach: { query: '' } };
-  }
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
 
-  const format = queryObj.format;
+const asOptionalString = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
 
-  if (format === 'composed') {
-    const base = typeof queryObj.base === 'string' ? queryObj.base : '';
-    const breachSegment = extractNestedString(queryObj.breach, 'segment');
-    const recoverySegment = extractNestedString(queryObj.recovery, 'segment');
-    return {
-      format: 'composed',
-      base,
-      breach: { segment: breachSegment },
-      ...(recoverySegment ? { recovery: { segment: recoverySegment } } : {}),
-    };
-  }
+const asOptionalNumber = (value: unknown): number | undefined =>
+  typeof value === 'number' ? value : undefined;
 
-  const breachQuery = extractNestedString(queryObj.breach, 'query');
-  const recoveryQuery = extractNestedString(queryObj.recovery, 'query');
-  const noDataQuery = extractNestedString(queryObj.no_data, 'query');
+const parseQuery = (queryObj: Record<string, unknown> | undefined): RuleQuery => ({
+  base: asOptionalString(queryObj?.base) ?? '',
+  breach: { segment: extractNestedString(queryObj?.breach, 'segment') },
+});
+
+const parseRecovery = (value: unknown): RuleRecovery | undefined => {
+  const recoveryObj = asRecord(value);
+  const parsedStrategy = recoveryStrategySchema.safeParse(recoveryObj?.strategy);
+  if (!parsedStrategy.success) return undefined;
   return {
-    format: 'standalone',
-    breach: { query: breachQuery },
-    ...(recoveryQuery ? { recovery: { query: recoveryQuery } } : {}),
-    ...(noDataQuery ? { no_data: { query: noDataQuery } } : {}),
+    strategy: parsedStrategy.data,
+    segment: asOptionalString(recoveryObj?.segment),
+    query: asOptionalString(recoveryObj?.query),
+  };
+};
+
+const parseNoData = (value: unknown): RuleNoData | undefined => {
+  const noDataObj = asRecord(value);
+  const parsedStrategy = noDataStrategySchema.safeParse(noDataObj?.strategy);
+  if (!parsedStrategy.success) return undefined;
+  return { strategy: parsedStrategy.data, query: asOptionalString(noDataObj?.query) };
+};
+
+const parseStateTransition = (value: unknown): StateTransition | undefined => {
+  const stateTransitionObj = asRecord(value);
+  if (!stateTransitionObj) return undefined;
+  const pending = asRecord(stateTransitionObj.pending);
+  const recovering = asRecord(stateTransitionObj.recovering);
+  return {
+    pendingCount: asOptionalNumber(pending?.count) ?? null,
+    pendingTimeframe: asOptionalString(pending?.timeframe) ?? null,
+    recoveringCount: asOptionalNumber(recovering?.count) ?? null,
+    recoveringTimeframe: asOptionalString(recovering?.timeframe) ?? null,
   };
 };
 
@@ -191,27 +213,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const grouping = obj.grouping as Record<string, unknown> | undefined;
   const parsedArtifacts = parseArtifacts(obj.artifacts);
   const artifactSlices = splitArtifactsByType(parsedArtifacts);
-  const stateTransitionObj = obj.state_transition as Record<string, unknown> | undefined;
-  const stateTransition: StateTransition | undefined = stateTransitionObj
-    ? {
-        pendingCount:
-          typeof stateTransitionObj.pending_count === 'number'
-            ? stateTransitionObj.pending_count
-            : null,
-        pendingTimeframe:
-          typeof stateTransitionObj.pending_timeframe === 'string'
-            ? stateTransitionObj.pending_timeframe
-            : null,
-        recoveringCount:
-          typeof stateTransitionObj.recovering_count === 'number'
-            ? stateTransitionObj.recovering_count
-            : null,
-        recoveringTimeframe:
-          typeof stateTransitionObj.recovering_timeframe === 'string'
-            ? stateTransitionObj.recovering_timeframe
-            : null,
-      }
-    : undefined;
+  const stateTransition = parseStateTransition(obj.state_transition);
 
   const kind = obj.kind;
   if (kind !== undefined && kind !== 'alert' && kind !== 'signal') {
@@ -224,24 +226,15 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   }
 
   const name = metadata?.name;
-
-  const rawRecoveryStrategy = obj.recovery_strategy;
-  const recoveryStrategy =
-    rawRecoveryStrategy === 'no_breach' ||
-    rawRecoveryStrategy === 'query' ||
-    rawRecoveryStrategy === 'none'
-      ? (rawRecoveryStrategy as RecoveryStrategy)
-      : undefined;
-
   const resolvedKind = (kind as 'alert' | 'signal') ?? 'alert';
+  const isAlert = resolvedKind === 'alert';
 
-  const rawNoDataStrategy = obj.no_data_strategy;
-  const validStrategies = Object.values(noDataStrategyEnum) as string[];
-  const parsedNoDataStrategy =
-    typeof rawNoDataStrategy === 'string' && validStrategies.includes(rawNoDataStrategy)
-      ? (rawNoDataStrategy as NoDataStrategy)
-      : undefined;
-  const noDataStrategy = parsedNoDataStrategy ?? (resolvedKind === 'alert' ? 'none' : undefined);
+  // Alert rules always carry both blocks; fall back to the API's own defaults
+  // so an omitted block round-trips as what the server would store.
+  const recovery =
+    parseRecovery(obj.recovery) ?? (isAlert ? { strategy: recoveryStrategy.no_breach } : undefined);
+  const noData =
+    parseNoData(obj.no_data) ?? (isAlert ? { strategy: noDataStrategy.ignore } : undefined);
 
   return {
     values: {
@@ -259,8 +252,8 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         lookback: typeof schedule?.lookback === 'string' ? schedule.lookback : '1m',
       },
       query: parseQuery(queryObj),
-      recoveryStrategy,
-      noDataStrategy,
+      recovery,
+      noData,
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }
         : undefined,
