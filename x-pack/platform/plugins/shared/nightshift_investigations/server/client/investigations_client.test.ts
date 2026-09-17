@@ -28,8 +28,8 @@ import {
   InvestigationConflictError,
   InvalidInvestigationContextError,
   InvestigationNotFoundError,
+  InvestigationMetadataMissingError,
   InvestigationQuotaDeniedError,
-  InvestigationSubjectMissingError,
   InvestigationUnavailableError,
 } from './errors';
 import { NightshiftInvestigationsClient } from './investigations_client';
@@ -93,6 +93,7 @@ const makeClient = (
   });
 
 const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): InvestigationAttributes => ({
+  title: 'Latency is too high',
   status: 'completed',
   subject_type: 'alert',
   subject_id: 'alert-42',
@@ -161,6 +162,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
 
     expect(result).toEqual({
       investigation_id: 'inv-1',
+      title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-42' },
       trigger_type: 'automatic',
       status: 'completed',
@@ -341,6 +343,7 @@ describe('NightshiftInvestigationsClient.list()', () => {
     const result = await makeClient().list({});
     expect(result.results[0]).toEqual({
       investigation_id: 'inv-42',
+      title: 'Latency is too high',
       status: 'completed',
       created_at: '2024-01-01T00:00:00Z',
       started_at: '2024-01-01T00:00:00Z',
@@ -415,6 +418,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
     const result = await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
       trigger_type: 'manual',
       context: alertContext,
@@ -448,6 +452,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     const result = await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
       message: 'Why did payment timeouts increase?',
@@ -487,6 +492,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
       message: '  Why did payment\n  timeouts increase?  ',
@@ -522,6 +528,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
       message: 'a'.repeat(500),
@@ -544,6 +551,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual', summary: 'Checkout latency' },
       trigger_type: 'manual',
       message: 'Why did payment timeouts increase?',
@@ -565,6 +573,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-sig');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'event-1' },
       trigger_type: 'manual',
       message: 'Why did payment timeouts increase?',
@@ -581,6 +590,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-sig');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'event-1' },
       trigger_type: 'manual',
     });
@@ -593,6 +603,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-124');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-2' },
       trigger_type: 'automatic',
       context: alertContext,
@@ -616,6 +627,26 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
+  it('passes the title as a workflow input and persists it on the pending record', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({
+      title: 'Checkout latency breach',
+      subject: { type: 'alert', id: 'alert-1' },
+      trigger_type: 'manual',
+      context: alertContext,
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.title).toBe('Checkout latency breach');
+    expect(inputs.context).not.toHaveProperty('title');
+    expect(repository.create).toHaveBeenCalledWith({
+      id: 'exec-123',
+      attributes: expect.objectContaining({ title: 'Checkout latency breach', status: 'pending' }),
+    });
+  });
+
   it.each([
     ['alert', { type: 'alert' as const, id: 'alert-1' }, alertContext],
     ['significant event', { type: 'significant_event' as const, id: 'event-1' }, undefined],
@@ -627,6 +658,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await expect(
         makeClient().start({
+          title: 'Latency is too high',
           subject,
           trigger_type: 'automatic',
           context,
@@ -645,6 +677,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1', summary: 'CPU saturation on checkout-api' },
       trigger_type: 'manual',
       context: alertContext,
@@ -659,6 +692,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
       trigger_type: 'manual',
       context: alertContext,
@@ -673,6 +707,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-456');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-99' },
       trigger_type: 'manual',
       concurrency_key: 'key-abc',
@@ -692,6 +727,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-789');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-1' },
       trigger_type: 'manual',
       message: 'Checkout latency breach\n\nP99 latency climbed above 2s.',
@@ -710,6 +746,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-999');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-1' },
       trigger_type: 'manual',
     });
@@ -724,6 +761,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
       trigger_type: 'manual',
       context: alertContext,
@@ -743,10 +781,12 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValueOnce('exec-123').mockResolvedValueOnce('exec-124');
 
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-1' },
       trigger_type: 'automatic',
     });
     await makeClient().start({
+      title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-2' },
       trigger_type: 'automatic',
     });
@@ -760,6 +800,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     await expect(
       makeClient().start({
+        title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'automatic',
       })
@@ -775,6 +816,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     await expect(
       makeClient().start({
+        title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'automatic',
       })
@@ -790,6 +832,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     await expect(
       makeClient().start({
+        title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'automatic',
       })
@@ -809,7 +852,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     await expect(
-      client.start({ subject: { type: 'alert', id: 'alert-1' }, trigger_type: 'automatic' })
+      client.start({
+        title: 'Latency is too high',
+        subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'automatic',
+      })
     ).rejects.toThrow(InvestigationUnavailableError);
     expect(investigationQuotaCallback).not.toHaveBeenCalled();
   });
@@ -817,6 +864,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
   it('throws InvestigationUnavailableError when a start requirement is unavailable', async () => {
     await expect(
       makeClient({ isAvailable: jest.fn().mockResolvedValue(false) }).start({
+        title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'automatic',
       })
@@ -839,6 +887,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await expect(
         makeClient().start({
+          title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
           trigger_type: 'manual',
           context,
@@ -857,6 +906,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
         await expect(
           makeClient().start({
+            title: 'Latency is too high',
             subject: { type: 'alert', id: 'alert-1' },
             trigger_type: 'manual',
             context: { ...alertContext, [key]: 'whatever' },
@@ -871,6 +921,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await expect(
         makeClient().start({
+          title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
           trigger_type: 'manual',
           context: { ...alertContext, event_uuid: 'se-1', severity: 'high' },
@@ -883,6 +934,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await expect(
         makeClient().start({
+          title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
           trigger_type: 'manual',
           context: { alerts: [{ ...alertContext.alerts[0], flapping: 'nope' }] },
@@ -904,6 +956,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await expect(
         makeClient().start({
+          title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
           trigger_type: 'manual',
           context: { event_uuid: uuid },
@@ -925,6 +978,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await expect(
         makeClient().start({
+          title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
           trigger_type: 'manual',
           context: { event_uuid: '3f2504e0-4f89-11d3-9a0c-0305e82c3301' },
@@ -938,6 +992,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await expect(
         makeClient().start({
+          title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
           trigger_type: 'manual',
           context: { event_uuid: 'se-1', severity: 'high' },
@@ -951,6 +1006,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await expect(
         makeClient().start({
+          title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
           trigger_type: 'manual',
         })
@@ -962,6 +1018,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.runWorkflow.mockResolvedValue('exec-321');
 
       await makeClient().start({
+        title: 'Latency is too high',
         subject: { type: 'alert', id: 'alert-1' },
         trigger_type: 'manual',
         context: alertContext,
@@ -979,6 +1036,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.runWorkflow.mockResolvedValue('exec-654');
 
       await makeClient().start({
+        title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'manual',
         message: 'Checkout latency breach',
@@ -1116,6 +1174,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     context: {
       inputs: {
         message: 'Investigate this',
+        title: 'Investigate this',
         concurrency_key: 'key-1',
         context: {
           source: 'alert',
@@ -1207,6 +1266,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.create).toHaveBeenCalledWith({
       id: EXECUTION_ID,
       attributes: expect.objectContaining({
+        title: 'Investigate this',
         status: 'running',
         subject_type: 'alert',
         subject_id: 'alert-42',
@@ -1217,6 +1277,24 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         started_at: '2024-01-01T00:00:00Z',
       }),
     });
+  });
+
+  it('throws InvestigationMetadataMissingError when the execution inputs carry no title', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeEnsureExecution({
+        context: {
+          inputs: {
+            message: 'Investigate this',
+            context: { source: 'alert', alert_id: 'alert-42' },
+          },
+        },
+      })
+    );
+
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+      InvestigationMetadataMissingError
+    );
+    expect(repository.create).not.toHaveBeenCalled();
   });
 
   it('cancels a superseded running investigation sharing the concurrency key', async () => {
@@ -1323,6 +1401,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         context: {
           inputs: {
             message: 'Investigate last error',
+            title: 'Investigate last error',
             context: {
               source: 'manual',
               manual_id: 'manual',
@@ -1356,13 +1435,13 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it('throws InvestigationSubjectMissingError for executions without an investigation subject', async () => {
+  it('throws InvestigationMetadataMissingError for executions without an investigation subject', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(
       makeEnsureExecution({ context: { inputs: { message: 'bare run' } } })
     );
 
     await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationSubjectMissingError
+      InvestigationMetadataMissingError
     );
     expect(repository.create).not.toHaveBeenCalled();
   });
@@ -1382,7 +1461,12 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     it('recovers significant_event subject via event_id', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeEnsureExecution({
-          context: { inputs: { context: { source: 'significant_event', event_id: 'event-42' } } },
+          context: {
+            inputs: {
+              title: 'Investigate this',
+              context: { source: 'significant_event', event_id: 'event-42' },
+            },
+          },
         })
       );
       await makeClient().ensureOrCreate(EXECUTION_ID);
@@ -1395,7 +1479,10 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeEnsureExecution({
           context: {
-            inputs: { context: { source: 'significant_event', significant_event_id: 'se-99' } },
+            inputs: {
+              title: 'Investigate this',
+              context: { source: 'significant_event', significant_event_id: 'se-99' },
+            },
           },
         })
       );
@@ -1410,6 +1497,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
+              title: 'Investigate this',
               context: {
                 source: 'significant_event',
                 event_id: 'checkout-latency-breach',
@@ -1429,6 +1517,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
+              title: 'Investigate this',
               context: {
                 source: 'significant_event',
                 event_id: '',
@@ -1443,28 +1532,33 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       expect(attrs.subject_id).toBe('se-fallback');
     });
 
-    it('throws InvestigationSubjectMissingError when all significant_event id fields are empty', async () => {
+    it('throws InvestigationMetadataMissingError when all significant_event id fields are empty', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeEnsureExecution({
           context: {
-            inputs: { context: { source: 'significant_event', significant_event_id: '' } },
+            inputs: {
+              title: 'Investigate this',
+              context: { source: 'significant_event', significant_event_id: '' },
+            },
           },
         })
       );
       await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-        InvestigationSubjectMissingError
+        InvestigationMetadataMissingError
       );
       expect(repository.create).not.toHaveBeenCalled();
     });
 
-    it('throws InvestigationSubjectMissingError when the source is unrecognized', async () => {
+    it('throws InvestigationMetadataMissingError when the source is unrecognized', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeEnsureExecution({
-          context: { inputs: { context: { source: 'chat', some_id: 'x' } } },
+          context: {
+            inputs: { title: 'Investigate this', context: { source: 'chat', some_id: 'x' } },
+          },
         })
       );
       await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-        InvestigationSubjectMissingError
+        InvestigationMetadataMissingError
       );
       expect(repository.create).not.toHaveBeenCalled();
     });
@@ -1475,6 +1569,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
+              title: 'Investigate this',
               context: { source: 'significant_event', event_id: 'event-42', summary: long },
             },
           },
@@ -1492,6 +1587,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
+              title: 'Investigate this',
               context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
             },
           },
@@ -1507,7 +1603,9 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     it('falls back to manual trigger_type when context carries none', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeEnsureExecution({
-          context: { inputs: { context: { source: 'alert', alert_id: 'a-1' } } },
+          context: {
+            inputs: { title: 'Investigate this', context: { source: 'alert', alert_id: 'a-1' } },
+          },
         })
       );
       await makeClient().ensureOrCreate(EXECUTION_ID);

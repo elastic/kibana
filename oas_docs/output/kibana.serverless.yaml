@@ -8223,8 +8223,9 @@ paths:
           name: page
           required: false
           schema:
+            maximum: 10000
             minimum: 1
-            type: number
+            type: integer
         - description: The number of action policies to return per page. Defaults to 20.
           in: query
           name: per_page
@@ -8232,7 +8233,7 @@ paths:
           schema:
             maximum: 100
             minimum: 1
-            type: number
+            type: integer
         - description: A text string to search across action policy fields.
           in: query
           name: search
@@ -12693,13 +12694,14 @@ paths:
         [Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: get-alerting-v2-rules
       parameters:
-        - description: The page number to return. Defaults to 1.
+        - description: The page number to return. Defaults to 1. `page * per_page` cannot exceed 10000.
           in: query
           name: page
           required: false
           schema:
+            maximum: 10000
             minimum: 1
-            type: number
+            type: integer
         - description: The number of rules to return per page. Defaults to 20.
           in: query
           name: per_page
@@ -12707,7 +12709,7 @@ paths:
           schema:
             maximum: 1000
             minimum: 1
-            type: number
+            type: integer
         - description: The filter to apply to the rules.
           in: query
           name: filter
@@ -90673,6 +90675,7 @@ components:
           properties:
             interval:
               description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+              maxLength: 32
               nullable: true
               type: string
             strategy:
@@ -90728,6 +90731,7 @@ components:
       properties:
         interval:
           description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+          maxLength: 32
           nullable: true
           type: string
         strategy:
@@ -90962,6 +90966,7 @@ components:
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
               description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -90976,6 +90981,7 @@ components:
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
@@ -91527,6 +91533,7 @@ components:
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
               description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -91541,6 +91548,7 @@ components:
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
@@ -92017,6 +92025,7 @@ components:
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
               description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -92031,6 +92040,7 @@ components:
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
@@ -92104,9 +92114,11 @@ components:
       properties:
         every:
           description: Execution interval, e.g. 1m, 5m, 1h.
+          maxLength: 32
           type: string
         lookback:
           description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+          maxLength: 32
           type: string
       required:
         - every
@@ -92325,9 +92337,11 @@ components:
           properties:
             every:
               description: Execution interval, e.g. 1m, 5m, 1h.
+              maxLength: 32
               type: string
             lookback:
               description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+              maxLength: 32
               type: string
         state_transition:
           anyOf:
@@ -92348,6 +92362,7 @@ components:
                   type: string
                 pending_timeframe:
                   description: Time window used with `pending_count`, for example `5m` or `15m`.
+                  maxLength: 32
                   type: string
                 recovering_count:
                   description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -92362,6 +92377,7 @@ components:
                   type: string
                 recovering_timeframe:
                   description: Time window used with `recovering_count`, for example `5m` or `15m`.
+                  maxLength: 32
                   type: string
             - nullable: true
           nullable: true
