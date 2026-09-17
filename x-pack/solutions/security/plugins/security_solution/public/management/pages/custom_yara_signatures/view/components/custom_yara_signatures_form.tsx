@@ -12,15 +12,19 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiResizeObserver,
   EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import { CodeEditor, type monaco } from '@kbn/code-editor';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { useCustomYaraSignatureEditorMarkers } from '../../hooks/use_custom_yara_signature_editor_markers';
+import { useValidateCustomYaraSignature } from '../../hooks/use_validate_custom_yara_signature';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
@@ -41,6 +45,7 @@ import {
   OS_PLACEHOLDER,
   SIGNATURE_EDITOR_ARIA_LABEL,
 } from './translations';
+import { CustomYaraSignatureValidationMessages } from './custom_yara_signature_validation_messages';
 
 interface CustomYaraSignatureEntry {
   field: typeof CUSTOM_YARA_SIGNATURE_FIELD_TYPE;
@@ -55,6 +60,17 @@ const EMPTY_YARA_ENTRY: CustomYaraSignatureEntry = {
   type: 'match',
   value: '',
 };
+
+const SIGNATURE_EDITOR_DEFAULT_HEIGHT = 300;
+const SIGNATURE_EDITOR_MIN_HEIGHT = 120;
+
+const signatureEditorContainerCss = css({
+  resize: 'vertical',
+  overflow: 'hidden',
+  height: SIGNATURE_EDITOR_DEFAULT_HEIGHT,
+  minHeight: SIGNATURE_EDITOR_MIN_HEIGHT,
+  maxHeight: '70vh',
+});
 
 const OS_OPTIONS: Array<EuiComboBoxOptionOption<OperatingSystem>> = [
   {
@@ -71,8 +87,17 @@ const OS_OPTIONS: Array<EuiComboBoxOptionOption<OperatingSystem>> = [
   },
 ];
 
-const isItemValid = (nextItem: ArtifactFormComponentProps['item']): boolean =>
-  !!nextItem.name?.trim() && (nextItem.os_types?.length ?? 0) > 0;
+const getYaraRuleValue = (nextItem: ArtifactFormComponentProps['item']): string =>
+  ((nextItem.entries[0] as CustomYaraSignatureEntry | undefined)?.value ?? '').trim();
+
+const isItemValid = (
+  nextItem: ArtifactFormComponentProps['item'],
+  isYaraSyntaxValid: boolean
+): boolean =>
+  !!nextItem.name?.trim() &&
+  (nextItem.os_types?.length ?? 0) > 0 &&
+  getYaraRuleValue(nextItem).length > 0 &&
+  isYaraSyntaxValid;
 
 export const testIdPrefix = 'customYaraSignatures-form';
 
@@ -84,6 +109,12 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
     const [hasNameError, setHasNameError] = useState(!item.name?.trim());
     const [hasOsError, setHasOsError] = useState(!(item.os_types?.length ?? 0));
+    const [signatureEditorInstance, setSignatureEditorInstance] =
+      useState<monaco.editor.IStandaloneCodeEditor | null>(null);
+    const [signatureEditorHeight, setSignatureEditorHeight] = useState(
+      SIGNATURE_EDITOR_DEFAULT_HEIGHT
+    );
+    const signatureEditorHeightRef = useRef(SIGNATURE_EDITOR_DEFAULT_HEIGHT);
 
     const selectedOsOptions = useMemo(
       () =>
@@ -97,8 +128,22 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
       return (item.entries[0] || EMPTY_YARA_ENTRY) as CustomYaraSignatureEntry;
     }, [item.entries]);
 
+    const {
+      errors: validationErrors,
+      warnings: validationWarnings,
+      requestError,
+      isYaraSyntaxValid,
+    } = useValidateCustomYaraSignature({
+      yaraRule: yaraEntry.value,
+      osTypes: item.os_types,
+      enabled: !disabled,
+    });
+
     const notifyOfChange = useCallback(
-      (updatedItem?: Partial<ArtifactFormComponentProps['item']>) => {
+      (
+        updatedItem?: Partial<ArtifactFormComponentProps['item']>,
+        yaraSyntaxValid: boolean = isYaraSyntaxValid
+      ) => {
         const nextItem = updatedItem
           ? {
               ...item,
@@ -108,10 +153,40 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
         onChange({
           item: nextItem,
-          isValid: isItemValid(nextItem),
+          isValid: isItemValid(nextItem, yaraSyntaxValid),
         });
       },
-      [item, onChange]
+      [isYaraSyntaxValid, item, onChange]
+    );
+
+    const notifyOfChangeRef = useRef(notifyOfChange);
+    notifyOfChangeRef.current = notifyOfChange;
+
+    useEffect(() => {
+      notifyOfChangeRef.current(undefined, isYaraSyntaxValid);
+    }, [isYaraSyntaxValid]);
+
+    useCustomYaraSignatureEditorMarkers({
+      editor: signatureEditorInstance,
+      errors: validationErrors,
+      warnings: validationWarnings,
+    });
+
+    const handleSignatureEditorDidMount = useCallback(
+      (editor: monaco.editor.IStandaloneCodeEditor) => {
+        setSignatureEditorInstance(editor);
+      },
+      []
+    );
+
+    const handleSignatureEditorResize = useCallback(
+      ({ height }: { width: number; height: number }) => {
+        if (height > 0 && height !== signatureEditorHeightRef.current) {
+          signatureEditorHeightRef.current = height;
+          setSignatureEditorHeight(height);
+        }
+      },
+      []
     );
 
     const handleOnChangeName = useCallback(
@@ -132,14 +207,17 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
     const handleOnSignatureChange = useCallback(
       (value: string) => {
-        notifyOfChange({
-          entries: [
-            {
-              ...yaraEntry,
-              value,
-            },
-          ],
-        });
+        notifyOfChange(
+          {
+            entries: [
+              {
+                ...yaraEntry,
+                value,
+              },
+            ],
+          },
+          false
+        );
       },
       [notifyOfChange, yaraEntry]
     );
@@ -151,7 +229,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
           .map(({ value }) => value as OperatingSystem);
 
         setHasOsError(osTypes.length === 0);
-        notifyOfChange({ os_types: osTypes });
+        notifyOfChange({ os_types: osTypes }, false);
       },
       [notifyOfChange]
     );
@@ -283,26 +361,45 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
           isDisabled={disabled}
           data-test-subj={getTestId('signature-input-formRow')}
         >
-          <CodeEditor
-            languageId="plaintext"
-            value={yaraEntry.value}
-            onChange={handleOnSignatureChange}
-            width="100%"
-            height={200}
-            options={{
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              automaticLayout: true,
-              readOnly: disabled,
-            }}
-            aria-label={SIGNATURE_EDITOR_ARIA_LABEL}
-            dataTestSubj={getTestId('signature-input')}
-            data-test-subj={getTestId('signature-input')}
-          />
+          <EuiResizeObserver onResize={handleSignatureEditorResize}>
+            {(resizeRef) => (
+              <div
+                ref={resizeRef}
+                css={signatureEditorContainerCss}
+                data-test-subj={getTestId('signature-input-container')}
+              >
+                <CodeEditor
+                  languageId="plaintext"
+                  value={yaraEntry.value}
+                  onChange={handleOnSignatureChange}
+                  editorDidMount={handleSignatureEditorDidMount}
+                  width="100%"
+                  height={signatureEditorHeight}
+                  options={{
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    automaticLayout: true,
+                    readOnly: disabled,
+                  }}
+                  aria-label={SIGNATURE_EDITOR_ARIA_LABEL}
+                  dataTestSubj={getTestId('signature-input')}
+                  data-test-subj={getTestId('signature-input')}
+                />
+              </div>
+            )}
+          </EuiResizeObserver>
         </EuiFormRow>
       ),
-      [disabled, getTestId, handleOnSignatureChange, yaraEntry.value]
+      [
+        disabled,
+        getTestId,
+        handleOnSignatureChange,
+        handleSignatureEditorDidMount,
+        handleSignatureEditorResize,
+        signatureEditorHeight,
+        yaraEntry.value,
+      ]
     );
 
     return (
@@ -336,6 +433,12 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
         </EuiText>
         <EuiSpacer size="m" />
         {signatureEditor}
+        <CustomYaraSignatureValidationMessages
+          errors={validationErrors}
+          warnings={validationWarnings}
+          requestError={requestError}
+          data-test-subj={getTestId('validation')}
+        />
         <EuiHorizontalRule />
 
         <EuiFormRow
