@@ -40,7 +40,7 @@ export const DisplayOptionsTour = ({ isOpen, onDismiss, children }: DisplayOptio
       title={
         <FormattedMessage
           id="xpack.searchInferenceEndpoints.eisModelsPage.displayOptionsTourTitle"
-          defaultMessage="Region preferences are blocking some models."
+          defaultMessage="Some models are hidden by your region preferences."
         />
       }
       footerAction={
