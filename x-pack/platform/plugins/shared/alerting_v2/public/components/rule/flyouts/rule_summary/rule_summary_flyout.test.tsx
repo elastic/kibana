@@ -30,6 +30,11 @@ jest.mock('../../../../hooks/use_rule_audit_metadata', () => ({
   }),
 }));
 
+const mockUseFetchRuleExecutions = jest.fn();
+jest.mock('../../../../hooks/use_fetch_rule_executions', () => ({
+  useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
+}));
+
 jest.mock('../../../../services/user_capabilities', () => ({
   UserCapabilities: 'UserCapabilities',
 }));
@@ -120,6 +125,10 @@ const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
 describe('RuleSummaryFlyout', () => {
   beforeEach(() => {
     mockCanRead.mockImplementation(() => true);
+    mockUseFetchRuleExecutions.mockReturnValue({
+      data: { items: [], total: 0, page: 1, per_page: 1 },
+      isLoading: false,
+    });
   });
 
   it('renders the template flyout with header, accordion sections, and take action', () => {
@@ -157,6 +166,58 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByText('Mar 4, 2026')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryFlyoutCreatedByBlock')).toHaveTextContent('Alice');
     expect(screen.getByTestId('ruleSummaryFlyoutUpdatedByBlock')).toHaveTextContent('Bob');
+  });
+
+  describe('Last execution info block', () => {
+    it('requests the single most recent execution for the rule', () => {
+      renderFlyout();
+
+      expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith({
+        ruleIds: ['rule-1'],
+        perPage: 1,
+        sort: 'startedAt',
+        sortOrder: 'desc',
+      });
+    });
+
+    it('shows a success health dot when the last execution succeeded', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: { items: [{ outcome: 'success' }], total: 1, page: 1, per_page: 1 },
+        isLoading: false,
+      });
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionStatus')).toHaveTextContent(
+        'Succeeded'
+      );
+    });
+
+    it('shows a danger health dot when the last execution failed', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: { items: [{ outcome: 'failure' }], total: 1, page: 1, per_page: 1 },
+        isLoading: false,
+      });
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionStatus')).toHaveTextContent(
+        'Failed'
+      );
+    });
+
+    it('shows a placeholder when the rule has no executions yet', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionBlock')).toHaveTextContent('-');
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionStatus')).not.toBeInTheDocument();
+    });
+
+    it('shows a spinner while the initial fetch is in flight', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({ data: undefined, isLoading: true });
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionSpinner')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionStatus')).not.toBeInTheDocument();
+    });
   });
 
   it('calls onClose when the flyout close button is clicked', () => {

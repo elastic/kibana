@@ -6,8 +6,9 @@
  */
 
 import type { EuiFlyoutProps } from '@elastic/eui';
-import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
+import { EuiHealth, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { RuleExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { RULE_KIND_ICONS, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { PluginStart } from '@kbn/core-di';
@@ -16,12 +17,23 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useAlertingLocators } from '../../../../application/locator_context';
+import { useFetchRuleExecutions } from '../../../../hooks/use_fetch_rule_executions';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
 import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
 import type { RuleApiResponse } from '../../../../services/rules_api';
+import { EMPTY_VALUE } from '../../../../utils/rule_display';
 import { RuleSummaryBody } from '../../rule_summary';
 
 const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
+
+const LAST_EXECUTION_OUTCOME_LABELS: Record<RuleExecutionOutcome, string> = {
+  success: i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution.success', {
+    defaultMessage: 'Succeeded',
+  }),
+  failure: i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution.failure', {
+    defaultMessage: 'Failed',
+  }),
+};
 
 export interface RuleSummaryFlyoutProps {
   rule: RuleApiResponse;
@@ -61,6 +73,13 @@ export const RuleSummaryFlyout = ({
   const { rulesLocators } = useAlertingLocators();
   useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
+  const { data: executionsData, isLoading: isLoadingLastExecution } = useFetchRuleExecutions({
+    ruleIds: [rule.id],
+    perPage: 1,
+    sort: 'startedAt',
+    sortOrder: 'desc',
+  });
+  const lastExecution = executionsData?.items[0];
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
   const detailsHref = rulesLocators.useUrl({ ruleId: rule.id }, undefined, [rule.id]);
 
@@ -119,6 +138,25 @@ export const RuleSummaryFlyout = ({
                 onChange={() => onToggleEnabled(rule)}
                 data-test-subj="ruleSummaryFlyoutEnabledSwitch"
               />
+            )}
+          </InfoBlock>
+          <InfoBlock
+            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
+              defaultMessage: 'Last execution',
+            })}
+            data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
+          >
+            {isLoadingLastExecution ? (
+              <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutLastExecutionSpinner" size="m" />
+            ) : lastExecution ? (
+              <EuiHealth
+                color={lastExecution.outcome === 'success' ? 'success' : 'danger'}
+                data-test-subj="ruleSummaryFlyoutLastExecutionStatus"
+              >
+                {LAST_EXECUTION_OUTCOME_LABELS[lastExecution.outcome]}
+              </EuiHealth>
+            ) : (
+              EMPTY_VALUE
             )}
           </InfoBlock>
           <InfoBlock
