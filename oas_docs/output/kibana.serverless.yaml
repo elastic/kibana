@@ -2471,22 +2471,23 @@ paths:
                   events:
                     - data:
                         text: First note on this conversation
-                      type: example.note
+                      type: text_note
                     - data:
                         text: Second note on this conversation
-                      type: example.note
+                      type: text_note
             schema:
               additionalProperties: false
               type: object
               properties:
                 events:
-                  description: Events to append. Between 1 and 50.
+                  description: Events to append. Between 1 and 10.
                   items:
                     additionalProperties: false
                     type: object
                     properties:
                       data:
                         additionalProperties: true
+                        description: The event payload. Its shape is defined by the event type.
                         type: object
                         properties: {}
                       type:
@@ -2497,7 +2498,7 @@ paths:
                     required:
                       - type
                       - data
-                  maxItems: 50
+                  maxItems: 10
                   minItems: 1
                   type: array
               required:
@@ -2519,7 +2520,7 @@ paths:
                         data:
                           text: First note on this conversation
                         id: 7d3f1a2b-4c5e-6f7a-8b9c-0d1e2f3a4b5c
-                        type: example.note
+                        type: text_note
                       - actor:
                           id: u_abc123_uid
                           type: user
@@ -2528,7 +2529,7 @@ paths:
                         data:
                           text: Second note on this conversation
                         id: 8e4f2b3c-5d6f-7a8b-9c0d-1e2f3a4b5c6d
-                        type: example.note
+                        type: text_note
           description: Indicates a successful response
       summary: Add events to a conversation
       tags:
@@ -2544,7 +2545,7 @@ paths:
               -H "Content-Type: application/json" \
               -d '{
                 "events": [
-                  { "type": "example.note", "data": { "text": "A note on this conversation" } }
+                  { "type": "text_note", "data": { "text": "A note on this conversation" } }
                 ]
               }'
         - lang: Console
@@ -2552,10 +2553,10 @@ paths:
             POST kbn://api/agent_builder/conversations/${CONVERSATION_ID}/_add_events
             {
               "events": [
-                { "type": "example.note", "data": { "text": "A note on this conversation" } }
+                { "type": "text_note", "data": { "text": "A note on this conversation" } }
               ]
             }
-      x-state: ''
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
