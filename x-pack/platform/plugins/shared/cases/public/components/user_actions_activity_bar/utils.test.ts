@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hasActiveUserActivityFilter, hasSearchOrAuthorFilter } from './utils';
+import { hasActiveUserActivityFilter, hasNonTypeActivityFilter } from './utils';
 import type { UserActivityParams } from './types';
 
 describe('hasActiveUserActivityFilter', () => {
@@ -56,36 +56,36 @@ describe('hasActiveUserActivityFilter', () => {
   });
 });
 
-describe('hasSearchOrAuthorFilter', () => {
-  it('returns false when neither search nor authors are set', () => {
-    expect(hasSearchOrAuthorFilter({})).toBe(false);
+describe('hasNonTypeActivityFilter', () => {
+  it('returns false when search, authors, and sources are unset', () => {
+    expect(hasNonTypeActivityFilter({})).toBe(false);
   });
 
   it('returns true when search is set', () => {
-    expect(hasSearchOrAuthorFilter({ search: 'hello' })).toBe(true);
+    expect(hasNonTypeActivityFilter({ search: 'hello' })).toBe(true);
   });
 
   it('returns false when search is an empty string', () => {
-    expect(hasSearchOrAuthorFilter({ search: '' })).toBe(false);
+    expect(hasNonTypeActivityFilter({ search: '' })).toBe(false);
   });
 
   it('returns true when authors has at least one entry', () => {
-    expect(hasSearchOrAuthorFilter({ authors: ['elastic'] })).toBe(true);
+    expect(hasNonTypeActivityFilter({ authors: ['elastic'] })).toBe(true);
   });
 
   it('returns false when authors is an empty array', () => {
-    expect(hasSearchOrAuthorFilter({ authors: [] })).toBe(false);
+    expect(hasNonTypeActivityFilter({ authors: [] })).toBe(false);
   });
 
   it('returns true when both search and authors are set', () => {
-    expect(hasSearchOrAuthorFilter({ search: 'hello', authors: ['elastic'] })).toBe(true);
+    expect(hasNonTypeActivityFilter({ search: 'hello', authors: ['elastic'] })).toBe(true);
   });
 
   it('returns true when sources has at least one entry', () => {
-    expect(hasSearchOrAuthorFilter({ sources: ['agent'] })).toBe(true);
+    expect(hasNonTypeActivityFilter({ sources: ['agent'] })).toBe(true);
   });
 
   it('returns false when sources is an empty array', () => {
-    expect(hasSearchOrAuthorFilter({ sources: [] })).toBe(false);
+    expect(hasNonTypeActivityFilter({ sources: [] })).toBe(false);
   });
 });

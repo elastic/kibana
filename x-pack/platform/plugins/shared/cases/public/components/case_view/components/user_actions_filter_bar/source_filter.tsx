@@ -11,17 +11,18 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { ActionSourceTypes } from '../../../../../common/types/domain';
+import type { UserActionFindRequestSources } from '../../../../../common/types/api';
 import { NO_ACTION_SOURCE_FILTERING_KEYWORD } from '../../../../../common/constants';
 import { getActionSourceKindLabel } from '../../../user_actions/translations';
 import * as i18n from './translations';
 
 export const SOURCE_FILTER_ID = 'userActionsSource';
 
-const EMPTY_SOURCES: string[] = [];
+const EMPTY_SOURCES: UserActionFindRequestSources[] = [];
 
-type SourceOption = EuiSelectableOption<{ value: string }>;
+type SourceOption = EuiSelectableOption<{ value: UserActionFindRequestSources }>;
 
-const SOURCE_OPTIONS: Array<{ value: string; label: string }> = [
+const SOURCE_OPTIONS: Array<{ value: UserActionFindRequestSources; label: string }> = [
   { value: ActionSourceTypes.agent, label: getActionSourceKindLabel(ActionSourceTypes.agent) },
   {
     value: ActionSourceTypes.workflow,
@@ -39,8 +40,8 @@ const SOURCE_OPTIONS: Array<{ value: string; label: string }> = [
 
 interface SourceFilterProps {
   isLoading?: boolean;
-  sources?: string[];
-  onSourcesChange: (sources: string[]) => void;
+  sources?: UserActionFindRequestSources[];
+  onSourcesChange: (sources: UserActionFindRequestSources[]) => void;
 }
 
 /**
@@ -65,9 +66,9 @@ export const SourceFilter = React.memo<SourceFilterProps>(
 
     const onChange = useCallback(
       (newOptions: SourceOption[]) => {
-        const selected = newOptions
-          .filter((option) => option.checked === 'on')
-          .map((option) => option.value);
+        const selected = newOptions.flatMap((option) =>
+          option.checked === 'on' && option.value != null ? [option.value] : []
+        );
         onSourcesChange(selected);
       },
       [onSourcesChange]
@@ -107,7 +108,7 @@ export const SourceFilter = React.memo<SourceFilterProps>(
         repositionOnScroll
         data-test-subj={`options-filter-popover-${SOURCE_FILTER_ID}`}
       >
-        <EuiSelectable<{ value: string }>
+        <EuiSelectable<{ value: UserActionFindRequestSources }>
           options={options}
           singleSelection={false}
           onChange={onChange}

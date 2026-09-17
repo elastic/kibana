@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { UserActionFindRequestSources } from '../../../common/types/api';
+
 export type UserActivityFilter = 'all' | 'user' | 'action';
 
 export type UserActivitySortOrder = 'asc' | 'desc';
@@ -16,7 +18,7 @@ export interface UserActivityParams {
   perPage: number;
   search?: string;
   authors?: string[];
-  sources?: string[];
+  sources?: UserActionFindRequestSources[];
 }
 
 /** Filters persisted to local storage. Excludes free-text search. */
@@ -24,5 +26,5 @@ export interface UserActivityFilters {
   type: UserActivityFilter;
   sortOrder: UserActivitySortOrder;
   authors?: string[];
-  sources?: string[];
+  sources?: UserActionFindRequestSources[];
 }

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 
 import type { CaseUserActionsStats } from '../../../../containers/types';
+import type { UserActionFindRequestSources } from '../../../../../common/types/api';
 import type {
   UserActivityFilter,
   UserActivityParams,
@@ -63,7 +64,7 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
     );
 
     const handleSourcesChange = useCallback(
-      (sources: string[]) => {
+      (sources: UserActionFindRequestSources[]) => {
         onParamsChange({ ...params, sources: sources.length ? sources : undefined });
       },
       [params, onParamsChange]
@@ -83,7 +84,6 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
       [params, onParamsChange]
     );
 
-    // Empty blur still clears an applied search. Enter and the field clear already do.
     const handleSearchBlur = useCallback(() => {
       if (!searchInputValue.trim() && params.search) {
         onParamsChange({ ...params, search: undefined });

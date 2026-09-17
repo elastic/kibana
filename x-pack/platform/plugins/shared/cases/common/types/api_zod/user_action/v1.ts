@@ -36,6 +36,12 @@ const UserActionFindRequestTypesValues = Object.values(UserActionFindRequestType
   ...string[]
 ];
 
+const ActionSourceTypeValues = Object.values(ActionSourceTypes) as [string, ...string[]];
+const UserActionFindRequestSourcesValues = [
+  ...ActionSourceTypeValues,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
+] as [string, ...string[]];
+
 export const CaseUserActionStatsSchema = z.object({
   total: z.number(),
   total_deletions: z.number(),
@@ -67,15 +73,7 @@ export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.e
     max: MAX_USER_ACTION_SEARCH_LENGTH,
   }).optional(),
   sources: limitedArraySchema({
-    codec: z.enum([
-      ActionSourceTypes.agent,
-      ActionSourceTypes.workflow,
-      ActionSourceTypes.rule,
-      ActionSourceTypes.attack,
-      ActionSourceTypes.api,
-      ActionSourceTypes.user,
-      NO_ACTION_SOURCE_FILTERING_KEYWORD,
-    ]),
+    codec: z.enum(UserActionFindRequestSourcesValues),
     fieldName: 'sources',
     min: 0,
     max: MAX_USER_ACTION_SOURCES_FILTER_LENGTH,

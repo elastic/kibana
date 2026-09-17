@@ -25,6 +25,7 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
+  UserActionFindRequestSources,
   FindCasesContainingAllAlertsResponse,
   FindCasesContainingAllDocumentsRequest,
   UpdateSummary,
@@ -230,7 +231,7 @@ export const findCaseUserActions = async (
     perPage: number;
     search?: string;
     authors?: string[];
-    sources?: string[];
+    sources?: UserActionFindRequestSources[];
   },
   signal?: AbortSignal
 ): Promise<InternalFindCaseUserActions> => {

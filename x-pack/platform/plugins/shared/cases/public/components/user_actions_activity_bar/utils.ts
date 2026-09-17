@@ -18,6 +18,6 @@ export const hasActiveUserActivityFilter = (params: UserActivityParams): boolean
 /**
  * True when search, authors, or sources are set. Excludes type so stats can still page.
  */
-export const hasSearchOrAuthorFilter = (
+export const hasNonTypeActivityFilter = (
   params: Pick<UserActivityParams, 'search' | 'authors' | 'sources'>
 ): boolean => Boolean(params.search || params.authors?.length || params.sources?.length);
