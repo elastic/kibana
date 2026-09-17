@@ -81,6 +81,7 @@
 - [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
 - [MISP](/reference/connectors-kibana/misp-action-type.md): Search attributes and events, check indicators and warninglists, and write sightings, events, attributes, and tags back to MISP.
 - [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.
+- [ThreatQ](/reference/connectors-kibana/threatq-action-type.md): Search and enrich intelligence, update indicators, link objects, and run operations.
 - [URLScan.io](/reference/connectors-kibana/urlscan-io-action-type.md): Search historical URL scans, detonate a URL in a sandboxed browser, and retrieve verdicts, screenshots, and page content.
 - [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
 - [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL and domain analysis, result retrieval, and threat intelligence lookups.
