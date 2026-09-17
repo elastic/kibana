@@ -52,18 +52,27 @@ export const useIsOnManagementLlmConnectorsPage = (): boolean => {
 
 export const useNavigation = () => {
   const {
-    services: { application },
+    services: { application, appParams },
   } = useKibana();
+  const isAgentWorkspaceMount = appParams?.isAgentWorkspaceMount === true;
+  const history = appParams?.history;
 
   const navigateToAgentBuilderUrl = useCallback(
     (path: string, params?: Record<string, string>, state?: LocationState) => {
       const queryParams = new URLSearchParams(params);
+      const nextPath = queryParams.size ? `${path}?${queryParams}` : path;
+
+      if (isAgentWorkspaceMount && history) {
+        history.push(nextPath, state);
+        return;
+      }
+
       application.navigateToApp(AGENTBUILDER_APP_ID, {
-        path: queryParams.size ? `${path}?${queryParams}` : path,
+        path: nextPath,
         state,
       });
     },
-    [application]
+    [application, history, isAgentWorkspaceMount]
   );
 
   const createAgentBuilderUrl = useCallback(
