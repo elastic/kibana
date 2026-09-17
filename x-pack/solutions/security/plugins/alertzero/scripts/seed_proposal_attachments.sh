@@ -63,7 +63,7 @@ create_conversation() {
     -H "Content-Type: application/json" \
     -H "elastic-api-version: ${AGENT_BUILDER_API_VERSION}" \
     "${KIBANA_URL}/api/agent_builder/conversations" \
-    -d "$(jq -n --arg t "$title" --arg a "$AGENT_ID" '{ title: $t, agent_id: $a, access_control: { access_mode: "public" } }')" \
+    -d "$(jq -n --arg t "$title" --arg a "$AGENT_ID" '{ title: $t, agent_id: $a, template_id: "investigation", access_control: { access_mode: "public" } }')" \
     | jq -r '.id'
 }
 
