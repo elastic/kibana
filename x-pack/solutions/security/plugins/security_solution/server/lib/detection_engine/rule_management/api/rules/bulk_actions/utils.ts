@@ -35,7 +35,11 @@ export const extractNotFoundAsSkipped = (
 ): void => {
   for (let i = errors.length - 1; i >= 0; i--) {
     const err = errors[i];
-    if ('item' in err && typeof err.item === 'string' && err.error.message === RULE_NOT_FOUND_MESSAGE) {
+    if (
+      'item' in err &&
+      typeof err.item === 'string' &&
+      err.error.message === RULE_NOT_FOUND_MESSAGE
+    ) {
       skipped.push({ id: err.item, skip_reason: 'RULE_NOT_FOUND' });
       errors.splice(i, 1);
     }
