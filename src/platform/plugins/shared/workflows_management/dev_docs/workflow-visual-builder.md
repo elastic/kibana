@@ -2,27 +2,30 @@
 
 This document describes what is **currently implemented** in the workflow graph authoring surface. It is updated in the same PR that lands each spec. The PR description (the spec itself) is the record of intent; this document is the record of outcome.
 
-> [!NOTE]
-> **This document reflects the state after the initial documentation PR (pre-implementation).** All authoring capabilities described below are **not yet implemented**. The graph is currently read-only. This skeleton is here so the document is honest from its first commit rather than describing unbuilt code.
-
 ---
 
 ## What exists today
 
-The workflow graph is a **read-only visualisation** of the workflow YAML:
+The workflow graph is a **read-only visualisation** of the workflow YAML with two authoring
+foundations now in place (specs 00 and 01):
 
 - Nodes render steps, triggers and `if`/`switch`/`parallel`/`foreach` control-flow blocks.
 - Edges render the execution path between steps, with `isMerge` routing for joins after branches.
 - The `stepExecutions` colouring from execution runs is the only interactive state.
 - `on-failure.fallback` steps are **not rendered** — only the retry badge appears.
-- All handles are `opacity: 0`; `nodesConnectable={false}`; no mutation path from graph to YAML exists.
+- All handles are `opacity: 0`; `nodesConnectable={false}`; no mutation path from graph to YAML
+  exists (authoring affordances land in specs 03–08).
+- `insertStep` can now address any step in the tree, including switch cases and parallel branches
+  (spec 00).
+- Fork and trigger lane order is stable across YAML edits — growing one branch never visually swaps
+  it with a sibling (spec 01).
 
 ## Authoring capabilities
 
 | Capability | Status | Spec | ADR |
 |---|---|---|---|
-| Shared step-child traversal (prerequisite) | ❌ Not implemented | 00 | ADR-0003 |
-| Fork and trigger lane order preserved after layout | ❌ Not implemented | 01 | — |
+| Shared step-child traversal (prerequisite) | ✅ Implemented | 00 | ADR-0003, ADR-0007 |
+| Fork and trigger lane order preserved after layout | ✅ Implemented | 01 | ADR-0008 |
 | Fallback lane graph model (read-only) | ❌ Not implemented | 02 | ADR-0004 |
 | Connection ports (visible anchors, hover `+`, red fallback dot) | ❌ Not implemented | 03 | — |
 | Insert step from a flow port | ❌ Not implemented | 04 | ADR-0002, ADR-0005, ADR-0006 |
@@ -60,8 +63,9 @@ Fallback lanes do not have their own ports in the initial implementation. A fall
 
 | Package | Role in authoring |
 |---|---|
-| `@kbn/workflows` (`graph_layout/`) | Logical graph construction; `visitStepChildren` (shared traversal) |
-| `@kbn/workflows-ui` | ReactFlow rendering; `WorkflowGraphEditActions` seam; `port_geometry.ts` |
+| `@kbn/workflows` (`graph_layout/`) | Logical graph construction; `visitStepChildSlots` (shared traversal); topology fingerprint |
+| `@kbn/dag-layout` | Dagre wrapper; `dagLayout`, `DagPositionedNode`, `DagPositionedEdge` |
+| `@kbn/workflows-ui` | ReactFlow rendering; post-dagre lane-order passes; `WorkflowGraphEditActions` seam; `port_geometry.ts` |
 | `@kbn/workflows-yaml` (`lib/yaml_edit`) | YAML AST utilities; `getStepNode`, `buildWorkflowLookup` |
 | `workflows_management` | Redux store; snippet mutation path; `insertStepSnippet`; `WorkflowVisualEditor` |
 
@@ -90,6 +94,7 @@ The mutation source is always `selectYamlString`, never `selectEditorYaml`. On t
 
 See [`@kbn/workflows/CONTEXT.md`](../../../packages/shared/kbn-workflows/CONTEXT.md) for the canonical glossary. Key terms:
 
+- **lane** — the cross-axis extent of one child slot's steps; declaration order is the invariant enforced post-dagre
 - **port** — the interactive attachment point (affordance), not the ReactFlow `Handle` primitive
 - **fallback steps** — steps under `on-failure.fallback`; not "error handling steps"
 - **fallback lane** — the placed row/column of fallback steps; not "error branch"

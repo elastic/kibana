@@ -1,6 +1,6 @@
 # ADR-0003 — Name addressing and shared step-child traversal
 
-**Status:** Accepted
+**Status:** Superseded by ADR-0007
 **Date:** 2026-09-16
 **Deciders:** @elastic/workflows-eng
 

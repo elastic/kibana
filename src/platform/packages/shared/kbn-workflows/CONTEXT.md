@@ -23,6 +23,14 @@ An entry in `TransformResult.nodeRefs` mapping a graph node id to a workflow ste
 **bypass lane node**
 A synthetic node with no corresponding YAML step, emitted by `transform_workflow_to_graph.ts` when a branch of an `if`/`switch`/`parallel` is empty. It renders as a dashed placeholder. _Not_ excluded from all operations: a bypass-lane node is a legitimate insertion target (its position in the graph encodes which empty branch it heads) and maps to `{ mode: 'branch', stepName: '<owner>', branch: BranchSlot }` in `WorkflowGraphInsertionContext`.
 
+**lane**
+The cross-axis extent occupied by the steps of one child slot within one laid-out graph. Lanes of
+the same fork owner are disjoint and ordered; that order is the **slot declaration order** (the
+order the slot's edge appears in the graph's edge list), not dagre's output. A lane is not a set of
+nodes: nodes reachable from more than one sibling lane (joins) belong to no lane and stay put during
+lane reordering. `bypass lane node` and `fallback lane` are specialisations — the former is what
+gives an *empty* slot a lane in the laid graph.
+
 **isMerge (edge property)**
 An _edge_ tag, not a node type. Set to `true` on edges whose target has in-degree > 1 (i.e., edges converging at a join after a fork). Computed in `use_workflow_layout.ts` from target in-degree; drives `buildMergeBusPath` routing. There is no join node in the logical graph — `transform_workflow_to_graph.ts` wires branch leaves directly to the next sibling via `exitIds = dedupeIds(branchExits)`.
 
@@ -38,6 +46,12 @@ Strictly the ReactFlow `<Handle>` primitive. Every port renders at least one han
 
 **anchor step**
 The step that an insertion is addressed _relative to_ in `WorkflowGraphInsertionContext`. Always qualified ("the anchor step"), never bare "anchor" (to avoid confusion with the retired POC concept `WorkflowGraphAnchorRect`, which is dead scope).
+
+**`BranchSlot`**
+The subset of `StepChildSlot` that a user can address as a branch:
+`Extract<StepChildSlot, { kind: 'steps' | 'else' | 'branch' | 'case' | 'default' }>`. Excludes
+`fallback` and `iteration-fallback`, which `WorkflowGraphInsertionContext` addresses via
+`mode: 'fallback'`. Used as the `branch` field in the `mode: 'branch'` insertion context.
 
 **`WorkflowGraphInsertionContext`**
 The typed address for a graph gesture:

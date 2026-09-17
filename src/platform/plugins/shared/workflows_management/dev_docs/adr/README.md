@@ -38,7 +38,9 @@ What becomes easier, what becomes harder, what constraints this imposes on futur
 |---|---|---|
 | [0001](0001-graph-inline-authoring-scope.md) | Graph inline authoring — scope | Accepted |
 | [0002](0002-synchronous-commit-for-graph-gestures.md) | Synchronous commit for graph gestures | Accepted |
-| [0003](0003-name-addressing-and-shared-traversal.md) | Name addressing and shared step-child traversal | Accepted |
+| [0003](0003-name-addressing-and-shared-traversal.md) | Name addressing and shared step-child traversal | Superseded by ADR-0007 |
 | [0004](0004-fallback-diamond-and-continue.md) | Fallback lane shape and `continue` separation | Accepted |
 | [0005](0005-undo-delegates-to-monaco.md) | Undo delegates to Monaco | Accepted |
 | [0006](0006-graph-mutations-reuse-snippet-path.md) | Graph mutations reuse the snippet insertion path | Accepted |
+| [0007](0007-structural-child-slots.md) | Structural child slots and per-slot enumerator | Accepted |
+| [0008](0008-post-dagre-lane-order.md) | Post-dagre fork and trigger lane order | Accepted |
