@@ -133,6 +133,8 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
       await expect.poll(() => lens.layers.getLayerCount()).toBe(1);
 
       await dashboard.openDashboardWithId(dashboardId);
+      // Both charts must still render; only the orphaned annotation layer is dropped.
+      await expect(page.testSubj.locator(testData.XY_CHART)).toHaveCount(2);
       await expect(annotationIcons).toHaveCount(0);
     }
   );
