@@ -84,43 +84,55 @@ const backfillAskUserQuestionAnswers = (
   return changed ? backfilled : steps;
 };
 
+type ExecutionContent = Pick<
+  AgentTurnItem,
+  'status' | 'steps' | 'terminal' | 'response' | 'pendingPrompts'
+>;
+
+const toExecutionContent = (
+  steps: ConversationRoundStep[],
+  terminal: ExecutionAccumulator['terminal'],
+  promptResponse?: PromptResponseEvent
+): ExecutionContent => {
+  const answers = responseResolvesTerminal(promptResponse, terminal)
+    ? promptResponse.data.responses
+    : undefined;
+  const content: ExecutionContent = {
+    status: resolveStatus(terminal, answers !== undefined),
+    steps: answers ? backfillAskUserQuestionAnswers(steps, answers) : steps,
+  };
+  if (terminal) content.terminal = terminal;
+  if (terminal?.type === TimelineEventType.executionTerminated) {
+    const { outcome } = terminal.data;
+    if (outcome.type === 'responded') {
+      content.response = outcome.response;
+    } else if (!answers && outcome.prompts.length) {
+      content.pendingPrompts = outcome.prompts;
+    }
+  }
+  return content;
+};
+
 const accumulatorToItem = (
   acc: ExecutionAccumulator,
   eventsById: Map<string, TimelineEvent>,
   responsesByRequestId: Map<string, PromptResponseEvent>
 ): AgentTurnItem => {
-  const { executionId, startedAt, triggerEventId, terminal } = acc;
-  const origin: ConversationRoundOrigin | undefined = triggerEventId
-    ? eventsById.get(triggerEventId)?.actor.origin
-    : undefined;
-  const answers = terminal ? responsesByRequestId.get(terminal.id)?.data.responses : undefined;
-  const status = resolveStatus(terminal, answers !== undefined);
-  const steps = answers ? backfillAskUserQuestionAnswers(acc.steps, answers) : acc.steps;
+  const { executionId, startedAt, triggerEventId, steps, terminal } = acc;
+  const origin = triggerEventId ? eventsById.get(triggerEventId)?.actor.origin : undefined;
   const item: AgentTurnItem = {
     kind: 'agentTurn',
     key: executionId,
     executionId,
-    status,
     startedAt,
-    steps,
+    ...toExecutionContent(
+      steps,
+      terminal,
+      terminal ? responsesByRequestId.get(terminal.id) : undefined
+    ),
   };
   if (triggerEventId) item.triggerEventId = triggerEventId;
   if (origin) item.origin = origin;
-  if (terminal) item.terminal = terminal;
-  if (
-    status === 'completed' &&
-    terminal?.type === TimelineEventType.executionTerminated &&
-    terminal.data.outcome.type === 'responded'
-  ) {
-    item.response = terminal.data.outcome.response;
-  }
-  if (
-    status === 'awaiting_prompt' &&
-    terminal?.type === TimelineEventType.executionTerminated &&
-    terminal.data.outcome.type === 'prompt_requested'
-  ) {
-    item.pendingPrompts = terminal.data.outcome.prompts;
-  }
   return item;
 };
 
@@ -136,29 +148,13 @@ export const activeExecutionToItem = (draft: ActiveExecutionDraft): AgentTurnIte
   if (draft.triggerEventId) identity.triggerEventId = draft.triggerEventId;
 
   if (draft.status === 'completed' && draft.terminalEvent) {
-    const { terminalEvent } = draft;
-    const matchedResponse = responseResolvesTerminal(draft.promptResponse, terminalEvent)
-      ? draft.promptResponse
-      : undefined;
-    const answers = matchedResponse?.data.responses;
-    const steps = answers ? backfillAskUserQuestionAnswers(draft.steps, answers) : draft.steps;
-    const item: AgentTurnItem = {
+    return {
       kind: 'agentTurn',
       key,
       ...identity,
-      status: resolveStatus(terminalEvent, answers !== undefined),
       startedAt,
-      steps,
-      terminal: terminalEvent,
+      ...toExecutionContent(draft.steps, draft.terminalEvent, draft.promptResponse),
     };
-    if (terminalEvent.data.outcome.type === 'responded') {
-      item.response = terminalEvent.data.outcome.response;
-    }
-    if (terminalEvent.data.outcome.type === 'prompt_requested' && !answers) {
-      const { prompts } = terminalEvent.data.outcome;
-      if (prompts.length) item.pendingPrompts = prompts;
-    }
-    return item;
   }
 
   const item: AgentTurnItem = {
@@ -180,13 +176,17 @@ type UserEntry = Extract<TimelineItem, { kind: 'userMessage' }>;
 export const groupTimelineEvents = (
   events: TimelineEvent[],
   eventsById: Map<string, TimelineEvent>,
-  localPromptResponses: PromptResponseEvent[] = []
+  localPromptResponse?: PromptResponseEvent
 ): TimelineItem[] => {
   const ordered: Array<UserEntry | ExecutionAccumulator> = [];
   const accMap = new Map<string, ExecutionAccumulator>();
-  const responsesByRequestId = new Map<string, PromptResponseEvent>(
-    localPromptResponses.map((event) => [event.data.prompt_requested_event_id, event])
-  );
+  const responsesByRequestId = new Map<string, PromptResponseEvent>();
+  if (localPromptResponse) {
+    responsesByRequestId.set(
+      localPromptResponse.data.prompt_requested_event_id,
+      localPromptResponse
+    );
+  }
 
   const getOrCreateAcc = (
     executionId: string,
@@ -274,10 +274,10 @@ interface ToTimelineItemsParams {
 
 export const buildSavedItems = (
   events: TimelineEvent[],
-  localPromptResponses: PromptResponseEvent[] = []
+  localPromptResponse?: PromptResponseEvent
 ): TimelineItem[] => {
   const eventsById = new Map(events.map((event) => [event.id, event]));
-  return groupTimelineEvents(events, eventsById, localPromptResponses);
+  return groupTimelineEvents(events, eventsById, localPromptResponse);
 };
 
 export const buildLiveItems = ({
@@ -355,40 +355,12 @@ export const assembleTimelineItems = (
   return items;
 };
 
-export const isEventsAwaitingPrompt = (
-  events: TimelineEvent[],
-  extraResponses: PromptResponseEvent[] = []
-): boolean => {
-  let latestTerminal: TimelineEvent | undefined;
-  const answeredTerminalIds = new Set<string>(
-    extraResponses.map((response) => response.data.prompt_requested_event_id)
-  );
-  for (const event of events) {
-    if (event.type === TimelineEventType.promptResponse) {
-      answeredTerminalIds.add(event.data.prompt_requested_event_id);
-    } else if (
-      event.type === TimelineEventType.executionTerminated ||
-      event.type === TimelineEventType.executionFailed ||
-      event.type === TimelineEventType.executionAborted
-    ) {
-      latestTerminal = event;
-    }
-  }
-  if (latestTerminal?.type !== TimelineEventType.executionTerminated) return false;
-  return (
-    latestTerminal.data.outcome.type === 'prompt_requested' &&
-    !answeredTerminalIds.has(latestTerminal.id)
-  );
-};
-
 export const toTimelineItems = ({
   events,
   pendingUserMessage,
   activeExecution,
-}: ToTimelineItemsParams): TimelineItem[] => {
-  const localPromptResponse = activeExecution?.promptResponse;
-  return assembleTimelineItems(
-    buildSavedItems(events, localPromptResponse ? [localPromptResponse] : []),
+}: ToTimelineItemsParams): TimelineItem[] =>
+  assembleTimelineItems(
+    buildSavedItems(events, activeExecution?.promptResponse),
     buildLiveItems({ pendingUserMessage, activeExecution })
   );
-};

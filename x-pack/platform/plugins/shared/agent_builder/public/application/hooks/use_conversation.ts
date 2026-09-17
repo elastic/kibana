@@ -20,10 +20,8 @@ import { useConversationStreamService } from '../context/streaming/streaming_con
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useLastAgentId } from './use_last_agent_id';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
-import {
-  isEventsAwaitingPrompt,
-  activeExecutionToItem,
-} from '../components/conversations/timeline/to_timeline_items';
+import { activeExecutionToItem } from '../components/conversations/timeline/to_timeline_items';
+import { isEventsAwaitingPrompt } from '../../services/events/is_events_awaiting_prompt';
 
 const POLL_INTERVAL_MS = 5_000;
 
@@ -193,8 +191,5 @@ export const useIsAwaitingPrompt = () => {
   if (activeExecution && activeExecutionToItem(activeExecution).status === 'awaiting_prompt') {
     return true;
   }
-  return isEventsAwaitingPrompt(
-    conversation?.events ?? [],
-    activeExecution?.promptResponse ? [activeExecution.promptResponse] : []
-  );
+  return isEventsAwaitingPrompt(conversation?.events ?? [], activeExecution?.promptResponse);
 };

@@ -52,7 +52,7 @@ export const useTimelineItems = (): TimelineItem[] => {
   const persistedEvents = conversation?.events;
   const localPromptResponse = activeExecution?.promptResponse;
   const savedItems = useMemo(
-    () => buildSavedItems(persistedEvents ?? [], localPromptResponse ? [localPromptResponse] : []),
+    () => buildSavedItems(persistedEvents ?? [], localPromptResponse),
     [persistedEvents, localPromptResponse]
   );
   const liveItems = useMemo(

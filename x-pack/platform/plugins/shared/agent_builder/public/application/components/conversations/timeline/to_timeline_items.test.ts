@@ -20,7 +20,6 @@ import {
   activeExecutionToItem,
   findSavedReplacement,
   isAwaitingPromptTurn,
-  isEventsAwaitingPrompt,
   ACTIVE_EXECUTION_ITEM_KEY,
 } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
@@ -700,31 +699,34 @@ describe('prompt_requested terminal', () => {
     expect(activeExecutionToItem(draft).pendingPrompts).toBeUndefined();
   });
 
-  it('agrees on status and prompts between the sealed draft and the saved replacement', () => {
-    const terminalEvent = createPromptRequestedTerminatedEvent({
-      prompts,
-      id: 'term-1',
-      execution_id: 'exec-paused',
-    });
-    const draft: ActiveExecutionDraft = {
-      status: 'completed',
-      steps: [],
-      message: '',
-      executionId: 'exec-paused',
-      startedAt: terminalEvent.created_at,
-      pendingPrompts: prompts,
-      terminalEvent,
-    };
-    const live = activeExecutionToItem(draft);
-    const [saved] = buildSavedItems([terminalEvent]);
+  it.each([{ prompts }, { prompts: [] }])(
+    'agrees on status and prompts between the sealed draft and the saved replacement: $prompts',
+    ({ prompts: terminalPrompts }) => {
+      const terminalEvent = createPromptRequestedTerminatedEvent({
+        prompts: terminalPrompts,
+        id: 'term-1',
+        execution_id: 'exec-paused',
+      });
+      const draft: ActiveExecutionDraft = {
+        status: 'completed',
+        steps: [],
+        message: '',
+        executionId: 'exec-paused',
+        startedAt: terminalEvent.created_at,
+        pendingPrompts: terminalPrompts,
+        terminalEvent,
+      };
+      const live = activeExecutionToItem(draft);
+      const [saved] = buildSavedItems([terminalEvent]);
 
-    expect(saved.kind).toBe('agentTurn');
-    if (saved.kind === 'agentTurn') {
-      expect(saved.status).toBe(live.status);
-      expect(saved.pendingPrompts).toEqual(live.pendingPrompts);
-      expect(saved.key).toBe(live.key);
+      expect(saved.kind).toBe('agentTurn');
+      if (saved.kind === 'agentTurn') {
+        expect(saved.status).toBe(live.status);
+        expect(saved.pendingPrompts).toEqual(live.pendingPrompts);
+        expect(saved.key).toBe(live.key);
+      }
     }
-  });
+  );
 
   it('still renders a responded terminal as a completed turn', () => {
     const items = buildSavedItems([
@@ -735,59 +737,6 @@ describe('prompt_requested terminal', () => {
       status: 'completed',
       response: { message: 'Here is a summary of your active hosts.' },
     });
-  });
-});
-
-describe('isEventsAwaitingPrompt', () => {
-  const paused = createPromptRequestedTerminatedEvent({
-    id: 'term-paused',
-    execution_id: 'exec-1',
-  });
-
-  it('is false for an empty conversation', () => {
-    expect(isEventsAwaitingPrompt([])).toBe(false);
-  });
-
-  it('is true when the latest terminal is an unanswered prompt pause', () => {
-    expect(isEventsAwaitingPrompt([paused])).toBe(true);
-  });
-
-  it('is false once a persisted answer targets that pause', () => {
-    const answer = createPromptResponseEvent({
-      id: 'response-1',
-      data: { prompt_requested_event_id: 'term-paused', responses: {} },
-    });
-    expect(isEventsAwaitingPrompt([paused, answer])).toBe(false);
-  });
-
-  it('is false when only a local answer targets that pause (resuming)', () => {
-    const localAnswer = createPromptResponseEvent({
-      id: 'local',
-      data: { prompt_requested_event_id: 'term-paused', responses: {} },
-    });
-    expect(isEventsAwaitingPrompt([paused], [localAnswer])).toBe(false);
-  });
-
-  it('is false when the latest terminal is a responded run', () => {
-    const responded = createExecutionTerminatedEvent({ id: 'term-done', execution_id: 'exec-2' });
-    expect(isEventsAwaitingPrompt([paused, responded])).toBe(false);
-  });
-
-  it('is true for a chained pause where an earlier answer does not resolve the newest pause', () => {
-    const answerA = createPromptResponseEvent({
-      id: 'response-a',
-      data: { prompt_requested_event_id: 'term-paused', responses: {} },
-    });
-    const pausedB = createPromptRequestedTerminatedEvent({
-      id: 'term-paused-b',
-      execution_id: 'exec-1::execution::1',
-    });
-    expect(isEventsAwaitingPrompt([paused, answerA, pausedB])).toBe(true);
-  });
-
-  it('is false when the latest terminal is a failure', () => {
-    const failed = createExecutionFailedEvent({ id: 'term-failed', execution_id: 'exec-3' });
-    expect(isEventsAwaitingPrompt([paused, failed])).toBe(false);
   });
 });
 
@@ -816,7 +765,7 @@ describe('answered prompt_requested terminal', () => {
   });
 
   it('resolves the same pause from an answer the fetched events do not carry yet', () => {
-    const items = buildSavedItems([terminated], [answer]);
+    const items = buildSavedItems([terminated], answer);
 
     expect(items[0]).toMatchObject({ status: 'completed' });
   });
