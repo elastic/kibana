@@ -9,10 +9,9 @@
 
 import { buildCoreCases } from './esql_conversion_cases/cases.core';
 import { buildDateHistogramCases } from './esql_conversion_cases/cases.date_histogram';
+import { buildDuplicateCases } from './esql_conversion_cases/cases.duplicates';
 import { buildStaticValueCases } from './esql_conversion_cases/cases.static_value';
 import { buildTopNCases } from './esql_conversion_cases/cases.top_n';
-import type { EsqlConversionCase, EsqlConversionCaseGroup } from './esql_conversion_cases/types';
-
 export {
   createEsqlConversionIndexPattern,
   createEsqlConversionInput,
@@ -23,7 +22,6 @@ export {
 } from './esql_conversion_cases/fixtures';
 export type {
   EsqlConversionCase,
-  EsqlConversionCaseGroup,
   EsqlConversionColumn,
   EsqlConversionDataset,
   EsqlConversionDatasetId,
@@ -35,12 +33,10 @@ export {
   isSuccessfulEsqlConversionCase,
 } from './esql_conversion_cases/types';
 
-export const buildEsqlConversionCasesByGroup = (): Record<
-  EsqlConversionCaseGroup,
-  EsqlConversionCase[]
-> => ({
+export const buildEsqlConversionCasesByGroup = () => ({
   core: buildCoreCases(),
   date_histogram: buildDateHistogramCases(),
   top_n: buildTopNCases(),
   static_value: buildStaticValueCases(),
+  duplicates: buildDuplicateCases(),
 });

@@ -103,7 +103,7 @@ export const buildStaticValueCases = (): EsqlConversionCase[] => {
         esql: `${ecommerceFrom} | STATS SUM(taxful_total_price), max_value = MAX(taxful_total_price) WHERE KQL("taxful_total_price > 100")`,
         columnNames: ['SUM(taxful_total_price)', 'max_value'],
         expectedSourceIds: { 'SUM(taxful_total_price)': ['col1'], max_value: ['col2'] },
-        expectedLabels: { max_value: 'Maximum of taxful_total_price' },
+        expectedLabels: { max_value: ['Maximum of taxful_total_price'] },
       },
     },
     {

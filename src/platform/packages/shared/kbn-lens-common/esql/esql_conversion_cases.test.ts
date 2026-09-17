@@ -65,8 +65,8 @@ const runSuccessfulCase = (conversionCase: SuccessfulEsqlConversionCase) => {
   )) {
     expect(result.esAggsIdMap[columnName][0].format).toEqual(format);
   }
-  for (const [columnName, label] of Object.entries(conversionCase.expected.expectedLabels ?? {})) {
-    expect(result.esAggsIdMap[columnName][0].label).toBe(label);
+  for (const [columnName, labels] of Object.entries(conversionCase.expected.expectedLabels ?? {})) {
+    expect(result.esAggsIdMap[columnName].map(({ label }) => label)).toEqual(labels);
   }
 };
 

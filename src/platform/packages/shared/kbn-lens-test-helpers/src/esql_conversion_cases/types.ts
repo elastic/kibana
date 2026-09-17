@@ -36,7 +36,7 @@ export interface EsqlConversionSuccess {
   readonly columnNames: readonly string[];
   readonly expectedSourceIds: Readonly<Record<string, readonly string[]>>;
   readonly expectedFormats?: Readonly<Record<string, unknown>>;
-  readonly expectedLabels?: Readonly<Record<string, string>>;
+  readonly expectedLabels?: Readonly<Record<string, readonly string[]>>;
   /** EVAL-only queries preserve source columns in addition to generated columns. */
   readonly allowAdditionalColumns?: true;
 }
@@ -54,10 +54,8 @@ export type FailedEsqlConversionCase = EsqlConversionCase & {
   readonly expected: EsqlConversionFailure;
 };
 
-export type EsqlConversionCaseGroup = 'core' | 'date_histogram' | 'top_n' | 'static_value';
-
 export interface EsqlConversionCase {
-  readonly group: EsqlConversionCaseGroup;
+  readonly group: string;
   readonly dataset: EsqlConversionDataset;
   readonly description: string;
   readonly columns: Readonly<Record<string, EsqlConversionColumn>>;

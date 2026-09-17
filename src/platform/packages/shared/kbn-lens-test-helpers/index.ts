@@ -10,7 +10,6 @@
 export { buildTrendlineQueryCases, type TrendlineQueryCase } from './src/trendline_query_cases';
 export {
   buildEsqlConversionCasesByGroup,
-  type EsqlConversionCaseGroup,
   createEsqlConversionIndexPattern,
   createEsqlConversionInput,
   createEsqlConversionUiSettings,
