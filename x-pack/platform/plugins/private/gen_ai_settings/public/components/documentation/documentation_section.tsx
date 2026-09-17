@@ -22,6 +22,7 @@ import {
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   useInstallProductDoc,
@@ -35,6 +36,7 @@ import { useQueries, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
 import { DOCUMENTATION_ITEMS_CONFIG, type NormalizedDocStatus } from './documentation_items';
+import { enableProductDocumentationToolOnDefaultAgent } from './enable_product_documentation_tool_on_agent';
 import * as i18n from './translations';
 
 interface DocumentationSectionProps {
@@ -76,13 +78,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         // IMPORTANT: use the shared product-doc-base query key so the existing install/uninstall hooks
         // invalidate these queries automatically (otherwise status only updates on full refresh).
         queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId, resourceType],
-        queryFn: async () => {
-          if (!inferenceId) {
-            throw new Error('Inference ID is not available');
-          }
-          return doc.getNormalizedStatus({ productDocBase, inferenceId });
-        },
-        enabled: Boolean(inferenceId) && !isInferenceIdLoading,
+        queryFn: async () => doc.getNormalizedStatus({ productDocBase, inferenceId }),
         keepPreviousData: false,
         refetchOnWindowFocus: false,
         refetchInterval: (queryData?: NormalizedDocStatus) => {
@@ -275,11 +271,29 @@ const DocumentationRowActions: React.FC<{
   onRefetch: () => void;
 }> = ({ item, productDocBase, hasManagePrivilege, isInferenceIdLoading, onRefetch }) => {
   const { services } = useKibana();
-  const { notifications, rendering, docLinks } = services;
+  const { application, http, notifications, rendering, docLinks } = services;
 
   const installMutation = useInstallProductDoc(productDocBase, {
     onSuccess: () => {
       notifications.toasts.addSuccess({ title: i18n.getInstallSuccessTitle(item.name) });
+
+      enableProductDocumentationToolOnDefaultAgent({ http }).catch(() => {
+        const toolsUrl = application.getUrlForApp('agent_builder', {
+          path: `/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}/tools`,
+        });
+        notifications.toasts.addWarning({
+          title: i18n.getInstallSuccessTitle(item.name),
+          text: toMountPoint(
+            <EuiText size="s">
+              <p>{i18n.TOOL_AUTO_ENABLE_FAILED_DESCRIPTION}</p>
+              <p>
+                <EuiLink href={toolsUrl}>{i18n.TOOL_AUTO_ENABLE_FAILED_LINK}</EuiLink>
+              </p>
+            </EuiText>,
+            rendering
+          ),
+        });
+      });
     },
     onError: (error) => {
       const message = error.body?.message ?? error.message;
