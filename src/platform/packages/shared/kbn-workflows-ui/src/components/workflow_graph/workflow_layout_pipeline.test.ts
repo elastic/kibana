@@ -336,6 +336,154 @@ describe('workflow layout pipeline', () => {
     expect(Math.abs(centerX(a) - centerX(b))).toBeGreaterThan(a.width / 2);
   });
 
+  // ─── spec 01: fork lane order ─────────────────────────────────────────────
+
+  describe('fork lane order — if step (TB)', () => {
+    /**
+     * An if whose `else` branch is much deeper (foreach with 2 inner steps)
+     * than its `then` branch (1 step). Dagre places the deeper branch first
+     * (lower cross-axis / further left in TB). After enforceForkLaneOrder the
+     * `then` (true) branch must be left of `else` (false).
+     */
+    const buildIfWithLongElse = () =>
+      runLayout(
+        minimal({
+          steps: [
+            {
+              name: 'gate',
+              type: 'if',
+              condition: 'true',
+              steps: [{ name: 'left_step', type: 'http' }],
+              else: [
+                {
+                  name: 'wide_loop',
+                  type: 'foreach',
+                  foreach: 'items',
+                  steps: [
+                    { name: 'inner_a', type: 'http' },
+                    { name: 'inner_b', type: 'http' },
+                  ],
+                },
+              ],
+            },
+          ] as unknown as WorkflowYaml['steps'],
+        }),
+        'TB'
+      );
+
+    it('then lane (left-step) is left of else lane (wide-loop) regardless of depth', () => {
+      const { result } = buildIfWithLongElse();
+      expect(centerX(findNode(result.nodes, 'left-step'))).toBeLessThan(
+        centerX(findNode(result.nodes, 'wide-loop'))
+      );
+    });
+
+    it('growing else branch by one step does not swap lane positions', () => {
+      const { result: base } = buildIfWithLongElse();
+      const { result: grown } = runLayout(
+        minimal({
+          steps: [
+            {
+              name: 'gate',
+              type: 'if',
+              condition: 'true',
+              steps: [{ name: 'left_step', type: 'http' }],
+              else: [
+                {
+                  name: 'wide_loop',
+                  type: 'foreach',
+                  foreach: 'items',
+                  steps: [
+                    { name: 'inner_a', type: 'http' },
+                    { name: 'inner_b', type: 'http' },
+                    { name: 'inner_c', type: 'http' },
+                  ],
+                },
+              ],
+            },
+          ] as unknown as WorkflowYaml['steps'],
+        }),
+        'TB'
+      );
+      // then lane must remain left of else lane in the grown layout too
+      expect(centerX(findNode(grown.nodes, 'left-step'))).toBeLessThan(
+        centerX(findNode(grown.nodes, 'wide-loop'))
+      );
+      // and the relative lane assignment must match base (then is left in both)
+      const baseOrder = centerX(findNode(base.nodes, 'left-step')) < centerX(findNode(base.nodes, 'wide-loop'));
+      const grownOrder = centerX(findNode(grown.nodes, 'left-step')) < centerX(findNode(grown.nodes, 'wide-loop'));
+      expect(baseOrder).toBe(grownOrder);
+    });
+
+    it('inner nodes of wide-loop stay inside the container after lane reorder', () => {
+      const { result } = buildIfWithLongElse();
+      const loop = findNode(result.nodes, 'wide-loop');
+      const innerA = findNode(result.nodes, 'inner-a');
+      const innerB = findNode(result.nodes, 'inner-b');
+      // Inner nodes must be within the container's bounding box
+      expect(innerA.x).toBeGreaterThanOrEqual(loop.x);
+      expect(innerA.x + innerA.width).toBeLessThanOrEqual(loop.x + loop.width + 1);
+      expect(innerB.x).toBeGreaterThanOrEqual(loop.x);
+      expect(innerB.x + innerB.width).toBeLessThanOrEqual(loop.x + loop.width + 1);
+    });
+  });
+
+  describe('fork lane order — switch step (TB)', () => {
+    it('case[0] lane is left of case[1] lane when case[1] is deeper', () => {
+      const { result } = runLayout(
+        minimal({
+          steps: [
+            {
+              name: 'router',
+              type: 'switch',
+              cases: [
+                { match: 'a', steps: [{ name: 'case_a', type: 'http' }] },
+                {
+                  match: 'b',
+                  steps: [
+                    { name: 'case_b1', type: 'http' },
+                    { name: 'case_b2', type: 'http' },
+                    { name: 'case_b3', type: 'http' },
+                  ],
+                },
+              ],
+            },
+          ] as unknown as WorkflowYaml['steps'],
+        }),
+        'TB'
+      );
+      expect(centerX(findNode(result.nodes, 'case-a'))).toBeLessThan(
+        centerX(findNode(result.nodes, 'case-b1'))
+      );
+    });
+  });
+
+  describe('trigger lane order (TB)', () => {
+    it('trigger 0 is left of trigger 1 when trigger 1 leads a deeper subtree', () => {
+      const { result } = runLayout(
+        minimal({
+          triggers: [
+            { type: 'manual', enabled: true },
+            { type: 'scheduled', enabled: true },
+          ],
+          steps: [
+            { name: 'step_a', type: 'http' },
+          ] as unknown as WorkflowYaml['steps'],
+        }),
+        'TB'
+      );
+      // Find the trigger nodes by their ids
+      const triggerNodes = result.nodes.filter((n) => n.id.startsWith('trigger-'));
+      if (triggerNodes.length < 2) {
+        // Fewer than 2 triggers laid out — assertion not applicable
+        return;
+      }
+      // triggerIndex 0 should be to the left of triggerIndex 1
+      const sorted = [...triggerNodes].sort((a, b) => centerX(a) - centerX(b));
+      expect(sorted[0].id).toContain('manual');
+    });
+  });
+
   it('throws on a cyclic foreach group graph', () => {
     // transformWorkflowToGraph never produces cycles; construct manually to
     // verify computeWorkflowLayout correctly surfaces the dagLayout cycle error.

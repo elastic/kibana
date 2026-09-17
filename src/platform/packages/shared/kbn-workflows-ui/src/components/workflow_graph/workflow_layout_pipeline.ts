@@ -10,6 +10,7 @@
 import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
 import { dagLayout } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
+import { enforceForkLaneOrder, enforceTriggerLaneOrder } from './enforce_lane_order';
 
 // Workflow-specific layout constants. These encode domain knowledge (foreach
 // header height, gutter widths) that does not belong in @kbn/dag-layout.
@@ -76,5 +77,23 @@ export const computeWorkflowLayout = (
     compoundPadding: WORKFLOW_COMPOUND_PADDING,
   });
 
-  return { nodes: laid.nodes, edges: laid.edges };
+  // Post-dagre pass 1: enforce fork lane declaration order.
+  // Runs once per graph (outer + each foreachGroup body) so containers move as
+  // opaque units — prevents inner nodes from detaching from their container.
+  const { nodes: orderedNodes, edges: orderedEdges } = enforceForkLaneOrder(
+    laid.nodes,
+    laid.edges,
+    transformed,
+    direction
+  );
+
+  // Post-dagre pass 2: enforce trigger lane declaration order.
+  const { nodes: finalNodes, edges: finalEdges } = enforceTriggerLaneOrder(
+    orderedNodes,
+    orderedEdges,
+    transformed.nodeRefs,
+    direction
+  );
+
+  return { nodes: finalNodes, edges: finalEdges };
 };
