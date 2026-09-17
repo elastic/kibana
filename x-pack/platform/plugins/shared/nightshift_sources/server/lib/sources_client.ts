@@ -145,18 +145,21 @@ export class SourcesClient {
     search?: string;
     enabled?: boolean;
   }): Promise<ListSourcesResponse> {
+    const filters: string[] = [];
+    if (search) {
+      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${search}*`);
+    }
+    if (enabled !== undefined) {
+      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.enabled: ${enabled}`);
+    }
+
     const response = await this.deps.soClient.find<NightshiftSourceAttributes>({
       type: NIGHTSHIFT_SOURCE_SO_TYPE,
       page,
       perPage,
-      search: search ? `${search}*` : undefined,
-      searchFields: search ? ['title'] : undefined,
       sortField: 'title',
       sortOrder: 'asc',
-      filter:
-        enabled === undefined
-          ? undefined
-          : `${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.enabled: ${enabled}`,
+      filter: filters.length > 0 ? filters.join(' AND ') : undefined,
     });
 
     const limit = pLimit(HEALTH_CHECK_CONCURRENCY);
