@@ -8,7 +8,11 @@
  */
 
 import { getCustomTriggerZodSchema, getTriggerSchema, toCustomTriggerSchemaConfigs } from '.';
-import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../../../common/constants';
+import {
+  ALL_CONNECTOR_IDS,
+  CONNECTOR_ID_MAX_LENGTH,
+  IF_CONDITION_MAX_LENGTH,
+} from '../../../common/constants';
 
 describe('custom trigger on.workflowEvents', () => {
   const triggerSchema = getTriggerSchema(['cases.updated']);
@@ -67,6 +71,15 @@ describe('custom trigger requiresConnectorId', () => {
         })
       );
     }
+  });
+
+  it('accepts the all-connectors wildcard', () => {
+    expect(
+      triggerSchema.safeParse({
+        type: connectorEventTriggerId,
+        'connector-id': ALL_CONNECTOR_IDS,
+      }).success
+    ).toBe(true);
   });
 
   it('accepts connector-id with optional on.condition', () => {
