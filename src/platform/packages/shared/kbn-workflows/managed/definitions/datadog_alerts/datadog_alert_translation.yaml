@@ -1,0 +1,28 @@
+name: Datadog alert translation
+description: Creates and recovers Elastic alerts from Datadog monitor webhook events.
+enabled: true
+triggers:
+  - type: datadog.alert
+    connector-id: "*"
+steps:
+  - name: create_datadog_alert
+    type: alerting.create_alert
+    with:
+      source: datadog
+      fingerprint: '{{ event.body.monitor_id }}:{{ event.body.scopes | default: "*" }}'
+      alert_status: '{% if event.body.alert_transition == "Recovered" %}inactive{% else %}active{% endif %}'
+      data:
+        rule_name: "{{ event.body.title }}"
+        monitor_id: "{{ event.body.monitor_id }}"
+        transition: "{{ event.body.alert_transition }}"
+        message: "{{ event.body.body }}"
+        alert_url: "{{ event.body.url }}"
+        priority: "{{ event.body.severity }}"
+        tags: "{{ event.body.tags }}"
+        alert_type: "{{ event.body.alert_type }}"
+        alert_query: "{{ event.body.alert_query }}"
+        event_type: "{{ event.body.event_type }}"
+        scopes: "{{ event.body.scopes }}"
+        event_id: "{{ event.body.id }}"
+    on-failure:
+      continue: true
