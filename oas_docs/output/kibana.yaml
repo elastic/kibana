@@ -13124,7 +13124,7 @@ paths:
         [Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: get-alerting-v2-rules
       parameters:
-        - description: The page number to return. Defaults to 1.
+        - description: The page number to return. Defaults to 1. `page * per_page` cannot exceed 10000.
           in: query
           name: page
           required: false
@@ -13132,7 +13132,7 @@ paths:
             maximum: 10000
             minimum: 1
             type: integer
-        - description: The number of rules to return per page. Defaults to 20
+        - description: The number of rules to return per page. Defaults to 20.
           in: query
           name: per_page
           required: false
