@@ -29,7 +29,8 @@ const metricsTabSchema = esqlTabSchema.extend(discoverSessionMetricsTabTypeState
   title: 'Metrics tab',
   description:
     'An ES|QL tab with saved metrics grid settings. ' +
-    'The dashboard panel preserves these settings for Discover but does not currently render the metrics grid.',
+    'The dashboard panel stores these settings and restores them in Discover. ' +
+    'The panel does not render the metrics grid.',
 });
 
 // Panel tabs reuse the shared base schemas, not the full session API schemas,
