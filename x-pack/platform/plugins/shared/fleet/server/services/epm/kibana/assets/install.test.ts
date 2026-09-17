@@ -187,6 +187,45 @@ describe('installKibanaSavedObjects', () => {
     ).rejects.toThrow(/resolving ambiguous conflicts/);
   });
 
+  it('deduplicates successResults when both ambiguous_conflict and missing_references resolve the same objects', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-1', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+    const refError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: { type: 'missing_references', references: [] },
+    };
+    // Import returns both error types for the same object
+    const initialResponse = createImportResponse([ambiguousError, refError]);
+    // Ambiguous pass resolves the object successfully
+    const ambiguousResolveResponse = createImportResponse([], [createImportSuccess(asset)]);
+    // Reference pass also resolves the same object successfully
+    const refResolveResponse = createImportResponse([], [createImportSuccess(asset)]);
+
+    mockImporter.import.mockResolvedValueOnce(initialResponse);
+    mockImporter.resolveImportErrors
+      .mockResolvedValueOnce(ambiguousResolveResponse)
+      .mockResolvedValueOnce(refResolveResponse);
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [asset],
+    });
+
+    // The object must appear only once despite being in both successResults
+    expect(result.filter((r) => r.id === asset.id)).toHaveLength(1);
+  });
+
   it('folds missing_references from ambiguous resolve pass into the reference-error handler instead of throwing', async () => {
     const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
     const ambiguousError: SavedObjectsImportFailure = {

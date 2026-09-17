@@ -21,7 +21,7 @@ import type {
 import { SavedObjectsUtils, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 
-import { partition, chunk, once } from 'lodash';
+import { partition, chunk, once, uniqBy } from 'lodash';
 
 import { getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
@@ -824,7 +824,10 @@ async function installKibanaSavedObjectsChunk({
     allSuccessResults = allSuccessResults.concat(resolveSuccessResults);
   }
 
-  return allSuccessResults;
+  // Dedup results: when both ambiguous_conflict and missing_references errors occur in the
+  // same chunk, both resolution passes call resolveImportErrors over the full object set,
+  // so the same object can appear in multiple successResults lists.
+  return uniqBy(allSuccessResults, (r) => `${r.type}:${r.id}:${r.destinationId ?? ''}`);
 }
 
 /**
