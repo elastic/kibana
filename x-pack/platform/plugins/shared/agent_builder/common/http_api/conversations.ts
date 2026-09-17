@@ -65,7 +65,7 @@ export interface UpdateConversationAccessControlRequestBody {
 export type UpdateConversationAccessControlResponse = ConversationAccessControl;
 
 export interface AddConversationEventsRequestBody {
-  events: Array<ConversationAddEventInput>;
+  events: ConversationAddEventInput[];
 }
 
 export interface AddConversationEventsResponse {
