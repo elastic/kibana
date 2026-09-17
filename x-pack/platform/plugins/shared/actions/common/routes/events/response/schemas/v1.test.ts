@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_HANDSHAKE_CHALLENGE_LENGTH } from '@kbn/connector-specs';
+import { MAX_HANDSHAKE_CHALLENGE_LENGTH } from '@kbn/connector-specs-common';
 
 import { ingestEventsAckResponseSchema } from './v1';
 

@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
-import { type ConnectorSpec, connectorsSpecs } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs-common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
@@ -110,18 +109,17 @@ const buildWorkflowsExtensionsFromRegistry = ({
   isReady: async () => {},
 });
 
-const allConnectorSpecs: ConnectorSpec[] = Object.values(connectorsSpecs);
+const allConnectorIds: string[] = [...ConnectorIconsMap.keys()];
 
-// Mirrors stack_connectors' runtime resolution: inline icon → ConnectorIconsMap → plugs.
-const resolveConnectorIcon = (spec: ConnectorSpec) =>
-  spec.metadata.icon ?? ConnectorIconsMap.get(spec.metadata.id) ?? 'plugs';
+// Mirrors stack_connectors' runtime resolution: ConnectorIconsMap → plugs.
+const resolveConnectorIcon = (id: string) => ConnectorIconsMap.get(id) ?? 'plugs';
 
 const buildSpecActionTypeRegistry = () => {
   const registry = new TypeRegistry<ActionTypeModel>();
-  for (const spec of allConnectorSpecs) {
+  for (const id of allConnectorIds) {
     registry.register({
-      id: spec.metadata.id,
-      iconClass: resolveConnectorIcon(spec),
+      id,
+      iconClass: resolveConnectorIcon(id),
     } as unknown as ActionTypeModel);
   }
   return registry;
@@ -281,15 +279,14 @@ const CatalogBody = ({ extensions }: { extensions: LoadedExtensions }) => {
       secondary: `base: ${baseTypeFor(def.id)}${def.icon ? '' : ' (no icon — falls back)'}`,
     }));
 
-  const connectorRows: IconRow[] = [...allConnectorSpecs]
-    .sort((a, b) => a.metadata.displayName.localeCompare(b.metadata.displayName))
-    .map((spec) => {
-      const id = spec.metadata.id;
+  const connectorRows: IconRow[] = [...allConnectorIds]
+    .sort((a, b) => a.localeCompare(b))
+    .map((id) => {
       const base = baseTypeFor(id.startsWith('.') ? id.slice(1) : id);
       return {
         icon: stepIconOf(base),
         primary: base,
-        secondary: spec.metadata.displayName,
+        secondary: id,
       };
     });
 
@@ -314,7 +311,7 @@ const CatalogBody = ({ extensions }: { extensions: LoadedExtensions }) => {
       <IconRowGrid rows={extensionRows} columns={3} />
 
       <SectionHeader
-        title={`Connector specs (${connectorRows.length} from @kbn/connector-specs)`}
+        title={`Connector specs (${connectorRows.length} from @kbn/connector-specs-common icons)`}
         subtitle="Bare base types, as the workflow list shows them (`aws_lambda` for `.aws_lambda`)."
       />
       <IconRowGrid rows={connectorRows} columns={3} />

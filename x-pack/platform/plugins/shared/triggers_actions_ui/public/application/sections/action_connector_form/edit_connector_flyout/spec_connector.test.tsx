@@ -11,7 +11,7 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor, screen } from '@testing-library/react';
 import EditConnectorFlyout from '.';
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs-common';
 import { EditConnectorTabs } from '../../../../types';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 import type { AppMockRenderer } from '../../test_utils';

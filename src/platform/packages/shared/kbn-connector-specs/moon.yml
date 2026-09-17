@@ -28,7 +28,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/connector-specs-common'
 tags:
-  - shared-common
+  - shared-server
   - package
   - prod
   - group-platform

@@ -11,7 +11,6 @@ import { EuiFlexGrid, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
-import { connectorsSpecs } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs-common';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -40,12 +39,11 @@ interface MockConnectorsResponse {
 // would say nothing, so they're left out rather than faked.
 const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
 
-for (const { metadata } of Object.values(connectorsSpecs)) {
-  const { id, displayName, icon } = metadata;
+for (const [id, icon] of ConnectorIconsMap) {
   connectorTypeRegistry.register({
     id,
-    actionTypeTitle: displayName,
-    iconClass: icon ?? ConnectorIconsMap.get(id) ?? 'plugs',
+    actionTypeTitle: id,
+    iconClass: icon,
   } as unknown as ActionTypeModel);
 }
 

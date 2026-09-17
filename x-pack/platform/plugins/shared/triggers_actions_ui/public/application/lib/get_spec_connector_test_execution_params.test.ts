@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs-common';
 import { getSpecConnectorTestExecutionParams } from './get_spec_connector_test_execution_params';
 
 describe('getSpecConnectorTestExecutionParams', () => {
