@@ -242,7 +242,13 @@ The `page_objects` directory contains all the Page Objects that represent Platfo
 
 ##### Where should a Page Object live?
 
-The placement policy (three tiers, shared vs solution vs plugin-local, frozen fixture keys, how exceptions are recorded) lives in one place: [Page objects: Placement policy](../../../../../docs/extend/testing/page-objects.md#scout-page-objects-where). Read it before adding or moving anything here. In short: `@kbn/scout` holds what wraps a shared `@kbn/*` component or a platform app with no single owner. UI that one plugin renders stays in that plugin (see ["Registering a plugin-local Page Object"](#registering-a-plugin-local-page-object)). A second plugin that already depends on the owner imports from it (see ["Reusing a Page Object from another plugin"](#reusing-a-page-object-from-another-plugin)).
+`@kbn/scout` is a critical package for Scout: any change to it triggers a full Scout test run. To keep CI fast, only add Page Objects here when they are shared across plugins. Use the following guidance to decide where a Page Object belongs:
+
+- If it is used by a single plugin, keep it in that plugin under `test/scout/ui/fixtures/page_objects/` and register it locally (see ["Registering a plugin-local Page Object"](#registering-a-plugin-local-page-object)). Changes are then scoped to that plugin's tests instead of the whole suite.
+- If it is used by a few plugins that already depend on the owning plugin, keep it in the owning plugin and import it from the others as a test helper (see ["Reusing a Page Object from another plugin"](#reusing-a-page-object-from-another-plugin)).
+- If it represents a core Platform surface with no natural owner (Discover, Dashboard, etc.), add it here so other teams can reuse it.
+
+For the full rules (three tiers, shared vs solution vs plugin-local, frozen fixture keys, recording exceptions) see the [placement policy](../../../../../docs/extend/testing/page-objects.md#scout-page-objects-placement).
 
 Page Objects must be registered with the `createLazyPageObject` function, which guarantees its instance is lazy-initialized. This way, we can have all the page objects available in the test context, but only the ones that are called will be actually initialized:
 
@@ -269,7 +275,11 @@ test.beforeEach(async ({ pageObjects }) => {
 For a Page Object used by a single plugin, keep it next to the tests in `test/scout/ui/fixtures/page_objects/` and extend the base `test` (or `spaceTest`) to add it to the `pageObjects` fixture:
 
 ```ts
-import type { PageObjects, ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import type {
+  PageObjects,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+} from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { MyPluginPage } from './page_objects';
 
@@ -792,7 +802,7 @@ export const scoutTestFixtures = mergeTests(coreFixtures, newTestFixture);
 
 #### Best Practices
 
-- **Reusable Code:** Placement of Page Objects, API services and Fixtures follows the [placement policy](../../../../../docs/extend/testing/page-objects.md#scout-page-objects-where). Ownership of the wrapped UI decides, not consumer count: shared `@kbn/*` components and platform apps belong here, UI that one plugin renders belongs in that plugin. Any change to `kbn-scout` re-runs the whole Scout suite, so keep it to what is genuinely shared.
+- **Reusable Code:** When creating Page Objects, API services or Fixtures that apply to more than one plugin, ensure they are added to the `kbn-scout` package. Single-consumer Page Objects should instead live in the consuming plugin (see ["Where should a Page Object live?"](#where-should-a-page-object-live)), since any change to `kbn-scout` re-runs the whole Scout suite.
 - **Adhere to Existing Structure:** Maintain consistency with the project's architecture.
 - **Keep the Scope of Components Clear** When designing test components, keep in mind naming conventions, scope, maintainability and performance.
   - `Page Objects` should focus exclusively on UI interactions (clicking buttons, filling forms, navigating page). They should not make API calls directly.

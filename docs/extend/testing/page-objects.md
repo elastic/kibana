@@ -32,50 +32,42 @@ test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
 });
 ```
 
-## Placement policy [scout-page-objects-where]
+## Where they live [scout-page-objects-where]
 
-Where a Scout UI helper lives and what it may contain. The `@kbn/scout` README and the solution Scout packages link here instead of repeating it.
+- Core page objects: `@kbn/scout` (available as `pageObjects.<name>`)
+- Solution Scout packages may provide additional page objects (their internal folder layout varies—search within the package for `page_objects` if you need the source).
+- Plugin-local page objects: `<plugin-root>/test/scout/ui/fixtures/page_objects`
 
-### The three tiers [scout-page-objects-tiers]
+### Placement policy [scout-page-objects-placement]
 
-The tier is decided by what renders the UI the object targets, not by the object's name or its current folder.
+Use this when deciding whether a new helper belongs in `@kbn/scout`, a solution package, or your plugin.
 
-| Tier                    | Lives in                                                                                                          | Wraps                                                                                                    | Reached through                      | Examples                                                                                                                              |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| EUI component object    | `@elastic/eui-test-helpers`, re-exported from `kbn-scout/src/playwright/eui_components`                           | One EUI component. Re-exports only, no Kibana logic                                                      | `page.components.<name>(testSubj)`   | `comboBox`, `dataGrid`, `toast`                                                                                                       |
-| Kibana component object | `kbn-scout/src/playwright/ui_components`                                                                          | One Kibana component that two or more apps render, wherever it is exported from (`@kbn/*`, plugin, core) | `pageObjects.<key>` or direct import | `KibanaCodeEditorWrapper` (`@kbn/code-editor`), `DataGrid` (`@kbn/unified-data-table`), `QueryBar` and `FilterBar` (`unified_search`) |
-| App page object         | `kbn-scout/src/playwright/page_objects`, a solution package, or a plugin's `test/scout*/ui/fixtures/page_objects` | One app, management screen, or chrome area                                                               | `pageObjects.<key>`                  | `dashboard`, `discover`, `lens`, `collapsibleNav`                                                                                     |
+**Three tiers.** The tier follows what renders the UI the helper targets, not the helper's name or current folder.
 
-- If an EUI component has no helper yet, contribute one to [EUI test helpers](./eui-test-helpers.md) rather than wrapping it in Kibana. A Kibana class may wrap an EUI helper only when it adds Kibana behaviour (for example `Toasts` fixes the `globalToastList` subject core sets). If it adds nothing, use `page.components.*` directly.
-- Do not target EUI internals by CSS class when a helper method exists. Enforced by `@kbn/eslint/scout_no_raw_eui_selectors`, which is keyed on exact selector so every violation names its fix. Selectors with no helper method are gaps to file against EUI test helpers, not violations.
-- A helper with no `data-test-subj` target at all (for example waiting on `data-render-complete`) is a utility under `page_objects/utils`, not a `pageObjects` key.
+| Tier                    | Lives in                                                                                | Wraps                                                                      | Reached through                      |
+| ----------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------ |
+| EUI component object    | `@elastic/eui-test-helpers`, re-exported from `kbn-scout/src/playwright/eui_components` | One EUI component. Re-exports only                                         | `page.components.<name>(testSubj)`   |
+| Kibana component object | `kbn-scout/src/playwright/ui_components`                                                | One Kibana component that two or more apps render (`@kbn/*`, plugin, core) | `pageObjects.<key>` or direct import |
+| App page object         | `kbn-scout/src/playwright/page_objects`, a solution package, or plugin-local            | One app, management screen, or chrome area                                 | `pageObjects.<key>`                  |
 
-### Shared, solution, or plugin-local [scout-page-objects-scope]
+**Where it goes.**
 
-`@kbn/scout` is a critical package. Any change to it re-runs the whole Scout suite, so it holds only what is genuinely shared.
+- A Kibana component rendered by two or more apps: `@kbn/scout`, even if only one test uses it today. Moving a shared component's test API into the one plugin that happens to use it makes that plugin the de facto owner, and the next consumer copies it.
+- A platform app that tests in another module drive, or that a `@kbn/scout` fixture depends on: `@kbn/scout`. A platform app only its own tests drive: plugin-local.
+- A solution app: the solution package when two or more of that solution's modules drive it, otherwise plugin-local. Never `@kbn/scout`.
+- If an EUI component has no helper yet, contribute one to [EUI test helpers](./eui-test-helpers.md) rather than wrapping it in Kibana. Do not target EUI internals by CSS class when a helper method exists (`@kbn/eslint/scout_no_raw_eui_selectors` enforces the covered cases).
+- Before adding a class, search all Scout locations for the same class name. Same name in two places is a duplicate until proven otherwise.
 
-- **Kibana component objects**: rendered inside two or more apps means `@kbn/scout`, regardless of how many tests use the object today. Moving a shared component's test API into the one plugin that happens to use it makes that plugin the de facto owner, and the next consumer copies it. That is how FTR page objects multiplied. Rendered only inside one solution's apps means that solution's package.
-- **App page objects**: a `platform` group app that tests in another module drive, or that a `@kbn/scout` fixture depends on (login under `browserAuth`), lives in `@kbn/scout`. A `platform` app only its own tests drive stays plugin-local. A solution group app lives in the solution package when two or more of that solution's modules drive it, otherwise plugin-local. Never in `@kbn/scout`.
-- A second plugin that already depends on the owning plugin imports the page object as a test helper instead of copying it (see the README's [Reusing a Page Object from another plugin](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-scout/README.md#reusing-a-page-object-from-another-plugin)).
-- Before adding a class, search the Scout packages and `test/scout*` directories for the same class name. Same name in two places is a duplicate until proven otherwise.
-- Any move into a plugin needs an ack from that plugin's code owners. When in doubt, keep.
+**Fixture keys are public API.** `pageObjects.<key>`, `page.components.<key>` and `apiServices.<key>` never change. A file may move between tiers or folders and keep its key.
 
-Consumer counts come from `node scripts/scout audit`, which greps fixture keys (`pageObjects.<key>`) and attributes each hit to its `kibana.jsonc` module. Page objects are Proxy fixtures, so import graph tools report every one of them as unused. That signal is wrong, not the page object. Run the audit by hand when touching page objects. It is not wired into CI.
+**Consumer counts** come from `node scripts/scout audit`. Page objects are Proxy fixtures, so import graph tools report every one of them as unused. That signal is wrong, not the page object.
 
-### Fixture keys are public API [scout-page-objects-stability]
-
-`pageObjects.<key>`, `page.components.<key>` and `apiServices.<key>` never change. This policy governs file location and class naming only. A file may move between tiers or folders and keep its key. Solution packages spread `...pageObjects`, so a core key change is a cross-team change and their code owners review it.
-
-### Recording an exception [scout-page-objects-exceptions]
-
-When a review or audit flags something and the decision is to keep it, record that next to the code so the record dies with it:
+**Recording an exception.** When a review flags something and the decision is to keep it, record it next to the code:
 
 ```ts
 // scout-audit: keep -- wraps @kbn/unified-tabs, Discover is the only consumer today
 export class UnifiedTabs {
 ```
-
-`apiServices.<key>` helpers under `kbn-scout/src/playwright/fixtures/scope/worker/apis` follow the same rules. See [API services](./api-services.md).
 
 To make your page object available as `pageObjects.newPage`, register it in your plugin fixtures.
 
