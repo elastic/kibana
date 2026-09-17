@@ -172,9 +172,9 @@ the same guidance in its instructions goes unmarked.
 ## Improvements
 
 An **improvement** is a proposed change to one AI index's KI pipeline, derived
-from that index's signals. They live in the single global
-`context-engine-improvements` index, exposed to the server as
-`ContextEnginePluginStart.getImprovementsService(esClient)` and written by an
+from that index's signals. They live in the `context-engine-improvements` index,
+exposed to the server as
+`ContextEnginePluginStart.getImprovementsService(esClient, spaceId)` and written by an
 analysis run (see [Feedback analysis runs](#feedback-analysis-runs)).
 
 ### Reviewing them
@@ -216,18 +216,19 @@ KI proposals (`add_ki`, `edit_ki`, `remove_ki`) currently have no panel. The
 loop is not expected to propose them, and the apply path for them exists either
 way.
 
-Unlike signals, the store is **global rather than per-space**: an improvement
-targets an AI index's KI pipeline, and the AI index registry has no space
-dimension. Two consequences are accepted deliberately — the analysis reads
-signals across all spaces, so an improvement's rationale can cite evidence from
-a space the reviewer cannot open; and a single index means one
-`deleteByAiIndex` cleans up completely when an AI index is deleted.
+Improvements are **scoped to the space of the AI index they target**, which is
+the space the service is constructed for. Every read filters on it and every
+write stamps it, so `list`, `get`, `transition` and `deleteByAiIndex` cannot
+reach another space's rows, and the same AI index id in two spaces keeps two
+independent sets of improvements. Documents written before the store was
+space-scoped carry no `space` and are treated as belonging to the default
+space.
 
 The lifecycle is an **append log** rather than a mutable status field, so the
 record of what the loop did to a user's index survives every transition:
 
 - `improvement_id` is the stable lineage key, derived idempotently from
-  `hash(ai_index_id + change_fingerprint)`. The fingerprint describes the
+  `hash(space + ai_index_id + change_fingerprint)`. The fingerprint describes the
   proposed fix (e.g. `remove_workflow:<workflow_id>`) and contains no free text,
   so a re-run over the same latent problem appends a revision instead of
   creating a near-duplicate row.
@@ -268,7 +269,8 @@ halves:
 - **The caller** creates the index on the first write, and Elasticsearch applies
   the template's mappings to it. Every subsequent read and write is authorized
   against that caller too, so `getImprovementsService` takes the client to act
-  through and callers pass a request-scoped one.
+  through, alongside the space to scope to, and callers pass a request-scoped
+  client.
 
 This is what keeps the store off the internal user. Applying mappings lazily per
 operation instead — the usual storage-adapter pattern — would need `manage` on
@@ -338,10 +340,15 @@ turned analysis on. The conversation it creates is private to that user, Agent
 Builder's default: a run reads the index's data under the owner's privileges,
 and its rounds quote what it read.
 
-A managed workflow instance is keyed by `(workflowId, spaceId)`, but an AI index
-is global and writable from any space, so the instance is installed in the
-default space rather than the caller's. Enable, disable and delete therefore
-address the same instance whichever space the write came from.
+The instance is installed in the space of the AI index it analyzes, so enable,
+disable and delete address that space's schedule and no other. The workflow
+document id has to carry the space itself: it is the ES `_id` and is unique per
+index regardless of the document's `spaceId`, so suffixing it with the AI index
+id alone would point two spaces holding the same id at one shared document. The
+space is folded in as a hash rather than appended, because space ids and AI
+index ids both allow hyphens (`<space>-<aiIndexId>` would make `('a-b', 'c')`
+and `('a', 'b-c')` collide) and space ids have no length cap while the `_id`
+does.
 
 The workflow carries a `concurrency` guard keyed on the AI index with
 `strategy: drop`, so two runs for one index never overlap.
@@ -389,8 +396,10 @@ with no restriction by signal type. A signal's type governs how it is
    scope it. It reaches the run's total but forms no pattern, since patterns are
    keyed on fields it does not have.
 
-**Every space is read**, because an AI index is global while signals are
-per-space. The spaces a run drew from are recorded on each improvement's
+**Only the AI index's own space is read.** Signals live one index per space, so
+a run reads `context-engine-signals-<space>` for the space its AI index belongs
+to and nothing else, which keeps an improvement's evidence inside the space its
+reviewer can open. The space is recorded on each improvement's
 `provenance.signal_spaces`.
 
 Signals are folded into ranked patterns — grouped by tag, target index and tool,

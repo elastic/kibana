@@ -19,6 +19,7 @@ import type { ImprovementsServiceApi } from '../improvements/service';
 
 export interface RecordImprovementsOptions {
   aiIndexId: string;
+  spaceId: string;
   agentRunId: string;
   signalWindow: { from: string; to: string };
   signalSpaces: string[];
@@ -67,6 +68,7 @@ const describe = (proposal: unknown): { action?: string; title?: string } => {
 /** Turns what an analysis run proposed into revisions of the improvements store. */
 export const recordImprovements = async ({
   aiIndexId,
+  spaceId,
   agentRunId,
   signalWindow,
   signalSpaces,
@@ -132,6 +134,7 @@ export const recordImprovements = async ({
     try {
       improvementId = buildImprovementId({
         aiIndexId,
+        spaceId,
         action: proposal.action,
         target: proposal.target,
       });

@@ -81,6 +81,7 @@ describe('getFeedbackContextStepDefinition', () => {
 
     expect(buildFeedbackContextMock).toHaveBeenCalledWith(
       'orders',
+      'default',
       expect.objectContaining({ esClient })
     );
   });
@@ -154,5 +155,35 @@ describe('getFeedbackContextStepDefinition', () => {
       expect.objectContaining({ type: 'FeatureDisabledError' })
     );
     expect(buildFeedbackContextMock).not.toHaveBeenCalled();
+  });
+
+  it('uses the workflow space for the feature flag, improvements service, and feedback context', async () => {
+    const esClient = { search: jest.fn() };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'orders' },
+      esClient,
+      spaceId: 'marketing',
+    });
+    const isContextEngineEnabled = jest.fn().mockResolvedValue(true);
+    const getImprovementsService = jest.fn().mockReturnValue(improvementsService);
+
+    const { handler } = getFeedbackContextStepDefinition({
+      getAiIndexService: () => aiIndexService,
+      getImprovementsService,
+      getAuditLogger: async () => undefined,
+      isContextEngineEnabled,
+      isFeedbackLoopEnabled: async () => true,
+      checkWritePrivilege: async () => true,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(isContextEngineEnabled).toHaveBeenCalledWith('marketing');
+    expect(getImprovementsService).toHaveBeenCalledWith(esClient, 'marketing');
+    expect(buildFeedbackContextMock).toHaveBeenCalledWith(
+      'orders',
+      'marketing',
+      expect.objectContaining({ esClient, aiIndexService, improvementsService })
+    );
   });
 });
