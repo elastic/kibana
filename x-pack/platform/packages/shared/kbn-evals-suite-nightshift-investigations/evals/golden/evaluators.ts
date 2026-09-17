@@ -180,6 +180,7 @@ const maxConfidence = (answer: string): number | null => {
 };
 const leakagePattern =
   /\b(incident\s+resolved|post[- ]incident|mitigation\s+completed|rollback\s+completed|rollback\s+fixed|resolution|resolved\s+at|pev[- ]\d+.*(?:resolved|mitigated|fixed))\b/i;
+// The pinned Python grader reads content[:400]; its separate tool_output cap is 2,000.
 const trajectoryText = (output: GoldenTaskOutput): string =>
   output.trajectory
     .map((step) => `[${step.step_type}] ${step.tool_name || ''}: ${step.content.slice(0, 400)}`)
@@ -236,11 +237,13 @@ const createSemanticEvaluators = (
         const toolLeakage = output.trajectory.some(
           (step) => step.step_type === 'tool_result' && leakagePattern.test(step.tool_output ?? '')
         );
+        // Preserve the reference's rule-first gate even when another grader populated the cache.
         if (name === 'rca_anti_leakage' && !answerLeakage && !toolLeakage)
           return { score: 1, explanation: 'no_leakage_detected' };
         const scores = await getScores(output, expected.reference_answer ?? '');
         if (name === 'rca_anti_leakage')
           return {
+            // Python treats judge failure as leakage for answer matches, but clean for tool-only matches.
             score: Number(!(scores?.used_post_incident_evidence ?? answerLeakage)),
             explanation:
               scores?.anti_leakage_reasoning ??

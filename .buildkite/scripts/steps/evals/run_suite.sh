@@ -14,6 +14,15 @@ if [[ -z "$EVAL_SUITE_ID" ]]; then
   exit 1
 fi
 
+# Preserve the existing smoke coverage until golden sandbox provisioning lands separately.
+# Apply this before fanout so child jobs and baseline refreshes use the same profile.
+if [[ "$EVAL_SUITE_ID" == "nightshift-investigations" ]]; then
+  export NIGHTSHIFT_DATASETS="${NIGHTSHIFT_DATASETS:-synthetic-smoke}"
+  if [[ "$NIGHTSHIFT_DATASETS" == "synthetic-smoke" ]]; then
+    export EVAL_SERVER_CONFIG_SET="evals_tracing"
+  fi
+fi
+
 # Boot disk for the fanout agents. Eval steps bootstrap the workspace, unpack the Kibana
 # distributable and run a local ES + Kibana; on the image default ES ends up under its merge
 # disk watermark and stops merging segments. Keep in sync with `pipelines/evals/eval_pipeline.ts`.
@@ -283,6 +292,7 @@ EOF
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+          NIGHTSHIFT_DATASETS: "${NIGHTSHIFT_DATASETS:-}"
           EVAL_GREP: "${EVAL_GREP:-}"
           EVAL_GREP_INVERT: "${EVAL_GREP_INVERT:-}"
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
@@ -429,6 +439,7 @@ EOF
         EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
         EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
         EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+        NIGHTSHIFT_DATASETS: "${NIGHTSHIFT_DATASETS:-}"
 EOF
       elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
         # Fresh-baseline mode: emit the post-comparison step inside the fanout so

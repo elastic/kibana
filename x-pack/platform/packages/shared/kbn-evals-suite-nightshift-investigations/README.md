@@ -314,12 +314,16 @@ against.
 | `GCS_CREDENTIALS` | Needed only for seed snapshots; supplied through profile `gcsDatasetAccessCredentials`. |
 
 Registered as `nightshift-investigations` in
-[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json), with Scout config
-`evals_nightshift_investigations`. PR and weekly jobs must provision the same external sandbox
-with `SANDBOX_API_KEY` and the client certificate/key paths. **CI sandbox provisioning is
-deferred to a separate change**; the current eval job does not supply this prerequisite,
-so golden CI runs remain blocked until it is provisioned. This PR adds no sandbox launcher.
-The credentialed local acceptance run is the golden baseline. Existing model group selection applies. Use `--judge` explicitly for the reference comparison.
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json). Local CLI runs
+use the golden profile and Scout config `evals_nightshift_investigations` by default.
+
+PR and weekly CI retain the existing `synthetic-smoke` coverage with `evals_tracing`, which
+needs no sandbox. The CI runner forwards this selection to model jobs and baseline refreshes.
+**Golden CI sandbox provisioning is deferred to a separate change**; the credentialed local
+acceptance run is the golden baseline. This PR adds no sandbox launcher. A provisioned job
+can explicitly select `NIGHTSHIFT_DATASETS=investigate-lite` and
+`EVAL_SERVER_CONFIG_SET=evals_nightshift_investigations` with the private dataset and sandbox
+configuration above. Use `--judge` explicitly for the reference comparison.
 
 Validation:
 
