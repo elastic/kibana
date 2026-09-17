@@ -2714,6 +2714,9 @@ importers:
       '@kbn/paertial-results-example-plugin':
         specifier: workspace:*
         version: link:examples/partial_results_example
+      '@kbn/page-render-screenshotting-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/page_render_screenshotting
       '@kbn/painless-lab-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/painless_lab
@@ -9019,6 +9022,8 @@ importers:
   x-pack/platform/plugins/private/observability_ai_assistant_management: {}
 
   x-pack/platform/plugins/private/otel_telemetry_collection: {}
+
+  x-pack/platform/plugins/private/page_render_screenshotting: {}
 
   x-pack/platform/plugins/private/painless_lab: {}
 
