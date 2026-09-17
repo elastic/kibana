@@ -11,7 +11,8 @@
  * TTL-based file cache for the EIS CCM API key.
  *
  * Stores the key at ~/.elastic/eis-ccm-key.json so that repeated `pnpm es
- * snapshot --eis` runs don't require a Vault round-trip every time. The TTL
+ * snapshot --eis` / `pnpm es serverless --eis` runs don't require a Vault
+ * round-trip every time. The TTL
  * defaults to 7 days and is configurable via the EIS_CCM_KEY_TTL_HOURS env var.
  *
  * Three read modes:
