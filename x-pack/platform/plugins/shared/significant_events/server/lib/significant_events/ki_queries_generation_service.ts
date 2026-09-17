@@ -11,7 +11,6 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { InferenceClient } from '@kbn/inference-common';
@@ -23,7 +22,6 @@ import {
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
-import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
@@ -47,7 +45,6 @@ export interface GenerateKIQueriesParams {
 export interface GenerateKIQueriesDependencies {
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
-  soClient: SavedObjectsClientContract;
   kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
   dataStreams: DataStreamsStart;
@@ -80,7 +77,6 @@ export async function generateKIQueries(
   const {
     streamsClient,
     inferenceClient,
-    soClient,
     kiClient,
     esClient,
     dataStreams,
@@ -105,17 +101,12 @@ export async function generateKIQueries(
 
   logger.debug(`Using connector ${connectorId} for query generation`);
 
-  const [
-    definition,
-    { significantEventsPromptOverride },
-    significantEventsAvailable,
-    useSemanticCodeSearchGrounding,
-  ] = await Promise.all([
-    streamsClient.getStream(streamName),
-    new PromptsConfigService({ soClient, logger }).getPrompt(),
-    isSignificantEventsFeatureFlagEnabled(featureFlags),
-    isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
-  ]);
+  const [definition, significantEventsAvailable, useSemanticCodeSearchGrounding] =
+    await Promise.all([
+      streamsClient.getStream(streamName),
+      isSignificantEventsFeatureFlagEnabled(featureFlags),
+      isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
+    ]);
 
   let memoryTools;
   if (significantEventsAvailable) {
@@ -158,7 +149,6 @@ export async function generateKIQueries(
     {
       definition,
       connectorId,
-      systemPrompt: significantEventsPromptOverride,
       maxExistingQueriesForContext,
       maxDurationMs,
       queryValidationTimeoutMs,

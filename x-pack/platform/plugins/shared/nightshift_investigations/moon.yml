@@ -45,6 +45,10 @@ dependsOn:
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/investigation-output'
+  - '@kbn/context-engine-plugin'
+  - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod

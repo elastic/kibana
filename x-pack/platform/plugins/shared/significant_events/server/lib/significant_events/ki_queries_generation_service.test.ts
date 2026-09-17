@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
@@ -48,9 +48,6 @@ const makeDeps = (
     getStream: jest.fn().mockResolvedValue(definition),
   } as unknown as GenerateKIQueriesDependencies['streamsClient'],
   inferenceClient: {} as InferenceClient,
-  soClient: {
-    get: jest.fn().mockRejectedValue({ statusCode: 404 }),
-  } as unknown as SavedObjectsClientContract,
   kiClient: {} as never,
   esClient: {} as never,
   dataStreams: {} as never,
@@ -154,6 +151,15 @@ describe('generateKIQueries', () => {
     expect(identifyKIQueriesMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({ maxDurationMs: 300000, connectorId: 'test-connector' })
     );
+  });
+
+  it('does not pass a system prompt', async () => {
+    await generateKIQueries(
+      { streamName: 'logs.test', connectorId: 'test-connector' },
+      makeDeps({ logger })
+    );
+
+    expect(identifyKIQueriesMock.mock.calls[0][0]).not.toHaveProperty('systemPrompt');
   });
 
   it('initializes memory clients when significant events are available', async () => {

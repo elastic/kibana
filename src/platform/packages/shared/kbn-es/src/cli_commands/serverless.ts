@@ -27,13 +27,28 @@ import {
   isServerlessProjectTier,
   serverlessProductTiers,
   kbnProjectTypeFromEs,
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 } from '../utils';
 import type { ServerlessProjectType } from '../utils';
 import type { Command } from './types';
 import { createCliError } from '../errors';
+import {
+  assertCcmApiKeyResolved,
+  mergeEisEsArgs,
+  resolveCcmApiKey,
+  setCcmApiKey,
+} from '../eis/eis_setup';
 
 const supportedProjectTypesStr = Array.from(esServerlessProjectTypes).join(' | ').trim();
 const supportedProductTiersStr = Array.from(serverlessProductTiers).join(' | ').trim();
+
+/**
+ * `--eis` is a CLI-only flag: it's consumed entirely in this file (to build
+ * `esArgs`/`onReady`) before the options are handed to `runServerlessCluster`,
+ * so it isn't part of the shared `ServerlessOptions` type.
+ */
+type ServerlessCliOptions = ServerlessOptions & { eis?: boolean };
 
 export const serverless: Command = {
   description: 'Run Serverless Elasticsearch through Docker',
@@ -65,6 +80,7 @@ export const serverless: Command = {
                           )}
       --uiam              Configure ES serverless with Universal Identity and Access Management (UIAM) support [default: true].
       --uiam-oauth        Start an additional UIAM OAuth container for OAuth flow support [default: false].
+      --eis               Enable EIS mode: sets the EIS inference URL, resolves and sets the CCM API key (implies --waitForReady)
 
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
@@ -73,6 +89,7 @@ export const serverless: Command = {
 
       es serverless --projectType elasticsearch_general_purpose --tag git-fec36430fba2-x86_64 # loads ${ES_SERVERLESS_REPO_ELASTICSEARCH}:git-fec36430fba2-x86_64
       es serverless --projectType observability --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
+      es serverless --projectType observability --productTier complete --eis
     `;
   },
   run: async (defaults = {}) => {
@@ -112,6 +129,7 @@ export const serverless: Command = {
         'waitForReady',
         'uiam',
         'uiamOAuth',
+        'eis',
       ],
 
       default: {
@@ -121,7 +139,7 @@ export const serverless: Command = {
         uiam: true,
         uiamOAuth: false,
       },
-    }) as unknown as ServerlessOptions;
+    }) as unknown as ServerlessCliOptions;
 
     if (!options.esProjectType) {
       throw createCliError(
@@ -174,6 +192,38 @@ export const serverless: Command = {
     if (options.background && !options.skipTeardown) {
       options.skipTeardown = true;
     }
+
+    // --eis implies the EIS inference URL and CCM setup after the cluster is
+    // ready. Resolve the CCM API key up front so any Vault login prompt appears
+    // before Docker pull / ES startup, not buried after them.
+    const eisEnabled = Boolean(options.eis);
+    let eisApiKey: string | undefined;
+
+    if (eisEnabled) {
+      options.esArgs = mergeEisEsArgs(options.esArgs);
+      options.waitForReady = true;
+      eisApiKey = await resolveCcmApiKey(log);
+      options.onReady = async () => {
+        const protocol = options.ssl ? 'https' : 'http';
+        await setCcmApiKey(
+          assertCcmApiKeyResolved(eisApiKey),
+          {
+            baseUrl: `${protocol}://localhost:${options.port || DEFAULT_PORT}`,
+            credentials: {
+              username: ELASTIC_SERVERLESS_SUPERUSER,
+              password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+            },
+            ssl: !!options.ssl,
+          },
+          log
+        );
+        log.success('EIS: CCM API key set in Elasticsearch');
+      };
+    }
+
+    // `eis` is CLI-only (see `ServerlessCliOptions`) — strip it before handing
+    // options to `runServerlessCluster`, which has no use for it.
+    delete options.eis;
 
     const cluster = new Cluster();
     await cluster.runServerless({
