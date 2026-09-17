@@ -607,7 +607,7 @@ export class ActionsPlugin
     this.securityStart = plugins.security;
     if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
       this.logger.warn(
-        '`xpack.actions.relay.uiam.enabled` is set but UIAM is not configured for this Kibana; Relay requests will fail until `xpack.security.uiam` is configured.'
+        '`xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity. Relay requests will fail until `xpack.security.uiam` is configured with a client certificate (`ssl.certificate` and `ssl.key`).'
       );
     }
     const {

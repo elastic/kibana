@@ -38,7 +38,8 @@ export interface RelayClientOptions {
   /**
    * Kibana's own UIAM identity. Resolved on each request because the client is built during
    * `setup`, before the security plugin's start contract exists. `undefined` means UIAM is not
-   * configured, which is a misconfiguration when `useSystemIdentity` is on.
+   * configured for this Kibana, or is configured without the client certificate the identity is
+   * derived from. Either is a misconfiguration when `useSystemIdentity` is on.
    */
   getSystemIdentity: () => SystemIdentity | undefined;
 }
@@ -256,7 +257,7 @@ export class RelayClient implements RelayClientContract {
     const systemIdentity = this.getSystemIdentity();
     if (!systemIdentity) {
       throw new Error(
-        'Cannot authenticate the Relay request: `xpack.actions.relay.uiam.enabled` is set but UIAM is not configured for this Kibana.'
+        'Cannot authenticate the Relay request: `xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity. Configure `xpack.security.uiam` with a client certificate (`ssl.certificate` and `ssl.key`).'
       );
     }
     return await systemIdentity.createEphemeralToken(signal);

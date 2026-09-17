@@ -78,8 +78,10 @@ obtained from the security plugin's `authc.systemIdentity`. The Relay forwards t
 with the certificate identity injected by the ingress proxy to UIAM, which is what lets Relay
 authenticate Kibana across regions. At the Relay, the token only validates alongside Kibana's mTLS
 certificate identity, so the certificate configured under `xpack.actions.relay.ssl` must be the same
-one configured under `xpack.security.uiam.ssl`. If the token cannot be minted, or the flag is on without
-`xpack.security.uiam` configured, the Relay request fails rather than being sent unauthenticated.
+one configured under `xpack.security.uiam.ssl`. That certificate is also what UIAM derives Kibana's own
+identity from. `authc.systemIdentity` is therefore only available when
+`xpack.security.uiam.ssl.certificate` and `.key` are set. If the token cannot be minted, or the flag is
+on without that configuration, the Relay request fails rather than being sent unauthenticated.
 The setting is rejected outside Serverless; with it off (the default) the header is omitted and the
 Relay identifies Kibana from the mTLS leg alone.
 

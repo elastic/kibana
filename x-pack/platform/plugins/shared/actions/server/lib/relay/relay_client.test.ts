@@ -127,10 +127,12 @@ describe('RelayClient', () => {
       );
     });
 
-    it('fails closed when `relay.uiam.enabled` is on but UIAM is not configured', async () => {
+    it('fails closed when `relay.uiam.enabled` is on but there is no system identity', async () => {
       await expect(
         createClient({ getSystemIdentity: () => undefined }).bind('tenant-1', 'C123')
-      ).rejects.toThrow('`xpack.actions.relay.uiam.enabled` is set but UIAM is not configured');
+      ).rejects.toThrow(
+        '`xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity'
+      );
       expect(requestMock).not.toHaveBeenCalled();
     });
 

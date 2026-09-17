@@ -36,7 +36,8 @@ export interface AuthenticationServiceStart {
   apiKeys: NativeAPIKeysType;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   /**
-   * Kibana's own UIAM identity. `undefined` when UIAM is not configured for this deployment.
+   * Kibana's own UIAM identity. `undefined` when UIAM is not configured for this deployment, or
+   * when it is configured without the mTLS client certificate UIAM derives the identity from.
    */
   systemIdentity?: SystemIdentity;
 }
