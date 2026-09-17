@@ -13,7 +13,7 @@ import {
   type LensConfig,
   type LensESQLDataset,
   type LensLegendConfig,
-  type LensSeriesLayer,
+  type LensXYConfig,
   type LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
 import type React from 'react';
@@ -81,7 +81,7 @@ export const useLensProps = ({
   query: string;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   chartRef?: React.RefObject<HTMLDivElement>;
-  chartLayers: LensSeriesLayer[];
+  chartLayers: LensXYConfig['layers'];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
   yAxisTitle?: string;
@@ -280,7 +280,7 @@ const buildLensParams = ({
   query: string;
   title: string;
   description?: string;
-  chartLayers: LensSeriesLayer[];
+  chartLayers: LensXYConfig['layers'];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
   yAxisTitle?: string;

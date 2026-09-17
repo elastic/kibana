@@ -13,6 +13,7 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
+import type { LensXYConfig } from '@kbn/lens-embeddable-utils';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import {
   DiscoverFlyouts,
@@ -41,11 +42,11 @@ import {
   ACTION_OPEN_IN_DISCOVER,
   ACTION_VIEW_DETAILS,
 } from '../../../common/constants';
+import { createExemplarsLayer } from '../../../common/utils/exemplars/create_exemplars_layer';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
 import type { ExemplarsAvailabilityResult } from './hooks/use_exemplars_availability';
-import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -373,19 +374,6 @@ const ChartItem = React.memo(
       metricItem.dimensionFields
     );
 
-    const exemplarRawResponse = useFetchExemplars({
-      fetchParams,
-      services,
-      metricItem,
-      availableMetrics: exemplarsAvailability.availableMetrics,
-      whereStatements,
-      originalSource: userSource,
-      profileId,
-    });
-    // TODO(kibana#289722): pass exemplarRawResponse to useChartLayers as a LensPointsLayer
-    // once that PR adds LensPointsLayer support to the config builder.
-    void exemplarRawResponse;
-
     const esqlQuery = useMemo(() => {
       const fieldType = firstNonNullable(metricItem.fieldTypes);
       const isSupported = fieldType !== 'unsigned_long';
@@ -406,12 +394,33 @@ const ChartItem = React.memo(
     }, [metricItem.metricTypes, gridSettings]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-    const chartLayers = useChartLayers({
+    const metricLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,
       color,
       gridSettings,
     });
+
+    // Exemplars ride along as a Lens points layer rather than a separate fetch: Lens runs
+    // the query under the host's time range and filters, which is what keeps the overlay
+    // live when the chart is copied to a dashboard. Breakdown dimensions are deliberately
+    // not applied to it.
+    const exemplarsLayer = useMemo(
+      () =>
+        createExemplarsLayer({
+          metricItem,
+          availableMetrics: exemplarsAvailability.availableMetrics,
+          whereStatements,
+          originalSource: userSource,
+        }),
+      [metricItem, exemplarsAvailability.availableMetrics, whereStatements, userSource]
+    );
+
+    const chartLayers = useMemo<LensXYConfig['layers']>(
+      () => (exemplarsLayer ? [...metricLayers, exemplarsLayer] : metricLayers),
+      [metricLayers, exemplarsLayer]
+    );
+
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]

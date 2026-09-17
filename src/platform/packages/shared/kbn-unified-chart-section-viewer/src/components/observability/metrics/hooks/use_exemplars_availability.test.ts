@@ -210,7 +210,7 @@ describe('useExemplarsAvailability', () => {
       expect(mockReportError).toHaveBeenCalledTimes(1);
       expect(mockReportError).toHaveBeenCalledWith({
         error: probeError,
-        source: 'useFetchExemplars',
+        source: 'useExemplarsAvailability',
         labels: { profile_id: TEST_PROFILE_ID },
       });
     });

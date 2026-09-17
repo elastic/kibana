@@ -71,8 +71,8 @@ const PROBE_FAILED: ExemplarsAvailabilityResult = Object.freeze({
 /**
  * Detects which metrics have OTLP exemplars, with one request for the whole grid.
  * Never throws: a failed probe degrades to "nothing available" and is reported to APM.
- * Probe and per-metric fetch failures share the `useFetchExemplars` source on purpose:
- * this probe goes away once `TS_EXEMPLARS` exists, so it does not get its own label.
+ * The per-metric exemplar queries themselves run inside Lens as a points layer, so this
+ * probe is the only exemplars request this package issues directly.
  */
 export const useExemplarsAvailability = ({
   fetchParams,
@@ -113,7 +113,11 @@ export const useExemplarsAvailability = ({
         // for a request nobody was waiting on.
         return undefined;
       }
-      reportError({ error, source: 'useFetchExemplars', labels: { profile_id: profileId } });
+      reportError({
+        error,
+        source: 'useExemplarsAvailability',
+        labels: { profile_id: profileId },
+      });
       return PROBE_FAILED;
     }
   }, [isExemplarsEnabled, dataView, search, uiSettings, profileId, reportError]);
