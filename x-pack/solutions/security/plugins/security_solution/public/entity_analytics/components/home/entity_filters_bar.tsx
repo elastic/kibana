@@ -139,19 +139,27 @@ export const EntityFiltersBar: React.FC<Props> = ({
     count: filterCounts.asset_criticality[value] ?? 0,
   }));
 
-  // dynamic options
+  // dynamic options — seed from both agg results and current selection so stale/zero-hit
+  // values remain visible and clearable
   const seenDataSources = useRef(new Set<string>());
-  Object.keys(filterCounts.data_sources).forEach((v) => seenDataSources.current.add(v));
+  [...Object.keys(filterCounts.data_sources), ...filters.dataSources].forEach((v) =>
+    seenDataSources.current.add(v)
+  );
   const dataSourceOptions = [...seenDataSources.current].map((value) => ({
     value,
     count: filterCounts.data_sources[value] ?? 0,
   }));
 
-  const watchlistOptions = [...watchlistNames.entries()].map(([id, name]) => ({
-    id,
-    name,
-    count: filterCounts.watchlists[id] ?? 0,
-  }));
+  const watchlistOptions = [
+    ...[...watchlistNames.entries()].map(([id, name]) => ({
+      id,
+      name,
+      count: filterCounts.watchlists[id] ?? 0,
+    })),
+    ...filters.watchlists
+      .filter((id) => !watchlistNames.has(id))
+      .map((id) => ({ id, name: id, count: filterCounts.watchlists[id] ?? 0 })),
+  ];
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
