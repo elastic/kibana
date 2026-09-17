@@ -316,24 +316,32 @@ export function getDataStateContainer({
             const projectRouting =
               getProjectRoutingFromEsqlQuery(esql) ?? projectRoutingFallback ?? undefined;
 
-            esqlTimeFieldName = await getESQLTimeField({
-              query: esql,
-              http: services.http,
-              projectRouting,
-            });
+            const existingSource = currentDataSource$.getValue();
+            const canReuseSource = existingSource?.kind === 'esql' && existingSource.query === esql;
 
-            fullEsqlSourcePromise = createEsqlSource({
-              esql,
-              http: services.http,
-              projectRoutingFallback,
-              timeRange: timefilter.getTime(),
-              esqlVariables: getCurrentTab().esqlVariables ?? undefined,
-              timeFieldName: esqlTimeFieldName,
-            });
+            if (canReuseSource && existingSource.kind === 'esql') {
+              esqlTimeFieldName = existingSource.timeFieldName;
+              fullEsqlSourcePromise = Promise.resolve(existingSource);
+            } else {
+              esqlTimeFieldName = await getESQLTimeField({
+                query: esql,
+                http: services.http,
+                projectRouting,
+              });
 
-            fullEsqlSourcePromise
-              .then((fullSource) => currentDataSource$.next(fullSource))
-              .catch(() => {});
+              fullEsqlSourcePromise = createEsqlSource({
+                esql,
+                http: services.http,
+                projectRoutingFallback,
+                timeRange: timefilter.getTime(),
+                esqlVariables: getCurrentTab().esqlVariables ?? undefined,
+                timeFieldName: esqlTimeFieldName,
+              });
+
+              fullEsqlSourcePromise
+                .then((fullSource) => currentDataSource$.next(fullSource))
+                .catch(() => {});
+            }
           }
 
           let searchSessionId: string;

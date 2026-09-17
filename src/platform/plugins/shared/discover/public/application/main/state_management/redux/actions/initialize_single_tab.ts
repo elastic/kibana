@@ -16,6 +16,7 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { EsqlSource } from '@kbn/data-source';
 import { registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
@@ -190,11 +191,15 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     let updateDataSource = true;
 
     if (isOfAggregateQueryType(initialQuery)) {
+      const initialTimeRange =
+        urlGlobalState?.time ??
+        tabInitialGlobalState?.timeRange ??
+        services.data.query.timefilter.timefilter.getTime();
       ({ esqlSource, dataView } = await initializeEsqlDataSource(
         initialQuery.esql,
         services,
-        persistedTabDataView,
-        esqlControls ? extractEsqlVariables(esqlControls) : undefined
+        esqlControls ? extractEsqlVariables(esqlControls) : undefined,
+        initialTimeRange
       ));
       // Set currentDataSource$ to the real EsqlSource before setDataView runs,
       // and tell setDataView not to overwrite it with DataViewSource(dataView).
@@ -218,7 +223,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     dispatch(setDataView({ tabId, dataView, updateDataSource }));
 
-    if (!dataView.isPersisted()) {
+    if (!isEsqlMode && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
     }
 
@@ -364,34 +369,26 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 async function initializeEsqlDataSource(
   esql: string,
   services: DiscoverServices,
-  persistedTabDataView: DataView | undefined,
-  esqlVariables?: ESQLControlVariable[]
+  esqlVariables?: ESQLControlVariable[],
+  timeRange?: { from: string; to: string }
 ): Promise<{ esqlSource: EsqlSource; dataView: DataView }> {
+  const projectRoutingFallback = services.cps?.cpsManager?.getProjectRouting();
+  const timeFieldName = await getESQLTimeField({
+    query: esql,
+    http: services.http,
+    projectRouting: projectRoutingFallback,
+  });
   const esqlSource = await createEsqlSource({
     esql,
     http: services.http,
-    projectRoutingFallback: services.cps?.cpsManager?.getProjectRouting(),
-    timeRange: services.data.query.timefilter.timefilter.getTime(),
+    projectRoutingFallback,
+    timeRange: timeRange ?? services.data.query.timefilter.timefilter.getTime(),
     esqlVariables,
+    timeFieldName,
   });
+
   services.dataSourceService.registerEsqlSource(esqlSource);
-  // Register in the DataViews cache for filter pill backward compat only — this synthetic DataView
-  // must never flow into currentDataView$ or Redux state.
-  await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
+  const dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
 
-  // Use the DataView already associated with the saved search if available.
-  let dataView: DataView | null = persistedTabDataView ?? null;
-
-  if (!dataView) {
-    try {
-      dataView = await services.dataViews.getDefaultDataView({
-        displayErrors: false,
-        refreshFields: false,
-      });
-    } catch (e) {
-      // fall through
-    }
-  }
-
-  return { esqlSource, dataView: dataView! };
+  return { esqlSource, dataView };
 }

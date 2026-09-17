@@ -12,7 +12,7 @@ import { getNamedParams, fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
-import { getTime } from '@kbn/data-plugin/common';
+import { getTime, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { ESQLColumn, ESQLSearchResponse } from '@kbn/es-types';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 import { getMaxNestingDepth, MAX_NESTING_DEPTH } from './get_timefield';
@@ -79,6 +79,9 @@ export const registerGetSourceInfoRoute = (
           esqlVariables as ESQLControlVariable[] | undefined
         );
 
+        const esQueryConfigs = getEsQueryConfig(
+          core.uiSettings.client as Parameters<typeof getEsQueryConfig>[0]
+        );
         const dateFormatTZ = await core.uiSettings.client.get<string>(DATE_FORMAT_TZ_SETTING);
         const timeZone = getTimeZoneFromSettings(dateFormatTZ ?? 'UTC');
 
@@ -87,11 +90,7 @@ export const registerGetSourceInfoRoute = (
             ? getTime(undefined, timeRange, { fieldName: timeFieldName })
             : undefined;
         const filter = timeFilter
-          ? buildEsQuery(undefined, [], [timeFilter], {
-              allowLeadingWildcards: true,
-              queryStringOptions: {},
-              ignoreFilterIfFieldNotInIndex: false,
-            })
+          ? buildEsQuery(undefined, [], [timeFilter], esQueryConfigs)
           : undefined;
 
         const columnsResult = await client.esql
