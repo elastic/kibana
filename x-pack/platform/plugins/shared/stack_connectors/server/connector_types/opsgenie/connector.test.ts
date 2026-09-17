@@ -118,6 +118,45 @@ describe('OpsgenieConnector', () => {
     });
   });
 
+  it('calls request without modifying the message when it is less than 130 characters when creating an alert', async () => {
+    const message = 'a'.repeat(129);
+    await connector.createAlert({ message }, connectorUsageCollector);
+
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
+      ...defaultCreateAlertExpect,
+      data: { message },
+      connectorUsageCollector,
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('calls request without modifying the message when it is equal to 130 characters when creating an alert', async () => {
+    const message = 'a'.repeat(130);
+    await connector.createAlert({ message }, connectorUsageCollector);
+
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
+      ...defaultCreateAlertExpect,
+      data: { message },
+      connectorUsageCollector,
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('calls request with a truncated message when it is greater than 130 characters when creating an alert', async () => {
+    const message = 'a'.repeat(131);
+    await connector.createAlert({ message }, connectorUsageCollector);
+
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
+      ...defaultCreateAlertExpect,
+      data: { message: 'a'.repeat(130) },
+      connectorUsageCollector,
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+  });
+
   it('calls request with the sha256 hash of the alias when it is greater than 512 characters when creating an alert', async () => {
     const alias = 'a'.repeat(513);
 

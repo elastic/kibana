@@ -24,3 +24,9 @@ export const MESSAGE_NON_EMPTY = i18n.translate(
     defaultMessage: 'must be populated with a value other than just whitespace',
   }
 );
+
+/** Opsgenie's create-alert `message` API limit. */
+export const MESSAGE_MAX_LENGTH = 130;
+
+/** HTTP-facing schema bound for `message`; the connector truncates to `MESSAGE_MAX_LENGTH`. */
+export const MESSAGE_SCHEMA_MAX_LENGTH = 15000;

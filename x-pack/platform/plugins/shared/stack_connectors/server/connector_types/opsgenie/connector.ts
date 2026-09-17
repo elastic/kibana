@@ -15,6 +15,7 @@ import {
   SUB_ACTION,
   CreateAlertParamsSchema,
   CloseAlertParamsSchema,
+  MESSAGE_MAX_LENGTH,
   Response,
 } from '@kbn/connector-schemas/opsgenie';
 import type {
@@ -87,7 +88,11 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
       {
         method: 'post',
         url: this.concatPathToURL('v2/alerts').toString(),
-        data: { ...params, ...OpsgenieConnector.createAliasObj(params.alias) },
+        data: {
+          ...params,
+          message: this.truncateMessage(params.message),
+          ...OpsgenieConnector.createAliasObj(params.alias),
+        },
         headers: this.createHeaders(),
         responseSchema: Response,
       },
@@ -105,6 +110,17 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     const newAlias = OpsgenieConnector.createAlias(alias);
 
     return { alias: newAlias };
+  }
+
+  private truncateMessage(message: string): string {
+    if (message.length <= MESSAGE_MAX_LENGTH) {
+      return message;
+    }
+
+    this.logger.warn(
+      `connector "${this.connector.id}" message length ${message.length} exceeds ${MESSAGE_MAX_LENGTH} and has been truncated`
+    );
+    return message.slice(0, MESSAGE_MAX_LENGTH);
   }
 
   private static createAlias(alias: string) {
