@@ -6,12 +6,12 @@
  */
 
 import type { ScopedHistory } from '@kbn/core/public';
+import type { AlertingV2PageProps } from '@kbn/alerting-v2-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import type { AlertingV2PageProps } from '@kbn/alerting-v2-plugin/public';
 import type { ClassicRulesPageProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
@@ -25,7 +25,11 @@ import {
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 
-const Placeholder = ({ name }: { name: string }) => <div data-test-subj={name}>{name}</div>;
+const Placeholder = ({ name, privilegeCheck }: { name: string; privilegeCheck?: unknown }) => (
+  <div data-test-subj={name} data-has-privilege-check={privilegeCheck != null}>
+    {name}
+  </div>
+);
 
 const HostTabs = ({ tabs }: { tabs?: AlertingV2PageProps['tabs'] }) => (
   <>
@@ -45,23 +49,38 @@ const HostTabs = ({ tabs }: { tabs?: AlertingV2PageProps['tabs'] }) => (
 );
 
 const mockAlertingVTwo = {
-  RulesPage: ({ hostApp, tabs }: AlertingV2PageProps) => (
+  RulesPage: ({ hostApp, tabs, privilegeCheck }: AlertingV2PageProps) => (
     <>
-      <Placeholder name={`rulesPage:${hostApp?.rules?.app ?? 'none'}`} />
+      <Placeholder
+        name={`rulesPage:${hostApp?.rules?.app ?? 'none'}`}
+        privilegeCheck={privilegeCheck}
+      />
       <HostTabs tabs={tabs} />
     </>
   ),
-  RuleLibraryPage: ({ hostApp }: AlertingV2PageProps) => (
-    <Placeholder name={`ruleLibraryPage:${hostApp?.ruleLibrary?.app ?? 'none'}`} />
+  RuleLibraryPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`ruleLibraryPage:${hostApp?.ruleLibrary?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
   ),
-  EpisodesPage: ({ hostApp }: AlertingV2PageProps) => (
-    <Placeholder name={`episodesPage:${hostApp?.episodes?.app ?? 'none'}`} />
+  EpisodesPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`episodesPage:${hostApp?.episodes?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
   ),
-  ActionPoliciesPage: ({ hostApp }: AlertingV2PageProps) => (
-    <Placeholder name={`actionPoliciesPage:${hostApp?.actionPolicies?.app ?? 'none'}`} />
+  ActionPoliciesPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`actionPoliciesPage:${hostApp?.actionPolicies?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
   ),
-  ExecutionHistoryPage: ({ hostApp }: AlertingV2PageProps) => (
-    <Placeholder name={`executionHistoryPage:${hostApp?.executionHistory?.app ?? 'none'}`} />
+  ExecutionHistoryPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`executionHistoryPage:${hostApp?.executionHistory?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
   ),
   CreateRuleOptionsFlyout: () => null,
   createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
@@ -224,5 +243,35 @@ describe('ObservabilityAlertingApp', () => {
     const { history } = renderAt('/unknown');
 
     expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_INBOX_PATH);
+  });
+
+  it.each([
+    {
+      path: OBSERVABILITY_ALERTING_INBOX_PATH,
+      testId: `episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+    },
+    {
+      path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
+      testId: `rulesPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+    },
+    {
+      path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+      testId: `ruleLibraryPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+    },
+    {
+      path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
+      testId: `actionPoliciesPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+    },
+    {
+      path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+      testId: `executionHistoryPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+    },
+  ])('passes privilegeCheck to $testId at $path', async ({ path, testId }) => {
+    const { getByTestId } = renderAt(path);
+
+    await waitFor(() => {
+      expect(getByTestId(testId)).toBeInTheDocument();
+    });
+    expect(getByTestId(testId)).toHaveAttribute('data-has-privilege-check', 'true');
   });
 });

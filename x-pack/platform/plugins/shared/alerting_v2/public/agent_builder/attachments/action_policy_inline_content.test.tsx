@@ -23,7 +23,6 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     matcher: { expression: 'rule.id : "abc"' },
     groupingMode: 'per_episode' as const,
     throttle: { strategy: 'on_status_change' as const },
-    tags: ['ops', 'critical'],
     enabled: overrides.enabled,
   } as any,
 });
@@ -69,19 +68,6 @@ describe('ActionPolicyInlineContent', () => {
   it('renders the destination count', () => {
     render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
     expect(screen.getByText('1 destination')).toBeDefined();
-  });
-
-  it('renders tags', () => {
-    render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText('ops')).toBeDefined();
-    expect(screen.getByText('critical')).toBeDefined();
-  });
-
-  it('does not render tags section when tags are empty', () => {
-    const attachment = createAttachment();
-    attachment.data.tags = [];
-    render(<ActionPolicyInlineContent attachment={attachment} isSidebar={false} />);
-    expect(screen.queryByText('ops')).toBeNull();
   });
 
   it('renders the throttle strategy badge', () => {

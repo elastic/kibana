@@ -364,6 +364,35 @@ describe('SLO Edit Page', () => {
         expect(mockCreate).toHaveBeenCalled();
       });
     });
+
+    it('allows Synthetics availability SLOs to use timeslices with guidance about the monitor interval', async () => {
+      const { getByTestId, queryByText, getByText } = render(<SloEditPage />);
+
+      fireEvent.change(getByTestId('sloFormIndicatorTypeSelect'), {
+        target: { value: 'sli.synthetics.availability' },
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('sloFormBudgetingMethodSelect')).toBeEnabled();
+      });
+
+      expect(
+        queryByText('Match the timeslice window to the monitor interval')
+      ).not.toBeInTheDocument();
+
+      fireEvent.change(getByTestId('sloFormBudgetingMethodSelect'), {
+        target: { value: 'timeslices' },
+      });
+
+      expect(getByTestId('sloFormObjectiveTimesliceTargetInput')).toBeEnabled();
+      expect(getByTestId('sloFormObjectiveTimesliceWindowInput')).toBeEnabled();
+      expect(getByText('Match the timeslice window to the monitor interval')).toBeInTheDocument();
+      expect(
+        getByText(
+          'Set the timeslice window to at least the monitor run interval. A shorter window can cause periods without monitor executions to inflate the calculated SLI and reduce burn rates.'
+        )
+      ).toBeInTheDocument();
+    });
   });
 
   describe('edit SLO flow', () => {
@@ -430,6 +459,35 @@ describe('SLO Edit Page', () => {
 
       expect(queryByTestId('sloFormNameInput')).toHaveValue(slo.name);
       expect(queryByTestId('sloFormDescriptionTextArea')).toHaveValue(slo.description);
+    });
+
+    it('allows editing Synthetics availability SLOs with timeslices', async () => {
+      slo = buildSlo({
+        id: SLO_ID,
+        indicator: {
+          type: 'sli.synthetics.availability',
+          params: {
+            index: 'synthetics-*',
+            monitorIds: [],
+            projects: [],
+            tags: [],
+          },
+        },
+        budgetingMethod: 'timeslices',
+        objective: {
+          target: 0.98,
+          timesliceTarget: 0.95,
+          timesliceWindow: '5m',
+        },
+      });
+      useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: slo });
+
+      const { getByTestId } = render(<SloEditPage />);
+
+      expect(getByTestId('sloFormBudgetingMethodSelect')).toHaveValue('timeslices');
+      expect(getByTestId('sloFormBudgetingMethodSelect')).toBeEnabled();
+      expect(getByTestId('sloFormObjectiveTimesliceTargetInput')).toHaveValue(95);
+      expect(getByTestId('sloFormObjectiveTimesliceWindowInput')).toHaveValue(5);
     });
 
     it('calls the updateSlo hook if all required values are filled in', async () => {
