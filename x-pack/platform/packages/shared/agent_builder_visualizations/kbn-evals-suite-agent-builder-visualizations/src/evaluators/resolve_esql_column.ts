@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { Parser, isAssignment, isColumn, isOptionNode, singleItems } from '@elastic/esql';
+import type { ESQLAstItem, ESQLColumn, ESQLSingleAstItem } from '@elastic/esql/types';
+
 const KEYWORD_SUFFIX = /\.keyword$/i;
 
 /**
@@ -19,15 +22,15 @@ export function columnsReferToSameExpression(
   actualColumn: string,
   actualQuery: string
 ): boolean {
-  const goldExpression = resolveColumnExpression(goldColumn, goldQuery);
-  const actualExpression = resolveColumnExpression(actualColumn, actualQuery);
-  return expressionsEquivalent(goldExpression, actualExpression);
+  return expressionsEquivalent(
+    resolveColumnExpression(goldColumn, goldQuery),
+    resolveColumnExpression(actualColumn, actualQuery)
+  );
 }
 
-export function resolveColumnExpression(column: string, query: string): string {
-  const aliases = buildAliasMap(query);
-  const key = normalizeIdentifier(column);
-  return aliases.get(key) ?? normalizeExpression(column);
+function resolveColumnExpression(column: string, query: string): string {
+  const key = normalizeExpression(column);
+  return buildAliasMap(query).get(key) ?? key;
 }
 
 function buildAliasMap(query: string): Map<string, string> {
@@ -36,185 +39,81 @@ function buildAliasMap(query: string): Map<string, string> {
     return aliases;
   }
 
-  for (const rawCommand of splitPipes(query)) {
-    const command = rawCommand.trim();
-    const statsMatch = command.match(/^STATS\s+([\s\S]+)$/i);
-    if (statsMatch) {
-      addStatsAliases(aliases, statsMatch[1]);
+  for (const command of Parser.parse(query).root.commands) {
+    if (command.name !== 'stats' && command.name !== 'eval') {
       continue;
     }
-    const evalMatch = command.match(/^EVAL\s+([\s\S]+)$/i);
-    if (evalMatch) {
-      addAssignments(aliases, evalMatch[1]);
+    for (const arg of command.args) {
+      addFields(aliases, arg, query);
     }
   }
 
   return aliases;
 }
 
-function addStatsAliases(aliases: Map<string, string>, body: string): void {
-  const [aggregates, grouping] = splitTopLevelBy(body);
-  addAssignments(aliases, aggregates);
-  if (grouping) {
-    addAssignments(aliases, grouping);
-  }
-}
-
-function addAssignments(aliases: Map<string, string>, clause: string): void {
-  for (const item of splitTopLevel(clause, ',')) {
-    const trimmed = item.trim();
-    if (!trimmed) {
-      continue;
+function addFields(aliases: Map<string, string>, arg: ESQLAstItem, query: string): void {
+  if (Array.isArray(arg)) {
+    for (const item of arg) {
+      addFields(aliases, item, query);
     }
-    const assignment = splitTopLevelAssignment(trimmed);
-    if (assignment) {
-      const aliasKey = normalizeIdentifier(assignment.alias);
-      const expression = normalizeExpression(assignment.expression);
-      aliases.set(aliasKey, expression);
-      aliases.set(expression, expression);
-    } else {
-      const identifier = normalizeIdentifier(trimmed);
-      // Bare identifiers in later STATS BY/EVAL clauses often reuse an earlier
-      // EVAL alias; keep the resolved expression instead of overwriting it.
-      if (aliases.has(identifier)) {
-        continue;
-      }
-      const expression = normalizeExpression(trimmed);
-      aliases.set(expression, expression);
-      aliases.set(identifier, expression);
+    return;
+  }
+
+  if (isOptionNode(arg) && arg.name === 'by') {
+    for (const grouping of arg.args) {
+      addFields(aliases, grouping, query);
+    }
+    return;
+  }
+
+  if (isAssignment(arg)) {
+    const [left, right] = [...singleItems(arg.args)];
+    if (isColumn(left) && right && !Array.isArray(right)) {
+      recordAlias(aliases, columnName(left), sourceOf(right, query));
+    }
+    return;
+  }
+
+  if (isColumn(arg)) {
+    const name = columnName(arg);
+    if (!aliases.has(normalizeExpression(name))) {
+      recordAlias(aliases, name, name);
     }
   }
 }
 
-type QuoteChar = '"' | "'" | '`';
-
-function splitPipes(query: string): string[] {
-  return splitTopLevel(query.replace(/\r\n/g, '\n'), '|');
+function recordAlias(aliases: Map<string, string>, name: string, expressionSource: string): void {
+  const expression = normalizeExpression(expressionSource);
+  aliases.set(normalizeExpression(name), expression);
+  aliases.set(expression, expression);
 }
 
-function advanceScan(
-  source: string,
-  index: number,
-  quote: QuoteChar | null,
-  depth: number
-): { quote: QuoteChar | null; depth: number; inQuoteOrParen: boolean } {
-  const ch = source[index];
-  if (quote) {
-    const closed = ch === quote && source[index - 1] !== '\\';
-    return { quote: closed ? null : quote, depth, inQuoteOrParen: true };
-  }
-  if (ch === '"' || ch === "'" || ch === '`') {
-    return { quote: ch, depth, inQuoteOrParen: true };
-  }
-  if (ch === '(') {
-    return { quote, depth: depth + 1, inQuoteOrParen: true };
-  }
-  if (ch === ')') {
-    return { quote, depth: depth - 1, inQuoteOrParen: true };
-  }
-  return { quote, depth, inQuoteOrParen: depth !== 0 };
+function columnName(column: ESQLColumn): string {
+  return column.parts.length > 0 ? column.parts.join('.') : column.name;
 }
 
-function splitTopLevelBy(body: string): [string, string | undefined] {
-  let depth = 0;
-  let quote: QuoteChar | null = null;
-
-  for (let i = 0; i < body.length; i++) {
-    const state = advanceScan(body, i, quote, depth);
-    quote = state.quote;
-    depth = state.depth;
-    if (!state.inQuoteOrParen && isBySeparator(body, i)) {
-      return [body.slice(0, i), body.slice(i + 3)];
-    }
-  }
-
-  return [body, undefined];
-}
-
-function isBySeparator(source: string, index: number): boolean {
-  if (!/\s/.test(source[index] ?? '')) {
-    return false;
-  }
-  if (source.slice(index + 1, index + 3).toUpperCase() !== 'BY') {
-    return false;
-  }
-  const after = source[index + 3];
-  return after === undefined || /\s/.test(after);
-}
-
-function splitTopLevel(source: string, delimiter: string): string[] {
-  const parts: string[] = [];
-  let current = '';
-  let depth = 0;
-  let quote: QuoteChar | null = null;
-
-  for (let i = 0; i < source.length; i++) {
-    const ch = source[i];
-    const state = advanceScan(source, i, quote, depth);
-    quote = state.quote;
-    depth = state.depth;
-    if (!state.inQuoteOrParen && source.startsWith(delimiter, i)) {
-      parts.push(current);
-      current = '';
-      i += delimiter.length - 1;
-      continue;
-    }
-    current += ch;
-  }
-
-  parts.push(current);
-  return parts;
-}
-
-function splitTopLevelAssignment(item: string): { alias: string; expression: string } | undefined {
-  let depth = 0;
-  let quote: QuoteChar | null = null;
-
-  for (let i = 0; i < item.length; i++) {
-    const ch = item[i];
-    const state = advanceScan(item, i, quote, depth);
-    quote = state.quote;
-    depth = state.depth;
-    if (state.inQuoteOrParen || ch !== '=' || item[i + 1] === '=') {
-      continue;
-    }
-    const alias = item.slice(0, i).trim();
-    const expression = item.slice(i + 1).trim();
-    if (alias && expression) {
-      return { alias, expression };
-    }
-  }
-
-  return undefined;
+function sourceOf(node: ESQLSingleAstItem, query: string): string {
+  return query.slice(node.location.min, node.location.max + 1);
 }
 
 function expressionsEquivalent(left: string, right: string): boolean {
-  return left === right || isKeywordTwin(left, right);
-}
-
-function isKeywordTwin(left: string, right: string): boolean {
+  if (left === right) {
+    return true;
+  }
   const strippedLeft = left.replace(KEYWORD_SUFFIX, '');
   const strippedRight = right.replace(KEYWORD_SUFFIX, '');
   return strippedLeft === strippedRight && strippedLeft.length > 0;
 }
 
-function normalizeIdentifier(value: string): string {
-  return stripTicks(value).replace(/\s+/g, ' ').trim().toLowerCase();
-}
-
 function normalizeExpression(value: string): string {
-  let normalized = stripTicks(value).replace(/\s+/g, ' ').trim().toLowerCase();
+  let normalized = value.replace(/`/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
   normalized = normalized.replace(/\bcount\s*\(\s*\)/g, 'count(*)');
   normalized = normalized.replace(
     /\bdate_extract\s*\(\s*["']hour_of_day["']\s*,\s*([^)]+)\)/g,
     'hour($1)'
   );
-  if (/^tbucket\s*\(/i.test(normalized) || /^bucket\s*\(/i.test(normalized)) {
+  if (/^t?bucket\s*\(/.test(normalized)) {
     return 'time_bucket';
   }
   return normalized;
-}
-
-function stripTicks(value: string): string {
-  return value.replace(/`/g, '');
 }
