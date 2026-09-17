@@ -13,8 +13,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSource, DataSourceWithSecrets } from '../../common';
 import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
-import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
-import { emptyDatasetFlyoutFormValues } from './dataset_flyout_initial_values';
+import type { CreateDatasetFormValues } from './create_dataset_form_state';
+import { emptyDatasetFormValues } from './dataset_form_initial_values';
 
 jest.mock('../create_data_source_flyout', () => ({
   CreateDataSourceFlyout: ({
@@ -45,7 +45,7 @@ const initialDataSources: DataSource[] = [
 function Harness({ add }: { add: jest.Mock }) {
   const [dataSources, setDataSources] = useState(initialDataSources);
   const methods = useForm<CreateDatasetFormValues>({
-    defaultValues: emptyDatasetFlyoutFormValues(),
+    defaultValues: emptyDatasetFormValues(),
   });
 
   return (
@@ -76,15 +76,15 @@ describe('CreateDatasetDetailsFields', () => {
       </EuiProvider>
     );
 
-    fireEvent.click(getByTestId('createDatasetFlyoutDataSource'));
-    await findByTestId('createDatasetFlyoutDataSource-connectNew');
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    await findByTestId('createDatasetDataSource-connectNew');
     const optionEls = Array.from(document.querySelectorAll('[role="listbox"] [role="option"]'));
     expect(optionEls[optionEls.length - 1]).toHaveAttribute(
       'data-test-subj',
-      'createDatasetFlyoutDataSource-connectNew'
+      'createDatasetDataSource-connectNew'
     );
     expect(optionEls[optionEls.length - 1]).toHaveTextContent('Connect new data source');
-    fireEvent.click(getByTestId('createDatasetFlyoutDataSource-connectNew'));
+    fireEvent.click(getByTestId('createDatasetDataSource-connectNew'));
 
     expect(await findByTestId('mockCreateDataSourceFlyout')).toBeInTheDocument();
 
@@ -102,7 +102,7 @@ describe('CreateDatasetDetailsFields', () => {
 
     expect(queryByTestId('mockCreateDataSourceFlyout')).toBeNull();
 
-    fireEvent.click(getByTestId('createDatasetFlyoutDataSource'));
-    expect(await findByTestId('createDatasetFlyoutDataSource-new-source')).toBeInTheDocument();
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    expect(await findByTestId('createDatasetDataSource-new-source')).toBeInTheDocument();
   });
 });

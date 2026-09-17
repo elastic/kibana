@@ -79,7 +79,7 @@ describe('CreateDatasetWizardPage', () => {
 
     expect(getByTestId('createDatasetWizardContent')).toBeInTheDocument();
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
-    expect(getByTestId('createDatasetFlyoutResource')).toBeInTheDocument();
+    expect(getByTestId('createDatasetResource')).toBeInTheDocument();
     expect(getByText('Select an existing data source or connect a new one')).toBeInTheDocument();
     expect(queryByText('Select the external data source this dataset belongs to.')).toBeNull();
     expect(getByText('Dataset name')).toBeInTheDocument();
@@ -88,42 +88,36 @@ describe('CreateDatasetWizardPage', () => {
         'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported'
       )
     ).toBeInTheDocument();
-    expect(getByTestId('createDatasetFlyoutName')).toHaveAttribute(
-      'placeholder',
-      'e.g. my-dataset'
-    );
+    expect(getByTestId('createDatasetName')).toHaveAttribute('placeholder', 'e.g. my-dataset');
     expect(getByText('Description (optional)')).toBeInTheDocument();
     expect(getByText('A brief description to identify this dataset')).toBeInTheDocument();
-    expect(getByTestId('createDatasetFlyoutDescription')).toHaveAttribute(
-      'placeholder',
-      'Type text'
-    );
+    expect(getByTestId('createDatasetDescription')).toHaveAttribute('placeholder', 'Type text');
     expect(
       getByText('URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)')
     ).toBeInTheDocument();
 
-    fireEvent.click(getByTestId('createDatasetFlyoutDataSource'));
-    expect(await findByTestId('createDatasetFlyoutDataSource-connectNew')).toHaveTextContent(
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    expect(await findByTestId('createDatasetDataSource-connectNew')).toHaveTextContent(
       'Connect new data source'
     );
-    fireEvent.click(await findByTestId('createDatasetFlyoutDataSource-source-1'));
-    fireEvent.change(getByTestId('createDatasetFlyoutName'), {
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), {
       target: { value: 'logs-dataset' },
     });
-    fireEvent.change(getByTestId('createDatasetFlyoutResource'), {
+    fireEvent.change(getByTestId('createDatasetResource'), {
       target: { value: 'bucket/*' },
     });
-    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+    fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
       target: { value: 'csv' },
     });
-    fireEvent.change(getByTestId('createDatasetFlyoutSettingsPartitionDetection'), {
+    fireEvent.change(getByTestId('createDatasetSettingsPartitionDetection'), {
       target: { value: 'hive' },
     });
 
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
-    expect(queryByTestId('createDatasetFlyoutSettingsFormat')).toBeNull();
-    expect(queryByTestId('createDatasetFlyoutSettingsPartitionDetection')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsFormat')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsPartitionDetection')).toBeNull();
 
     fireEvent.click(getByTestId('backButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
@@ -161,23 +155,23 @@ describe('CreateDatasetWizardPage', () => {
   it('requires format before leaving the dataset step', async () => {
     const { getByTestId, queryByTestId, findByTestId } = renderWizard();
 
-    fireEvent.click(getByTestId('createDatasetFlyoutDataSource'));
-    fireEvent.click(await findByTestId('createDatasetFlyoutDataSource-source-1'));
-    fireEvent.change(getByTestId('createDatasetFlyoutName'), {
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), {
       target: { value: 'logs-dataset' },
     });
-    fireEvent.change(getByTestId('createDatasetFlyoutResource'), {
+    fireEvent.change(getByTestId('createDatasetResource'), {
       target: { value: 'bucket/*' },
     });
 
-    expect(getByTestId('createDatasetFlyoutSettingsFormat')).toBeInTheDocument();
-    expect(getByTestId('createDatasetFlyoutSettingsPartitionDetection')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsFormat')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
 
     fireEvent.click(getByTestId('nextButton'));
     expect(queryByTestId('createDatasetWizardAdvancedStep')).toBeNull();
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
 
-    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+    fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
       target: { value: 'parquet' },
     });
     fireEvent.click(getByTestId('nextButton'));
@@ -220,10 +214,10 @@ describe('CreateDatasetWizardPage', () => {
     );
 
     expect(getByText('Edit dataset: logs-dataset')).toBeInTheDocument();
-    expect(getByTestId('createDatasetFlyoutName')).toHaveValue('logs-dataset');
-    expect(getByTestId('createDatasetFlyoutResource')).toHaveValue('bucket/*');
+    expect(getByTestId('createDatasetName')).toHaveValue('logs-dataset');
+    expect(getByTestId('createDatasetResource')).toHaveValue('bucket/*');
 
-    fireEvent.change(getByTestId('createDatasetFlyoutResource'), {
+    fireEvent.change(getByTestId('createDatasetResource'), {
       target: { value: 'bucket/updated/*' },
     });
     fireEvent.click(getByTestId('nextButton'));
@@ -279,7 +273,7 @@ describe('CreateDatasetWizardPage', () => {
       </EuiProvider>
     );
 
-    fireEvent.change(getByTestId('createDatasetFlyoutName'), {
+    fireEvent.change(getByTestId('createDatasetName'), {
       target: { value: 'renamed-dataset' },
     });
     fireEvent.click(getByTestId('nextButton'));

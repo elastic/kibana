@@ -7,7 +7,7 @@
 
 import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
 
-import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import { createDatasetFormStrings } from './create_dataset_form_i18n';
 
 export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
@@ -111,7 +111,7 @@ const parseBooleanFormValue = (value: DatasetBooleanFormValue): boolean | undefi
 export const validateSchemaSampleSize = (value: string): true | string => {
   const parsed = parseOptionalPositiveInteger(value);
   if (value?.trim() && parsed === undefined) {
-    return createDatasetFlyoutStrings.settingsSchemaSampleSizeInvalid();
+    return createDatasetFormStrings.settingsSchemaSampleSizeInvalid();
   }
   return true;
 };
@@ -119,26 +119,26 @@ export const validateSchemaSampleSize = (value: string): true | string => {
 export const validateMaxErrors = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseNonNegativeInteger(value);
-  if (parsed === undefined) return createDatasetFlyoutStrings.settingsMaxErrorsInvalid();
+  if (parsed === undefined) return createDatasetFormStrings.settingsMaxErrorsInvalid();
   return true;
 };
 
 export const validateMaxErrorRatio = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseRatio(value);
-  if (parsed === undefined) return createDatasetFlyoutStrings.settingsMaxErrorRatioInvalid();
+  if (parsed === undefined) return createDatasetFormStrings.settingsMaxErrorRatioInvalid();
   return true;
 };
 
 export const validateMaxFieldSize = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseNonNegativeInteger(value);
-  if (parsed === undefined) return createDatasetFlyoutStrings.settingsMaxFieldSizeInvalid();
+  if (parsed === undefined) return createDatasetFormStrings.settingsMaxFieldSizeInvalid();
   return true;
 };
 
 /**
- * Maps flyout form values to settings for the API payload.
+ * Maps form values to settings for the API payload.
  *
  * The form uses empty strings for "unset"; the API uses omitted fields.
  * Fields are filtered to only the subset valid for the chosen format so that

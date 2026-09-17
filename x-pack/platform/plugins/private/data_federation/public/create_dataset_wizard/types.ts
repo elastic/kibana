@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateDatasetSettingsFormValues } from './create_dataset_flyout_form_state';
+import type { CreateDatasetSettingsFormValues } from './create_dataset_form_state';
 
 export interface DatasetWizardDatasetStep {
   name: string;

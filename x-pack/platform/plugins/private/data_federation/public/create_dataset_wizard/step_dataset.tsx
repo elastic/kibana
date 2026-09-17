@@ -12,11 +12,11 @@ import { useFormContext, useWatch } from 'react-hook-form';
 
 import type { DataSource } from '../../common';
 import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
-import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
+import type { CreateDatasetFormValues } from './create_dataset_form_state';
 import {
   CreateDatasetFormatField,
   CreateDatasetPartitionDetectionField,
-} from './create_dataset_flyout_settings';
+} from './create_dataset_settings';
 import type { DatasetWizardContent } from './types';
 
 export function StepDataset({

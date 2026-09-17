@@ -19,8 +19,8 @@ import {
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useFormContext } from 'react-hook-form';
 
-import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
-import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import type { CreateDatasetFormValues } from './create_dataset_form_state';
+import { createDatasetFormStrings } from './create_dataset_form_i18n';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { DatasetWizardSection } from './types';
 
@@ -68,37 +68,35 @@ export function StepReview() {
       >
         <EuiDescriptionList textStyle="reverse" compressed>
           <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.dataSourceLabel()}
+            {createDatasetFormStrings.dataSourceLabel()}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewDataSource">
             {displayValue(values.data_source)}
           </EuiDescriptionListDescription>
-          <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.nameLabel()}
-          </EuiDescriptionListTitle>
+          <EuiDescriptionListTitle>{createDatasetFormStrings.nameLabel()}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewName">
             {displayValue(values.name)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.descriptionLabel()}
+            {createDatasetFormStrings.descriptionLabel()}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewDescription">
             {displayValue(values.description)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.resourceLabel()}
+            {createDatasetFormStrings.resourceLabel()}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewResource">
             {displayValue(values.resource)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.settingsFormatLabel()}
+            {createDatasetFormStrings.settingsFormatLabel()}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewFormat">
             {displayValue(values.settings.format)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.settingsPartitionDetectionLabel()}
+            {createDatasetFormStrings.settingsPartitionDetectionLabel()}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewPartitionDetection">
             {displayValue(values.settings.partition_detection)}
@@ -115,19 +113,19 @@ export function StepReview() {
       >
         <EuiDescriptionList textStyle="reverse" compressed>
           <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.settingsSchemaResolutionLabel()}
+            {createDatasetFormStrings.settingsSchemaResolutionLabel()}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewSchemaResolution">
             {displayValue(values.settings.schema_resolution)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.settingsPartitionPathLabel()}
+            {createDatasetFormStrings.settingsPartitionPathLabel()}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewPartitionPath">
             {displayValue(values.settings.partition_path)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFlyoutStrings.settingsHivePartitioningLabel()}
+            {createDatasetFormStrings.settingsHivePartitioningLabel()}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewHivePartitioning">
             {displayValue(values.settings.hive_partitioning)}

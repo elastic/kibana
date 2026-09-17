@@ -27,12 +27,9 @@ import type { DataFederationKibanaServices } from '../types';
 import {
   buildDatasetSettingsFromFormValues,
   type CreateDatasetFormValues,
-} from './create_dataset_flyout_form_state';
-import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
-import {
-  dataSetToFlyoutFormValues,
-  emptyDatasetFlyoutFormValues,
-} from './dataset_flyout_initial_values';
+} from './create_dataset_form_state';
+import { createDatasetFormStrings } from './create_dataset_form_i18n';
+import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { StepAdvanced } from './step_advanced';
 import { StepDataset } from './step_dataset';
@@ -83,7 +80,7 @@ export function CreateDatasetWizardPage({
   const [isSaving, setIsSaving] = useState(false);
   const formDefaultValues = useMemo(
     (): CreateDatasetFormValues =>
-      initialDataSet ? dataSetToFlyoutFormValues(initialDataSet) : emptyDatasetFlyoutFormValues(),
+      initialDataSet ? dataSetToFormValues(initialDataSet) : emptyDatasetFormValues(),
     [initialDataSet]
   );
   const methods = useForm<CreateDatasetFormValues>({
@@ -100,7 +97,7 @@ export function CreateDatasetWizardPage({
 
     const formatValid = await methods.trigger('settings.format');
     if (!formatValid) {
-      setSaveError(createDatasetFlyoutStrings.settingsFormatRequired());
+      setSaveError(createDatasetFormStrings.settingsFormatRequired());
       return;
     }
 
@@ -159,7 +156,7 @@ export function CreateDatasetWizardPage({
             disabled={isSaving}
             data-test-subj="createDatasetWizardCancel"
           >
-            {createDatasetFlyoutStrings.cancelButton()}
+            {createDatasetFormStrings.cancelButton()}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -174,8 +171,8 @@ export function CreateDatasetWizardPage({
           apiError={apiError}
           texts={{
             save: isEditMode
-              ? createDatasetFlyoutStrings.saveButton()
-              : createDatasetFlyoutStrings.addButton(),
+              ? createDatasetFormStrings.saveButton()
+              : createDatasetFormStrings.addButton(),
           }}
         >
           <FormWizardStep

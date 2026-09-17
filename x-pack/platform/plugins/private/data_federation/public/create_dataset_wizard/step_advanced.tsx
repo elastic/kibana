@@ -8,8 +8,8 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
-import { CreateDatasetAdvancedSettings } from './create_dataset_flyout_settings';
+import type { CreateDatasetFormValues } from './create_dataset_form_state';
+import { CreateDatasetAdvancedSettings } from './create_dataset_settings';
 
 export function StepAdvanced() {
   const { control } = useFormContext<CreateDatasetFormValues>();

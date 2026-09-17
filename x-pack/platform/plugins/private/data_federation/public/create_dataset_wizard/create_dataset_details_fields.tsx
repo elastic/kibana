@@ -27,8 +27,8 @@ import { DATA_SOURCE_TYPES_TO_ICONS, validateIndexNameRules } from '../../common
 import { CreateDataSourceFlyout } from '../create_data_source_flyout';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
-import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
-import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import type { CreateDatasetFormValues } from './create_dataset_form_state';
+import { createDatasetFormStrings } from './create_dataset_form_i18n';
 
 const trimRequired =
   (message: string) =>
@@ -82,7 +82,7 @@ export function CreateDatasetDetailsFields({
       validate: (value: string) => {
         const trimmed = value.trim();
         if (!trimmed) {
-          return createDatasetFlyoutStrings.nameRequired();
+          return createDatasetFormStrings.nameRequired();
         }
 
         const nameValidation = validateIndexNameRules(trimmed);
@@ -98,7 +98,7 @@ export function CreateDatasetDetailsFields({
           }
           return nNormalized === normalized;
         });
-        return isDuplicate ? createDatasetFlyoutStrings.nameAlreadyExists() : true;
+        return isDuplicate ? createDatasetFormStrings.nameAlreadyExists() : true;
       },
     },
   });
@@ -112,7 +112,7 @@ export function CreateDatasetDetailsFields({
     name: 'data_source',
     control,
     rules: {
-      validate: trimRequired(createDatasetFlyoutStrings.dataSourceRequired()),
+      validate: trimRequired(createDatasetFormStrings.dataSourceRequired()),
     },
   });
 
@@ -120,7 +120,7 @@ export function CreateDatasetDetailsFields({
     name: 'resource',
     control,
     rules: {
-      validate: trimRequired(createDatasetFlyoutStrings.resourceRequired()),
+      validate: trimRequired(createDatasetFormStrings.resourceRequired()),
     },
   });
 
@@ -137,10 +137,10 @@ export function CreateDatasetDetailsFields({
         value: dataSource.name,
         inputDisplay: display,
         dropdownDisplay: display,
-        'data-test-subj': `createDatasetFlyoutDataSource-${dataSource.name}`,
+        'data-test-subj': `createDatasetDataSource-${dataSource.name}`,
       };
     });
-    const connectLabel = createDatasetFlyoutStrings.connectNewDataSourceDropDownOptionLabel();
+    const connectLabel = createDatasetFormStrings.connectNewDataSourceDropDownOptionLabel();
     const connectOption = {
       value: CONNECT_NEW_DATA_SOURCE,
       inputDisplay: connectLabel,
@@ -160,7 +160,7 @@ export function CreateDatasetDetailsFields({
           {connectLabel}
         </div>
       ),
-      'data-test-subj': 'createDatasetFlyoutDataSource-connectNew',
+      'data-test-subj': 'createDatasetDataSource-connectNew',
       showIndicator: false,
     };
     return [...fromSources, connectOption];
@@ -199,36 +199,36 @@ export function CreateDatasetDetailsFields({
   return (
     <>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.dataSourceLabel()}
+        label={createDatasetFormStrings.dataSourceLabel()}
         fullWidth
         isInvalid={Boolean(dataSourceFieldState.error)}
         error={dataSourceFieldState.error?.message}
       >
         <EuiSuperSelect
           options={dataSourceOptions}
-          data-test-subj="createDatasetFlyoutDataSource"
+          data-test-subj="createDatasetDataSource"
           fullWidth
           name={dataSourceIdField.name}
-          aria-label={createDatasetFlyoutStrings.dataSourceLabel()}
+          aria-label={createDatasetFormStrings.dataSourceLabel()}
           valueOfSelected={isDataSourceEmpty ? undefined : dataSourceIdField.value}
           onChange={onDataSourceChange}
           onBlur={dataSourceIdField.onBlur}
-          placeholder={createDatasetFlyoutStrings.dataSourcePlaceholder()}
+          placeholder={createDatasetFormStrings.dataSourcePlaceholder()}
           isInvalid={Boolean(dataSourceFieldState.error)}
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.nameLabel()}
-        helpText={createDatasetFlyoutStrings.nameHelp()}
+        label={createDatasetFormStrings.nameLabel()}
+        helpText={createDatasetFormStrings.nameHelp()}
         fullWidth
         isInvalid={Boolean(nameFieldState.error)}
         error={nameFieldState.error?.message}
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutName"
+          data-test-subj="createDatasetName"
           autoFocus={autoFocusName}
           fullWidth
-          placeholder={createDatasetFlyoutStrings.namePlaceholder()}
+          placeholder={createDatasetFormStrings.namePlaceholder()}
           isInvalid={Boolean(nameFieldState.error)}
           value={nameField.value}
           onChange={(e) => nameField.onChange(e.target.value)}
@@ -237,15 +237,15 @@ export function CreateDatasetDetailsFields({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.descriptionLabel()}
-        helpText={createDatasetFlyoutStrings.descriptionHelp()}
+        label={createDatasetFormStrings.descriptionLabel()}
+        helpText={createDatasetFormStrings.descriptionHelp()}
         fullWidth
       >
         <EuiTextArea
-          data-test-subj="createDatasetFlyoutDescription"
+          data-test-subj="createDatasetDescription"
           fullWidth
           rows={1}
-          placeholder={createDatasetFlyoutStrings.descriptionPlaceholder()}
+          placeholder={createDatasetFormStrings.descriptionPlaceholder()}
           value={descriptionField.value}
           onChange={(e) => descriptionField.onChange(e.target.value)}
           name={descriptionField.name}
@@ -253,14 +253,14 @@ export function CreateDatasetDetailsFields({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.resourceLabel()}
-        helpText={createDatasetFlyoutStrings.resourceHelp()}
+        label={createDatasetFormStrings.resourceLabel()}
+        helpText={createDatasetFormStrings.resourceHelp()}
         fullWidth
         isInvalid={Boolean(resourceFieldState.error)}
         error={resourceFieldState.error?.message}
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutResource"
+          data-test-subj="createDatasetResource"
           fullWidth
           autoComplete="off"
           isInvalid={Boolean(resourceFieldState.error)}
