@@ -551,7 +551,7 @@ steps:
           channels:
             - '#security-entity-analytics-alerts'
           message: ':alert: *Serverless Entity Analytics - Security Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless Explore - Security Solution Cypress Tests failure'
     key: notify-serverless-explore
@@ -582,7 +582,7 @@ steps:
           channels:
             - '#security-threat-hunting'
           message: ':alert: *Serverless Explore - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless Investigations - Security Solution Cypress Tests failure'
     key: notify-serverless-investigations
@@ -613,7 +613,7 @@ steps:
           channels:
             - '#security-threat-hunting'
           message: ':alert: *Serverless Investigations - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless Rule Management - Security Solution Cypress Tests failure'
     key: notify-serverless-rule-management
@@ -644,7 +644,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Serverless Rule Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests failure'
     key: notify-serverless-rule-management-prebuilt-rules-customization
@@ -675,7 +675,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests failure'
     key: notify-serverless-rule-management-prebuilt-rules-installation
@@ -706,7 +706,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests failure'
     key: notify-serverless-rule-management-prebuilt-rules-management
@@ -737,7 +737,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests failure'
     key: notify-serverless-rule-management-prebuilt-rules-upgrade
@@ -768,7 +768,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Rule Management - Security Solution Cypress Tests failure'
     key: notify-rule-management
@@ -798,7 +798,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Rule Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests failure'
     key: notify-rule-management-prebuilt-rules-customization
@@ -828,7 +828,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests failure'
     key: notify-rule-management-prebuilt-rules-installation
@@ -858,7 +858,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests failure'
     key: notify-rule-management-prebuilt-rules-management
@@ -888,7 +888,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests failure'
     key: notify-rule-management-prebuilt-rules-upgrade
@@ -918,7 +918,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless Detection Engine - Security Solution Cypress Tests failure'
     key: notify-serverless-detection-engine
@@ -949,7 +949,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Serverless Detection Engine - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless Detection Engine - Exceptions - Security Solution Cypress Tests failure'
     key: notify-serverless-detection-engine-exceptions
@@ -980,7 +980,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Serverless Detection Engine - Exceptions - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Detection Engine - Security Solution Cypress Tests failure'
     key: notify-detection-engine
@@ -1010,7 +1010,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Detection Engine - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Detection Engine - Exceptions - Security Solution Cypress Tests failure'
     key: notify-detection-engine-exceptions
@@ -1040,7 +1040,7 @@ steps:
           channels:
             - '#security-detection-engineering-team'
           message: ':alert: *Detection Engine - Exceptions - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Serverless AI Assistant - Security Solution Cypress Tests failure'
     key: notify-serverless-ai-assistant
@@ -1071,7 +1071,7 @@ steps:
           channels:
             - '#security-threat-hunting'
           message: ':alert: *Serverless AI Assistant - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify AI Assistant - Security Solution Cypress Tests failure'
     key: notify-ai-assistant
@@ -1101,7 +1101,7 @@ steps:
           channels:
             - '#security-threat-hunting'
           message: ':alert: *AI Assistant - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Entity Analytics - Security Solution Cypress Tests failure'
     key: notify-entity-analytics
@@ -1131,7 +1131,7 @@ steps:
           channels:
             - '#security-entity-analytics-alerts'
           message: ':alert: *Entity Analytics - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Explore - Security Solution Cypress Tests failure'
     key: notify-explore
@@ -1161,7 +1161,7 @@ steps:
           channels:
             - '#security-threat-hunting'
           message: ':alert: *Explore - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Investigations - Security Solution Cypress Tests failure'
     key: notify-investigations
@@ -1191,7 +1191,7 @@ steps:
           channels:
             - '#security-threat-hunting'
           message: ':alert: *Investigations - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Osquery Cypress Tests failure'
     key: notify-osquery
@@ -1221,7 +1221,7 @@ steps:
           channels:
             - '#security-defend-workflows'
           message: ':alert: *Osquery Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Osquery Cypress Tests on Serverless failure'
     key: notify-osquery-serverless
@@ -1252,7 +1252,7 @@ steps:
           channels:
             - '#security-defend-workflows'
           message: ':alert: *Osquery Cypress Tests on Serverless* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Defend Workflows Cypress Tests failure'
     key: notify-defend-workflows
@@ -1282,7 +1282,7 @@ steps:
           channels:
             - '#security-defend-workflows'
           message: ':alert: *Defend Workflows Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
 
   - label: ':slack: Notify Defend Workflows Cypress Tests on Serverless failure'
     key: notify-defend-workflows-serverless
@@ -1313,4 +1313,4 @@ steps:
           channels:
             - '#security-defend-workflows'
           message: ':alert: *Defend Workflows Cypress Tests on Serverless* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "hard_failed"
+        if: step.outcome == "soft_failed"
