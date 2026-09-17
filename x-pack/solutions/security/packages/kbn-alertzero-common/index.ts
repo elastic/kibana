@@ -121,6 +121,8 @@ export {
   WatchWorkerAttachment,
   AnalysisWindowDays,
   RuleTuningWorkerExtras,
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,

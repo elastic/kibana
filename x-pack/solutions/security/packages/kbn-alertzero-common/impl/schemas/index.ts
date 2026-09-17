@@ -51,6 +51,11 @@ export {
 } from './components/detection_watch_settings.gen';
 
 export {
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
+} from './components/floor_watch_settings.gen';
+
+export {
   TemplateId,
   RecommendedAction,
   ProposalStatus,

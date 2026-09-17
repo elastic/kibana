@@ -11,12 +11,15 @@ import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
   touchesWorkerSettings,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   type UpdateWorkerRequestBody,
   type Worker,
 } from '@kbn/alertzero-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowSchema } from '@kbn/workflows';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -30,6 +33,25 @@ import {
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
+
+interface AlertTriageAttachmentService {
+  getRuleAttachmentSelection(params: {
+    search: string;
+    attachmentFilter: 'all' | 'attached' | 'not_attached';
+  }): Promise<{ ruleIds: string[]; attachedRuleIds: string[] }>;
+  updateRuleAttachments(params: {
+    attachRuleIds: string[];
+    detachRuleIds: string[];
+  }): Promise<unknown>;
+}
+
+interface AlertTriageOpts {
+  alertTriageWorkerEnabled: boolean;
+  getAttachmentService?: (
+    request: KibanaRequest,
+    workflowId: string
+  ) => Promise<AlertTriageAttachmentService>;
+}
 
 const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYaml | null => {
   const managedDef: ManagedWorkflowDefinition | undefined = getManagedWorkflowDefinition(
@@ -76,7 +98,8 @@ export class WorkersService {
       agentBuilder?: AgentBuilderPluginStart;
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
-    } = {}
+    } = {},
+    private readonly alertTriageOpts: AlertTriageOpts = { alertTriageWorkerEnabled: false }
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -219,17 +242,104 @@ export class WorkersService {
         if (!status.installed) return { outcome: 'unavailable' };
       }
 
+      const isAlertTriageWorker =
+        workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID &&
+        this.alertTriageOpts.alertTriageWorkerEnabled &&
+        this.alertTriageOpts.getAttachmentService != null;
+
+      if (isAlertTriageWorker && patch.enabled) {
+        const preflightError = await this.checkAlertAnalysisPreflight();
+        if (preflightError) {
+          return { outcome: 'rejected', what: preflightError };
+        }
+        // Attach-then-enable: a failed bulk edit leaves the Worker off, not enabled-but-unattached.
+        await this.attachAlertTriageWorkerToAllRules(request).catch((err: Error) => {
+          this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
+          throw err;
+        });
+      }
+
       await management.updateWorkflow(
         status.workflowId,
         { enabled: patch.enabled },
         spaceId,
         request
       );
+
+      if (isAlertTriageWorker && !patch.enabled) {
+        // Detach after disabling; don't let a partial detach fail the disable.
+        await this.detachAlertTriageWorkerFromAllRules(request).catch((err: Error) => {
+          this.logger.error(`Alert Triage Worker: rule detachment failed: ${err.message}`);
+        });
+      }
     }
 
     const agentLookup = await this.buildAgentLookup(request);
     const worker = await this.projectWorker(registration, spaceId, agentLookup);
     return { outcome: 'updated', response: { worker } };
+  }
+
+  /**
+   * Returns an error message string if the standalone alert-analysis workflow is disabled,
+   * null if the preflight check passes. The Worker calling `workflow.execute` against a
+   * disabled workflow would produce a failing execution on every rule trigger, so we refuse
+   * the enable rather than silently setting up a broken state.
+   */
+  private async checkAlertAnalysisPreflight(): Promise<string | null> {
+    const management = this.management;
+    if (!management) return null;
+    try {
+      const workflow = await management.getWorkflow(
+        SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+        GLOBAL_WORKFLOW_SPACE_ID
+      );
+      if (workflow && !workflow.enabled) {
+        return 'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.';
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Alert Triage Worker: could not verify Alert Analysis workflow state: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+    return null;
+  }
+
+  private async attachAlertTriageWorkerToAllRules(request: KibanaRequest): Promise<void> {
+    const { getAttachmentService } = this.alertTriageOpts;
+    if (!getAttachmentService) return;
+    const service = await getAttachmentService(
+      request,
+      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+    );
+    const selection = await service.getRuleAttachmentSelection({
+      search: '',
+      attachmentFilter: 'not_attached',
+    });
+    if (selection.ruleIds.length === 0) return;
+    await service.updateRuleAttachments({
+      attachRuleIds: selection.ruleIds,
+      detachRuleIds: [],
+    });
+  }
+
+  private async detachAlertTriageWorkerFromAllRules(request: KibanaRequest): Promise<void> {
+    const { getAttachmentService } = this.alertTriageOpts;
+    if (!getAttachmentService) return;
+    const service = await getAttachmentService(
+      request,
+      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+    );
+    const selection = await service.getRuleAttachmentSelection({
+      search: '',
+      attachmentFilter: 'attached',
+    });
+    if (selection.attachedRuleIds.length === 0) return;
+    await service.updateRuleAttachments({
+      attachRuleIds: [],
+      detachRuleIds: selection.attachedRuleIds,
+    });
   }
 
   private async projectWorker(

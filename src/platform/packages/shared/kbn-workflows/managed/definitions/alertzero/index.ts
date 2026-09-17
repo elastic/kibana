@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID } from './actions/action_close_alerts_false_positive';
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
 import { ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID } from './actions/action_edit_detection_rule';
 import {
@@ -52,6 +53,10 @@ export {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
 } from './actions/action_create_detection_rule';
+export {
+  ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW,
+  ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
+} from './actions/action_close_alerts_false_positive';
 export {
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
@@ -133,6 +138,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
  */
 export const ALERTZERO_ACTION_WORKFLOW_IDS = [
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
