@@ -9,7 +9,13 @@ export type { AgentBuilderEvent } from './base/events';
 export { apiTargets, type ApiTarget } from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
+  ConversationAttachmentAddedTriggerId,
+  ConversationAttachmentUpdatedTriggerId,
+  ConversationAttachmentDeletedTriggerId,
   type ConversationMetadataUpdatedEvent,
+  type AttachmentAddedTriggerEvent,
+  type AttachmentUpdatedTriggerEvent,
+  type AttachmentDeletedTriggerEvent,
 } from './triggers';
 export {
   internalNamespaces as toolNamespaces,
@@ -209,6 +215,7 @@ export {
   type ConversationRoundAuthor,
   type ConversationRoundOrigin,
   type ConversationWithoutRounds,
+  type ConversationAttachmentSummary,
   type ConversationPermissions,
   type ConversationWithPermissions,
   type ConversationWithoutRoundsWithPermissions,
@@ -366,6 +373,15 @@ export {
   type ExecutionFailedEvent,
   type ExecutionAbortedEventData,
   type ExecutionAbortedEvent,
+  type AttachmentEventSource,
+  type AttachmentAddedEventData,
+  type AttachmentAddedEvent,
+  type AttachmentUpdatedEventData,
+  type AttachmentUpdatedEvent,
+  type AttachmentDeletedEventData,
+  type AttachmentDeletedEvent,
+  type AttachmentTimelineEvent,
+  isAttachmentEvent,
   type TimelineEvent,
   type TimelineEventInput,
   type ActiveExecution,

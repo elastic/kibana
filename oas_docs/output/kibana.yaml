@@ -2156,6 +2156,11 @@ paths:
                       total: 128
                     results:
                       - agent_id: elastic-ai-agent
+                        attachments:
+                          - id: 6f1c0f1e-6c2a-4a0a-9a1e-2f2b1c7d4e11
+                            type: text
+                          - id: 2b9d7c53-0b8e-4a77-9f0c-91a5d6c3b208
+                            type: esql
                         created_at: '2025-09-19T17:45:39.554Z'
                         id: bcc176c5-38f6-40be-be0c-898e34fa1480
                         permissions:
@@ -2817,6 +2822,10 @@ paths:
                   description: Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
                   maxLength: 256
@@ -3102,6 +3111,10 @@ paths:
                   description: Optional new description for the attachment.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
               required:
                 - data
       responses:
@@ -3403,7 +3416,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview; added in 9.5.0
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
@@ -3884,7 +3898,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview; added in 9.5.0
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
@@ -8638,8 +8653,9 @@ paths:
           name: page
           required: false
           schema:
+            maximum: 10000
             minimum: 1
-            type: number
+            type: integer
         - description: The number of action policies to return per page. Defaults to 20.
           in: query
           name: per_page
@@ -8647,7 +8663,7 @@ paths:
           schema:
             maximum: 100
             minimum: 1
-            type: number
+            type: integer
         - description: A text string to search across action policy fields.
           in: query
           name: search
@@ -8656,17 +8672,6 @@ paths:
             maxLength: 256
             minLength: 1
             type: string
-        - description: Filter by tags. Accepts a single string or an array.
-          in: query
-          name: tags
-          required: false
-          schema:
-            items:
-              maxLength: 128
-              minLength: 1
-              type: string
-            maxItems: 10
-            type: array
         - description: Filter by enabled status. Accepts the strings true or false.
           in: query
           name: enabled
@@ -8721,8 +8726,6 @@ paths:
                           expression: 'rule.tags: "production"'
                         name: Notify on production alerts
                         snoozed_until: null
-                        tags:
-                          - production
                         throttle:
                           interval: null
                           strategy: on_status_change
@@ -8847,8 +8850,6 @@ paths:
                   matcher:
                     expression: 'rule.tags: "production"'
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -8878,8 +8879,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9876,8 +9875,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10044,8 +10041,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts (updated)
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10206,8 +10201,6 @@ paths:
                   matcher:
                     expression: 'rule.tags: "production"'
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -10237,8 +10230,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10272,8 +10263,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10445,8 +10434,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10617,8 +10604,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10799,8 +10784,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10971,8 +10954,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -13143,13 +13124,14 @@ paths:
         [Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: get-alerting-v2-rules
       parameters:
-        - description: The page number to return. Defaults to 1.
+        - description: The page number to return. Defaults to 1. `page * per_page` cannot exceed 10000.
           in: query
           name: page
           required: false
           schema:
+            maximum: 10000
             minimum: 1
-            type: number
+            type: integer
         - description: The number of rules to return per page. Defaults to 20.
           in: query
           name: per_page
@@ -13157,7 +13139,7 @@ paths:
           schema:
             maximum: 1000
             minimum: 1
-            type: number
+            type: integer
         - description: The filter to apply to the rules.
           in: query
           name: filter
@@ -98388,12 +98370,6 @@ components:
           description: The ISO datetime until which the policy is snoozed, or null if not snoozed.
           nullable: true
           type: string
-        tags:
-          description: Tags associated with the action policy.
-          items:
-            type: string
-          nullable: true
-          type: array
         throttle:
           additionalProperties: false
           description: The throttle configuration for notifications.
@@ -98402,6 +98378,7 @@ components:
           properties:
             interval:
               description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+              maxLength: 32
               nullable: true
               type: string
             strategy:
@@ -98443,7 +98420,6 @@ components:
         - destinations
         - matcher
         - group_by
-        - tags
         - grouping_mode
         - throttle
         - snoozed_until
@@ -98458,6 +98434,7 @@ components:
       properties:
         interval:
           description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+          maxLength: 32
           nullable: true
           type: string
         strategy:
@@ -98692,6 +98669,7 @@ components:
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
               description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -98706,6 +98684,7 @@ components:
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
@@ -99135,14 +99114,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          type: array
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
           description: The throttle configuration for notifications.
@@ -99265,6 +99236,7 @@ components:
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
               description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -99279,6 +99251,7 @@ components:
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
@@ -99755,6 +99728,7 @@ components:
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
               description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -99769,6 +99743,7 @@ components:
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
@@ -99842,9 +99817,11 @@ components:
       properties:
         every:
           description: Execution interval, e.g. 1m, 5m, 1h.
+          maxLength: 32
           type: string
         lookback:
           description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+          maxLength: 32
           type: string
       required:
         - every
@@ -99961,15 +99938,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          nullable: true
-          type: array
         throttle:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
@@ -100072,9 +100040,11 @@ components:
           properties:
             every:
               description: Execution interval, e.g. 1m, 5m, 1h.
+              maxLength: 32
               type: string
             lookback:
               description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+              maxLength: 32
               type: string
         state_transition:
           anyOf:
@@ -100095,6 +100065,7 @@ components:
                   type: string
                 pending_timeframe:
                   description: Time window used with `pending_count`, for example `5m` or `15m`.
+                  maxLength: 32
                   type: string
                 recovering_count:
                   description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -100109,6 +100080,7 @@ components:
                   type: string
                 recovering_timeframe:
                   description: Time window used with `recovering_count`, for example `5m` or `15m`.
+                  maxLength: 32
                   type: string
             - nullable: true
           nullable: true

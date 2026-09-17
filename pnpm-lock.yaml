@@ -195,11 +195,11 @@ importers:
         specifier: 4.25.0
         version: 4.25.0
       '@elastic/eui':
-        specifier: 121.0.0
-        version: 121.0.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
+        specifier: 122.0.0
+        version: 122.0.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
       '@elastic/eui-illustrations':
-        specifier: 1.0.2
-        version: 1.0.2
+        specifier: 1.1.0
+        version: 1.1.0
       '@elastic/eui-theme-borealis':
         specifier: 8.0.0
         version: 8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -213,8 +213,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.24.0
-        version: 4.24.0(monaco-editor@0.44.0)
+        specifier: 4.25.0
+        version: 4.25.0(monaco-editor@0.44.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -1868,6 +1868,9 @@ importers:
       '@kbn/esql':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/esql
+      '@kbn/esql-browser':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/esql/kbn-esql-browser
       '@kbn/esql-composer':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-esql-composer
@@ -7642,6 +7645,8 @@ importers:
 
   src/platform/packages/shared/deeplinks/workplace_ai: {}
 
+  src/platform/packages/shared/esql/kbn-esql-browser: {}
+
   src/platform/packages/shared/home/sample_data_card: {}
 
   src/platform/packages/shared/home/sample_data_tab: {}
@@ -10723,8 +10728,8 @@ packages:
   '@elastic/esql@4.25.0':
     resolution: {integrity: sha512-4DFggfZsEYslfylmGniKC4yeTO5wGeLqqVEGHaxEQhVg2Ns1eWKDOad4FGopJkRtX5nwcmXwIwyPpPBiKhG2Uw==}
 
-  '@elastic/eui-illustrations@1.0.2':
-    resolution: {integrity: sha512-gYK9mHdGm/P7wbf6yhYo17qoP61IlUcwVwIDyOSHqx89TymSn9AyVZzbgjwmGdaLFNfgM+RKvg+hfTB7Unm+Gw==}
+  '@elastic/eui-illustrations@1.1.0':
+    resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
 
   '@elastic/eui-test-helpers@1.7.0':
     resolution: {integrity: sha512-JiWZoENq5P0TxBYIhExlFHl0DPh0ua9IQ5QTkZxpt9m9pRQZ5ceK5Lbf1StBFz1BupjKNf7XSM+sAS2+NRcRdw==}
@@ -10744,8 +10749,8 @@ packages:
       react: ^17.0 || ^18.0
       react-dom: ^17.0 || ^18.0
 
-  '@elastic/eui@121.0.0':
-    resolution: {integrity: sha512-Ws6scxpbhK7kiUqC8RR1Nua3ppguOOcXis81OATvzb9xSKQZbUWys+6TlZP67lrFheO1eqVc3ih276Pfm6kVBw==}
+  '@elastic/eui@122.0.0':
+    resolution: {integrity: sha512-fzgkBEsL2cMkwR2X7dMQF23Xw8uqQbPlC2MbOYxrC2+0nP+G5E9VNt8Ms6SbeNv1QP0rMwaXUuE4LxQRzCFiOA==}
     engines: {node: 16.x || 18.x || >=20.x}
     peerDependencies:
       '@elastic/datemath': ^5.0.2
@@ -10774,8 +10779,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.24.0':
-    resolution: {integrity: sha512-rpUGq+dpuNXofxU7B1+IrW8ePCK5A7DjrdkI2rJFzU24h+tRm3v6HmEpbmGl4nu9QmMHCy3JxLVmDBaYtXGEPA==}
+  '@elastic/monaco-esql@4.25.0':
+    resolution: {integrity: sha512-PG6BX/MjlLtCbEbLTwlg+tLPAu/xCyWVryXlsC87AUDrg+3Kiuzio8jvknyDkVQ00OeIkGrQVWiYyyW2utVBBQ==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -27597,7 +27602,7 @@ snapshots:
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
-  '@elastic/eui-illustrations@1.0.2': {}
+  '@elastic/eui-illustrations@1.1.0': {}
 
   '@elastic/eui-test-helpers@1.7.0(@playwright/test@1.62.1)':
     optionalDependencies:
@@ -27621,7 +27626,7 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@elastic/eui@121.0.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
+  '@elastic/eui@122.0.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
     dependencies:
       '@elastic/datemath': 5.0.3(moment@2.30.1)
       '@elastic/eui-theme-borealis': 8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -27686,7 +27691,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.24.0(monaco-editor@0.44.0)':
+  '@elastic/monaco-esql@4.25.0(monaco-editor@0.44.0)':
     dependencies:
       '@elastic/esql-definitions': 4.25.0
       monaco-editor: 0.44.0

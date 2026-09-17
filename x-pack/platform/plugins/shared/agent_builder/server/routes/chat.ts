@@ -291,7 +291,8 @@ export const conversePayloadSchema = schema.object({
     schema.oneOf([schema.literal('regenerate')], {
       meta: {
         description:
-          'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
+          'Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.',
+        deprecated: true,
       },
     })
   ),
@@ -386,7 +387,7 @@ export function registerChatRoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const { validateAction, validateConfigurationOverrides, executeAgent } = getConverseHelpers({
+  const { validateConfigurationOverrides, executeAgent } = getConverseHelpers({
     getInternalServices,
   });
 
@@ -458,7 +459,6 @@ export function registerChatRoutes({
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         await validateConfigurationOverrides({ payload, request });
-        validateAction(payload);
 
         const { events$: chatEvents$ } = await executeAgent({
           payload,
@@ -508,7 +508,6 @@ export function registerChatRoutes({
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         await validateConfigurationOverrides({ payload, request });
-        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -571,7 +570,6 @@ export function registerChatRoutes({
         }
 
         await validateConfigurationOverrides({ payload, request });
-        validateAction(payload);
 
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 

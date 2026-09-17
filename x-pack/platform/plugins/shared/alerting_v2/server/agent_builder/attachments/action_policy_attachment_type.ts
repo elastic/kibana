@@ -54,8 +54,7 @@ Destinations: ${destinationSummary}
 Matcher: ${matcherSnippet}
 Grouping: ${grouping}
 Throttle: ${throttle}
-${data.description ? `Description: ${data.description}` : ''}
-${data.tags?.length ? `Tags: ${data.tags.join(', ')}` : ''}`.trim();
+${data.description ? `Description: ${data.description}` : ''}`.trim();
 };
 
 export const createActionPolicyAttachmentType = ({
