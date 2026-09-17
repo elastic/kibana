@@ -51,6 +51,7 @@ import { refreshEventLogIndex } from './refresh_event_log_index';
 import { resolveDefaultWorkflowIds } from './resolve_default_workflow_ids';
 import { validatePreExecution } from './validate_pre_execution';
 import { verifyWorkflowIntegrity } from './verify_workflow_integrity';
+import { scheduleSubWorkflows } from './schedule_sub_workflows';
 import { type WorkflowsManagementApi } from './invoke_alert_retrieval_workflow';
 import {
   PipelineStepError,
@@ -712,7 +713,18 @@ export async function executeGenerationWorkflow({
     });
 
     /** Manual workflow invocation: runs bundled workflows sequentially. */
-    const workflowsApi = workflowsManagementApi as WorkflowsManagementApi;
+    //
+    // The platform runs a sub-workflow inline when the request it is given is a fake
+    // request, so `runWorkflow` would not resolve (and the run id would not be known)
+    // until that sub-workflow finished. Each phase writes its tracking event only
+    // after it has the run id, so the flyout would have nothing to render while the
+    // pipeline is in progress. Scheduling each sub-workflow instead returns its id
+    // immediately, before the workflow starts running.
+    const workflowsApi = (
+      pipelineRequest?.isFakeRequest === true
+        ? scheduleSubWorkflows(workflowsManagementApi)
+        : workflowsManagementApi
+    ) as WorkflowsManagementApi;
     const basePath = coreStart.http.basePath.get(request);
     const orchestrationOutcome = await runManualOrchestration({
       alerts,
