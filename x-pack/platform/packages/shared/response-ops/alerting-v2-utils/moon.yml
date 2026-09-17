@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/core-lifecycle-browser'
   - '@kbn/i18n'
   - '@kbn/deeplinks-observability'
+  - '@kbn/rule-data-utils'
 tags:
   - shared-common
   - package
