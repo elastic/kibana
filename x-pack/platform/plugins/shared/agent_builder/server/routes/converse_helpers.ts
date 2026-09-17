@@ -25,7 +25,6 @@ import {
   resolveConnectorOrInferenceId,
 } from '../../common/resolve_connector_or_inference_id';
 import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
-import type { ChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
 import { validateSkillIds } from '../services/agents/persisted/client/utils/skills';
 import type { RouteDependencies } from './types';
@@ -53,12 +52,6 @@ export interface ResolvedExecutionOptions {
 export const getConverseHelpers = ({
   getInternalServices,
 }: Pick<RouteDependencies, 'getInternalServices'>) => {
-  const validateAction = (payload: ChatRequestBodyPayload) => {
-    if (payload.action === 'regenerate' && !payload.conversation_id) {
-      throw createBadRequestError('conversation_id is required when action is regenerate');
-    }
-  };
-
   const resolveConnectorIdFromPayload = (payload: ChatRequestBodyPayload): string | undefined => {
     try {
       return resolveConnectorOrInferenceId({
@@ -124,7 +117,7 @@ export const getConverseHelpers = ({
     executionService,
     executionOptions,
   }: {
-    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload;
+    payload: ChatRequestBodyPayload;
     request: KibanaRequest;
     executionService: AgentExecutionService;
     executionOptions?: ResolvedExecutionOptions;
@@ -139,7 +132,6 @@ export const getConverseHelpers = ({
       read_only: readOnly,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
-      action,
       project_routing: projectRouting,
       reasoning_level: reasoningLevel,
     } = payload;
@@ -165,7 +157,6 @@ export const getConverseHelpers = ({
         callback,
         browserApiTools,
         configurationOverrides,
-        action,
         projectRouting,
         reasoningLevel,
         nextInput: {
@@ -177,5 +168,5 @@ export const getConverseHelpers = ({
     });
   };
 
-  return { validateAction, validateConfigurationOverrides, executeAgent };
+  return { validateConfigurationOverrides, executeAgent };
 };
