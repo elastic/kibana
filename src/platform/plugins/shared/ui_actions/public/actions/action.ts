@@ -47,6 +47,7 @@ export type ActionDefinitionContext<Context extends object = object> =
 
 export interface ActionMenuItemProps<Context extends object> {
   context: ActionExecutionContext<Context>;
+  dataTestSubj?: string;
 }
 
 export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
