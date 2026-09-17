@@ -6,35 +6,36 @@
  */
 
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
+import type { IndexKind } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { AiIndexTrace } from '../../../../common/http_api/ai_indices';
 import { useKibana } from '../../hooks/use_kibana';
+import type { EditableAiIndexTrace } from './types';
 
 interface DataStreamFieldProps {
-  value: AiIndexTrace | undefined;
-  onChange: (trace: AiIndexTrace | undefined) => void;
+  value: EditableAiIndexTrace | undefined;
+  onChange: (trace: EditableAiIndexTrace | undefined) => void;
 }
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-const isDataStreamMatch = (tags: Array<{ key: string }>): boolean =>
-  tags.some((tag) => tag.key === 'data_stream');
+const DATA_STREAM_TAG: IndexKind = 'data_stream';
 
 export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
   const {
     services: {
       data: { dataViews },
+      notifications,
     },
   } = useKibana();
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | undefined>(undefined);
   // Ignore stale getIndices responses when a newer debounced search starts before the prior one settles.
   const requestIdRef = useRef(0);
+  // Skip getIndices until first focus so mount never issues a `*` query.
+  const hasFocusedRef = useRef(false);
 
   const selectedValue = value?.type === 'index' ? value.value : undefined;
 
@@ -47,10 +48,11 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
 
   const loadOptions = useCallback(
     async (search: string) => {
+      const trimmed = search.trim();
+      const pattern = trimmed.length > 0 ? `*${trimmed}*` : '*';
       const requestId = ++requestIdRef.current;
       setIsLoading(true);
       try {
-        const pattern = search.length > 0 ? `${search}*` : '*';
         const matches = await dataViews.getIndices({
           pattern,
           isRollupIndex: () => false,
@@ -60,44 +62,47 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
         }
         setOptions(
           matches
-            .filter((item) => isDataStreamMatch(item.tags))
+            .filter((item) => item.tags.some((tag) => tag.key === DATA_STREAM_TAG))
             .map((item) => ({ label: item.name, value: item.name }))
         );
-        setLoadError(undefined);
       } catch {
         if (requestId !== requestIdRef.current) {
           return;
         }
         setOptions([]);
-        setLoadError(
-          i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.loadError', {
+        // getIndices resolves to [] on network failure; this catch only covers synchronous throws.
+        notifications.toasts.addWarning({
+          title: i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.loadError', {
             defaultMessage: 'Unable to load data streams.',
-          })
-        );
+          }),
+        });
       } finally {
         if (requestId === requestIdRef.current) {
           setIsLoading(false);
         }
       }
     },
-    [dataViews]
+    [dataViews, notifications]
   );
 
   useEffect(() => {
+    if (!hasFocusedRef.current) {
+      return;
+    }
     void loadOptions(debouncedSearch);
   }, [debouncedSearch, loadOptions]);
+
+  const handleFocus = () => {
+    if (hasFocusedRef.current) {
+      return;
+    }
+    hasFocusedRef.current = true;
+    void loadOptions(searchValue);
+  };
 
   const handleChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
     const next = selected[0]?.value;
     onChange(next ? { type: 'index', value: next } : undefined);
-  };
-
-  const handleCreateOption = (search: string) => {
-    const trimmed = search.trim();
-    if (trimmed.length === 0) {
-      return false;
-    }
-    onChange({ type: 'index', value: trimmed });
   };
 
   return (
@@ -109,12 +114,9 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
         defaultMessage:
           'Data streams carrying OTel GenAI spans from external harnesses such as LangChain, LlamaIndex, or the OpenAI SDK.',
       })}
-      error={loadError}
-      isInvalid={loadError !== undefined}
       fullWidth
     >
       <EuiComboBox
-        isInvalid={loadError !== undefined}
         singleSelection={{ asPlainText: true }}
         fullWidth
         async
@@ -123,14 +125,7 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
         selectedOptions={selectedOptions}
         onChange={handleChange}
         onSearchChange={setSearchValue}
-        onCreateOption={handleCreateOption}
-        customOptionText={i18n.translate(
-          'xpack.contextEngine.traceSelector.dataStreamField.customOptionText',
-          {
-            defaultMessage: 'Add {searchValue} as a data stream',
-            values: { searchValue: '{searchValue}' },
-          }
-        )}
+        onFocus={handleFocus}
         placeholder={i18n.translate(
           'xpack.contextEngine.traceSelector.dataStreamField.placeholder',
           {

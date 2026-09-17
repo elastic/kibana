@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { TracesPanel } from './traces_panel';
 
@@ -61,7 +61,8 @@ const renderWithProviders = (
 };
 
 const EMPTY_FALLBACK = /No agent traces configured/;
-const ADD_ONE_HINT = /Add one to tune Knowledge Indicators against real agent questions/;
+const PICK_HINT =
+  /Point this index at an Elastic agent from Agent Builder, or a data stream carrying OTel GenAI spans/;
 
 describe('TracesPanel', () => {
   beforeEach(() => {
@@ -82,7 +83,7 @@ describe('TracesPanel', () => {
     );
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
-    expect(screen.getByText(ADD_ONE_HINT)).toBeInTheDocument();
+    expect(screen.getByText(PICK_HINT)).toBeInTheDocument();
   });
 
   it('renders read-only empty fallback for managed AI indexes', () => {
@@ -91,7 +92,7 @@ describe('TracesPanel', () => {
     );
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
-    expect(screen.queryByText(ADD_ONE_HINT)).not.toBeInTheDocument();
+    expect(screen.queryByText(PICK_HINT)).not.toBeInTheDocument();
   });
 
   it('renders the configured elastic agent trace in read-only mode', () => {
@@ -163,7 +164,11 @@ describe('TracesPanel', () => {
     expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
   });
 
-  it('hides the edit button and shows the ES|QL label for esql traces', () => {
+  it('treats an esql trace as empty, shows Edit, and replaces it on save', async () => {
+    const onSaved = jest.fn();
+    const testServices = coreMock.createStart();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
     renderWithProviders(
       <TracesPanel
         isLoading={false}
@@ -171,15 +176,41 @@ describe('TracesPanel', () => {
           ...aiIndex,
           traces: [{ type: 'esql', value: 'FROM traces | LIMIT 10', query: 'FROM traces' }],
         }}
-        onSaved={jest.fn()}
+        onSaved={onSaved}
         isManaged={false}
-      />
+      />,
+      testServices
     );
 
-    expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextTracesReadOnlyValue')).toHaveTextContent(
-      'ES|QL query: FROM traces | LIMIT 10'
-    );
+    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
+    expect(screen.getByTestId('contextEditTracesButton')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+
+    fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
+      target: { value: 'Loyalty' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Loyalty Support Agent')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Loyalty Support Agent'));
+    fireEvent.click(screen.getByTestId('contextTracesSaveButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [],
+            traces: [{ type: 'elastic_agent', value: 'agent-1' }],
+          }),
+        })
+      );
+    });
   });
 
   it('saves the edited trace, exits edit mode, and calls onSaved', async () => {
@@ -223,7 +254,7 @@ describe('TracesPanel', () => {
     expect(onSaved).toHaveBeenCalledTimes(1);
   });
 
-  it('preserves additional traces beyond the first when saving', async () => {
+  it('drops additional traces beyond the first when saving', async () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
@@ -246,9 +277,10 @@ describe('TracesPanel', () => {
 
     fireEvent.click(screen.getByTestId('contextEditTracesButton'));
 
-    fireEvent.change(screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input')!, {
-      target: { value: 'logs-genai' },
-    });
+    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
+    const input = comboBox.querySelector('input')!;
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'logs-genai' } });
 
     await waitFor(() => {
       expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
@@ -265,10 +297,7 @@ describe('TracesPanel', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [],
-            traces: [
-              { type: 'index', value: 'logs-genai-default' },
-              { type: 'index', value: 'logs-second' },
-            ],
+            traces: [{ type: 'index', value: 'logs-genai-default' }],
           }),
         })
       );
@@ -394,44 +423,7 @@ describe('TracesPanel', () => {
     });
   });
 
-  it('disables Save when the draft is cleared while a trace exists', async () => {
-    renderWithProviders(
-      <TracesPanel
-        isLoading={false}
-        aiIndex={{
-          ...aiIndex,
-          traces: [{ type: 'elastic_agent', value: 'agent-1', query: 'FROM traces' }],
-        }}
-        onSaved={jest.fn()}
-        isManaged={false}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
-    fireEvent.click(screen.getByTestId('contextTraceToggle-index'));
-
-    expect(screen.getByTestId('contextTracesSaveButton')).toBeDisabled();
-  });
-
-  it('enables Save for an index draft with a non-empty value', () => {
-    renderWithProviders(
-      <TracesPanel
-        isLoading={false}
-        aiIndex={{
-          ...aiIndex,
-          traces: [{ type: 'index', value: 'logs-genai-default', query: 'FROM logs' }],
-        }}
-        onSaved={jest.fn()}
-        isManaged={false}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
-
-    expect(screen.getByTestId('contextTracesSaveButton')).not.toBeDisabled();
-  });
-
-  it('removes the configured trace while preserving the remaining ones', async () => {
+  it('clears the trace when saving an empty draft', async () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
@@ -441,10 +433,7 @@ describe('TracesPanel', () => {
         isLoading={false}
         aiIndex={{
           ...aiIndex,
-          traces: [
-            { type: 'index', value: 'logs-original', query: 'FROM logs-original' },
-            { type: 'index', value: 'logs-second', query: 'FROM logs-second' },
-          ],
+          traces: [{ type: 'elastic_agent', value: 'agent-1', query: 'FROM traces' }],
         }}
         onSaved={onSaved}
         isManaged={false}
@@ -453,7 +442,8 @@ describe('TracesPanel', () => {
     );
 
     fireEvent.click(screen.getByTestId('contextEditTracesButton'));
-    fireEvent.click(screen.getByTestId('contextTracesRemoveButton'));
+    fireEvent.click(screen.getByTestId('contextTraceToggle-index'));
+    fireEvent.click(screen.getByTestId('contextTracesSaveButton'));
 
     await waitFor(() => {
       expect(testServices.http.put).toHaveBeenCalledWith(
@@ -463,21 +453,64 @@ describe('TracesPanel', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [],
-            traces: [{ type: 'index', value: 'logs-second' }],
+            traces: [],
           }),
         })
       );
     });
-    expect(onSaved).toHaveBeenCalled();
   });
 
-  it('does not offer the remove action when no trace is configured', () => {
+  it('enables Save immediately when opening the editor with no traces', () => {
     renderWithProviders(
       <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
     fireEvent.click(screen.getByTestId('contextEditTracesButton'));
 
-    expect(screen.queryByTestId('contextTracesRemoveButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextTracesSaveButton')).not.toBeDisabled();
+  });
+
+  it('returns to the read-only view showing the saved trace', async () => {
+    const testServices = coreMock.createStart();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    const PanelWithRefetch = () => {
+      const [currentAiIndex, setCurrentAiIndex] = useState(aiIndex);
+      return (
+        <TracesPanel
+          isLoading={false}
+          aiIndex={currentAiIndex}
+          onSaved={() => {
+            setCurrentAiIndex({
+              ...aiIndex,
+              traces: [{ type: 'elastic_agent', value: 'agent-1', query: 'FROM traces' }],
+            });
+          }}
+          isManaged={false}
+        />
+      );
+    };
+
+    renderWithProviders(<PanelWithRefetch />, testServices);
+
+    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+
+    fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
+      target: { value: 'Loyalty' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Loyalty Support Agent')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Loyalty Support Agent'));
+    fireEvent.click(screen.getByTestId('contextTracesSaveButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextTracesReadOnlyValue')).toHaveTextContent(
+        'Elastic agent: Loyalty Support Agent'
+      );
+    });
   });
 });

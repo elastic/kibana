@@ -6,7 +6,9 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ElasticAgentField } from './elastic_agent_field';
@@ -17,14 +19,19 @@ jest.mock('../../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
 }));
 
-const renderField = (props: React.ComponentProps<typeof ElasticAgentField>) =>
-  render(
+const renderField = (props: React.ComponentProps<typeof ElasticAgentField>) => {
+  const services = coreMock.createStart();
+  const view = render(
     <I18nProvider>
       <EuiProvider>
-        <ElasticAgentField {...props} />
+        <KibanaContextProvider services={services}>
+          <ElasticAgentField {...props} />
+        </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+  return { ...view, services };
+};
 
 describe('ElasticAgentField', () => {
   beforeEach(() => {
@@ -67,17 +74,20 @@ describe('ElasticAgentField', () => {
     );
   });
 
-  it('renders a translated load error instead of the raw error message', () => {
+  it('shows a toast warning on load error instead of rendering the raw error message', () => {
     mockUseAgentBuilderAgents.mockReturnValue({
       agents: [],
       isLoading: false,
       error: new Error('upstream exploded with secrets'),
     });
 
-    renderField({ value: undefined, onChange: jest.fn() });
+    const { services } = renderField({ value: undefined, onChange: jest.fn() });
 
-    expect(screen.getByText('Unable to load Agent Builder agents.')).toBeInTheDocument();
+    expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith({
+      title: 'Unable to load Agent Builder agents.',
+    });
     expect(screen.queryByText('upstream exploded with secrets')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unable to load Agent Builder agents.')).not.toBeInTheDocument();
   });
 
   it('renders an empty agent list without crashing', () => {

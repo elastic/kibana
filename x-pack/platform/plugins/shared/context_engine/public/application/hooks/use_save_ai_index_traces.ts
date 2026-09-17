@@ -6,26 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  AiIndexProperties,
-  AiIndexTrace,
-  GetAiIndexResponse,
-} from '../../../common/http_api/ai_indices';
+import type { AiIndexProperties, GetAiIndexResponse } from '../../../common/http_api/ai_indices';
+import type { EditableAiIndexTrace } from '../components/trace_selector';
 import { toProperties, useSaveAiIndexField } from './use_save_ai_index_field';
 
 const buildProperties = (
   aiIndex: GetAiIndexResponse,
-  trace: AiIndexTrace | undefined
-): AiIndexProperties => {
-  const { traces: existingTraces, ...rest } = toProperties(aiIndex);
-  return {
-    ...rest,
-    traces: trace ? [trace, ...existingTraces.slice(1)] : existingTraces.slice(1),
-  };
-};
+  trace: EditableAiIndexTrace | undefined
+): AiIndexProperties => ({
+  ...toProperties(aiIndex),
+  traces: trace ? [trace] : [],
+});
 
 export const useSaveAiIndexTraces = () => {
-  const { save, isSaving } = useSaveAiIndexField<AiIndexTrace | undefined>({
+  const { save, isSaving } = useSaveAiIndexField<EditableAiIndexTrace | undefined>({
     errorTitle: i18n.translate('xpack.contextEngine.saveAiIndexTraces.errorTitle', {
       defaultMessage: 'Unable to update agent traces',
     }),

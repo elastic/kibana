@@ -17,10 +17,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
-import type { AiIndexTrace, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import React, { useMemo } from 'react';
+import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
-import { useSaveAiIndexTraces } from '../../hooks/use_save_ai_index_traces';
+import { useTracesEditor } from '../../hooks/use_traces_editor';
 import { TraceSelector } from '../trace_selector';
 
 interface TracesPanelProps {
@@ -30,56 +30,12 @@ interface TracesPanelProps {
   isManaged: boolean;
 }
 
-const toTrace = (aiIndex: GetAiIndexResponse | undefined): AiIndexTrace | undefined => {
-  const trace = aiIndex?.traces[0];
-  return trace ? { type: trace.type, value: trace.value } : undefined;
-};
-
-const isTraceSaveable = (trace: AiIndexTrace | undefined): boolean =>
-  trace !== undefined && trace.value.trim().length > 0;
-
 export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPanelProps) => {
-  const { saveTraces, isSaving } = useSaveAiIndexTraces();
   const { agents } = useAgentBuilderAgents();
-  const [isEditing, setIsEditing] = useState(false);
-  const [draft, setDraft] = useState<AiIndexTrace | undefined>();
-
-  const currentTrace = useMemo(() => toTrace(aiIndex), [aiIndex]);
-  const isDraftSaveable = useMemo(() => isTraceSaveable(draft), [draft]);
-  const isEsqlTrace = currentTrace?.type === 'esql';
-
-  const startEditing = () => {
-    setDraft(currentTrace);
-    setIsEditing(true);
-  };
-
-  const handleCancel = () => {
-    setDraft(undefined);
-    setIsEditing(false);
-  };
-
-  const persistTrace = async (trace: AiIndexTrace | undefined) => {
-    if (!aiIndex) {
-      return;
-    }
-    const saved = await saveTraces(aiIndex, trace);
-    if (saved) {
-      setDraft(undefined);
-      setIsEditing(false);
-      onSaved();
-    }
-  };
-
-  const handleSave = async () => {
-    if (!isDraftSaveable) {
-      return;
-    }
-    await persistTrace(draft);
-  };
-
-  const handleRemove = async () => {
-    await persistTrace(undefined);
-  };
+  const { currentTrace, startEditing, editing } = useTracesEditor({
+    aiIndex,
+    onSaved,
+  });
 
   const readOnlyContent = useMemo(() => {
     if (!currentTrace) {
@@ -98,33 +54,19 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
       );
     }
 
-    if (currentTrace.type === 'index') {
-      return (
-        <FormattedMessage
-          id="xpack.contextEngine.aiIndexDetail.traces.dataStreamValueLabel"
-          defaultMessage="Data stream: {value}"
-          values={{ value: currentTrace.value }}
-        />
-      );
-    }
-
-    if (currentTrace.type === 'esql') {
-      return (
-        <FormattedMessage
-          id="xpack.contextEngine.aiIndexDetail.traces.esqlValueLabel"
-          defaultMessage="ES|QL query: {value}"
-          values={{ value: currentTrace.value }}
-        />
-      );
-    }
-
-    return currentTrace.value;
+    return (
+      <FormattedMessage
+        id="xpack.contextEngine.aiIndexDetail.traces.dataStreamValueLabel"
+        defaultMessage="Data stream: {value}"
+        values={{ value: currentTrace.value }}
+      />
+    );
   }, [agents, currentTrace]);
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextTracesPanel">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 0 }}>
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
@@ -143,7 +85,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             </p>
           </EuiText>
         </EuiFlexItem>
-        {!isEditing && !isManaged && !isLoading && !isEsqlTrace && (
+        {!editing && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
@@ -160,33 +102,18 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={2} />
-      ) : isEditing ? (
+      ) : editing ? (
         <>
-          <TraceSelector value={draft} onChange={setDraft} />
+          <TraceSelector value={editing.draft} onChange={editing.setDraft} />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-            {currentTrace !== undefined && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="danger"
-                  onClick={handleRemove}
-                  isDisabled={isSaving}
-                  data-test-subj="contextTracesRemoveButton"
-                >
-                  <FormattedMessage
-                    id="xpack.contextEngine.aiIndexDetail.traces.removeButton"
-                    defaultMessage="Remove trace"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={handleCancel}
-                isDisabled={isSaving}
+                onClick={editing.cancel}
+                isDisabled={editing.isSaving}
                 data-test-subj="contextTracesCancelButton"
               >
                 <FormattedMessage
@@ -199,9 +126,8 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
               <EuiButton
                 fill
                 size="s"
-                onClick={handleSave}
-                isLoading={isSaving}
-                isDisabled={!isDraftSaveable}
+                onClick={editing.save}
+                isLoading={editing.isSaving}
                 data-test-subj="contextTracesSaveButton"
               >
                 <FormattedMessage
@@ -224,7 +150,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
               ) : (
                 <FormattedMessage
                   id="xpack.contextEngine.aiIndexDetail.traces.empty"
-                  defaultMessage="No agent traces configured. Add one to tune Knowledge Indicators against real agent questions."
+                  defaultMessage="No agent traces configured. Point this index at an Elastic agent from Agent Builder, or a data stream carrying OTel GenAI spans."
                 />
               ))}
           </p>

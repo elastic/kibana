@@ -37,9 +37,18 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
   }),
 }));
 
-const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
+const defaultDataStream = {
+  name: 'logs-genai-default',
+  tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
+  item: { name: 'logs-genai-default' },
+};
+
+const renderWithProviders = (
+  services: ReturnType<typeof coreMock.createStart>,
+  getIndices = jest.fn().mockResolvedValue([])
+) => {
   const data = dataPluginMock.createStartContract();
-  data.dataViews.getIndices = jest.fn().mockResolvedValue([]);
+  data.dataViews.getIndices = getIndices;
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <ChromeServiceProvider value={{ chrome: services.chrome }}>
@@ -204,6 +213,52 @@ describe('CreateAiIndexPage', () => {
             automations: [],
             sources: [],
             traces: [{ type: 'elastic_agent', value: 'agent-1' }],
+          }),
+        })
+      );
+    });
+  });
+
+  it('includes a selected data stream trace in the create request', async () => {
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+    const getIndices = jest.fn().mockResolvedValue([defaultDataStream]);
+
+    renderWithProviders(services, getIndices);
+
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextTraceToggle-index'));
+
+    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
+    const input = comboBox.querySelector('input')!;
+    fireEvent.click(comboBox);
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'lo' } });
+
+    await waitFor(() => {
+      expect(getIndices).toHaveBeenCalledWith({
+        pattern: '*lo*',
+        isRollupIndex: expect.any(Function),
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('logs-genai-default'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            id: VALID_ID,
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
+            automations: [],
+            sources: [],
+            traces: [{ type: 'index', value: 'logs-genai-default' }],
           }),
         })
       );
