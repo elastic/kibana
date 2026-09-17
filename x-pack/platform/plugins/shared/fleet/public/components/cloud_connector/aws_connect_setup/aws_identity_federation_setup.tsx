@@ -105,10 +105,23 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // a check will run (same condition IacKeyCheck uses), so Deploy cannot be pressed during the
   // verify round-trip; with no check coming, nothing would ever flip it back to true.
   const willRunIacCheck = isIacProvisionerEnabled && (integrations?.length ?? 0) > 0;
-  // Stable identity of the set, for the IacKeyCheck remount key below.
+  // Stable identity of the set, for the check key below.
   const integrationsKey = useMemo(() => JSON.stringify(integrations ?? []), [integrations]);
   const initialCheckValidity = !willRunIacCheck;
-  const [isCheckValid, setIsCheckValid] = useState(initialCheckValidity);
+  // A verdict belongs to the identity AND integration set it was computed for. IacKeyCheck is
+  // remounted on this key and says nothing until its new verdict lands, so the parent must not
+  // carry the previous combination's "valid" across the change: a set widened after Launch, or a
+  // newly selected identity, would otherwise leave Deploy enabled for the whole re-check.
+  // Storing the verdict with its key (rather than resetting in an effect) keeps it correct in the
+  // same render the key changes, and survives the remounted check reporting from a mount effect
+  // that runs before any parent effect.
+  const checkKey = `${selected?.id ?? ''}|${integrationsKey}`;
+  const [checkVerdict, setCheckVerdict] = useState<{ key: string; isValid: boolean }>();
+  const isCheckValid = checkVerdict?.key === checkKey ? checkVerdict.isValid : initialCheckValidity;
+  const handleCheckValidityChange = useCallback(
+    (isValid: boolean) => setCheckVerdict({ key: checkKey, isValid }),
+    [checkKey]
+  );
   // Validate what Create will post: a pasted ARN often carries surrounding whitespace.
   const trimmedStackArn = stackArn.trim();
   const stackArnInvalid = isStackArnInvalid(stackArn);
@@ -137,19 +150,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // be the initialConnectorId seed whose name is still being resolved above. Hold the emission
   // until it lands, otherwise consumers persist an id with no name and render an empty summary.
   const isAwaitingInitialName = !!selected?.id && !selected.name && isLoadingConnectors;
-
-  // A verdict belongs to the identity it was computed for. Clear it back to the initial value in
-  // the same update as the selection change (not in an effect: the remounted IacKeyCheck reports
-  // its fresh verdict in a mount effect that runs before any parent effect, and a parent-effect
-  // reset would erase it) so the previous identity's verdict neither blocks nor releases the new
-  // one before its own check reports.
-  const selectConnector = useCallback(
-    (next: { id: string; name?: string } | undefined) => {
-      setSelected(next);
-      setIsCheckValid(initialCheckValidity);
-    },
-    [initialCheckValidity]
-  );
 
   useEffect(() => {
     onReadyChange?.(!!selected?.id && isCheckValid);
@@ -185,7 +185,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
 
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
     (connector) => {
-      selectConnector({ id: connector.id, name: connector.name });
+      setSelected({ id: connector.id, name: connector.name });
       setSelectedTabId(TABS.EXISTING_CONNECTION);
       setRoleArn('');
       setConnectorName('');
@@ -218,8 +218,14 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   ]);
 
   const roleArnInvalid = hasInvalidRequiredVars && !roleArn;
+  // While a live render is in flight `iacConfirm` is still unset, so a Create pressed then would
+  // store a keyless identity and the late render's template details would land after the tab
+  // switch, on nothing. Wait for it to settle; a failed render fails open once it does.
   const isCreateDisabled =
-    !roleArn || !!getCloudConnectorNameError(connectorName) || stackArnInvalid;
+    isGeneratingTemplate ||
+    !roleArn ||
+    !!getCloudConnectorNameError(connectorName) ||
+    stackArnInvalid;
 
   if (isLoadingConnectors) {
     return <EuiSkeletonText lines={4} data-test-subj="awsIdentityFederationSetup-loading" />;
@@ -228,7 +234,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const handleTabClick = (tab: { id: string }) => {
     setSelectedTabId(tab.id);
     if (tab.id === TABS.NEW_CONNECTION) {
-      selectConnector(undefined);
+      setSelected(undefined);
     }
   };
 
@@ -344,7 +350,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             credentials={selected?.id ? { cloudConnectorId: selected.id } : {}}
             setCredentials={(creds) => {
               if (creds.cloudConnectorId) {
-                selectConnector({ id: creds.cloudConnectorId, name: creds.name });
+                setSelected({ id: creds.cloudConnectorId, name: creds.name });
               }
             }}
             accountType={accountType}
@@ -357,13 +363,13 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                   its verdict and its launched state start fresh for each combination: a set
                   widened after Launch must block again. */}
               <IacKeyCheck
-                key={`${selected?.id ?? ''}|${integrationsKey}`}
+                key={checkKey}
                 cloudConnectorId={selected?.id}
                 integrations={integrations}
                 cloud={cloud}
                 accountType={accountType}
                 iacTemplateUrl={iacTemplateUrl}
-                onValidityChange={setIsCheckValid}
+                onValidityChange={handleCheckValidityChange}
                 {...(onIacTemplateRecorded
                   ? { writeOnRender: false, onTemplateRecorded: onIacTemplateRecorded }
                   : {})}

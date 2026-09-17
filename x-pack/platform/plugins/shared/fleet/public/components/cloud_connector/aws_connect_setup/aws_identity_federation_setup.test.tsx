@@ -507,6 +507,20 @@ describe('AwsIdentityFederationSetup', () => {
       });
     });
 
+    it('keeps Create disabled while the live render is in flight', async () => {
+      // Before the render settles there is no template details to post; a Create pressed then would
+      // store a keyless identity that the late render could no longer attach to.
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, { isGeneratingTemplate: true })
+      );
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeDisabled();
+    });
+
     it('renders the template generation error from the hook as a danger callout', () => {
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, { templateGenerationError: 'boom' })
@@ -656,6 +670,45 @@ describe('AwsIdentityFederationSetup', () => {
       });
       // connector-1's verdict says nothing about connector-2: not ready until its check reports,
       // rather than re-enabling Deploy for the round-trip.
+      expect(lastReadyValue(onReadyChange)).toBe(false);
+
+      act(() => {
+        lastIacKeyCheckProps()?.onValidityChange?.(true);
+      });
+      expect(lastReadyValue(onReadyChange)).toBe(true);
+    });
+
+    it('goes back to not ready when the integration set changes, until the new check reports', async () => {
+      const widerIntegrations: RenderIacTemplateIntegration[] = [
+        ...integrations,
+        { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
+      ];
+      const { rerender } = renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
+      await waitFor(() => expect(onReadyChange).toHaveBeenCalled());
+
+      act(() => {
+        lastIacKeyCheckProps()?.onValidityChange?.(true);
+      });
+      expect(lastReadyValue(onReadyChange)).toBe(true);
+
+      // The onboarding does not remount this component when the user widens the selection; the
+      // previous set's verdict must not keep Deploy enabled while the remounted check is pending.
+      rerender(
+        <I18nProvider>
+          <QueryClientProvider client={queryClient}>
+            <AwsIdentityFederationSetup
+              onReadyChange={onReadyChange}
+              onConnectorIdChange={onConnectorIdChange}
+              cloud={cloud}
+              integrations={widerIntegrations}
+              initialConnectorId="connector-1"
+            />
+          </QueryClientProvider>
+        </I18nProvider>
+      );
+      await waitFor(() => {
+        expect(lastIacKeyCheckProps()?.integrations).toBe(widerIntegrations);
+      });
       expect(lastReadyValue(onReadyChange)).toBe(false);
 
       act(() => {
