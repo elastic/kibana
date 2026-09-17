@@ -7,24 +7,15 @@
 
 import yaml from 'yaml';
 import { z, ZodError } from '@kbn/zod/v4';
-import type { DeclarativeConnectorSpec, DeclarativeJsonSchema } from './types';
+import { areValidFeatures } from '@kbn/actions-plugin/common';
+import { LICENSE_TYPE, type LicenseType } from '@kbn/licensing-types';
+import type { DeclarativeConnectorSpec } from './types';
 
-const featureIdSchema = z.enum([
-  'alerting',
-  'cases',
-  'uptime',
-  'siem',
-  'generativeAIForSecurity',
-  'generativeAIForObservability',
-  'generativeAIForSearchPlayground',
-  'endpointSecurity',
-  'workflows',
-  'agentBuilder',
-  'contextEngine',
-]);
-
+const LICENSE_TYPES = Object.values(LICENSE_TYPE).filter(
+  (value): value is LicenseType => typeof value === 'string'
+) as [LicenseType, ...LicenseType[]];
+const jsonSchemaRecord = z.record(z.string(), z.unknown());
 const contentHashSchema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
-
 const relativeAssetPathSchema = z
   .string()
   .min(1)
@@ -33,121 +24,6 @@ const relativeAssetPathSchema = z
     (path) => !path.startsWith('/') && !/^[a-z][a-z0-9+.-]*:/i.test(path),
     'Asset paths must be relative to the connector definition.'
   );
-
-const matchesSchemaType = (value: unknown, type: DeclarativeJsonSchema['type']): boolean => {
-  switch (type) {
-    case 'object':
-      return value !== null && typeof value === 'object' && !Array.isArray(value);
-    case 'string':
-      return typeof value === 'string';
-    case 'number':
-      return typeof value === 'number' && Number.isFinite(value);
-    case 'integer':
-      return typeof value === 'number' && Number.isInteger(value);
-    case 'boolean':
-      return typeof value === 'boolean';
-    case 'array':
-      return Array.isArray(value);
-    default: {
-      const exhaustiveCheck: never = type;
-      throw new Error(`Unsupported declarative schema type: ${exhaustiveCheck}`);
-    }
-  }
-};
-
-const jsonSchema: z.ZodType<DeclarativeJsonSchema> = z.lazy(() =>
-  z
-    .object({
-      type: z.enum(['object', 'string', 'number', 'integer', 'boolean', 'array']),
-      properties: z.record(z.string(), jsonSchema).optional(),
-      required: z.array(z.string()).optional(),
-      items: jsonSchema.optional(),
-      format: z.enum(['uri', 'ipv4', 'date-time']).optional(),
-      description: z.string().optional(),
-      default: z.unknown().optional(),
-      minimum: z.number().optional(),
-      maximum: z.number().optional(),
-      minLength: z.number().int().nonnegative().optional(),
-      maxLength: z.number().int().nonnegative().optional(),
-      enum: z
-        .array(z.union([z.string(), z.number(), z.boolean()]))
-        .min(1)
-        .optional(),
-      additionalProperties: z.boolean().optional(),
-      xUi: z
-        .object({
-          label: z.string().optional(),
-          placeholder: z.string().optional(),
-          helpText: z.string().optional(),
-          hidden: z.boolean().optional(),
-          validate: z
-            .object({
-              allowedHosts: z.boolean().optional(),
-            })
-            .strict()
-            .optional(),
-        })
-        .strict()
-        .optional(),
-    })
-    .strict()
-    .superRefine((definition, context) => {
-      const reportUnsupportedField = (
-        field: keyof DeclarativeJsonSchema,
-        supportedType: string
-      ) => {
-        if (definition[field] !== undefined && definition.type !== supportedType) {
-          context.addIssue({
-            code: 'custom',
-            path: [field],
-            message: `"${field}" is only supported for ${supportedType} schemas.`,
-          });
-        }
-      };
-      const properties = definition.properties ?? {};
-      if (definition.type === 'object') {
-        for (const name of definition.required ?? []) {
-          if (!(name in properties)) {
-            context.addIssue({
-              code: 'custom',
-              path: ['required'],
-              message: `Required field "${name}" has no property definition.`,
-            });
-          }
-        }
-      }
-      reportUnsupportedField('properties', 'object');
-      reportUnsupportedField('required', 'object');
-      reportUnsupportedField('additionalProperties', 'object');
-      reportUnsupportedField('items', 'array');
-      reportUnsupportedField('format', 'string');
-      reportUnsupportedField('minLength', 'string');
-      reportUnsupportedField('maxLength', 'string');
-      if (definition.type !== 'number' && definition.type !== 'integer') {
-        reportUnsupportedField('minimum', 'number or integer');
-        reportUnsupportedField('maximum', 'number or integer');
-      }
-      if (
-        definition.default !== undefined &&
-        !matchesSchemaType(definition.default, definition.type)
-      ) {
-        context.addIssue({
-          code: 'custom',
-          path: ['default'],
-          message: `Default value must match type "${definition.type}".`,
-        });
-      }
-      for (const [index, value] of (definition.enum ?? []).entries()) {
-        if (!matchesSchemaType(value, definition.type)) {
-          context.addIssue({
-            code: 'custom',
-            path: ['enum', index],
-            message: `Enum value must match type "${definition.type}".`,
-          });
-        }
-      }
-    })
-);
 
 const retrySchema = z
   .object({
@@ -296,12 +172,15 @@ const connectorSpecSchema = z
           .optional(),
         description: z.string().min(1),
         docsUrl: z.string().optional(),
-        minimumLicense: z.enum(['basic', 'gold', 'platinum', 'enterprise']),
+        minimumLicense: z.enum(LICENSE_TYPES),
         isTechnicalPreview: z.boolean().optional(),
-        supportedFeatureIds: z.array(featureIdSchema).min(1),
+        supportedFeatureIds: z
+          .array(z.string())
+          .min(1)
+          .refine(areValidFeatures, { message: 'Unknown connector feature id' }),
       })
       .strict(),
-    config: jsonSchema,
+    config: jsonSchemaRecord,
     auth: z.union([connectorSpecAuthSchema, legacyAuthSchema]),
     actions: z
       .record(
@@ -311,7 +190,7 @@ const connectorSpecSchema = z
             description: z.string().optional(),
             isTool: z.boolean().optional(),
             scope: z.enum(['read', 'write', 'destroy']).optional(),
-            input: jsonSchema,
+            input: jsonSchemaRecord,
             request: requestSchema,
           })
           .strict()
@@ -338,7 +217,6 @@ export const parseDeclarativeConnectorSpec = (raw: string): DeclarativeConnector
   } catch (error) {
     throw new Error('Declarative connector definition is not valid YAML.', { cause: error });
   }
-
   try {
     return connectorSpecSchema.parse(parsed) as DeclarativeConnectorSpec;
   } catch (error) {

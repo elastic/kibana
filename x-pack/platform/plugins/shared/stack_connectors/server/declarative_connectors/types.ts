@@ -16,29 +16,6 @@ export type DeclarativeConnectorMetadata = Omit<ConnectorMetadata, 'id' | 'icon'
   icon?: DeclarativeConnectorIcon;
 };
 
-export interface DeclarativeJsonSchema {
-  type: 'object' | 'string' | 'number' | 'integer' | 'boolean' | 'array';
-  properties?: Record<string, DeclarativeJsonSchema>;
-  required?: string[];
-  items?: DeclarativeJsonSchema;
-  format?: 'uri' | 'ipv4' | 'date-time';
-  description?: string;
-  default?: unknown;
-  minimum?: number;
-  maximum?: number;
-  minLength?: number;
-  maxLength?: number;
-  enum?: Array<string | number | boolean>;
-  additionalProperties?: boolean;
-  xUi?: {
-    label?: string;
-    placeholder?: string;
-    helpText?: string;
-    hidden?: boolean;
-    validate?: { allowedHosts?: boolean };
-  };
-}
-
 export interface DeclarativeRequest {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   url?: string;
@@ -75,7 +52,7 @@ export interface DeclarativeAction {
   description?: string;
   isTool?: boolean;
   scope?: ActionScope;
-  input: DeclarativeJsonSchema;
+  input: Record<string, unknown>;
   request: DeclarativeRequest;
 }
 
@@ -88,7 +65,7 @@ export interface DeclarativeConnectorSpec {
   id: string;
   version: string;
   metadata: DeclarativeConnectorMetadata;
-  config: DeclarativeJsonSchema;
+  config: Record<string, unknown>;
   auth: {
     types: Array<string | DeclarativeAuthTypeDef>;
   };

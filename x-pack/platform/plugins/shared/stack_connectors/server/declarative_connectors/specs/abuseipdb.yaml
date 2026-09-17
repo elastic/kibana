@@ -22,12 +22,11 @@ config:
       format: uri
       default: https://api.abuseipdb.com
       description: AbuseIPDB API base URL
-      xUi:
-        label: Base URL
-        placeholder: https://api.abuseipdb.com
-        helpText: Use the local mock URL for the PoC or https://api.abuseipdb.com for live testing.
-        validate:
-          allowedHosts: true
+      label: Base URL
+      placeholder: https://api.abuseipdb.com
+      helpText: Use the local mock URL for the PoC or https://api.abuseipdb.com for live testing.
+      validate:
+        allowedHosts: true
 auth:
   types:
     - type: api_key_header
@@ -63,9 +62,6 @@ actions:
           type: boolean
           default: false
           description: Include reports from countries outside the top-level summary
-        someOtherParam:
-          type: string
-          description: Just to demonstrate how it all connects
     request:
       method: GET
       baseUrl: "{{ config.baseUrl }}"
@@ -74,7 +70,6 @@ actions:
         ipAddress: "{{ input.ipAddress }}"
         maxAgeInDays: "{{ input.maxAgeInDays }}"
         verbose: "{{ input.verbose }}"
-        someOtherParam: "{{ input.someOtherParam }}"
       retry:
         statusCodes:
           - 429

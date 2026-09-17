@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
+import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FsSpecReader } from './fs_spec_reader';
 import { getContentHash } from './icon';
@@ -82,6 +84,32 @@ describe('loadDeclarativeConnectorSpecs', () => {
     expect(() => loadDeclarativeConnectorSpecs(source, logger)).toThrow(
       'Duplicate declarative connector id ".abuseipdb"'
     );
+  });
+
+  it('round-trips the shipped spec and rejects unknown config keys', () => {
+    const [spec] = loadDeclarativeConnectorSpecs(new FsSpecReader(), logger);
+    const serialized = serializeConnectorSpec(spec);
+    const restored = fromConnectorSpecSchema(serialized.schema);
+
+    expect(restored).toBeDefined();
+
+    const secrets = { authType: 'api_key_header', Key: 'test-key' };
+    expect(
+      restored?.parse({
+        config: { baseUrl: 'https://api.abuseipdb.com' },
+        secrets,
+      })
+    ).toEqual(
+      expect.objectContaining({
+        config: { baseUrl: 'https://api.abuseipdb.com' },
+      })
+    );
+    expect(() =>
+      restored?.parse({
+        config: { baseUrl: 'https://api.abuseipdb.com', extra: true },
+        secrets,
+      })
+    ).toThrow();
   });
 
   it('rejects unknown auth types', () => {
