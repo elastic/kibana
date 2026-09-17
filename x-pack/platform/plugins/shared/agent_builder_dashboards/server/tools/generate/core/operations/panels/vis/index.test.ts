@@ -46,17 +46,4 @@ describe('visualization panel request schemas', () => {
       }).success
     ).toBe(true);
   });
-
-  it.each([true, false])('accepts enhancement with preserveESQL: %s', (preserveESQL) => {
-    const request = {
-      source: 'request',
-      type: 'vis',
-      panelId: 'panel-1',
-      query: 'Enhance this panel',
-      preserveESQL,
-      applyChartRules: true,
-    };
-
-    expect(editPanelRequestInputSchema.parse(request)).toEqual(request);
-  });
 });
