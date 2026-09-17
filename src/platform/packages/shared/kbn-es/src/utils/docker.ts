@@ -177,6 +177,11 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
   /**
+   * Called after the cluster is ready (requires `waitForReady: true`), before
+   * attaching to node logs. Used by `pnpm es serverless --eis` to set the CCM API key.
+   */
+  onReady?: () => Promise<void>;
+  /**
    * Resource file(s) to overwrite
    * (see list of files that can be overwritten under `src/platform/packages/shared/kbn-es/src/serverless_resources/users`)
    */
@@ -1128,6 +1133,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       log.info(`[runServerlessCluster] Waiting for security index (${elapsed()})...`);
       await waitForSecurityIndex({ client, log });
       log.info(`[runServerlessCluster] Security index ready (${elapsed()})`);
+    }
+    if (options.onReady) {
+      await options.onReady();
     }
   }
 
