@@ -68,8 +68,7 @@ spaceTest.describe(
 
         // A fresh tab carries the data view over but resolves the profile from scratch, so it
         // starts from the default again.
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         expect(await readRowHeight(page, dataGrid)).toStrictEqual(LOGS_PROFILE_ROW_HEIGHT);
 
         await unifiedTabs.selectTab(0);
@@ -156,8 +155,7 @@ spaceTest.describe(
 
         await timestampColor.selectOption('accent');
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         await unifiedTabs.closeTab(0);
         await expect.poll(() => getStoredTabs(page)).toContain('closedAt');
 
