@@ -206,7 +206,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await expect(
       deletePackageDatastreamAssetsHandler(context, request, response)
     ).rejects.toThrowError(
-      new FleetNotFoundError('Requested package test-1.0.0 is not an input package')
+      new FleetNotFoundError('Requested package logs-1.0.0 is not an input package')
     );
 
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
