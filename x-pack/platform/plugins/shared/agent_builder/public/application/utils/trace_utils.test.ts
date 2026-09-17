@@ -58,7 +58,9 @@ describe('parseTraceSpansFromFile', () => {
   });
 
   it('rejects an array containing null', async () => {
-    const result = await parseTraceSpansFromFile(makeFile(JSON.stringify([{ span_id: 'a' }, null])));
+    const result = await parseTraceSpansFromFile(
+      makeFile(JSON.stringify([{ span_id: 'a' }, null]))
+    );
     expect(result).toBeNull();
   });
 
