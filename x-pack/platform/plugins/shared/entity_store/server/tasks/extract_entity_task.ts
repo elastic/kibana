@@ -128,7 +128,9 @@ async function bootstrapNonPriorityTask({
     }
   } catch (err) {
     logger.warn(
-      `Non-priority task bootstrap failed for ${entityType} in ${namespace}: ${(err as Error).message}`
+      `Non-priority task bootstrap failed for ${entityType} in ${namespace}: ${
+        (err as Error).message
+      }`
     );
   }
 }

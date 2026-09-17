@@ -7,7 +7,12 @@
 
 import type { Subject } from 'rxjs';
 import { pairwise, concatMap, takeUntil } from 'rxjs';
-import type { CoreStart, FeatureFlagsStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CoreStart,
+  FeatureFlagsStart,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { FF_DUAL_PROCESS_ENABLED } from '../../../common';
 import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
 import { ENGINE_STATUS } from '../../domain/constants';
