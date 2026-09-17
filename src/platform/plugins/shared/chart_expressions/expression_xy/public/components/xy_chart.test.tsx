@@ -3217,7 +3217,7 @@ describe('XYChart component', () => {
       label: 'Event range',
       type: 'manual_range_event_annotation' as const,
     };
-    const configToRowHelper = (config: EventAnnotationOutput) => {
+    const configToRowHelper = (config: EventAnnotationOutput): DatatableRow => {
       return {
         ...config,
         timebucket: 1647591917100,
