@@ -765,78 +765,15 @@ async function installKibanaSavedObjectsChunk({
   // but if any slipped through (e.g. created outside Fleet's control), resolve by picking
   // the most-recently-updated destination rather than aborting the whole install.
   if (ambiguousConflictErrors.length) {
-    logger.warn(
-      `[Fleet] Encountered ${
-        ambiguousConflictErrors.length
-      } ambiguous_conflict error(s) in space '${
-        options?.spaceId ?? DEFAULT_SPACE_ID
-      }'. Resolving by picking the most-recently-updated destination for each. Run the orphan cleanup manually if this recurs: ${formatImportErrorsForLog(
-        ambiguousConflictErrors
-      )}`
-    );
-
-    const ambiguousRetries = toBeSavedObjects.map(({ id, type }) => {
-      const conflictError = ambiguousConflictErrors.find(
-        ({ id: errId, type: errType }) => errId === id && errType === type
-      );
-      if (conflictError && conflictError.error.type === 'ambiguous_conflict') {
-        // Pick the destination with the most recent updatedAt; fall back to first if dates missing.
-        // A destinationId is required: without it checkOriginConflicts will not skip the origin
-        // search and resolveImportErrors will raise ambiguous_conflict again.
-        const destinations = conflictError.error.destinations ?? [];
-        const best = destinations.length
-          ? destinations.reduce((prev, cur) =>
-              (cur.updatedAt ?? '') > (prev.updatedAt ?? '') ? cur : prev
-            )
-          : undefined;
-        if (!best?.id) {
-          // No resolvable destination — fall through to the error accumulator below.
-          return { id, type, overwrite: true, replaceReferences: [] };
-        }
-        return {
-          id,
-          type,
-          overwrite: true,
-          replaceReferences: [],
-          destinationId: best.id,
-        };
-      }
-      return { id, type, overwrite: true, replaceReferences: [] };
-    });
-
-    const { successResults: ambiguousSuccessResults = [], errors: ambiguousResolveErrors = [] } =
-      await savedObjectsImporter.resolveImportErrors({
-        readStream: createListStream(toBeSavedObjects),
-        createNewCopies: false,
-        managed: true,
-        retries: ambiguousRetries,
+    const { successResults: ambiguousSuccessResults, referenceErrors: ambiguousRefErrors } =
+      await resolveAmbiguousConflicts({
+        ambiguousConflictErrors,
+        toBeSavedObjects,
+        savedObjectsImporter,
+        logger,
+        spaceId: options?.spaceId ?? DEFAULT_SPACE_ID,
       });
-
-    if (ambiguousResolveErrors?.length) {
-      // missing_references errors from the ambiguous recovery pass are tolerable — fold
-      // them into referenceErrors so the existing handler below resolves them normally.
-      const [ambiguousRefErrors, ambiguousFatalErrors] = partition(
-        ambiguousResolveErrors,
-        (e) => e?.error?.type === 'missing_references'
-      );
-      referenceErrors.push(...ambiguousRefErrors);
-
-      if (ambiguousFatalErrors.length) {
-        logger.error(
-          `[Fleet] Failed to resolve ${
-            ambiguousFatalErrors.length
-          } ambiguous_conflict error(s) in space '${
-            options?.spaceId ?? DEFAULT_SPACE_ID
-          }': ${formatImportErrorsForLog(ambiguousFatalErrors)}`
-        );
-        throw new KibanaSOReferenceError(
-          `Encountered ${
-            ambiguousFatalErrors.length
-          } errors resolving ambiguous conflicts: ${formatImportErrorsForLog(ambiguousFatalErrors)}`
-        );
-      }
-    }
-
+    referenceErrors.push(...ambiguousRefErrors);
     allSuccessResults = allSuccessResults.concat(ambiguousSuccessResults);
   }
 
@@ -888,6 +825,96 @@ async function installKibanaSavedObjectsChunk({
   }
 
   return allSuccessResults;
+}
+
+/**
+ * Resolves `ambiguous_conflict` errors from a saved-objects import by picking the
+ * most-recently-updated destination for each conflicting object. Any `missing_references`
+ * errors surfaced by the resolution pass are returned as `referenceErrors` so the caller
+ * can feed them into the existing missing-reference handler rather than treating them as
+ * fatal.
+ */
+async function resolveAmbiguousConflicts({
+  ambiguousConflictErrors,
+  toBeSavedObjects,
+  savedObjectsImporter,
+  logger,
+  spaceId,
+}: {
+  ambiguousConflictErrors: SavedObjectsImportFailure[];
+  toBeSavedObjects: SavedObjectToBe[];
+  savedObjectsImporter: SavedObjectsImporterContract;
+  logger: Logger;
+  spaceId: string;
+}): Promise<{
+  successResults: SavedObjectsImportSuccess[];
+  referenceErrors: SavedObjectsImportFailure[];
+}> {
+  logger.warn(
+    `[Fleet] Encountered ${
+      ambiguousConflictErrors.length
+    } ambiguous_conflict error(s) in space '${spaceId}'. Resolving by picking the most-recently-updated destination for each. Run the orphan cleanup manually if this recurs: ${formatImportErrorsForLog(
+      ambiguousConflictErrors
+    )}`
+  );
+
+  const retries = toBeSavedObjects.map(({ id, type }) => {
+    const conflictError = ambiguousConflictErrors.find(
+      ({ id: errId, type: errType }) => errId === id && errType === type
+    );
+    if (conflictError && conflictError.error.type === 'ambiguous_conflict') {
+      // Pick the destination with the most recent updatedAt; fall back to first if dates missing.
+      // A destinationId is required: without it checkOriginConflicts will not skip the origin
+      // search and resolveImportErrors will raise ambiguous_conflict again.
+      const destinations = conflictError.error.destinations ?? [];
+      const best = destinations.length
+        ? destinations.reduce((prev, cur) =>
+            (cur.updatedAt ?? '') > (prev.updatedAt ?? '') ? cur : prev
+          )
+        : undefined;
+      if (!best?.id) {
+        return { id, type, overwrite: true, replaceReferences: [] };
+      }
+      return { id, type, overwrite: true, replaceReferences: [], destinationId: best.id };
+    }
+    return { id, type, overwrite: true, replaceReferences: [] };
+  });
+
+  const { successResults = [], errors: resolveErrors = [] } =
+    await savedObjectsImporter.resolveImportErrors({
+      readStream: createListStream(toBeSavedObjects),
+      createNewCopies: false,
+      managed: true,
+      retries,
+    });
+
+  if (resolveErrors.length) {
+    // missing_references from the ambiguous recovery pass are tolerable — return them
+    // so the caller can feed them into the normal missing-reference handler.
+    const [referenceErrors, fatalErrors] = partition(
+      resolveErrors,
+      (e) => e?.error?.type === 'missing_references'
+    );
+
+    if (fatalErrors.length) {
+      logger.error(
+        `[Fleet] Failed to resolve ${
+          fatalErrors.length
+        } ambiguous_conflict error(s) in space '${spaceId}': ${formatImportErrorsForLog(
+          fatalErrors
+        )}`
+      );
+      throw new KibanaSOReferenceError(
+        `Encountered ${
+          fatalErrors.length
+        } errors resolving ambiguous conflicts: ${formatImportErrorsForLog(fatalErrors)}`
+      );
+    }
+
+    return { successResults, referenceErrors };
+  }
+
+  return { successResults, referenceErrors: [] };
 }
 
 // Filter out any reserved index patterns
