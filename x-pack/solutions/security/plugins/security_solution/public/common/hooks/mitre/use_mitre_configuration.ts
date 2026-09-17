@@ -47,16 +47,18 @@ export const useMitreConfiguration = (
 
   const activeQuery = isManagedSourceEnabled ? managedQuery : legacyQuery;
 
-  // On the managed path, a 200 response with zero tactics means population hasn't run
-  // (e.g. ES wasn't ready at startup). The Enterprise framework always has tactics, so
-  // empty is not a valid success state. This treats it as a failure so consumers get
-  // the same error behaviour (inline callout, mitreReady: false) without having to
-  // guard for this edge case themselves.
+  // On the managed path, framework_version is undefined when the index has no documents
+  // (e.g. ES wasn't ready at startup and population hasn't run). This signal is
+  // independent of the types filter, so it remains correct even for technique- or
+  // subtechnique-only requests where the tactics bucket is intentionally empty.
+  // Treat a missing framework_version as a failure so consumers get the same error
+  // behavior (inline callout, mitreReady: false) without having to guard for this
+  // edge case themselves.
   const isEmptyManagedResponse =
     isManagedSourceEnabled &&
     !managedQuery.isLoading &&
     !managedQuery.isError &&
-    managedQuery.data?.tactics.length === 0;
+    managedQuery.data?.framework_version === undefined;
 
   if (activeQuery.isError || !activeQuery.data || isEmptyManagedResponse) {
     return {

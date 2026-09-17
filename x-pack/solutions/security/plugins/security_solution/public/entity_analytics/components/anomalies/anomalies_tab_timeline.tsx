@@ -61,7 +61,11 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
   isEmpty = false,
   isLoading = false,
 }) => {
-  const { tactics, isLoading: isMitreLoading } = useMitreConfiguration({ types: ['tactic'] });
+  const {
+    tactics,
+    isLoading: isMitreLoading,
+    isError: isMitreError,
+  } = useMitreConfiguration({ types: ['tactic'] });
   const tacticNames = useMemo(
     () => [...tactics].sort((a, b) => a.position - b.position).map(({ name }) => name),
     [tactics]
@@ -69,9 +73,10 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
 
   const { bands } = useAnomalyBands();
   const styling = getAnomalyChartStyling(true);
-  // Gate on MITRE loading so the chart doesn't render with zero tactic rows on first paint
-  // while tactic names are being fetched asynchronously.
-  const showPlaceholderPanel = isEmpty || isLoading || isMitreLoading;
+  // Gate on MITRE loading or error so the chart never renders with zero tactic rows.
+  // A failed MITRE fetch falls through to the empty-state placeholder rather than
+  // producing a swimlane with no Y-axis entries.
+  const showPlaceholderPanel = isEmpty || isLoading || isMitreLoading || isMitreError;
 
   const mitreTacticNames = useMemo(() => {
     if (selectedTactic && tacticNames.includes(selectedTactic)) {

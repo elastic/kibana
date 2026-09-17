@@ -69,12 +69,17 @@ describe('resolveMitreBuckets — managed path', () => {
     expect(mockList).toHaveBeenCalledTimes(1);
   });
 
-  it('does NOT cache an empty result and retries list() on the next call', async () => {
+  it('rejects with "not initialized" and does not cache an empty result, so list() is retried on the next call', async () => {
     const { client, mockList } = makeClient(true /* empty */);
 
-    await resolveMitreBuckets(client);
-    await resolveMitreBuckets(client);
+    await expect(resolveMitreBuckets(client)).rejects.toThrow(
+      'Managed MITRE data is not initialized'
+    );
+    await expect(resolveMitreBuckets(client)).rejects.toThrow(
+      'Managed MITRE data is not initialized'
+    );
 
+    // Cache must have been cleared after each rejection so each call re-queries.
     expect(mockList).toHaveBeenCalledTimes(2);
   });
 

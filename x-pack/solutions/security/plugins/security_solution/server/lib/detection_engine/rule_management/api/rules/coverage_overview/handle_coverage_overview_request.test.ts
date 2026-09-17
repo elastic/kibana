@@ -220,6 +220,50 @@ describe('handleCoverageOverviewRequest', () => {
     expect(result.invalid_mitre_ids).toEqual({});
   });
 
+  it('returns a normal coverage response with no invalid_mitre_ids when managed buckets are empty (population not yet complete)', async () => {
+    const ruleWithMitre: Rule = {
+      id: 'rule-with-mitre',
+      name: 'Some Rule',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: VALID_TACTIC_ID,
+              name: 'Defense Evasion',
+              reference: 'https://attack.mitre.org/tactics/TA0005/',
+            },
+            technique: [],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      total: 1,
+      page: 1,
+      perPage: 10000,
+      data: [ruleWithMitre],
+    });
+
+    // Simulates the state where the managed SO has not yet been populated.
+    const emptyList = jest
+      .fn()
+      .mockResolvedValue({ tactics: [], techniques: [], subtechniques: [] });
+    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: jest.fn() };
+
+    const result = await handleCoverageOverviewRequest({
+      params: {},
+      deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
+    });
+
+    // Rule must still appear in rules_data and coverage; invalid-ID detection is
+    // skipped entirely so no false positives appear in invalid_mitre_ids.
+    expect(result.rules_data['rule-with-mitre']).toBeDefined();
+    expect(result.invalid_mitre_ids).toEqual({});
+  });
+
   it('sources MITRE data from the managed client when mitreDataClient is provided', async () => {
     const validIdSets: ValidMitreIdSets = buildValidMitreIdsFromBuckets({
       tactics: [{ id: VALID_TACTIC_ID }],

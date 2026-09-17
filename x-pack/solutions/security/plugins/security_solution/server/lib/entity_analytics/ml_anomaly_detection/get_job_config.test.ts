@@ -443,6 +443,49 @@ describe('getJobConfig', () => {
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('mitre service unavailable'));
   });
 
+  it('still returns job configs with raw IDs when managed buckets are empty (population not yet complete)', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          custom_settings: {
+            security_app_display_name: 'Auth Spike',
+            threat_tactics: ['TA0006'],
+            threat_techniques: ['T1110'],
+          },
+        }),
+      ],
+    });
+
+    // Simulates the state where the managed SO has not yet been populated.
+    const emptyList = jest.fn().mockResolvedValue({
+      framework: 'enterprise',
+      tactics: [],
+      techniques: [],
+      subtechniques: [],
+    });
+    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: jest.fn() };
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    // Job config must still be present; IDs are unresolved because the name maps are empty.
+    expect(result.size).toBe(1);
+    expect(result.get('test-job')).toMatchObject({
+      jobName: 'Auth Spike',
+      threatTactics: ['TA0006'],
+      threatTechniques: ['T1110'],
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Managed MITRE data is not initialized')
+    );
+  });
+
   it('returns entries for multiple jobs', async () => {
     mockJobsFn
       .mockResolvedValueOnce({ jobs: [makeJob({ job_id: 'job-a' })] })

@@ -225,12 +225,13 @@ describe('useMitreConfiguration', () => {
   });
 
   describe('empty managed response', () => {
-    it('surfaces isError:true and empty buckets when managed returns zero tactics', () => {
-      // Zero tactics on the managed path means population has not run (e.g. ES not ready).
-      // The Enterprise framework always has tactics, so empty is treated as a failure.
+    it('surfaces isError:true and empty buckets when managed returns no framework_version', () => {
+      // framework_version is undefined when the index has no documents — population has
+      // not run (e.g. ES was not ready at startup). This signal is independent of the
+      // types filter and is the correct uninitialized indicator.
       setupKibanaMock(true);
       mockUseFetchMitreEntitiesQuery.mockReturnValue(
-        makeQueryResult({ ...mockManagedData, tactics: [] })
+        makeQueryResult({ ...mockManagedData, framework_version: undefined })
       );
 
       const { result } = renderHook(() => useMitreConfiguration());
@@ -242,8 +243,24 @@ describe('useMitreConfiguration', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    it('does not treat zero tactics as an error on the legacy path', () => {
-      // The zero-tactic guard only applies to managed; the legacy blob is always considered valid.
+    it('does not treat zero tactics as an error when framework_version is present', () => {
+      // A types-filtered request (e.g. types: ['technique']) legitimately returns an empty
+      // tactics bucket. Provided framework_version is set, this is a valid success response.
+      setupKibanaMock(true);
+      mockUseFetchMitreEntitiesQuery.mockReturnValue(
+        makeQueryResult({ ...mockManagedData, tactics: [] })
+      );
+
+      const { result } = renderHook(() => useMitreConfiguration());
+
+      expect(result.current.isError).toBe(false);
+      // Techniques from the filtered response are passed through unchanged.
+      expect(result.current.techniques).toEqual(mockManagedData.techniques);
+    });
+
+    it('does not treat missing framework_version as an error on the legacy path', () => {
+      // The framework_version guard only applies to the managed path; the legacy blob is
+      // always considered valid once loaded.
       setupKibanaMock(false);
       mockUseFetchLegacyMitreQuery.mockReturnValue(
         makeQueryResult({ ...mockLegacyData, tactics: [] })
@@ -254,7 +271,7 @@ describe('useMitreConfiguration', () => {
       expect(result.current.isError).toBe(false);
     });
 
-    it('does not fire when managed returns non-empty tactics', () => {
+    it('does not fire when managed returns a populated response with framework_version', () => {
       setupKibanaMock(true);
       mockUseFetchMitreEntitiesQuery.mockReturnValue(makeQueryResult(mockManagedData));
 

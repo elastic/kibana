@@ -200,6 +200,45 @@ describe('addMitreMappingsNode', () => {
     ]);
   });
 
+  it('returns a rule without threat mappings (and a warning) when managed buckets are empty (population not yet complete)', async () => {
+    const invoke = jest.fn().mockResolvedValue({
+      tactics: ['TA0001'],
+      techniques: [{ id: 'T1078' }],
+    });
+    (MITRE_MAPPING_SELECTION_PROMPT.pipe as jest.Mock).mockReturnValue({
+      pipe: jest.fn().mockReturnValue({ invoke }),
+    });
+
+    // Simulates the state where the managed SO has not yet been populated.
+    const emptyList = jest.fn().mockResolvedValue({
+      framework: 'enterprise',
+      tactics: [],
+      techniques: [],
+      subtechniques: [],
+    });
+    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: jest.fn() };
+
+    const node = addMitreMappingsNode({
+      model: {} as Parameters<typeof addMitreMappingsNode>[0]['model'],
+      mitreDataClient,
+    });
+
+    const state = {
+      userQuery: 'detect failed logins',
+      rule: { query: 'from logs-*' },
+      errors: [],
+    } as unknown as Parameters<typeof node>[0];
+
+    const result = await node(state);
+
+    // The node must not throw — a rule without threat mappings is recoverable;
+    // a failed rule creation is not.
+    expect(result.warnings).toEqual(
+      expect.arrayContaining([expect.stringContaining('Managed MITRE data is not initialized')])
+    );
+    expect(result.rule?.threat).toBeUndefined();
+  });
+
   it('falls back to the adapted legacy blob when mitreDataClient is absent', async () => {
     // Model selects the fixture tactic/technique defined in the mock blob below.
     const invoke = jest.fn().mockResolvedValue({

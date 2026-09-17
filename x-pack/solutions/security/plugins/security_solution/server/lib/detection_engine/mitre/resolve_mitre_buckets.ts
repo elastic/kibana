@@ -37,9 +37,13 @@ export const resolveMitreBuckets = async (
       // in-flight request.
       managedCachePromise = mitreDataClient.list().then(
         (collection): MitreEntitySummaryBuckets => {
-          // Guard: empty result means SO population is not yet complete; do not cache.
+          // An empty managed collection means SO population has not completed yet.
+          // Returning it would be indistinguishable from real data to callers —
+          // every MITRE ID on every rule would appear invalid. Clear the cache and
+          // throw so callers' existing degraded-mode error handling engages instead.
           if (collection.tactics.length === 0 && collection.techniques.length === 0) {
             managedCachePromise = null;
+            throw new Error('Managed MITRE data is not initialized');
           }
           return collection;
         },
