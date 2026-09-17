@@ -40,11 +40,13 @@ export async function buildStorybook({
   configDir,
   name,
   site = false,
+  sharedBundlesPrebuilt = false,
   loglevel = 'info',
 }: {
   configDir: string;
   name: string;
   site?: boolean;
+  sharedBundlesPrebuilt?: boolean;
   loglevel?: StorybookCliOptions['loglevel'];
 }) {
   const config: StorybookCliOptions = {
@@ -62,12 +64,14 @@ export async function buildStorybook({
     process.env.NODE_ENV = 'development';
   }
 
-  const sharedBuild = await runSharedBuild({
-    repoRoot: REPO_ROOT,
-    dist: site,
-    watch: !site,
-  });
-  if (!sharedBuild.success) {
+  const sharedBuild = sharedBundlesPrebuilt
+    ? undefined
+    : await runSharedBuild({
+        repoRoot: REPO_ROOT,
+        dist: site,
+        watch: !site,
+      });
+  if (sharedBuild && !sharedBuild.success) {
     await sharedBuild.close?.();
     throw new Error(`Shared frontend build failed: ${sharedBuild.errors?.join(', ')}`);
   }
@@ -79,7 +83,7 @@ export async function buildStorybook({
     await build(config);
   } finally {
     require('fix-esm').unregister();
-    await sharedBuild.close?.();
+    await sharedBuild?.close?.();
   }
 }
 
@@ -92,6 +96,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         configDir,
         name,
         site: Boolean(flags.site),
+        sharedBundlesPrebuilt: Boolean(flags['shared-bundles-prebuilt']),
         loglevel: getLogLevelFromFlags(flags),
       });
 
@@ -100,7 +105,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
     },
     {
       flags: {
-        boolean: ['site'],
+        boolean: ['site', 'shared-bundles-prebuilt'],
       },
       description: `
         Run the storybook examples for ${name}

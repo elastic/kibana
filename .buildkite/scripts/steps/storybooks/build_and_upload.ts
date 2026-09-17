@@ -89,7 +89,7 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
       logsBuffer.push(chunk.toString());
     };
 
-    const child = spawn('pnpm', ['storybook', '--site', storybook], {
+    const child = spawn('pnpm', ['storybook', '--site', '--shared-bundles-prebuilt', storybook], {
       stdio: 'pipe',
       env: {
         ...process.env,
@@ -133,6 +133,7 @@ const build = async (): Promise<{
   registry: BuildDocsRegistryResult;
 }> => {
   console.log('--- Building Storybooks');
+  exec('pnpm kbn build-shared --dist --no-cache');
 
   const limit = pLimit(os.availableParallelism());
   const storybooks = Object.keys(storybookAliases);
