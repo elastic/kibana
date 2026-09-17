@@ -393,6 +393,9 @@ export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
   ]),
   deploymentId: schema.maybe(schema.string()),
   region: schema.maybe(schema.string()),
-  // Same shape the render route takes, so the browser can re-render exactly this set.
-  integrations: schema.arrayOf(RenderIacTemplateIntegrationSchema),
+  // Same shape and size limit as the render route takes, so the browser can re-render exactly
+  // this set: the service returns an empty set instead of one the render route would reject.
+  integrations: schema.arrayOf(RenderIacTemplateIntegrationSchema, {
+    maxSize: MAX_IAC_RENDER_INTEGRATIONS,
+  }),
 });

@@ -25,6 +25,7 @@ import { isIacProvisionerSupportedFor } from '../utils/iac_provisioner';
 import { buildIacProvisionerIntegrations } from '../iac_provisioner_integrations';
 
 import { IAC_UPGRADE_TASK_FLOW } from '../../../common/telemetry/iac_provisioner_events';
+import { MAX_IAC_RENDER_INTEGRATIONS } from '../../../common/types/rest_spec/iac_provisioner';
 
 import { getCloudConnectorIntegrationSelections } from './iac_integrations';
 import { getIacKeyOutcome, verifyCloudConnectorIacKey } from './iac_key_verification';
@@ -131,6 +132,20 @@ describe('getIacKeyOutcome', () => {
     const result = await getIacKeyOutcome(soClient, keyed, [], opts);
 
     expect(result).toBe('no_integrations');
+    expect(mockedResolve).not.toHaveBeenCalled();
+    expect(mockedRender).not.toHaveBeenCalled();
+  });
+
+  it('returns key_unavailable without resolving when the set exceeds the render limit', async () => {
+    // The Update the callout would offer posts this set to the render route, which rejects it.
+    const tooMany = Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS + 1 }, (_, i) => ({
+      name: `pkg_${i}`,
+      policyTemplates: [{ name: 'tpl', enabledInputs: ['in'] }],
+    }));
+
+    const result = await getIacKeyOutcome(soClient, keyed, tooMany, opts);
+
+    expect(result).toBe('key_unavailable');
     expect(mockedResolve).not.toHaveBeenCalled();
     expect(mockedRender).not.toHaveBeenCalled();
   });
@@ -357,6 +372,38 @@ describe('verifyCloudConnectorIacKey', () => {
     expect(logger.info).toHaveBeenCalledWith(
       'IaC key check for connector cc-1 (onboarding, aws): matches — adding aws[guardduty], aws_logs[generic]'
     );
+  });
+
+  it('returns an empty, uncompared set when the merged set exceeds the render limit', async () => {
+    // The request cap bounds only the integrations being added; MAX existing packages plus one
+    // new one is a set the render route would reject, so no stack action may be offered for it.
+    mockedSelections.mockResolvedValue(
+      Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS }, (_, i) => ({
+        name: `pkg_${i}`,
+        policyTemplates: [{ name: 'tpl', enabledInputs: ['in'] }],
+      }))
+    );
+    soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:stored' }));
+
+    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', [
+      { name: 'one_more', policyTemplates: [{ name: 'tpl', enabledInputs: ['in'] }] },
+    ]);
+
+    expect(result).toEqual(
+      expect.objectContaining({ matches: true, outcome: 'key_unavailable', integrations: [] })
+    );
+    expect(mockedResolve).not.toHaveBeenCalled();
+    expect(mockedRender).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
+
+    soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:stored' }));
+    const read = await verifyCloudConnectorIacKey(
+      soClient,
+      'cc-1',
+      [{ name: 'one_more', policyTemplates: [{ name: 'tpl', enabledInputs: ['in'] }] }],
+      { compare: false }
+    );
+    expect(read).toEqual(expect.objectContaining({ outcome: 'not_checked', integrations: [] }));
   });
 
   it('treats an empty integrations array as a flyout check', async () => {

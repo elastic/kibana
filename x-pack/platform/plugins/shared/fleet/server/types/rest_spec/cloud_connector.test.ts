@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { MAX_IAC_RENDER_INTEGRATIONS } from '../../../common/types/rest_spec/iac_provisioner';
+
 import {
   CreateCloudConnectorRequestSchema,
   UpdateCloudConnectorRequestSchema,
   VerifyCloudConnectorIacKeyRequestSchema,
+  VerifyCloudConnectorIacKeyResponseSchema,
 } from './cloud_connector';
 
 describe('cloud connector request schemas — IaC fields', () => {
@@ -108,6 +111,27 @@ describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
           { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: [] }] },
         ],
       })
+    ).toThrow();
+  });
+});
+
+describe('VerifyCloudConnectorIacKeyResponseSchema', () => {
+  it('caps the returned set at the render limit, since the browser re-renders it as-is', () => {
+    const integration = (i: number) => ({
+      name: `pkg_${i}`,
+      policyTemplates: [{ name: 'tpl', enabledInputs: ['in'] }],
+    });
+    const response = (count: number) => ({
+      matches: true,
+      outcome: 'not_checked',
+      integrations: Array.from({ length: count }, (_, i) => integration(i)),
+    });
+
+    expect(() =>
+      VerifyCloudConnectorIacKeyResponseSchema.validate(response(MAX_IAC_RENDER_INTEGRATIONS))
+    ).not.toThrow();
+    expect(() =>
+      VerifyCloudConnectorIacKeyResponseSchema.validate(response(MAX_IAC_RENDER_INTEGRATIONS + 1))
     ).toThrow();
   });
 });

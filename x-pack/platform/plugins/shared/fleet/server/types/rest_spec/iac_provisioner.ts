@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  MAX_IAC_RENDER_INTEGRATIONS,
+} from '../../../common/types/rest_spec/iac_provisioner';
 import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
 
 const IacProvisionerFlowSchema = schema.oneOf([schema.literal(CLOUD_CONNECTOR_RENDER_FLOW)], {
@@ -30,12 +33,8 @@ const IacPolicyTemplateSelectionSchema = schema.object({
   }),
 });
 
-/**
- * Upper bound on integrations per render. Each entry costs a registry fetch; known flows
- * send a single integration, so this cap only exists to bound abuse. The connector verify
- * route shares the limit because the merged set it returns is re-rendered as-is.
- */
-export const MAX_IAC_RENDER_INTEGRATIONS = 10;
+// Re-exported for the route modules that import every schema constant from here.
+export { MAX_IAC_RENDER_INTEGRATIONS };
 
 /**
  * One package plus the policy templates the user enabled, each listing only the input

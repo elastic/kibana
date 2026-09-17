@@ -18,7 +18,10 @@ import {
 } from '../../../common/telemetry/iac_provisioner_events';
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
 import type { IacUpgradeStatus } from '../../../common/types/models/cloud_connector';
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  MAX_IAC_RENDER_INTEGRATIONS,
+} from '../../../common/types/rest_spec/iac_provisioner';
 import type { CloudConnectorSOAttributes } from '../../types/so_attributes';
 import {
   IacProvisionerRequestError,
@@ -64,19 +67,28 @@ export interface IacKeyOutcomeOptions {
 }
 
 /**
- * The decision both the verify route and the daily upgrade task run for a connector's integration
- * set. Nothing here compares keys: IaCP does, answering `render` for the stored `iac_key` (its
- * `templateSha`). In order:
- * - `unsupported_provider`: not AWS, or IaCP is not enabled for it.
- * - `no_integrations`: the set is empty.
- * - `key_unavailable` (fail open): the set does not resolve against the package manifests, or
- *   IaCP could not answer. The daily task leaves the stored status alone on this outcome.
- * - `no_key`: no stored digest, so the static template is deployed. Reported without asking
- *   IaCP, but only once the saved set is known to be renderable, so the Update the callout offers
- *   can actually succeed.
- * - `key_mismatch` / `matches`: IaCP's `render` verdict.
- * Never throws for IaCP or registry problems; SO errors from the caller's own reads propagate
- * before this runs.
+ * Works out whether a connector's deployed CloudFormation template still covers its integrations.
+ * Shared by the verify route (flyout and onboarding checks) and the daily upgrade task.
+ *
+ * Kibana never inspects the stack itself. It asks IaCP to render the template for the connector's
+ * current integration set and passes the stored `iac_key` along; IaCP replies with `render: true`
+ * when the template it would generate now differs from the one that key identifies.
+ *
+ * Outcomes, checked in this order:
+ * - `unsupported_provider`: not an AWS connector, or IaCP is not enabled.
+ * - `no_integrations`: the connector has no integrations attached.
+ * - `key_unavailable`: no verdict. The saved integrations reference a package, policy template or
+ *   input that no longer exists, or IaCP could not be reached. Callers fail open: the daily task
+ *   keeps the stored status, and the flyout and onboarding do not block.
+ * - `no_key`: the connector has no `iac_key`, so the static template is deployed and an upgrade to
+ *   the generated one is available. IaCP is not asked. This is only reported after the saved
+ *   integrations have resolved, because the Update button the callout then shows renders that same
+ *   set through the strict render route, which would reject a stale one.
+ * - `key_mismatch`: IaCP says the template has changed since the stored key.
+ * - `matches`: the deployed template is current.
+ *
+ * Registry and IaCP failures never throw; they become `key_unavailable`. Saved-object errors from
+ * the caller's own reads happen before this runs and propagate.
  */
 export const getIacKeyOutcome = async (
   soClient: SavedObjectsClientContract,
@@ -99,6 +111,14 @@ export const getIacKeyOutcome = async (
     return 'no_integrations';
   }
   const logger = appContextService.getLogger().get('IacKeyVerification');
+  if (selections.length > MAX_IAC_RENDER_INTEGRATIONS) {
+    // The render route the flyout's Update goes through rejects a set this large, so a verdict
+    // could not be acted on; leave the stored status alone.
+    logger.warn(
+      `IaC template check skipped for ${contextForLog} (fail open): ${selections.length} packages exceed the render limit of ${MAX_IAC_RENDER_INTEGRATIONS}`
+    );
+    return 'key_unavailable';
+  }
   const startTime = Date.now();
   const failOpen = (error: unknown): IacKeyVerificationOutcome => {
     // Mirror the render route's telemetry mapping: provider status when we have one, 500 for
@@ -281,10 +301,21 @@ export const verifyCloudConnectorIacKey = async (
     cloudConnectorId
   );
   const existing = await getCloudConnectorIntegrationSelections(soClient, cloudConnectorId);
-  const integrations = mergeIntegrationSelections([...existing, ...(newIntegrations ?? [])]);
+  const merged = mergeIntegrationSelections([...existing, ...(newIntegrations ?? [])]);
   const deploymentId = attributes.iac_deployment_id || undefined;
   const region = parseAwsRegionFromArn(deploymentId);
   const { cloudProvider } = attributes;
+  // The request body caps only the integrations being added; the merged set can be larger. The
+  // browser re-renders the returned set as-is through the render route, which rejects more than
+  // MAX_IAC_RENDER_INTEGRATIONS packages, so a set that large is returned empty and left
+  // uncompared: no stack action is offered that could not complete.
+  const exceedsRenderCap = merged.length > MAX_IAC_RENDER_INTEGRATIONS;
+  if (exceedsRenderCap) {
+    logger.warn(
+      `IaC key check skipped for connector ${cloudConnectorId}: ${merged.length} packages exceed the render limit of ${MAX_IAC_RENDER_INTEGRATIONS}`
+    );
+  }
+  const integrations = exceedsRenderCap ? [] : merged;
 
   if (!compare) {
     logger.debug(
@@ -316,10 +347,12 @@ export const verifyCloudConnectorIacKey = async (
     return { matches: !reason, reason, outcome, deploymentId, region, integrations };
   };
 
-  const outcome = await getIacKeyOutcome(soClient, attributes, integrations, {
-    flow: IAC_KEY_CHECK_FLOW,
-    contextForLog: `connector ${cloudConnectorId}`,
-  });
+  const outcome = exceedsRenderCap
+    ? 'key_unavailable'
+    : await getIacKeyOutcome(soClient, attributes, integrations, {
+        flow: IAC_KEY_CHECK_FLOW,
+        contextForLog: `connector ${cloudConnectorId}`,
+      });
   // Only a plain re-check describes the connector as it is stored; an onboarding check
   // carries integrations the user has not saved yet, so its verdict must not be written down.
   if (!isAddingIntegrations) {
