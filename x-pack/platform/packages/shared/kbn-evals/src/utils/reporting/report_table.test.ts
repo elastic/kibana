@@ -49,17 +49,17 @@ describe('report_table', () => {
       const evaluatorDisplayGroups: EvaluatorDisplayGroup[] = [
         {
           evaluatorNames: ['Precision@K', 'Recall@K', 'F1@K'],
-          combinedColumnName: 'RAG',
+          combinedColumnName: 'IR',
         },
       ];
 
       const result = createTable(stats, 1, { evaluatorDisplayGroups });
 
-      // The table should have the RAG column (grouped)
-      expect(result).toContain('RAG');
+      // The table should have the IR column (grouped)
+      expect(result).toContain('IR');
       // And the ungrouped Factuality column
       expect(result).toContain('Factuality');
-      // The individual RAG evaluators should still appear in the grouped cell
+      // The individual IR evaluators should still appear in the grouped cell
       expect(result).toContain('Precision@5');
       expect(result).toContain('Precision@10');
       expect(result).toContain('Recall@5');
@@ -68,7 +68,7 @@ describe('report_table', () => {
       expect(result).toContain('F1@10');
     });
 
-    it('should handle multiple K values for RAG evaluators', () => {
+    it('should handle multiple K values for IR evaluators', () => {
       const stats = createMockEvaluatorStats('test-dataset-id', 'test-dataset', {
         'Precision@5': { mean: 0.8, count: 10 },
         'Precision@10': { mean: 0.7, count: 10 },
@@ -84,7 +84,7 @@ describe('report_table', () => {
       const evaluatorDisplayGroups: EvaluatorDisplayGroup[] = [
         {
           evaluatorNames: ['Precision@K', 'Recall@K', 'F1@K'],
-          combinedColumnName: 'RAG',
+          combinedColumnName: 'IR',
         },
       ];
 
@@ -111,14 +111,14 @@ describe('report_table', () => {
       const evaluatorDisplayGroups: EvaluatorDisplayGroup[] = [
         {
           evaluatorNames: ['Precision@K', 'Recall@K', 'F1@K'],
-          combinedColumnName: 'RAG',
+          combinedColumnName: 'IR',
         },
       ];
 
       const result = createTable(stats, 1, { evaluatorDisplayGroups });
 
-      // RAG column should not appear since no RAG evaluators exist
-      expect(result).not.toContain('RAG');
+      // IR column should not appear since no IR evaluators exist
+      expect(result).not.toContain('IR');
       // But the other evaluators should appear as individual columns
       expect(result).toContain('Factuality');
       expect(result).toContain('Relevance');
@@ -158,7 +158,7 @@ describe('report_table', () => {
         },
         {
           evaluatorNames: ['Precision@K', 'Recall@K', 'F1@K'],
-          combinedColumnName: 'RAG',
+          combinedColumnName: 'IR',
         },
       ];
 
@@ -166,21 +166,21 @@ describe('report_table', () => {
 
       // Both groups should appear
       expect(result).toContain('Tokens');
-      expect(result).toContain('RAG');
+      expect(result).toContain('IR');
 
       // Token evaluators in Tokens column
       expect(result).toContain('InputTokens');
       expect(result).toContain('OutputTokens');
       expect(result).toContain('CachedTokens');
 
-      // RAG evaluators in RAG column
+      // IR evaluators in IR column
       expect(result).toContain('Precision@5');
       expect(result).toContain('Recall@5');
       expect(result).toContain('F1@5');
     });
 
     it('should handle partial pattern matches', () => {
-      // When only some RAG evaluators are present
+      // When only some IR evaluators are present
       const stats = createMockEvaluatorStats('test-dataset-id', 'test-dataset', {
         'Precision@5': { mean: 0.8, count: 10 },
         'Precision@10': { mean: 0.7, count: 10 },
@@ -191,14 +191,14 @@ describe('report_table', () => {
       const evaluatorDisplayGroups: EvaluatorDisplayGroup[] = [
         {
           evaluatorNames: ['Precision@K', 'Recall@K', 'F1@K'],
-          combinedColumnName: 'RAG',
+          combinedColumnName: 'IR',
         },
       ];
 
       const result = createTable(stats, 1, { evaluatorDisplayGroups });
 
-      // RAG group should still be created with available evaluators
-      expect(result).toContain('RAG');
+      // IR group should still be created with available evaluators
+      expect(result).toContain('IR');
       expect(result).toContain('Precision@5');
       expect(result).toContain('Precision@10');
       expect(result).toContain('Factuality');

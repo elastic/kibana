@@ -1,5 +1,5 @@
 {
-  "sha1": "af7515cb9981884191824bb725b828eb701720be",
+  "sha1": "b2cbdd19db40612b3a687e601b6f9ca9486a9fd6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 89,
-        "column": 24
+        "line": 99,
+        "column": 23
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 181,
-        "column": 60
+        "line": 191,
+        "column": 29
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 195,
-        "column": 33
+        "line": 204,
+        "column": 60
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 214,
-        "column": 79
+        "line": 225,
+        "column": 16
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 224,
-        "column": 11
+        "line": 233,
+        "column": 89
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 229,
-        "column": 27
+        "line": 240,
+        "column": 7
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 238,
-        "column": 58
+        "line": 248,
+        "column": 27
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 248,
-        "column": 16
+        "line": 257,
+        "column": 59
       }
     },
     {
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 256,
-        "column": 57
+        "line": 266,
+        "column": 22
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 280,
-        "column": 6
+        "line": 292,
+        "column": 12
       }
     },
     {
@@ -154,8 +154,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 308,
-        "column": 25
+        "line": 317,
+        "column": 75
+      }
+    },
+    {
+      "id": "ec1ea961b0a61a1-f97ae7e1eb228af",
+      "title": "context engine AI indices API skips dest delete while the same AI index id in another space still uses it",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
+        "line": 368,
+        "column": 65
       }
     },
     {
@@ -168,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 358,
+        "line": 413,
         "column": 16
       }
     }

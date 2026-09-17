@@ -10,7 +10,11 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../../common/project_routings';
 import type { SLODefinition } from '../../domain/models';
 import { twoMinute } from '../fixtures/duration';
-import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
+import {
+  createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+  createSyntheticsAvailabilityIndicator,
+} from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
 
 const SPACE_ID = 'custom-space';
@@ -34,6 +38,31 @@ describe('Synthetics Availability Transform Generator', () => {
       expect(transform.source.query?.bool?.filter).toContainEqual({
         term: {
           'summary.final_attempt': true,
+        },
+      });
+    });
+
+    it('builds a good-slice aggregation for timeslices SLOs', async () => {
+      const slo = createSLOWithTimeslicesBudgetingMethod({
+        id: 'irrelevant',
+        indicator: createSyntheticsAvailabilityIndicator(),
+      });
+      const transform = await generator.getTransformParams(slo);
+
+      expect(transform.pivot?.aggregations?.['slo.isGoodSlice']).toEqual({
+        bucket_script: {
+          buckets_path: {
+            goodEvents: 'slo.numerator>_count',
+            totalEvents: 'slo.denominator>_count',
+          },
+          script:
+            'if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0 }',
+        },
+      });
+      expect(transform.pivot?.group_by?.['@timestamp']).toEqual({
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: '2m',
         },
       });
     });
