@@ -176,14 +176,16 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     await lens.workspace.convertToEsqlButton.click();
 
     const modal = lens.workspace.convertToEsqlModal;
-    await expect(modal.getByText('Will be converted')).toHaveCount(2);
-    await expect(modal.getByText('Will remain unchanged')).toHaveCount(2);
+    await expect(modal.getByText('Will be converted', { exact: true })).toHaveCount(2);
+    await expect(modal.getByText('Will remain unchanged', { exact: true })).toHaveCount(2);
     await expect(modal.getByRole('checkbox')).toHaveCount(0);
     await lens.workspace.convertToEsqlModalConfirmButton.click();
     await expect(modal).toBeHidden();
     await expect(lens.workspace.convertToEsqlButton).toBeHidden();
 
-    expect(await lens.layers.getLayerCount()).toBe(4);
+    // Conversion recreates the inline editor store with the text-based datasource.
+    // Wait for the remounted layer tabs instead of reading during the transient unmount.
+    await expect.poll(() => lens.layers.getLayerCount()).toBe(4);
     expect(await lens.workspace.getEsqlQuery()).toContain('STATS COUNT(*)');
 
     await lens.layers.activateLayerTab(1);
