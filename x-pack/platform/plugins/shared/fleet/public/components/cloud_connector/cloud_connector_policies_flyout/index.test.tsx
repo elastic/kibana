@@ -99,6 +99,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
   const mockOnClose = jest.fn();
   const mockNavigateToApp = jest.fn();
   const mockReportEvent = jest.fn();
+  const mockAddWarning = jest.fn();
   const mockHttp = {} as ReturnType<typeof useStartServices>['http'];
   const mockLaunchOnClick = jest.fn(() => Promise.resolve());
 
@@ -150,6 +151,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       analytics: { reportEvent: mockReportEvent },
       http: mockHttp,
       cloud: mockCloud,
+      notifications: { toasts: { addWarning: mockAddWarning } },
     } as unknown as ReturnType<typeof useStartServices>);
 
     mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
@@ -196,6 +198,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     mockNavigateToApp.mockClear();
     mockReportEvent.mockClear();
     mockLaunchOnClick.mockClear();
+    mockAddWarning.mockClear();
     // Reset, not clear: a test may swap in a write that stays pending until it releases it.
     mockUpdateCloudConnector.mockReset();
     mockUpdateCloudConnector.mockResolvedValue(
@@ -1112,6 +1115,97 @@ describe('CloudConnectorPoliciesFlyout', () => {
       ).not.toBeInTheDocument();
     });
 
+    it('(i-write-failed) warns when the digest write fails, and neither re-checks nor invalidates', async () => {
+      // Without the new key the callout would stay until the daily task runs again; the user has
+      // to hear why instead of the failure being swallowed.
+      mockUseVerifyIacKey.mockReturnValue({
+        data: {
+          matches: true,
+          outcome: 'not_checked',
+          integrations: [
+            {
+              name: 'aws',
+              policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+            },
+          ],
+        },
+        isFetching: false,
+        refetch: jest.fn(),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+      mockUseCloudConnectorTemplate.mockImplementation(({ onTemplateRendered }) => ({
+        launchButtonProps: {
+          onClick: async () => {
+            onTemplateRendered?.({ key: 'sha256:new', integrations: [], ...RENDERED_BLUEPRINT });
+          },
+        },
+        isDisabled: false,
+        isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
+        isIacProvisionerEnabled: true,
+      }));
+      mockUpdateCloudConnector.mockRejectedValue(new Error('403 Forbidden'));
+      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+      const user = userEvent.setup();
+
+      renderFlyout({
+        provider: 'aws',
+        iacKey: 'sha256:old',
+        iacDeploymentId: VALID_STACK_ARN,
+        iacUpgradeStatus: 'upgrade_available',
+      });
+      await user.click(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON)
+      );
+
+      await waitFor(() => expect(mockAddWarning).toHaveBeenCalledTimes(1));
+      expect(mockAddWarning).toHaveBeenCalledWith({
+        title: 'Template details were not saved on the identity',
+        text: 'Kibana could not record the new template for this identity, so the upgrade callout will stay until the daily check runs again. Try Update again.',
+      });
+      expect(mockSendVerify).not.toHaveBeenCalled();
+      expect(invalidateQueries).not.toHaveBeenCalled();
+      // The callout stays: nothing was stored.
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).toBeInTheDocument();
+    });
+
+    it('(i-read-forbidden) tolerates a 403 on the on-open read: callout from the stored status, no Redeploy or Launch', () => {
+      // The verify route is gated like the connector update; a read-only user cannot read the
+      // integration set, so there is nothing to render from, but the stored status still shows.
+      mockUseVerifyIacKey.mockReturnValue({
+        data: undefined,
+        isError: true,
+        error: Object.assign(new Error('Forbidden'), { statusCode: 403 }),
+        isFetching: false,
+        refetch: jest.fn(),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      renderFlyout({
+        provider: 'aws',
+        iacKey: 'sha256:old',
+        iacDeploymentId: VALID_STACK_ARN,
+        iacUpgradeStatus: 'upgrade_available',
+      });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).toBeInTheDocument();
+      // No integration set → Update cannot render either.
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON)
+      ).toBeDisabled();
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_REDEPLOY_BUTTON)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_LAUNCH_BUTTON)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION)
+      ).toBeInTheDocument();
+    });
+
     it('(i-status-only) the callout follows the stored status, whatever the on-open read says', () => {
       // Nothing in the flyout compares templates: only the daily task discovers upgrades.
       mockUseVerifyIacKey.mockReturnValue({
@@ -1829,6 +1923,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         analytics: { reportEvent: mockReportEvent },
         http: mockHttp,
         cloud: undefined,
+        notifications: { toasts: { addWarning: mockAddWarning } },
       } as unknown as ReturnType<typeof useStartServices>);
 
       renderFlyout({ provider: 'aws' });

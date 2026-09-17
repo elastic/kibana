@@ -100,7 +100,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   iacUpgradeCheckedAt,
 }) => {
   const { application } = useKibana().services;
-  const { analytics, http, cloud } = useStartServices();
+  const { analytics, http, cloud, notifications } = useStartServices();
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const queryClient = useQueryClient();
 
@@ -169,30 +169,47 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
   const onTemplateRendered = useCallback(
     ({ key, blueprintId, blueprintVersion }: TemplateRendered) => {
-      // Runs on the Update / Redeploy click once the render succeeds; Kibana cannot see the user
-      // apply the update in AWS, so the key and its blueprint provenance are stored at click time
-      // (idempotent when unchanged). One comparing re-check follows: with the new key stored it
-      // answers `matches` and the server persists `up_to_date`, and the invalidations re-read the
-      // stored status that drives the callout, so it clears itself without a second click
-      // (https://github.com/elastic/ingest-dev/issues/9415). Raw requests: no toast.
+      // Runs on the Update / Redeploy / Launch click once the console has opened; Kibana cannot
+      // see the user apply the update in AWS, so the key and its blueprint provenance are stored
+      // at click time (idempotent when unchanged). One comparing re-check follows: with the new
+      // key stored it answers `matches` and the server persists `up_to_date`, and the
+      // invalidations re-read the stored status that drives the callout, so it clears itself
+      // without a second click (https://github.com/elastic/ingest-dev/issues/9415).
+      // A failed write is surfaced: without the new key the callout would stay until the daily
+      // task runs again and the user would not know why; there is nothing to re-check then.
       if (key && cloudConnectorId) {
         updateCloudConnector(http, cloudConnectorId, {
           iac_key: key,
           iac_blueprint_id: blueprintId,
           iac_blueprint_version: blueprintVersion,
           ...(iacDeploymentIdToSave ? { iac_deployment_id: iacDeploymentIdToSave } : {}),
-        })
-          .then(() => sendVerifyCloudConnectorIacKey(cloudConnectorId, {}))
-          .then(() => {
+        }).then(
+          async () => {
+            // Best effort: sendRequest never rejects, it answers { error }, which is ignored here
+            // on purpose — the daily task re-derives the status if this re-check fails.
+            await sendVerifyCloudConnectorIacKey(cloudConnectorId, {});
             queryClient.invalidateQueries(['get-cloud-connectors']);
             queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
-          })
-          .catch(() => {
-            // Silent: the daily iac_upgrade_check task self-heals key mismatches.
-          });
+          },
+          () => {
+            notifications.toasts.addWarning({
+              title: i18n.translate(
+                'xpack.fleet.cloudConnector.policiesFlyout.provenanceWriteFailed.title',
+                { defaultMessage: 'Template details were not saved on the identity' }
+              ),
+              text: i18n.translate(
+                'xpack.fleet.cloudConnector.policiesFlyout.provenanceWriteFailed.text',
+                {
+                  defaultMessage:
+                    'Kibana could not record the new template for this identity, so the upgrade callout will stay until the daily check runs again. Try Update again.',
+                }
+              ),
+            });
+          }
+        );
       }
     },
-    [cloudConnectorId, http, iacDeploymentIdToSave, queryClient]
+    [cloudConnectorId, http, iacDeploymentIdToSave, notifications, queryClient]
   );
 
   // Without a stack ARN the hook lands the rendered template on the package's quick-create

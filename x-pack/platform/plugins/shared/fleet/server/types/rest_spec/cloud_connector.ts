@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
+import { isCloudFormationStackArn } from '../../../common/services/cloud_connectors';
 
 import { MAX_IAC_RENDER_INTEGRATIONS, RenderIacTemplateIntegrationSchema } from './iac_provisioner';
 
@@ -60,8 +61,16 @@ const IacRequestFieldsSchema = {
     schema.string({
       minLength: 1,
       maxLength: 2048,
+      // Same rule as the browser's stack ARN fields: the value is deep-linked into the
+      // CloudFormation console as a stack, so any other ARN (IAM role, CloudWatch Logs group) is
+      // rejected here too, not only in the UI.
+      validate: (value) =>
+        isCloudFormationStackArn(value)
+          ? undefined
+          : 'must be a CloudFormation stack ARN (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>)',
       meta: {
-        description: 'Identifier of the last CloudFormation stack deployed for this connector.',
+        description:
+          'ARN of the last CloudFormation stack deployed for this connector (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>).',
         availability: IAC_FIELD_AVAILABILITY,
       },
     })

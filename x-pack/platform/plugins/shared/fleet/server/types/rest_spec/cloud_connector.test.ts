@@ -28,6 +28,31 @@ describe('cloud connector request schemas — IaC fields', () => {
     ).not.toThrow();
   });
 
+  it.each([
+    ['arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/fn:*', 'a CloudWatch Logs ARN'],
+    ['arn:aws:iam::123456789012:role/MyRole', 'an IAM role ARN'],
+    ['not-an-arn', 'a plain string'],
+    ['arn:aws:cloudformation:us-east-1:123456789012:stack/s/u ', 'a trailing space'],
+    ['arn:aws:cloudformation:us-east-1:123456789012:stack/s/u\n', 'a trailing newline'],
+    ['arn:aws:cloudformation:us-east-1:123456789012:stack/s/u?x=1', 'a query string'],
+  ])('create and update reject iac_deployment_id %s (%s) with a clear message', (value) => {
+    // Same rule as the UI's stack ARN fields: any other ARN would be deep-linked as a stack.
+    expect(() =>
+      CreateCloudConnectorRequestSchema.body.validate({ ...validCreate, iac_deployment_id: value })
+    ).toThrow(/must be a CloudFormation stack ARN/);
+    expect(() =>
+      UpdateCloudConnectorRequestSchema.body.validate({ iac_deployment_id: value })
+    ).toThrow(/must be a CloudFormation stack ARN/);
+  });
+
+  it('accepts a stack ARN from another AWS partition', () => {
+    expect(() =>
+      UpdateCloudConnectorRequestSchema.body.validate({
+        iac_deployment_id: 'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/s/u',
+      })
+    ).not.toThrow();
+  });
+
   it.each(['iac_key', 'iac_deployment_id'])('create rejects an empty %s', (field) => {
     expect(() =>
       CreateCloudConnectorRequestSchema.body.validate({ ...validCreate, [field]: '' })

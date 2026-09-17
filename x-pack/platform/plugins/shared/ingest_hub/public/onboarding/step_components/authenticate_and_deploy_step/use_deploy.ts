@@ -62,9 +62,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   // The Existing Identity check renders the stack update without touching the connector; the
   // template's provenance is written only once every integration it was rendered for is deployed,
   // so a launch the user abandoned never marks the identity as upgraded
-  // (https://github.com/elastic/ingest-dev/issues/9415). Best-effort: the connector is reported as
-  // static until the write lands, and the next Deploy retries it.
-  const writePendingIacProvenance = useCallback(async () => {
+  // (https://github.com/elastic/ingest-dev/issues/9415). Best-effort: until the write lands the
+  // identity may be reported as needing an update, and the next Deploy retries it — including a
+  // Deploy with nothing left to deploy, which is what "deploy again" means once every instance is
+  // tracked.
+  const persistPendingProvenance = useCallback(async () => {
     const { connectorId, pendingIac } = authenticateAndDeployStep;
     if (!connectorId || !pendingIac || pendingIac.connectorId !== connectorId) {
       return;
@@ -192,6 +194,9 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
         if (targets.length === 0 && Object.keys(newNonAgentlessStatuses).length === 0) {
           onContinue();
+          // Everything is already deployed: the only work left is a provenance write that failed
+          // last time.
+          await persistPendingProvenance();
           return;
         }
 
@@ -203,7 +208,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         });
         onContinue();
 
-        if (targets.length === 0) return;
+        if (targets.length === 0) {
+          await persistPendingProvenance();
+          return;
+        }
       } else {
         // Retry: select any group that intersects the requested instanceIds.
         // A bundled group is re-run as a whole — retrying one bundled original re-runs its bundle.
@@ -297,7 +305,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       }
 
       if (mergedFailed.length === 0) {
-        await writePendingIacProvenance();
+        await persistPendingProvenance();
       }
 
       setIsDeploying(false);
@@ -331,7 +339,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       dataFormat,
       servicesMap,
       hasEcfServices,
-      writePendingIacProvenance,
+      persistPendingProvenance,
     ]
   );
 

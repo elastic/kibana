@@ -393,15 +393,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       access: 'internal',
       security: {
         authz: {
-          // Loads the connector + its policies and proxies a comparison render. Called without an
-          // integration it also stores the upgrade status it just derived — the same two fields
-          // the daily upgrade task writes. Privileges stay READ because the caller supplies no
-          // part of that value: it is derived server-side from what is already stored.
+          // Loads the connector + its policies and proxies a comparison render. Called without
+          // added integrations it also stores the upgrade status it just derived, so it needs the
+          // same privileges as updating the connector (PUT above), not READ. Consequence: a
+          // read-only user gets 403 on the flyout's compare:false read as well; the flyout
+          // tolerates that (no integration set → no Redeploy/Launch, the callout still follows the
+          // stored status) (https://github.com/elastic/ingest-dev/issues/9415).
           requiredPrivileges: [
             {
               anyRequired: [
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
               ],
             },
           ],

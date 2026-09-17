@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -83,26 +83,33 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
 
   const queryClient = useQueryClient();
 
-  // The identity the user launched the stack update for. Bound to the id rather than a bare
-  // boolean so a change of connector resets it on its own: a launch for one identity says nothing
-  // about the next (the host also keys this component by id).
-  const [launchedForId, setLaunchedForId] = useState<string | undefined>(undefined);
-  const updateLaunched = launchedForId !== undefined && launchedForId === cloudConnectorId;
+  // What the user launched the stack update for: the identity AND the integration set the
+  // template was rendered for. Bound to both rather than a bare boolean so a change of either
+  // resets it on its own: a launch says nothing about another identity, nor about a set widened
+  // after the click (the host also keys this component by both).
+  const integrationsKey = useMemo(() => JSON.stringify(integrations), [integrations]);
+  const [launchedFor, setLaunchedFor] = useState<
+    { connectorId: string; integrationsKey: string } | undefined
+  >(undefined);
+  const updateLaunched =
+    launchedFor !== undefined &&
+    launchedFor.connectorId === cloudConnectorId &&
+    launchedFor.integrationsKey === integrationsKey;
 
   const onProvenanceRenderedRef = useRef(onProvenanceRendered);
   onProvenanceRenderedRef.current = onProvenanceRendered;
 
   const onTemplateRendered = useCallback(
     ({ key, blueprintId, blueprintVersion }: TemplateRendered) => {
-      // Runs on the "Update CloudFormation stack" click, once the render succeeds and before the
-      // console opens. Kibana cannot observe the user applying the update in AWS, so the launch
-      // itself is what lifts the block ("let them finish"): the callout switches to its launched
-      // state and the host is told the identity is ready
-      // (https://github.com/elastic/ingest-dev/issues/9415).
+      // Runs on the "Update CloudFormation stack" click, once the render succeeded and the console
+      // has opened on it (never when a pop-up blocker kept it closed). Kibana cannot observe the
+      // user applying the update in AWS, so the launch itself is what lifts the block ("let them
+      // finish"): the callout switches to its launched state and the host is told the identity is
+      // ready (https://github.com/elastic/ingest-dev/issues/9415).
       if (!key || !cloudConnectorId) {
         return;
       }
-      setLaunchedForId(cloudConnectorId);
+      setLaunchedFor({ connectorId: cloudConnectorId, integrationsKey });
 
       if (!writeOnRender) {
         // The host records the provenance once its own flow succeeds (the onboarding writes it
@@ -129,7 +136,7 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
           // Silent: the daily iac_upgrade_check task self-heals key mismatches.
         });
     },
-    [cloudConnectorId, http, queryClient, writeOnRender]
+    [cloudConnectorId, http, integrationsKey, queryClient, writeOnRender]
   );
 
   const { launchButtonProps, isGeneratingTemplate, templateGenerationError } =

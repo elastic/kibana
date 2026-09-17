@@ -348,15 +348,94 @@ describe('useCloudConnectorTemplate', () => {
       });
     });
 
-    it('falls back to a direct window.open when the pre-opened tab was blocked', async () => {
+    it('falls back to a direct window.open when the pre-opened tab was blocked, and still records provenance when that opens', async () => {
       windowOpenSpy.mockReturnValueOnce(null);
+      const onTemplateRendered = jest.fn();
 
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, onTemplateRendered })
+      );
       await launch(result);
 
       expect(windowOpenSpy).toHaveBeenCalledTimes(2);
       expect(windowOpenSpy.mock.calls[1][0]).toContain(
         `templateURL=${encodeURIComponent(ARTIFACT_URL)}`
+      );
+      expect(onTemplateRendered).toHaveBeenCalledTimes(1);
+      expect(result.current.iacConfirm).toEqual(
+        expect.objectContaining({ iac_key: 'sha256:661cb7def1c7101f' })
+      );
+      expect(result.current.templateGenerationError).toBeUndefined();
+    });
+
+    it('records nothing and reports an error when the console could not be opened at all', async () => {
+      // Both the pre-opened tab and the direct open were eaten by a pop-up blocker: the user never
+      // saw the template, so no digest may be recorded and no caller unblocked
+      // (https://github.com/elastic/ingest-dev/issues/9415).
+      windowOpenSpy.mockReturnValue(null);
+      const onTemplateRendered = jest.fn();
+
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, onTemplateRendered })
+      );
+      await launch(result);
+
+      expect(windowOpenSpy).toHaveBeenCalledTimes(2);
+      expect(onTemplateRendered).not.toHaveBeenCalled();
+      expect(result.current.iacConfirm).toBeUndefined();
+      expect(result.current.templateGenerationError).toBe(
+        'The CloudFormation console could not be opened. Allow pop-ups for Kibana and try again.'
+      );
+      expect(result.current.isGeneratingTemplate).toBe(false);
+    });
+
+    it('records provenance only after navigating the pre-opened tab', async () => {
+      // Captured inside the callback and asserted afterwards: an expect thrown inside it would be
+      // swallowed by the hook's catch and the test would pass on a regressed order.
+      let hrefWhenNotified: string | undefined;
+      const onTemplateRendered = jest.fn(() => {
+        hrefWhenNotified = cloudFormationTab.location.href;
+      });
+
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, onTemplateRendered })
+      );
+      await launch(result);
+
+      expect(onTemplateRendered).toHaveBeenCalledTimes(1);
+      // By the time the caller heard about the render, the console page was already loading.
+      expect(hrefWhenNotified).toContain(`templateURL=${encodeURIComponent(ARTIFACT_URL)}`);
+      expect(result.current.templateGenerationError).toBeUndefined();
+    });
+
+    it('does not record the missing-context static fallback when the console could not be opened', async () => {
+      windowOpenSpy.mockReturnValue(null);
+
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, policyTemplates: [] })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+      expect(result.current.iacConfirm).toBeUndefined();
+      expect(result.current.templateGenerationError).toBe(
+        'The CloudFormation console could not be opened. Allow pop-ups for Kibana and try again.'
+      );
+    });
+
+    it('does not record the static fallback confirm when the console could not be opened', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: null,
+        error: new Error('down'),
+      } as any);
+      windowOpenSpy.mockReturnValue(null);
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      await launch(result);
+
+      expect(result.current.iacConfirm).toBeUndefined();
+      expect(result.current.templateGenerationError).toBe(
+        'The CloudFormation console could not be opened. Allow pop-ups for Kibana and try again.'
       );
     });
 

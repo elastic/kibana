@@ -1502,6 +1502,50 @@ describe('useDeploy', () => {
       );
     });
 
+    it('retries the write on a Deploy with nothing left to deploy, as the failure toast promises', async () => {
+      // Every instance is already tracked, so handleDeploy takes its early return; the pending
+      // write from the previous run must still be attempted.
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: 'connector-abc',
+        pendingIac,
+        detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
+      });
+      const onContinue = jest.fn();
+      const { result } = renderHook(() => useDeploy({ onContinue }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
+      expect(onContinue).toHaveBeenCalledTimes(1);
+      expect(mockSendUpdateCloudConnector).toHaveBeenCalledWith(
+        'connector-abc',
+        expect.objectContaining({ iac_key: 'sha256:new' })
+      );
+      expect(setPendingIacMock()).toHaveBeenCalledWith(undefined);
+    });
+
+    it('retries the write when only non-managed services are newly tracked', async () => {
+      // ec2 is already deployed; cloudtrail is ECF (gray chip, no API call): no targets, but the
+      // pending write still runs.
+      setupMocks({
+        selectedServiceIds: ['ec2', 'cloudtrail'],
+        connectorId: 'connector-abc',
+        pendingIac,
+        detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
+      expect(mockSendUpdateCloudConnector).toHaveBeenCalledTimes(1);
+    });
+
     it('does not write when nothing is pending', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));

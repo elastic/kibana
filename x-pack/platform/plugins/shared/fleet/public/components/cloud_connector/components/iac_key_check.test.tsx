@@ -553,6 +553,70 @@ describe('IacKeyCheck', () => {
       expect(onValidityChange).not.toHaveBeenCalledWith(true);
     });
 
+    it('forgets the launch when the integration set changes: a set widened after Launch blocks again', async () => {
+      // The template was rendered for the set at click time; a wider set is not covered by it.
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      const getOnTemplateRendered = captureOnTemplateRendered();
+      const onValidityChange = jest.fn();
+
+      const { rerender } = renderWithIntl(
+        <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
+      );
+      await act(async () => {
+        getOnTemplateRendered()?.(rendered);
+      });
+      await waitFor(() => expect(onValidityChange).toHaveBeenLastCalledWith(true));
+      expect(await screen.findByText('CloudFormation stack update opened')).toBeInTheDocument();
+
+      rerender(
+        withProviders(
+          <IacKeyCheck
+            {...defaultProps}
+            integrations={[
+              ...integrations,
+              {
+                name: 'aws',
+                policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }],
+              },
+            ]}
+            onValidityChange={onValidityChange}
+          />
+        )
+      );
+
+      await waitFor(() => expect(onValidityChange).toHaveBeenLastCalledWith(false));
+      expect(screen.getByText('CloudFormation stack update required')).toBeInTheDocument();
+      expect(screen.queryByText('CloudFormation stack update opened')).not.toBeInTheDocument();
+    });
+
+    it('keeps the launch when the integration set is re-created with the same content', async () => {
+      // Hosts rebuild the array on every render; only a real change of content resets the launch.
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      const getOnTemplateRendered = captureOnTemplateRendered();
+      const onValidityChange = jest.fn();
+
+      const { rerender } = renderWithIntl(
+        <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
+      );
+      await act(async () => {
+        getOnTemplateRendered()?.(rendered);
+      });
+      await waitFor(() => expect(onValidityChange).toHaveBeenLastCalledWith(true));
+
+      rerender(
+        withProviders(
+          <IacKeyCheck
+            {...defaultProps}
+            integrations={JSON.parse(JSON.stringify(integrations))}
+            onValidityChange={onValidityChange}
+          />
+        )
+      );
+
+      expect(onValidityChange).toHaveBeenCalledTimes(2);
+      expect(screen.getByText('CloudFormation stack update opened')).toBeInTheDocument();
+    });
+
     describe('writeOnRender={false}', () => {
       it('hands the provenance to the host instead of writing the connector', async () => {
         mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });

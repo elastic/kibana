@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -107,6 +107,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // verify round-trip; with no check coming, nothing would ever flip it back to true
   // (https://github.com/elastic/ingest-dev/issues/9415).
   const willRunIacCheck = isIacProvisionerEnabled && (integrations?.length ?? 0) > 0;
+  // Stable identity of the set, for the IacKeyCheck remount key below.
+  const integrationsKey = useMemo(() => JSON.stringify(integrations ?? []), [integrations]);
   const initialCheckValidity = !willRunIacCheck;
   const [isCheckValid, setIsCheckValid] = useState(initialCheckValidity);
   // Validate what Create will post: a pasted ARN often carries surrounding whitespace.
@@ -353,9 +355,11 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
           {integrations && integrations.length > 0 && (
             <>
               <EuiSpacer size="m" />
-              {/* Keyed per identity so the check's change-only reporting starts fresh for each one. */}
+              {/* Keyed per identity AND integration set so the check's change-only reporting,
+                  its verdict and its launched state start fresh for each combination: a set
+                  widened after Launch must block again. */}
               <IacKeyCheck
-                key={selected?.id}
+                key={`${selected?.id ?? ''}|${integrationsKey}`}
                 cloudConnectorId={selected?.id}
                 integrations={integrations}
                 cloud={cloud}

@@ -18,6 +18,7 @@ import type {
 import { isCloudProvider } from '../../../common/types';
 import {
   getIacTemplateUrlFromVarGroupSelection,
+  isCloudFormationStackArn,
   parseAwsRegionFromArn,
 } from '../../../common/services/cloud_connectors';
 
@@ -638,10 +639,14 @@ export const INVALID_STACK_ARN_MESSAGE = i18n.translate(
   }
 );
 
-/** True for a non-empty stack ARN whose region cannot be parsed; whitespace is ignored so a pasted value is judged as it will be saved. */
+/**
+ * True for a non-empty value that is not a CloudFormation stack ARN (any other regional ARN, such
+ * as a CloudWatch Logs group, is rejected too); whitespace is ignored so a pasted value is judged
+ * as it will be saved. Same rule as the connector API's `iac_deployment_id`.
+ */
 export const isStackArnInvalid = (stackArn: string | undefined): boolean => {
   const trimmed = stackArn?.trim() ?? '';
-  return trimmed !== '' && parseAwsRegionFromArn(trimmed) === undefined;
+  return trimmed !== '' && !isCloudFormationStackArn(trimmed);
 };
 
 /** Read-only link to the deployed stack; needs no render. */

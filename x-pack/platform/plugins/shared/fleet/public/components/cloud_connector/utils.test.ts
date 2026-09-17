@@ -1123,6 +1123,20 @@ describe('isStackArnInvalid', () => {
     expect(isStackArnInvalid('arn:aws:cloudformation::123456789012:stack/x/y')).toBe(true);
   });
 
+  it('returns true for a regional ARN that is not a CloudFormation stack', () => {
+    // A region alone is not enough: the value is deep-linked as a stack and stored as one.
+    expect(
+      isStackArnInvalid('arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/fn:*')
+    ).toBe(true);
+    expect(isStackArnInvalid('arn:aws:iam::123456789012:role/MyRole')).toBe(true);
+  });
+
+  it('accepts other AWS partitions', () => {
+    expect(
+      isStackArnInvalid('arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/s/u')
+    ).toBe(false);
+  });
+
   it('ignores leading and trailing whitespace around a valid ARN', () => {
     expect(isStackArnInvalid(`  ${STACK_ARN}\n`)).toBe(false);
   });

@@ -664,6 +664,57 @@ describe('AwsIdentityFederationSetup', () => {
       expect(lastReadyValue(onReadyChange)).toBe(true);
     });
 
+    it('remounts IacKeyCheck when the integration set changes, so its verdict and launched state start fresh', async () => {
+      // A set widened after Launch must block again; the remount also re-runs the check.
+      let mounts = 0;
+      mockIacKeyCheck.mockImplementation(() => {
+        React.useEffect(() => {
+          mounts += 1;
+        }, []);
+        return <div data-test-subj="mockIacKeyCheck" />;
+      });
+      const { rerender } = renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
+      await waitFor(() => expect(mounts).toBe(1));
+
+      // Same content, new array identity: no remount.
+      rerender(
+        <I18nProvider>
+          <QueryClientProvider client={queryClient}>
+            <AwsIdentityFederationSetup
+              onReadyChange={onReadyChange}
+              onConnectorIdChange={onConnectorIdChange}
+              cloud={cloud}
+              integrations={JSON.parse(JSON.stringify(integrations))}
+              initialConnectorId="connector-1"
+            />
+          </QueryClientProvider>
+        </I18nProvider>
+      );
+      expect(mounts).toBe(1);
+
+      // A wider set: remount.
+      rerender(
+        <I18nProvider>
+          <QueryClientProvider client={queryClient}>
+            <AwsIdentityFederationSetup
+              onReadyChange={onReadyChange}
+              onConnectorIdChange={onConnectorIdChange}
+              cloud={cloud}
+              integrations={[
+                ...integrations,
+                {
+                  name: 'aws',
+                  policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }],
+                },
+              ]}
+              initialConnectorId="connector-1"
+            />
+          </QueryClientProvider>
+        </I18nProvider>
+      );
+      await waitFor(() => expect(mounts).toBe(2));
+    });
+
     it('keeps blocking when the newly selected connector reports invalid as soon as it mounts', async () => {
       // A connector whose verdict is already cached reports in its mount effect, which runs
       // before any parent effect: the parent's reset must not overwrite that fresh verdict.

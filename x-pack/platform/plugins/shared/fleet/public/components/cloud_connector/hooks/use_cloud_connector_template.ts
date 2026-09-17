@@ -44,6 +44,14 @@ const TEMPLATE_GENERATION_ERROR = i18n.translate(
   }
 );
 
+const CONSOLE_OPEN_FAILED_ERROR = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.consoleOpenFailedError',
+  {
+    defaultMessage:
+      'The CloudFormation console could not be opened. Allow pop-ups for Kibana and try again.',
+  }
+);
+
 const TEMPLATE_ALREADY_CURRENT = i18n.translate(
   'xpack.fleet.cloudConnector.iacProvisioner.templateAlreadyCurrent',
   {
@@ -103,9 +111,10 @@ export interface UseCloudConnectorTemplateParams {
    */
   staticTemplateFallback?: boolean;
   /**
-   * Called right before the console opens with the key IaCP returned for the rendered template,
-   * its blueprint provenance and the integration set it was rendered for. Callers that write the
-   * connector at click time store all of it (https://github.com/elastic/ingest-dev/issues/9415).
+   * Called once the console has opened on the rendered template (never when a pop-up blocker kept
+   * it closed), with the key IaCP returned for it, its blueprint provenance and the integration
+   * set it was rendered for. Callers that write the connector at click time store all of it
+   * (https://github.com/elastic/ingest-dev/issues/9415).
    */
   onTemplateRendered?: (rendered: TemplateRendered) => void;
 }
@@ -198,8 +207,12 @@ export const useCloudConnectorTemplate = ({
       if (staticTemplateUrl) {
         reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
         if (staticTemplateFallback) {
-          setIacConfirm(STATIC_FALLBACK_IAC);
-          window.open(staticTemplateUrl, '_blank');
+          // Record the static fallback only when the console actually opened, as for a render.
+          if (window.open(staticTemplateUrl, '_blank') !== null) {
+            setIacConfirm(STATIC_FALLBACK_IAC);
+          } else {
+            setTemplateGenerationError(CONSOLE_OPEN_FAILED_ERROR);
+          }
           return;
         }
       }
@@ -212,21 +225,25 @@ export const useCloudConnectorTemplate = ({
     // made after an await. The tab is opened blank now and navigated (or
     // closed) once the render settles.
     const cloudFormationTab = window.open('', '_blank');
-    const navigateTo = (url: string) => {
+    /** True when the console page is actually open in a tab; false when the blocker ate it. */
+    const navigateTo = (url: string): boolean => {
       if (cloudFormationTab && !cloudFormationTab.closed) {
         cloudFormationTab.location.href = url;
-      } else {
-        // The blank tab was blocked or closed mid-render; a direct open is
-        // the only remaining option, even if the blocker eats it too.
-        window.open(url, '_blank');
+        return true;
       }
+      // The blank tab was blocked or closed mid-render; a direct open is the only remaining
+      // option, and the blocker may eat it too.
+      return window.open(url, '_blank') !== null;
     };
 
     const fallbackToStatic = (reason: string) => {
       reportFallback(reason);
       if (staticTemplateUrl && staticTemplateFallback) {
-        setIacConfirm(STATIC_FALLBACK_IAC);
-        navigateTo(staticTemplateUrl);
+        if (navigateTo(staticTemplateUrl)) {
+          setIacConfirm(STATIC_FALLBACK_IAC);
+        } else {
+          setTemplateGenerationError(CONSOLE_OPEN_FAILED_ERROR);
+        }
         return;
       }
       cloudFormationTab?.close();
@@ -278,6 +295,14 @@ export const useCloudConnectorTemplate = ({
         return;
       }
 
+      // Navigate first: the provenance is only recorded (and callers only unblock) for a template
+      // the user can actually see in the console. A pop-up blocker that ate both tabs must not
+      // leave a digest on the connector for a stack that was never opened
+      // (https://github.com/elastic/ingest-dev/issues/9415).
+      if (!navigateTo(launchUrl)) {
+        setTemplateGenerationError(CONSOLE_OPEN_FAILED_ERROR);
+        return;
+      }
       setIacConfirm({
         iac_key: data.templateSha,
         iac_blueprint_id: data.blueprint.id,
@@ -289,7 +314,6 @@ export const useCloudConnectorTemplate = ({
         blueprintId: data.blueprint.id,
         blueprintVersion: data.blueprint.version,
       });
-      navigateTo(launchUrl);
     } catch (e) {
       cloudFormationTab?.close();
       setIacConfirm(undefined);
