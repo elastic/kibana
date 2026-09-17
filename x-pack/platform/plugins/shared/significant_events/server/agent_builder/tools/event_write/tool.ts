@@ -322,7 +322,7 @@ export function createEventsWriteTool({
         );
 
         const data = await eventsWriteBulkHandler({
-          eventClient: getEventClient(),
+          eventClient: await getEventClient(),
           inputs: items,
           source: toolParams.source,
         });

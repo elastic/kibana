@@ -15,7 +15,6 @@
 
 export {
   API_VERSIONS,
-  CONVERSATION_CATEGORY_COLORS,
   INTERNAL_API_ACCESS,
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
@@ -35,14 +34,14 @@ export {
   ALERTZERO_WORKERS_URL,
   ALERTZERO_WORKER_URL_TEMPLATE,
   SYSTEM_SECURITY_WATCH_CATALOG,
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_IDS,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WORKER_CATALOG,
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -53,7 +52,7 @@ export {
   TEMPLATE_ID_PROPOSAL,
   WATCH_AUTONOMY_LEVELS,
   WORKER_SCHEDULE_UNITS,
-  WATCH_DARK_TAG,
+  WATCH_HUNT_TAG,
   WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
   WATCH_FLOOR_TAG,
@@ -73,7 +72,6 @@ export type {
   ActionImpact,
   ListActionsResponse,
 } from './action_catalog_types';
-export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
 
 export {
   ApprovalRequirement,
@@ -115,10 +113,14 @@ export {
   WatchTriggersSettings,
   WatchWorker,
   WatchWorkerAttachment,
+  AnalysisWindowDays,
+  RuleTuningWorkerExtras,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
+  WorkerSettingsExtras,
+  WorkerSettingsWrite,
   WorkflowTriggerType,
   type TimelineEvent,
 } from './impl/schemas';
@@ -143,12 +145,26 @@ export {
   WATCHES_SEED,
   WORKERS_SEED,
   createMockInvestigation,
-  createMockProposal,
   getMockInvestigationById,
   getMockInvestigationsByWatchId,
-  getMockProposalById,
-  getMockProposalsByInvestigationId,
+  getMockProposalsByConversationId,
 } from './impl/samples';
+export {
+  ANALYSIS_WINDOW_DAYS_DEFAULT,
+  ANALYSIS_WINDOW_DAYS_MAX,
+  ANALYSIS_WINDOW_DAYS_MIN,
+  RULE_TUNING_DEFAULT_EXTRAS,
+  WORKER_SETTINGS_DECLARATIONS,
+  applyWorkerSettingsWrite,
+  createDefaultWorkerSettings,
+  diffWorkerSettings,
+  formatWorkerSettingsIssues,
+  getAllowedAutonomyLevels,
+  getCompleteWorkerSettingsSchema,
+  getWorkerSettingsDeclaration,
+  touchesWorkerSettings,
+} from './impl/worker_settings';
+export type { WorkerSettingsDeclaration } from './impl/worker_settings';
 export type {
   SystemSecurityWatchCatalogEntry,
   SystemSecurityWorkerCatalogEntry,
