@@ -29,7 +29,8 @@ import { createQueryService } from '../../services/query_service/query_service.m
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-import { type EsqlConfig, type PluginConfig, NON_STREAMING_MAX_ROWS } from '../../../config';
+import type { EsqlConfig, PluginConfig } from '../../../config';
+import { NON_STREAMING_MAX_ROWS } from '../../services/query_service/formats';
 
 const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
 

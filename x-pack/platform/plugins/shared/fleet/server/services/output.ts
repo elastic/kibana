@@ -152,22 +152,25 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     } catch (e) {
       logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
     }
+    // canonical id placed last so attributes.id cannot shadow it
     return {
-      id: outputId ?? so.id,
       ...attributes,
       ...(parsedSsl ? { ssl: parsedSsl } : {}),
       ...(proxyId ? { proxy_id: proxyId } : {}),
+      id: outputId ?? so.id,
     };
   }
 
   if (isOtlpSOOutput(so.attributes)) {
     const { output_id: outputId, ...attributes } = so.attributes;
-    return { id: outputId ?? so.id, ...attributes };
+    // canonical id placed last so attributes.id cannot shadow it
+    return { ...attributes, id: outputId ?? so.id };
   }
 
   const { output_id: outputId, ...attributes } =
     so.attributes as unknown as OutputSoBaseAttributes & Record<string, unknown>;
-  return { id: outputId ?? so.id, ...attributes } as unknown as Output;
+  // canonical id placed last so attributes.id cannot shadow it
+  return { ...attributes, id: outputId ?? so.id } as unknown as Output;
 }
 
 async function getAgentPoliciesPerOutput(
@@ -1139,9 +1142,10 @@ class OutputService {
     const isPreconfigured = (fromPreconfiguration || originalOutput.is_preconfigured) ?? false;
     this._runOutputValidators(typedFullUpdateData, isPreconfigured);
 
-    // type is always defined here after merging; ssl/secrets omitted at runtime but allowed on the type.
+    // type is always defined here after merging; ssl/secrets/id omitted at runtime but allowed on the type.
+    // id is stripped to prevent poisoning the saved object's identity field.
     const updateData = {
-      ...omit(data, ['ssl', 'secrets']),
+      ...omit(data, ['ssl', 'secrets', 'id']),
       type: mergedType,
     } as Nullable<Partial<OutputSOAttributes>> & {
       type: ValueOf<OutputType>;
