@@ -30,6 +30,15 @@ const RANSOMWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
   PolicyOperatingSystem.mac,
 ];
 
+/**
+ * Reads a ransomware mode from an OS branch that may predate the field. Only reads are
+ * normalised — nothing is written back, because `supported` participates in the policy's
+ * licence validation and cannot be invented here.
+ */
+const readRansomwareMode = (osPolicy: {
+  ransomware?: { mode?: ProtectionModes };
+}): ProtectionModes => osPolicy.ransomware?.mode ?? ProtectionModes.off;
+
 export const LOCKED_CARD_RANSOMWARE_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.ransomware',
   {
@@ -49,10 +58,11 @@ export const PerOsRansomwareProtectionCard = memo(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const getTestId = useTestIdGenerator(dataTestSubj);
-    // `mac.ransomware.mode` can reach the form missing. Read it as `off` so the row renders a
-    // real option rather than an empty select.
+    // A policy stored before macOS ransomware existed has no `ransomware` branch at all, and one
+    // written by the 9.4 advanced field can have the branch without a `mode`. Read both as `off`
+    // so the row renders a real option instead of throwing.
     const selected = RANSOMWARE_OS_VALUES.some(
-      (os) => (policy[os].ransomware.mode ?? ProtectionModes.off) !== ProtectionModes.off
+      (os) => readRansomwareMode(policy[os]) !== ProtectionModes.off
     );
     const protectionLabel = i18n.translate(
       'xpack.securitySolution.endpoint.policy.protections.ransomware',
@@ -132,7 +142,7 @@ const PerOsRansomwareProtectionRow = <OS extends RansomwareProtectionOSes>({
 }: PerOsRansomwareProtectionRowProps<OS>) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
   const osPolicy = accessor.read();
-  const ransomwareMode = osPolicy.ransomware.mode ?? ProtectionModes.off;
+  const ransomwareMode = readRansomwareMode(osPolicy);
   const subfeaturesVisible = ransomwareMode !== ProtectionModes.off;
   const handleModeChange = useProtectionModeChangeHandler(accessor, 'ransomware', onChange);
 

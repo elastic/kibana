@@ -197,6 +197,21 @@ describe('PerOsEventCollectionCard', () => {
     ).toHaveLength(3);
   });
 
+  // A stored `dns` selection must not be counted while the flag hides its checkbox, or the row
+  // reports more selected events than it renders.
+  it('excludes a hidden Linux DNS selection from the count when linuxDnsEvents is disabled', () => {
+    mockedContext.setExperimentalFlag({ linuxDnsEvents: false });
+    policy.linux.events.dns = true;
+    policy.linux.events.file = true;
+    policy.linux.events.network = true;
+    policy.linux.events.process = true;
+    render();
+
+    expect(renderResult.getByTestId(testSubj.linux.selectedCount)).toHaveTextContent(
+      '3 / 3 event collections enabled'
+    );
+  });
+
   it('disables tty_io while session_data is false', () => {
     policy.linux.events.process = true;
     policy.linux.events.session_data = false;

@@ -23,6 +23,7 @@ import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { useGetProtectionsUnavailableComponent as _useGetProtectionsUnavailableComponent } from '../hooks/use_get_protections_unavailable_component';
 import { PerOsRansomwareProtectionCard } from './per_os_ransomware_protection_card';
+import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
 jest.mock('../../../../../../common/hooks/use_license');
 jest.mock('../hooks/use_get_protections_unavailable_component');
@@ -111,5 +112,36 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     expect(renderResult.getByTestId(testSubjects.perOsRansomware.mac.modeSelect)).toHaveTextContent(
       /^Disable$/
     );
+  });
+
+  // A policy stored before macOS ransomware existed has no `ransomware` object at all, which the
+  // server-side feature-usage path already tolerates. Rendering must survive it too, and setting a
+  // mode has to create the branch rather than throw.
+  it('renders and writes a mode when the whole macOS ransomware branch is absent', async () => {
+    const onChange = jest.fn();
+    // @ts-expect-error reproducing a policy stored before the branch existed
+    delete policy.mac.ransomware;
+
+    renderResult = mockedContext.render(
+      <PerOsRansomwareProtectionCard
+        policy={policy}
+        onChange={onChange}
+        mode="edit"
+        data-test-subj={testSubjects.perOsRansomware.card}
+      />
+    );
+
+    expect(renderResult.getByTestId(testSubjects.perOsRansomware.mac.modeSelect)).toHaveTextContent(
+      /^Disable$/
+    );
+
+    await selectOsControlOption(
+      renderResult,
+      testSubjects.perOsRansomware.mac.modeSelect,
+      /^Detect$/
+    );
+
+    const { updatedPolicy } = onChange.mock.calls.at(-1)![0];
+    expect(updatedPolicy.mac.ransomware.mode).toBe(ProtectionModes.detect);
   });
 });

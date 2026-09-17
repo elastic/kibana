@@ -177,10 +177,11 @@ const PerOsEventCollectionRow = <OS extends OperatingSystem>({
   const inputIdPrefix = useId();
   const isEditMode = mode === 'edit';
   const totalOptions = options.length;
-  // Supplemental fields (Linux session_data / tty_io) never contribute to selected or total.
+  // Count the rendered options only: a field hidden by a feature flag must not appear in the
+  // numerator while the denominator excludes it. Supplemental fields count toward neither.
   const selectedCount = useMemo(
-    () => countSelectedEvents(selection, supplementalOptions),
-    [selection, supplementalOptions]
+    () => countSelectedEvents(selection, options),
+    [selection, options]
   );
 
   return (
@@ -322,15 +323,8 @@ const hasSelectedEvent = <OS extends OperatingSystem>(
 
 const countSelectedEvents = <OS extends OperatingSystem>(
   selection: EventFormSelection<OS>,
-  supplementalOptions?: ReadonlyArray<PerOsSupplementalEventFormOption<OS>>
-): number => {
-  const supplementalSelectionFields: string[] = supplementalOptions
-    ? supplementalOptions.map((value) => value.protectionField as string)
-    : [];
-  return Object.entries(selection).filter(([key, value]) =>
-    !supplementalSelectionFields.includes(key) ? value : false
-  ).length;
-};
+  options: ReadonlyArray<EventFormOption<OS>>
+): number => options.filter(({ protectionField }) => Boolean(selection[protectionField])).length;
 
 const isLinuxSupplementalOptionDisabled = (
   field: ProtectionField<OperatingSystem.LINUX>,

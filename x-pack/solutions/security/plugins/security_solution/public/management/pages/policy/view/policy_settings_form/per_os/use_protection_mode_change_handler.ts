@@ -47,11 +47,16 @@ export const useProtectionModeChangeHandler = <
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         const protectionPolicy = currentOsPolicy as PolicyConfig[OS] &
           ProtectionPolicyBranch<Protection>;
-        protectionPolicy[protection].mode = nextMode;
+        // Spread rather than assign into the branch: a policy stored before the protection
+        // existed has no object there, and any sibling field it does carry must survive.
+        protectionPolicy[protection] = { ...protectionPolicy[protection], mode: nextMode };
         // An active mode always writes popup.enabled from the new mode, true only for prevent.
         // off is the only mode that leaves popup.enabled untouched.
         if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
-          protectionPolicy.popup[protection].enabled = nextMode === ProtectionModes.prevent;
+          protectionPolicy.popup[protection] = {
+            ...protectionPolicy.popup[protection],
+            enabled: nextMode === ProtectionModes.prevent,
+          };
         }
       });
       onChange({ isValid: true, updatedPolicy });
