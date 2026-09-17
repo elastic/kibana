@@ -8,29 +8,17 @@
  */
 
 import type { Locator } from '@playwright/test';
+// eslint-disable-next-line @kbn/imports/no_direct_monaco_import -- We intentionally use @kbn/monaco here
+import type { monaco } from '@kbn/monaco';
 import type { ScoutPage } from '..';
 import { expect } from '../../../ui';
 
-/**
- * Minimal description of a Monaco text model used inside `page.evaluate` callbacks.
- * Interfaces are TypeScript-only and are erased at compile time, so these are safe
- * to reference from stringified evaluate functions.
- */
-interface MonacoModel {
-  getValue(): string;
-  setValue(value: string): void;
-  getPositionAt(offset: number): unknown;
-  uri: { toString(): string };
-}
-
-/** Minimal description of a Monaco editor instance used inside `page.evaluate` callbacks. */
-interface MonacoEditorInstance {
-  getModel(): { uri: { toString(): string } } | null;
-  setPosition(pos: unknown): void;
-  focus(): void;
-  trigger(source: string, handlerId: string, payload: unknown): void;
-  setScrollTop(scrollTop: number): void;
-  getScrollTop(): number;
+declare global {
+  // augment window with monaco types so we are as close to current API monaco exposes
+  // as much as possible
+  interface Window {
+    MonacoEnvironment?: monaco.Environment;
+  }
 }
 
 /**
@@ -40,7 +28,22 @@ interface MonacoEditorInstance {
  * (`src/platform/test/functional/services/monaco_editor.ts`).
  */
 export class KibanaCodeEditorWrapper {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly editorInputLocator: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    /**
+     * Formula Monaco's real keyboard input surface — Lens has no data-test-subj on the editor
+     * input. Monaco 0.54+ defaults to Chrome's native EditContext API (`.native-edit-context`,
+     * a focusable div) for keyboard input whenever it's available, demoting the plain
+     * `<textarea>` to a `readonly`, `aria-hidden` IME/composition fallback that never receives
+     * typed characters. This selector matches whichever node is the real input surface in either
+     * mode: the native-edit-context div (Chrome), or the legacy editable textarea (older engines).
+     *
+     */
+    this.editorInputLocator = this.page
+      .locator('.monaco-editor .native-edit-context')
+      .or(this.page.locator('.monaco-editor textarea:not([readonly])'));
+  }
 
   /**
    * Waits until the editor inside the given container is ready to accept interactions.
@@ -51,7 +54,7 @@ export class KibanaCodeEditorWrapper {
       .poll(
         async () =>
           this.page.evaluate((id) => {
-            const monacoEnv = (window as Window & { MonacoEnvironment?: any }).MonacoEnvironment;
+            const monacoEnv = window.MonacoEnvironment;
             const container = document.querySelector(`[data-test-subj="${id}"]`);
             const editor = monacoEnv?.monaco?.editor
               ?.getEditors?.()
@@ -82,15 +85,15 @@ export class KibanaCodeEditorWrapper {
 
     await expect(async () => {
       result = await this.page.evaluate((index) => {
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
 
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
 
-        const values: string[] = (monacoEnv.monaco.editor.getModels() as MonacoModel[]).map(
-          (model) => model.getValue()
-        );
+        const values: string[] = monacoEnv.monaco.editor
+          .getModels()
+          .map((model) => model.getValue());
 
         if (!values.length) {
           return '';
@@ -109,80 +112,94 @@ export class KibanaCodeEditorWrapper {
   }
 
   /**
-   * Resolves the `data-uri` Monaco sets on the editor root, scoped to the given
-   * container `data-test-subj`. Use this (instead of a model index) when several
-   * Monaco editors are mounted at once and the index would be ambiguous or unstable
-   * across mode/tab transitions.
-   */
-  private async getEditorUriByTestSubj(dataTestSubjId: string): Promise<string> {
-    const uri = await this.page
-      .getByTestId(dataTestSubjId)
-      .locator('.monaco-editor[data-uri]')
-      .getAttribute('data-uri');
-    if (!uri) {
-      throw new Error(`Editor data-uri not found for container "${dataTestSubjId}"`);
-    }
-    return uri;
-  }
-
-  /**
-   * Returns the current value of the Monaco editor model inside the given
-   * container `data-test-subj`, resolved by the model's `data-uri` rather than
-   * a global index.
+   * Returns the current value of the *live* Monaco editor instance mounted inside the
+   * given container `data-test-subj`, resolved fresh on every call. Use this (instead of
+   * a model index) when several Monaco editors are mounted at once and the index would be
+   * ambiguous or unstable across mode/tab transitions.
+   *
+   * This deliberately resolves the model via the editor *instance* (`getEditors().find(...)`
+   * by DOM containment, then `editor.getModel()`) rather than caching the model's `data-uri`.
+   * Monaco only stamps `data-uri` onto the editor's DOM node once, during initial view
+   * creation (see `codeEditorWidget.js`'s `_createView`) — it is never refreshed if the same
+   * editor instance later has its model swapped via `editor.setModel(...)` instead of being
+   * unmounted and remounted (e.g. Lens's formula editor reuses one editor instance across
+   * "quick function" <-> "formula" mode switches). A `data-uri`-based lookup can then keep
+   * silently resolving to a stale, no-longer-attached model — asking the live instance for
+   * its current model side-steps that entirely.
    */
   async getCodeEditorValueByTestSubj(dataTestSubjId: string): Promise<string> {
     let result = '';
 
     await expect(async () => {
-      const uri = await this.getEditorUriByTestSubj(dataTestSubjId);
-      result = await this.page.evaluate((modelUri) => {
-        const monacoEnv = (window as any).MonacoEnvironment;
+      result = await this.page.evaluate((id) => {
+        const monacoEnv = window.MonacoEnvironment;
 
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
 
-        const model = (monacoEnv.monaco.editor.getModel(modelUri) as MonacoModel | null) ?? null;
+        const container = document.querySelector(`[data-test-subj="${id}"]`);
+        if (!container) {
+          throw new Error(`No container found for data-test-subj "${id}"`);
+        }
+
+        const editor = monacoEnv.monaco.editor
+          .getEditors?.()
+          ?.find((instance: any) => container.contains(instance.getDomNode()));
+
+        if (!editor) {
+          throw new Error(`No Monaco editor instance found inside container "${id}"`);
+        }
+
+        const model = editor.getModel();
         if (!model) {
-          throw new Error(`No Monaco editor model found for uri "${modelUri}"`);
+          throw new Error(`Editor inside container "${id}" has no model attached`);
         }
 
         return model.getValue();
-      }, uri);
+      }, dataTestSubjId);
     }).toPass({ timeout: 30_000 });
 
     return result;
   }
 
   /**
-   * Sets the value of the Monaco editor model inside the given container
-   * `data-test-subj`, resolved by the model's `data-uri` rather than a global
-   * index, and verifies that the value was applied.
+   * Sets the value of the live Monaco editor instance mounted inside the given container
+   * `data-test-subj` (resolved the same way as `getCodeEditorValueByTestSubj` — see there
+   * for why this doesn't use `data-uri`), and verifies that the value was applied.
    */
   async setCodeEditorValueByTestSubj(dataTestSubjId: string, value: string): Promise<string> {
-    const uri = await this.getEditorUriByTestSubj(dataTestSubjId);
     await this.page.evaluate(
-      ({ modelUri, editorValue }) => {
-        const monacoEnv = (window as any).MonacoEnvironment;
+      ({ id, editorValue }) => {
+        const monacoEnv = window.MonacoEnvironment;
 
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
 
-        const model = (monacoEnv.monaco.editor.getModel(modelUri) as MonacoModel | null) ?? null;
-        if (!model) {
-          throw new Error(`No Monaco editor model found for uri "${modelUri}"`);
-        }
+        const container = document.querySelector(`[data-test-subj="${id}"]`);
 
-        model.setValue(editorValue);
+        if (!container) {
+          throw new Error(`No container found for data-test-subj "${id}"`);
+        }
 
         const editor = monacoEnv.monaco.editor
           .getEditors?.()
-          ?.find((instance: any) => instance.getModel()?.uri?.toString() === modelUri);
+          ?.find((instance: any) => container.contains(instance.getDomNode()));
 
-        editor?.focus();
+        if (!editor) {
+          throw new Error(`No Monaco editor instance found inside container "${id}"`);
+        }
+
+        const model = editor.getModel();
+        if (!model) {
+          throw new Error(`Editor inside container "${id}" has no model attached`);
+        }
+
+        model.setValue(editorValue);
+        editor.focus();
       },
-      { modelUri: uri, editorValue: value }
+      { id: dataTestSubjId, editorValue: value }
     );
 
     return await this.getCodeEditorValueByTestSubj(dataTestSubjId);
@@ -199,13 +216,13 @@ export class KibanaCodeEditorWrapper {
   async setCodeEditorValue(value: string, nthIndex?: number): Promise<string> {
     await this.page.evaluate(
       ({ editorIndex, codeEditorValue }) => {
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
 
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
 
-        const textModels = monacoEnv.monaco.editor.getModels() as MonacoModel[];
+        const textModels = monacoEnv.monaco.editor.getModels();
 
         if (!textModels.length) {
           throw new Error('No Monaco editor models found');
@@ -270,18 +287,18 @@ export class KibanaCodeEditorWrapper {
   async triggerSuggest(text?: string, nthIndex: number = 0): Promise<void> {
     await this.page.evaluate(
       ({ searchText, modelIndex }) => {
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
 
-        const models = monacoEnv.monaco.editor.getModels() as MonacoModel[];
+        const models = monacoEnv.monaco.editor.getModels();
         if (!models.length) {
           throw new Error('No Monaco editor models found');
         }
 
         const model = models[modelIndex] ?? models[0];
-        const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+        const editors = monacoEnv.monaco.editor.getEditors();
         const editorInstance =
           editors.find((e) => e.getModel()?.uri?.toString() === model.uri.toString()) ?? editors[0];
 
@@ -311,21 +328,41 @@ export class KibanaCodeEditorWrapper {
    * change events. Use this when a test depends on incremental change listeners (e.g. live
    * autocomplete filtering as you type). For bulk content, prefer setCodeEditorValueByTestSubj.
    */
-  async simulateTyping(testSubjId: string, text: string): Promise<void> {
+  async simulateTyping(
+    testSubjId: string,
+    text: string,
+    options?: Partial<{
+      delay: number;
+    }>
+  ): Promise<void> {
     await this.waitCodeEditorReady(testSubjId);
     await this.page.evaluate(
-      ({ id, textToType }: { id: string; textToType: string }) => {
+      async ({
+        id,
+        textToType,
+        typingSimulationOptions,
+      }: {
+        id: string;
+        textToType: string;
+        typingSimulationOptions?: Partial<{
+          delay: number;
+        }>;
+      }) => {
         const container = document.querySelector(`[data-test-subj="${id}"]`);
-        const editor = (window as any).MonacoEnvironment?.monaco?.editor
+        const editor = window.MonacoEnvironment?.monaco?.editor
           ?.getEditors()
           ?.find((e: any) => container?.contains(e.getDomNode()));
         if (!editor) throw new Error(`Monaco editor not found for test subject: "${id}"`);
         editor.focus();
+        const delay = typingSimulationOptions?.delay ?? 0;
         for (let i = 0; i < textToType.length; i++) {
+          if (delay > 0) {
+            await new Promise((resolve) => setTimeout(resolve, delay));
+          }
           editor.trigger('keyboard', 'type', { text: textToType[i] });
         }
       },
-      { id: testSubjId, textToType: text }
+      { id: testSubjId, textToType: text, typingSimulationOptions: options }
     );
   }
 
@@ -340,11 +377,11 @@ export class KibanaCodeEditorWrapper {
    */
   async toggleSuggestDetails(editorIndex: number = 0): Promise<void> {
     await this.page.evaluate((index) => {
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
-      const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+      const editors = monacoEnv.monaco.editor.getEditors();
       const editor = editors[index] ?? editors[0];
       if (!editor) {
         throw new Error('No Monaco editor instance found');
@@ -356,11 +393,11 @@ export class KibanaCodeEditorWrapper {
   async setScrollTop(scrollTop: number, editorIndex: number = 0): Promise<void> {
     await this.page.evaluate(
       ({ index, scrollAmount }) => {
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
-        const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+        const editors = monacoEnv.monaco.editor.getEditors();
         const editor = editors[index] ?? editors[0];
         if (!editor) {
           throw new Error('No Monaco editor instance found');
@@ -373,11 +410,11 @@ export class KibanaCodeEditorWrapper {
 
   async getScrollTop(editorIndex: number = 0): Promise<number> {
     return this.page.evaluate((index) => {
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
-      const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+      const editors = monacoEnv.monaco.editor.getEditors();
       return editors[index]?.getScrollTop() ?? editors[0]?.getScrollTop() ?? 0;
     }, editorIndex);
   }
