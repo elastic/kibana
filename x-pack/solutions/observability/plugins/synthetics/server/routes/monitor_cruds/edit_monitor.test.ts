@@ -11,6 +11,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { ConfigKey } from '../../../common/runtime_types';
 import type {
   EncryptedSyntheticsMonitorAttributes,
+  MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
@@ -193,7 +194,7 @@ describe('editSyntheticsMonitorRoute space authorization', () => {
 
     normalizeSpy = jest
       .spyOn(AddEditMonitorAPI.prototype, 'normalizeMonitor')
-      .mockImplementation(async (cfg) => cfg as SyntheticsMonitor);
+      .mockImplementation(async (requestPayload) => requestPayload as unknown as MonitorFields);
   });
 
   afterEach(() => {
