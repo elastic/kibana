@@ -211,7 +211,7 @@
     "src/platform/packages/private/analytics/utils/analytics_collection_utils": "'analytics_collection_utils' should be kebab-case",
     "src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts": "'openapi-types.d.ts' should be snake_case"
   },
-  "@elastic/kibana-esql": {
+  "@elastic/kibana-discover": {
     "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/Readme.md": "'Readme.md' should be snake_case"
   },
   "@elastic/kibana-management": {
@@ -239,7 +239,7 @@
     "src/setup_node_env": "'setup_node_env' should be kebab-case",
     "x-pack/dev-tools": "'dev-tools' should be snake_case"
   },
-  "@elastic/kibana-presentation": {
+  "@elastic/kibana-dashboards": {
     "src/platform/packages/shared/presentation/presentation_containers": "'presentation_containers' should be kebab-case",
     "src/platform/packages/shared/presentation/presentation_publishing": "'presentation_publishing' should be kebab-case",
     "src/platform/packages/shared/presentation/presentation_publishing_schemas": "'presentation_publishing_schemas' should be kebab-case",
@@ -275,7 +275,11 @@
     "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/1024-1279.pbf": "'1024-1279.pbf' should be snake_case",
     "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/256-511.pbf": "'256-511.pbf' should be snake_case",
     "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/768-1023.pbf": "'768-1023.pbf' should be snake_case",
-    "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/8192-8447.pbf": "'8192-8447.pbf' should be snake_case"
+    "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/8192-8447.pbf": "'8192-8447.pbf' should be snake_case",
+    "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/schema/serializedValue.ts": "'serializedValue.ts' should be snake_case",
+    "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/basicXY.mock.ts": "'basicXY.mock.ts' should be snake_case",
+    "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/esqlXY.mock.ts": "'esqlXY.mock.ts' should be snake_case",
+    "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/referenceLines.mock.ts": "'referenceLines.mock.ts' should be snake_case"
   },
   "@elastic/kibana-reporting-services": {
     "x-pack/platform/plugins/shared/screenshotting/chromium/chrome-headless-shell-mac-arm64": "'chrome-headless-shell-mac-arm64' should be snake_case",
@@ -301,12 +305,6 @@
     "x-pack/platform/packages/shared/security/plugin_types_common": "'plugin_types_common' should be kebab-case",
     "x-pack/platform/packages/shared/security/plugin_types_public": "'plugin_types_public' should be kebab-case",
     "x-pack/platform/packages/shared/security/plugin_types_server": "'plugin_types_server' should be kebab-case"
-  },
-  "@elastic/kibana-visualizations": {
-    "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/schema/serializedValue.ts": "'serializedValue.ts' should be snake_case",
-    "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/basicXY.mock.ts": "'basicXY.mock.ts' should be snake_case",
-    "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/esqlXY.mock.ts": "'esqlXY.mock.ts' should be snake_case",
-    "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/referenceLines.mock.ts": "'referenceLines.mock.ts' should be snake_case"
   },
   "@elastic/search-ml-ux": {
     "x-pack/platform/packages/private/ml/agg_utils": "'agg_utils' should be kebab-case",

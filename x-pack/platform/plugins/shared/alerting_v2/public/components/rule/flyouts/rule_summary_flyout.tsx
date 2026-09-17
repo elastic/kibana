@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
-import { paths } from '../../../constants';
+import { useAlertingLocators } from '../../../application/locator_context';
 import { RuleActionsMenu } from '../../../pages/rules_list_page/rule_actions_menu';
 import { TakeActionButton } from './take_action_button';
 import { RuleProvider } from '../../rule_details/rule_context';
@@ -71,13 +71,13 @@ export const RuleSummaryFlyout = ({
   ownFocus = true,
   hasAnimation = true,
 }: RuleSummaryFlyoutProps) => {
-  const { basePath } = useService(CoreStart('http'));
+  const { rulesLocators } = useAlertingLocators();
   const chrome = useService(CoreStart('chrome'));
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
     | AgentBuilderPluginStart
     | undefined;
   useRuleAutoAttach(rule, { chrome, agentBuilder });
-  const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));
+  const detailsHref = rulesLocators.useUrl({ ruleId: rule.id }, undefined, [rule.id]);
 
   return (
     <RuleProvider rule={rule}>

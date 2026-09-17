@@ -45,6 +45,7 @@ const sidePanelItemId = (id: string) => `kbnChromeNav-sidePanelItem-${id}`;
 const moreMenuId = 'kbnChromeNav-moreMenuTrigger';
 const morePopoverId = 'side-nav-popover-More';
 const popoverId = (label: string) => `side-nav-popover-${label}`;
+const popoverItemId = (id: string) => `kbnChromeNav-popoverItem-${id}`;
 const footerContainerId = 'kbnChromeNav-footer';
 const footerItemId = (id: string) => `kbnChromeNav-footerItem-${id}`;
 const nestedMenuItemId = (id: string) => `kbnChromeNav-nestedMenuItem-${id}`;
@@ -857,6 +858,27 @@ describe('Both modes', () => {
         expect(badge).toBeInTheDocument();
         expect(badge).toHaveTextContent('New');
       });
+
+      /**
+       * GIVEN a footer item is new
+       * WHEN I visit that item and navigate away
+       * THEN hovering it shows the label without a New badge
+       */
+      it('should hide new badge from tooltip after visiting the item and navigating away', async () => {
+        render(<TestComponent items={observabilityMock.navItems} />);
+
+        const whatsNewLink = screen.getByTestId(footerItemId('whats_new'));
+
+        await user.click(whatsNewLink);
+        await user.click(screen.getByTestId(primaryItemId('discover')));
+        await user.hover(whatsNewLink);
+        flushPopoverTimers();
+
+        const tooltip = await screen.findByRole('tooltip');
+
+        expect(tooltip).toHaveTextContent("What's new");
+        expect(tooltip.querySelector('.euiBadge')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -1164,6 +1186,105 @@ describe('Both modes', () => {
         const instructions = within(popover).getByText(/secondary menu dialog/i);
 
         expect(instructions).toHaveTextContent(longTitle);
+      });
+    });
+
+    describe('Hover-only lists', () => {
+      /**
+       * GIVEN a primary item has hover `popoverSections` and an href
+       * WHEN I hover it, click it, and stay hovered
+       * THEN the popover must not reopen on the click's focus
+       * AND hovering again after leaving still opens it
+       */
+      it('should not reopen the hover popover after clicking the parent while still hovering', async () => {
+        const recentsNav = {
+          primaryItems: [
+            {
+              id: 'dashboards',
+              label: 'Dashboards',
+              iconType: 'dashboardApp',
+              href: '/dashboards',
+              popoverSections: [
+                {
+                  id: 'recentlyViewed',
+                  label: 'Recently viewed',
+                  items: [{ id: 'dash-1', label: 'One', href: '/dashboards/1' }],
+                },
+              ],
+            },
+          ],
+          footerItems: [],
+        };
+
+        render(<TestComponent items={recentsNav} />);
+
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
+
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
+
+        expect(await screen.findByTestId(popoverId('Dashboards'))).toBeInTheDocument();
+
+        await user.click(dashboardsLink);
+        flushPopoverTimers();
+
+        expect(screen.queryByTestId(popoverId('Dashboards'))).not.toBeInTheDocument();
+
+        await user.unhover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
+
+        expect(await screen.findByTestId(popoverId('Dashboards'))).toBeInTheDocument();
+      });
+    });
+
+    describe('Hover-only lists in More', () => {
+      /**
+       * GIVEN an overflow item has hover `popoverSections` but no tree `sections`
+       * WHEN I open More
+       * THEN it stays a normal link — recents do not become a nested submenu
+       */
+      it('should keep hover-only lists as a flat link in More', async () => {
+        const overflowNav = {
+          primaryItems: [
+            {
+              id: 'home',
+              label: 'Home',
+              iconType: 'home',
+              href: '/home',
+            },
+          ],
+          footerItems: [],
+          overflowItems: [
+            {
+              id: 'dashboards',
+              label: 'Dashboards',
+              iconType: 'dashboardApp',
+              href: '/dashboards',
+              popoverSections: [
+                {
+                  id: 'recentlyViewed',
+                  label: 'Recently viewed',
+                  items: [{ id: 'dash-1', label: 'One', href: '/dashboards/1' }],
+                },
+              ],
+            },
+          ],
+        };
+
+        render(<TestComponent items={overflowNav} />);
+
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.click(moreButton);
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(morePopoverId);
+        const dashboardsLink = within(popover).getByTestId(secondaryItemId('dashboards'));
+
+        expect(dashboardsLink).toHaveAttribute('href', '/dashboards');
+        expect(within(popover).queryByText('Recently viewed')).not.toBeInTheDocument();
+        expect(within(popover).queryByText('One')).not.toBeInTheDocument();
       });
     });
   });
@@ -1479,6 +1600,7 @@ describe('Both modes', () => {
         const machineLearningButton = within(popover).getByTestId(secondaryItemId('ml-overview'));
 
         expect(machineLearningButton).toHaveFocus();
+        expect(screen.getByRole('main')).not.toHaveFocus();
 
         // Open the "Machine learning" nested panel
         await user.keyboard('{Enter}');
@@ -1619,6 +1741,152 @@ describe('Both modes', () => {
       });
     });
   });
+
+  describe('Focus after navigation', () => {
+    /**
+     * GIVEN a primary menu item without a submenu
+     * WHEN I click it
+     * THEN focus moves to main content
+     */
+    it('should move focus to main after clicking a primary item', async () => {
+      render(<TestComponent items={basicMock.navItems} />);
+
+      await user.click(screen.getByTestId(primaryItemId('discover')));
+
+      expect(screen.getByRole('main')).toHaveFocus();
+    });
+
+    /**
+     * GIVEN a primary menu item with a submenu in expanded mode
+     * WHEN I click it
+     * THEN the side panel opens
+     * AND focus moves to main content
+     */
+    it('should move focus to main after clicking a primary item with a submenu', async () => {
+      render(<TestComponent items={basicMock.navItems} />);
+
+      await user.click(screen.getByTestId(primaryItemId('apps_overview')));
+
+      expect(screen.getByTestId(sidePanelId)).toBeInTheDocument();
+      expect(screen.getByRole('main')).toHaveFocus();
+    });
+
+    /**
+     * GIVEN a footer item without a submenu
+     * WHEN I click it
+     * THEN focus moves to main content
+     */
+    it('should move focus to main after clicking a footer item', async () => {
+      render(<TestComponent items={basicMock.navItems} />);
+
+      await user.click(screen.getByTestId(footerItemId('getting_started')));
+
+      expect(screen.getByRole('main')).toHaveFocus();
+    });
+
+    /**
+     * GIVEN a side panel is open
+     * WHEN I click a side panel item
+     * THEN focus moves to main content
+     */
+    it('should move focus to main after clicking a side panel item', async () => {
+      render(
+        <TestComponent items={basicMock.navItems} initialActiveItemId={tlsCertificatesItemId} />
+      );
+
+      await user.click(
+        within(screen.getByTestId(sidePanelId)).getByTestId(sidePanelItemId(tlsCertificatesItemId))
+      );
+
+      expect(screen.getByRole('main')).toHaveFocus();
+    });
+
+    /**
+     * GIVEN a hover popover is open
+     * WHEN I click a popover item
+     * THEN focus moves to main content
+     */
+    it('should move focus to main after clicking a popover item', async () => {
+      render(<TestComponent items={basicMock.navItems} />);
+
+      await user.hover(screen.getByTestId(primaryItemId('apps_overview')));
+      flushPopoverTimers();
+
+      const popover = await screen.findByTestId(popoverId('Apps'));
+
+      await user.click(within(popover).getByTestId(popoverItemId(tlsCertificatesItemId)));
+
+      expect(screen.getByRole('main')).toHaveFocus();
+    });
+
+    /**
+     * GIVEN the More menu is open
+     * WHEN I click a leaf item
+     * THEN focus moves to main content
+     */
+    it('should move focus to main after clicking a More menu leaf item', async () => {
+      const moreLeafNav = {
+        primaryItems: [
+          {
+            id: 'dashboards',
+            label: 'Dashboards',
+            iconType: 'dashboardApp',
+            href: '/dashboards',
+          },
+        ],
+        overflowItems: [
+          {
+            id: 'maps',
+            label: 'Maps',
+            iconType: 'apps',
+            href: '/maps',
+          },
+        ],
+        footerItems: [],
+      };
+
+      render(<TestComponent items={moreLeafNav} />);
+
+      await user.click(await screen.findByTestId(moreMenuId));
+      flushPopoverTimers();
+
+      const popover = screen.getByTestId(morePopoverId);
+
+      await user.click(within(popover).getByTestId(secondaryItemId('maps')));
+
+      expect(screen.getByRole('main')).toHaveFocus();
+    });
+
+    /**
+     * GIVEN an external secondary item that is already active, so the click does not change nav state
+     * AND it is in a collapsed-mode popover
+     * WHEN I click it
+     * THEN focus stays on the item
+     * AND the popover stays open
+     */
+    it('should keep focus on an external popover item and leave the popover open', async () => {
+      render(
+        <TestComponent
+          isCollapsed
+          items={observabilityMock.navItems}
+          initialActiveItemId="traces"
+        />
+      );
+
+      await user.hover(screen.getByTestId(primaryItemId(appsItemId)));
+      flushPopoverTimers();
+
+      const popover = await screen.findByTestId(popoverId('Apps'));
+      const tracesLink = within(popover).getByTestId(popoverItemId('traces'));
+
+      await user.click(tracesLink);
+
+      expect(tracesLink).toHaveFocus();
+      expect(popover).toBeInTheDocument();
+      expect(screen.getByRole('main')).not.toHaveFocus();
+    });
+  });
+
   describe('New items indicator', () => {
     /**
      * GIVEN a primary menu item is new

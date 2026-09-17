@@ -506,6 +506,8 @@ describe('POST /conversations', () => {
           getScopedClient: jest.fn().mockResolvedValue({
             get: mockGet,
             list: jest.fn(),
+            search: jest.fn(),
+            bulkGet: jest.fn(),
             exists: mockExists,
             create: mockCreate,
           }),
@@ -545,6 +547,8 @@ describe('POST /conversations', () => {
           getScopedClient: jest.fn().mockResolvedValue({
             get: mockGet,
             list: jest.fn(),
+            search: jest.fn(),
+            bulkGet: jest.fn(),
             exists: mockExists,
             create: mockCreate,
           }),
@@ -587,6 +591,8 @@ describe('POST /conversations', () => {
           getScopedClient: jest.fn().mockResolvedValue({
             get: jest.fn(),
             list: jest.fn(),
+            search: jest.fn(),
+            bulkGet: jest.fn(),
             exists: jest.fn(),
             create: jest.fn(),
           }),
@@ -623,6 +629,8 @@ describe('POST /conversations', () => {
           getScopedClient: jest.fn().mockResolvedValue({
             get: jest.fn(),
             list: jest.fn(),
+            search: jest.fn(),
+            bulkGet: jest.fn(),
             exists: mockExists,
             create: jest.fn(),
           }),
@@ -660,6 +668,8 @@ describe('POST /conversations', () => {
           getScopedClient: jest.fn().mockResolvedValue({
             get: jest.fn(),
             list: jest.fn(),
+            search: jest.fn(),
+            bulkGet: jest.fn(),
             exists: mockExists,
             create: mockCreate,
           }),

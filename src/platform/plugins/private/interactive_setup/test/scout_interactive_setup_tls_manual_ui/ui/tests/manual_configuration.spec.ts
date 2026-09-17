@@ -15,6 +15,7 @@ import {
   SETUP_COMPLETION_TIMEOUT_MS,
   SETUP_SPEC_TIMEOUT_MS,
 } from '../../../helpers/constants';
+import { isFipsEnabled } from '../../../helpers/fips';
 import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup_state';
 import { test } from '../fixtures';
 
@@ -22,7 +23,9 @@ test.describe(
   'Interactive setup - manual configuration',
   { tag: ['@local-stateful-classic'] },
   () => {
-    // Pre-migration tag 'skipFIPS'
+    // Interactive setup reconfigures Kibana's crypto and reboots — unsupported under FIPS (pre-migration 'skipFIPS').
+    test.skip(isFipsEnabled, 'Interactive setup is not supported under FIPS');
+
     test('configures Kibana against a TLS-enabled cluster', async ({
       pageObjects,
       apiClient,

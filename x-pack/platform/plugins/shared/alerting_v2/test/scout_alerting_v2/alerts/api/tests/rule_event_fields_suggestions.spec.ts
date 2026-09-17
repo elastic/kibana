@@ -10,13 +10,13 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALERT_EVENTS_DATA_STREAM,
-  ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+  ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
 } from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE } from '../fixtures';
 
 const RULE_ID_A = 'matcher-suggestions-rule-a';
 const RULE_ID_B = 'matcher-suggestions-rule-b';
-const RULE_EVENT_FIELDS_PATH = ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH;
+const RULE_EVENT_FIELDS_PATH = ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH;
 
 const buildAlertEvent = (overrides: {
   ruleId: string;
