@@ -18,9 +18,11 @@ describe('deleteDuplicatePackagePolicies', () => {
   const makeServerSetup = ({
     deleteMock,
     bumpRevisionMock,
+    spaceIdsByPolicy = {},
   }: {
     deleteMock: jest.Mock;
     bumpRevisionMock?: jest.Mock;
+    spaceIdsByPolicy?: Record<string, string[]>;
   }) => {
     const logger = {
       info: jest.fn(),
@@ -28,27 +30,47 @@ describe('deleteDuplicatePackagePolicies', () => {
       warn: jest.fn(),
       error: jest.fn(),
     };
+    const bumpRevision = bumpRevisionMock ?? jest.fn().mockResolvedValue(undefined);
+    const esClient = {} as ElasticsearchClient;
+    const scopedClients: Record<string, unknown> = {};
+    const asScopedToNamespace = jest.fn((spaceId: string) => {
+      scopedClients[spaceId] = scopedClients[spaceId] ?? { spaceId };
+      return scopedClients[spaceId];
+    });
+    const agentPolicyService = {
+      bumpRevision,
+      getByIds: jest.fn(async (_soClient: unknown, ids: Array<{ id: string }>) =>
+        ids.map(({ id }) => ({ id, space_ids: spaceIdsByPolicy[id] ?? [] }))
+      ),
+    };
+    const fleet = {
+      packagePolicyService: { delete: deleteMock },
+      agentPolicyService,
+    };
     const serverSetup = {
-      pluginsStart: {
-        fleet: {
-          packagePolicyService: {
-            delete: deleteMock,
-          },
-          agentPolicyService: {
-            bumpRevision: bumpRevisionMock ?? jest.fn().mockResolvedValue(undefined),
-          },
+      coreStart: {
+        savedObjects: {
+          createInternalRepository: jest.fn().mockReturnValue({ unscoped: true }),
+          getUnsafeInternalClient: jest.fn().mockReturnValue({ asScopedToNamespace }),
         },
+        elasticsearch: { client: { asInternalUser: esClient } },
       },
+      fleet,
+      pluginsStart: { fleet },
       logger,
     } as unknown as SyntheticsServerSetup;
     return {
       serverSetup,
       logger,
-      bumpRevisionMock:
-        bumpRevisionMock ??
-        (serverSetup.pluginsStart.fleet.agentPolicyService.bumpRevision as jest.Mock),
+      bumpRevisionMock: bumpRevision,
+      bumpEsClient: esClient,
+      asScopedToNamespace,
+      scopedClients,
     };
   };
+
+  /** Agent policies with no explicit spaces are bumped through the default space. */
+  const defaultSpaceClient = (scopedClients: Record<string, unknown>) => scopedClients.default;
 
   const deleted = (id: string, policyIds: string[]) => ({
     id,
@@ -85,7 +107,9 @@ describe('deleteDuplicatePackagePolicies', () => {
         deleted('p-2', ['agent-a']),
         deleted('p-3', ['agent-a']),
       ]);
-    const { serverSetup, logger, bumpRevisionMock } = makeServerSetup({ deleteMock });
+    const { serverSetup, logger, bumpRevisionMock, bumpEsClient, scopedClients } = makeServerSetup({
+      deleteMock,
+    });
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;
 
@@ -110,9 +134,12 @@ describe('deleteDuplicatePackagePolicies', () => {
       bumpRevision: false,
     });
     expect(bumpRevisionMock).toHaveBeenCalledTimes(1);
-    expect(bumpRevisionMock).toHaveBeenCalledWith(soClient, esClient, 'agent-a', {
-      asyncDeploy: true,
-    });
+    expect(bumpRevisionMock).toHaveBeenCalledWith(
+      defaultSpaceClient(scopedClients),
+      bumpEsClient,
+      'agent-a',
+      { asyncDeploy: true }
+    );
   });
 
   test('deletes a large list in 500-id batches and bumps once after all deletes', async () => {
@@ -121,7 +148,9 @@ describe('deleteDuplicatePackagePolicies', () => {
       .mockImplementation((_so, _es, batch: string[]) =>
         Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])))
       );
-    const { serverSetup, logger, bumpRevisionMock } = makeServerSetup({ deleteMock });
+    const { serverSetup, logger, bumpRevisionMock, bumpEsClient, scopedClients } = makeServerSetup({
+      deleteMock,
+    });
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;
 
@@ -151,9 +180,12 @@ describe('deleteDuplicatePackagePolicies', () => {
       bumpRevision: false,
     });
     expect(bumpRevisionMock).toHaveBeenCalledTimes(1);
-    expect(bumpRevisionMock).toHaveBeenCalledWith(soClient, esClient, 'agent-a', {
-      asyncDeploy: true,
-    });
+    expect(bumpRevisionMock).toHaveBeenCalledWith(
+      defaultSpaceClient(scopedClients),
+      bumpEsClient,
+      'agent-a',
+      { asyncDeploy: true }
+    );
     expect(bumpRevisionMock.mock.invocationCallOrder[0]).toBeGreaterThan(
       deleteMock.mock.invocationCallOrder[1]
     );
@@ -167,19 +199,27 @@ describe('deleteDuplicatePackagePolicies', () => {
         deleted('p-2', ['agent-b']),
         deleted('p-3', ['agent-a']),
       ]);
-    const { serverSetup, bumpRevisionMock } = makeServerSetup({ deleteMock });
+    const { serverSetup, bumpRevisionMock, bumpEsClient, scopedClients } = makeServerSetup({
+      deleteMock,
+    });
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;
 
     await deleteDuplicatePackagePolicies(['p-1', 'p-2', 'p-3'], soClient, esClient, serverSetup);
 
     expect(bumpRevisionMock).toHaveBeenCalledTimes(2);
-    expect(bumpRevisionMock).toHaveBeenCalledWith(soClient, esClient, 'agent-a', {
-      asyncDeploy: true,
-    });
-    expect(bumpRevisionMock).toHaveBeenCalledWith(soClient, esClient, 'agent-b', {
-      asyncDeploy: true,
-    });
+    expect(bumpRevisionMock).toHaveBeenCalledWith(
+      defaultSpaceClient(scopedClients),
+      bumpEsClient,
+      'agent-a',
+      { asyncDeploy: true }
+    );
+    expect(bumpRevisionMock).toHaveBeenCalledWith(
+      defaultSpaceClient(scopedClients),
+      bumpEsClient,
+      'agent-b',
+      { asyncDeploy: true }
+    );
   });
 
   test('does not bump when every delete fails', async () => {
@@ -205,7 +245,9 @@ describe('deleteDuplicatePackagePolicies', () => {
     const deleteMock = jest
       .fn()
       .mockResolvedValue([{ id: 'p-1', success: true, policy_id: 'agent-a' }]);
-    const { serverSetup, bumpRevisionMock } = makeServerSetup({ deleteMock });
+    const { serverSetup, bumpRevisionMock, bumpEsClient, scopedClients } = makeServerSetup({
+      deleteMock,
+    });
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;
 
@@ -218,9 +260,12 @@ describe('deleteDuplicatePackagePolicies', () => {
 
     expect(deletedCount).toBe(1);
     expect(bumpRevisionMock).toHaveBeenCalledTimes(1);
-    expect(bumpRevisionMock).toHaveBeenCalledWith(soClient, esClient, 'agent-a', {
-      asyncDeploy: true,
-    });
+    expect(bumpRevisionMock).toHaveBeenCalledWith(
+      defaultSpaceClient(scopedClients),
+      bumpEsClient,
+      'agent-a',
+      { asyncDeploy: true }
+    );
   });
 
   test('counts and bumps only successful deletes', async () => {
@@ -230,7 +275,9 @@ describe('deleteDuplicatePackagePolicies', () => {
         deleted('p-1', ['agent-a']),
         { id: 'p-2', success: false, policy_ids: ['agent-b'] },
       ]);
-    const { serverSetup, bumpRevisionMock } = makeServerSetup({ deleteMock });
+    const { serverSetup, bumpRevisionMock, bumpEsClient, scopedClients } = makeServerSetup({
+      deleteMock,
+    });
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;
 
@@ -243,14 +290,45 @@ describe('deleteDuplicatePackagePolicies', () => {
 
     expect(deletedCount).toBe(1);
     expect(bumpRevisionMock).toHaveBeenCalledTimes(1);
-    expect(bumpRevisionMock).toHaveBeenCalledWith(soClient, esClient, 'agent-a', {
-      asyncDeploy: true,
-    });
+    expect(bumpRevisionMock).toHaveBeenCalledWith(
+      defaultSpaceClient(scopedClients),
+      bumpEsClient,
+      'agent-a',
+      { asyncDeploy: true }
+    );
     expect(bumpRevisionMock).not.toHaveBeenCalledWith(
-      soClient,
-      esClient,
+      expect.anything(),
+      expect.anything(),
       'agent-b',
       expect.anything()
+    );
+  });
+
+  test('bumps agent policies from earlier batches when a later batch throws', async () => {
+    const deleteMock = jest.fn().mockImplementation((_so, _es, batch: string[]) => {
+      if (batch.includes('p-1')) {
+        return Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])));
+      }
+      return Promise.reject(new Error('fleet unavailable'));
+    });
+    const { serverSetup, bumpRevisionMock, bumpEsClient, scopedClients } = makeServerSetup({
+      deleteMock,
+    });
+    const soClient = {} as SavedObjectsClientContract;
+    const esClient = {} as ElasticsearchClient;
+
+    const total = DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 50;
+    const packages = Array.from({ length: total }, (_, i) => `p-${i + 1}`);
+
+    await expect(
+      deleteDuplicatePackagePolicies(packages, soClient, esClient, serverSetup)
+    ).rejects.toThrow('fleet unavailable');
+
+    expect(bumpRevisionMock).toHaveBeenCalledWith(
+      defaultSpaceClient(scopedClients),
+      bumpEsClient,
+      'agent-a',
+      { asyncDeploy: true }
     );
   });
 
@@ -302,7 +380,7 @@ describe('deleteDuplicatePackagePolicies', () => {
         throw new Error('deployment failed');
       }
     });
-    const { serverSetup } = makeServerSetup({
+    const { serverSetup, bumpEsClient, scopedClients } = makeServerSetup({
       deleteMock,
       bumpRevisionMock,
     });
@@ -318,69 +396,98 @@ describe('deleteDuplicatePackagePolicies', () => {
 
     expect(result.deletedCount).toBe(2);
     expect(result.failedAgentPolicyIds).toEqual(['agent-a']);
-    expect(bumpRevisionMock).toHaveBeenCalledWith(soClient, esClient, 'agent-b', {
-      asyncDeploy: true,
-    });
+    expect(bumpRevisionMock).toHaveBeenCalledWith(
+      defaultSpaceClient(scopedClients),
+      bumpEsClient,
+      'agent-b',
+      { asyncDeploy: true }
+    );
   });
 });
 
 describe('bumpAgentPolicyRevisions', () => {
-  const makeServerSetup = (bumpRevisionMock: jest.Mock) => {
+  const makeServerSetup = (
+    bumpRevisionMock: jest.Mock,
+    spaceIdsByPolicy: Record<string, string[]> = {}
+  ) => {
     const logger = {
       info: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
       debug: jest.fn(),
     };
+    const esClient = {} as ElasticsearchClient;
+    const scopedClients: Record<string, unknown> = {};
+    const asScopedToNamespace = jest.fn((spaceId: string) => {
+      scopedClients[spaceId] = scopedClients[spaceId] ?? { spaceId };
+      return scopedClients[spaceId];
+    });
+    const getByIds = jest.fn(async (_soClient: unknown, ids: Array<{ id: string }>) =>
+      ids.map(({ id }) => ({ id, space_ids: spaceIdsByPolicy[id] ?? [] }))
+    );
+    const agentPolicyService = {
+      bumpRevision: bumpRevisionMock,
+      getByIds,
+    };
     const serverSetup = {
-      pluginsStart: {
-        fleet: {
-          agentPolicyService: {
-            bumpRevision: bumpRevisionMock,
-          },
+      coreStart: {
+        savedObjects: {
+          createInternalRepository: jest.fn().mockReturnValue({ unscoped: true }),
+          getUnsafeInternalClient: jest.fn().mockReturnValue({ asScopedToNamespace }),
         },
+        elasticsearch: { client: { asInternalUser: esClient } },
       },
+      fleet: { agentPolicyService },
+      pluginsStart: { fleet: { agentPolicyService } },
       logger,
     } as unknown as SyntheticsServerSetup;
-    return { serverSetup, logger };
+    return { serverSetup, logger, esClient, asScopedToNamespace, getByIds, scopedClients };
   };
 
   test('returns an empty list when there is nothing to bump', async () => {
     const bumpRevisionMock = jest.fn();
     const { serverSetup } = makeServerSetup(bumpRevisionMock);
 
-    await expect(
-      bumpAgentPolicyRevisions(
-        [],
-        {} as SavedObjectsClientContract,
-        {} as ElasticsearchClient,
-        serverSetup
-      )
-    ).resolves.toEqual([]);
+    await expect(bumpAgentPolicyRevisions([], serverSetup)).resolves.toEqual([]);
     expect(bumpRevisionMock).not.toHaveBeenCalled();
   });
 
   test('bumps duplicate ids once', async () => {
     const bumpRevisionMock = jest.fn().mockResolvedValue(undefined);
     const { serverSetup } = makeServerSetup(bumpRevisionMock);
-    const soClient = {} as SavedObjectsClientContract;
-    const esClient = {} as ElasticsearchClient;
 
-    await expect(
-      bumpAgentPolicyRevisions(['agent-a', 'agent-a'], soClient, esClient, serverSetup)
-    ).resolves.toEqual([]);
+    await expect(bumpAgentPolicyRevisions(['agent-a', 'agent-a'], serverSetup)).resolves.toEqual(
+      []
+    );
     expect(bumpRevisionMock).toHaveBeenCalledTimes(1);
   });
 
   test('returns every id that still failed', async () => {
     const bumpRevisionMock = jest.fn().mockRejectedValue(new Error('conflict'));
     const { serverSetup } = makeServerSetup(bumpRevisionMock);
-    const soClient = {} as SavedObjectsClientContract;
-    const esClient = {} as ElasticsearchClient;
 
-    await expect(
-      bumpAgentPolicyRevisions(['agent-a', 'agent-b'], soClient, esClient, serverSetup)
-    ).resolves.toEqual(['agent-a', 'agent-b']);
+    await expect(bumpAgentPolicyRevisions(['agent-a', 'agent-b'], serverSetup)).resolves.toEqual([
+      'agent-a',
+      'agent-b',
+    ]);
     expect(bumpRevisionMock).toHaveBeenCalledTimes(2);
+  });
+
+  test('bumps in a space the agent policy actually lives in', async () => {
+    const bumpRevisionMock = jest.fn().mockResolvedValue(undefined);
+    const { serverSetup, esClient, asScopedToNamespace, scopedClients } = makeServerSetup(
+      bumpRevisionMock,
+      { 'agent-a': ['team-space'] }
+    );
+
+    await expect(bumpAgentPolicyRevisions(['agent-a'], serverSetup)).resolves.toEqual([]);
+
+    expect(asScopedToNamespace).toHaveBeenCalledWith('team-space');
+    expect(bumpRevisionMock).toHaveBeenCalledWith(
+      scopedClients['team-space'],
+      esClient,
+      'agent-a',
+      { asyncDeploy: true }
+    );
   });
 });

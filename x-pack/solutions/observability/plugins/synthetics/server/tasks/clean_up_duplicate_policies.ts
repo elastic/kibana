@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
+import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
 import { getFilterForTestNowRun } from './test_now_run_filter';
 import {
   DEFAULT_MAX_CLEANUP_RETRIES,
@@ -60,17 +61,14 @@ export async function cleanUpDuplicatedPackagePolicies(
     return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
   }
 
-  // Same budget for leftover deletes and recreate. Clearing it on every
-  // extras pass would retry a failing delete forever.
-  if (taskState.maxCleanUpRetries <= 0) {
-    // `warn`, not `debug`: this is cleanup giving up for this invocation. The
-    // package-policy task passes a fresh budget on the next run.
+  // The budget bounds recreate attempts only. Letting it stop the scan too would
+  // hide leftovers behind a recreate that can never succeed — the 9.5.3 failure.
+  const canRecreate = (taskState.maxCleanUpRetries ?? DEFAULT_MAX_CLEANUP_RETRIES) > 0;
+  if (!canRecreate) {
     logger.warn(
-      `[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached. ` +
-        `Request cleanup again to retry.`
+      `[PrivateLocationCleanUpTask] Not recreating missing package policies as max retries have been reached. ` +
+        `Leftover policies are still deleted. Request cleanup again to retry.`
     );
-    taskState.hasAlreadyDoneCleanup = true;
-    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
   }
   debugLog('Starting cleanup of duplicated package policies');
 
@@ -152,7 +150,6 @@ export async function cleanUpDuplicatedPackagePolicies(
       if (deletedCount > 0) {
         taskState.hasAlreadyDoneCleanup = false;
         taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
-        performCleanupSync = true;
       } else {
         taskState.maxCleanUpRetries -= 1;
         if (taskState.maxCleanUpRetries <= 0) {
@@ -171,9 +168,13 @@ export async function cleanUpDuplicatedPackagePolicies(
       if (wasLatched && !hasExtras) {
         return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
       }
-      performCleanupSync = true;
-      if (!hasExtras) {
-        taskState.maxCleanUpRetries -= 1;
+      // Deleted extras need no recreate of their own: a monitor left without its
+      // expected policy shows up here as missing.
+      if (canRecreate) {
+        performCleanupSync = true;
+        if (!hasExtras) {
+          taskState.maxCleanUpRetries -= 1;
+        }
       }
     } else if (!hasExtras) {
       taskState.hasAlreadyDoneCleanup = true;
@@ -213,51 +214,54 @@ export async function deleteDuplicatePackagePolicies(
   const totalBatches = Math.ceil(total / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE);
   const agentPolicyIds = new Set<string>();
   let deletedCount = 0;
-  for (let i = 0; i < total; i += DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) {
-    const batch = packagePoliciesToDelete.slice(i, i + DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE);
-    const batchIndex = Math.floor(i / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) + 1;
-    logger.info(
-      `[PrivateLocationCleanUpTask] Deleting batch ${batchIndex}/${totalBatches} (size=${
-        batch.length
-      }), with ids [${batch.join(`, `)}]`
-    );
-    // `bumpRevision: false`: one agent-policy bump after every leftover is
-    // gone. Default bump-per-delete would redeploy the full policy once per
-    // batch (thousands of units on a Windows private location).
-    const results = await fleet.packagePolicyService.delete(soClient, esClient, batch, {
-      force: true,
-      spaceIds: ['*'],
-      ignoreMissing: true,
-      bumpRevision: false,
-    });
-    for (const result of results ?? []) {
-      if (!result.success) {
-        continue;
-      }
-      deletedCount += 1;
-      for (const policyId of result.policy_ids ?? []) {
-        agentPolicyIds.add(policyId);
-      }
-      if (result.policy_id) {
-        agentPolicyIds.add(result.policy_id);
+  try {
+    for (let i = 0; i < total; i += DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) {
+      const batch = packagePoliciesToDelete.slice(
+        i,
+        i + DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE
+      );
+      const batchIndex = Math.floor(i / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) + 1;
+      logger.info(
+        `[PrivateLocationCleanUpTask] Deleting batch ${batchIndex}/${totalBatches} (size=${
+          batch.length
+        }), with ids [${batch.join(`, `)}]`
+      );
+      // `bumpRevision: false`: one agent-policy bump after every leftover is
+      // gone. Default bump-per-delete would redeploy the full policy once per
+      // batch (thousands of units on a Windows private location).
+      const results = await fleet.packagePolicyService.delete(soClient, esClient, batch, {
+        force: true,
+        spaceIds: ['*'],
+        ignoreMissing: true,
+        bumpRevision: false,
+      });
+      for (const result of results ?? []) {
+        if (!result.success) {
+          continue;
+        }
+        deletedCount += 1;
+        for (const policyId of result.policy_ids ?? []) {
+          agentPolicyIds.add(policyId);
+        }
+        if (result.policy_id) {
+          agentPolicyIds.add(result.policy_id);
+        }
       }
     }
+  } catch (e) {
+    // Earlier batches are already deleted with no revision bump, so their agents
+    // still run the removed integrations. Bump what was collected before failing.
+    await bumpAgentPolicyRevisions([...agentPolicyIds], serverSetup);
+    throw e;
   }
 
   const attemptedAgentPolicyIds = [...agentPolicyIds];
-  const failedAgentPolicyIds = await bumpAgentPolicyRevisions(
-    attemptedAgentPolicyIds,
-    soClient,
-    esClient,
-    serverSetup
-  );
+  const failedAgentPolicyIds = await bumpAgentPolicyRevisions(attemptedAgentPolicyIds, serverSetup);
   return { deletedCount, failedAgentPolicyIds, attemptedAgentPolicyIds };
 }
 
 export const bumpAgentPolicyRevisions = async (
   agentPolicyIds: string[],
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
   serverSetup: SyntheticsServerSetup
 ): Promise<string[]> => {
   const uniqueIds = [...new Set(agentPolicyIds)];
@@ -266,16 +270,16 @@ export const bumpAgentPolicyRevisions = async (
   }
 
   const { logger } = serverSetup;
-  const { fleet } = serverSetup.pluginsStart;
   logger.info(
     `[PrivateLocationCleanUpTask] Bumping agent policy revision for [${uniqueIds.join(', ')}]`
   );
   const failedAgentPolicyIds: string[] = [];
   for (const policyId of uniqueIds) {
     try {
-      await fleet.agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-        asyncDeploy: true,
-      });
+      // Resolves the agent policy's own space: leftovers are deleted across all
+      // spaces, but a bump through the default-space client 404s for any agent
+      // policy that lives elsewhere.
+      await bumpAgentPolicyRevision(serverSetup, policyId);
     } catch (error) {
       logger.error(
         `[PrivateLocationCleanUpTask] Failed to bump agent policy [${policyId}]; will retry on the next run`,

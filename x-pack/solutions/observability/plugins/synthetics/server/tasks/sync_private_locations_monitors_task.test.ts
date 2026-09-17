@@ -723,6 +723,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           ids.map((id) => ({ id, success: true, policy_ids: ['agent-a'] }))
       );
       mockFleet.agentPolicyService.bumpRevision.mockResolvedValue(undefined as any);
+      mockFleet.agentPolicyService.getByIds.mockImplementation(
+        async (_soClient: unknown, ids: any) =>
+          (ids as Array<{ id: string }>).map(({ id }) => ({ id, space_ids: [] } as any))
+      );
       task = new SyncPrivateLocationMonitorsTask(
         mockServerSetup as any,
         mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
@@ -775,7 +779,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(state.hasAlreadyDoneCleanup).toBe(true);
     });
 
-    it('should delete unexpected policies and set performCleanupSync true', async () => {
+    it('deletes unexpected policies without requesting a follow-up sync', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
           yield ['monitor1-loc1', 'unexpected-policy'];
@@ -792,7 +796,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['unexpected-policy'],
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
       expect(result.failedAgentPolicyIds).toEqual([]);
       expect(result.attemptedAgentPolicyIds).toEqual(['agent-a']);
     });
@@ -811,7 +815,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         state as any
       );
 
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
       // Deleting policies is progress. Charging it drained the budget during
       // ordinary churn, and the next cleanup -- including one requested through
       // the API -- was then skipped while still reporting success.
@@ -881,13 +885,73 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
 
       expect(exhausted.performCleanupSync).toBe(false);
-      expect(state.hasAlreadyDoneCleanup).toBe(true);
       // the spent budget is left on the state so the exhaustion stays visible;
       // only an explicit cleanup request restores it
       expect(state.maxCleanUpRetries).toBe(0);
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('max retries have been reached')
       );
+    });
+
+    it('does not request a follow-up sync when only unexpected extras were deleted', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
+        (async function* () {
+          yield ['monitor1-loc1', 'unexpected-policy'];
+        })()
+      );
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        {} as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['unexpected-policy'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(false);
+    });
+
+    it('still deletes extras when the recreate budget is exhausted', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
+        (async function* () {
+          yield ['monitor1-loc1', 'unexpected-policy'];
+        })()
+      );
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 0 };
+
+      await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        state as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['unexpected-policy'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+    });
+
+    it('does not request recreate when the budget is exhausted and policies are missing', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
+        (async function* () {
+          yield [];
+        })()
+      );
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 0 };
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        state as any
+      );
+
+      expect(result.performCleanupSync).toBe(false);
     });
 
     it('should set performCleanupSync true if expected policies are missing', async () => {
@@ -1014,12 +1078,12 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
       expect(mockFleet.agentPolicyService.bumpRevision).toHaveBeenCalledWith(
-        mockSoClient,
+        expect.anything(),
         expect.anything(),
         'agent-a',
         { asyncDeploy: true }
       );
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
       expect(state.hasAlreadyDoneCleanup).toBe(false);
       expect(state.maxCleanUpRetries).toBe(DEFAULT_MAX_CLEANUP_RETRIES);
       expect(state.cleanupScanVersion).toBe(LEFTOVER_CLEANUP_SCAN_VERSION);
@@ -1074,7 +1138,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         state as any
       );
 
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
       expect(mockFleet.packagePolicyService.delete).toHaveBeenCalled();
       expect(state.maxCleanUpRetries).toBe(DEFAULT_MAX_CLEANUP_RETRIES);
       expect(state.cleanupScanVersion).toBe(LEFTOVER_CLEANUP_SCAN_VERSION);
@@ -1099,7 +1163,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['extra-a', 'extra-b'],
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
     });
 
     it('does not expect a package policy for service-managed locations', async () => {
@@ -1166,16 +1230,15 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(state.hasAlreadyDoneCleanup).toBe(true);
     });
 
-    it('should skip cleanup if maxCleanUpRetries is 0 or less', async () => {
+    it('still scans but pauses recreate when maxCleanUpRetries is 0 or less', async () => {
       const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 0 };
       const result = await cleanUpDuplicatedPackagePolicies(
         mockServerSetup as any,
         mockSoClient as any,
         state as any
       );
+      expect(mockFleet.packagePolicyService.fetchAllItemIds).toHaveBeenCalled();
       expect(result.performCleanupSync).toBe(false);
-      expect(state.hasAlreadyDoneCleanup).toBe(true);
-      expect(state.maxCleanUpRetries).toBe(0);
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('max retries have been reached')
       );
@@ -1224,7 +1287,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['monitor1-loc1-stores'],
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
     });
 
     it('deletes extras and still requests recreate when expected policies are missing', async () => {
@@ -1251,7 +1314,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(state.hasAlreadyDoneCleanup).toBe(false);
     });
 
-    it('still requests follow-up sync when leftover deletes succeed but revision bump fails', async () => {
+    it('records failed revision bumps when leftover deletes succeed', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
         (async function* () {
           yield ['monitor1-loc1', 'unexpected-policy'];
@@ -1265,7 +1328,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         state as any
       );
 
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
       expect(result.failedAgentPolicyIds).toEqual(['agent-a']);
       expect(result.attemptedAgentPolicyIds).toEqual(['agent-a']);
       expect(state.maxCleanUpRetries).toBe(3);
@@ -1319,7 +1382,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['monitor1-loc1-default', 'monitor1-loc1-stores', 'monitor1-loc1-other'],
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
     });
 
     it('expects one config-location policy for a multi-space monitor', async () => {
@@ -1360,7 +1423,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['monitor1-loc1-stores', 'monitor1-loc1-default'],
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
     });
 
     it('deletes orphan new-format ids that match no monitor', async () => {
@@ -1382,7 +1445,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['deadbeef-loc1', 'orphan-loc1'],
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
     });
 
     it('builds expected policy ids across monitor finder pages', async () => {
@@ -1435,7 +1498,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['orphan-loc1'],
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
     });
 
     it('uses config id and location id for project monitors', async () => {
@@ -1475,7 +1538,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['proj-monitor-loc1-default'],
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
-      expect(result.performCleanupSync).toBe(true);
+      expect(result.performCleanupSync).toBe(false);
     });
 
     it('returns empty bump lists when leftover cleanup is skipped', async () => {
