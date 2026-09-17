@@ -27,6 +27,7 @@ export const ApproximationBadge: React.FC<{
         iconType="bolt"
         aria-label={approximationTooltip}
         data-test-subj={dataTestSubj}
+        tabIndex={0}
       />
     </EuiToolTip>
   ) : null;
