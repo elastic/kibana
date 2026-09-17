@@ -17,8 +17,6 @@ export interface AlertTriggerInput {
     alertIds?: DocumentSelection[];
     /** Query-based selection expanded server-side. Mutually exclusive with `alertIds`. */
     querySelection?: EventQuerySelection;
-    /** Optional rule type ids, carried for context/telemetry. */
-    ruleTypeIds?: string[];
   };
 }
 

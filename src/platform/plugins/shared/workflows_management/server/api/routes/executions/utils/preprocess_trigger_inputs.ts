@@ -158,7 +158,7 @@ async function preprocessAlertEvent(
   }
 
   if (rawHits.length === 0) {
-    throw new Error('No alerts found with the provided IDs');
+    throw new Error('No alerts found with the provided selection');
   }
 
   const alertHits = formatAlertHits(rawHits, ruleTypeRegistryMap);

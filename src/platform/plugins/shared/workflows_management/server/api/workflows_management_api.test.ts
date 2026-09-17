@@ -59,7 +59,7 @@ describe('WorkflowsManagementApi', () => {
   let mockRequest: KibanaRequest;
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
   const logger = loggingSystemMock.createLogger();
-  const mockPreprocessAlertInputs = jest.mocked(preprocessTriggerInputs);
+  const mockPreprocessTriggerInputs = jest.mocked(preprocessTriggerInputs);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,7 +71,7 @@ describe('WorkflowsManagementApi', () => {
       workflowExecutionId: 'sched-exec-id',
     });
     mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
-    mockPreprocessAlertInputs.mockImplementation(async (inputs) => inputs);
+    mockPreprocessTriggerInputs.mockImplementation(async (inputs) => inputs);
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
@@ -739,7 +739,7 @@ steps:
       };
       const context = {} as TriggerInputPreprocessingContext;
       const metadata = { caseIds: ['case-1'] };
-      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+      mockPreprocessTriggerInputs.mockResolvedValue(processedInputs);
 
       await expect(
         api.runWorkflowWithPreprocessing({
@@ -754,7 +754,7 @@ steps:
         workflowExecutionId: 'test-exec-id',
       });
 
-      expect(mockPreprocessAlertInputs).toHaveBeenCalledWith(inputs, context, 'default', logger);
+      expect(mockPreprocessTriggerInputs).toHaveBeenCalledWith(inputs, context, 'default', logger);
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         workflow,
         {
@@ -798,7 +798,7 @@ steps:
       const validateProcessedInputs = jest.fn(() => {
         throw new Error('Document is not attached to the case');
       });
-      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+      mockPreprocessTriggerInputs.mockResolvedValue(processedInputs);
 
       await expect(
         api.runWorkflowWithPreprocessing({
@@ -841,7 +841,7 @@ steps:
       };
       const context = {} as TriggerInputPreprocessingContext;
       const eventOverrides = { caseIds: ['case-1'] };
-      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+      mockPreprocessTriggerInputs.mockResolvedValue(processedInputs);
 
       const result = await api.runWorkflowWithPreprocessing({
         workflow,
