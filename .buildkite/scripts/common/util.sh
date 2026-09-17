@@ -219,7 +219,7 @@ set_git_stack_merge_base() {
 
   local github_token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
   local stack_target_branch
-  local stack_merge_base
+  local stack_merge_base=""
 
   if [[ -z "$github_token" || -z "${GITHUB_PR_BASE_OWNER:-}" || -z "${GITHUB_PR_BASE_REPO:-}" ]] || ! command -v gh >/dev/null 2>&1; then
     return
@@ -235,6 +235,64 @@ set_git_stack_merge_base() {
   )" || [[ -z "$stack_target_branch" ]]; then
     return
   fi
+
+  # Native stacks cannot include fork PRs. A mirrored feature branch can therefore
+  # be the native stack root even though its parent PR targets main or a release.
+  # Follow that PR ancestry so snapshot checks use a published branch baseline.
+  local parent_target_branch
+  local parent_candidates
+  local candidate_target_branch
+  local candidate_head
+  local candidate_merge_base
+  local stack_target_sha
+  local visited_branch
+  local visited_branches=("$stack_target_branch")
+  while [[ "$stack_target_branch" != "main" && ! "$stack_target_branch" =~ ^[0-9]+\.(x|[0-9]+)$ ]]; do
+    if [[ "${#visited_branches[@]}" -ge 20 ]]; then
+      echo "Stack parent branch limit reached; falling back to PR merge base" >&2
+      return
+    fi
+    if ! parent_candidates="$(
+      GH_TOKEN="$github_token" gh api graphql \
+        -f owner="$GITHUB_PR_BASE_OWNER" \
+        -f repo="$GITHUB_PR_BASE_REPO" \
+        -f head="$stack_target_branch" \
+        -f query='query($owner: String!, $repo: String!, $head: String!) { repository(owner: $owner, name: $repo) { pullRequests(headRefName: $head, states: [OPEN, MERGED], first: 100) { nodes { baseRefName headRefOid } pageInfo { hasNextPage } } } }' \
+        --jq '.data.repository.pullRequests | select(.pageInfo.hasNextPage == false) | .nodes[] | [.baseRefName, .headRefOid] | @tsv' 2>/dev/null
+    )" || [[ -z "$parent_candidates" ]]; then
+      echo "Failed to resolve stack parent PRs; falling back to PR merge base" >&2
+      return
+    fi
+    if ! git fetch origin "$stack_target_branch" 2>/dev/null || ! stack_target_sha="$(git rev-parse FETCH_HEAD 2>/dev/null)"; then
+      return
+    fi
+    parent_target_branch=""
+    while IFS=$'\t' read -r candidate_target_branch candidate_head; do
+      # Forks can reuse branch names; only follow a PR containing the mirror tip.
+      if ! git fetch origin "$candidate_head" 2>/dev/null || ! candidate_merge_base="$(git merge-base "$stack_target_sha" "$candidate_head" 2>/dev/null)"; then
+        return
+      fi
+      if [[ "$candidate_merge_base" != "$stack_target_sha" ]]; then
+        continue
+      fi
+      if [[ -n "$parent_target_branch" && "$parent_target_branch" != "$candidate_target_branch" ]]; then
+        echo "Ambiguous stack parent PRs; falling back to PR merge base" >&2
+        return
+      fi
+      parent_target_branch="$candidate_target_branch"
+    done <<< "$parent_candidates"
+    if [[ -z "$parent_target_branch" ]]; then
+      return
+    fi
+    for visited_branch in "${visited_branches[@]}"; do
+      if [[ "$visited_branch" == "$parent_target_branch" ]]; then
+        echo "Cycle in stack parent branches; falling back to PR merge base" >&2
+        return
+      fi
+    done
+    visited_branches+=("$parent_target_branch")
+    stack_target_branch="$parent_target_branch"
+  done
 
   if git fetch origin "$stack_target_branch" 2>/dev/null; then
     stack_merge_base="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
