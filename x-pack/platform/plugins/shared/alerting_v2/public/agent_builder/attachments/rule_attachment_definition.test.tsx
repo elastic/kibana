@@ -15,8 +15,6 @@ const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
 const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
-const mockLocator = { useUrl: jest.fn(() => '/action-policies') };
-const mockShare = { url: { locators: { get: jest.fn(() => mockLocator) } } };
 
 jest.mock('@kbn/core-di-browser', () => ({
   Context: {
@@ -33,15 +31,8 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
-    if (token === 'plugin:share') {
-      return mockShare;
-    }
     return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
   },
-}));
-
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => `plugin:${key}`,
 }));
 
 jest.mock('../../services/rules_api', () => ({
@@ -54,7 +45,6 @@ jest.mock('../../components/rule/rule_summary', () => ({
   ),
   RuleSummaryAboutSection: () => <div data-test-subj="mockAboutSection" />,
   RuleSummaryInvestigationSection: () => <div data-test-subj="mockInvestigationSection" />,
-  RuleSummaryActionPoliciesSection: () => <div data-test-subj="mockActionPoliciesSection" />,
   RuleSummaryArtifactsSection: () => <div data-test-subj="mockArtifactsSection" />,
 }));
 
@@ -209,7 +199,6 @@ describe('createRuleAttachmentDefinition', () => {
       expect(getByTestId('mockAboutSection')).toBeDefined();
       expect(getByTestId('mockInvestigationSection')).toBeDefined();
       expect(getByTestId('mockQueryPreviewSection')).toBeDefined();
-      expect(getByTestId('mockActionPoliciesSection')).toBeDefined();
       expect(getByTestId('mockArtifactsSection')).toBeDefined();
     });
 

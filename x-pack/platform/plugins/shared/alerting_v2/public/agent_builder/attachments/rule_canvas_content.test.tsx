@@ -15,12 +15,7 @@ const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
 const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
-const mockLocator = { useUrl: jest.fn(() => '/action-policies') };
-const mockShare = { url: { locators: { get: jest.fn(() => mockLocator) } } };
 const mockUseQueryClient = jest.requireActual('@kbn/react-query').useQueryClient;
-const mockUseAlertingLocators = jest.requireActual(
-  '../../application/locator_context'
-).useAlertingLocators;
 let capturedSummaryRule: Record<string, unknown> = {};
 
 jest.mock('@kbn/core-di-browser', () => ({
@@ -35,15 +30,8 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
-    if (token === 'plugin:share') {
-      return mockShare;
-    }
     return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
   },
-}));
-
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => `plugin:${key}`,
 }));
 
 jest.mock('../../components/rule/rule_summary', () => ({
@@ -59,15 +47,6 @@ jest.mock('../../components/rule/rule_summary', () => ({
   },
   RuleSummaryAboutSection: () => <div data-test-subj="mockAboutSection" />,
   RuleSummaryInvestigationSection: () => <div data-test-subj="mockInvestigationSection" />,
-  RuleSummaryActionPoliciesSection: () => {
-    const locators = mockUseAlertingLocators();
-    return (
-      <div
-        data-test-subj="mockActionPoliciesSection"
-        data-has-action-policy-locator={Boolean(locators.actionPolicyLocators)}
-      />
-    );
-  },
   RuleSummaryArtifactsSection: () => {
     const queryClient = mockUseQueryClient();
     return (
@@ -150,10 +129,6 @@ describe('RuleCanvasContent', () => {
       expect(getByTestId('mockAboutSection')).toBeDefined();
       expect(getByTestId('mockInvestigationSection')).toBeDefined();
       expect(getByTestId('mockQueryPreviewSection')).toBeDefined();
-      expect(getByTestId('mockActionPoliciesSection')).toHaveAttribute(
-        'data-has-action-policy-locator',
-        'true'
-      );
       expect(getByTestId('mockArtifactsSection')).toHaveAttribute('data-has-query-client', 'true');
 
       const sectionOrder = Array.from(getByTestId('mockRuleSummaryBody').children).map((section) =>
@@ -163,7 +138,6 @@ describe('RuleCanvasContent', () => {
         'mockAboutSection',
         'mockQueryPreviewSection',
         'mockInvestigationSection',
-        'mockActionPoliciesSection',
         'mockArtifactsSection',
       ]);
     });
@@ -174,10 +148,10 @@ describe('RuleCanvasContent', () => {
       expect(capturedSummaryRule.id).toBeUndefined();
     });
 
-    it('uses the attachment origin as the persisted summary id', () => {
+    it('keeps a persisted attachment summary read-only', () => {
       renderCanvas({ origin: 'persisted-rule-id', dataId: 'stale-data-id' });
 
-      expect(capturedSummaryRule.id).toBe('persisted-rule-id');
+      expect(capturedSummaryRule.id).toBeUndefined();
     });
   });
 
