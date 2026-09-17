@@ -518,8 +518,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # Per-suite Slack followers: check the suite step's aggregate outcome (failed if
-  # any parallel shard hard-failed), then soft_fail this step so Slack fires once
+  # Per-suite Slack followers: check the suite step's aggregate outcome (hard_failed
+  # or errored — timeouts / agent loss), then soft_fail this step so Slack fires once
   # per suite rather than once per red shard. soft_fail also keeps a notify miss
   # from masking suite results; notify.if must be soft_failed (not hard_failed).
   - label: ':slack: Notify Serverless Entity Analytics - Security Cypress Tests failure'
@@ -529,7 +529,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-entity-analytics)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-entity-analytics)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -560,7 +561,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-explore)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-explore)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -591,7 +593,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-investigations)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-investigations)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -622,7 +625,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-rule-management)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-rule-management)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -653,7 +657,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-customization)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-customization)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -684,7 +689,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-installation)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-installation)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -715,7 +721,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-management)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-management)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -746,7 +753,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-upgrade)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-upgrade)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -776,7 +784,8 @@ steps:
       - step: rule-management
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step rule-management)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step rule-management)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -806,7 +815,8 @@ steps:
       - step: rule-management-prebuilt-rules-customization
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-customization)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-customization)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -836,7 +846,8 @@ steps:
       - step: rule-management-prebuilt-rules-installation
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-installation)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-installation)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -866,7 +877,8 @@ steps:
       - step: rule-management-prebuilt-rules-management
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-management)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-management)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -896,7 +908,8 @@ steps:
       - step: rule-management-prebuilt-rules-upgrade
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-upgrade)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-upgrade)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -927,7 +940,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-detection-engine)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-detection-engine)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -958,7 +972,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-detection-engine-exceptions)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-detection-engine-exceptions)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -988,7 +1003,8 @@ steps:
       - step: detection-engine
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step detection-engine)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step detection-engine)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1018,7 +1034,8 @@ steps:
       - step: detection-engine-exceptions
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step detection-engine-exceptions)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step detection-engine-exceptions)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1049,7 +1066,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step serverless-ai-assistant)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step serverless-ai-assistant)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1079,7 +1097,8 @@ steps:
       - step: ai-assistant
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step ai-assistant)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step ai-assistant)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1109,7 +1128,8 @@ steps:
       - step: entity-analytics
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step entity-analytics)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step entity-analytics)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1139,7 +1159,8 @@ steps:
       - step: explore
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step explore)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step explore)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1169,7 +1190,8 @@ steps:
       - step: investigations
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step investigations)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step investigations)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1199,7 +1221,8 @@ steps:
       - step: osquery
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step osquery)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step osquery)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1230,7 +1253,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step osquery-serverless)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step osquery-serverless)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1260,7 +1284,8 @@ steps:
       - step: defend-workflows
         allow_dependency_failure: true
     command: |
-      if [ "$(buildkite-agent step get outcome --step defend-workflows)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step defend-workflows)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
@@ -1291,7 +1316,8 @@ steps:
         allow_dependency_failure: true
     branches: main
     command: |
-      if [ "$(buildkite-agent step get outcome --step defend-workflows-serverless)" = "hard_failed" ]; then
+      outcome="$(buildkite-agent step get outcome --step defend-workflows-serverless)"
+      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
     timeout_in_minutes: 10
