@@ -38,6 +38,7 @@ export const addAttachmentStepDefinition = ({
           origin: input.origin,
           description: input.description,
           hidden: input.hidden,
+          render_inline: input.render_inline,
         });
 
         return {

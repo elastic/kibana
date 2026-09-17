@@ -16,3 +16,12 @@ export type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
 } from './types';
+
+export {
+  useApproveProposal,
+  useDismissProposal,
+  usePendingProposals,
+  useProposal,
+} from './proposals/hooks/use_proposals_api';
+
+export { DISMISS_REASON_LABELS, DISMISS_REASON_OPTIONS } from './proposals/dismiss_reason_i18n';
