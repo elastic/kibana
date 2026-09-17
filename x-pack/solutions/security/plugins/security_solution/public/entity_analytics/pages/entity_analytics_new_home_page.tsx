@@ -23,6 +23,7 @@ import {
   globalQuerySelector,
 } from '../../common/store/inputs/selectors';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
+import { DataViewErrorComponent } from '../../common/components/data_view_error';
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
 import { useTimeRangeParam } from '../components/home/use_time_range_param';
 import { useEntityFiltersParam } from '../components/home/use_entity_filters_param';
@@ -39,7 +40,11 @@ const MANAGEMENT_LABEL = i18n.translate(
 
 export const EntityAnalyticsNewHomePage: React.FC = () => {
   const spaceId = useSpaceId();
-  const { dataView, isLoading: isDataViewLoading } = useEntityStoreDataView(spaceId);
+  const {
+    dataView,
+    isLoading: isDataViewLoading,
+    error: isDataViewError,
+  } = useEntityStoreDataView(spaceId);
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { euiTheme } = useEuiTheme();
 
@@ -82,6 +87,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   );
 
   if (isDataViewLoading) return <EuiLoadingSpinner size="l" />;
+  if (isDataViewError) return <DataViewErrorComponent />;
 
   return (
     <>
@@ -96,7 +102,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           `}
         >
           {/* SiemSearchBar has internal left padding; pull it left so its content aligns with the page edge */}
-          <div css={css`margin-inline-start: -${euiTheme.size.s};`}>
+          <div
+            css={css`
+              margin-inline-start: -${euiTheme.size.s};
+            `}
+          >
             <EntitySearchBar
               dataView={dataView}
               timeRange={timeRange}
