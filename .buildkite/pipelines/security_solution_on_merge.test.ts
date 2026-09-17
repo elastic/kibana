@@ -20,13 +20,27 @@ import { parse as parseYaml } from 'yaml';
 
 const PIPELINE_YML = join(__dirname, 'security_solution_on_merge.yml');
 
-/** Channels the Buildkite Slack app is known to reach. Adding one is deliberate. */
-const ALLOWED_CHANNELS = [
-  '#security-defend-workflows',
-  '#security-detection-engineering-team',
-  '#security-entity-analytics-alerts',
-  '#security-threat-hunting',
+/**
+ * Which team owns which suite, keyed on the domain in the step label.
+ *
+ * Encodes the routing contract rather than a flat allowlist, so reassigning a
+ * suite to a different team's channel fails even though that channel is valid.
+ */
+const DOMAIN_CHANNELS: ReadonlyArray<readonly [RegExp, string]> = [
+  [/Detection Engine|Rule Management|Exceptions/, '#security-detection-engineering-team'],
+  [/Entity Analytics/, '#security-entity-analytics-alerts'],
+  [/Explore|Investigations|AI Assistant/, '#security-threat-hunting'],
+  [/Osquery|Defend Workflows/, '#security-defend-workflows'],
 ];
+
+const expectedChannel = (label: string): string | undefined => {
+  const matched = new Set(
+    DOMAIN_CHANNELS.filter(([pattern]) => pattern.test(label)).map(([, channel]) => channel)
+  );
+
+  // Ambiguity means the contract is undefined for this label, not that either is fine.
+  return matched.size === 1 ? [...matched][0] : undefined;
+};
 
 /** Timeouts and agent loss report as `errored`, which is not `hard_failed`. */
 const FAILURE_CONDITION = 'step.outcome == "hard_failed" || step.outcome == "errored"';
@@ -69,16 +83,25 @@ describe('security_solution_on_merge Slack routing', () => {
     expect(unrouted).toEqual([]);
   });
 
-  it('only routes to channels the Slack app can reach', () => {
-    const unknown = suiteSteps().flatMap((step) =>
+  it('routes every suite to its owning team', () => {
+    const misrouted = suiteSteps().flatMap((step) =>
       (step.notify ?? []).flatMap((entry) =>
         entry.slack.channels
-          .filter((channel) => !ALLOWED_CHANNELS.includes(channel))
+          .filter((channel) => channel !== expectedChannel(step.label!))
           .map((channel) => `${step.label} -> ${channel}`)
       )
     );
 
-    expect(unknown).toEqual([]);
+    expect(misrouted).toEqual([]);
+  });
+
+  it('has an unambiguous owning team for every suite', () => {
+    // A suite in a new domain must get an explicit rule rather than inheriting one.
+    const unmapped = suiteSteps()
+      .filter((step) => expectedChannel(step.label!) === undefined)
+      .map((step) => step.label);
+
+    expect(unmapped).toEqual([]);
   });
 
   it('alerts on test failures and on timeouts or agent loss', () => {
