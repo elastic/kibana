@@ -32,7 +32,7 @@ import { OverviewStatus } from './overview/overview_status';
 import { QuickFilters } from './overview/quick_filters';
 import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
-import { OverviewActivityChart } from './overview/overview_activity_chart';
+import { OverviewActivityChart, OverviewActivityStats } from './overview/overview_activity_chart';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 
@@ -157,7 +157,9 @@ export const OverviewPage: React.FC = () => {
         <>
           <EuiFlexGroup gutterSize="m" wrap>
             <EuiFlexItem grow={false}>
-              <OverviewStatus />
+              <OverviewStatus>
+                <OverviewActivityStats />
+              </OverviewStatus>
             </EuiFlexItem>
             <EuiFlexItem grow={1} css={{ minWidth: 500 }}>
               <OverviewActivityChart />
