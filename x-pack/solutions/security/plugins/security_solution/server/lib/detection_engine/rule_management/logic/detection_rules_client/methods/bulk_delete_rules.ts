@@ -41,10 +41,29 @@ export const bulkDeleteRules = async ({
   const allSkipped: BulkDeleteActionSkipResult[] = [];
 
   for (const idsChunk of chunks) {
-    const result = await rulesClient.bulkDeleteRules({
-      ids: idsChunk,
-      changeTracking: { metadata: { bulkCount: ruleIds.length, ...changeTracking?.metadata } },
-    });
+    let result;
+    try {
+      result = await rulesClient.bulkDeleteRules({
+        ids: idsChunk,
+        changeTracking: { metadata: { bulkCount: ruleIds.length, ...changeTracking?.metadata } },
+      });
+    } catch (error) {
+      // When every rule in the chunk is already gone, alerting throws
+      // Boom.badRequest('No rules found for bulk delete'). Treat the
+      // entire chunk as skipped.
+      if (error.isBoom && error.output?.statusCode === 400) {
+        for (const id of idsChunk) {
+          allSkipped.push({
+            id,
+            name: rulesById.get(id)?.name,
+            skip_reason: 'RULE_NOT_FOUND',
+          });
+        }
+        continue;
+      }
+      throw error;
+    }
+
     allRules.push(...(result.rules as RuleAlertType[]));
 
     for (const error of result.errors) {

@@ -110,4 +110,29 @@ describe('bulkDeleteRules', () => {
       { id: 'rule-b', name: 'Rule B', skip_reason: 'RULE_NOT_FOUND' },
     ]);
   });
+
+  it('treats an entire chunk as skipped when alerting throws "No rules found"', async () => {
+    const boomError = Object.assign(new Error('No rules found for bulk delete'), {
+      isBoom: true,
+      output: { statusCode: 400 },
+    });
+    rulesClient.bulkDeleteRules.mockRejectedValue(boomError);
+
+    const result = await bulkDeleteRules({ rulesClient, rules: [ruleA, ruleB] });
+
+    expect(result.rules).toEqual([]);
+    expect(result.errors).toEqual([]);
+    expect(result.skipped).toEqual([
+      { id: 'rule-a', name: 'Rule A', skip_reason: 'RULE_NOT_FOUND' },
+      { id: 'rule-b', name: 'Rule B', skip_reason: 'RULE_NOT_FOUND' },
+    ]);
+  });
+
+  it('rethrows non-Boom errors from rulesClient.bulkDeleteRules', async () => {
+    rulesClient.bulkDeleteRules.mockRejectedValue(new Error('unexpected failure'));
+
+    await expect(bulkDeleteRules({ rulesClient, rules: [ruleA] })).rejects.toThrow(
+      'unexpected failure'
+    );
+  });
 });
