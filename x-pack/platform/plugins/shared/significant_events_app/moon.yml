@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/streamlang'
   - '@kbn/nightshift-ai'
   - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/nightshift-decision-trees'
   - '@kbn/streams-plugin'
   - '@kbn/streams-schema'
   - '@kbn/typed-react-router-config'
