@@ -22,6 +22,5 @@
     "@kbn/zod",
     "@kbn/core",
     "@kbn/significant-events-schema",
-    "@kbn/evals-common"
   ]
 }

@@ -8,7 +8,7 @@
 import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { EvalsClient, getEvaluationsKbnClient } from '@kbn/evals';
+import { EvalsClient, getEvaluationsKbnClient, getSpaceIdsFromEnv } from '@kbn/evals';
 import { KbnClient } from '@kbn/kbn-client';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getGoldenSourceDatasetName, readGoldenDataset } from './datasets';
@@ -24,7 +24,9 @@ async function setupGoldenDataset(): Promise<(() => void) | undefined> {
     );
   const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
   const kbnClient = getEvaluationsKbnClient({ kbnClient: new KbnClient({ url, log }), log });
-  const source = await new EvalsClient(kbnClient, log).getDatasetByName(sourceDatasetName);
+  const source = await new EvalsClient(kbnClient, log, {
+    spaceIds: getSpaceIdsFromEnv(),
+  }).getDatasetByName(sourceDatasetName);
   if (!source)
     throw new Error('The configured approved dataset was not found on the selected cluster.');
   const directory = mkdtempSync(join(tmpdir(), 'nightshift-golden-'));

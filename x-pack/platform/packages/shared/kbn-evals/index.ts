@@ -132,6 +132,7 @@ export {
 } from './src/utils/evals_client';
 export { EvaluatorApiClient, type MapContextFn } from './src/utils/evaluator_api_client';
 export { getEvaluationsKbnClient } from './src/utils/evaluations_kbn_client';
+export { getSpaceIdsFromEnv } from './src/utils/space_ids';
 export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
 export { buildIngestRequest } from './src/utils/build_ingest_request';
 

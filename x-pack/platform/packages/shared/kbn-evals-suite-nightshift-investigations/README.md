@@ -126,7 +126,8 @@ file with owner-only access. Collection reads it synchronously, excludes archive
 and intersects all requested `metadata.dataset_split` tags (AND semantics). Only
 `suite/investigate-lite` is currently registered, under **`nightshift/investigate-lite`**.
 The source is read-only; the native runner upserts only the derived nightshift-owned dataset.
-Temporary source data is removed after the run.
+Temporary source data is removed after the run. Source lookup and detailed score reads use
+the first Space selected by `--space-ids`, matching the native executor.
 
 | Field | Requirement and meaning |
 | --- | --- |
@@ -315,8 +316,10 @@ against.
 Registered as `nightshift-investigations` in
 [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json), with Scout config
 `evals_nightshift_investigations`. PR and weekly jobs must provision the same external sandbox
-with `SANDBOX_API_KEY` and the client certificate/key paths; this suite does not add a sandbox launcher. Existing model group selection
-applies. Use `--judge` explicitly for the reference comparison.
+with `SANDBOX_API_KEY` and the client certificate/key paths. **CI sandbox provisioning is
+deferred to a separate change**; the current eval job does not supply this prerequisite,
+so golden CI runs remain blocked until it is provisioned. This PR adds no sandbox launcher.
+The credentialed local acceptance run is the golden baseline. Existing model group selection applies. Use `--judge` explicitly for the reference comparison.
 
 Validation:
 
