@@ -761,13 +761,7 @@ export function registerConnectorRoutes({
       if (!connectorResult) {
         return createError({
           errorCode: ErrorCode.RESOURCE_NOT_FOUND,
-          message: i18n.translate(
-            'xpack.contentConnectors.routes.connectors.resource_not_found_error',
-            {
-              defaultMessage: 'Connector with id {connectorId} is not found.',
-              values: { connectorId },
-            }
-          ),
+          message: `Connector with id ${connectorId} is not found.`,
           response,
           statusCode: 404,
         });

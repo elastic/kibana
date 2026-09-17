@@ -50,6 +50,9 @@ export const fetchConnectorByIndexName = async (
       },
     });
     const result = connectorListResult.count > 0 ? connectorListResult.results[0] : undefined;
+    if (result?.deleted) {
+      return undefined;
+    }
     return result;
   } catch (error) {
     throw error;

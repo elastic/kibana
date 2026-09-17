@@ -116,6 +116,16 @@ describe('fetchConnectors lib', () => {
         },
       });
     });
+    it('should return undefined if connector is soft-deleted', async () => {
+      mockClient.transport.request.mockResolvedValue({
+        count: 1,
+        results: [{ id: 'connectorId', service_type: 'someServiceType', deleted: true }],
+      });
+
+      await expect(
+        fetchConnectorByIndexName(mockClient as unknown as ElasticsearchClient, 'indexName')
+      ).resolves.toBeUndefined();
+    });
     it('should return undefined on connector not found case', async () => {
       mockClient.transport.request.mockImplementationOnce(() =>
         Promise.resolve({ count: 0, results: [] })
