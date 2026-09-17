@@ -173,7 +173,7 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '3:2ffca0f3'],
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '4:a4494787'],
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '3:17a26220'],
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -228,6 +228,10 @@ function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): voi
 
 const AI_AGENT_STEP_TYPE = 'ai.agent';
 const CONNECTOR_ID_BY_FEATURE = 'connector-id-by-feature';
+const PLUGIN_ID = 'plugin-id';
+const AGGREGATE_BY = 'aggregate-by';
+/** Mirrors ALERTZERO_INFERENCE_PARENT_FEATURE_ID; @kbn/alertzero-common is not a dependency here. */
+const ALERTZERO_ROLLUP_ID = 'alertzero_parent';
 
 /**
  * Collects `ai.agent` steps from anywhere in a parsed workflow, walking the whole tree rather than
@@ -348,6 +352,23 @@ describe('managedWorkflowDefinitions', () => {
         .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
 
       expect(unpinnedStepNames).toEqual([]);
+    }
+  );
+
+  // Same failure mode as the tier pin: a step with no plugin-id falls back to the default Agent
+  // Builder attribution, so its spend leaves AlertZero's rollup without anything failing.
+  it.each(alertZeroDefinitionsById)(
+    '%s attributes every ai.agent step to a Worker and the AlertZero rollup',
+    (id, definition) => {
+      const aiAgentSteps = collectAiAgentSteps(parse(renderWorkflowYaml(definition)));
+      const unattributedStepNames = aiAgentSteps
+        .filter(
+          (step) =>
+            typeof step[PLUGIN_ID] !== 'string' || step[AGGREGATE_BY] !== ALERTZERO_ROLLUP_ID
+        )
+        .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
+
+      expect(unattributedStepNames).toEqual([]);
     }
   );
 });
