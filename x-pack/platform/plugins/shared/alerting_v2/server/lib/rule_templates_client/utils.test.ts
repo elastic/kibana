@@ -27,12 +27,9 @@ const validTemplateAttributes = {
       every: '1m',
       lookback: '15m',
     },
-    state_transition: {
-      pending_count: 3,
-    },
-    recovery_strategy: 'no_breach' as const,
+    state_transition: { pending: { count: 3 } },
+    recovery: { strategy: 'no_breach' as const },
     query: {
-      format: 'composed' as const,
       base: 'TS metrics-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name',
       breach: {
         segment: 'WHERE restarts > 0 | LIMIT 50',
@@ -109,6 +106,25 @@ describe('rule templates client utils', () => {
           name: 'classic',
         })
       ).toThrow();
+    });
+
+    // The collapse migration is additive, so a migrated template carries the
+    // pre-collapse keys until the model version that removes them from disk.
+    it('strips the pre-collapse keys a migrated template still carries', () => {
+      const { rule } = validTemplateAttributes;
+
+      expect(
+        transformRuleTemplateSoAttributesToApiResponse('template-1', {
+          engine: 'v2',
+          rule: {
+            ...rule,
+            recovery_strategy: 'no_breach',
+            no_data_strategy: 'last_known_status',
+            query: { ...rule.query, format: 'composed' },
+            state_transition: { ...rule.state_transition, pending_count: 3 },
+          },
+        })
+      ).toEqual({ id: 'template-1', ...validTemplateAttributes });
     });
   });
 });

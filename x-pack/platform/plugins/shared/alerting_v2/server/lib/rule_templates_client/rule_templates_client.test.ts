@@ -27,12 +27,9 @@ const validTemplateAttributes = {
       every: '1m',
       lookback: '15m',
     },
-    state_transition: {
-      pending_count: 3,
-    },
-    recovery_strategy: 'no_breach' as const,
+    state_transition: { pending: { count: 3 } },
+    recovery: { strategy: 'no_breach' as const },
     query: {
-      format: 'composed' as const,
       base: 'TS metrics-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name',
       breach: {
         segment: 'WHERE restarts > 0 | SORT restarts DESC | LIMIT 50',

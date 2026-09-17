@@ -22,9 +22,9 @@ const exampleTemplateAttributes = {
       lookback: '15m',
     },
     state_transition: {
-      pending_count: 3,
+      pending: { count: 3 },
     },
-    recovery_strategy: 'no_breach' as const,
+    recovery: { strategy: 'no_breach' as const },
     artifacts: [
       {
         id: 'kubernetes_otel-pod-crashloopbackoff-v2-runbook',
@@ -35,7 +35,6 @@ const exampleTemplateAttributes = {
       },
     ],
     query: {
-      format: 'composed' as const,
       base: 'TS metrics-k8sclusterreceiver.otel-*\n| STATS restarts = MAX(k8s.container.restarts)\n    BY k8s.pod.name, k8s.container.name, k8s.namespace.name',
       breach: {
         segment:
@@ -56,7 +55,7 @@ describe('createRuleDataFromTemplate', () => {
 
     expect(createData).not.toHaveProperty('engine');
     expect(() => createRuleDataSchema.parse(createData)).not.toThrow();
-    expect(createData.recovery_strategy).toBe('no_breach');
+    expect(createData.recovery).toEqual({ strategy: 'no_breach' });
     expect(createData.kind).toBe('alert');
   });
 });

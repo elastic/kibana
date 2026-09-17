@@ -7,16 +7,16 @@
 
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
-import type { CreateRuleData, UpdateRuleData, Query, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RuleResponse, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import {
   IMMUTABLE_RULE_FIELDS,
-  isNoDataQueryConsistentWithStrategy,
-  isNoDataQueryProvidedForStrategy,
+  isLifecycleConfigAllowedForKind,
+  isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
-  isRecoveryQueryConsistentWithStrategy,
-  isRecoveryQueryProvidedForStrategy,
-  isSignalQueryBreachOnly,
-  isSignalUsingStandaloneFormat,
+  recoveryStrategy,
+  toApiQuery,
+  toApiStateTransition,
+  validateComposedEsqlQuery,
   type ImmutableRuleField,
 } from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -172,18 +172,6 @@ export function pickImmutable(
 }
 
 /**
- * For SO fields whose schema is `maybe(nullable(...))` — null is a valid
- * stored value meaning "explicitly cleared".
- */
-function applyNullableUpdate<T>(
-  value: T | null | undefined,
-  existing: T | undefined
-): T | null | undefined {
-  if (value === undefined) return existing;
-  return value; // null (clear) or new value (set)
-}
-
-/**
  * For SO fields whose schema is `maybe(...)` without `nullable()` — null
  * from the API means "clear", but must be stored as `undefined` (absent).
  */
@@ -203,26 +191,19 @@ function nullToEmptyArray<T>(
 }
 
 /**
- * A composed query may omit `breach` over the API to mean "every row returned
- * by `base` breaches". Storage always writes the block with an empty segment
- * instead: every shipped model version requires `query.breach`, so omitting it
- * on disk would make the rule unreadable by an older Kibana during a rollback
- * or a zero-downtime upgrade — and `find` fails as a whole rather than per
- * document, so one such rule would break the entire rules list.
+ * The lifecycle objects an alert rule is stored with. The API may omit either
+ * one; storage never does, so no reader has to interpret absence. Signal rules
+ * have no episodes, so they store neither regardless of what was sent.
  */
-const toStoredQuery = (query: Query): RuleSavedObjectAttributes['query'] =>
-  query.format === 'composed'
-    ? { ...query, breach: { segment: query.breach?.segment ?? '' } }
-    : query;
-
-/** Inverse of {@link toStoredQuery}: an empty stored segment reads back as an omitted block. */
-const toApiQuery = (query: RuleSavedObjectAttributes['query']): Query => {
-  if (query.format !== 'composed' || query.breach.segment.trim()) {
-    return query;
-  }
-  const { breach, ...withoutBreach } = query;
-  return withoutBreach;
-};
+const toStoredLifecycle = (
+  data: Pick<CreateRuleData, 'kind' | 'recovery' | 'no_data'>
+): Pick<RuleSavedObjectAttributes, 'recovery' | 'no_data'> =>
+  data.kind === 'alert'
+    ? {
+        recovery: data.recovery ?? { strategy: recoveryStrategy.no_breach },
+        no_data: data.no_data ?? { strategy: 'ignore' },
+      }
+    : {};
 
 /**
  * Converts a create-rule API body into saved object attributes.
@@ -254,10 +235,10 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       every: data.schedule.every,
       lookback: data.schedule.lookback,
     },
-    query: toStoredQuery(data.query),
-    recovery_strategy: data.recovery_strategy,
-    no_data_strategy: data.no_data_strategy,
-    state_transition: data.state_transition,
+    query: data.query,
+    ...toStoredLifecycle(data),
+    // `null` is accepted on the wire as "no gating" and normalised to absent.
+    state_transition: data.state_transition ?? undefined,
     grouping: data.grouping,
     artifacts: data.artifacts,
     ...restServerFields,
@@ -278,11 +259,8 @@ function resolveBuilderType(
     return updateData.metadata.builder_type ?? undefined;
   }
 
-  // Compare in stored shape so an unchanged conditionless query (`breach`
-  // omitted in the body, empty segment on disk) does not read as a change.
   const queryChanged =
-    updateData.query !== undefined &&
-    !isEqual(toStoredQuery(updateData.query), existingAttrs.query);
+    updateData.query !== undefined && !isEqual(updateData.query, existingAttrs.query);
 
   if (queryChanged && existingAttrs.metadata.builder_type) {
     throw Boom.badRequest(
@@ -329,20 +307,14 @@ export function buildUpdateRuleAttributes(
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
-    // `query` - callers must send a complete new shape (we can't merge across formats),
-    // so omitted = preserved, present = full replacement.
-    query: updateData.query !== undefined ? toStoredQuery(updateData.query) : existingAttrs.query,
-    // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
-    recovery_strategy: nullToUndefined(
-      updateData.recovery_strategy,
-      existingAttrs.recovery_strategy
-    ),
-    no_data_strategy: nullToUndefined(updateData.no_data_strategy, existingAttrs.no_data_strategy),
-    // `null` → clear (null). SO schema uses `maybe(nullable())`.
-    state_transition: applyNullableUpdate(
-      updateData.state_transition,
-      existingAttrs.state_transition
-    ),
+    // `query`, `recovery`, and `no_data` are replaced wholesale: each is a
+    // closed shape (two of them discriminated unions), so a partial merge could
+    // produce a member that never validates. Omitted = preserved.
+    query: updateData.query ?? existingAttrs.query,
+    recovery: updateData.recovery ?? existingAttrs.recovery,
+    no_data: updateData.no_data ?? existingAttrs.no_data,
+    // `null` → clear. Stored as absent, never as `null`.
+    state_transition: nullToUndefined(updateData.state_transition, existingAttrs.state_transition),
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
@@ -378,46 +350,26 @@ export function validateMergedRuleAttributes(
     details: Record<string, unknown>;
   }> = [
     {
-      valid: isSignalUsingStandaloneFormat(attrs),
-      message: 'kind "signal" requires query.format "standalone".',
+      valid: isLifecycleConfigAllowedForKind(attrs),
+      message: 'Signal rules cannot set recovery or no_data.',
       code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
     },
     {
-      valid: isSignalQueryBreachOnly(attrs),
-      message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
-      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
-      details: { rule_id: ruleId, rule_kind: attrs.kind },
-    },
-    {
-      valid: isRecoveryQueryConsistentWithStrategy(attrs),
-      message: 'query.recovery is only allowed when recovery_strategy is "query".',
+      valid: isRecoveryConditionUsableWithBreach(attrs),
+      message: 'recovery.strategy "condition" requires query.breach.',
       code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
     {
-      valid: isRecoveryQueryProvidedForStrategy(attrs),
-      message: 'query.recovery is required when recovery_strategy is "query".',
-      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
-      details: { rule_id: ruleId },
-    },
-    {
-      valid: isNoDataQueryConsistentWithStrategy(attrs),
-      message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
-      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
-      details: { rule_id: ruleId },
-    },
-    {
-      valid: isNoDataQueryProvidedForStrategy(attrs),
-      message:
-        'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
+      valid: isMergedRecoverySegmentComposable(attrs),
+      message: 'recovery.segment does not compose into a valid ES|QL query with query.base.',
       code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
     {
       valid: isRecoveryTransitionConsistentWithStrategy(attrs),
-      message:
-        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+      message: 'state_transition.recovering has no effect when recovery.strategy is "manual".',
       code: ALERTING_ERROR_CODES.INVALID_STATE_TRANSITION_CONFIG,
       details: { rule_id: ruleId },
     },
@@ -431,6 +383,17 @@ export function validateMergedRuleAttributes(
       });
     }
   }
+}
+
+/**
+ * `recovery.segment` and `query.base` can be updated independently, so the
+ * create schema's composition check has to be repeated once they are merged.
+ */
+function isMergedRecoverySegmentComposable(attrs: RuleSavedObjectAttributes): boolean {
+  if (attrs.recovery?.strategy !== recoveryStrategy.condition) {
+    return true;
+  }
+  return validateComposedEsqlQuery(attrs.query.base, attrs.recovery.segment) == null;
 }
 
 /**
@@ -459,9 +422,9 @@ export function transformRuleSoAttributesToRuleApiResponse(
       lookback: attrs.schedule.lookback,
     },
     query: toApiQuery(attrs.query),
-    recovery_strategy: attrs.recovery_strategy,
-    no_data_strategy: attrs.no_data_strategy,
-    state_transition: attrs.state_transition,
+    recovery: attrs.recovery,
+    no_data: attrs.no_data,
+    state_transition: toApiStateTransition(attrs.state_transition),
     grouping: attrs.grouping,
     // Project to the public artifact contract. Migrated rules may still carry a
     // legacy `value` on disk for model-version rollback; echoing it in the API
