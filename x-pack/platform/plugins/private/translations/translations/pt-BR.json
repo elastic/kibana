@@ -1437,7 +1437,6 @@
     "core.euiSelectable.placeholderName": "Opções de filtro",
     "core.euiSelectable.screenReaderInstructions": "Use as teclas de seta para cima e para baixo para mover o foco entre as opções. Pressione Enter para selecionar. Pressione Esc para recolher as opções.",
     "core.euiSelectable.searchResults": "{resultsLength, plural, one {# result} other {# results}} disponível",
-    "core.euiSelectableListItem.checkedOption": "Opção marcada.",
     "core.euiSelectableListItem.checkOptionInstructions": "Para verificar essa opção, pressione Enter.",
     "core.euiSelectableListItem.excludedOption": "Opção excluída.",
     "core.euiSelectableListItem.excludeOptionInstructions": "Para excluir essa opção, pressione Enter.",
