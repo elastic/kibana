@@ -51,6 +51,7 @@ export class ProductDocBasePlugin
   private logger: Logger;
   private internalServices?: InternalServices;
   private cloud?: ProductDocBaseSetupDependencies['cloud'];
+  private lockManager?: LockManagerService;
 
   constructor(private readonly context: PluginInitializerContext<ProductDocBaseConfig>) {
     this.logger = context.logger.get();
@@ -70,10 +71,11 @@ export class ProductDocBasePlugin
 
     coreSetup.savedObjects.registerType(productDocInstallStatusSavedObjectType);
 
+    this.lockManager = new LockManagerService(coreSetup, this.logger);
     registerTaskDefinitions({
       taskManager,
       getServices,
-      lockManager: new LockManagerService(coreSetup, this.logger),
+      lockManager: this.lockManager,
     });
 
     const router = coreSetup.http.createRouter();
@@ -90,6 +92,9 @@ export class ProductDocBasePlugin
     { licensing, taskManager }: ProductDocBaseStartDependencies
   ): ProductDocBaseStartContract {
     const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+    if (!this.lockManager) {
+      throw new Error('#start called before #setup');
+    }
 
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
@@ -125,6 +130,7 @@ export class ProductDocBasePlugin
       auditService: core.security.audit,
       packageInstaller,
       esClient: core.elasticsearch.client.asInternalUser,
+      lockManager: this.lockManager,
     });
 
     this.internalServices = {

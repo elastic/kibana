@@ -32,6 +32,7 @@ import {
   waitUntilTaskCompleted,
 } from '../../tasks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../install_lock';
 
 const scheduleInstallAllTaskMock = scheduleInstallAllTask as jest.MockedFn<
   typeof scheduleInstallAllTask
@@ -65,6 +66,7 @@ describe('DocumentationManager', () => {
   };
 
   let docManager: DocumentationManager;
+  let withLock: jest.Mock;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -97,6 +99,7 @@ describe('DocumentationManager', () => {
         ]),
     } as unknown as jest.Mocked<ProductDocInstallClient>;
 
+    withLock = jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback());
     docManager = new DocumentationManager({
       logger,
       taskManager,
@@ -104,6 +107,7 @@ describe('DocumentationManager', () => {
       auditService,
       docInstallClient,
       esClient,
+      lockManager: { withLock },
       packageInstaller: packageInstaller as unknown as ConstructorParameters<
         typeof DocumentationManager
       >[0]['packageInstaller'],
@@ -373,6 +377,24 @@ describe('DocumentationManager', () => {
         inferenceId: defaultInferenceEndpoints.JINAv5,
         version: undefined,
       });
+    });
+
+    it('installs under the shared install lock', async () => {
+      packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'uninstalled' });
+      let installedUnderLock = false;
+      withLock.mockImplementation(async (_lockId: string, callback: () => Promise<unknown>) => {
+        await callback();
+        installedUnderLock = packageInstaller.installSecurityLabs.mock.calls.length === 1;
+      });
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(withLock).toHaveBeenCalledWith(
+        PRODUCT_DOC_INSTALL_LOCK_ID,
+        expect.any(Function),
+        expect.anything()
+      );
+      expect(installedUnderLock).toBe(true);
     });
 
     it('schedules no install when Security Labs is already installed', async () => {

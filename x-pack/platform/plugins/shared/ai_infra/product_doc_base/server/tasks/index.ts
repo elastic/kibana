@@ -23,9 +23,9 @@ export const registerTaskDefinitions = ({
   lockManager: InstallLockManager;
 }) => {
   registerEnsureUpToDateTaskDefinition({ getServices, taskManager, lockManager });
-  registerEnsureSecurityLabsUpToDateTaskDefinition({ getServices, taskManager });
+  registerEnsureSecurityLabsUpToDateTaskDefinition({ getServices, taskManager, lockManager });
   registerInstallAllTaskDefinition({ getServices, taskManager, lockManager });
-  registerUninstallAllTaskDefinition({ getServices, taskManager });
+  registerUninstallAllTaskDefinition({ getServices, taskManager, lockManager });
 };
 
 export { scheduleEnsureUpToDateTask, ENSURE_DOC_UP_TO_DATE_TASK_ID } from './ensure_up_to_date';

@@ -8,19 +8,14 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
+import {
+  INSTALL_LOCK_RETRY_DELAY_MS,
+  tryWithInstallLock,
+  type InstallLockManager,
+} from '../services/install_lock';
 
-export const PRODUCT_DOC_INSTALL_LOCK_ID = 'product_doc_base:install';
-export const INSTALL_LOCK_RETRY_DELAY_MS = 30_000;
-
-export interface InstallLockManager {
-  withLock<T>(
-    lockId: string,
-    callback: () => Promise<T>,
-    options?: { metadata?: Record<string, unknown> }
-  ): Promise<T>;
-}
+export type { InstallLockManager };
 
 const allProductNames = Object.values(DocumentationProduct) as ProductName[];
 
@@ -48,10 +43,32 @@ export const isProductName = (value: string): value is ProductName =>
 export const nextChunkRunResult = (remaining: string[]) =>
   remaining.length > 0 ? { state: { remaining }, runAt: new Date() } : { state: {} };
 
+// Re-runs the task shortly without consuming an attempt, e.g. while another install holds the lock
+export const deferredRunResult = (state: Record<string, unknown>) => ({
+  state,
+  runAt: new Date(Date.now() + INSTALL_LOCK_RETRY_DELAY_MS),
+});
+
 /**
- * Installs the first of `items` under the cluster-wide product doc install lock, so that at most one
- * documentation install runs at a time across all tasks and Kibana nodes. When another install holds
- * the lock the item is kept and the run is deferred instead of failing an attempt.
+ * Runs `run` under the cluster-wide install lock, deferring the task run when another install holds it.
+ */
+export const runTaskUnderInstallLock = async ({
+  lockManager,
+  run,
+  metadata,
+}: {
+  lockManager: InstallLockManager;
+  run: () => Promise<void>;
+  metadata?: Record<string, unknown>;
+}) => {
+  const acquired = await tryWithInstallLock({ lockManager, run, metadata });
+  return acquired ? { state: {} } : deferredRunResult({});
+};
+
+/**
+ * Installs the first of `items` under the cluster-wide install lock, so that at most one documentation
+ * install runs at a time across all tasks and Kibana nodes. When another install holds the lock the
+ * item is kept and the run is deferred instead of failing an attempt.
  */
 export const runInstallChunk = async <T extends string>({
   lockManager,
@@ -68,20 +85,12 @@ export const runInstallChunk = async <T extends string>({
   if (!item) {
     return { state: {} };
   }
-  try {
-    await lockManager.withLock(PRODUCT_DOC_INSTALL_LOCK_ID, () => install(item), {
-      metadata: { ...metadata, item },
-    });
-  } catch (e) {
-    if (!isLockAcquisitionError(e)) {
-      throw e;
-    }
-    return {
-      state: { remaining: items },
-      runAt: new Date(Date.now() + INSTALL_LOCK_RETRY_DELAY_MS),
-    };
-  }
-  return nextChunkRunResult(rest);
+  const acquired = await tryWithInstallLock({
+    lockManager,
+    run: () => install(item),
+    metadata: { ...metadata, item },
+  });
+  return acquired ? nextChunkRunResult(rest) : deferredRunResult({ remaining: items });
 };
 
 export const getTaskStatus = async ({

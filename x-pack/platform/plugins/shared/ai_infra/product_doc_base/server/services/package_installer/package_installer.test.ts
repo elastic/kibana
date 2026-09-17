@@ -427,6 +427,33 @@ describe('PackageInstaller', () => {
     });
   });
 
+  describe('updateProduct', () => {
+    it('re-installs a product that is still installed', async () => {
+      productDocClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.15' },
+      } as never);
+      jest.spyOn(packageInstaller, 'installProduct').mockResolvedValue(undefined);
+
+      await packageInstaller.updateProduct({ productName: 'kibana', inferenceId: '.elser' });
+
+      expect(packageInstaller.installProduct).toHaveBeenCalledWith({
+        productName: 'kibana',
+        inferenceId: '.elser',
+      });
+    });
+
+    it('skips a product that was uninstalled after the update was planned', async () => {
+      productDocClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'uninstalled' },
+      } as never);
+      jest.spyOn(packageInstaller, 'installProduct');
+
+      await packageInstaller.updateProduct({ productName: 'kibana', inferenceId: '.elser' });
+
+      expect(packageInstaller.installProduct).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getProductsToUpdate', () => {
     it('returns installed products whose version differs from the selected version', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({

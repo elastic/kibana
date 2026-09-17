@@ -11,7 +11,7 @@ import { LockAcquisitionError } from '@kbn/lock-manager';
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import { registerInstallAllTaskDefinition, INSTALL_ALL_TASK_TYPE } from './install_all';
-import { PRODUCT_DOC_INSTALL_LOCK_ID } from './utils';
+import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../services/install_lock';
 
 const allProducts = Object.values(DocumentationProduct);
 

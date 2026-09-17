@@ -38,6 +38,7 @@ import type {
 import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
 import type { PerformUpdateResponse } from '../../../common/http_api/installation';
 import type { PackageInstaller } from '../package_installer';
+import { waitForInstallLock, type InstallLockManager } from '../install_lock';
 
 const TEN_MIN_IN_MS = 10 * 60 * 1000;
 
@@ -54,6 +55,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   private auditService: CoreAuditService;
   private packageInstaller?: PackageInstaller;
   private esClient: ElasticsearchClient;
+  private lockManager: InstallLockManager;
 
   constructor({
     logger,
@@ -63,6 +65,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     auditService,
     packageInstaller,
     esClient,
+    lockManager,
   }: {
     logger: Logger;
     taskManager: TaskManagerStartContract;
@@ -71,6 +74,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     auditService: CoreAuditService;
     packageInstaller?: PackageInstaller;
     esClient: ElasticsearchClient;
+    lockManager: InstallLockManager;
   }) {
     this.logger = logger;
     this.taskManager = taskManager;
@@ -79,6 +83,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.auditService = auditService;
     this.packageInstaller = packageInstaller;
     this.esClient = esClient;
+    this.lockManager = lockManager;
   }
 
   async install(options: DocInstallOptions): Promise<void> {
@@ -424,10 +429,12 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
+    const { packageInstaller } = this;
     try {
-      await this.packageInstaller.installSecurityLabs({
-        version,
-        inferenceId,
+      await waitForInstallLock({
+        lockManager: this.lockManager,
+        run: () => packageInstaller.installSecurityLabs({ version, inferenceId }),
+        metadata: { source: 'installSecurityLabs', inferenceId },
       });
     } catch (error) {
       this.logger.error(`Failed to install Security Labs content: ${error.message}`);
@@ -533,10 +540,12 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
+    const { packageInstaller } = this;
     try {
-      await this.packageInstaller.installOpenAPISpec({
-        version,
-        inferenceId,
+      await waitForInstallLock({
+        lockManager: this.lockManager,
+        run: () => packageInstaller.installOpenAPISpec({ version, inferenceId }),
+        metadata: { source: 'installOpenApiSpec', inferenceId },
       });
     } catch (error) {
       this.logger.error(`Failed to install OpenAPI Spec content: ${error.message}`);

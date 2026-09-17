@@ -239,6 +239,21 @@ export class PackageInstaller {
   }
 
   /**
+   * Re-installs a product that was planned for update, unless it has been uninstalled since the plan was computed.
+   */
+  async updateProduct(params: { productName: ProductName; inferenceId: string }): Promise<void> {
+    const { productName, inferenceId } = params;
+    const installStatuses = await this.productDocClient.getInstallationStatus({ inferenceId });
+    if (installStatuses[productName]?.status === 'uninstalled') {
+      this.log.info(
+        `Skipping update of product [${productName}] for inference ID [${inferenceId}]: no longer installed`
+      );
+      return;
+    }
+    await this.installProduct({ productName, inferenceId });
+  }
+
+  /**
    * Installs the OpenAPI spec when the installed version differs from the version selected for this deployment.
    */
   async ensureOpenApiSpecUpToDate(params: {
