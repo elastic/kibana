@@ -6,6 +6,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -16,6 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import type { DeleteWorkflowsApi } from '../types';
@@ -65,7 +67,6 @@ import { apiPrivileges } from '../../common/features';
 import {
   validateAbsoluteSignalWindow,
   validateAiIndexId,
-  validateAiIndexTraceIndexName,
   validateFeedbackAnalysisInterval,
   validateRelativeSignalWindow,
   validateSignalWindowCoversInterval,
@@ -78,6 +79,7 @@ import {
   AiIndexAlreadyExistsError,
   AiIndexIdConflictError,
   InvalidConnectorSourceError,
+  InvalidAiIndexTraceError,
   KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
@@ -91,6 +93,7 @@ import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
 import { validateSignalFilter } from '../ai_indices/signal_filter';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
+import { validateTraces } from '../ai_indices/validate_traces';
 import { resolveSpaceId } from '../utils/resolve_space_id';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
@@ -235,7 +238,6 @@ const aiIndexTraceSchema = schema.oneOf([
     value: schema.string({
       minLength: 1,
       maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
-      validate: validateAiIndexTraceIndexName,
       meta: { description: 'An index or data stream name or pattern to read traces from.' },
     }),
   }),
@@ -347,7 +349,11 @@ const getKiQuerySchema = schema.object({
 });
 
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
-  if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
+  if (
+    error instanceof InvalidAiIndexDestError ||
+    error instanceof InvalidConnectorSourceError ||
+    error instanceof InvalidAiIndexTraceError
+  ) {
     return response.badRequest({ body: { message: error.message } });
   }
   if (error instanceof AiIndexNotFoundError || error instanceof KiNotFoundError) {
@@ -363,7 +369,8 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
   }
   const message = error instanceof Error ? error.message : String(error);
   logger.error(error instanceof Error ? error.stack ?? error.message : message);
-  return response.customError({ statusCode: 500, body: { message } });
+  const statusCode = isResponseError(error) ? error.statusCode ?? 500 : 500;
+  return response.customError({ statusCode, body: { message } });
 };
 
 const deleteAiIndexQuerySchema = schema.object({
@@ -389,6 +396,7 @@ export const registerAiIndexRoutes = ({
   getImprovementsService,
   getScheduleService,
   getActions,
+  getAgentBuilder,
   getWorkflowsManagementApi,
   getSpaces,
 }: {
@@ -401,6 +409,7 @@ export const registerAiIndexRoutes = ({
   ) => ImprovementsServiceApi;
   getScheduleService: () => FeedbackAnalysisScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
+  getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
 }) => {
@@ -445,12 +454,19 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const { security, elasticsearch } = await ctx.core;
+        const auditLogger = security.audit.logger;
         const { id, ...properties } = request.body;
         try {
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
+            request,
+          });
+          await validateTraces({
+            traces: properties.traces,
+            esClient: elasticsearch.client.asCurrentUser,
+            agents: (await getAgentBuilder())?.agents,
             request,
           });
           const spaceId = resolveSpaceId(await getSpaces(), request);
@@ -491,12 +507,19 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const { security, elasticsearch } = await ctx.core;
+        const auditLogger = security.audit.logger;
         const { aiIndexId } = request.params;
         try {
           await validateConnectorSources({
             sources: request.body.sources,
             actions: await getActions(),
+            request,
+          });
+          await validateTraces({
+            traces: request.body.traces,
+            esClient: elasticsearch.client.asCurrentUser,
+            agents: (await getAgentBuilder())?.agents,
             request,
           });
           const spaceId = resolveSpaceId(await getSpaces(), request);

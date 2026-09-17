@@ -48,18 +48,9 @@ describe('buildTraceQuery', () => {
       expect(buildTraceQuery(trace, spaceId)).toBe('FROM logs-*');
     });
 
-    it('throws for a value containing a pipe (|)', () => {
-      const trace = { type: 'index' as const, value: 'good | bad' };
-      expect(() => buildTraceQuery(trace, spaceId)).toThrow(
-        "Cannot derive ES|QL for index trace 'good | bad'"
-      );
-    });
-
-    it('throws for a value containing a space', () => {
-      const trace = { type: 'index' as const, value: 'bad index' };
-      expect(() => buildTraceQuery(trace, spaceId)).toThrow(
-        "Cannot derive ES|QL for index trace 'bad index'"
-      );
+    it('does not reject a value that is not a valid index name', () => {
+      const trace = { type: 'index' as const, value: 'not an index' };
+      expect(buildTraceQuery(trace, spaceId)).toBe('FROM not an index');
     });
   });
 
@@ -115,7 +106,7 @@ describe('buildTraceQueries', () => {
     expect(buildTraceQueries([], 'default')).toEqual([]);
   });
 
-  it('attaches a query to every valid trace', () => {
+  it('attaches a query to every trace', () => {
     const traces = [
       { type: 'index' as const, value: 'valid-index' },
       { type: 'esql' as const, value: 'FROM foo' },
@@ -126,13 +117,15 @@ describe('buildTraceQueries', () => {
     ]);
   });
 
-  it('throws when any trace cannot produce ES|QL', () => {
+  // A trace that cannot produce a usable query must not fail the whole list response.
+  it('keeps building queries when a value is not a valid index name', () => {
     const traces = [
       { type: 'index' as const, value: 'valid-index' },
-      { type: 'index' as const, value: 'bad index' },
+      { type: 'index' as const, value: 'not an index' },
     ];
-    expect(() => buildTraceQueries(traces, 'default')).toThrow(
-      "Cannot derive ES|QL for index trace 'bad index'"
-    );
+    expect(buildTraceQueries(traces, 'default')).toEqual([
+      { type: 'index', value: 'valid-index', query: 'FROM valid-index' },
+      { type: 'index', value: 'not an index', query: 'FROM not an index' },
+    ]);
   });
 });

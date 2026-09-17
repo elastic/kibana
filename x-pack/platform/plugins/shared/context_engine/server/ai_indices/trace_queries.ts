@@ -7,22 +7,19 @@
 
 import { normalizeAgentIdForTelemetry } from '@kbn/agent-builder-server/telemetry';
 import type { AiIndexTrace, AiIndexTraceWithQuery } from '../../common/http_api/ai_indices';
-import { buildAgentBuilderTracesIndexName, SAFE_INDEX_NAME_RE } from '../../common/constants';
+import { buildAgentBuilderTracesIndexName } from '../../common/constants';
 
 /** Escapes `\` and `"` in value and wraps it in double quotes for safe embedding in an ES|QL string expression. */
 export const toEsqlStringLiteral = (value: string): string =>
   `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 
-/** Derives an ES|QL query from a single trace entry. Throws if the trace is invalid. */
+/** Derives an ES|QL query from a single trace entry. Values are validated when the AI index is written. */
 export const buildTraceQuery = (trace: AiIndexTrace, spaceId: string): string => {
   if (trace.type === 'esql') {
     return trace.value;
   }
 
   if (trace.type === 'index') {
-    if (!SAFE_INDEX_NAME_RE.test(trace.value)) {
-      throw new Error(`Cannot derive ES|QL for index trace '${trace.value}'`);
-    }
     return `FROM ${trace.value}`;
   }
 

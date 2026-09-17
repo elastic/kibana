@@ -18,7 +18,7 @@ import {
   MAX_AI_INDEX_TRACE_VALUE_LENGTH,
 } from './constants';
 import type { AiIndexProperties } from './http_api/ai_indices';
-import { validateAiIndexId, validateAiIndexTraceIndexName } from './validation';
+import { validateAiIndexId } from './validation';
 
 export const aiIndexDestSchema = z.object({
   type: z.enum(['data_stream', 'index']),
@@ -52,16 +52,7 @@ export const aiIndexTraceSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('index'),
-    value: z
-      .string()
-      .min(1)
-      .max(MAX_AI_INDEX_TRACE_VALUE_LENGTH)
-      .superRefine((value, ctx) => {
-        const validationError = validateAiIndexTraceIndexName(value);
-        if (validationError) {
-          ctx.addIssue({ code: 'custom', message: validationError });
-        }
-      }),
+    value: z.string().min(1).max(MAX_AI_INDEX_TRACE_VALUE_LENGTH),
   }),
   z.object({
     type: z.literal('esql'),
