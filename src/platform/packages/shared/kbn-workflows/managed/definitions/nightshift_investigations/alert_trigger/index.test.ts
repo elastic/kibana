@@ -67,6 +67,7 @@ describe('nightshift investigation alert trigger workflow', () => {
     });
     expect(start?.with).toMatchObject({
       subject_type: 'alert',
+      title: '{{ foreach.item.kibana.alert.rule.name | default: event.rule.name }}',
       trigger_type: 'automatic',
     });
   });

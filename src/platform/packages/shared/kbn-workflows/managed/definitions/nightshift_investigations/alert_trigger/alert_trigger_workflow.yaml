@@ -34,6 +34,7 @@ steps:
         with:
           subject_type: alert
           subject_id: '{{ foreach.item._id | default: foreach.item.kibana.alert.uuid }}'
+          title: '{{ foreach.item.kibana.alert.rule.name | default: event.rule.name }}'
           summary: '{{ foreach.item.kibana.alert.reason | default: event.rule.name }}'
           concurrency_key: '{{ foreach.item._id | default: foreach.item.kibana.alert.uuid }}'
           trigger_type: automatic

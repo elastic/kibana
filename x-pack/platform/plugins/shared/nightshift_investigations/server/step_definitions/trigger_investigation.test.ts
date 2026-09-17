@@ -99,6 +99,7 @@ describe('triggerInvestigationStepDefinition', () => {
       createContext({
         subject_type: 'alert',
         subject_id: 'alert-1',
+        title: 'CPU threshold',
         context: {
           alerts: [
             {
@@ -126,6 +127,7 @@ describe('triggerInvestigationStepDefinition', () => {
     expect(start).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: { type: 'alert', id: 'alert-1', summary: undefined },
+        title: 'CPU threshold',
         context: {
           alerts: [
             expect.objectContaining({
