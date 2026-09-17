@@ -46,3 +46,17 @@ export const FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS = 60 * 1000; // 60 seconds
  * Grace period (ms) for followExecution polling while the execution is still `scheduled`.
  */
 export const FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * How long (ms) followExecution keeps draining events after observing `aborted`, so the
+ * `execution_aborted` terminal written by the executing node is forwarded before the follower
+ * throws. The bound covers the whole worker-side chain: abort detection by the AbortMonitor,
+ * the graceful cancellation deadline, event batching, the interruption persist and event flush,
+ * one follower poll, plus a read-retry margin.
+ */
+export const FOLLOW_ABORT_DRAIN_TIMEOUT_MS =
+  ABORT_POLL_INTERVAL_MS +
+  CANCELLATION_DEADLINE_MS +
+  EVENT_BATCH_INTERVAL_MS +
+  FOLLOW_POLL_INTERVAL_MS +
+  7_300; // ≈ 15 s

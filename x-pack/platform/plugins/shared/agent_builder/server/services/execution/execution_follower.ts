@@ -11,11 +11,13 @@ import {
   createAgentBuilderError,
   createInternalError,
   createRequestAbortedError,
+  isExecutionTerminalEvent,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
 import {
+  FOLLOW_ABORT_DRAIN_TIMEOUT_MS,
   FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS,
   FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS,
   FOLLOW_EXECUTION_TIMEOUT_MS,
@@ -70,7 +72,9 @@ export const followExecution$ = ({
  * 2. Full `readEvents` GET only when the event count has increased.
  *
  * - Yields new events from each poll.
- * - On terminal `failed` / `aborted` status: throws the appropriate error.
+ * - On terminal `failed` / `aborted` status: drains up to the terminal timeline event (so the
+ *   `execution_failed` / `execution_aborted` written by the executing node reaches the follower),
+ *   then throws the appropriate error.
  * - On terminal `completed` status: drains remaining events then returns.
  * - Otherwise: waits {@link FOLLOW_POLL_INTERVAL_MS} and polls again.
  */
@@ -85,6 +89,9 @@ async function* pollExecutionEvents(
   }
 ): AsyncGenerator<ChatEvent> {
   let lastEventIndex = since ?? 0;
+  // Latched across polls: a terminal timeline event read while the status was still `running`
+  // must be remembered when `failed` / `aborted` arrives on a later poll.
+  let receivedExecutionTerminal = false;
   let lastStatus: ExecutionStatus | undefined;
   let lastHeartbeat: string | undefined;
   let hasStartedRunning = false;
@@ -140,6 +147,9 @@ async function* pollExecutionEvents(
         if (isRoundCompleteEvent(event)) {
           receivedRoundComplete = true;
         }
+        if (isExecutionTerminalEvent(event)) {
+          receivedExecutionTerminal = true;
+        }
       }
       lastEventIndex += newEvents.length;
     }
@@ -156,12 +166,28 @@ async function* pollExecutionEvents(
 
     // 5. Handle terminal statuses
     if (status === ExecutionStatus.failed) {
+      // The worker writes `failed` after its event flush settled, so the terminal event is either
+      // already read or one short retry away.
+      if (!receivedExecutionTerminal) {
+        yield* drainUntilTerminal(executionId, executionClient, lastEventIndex, {
+          timeoutMs: FOLLOW_TERMINAL_READ_MAX_RETRIES * FOLLOW_TERMINAL_READ_RETRY_DELAY_MS,
+          pollMs: FOLLOW_TERMINAL_READ_RETRY_DELAY_MS,
+        });
+      }
       throw error
         ? createAgentBuilderError(error.code, error.message, error.meta)
         : createInternalError(`Execution ${executionId} failed`);
     }
 
     if (status === ExecutionStatus.aborted) {
+      // `aborted` is flipped by the abort request before the worker has stopped: keep draining for
+      // a bounded window so the `execution_aborted` terminal can be forwarded first.
+      if (!receivedExecutionTerminal) {
+        yield* drainUntilTerminal(executionId, executionClient, lastEventIndex, {
+          timeoutMs: FOLLOW_ABORT_DRAIN_TIMEOUT_MS,
+          pollMs: FOLLOW_POLL_INTERVAL_MS,
+        });
+      }
       throw createRequestAbortedError('request was aborted');
     }
 
@@ -203,5 +229,34 @@ async function* drainRemainingEvents(
       break;
     }
     await delay(FOLLOW_TERMINAL_READ_RETRY_DELAY_MS);
+  }
+}
+
+/**
+ * Yields new events until a terminal timeline event (`execution_terminated` / `execution_failed` /
+ * `execution_aborted`) is seen or `timeoutMs` elapses. Used once the status is `failed` /
+ * `aborted`, so the terminal the executing node wrote reaches the follower before the error.
+ */
+async function* drainUntilTerminal(
+  executionId: string,
+  executionClient: AgentExecutionClient,
+  lastEventIndex: number,
+  { timeoutMs, pollMs }: { timeoutMs: number; pollMs: number }
+): AsyncGenerator<ChatEvent> {
+  const deadline = Date.now() + timeoutMs;
+  while (true) {
+    const { events } = await executionClient.readEvents(executionId, lastEventIndex);
+    let terminal = false;
+    for (const event of events) {
+      yield event;
+      if (isExecutionTerminalEvent(event)) {
+        terminal = true;
+      }
+    }
+    lastEventIndex += events.length;
+    if (terminal || Date.now() >= deadline) {
+      return;
+    }
+    await delay(pollMs);
   }
 }
