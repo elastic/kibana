@@ -15,6 +15,7 @@ import { z } from '@kbn/zod';
 import { buildAssumableBy } from './assumable_by';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type { CloudProjectContext, ServiceAccountsBackend } from './types';
@@ -127,18 +128,12 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 
-    const { hasAllRequested } = await this.checkPrivilegesWithRequest(request).globally({
-      elasticsearch: { cluster: ['manage_security'], index: {} },
+    await ensureManageSecurityPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      action: 'create a service account',
     });
-
-    if (!hasAllRequested) {
-      this.logger.warn(
-        'Service account creation denied: missing `manage_security` cluster privilege'
-      );
-      throw Boom.forbidden(
-        'Cannot create a service account: missing `manage_security` cluster privilege'
-      );
-    }
 
     this.logger.debug('Attempting to create a service account');
 
@@ -216,6 +211,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   async createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
     // The license gate is enforced by `exchangeToken`, which mints the initial credential.
     return await this.fakeRequests.create(params);
+  }
+
+  releaseFakeRequest(request: KibanaRequest): void {
+    this.fakeRequests.release(request);
   }
 
   async reauthenticateFakeRequest(

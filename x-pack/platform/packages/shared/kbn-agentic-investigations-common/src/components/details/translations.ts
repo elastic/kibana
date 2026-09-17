@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RecommendedAction } from '../../types';
 
 export const DETAILS_FLYOUT_LABELS = Object.freeze({
   ariaLabel: i18n.translate('xpack.alertzero.detailsFlyout.ariaLabel', {
@@ -95,20 +94,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
       defaultMessage: 'Attachments will appear here.',
     }),
   },
-  recommendedAction: {
-    contain: i18n.translate('xpack.alertzero.detailsFlyout.recommendedAction.contain', {
-      defaultMessage: 'Contain',
-    }),
-    escalate: i18n.translate('xpack.alertzero.detailsFlyout.recommendedAction.escalate', {
-      defaultMessage: 'Escalate',
-    }),
-    investigate: i18n.translate('xpack.alertzero.detailsFlyout.recommendedAction.investigate', {
-      defaultMessage: 'Investigate',
-    }),
-    tune: i18n.translate('xpack.alertzero.detailsFlyout.recommendedAction.tune', {
-      defaultMessage: 'Tune',
-    }),
-  } satisfies Record<RecommendedAction, string>,
   actions: {
     openChat: i18n.translate('xpack.alertzero.detailsFlyout.actions.openChat', {
       defaultMessage: 'Open in chat',
