@@ -19,14 +19,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import { getEntitiesAlias, ENTITY_LATEST } from './constants';
 
-export const combineFilters = (
-  parts: Array<QueryDslQueryContainer | null | undefined>
-): QueryDslQueryContainer | undefined => {
-  const active = parts.filter((p): p is QueryDslQueryContainer => p !== null && p !== undefined);
-  if (!active.length) return undefined;
-  return { bool: { filter: active } };
-};
-
 export interface EntityFilterBarCounts {
   entity_types: Record<string, number>;
   risk_levels: Record<string, number>;
