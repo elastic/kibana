@@ -73,8 +73,8 @@ export const registerViewsManagementRoutes = (
       const { name } = request.params;
       try {
         const core = await requestHandlerContext.core;
-        const { views } = await core.elasticsearch.client.asCurrentUser.esql.getView({ name });
-        const view = views[0];
+        const result = await core.elasticsearch.client.asCurrentUser.esql.getView({ name });
+        const view = result?.views?.[0];
 
         if (!view) {
           return response.notFound({

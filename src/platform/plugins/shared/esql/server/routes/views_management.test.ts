@@ -146,6 +146,20 @@ describe('ES|QL views routes', () => {
       ).resolves.toMatchObject({ status: 404 });
     });
 
+    it('returns not found when Elasticsearch returns no response', async () => {
+      const mocks = createMocks();
+      mocks.esql.getView.mockResolvedValue(undefined);
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
+
+      await expect(
+        mocks.handlers.get(
+          mocks.requestHandlerContext,
+          { params: { name: 'missing-view' } },
+          mocks.response
+        )
+      ).resolves.toMatchObject({ status: 404 });
+    });
+
     it('upserts name, query, and description', async () => {
       const mocks = createMocks();
       mocks.esql.putView.mockResolvedValue({ acknowledged: true });
