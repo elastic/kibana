@@ -9,8 +9,8 @@
 
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ConfigSchema } from './config';
-import { AnnotationsClient } from './annotations/annotations_client';
-import { registerAnnotationsRoutes } from './annotations/routes';
+import { CommentsClient } from './comments/comments_client';
+import { registerCommentsRoutes } from './comments/routes';
 
 export class DeveloperToolbarServerPlugin implements Plugin {
   private readonly logger: Logger;
@@ -27,9 +27,9 @@ export class DeveloperToolbarServerPlugin implements Plugin {
         .getStartServices()
         .then(
           ([{ elasticsearch }]) =>
-            new AnnotationsClient(elasticsearch.client.asInternalUser, this.logger)
+            new CommentsClient(elasticsearch.client.asInternalUser, this.logger)
         );
-      registerAnnotationsRoutes(core.http.createRouter(), client);
+      registerCommentsRoutes(core.http.createRouter(), client);
     }
     return {};
   }

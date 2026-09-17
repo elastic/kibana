@@ -1718,6 +1718,9 @@ importers:
       '@kbn/design-tools':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-design-tools
+      '@kbn/dev-comments':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-dev-comments
       '@kbn/dev-tools-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/dev_tools
@@ -3629,9 +3632,6 @@ importers:
       '@kbn/ui-ai-components':
         specifier: workspace:*
         version: link:src/platform/kbn-ui/ai-components
-      '@kbn/ui-annotations':
-        specifier: workspace:*
-        version: link:src/platform/kbn-ui/annotations
       '@kbn/ui-app-header':
         specifier: workspace:*
         version: link:src/platform/kbn-ui/app-header
@@ -7354,8 +7354,6 @@ importers:
 
   src/platform/kbn-ui/ai-components: {}
 
-  src/platform/kbn-ui/annotations: {}
-
   src/platform/kbn-ui/app-header: {}
 
   src/platform/kbn-ui/app-menu: {}
@@ -7401,6 +7399,8 @@ importers:
   src/platform/packages/private/kbn-cps-common: {}
 
   src/platform/packages/private/kbn-data-streams: {}
+
+  src/platform/packages/private/kbn-dev-comments: {}
 
   src/platform/packages/private/kbn-discover-session-constants: {}
 

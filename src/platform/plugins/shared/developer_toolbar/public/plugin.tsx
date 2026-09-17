@@ -42,10 +42,10 @@ const LazyDesignToolsButton = lazy(() =>
   }))
 );
 
-// The launcher loads the annotations layer itself on first use.
-const LazyAnnotationsLauncher = lazy(() =>
-  import('./annotations/annotations_launcher').then(({ AnnotationsLauncher }) => ({
-    default: AnnotationsLauncher,
+// The launcher loads the comments layer itself on first use.
+const LazyCommentsLauncher = lazy(() =>
+  import('./comments/comments_launcher').then(({ CommentsLauncher }) => ({
+    default: CommentsLauncher,
   }))
 );
 
@@ -98,10 +98,10 @@ export class DeveloperToolbarPlugin
     });
 
     this.registerItem({
-      id: 'Annotations',
+      id: 'Comments',
       children: (
         <Suspense fallback={null}>
-          <LazyAnnotationsLauncher core={core} />
+          <LazyCommentsLauncher core={core} />
         </Suspense>
       ),
     });

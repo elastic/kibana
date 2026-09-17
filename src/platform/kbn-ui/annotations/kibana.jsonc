@@ -1,8 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/ui-annotations",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "private",
-  "description": "Portable in-page annotation layer: comments anchored to DOM elements, with a screenshot and the author's clicks to get back to them."
-}

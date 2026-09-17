@@ -371,7 +371,6 @@ src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/dev @elastic/kibana-operations
 src/platform/kbn-ui/ai-components @elastic/appex-sharedux
-src/platform/kbn-ui/annotations @elastic/appex-sharedux
 src/platform/kbn-ui/app-header @elastic/appex-sharedux
 src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 src/platform/kbn-ui/callout @elastic/appex-sharedux
@@ -395,6 +394,7 @@ src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-controls-renderer @elastic/kibana-dashboards
 src/platform/packages/private/kbn-cps-common @elastic/appex-sharedux
 src/platform/packages/private/kbn-data-streams @elastic/kibana-core
+src/platform/packages/private/kbn-dev-comments @elastic/appex-sharedux
 src/platform/packages/private/kbn-discover-session-constants @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-dot-text @elastic/kibana-operations
 src/platform/packages/private/kbn-dot-text-loader @elastic/kibana-operations

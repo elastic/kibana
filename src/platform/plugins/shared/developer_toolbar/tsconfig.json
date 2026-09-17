@@ -14,7 +14,7 @@
     "@kbn/core-chrome-browser-internal-types",
     "@kbn/core-theme-browser-internal-types",
     "@kbn/design-tools",
-    "@kbn/ui-annotations",
+    "@kbn/dev-comments",
     "@kbn/core-http-browser",
   ]
 }
