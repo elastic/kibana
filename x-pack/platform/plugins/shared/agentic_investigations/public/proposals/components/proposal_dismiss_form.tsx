@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFormRow, EuiSelect, EuiTextArea, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +33,9 @@ export const ProposalDismissForm = memo<ProposalDismissFormProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const [touched, setTouched] = useState(false);
+    const isRationaleEmpty = !rationale.trim();
+    const showError = touched && isRationaleEmpty;
 
     return (
       <div
@@ -56,12 +59,21 @@ export const ProposalDismissForm = memo<ProposalDismissFormProps>(
             defaultMessage: 'Rationale',
           })}
           helpText={i18n.translate('xpack.agenticInvestigations.proposalCard.rationaleHelpText', {
-            defaultMessage: 'Required - explain why this proposal is being dismissed.',
+            defaultMessage: 'Required for auditing — explain why this proposal is being dismissed.',
           })}
+          isInvalid={showError}
+          error={
+            showError
+              ? i18n.translate('xpack.agenticInvestigations.proposalCard.rationaleError', {
+                  defaultMessage: 'A rationale is required.',
+                })
+              : undefined
+          }
         >
           <EuiTextArea
             value={rationale}
-            required
+            isInvalid={showError}
+            onBlur={() => setTouched(true)}
             onChange={(e) => onRationaleChange(e.target.value)}
             placeholder={i18n.translate(
               'xpack.agenticInvestigations.proposalCard.rationalePlaceholder',

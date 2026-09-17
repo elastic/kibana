@@ -6,7 +6,6 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   API_VERSIONS,
@@ -18,17 +17,8 @@ import type {
   ListInvestigationProposalsResponse,
   ListInvestigationsResponse,
 } from '@kbn/alertzero-common';
+import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
-
-const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
-  if (failureCount >= 3) {
-    return false;
-  }
-  if (isHttpFetchError(error)) {
-    return !error.response?.status || error.response.status >= 500;
-  }
-  return true;
-};
 
 // TODO: update the API schemas as well for renaming investigations to conversations and remove the ListInvestigationsResponse type
 export const useInvestigations = () => {

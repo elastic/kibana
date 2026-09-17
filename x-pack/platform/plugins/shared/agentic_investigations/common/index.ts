@@ -17,7 +17,6 @@ export {
 export {
   ACTION_WORKFLOW_TAG,
   PROPOSAL_ATTACHMENT_TYPE,
-  PROPOSAL_WITHOUT_ACTION,
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
@@ -35,6 +34,7 @@ export {
   dismissProposalRequestSchema,
   dismissReasonSchema,
   isDecided,
+  isTerminal,
   isExpired,
   listProposalsQuerySchema,
   MAX_PROPOSALS_SIZE,

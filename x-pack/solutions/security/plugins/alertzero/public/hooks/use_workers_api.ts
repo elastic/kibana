@@ -18,7 +18,7 @@ import type {
   Worker,
 } from '@kbn/alertzero-common';
 import { queryKeys } from '../query_keys';
-import { retryOnTransientError } from './use_watches_api';
+import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 
 export const useWorkers = () => {
   const { services } = useKibana();

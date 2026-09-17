@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { isDecided } from '../../../common';
-import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
+import { PROPOSAL_WITHOUT_ACTION_LABEL, STATUS_BADGE_LABELS } from '../translations';
 import type {
   ProposalWithMetadata,
   PROPOSAL_ATTACHMENT_TYPE,
-  ProposalStatus,
   ProposalImpact,
+  ProposalStatus,
 } from '../../../common';
 import { ProposalApprovalCard } from '../components/proposal_approval_card';
 
@@ -28,32 +28,6 @@ const IMPACT_BADGE_COLORS: Record<ProposalImpact, string> = {
   medium: 'warning',
   high: 'danger',
   critical: 'danger',
-};
-
-/** Translated labels for decided statuses. */
-const STATUS_BADGE_LABELS: Record<ProposalStatus, string> = {
-  approved: i18n.translate(
-    'xpack.agenticInvestigations.proposals.attachments.statusBadge.approved',
-    { defaultMessage: 'Approved' }
-  ),
-  pending: i18n.translate('xpack.agenticInvestigations.proposals.attachments.statusBadge.pending', {
-    defaultMessage: 'Pending',
-  }),
-  executing: i18n.translate(
-    'xpack.agenticInvestigations.proposals.attachments.statusBadge.executing',
-    { defaultMessage: 'Executing' }
-  ),
-  succeeded: i18n.translate(
-    'xpack.agenticInvestigations.proposals.attachments.statusBadge.succeeded',
-    { defaultMessage: 'Succeeded' }
-  ),
-  failed: i18n.translate('xpack.agenticInvestigations.proposals.attachments.statusBadge.failed', {
-    defaultMessage: 'Failed',
-  }),
-  dismissed: i18n.translate(
-    'xpack.agenticInvestigations.proposals.attachments.statusBadge.dismissed',
-    { defaultMessage: 'Dismissed' }
-  ),
 };
 
 /** Badge color map for decided statuses. */
@@ -78,7 +52,7 @@ export const createProposalAttachmentDefinition =
 
     getHeader: ({ attachment }) => {
       const { data } = attachment;
-      const badges = [];
+      const badges: HeaderBadge[] = [];
 
       // Status badge — suppressed for pending (the card footer shows the actions instead)
       if (data.expired) {
@@ -91,8 +65,8 @@ export const createProposalAttachmentDefinition =
         });
       } else if (isDecided(data.status)) {
         badges.push({
-          label: STATUS_BADGE_LABELS[data.status] ?? data.status,
-          color: STATUS_BADGE_COLORS[data.status] ?? 'default',
+          label: STATUS_BADGE_LABELS[data.status],
+          color: STATUS_BADGE_COLORS[data.status],
         });
       }
 
@@ -105,7 +79,7 @@ export const createProposalAttachmentDefinition =
             values: { impact: data.impact },
           }
         ),
-        color: IMPACT_BADGE_COLORS[data.impact] ?? 'default',
+        color: IMPACT_BADGE_COLORS[data.impact],
       });
 
       // Confidence badge

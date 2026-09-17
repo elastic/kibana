@@ -72,7 +72,7 @@ export const useProposal = (id: string | undefined) => {
       if (!id) {
         throw new Error('proposal id is required');
       }
-      return services.http!.get<ProposalWithMetadata>(`${PROPOSALS_INTERNAL_URL}/${id}`, {
+      return services.http!.get<ProposalWithMetadata>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
       });
     },
@@ -91,15 +91,12 @@ export const useApproveProposal = () => {
 
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: ApproveProposalRequest }): Promise<Proposal> =>
-      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/approve`, {
+      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}/approve`, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (proposal) => {
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
     },
   });
 };
@@ -110,15 +107,12 @@ export const useDismissProposal = () => {
 
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: DismissProposalRequest }): Promise<Proposal> =>
-      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/dismiss`, {
+      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}/dismiss`, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (proposal) => {
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
     },
   });
 };

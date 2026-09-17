@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { ApprovalContent } from '@kbn/agentic-investigations-common';
 import type { ApprovalAction } from '@kbn/agentic-investigations-common';
-import { isDecided } from '../../../common';
-import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
+import { isDecided, isTerminal } from '../../../common';
+import { PROPOSAL_WITHOUT_ACTION_LABEL, STATUS_BADGE_LABELS } from '../translations';
 import type { DismissReason } from '../../../common';
 import { toBlastRadiusItems } from '../attachments/to_blast_radius_items';
 import { useApproveProposal, useDismissProposal, useProposal } from '../hooks/use_proposals_api';
@@ -113,7 +113,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     try {
       await dismissMutation.mutateAsync({
         id: proposalId,
-        body: { dismissReason, rationale },
+        body: { dismissReason, rationale: rationale.trim() || undefined },
       });
       setMode('view');
     } catch {
@@ -150,6 +150,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const isPending = liveProposal.status === 'pending';
   const isExpired = liveProposal.expired;
   const isAlreadyDecided = isDecided(liveProposal.status);
+  const isExecuting = liveProposal.status === 'executing';
+  const isAlreadyTerminal = isTerminal(liveProposal.status);
 
   const impact = liveProposal.action?.impact ?? liveProposal.impact;
   const tone =
@@ -189,7 +191,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         }),
         color: 'danger',
         onClick: handleDismissConfirm,
-        isDisabled: isLoading || !rationale,
+        isDisabled: isLoading || !rationale.trim(),
         isLoading,
         'data-test-subj': `agenticInvestigationsProposalDismissConfirm-${proposalId}`,
       };
@@ -238,7 +240,22 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
             </div>
           </>
         )}
-        {isAlreadyDecided && (
+        {isExecuting && (
+          <>
+            <EuiSpacer size="m" />
+            <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
+              <KbnInfoCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate('xpack.agenticInvestigations.proposalCard.executingCallout', {
+                  defaultMessage:
+                    'The approved action is currently executing. No further action is needed.',
+                })}
+              />
+            </div>
+          </>
+        )}
+        {isAlreadyTerminal && (
           <>
             <EuiSpacer size="m" />
             <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
@@ -248,7 +265,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
                 title={i18n.translate('xpack.agenticInvestigations.proposalCard.decidedCallout', {
                   defaultMessage:
                     'This proposal has already been decided ({status}). No further action is needed.',
-                  values: { status: liveProposal.status },
+                  values: { status: STATUS_BADGE_LABELS[liveProposal.status] },
                 })}
               />
             </div>
