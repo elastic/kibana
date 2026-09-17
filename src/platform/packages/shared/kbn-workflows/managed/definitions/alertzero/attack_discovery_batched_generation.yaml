@@ -127,6 +127,12 @@ steps:
         with:
           alerts: "${{ steps.retrieve_alerts.output.alerts | slice: foreach.item, inputs.batch_size }}"
           connector_id: "{{ inputs.connector_id }}"
+          # Stated on the leaf step rather than threaded down from the Worker: the
+          # tier is a property of the call, not of the caller. Only consulted when
+          # `connector_id` is empty, and ignored when AlertZero is disabled and the
+          # tier is therefore unregistered. Keep in sync with
+          # ALERTZERO_GENERATION_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+          feature_id: alertzero_generation
           # The discoveries are read back from the index below instead. They
           # dominate this step's output, and an output above the engine's
           # eviction threshold is dropped from in-memory state before the
