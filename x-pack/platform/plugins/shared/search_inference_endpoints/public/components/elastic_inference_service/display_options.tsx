@@ -71,7 +71,7 @@ const DISPLAY_OPTION_ROWS: DisplayOptionRowConfig[] = [
     helpText: i18n.translate(
       'xpack.searchInferenceEndpoints.eisModelsPage.displayOptions.endOfLifeModelsDescription',
       {
-        defaultMessage: 'Models past their end-of-life date are not available for use.',
+        defaultMessage: 'Models that you can't use because they have reached end of life.',
       }
     ),
     hideId: 'eisDisplayOptionsEndOfLifeModelsHide',
