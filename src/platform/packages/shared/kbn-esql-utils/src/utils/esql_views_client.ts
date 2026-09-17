@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  EsqlDeleteViewResponse,
+  EsqlPutViewResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
 import {
   type DeleteEsqlViewsRequest,
   type EsqlView,
-  type EsqlViewMutationResponse,
   type EsqlViewsResult,
   type UpsertEsqlViewRequest,
   VIEWS_BULK_DELETE_ROUTE,
@@ -45,9 +48,9 @@ export class EsqlViewsClientError extends Error {
 export interface EsqlViewsClient {
   getViews(signal?: AbortSignal): Promise<EsqlViewsResult>;
   getView(name: string, signal?: AbortSignal): Promise<EsqlView | undefined>;
-  createView(request: UpsertEsqlViewRequest): Promise<EsqlViewMutationResponse>;
-  updateView(request: UpsertEsqlViewRequest): Promise<EsqlViewMutationResponse>;
-  deleteViews(names: string[]): Promise<EsqlViewMutationResponse>;
+  createView(request: UpsertEsqlViewRequest): Promise<EsqlPutViewResponse>;
+  updateView(request: UpsertEsqlViewRequest): Promise<EsqlPutViewResponse>;
+  deleteViews(names: string[]): Promise<EsqlDeleteViewResponse>;
 }
 
 const normalizeError = (error: unknown): EsqlViewsClientError => {
@@ -96,12 +99,12 @@ export const createEsqlViewsClient = (http: HttpStart): EsqlViewsClient => {
 
   const upsertView = ({ name, query, description }: UpsertEsqlViewRequest) =>
     runRequest(() =>
-      http.put<EsqlViewMutationResponse>(getViewRoute(name), {
+      http.put<EsqlPutViewResponse>(getViewRoute(name), {
         body: JSON.stringify({ query, description }),
       })
     );
 
-  const createView = async (request: UpsertEsqlViewRequest): Promise<EsqlViewMutationResponse> => {
+  const createView = async (request: UpsertEsqlViewRequest): Promise<EsqlPutViewResponse> => {
     const existingView = await getView(request.name);
     if (existingView === undefined) {
       return upsertView(request);
@@ -112,7 +115,7 @@ export const createEsqlViewsClient = (http: HttpStart): EsqlViewsClient => {
 
   const updateView = (request: UpsertEsqlViewRequest) => upsertView(request);
 
-  const deleteViews = (names: string[]): Promise<EsqlViewMutationResponse> => {
+  const deleteViews = (names: string[]): Promise<EsqlDeleteViewResponse> => {
     if (names.length === 0) {
       return Promise.reject(
         new EsqlViewsClientError('At least one ES|QL view name is required', 400)
@@ -120,12 +123,12 @@ export const createEsqlViewsClient = (http: HttpStart): EsqlViewsClient => {
     }
 
     if (names.length === 1) {
-      return runRequest(() => http.delete<EsqlViewMutationResponse>(getViewRoute(names[0])));
+      return runRequest(() => http.delete<EsqlDeleteViewResponse>(getViewRoute(names[0])));
     }
 
     const request: DeleteEsqlViewsRequest = { names };
     return runRequest(() =>
-      http.post<EsqlViewMutationResponse>(VIEWS_BULK_DELETE_ROUTE, {
+      http.post<EsqlDeleteViewResponse>(VIEWS_BULK_DELETE_ROUTE, {
         body: JSON.stringify(request),
       })
     );

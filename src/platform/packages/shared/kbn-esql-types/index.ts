@@ -32,7 +32,6 @@ export {
   type EsqlViewsResult,
   type UpsertEsqlViewRequest,
   type DeleteEsqlViewsRequest,
-  type EsqlViewMutationResponse,
   type EsqlDataset,
   type EsqlDatasetsResult,
 } from './src/sources_autocomplete_types';

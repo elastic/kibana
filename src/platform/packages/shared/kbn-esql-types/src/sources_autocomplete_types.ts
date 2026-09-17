@@ -65,10 +65,6 @@ export interface DeleteEsqlViewsRequest {
   names: string[];
 }
 
-export interface EsqlViewMutationResponse {
-  acknowledged: boolean;
-}
-
 export interface EsqlDataset {
   name: string;
   data_source: string;
