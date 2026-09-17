@@ -275,11 +275,7 @@ test.beforeEach(async ({ pageObjects }) => {
 For a Page Object used by a single plugin, keep it next to the tests in `test/scout/ui/fixtures/page_objects/` and extend the base `test` (or `spaceTest`) to add it to the `pageObjects` fixture:
 
 ```ts
-import type {
-  PageObjects,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '@kbn/scout';
+import type { PageObjects, ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { MyPluginPage } from './page_objects';
 
@@ -315,11 +311,7 @@ export type { SaveQueryOptions } from './saved_query_management_menu';
 The consumer then imports the Page Object via the owner's `@kbn/<plugin>` subpath and registers it on its own `pageObjects` fixture:
 
 ```ts
-import type {
-  PageObjects,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '@kbn/scout';
+import type { PageObjects, ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 // Page Object owned by the unified_search plugin, reused here as a test helper:
 import { SavedQueryManagementMenu } from '@kbn/unified-search-plugin/test/scout/ui/fixtures/page_objects';
