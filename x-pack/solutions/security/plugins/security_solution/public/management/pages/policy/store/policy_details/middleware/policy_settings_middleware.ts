@@ -25,6 +25,8 @@ import {
   sendPutPackagePolicy,
 } from '../../../../../services/policies/ingest';
 import type { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
+import { ExperimentalFeaturesService } from '../../../../../../common/experimental_features_service';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 
 export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
@@ -41,25 +43,31 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
 
     try {
       policyItem = (await sendGetPackagePolicy(http, id)).item;
-      // Default each OS notification message from its own stored value when empty.
-      if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
+      // sets default user notification message if policy config message is empty.
+      // The per-OS form makes each OS's message independently editable, so under that flag each
+      // one defaults from its own value; defaulting them together would overwrite a message the
+      // user set on macOS or Linux whenever the Windows one is empty.
+      if (ExperimentalFeaturesService.get().perOsPolicySettings) {
+        for (const os of [
+          PolicyOperatingSystem.windows,
+          PolicyOperatingSystem.mac,
+          PolicyOperatingSystem.linux,
+        ]) {
+          if (policyItem.inputs[0].config.policy.value[os].popup.malware.message === '') {
+            policyItem.inputs[0].config.policy.value[os].popup.malware.message =
+              DefaultPolicyNotificationMessage;
+          }
+        }
+      } else if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.malware.message =
           DefaultPolicyNotificationMessage;
-      }
-      if (policyItem.inputs[0].config.policy.value.mac.popup.malware.message === '') {
         policyItem.inputs[0].config.policy.value.mac.popup.malware.message =
           DefaultPolicyNotificationMessage;
-      }
-      if (policyItem.inputs[0].config.policy.value.linux.popup.malware.message === '') {
         policyItem.inputs[0].config.policy.value.linux.popup.malware.message =
           DefaultPolicyNotificationMessage;
       }
       if (policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message =
-          DefaultPolicyNotificationMessage;
-      }
-      if (policyItem.inputs[0].config.policy.value.mac.popup.ransomware.message === '') {
-        policyItem.inputs[0].config.policy.value.mac.popup.ransomware.message =
           DefaultPolicyNotificationMessage;
       }
       if (policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message === '') {

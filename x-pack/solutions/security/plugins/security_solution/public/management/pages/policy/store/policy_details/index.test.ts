@@ -20,15 +20,17 @@ import type { MiddlewareActionSpyHelper } from '../../../../../common/store/test
 import { createSpyMiddleware } from '../../../../../common/store/test_utils';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import type { AppAction } from '../../../../../common/store/actions';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import type { AppAction } from '../../../../../common/store/actions';
 
 describe('policy details: ', () => {
   let store: Store;
   let getState: (typeof store)['getState'];
-  let dispatch: Dispatch<PolicyDetailsAction | AppAction>;
+  let dispatch: Dispatch<PolicyDetailsAction>;
   let policyItem: PolicyData;
 
   const generateNewPolicyItemMock = (): PolicyData => {
@@ -446,6 +448,12 @@ describe('policy details: ', () => {
     let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
     let http: AppContextTestRender['coreStart']['http'];
 
+    const setPerOsFlag = (perOsPolicySettings: boolean) => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, perOsPolicySettings },
+      });
+    };
+
     beforeEach(() => {
       let actionSpyMiddleware: MiddlewareActionSpyHelper<PolicyDetailsState>['actionSpyMiddleware'];
       const { coreStart, depsStart } = createAppRootMockRenderer();
@@ -461,49 +469,47 @@ describe('policy details: ', () => {
       dispatch = store.dispatch;
     });
 
-    const loadPolicyFromUrl = async (item: PolicyData) => {
-      item.policy_ids = [];
-      http.get.mockResolvedValueOnce({
-        item,
-        success: true,
-      });
-
-      const serverReturnedPolicy = waitForAction('serverReturnedPolicyDetailsData');
-      dispatch({
-        type: 'userChangedUrl',
-        payload: {
-          pathname: `/administration/policy/${item.id || 'policy-1'}/settings`,
-          search: '',
-          hash: '',
-        },
-      });
-      await serverReturnedPolicy;
-    };
-
-    it('should keep a custom macOS malware message when Windows malware message is empty', async () => {
-      const customMacMalwareMessage = 'Custom macOS malware notification';
-      const loadedPolicy = generateNewPolicyItemMock();
-      loadedPolicy.id = 'policy-1';
-      loadedPolicy.inputs[0].config.policy.value.windows.popup.malware.message = '';
-      loadedPolicy.inputs[0].config.policy.value.mac.popup.malware.message =
-        customMacMalwareMessage;
-
-      await loadPolicyFromUrl(loadedPolicy);
-
-      const loadedConfig = policyDetails(getState())?.inputs[0].config.policy.value;
-      expect(loadedConfig?.windows.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
-      expect(loadedConfig?.mac.popup.malware.message).toEqual(customMacMalwareMessage);
+    afterEach(() => {
+      setPerOsFlag(allowedExperimentalValues.perOsPolicySettings);
     });
 
-    it('should default an empty macOS ransomware message on load', async () => {
+    const loadPolicyWithMessages = async (windowsMessage: string, macMessage: string) => {
       const loadedPolicy = generateNewPolicyItemMock();
       loadedPolicy.id = 'policy-1';
-      loadedPolicy.inputs[0].config.policy.value.mac.popup.ransomware.message = '';
+      loadedPolicy.policy_ids = [];
+      loadedPolicy.inputs[0].config.policy.value.windows.popup.malware.message = windowsMessage;
+      loadedPolicy.inputs[0].config.policy.value.mac.popup.malware.message = macMessage;
 
-      await loadPolicyFromUrl(loadedPolicy);
+      http.get.mockResolvedValueOnce({ item: loadedPolicy, success: true });
 
-      const loadedConfig = policyDetails(getState())?.inputs[0].config.policy.value;
-      expect(loadedConfig?.mac.popup.ransomware.message).toEqual(DefaultPolicyNotificationMessage);
+      const serverReturnedPolicy = waitForAction('serverReturnedPolicyDetailsData');
+      // userChangedUrl is an app-level action, outside this store's own action union.
+      (dispatch as Dispatch<AppAction>)({
+        type: 'userChangedUrl',
+        payload: { pathname: '/administration/policy/policy-1/settings', search: '', hash: '' },
+      });
+      await serverReturnedPolicy;
+
+      return policyDetails(getState())?.inputs[0].config.policy.value;
+    };
+
+    it('keeps a per-OS malware message when the flag is on and the Windows one is empty', async () => {
+      setPerOsFlag(true);
+
+      const loaded = await loadPolicyWithMessages('', 'Custom macOS malware notification');
+
+      expect(loaded?.windows.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
+      expect(loaded?.mac.popup.malware.message).toEqual('Custom macOS malware notification');
+    });
+
+    it('defaults every OS from the Windows message when the flag is off', async () => {
+      setPerOsFlag(false);
+
+      const loaded = await loadPolicyWithMessages('', 'Custom macOS malware notification');
+
+      expect(loaded?.windows.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
+      expect(loaded?.mac.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
+      expect(loaded?.linux.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
     });
   });
 });
