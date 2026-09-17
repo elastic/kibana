@@ -16,9 +16,9 @@ import { useEpisodesHistogramQuery } from './use_episodes_histogram_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeSourceHistogram } from '../types/episode_data_source';
+import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
-import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 
 jest.mock('../utils/execute_esql_query');
@@ -86,6 +86,7 @@ describe('useEpisodesHistogramQuery', () => {
     expect(result.current.table?.type).toBe('datatable');
     expect(result.current.isCapHit).toBe(false);
     expect(result.current.error).toBeUndefined();
+    expect(result.current.sourceErrors).toEqual([]);
   });
 
   it('sets isCapHit when result has exactly HISTOGRAM_EPISODE_LIMIT rows', async () => {
@@ -112,7 +113,7 @@ describe('useEpisodesHistogramQuery', () => {
     expect(result.current.isCapHit).toBe(true);
   });
 
-  it('returns error when query fails', async () => {
+  it('returns sourceErrors and still builds a table when the v2 query fails', async () => {
     const mockError = new Error('ES|QL failed');
     mockExecuteEsqlQuery.mockRejectedValue(mockError);
 
@@ -128,8 +129,9 @@ describe('useEpisodesHistogramQuery', () => {
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.error).toBeDefined();
-    expect(result.current.table).toBeUndefined();
+    expect(result.current.error).toBeUndefined();
+    expect(result.current.table).toBeDefined();
+    expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: mockError }]);
   });
 
   it('passes breakdownField to the query builder', async () => {
@@ -342,5 +344,8 @@ describe('useEpisodesHistogramQuery', () => {
 
     expect(result.current.table).toBeDefined();
     expect(result.current.error).toBeUndefined();
+    expect(result.current.sourceErrors).toEqual([
+      { sourceId: 'test-source', error: new Error('source fetch failed') },
+    ]);
   });
 });
