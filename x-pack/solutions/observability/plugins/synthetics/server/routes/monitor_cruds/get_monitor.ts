@@ -15,6 +15,7 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { maskMonitorParams } from '../../../common/utils/mask_monitor_params';
+import { canRevealParameterValues } from '../../../common/utils/can_reveal_parameter_values';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -42,14 +43,15 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     try {
       const { internal, hideParams } = request.query;
 
-      const canSave =
-        (
-          await coreStart?.capabilities.resolveCapabilities(request, {
-            capabilityPath: 'uptime.*',
-          })
-        ).uptime.save ?? false;
+      const capabilities = await coreStart?.capabilities.resolveCapabilities(request, {
+        capabilityPath: 'uptime.*',
+      });
+      const canRevealParams = canRevealParameterValues({
+        canSave: Boolean(capabilities?.uptime?.save),
+        canReadParamValues: Boolean(capabilities?.uptime?.canReadParamValues),
+      });
 
-      if (Boolean(canSave)) {
+      if (canRevealParams) {
         // only user with write permissions can decrypt the monitor
         const monitor = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
         const normalizedMonitor = hideParams
