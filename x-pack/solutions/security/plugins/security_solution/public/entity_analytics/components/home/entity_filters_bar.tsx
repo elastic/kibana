@@ -115,31 +115,34 @@ export const EntityFiltersBar: React.FC<Props> = ({
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const filterCounts = useEntityFilterBarCounts({ spaceId, view, filter: esFilter });
-
+  const { counts, isLoading: isFiltersCountLoading } = useEntityFilterBarCounts({
+    spaceId,
+    view,
+    filter: esFilter,
+  });
   // static options
   const entityTypeOptions = ENTITY_TYPE_OPTIONS.map((value) => ({
     value,
-    count: filterCounts.entity_types[value] ?? 0,
+    count: counts.entity_types[value] ?? 0,
   }));
 
   const riskLevelOptions = RISK_LEVEL_OPTIONS.map((value) => ({
     value,
-    count: filterCounts.risk_levels[value] ?? 0,
+    count: counts.risk_levels[value] ?? 0,
   }));
 
   const criticalityOptions = ValidCriticalityLevels.map((value) => ({
     value,
-    count: filterCounts.asset_criticality[value] ?? 0,
+    count: counts.asset_criticality[value] ?? 0,
   }));
 
   const dataSourceOptions = [
-    ...Object.keys(filterCounts.data_sources).map((value) => ({
+    ...Object.keys(counts.data_sources).map((value) => ({
       value,
-      count: filterCounts.data_sources[value],
+      count: counts.data_sources[value],
     })),
     ...filters.dataSources
-      .filter((v) => !(v in filterCounts.data_sources))
+      .filter((v) => !(v in counts.data_sources))
       .map((v) => ({ value: v, count: 0 })),
   ];
 
@@ -147,11 +150,11 @@ export const EntityFiltersBar: React.FC<Props> = ({
     ...[...watchlistNames.entries()].map(([id, name]) => ({
       id,
       name,
-      count: filterCounts.watchlists[id] ?? 0,
+      count: counts.watchlists[id] ?? 0,
     })),
     ...filters.watchlists
       .filter((id) => !watchlistNames.has(id))
-      .map((id) => ({ id, name: id, count: filterCounts.watchlists[id] ?? 0 })),
+      .map((id) => ({ id, name: id, count: counts.watchlists[id] ?? 0 })),
   ];
 
   return (
@@ -174,6 +177,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
               </EuiFlexGroup>
             </ItemWithCount>
           )}
+          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
@@ -204,6 +208,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
               })()}
             </ItemWithCount>
           )}
+          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
@@ -224,6 +229,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
               />
             </ItemWithCount>
           )}
+          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
@@ -239,6 +245,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
               <EntitySourceValue values={toEntitySourceArray(s)} textSize="s" />
             </ItemWithCount>
           )}
+          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
@@ -253,6 +260,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
             const opt = watchlistOptions.find((o) => o.id === id);
             return <ItemWithCount count={opt?.count ?? 0}>{opt?.name ?? id}</ItemWithCount>;
           }}
+          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
