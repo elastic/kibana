@@ -19,6 +19,7 @@ import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-serv
 import { z } from '@kbn/zod';
 
 import { resolveWorkloadBinder } from './bindings';
+import { parseCreateServiceAccountParams } from './create_params';
 import type { ServiceAccountCredentialStore } from './credentials';
 import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import type { ServiceAccountsBackend } from './types';
@@ -29,7 +30,6 @@ import {
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_MAX_ROLES,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
-  serviceAccountNameSchema,
   serviceAccountRoleNameSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
@@ -139,16 +139,12 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    // Re-validated here rather than trusted from the route, because the name is interpolated
-    // into an Elasticsearch path and callers of the server contract never pass through the route.
-    const parsedName = serviceAccountNameSchema.safeParse(params.name);
-    if (!parsedName.success) {
-      throw Boom.badRequest(`Cannot create a service account: invalid name [${params.name}]`);
-    }
-    const name = parsedName.data;
+    // The schema refuses an empty `roles` rather than letting it fall through to the derivation
+    // below, which would answer an explicit "no roles" with the widest possible grant.
+    const { name, roles: requestedRoles } = parseCreateServiceAccountParams(params);
     const serviceAccountId = `${namespace}/${name}`;
 
-    const derivedRoles = params.roles ?? user.roles ?? [];
+    const derivedRoles = requestedRoles ?? user.roles ?? [];
     const roles = derivedRoles.length > 0 ? derivedRoles : [ES_SERVICE_ACCOUNT_FALLBACK_ROLE];
 
     if (derivedRoles.length === 0) {
@@ -205,13 +201,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       this.logger.error(`Failed to create service account: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
-
-    const created = await this.readAccount(esClient, namespace, name);
-    if (!created) {
-      throw Boom.internal(`Service account [${serviceAccountId}] was not found after creation`);
-    }
-
-    return { id: created.id, name: created.name };
+    return { id: serviceAccountId, name };
   }
 
   // See https://github.com/elastic/kibana/issues/284465.

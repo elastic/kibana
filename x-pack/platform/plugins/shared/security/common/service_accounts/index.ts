@@ -17,6 +17,7 @@ export {
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
 } from './constants';
 export {
+  createServiceAccountParamsSchema,
   serviceAccountIdSchema,
   serviceAccountNameSchema,
   serviceAccountRoleNameSchema,

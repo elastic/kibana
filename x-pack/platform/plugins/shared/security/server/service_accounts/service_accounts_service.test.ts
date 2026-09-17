@@ -35,10 +35,11 @@ describe('ServiceAccountsService', () => {
 
     return {
       config: createConfig(
-        ConfigSchema.validate(config, { serverless: config.serviceAccounts !== undefined }),
+        ConfigSchema.validate(config, { serverless: true }),
         loggingSystemMock.createLogger(),
         { isTLSEnabled: false }
       ),
+      isServerless: true,
       license: licenseMock.create(),
       uiam: uiamServiceMock.create(),
       checkPrivilegesWithRequest: jest.fn(),
@@ -59,9 +60,11 @@ describe('ServiceAccountsService', () => {
   };
 
   let service: ServiceAccountsService;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    service = new ServiceAccountsService(loggingSystemMock.create().get('service-accounts'));
+    logger = loggingSystemMock.createLogger();
+    service = new ServiceAccountsService(logger);
   });
 
   describe('#start', () => {
@@ -69,30 +72,43 @@ describe('ServiceAccountsService', () => {
       expect(service.start(startParams({ serviceAccounts: { enabled: false } }))).toBeNull();
     });
 
-    it('returns null when the feature is not configured at all (non-serverless)', () => {
+    it('returns null when the feature is not configured at all', () => {
       expect(service.start(startParams({}))).toBeNull();
     });
 
-    it('selects the UIAM backend when UIAM and project context are available', () => {
+    it('selects the UIAM backend on serverless', () => {
       expect(
         service.start(startParams({ serviceAccounts: { enabled: true } }))?.backend
       ).toBeInstanceOf(UiamServiceAccounts);
     });
 
-    it('falls back to the Elasticsearch backend when UIAM is unavailable', () => {
+    it('selects the Elasticsearch backend outside serverless', () => {
       expect(
-        service.start(startParams({ serviceAccounts: { enabled: true } }, { uiam: undefined }))
+        service.start(startParams({ serviceAccounts: { enabled: true } }, { isServerless: false }))
           ?.backend
       ).toBeInstanceOf(EsServiceAccounts);
     });
 
-    it('falls back to Elasticsearch when project context is unavailable', () => {
-      expect(
-        service.start(
-          startParams({ serviceAccounts: { enabled: true } }, { cloudProjectContext: undefined })
-        )?.backend
-      ).toBeInstanceOf(EsServiceAccounts);
+    // The offering decides, not what happens to be wired up: a serverless deployment must never
+    // reach Elasticsearch's service accounts, and a traditional one must never reach UIAM.
+    it('selects the Elasticsearch backend outside serverless even when UIAM is configured', () => {
+      const params = startParams({ serviceAccounts: { enabled: true } }, { isServerless: false });
+
+      expect(service.start(params)?.backend).toBeInstanceOf(EsServiceAccounts);
+      expect(params.uiam.createServiceAccount).not.toHaveBeenCalled();
     });
+
+    it.each([{ uiam: undefined }, { cloudProjectContext: undefined }])(
+      'reports the feature as unavailable on serverless when UIAM is not available (%j)',
+      (overrides) => {
+        expect(
+          service.start(startParams({ serviceAccounts: { enabled: true } }, overrides))
+        ).toBeNull();
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Service accounts are enabled but UIAM is not available')
+        );
+      }
+    );
 
     it('passes the configured refresh lifetime to the UIAM backend', async () => {
       jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
@@ -128,7 +144,7 @@ describe('ServiceAccountsService', () => {
 
     it('refuses workload bindings on the Elasticsearch backend', async () => {
       const start = service.start(
-        startParams({ serviceAccounts: { enabled: true } }, { uiam: undefined })
+        startParams({ serviceAccounts: { enabled: true } }, { isServerless: false })
       )!;
 
       await expect(

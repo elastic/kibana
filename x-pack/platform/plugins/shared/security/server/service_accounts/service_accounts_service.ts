@@ -31,6 +31,8 @@ import type { UiamServicePublic } from '../uiam';
 
 export interface ServiceAccountsServiceStartParams {
   config: ConfigType;
+  /** Whether this is a serverless deployment, which is what selects the backend. */
+  isServerless: boolean;
   license: SecurityLicense;
   /** The UIAM service, when UIAM is configured for this deployment. */
   uiam?: UiamServicePublic;
@@ -55,6 +57,7 @@ export class ServiceAccountsService {
    */
   start({
     config,
+    isServerless,
     license,
     uiam,
     checkPrivilegesWithRequest,
@@ -67,77 +70,87 @@ export class ServiceAccountsService {
     getCurrentUserProfileId,
     getSpaceId,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
-    if (!config.serviceAccounts?.enabled) {
+    if (!config.serviceAccounts.enabled) {
       this.logger.debug('Service accounts are not enabled.');
       return null;
     }
 
-    // UIAM and Elasticsearch are mutually exclusive: serverless deployments run UIAM, every
-    // other offering runs Elasticsearch's user-managed service accounts. Selection keys off UIAM
-    // availability rather than the build flavor so the Elasticsearch path stays testable.
-    if (!uiam || !cloudProjectContext) {
-      this.logger.debug('UIAM is not available; using the Elasticsearch service accounts backend.');
+    // UIAM and Elasticsearch are mutually exclusive, and the offering decides which one runs:
+    // serverless runs UIAM, every other offering runs Elasticsearch's user-managed service
+    // accounts. Deliberately not keyed off UIAM availability. A serverless deployment whose
+    // UIAM configuration is incomplete has to report the feature as unavailable, rather than
+    // fall through to creating Elasticsearch accounts the control plane knows nothing about.
+    if (isServerless) {
+      if (!uiam || !cloudProjectContext) {
+        this.logger.error(
+          'Service accounts are enabled but UIAM is not available, so they cannot be offered on ' +
+            'this deployment. Elasticsearch-backed service accounts are not supported on serverless.'
+        );
+        return null;
+      }
+
+      const backend = new UiamServiceAccounts({
+        logger: this.logger,
+        requestLifetimeMs: config.serviceAccounts.requestLifetime.asMilliseconds(),
+        license,
+        uiam,
+        checkPrivilegesWithRequest,
+        cloudProjectContext,
+        getCurrentUser,
+      });
+
+      const bindingsLogger = this.logger.get('workload-bindings');
+      const store = new WorkloadBindingStore({
+        client: savedObjects.getUnsafeInternalClient({
+          includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
+        }),
+        encryptedClient: encryptedSavedObjects.getClient({
+          includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
+        }),
+        isEncryptionError: encryptedSavedObjects.isEncryptionError,
+        logger: bindingsLogger,
+      });
+
       return {
-        backend: new EsServiceAccounts({
-          logger: this.logger.get('elasticsearch'),
+        backend,
+        workloads: new ServiceAccountWorkloadBindings({
+          logger: bindingsLogger,
           license,
-          clusterClient,
+          store,
+          backend,
           checkPrivilegesWithRequest,
-          credentialStore: new ServiceAccountCredentialStore({
-            client: savedObjects.getUnsafeInternalClient({
-              includedHiddenTypes: [SERVICE_ACCOUNT_CREDENTIAL_TYPE],
-            }),
-            encryptedClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: [SERVICE_ACCOUNT_CREDENTIAL_TYPE],
-            }),
-            isEncryptionError: encryptedSavedObjects.isEncryptionError,
-            logger: this.logger.get('credentials'),
-          }),
-          canEncrypt,
           getCurrentUser,
           getCurrentUserProfileId,
+          getSpaceId,
+          canEncrypt,
         }),
-        // Workload binding is a UIAM-only capability until the Elasticsearch token exchange
-        // lands; see https://github.com/elastic/kibana/issues/284465.
-        workloads: createNotImplementedWorkloadBindings(),
       };
     }
 
-    const backend = new UiamServiceAccounts({
-      logger: this.logger,
-      requestLifetimeMs: config.serviceAccounts.requestLifetime.asMilliseconds(),
-      license,
-      uiam,
-      checkPrivilegesWithRequest,
-      cloudProjectContext,
-      getCurrentUser,
-    });
-
-    const bindingsLogger = this.logger.get('workload-bindings');
-    const store = new WorkloadBindingStore({
-      client: savedObjects.getUnsafeInternalClient({
-        includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
-      }),
-      encryptedClient: encryptedSavedObjects.getClient({
-        includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
-      }),
-      isEncryptionError: encryptedSavedObjects.isEncryptionError,
-      logger: bindingsLogger,
-    });
-
+    this.logger.debug('Using the Elasticsearch service accounts backend.');
     return {
-      backend,
-      workloads: new ServiceAccountWorkloadBindings({
-        logger: bindingsLogger,
+      backend: new EsServiceAccounts({
+        logger: this.logger.get('elasticsearch'),
         license,
-        store,
-        backend,
+        clusterClient,
         checkPrivilegesWithRequest,
+        credentialStore: new ServiceAccountCredentialStore({
+          client: savedObjects.getUnsafeInternalClient({
+            includedHiddenTypes: [SERVICE_ACCOUNT_CREDENTIAL_TYPE],
+          }),
+          encryptedClient: encryptedSavedObjects.getClient({
+            includedHiddenTypes: [SERVICE_ACCOUNT_CREDENTIAL_TYPE],
+          }),
+          isEncryptionError: encryptedSavedObjects.isEncryptionError,
+          logger: this.logger.get('credentials'),
+        }),
+        canEncrypt,
         getCurrentUser,
         getCurrentUserProfileId,
-        getSpaceId,
-        canEncrypt,
       }),
+      // Workload binding is a UIAM-only capability until the Elasticsearch token exchange
+      // lands; see https://github.com/elastic/kibana/issues/284465.
+      workloads: createNotImplementedWorkloadBindings(),
     };
   }
 }

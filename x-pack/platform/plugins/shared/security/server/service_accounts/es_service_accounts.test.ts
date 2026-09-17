@@ -50,13 +50,12 @@ describe('EsServiceAccounts', () => {
   let getCurrentUser: jest.Mock;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
 
-  /** Queues the transport responses for the happy path: pre-flight miss, PUT, token, read-back. */
+  /** Queues the transport responses for the happy path: pre-flight miss, PUT, token. */
   const mockHappyPath = () => {
     esClient.asCurrentUser.transport.request
       .mockResolvedValueOnce({}) // pre-flight GET: no such account
       .mockResolvedValueOnce({ created: true }) // PUT
-      .mockResolvedValueOnce({ created: true, token: { value: 'AAEAAWtpYmFuYS9...' } })
-      .mockResolvedValueOnce(accountEntry()); // read-back
+      .mockResolvedValueOnce({ created: true, token: { value: 'AAEAAWtpYmFuYS9...' } });
   };
 
   beforeEach(() => {
@@ -110,6 +109,9 @@ describe('EsServiceAccounts', () => {
         querystring: { refresh: 'wait_for' },
       });
       expect(calls[2][0]).toEqual({ method: 'POST', path: TOKEN_PATH });
+      // No read-back: the principal and the name are the ones just written, so a completed
+      // creation has no remaining way to fail.
+      expect(calls).toHaveLength(3);
 
       expect(credentialStore.set).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -213,8 +215,7 @@ describe('EsServiceAccounts', () => {
           'kibana/nightshift-relay': { type: 'built_in', role_descriptor: {} },
         })
         .mockResolvedValueOnce({ created: true })
-        .mockResolvedValueOnce({ created: true, token: { value: 'token' } })
-        .mockResolvedValueOnce(accountEntry());
+        .mockResolvedValueOnce({ created: true, token: { value: 'token' } });
 
       await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
         id: 'kibana/nightshift-relay',
@@ -265,6 +266,17 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
+    // An explicit empty list means "no roles", which is not the same question as "work them out
+    // for me". Answering it with the widest possible grant would be the worst reading of it.
+    it('rejects an empty `roles` rather than falling back to `superuser`', async () => {
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles: [] })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
     it('rolls back the token and the account when the credential cannot be stored', async () => {
       mockHappyPath();
       credentialStore.set.mockRejectedValue(new Error('encryption key rotated'));
@@ -310,18 +322,6 @@ describe('EsServiceAccounts', () => {
         expect.stringContaining('Failed to create service account')
       );
       expect(credentialStore.set).not.toHaveBeenCalled();
-    });
-
-    it('rejects with a 500 when the account cannot be read back', async () => {
-      esClient.asCurrentUser.transport.request
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({ created: true })
-        .mockResolvedValueOnce({ created: true, token: { value: 'token' } })
-        .mockResolvedValueOnce({});
-
-      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
-        output: { statusCode: 500 },
-      });
     });
   });
 

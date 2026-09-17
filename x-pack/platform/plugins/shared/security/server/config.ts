@@ -335,13 +335,10 @@ export const ConfigSchema = schema.object({
     serverless: schema.boolean({ defaultValue: true }),
   }),
 
-  // Available in both offerings, which run different backends: UIAM on Serverless, and
-  // Elasticsearch's user-managed service accounts everywhere else. Two explicit branches rather
-  // than one shared schema, so the defaults can diverge later without reshaping the setting.
-  serviceAccounts: offeringBasedSchema({
-    serverless: serviceAccountsSchema,
-    traditional: serviceAccountsSchema,
-  }),
+  // Offering-independent: the setting is the same everywhere, and the backend behind it is chosen
+  // at runtime. UIAM on Serverless, Elasticsearch's user-managed service accounts everywhere
+  // else. See `ServiceAccountsService#start`.
+  serviceAccounts: serviceAccountsSchema,
 
   // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({

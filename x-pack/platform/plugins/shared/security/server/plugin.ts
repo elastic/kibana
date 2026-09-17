@@ -541,6 +541,7 @@ export class SecurityPlugin
 
     this.serviceAccountsStart = this.serviceAccountsService.start({
       config,
+      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
       license: this.securityLicense!,
       uiam,
       checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,

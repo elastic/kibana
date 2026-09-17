@@ -15,8 +15,9 @@
 export interface CreateServiceAccountParams {
   name: string;
   /**
-   * Role names to bound the new account's privileges by for supported backends. Defaults to the creating user's own
-   * roles when available.
+   * Role names to bound the new account's privileges by, on backends that support them. Omit to
+   * have them derived from the creating user's own roles where possible. An empty list is
+   * rejected rather than treated as "derive them for me", because the two mean different things.
    */
   roles?: string[];
 }
