@@ -307,10 +307,15 @@ xpack.pageRenderScreenshotting.url: https://page-render-service.page-render-serv
 # reads in serverless.oblt.yml.
 xpack.pageRenderScreenshotting.ssl.certificate: /mnt/elastic-internal/http-certs/tls.crt
 xpack.pageRenderScreenshotting.ssl.key: /mnt/elastic-internal/http-certs/tls.key
-# TODO(response-ops-team#682): certificateAuthorities is deliberately unset here. The
-# service's certificate comes from ecp-issuer, which is not in the system trust store, so
-# this needs the same CA bundle the operator sets on xpack.security.uiam.ssl -- confirm
-# the path in QA rather than guessing it here.
+# The same CA, from the same mount. cert-manager writes ca.crt into the secret it issues,
+# and both this Kibana's certificate and the service's come from the platform CA -- so the
+# CA that signed ours verifies theirs. That is what "no key material for us to distribute"
+# means in practice.
+#
+# If this file turns out not to be present in the mount, the fix is to point at whatever
+# bundle the operator sets on xpack.security.uiam.ssl.certificateAuthorities. Do not reach
+# for verificationMode: none -- the request carries a live bearer credential.
+xpack.pageRenderScreenshotting.ssl.certificateAuthorities: /mnt/elastic-internal/http-certs/ca.crt
 
 # Disabled Platform plugins
 monitoring.enabled: false
