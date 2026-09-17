@@ -42,6 +42,13 @@ const LazyDesignToolsButton = lazy(() =>
   }))
 );
 
+// The launcher loads the annotations layer itself on first use.
+const LazyAnnotationsLauncher = lazy(() =>
+  import('./annotations/annotations_launcher').then(({ AnnotationsLauncher }) => ({
+    default: AnnotationsLauncher,
+  }))
+);
+
 export class DeveloperToolbarPlugin
   implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
 {
@@ -86,6 +93,15 @@ export class DeveloperToolbarPlugin
       children: (
         <Suspense fallback={null}>
           <LazyDesignToolsButton />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
+      id: 'Annotations',
+      children: (
+        <Suspense fallback={null}>
+          <LazyAnnotationsLauncher core={core} />
         </Suspense>
       ),
     });
