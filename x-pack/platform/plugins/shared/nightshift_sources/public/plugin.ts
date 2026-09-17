@@ -7,10 +7,9 @@
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { NightshiftSourcesRepositoryClient } from './api';
-import { createNightshiftSourcesRepositoryClient } from './api';
 
 export interface NightshiftSourcesPublicPluginStart {
-  nightshiftSourcesRepositoryClient: NightshiftSourcesRepositoryClient;
+  getClient: () => Promise<NightshiftSourcesRepositoryClient>;
 }
 
 export class NightshiftSourcesPublicPlugin
@@ -19,8 +18,16 @@ export class NightshiftSourcesPublicPlugin
   setup(): void {}
 
   start(core: CoreStart): NightshiftSourcesPublicPluginStart {
+    let clientPromise: Promise<NightshiftSourcesRepositoryClient> | undefined;
     return {
-      nightshiftSourcesRepositoryClient: createNightshiftSourcesRepositoryClient(core),
+      getClient: () => {
+        if (!clientPromise) {
+          clientPromise = import('./api').then(({ createNightshiftSourcesRepositoryClient }) =>
+            createNightshiftSourcesRepositoryClient(core)
+          );
+        }
+        return clientPromise;
+      },
     };
   }
 }

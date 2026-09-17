@@ -6,7 +6,8 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { getSourceCommandQuery, validateSourceQuery } from './validate_source_query';
+import { getSourceCommandQuery } from '@kbn/nightshift-shared';
+import { validateSourceQuery } from './validate_source_query';
 
 const expectRejected = (esql: string, messagePart: string) => {
   try {

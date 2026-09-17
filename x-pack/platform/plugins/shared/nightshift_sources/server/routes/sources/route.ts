@@ -19,7 +19,7 @@ import {
 import { createNightshiftSourcesServerRoute } from '../create_server_route';
 
 const sourceIdPathSchema = z.object({
-  sourceId: z.string().min(1).max(128),
+  sourceId: z.uuid(),
 });
 
 const listSourcesRoute = createNightshiftSourcesServerRoute({
@@ -40,8 +40,8 @@ const listSourcesRoute = createNightshiftSourcesServerRoute({
   }),
   handler: async ({ params, request, getSourcesClient }): Promise<ListSourcesResponse> => {
     const client = await getSourcesClient({ request });
-    const { page, per_page: perPage, enabled } = params.query;
-    return client.list({ page, perPage, enabled });
+    const { page, per_page: perPage, search, enabled } = params.query;
+    return client.list({ page, perPage, search, enabled });
   },
 });
 

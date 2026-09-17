@@ -57,3 +57,5 @@ export {
   type SourceMutationResponse,
   type SourceWithHealth,
 } from './src/sources/schema';
+
+export { getSourceCommandQuery, validateSourceQuery } from './src/sources/validate_source_query';

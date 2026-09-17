@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { getSourceCommandQuery } from '@kbn/nightshift-shared';
 import { isEsqlUnknownIndexError, isEsqlVerificationError, toBoom } from './es_errors';
-import { getSourceCommandQuery } from './validate_source_query';
 
 // ES|QL answers a wildcard that matches nothing with a single placeholder column of this name.
 const ESQL_EMPTY_RELATION_COLUMN = '<no-fields>';

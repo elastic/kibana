@@ -13,7 +13,7 @@ const MAX_SOURCE_ESQL_LENGTH = 10_000;
 const MAX_SOURCE_TAGS = 20;
 const MAX_SOURCE_TAG_LENGTH = 64;
 const MAX_SOURCES_PER_PAGE = 100;
-const DEFAULT_SOURCES_PER_PAGE = 50;
+const DEFAULT_SOURCES_PER_PAGE = 25;
 
 export type SourceHealth = 'ok' | 'view_missing' | 'view_drift' | 'unresolvable' | 'unknown';
 
@@ -74,6 +74,7 @@ export const listSourcesQuerySchema = z.object({
     .min(1)
     .max(MAX_SOURCES_PER_PAGE)
     .default(DEFAULT_SOURCES_PER_PAGE),
+  search: z.string().max(MAX_SOURCE_TITLE_LENGTH).optional(),
   enabled: z.stringbool().optional(),
 });
 

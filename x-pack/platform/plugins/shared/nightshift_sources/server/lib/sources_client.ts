@@ -134,16 +134,20 @@ export class SourcesClient {
   async list({
     page,
     perPage,
+    search,
     enabled,
   }: {
     page: number;
     perPage: number;
+    search?: string;
     enabled?: boolean;
   }): Promise<ListSourcesResponse> {
     const response = await this.deps.soClient.find<NightshiftSourceAttributes>({
       type: NIGHTSHIFT_SOURCE_SO_TYPE,
       page,
       perPage,
+      search: search ? `${search}*` : undefined,
+      searchFields: search ? ['title'] : undefined,
       sortField: 'title',
       sortOrder: 'asc',
       filter:
