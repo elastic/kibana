@@ -23,7 +23,7 @@ import {
   globalQuerySelector,
 } from '../../common/store/inputs/selectors';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
-import { useWatchlistNames } from '../components/home/use_watchlist_names';
+import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
 import { useTimeRangeParam } from '../components/home/use_time_range_param';
 import { useEntityFiltersParam } from '../components/home/use_entity_filters_param';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
@@ -54,7 +54,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     }
   }, [dataView, globalQuery, globalFilters]);
 
-  const watchlistNames = useWatchlistNames();
+  const { data: watchlistsData } = useGetWatchlists();
+  const watchlistNames = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const w of watchlistsData ?? []) {
+      if (w.id) map.set(w.id, w.name);
+    }
+    return map;
+  }, [watchlistsData]);
   const [timeRange, setTimeRange] = useTimeRangeParam();
   const [viewBy] = useState<'resolved' | 'raw'>('resolved');
 
