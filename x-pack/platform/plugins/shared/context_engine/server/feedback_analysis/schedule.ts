@@ -190,7 +190,8 @@ export const createFeedbackAnalysisScheduleService = ({
     async reconcile({ aiIndexId, spaceId, feedbackAnalysis, request }) {
       if (!feedbackAnalysis?.enabled) {
         // Uninstalling drops the trigger task with the document, so disabling needs no request.
-        await uninstall(aiIndexId, spaceId);
+        // Always target SCHEDULE_SPACE_ID so the document ID matches what run() addresses.
+        await uninstall(aiIndexId, SCHEDULE_SPACE_ID);
         log.debug(
           () =>
             `Removed feedback analysis schedule for AI index '${aiIndexId}' in space '${spaceId}'`
@@ -206,9 +207,12 @@ export const createFeedbackAnalysisScheduleService = ({
 
       const intervalMinutes = intervalMinutesFor(feedbackAnalysis);
       const client = await getManagedWorkflowsClient();
+      // Install into SCHEDULE_SPACE_ID so run()'s workflowIdSuffix (which also uses
+      // SCHEDULE_SPACE_ID) addresses the same workflow document regardless of which space
+      // the enable/disable request came from.
       await client.install(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: workflowIdSuffixFor(aiIndexId, spaceId),
+        spaceId: SCHEDULE_SPACE_ID,
+        workflowIdSuffix: workflowIdSuffixFor(aiIndexId, SCHEDULE_SPACE_ID),
         values: {
           aiIndexId,
           intervalMinutes,
@@ -222,9 +226,9 @@ export const createFeedbackAnalysisScheduleService = ({
       // reconciles: the schedule then follows whoever last saved it rather than expiring with the
       // account that first turned it on.
       await workflowsManagement.updateWorkflow(
-        workflowDocumentIdFor(aiIndexId, spaceId),
+        workflowDocumentIdFor(aiIndexId, SCHEDULE_SPACE_ID),
         { enabled: true },
-        spaceId,
+        SCHEDULE_SPACE_ID,
         request
       );
 
@@ -258,7 +262,7 @@ export const createFeedbackAnalysisScheduleService = ({
     },
 
     async remove({ aiIndexId, spaceId }) {
-      await uninstall(aiIndexId, spaceId);
+      await uninstall(aiIndexId, SCHEDULE_SPACE_ID);
       log.debug(
         () =>
           `Removed feedback analysis schedule for deleted AI index '${aiIndexId}' in space '${spaceId}'`

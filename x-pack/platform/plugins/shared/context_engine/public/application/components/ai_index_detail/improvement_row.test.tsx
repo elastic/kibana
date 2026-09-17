@@ -70,6 +70,9 @@ describe('ImprovementRow', () => {
   it('renders the proposed change and where it came from', () => {
     renderRow();
 
+    // Change fields are hidden behind "Show more" to avoid showing the full YAML by default.
+    fireEvent.click(screen.getByTestId('contextImprovementRationaleShowMore'));
+
     expect(screen.getByTestId('contextImprovementChange')).toHaveTextContent(
       'Refunds are accepted for 30 days.'
     );
