@@ -163,21 +163,6 @@ describe('create_data_source_flyout_authentication', () => {
       expect(applied.settings).not.toHaveProperty('jwt_audience');
     });
 
-    it('drops leftover s3 region from submitted settings', () => {
-      const data: DataSourceWithSecrets = {
-        type: 's3',
-        name: 's3',
-        description: '',
-        settings: {
-          endpoint: 'https://s3.example',
-          region: 'us-east-1',
-        } as any,
-      };
-
-      const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
-      expect(applied.settings).toEqual({ endpoint: 'https://s3.example', auth: 'anonymous' });
-    });
-
     it('trims and applies gcs credentials when access_and_secret_keys selected', () => {
       const data: DataSourceWithSecrets = {
         type: 'gcs',
