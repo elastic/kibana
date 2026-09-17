@@ -145,6 +145,12 @@ export class NightshiftInvestigationsPlugin
         const getSpaceId = (req: KibanaRequest) =>
           this.spaces?.spacesService.getSpaceId(req) ?? DEFAULT_SPACE_ID;
 
+        // Start deps are read lazily: tools are registered in setup() but only run after start().
+        const resolveConnectorCredentials = createConnectorCredentialResolver({
+          getDeps: () => ({ actions: this.actionsStart }),
+          logger: sandboxLogger.get('connector_credentials'),
+        });
+
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
           logger: sandboxLogger,
@@ -161,22 +167,26 @@ export class NightshiftInvestigationsPlugin
               logger: sandboxLogger,
             });
             if (telemetryConnectorId) {
+              const credentials = await resolveConnectorCredentials(
+                telemetryConnectorId,
+                callContext
+              );
+              const usesBasicAuth =
+                !('errorMessage' in credentials) &&
+                Boolean(
+                  credentials.env.CONNECTOR_SECRET_USER && credentials.env.CONNECTOR_SECRET_PASSWORD
+                );
               await writeElasticManifest({
                 conversationId,
                 apiClient: connectionManager.apiClient,
                 connectorId: telemetryConnectorId,
+                auth: usesBasicAuth ? 'basic' : 'apiKey',
                 logger: sandboxLogger,
               });
             }
           },
         });
         this.sandboxConnectionManager = connectionManager;
-
-        // Start deps are read lazily: tools are registered in setup() but only run after start().
-        const resolveConnectorCredentials = createConnectorCredentialResolver({
-          getDeps: () => ({ actions: this.actionsStart }),
-          logger: sandboxLogger.get('connector_credentials'),
-        });
 
         plugins.agentBuilder.tools.register(
           createSandboxBashTool({

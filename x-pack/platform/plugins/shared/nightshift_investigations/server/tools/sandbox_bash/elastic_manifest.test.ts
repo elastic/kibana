@@ -10,6 +10,15 @@ import type { SandboxApiClient } from './grpc_client';
 import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
 
 describe('renderElasticManifest', () => {
+  it('documents basic auth without embedding credentials', () => {
+    const content = renderElasticManifest('scout-telemetry', 'basic');
+
+    expect(content).toContain('`CONNECTOR_SECRET_USER`');
+    expect(content).toContain('`CONNECTOR_SECRET_PASSWORD`');
+    expect(content).toContain('-u "$CONNECTOR_SECRET_USER:$CONNECTOR_SECRET_PASSWORD"');
+    expect(content).not.toContain('Authorization: ApiKey');
+  });
+
   it('tells the agent which connector id unlocks the credentials', () => {
     const content = renderElasticManifest('elasticsearch-telemetry');
 

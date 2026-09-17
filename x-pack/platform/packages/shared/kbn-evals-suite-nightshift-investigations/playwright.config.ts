@@ -8,8 +8,26 @@
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-export default createPlaywrightEvalsConfig({
+const selection = process.env.NIGHTSHIFT_DATASETS;
+if (selection && !['all', 'investigate-lite', 'synthetic-smoke'].includes(selection)) {
+  throw new Error(
+    `Unknown NIGHTSHIFT_DATASETS: ${selection}. Choose investigate-lite or synthetic-smoke.`
+  );
+}
+
+const config = createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  // Restoring and reindexing a snapshot dominates the runtime of every spec here.
-  timeout: 10 * 60_000,
+  timeout: 55 * 60_000,
+  testIgnore:
+    process.env.NIGHTSHIFT_DATASETS === 'synthetic-smoke' ? '**/golden/**' : '**/smoke/**',
 });
+
+const goldenConfig: typeof config = {
+  ...config,
+  globalSetup: [
+    ...(typeof config.globalSetup === 'string' ? [config.globalSetup] : config.globalSetup ?? []),
+    require.resolve('./evals/golden/global_setup'),
+  ],
+};
+
+export default goldenConfig;
