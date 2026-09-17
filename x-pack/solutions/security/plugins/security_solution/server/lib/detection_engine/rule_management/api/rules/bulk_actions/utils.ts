@@ -7,8 +7,10 @@
 
 import type { ScheduleBackfillResults } from '@kbn/alerting-plugin/server/application/backfill/methods/schedule/types';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
+import type { BulkActionError } from './bulk_actions_response';
 
 interface HandleScheduleBackfillResultsParams {
   rules: RuleAlertType[];
@@ -19,6 +21,26 @@ interface HandleScheduleBackfillResultsOutcome {
   backfilled: RuleAlertType[];
   errors: Array<PromisePoolError<RuleAlertType, Error> | BulkOperationError>;
 }
+
+const RULE_NOT_FOUND_MESSAGE = 'Rule not found';
+
+/**
+ * Mutates the errors array in place: removes fetch-time "Rule not found" errors
+ * and pushes corresponding RULE_NOT_FOUND skip results into the skipped array.
+ * Used by the delete action to treat missing rules as skipped (idempotent delete).
+ */
+export const extractNotFoundAsSkipped = (
+  errors: BulkActionError[],
+  skipped: BulkActionSkipResult[]
+): void => {
+  for (let i = errors.length - 1; i >= 0; i--) {
+    const err = errors[i];
+    if ('item' in err && typeof err.item === 'string' && err.error.message === RULE_NOT_FOUND_MESSAGE) {
+      skipped.push({ id: err.item, skip_reason: 'RULE_NOT_FOUND' });
+      errors.splice(i, 1);
+    }
+  }
+};
 
 export const handleScheduleBackfillResults = ({
   results,

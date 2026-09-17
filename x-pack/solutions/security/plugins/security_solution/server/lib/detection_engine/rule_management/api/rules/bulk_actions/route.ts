@@ -52,6 +52,7 @@ import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
+import { extractNotFoundAsSkipped } from './utils';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
 import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
@@ -320,6 +321,9 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.delete: {
+              // Rules not found at fetch time are skipped for delete (idempotent semantics)
+              extractNotFoundAsSkipped(errors, skipped);
+
               // during dry run return early for delete, as no validations needed for this action
               if (isDryRun) {
                 // Populate `deleted` so the summary reflects the correct count of affected rules
@@ -331,7 +335,7 @@ export const performBulkActionRoute = (
 
               errors.push(...bulkDeleteResult.errors);
               deleted = bulkDeleteResult.rules;
-              skipped = bulkDeleteResult.skipped;
+              skipped = [...skipped, ...bulkDeleteResult.skipped];
               break;
             }
             case BulkActionTypeEnum.duplicate: {

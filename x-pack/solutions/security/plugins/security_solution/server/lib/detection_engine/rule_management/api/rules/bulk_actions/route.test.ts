@@ -232,6 +232,39 @@ describe('Perform bulk action route', () => {
       ]);
     });
 
+    it('returns 200 with skipped rules when rules are not found at fetch time', async () => {
+      const missingId = 'missing-rule-id';
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [],
+        errors: [{ id: missingId, error: { statusCode: 404 } }],
+      });
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [],
+        errors: [],
+        skipped: [],
+      });
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'patch',
+          path: DETECTION_ENGINE_RULES_BULK_ACTION,
+          body: { query: undefined, ids: [missingId], action: BulkActionTypeEnum.delete },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 0,
+        skipped: 1,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(response.body.attributes.results.skipped).toEqual([
+        { id: missingId, skip_reason: 'RULE_NOT_FOUND' },
+      ]);
+    });
+
     it('returns 500 when deletion fails with a non-404 error', async () => {
       clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
         rules: [],
