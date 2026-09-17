@@ -8,19 +8,12 @@
 import type { Subject } from 'rxjs';
 import { pairwise, concatMap, takeUntil } from 'rxjs';
 import type { CoreStart, FeatureFlagsStart, Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { FF_DUAL_PROCESS_ENABLED } from '../../../common';
 import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
-import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../../domain/constants';
 import { EngineDescriptorTypeName } from '../../domain/saved_objects';
 import type { EngineDescriptor } from '../../domain/saved_objects';
-import {
-  getExtractEntityTaskConfig,
-  getExtractEntityTaskId,
-  stopExtractEntityTask,
-} from '../../tasks/extract_entity_task';
 
 /**
  * Whether the dual-process log extraction architecture is active for this deployment.
@@ -35,10 +28,6 @@ export const isDualProcessEnabled = (featureFlags: FeatureFlagsStart): Promise<b
 // ---------------------------------------------------------------------------
 
 const MAX_ENGINES_PER_PAGE = 10_000;
-
-/** Returns the task type string for a non-priority extract entity task. */
-const getNonPriorityTaskType = (type: EntityType): string =>
-  `${getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority).type}:${type}`;
 
 /** Saved object ID for an engine descriptor, matching EngineDescriptorClient.getSavedObjectId. */
 const getEngineDescriptorSoId = (type: EntityType, namespace: string): string =>
@@ -72,11 +61,9 @@ async function findAllEngineDescriptors(coreStart: CoreStart): Promise<EngineEnt
  */
 async function teardownNonPriorityTasks({
   coreStart,
-  taskManager,
   logger,
 }: {
   coreStart: CoreStart;
-  taskManager: TaskManagerStartContract;
   logger: Logger;
 }): Promise<void> {
   const engines = await findAllEngineDescriptors(coreStart);
@@ -91,19 +78,16 @@ async function teardownNonPriorityTasks({
   await Promise.all(
     targets.map(async ({ attributes: { type }, namespace }) => {
       logger.info(
-        `Dual-process flag turned off: removing non-priority task for ${type} in namespace ${namespace}`
+        `Dual-process flag turned off: suspending non-priority extraction for ${type} in namespace ${namespace}`
       );
-      await stopExtractEntityTask({
-        taskManager,
-        logger,
-        type,
-        namespace,
-        extractionMode: EXTRACTION_MODE.nonPriority,
-      });
       await soClient.update<EngineDescriptor>(
         EngineDescriptorTypeName,
         getEngineDescriptorSoId(type, namespace),
-        { nonPriorityStatus: null, nonPriorityLogExtractionState: null, nonPriorityError: null },
+        {
+          nonPriorityStatus: ENGINE_STATUS.STOPPED,
+          nonPriorityLogExtractionState: null,
+          nonPriorityError: null,
+        },
         { mergeAttributes: true, namespace }
       );
     })
@@ -123,36 +107,26 @@ async function teardownNonPriorityTasks({
  */
 async function enableNonPriorityTasks({
   coreStart,
-  taskManager,
   logger,
 }: {
   coreStart: CoreStart;
-  taskManager: TaskManagerStartContract;
   logger: Logger;
 }): Promise<void> {
   const engines = await findAllEngineDescriptors(coreStart);
   const soClient = coreStart.savedObjects.createInternalRepository([EngineDescriptorTypeName]);
-  const interval = getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority).interval ?? '1m';
 
   const targets = engines.filter(
     ({ attributes }) =>
       hasPriorityExtractionGate(attributes.type) &&
       attributes.status === ENGINE_STATUS.STARTED &&
-      attributes.nonPriorityStatus == null
+      attributes.nonPriorityStatus === ENGINE_STATUS.STOPPED
   );
 
   await Promise.all(
     targets.map(async ({ attributes: { type }, namespace }) => {
       logger.info(
-        `Dual-process flag turned on: scheduling non-priority task for ${type} in namespace ${namespace}`
+        `Dual-process flag turned on: resuming non-priority extraction for ${type} in namespace ${namespace}`
       );
-      await taskManager.ensureScheduled({
-        id: getExtractEntityTaskId(type, namespace, EXTRACTION_MODE.nonPriority),
-        taskType: getNonPriorityTaskType(type),
-        schedule: { interval },
-        state: { namespace },
-        params: {},
-      });
       await soClient.update<EngineDescriptor>(
         EngineDescriptorTypeName,
         getEngineDescriptorSoId(type, namespace),
@@ -182,12 +156,10 @@ async function enableNonPriorityTasks({
  */
 export const subscribeToDualProcessFlag = ({
   coreStart,
-  taskManager,
   logger,
   stop$,
 }: {
   coreStart: CoreStart;
-  taskManager: TaskManagerStartContract;
   logger: Logger;
   stop$: Subject<void>;
 }): void => {
@@ -198,10 +170,13 @@ export const subscribeToDualProcessFlag = ({
       takeUntil(stop$),
       concatMap(([prev, curr]) => {
         if (prev === curr) return Promise.resolve();
-        if (prev && !curr) {
-          return teardownNonPriorityTasks({ coreStart, taskManager, logger });
-        }
-        return enableNonPriorityTasks({ coreStart, taskManager, logger });
+        const transition =
+          prev && !curr
+            ? teardownNonPriorityTasks({ coreStart, logger })
+            : enableNonPriorityTasks({ coreStart, logger });
+        return transition.catch((err: Error) =>
+          logger.error(`Dual-process flag transition failed: ${err.message}`)
+        );
       })
     )
     .subscribe({

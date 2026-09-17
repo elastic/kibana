@@ -246,7 +246,7 @@ export class AssetManagerClient {
         request,
       });
 
-      if (dualProcess) {
+      if (hasPriorityExtractionGate(type)) {
         const { frequency: nonPriorityFrequency } = await this.getLogExtractionConfig(
           type,
           EXTRACTION_MODE.nonPriority
@@ -261,13 +261,13 @@ export class AssetManagerClient {
           extractionMode: EXTRACTION_MODE.nonPriority,
         });
         await this.engineDescriptorClient.update(type, {
-          nonPriorityStatus: ENGINE_STATUS.STARTED,
+          nonPriorityStatus: dualProcess ? ENGINE_STATUS.STARTED : ENGINE_STATUS.STOPPED,
           nonPriorityError: null,
         });
       }
     } catch (error) {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
-      if (dualProcess) {
+      if (hasPriorityExtractionGate(type)) {
         // Starting is all or nothing: leaving one process scheduled without the other would
         // silently extract half the logs. Removal is idempotent, so this is safe whichever step
         // failed.
@@ -275,7 +275,7 @@ export class AssetManagerClient {
       }
       await this.engineDescriptorClient.update(type, {
         status: ENGINE_STATUS.ERROR,
-        ...(dualProcess ? { nonPriorityStatus: ENGINE_STATUS.ERROR } : {}),
+        ...(hasPriorityExtractionGate(type) ? { nonPriorityStatus: ENGINE_STATUS.ERROR } : {}),
       });
       throw error;
     }

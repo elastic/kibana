@@ -61,7 +61,7 @@ import {
   type EntityStoreGlobalStateClient,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
-import { EntityStoreNotRunningError } from '../errors';
+import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../errors';
 import type { LogExtractionInstallParams } from '../../routes/constants';
 
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
@@ -171,7 +171,14 @@ export class LogsExtractionClient {
     type: EntityType
   ): Promise<{ config: LogExtractionConfig; engineState: EngineLogExtractionState }> {
     const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
-    if (engineDescriptor[this.descriptorFields.status] !== ENGINE_STATUS.STARTED) {
+    const status = engineDescriptor[this.descriptorFields.status];
+    if (status !== ENGINE_STATUS.STARTED) {
+      if (
+        this.extractionMode === EXTRACTION_MODE.nonPriority &&
+        status === ENGINE_STATUS.STOPPED
+      ) {
+        throw new NonPriorityExtractionDisabledError();
+      }
       throw new EntityStoreNotRunningError();
     }
     const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
@@ -1025,7 +1032,8 @@ export class LogsExtractionClient {
   ): Promise<ExtractedLogsSummary> {
     if (
       SavedObjectsErrorHelpers.isNotFoundError(error) ||
-      error instanceof EntityStoreNotRunningError
+      error instanceof EntityStoreNotRunningError ||
+      error instanceof NonPriorityExtractionDisabledError
     ) {
       return {
         success: false,

@@ -151,7 +151,6 @@ export class EntityStorePlugin
 
     subscribeToDualProcessFlag({
       coreStart: core,
-      taskManager: plugins.taskManager,
       logger: this.logger,
       stop$: this.stop$,
     });
