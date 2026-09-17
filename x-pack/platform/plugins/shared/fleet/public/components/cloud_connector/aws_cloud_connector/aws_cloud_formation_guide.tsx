@@ -15,10 +15,7 @@ import { ORGANIZATION_ACCOUNT } from '../constants';
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
 
-export type CloudFormationCredentialType =
-  | 'identity_federation'
-  | 'workload_identity'
-  | 'direct_access_keys';
+export type CloudFormationCredentialType = 'identity_federation' | 'direct_access_keys';
 
 export interface CloudFormationCloudCredentialsGuideProps {
   accountType?: AccountType;
@@ -29,7 +26,6 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
   CloudFormationCloudCredentialsGuideProps
 > = ({ accountType = ORGANIZATION_ACCOUNT, credentialType = 'identity_federation' }) => {
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
-  const isWorkloadIdentity = credentialType === 'workload_identity';
 
   const lastStep =
     credentialType === 'direct_access_keys' ? (
@@ -41,21 +37,12 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
           secretAccessKey: <strong>{'Secret Access Key'}</strong>,
         }}
       />
-    ) : isWorkloadIdentity ? (
+    ) : (
       <FormattedMessage
         id="xpack.fleet.cloudConnector.aws.guide.steps.roleArnCredentials"
         defaultMessage="Copy {role} then paste it below"
         values={{
           role: <strong>{'Role ARN'}</strong>,
-        }}
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.fleet.cloudConnector.aws.guide.steps.credentials"
-        defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
-        values={{
-          role: <strong>{'Role ARN'}</strong>,
-          external_id: <strong>{'External ID'}</strong>,
         }}
       />
     );
@@ -77,30 +64,6 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
                   >
                     <FormattedMessage
                       id="xpack.fleet.cloudConnector.aws.guide.directAccessKeys.learnMore"
-                      defaultMessage="Learn more about CloudFormation"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-      )}
-      {isWorkloadIdentity && (
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.aws.guide.workloadIdentity.intro"
-              defaultMessage="The CloudFormation stack creates an IAM role that only this Elastic Cloud deployment or project can assume, through an OpenID Connect identity provider for your Elastic Cloud organization. A small AWS Lambda function in the stack registers that identity provider only if your account does not have one yet, and never removes it, because other Elastic stacks in the account may share it. No long-lived credentials or external IDs are exchanged. {learnMore}."
-              values={{
-                learnMore: (
-                  <EuiLink
-                    href={CLOUD_FORMATION_EXTERNAL_DOC_URL}
-                    target="_blank"
-                    rel="noopener nofollow noreferrer"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.cloudConnector.aws.guide.workloadIdentity.learnMore"
                       defaultMessage="Learn more about CloudFormation"
                     />
                   </EuiLink>
@@ -151,18 +114,6 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
               }}
             />
           </li>
-          {isWorkloadIdentity && (
-            <li>
-              <FormattedMessage
-                id="xpack.fleet.cloudConnector.aws.guide.steps.workloadIdentityParameters"
-                defaultMessage="Review the pre-filled Elastic parameters: {issuer} is the Elastic Workload Identity token issuer of your Elastic Cloud organization and region, {subject} identifies this deployment or project. They should not be changed."
-                values={{
-                  issuer: <strong>{'ElasticIssuer'}</strong>,
-                  subject: <strong>{'ElasticSubject'}</strong>,
-                }}
-              />
-            </li>
-          )}
           <li>
             <FormattedMessage
               id="xpack.fleet.cloudConnector.aws.guide.steps.accept"

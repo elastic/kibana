@@ -18,7 +18,6 @@ import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 
 import { AwsIdentityFederationSetup } from './aws_identity_federation_setup';
-import type { CloudSetupForCloudConnector } from '../types';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_get_cloud_connectors');
@@ -204,96 +203,6 @@ describe('AwsIdentityFederationSetup', () => {
           iac_blueprint_version: 'v1',
         })
       );
-    });
-  });
-  describe('CloudFormation launch', () => {
-    const WII_TEMPLATE_URL =
-      'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&stackName=Elastic-Workload-Identity-RESOURCE_ID&param_ElasticIssuer=ISSUER&param_ElasticSubject=SUBJECT';
-    const LEGACY_TEMPLATE_URL =
-      'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-aws-9.6.0.yml';
-
-    // cloudId payload: host$esComponentId$kibanaComponentId
-    const echCloud: CloudSetupForCloudConnector = {
-      isCloudEnabled: true,
-      isServerlessEnabled: false,
-      cloudId: `qa:${btoa(
-        'eu-west-1.aws.qa.cld.elstc.co$es-component-id$3a127b696031473aba8624d0cb17ec43'
-      )}`,
-      deploymentUrl: 'https://console.qa.cld.elstc.co/deployments/1f2e3d4c5b6a79808172635445362718',
-      organizationId: '2070044029',
-      serverless: {},
-    };
-
-    const mockLaunch = (isDisabled: boolean) => {
-      mockUseCloudConnectorTemplate.mockReturnValue({
-        launchButtonProps: {
-          href: isDisabled ? undefined : 'https://cf.example',
-          target: '_blank',
-        },
-        isDisabled,
-        isGeneratingTemplate: false,
-      });
-    };
-
-    beforeEach(() => {
-      // no existing connectors, so the New Identity tab with the launch button is shown
-      mockGetConnectors({ data: [] });
-    });
-
-    it('hands the cloud context and template URL to the launch hook', () => {
-      mockLaunch(false);
-      const { getByTestId, queryByTestId } = renderSetup({
-        cloud: echCloud,
-        iacTemplateUrl: WII_TEMPLATE_URL,
-      });
-
-      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          cloud: echCloud,
-          accountType: 'single-account',
-          iacTemplateUrl: WII_TEMPLATE_URL,
-        })
-      );
-      expect(getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toHaveAttribute(
-        'href',
-        'https://cf.example'
-      );
-      expect(queryByTestId('cloudFormationTemplateUnavailableCallout')).not.toBeInTheDocument();
-    });
-
-    it('explains what is missing when the Workload Identity template cannot be pre-filled', () => {
-      mockLaunch(true);
-      const { getByTestId } = renderSetup({
-        cloud: { ...echCloud, organizationId: undefined },
-        iacTemplateUrl: WII_TEMPLATE_URL,
-      });
-
-      expect(getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
-      expect(getByTestId('cloudFormationTemplateUnavailableCallout')).toHaveTextContent(
-        'Elastic Cloud organization ID'
-      );
-    });
-
-    it('shows the Workload Identity guide only for templates that ask for the issuer', () => {
-      mockLaunch(false);
-      const wii = renderSetup({ cloud: echCloud, iacTemplateUrl: WII_TEMPLATE_URL });
-      expect(wii.container).toHaveTextContent('ElasticIssuer');
-      wii.unmount();
-
-      const legacy = renderSetup({ cloud: echCloud, iacTemplateUrl: LEGACY_TEMPLATE_URL });
-      expect(legacy.container).not.toHaveTextContent('ElasticIssuer');
-      expect(legacy.container).toHaveTextContent('External ID');
-      expect(
-        legacy.queryByTestId('cloudFormationTemplateUnavailableCallout')
-      ).not.toBeInTheDocument();
-    });
-
-    it('does not render the callout when no template URL is declared', () => {
-      mockLaunch(true);
-      const { getByTestId, queryByTestId } = renderSetup({ cloud: echCloud });
-
-      expect(getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
-      expect(queryByTestId('cloudFormationTemplateUnavailableCallout')).not.toBeInTheDocument();
     });
   });
 });

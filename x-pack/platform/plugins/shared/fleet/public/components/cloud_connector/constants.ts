@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// Tokens in `iac_template_url` that Kibana replaces with values of the current deployment.
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
-// Workload Identity templates take the JWT `iss` (without scheme) and `sub` claims.
 export const TEMPLATE_URL_ELASTIC_ISSUER_ENV_VAR = 'ISSUER';
 export const TEMPLATE_URL_ELASTIC_SUBJECT_ENV_VAR = 'SUBJECT';
 
@@ -19,7 +17,6 @@ export const TEMPLATE_URL_TOKENS = [
 ] as const;
 export type TemplateUrlToken = (typeof TEMPLATE_URL_TOKENS)[number];
 
-// JWT subject prefix: `deployment:<id>` on ECH, `project:<id>` on serverless.
 export const ELASTIC_RESOURCE_TYPE_DEPLOYMENT = 'deployment';
 export const ELASTIC_RESOURCE_TYPE_PROJECT = 'project';
 export type ElasticResourceType =

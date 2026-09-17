@@ -21966,7 +21966,6 @@
     "xpack.fleet.cloudConnector.aws.guide.steps.accept.capabilities": "功能",
     "xpack.fleet.cloudConnector.aws.guide.steps.accessKeyCredentials": "复制 {accessKeyId} 和 {secretAccessKey}，然后粘贴以下凭据",
     "xpack.fleet.cloudConnector.aws.guide.steps.create": "单击 {createStack}。",
-    "xpack.fleet.cloudConnector.aws.guide.steps.credentials": "复制 {role} 和 {external_id}，然后粘贴以下角色凭据",
     "xpack.fleet.cloudConnector.aws.guide.steps.launch": "单击下面的 {launchCloudFormation} 按钮。",
     "xpack.fleet.cloudConnector.aws.guide.steps.organizationLogin": "以 {admin} 身份登录到您要载入的 AWS 组织的管理账户",
     "xpack.fleet.cloudConnector.aws.guide.steps.region": "（可选）将右上角的 {amazonRegion} 更改为您要将堆栈部署到的区域",

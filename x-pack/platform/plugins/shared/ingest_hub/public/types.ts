@@ -23,7 +23,6 @@ export interface IngestFlow {
 }
 
 export interface IngestHubSetupDependencies {
-  // has the organizationId, csp and region that CloudStart lacks
   cloud?: CloudSetup;
 }
 

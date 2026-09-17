@@ -23,8 +23,6 @@ import {
   isCloudConnectorNameValid,
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
   getAnyCloudConnectorIacTemplateUrl,
-  getMissingTemplateContext,
-  isWorkloadIdentityTemplateUrl,
   getTemplateUrlTokens,
   getWorkloadIdentityIssuer,
   getWorkloadIdentitySubject,
@@ -1046,7 +1044,6 @@ describe('Workload Identity template URLs', () => {
   const LEGACY_TEMPLATE_URL =
     'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-aws-9.6.0.yml';
 
-  // cloudId payload: host[:port]$esComponentId$kibanaComponentId
   const encodeCloudId = (host: string, kibanaComponentId: string) =>
     `label:${btoa(`${host}$es-component-id$${kibanaComponentId}`)}`;
 
@@ -1066,7 +1063,6 @@ describe('Workload Identity template URLs', () => {
     isCloudEnabled: true,
     isServerlessEnabled: true,
     cloudId: encodeCloudId('us-east-1.aws.elastic.cloud', 'kibana'),
-    // serverless deployment_url points at the project page
     deploymentUrl: `https://cloud.elastic.co/projects/security/${PROJECT_ID}`,
     organizationId: '10',
     csp: 'aws',
@@ -1209,72 +1205,6 @@ describe('Workload Identity template URLs', () => {
         'param_ElasticIssuer=workload-identity-issuer.eu-west-1.aws.svc.qa.elastic.cloud/orgs/org%20id%26x'
       );
       expect(result).toContain(`param_ElasticSubject=deployment:${KIBANA_COMPONENT_ID}`);
-    });
-  });
-
-  describe('getMissingTemplateContext', () => {
-    it('is empty when every token resolves', () => {
-      expect(
-        getMissingTemplateContext({
-          cloud: echQaCloud,
-          accountType: SINGLE_ACCOUNT,
-          iacTemplateUrl: WII_TEMPLATE_URL,
-        })
-      ).toEqual([]);
-    });
-
-    it('names the deployment fact behind an unresolved token', () => {
-      expect(
-        getMissingTemplateContext({
-          cloud: { ...echQaCloud, organizationId: undefined } as CloudSetup,
-          accountType: SINGLE_ACCOUNT,
-          iacTemplateUrl: WII_TEMPLATE_URL,
-        })
-      ).toEqual(['organizationId']);
-    });
-
-    it('reports every missing fact once, in token order, outside Elastic Cloud', () => {
-      expect(
-        getMissingTemplateContext({
-          cloud: {
-            isCloudEnabled: false,
-            isServerlessEnabled: false,
-            serverless: {},
-          } as CloudSetup,
-          accountType: SINGLE_ACCOUNT,
-          iacTemplateUrl: WII_TEMPLATE_URL,
-        })
-      ).toEqual(['resourceId', 'organizationId', 'cloudProvider', 'cloudRegion']);
-    });
-
-    it('is empty for token-free URLs and for no URL', () => {
-      expect(
-        getMissingTemplateContext({
-          cloud: undefined,
-          accountType: SINGLE_ACCOUNT,
-          iacTemplateUrl: LEGACY_TEMPLATE_URL,
-        })
-      ).toEqual([]);
-      expect(
-        getMissingTemplateContext({
-          cloud: undefined,
-          accountType: SINGLE_ACCOUNT,
-          iacTemplateUrl: undefined,
-        })
-      ).toEqual([]);
-    });
-  });
-
-  describe('isWorkloadIdentityTemplateUrl', () => {
-    it('recognises templates that ask for the token issuer', () => {
-      expect(isWorkloadIdentityTemplateUrl(WII_TEMPLATE_URL)).toBe(true);
-      expect(isWorkloadIdentityTemplateUrl(LEGACY_TEMPLATE_URL)).toBe(false);
-      expect(
-        isWorkloadIdentityTemplateUrl(
-          'https://example.com/templates/ACCOUNT_TYPE/RESOURCE_ID/cloudformation.yaml'
-        )
-      ).toBe(false);
-      expect(isWorkloadIdentityTemplateUrl(undefined)).toBe(false);
     });
   });
 
@@ -1457,7 +1387,6 @@ describe('Workload Identity template URLs', () => {
       expect(getElasticCloudEnvironmentFromHost('console.staging.foundit.no')).toBe('staging');
       expect(getElasticCloudEnvironmentFromHost('cloud.elastic.co')).toBe('production');
       expect(getElasticCloudEnvironmentFromHost('ap-southeast-1.aws.found.io')).toBe('production');
-      // dev is not a template environment
       expect(getElasticCloudEnvironmentFromHost('eu-west-1.aws.dev.elastic.cloud')).toBe(
         'production'
       );

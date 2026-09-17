@@ -37,12 +37,7 @@ import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_t
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
-import { CloudFormationTemplateUnavailableCallout } from '../aws_cloud_connector/cloud_formation_template_unavailable_callout';
-import {
-  getCloudConnectorNameError,
-  getMissingTemplateContext,
-  isWorkloadIdentityTemplateUrl,
-} from '../utils';
+import { getCloudConnectorNameError } from '../utils';
 import { TABS } from '../constants';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
@@ -136,18 +131,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     integrations,
   });
 
-  const isTemplateUnavailable = isLaunchDisabled && !!iacTemplateUrl;
-  const missingTemplateContext = isTemplateUnavailable
-    ? getMissingTemplateContext({
-        cloud,
-        accountType: accountType || 'single-account',
-        iacTemplateUrl,
-      })
-    : [];
-  const guideCredentialType = isWorkloadIdentityTemplateUrl(iacTemplateUrl)
-    ? 'workload_identity'
-    : 'identity_federation';
-
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
     (connector) => {
       setSelected({ id: connector.id, name: connector.name });
@@ -213,10 +196,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             }
             paddingSize="l"
           >
-            <CloudFormationCloudCredentialsGuide
-              accountType={accountType}
-              credentialType={guideCredentialType}
-            />
+            <CloudFormationCloudCredentialsGuide accountType={accountType} />
           </EuiAccordion>
           <EuiSpacer size="l" />
           <EuiButton
@@ -254,12 +234,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 title={templateAlreadyCurrent}
                 size="s"
               />
-            </>
-          )}
-          {isTemplateUnavailable && (
-            <>
-              <EuiSpacer size="m" />
-              <CloudFormationTemplateUnavailableCallout missingContext={missingTemplateContext} />
             </>
           )}
           <EuiSpacer size="m" />

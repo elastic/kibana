@@ -21894,7 +21894,6 @@
     "xpack.fleet.cloudConnector.aws.guide.steps.accept.capabilities": "Funktionen",
     "xpack.fleet.cloudConnector.aws.guide.steps.accessKeyCredentials": "Kopieren Sie {accessKeyId} und {secretAccessKey}; fügen Sie dann die Anmeldeinformationen unten ein",
     "xpack.fleet.cloudConnector.aws.guide.steps.create": "Klicken Sie auf {createStack}.",
-    "xpack.fleet.cloudConnector.aws.guide.steps.credentials": "Kopieren Sie {role} und {external_id} und fügen Sie dann die Zugangsdaten der Rolle unten ein",
     "xpack.fleet.cloudConnector.aws.guide.steps.launch": "Klicken Sie auf die Schaltfläche {launchCloudFormation} unten.",
     "xpack.fleet.cloudConnector.aws.guide.steps.organizationLogin": "Melden Sie sich als {admin} im Verwaltungskonto der AWS-Organisation an, die Sie aufnehmen möchten",
     "xpack.fleet.cloudConnector.aws.guide.steps.region": "(Optional) Ändern Sie die {amazonRegion} in der oberen rechten Ecke in die Region, für die Sie Ihren Stack bereitstellen möchten",

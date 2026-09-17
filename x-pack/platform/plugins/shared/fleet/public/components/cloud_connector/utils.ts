@@ -176,7 +176,7 @@ export const getDeploymentIdFromUrl = (url: string | undefined): string | undefi
   return match?.[1];
 };
 
-// cloudId payload: `<host>[:<port>]$<es component id>$<kibana component id>`
+// <host>[:<port>]$<es component id>$<kibana component id>
 const decodeCloudIdParts = (cloudId: string | undefined): string[] | undefined => {
   if (!cloudId) return undefined;
 
@@ -214,7 +214,7 @@ const normalizeRegion = (region: string | undefined): string | undefined => {
   return value && REGION_LABEL_REGEX.test(value) ? value : undefined;
 };
 
-// `/` and `:` are valid in a query string; the console gets them as-is like in templateURL.
+// keep / and : readable in the console
 const encodeTemplateValue = (value: string): string =>
   encodeURIComponent(value).replace(/%2F/gi, '/').replace(/%3A/gi, ':');
 
@@ -227,7 +227,6 @@ const getHostname = (url: string | undefined): string | undefined => {
   }
 };
 
-// qa and staging hosts carry the environment as a DNS label, e.g. eu-west-1.aws.qa.cld.elstc.co
 export const getElasticCloudEnvironmentFromHost = (
   host: string | undefined
 ): ElasticCloudEnvironment | undefined => {
@@ -238,7 +237,7 @@ export const getElasticCloudEnvironmentFromHost = (
   return ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION;
 };
 
-// Cloud hosts are `<region>.<csp>.<domain>`, e.g. us-east-1.aws.found.io
+// <region>.<csp>.<domain>
 export const parseElasticCloudHost = (
   host: string | undefined
 ): ElasticCloudHostInfo | undefined => {
@@ -309,7 +308,6 @@ export const getElasticCloudTemplateContext = (
   };
 };
 
-// JWT `iss` without the scheme, the form the template's IAM condition keys use.
 export const getWorkloadIdentityIssuer = ({
   organizationId,
   cloudProvider,
@@ -330,10 +328,6 @@ export const getWorkloadIdentitySubject = ({
 export const getTemplateUrlTokens = (iacTemplateUrl: string | undefined): TemplateUrlToken[] =>
   iacTemplateUrl ? TEMPLATE_URL_TOKENS.filter((token) => iacTemplateUrl.includes(token)) : [];
 
-// Only Workload Identity templates ask for the token issuer.
-export const isWorkloadIdentityTemplateUrl = (iacTemplateUrl: string | undefined): boolean =>
-  !!iacTemplateUrl && iacTemplateUrl.includes(TEMPLATE_URL_ELASTIC_ISSUER_ENV_VAR);
-
 const getTemplateTokenValues = (
   cloud: CloudSetupForCloudConnector | undefined,
   accountType: AccountType | undefined
@@ -345,42 +339,6 @@ const getTemplateTokenValues = (
     [TEMPLATE_URL_ELASTIC_ISSUER_ENV_VAR]: getWorkloadIdentityIssuer(context),
     [TEMPLATE_URL_ELASTIC_SUBJECT_ENV_VAR]: getWorkloadIdentitySubject(context),
   };
-};
-
-// Deployment facts a token is built from, so the UI can name what is actually missing.
-export type TemplateContextField =
-  | 'accountType'
-  | 'resourceId'
-  | 'organizationId'
-  | 'cloudProvider'
-  | 'cloudRegion';
-
-const TOKEN_CONTEXT_FIELDS: Record<TemplateUrlToken, TemplateContextField[]> = {
-  [TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR]: ['accountType'],
-  [TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR]: ['resourceId'],
-  [TEMPLATE_URL_ELASTIC_ISSUER_ENV_VAR]: ['organizationId', 'cloudProvider', 'cloudRegion'],
-  [TEMPLATE_URL_ELASTIC_SUBJECT_ENV_VAR]: ['resourceId'],
-};
-
-export const getMissingTemplateContext = ({
-  cloud,
-  accountType,
-  iacTemplateUrl,
-}: {
-  cloud: CloudSetupForCloudConnector | undefined;
-  accountType: AccountType | undefined;
-  iacTemplateUrl: string | undefined;
-}): TemplateContextField[] => {
-  const tokens = getTemplateUrlTokens(iacTemplateUrl);
-  if (tokens.length === 0) return [];
-  const values = { ...getElasticCloudTemplateContext(cloud), accountType };
-  const missing = new Set<TemplateContextField>();
-  for (const token of tokens) {
-    for (const field of TOKEN_CONTEXT_FIELDS[token]) {
-      if (!values[field]) missing.add(field);
-    }
-  }
-  return [...missing];
 };
 
 export const getTemplateUrlFromPackageInfo = (
@@ -425,7 +383,6 @@ export const getAnyCloudConnectorIacTemplateUrl = (
   return getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
 };
 
-// Every token has to resolve; a partially filled template would trust the wrong issuer or subject.
 export const getCloudConnectorRemoteRoleTemplate = ({
   cloud,
   accountType,

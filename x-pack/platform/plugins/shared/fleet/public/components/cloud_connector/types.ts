@@ -117,7 +117,6 @@ export interface CloudConnectorFormProps {
   templateSha?: string;
 }
 
-// organizationId, csp, region and cloudHost only exist on CloudSetup, not on CloudStart.
 export type CloudSetupForCloudConnector = Pick<
   CloudSetup,
   | 'isCloudEnabled'
