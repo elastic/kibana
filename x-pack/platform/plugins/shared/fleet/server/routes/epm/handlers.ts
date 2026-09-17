@@ -135,6 +135,7 @@ import { getPackagePoliciesCountByPackageName } from '../../services/package_pol
 import { getPackageKnowledgeBase } from '../../services/epm/packages';
 
 import { getPackagePolicyIdsForCurrentUser } from './bulk_handler';
+import { checkUploadPackageAssetPrivileges } from './upload_preflight_authz';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -699,6 +700,9 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
   const installSource = 'upload';
+
+  await checkUploadPackageAssetPrivileges(request, archiveBuffer, contentType, spaceId);
+
   const res = await installPackage({
     installSource,
     savedObjectsClient,
