@@ -14,7 +14,7 @@ If an analyst (or a future workflow) sees only the alerts plus the discovery, bo
 ## Layout
 
 ```
-encoded-powershell.tp/   encoded-powershell.fp/
+encoded_powershell.tp/   encoded_powershell.fp/
   attack.json              attack.json     ← identical
   entity.json              entity.json     ← differs
   gold.yaml                gold.yaml       ← differs
@@ -103,7 +103,7 @@ On the FP world, `entity.sub_type` is `mdm_management`. On the TP world it is `e
 
 1. Create a user workflow and paste `fp_tp_analysis_user_workflow.yaml`.
 2. **Run** with `attack_discovery_id` omitted or set to `ad-fp-tp-encoded-powershell-attack`.
-3. Compare `classification` plus cited entity/event ids to `encoded-powershell.{fp,tp}/gold.yaml`.
+3. Compare `classification` plus cited entity/event ids to `encoded_powershell.{fp,tp}/gold.yaml`.
 
 | Seeded variant | Expected `classification` | Why |
 | --- | --- | --- |
