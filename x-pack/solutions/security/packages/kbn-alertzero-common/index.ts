@@ -122,6 +122,7 @@ export type {
 } from './impl/watches/watch_helpers';
 
 export {
+  ALERT_TRIAGE_DEFAULT_EXTRAS,
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,
