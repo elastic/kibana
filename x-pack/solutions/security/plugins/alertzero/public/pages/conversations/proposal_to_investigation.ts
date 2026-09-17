@@ -12,12 +12,13 @@ import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
 /**
  * Category an action declares → queue bucket.
  *
- * `tune` is the only category the action catalog ships today
- * (`action_create_detection_rule.yaml`). It maps to `configure` here; drop the
- * entry once the catalog declares `configure` directly.
+ * Action catalog categories are more specific than the four queue columns.
+ * `contain` (host isolate / kill / suspend) is a respond action; `tune` is
+ * the legacy configure alias from before the catalog declared `configure`.
  */
 const CATEGORY_TO_BUCKET: Record<string, RecommendedAction> = {
   respond: 'respond',
+  contain: 'respond',
   investigate: 'investigate',
   configure: 'configure',
   tune: 'configure',
