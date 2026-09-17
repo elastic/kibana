@@ -24,6 +24,7 @@ import {
   PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE,
   PARALLEL_MODE_REFINEMENT_MESSAGE,
   ParallelStepSchema,
+  TimeoutPropSchema,
   WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
@@ -1259,5 +1260,34 @@ describe('`if` condition on step schemas', () => {
 
     expect(IfStepSchema.safeParse({ ...ifStep, condition: atLimit }).success).toBe(true);
     expect(IfStepSchema.safeParse({ ...ifStep, condition: overLimit }).success).toBe(false);
+  });
+});
+
+describe('dynamic timeout schema', () => {
+  const approval = { name: 's', type: 'waitForApproval' as const };
+  const input = { name: 's', type: 'waitForInput' as const };
+  const templated = "{{ inputs.expiresIn | default: '72h' }}";
+
+  it('accepts a duration or a Liquid template on waitForApproval and waitForInput', () => {
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: '72h' }).success).toBe(true);
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: templated }).success).toBe(
+      true
+    );
+    expect(WaitForInputStepSchema.safeParse({ ...input, timeout: '30s' }).success).toBe(true);
+    expect(WaitForInputStepSchema.safeParse({ ...input, timeout: templated }).success).toBe(true);
+  });
+
+  it('rejects a non-duration, non-template timeout on HITL steps', () => {
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: 'soon' }).success).toBe(
+      false
+    );
+    expect(WaitForInputStepSchema.safeParse({ ...input, timeout: '{{ unterminated' }).success).toBe(
+      false
+    );
+  });
+
+  it('does not accept templates on connector TimeoutPropSchema', () => {
+    expect(TimeoutPropSchema.safeParse({ timeout: templated }).success).toBe(false);
+    expect(TimeoutPropSchema.safeParse({ timeout: '5m' }).success).toBe(true);
   });
 });

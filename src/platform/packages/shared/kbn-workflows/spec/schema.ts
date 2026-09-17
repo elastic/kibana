@@ -197,6 +197,20 @@ export const TimeoutPropSchema = z.object({
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
+/** A duration, or Liquid that renders to one at step entry. */
+export const DynamicTimeoutSchema = z
+  .string()
+  .refine((value) => DurationSchema.safeParse(value).success || /\{\{[\s\S]*\}\}/.test(value), {
+    error: 'Invalid timeout. Use a duration (e.g. "72h") or a template that renders to one.',
+  })
+  .describe(
+    "Duration (`72h`) or Liquid that renders to one (`{{ inputs.expiresIn | default: '72h' }}`)."
+  );
+
+export const DynamicTimeoutPropSchema = z.object({
+  timeout: DynamicTimeoutSchema.optional(),
+});
+
 export const MaxStepSizePropSchema = z.object({
   'max-step-size': ByteSizeSchema.optional(),
 });
@@ -345,7 +359,7 @@ export const WaitForInputStepInputSchema = z
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-}).merge(TimeoutPropSchema);
+}).merge(DynamicTimeoutPropSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
@@ -374,7 +388,7 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
-}).merge(TimeoutPropSchema);
+}).merge(DynamicTimeoutPropSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z
