@@ -16,7 +16,13 @@ import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
 } from '../common/proposals/constants';
-import { CreateProposalStepId, UpdateProposalStepId } from '../common/proposals/step_types';
+import {
+  CheckDecidePrivilegesStepId,
+  CloneProposalStepId,
+  CreateProposalStepId,
+  GetProposalStepId,
+  UpdateProposalStepId,
+} from '../common/proposals/step_types';
 import { AgenticInvestigationsPlugin } from './plugin';
 import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
 import {
@@ -146,13 +152,28 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('registers both workflow step definitions during setup, not start', () => {
+    it('registers every workflow step definition during setup, not start', () => {
       const { workflowsExtensions } = setupPlugin();
 
       const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
         ([definition]) => definition.id
       );
-      expect(registeredIds).toEqual([CreateProposalStepId, UpdateProposalStepId]);
+      expect(registeredIds).toEqual([
+        CreateProposalStepId,
+        UpdateProposalStepId,
+        CheckDecidePrivilegesStepId,
+        GetProposalStepId,
+        CloneProposalStepId,
+      ]);
+    });
+
+    it('does not resolve the authorization service until a step actually runs', () => {
+      const { coreSetup } = setupPlugin();
+
+      // Steps register during setup, when `security.authz` does not exist yet.
+      // Reaching for it here would leave every privilege check reading
+      // undefined and silently failing closed.
+      expect(coreSetup.getStartServices).not.toHaveBeenCalled();
     });
 
     it('registers the HTTP routes', () => {

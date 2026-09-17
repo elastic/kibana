@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -57,7 +57,7 @@ import {
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
-  InvestigationSubjectMissingError,
+  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from './errors';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
@@ -88,24 +88,30 @@ const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
 const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
   typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
 
+const LEGACY_DEDUCTIVE_INVESTIGATION_WORKFLOW_ID = 'system-deductive-investigation';
+
 const INVESTIGATION_WORKFLOW_IDS = new Set([
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  LEGACY_DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
 ]);
 
 /**
- * A manual investigation has no stored entity to write results back to, so it runs the lean
- * deductive workflow; every other subject runs the significant-events workflow, which attaches
- * its findings to the event or alert it was started from.
+ * Manual questions and v1 alerts have no significant-event write-back, so they run the lean
+ * Nightshift investigation workflow. Significant events keep the workflow that attaches findings
+ * to the event.
  */
+const usesNightshiftWorkflow = (subject: InvestigationSubject): boolean =>
+  subject.type === 'manual' || subject.type === 'alert';
+
 const workflowIdForSubject = (subject: InvestigationSubject): string =>
-  subject.type === 'manual'
-    ? DEDUCTIVE_INVESTIGATION_WORKFLOW_ID
+  usesNightshiftWorkflow(subject)
+    ? NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID
     : SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
 
 /** Each workflow calls its own agent, so the pre-install has to follow the same split. */
 const installAgentForSubject = (subject: InvestigationSubject) =>
-  subject.type === 'manual' ? installDeductiveInvestigationAgent : installInvestigationAgent;
+  usesNightshiftWorkflow(subject) ? installDeductiveInvestigationAgent : installInvestigationAgent;
 
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
@@ -146,6 +152,7 @@ const isInvestigationWorkflowExecution = (execution: {
 
 interface ExecutionInvestigationMetadata {
   subject?: InvestigationSubject;
+  title?: string;
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
 }
@@ -184,6 +191,7 @@ const toSubject = ({
  */
 const LIST_INVESTIGATION_ITEM_FIELDS = {
   investigation_id: [],
+  title: ['title'],
   status: ['status'],
   created_at: ['created_at'],
   started_at: ['started_at'],
@@ -207,6 +215,7 @@ type ListInvestigationRecord = ProjectedInvestigationRecord<
 
 const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
+  title: record.title,
   status: record.status,
   created_at: record.created_at,
   started_at: record.started_at,
@@ -256,6 +265,8 @@ const parseExecutionInvestigationMetadata = (
 
   return {
     subject: recoverSubjectFromInput(inputs),
+    // A required workflow input, so the engine has already rejected a run without one.
+    title: asString(inputs?.title),
     triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
     concurrencyKey,
   };
@@ -384,6 +395,7 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    title,
     trigger_type,
     message,
     stream_names,
@@ -442,6 +454,7 @@ export class NightshiftInvestigationsClient {
 
     const inputs = {
       message: prepared.message,
+      title,
       stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
@@ -468,6 +481,7 @@ export class NightshiftInvestigationsClient {
     await this.create({
       investigationId: executionId,
       subject: resolvedSubject,
+      title,
       triggerType: trigger_type,
       concurrencyKey: concurrency_key,
     }).catch((error) => {
@@ -487,11 +501,13 @@ export class NightshiftInvestigationsClient {
   async create({
     investigationId,
     subject,
+    title,
     triggerType,
     concurrencyKey,
   }: {
     investigationId: string;
     subject: InvestigationSubject;
+    title: string;
     triggerType: InvestigationTriggerType;
     concurrencyKey?: string;
   }): Promise<void> {
@@ -502,6 +518,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'pending',
         ...toSubjectFields(subject),
         trigger_type: triggerType,
@@ -560,12 +577,12 @@ export class NightshiftInvestigationsClient {
       return;
     }
 
-    const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
+    const { subject, title, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
       execution.context
     );
 
-    if (!subject) {
-      throw new InvestigationSubjectMissingError(investigationId);
+    if (!subject || !title) {
+      throw new InvestigationMetadataMissingError(investigationId);
     }
 
     if (concurrencyKey) {
@@ -575,6 +592,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'running',
         ...toSubjectFields(subject),
         trigger_type: triggerType,

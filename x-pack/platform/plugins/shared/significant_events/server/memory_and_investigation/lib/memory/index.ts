@@ -17,7 +17,7 @@ export type {
   MemoryService,
 } from './types';
 
-export { MemoryServiceImpl } from './memory_service';
+export { createMemoryService, MemoryServiceImpl } from './memory_service';
 
 export { memoriesDataStream } from './data_stream';
 export type { StoredMemoryPage } from './data_stream';
