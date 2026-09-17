@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/observability-shared-plugin'
+  - '@kbn/react-hooks'
   - '@kbn/react-query'
   - '@kbn/scout-oblt'
   - '@kbn/serverless'

@@ -19,6 +19,7 @@ import {
 import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
@@ -47,6 +48,8 @@ function isSeverity(value: string | undefined): value is Severity {
   return SEVERITY_OPTIONS.some((severity) => severity === value);
 }
 
+const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
+
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { application, nightshiftInvestigations } = useKibana().services;
@@ -57,6 +60,7 @@ export function NightshiftApp(): React.ReactElement {
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, INVESTIGATIONS_SEARCH_DEBOUNCE_MS);
   const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
   const activeSeverity: Severity | undefined = useMemo(
     () => (isSeverity(rawSeverity) ? rawSeverity : undefined),
@@ -72,7 +76,7 @@ export function NightshiftApp(): React.ReactElement {
     totalCount,
     loadedCount,
     refetchAll,
-  } = useInvestigationSections({ query: searchQuery });
+  } = useInvestigationSections({ query: debouncedSearchQuery });
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
