@@ -99,6 +99,11 @@ import type { AlertingAuthorization } from './authorization';
 import type { SecurityHealth } from './lib/get_security_health';
 import { getSecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
 import {
@@ -213,6 +218,7 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   kql: KQLPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -228,6 +234,7 @@ export interface AlertingPluginsStart {
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
   maintenanceWindows?: MaintenanceWindowsServerStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export class AlertingPlugin {
@@ -505,6 +512,10 @@ export class AlertingPlugin {
       createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       core
     );
+
+    if (plugins.workflowsExtensions) {
+      registerTriggerDefinitions(plugins.workflowsExtensions);
+    }
 
     return {
       registerConnectorAdapter: <
@@ -819,6 +830,7 @@ export class AlertingPlugin {
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
       uiamConvert: core.security.authc.apiKeys.uiam?.convert,
+      workflowsExtensions: plugins.workflowsExtensions,
     });
 
     this.eventLogService!.registerSavedObjectProvider(
