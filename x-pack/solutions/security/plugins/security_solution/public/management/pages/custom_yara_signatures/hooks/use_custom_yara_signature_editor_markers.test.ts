@@ -129,6 +129,27 @@ describe('toCustomYaraSignatureEditorMarkers', () => {
     ]);
   });
 
+  it('covers the last non-whitespace character with an exclusive end column', () => {
+    const oneCharacterModel = createModel({
+      lineCount: 1,
+      lineMaxColumn: 2,
+      firstNonWhitespaceColumn: 1,
+      lastNonWhitespaceColumn: 2,
+    });
+
+    expect(
+      toCustomYaraSignatureEditorMarkers(
+        [{ message: 'syntax error', line: 1, severity: 'error' }],
+        oneCharacterModel
+      )
+    ).toEqual([
+      expect.objectContaining({
+        startColumn: 1,
+        endColumn: 2,
+      }),
+    ]);
+  });
+
   it('falls back to the full line when the line is only whitespace', () => {
     const whitespaceModel = createModel({
       lineCount: 1,
