@@ -134,7 +134,7 @@ describe('TimeWindowButtons', () => {
   });
 
   describe('time shift', () => {
-    it('calls onChange when stepping forward', async () => {
+    it('steps forward to the adjacent window, starting 1ms after the current end', async () => {
       const { onChange } = renderPicker({
         defaultValue: '2025-01-01T00:00:00.000Z to 2025-01-02T00:00:00.000Z',
       });
@@ -145,11 +145,11 @@ describe('TimeWindowButtons', () => {
 
       expect(onChange).toHaveBeenCalledTimes(1);
       const call = onChange.mock.calls[0][0];
-      expect(call.start).toBe('2025-01-02T00:00:00.000Z');
-      expect(call.end).toBe('2025-01-03T00:00:00.000Z');
+      expect(call.start).toBe('2025-01-02T00:00:00.001Z');
+      expect(call.end).toBe('2025-01-03T00:00:00.001Z');
     });
 
-    it('calls onChange when stepping backward', async () => {
+    it('steps backward to the adjacent window, ending 1ms before the current start', async () => {
       const { onChange } = renderPicker({
         defaultValue: '2025-01-02T00:00:00.000Z to 2025-01-03T00:00:00.000Z',
       });
@@ -160,8 +160,36 @@ describe('TimeWindowButtons', () => {
 
       expect(onChange).toHaveBeenCalledTimes(1);
       const call = onChange.mock.calls[0][0];
+      expect(call.start).toBe('2024-12-31T23:59:59.999Z');
+      expect(call.end).toBe('2025-01-01T23:59:59.999Z');
+    });
+
+    it('steps a full calendar day to the next full calendar day', async () => {
+      const { onChange } = renderPicker({
+        defaultValue: '2025-01-01T00:00:00.000Z to 2025-01-01T23:59:59.999Z',
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('dateRangePickerNextButton'));
+      });
+
+      const call = onChange.mock.calls[0][0];
+      expect(call.start).toBe('2025-01-02T00:00:00.000Z');
+      expect(call.end).toBe('2025-01-02T23:59:59.999Z');
+    });
+
+    it('steps a full calendar day to the previous full calendar day', async () => {
+      const { onChange } = renderPicker({
+        defaultValue: '2025-01-02T00:00:00.000Z to 2025-01-02T23:59:59.999Z',
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('dateRangePickerPreviousButton'));
+      });
+
+      const call = onChange.mock.calls[0][0];
       expect(call.start).toBe('2025-01-01T00:00:00.000Z');
-      expect(call.end).toBe('2025-01-02T00:00:00.000Z');
+      expect(call.end).toBe('2025-01-01T23:59:59.999Z');
     });
   });
 
@@ -307,10 +335,10 @@ describe('TimeWindowButtons', () => {
           fireEvent.click(screen.getByTestId('dateRangePickerNextButton'));
         });
 
-        // Stepping forward shifts the window by its own duration
+        // Stepping forward moves to the adjacent window of the same duration
         const windowMs = moment(end).diff(moment(start));
-        const expectedStart = end;
-        const expectedEnd = moment(end).add(windowMs, 'ms').toISOString();
+        const expectedStart = moment(end).add(1, 'ms').toISOString();
+        const expectedEnd = moment(expectedStart).add(windowMs, 'ms').toISOString();
 
         expect(onChange).toHaveBeenCalledTimes(1);
         const call = onChange.mock.calls[0][0];

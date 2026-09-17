@@ -252,14 +252,20 @@ function useTimeWindow(
     [apply]
   );
 
+  // Range bounds are inclusive, so the adjacent window starts one ms after
+  // the current end (and ends one ms before the current start). Otherwise the
+  // boundary ms would belong to both windows and a full day (00:00:00.000 to
+  // 23:59:59.999) would drift by one ms on every step.
   const stepForward = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
-    applyDates(moment(max), moment(max).add(windowDuration, 'ms'));
+    const nextStart = moment(max).add(1, 'ms');
+    applyDates(nextStart, moment(nextStart).add(windowDuration, 'ms'));
   }, [isInvalid, isWindowDurationZero, max, windowDuration, applyDates]);
 
   const stepBackward = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
-    applyDates(moment(min).subtract(windowDuration, 'ms'), moment(min));
+    const previousEnd = moment(min).subtract(1, 'ms');
+    applyDates(moment(previousEnd).subtract(windowDuration, 'ms'), previousEnd);
   }, [isInvalid, isWindowDurationZero, min, windowDuration, applyDates]);
 
   const expandWindow = useCallback(() => {
