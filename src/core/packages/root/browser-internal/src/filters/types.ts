@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../ftr_provider_context';
+// Copied from @elastic/apm-rum/src/common/types.ts
+export type FilterFn = (payload: Payload) => Payload | boolean | void;
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const browser = getService('browser');
-
-  describe('discover/esql_2', function () {
-    before(async function () {
-      await browser.setWindowSize(1600, 1200);
-    });
-
-    loadTestFile(require.resolve('./_esql_view'));
-  });
+export interface Payload {
+  transactions: Array<Record<string, any>>;
+  errors: Array<Record<string, any>>;
+  [key: string]: any;
 }
