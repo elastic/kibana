@@ -8,7 +8,10 @@
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { EntityType } from '../../../../common/entity_analytics/types';
+import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { RiskSeverity } from '../../../../common/search_strategy';
+import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
+import { ValidCriticalityLevels } from '../../../../common/entity_analytics/asset_criticality/constants';
 
 export interface EntityFilters {
   entityTypes: EntityType[];
@@ -25,6 +28,10 @@ const FILTER_FIELDS = [
   ['watchlists', 'entity.attributes.watchlists'],
   ['dataSources', 'entity.source'],
 ] as const satisfies ReadonlyArray<[key: keyof EntityFilters, esField: string]>;
+
+const VALID_ENTITY_TYPES = new Set<string>(getEntityAnalyticsEntityTypes());
+const VALID_RISK_LEVELS = new Set<string>(SEVERITY_UI_SORT_ORDER);
+const VALID_CRITICALITY = new Set<string>(ValidCriticalityLevels);
 
 const parseArray = (params: URLSearchParams, key: keyof EntityFilters): string[] => {
   const val = params.get(key);
@@ -52,9 +59,15 @@ export const useEntityFiltersParam = (): EntityFiltersResult => {
   const entityFilters = useMemo((): EntityFilters => {
     const params = new URLSearchParams(search);
     return {
-      entityTypes: parseArray(params, 'entityTypes') as EntityType[],
-      riskLevels: parseArray(params, 'riskLevels') as RiskSeverity[],
-      assetCriticality: parseArray(params, 'assetCriticality'),
+      entityTypes: parseArray(params, 'entityTypes').filter((v): v is EntityType =>
+        VALID_ENTITY_TYPES.has(v)
+      ),
+      riskLevels: parseArray(params, 'riskLevels').filter((v): v is RiskSeverity =>
+        VALID_RISK_LEVELS.has(v)
+      ),
+      assetCriticality: parseArray(params, 'assetCriticality').filter((v) =>
+        VALID_CRITICALITY.has(v)
+      ),
       watchlists: parseArray(params, 'watchlists'),
       dataSources: parseArray(params, 'dataSources'),
     };

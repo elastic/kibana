@@ -84,6 +84,13 @@ describe('useEntityFiltersParam', () => {
       expect(result.current.entityFilters.riskLevels).toEqual(['High']);
     });
 
+    it('silently drops invalid values for closed-set filters', () => {
+      const { wrapper } = makeWrapper('?entityTypes=host,unsupported&riskLevels=Critical,bogus');
+      const { result } = renderHook(() => useEntityFiltersParam(), { wrapper });
+      expect(result.current.entityFilters.entityTypes).toEqual(['host']);
+      expect(result.current.entityFilters.riskLevels).toEqual(['Critical']);
+    });
+
     it('clearing a filter removes its key from the URL', () => {
       const { wrapper } = makeWrapper('?entityTypes=host');
       const { result } = renderHook(() => useEntityFiltersParam(), { wrapper });
