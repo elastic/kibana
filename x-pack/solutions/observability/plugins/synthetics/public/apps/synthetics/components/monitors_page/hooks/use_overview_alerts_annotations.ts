@@ -82,6 +82,14 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       // when the matched doc doesn't have it (as a literal "(null)"), and a
       // still-active alert has no end time — `duration.us` alone already
       // covers "how long" for both an active and a recovered alert.
+      //
+      // The underlying check's own error detail isn't usable here:
+      // `error.message` is mapped as plain `text` (not aggregatable), and
+      // Lens's query-annotation tooltip can only pull aggregatable fields —
+      // asking for a non-aggregatable one silently drops the whole
+      // annotation layer (no request, no error, no markers). `error.type`
+      // is aggregatable but only holds a coarse category (e.g. "io",
+      // "validate") that isn't informative on its own.
       extraFields: ['monitor.name', 'kibana.alert.reason', 'kibana.alert.duration.us'],
     };
 
