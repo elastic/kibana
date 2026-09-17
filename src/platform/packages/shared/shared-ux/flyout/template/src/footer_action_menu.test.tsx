@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 import type { FlyoutFooterMenuPanel } from './types';
 
@@ -20,7 +20,7 @@ const noop = () => {};
 // EUI sets pointer-events: none on the popover panel during its opening animation.
 // jsdom never fires animationend, so this inline style is never cleared. Disable the
 // check so clicks inside the popover work without waiting for an animation that never fires.
-const user = userEvent.setup({ pointerEventsCheck: 0 });
+const user = userEvent.setup({ pointerEventsCheck: PointerEventsCheckLevel.Never });
 
 const SIMPLE_PANELS: FlyoutFooterMenuPanel[] = [
   {
