@@ -56,6 +56,7 @@ import { registerSuggestionsInferenceFeatures } from './register_suggestions_inf
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
+const STREAMS_ALLOWED_PROJECT_TYPES = ['observability', 'security'];
 
 export interface StreamsPluginSetup {
   registerKnowledgeIndicatorClientProvider(
@@ -95,12 +96,14 @@ export class StreamsPlugin
   private streamsGetScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
   private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClientContract>;
+  private readonly isServerless: boolean;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
     this.processorSuggestionsService = new ProcessorSuggestionsService();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -210,7 +213,15 @@ export class StreamsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
-    if (plugins.agentBuilder) {
+    const serverlessProjectType = this.isServerless
+      ? plugins.cloud?.serverless.projectType
+      : undefined;
+
+    const isStreamsAgentBuilderAllowed =
+      !this.isServerless ||
+      (!!serverlessProjectType && STREAMS_ALLOWED_PROJECT_TYPES.includes(serverlessProjectType));
+
+    if (plugins.agentBuilder && isStreamsAgentBuilderAllowed) {
       void core
         .getStartServices()
         .then(async ([]) => {
@@ -223,6 +234,7 @@ export class StreamsPlugin
             server,
             logger: this.logger,
             telemetry: telemetryClient,
+            core,
           });
         })
         .catch((err) => {
