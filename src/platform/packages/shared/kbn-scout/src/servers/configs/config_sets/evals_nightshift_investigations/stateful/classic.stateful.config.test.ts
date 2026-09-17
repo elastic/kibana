@@ -22,6 +22,7 @@ jest.mock('../../evals_tracing/stateful/classic.stateful.config', () => ({
     kbnTestServer: {
       serverArgs: [
         '--telemetry.enabled=true',
+        '--telemetry.tracing.exporters=[{"http":{"url":"https://traces.example","headers":{"Authorization":"synthetic-trace-key"}}}]',
         '--xpack.actions.preconfigured={"existing":{"secrets":{"apiKey":"synthetic-model-key"}}}',
       ],
     },
@@ -86,6 +87,14 @@ describe('Nightshift sandbox configuration', () => {
         telemetry_connector_id: 'nightshift-evals-telemetry',
       },
     });
+    expect(config['telemetry.tracing.exporters']).toEqual([
+      {
+        http: { url: 'https://traces.example', headers: { Authorization: 'synthetic-trace-key' } },
+      },
+    ]);
+    expect(config['xpack.agentBuilder.tracing.exporters']).toEqual([
+      { url: 'https://traces.example', headers: { Authorization: 'synthetic-trace-key' } },
+    ]);
     const connector = config['xpack.actions.preconfigured']['nightshift-evals-telemetry'];
     expect(connector.secrets.user).toBe('nightshift_evals_telemetry');
     expect(connector.secrets.password).toMatch(/^[a-f0-9]{64}$/);
@@ -95,6 +104,7 @@ describe('Nightshift sandbox configuration', () => {
     const args = serverArgs.join(' ');
     expect(args).not.toContain(connector.secrets.password);
     expect(args).not.toContain('synthetic-model-key');
+    expect(args).not.toContain('synthetic-trace-key');
     expect(args).not.toContain('--xpack.actions.preconfigured=');
     expect(args).not.toContain('synthetic-api-key');
     expect(args).not.toContain('synthetic private key');

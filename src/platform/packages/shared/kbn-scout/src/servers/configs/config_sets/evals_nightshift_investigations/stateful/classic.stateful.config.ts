@@ -41,11 +41,13 @@ const exporters: Array<{ http?: { url: string; headers?: Record<string, string> 
   ? JSON.parse(exporterArg.slice(exporterPrefix.length))
   : [];
 
-// Keep sandbox and telemetry credentials out of process arguments and launcher logs.
+// Keep sandbox, connector, and trace-exporter credentials out of process arguments and logs.
 const configDirectory = mkdtempSync(join(tmpdir(), 'nightshift-evals-'));
 process.once('exit', () => rmSync(configDirectory, { recursive: true, force: true }));
 const telemetry = createTelemetryIdentity(configDirectory, tracing.esTestCluster.files);
 const sandboxConfig = {
+  ...(exporterArg ? { 'telemetry.tracing.exporters': exporters } : {}),
+  'xpack.agentBuilder.tracing.exporters': exporters.flatMap(({ http }) => (http ? [http] : [])),
   'xpack.actions.preconfigured': {
     ...connectors,
     'nightshift-evals-telemetry': {
@@ -85,13 +87,12 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...tracing.kbnTestServer,
     serverArgs: [
-      ...parentArgs.filter((arg) => !arg.startsWith(connectorPrefix)),
+      ...parentArgs.filter(
+        (arg) => !arg.startsWith(connectorPrefix) && !arg.startsWith(exporterPrefix)
+      ),
       '--xpack.nightshift_investigations.enabled=true',
       '--xpack.nightshift_investigations.cortex.enabled=false',
       `--config=${sandboxConfigPath}`,
-      `--xpack.agentBuilder.tracing.exporters=${JSON.stringify(
-        exporters.flatMap(({ http }) => (http ? [http] : []))
-      )}`,
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
