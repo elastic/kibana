@@ -112,7 +112,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         'Displays a single metric within a range with optional min/max/goal bounds. Choose when showing progress toward a goal or performance against thresholds (e.g. "CPU usage as a gauge", "sales target progress").',
       rules: [
         noPanelTitleRule('the gauge label names the measure'),
-        'Omit `min`, `max`, and `goal` unless supplied or meaningful in the existing configuration. Never invent business targets from the data or units.',
+        'Bind `min`, `max`, or `goal` only to a column the query returns for that purpose. Never add or infer them otherwise.',
         'The default bands are `range: "percentage"` with 4 steps: `0 <= value < 25`, `25 <= value < 50`, `50 <= value < 75`, `75 <= value <= 100`. During enhancement, restore these unless existing thresholds are meaningful for the measure. A focused palette-only edit changes step colors while preserving the step count, boundaries, and `range`.',
       ],
       coloring: {
