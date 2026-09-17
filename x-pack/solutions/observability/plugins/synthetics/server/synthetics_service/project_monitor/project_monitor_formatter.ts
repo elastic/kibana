@@ -16,6 +16,7 @@ import type { SyntheticsServerSetup } from '../../types';
 import type { RouteContext } from '../../routes/types';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
+import { DeleteMonitorAPI } from '../../routes/monitor_cruds/services/delete_monitor_api';
 import type { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import type { MonitorConfigUpdate } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
@@ -27,7 +28,11 @@ import type {
   SyntheticsMonitor,
   MonitorFields,
 } from '../../../common/runtime_types';
-import { ConfigKey, type SyntheticsPrivateLocations } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  type SyntheticsPrivateLocations,
+} from '../../../common/runtime_types';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import type { ValidationResult } from '../../routes/monitor_cruds/monitor_validation';
 import {
@@ -36,6 +41,7 @@ import {
   INVALID_CONFIGURATION_ERROR,
 } from '../../routes/monitor_cruds/monitor_validation';
 import { normalizeProjectMonitor } from './normalizers';
+import { expandProjectMonitorUrls, isUrlMonitorForParent } from './expand_project_monitor_urls';
 
 type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
 
@@ -72,6 +78,7 @@ export class ProjectMonitorFormatter {
   private maintenanceWindows: MaintenanceWindow[];
   private savedObjectsClient: SavedObjectsClientContract;
   private monitors: ProjectMonitor[] = [];
+  private httpMonitorIds: string[] = [];
   public createdMonitors: string[] = [];
   public updatedMonitors: string[] = [];
   public failedMonitors: FailedError = [];
@@ -96,7 +103,10 @@ export class ProjectMonitorFormatter {
     this.spaceId = spaceId;
     this.savedObjectsClient = routeContext.savedObjectsClient;
     this.syntheticsMonitorClient = routeContext.syntheticsMonitorClient;
-    this.monitors = monitors;
+    this.httpMonitorIds = monitors
+      .filter((monitor) => monitor.type === MonitorTypeEnum.HTTP)
+      .map((monitor) => monitor.id);
+    this.monitors = expandProjectMonitorUrls(monitors);
     this.server = routeContext.server;
     this.projectFilter = `${syntheticsMonitorSavedObjectType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
     this.publicLocations = [];
@@ -189,6 +199,8 @@ export class ProjectMonitorFormatter {
       this.createMonitorsBulk(normalizedNewMonitors),
       this.updateMonitorsBulk(normalizedUpdateMonitors),
     ]);
+
+    await this.deleteStaleUrlMonitors(existingMonitors);
   };
 
   validateProjectMonitor = ({
@@ -266,14 +278,12 @@ export class ProjectMonitorFormatter {
   };
 
   public getProjectMonitorsForProject = async (): Promise<PreviousMonitorForUpdate[]> => {
-    const journeyIds = this.monitors.map((monitor) => monitor.id);
-    const journeyFilter = getSavedObjectKqlFilter({
-      field: ConfigKey.JOURNEY_ID,
-      values: journeyIds,
-    });
-
     const result = await this.routeContext.monitorConfigRepository.find<ExistingMonitor>({
-      filter: `${this.projectFilter} AND ${journeyFilter}`,
+      // Fetch the project's monitors rather than only the incoming IDs. A URL
+      // can be removed from a multi-URL definition, and its generated monitor
+      // ID is then absent from the current push but still needs deleting.
+      filter: this.projectFilter,
+      perPage: 10000,
       fields: [
         ConfigKey.JOURNEY_ID,
         ConfigKey.CONFIG_ID,
@@ -288,6 +298,56 @@ export class ProjectMonitorFormatter {
         updated_at: monitor.updated_at,
       };
     });
+  };
+
+  private deleteStaleUrlMonitors = async (existingMonitors: PreviousMonitorForUpdate[]) => {
+    // Never remove a previous configuration if any monitor in this push failed
+    // validation or synchronization. A retry after the push succeeds will
+    // reconcile the stale children safely.
+    if (this.httpMonitorIds.length === 0 || this.failedMonitors.length > 0) {
+      return;
+    }
+
+    const currentMonitorIds = new Set(this.monitors.map((monitor) => monitor.id));
+    const staleMonitors = existingMonitors.filter((monitor) => {
+      const journeyId = monitor[ConfigKey.JOURNEY_ID];
+
+      if (
+        monitor[ConfigKey.MONITOR_TYPE] !== MonitorTypeEnum.HTTP ||
+        currentMonitorIds.has(journeyId)
+      ) {
+        return false;
+      }
+
+      return this.httpMonitorIds.some(
+        (parentId) => journeyId === parentId || isUrlMonitorForParent(journeyId, parentId)
+      );
+    });
+
+    if (staleMonitors.length === 0) {
+      return;
+    }
+
+    try {
+      const { res, result } = await new DeleteMonitorAPI(this.routeContext).execute({
+        monitorIds: staleMonitors.map((monitor) => monitor[ConfigKey.CONFIG_ID]),
+      });
+
+      if (res || result?.some(({ deleted }) => !deleted)) {
+        this.failedMonitors.push({
+          reason: FAILED_TO_UPDATE_MONITOR,
+          details: 'Failed to delete stale URL monitor configurations.',
+          payload: staleMonitors,
+        });
+      }
+    } catch (e) {
+      this.server.logger.error(e);
+      this.failedMonitors.push({
+        reason: FAILED_TO_UPDATE_MONITOR,
+        details: e.message,
+        payload: staleMonitors,
+      });
+    }
   };
 
   private createMonitorsBulk = async (monitors: SyntheticsMonitor[]) => {
