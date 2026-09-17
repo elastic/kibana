@@ -18,11 +18,14 @@ import {
   createPromptRequestedTerminatedEvent,
 } from './items/execution_terminated_event.factory';
 import { createAwaitingPromptTurnItem } from './items/timeline_item.factory';
-import { createAskUserQuestionPrompt } from './items/prompt_request_event.factory';
+import {
+  createAskUserQuestionPrompt,
+  createAuthorizationPrompt,
+} from './items/prompt_request_event.factory';
 import { createPromptResponseEvent } from './items/prompt_response_event.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
 import type { TimelineItem } from './to_timeline_items';
-import { activeExecutionToItem, buildSavedItems } from './to_timeline_items';
+import { activeExecutionToItem, buildSavedItems, toTimelineItems } from './to_timeline_items';
 import { Timeline } from './timeline';
 
 jest.mock('../conversation_rounds/round_response/response_message', () => ({
@@ -57,11 +60,14 @@ const completedSaved: TimelineItem = { ...completedLive, steps: [...steps] };
 
 type TimelineProps = React.ComponentProps<typeof Timeline>;
 
-const renderTimeline = (item: TimelineItem, props?: Omit<TimelineProps, 'items'>) =>
+const renderTimeline = (
+  item: TimelineItem | TimelineItem[],
+  props?: Omit<TimelineProps, 'items'>
+) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <Timeline items={[item]} {...props} />
+        <Timeline items={Array.isArray(item) ? item : [item]} {...props} />
       </EuiProvider>
     </I18nProvider>
   );
@@ -227,9 +233,57 @@ describe('AgentTurn - awaiting prompt', () => {
     expect(screen.queryByTestId('agentBuilderConfirmationPrompt')).not.toBeInTheDocument();
   });
 
-  it('shows the answered clarification pill on a resolved ask_user_question pause', () => {
+  it.each([
+    { source: 'saved', accepted: true },
+    { source: 'saved', accepted: false },
+    { source: 'optimistic', accepted: true },
+    { source: 'optimistic', accepted: false },
+  ])(
+    'hides $source confirmation and authorization answers (accepted: $accepted)',
+    ({ source, accepted }) => {
+      const confirmation = createConfirmation('confirmation-1');
+      const authorization = createAuthorizationPrompt();
+      const terminalEvent = createPromptRequestedTerminatedEvent({
+        id: 'term-paused',
+        execution_id: executionId,
+        prompts: [confirmation, authorization],
+      });
+      const promptResponse = createPromptResponseEvent({
+        id: 'response-1',
+        data: {
+          prompt_requested_event_id: terminalEvent.id,
+          responses: {
+            [confirmation.id]: { allow: accepted },
+            [authorization.id]: { authorized: accepted },
+          },
+        },
+      });
+      const items =
+        source === 'saved'
+          ? buildSavedItems([terminalEvent, promptResponse])
+          : toTimelineItems({
+              events: [terminalEvent],
+              activeExecution: {
+                status: 'running',
+                executionId: 'exec-resumed',
+                steps: [],
+                message: '',
+                promptResponse,
+              },
+            });
+
+      const { container } = renderTimeline(items);
+
+      expect(screen.queryByTestId('agentBuilderConfirmationPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderAuthorizationPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderPromptResponse')).not.toBeInTheDocument();
+      expect(container.querySelector('[data-timeline-item-key="response-1"]')).toBeNull();
+    }
+  );
+
+  it.each(['saved', 'optimistic'])('opens the clarification flyout for a %s answer', (source) => {
     const prompt = createAskUserQuestionPrompt();
-    const [item] = buildSavedItems([
+    const pausedEvents = [
       createExecutionStepEvent({
         id: 'step-ask',
         execution_id: executionId,
@@ -247,18 +301,34 @@ describe('AgentTurn - awaiting prompt', () => {
         execution_id: executionId,
         prompts: [prompt],
       }),
-      createPromptResponseEvent({
-        id: 'response-1',
-        data: {
-          prompt_requested_event_id: 'term-paused',
-          responses: { [prompt.id]: { answers: [{ choice: [0] }] } },
-        },
-      }),
-    ]);
+    ];
+    const promptResponse = createPromptResponseEvent({
+      id: 'response-1',
+      data: {
+        prompt_requested_event_id: 'term-paused',
+        responses: { [prompt.id]: { answers: [{ choice: [0] }] } },
+      },
+    });
+    const items =
+      source === 'saved'
+        ? buildSavedItems([...pausedEvents, promptResponse])
+        : toTimelineItems({
+            events: pausedEvents,
+            activeExecution: {
+              status: 'running',
+              executionId: 'exec-resumed',
+              steps: [],
+              message: '',
+              promptResponse,
+            },
+          });
 
-    renderTimeline(item, { onResumePrompt: jest.fn() });
+    renderTimeline(items);
 
     expect(screen.queryByTestId('agentBuilderAskUserQuestionPrompt')).not.toBeInTheDocument();
-    expect(screen.getByText('Clarification • 1 answered')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Clarification • 1 answered' }));
+    expect(screen.getByRole('heading', { name: 'Clarification' })).toBeInTheDocument();
+    expect(screen.getByText('Which environment are you investigating?')).toBeInTheDocument();
+    expect(screen.getByText('Production')).toBeInTheDocument();
   });
 });

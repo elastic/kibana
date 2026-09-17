@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
-import { PromptResponseEvent } from './items/prompt_response_event';
 import type { PromptResumeProps } from './agent_turn';
 import { AgentTurn } from './agent_turn';
 import type { TimelineItem } from './to_timeline_items';
@@ -42,9 +41,6 @@ export const Timeline: React.FC<TimelineProps> = ({
                   conversationAttachments={conversationAttachments}
                 />
               );
-              break;
-            case 'promptResponse':
-              content = <PromptResponseEvent event={item.event} prompts={item.prompts} />;
               break;
             case 'agentTurn':
               content = (

@@ -192,14 +192,13 @@ describe('groupTimelineEvents', () => {
     }
   });
 
-  it('renders prompt_response as its own promptResponse item', () => {
+  it('does not create a timeline item for a prompt_response event', () => {
     const promptResponse = createPromptResponseEvent({ id: 'pr-1' });
 
     const events = [promptResponse];
     const items = groupTimelineEvents(events, makeEventsById(events));
 
-    expect(items).toHaveLength(1);
-    expect(items[0]).toEqual({ kind: 'promptResponse', key: 'pr-1', event: promptResponse });
+    expect(items).toEqual([]);
   });
 
   it('handles execution_aborted as aborted status', () => {
@@ -924,7 +923,7 @@ describe('answered prompt_requested terminal', () => {
     expect(step && isAskUserQuestionStep(step) ? step.answers : undefined).toEqual(answers);
   });
 
-  it('orders the recorded answer between the paused turn and the resumed turn, deduped once persisted', () => {
+  it('resolves the paused turn without inserting an answer item before or after persistence', () => {
     const items = toTimelineItems({
       events: [terminated],
       activeExecution: {
@@ -936,8 +935,10 @@ describe('answered prompt_requested terminal', () => {
       },
     });
 
-    expect(items.map((item) => item.kind)).toEqual(['agentTurn', 'promptResponse', 'agentTurn']);
-    expect(items.filter((item) => item.kind === 'promptResponse')).toHaveLength(1);
+    expect(items).toMatchObject([
+      { kind: 'agentTurn', key: 'exec-paused', status: 'completed' },
+      { kind: 'agentTurn', key: 'exec-resume', status: 'running' },
+    ]);
 
     const persisted = toTimelineItems({
       events: [terminated, answer],
@@ -949,22 +950,32 @@ describe('answered prompt_requested terminal', () => {
         promptResponse: answer,
       },
     });
-    expect(persisted.map((item) => item.kind)).toEqual([
-      'agentTurn',
-      'promptResponse',
-      'agentTurn',
+    expect(persisted).toMatchObject([
+      { kind: 'agentTurn', key: 'exec-paused', status: 'completed' },
+      { kind: 'agentTurn', key: 'exec-resume', status: 'running' },
     ]);
-    expect(persisted.filter((item) => item.kind === 'promptResponse')).toHaveLength(1);
   });
 
-  it('joins the answered pause definitions onto the recorded answer for context', () => {
-    const [responseItem] = buildSavedItems([terminated, answer]).filter(
-      (item) => item.kind === 'promptResponse'
-    );
-    expect(responseItem).toMatchObject({ kind: 'promptResponse', prompts: [prompt] });
+  it('preserves the resumed turn origin from its prompt-response trigger', () => {
+    const origin = { type: ConversationOriginType.Slack };
+    const externalAnswer = createPromptResponseEvent({
+      ...answer,
+      actor: { type: EventActorType.external, id: 'external-user', origin },
+    });
+    const started = createExecutionStartedEvent({
+      execution_id: 'exec-resume',
+      trigger_event_id: externalAnswer.id,
+    });
+
+    const items = buildSavedItems([terminated, externalAnswer, started]);
+
+    expect(items).toMatchObject([
+      { kind: 'agentTurn', key: 'exec-paused', status: 'completed' },
+      { kind: 'agentTurn', key: 'exec-resume', triggerEventId: externalAnswer.id, origin },
+    ]);
   });
 
-  it('surfaces a fast local answer even before the paused turn is saved', () => {
+  it('resolves a live pause from a local answer before the paused turn is saved', () => {
     const items = toTimelineItems({
       events: [],
       activeExecution: {
@@ -979,6 +990,7 @@ describe('answered prompt_requested terminal', () => {
       },
     });
 
-    expect(items.map((item) => item.kind)).toEqual(['agentTurn', 'promptResponse']);
+    expect(items).toMatchObject([{ kind: 'agentTurn', key: 'exec-paused', status: 'completed' }]);
+    expect(items[0]).not.toHaveProperty('pendingPrompts');
   });
 });

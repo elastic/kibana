@@ -10,7 +10,6 @@ import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation'
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { AgentTurnItem, TimelineItem } from '../to_timeline_items';
 import { createUserMessageEvent } from './user_message_event.factory';
-import { createPromptResponseEvent } from './prompt_response_event.factory';
 import {
   createExecutionTerminatedEvent,
   createPromptRequestedTerminatedEvent,
@@ -19,21 +18,11 @@ import { createExecutionFailedEvent } from './execution_failed_event.factory';
 import { createExecutionAbortedEvent } from './execution_aborted_event.factory';
 
 type UserMessageItem = Extract<TimelineItem, { kind: 'userMessage' }>;
-type PromptResponseItem = Extract<TimelineItem, { kind: 'promptResponse' }>;
 
 export const createUserMessageItem = (overrides?: Partial<UserMessageItem>): UserMessageItem => ({
   kind: 'userMessage',
   key: 'event-1',
   event: createUserMessageEvent(),
-  ...overrides,
-});
-
-export const createPromptResponseItem = (
-  overrides?: Partial<PromptResponseItem>
-): PromptResponseItem => ({
-  kind: 'promptResponse',
-  key: 'event-3',
-  event: createPromptResponseEvent(),
   ...overrides,
 });
 

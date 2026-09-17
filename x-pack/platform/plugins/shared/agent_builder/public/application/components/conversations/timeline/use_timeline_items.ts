@@ -59,8 +59,5 @@ export const useTimelineItems = (): TimelineItem[] => {
     () => buildLiveItems({ pendingUserMessage, activeExecution }),
     [pendingUserMessage, activeExecution]
   );
-  return useMemo(
-    () => assembleTimelineItems(savedItems, liveItems, localPromptResponse),
-    [savedItems, liveItems, localPromptResponse]
-  );
+  return useMemo(() => assembleTimelineItems(savedItems, liveItems), [savedItems, liveItems]);
 };

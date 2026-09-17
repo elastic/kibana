@@ -39,12 +39,6 @@ export interface AgentTurnItem {
 
 export type TimelineItem =
   | { kind: 'userMessage'; key: string; event: UserMessageEvent; isPending?: boolean }
-  | {
-      kind: 'promptResponse';
-      key: string;
-      event: PromptResponseEvent;
-      prompts?: PromptRequest[];
-    }
   | AgentTurnItem;
 
 const responseResolvesTerminal = (
@@ -52,12 +46,6 @@ const responseResolvesTerminal = (
   terminal: { id: string } | undefined
 ): response is PromptResponseEvent =>
   !!response && !!terminal && response.data.prompt_requested_event_id === terminal.id;
-
-const promptsFromTerminal = (terminal: TimelineEvent | undefined): PromptRequest[] | undefined =>
-  terminal?.type === TimelineEventType.executionTerminated &&
-  terminal.data.outcome.type === 'prompt_requested'
-    ? terminal.data.outcome.prompts
-    : undefined;
 
 interface ExecutionAccumulator {
   executionId: string;
@@ -187,9 +175,7 @@ export const activeExecutionToItem = (draft: ActiveExecutionDraft): AgentTurnIte
   return item;
 };
 
-type UserEntry =
-  | Extract<TimelineItem, { kind: 'userMessage' }>
-  | Extract<TimelineItem, { kind: 'promptResponse' }>;
+type UserEntry = Extract<TimelineItem, { kind: 'userMessage' }>;
 
 export const groupTimelineEvents = (
   events: TimelineEvent[],
@@ -222,17 +208,9 @@ export const groupTimelineEvents = (
         ordered.push({ kind: 'userMessage', key: event.id, event });
         break;
 
-      case TimelineEventType.promptResponse: {
-        const prompts = promptsFromTerminal(eventsById.get(event.data.prompt_requested_event_id));
-        ordered.push({
-          kind: 'promptResponse',
-          key: event.id,
-          event,
-          ...(prompts ? { prompts } : {}),
-        });
+      case TimelineEventType.promptResponse:
         responsesByRequestId.set(event.data.prompt_requested_event_id, event);
         break;
-      }
 
       case TimelineEventType.executionStarted:
         if (!event.execution_id) break;
@@ -360,41 +338,9 @@ const appendDraftItem = (items: TimelineItem[], draftItem: AgentTurnItem): void 
   }
 };
 
-const insertLocalPromptResponse = (
-  items: TimelineItem[],
-  localPromptResponse: PromptResponseEvent | undefined
-): TimelineItem[] => {
-  if (!localPromptResponse) return items;
-  const targetId = localPromptResponse.data.prompt_requested_event_id;
-  const alreadyPersisted = items.some(
-    (item) =>
-      item.kind === 'promptResponse' && item.event.data.prompt_requested_event_id === targetId
-  );
-  if (alreadyPersisted) return items;
-
-  const targetIndex = items.findIndex(
-    (item) => item.kind === 'agentTurn' && item.terminal?.id === targetId
-  );
-  const target = targetIndex >= 0 ? (items[targetIndex] as AgentTurnItem) : undefined;
-  const prompts = target
-    ? promptsFromTerminal(target.terminal) ?? target.pendingPrompts
-    : undefined;
-  const responseItem: TimelineItem = {
-    kind: 'promptResponse',
-    key: localPromptResponse.id,
-    event: localPromptResponse,
-    ...(prompts ? { prompts } : {}),
-  };
-  if (targetIndex < 0) return [...items, responseItem];
-  const next = [...items];
-  next.splice(targetIndex + 1, 0, responseItem);
-  return next;
-};
-
 export const assembleTimelineItems = (
   savedItems: TimelineItem[],
-  liveItems: TimelineItem[],
-  localPromptResponse?: PromptResponseEvent | null
+  liveItems: TimelineItem[]
 ): TimelineItem[] => {
   const items = [...savedItems];
   const liveTurn = liveItems.find((item): item is AgentTurnItem => item.kind === 'agentTurn');
@@ -402,11 +348,11 @@ export const assembleTimelineItems = (
   for (const item of liveItems) {
     if (item.kind === 'agentTurn') {
       appendDraftItem(items, item);
-    } else if (!(item.kind === 'userMessage' && item.isPending && userMessagePersisted)) {
+    } else if (!(item.isPending && userMessagePersisted)) {
       items.push(item);
     }
   }
-  return insertLocalPromptResponse(items, localPromptResponse ?? undefined);
+  return items;
 };
 
 export const isEventsAwaitingPrompt = (
@@ -443,7 +389,6 @@ export const toTimelineItems = ({
   const localPromptResponse = activeExecution?.promptResponse;
   return assembleTimelineItems(
     buildSavedItems(events, localPromptResponse ? [localPromptResponse] : []),
-    buildLiveItems({ pendingUserMessage, activeExecution }),
-    localPromptResponse
+    buildLiveItems({ pendingUserMessage, activeExecution })
   );
 };
