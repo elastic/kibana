@@ -97,6 +97,7 @@ selenium
 *.out
 package-lock.json
 !/.buildkite/package-lock.json
+yarn.lock
 .yo-rc.json
 .vscode
 *.sublime-*

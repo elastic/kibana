@@ -3,11 +3,11 @@ pageLoadAssetSize:
   advancedSettings: 6196
   agentBuilder: 48000
   agentBuilderPlatform: 8886
-  aiAssistantManagementSelection: 13590
+  aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
   alertingVTwo: 47881
-  apm: 25434
+  apm: 28057
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -28,7 +28,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   controls: 10300
   core: 547151
-  cps: 9209
+  cps: 9153
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
@@ -45,7 +45,7 @@ pageLoadAssetSize:
   dataVisualizer: 32727
   developerToolbar: 4467
   devTools: 8109
-  discover: 31186
+  discover: 30538
   discoverEnhanced: 5509
   discoverShared: 2322
   elasticAssistant: 301540
@@ -64,7 +64,7 @@ pageLoadAssetSize:
   exploratoryView: 45042
   expressionGauge: 15748
   expressionHeatmap: 17563
-  expressionLegacyMetricVis: 13800
+  expressionLegacyMetricVis: 13747
   expressionMetricVis: 18100
   expressionPartitionVis: 29826
   expressions: 105076
@@ -74,7 +74,7 @@ pageLoadAssetSize:
   feedback: 7000
   fieldFormats: 64634
   fieldsMetadata: 4901
-  files: 6037
+  files: 6035
   filesManagement: 5208
   fileUpload: 22957
   fleet: 229729
@@ -146,7 +146,7 @@ pageLoadAssetSize:
   sampleDataIngest: 2640
   savedObjects: 11735
   savedObjectsFinder: 4319
-  savedObjectsManagement: 22390
+  savedObjectsManagement: 22361
   savedObjectsTagging: 23144
   savedObjectsTaggingOss: 2163
   savedSearch: 11000
@@ -155,7 +155,7 @@ pageLoadAssetSize:
   searchAssistant: 7079
   searchGettingStarted: 6678
   searchHomepage: 9005
-  searchInferenceEndpoints: 13404
+  searchInferenceEndpoints: 10571
   searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -171,13 +171,13 @@ pageLoadAssetSize:
   serverlessSearch: 26287
   serverlessWorkplaceAI: 5078
   sessionView: 47912
-  share: 64618
+  share: 64066
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 12500
+  streams: 11801
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
