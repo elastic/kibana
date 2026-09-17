@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { proposalSchema } from '@kbn/agentic-investigations-plugin/common';
 import {
   MOCK_INVESTIGATIONS,
   MOCK_PROPOSALS,
@@ -12,11 +13,10 @@ import {
   WATCHES_SEED,
   WORKERS_SEED,
 } from '../samples';
-import type { Investigation, Proposal, Watch } from '.';
+import type { Investigation, Watch } from '.';
 import {
   GetInvestigationResponse,
   GetWatchResponse,
-  ListInvestigationProposalsResponse,
   ListInvestigationsResponse,
   ListWatchesResponse,
   WatchSkill,
@@ -167,15 +167,13 @@ describe('AlertZero schema smoke tests', () => {
     });
   });
 
-  it('parses mock proposals through ListInvestigationProposalsResponse', () => {
-    const result = ListInvestigationProposalsResponse.parse({
-      proposals: MOCK_PROPOSALS,
-      total: MOCK_PROPOSALS.length,
+  it('parses mock proposals through the proposals API schema', () => {
+    // MOCK_PROPOSALS is the shape the proposals API returns, so it is validated against
+    // that schema rather than this package's legacy `Proposal` component.
+    MOCK_PROPOSALS.forEach((proposal) => {
+      expect(() => proposalSchema.parse(proposal)).not.toThrow();
     });
-    expect(result.proposals.length).toBeGreaterThanOrEqual(8);
-    result.proposals.forEach((prop: Proposal) => {
-      expect(prop.template_id).toBe('proposal');
-    });
+    expect(MOCK_PROPOSALS.length).toBeGreaterThanOrEqual(8);
   });
 
   it('parses investigation detail through GetInvestigationResponse', () => {
