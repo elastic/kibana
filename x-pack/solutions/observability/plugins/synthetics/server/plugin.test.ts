@@ -9,6 +9,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { Plugin } from './plugin';
 import { PRIVATE_LOCATIONS_SYNC_TASK_ID } from './tasks/sync_private_locations_monitors_task';
+import { SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID } from './tasks/clean_up_package_policies_task';
 
 jest.mock('./synthetics_service/synthetics_service', () => ({
   SyntheticsService: jest.fn().mockImplementation(() => ({
@@ -105,5 +106,58 @@ describe('Synthetics server plugin', () => {
     await flushStart();
 
     expect(registerSyncTask).toHaveBeenCalledWith(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+  });
+
+  it('schedules the package policy clean up task on start', async () => {
+    const context = coreMock.createPluginInitializerContext({ enabled: true });
+    const plugin = new Plugin(context);
+
+    const taskManagerSetup = taskManagerMock.createSetup();
+    const taskManagerStart = taskManagerMock.createStart();
+    taskManagerStart.get.mockRejectedValue({ statusCode: 404 });
+    taskManagerStart.ensureScheduled.mockResolvedValue({} as any);
+
+    plugin.setup(coreMock.createSetup(), {
+      ruleRegistry: {
+        ruleDataService: {
+          initializeIndex: jest.fn().mockReturnValue({}),
+        },
+      },
+      features: {
+        registerKibanaFeature: jest.fn(),
+      },
+      taskManager: taskManagerSetup,
+      telemetry: {},
+      cloud: {},
+      share: {},
+      alerting: {},
+      embeddable: {
+        registerEmbeddableServerDefinition: jest.fn(),
+      },
+      encryptedSavedObjects: {},
+      observability: {},
+      usageCollection: {},
+      ml: {},
+    } as any);
+
+    plugin.start(coreMock.createStart(), {
+      taskManager: taskManagerStart,
+      maintenanceWindows: {
+        registerSyncTask: jest.fn().mockReturnValue(jest.fn()),
+        getMaintenanceWindowClientInternal: jest.fn(),
+      },
+      security: {},
+      fleet: {},
+      encryptedSavedObjects: {},
+      telemetry: {},
+      alerting: {},
+    } as any);
+
+    await flushStart();
+
+    expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID })
+    );
+    expect(taskManagerStart.runSoon).not.toHaveBeenCalled();
   });
 });
