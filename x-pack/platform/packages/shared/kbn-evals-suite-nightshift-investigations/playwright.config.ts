@@ -9,17 +9,22 @@ import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 const selection = process.env.NIGHTSHIFT_DATASETS;
-if (selection && !['all', 'investigate-lite', 'synthetic-smoke'].includes(selection)) {
+if (selection && !['all', 'investigate-lite', 'synthetic-smoke', 'remote'].includes(selection)) {
   throw new Error(
-    `Unknown NIGHTSHIFT_DATASETS: ${selection}. Choose investigate-lite or synthetic-smoke.`
+    `Unknown NIGHTSHIFT_DATASETS: ${selection}. Choose investigate-lite, synthetic-smoke or remote.`
   );
 }
+
+// Each selector runs exactly one eval folder; the golden lite eval is the default.
+const testIgnore: Record<string, string[]> = {
+  'synthetic-smoke': ['**/golden/**', '**/remote/**'],
+  remote: ['**/golden/**', '**/smoke/**'],
+};
 
 const config = createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   timeout: 55 * 60_000,
-  testIgnore:
-    process.env.NIGHTSHIFT_DATASETS === 'synthetic-smoke' ? '**/golden/**' : '**/smoke/**',
+  testIgnore: testIgnore[selection ?? ''] ?? ['**/smoke/**', '**/remote/**'],
 });
 
 const goldenConfig: typeof config = {

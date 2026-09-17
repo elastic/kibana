@@ -89,6 +89,22 @@ describe('buildConnectorEnv', () => {
     // Very short values are not redacted: they would produce false positives in output.
     expect(secretValues).toEqual([TOKEN]);
   });
+
+  it('flattens webhook secret headers into per-header env vars', () => {
+    const { env, secretValues } = buildConnectorEnv({
+      connectorId: CONNECTOR_ID,
+      actionTypeId: '.webhook',
+      config: { url: 'https://telemetry.example:443', hasAuth: false },
+      secrets: { user: null, password: null, secretHeaders: { Authorization: `ApiKey ${TOKEN}` } },
+    });
+
+    expect(env.CONNECTOR_SECRET_HEADER_AUTHORIZATION).toBe(`ApiKey ${TOKEN}`);
+    expect(env.CONNECTOR_SECRET_SECRETHEADERS).toBe(
+      JSON.stringify({ Authorization: `ApiKey ${TOKEN}` })
+    );
+    expect(env).not.toHaveProperty('CONNECTOR_SECRET_USER');
+    expect(secretValues).toContain(`ApiKey ${TOKEN}`);
+  });
 });
 
 describe('redactSecrets', () => {

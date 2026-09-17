@@ -34,6 +34,9 @@ const sandboxConfigSchema = schema.object({
   // sandbox queries telemetry with. It is added to the investigator's connector
   // allow-list; credentials are injected per command, only when the agent asks for it.
   telemetry_connector_id: schema.maybe(schema.string()),
+  // Markdown telling the investigator which indices (or cross-cluster patterns) the telemetry
+  // connector can read. Replaces the default `logs-*`, `metrics-*`, `traces-*` hint.
+  telemetry_readable_indices: schema.maybe(schema.string({ maxLength: 4000 })),
 });
 
 const cortexConfigSchema = schema.object({

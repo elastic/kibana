@@ -173,16 +173,19 @@ export class NightshiftInvestigationsPlugin
                 telemetryConnectorId,
                 callContext
               );
-              const usesBasicAuth =
-                !('errorMessage' in credentials) &&
-                Boolean(
-                  credentials.env.CONNECTOR_SECRET_USER && credentials.env.CONNECTOR_SECRET_PASSWORD
-                );
+              const env = 'errorMessage' in credentials ? {} : credentials.env;
+              const auth =
+                env.CONNECTOR_SECRET_USER && env.CONNECTOR_SECRET_PASSWORD
+                  ? 'basic'
+                  : env.CONNECTOR_SECRET_HEADER_AUTHORIZATION
+                  ? 'header'
+                  : 'apiKey';
               await writeElasticManifest({
                 conversationId,
                 apiClient: connectionManager.apiClient,
                 connectorId: telemetryConnectorId,
-                auth: usesBasicAuth ? 'basic' : 'apiKey',
+                auth,
+                readableIndices: config.sandbox?.telemetry_readable_indices,
                 logger: sandboxLogger,
               });
             }

@@ -658,18 +658,26 @@ export class SandboxConnectionManager {
   private readonly lastAllowedIds = new Map<string, string>();
   /** Called once per conversation so workspace can be restored before manifest write. */
   private restoreCallback?: (conversationId: string) => Promise<void>;
+  /**
+   * The manifest write is the first RPC a fresh sandbox receives and can hit it before its mTLS
+   * side is up, which surfaces as UNAVAILABLE. Retry a few times before giving up.
+   */
+  private readonly manifestRetry: { attempts: number; delayMs: number };
 
   constructor({
     config,
     logger,
     writeManifest,
+    manifestRetry = { attempts: 5, delayMs: 1000 },
   }: {
     config: SandboxConfig;
     logger: Logger;
     writeManifest?: (conversationId: string, callContext: SandboxCallContext) => Promise<void>;
+    manifestRetry?: { attempts: number; delayMs: number };
   }) {
     this.logger = logger;
     this.writeManifest = writeManifest;
+    this.manifestRetry = manifestRetry;
     this.apiClient = new SandboxApiClient({
       host: config.sandbox_api_host,
       port: config.sandbox_api_port,
@@ -782,12 +790,43 @@ export class SandboxConnectionManager {
     const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
     const lastKey = this.lastAllowedIds.get(conversationId);
     if (lastKey === currentKey) return;
-    this.lastAllowedIds.set(conversationId, currentKey);
-    await this.writeManifest(conversationId, callContext).catch((err) => {
-      this.logger.warn(
-        `Connector manifest refresh failed for conversation ${conversationId}: ${err.message}`
-      );
-    });
+    await this.writeManifestOnce(conversationId, callContext, currentKey, 'refresh');
+  }
+
+  /**
+   * Writes the manifests, retrying UNAVAILABLE while the sandbox comes up. A write that still
+   * fails leaves the conversation unmarked so the next command tries again instead of leaving
+   * the agent without connector documentation for the rest of the conversation.
+   */
+  private async writeManifestOnce(
+    conversationId: string,
+    callContext: SandboxCallContext,
+    allowedIdsKey: string,
+    stage: 'write' | 'refresh'
+  ): Promise<void> {
+    if (!this.writeManifest) return;
+    const { attempts, delayMs } = this.manifestRetry;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await this.writeManifest(conversationId, callContext);
+        this.lastAllowedIds.set(conversationId, allowedIdsKey);
+        return;
+      } catch (err) {
+        const unavailable = err?.code === 14; /* UNAVAILABLE */
+        if (unavailable && attempt < attempts) {
+          this.logger.debug(
+            `Sandbox not ready for manifest write (attempt ${attempt}/${attempts}) for conversation ${conversationId}; retrying`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+          continue;
+        }
+        this.lastAllowedIds.delete(conversationId);
+        this.logger.warn(
+          `Connector manifest ${stage} failed for conversation ${conversationId}: ${err.message}`
+        );
+        return;
+      }
+    }
   }
 
   private ensureInitialized(
@@ -819,12 +858,7 @@ export class SandboxConnectionManager {
 
     if (this.writeManifest) {
       const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
-      this.lastAllowedIds.set(conversationId, currentKey);
-      await this.writeManifest(conversationId, callContext).catch((err) => {
-        this.logger.warn(
-          `Connector manifest write failed for conversation ${conversationId}: ${err.message}`
-        );
-      });
+      await this.writeManifestOnce(conversationId, callContext, currentKey, 'write');
     }
   }
 

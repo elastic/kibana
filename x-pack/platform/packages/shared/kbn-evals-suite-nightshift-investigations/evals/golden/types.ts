@@ -20,36 +20,55 @@ const expectedSchema = z
   })
   .catchall(z.json());
 
-export const goldenExampleSchema = z.object({
-  input: z
-    .object({
-      question: z
+const metadataSchema = z
+  .object({
+    langsmith_example_id: z.string().min(1).max(500).optional(),
+    source_kbn_example_id: z.string().min(1).max(500).optional(),
+    case_id: z.string().min(1).max(500).optional(),
+    category: z.string().max(500).optional(),
+    max_latency_seconds: z.union([
+      z.number().positive(),
+      z
         .string()
-        .min(1)
-        .max(MAX_TEXT_LENGTH - DOORDASH_ALERT_EVAL_CONSTRAINTS.length),
-    })
-    .catchall(z.json()),
-  output: z.union([
-    expectedSchema.extend({ reference_answer: answerSchema }),
-    expectedSchema.extend({ answer: answerSchema }),
-  ]),
-  metadata: z
-    .object({
-      langsmith_example_id: z.string().min(1).max(500),
-      source_kbn_example_id: z.string().min(1).max(500).optional(),
-      case_id: z.string().max(500).optional(),
-      category: z.string().max(500).optional(),
-      max_latency_seconds: z.union([
-        z.number().positive(),
-        z
+        .max(100)
+        .regex(/^(?=.*[1-9])(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/),
+    ]),
+    dataset_split: z.array(z.string().max(500)).max(100),
+    status: z.string().max(100).optional(),
+  })
+  .catchall(z.json());
+
+/**
+ * One investigation example. The question must leave room for the eval constraints suffix the
+ * task appends, and either a LangSmith id or a case id must identify the example.
+ */
+export const createInvestigationExampleSchema = (constraintsSuffixLength: number) =>
+  z.object({
+    input: z
+      .object({
+        question: z
           .string()
-          .max(100)
-          .regex(/^(?=.*[1-9])(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/),
-      ]),
-      dataset_split: z.array(z.string().max(500)).max(100),
-      status: z.string().max(100).optional(),
-    })
-    .catchall(z.json()),
+          .min(1)
+          .max(MAX_TEXT_LENGTH - constraintsSuffixLength),
+      })
+      .catchall(z.json()),
+    output: z.union([
+      expectedSchema.extend({ reference_answer: answerSchema }),
+      expectedSchema.extend({ answer: answerSchema }),
+    ]),
+    metadata: metadataSchema.refine(
+      ({ langsmith_example_id: langsmithId, case_id: caseId }) => Boolean(langsmithId || caseId),
+      { message: 'metadata needs langsmith_example_id or case_id' }
+    ),
+  });
+
+export type InvestigationExample = z.infer<ReturnType<typeof createInvestigationExampleSchema>>;
+
+const goldenBaseSchema = createInvestigationExampleSchema(DOORDASH_ALERT_EVAL_CONSTRAINTS.length);
+
+/** The procurement contract: golden examples always carry their LangSmith id for comparison joins. */
+export const goldenExampleSchema = goldenBaseSchema.extend({
+  metadata: metadataSchema.extend({ langsmith_example_id: z.string().min(1).max(500) }),
 });
 
 export type GoldenExample = z.infer<typeof goldenExampleSchema>;
@@ -87,4 +106,4 @@ export interface GoldenTaskOutput {
   traceId?: string;
 }
 
-export type GoldenEvaluator = Evaluator<GoldenExample, GoldenTaskOutput>;
+export type GoldenEvaluator = Evaluator<InvestigationExample, GoldenTaskOutput>;
