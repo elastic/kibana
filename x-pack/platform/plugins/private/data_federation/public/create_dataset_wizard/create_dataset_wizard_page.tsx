@@ -177,30 +177,31 @@ export function CreateDatasetWizardPage({
               ? createDatasetFlyoutStrings.saveButton()
               : createDatasetFlyoutStrings.addButton(),
           }}
-          contentWrapper={(content) => (
-            <div css={wizardContentCss} data-test-subj="createDatasetWizardContent">
-              {content}
-            </div>
-          )}
         >
           <FormWizardStep
             id="dataset"
             label={createDatasetWizardStrings.datasetStepLabel()}
             isRequired
           >
-            <StepDataset
-              dataSources={dataSources}
-              existingDataSetNames={existingDataSetNames}
-              loadDataSources={loadDataSources}
-              isEditMode={isEditMode}
-              initialIdNormalized={initialIdNormalized}
-            />
+            <div css={wizardContentCss} data-test-subj="createDatasetWizardContent">
+              <StepDataset
+                dataSources={dataSources}
+                existingDataSetNames={existingDataSetNames}
+                loadDataSources={loadDataSources}
+                isEditMode={isEditMode}
+                initialIdNormalized={initialIdNormalized}
+              />
+            </div>
           </FormWizardStep>
           <FormWizardStep id="settings" label={createDatasetWizardStrings.advancedStepLabel()}>
-            <StepAdvanced />
+            <div css={wizardContentCss} data-test-subj="createDatasetWizardContent">
+              <StepAdvanced />
+            </div>
           </FormWizardStep>
           <FormWizardStep id="review" label={createDatasetWizardStrings.reviewStepLabel()}>
-            <StepReview />
+            <div css={wizardContentCss} data-test-subj="createDatasetWizardContent">
+              <StepReview />
+            </div>
           </FormWizardStep>
         </FormWizard>
       </FormProvider>

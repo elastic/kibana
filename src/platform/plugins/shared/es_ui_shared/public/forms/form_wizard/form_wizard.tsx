@@ -21,7 +21,6 @@ interface Props<T extends object, S extends string> extends ProviderProps<T> {
   apiError: JSX.Element | null;
   texts?: Partial<NavTexts>;
   rightContentNav?: JSX.Element | null | ((stepId: S) => JSX.Element | null);
-  contentWrapper?: (content: JSX.Element) => JSX.Element;
 }
 
 export function FormWizard<T extends object = { [key: string]: any }, S extends string = any>({
@@ -36,7 +35,6 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
   onStepChange,
   children,
   rightContentNav,
-  contentWrapper,
 }: Props<T, S>) {
   return (
     <FormWizardProvider<T>
@@ -118,11 +116,22 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
             navigateToStep(nextStep);
           };
 
-          const content = (
+          return (
             <>
-              {apiError}
-              {children}
+              {/* Horizontal Steps indicator */}
+              <EuiStepsHorizontal steps={euiSteps} />
+
               <EuiSpacer size="l" />
+
+              {/* Any possible API error when saving/updating */}
+              {apiError}
+
+              {/* Active step content */}
+              {children}
+
+              <EuiSpacer size="l" />
+
+              {/* Button navigation */}
               <FormWizardNav
                 activeStepIndex={activeStepIndex}
                 lastStep={lastStep}
@@ -133,14 +142,6 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
                 texts={texts}
                 getRightContent={getRightContentNav}
               />
-            </>
-          );
-
-          return (
-            <>
-              <EuiStepsHorizontal steps={euiSteps} />
-              <EuiSpacer size="l" />
-              {contentWrapper ? contentWrapper(content) : content}
             </>
           );
         }}
