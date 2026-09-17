@@ -129,6 +129,34 @@ steps:
       const schemaErrors = result.diagnostics.filter((d) => d.source === 'schema');
       expect(schemaErrors.length).toBeGreaterThan(0);
     });
+
+    it('reports the offending leaf field for elasticsearch.index union params', () => {
+      const yaml = `
+name: Index Repo
+triggers:
+  - type: manual
+steps:
+  - name: index_repo_data
+    type: elasticsearch.index
+    with:
+      index: "sophie-repro"
+      id: "elastic-kibana"
+      document: "d"
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: 'document expects record<string, unknown>',
+            path: ['steps', 0, 'with', 'document'],
+            ruleId: 'schemaViolation',
+            source: 'schema',
+          }),
+        ])
+      );
+    });
   });
 
   describe('step name uniqueness', () => {

@@ -45,23 +45,22 @@ export function formatZodError(
   const context = { schema, yamlDocument, connectorParamsSchemaResolver };
 
   const formattedIssues = error.issues.map((issue) => {
-    // Build a message that includes 'received' when available, so enrichment
-    // can extract the actual value (e.g. for invalid_literal connector types)
-    const issueWithReceived = issue as typeof issue & { received?: unknown };
+    const resolvedIssue = resolveUnionIssue(issue);
+    const issueWithReceived = resolvedIssue as typeof resolvedIssue & { received?: unknown };
     const messageForEnrichment =
       issueWithReceived.received !== undefined
-        ? `${issue.message} (received: "${issueWithReceived.received}")`
-        : issue.message;
+        ? `${resolvedIssue.message} (received: "${issueWithReceived.received}")`
+        : resolvedIssue.message;
 
     const { message: enrichedMessage } = enrichErrorMessage(
-      issue.path ?? [],
+      resolvedIssue.path ?? [],
       messageForEnrichment,
-      issue.code,
+      resolvedIssue.code,
       context
     );
 
     return {
-      ...issue,
+      ...resolvedIssue,
       message: enrichedMessage,
     };
   });
@@ -76,4 +75,62 @@ export function formatZodError(
     message: formattedError.message,
     formattedError: formattedError as FormattedZodError,
   };
+}
+
+interface IssueLike {
+  code: string;
+  message: string;
+  path?: PropertyKey[];
+  errors?: unknown;
+}
+
+/** Prefer the union branch with the fewest issues, then the deepest path. */
+function resolveUnionIssue<T extends IssueLike>(issue: T): T {
+  const branches = getUnionBranches(issue);
+  if (!branches) {
+    return issue;
+  }
+
+  const resolved = branches.map((branch) => branch.map(resolveUnionIssue));
+  const bestBranch = resolved.reduce((best, branch) =>
+    isBetterBranch(branch, best) ? branch : best
+  );
+  if (bestBranch.length === 0) {
+    return issue;
+  }
+
+  const bestIssue = bestBranch.reduce((best, candidate) =>
+    issuePath(candidate).length > issuePath(best).length ? candidate : best
+  );
+  if (issuePath(bestIssue).length === 0) {
+    return issue;
+  }
+
+  return {
+    ...bestIssue,
+    path: [...issuePath(issue), ...issuePath(bestIssue)],
+  } as T;
+}
+
+function getUnionBranches(issue: IssueLike): IssueLike[][] | null {
+  if (issue.code !== 'invalid_union' || !Array.isArray(issue.errors) || issue.errors.length === 0) {
+    return null;
+  }
+  return issue.errors as IssueLike[][];
+}
+
+function isBetterBranch(candidate: IssueLike[], current: IssueLike[]): boolean {
+  if (candidate.length !== current.length) {
+    return candidate.length < current.length;
+  }
+  const candidateDepth = candidate.reduce(
+    (max, issue) => Math.max(max, issuePath(issue).length),
+    0
+  );
+  const currentDepth = current.reduce((max, issue) => Math.max(max, issuePath(issue).length), 0);
+  return candidateDepth > currentDepth;
+}
+
+function issuePath(issue: IssueLike): PropertyKey[] {
+  return issue.path ?? [];
 }
