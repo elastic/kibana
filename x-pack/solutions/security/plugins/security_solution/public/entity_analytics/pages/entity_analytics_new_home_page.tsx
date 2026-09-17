@@ -10,18 +10,13 @@ import { EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
-import { buildEsQuery } from '@kbn/es-query';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { EntitySearchBar } from '../components/home/entity_search_bar';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useSpaceId } from '../../common/hooks/use_space_id';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import {
-  globalFiltersQuerySelector,
-  globalQuerySelector,
-} from '../../common/store/inputs/selectors';
+import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import { DataViewErrorComponent } from '../../common/components/data_view_error';
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
@@ -49,16 +44,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { euiTheme } = useEuiTheme();
 
-  const globalFilters = useDeepEqualSelector(globalFiltersQuerySelector());
-  const globalQuery = useDeepEqualSelector(globalQuerySelector());
-
-  const esFilter = useMemo(() => {
-    try {
-      return buildEsQuery(dataView, [globalQuery], globalFilters);
-    } catch {
-      return undefined;
-    }
-  }, [dataView, globalQuery, globalFilters]);
+  const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(
