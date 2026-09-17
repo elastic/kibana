@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EuiLoadingSpinner, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
@@ -25,8 +26,31 @@ import {
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import { useWatchlistNames } from '../components/home/use_watchlist_names';
 import { useTimeRangeParam } from '../components/home/use_time_range_param';
-import { useEntityFiltersParam } from '../components/home/use_entity_filters_param';
-import { EntityFiltersBar } from '../components/home/entity_filters_bar';
+import {
+  useEntityFiltersParam,
+  getEntityFilterTerms,
+} from '../components/home/use_entity_filters_param';
+import { EntityFiltersBar, combineFilters } from '../components/home/entity_filters_bar';
+import {
+  useEntitiesWithAlertsCount,
+  useEntitiesWithAnomaliesCount,
+  useWatchlistedCount,
+  useNewEntityCount,
+  useRiskMoversCount,
+  useNewlyHighCriticalCount,
+} from '../components/home/hooks';
+import { SignalCards } from '../components/home/facelift/v5/signal_cards';
+import type { ActiveFilter, SignalCardData } from '../components/home/facelift/v5/data';
+import {
+  DataViewContext,
+  useEntityURLState,
+  DEFAULT_ENTITIES_TABLE_CONFIG,
+  DEFAULT_ENTITIES_TABLE_SORT,
+  type EntitiesBaseURLQuery,
+  EntitiesTableSection,
+  type URLQuery,
+} from '../components/home/entities_table';
+import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.home.pageTitle', {
   defaultMessage: 'Entity Analytics',
@@ -36,6 +60,24 @@ const MANAGEMENT_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.managementLink',
   { defaultMessage: 'Management' }
 );
+
+// ES has a 1 MB HTTP body limit. A terms filter with thousands of entity IDs easily
+// exceeds it once the grouping aggregation is added. Cap at 500 IDs; beyond that,
+// return null so the table shows all entities (tile stays highlighted for context).
+const MAX_CARD_FILTER_TERMS = 500;
+const toTermsFilter = (ids: string[]): QueryDslQueryContainer | null => {
+  if (ids.length === 0) return null;
+  const capped = ids.length > MAX_CARD_FILTER_TERMS ? ids.slice(0, MAX_CARD_FILTER_TERMS) : ids;
+  return { terms: { 'entity.id': capped } };
+};
+
+const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
+  query,
+  filters,
+  pageFilters: [],
+  sort: DEFAULT_ENTITIES_TABLE_SORT,
+  pageIndex: 0,
+});
 
 export const EntityAnalyticsNewHomePage: React.FC = () => {
   const spaceId = useSpaceId();
@@ -57,28 +99,124 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const watchlistNames = useWatchlistNames();
   const [timeRange, setTimeRange] = useTimeRangeParam();
   const [viewBy] = useState<'resolved' | 'raw'>('resolved');
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
 
   const { entityFilters, setEntityFilters } = useEntityFiltersParam();
 
-  // const baseFilter = useMemo(
-  //   () => combineFilters([esFilter, ...getEntityFilterTerms(entityFilters)]),
-  //   [esFilter, entityFilters]
-  // );
+  const baseFilter = useMemo(
+    () => combineFilters([esFilter, ...getEntityFilterTerms(entityFilters)]),
+    [esFilter, entityFilters]
+  );
 
-  // const [selectedTileId, setSelectedTileId] = useTileParam();
+  const resolvedSpaceId = spaceId ?? 'default';
 
-  // tile hooks filters: esFilter + entity filters
-  // const { entityIds: alertEntityIds } = useEntitiesWithAlertsCount({ spaceId, filter: baseFilter });
+  const { count: alertsCount, entityIds: alertsEntityIds, isLoading: alertsLoading } =
+    useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId });
+  const { count: anomaliesCount, entityIds: anomaliesEntityIds, isLoading: anomaliesLoading } =
+    useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId });
+  const { count: watchlistedCount, entityIds: watchlistedEntityIds, isLoading: watchlistedLoading } =
+    useWatchlistedCount({ spaceId: resolvedSpaceId });
+  const { count: newEntityCount, entityIds: newEntityEntityIds, isLoading: newEntityLoading } =
+    useNewEntityCount({ spaceId: resolvedSpaceId });
+  const { count: riskMoversCount, entityIds: riskMoversEntityIds, isLoading: riskMoversLoading } =
+    useRiskMoversCount({ spaceId: resolvedSpaceId });
+  const { count: newlyHCCount, entityIds: newlyHCEntityIds, isLoading: newlyHCLoading } =
+    useNewlyHighCriticalCount({ spaceId: resolvedSpaceId });
 
-  // const tileEntityIds = useMemo(() => {
-  //   if (selectedTileId === 'entitiesWithAlerts') return alertEntityIds;
-  //   if (selectedTileId === 'entitiesWithAnomalies') return anomalyEntityIds;
-  //   return [];
-  // }, [selectedTileId, alertEntityIds, anomalyEntityIds]);
+  const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
+    setActiveFilter((prev) =>
+      prev?.cardId === cardId ? null : { type: 'card', cardId, label: cardId }
+    );
+  }, []);
 
-  // const tileFilter = selectedTileId
-  //   ? { terms: { 'entity.id': tileEntityIds } }
-  //   : undefined;
+  const cardFilter = useMemo((): QueryDslQueryContainer | null => {
+    if (!activeFilter || activeFilter.type !== 'card') return null;
+    switch (activeFilter.cardId) {
+      case 'entitiesWithAlerts':
+        return toTermsFilter(alertsEntityIds);
+      case 'entitiesWithAnomalies':
+        return toTermsFilter(anomaliesEntityIds);
+      case 'riskMovers':
+        return toTermsFilter(riskMoversEntityIds);
+      case 'newlyHighCritical':
+        return toTermsFilter(newlyHCEntityIds);
+      case 'watchlisted':
+        return toTermsFilter(watchlistedEntityIds);
+      case 'newEntity':
+        return toTermsFilter(newEntityEntityIds);
+      default:
+        return null;
+    }
+  }, [
+    activeFilter,
+    alertsEntityIds,
+    anomaliesEntityIds,
+    riskMoversEntityIds,
+    newlyHCEntityIds,
+    watchlistedEntityIds,
+    newEntityEntityIds,
+  ]);
+
+  const signalCards = useMemo(
+    (): SignalCardData[] => [
+      {
+        id: 'entitiesWithAlerts',
+        title: 'Entities with alerts',
+        value: alertsLoading ? 0 : alertsCount,
+        description: 'Entities with at least one alert in the last 24h',
+        filterLabel: 'Entities with alerts (24h)',
+      },
+      {
+        id: 'entitiesWithAnomalies',
+        title: 'Entities with anomalies',
+        value: anomaliesLoading ? 0 : anomaliesCount,
+        description: 'Entities with at least one ML anomaly in the last 24h',
+        filterLabel: 'Entities with anomalies (24h)',
+      },
+      {
+        id: 'riskMovers',
+        title: 'Risk movers',
+        value: riskMoversLoading ? 0 : riskMoversCount,
+        description: 'Entities whose risk score rose ≥10 points vs yesterday',
+        filterLabel: 'Risk movers',
+      },
+      {
+        id: 'newlyHighCritical',
+        title: 'Newly high/critical',
+        value: newlyHCLoading ? 0 : newlyHCCount,
+        description: 'Entities that crossed into High or Critical risk since yesterday',
+        filterLabel: 'Newly high/critical',
+      },
+      {
+        id: 'watchlisted',
+        title: 'Watchlisted',
+        value: watchlistedLoading ? 0 : watchlistedCount,
+        description: 'Entities on a watchlist with a risk score above zero',
+        filterLabel: 'Watchlisted',
+      },
+      {
+        id: 'newEntity',
+        title: 'New entity',
+        value: newEntityLoading ? 0 : newEntityCount,
+        description: 'Entities first seen in the last 7 days with a risk score above zero',
+        filterLabel: 'New entity (last 7 days)',
+      },
+    ],
+    [
+      alertsCount,
+      alertsLoading,
+      anomaliesCount,
+      anomaliesLoading,
+      riskMoversCount,
+      riskMoversLoading,
+      newlyHCCount,
+      newlyHCLoading,
+      watchlistedCount,
+      watchlistedLoading,
+      newEntityCount,
+      newEntityLoading,
+    ]
+  );
 
   const menu = useMemo<AppHeaderMenu>(
     () => ({
@@ -92,6 +230,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       ],
     }),
     [getSecuritySolutionUrl]
+  );
+
+  const dataViewContextValue = useMemo(
+    () => ({ dataView, dataViewIsLoading: isDataViewLoading }),
+    [dataView, isDataViewLoading]
   );
 
   if (isDataViewLoading) return <EuiLoadingSpinner size="l" />;
@@ -126,13 +269,74 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
               spaceId={spaceId}
               view={viewBy}
               esFilter={esFilter}
-              // tileFilter={tileFilter}
+              tileFilter={cardFilter ?? undefined}
               watchlistNames={watchlistNames}
             />
           </div>
+          <EuiSpacer size="m" />
+          <div
+            css={css`
+              padding-inline-start: ${euiTheme.size.s};
+              padding-inline-end: ${euiTheme.size.s};
+            `}
+          >
+            <SignalCards
+              activeFilter={activeFilter}
+              cards={signalCards}
+              onFilterForCard={handleFilterForCard}
+            />
+          </div>
+          <EuiSpacer size="m" />
+          <EuiPanel
+            hasBorder
+            css={css`
+              padding-inline: ${euiTheme.size.s};
+            `}
+          >
+            <DataViewContext.Provider value={dataViewContextValue}>
+              <EntityAnalyticsEntitiesTableContent
+                baseFilter={baseFilter}
+                cardFilter={cardFilter}
+              />
+            </DataViewContext.Provider>
+          </EuiPanel>
         </div>
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );
+};
+
+const EntityAnalyticsEntitiesTableContent = ({
+  baseFilter,
+  cardFilter,
+}: {
+  baseFilter?: QueryDslQueryContainer;
+  cardFilter: QueryDslQueryContainer | null;
+}) => {
+  const urlState = useEntityURLState({
+    paginationLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
+    defaultQuery: getDefaultQuery,
+  });
+
+  const state = useMemo(() => {
+    const extraFilters = (
+      [baseFilter ?? null, cardFilter] as Array<QueryDslQueryContainer | null>
+    ).filter((f): f is QueryDslQueryContainer => f !== null && f !== undefined);
+
+    if (!extraFilters.length) return urlState;
+
+    return {
+      ...urlState,
+      query: {
+        ...urlState.query,
+        bool: {
+          ...urlState.query?.bool,
+          filter: [...(urlState.query?.bool?.filter ?? []), ...extraFilters],
+        },
+      },
+    };
+  }, [urlState, baseFilter, cardFilter]);
+
+  return <EntitiesTableSection state={state} config={DEFAULT_ENTITIES_TABLE_CONFIG} />;
 };
