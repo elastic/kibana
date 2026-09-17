@@ -20,9 +20,7 @@ export const ApproximationIcon: React.FC<{
   isApproximationApplied: boolean;
   'data-test-subj'?: string;
 }> = ({ isApproximationApplied, 'data-test-subj': dataTestSubj = 'approximationApplied' }) => {
-  if (!isApproximationApplied) return null;
-
-  return (
+  return isApproximationApplied ? (
     <span style={{ marginRight: 4 }}>
       <EuiToolTip content={approximationTooltip}>
         <EuiBadge
@@ -35,5 +33,5 @@ export const ApproximationIcon: React.FC<{
         />
       </EuiToolTip>
     </span>
-  );
+  ) : null;
 };
