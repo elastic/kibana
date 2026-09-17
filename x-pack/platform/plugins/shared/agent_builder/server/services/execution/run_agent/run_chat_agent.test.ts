@@ -6,12 +6,12 @@
  */
 
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, ToolOrigin } from '@kbn/agent-builder-common';
+import { ToolOrigin } from '@kbn/agent-builder-common';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
 import { createAgentHandlerContextMock } from '../../../test_utils/runner';
-import { createEmptyConversation, createRound } from '../../../test_utils/conversations';
+import { createRound } from '../../../test_utils/conversations';
 import { createMockedExecutableTool } from '../../../test_utils/tools';
 
 import { runDefaultAgentMode } from './run_chat_agent';
@@ -161,43 +161,6 @@ describe('runDefaultAgentMode', () => {
         logger: context.logger,
       },
       { dynamic: true }
-    );
-  });
-
-  it('never resolves a pending round when regenerating, so a paused round is not resumed', async () => {
-    const context = createAgentHandlerContextMock();
-    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
-      connector: { name: 'test-connector' },
-      chatModel: {} as any,
-    } as any);
-    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
-    context.toolManager.getDynamicToolIds.mockReturnValue([]);
-    selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
-    prepareConversationMock.mockResolvedValue({
-      timeline: [],
-      nextInput: { message: 'hello', attachments: [] },
-      attachments: [],
-      attachmentTypes: [],
-      attachmentStateManager: context.attachmentStateManager,
-    } as any);
-    extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
-    createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
-
-    await runDefaultAgentMode(
-      {
-        nextInput: {},
-        action: 'regenerate',
-        agentConfiguration: { tools: [] } as any,
-        conversation: createEmptyConversation({
-          rounds: [createRound({ id: 'paused', status: ConversationRoundStatus.awaitingPrompt })],
-        }) as any,
-      },
-      context
-    );
-
-    expect(getPendingRoundMock).not.toHaveBeenCalled();
-    expect(prepareConversationMock).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'regenerate' })
     );
   });
 

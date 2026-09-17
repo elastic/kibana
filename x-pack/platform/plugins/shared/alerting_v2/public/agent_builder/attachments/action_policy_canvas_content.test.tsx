@@ -78,7 +78,6 @@ const defaultData = {
   matcher: { tags: ['abc'] },
   groupingMode: 'per_episode' as const,
   throttle: { strategy: 'on_status_change' as const },
-  tags: ['tag1'],
 };
 
 const createAttachment = ({

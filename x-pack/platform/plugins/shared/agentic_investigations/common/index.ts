@@ -16,6 +16,8 @@ export {
 // them so consumers have a single entry point per the plugin's public surface.
 export {
   ACTION_WORKFLOW_TAG,
+  PROPOSAL_ATTACHMENT_TYPE,
+  PROPOSAL_WITHOUT_ACTION,
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
