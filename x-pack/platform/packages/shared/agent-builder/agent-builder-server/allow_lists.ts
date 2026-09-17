@@ -161,6 +161,7 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
 export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
+  `${internalNamespaces.platformSignificantEvents}.deductive-investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
   `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
@@ -378,6 +379,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',
+
+  // Platform – Agentic Investigations
+  'investigation_proposal',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

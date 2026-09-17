@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { PROPOSAL_ATTACHMENT_TYPE, PROPOSAL_WITHOUT_ACTION } from './attachment';
+
 export {
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_INDEX_NAME,

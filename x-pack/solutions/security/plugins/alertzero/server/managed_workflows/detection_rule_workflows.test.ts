@@ -86,6 +86,10 @@ describe('detection rule workflows', () => {
         ['run_rule_tuning', 'workflow.executeAsync'],
       ]);
       expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID);
+      expect(calls[0].with?.inputs).toEqual({
+        autonomy_level: '{{ consts.worker_settings.autonomy }}',
+        analysis_window_days: 14,
+      });
     });
   });
 
@@ -242,9 +246,10 @@ describe('detection rule workflows', () => {
       }
     });
 
-    // The review parks in WAITING_FOR_CHILD while the gate holds the decision for up
-    // to 72h (80h with the gate's own margin); the engine's default 6h workflow
-    // timeout would cancel it under the analyst.
+    // The review parks in WAITING_FOR_CHILD while the gate holds the decision —
+    // up to 72h per park, and the gate's ceiling allows for a second park before
+    // it settles. The engine's default 6h workflow timeout would cancel the
+    // review under the analyst.
     it('outlives the proposal gate it waits on', () => {
       const review = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
