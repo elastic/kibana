@@ -13,11 +13,8 @@ import {
   ALERTZERO_INVESTIGATIONS_URL,
   buildInvestigationUrl,
 } from '@kbn/alertzero-common';
-import type {
-  GetInvestigationResponse,
-  ListInvestigationProposalsResponse,
-  ListInvestigationsResponse,
-} from '@kbn/alertzero-common';
+import type { GetInvestigationResponse, ListInvestigationsResponse } from '@kbn/alertzero-common';
+import type { ListProposalsResponse } from '@kbn/agentic-investigations-plugin/common';
 import { queryKeys } from '../query_keys';
 
 const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
@@ -68,11 +65,11 @@ export const useInvestigationProposals = (investigationId: string | undefined) =
 
   return useQuery({
     queryKey: queryKeys.investigations.proposals(investigationId),
-    queryFn: async (): Promise<ListInvestigationProposalsResponse> => {
+    queryFn: async (): Promise<ListProposalsResponse> => {
       if (!investigationId) {
         throw new Error('investigation id is required');
       }
-      return services.http!.get<ListInvestigationProposalsResponse>(
+      return services.http!.get<ListProposalsResponse>(
         `${buildInvestigationUrl(investigationId)}/proposals`,
         {
           version: API_VERSIONS.internal.v1,

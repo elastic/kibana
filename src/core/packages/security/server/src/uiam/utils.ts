@@ -22,3 +22,14 @@ export function isUiamCredential(credential: HTTPAuthorizationHeader | string) {
     credential instanceof HTTPAuthorizationHeader ? credential.credentials : credential
   ).startsWith(UIAM_CREDENTIALS_PREFIX);
 }
+
+/**
+ * Checks if the given authorization header carries a UIAM bearer token (`Bearer essu_...`), as
+ * opposed to a UIAM API key or a non-UIAM credential.
+ *
+ * @param credential The HTTP authorization header to check.
+ * @returns True if the header uses the `Bearer` scheme with UIAM credentials, false otherwise.
+ */
+export function isUiamBearerCredential(credential: HTTPAuthorizationHeader) {
+  return credential.scheme.toLowerCase() === 'bearer' && isUiamCredential(credential);
+}
