@@ -153,7 +153,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.who',
           {
-            defaultMessage: 'Analyzes and classifies every alert batch; closures wait for you.',
+            defaultMessage: 'Analyzes every batch; every closure waits for you.',
           }
         ),
         facts: [
@@ -182,7 +182,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.who',
           {
             defaultMessage:
-              'Analyzes and classifies every batch; closes false positives automatically at or above the confidence score.',
+              'Closes false positives automatically at or above the confidence score.',
           }
         ),
         facts: [
@@ -198,7 +198,12 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.closures',
               { defaultMessage: 'Closures' }
             ),
-            parts: [pill('worker'), text(' close automatically at the confidence score')],
+            parts: [
+              pill('worker'),
+              text(' answers Proposals automatically at ≥ confidence — '),
+              pill('you'),
+              text(' reopen any you disagree with'),
+            ],
           },
         ],
       },
@@ -208,7 +213,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.who',
           {
             defaultMessage:
-              'Closures behave the same as Assisted for this Worker — the level future-proofs later write actions.',
+              'Closes false positives automatically — same as Assisted for this Worker.',
           }
         ),
         facts: [
@@ -224,7 +229,12 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.closures',
               { defaultMessage: 'Closures' }
             ),
-            parts: [pill('worker'), text(' close automatically at the confidence score')],
+            parts: [
+              pill('worker'),
+              text(' answers Proposals automatically at ≥ confidence — '),
+              pill('you'),
+              text(' reopen any you disagree with'),
+            ],
           },
         ],
       },
@@ -232,8 +242,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.threatHunt.intro', {
-      defaultMessage:
-        'It always hunts and gathers evidence; the level decides who turns findings into Proposals and who runs them.',
+      defaultMessage: 'Decides how many checkpoints stand between its findings and action.',
     }),
     levels: [
       {
@@ -241,16 +250,24 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.who',
           {
-            defaultMessage: 'Hunts on its schedule and drafts Proposals; you decide what runs.',
+            defaultMessage:
+              'Two checkpoints: you approve what it hunts, and every Proposal waits for you.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.hunt',
+              { defaultMessage: 'Hunt' }
+            ),
+            parts: [pill('you'), text(' approve before it hunts')],
+          },
+          {
+            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' approve each before it runs')],
+            parts: [pill('you'), text(' approve each')],
           },
         ],
       },
@@ -259,17 +276,23 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.who',
           {
-            defaultMessage:
-              'Hunts on its schedule and drafts Proposals; reversible actions run after your approval.',
+            defaultMessage: 'Hunts on its own; every Proposal still waits for you.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.hunt',
+              { defaultMessage: 'Hunt' }
+            ),
+            parts: [pill('worker'), text(' hunts every report automatically')],
+          },
+          {
+            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('worker'), text(' drafts; '), pill('you'), text(' approve each')],
+            parts: [pill('you'), text(' approve each')],
           },
         ],
       },
@@ -278,17 +301,28 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.who',
           {
-            defaultMessage:
-              'Hunts and runs reversible actions on its own within policy; you review afterwards.',
+            defaultMessage: 'Hunts and acts on its own. You review afterwards.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.hunt',
+              { defaultMessage: 'Hunt' }
+            ),
+            parts: [pill('worker'), text(' hunts every report automatically')],
+          },
+          {
+            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('worker'), text(' runs reversible actions automatically')],
+            parts: [
+              pill('worker'),
+              text(' answers them automatically — reversible by '),
+              pill('you'),
+              text('. Every action is recorded.'),
+            ],
           },
         ],
       },
@@ -297,7 +331,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleTuning.intro', {
       defaultMessage:
-        'It always diagnoses rules and drafts tuning Proposals; the level decides who reviews them.',
+        'Decides whether an entry checkpoint stands before analysis. Applying tuning always waits for your approval.',
     }),
     levels: [
       {
@@ -305,16 +339,24 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.who',
           {
-            defaultMessage: 'Diagnoses rules and drafts tuning Proposals for your review.',
+            defaultMessage:
+              'Two checkpoints: you approve what it analyzes, and every tuning proposal waits for you.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.analysis',
+              { defaultMessage: 'Analysis' }
+            ),
+            parts: [pill('you'), text(' approve before it analyzes a rule')],
+          },
+          {
+            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' review each before it applies')],
+            parts: [pill('you'), text(' approve each')],
           },
         ],
       },
@@ -323,17 +365,23 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.who',
           {
-            defaultMessage:
-              'Diagnoses rules and applies reversible tuning automatically; changes beyond policy still wait for you.',
+            defaultMessage: 'Analyzes on its own; every tuning proposal still waits for you.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.analysis',
+              { defaultMessage: 'Analysis' }
+            ),
+            parts: [pill('worker'), text(' analyzes every qualifying rule automatically')],
+          },
+          {
+            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('worker'), text(' applies reversible tuning automatically')],
+            parts: [pill('you'), text(' approve each')],
           },
         ],
       },
@@ -342,7 +390,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.intro', {
       defaultMessage:
-        'It always drafts rule logic for coverage gaps; the level decides who reviews before anything is installed.',
+        'Decides whether an entry checkpoint stands before drafting. Installing always waits for your approval.',
     }),
     levels: [
       {
@@ -351,16 +399,23 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.who',
           {
             defaultMessage:
-              'Drafts new rule logic for coverage gaps; you review each before install.',
+              'Two checkpoints: you approve what it drafts against, and every rule waits for you.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.drafting',
+              { defaultMessage: 'Drafting' }
+            ),
+            parts: [pill('you'), text(' approve before it drafts against a gap')],
+          },
+          {
+            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' review each before install')],
+            parts: [pill('you'), text(' approve each')],
           },
         ],
       },
@@ -370,16 +425,23 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.who',
           {
             defaultMessage:
-              'Drafts and installs prebuilt rules automatically; new rule logic still waits for your review.',
+              'Drafts on its own from coverage gap signals; every rule still waits for you.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.drafting',
+              { defaultMessage: 'Drafting' }
+            ),
+            parts: [pill('worker'), text(' drafts against every gap signal automatically')],
+          },
+          {
+            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('worker'), text(' installs prebuilt rules automatically')],
+            parts: [pill('you'), text(' approve each')],
           },
         ],
       },
