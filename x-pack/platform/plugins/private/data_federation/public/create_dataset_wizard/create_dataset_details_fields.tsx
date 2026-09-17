@@ -23,12 +23,13 @@ import { useController } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSource, DataSourceWithSecrets } from '../../common';
-import { DATA_SOURCE_TYPES_TO_ICONS, validateIndexNameRules } from '../../common';
+import { DATA_SOURCE_TYPES_TO_ICONS } from '../../common';
 import { CreateDataSourceFlyout } from '../create_data_source_flyout';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
 import { createDatasetFormStrings } from './create_dataset_form_i18n';
+import { validateDatasetName } from './validators';
 
 const trimRequired =
   (message: string) =>
@@ -77,27 +78,11 @@ export function CreateDatasetDetailsFields({
     name: 'name',
     control,
     rules: {
-      validate: (value: string) => {
-        const trimmed = value.trim();
-        if (!trimmed) {
-          return createDatasetFormStrings.nameRequired();
-        }
-
-        const nameValidation = validateIndexNameRules(trimmed);
-        if (nameValidation) {
-          return nameValidation.message;
-        }
-
-        const normalized = trimmed.toLowerCase();
-        const isDuplicate = existingDataSetNames.some((n) => {
-          const nNormalized = n.trim().toLowerCase();
-          if (isEditMode && nNormalized === datasetNameToEdit) {
-            return false;
-          }
-          return nNormalized === normalized;
-        });
-        return isDuplicate ? createDatasetFormStrings.nameAlreadyExists() : true;
-      },
+      validate: validateDatasetName({
+        existingDataSetNames,
+        isEditMode,
+        datasetNameToEdit,
+      }),
     },
   });
 
