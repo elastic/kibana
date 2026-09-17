@@ -67,6 +67,7 @@ export {
 } from './src/authentication';
 export {
   isUiamCredential,
+  isUiamBearerCredential,
   isMissingApiKey,
   isRevokedApiKey,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
