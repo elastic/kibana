@@ -5,7 +5,7 @@ metadata:
   name: bk-kibana-vm-build-orchestrator
   description: Build CI agent VM images for Kibana
   links:
-    - url: "https://buildkite.com/elastic/kibana-vm-build-orchestrator"
+    - url: 'https://buildkite.com/elastic/kibana-vm-build-orchestrator'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -19,8 +19,8 @@ spec:
       description: Build CI agent VM images for Kibana
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: "true"
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/orchestrate_vm_builds.yml

@@ -9,6 +9,12 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+/**
+ * Migration recommendation: DELETE this index once every file below is resolved.
+ * `_timeout_results` and `_cancel_results` load only when `esTestCluster.ccs` is set.
+ * No serverless FTR mirror.
+ */
+
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const config = getService('config');

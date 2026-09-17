@@ -282,7 +282,7 @@ describe('search', () => {
 
       const searchRequest = createCasesClientMockSearchRequest({ tags });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
       );
     });
@@ -292,7 +292,7 @@ describe('search', () => {
 
       const searchRequest = createCasesClientMockSearchRequest({ assignees });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
       );
     });
@@ -302,7 +302,7 @@ describe('search', () => {
 
       const searchRequest = createCasesClientMockSearchRequest({ reporters });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
       );
     });
@@ -310,7 +310,7 @@ describe('search', () => {
     it('Invalid total items results in error', async () => {
       const searchRequest = createCasesClientMockSearchRequest({ page: 209, perPage: 100 });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
       );
     });
@@ -321,7 +321,7 @@ describe('search', () => {
         perPage: MAX_CASES_PER_PAGE + 1,
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
       );
     });
@@ -331,7 +331,7 @@ describe('search', () => {
         customFields: { second_key: [true] },
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
@@ -342,7 +342,7 @@ describe('search', () => {
         owner: [''],
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
@@ -353,7 +353,7 @@ describe('search', () => {
         owner: ['cases', 'observability'],
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
@@ -364,7 +364,7 @@ describe('search', () => {
         owner: 'cases',
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Invalid custom field key: test_custom_field_key.`
       );
     });
@@ -375,7 +375,7 @@ describe('search', () => {
         owner: 'cases',
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Filtering by custom field of type text is not allowed.`
       );
     });
@@ -386,7 +386,7 @@ describe('search', () => {
         owner: 'cases',
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Unsupported filtering value for custom field of type toggle.`
       );
     });
@@ -398,7 +398,7 @@ describe('search', () => {
         owner: 'cases',
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: No custom fields configured.`
       );
     });

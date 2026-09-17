@@ -24,6 +24,16 @@ interface ProductInterceptPluginStartDeps {
   cloud: CloudStart;
 }
 
+/**
+ * Product offering names for project types whose display name is not simply the
+ * capitalized project type, e.g. 'vectordb' would otherwise read 'Elastic Vectordb'.
+ */
+const PRODUCT_OFFERING_BY_PROJECT_TYPE: Record<string, string> = {
+  search: 'Elasticsearch',
+  vectordb: 'Elastic Vector Database',
+  workplaceai: 'Elastic Workplace AI',
+};
+
 export class ProductInterceptPublicPlugin implements Plugin {
   private readonly telemetry = new PromptTelemetry();
   private interceptSubscription?: Subscription;
@@ -46,7 +56,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
 
     const projectType = cloud.serverless.projectType || '';
     const productOffering =
-      projectType === 'search' ? 'Elasticsearch' : `Elastic ${capitalize(projectType)}`.trim();
+      PRODUCT_OFFERING_BY_PROJECT_TYPE[projectType] ?? `Elastic ${capitalize(projectType)}`.trim();
 
     void (async () => {
       const currentUser = await core.security.authc.getCurrentUser();

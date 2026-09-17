@@ -81,22 +81,24 @@ const workflowIdsEqual = (a: string[], b: string[]): boolean =>
   a.length === b.length && a.every((id, index) => id === b[index]);
 
 /**
- * Guards changes to an agent's pre-execution workflow IDs.
+ * Guards changes to an agent's workflow IDs (pre-execution or post-execution).
  */
 const assertCanConfigureWorkflows = ({
   nextWorkflowIds,
   currentWorkflowIds,
   isAdmin,
+  errorMessage,
 }: {
   nextWorkflowIds: string[] | undefined;
   currentWorkflowIds: string[] | undefined;
   isAdmin: boolean;
+  errorMessage: string;
 }): void => {
   if (isAdmin || nextWorkflowIds === undefined) {
     return;
   }
   if (!workflowIdsEqual(nextWorkflowIds, currentWorkflowIds ?? [])) {
-    throw createBadRequestError('Only administrators can configure pre-execution workflows.');
+    throw createBadRequestError(errorMessage);
   }
 };
 
@@ -453,6 +455,13 @@ class AgentClientImpl implements AgentClient {
       nextWorkflowIds: profile.configuration.workflow_ids,
       currentWorkflowIds: [],
       isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure pre-execution workflows.',
+    });
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profile.configuration.post_execution_workflow_ids,
+      currentWorkflowIds: [],
+      isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure post-execution workflows.',
     });
 
     await this.validateAgentToolSelection(profile.configuration.tools);
@@ -512,12 +521,19 @@ class AgentClientImpl implements AgentClient {
       throw createAgentNotFoundError({ agentId });
     }
 
-    // Only admins may change pre-execution workflows
+    // Only admins may change workflow configurations
     const currentConfig = source.config ?? source.configuration;
     assertCanConfigureWorkflows({
       nextWorkflowIds: profileUpdate.configuration?.workflow_ids,
       currentWorkflowIds: currentConfig?.workflow_ids,
       isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure pre-execution workflows.',
+    });
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profileUpdate.configuration?.post_execution_workflow_ids,
+      currentWorkflowIds: currentConfig?.post_execution_workflow_ids,
+      isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure post-execution workflows.',
     });
 
     if (profileUpdate.configuration?.tools) {

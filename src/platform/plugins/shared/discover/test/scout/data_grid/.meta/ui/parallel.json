@@ -1,21 +1,9 @@
 {
-  "sha1": "de9e9cd56ce314840caf46ed8433654b10c09b0f",
+  "sha1": "e948a4977ae176529d5705a79c8742260861d856",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "dd8d3bea8591859-efeb975c1fb574f",
-      "title": "Teardown data grid tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "d3bfac238753802-05460b2aab98f7c",
       "title": "Setup data grid tests data",
@@ -424,7 +412,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
         "line": 47,
-        "column": 60
+        "column": 13
       }
     },
     {
@@ -436,8 +424,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 57,
-        "column": 20
+        "line": 56,
+        "column": 5
       }
     },
     {
@@ -449,7 +437,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 62,
+        "line": 61,
         "column": 17
       }
     },
@@ -462,8 +450,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 77,
-        "column": 14
+        "line": 75,
+        "column": 22
       }
     },
     {
@@ -818,6 +806,19 @@
       }
     },
     {
+      "id": "0a00c5204210411-c194797620e6e3a",
+      "title": "Discover doc viewer - fields table renders a field row that was not initially mounted once scrolled into view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table.spec.ts",
+        "line": 73,
+        "column": 21
+      }
+    },
+    {
       "id": "5e3d2b70d72b957-8d69de228de34bc",
       "title": "Discover doc viewer flyout - accessibility focuses the flyout on open and retains focus when resizing between push and overlay",
       "expectedStatus": "passed",
@@ -1010,6 +1011,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_pinning.spec.ts",
         "line": 77,
         "column": 20
+      }
+    },
+    {
+      "id": "dd8d3bea8591859-efeb975c1fb574f",
+      "title": "Teardown data grid tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

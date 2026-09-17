@@ -37,6 +37,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
     summary: 'Update visualization',
+    operationId: 'upsert-visualization',
     description: [
       'Replaces the full configuration of an existing Lens visualization. Partial updates are not supported.',
       'To make incremental changes, retrieve the visualization first, modify the fields you need, then send the complete object back.',
@@ -131,7 +132,9 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
         try {
           const { result } = await client.update(req.params.id, data, options);
-          const responseItem = getLensResponseItem(builder, result.item);
+          const responseItem = lensUpdateResponseBodySchema.parse(
+            getLensResponseItem(builder, result.item)
+          );
 
           if (createdNew) {
             return res.created<LensUpdateResponseBody>({

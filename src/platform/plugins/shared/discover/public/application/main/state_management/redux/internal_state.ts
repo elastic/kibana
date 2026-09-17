@@ -71,7 +71,7 @@ const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 const initialState: DiscoverInternalState = {
-  initializationState: { hasESData: false, hasUserDataView: false },
+  initializationState: { hasESData: false, hasDataView: false },
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
@@ -205,9 +205,22 @@ const internalStateSliceDef = createSlice({
         tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
       }),
 
+    setSkipInitialFetch: (state, action: TabAction<Pick<TabState, 'skipInitialFetch'>>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.skipInitialFetch = action.payload.skipInitialFetch;
+      }),
+
     setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.isDataViewLoading = action.payload.isDataViewLoading;
+      }),
+
+    setIsWarningCalloutDismissed: (
+      state,
+      action: TabAction<Pick<TabState, 'isWarningCalloutDismissed'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.isWarningCalloutDismissed = action.payload.isWarningCalloutDismissed;
       }),
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {

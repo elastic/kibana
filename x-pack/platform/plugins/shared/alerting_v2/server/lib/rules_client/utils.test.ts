@@ -47,7 +47,7 @@ const createRuleSoAttributesWithArtifacts = () =>
   createRuleSoAttributes({
     artifacts: [
       { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-      { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
     ],
   });
 
@@ -157,6 +157,57 @@ describe('utils', () => {
       expect(result.metadata.description).toBe('Existing desc');
     });
 
+    it('clears tags when update sends null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod', 'infra'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { tags: null },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.tags).toBeUndefined();
+    });
+
+    it('preserves existing tags when update omits them', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod', 'infra'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { name: 'renamed' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.tags).toEqual(['prod', 'infra']);
+    });
+
+    it('sets tags when update provides a value', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['old'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { tags: ['prod', 'infra'] },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.tags).toEqual(['prod', 'infra']);
+    });
+
     it('clears state_transition when update sends null (immediate mode)', () => {
       const existing = createRuleSoAttributes({
         state_transition: { pending_count: 3 },
@@ -221,9 +272,44 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('auto-clears metadata.builder_type when query is changed without explicit builder_type', () => {
+    it('rejects query change on a builder rule without explicit builder_type clear', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+      };
+
+      expect(() =>
+        buildUpdateRuleAttributes(existing, updateData, {
+          updatedBy: 'user-2',
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        })
+      ).toThrow(/Cannot update the query on a builder rule/);
+    });
+
+    it('clears builder_type when query changes and explicit builder_type: null is sent', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        metadata: { builder_type: null },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBeUndefined();
+    });
+
+    it('allows query change on a non-builder rule without explicit builder_type', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule' },
       });
       const updateData: UpdateRuleData = {
         query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
@@ -236,6 +322,24 @@ describe('utils', () => {
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
+    });
+
+    it('allows strategy change on a builder rule without clearing builder_type', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        recovery_strategy: 'no_breach',
+      });
+      const updateData: UpdateRuleData = {
+        recovery_strategy: 'none',
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
     });
 
     it('keeps metadata.builder_type when query is changed with explicit builder_type', () => {
@@ -350,7 +454,7 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
   });
@@ -363,7 +467,7 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
@@ -381,7 +485,7 @@ describe('utils', () => {
           {
             id: 'dashboard-1',
             type: 'dashboard',
-            data: { dashboardId: 'dash-1' },
+            data: { dashboard_id: 'dash-1' },
             // @ts-expect-error legacy key retained on disk for rollback
             value: 'dash-1',
           },
@@ -392,7 +496,7 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
@@ -766,6 +870,62 @@ describe('utils', () => {
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG (400) when a recovering delay is set while recovery is disabled', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 3 },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message:
+            'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG when a recovering_timeframe is set while recovery is unset', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: undefined,
+        state_transition: { recovering_timeframe: '5m' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not throw for a recovering delay when recovery is enabled', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 3, recovering_timeframe: '5m' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG for recovering_count 0 when recovery is disabled', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
   });
 
   describe('pickImmutable', () => {
@@ -818,6 +978,7 @@ describe('groupCandidatesByInterval', () => {
     taskId: `task:${id}`,
     attrs: createRuleSoAttributes({ schedule: { every, lookback: '1m' } }),
     version: 'v1',
+    references: [],
   });
 
   it('groups candidates by their schedule interval, preserving order', () => {

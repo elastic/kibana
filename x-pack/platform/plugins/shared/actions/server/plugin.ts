@@ -47,6 +47,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { CredentialAccessor } from '@kbn/connector-specs';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -95,6 +96,7 @@ import {
   scheduleUserConnectorTokenCleanupTask,
 } from './lib/user_connector_token_cleanup_task';
 import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
@@ -210,7 +212,7 @@ export interface PluginStartContract {
    */
   getActionsClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
@@ -275,6 +277,7 @@ export interface ActionsPluginsStart {
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -503,13 +506,13 @@ export class ActionsPlugin
             isActionTypeEnabled: (actionTypeId) =>
               actionsConfigUtils.isActionTypeEnabled(actionTypeId),
             maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
+            maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
             getStartServices: core.getStartServices,
             inMemoryConnectors: this.inMemoryConnectors,
             emitConnectorEvents: (params) =>
               dispatchConnectorEvents({
                 emitter: this.connectorEventEmitter,
                 params,
-                logger: this.logger,
               }),
           }),
           getSpaceId: (request: KibanaRequest) =>
@@ -683,6 +686,7 @@ export class ActionsPlugin
         evictClientPool: async (connectorId: string) => {
           await this.clientLeasePool.evict(connectorId);
         },
+        securityService: core.security,
       });
     };
 
@@ -704,7 +708,7 @@ export class ActionsPlugin
       return await createActionsClient({ request, unsecuredSavedObjectsClient });
     };
 
-    const getActionsClientWithRequestInSpace = async (request: KibanaRequest, spaceId: string) => {
+    const getActionsClientWithRequestInSpace = async (request: KibanaRequest, spaceId: SpaceId) => {
       throwIfCannotEncrypt();
 
       const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
@@ -1129,6 +1133,7 @@ export class ActionsPlugin
             getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
               getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
             evictClientPool,
+            securityService: coreStart.security,
           });
         },
         listTypes: (featureId?: string) => {

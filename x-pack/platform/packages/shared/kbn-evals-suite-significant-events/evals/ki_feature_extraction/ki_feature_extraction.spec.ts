@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import { identifyFeatures } from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
-import {
-  createMemoryDiscoveryTools,
-  MemoryServiceImpl,
-} from '@kbn/significant-events-plugin/server';
+import { sumTokens, type InferenceDocument } from '@kbn/nightshift-ai';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 import {
   getCurrentTraceId,
   createChatCallsEvaluator,
   createSpanLatencyEvaluator,
 } from '@kbn/evals';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import {
-  createEvalSignificantEventSearchTool,
-  type AgentBuilderToolResult,
-} from '../../src/tools/significant_event_search_tool';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
@@ -40,21 +31,21 @@ import {
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from './collect_sample_documents';
+import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 interface CollectedExample {
   scenario: KIFeatureExtractionScenario;
-  sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
+  sampleDocuments: InferenceDocument[];
 }
 
 evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-  evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
-    // The significant_event_search tool is only registered when significant
-    // events availability is on (defaults to false); enable it before any run.
+  evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
     await kbnClient.request({
       path: '/internal/core/_settings',
       method: 'PUT',
@@ -74,6 +65,20 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
       log
     );
     snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+  });
+
+  evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
+    await uiSettings.unset('agentBuilder:experimentalFeatures');
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+        },
+      },
+    });
   });
 
   for (const dataset of activeDatasets) {
@@ -103,11 +108,12 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
           await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-          const sampleDocuments = await collectSampleDocuments({
+          const sampledHits = await collectSampleDocuments({
             esClient,
             scenario,
             log,
           });
+          const sampleDocuments = compactInferenceDocuments(sampledHits);
           if (sampleDocuments.length === 0) {
             throw new Error(
               `No log documents found after replaying snapshot ${source.snapshotName}`
@@ -125,44 +131,13 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
       evaluate(
         'KI feature extraction',
-        async ({
-          esClient,
-          executorClient,
-          evaluators,
-          inferenceClient,
-          logger,
-          traceEsClient,
-          log,
-          fetch,
-        }) => {
+        async ({ fetch, connector, executorClient, evaluators, traceEsClient, log }) => {
           const heavyDataByScenario = new Map(
             collectedExamples.map(({ scenario, sampleDocuments }) => [
               scenario.input.scenario_id,
               { sampleDocuments },
             ])
           );
-
-          // Exercise the same grounding tools that production feature extraction
-          // now wires in, so the eval covers the memory + prior-SigEvents paths.
-          const memoryTools = createMemoryDiscoveryTools({
-            memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
-          });
-
-          const executeAgentBuilderTool = async (
-            toolId: string,
-            toolParams: Record<string, unknown>
-          ) =>
-            (await fetch('/api/agent_builder/tools/_execute', {
-              method: 'POST',
-              version: '2023-10-31',
-              body: JSON.stringify({ tool_id: toolId, tool_params: toolParams }),
-            })) as { results?: AgentBuilderToolResult[] };
-
-          const eventSearchTool = createEvalSignificantEventSearchTool({
-            executeTool: executeAgentBuilderTool,
-            streamName: MANAGED_STREAM_NAME,
-            logger,
-          });
 
           await executorClient.runExperiment(
             {
@@ -189,25 +164,19 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                 }
 
-                const { features, tokensUsed } = await identifyFeatures({
+                const { features, tokensUsed } = await runFeatureIdentificationAgent({
+                  fetch,
+                  log,
                   streamName: MANAGED_STREAM_NAME,
+                  connectorId: connector.id,
                   sampleDocuments: heavy.sampleDocuments,
-                  systemPrompt: `${featuresPrompt}\n${memoryTools.promptSnippet}\n${eventSearchTool.promptSnippet}`,
-                  inferenceClient,
-                  logger,
-                  signal: new AbortController().signal,
-                  additionalTools: { ...memoryTools.tools, ...eventSearchTool.tools },
-                  additionalToolCallbacks: {
-                    ...memoryTools.callbacks,
-                    ...eventSearchTool.callbacks,
-                  },
                 });
 
                 return {
                   features,
+                  tokens_used: sumTokens({ added: tokensUsed }),
                   traceId: getCurrentTraceId(),
                   sample_documents: heavy.sampleDocuments,
-                  tokens_used: tokensUsed,
                 };
               },
             },

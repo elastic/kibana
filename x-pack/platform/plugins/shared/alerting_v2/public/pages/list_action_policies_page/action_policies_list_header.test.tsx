@@ -58,7 +58,7 @@ describe('ActionPoliciesListHeader', () => {
   });
 
   it('calls onCreatePolicy when the primary create button is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     renderHeader();
 
     await user.click(screen.getByTestId('createActionPolicyButton'));
@@ -68,7 +68,7 @@ describe('ActionPoliciesListHeader', () => {
   });
 
   it('calls onCreateWithAgent from the split-button dropdown', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     renderHeader();
 
     await user.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
@@ -82,7 +82,7 @@ describe('ActionPoliciesListHeader', () => {
   });
 
   it('disables the agent option (does not hide it) when createWithAgentDisabled is set', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     renderHeader({
       createWithAgentDisabled: true,
       createWithAgentTooltipText: 'Missing privileges',

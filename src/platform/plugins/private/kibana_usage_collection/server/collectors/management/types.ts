@@ -57,6 +57,9 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
+  'agentBuilder:deductiveEnabled': boolean;
+  'agentBuilder:deductiveEndpoint': string;
+  'agentBuilder:deductiveApiKey': string;
   'contextEngine:enabled': boolean;
   'agentBuilder:tracing:enabled': boolean;
   'agentBuilder:tracing:includeLlmResponses': boolean;
@@ -69,6 +72,7 @@ export interface UsageStats {
   'workflows:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
   'workflows:ui:showManagedWorkflows': boolean;
+  'workflows:executionFlyout:aiDiagnose:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -227,6 +231,7 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
   'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': boolean;
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;

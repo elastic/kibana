@@ -172,7 +172,7 @@ export class DiscoveriesPlugin
     const ruleDataServiceOptions: IndexOptions = {
       // IMPORTANT: These values MUST match what elastic_assistant uses to ensure
       // both plugins read/write to the same index. See elastic_assistant/server/plugin.ts
-      // The resulting index pattern is: .adhoc.alerts-siem.security.attack.discovery-{namespace}
+      // The resulting index pattern is: .adhoc.alerts-security.attack.discovery.alerts-{namespace}
       feature: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
       registrationContext: ATTACK_DISCOVERY_ALERTS_CONTEXT,
       dataset: Dataset.alerts,

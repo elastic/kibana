@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiPanel,
   EuiTitle,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
@@ -23,8 +24,9 @@ import { anthropicIcon, cursorIcon, visualStudioCodeIcon } from '@kbn/custom-ico
 
 import { useKibana } from '../../hooks/use_kibana';
 import { PromptModal } from './prompt_modal';
+import { CliInstallModal } from './cli_install_modal';
 import { buildPrompt } from './util';
-import { AgentBuilderPanelContainer, brandIcon } from './styles';
+import { AgentBuilderPanelContainer, AgentInstallPanelContainer, brandIcon } from './styles';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
 
@@ -34,7 +36,7 @@ const BrandIcon: React.FC<{ icon: string; title: string }> = ({ icon, title }) =
 
 const AgentInstallPanel: React.FC<{
   icon: string;
-  title: string;
+  title: React.ReactNode;
   description: string;
   children: React.ReactNode;
 }> = ({ icon, title, description, children }) => {
@@ -42,7 +44,7 @@ const AgentInstallPanel: React.FC<{
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" direction="column">
       <EuiFlexItem grow={false}>
         <EuiPanel color="subdued" paddingSize="s" grow={false}>
-          <EuiIcon color="subdued" size="m" type={icon} title={title} />
+          <EuiIcon color="subdued" size="m" type={icon} aria-hidden />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -65,10 +67,12 @@ const AgentInstallPanel: React.FC<{
 export const AgentInstallSection = () => {
   const { services } = useKibana();
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [isCliModalOpen, setIsCliModalOpen] = useState(false);
   const [modalPrompt, setModalPrompt] = useState('');
   const usageTracker = useUsageTracker();
 
   const closePromptModal = useCallback(() => setIsPromptModalOpen(false), []);
+  const closeCliModal = useCallback(() => setIsCliModalOpen(false), []);
 
   const handleOpenInClaudeCli = useCallback(() => {
     const prompt = buildPrompt('cli');
@@ -76,6 +80,11 @@ export const AgentInstallSection = () => {
     setIsPromptModalOpen(true);
     setModalPrompt(prompt);
   }, []);
+
+  const handleInstallCli = useCallback(() => {
+    usageTracker.click(AnalyticsEvents.cliInstallModalOpened);
+    setIsCliModalOpen(true);
+  }, [usageTracker]);
 
   const handleOpenInAgentBuilder = useCallback(() => {
     usageTracker.click(AnalyticsEvents.agentBuilderOpened);
@@ -94,9 +103,9 @@ export const AgentInstallSection = () => {
           <EuiFlexItem>
             <EuiPanel color="transparent" paddingSize="l">
               <AgentInstallPanel
-                icon="commandLine"
+                icon="code"
                 title={i18n.translate('xpack.searchGettingStarted.agentInstall.ide.title', {
-                  defaultMessage: 'Build in your IDE',
+                  defaultMessage: 'Prompt your agent',
                 })}
                 description={i18n.translate(
                   'xpack.searchGettingStarted.agentInstall.ide.description',
@@ -110,11 +119,10 @@ export const AgentInstallSection = () => {
                     <EuiButton
                       onClick={handleOpenInClaudeCli}
                       data-test-subj="agentInstallLaunchBtn"
-                      color="primary"
-                      fill
+                      color="text"
                     >
                       {i18n.translate('xpack.searchGettingStarted.agentInstall.userLLM.cta', {
-                        defaultMessage: 'Copy prompt',
+                        defaultMessage: 'View prompt',
                       })}
                     </EuiButton>
                   </EuiFlexItem>
@@ -165,6 +173,46 @@ export const AgentInstallSection = () => {
               </AgentInstallPanel>
             </EuiPanel>
           </EuiFlexItem>
+          <EuiFlexItem css={AgentInstallPanelContainer}>
+            <EuiPanel color="transparent" paddingSize="l">
+              <AgentInstallPanel
+                icon="commandLine"
+                title={
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate('xpack.searchGettingStarted.agentInstall.cli.title', {
+                        defaultMessage: 'Build from your terminal',
+                      })}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="accent" fill data-test-subj="agentInstallCliNewBadge">
+                        {i18n.translate('xpack.searchGettingStarted.agentInstall.cli.newBadge', {
+                          defaultMessage: 'New',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
+                description={i18n.translate(
+                  'xpack.searchGettingStarted.agentInstall.cli.description',
+                  {
+                    defaultMessage: 'Query and manage this project with the Elastic CLI.',
+                  }
+                )}
+              >
+                <EuiButton
+                  color="text"
+                  onClick={handleInstallCli}
+                  data-test-subj="agentInstallInstallCli"
+                >
+                  {i18n.translate('xpack.searchGettingStarted.agentInstall.cli.cta', {
+                    defaultMessage: 'Install the CLI',
+                  })}
+                </EuiButton>
+              </AgentInstallPanel>
+            </EuiPanel>
+          </EuiFlexItem>
+
           {services.agentBuilder ? (
             <EuiFlexItem css={AgentBuilderPanelContainer}>
               <EuiPanel color="transparent" paddingSize="l">
@@ -199,6 +247,7 @@ export const AgentInstallSection = () => {
         </EuiFlexGroup>
       </EuiPanel>
       {isPromptModalOpen && <PromptModal prompt={modalPrompt} onClose={closePromptModal} />}
+      {isCliModalOpen && <CliInstallModal onClose={closeCliModal} />}
     </>
   );
 };

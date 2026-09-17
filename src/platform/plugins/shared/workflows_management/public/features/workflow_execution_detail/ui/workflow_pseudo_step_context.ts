@@ -41,16 +41,26 @@ export function buildTriggerContextFromExecution(
     const event = executionContext.event as Record<string, unknown>;
     if (event.alerts != null || event.type === 'alert') {
       triggerType = 'alert';
-    } else if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+    } else if (event.type === 'manual') {
+      triggerType = 'manual';
+    } else if (
+      isEventDrivenWorkflowTriggerSource({
+        triggeredBy,
+        context: executionContext,
+      })
+    ) {
       triggerType = 'event';
     } else {
       triggerType = 'document';
     }
   }
 
-  const inputData = (executionContext as { event?: JsonValue; inputs?: JsonValue }).event
-    ? executionContext.event
-    : executionContext.inputs;
+  // Manual runs store the payload on context.inputs. Older rows may still have
+  // event.type === 'manual'; keep classifying those as manual and show inputs.
+  const inputData =
+    triggerType === 'manual'
+      ? (executionContext as { inputs?: JsonValue }).inputs
+      : (executionContext as { event?: JsonValue }).event;
 
   return {
     triggerType,

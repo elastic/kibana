@@ -35,6 +35,27 @@ const getDataView = (name: string, dataViewFields: DataView['fields'], timeField
   } as unknown as DataView;
 };
 
+const getTSDBFields = () =>
+  [
+    {
+      name: '@timestamp',
+      displayName: '@timestamp',
+      type: 'date',
+      scripted: false,
+      filterable: true,
+      aggregatable: true,
+      sortable: true,
+    },
+    {
+      name: 'system.cpu.usage',
+      displayName: 'system.cpu.usage',
+      type: 'number',
+      timeSeriesMetric: 'gauge',
+      scripted: false,
+      filterable: false,
+    },
+  ] as DataView['fields'];
+
 describe('getInitialESQLQuery', () => {
   it('should add SORT by timeFieldName when @timestamp exists in the index', () => {
     const fields = [
@@ -263,5 +284,45 @@ describe('getInitialESQLQuery', () => {
     const dataView = getDataView('metrics-*', fields, '@timestamp');
 
     expect(getInitialESQLQuery(dataView)).toBe('TS metrics-* | SORT @timestamp DESC');
+  });
+
+  it('should use FROM command when the index pattern is *:* even in TSDB mode', () => {
+    const dataView = getDataView('*:*', getTSDBFields(), '@timestamp');
+
+    expect(getInitialESQLQuery(dataView)).toBe('FROM *:* | SORT @timestamp DESC');
+  });
+
+  it('should use FROM command when *:* is one of several index patterns', () => {
+    const dataView = getDataView(
+      '*:*,.alerts-security.alerts-default,apm-*-transaction*',
+      getTSDBFields(),
+      '@timestamp'
+    );
+
+    expect(getInitialESQLQuery(dataView)).toBe(
+      'FROM *:*,.alerts-security.alerts-default,apm-*-transaction* | SORT @timestamp DESC'
+    );
+  });
+
+  it('should use FROM command when a whitespace padded *:* appears in a non-leading position', () => {
+    const dataView = getDataView('logs-*, *:* ,metrics-*', getTSDBFields(), '@timestamp');
+
+    expect(getInitialESQLQuery(dataView)).toBe(
+      'FROM logs-*, *:* ,metrics-* | SORT @timestamp DESC'
+    );
+  });
+
+  it('should still use TS command for a targeted cross-cluster pattern in TSDB mode', () => {
+    const dataView = getDataView('remote-cluster:metrics-*', getTSDBFields(), '@timestamp');
+
+    expect(getInitialESQLQuery(dataView)).toBe(
+      'TS remote-cluster:metrics-* | SORT @timestamp DESC'
+    );
+  });
+
+  it('should still use TS command for a wildcard cluster with a targeted index in TSDB mode', () => {
+    const dataView = getDataView('*:metrics-*', getTSDBFields(), '@timestamp');
+
+    expect(getInitialESQLQuery(dataView)).toBe('TS *:metrics-* | SORT @timestamp DESC');
   });
 });

@@ -16,12 +16,14 @@
       "security"
     ],
     "requiredPlugins": [
+      "encryptedSavedObjects",
       "features",
       "licensing",
       "taskManager"
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "dataViews",
       "home",
       "management",

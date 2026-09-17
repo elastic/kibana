@@ -20,6 +20,7 @@ import {
   toggleToType,
   validateRuleBasedSource,
 } from './rule_based_source_helpers';
+import { useValidateIndexPatternTimestamp } from './use_validate_index_pattern_timestamp';
 
 // Re-export so consumers can keep importing from here
 export { ENTITY_FIELD_OPTIONS } from './rule_based_source_helpers';
@@ -144,6 +145,12 @@ export const useRuleBasedSourceState = ({
     [activeToggle, byType]
   );
 
+  const { hasTimestamp, isLoading: isValidatingTimestamp } = useValidateIndexPatternTimestamp(
+    currentState.indexPatterns
+  );
+  const indexPatternMissingTimestamp = hasTimestamp === false;
+  const isValid = validation.isValid && !indexPatternMissingTimestamp;
+
   return {
     activeToggle,
     filterQuery: currentState.filterQuery,
@@ -155,6 +162,9 @@ export const useRuleBasedSourceState = ({
     savedQuery,
     toggleButtons,
     validation,
+    isValid,
+    isValidatingTimestamp,
+    indexPatternMissingTimestamp,
     onToggleChange,
     onQueryChange,
     onSavedQueryChange: setSavedQuery,

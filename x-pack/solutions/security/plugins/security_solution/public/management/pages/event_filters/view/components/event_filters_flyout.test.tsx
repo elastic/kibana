@@ -352,8 +352,7 @@ describe('Event filter flyout', () => {
       expect(onCancelMock).toHaveBeenCalledTimes(0);
     });
 
-    // TODO: Find out why this test passes when run via `it.only()` but fails when run with all tests.
-    it.skip('should close when exception has been submitted successfully and close flyout', async () => {
+    it('should close when exception has been submitted successfully and close flyout', async () => {
       // mock submit query
       (useCreateArtifact as jest.Mock).mockImplementation(() => {
         return {
@@ -372,6 +371,8 @@ describe('Event filter flyout', () => {
       });
 
       render();
+
+      await user.type(renderResult.getByTestId('eventFilters-form-name-input'), 'a');
 
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
       expect(confirmButton.hasAttribute('disabled')).toBeFalsy();

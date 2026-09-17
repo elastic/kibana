@@ -27,12 +27,16 @@ export type {
   SmlSearchConstraints,
   SmlSearchFilters,
   SmlDocument,
+  SmlReference,
+  SmlReferenceRelation,
+  SmlWriter,
   SmlIndexAction,
 } from './services/sml/types';
 
-export { kibanaSavedObjectPermissions } from './services/sml/permissions/kibana_saved_object';
+export { kibanaPermissions } from './services/sml/permissions/kibana';
+export { getSmlOriginId } from './services/sml/sml_origin';
 
-export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
+export { smlAiIndexDescription, smlIndexName } from './services/sml/sml_storage';
 export { SmlSearchFilterType } from '../common/http_api/sml';
 
 export const plugin: PluginInitializer<

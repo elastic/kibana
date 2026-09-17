@@ -53,9 +53,9 @@ describe('useServicesBootstrap', () => {
       )
     );
 
-    expect(createStateServiceMock).toBeCalledTimes(1);
-    expect(getBreakdownFieldMock).toBeCalledTimes(1);
-    expect(useStatePropsMock).toBeCalledTimes(1);
+    expect(createStateServiceMock).toHaveBeenCalledTimes(1);
+    expect(getBreakdownFieldMock).toHaveBeenCalledTimes(1);
+    expect(useStatePropsMock).toHaveBeenCalledTimes(1);
 
     expect(hook.result.current.api).not.toBeUndefined();
     expect(hook.result.current.fetch$).not.toBeUndefined();
@@ -68,7 +68,7 @@ describe('useServicesBootstrap', () => {
     const subscriber = jest.fn();
     hook.result.current.fetch$.subscribe(subscriber);
 
-    expect(subscriber).toBeCalledTimes(0);
+    expect(subscriber).toHaveBeenCalledTimes(0);
 
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
       searchSessionId: 'test-session',
@@ -94,8 +94,8 @@ describe('useServicesBootstrap', () => {
     );
     expect(hook.result.current.lensVisService).toBeDefined();
     expect(hook.result.current.lensVisServiceState).toBeDefined();
-    expect(subscriber).toBeCalledTimes(1);
-    expect(subscriber).toBeCalledWith({
+    expect(subscriber).toHaveBeenCalledTimes(1);
+    expect(subscriber).toHaveBeenCalledWith({
       fetchParams: hook.result.current.fetchParams,
       lensVisServiceState: hook.result.current.lensVisServiceState,
     });

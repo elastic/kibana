@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
@@ -20,8 +20,15 @@ import {
   deployGroup,
 } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
+import { toSOServiceVars } from './package_inputs';
+import { useOnboardingSO } from './use_onboarding_so';
 
-export { getRegionFieldName, buildStreamVars, buildPackageInputs } from './package_inputs';
+export {
+  getRegionFieldName,
+  buildStreamVars,
+  buildPackageInputs,
+  toSOServiceVars,
+} from './package_inputs';
 
 export interface UseDeployResult {
   namespace: string;
@@ -33,16 +40,16 @@ export interface UseDeployResult {
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
+  const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
   const {
     servicesStep,
     authenticateAndDeployStep,
-    deployAndDetectStep,
-    updateDeployAndDetectStep,
+    detectAndReviewStep,
+    updateDetectAndReviewStep,
     getLatestFailedInstances,
-    registerDeployHandler,
     awsServicesMap: servicesMap,
   } = useOnboardingFlow();
-  const { selectedServiceIds } = servicesStep;
+  const { selectedServiceIds, dataFormat } = servicesStep;
 
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
@@ -55,7 +62,15 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   // navigating Back and forward again clears the failure locally while serviceStatuses still holds
   // the 'error' chip, which opens the isDone gate on a deploy that never succeeded.
   const [failedInstances, setFailedInstances] = useState<string[]>(
-    () => deployAndDetectStep.failedInstances ?? []
+    () => detectAndReviewStep.failedInstances ?? []
+  );
+
+  const hasEcfServices = useMemo(
+    () =>
+      selectedServiceIds.some((id) =>
+        servicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'ecf')
+      ),
+    [selectedServiceIds, servicesMap]
   );
 
   const deployGroups: DeployGroup[] = useMemo(
@@ -73,11 +88,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       deployGroups.length > 0 &&
       deployGroups.every((group) =>
         group.members.every(({ instance }) => {
-          const status = deployAndDetectStep.serviceStatuses[instance.instanceId];
-          return status === 'receiving' || status === 'detecting';
+          const status = detectAndReviewStep.serviceStatuses[instance.instanceId];
+          return status === 'receiving' || status === 'detecting' || status === 'timeout';
         })
       ),
-    [deployGroups, deployAndDetectStep.serviceStatuses]
+    [deployGroups, detectAndReviewStep.serviceStatuses]
   );
 
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
@@ -104,7 +119,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         groupsToDeploy = deployGroups
           .map((group) => {
             const untrackedMembers = group.members.filter(
-              ({ instance }) => !(instance.instanceId in deployAndDetectStep.serviceStatuses)
+              ({ instance }) => !(instance.instanceId in detectAndReviewStep.serviceStatuses)
             );
             if (untrackedMembers.length === 0) return null;
             return {
@@ -117,10 +132,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         // Flat list of all instanceIds being deployed this run.
         const targets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
 
-        // Non-agentless services are shown as gray chips but never deployed.
+        // Non-managed-integration services are shown as gray chips (ECF deployed on a different path).
         const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
         for (const service of nonAgentlessServices) {
-          if (!(service.id in deployAndDetectStep.serviceStatuses)) {
+          if (!(service.id in detectAndReviewStep.serviceStatuses)) {
             newNonAgentlessStatuses[service.id] = 'instantiating';
           }
         }
@@ -132,7 +147,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
         const initialStatuses = buildInstanceStatuses(targets, []);
         if (targets.length > 0) setIsDeploying(true);
-        updateDeployAndDetectStep({
+        updateDetectAndReviewStep({
           isDeploying: targets.length > 0,
           serviceStatuses: { ...initialStatuses, ...newNonAgentlessStatuses },
         });
@@ -151,11 +166,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         // dropped — otherwise it would be set to 'instantiating' and never resolved.
         const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
         const retryStatuses = buildInstanceStatuses(deployedTargets, []);
-        const remainingFailed = deployAndDetectStep.failedInstances.filter(
+        const remainingFailed = detectAndReviewStep.failedInstances.filter(
           (id) => !deployedTargets.includes(id)
         );
         setIsDeploying(true);
-        updateDeployAndDetectStep({
+        updateDetectAndReviewStep({
           isDeploying: true,
           serviceStatuses: retryStatuses,
           failedInstances: remainingFailed,
@@ -165,6 +180,31 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
       const globalRegion = serviceSettings?.globalRegion ?? '';
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
+
+      const { connectorId } = authenticateAndDeployStep;
+      let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
+
+      if (isInitialDeploy && !onboardingDeploymentId) {
+        onboardingDeploymentId =
+          (await createDeployment({
+            provider: 'aws',
+            connectorId,
+            mechanisms: hasEcfServices ? ['managed_integration', 'ecf'] : ['managed_integration'],
+            services: selectedServiceIds,
+            serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+              string,
+              Record<string, unknown>
+            >,
+            globalRegion,
+            dataFormat,
+            authMethod: connectorId ? 'identity_federation' : 'static_keys',
+          })) ?? undefined;
+        if (onboardingDeploymentId) {
+          // Enter edit mode: add ?deploymentId= to URL so the format selector is locked
+          // and any reload identifies this as a resumable deployment.
+          persistDeploymentId(onboardingDeploymentId);
+        }
+      }
 
       // Promise.allSettled preserves insertion order, so results[i] matches groupsToDeploy[i].
       const results = await Promise.allSettled(
@@ -184,16 +224,31 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         failedInstances: newFailed,
         errorsByInstance,
       } = collectDeployResults(results, groupsToDeploy);
-      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'receiving');
+      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'detecting');
 
       // Merge with instances that failed in a prior run but weren't retried in this one.
       const deployedSet = new Set(deployedTargets);
       const previouslyFailed = getLatestFailedInstances().filter((id) => !deployedSet.has(id));
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
+      // Update SO with deploy outcome (best-effort).
+      if (onboardingDeploymentId) {
+        await updateDeployment(onboardingDeploymentId, {
+          packagePolicyIds: [
+            ...new Set(
+              Object.values({
+                ...detectAndReviewStep.policyIdsByInstance,
+                ...policyIdsByInstance,
+              })
+            ),
+          ],
+          status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
+        });
+      }
+
       setIsDeploying(false);
       setFailedInstances(mergedFailed);
-      updateDeployAndDetectStep({
+      updateDetectAndReviewStep({
         isDeploying: false,
         serviceStatuses: newServiceStatuses,
         policyIdsByInstance,
@@ -209,16 +264,21 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       authenticateAndDeployStep,
       namespace,
       onContinue,
-      updateDeployAndDetectStep,
+      updateDetectAndReviewStep,
       getLatestFailedInstances,
-      deployAndDetectStep.serviceStatuses,
-      deployAndDetectStep.failedInstances,
+      detectAndReviewStep.serviceStatuses,
+      detectAndReviewStep.failedInstances,
+      detectAndReviewStep.onboardingDeploymentId,
+      detectAndReviewStep.policyIdsByInstance,
+      createDeployment,
+      updateDeployment,
+      persistDeploymentId,
+      selectedServiceIds,
+      dataFormat,
+      servicesMap,
+      hasEcfServices,
     ]
   );
-
-  useEffect(() => {
-    registerDeployHandler(handleDeploy);
-  }, [handleDeploy, registerDeployHandler]);
 
   return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy, isAlreadyDeployed };
 }

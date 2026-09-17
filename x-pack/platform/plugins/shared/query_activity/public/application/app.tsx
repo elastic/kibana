@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiText,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AppHeader, type AppHeaderBadge, type AppHeaderMenu } from '@kbn/app-header';
 import { CANCELLATION_POLL_INTERVAL_MS, PLUGIN_NAME } from '../../common/constants';
 import {
   getStopRequestedTaskIds,
@@ -27,8 +19,75 @@ import { useQueryActivityAppContext } from './app_context';
 import { QueryActivityTable } from './components/query_activity_table';
 import { QueryActivityNoAccessPrompt } from './no_access_prompt';
 
+const getLastUpdatedLabel = (secondsAgo: number): string =>
+  secondsAgo < 60
+    ? i18n.translate('xpack.queryActivity.lastUpdatedLessThanOneMinute', {
+        defaultMessage: 'Updated <1m ago',
+      })
+    : i18n.translate('xpack.queryActivity.lastUpdatedMinutes', {
+        defaultMessage: 'Updated {minutes} min ago',
+        values: { minutes: Math.floor(secondsAgo / 60) },
+      });
+
+const QueryActivityPageHeader: React.FC<{
+  lastUpdatedLabel?: string;
+  isRefreshing?: boolean;
+  onRefresh?: () => void;
+}> = ({ lastUpdatedLabel, isRefreshing, onRefresh }) => {
+  const { docLinks } = useQueryActivityAppContext();
+
+  const badges = useMemo<AppHeaderBadge[] | undefined>(
+    () =>
+      lastUpdatedLabel
+        ? [
+            {
+              color: 'hollow',
+              label: lastUpdatedLabel,
+              'data-test-subj': 'queryActivityLastUpdatedBadge',
+            },
+          ]
+        : undefined,
+    [lastUpdatedLabel]
+  );
+
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!onRefresh) {
+      return undefined;
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'refresh',
+        iconType: 'refresh',
+        isLoading: isRefreshing,
+        label: i18n.translate('xpack.queryActivity.refreshButton', {
+          defaultMessage: 'Refresh',
+        }),
+        run: onRefresh,
+        testId: 'queryActivityRefreshButton',
+      },
+    };
+  }, [isRefreshing, onRefresh]);
+
+  return (
+    <AppHeader
+      title={PLUGIN_NAME}
+      description={{
+        text: i18n.translate('xpack.queryActivity.subtitle', {
+          defaultMessage:
+            'Real-time visibility and control over queries currently running in your cluster.',
+        }),
+        learnMoreUrl: docLinks.links.management.queryActivity,
+      }}
+      badges={badges}
+      menu={menu}
+      spacing="bleed"
+    />
+  );
+};
+
 const QueryActivityAppWithData: React.FC = () => {
-  const { apiService, notifications, docLinks } = useQueryActivityAppContext();
+  const { apiService, notifications } = useQueryActivityAppContext();
   const { data, isLoading, error, resendRequest } = apiService.useLoadQueryActivity();
 
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
@@ -128,83 +187,26 @@ const QueryActivityAppWithData: React.FC = () => {
   const queries = data?.queries ?? [];
 
   return (
-    <EuiPageTemplate restrictWidth={false}>
-      <EuiPageTemplate.Header
-        pageTitle={PLUGIN_NAME}
-        description={
-          <FormattedMessage
-            id="xpack.queryActivity.subtitle"
-            defaultMessage="Real-time visibility and control over queries currently running in your cluster. {learnMore}"
-            values={{
-              learnMore: (
-                <EuiLink
-                  href={docLinks.links.management.queryActivity}
-                  target="_blank"
-                  external
-                  css={{ whiteSpace: 'nowrap' }}
-                >
-                  <FormattedMessage
-                    id="xpack.queryActivity.subtitle.learnMoreLink"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-        rightSideItems={[
-          <EuiFlexGroup
-            key="refresh-group"
-            alignItems="flexStart"
-            gutterSize="m"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                direction="column"
-                alignItems="center"
-                gutterSize="xs"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButton iconType="refresh" isLoading={isLoading} onClick={handleRefresh}>
-                    {i18n.translate('xpack.queryActivity.refreshButton', {
-                      defaultMessage: 'Refresh',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {secondsAgo < 60
-                      ? i18n.translate('xpack.queryActivity.lastUpdatedLessThanOneMinute', {
-                          defaultMessage: 'Updated <1m ago',
-                        })
-                      : i18n.translate('xpack.queryActivity.lastUpdatedMinutes', {
-                          defaultMessage: 'Updated {minutes} min ago',
-                          values: { minutes: Math.floor(secondsAgo / 60) },
-                        })}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-        ]}
+    <>
+      <QueryActivityPageHeader
+        lastUpdatedLabel={getLastUpdatedLabel(secondsAgo)}
+        isRefreshing={isLoading}
+        onRefresh={handleRefresh}
       />
-      <EuiPageTemplate.Section>
-        <QueryActivityTable
-          queries={queries}
-          onCancelQuery={handleCancelQuery}
-          isLoading={isLoading}
-          error={
-            error
-              ? i18n.translate('xpack.queryActivity.loadError', {
-                  defaultMessage: 'Failed to load query activity.',
-                })
-              : undefined
-          }
-        />
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+      <EuiSpacer size="l" />
+      <QueryActivityTable
+        queries={queries}
+        onCancelQuery={handleCancelQuery}
+        isLoading={isLoading}
+        error={
+          error
+            ? i18n.translate('xpack.queryActivity.loadError', {
+                defaultMessage: 'Failed to load query activity.',
+              })
+            : undefined
+        }
+      />
+    </>
   );
 };
 
@@ -215,24 +217,27 @@ export const QueryActivityApp: React.FC = () => {
 
   if (capabilities.isLoading) {
     return (
-      <EuiPageTemplate restrictWidth={false}>
-        <EuiPageTemplate.Header pageTitle={PLUGIN_NAME} />
-        <EuiPageTemplate.Section>
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageTemplate.Section>
-      </EuiPageTemplate>
+      <>
+        <QueryActivityPageHeader />
+        <EuiSpacer size="l" />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     );
   }
 
   if (!capabilities.canViewTasks) {
     return (
-      <QueryActivityNoAccessPrompt
-        missingClusterPrivileges={capabilities.missingClusterPrivileges}
-      />
+      <>
+        <QueryActivityPageHeader />
+        <EuiSpacer size="l" />
+        <QueryActivityNoAccessPrompt
+          missingClusterPrivileges={capabilities.missingClusterPrivileges}
+        />
+      </>
     );
   }
 

@@ -40,6 +40,8 @@ export type AddEvaluationDatasetExamplesRequestParamsInput = z.input<
 export const AddEvaluationDatasetExamplesRequestBody = lazySchema(() =>
   z.object({
     examples: z.array(AddExamplesPayload).max(10000),
+    source: z.literal('import').optional(),
+    on_duplicate: z.enum(['error', 'skip']).optional().default('error'),
   })
 );
 export type AddEvaluationDatasetExamplesRequestBody = z.infer<
@@ -52,6 +54,7 @@ export type AddEvaluationDatasetExamplesRequestBodyInput = z.input<
 export const AddEvaluationDatasetExamplesResponse = lazySchema(() =>
   z.object({
     added: z.number().int(),
+    skipped_duplicates: z.number().int(),
   })
 );
 export type AddEvaluationDatasetExamplesResponse = z.infer<

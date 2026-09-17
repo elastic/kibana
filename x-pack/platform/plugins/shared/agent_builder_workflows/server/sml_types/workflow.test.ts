@@ -10,9 +10,9 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createWorkflowSmlType } from './workflow';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIndexName } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -37,21 +37,25 @@ const createMockApi = (overrides: Partial<WorkflowsManagementApi> = {}) =>
     ...overrides,
   } as unknown as WorkflowsManagementApi);
 
-const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
-  id: 'chunk-1',
+const createSmlDocument = (originId = 'workflow-abc'): SmlDocument => ({
   type: 'workflow',
   title: 'My Workflow',
-  origin_id: 'workflow-abc',
-  origin: { uri: 'workflow://workflow-abc' },
   content: 'My Workflow\nA test workflow',
-  created_at: '2025-01-01T00:00:00.000Z',
-  updated_at: '2025-01-01T00:00:00.000Z',
-  spaces: ['default'],
   permissions: {
-    kibana: { privileges: [] },
+    kibana: {
+      privileges: [{ space: 'default', name: [`ai_index:${WORKFLOW_KI_TYPE}/read`], count: 1 }],
+    },
   },
-  ingestion_method: 'crawled',
-  ...overrides,
+  id: 'chunk-1',
+  '@timestamp': '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  references: [{ uri: `workflow://${originId}`, relation: 'derived_from' }],
+  governance: {
+    provenance: {
+      created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+      updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+    },
+  },
 });
 
 describe('workflowSmlType', () => {
@@ -432,7 +436,7 @@ describe('workflowSmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the api:workflowsManagement:read privilege', () => {
+    it('returns the registered ai_index read action for workflows', () => {
       const smlType = createWorkflowSmlType(createMockApi());
       const permissions = smlType.getPermissions!('workflow-abc', {
         esClient: createMockEsClient(),
@@ -440,7 +444,7 @@ describe('workflowSmlType', () => {
         logger: createMockLogger(),
       });
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: `api:${WorkflowsManagementApiActions.read}` }] },
+        kibana: { privileges: { name: [`ai_index:${WORKFLOW_KI_TYPE}/read`] } },
       });
     });
   });
@@ -478,7 +482,7 @@ describe('workflowSmlType', () => {
 
       const smlType = createWorkflowSmlType(api);
 
-      await smlType.toAttachment(createSmlDocument({ origin_id: 'workflow-xyz' }), {
+      await smlType.toAttachment(createSmlDocument('workflow-xyz'), {
         savedObjectsClient: {} as never,
         request: {} as never,
         spaceId: 'my-space',

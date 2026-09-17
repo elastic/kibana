@@ -45,7 +45,6 @@ describe('useCasesColumnsConfiguration ', () => {
     jest.clearAllMocks();
     useCasesFeaturesMock.mockReturnValue({
       caseAssignmentAuthorized: true,
-      isAlertsEnabled: true,
     });
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useCasesConfigMock.mockReturnValue({ templatesEnabled: false });
@@ -148,7 +147,6 @@ describe('useCasesColumnsConfiguration ', () => {
   it('cannot display assignees when case assignment is not authorized', async () => {
     useCasesFeaturesMock.mockReturnValue({
       caseAssignmentAuthorized: false,
-      isAlertsEnabled: true,
     });
 
     const { result } = renderHook(() => useCasesColumnsConfiguration(), {
@@ -161,26 +159,6 @@ describe('useCasesColumnsConfiguration ', () => {
         "field": "assignees",
         "isCheckedDefault": true,
         "name": "Assignees",
-      }
-    `);
-  });
-
-  it('cannot display alerts if alerts are not enabled', async () => {
-    useCasesFeaturesMock.mockReturnValue({
-      caseAssignmentAuthorized: true,
-      isAlertsEnabled: false,
-    });
-
-    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
-    });
-
-    expect(result.current.totalAlerts).toMatchInlineSnapshot(`
-      Object {
-        "canDisplay": false,
-        "field": "totalAlerts",
-        "isCheckedDefault": true,
-        "name": "Alerts",
       }
     `);
   });

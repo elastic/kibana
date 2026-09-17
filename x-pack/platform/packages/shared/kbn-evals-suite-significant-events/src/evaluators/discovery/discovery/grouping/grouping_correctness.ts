@@ -40,6 +40,7 @@ function intersectionSize(a: Set<string>, b: Set<string>): number {
 export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
   name: 'grouping_correctness',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output, expected }) => {
     // Derive the expected grouping from the canonical expected_significant_events: each event's
     // detection signals form one group, keyed by rule_uuid from signal metadata.
