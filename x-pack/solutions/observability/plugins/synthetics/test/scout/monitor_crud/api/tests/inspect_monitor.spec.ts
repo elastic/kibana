@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/api';
+import type { KibanaRole } from '@kbn/scout-oblt';
 import {
   apiTest,
   mergeSyntheticsApiHeaders,
@@ -21,6 +22,17 @@ const LOCAL_PUBLIC_LOCATION = {
   label: 'Dev Service',
   isServiceManaged: true,
 };
+
+const SYNTHETICS_EDITOR_WITH_PARAMETER_VALUES_ROLE = {
+  elasticsearch: { cluster: [], indices: [{ names: ['*'], privileges: ['all'] }] },
+  kibana: [
+    {
+      base: [],
+      spaces: ['*'],
+      feature: { uptime: ['all', 'can_read_param_values'] },
+    },
+  ],
+} satisfies KibanaRole;
 
 const testParamWithNewLine = {
   key: 'testWithNewLine',
@@ -64,7 +76,9 @@ apiTest.describe(
     let adminHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
-      const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
+      const { apiKeyHeader: editorKey } = await requestAuth.getApiKeyForCustomRole(
+        SYNTHETICS_EDITOR_WITH_PARAMETER_VALUES_ROLE
+      );
       editorHeaders = mergeSyntheticsApiHeaders(editorKey);
       const { apiKeyHeader: adminKey } = await requestAuth.getApiKey('admin');
       adminHeaders = mergeSyntheticsApiHeaders(adminKey);
