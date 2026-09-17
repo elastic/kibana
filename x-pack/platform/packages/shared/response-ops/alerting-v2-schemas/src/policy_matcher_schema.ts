@@ -14,7 +14,7 @@ export const POLICY_MATCHER_TAGS_MAX = 50;
 export const POLICY_MATCHER_TAG_MAX_LENGTH = 256;
 
 export const POLICY_MATCHER_TAGS_DESCRIPTION =
-  "Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.";
+  'Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.';
 
 export const POLICY_MATCHER_EXPRESSION_DESCRIPTION =
   "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone.";
