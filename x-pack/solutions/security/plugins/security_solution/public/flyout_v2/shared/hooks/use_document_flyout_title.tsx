@@ -63,7 +63,7 @@ export const useDocumentFlyoutTitle = ({
   renderCellActions = noopCellActionRenderer,
   onAlertUpdated = noop,
 }: UseDocumentFlyoutTitleOptions): DocumentFlyoutTitleResult => {
-  const { openDocumentFlyoutFromIndexAsChild, openAttackFlyoutAsChild } = useFlyoutApi();
+  const { openDocumentFlyoutFromPatternAsChild, openAttackFlyoutAsChild } = useFlyoutApi();
 
   // Attack discovery documents are persisted as alerts (event.kind: signal), so detect them by
   // rule type id first — they'd otherwise match the generic alert branch below.
@@ -89,10 +89,13 @@ export const useDocumentFlyoutTitle = ({
   // Open the source document as a child flyout. Route through the flyout API rather than calling
   // `overlays.openSystemFlyout` directly so the child descriptor is written to the flyoutV2 URL
   // param (via the API's internal writeOnOpen('inherit')) and restored on refresh.
-  // Attack documents live in alert-specific indices not covered by the default data view, so they
-  // must be opened with openAttackFlyoutAsChild (which fetches via useTimelineEventsDetails against
-  // the specific index). openDocumentFlyoutFromIndexAsChild uses useEsDocSearch against the default
-  // data view and returns NotFound for attack documents.
+  // Attack documents open a different flyout type (the attack flyout), so they use
+  // openAttackFlyoutAsChild. Every other document is opened by *pattern* (routing the search at its
+  // index via useTimelineEventsDetails) rather than by concrete `_index`: the from-index path pins
+  // `_index` with a `term` filter and searches the default data view, so it returns NotFound for a
+  // document that lives outside that data view or on a remote cluster (a common case here, since the
+  // title is clicked from a tool flyout such as the analyzer or session view). See
+  // https://github.com/elastic/kibana/issues/286323.
   //
   // Rule preview documents are transient and cannot be re-opened, so no click handler is
   // provided — callers render the title as plain text in that case.
@@ -105,7 +108,7 @@ export const useDocumentFlyoutTitle = ({
         origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
       });
     } else {
-      openDocumentFlyoutFromIndexAsChild({
+      openDocumentFlyoutFromPatternAsChild({
         documentId: hit.raw._id ?? '',
         indexName: (hit.raw._index as string) ?? '',
         renderCellActions,
@@ -117,7 +120,7 @@ export const useDocumentFlyoutTitle = ({
   }, [
     isAttack,
     openAttackFlyoutAsChild,
-    openDocumentFlyoutFromIndexAsChild,
+    openDocumentFlyoutFromPatternAsChild,
     hit,
     attackTitle,
     renderCellActions,
