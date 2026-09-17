@@ -59,6 +59,12 @@ import type {
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
+  /**
+   * Human-readable headline shown in the investigations list and the details flyout from the
+   * moment the record exists. Seeded by the caller (significant event title, alert rule name,
+   * chat-supplied headline) and refined by the agent's structured output on completion.
+   */
+  title: string;
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   /**
@@ -121,12 +127,15 @@ export interface InvestigationStructuredOutput {
 /** Body of PATCH /internal/nightshift/investigations/{id}. */
 export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
   status: UpdatableInvestigationStatus;
+  /** Agent-refined headline; leaves the seeded title in place when omitted. */
+  title?: string;
   error?: string;
   conversation_id?: string;
 }
 
 export interface GetInvestigationResponse extends InvestigationStructuredOutput {
   investigation_id: string;
+  title: string;
   subject: InvestigationSubject;
   trigger_type?: InvestigationTriggerType;
   status: InvestigationStatus;
@@ -151,7 +160,7 @@ export interface ListInvestigationsRequest {
   severities?: Severity[];
   subject_types?: InvestigationSubjectType[];
   /**
-   * Full-text query matched against subject_summary, summary, and conclusion.
+   * Full-text query matched against title, subject_summary, summary, and conclusion.
    */
   query?: string;
   concurrency_key?: string;
@@ -170,6 +179,7 @@ export interface ListInvestigationsRequest {
 export type ListInvestigationItem = Pick<
   GetInvestigationResponse,
   | 'investigation_id'
+  | 'title'
   | 'status'
   | 'created_at'
   | 'started_at'

@@ -17,6 +17,7 @@ import type { InvestigationAttributes } from './types';
 const TYPE = NIGHTSHIFT_INVESTIGATION_SO_TYPE;
 
 const attributes: InvestigationAttributes = {
+  title: 'Test rule',
   status: 'running',
   subject_type: 'alert',
   subject_id: 'alert-1',
@@ -264,7 +265,7 @@ describe('SavedObjectInvestigationRepository', () => {
       );
     });
 
-    it('passes free-text search across the three text-mapped attributes', async () => {
+    it('passes free-text search across the four text-mapped attributes', async () => {
       const { repository, savedObjectsClient } = createRepository();
       savedObjectsClient.find.mockResolvedValue({
         saved_objects: [],
@@ -278,7 +279,7 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'checkout latency',
-          searchFields: ['subject_summary', 'summary', 'conclusion'],
+          searchFields: ['title', 'subject_summary', 'summary', 'conclusion'],
         })
       );
     });

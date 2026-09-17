@@ -15,6 +15,7 @@ import type {
 } from '../../common';
 
 export interface InvestigationAttributes extends InvestigationStructuredOutput {
+  title: string;
   status: InvestigationStatus;
   subject_type: InvestigationSubjectType;
   subject_id: string;
@@ -44,6 +45,7 @@ export type ProjectedInvestigationRecord<Fields extends keyof InvestigationAttri
 };
 
 export interface InvestigationPatch extends InvestigationStructuredOutput {
+  title?: string;
   status?: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
@@ -59,7 +61,7 @@ export interface FindInvestigationsQuery<
   subjectTypes?: InvestigationSubjectType[];
   severities?: Severity[];
   /**
-   * Full-text query across subject_summary, summary, and conclusion.
+   * Full-text query across title, subject_summary, summary, and conclusion.
    * Passed as `search` + `searchFields` to the SO find API, not as part of the KQL filter.
    */
   query?: string;

@@ -22,7 +22,6 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_c
 import { SEVERITY_DOT_COLOR } from '../common/severity';
 import { nightshiftBackgroundTransition } from '../common/transition';
 import {
-  getInvestigationPrimaryText,
   getInvestigationRunTimeLabel,
   getInvestigationSubtitleText,
 } from './investigation_list_presentation';
@@ -65,7 +64,7 @@ export function InvestigationListItem({
     }
   };
 
-  const primaryText = getInvestigationPrimaryText(investigation);
+  const primaryText = investigation.title;
   const subtitleText =
     getInvestigationSubtitleText(investigation) ??
     getInvestigationRunTimeLabel({

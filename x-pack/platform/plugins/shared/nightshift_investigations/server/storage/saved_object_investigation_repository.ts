@@ -31,7 +31,7 @@ const toRecord = <Attributes extends Partial<InvestigationAttributes>>({
 
 /** Text-mapped attributes the free-text `query` searches across. */
 const buildSearchFields = (query: FindInvestigationsQuery): string[] | undefined =>
-  query.query ? ['subject_summary', 'summary', 'conclusion'] : undefined;
+  query.query ? ['title', 'subject_summary', 'summary', 'conclusion'] : undefined;
 
 export type InvestigationSavedObjectsClient = Pick<
   SavedObjectsClientContract,
