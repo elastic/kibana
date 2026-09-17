@@ -21,6 +21,21 @@ import type {
 } from '.';
 import { Graph } from '.';
 
+/** Reusable toolbar items for entity node Storybook previews. */
+const storybookToolbarItems = () => [
+  { iconType: 'cluster', label: 'Show entity relationships', onClick: () => {} },
+  { iconType: 'sortRight', label: "Show this entity's actions", onClick: () => {} },
+  { iconType: 'sortLeft', label: 'Show actions done to this entity', onClick: () => {} },
+  { iconType: 'analyzeEvent', label: 'Show related events', onClick: () => {} },
+  { iconType: 'maximize', label: 'Show entity details', onClick: () => {} },
+];
+
+/** Reusable toolbar items for label (event) node Storybook previews. */
+const storybookLabelToolbarItems = () => [
+  { iconType: 'filter', label: 'Show events with this action', onClick: () => {} },
+  { iconType: 'inspect', label: 'Show event details', onClick: () => {} },
+];
+
 type GraphPropsAndCustomArgs = React.ComponentProps<typeof Graph> & {};
 
 const meta = {
@@ -277,6 +292,7 @@ export const GroupWithWarningAPIMock: Story = {
         color: 'warning',
         shape: 'label',
         parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        toolbarItemsFn: storybookLabelToolbarItems,
       },
       {
         id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
@@ -286,6 +302,7 @@ export const GroupWithWarningAPIMock: Story = {
         color: 'primary',
         shape: 'label',
         parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        toolbarItemsFn: storybookLabelToolbarItems,
       },
     ],
     edges: [
@@ -371,6 +388,7 @@ export const GroupWithAlertAPIMock: Story = {
         uniqueAlertsCount: 1,
         shape: 'label',
         parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        toolbarItemsFn: storybookLabelToolbarItems,
       },
       {
         id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
@@ -378,6 +396,7 @@ export const GroupWithAlertAPIMock: Story = {
         color: 'primary',
         shape: 'label',
         parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        toolbarItemsFn: storybookLabelToolbarItems,
       },
     ],
     edges: [
@@ -446,6 +465,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     countryCodes: ['RU', 'US'],
     tag: 'Host',
     count: 3,
+    toolbarItemsFn: storybookToolbarItems,
     riskScore: { min: 55.0, max: 95.0 },
     assetCriticality: [
       { level: 'high_impact', count: 2 },
@@ -491,6 +511,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     shape: 'diamond',
     icon: 'globe',
     tag: 'IP',
+    toolbarItemsFn: storybookToolbarItems,
     riskScore: { min: 81.0, max: 81.0 },
     assetCriticality: [{ level: 'medium_impact', count: 1 }],
     documentsData: [
@@ -516,6 +537,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     countryCodes: ['RU', 'DE'],
     tag: 'User',
     count: 3,
+    toolbarItemsFn: storybookToolbarItems,
     riskScore: { min: 70.0, max: 88.5 },
     assetCriticality: [
       { level: 'extreme_impact', count: 1 },
@@ -561,6 +583,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     shape: 'ellipse',
     icon: 'user',
     tag: 'User',
+    toolbarItemsFn: storybookToolbarItems,
     riskScore: { min: 42.0, max: 42.0 },
     assetCriticality: [{ level: 'low_impact', count: 1 }],
     documentsData: [
@@ -583,6 +606,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     shape: 'ellipse',
     icon: 'user',
     tag: 'User',
+    toolbarItemsFn: storybookToolbarItems,
     riskScore: { min: 90.01, max: 90.01 },
     assetCriticality: [{ level: 'high_impact', count: 1 }],
     documentsData: [
@@ -605,6 +629,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     shape: 'rectangle',
     icon: 'aws_s3',
     tag: 'Storage',
+    toolbarItemsFn: storybookToolbarItems,
     riskScore: { min: 35.0, max: 35.0 },
     assetCriticality: [{ level: 'extreme_impact', count: 1 }],
     documentsData: [
@@ -627,6 +652,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     shape: 'rectangle',
     icon: 'aws_ec2',
     tag: 'Host',
+    toolbarItemsFn: storybookToolbarItems,
     riskScore: { min: 60.5, max: 60.5 },
     assetCriticality: [{ level: 'high_impact', count: 1 }],
     documentsData: [
@@ -649,6 +675,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     shape: 'rectangle',
     icon: 'aws',
     tag: 'Service',
+    toolbarItemsFn: storybookToolbarItems,
     documentsData: [
       {
         id: 'generic:aws-cloudtrail',

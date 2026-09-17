@@ -365,6 +365,26 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+
+    // Converts a raw expand-popover itemsFn into the minimal NodeToolbarItem shape:
+    // filters out separators and maps iconType + label + onClick + disabled.
+    const toToolbarItemsFn =
+      (itemsFn: (node: NodeProps) => Array<{ type: string; [key: string]: unknown }>) =>
+      (node: NodeProps) =>
+        (itemsFn(node) ?? [])
+          .filter((item) => item.type === 'item')
+          .map((item) => ({
+            iconType: item.iconType as string,
+            label: item.label as string,
+            onClick: item.onClick as () => void,
+            disabled: item.disabled as boolean | undefined,
+          }));
+
+    const { itemsFn: nodeItemsFn } = nodeExpandPopover;
+    const nodeToolbarItemsFn = nodeItemsFn ? toToolbarItemsFn(nodeItemsFn) : undefined;
+
+    const { itemsFn: labelItemsFn } = labelExpandPopover;
+    const labelToolbarItemsFn = labelItemsFn ? toToolbarItemsFn(labelItemsFn) : undefined;
     const isPopoverOpen = [
       nodeExpandPopover,
       labelExpandPopover,
@@ -472,6 +492,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ...node,
               ...(isOrigin && { isOrigin }),
               expandButtonClick: nodeExpandButtonClickHandler,
+              toolbarItemsFn: nodeToolbarItemsFn,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
@@ -494,6 +515,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
               isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
+              toolbarItemsFn: labelToolbarItemsFn,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
               eventClickHandler: createEventClickHandler(analysis, text),

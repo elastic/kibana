@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
-import { Handle, Position, useViewport } from '@xyflow/react';
+import { Handle, NodeToolbar, Position } from '@xyflow/react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -31,7 +31,8 @@ import {
   HandleStyleOverride,
   useNodeFillColor,
 } from './styles';
-import { NODE_HEIGHT, NODE_WIDTH, LAYERS_ZOOM_THRESHOLD } from '../constants';
+import { NodeExpandButton } from './node_expand_button';
+import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import {
   GRAPH_ENTITY_NODE_ID,
   GRAPH_ENTITY_NODE_RISK_BADGE_ID,
@@ -40,7 +41,7 @@ import {
 } from '../test_ids';
 import { getSpanIcon } from './get_span_icon';
 import { showStackedShape } from '../utils';
-import type { EntityNodeViewModel, NodeProps } from '../types';
+import type { EntityNodeViewModel, NodeProps, NodeToolbarItem } from '../types';
 
 /** Converts an ISO 3166-1 alpha-2 country code to its flag emoji. */
 const countryCodeToFlag = (code: string): string =>
@@ -168,8 +169,7 @@ const RiskBadgeArea = styled.div<{ euiTheme: EuiThemeComputed }>`
 `;
 
 /**
- * Expanded metadata panel — rendered below the header when the user zooms in
- * past LAYERS_ZOOM_THRESHOLD. Laid out as a 2-column grid.
+ * Metadata panel — rendered below the header, always visible. Laid out as a 2-column grid.
  */
 const EntityCardMetadata = styled.div<{ euiTheme: EuiThemeComputed }>`
   display: grid;
@@ -209,6 +209,14 @@ const MetadataItem = styled.div<{ euiTheme: EuiThemeComputed }>`
   flex-direction: column;
   padding: ${({ euiTheme }) => euiTheme.size.s};
   gap: ${({ euiTheme }) => euiTheme.size.xxs};
+  /* Prevent grid items from overflowing their 1fr column — required for
+     text truncation inside flex children to work. */
+  min-width: 0;
+  overflow: hidden;
+  /* Don't stretch to the tallest cell in the row. Each cell is only as tall
+     as its own content, preventing the neighbour's multi-line value from
+     pushing this cell's value to the bottom via EUI's flex-grow defaults. */
+  align-self: flex-start;
 `;
 
 /**
@@ -282,19 +290,27 @@ const SOURCES_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
 
 /**
  * Shows the first formatted source value as plain text and collapses any
- * remaining values into a hollow "+N" badge whose tooltip lists them —
- * matching the TruncatedBadgeList pattern used in the Security Solution
- * entities table and flyout (which live in a plugin we cannot import from).
+ * remaining values into a hollow "+N" badge whose tooltip lists them.
  */
 const SourcesCell = memo<{ sources: string[] }>(({ sources }) => {
   const formatted = sources.map(formatSourceName);
   const [first, ...rest] = formatted;
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={{ width: '100%' }}>
-      <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-        <EuiText size="xs" className="eui-textTruncate">
-          <p css={{ margin: 0, fontWeight: 'inherit' }}>{first}</p>
+    <EuiFlexGroup gutterSize="xxs" alignItems="center" responsive={false} css={{ width: '100%' }}>
+      <EuiFlexItem css={{ flex: '0 1 auto', minWidth: 0 }}>
+        <EuiText size="xs">
+          <p
+            css={{
+              margin: 0,
+              fontWeight: 'inherit',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {first}
+          </p>
         </EuiText>
       </EuiFlexItem>
       {rest.length > 0 && (
@@ -304,9 +320,7 @@ const SourcesCell = memo<{ sources: string[] }>(({ sources }) => {
             title={SOURCES_OVERFLOW_TOOLTIP_TITLE}
             content={rest.join(', ')}
           >
-            <EuiBadge color="hollow" tabIndex={0}>
-              {`+${rest.length}`}
-            </EuiBadge>
+            <EuiBadge color="hollow" tabIndex={0}>{`+${rest.length}`}</EuiBadge>
           </EuiToolTip>
         </EuiFlexItem>
       )}
@@ -340,9 +354,18 @@ const IpsCell = memo<{ ips: string[] }>(({ ips }) => {
   const [first, ...rest] = ips;
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={{ width: '100%' }}>
-      <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-        <EuiText size="xs" className="eui-textTruncate">
-          <p css={{ margin: 0 }}>{first}</p>
+      <EuiFlexItem css={{ flex: '0 1 auto', minWidth: 0 }}>
+        <EuiText size="xs">
+          <p
+            css={{
+              margin: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {first}
+          </p>
         </EuiText>
       </EuiFlexItem>
       {rest.length > 0 && (
@@ -394,14 +417,23 @@ const ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   { defaultMessage: 'Additional entity IDs' }
 );
 
-/** Shows the first entity ID with a hollow "+N" overflow badge for the rest. */
+/** Shows the first entity ID with ellipsis ("…") and a hollow "+N" badge for the rest. */
 const EntityIdsCell = memo<{ entityIds: string[] }>(({ entityIds }) => {
   const [first, ...rest] = entityIds;
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={{ width: '100%' }}>
-      <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-        <EuiText size="xs" className="eui-textTruncate">
-          <p css={{ margin: 0 }}>{first}</p>
+    <EuiFlexGroup gutterSize="xxs" alignItems="center" responsive={false} css={{ width: '100%' }}>
+      <EuiFlexItem css={{ flex: '0 1 auto', minWidth: 0 }}>
+        <EuiText size="xs">
+          <p
+            css={{
+              margin: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {first}
+          </p>
         </EuiText>
       </EuiFlexItem>
       {rest.length > 0 && (
@@ -430,9 +462,9 @@ const CriticalityDistribution = memo<{
 }>(({ levels, euiTheme }) => (
   <div
     css={css`
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: ${euiTheme.size.xs};
+      display: flex;
+      flex-direction: column;
+      gap: ${euiTheme.size.xxs};
     `}
   >
     {levels.map(({ level, count }) => (
@@ -559,7 +591,21 @@ const GroupedMetadataPanel = memo<{
   euiTheme: EuiThemeComputed;
 }>(({ ips, countryCodes, sources, entityIds, assetCriticality, riskScore, euiTheme }) => (
   <>
-    {/* Row 1: IP | Geolocation (2-column, with overflow badges) */}
+    {/* Row 1: Asset Criticality | Source */}
+    <MetadataItem euiTheme={euiTheme}>
+      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+      {assetCriticality?.length ? (
+        <CriticalityDistribution levels={assetCriticality} euiTheme={euiTheme} />
+      ) : (
+        <DashValue euiTheme={euiTheme} />
+      )}
+    </MetadataItem>
+    <MetadataItem euiTheme={euiTheme}>
+      <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
+      {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
+    </MetadataItem>
+
+    {/* Row 2: IP Address | Geolocation */}
     <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
       {ips?.length ? <IpsCell ips={ips} /> : <DashValue euiTheme={euiTheme} />}
@@ -573,41 +619,23 @@ const GroupedMetadataPanel = memo<{
       )}
     </MetadataItem>
 
-    {/* Row 2: Source (full-width) */}
-    <FullWidthMetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
-      {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
-    </FullWidthMetadataItem>
-
-    {/* Row 3: Entity ID with overflow (full-width) */}
-    <FullWidthMetadataItem euiTheme={euiTheme}>
+    {/* Row 3: Entity ID | Risk Score */}
+    <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{ENTITY_ID_LABEL}</MetadataLabel>
       {entityIds?.length ? (
         <EntityIdsCell entityIds={entityIds} />
       ) : (
         <DashValue euiTheme={euiTheme} />
       )}
-    </FullWidthMetadataItem>
-
-    {/* Row 4: Asset criticality distribution (full-width, always shown) */}
-    <FullWidthMetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
-      {assetCriticality?.length ? (
-        <CriticalityDistribution levels={assetCriticality} euiTheme={euiTheme} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
-    </FullWidthMetadataItem>
-
-    {/* Row 5: Risk score range (full-width, always shown) */}
-    <FullWidthMetadataItem euiTheme={euiTheme}>
+    </MetadataItem>
+    <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{RISK_SCORE_LABEL}</MetadataLabel>
       {riskScore != null ? (
         <RiskScoreRange riskScore={riskScore} euiTheme={euiTheme} />
       ) : (
         <DashValue euiTheme={euiTheme} />
       )}
-    </FullWidthMetadataItem>
+    </MetadataItem>
   </>
 ));
 GroupedMetadataPanel.displayName = 'GroupedMetadataPanel';
@@ -623,7 +651,23 @@ const SingleEntityMetadataPanel = memo<{
   euiTheme: EuiThemeComputed;
 }>(({ ips, countryCodes, sources, entityId, assetCriticality, riskScore, euiTheme }) => (
   <>
-    {/* Row 1: IP | Geolocation (2-column) */}
+    {/* Row 1: Asset Criticality | Source */}
+    <MetadataItem euiTheme={euiTheme}>
+      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+      {assetCriticality?.length ? (
+        <EuiHealth color={getCriticalityColor(assetCriticality[0].level, euiTheme)} textSize="xs">
+          {formatCriticalityLevel(assetCriticality[0].level)}
+        </EuiHealth>
+      ) : (
+        <DashValue euiTheme={euiTheme} />
+      )}
+    </MetadataItem>
+    <MetadataItem euiTheme={euiTheme}>
+      <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
+      {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
+    </MetadataItem>
+
+    {/* Row 2: IP Address | Geolocation */}
     <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
       {ips?.length ? <IpsCell ips={ips} /> : <DashValue euiTheme={euiTheme} />}
@@ -637,21 +681,18 @@ const SingleEntityMetadataPanel = memo<{
       )}
     </MetadataItem>
 
-    {/* Row 2: Source (full-width) */}
-    <FullWidthMetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
-      {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
-    </FullWidthMetadataItem>
-
-    {/* Row 3: Entity ID (full-width) */}
-    <FullWidthMetadataItem euiTheme={euiTheme}>
+    {/* Row 3: Entity ID | Risk Score */}
+    <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{ENTITY_ID_LABEL}</MetadataLabel>
       {entityId ? (
-        <EuiText size="xs" className="eui-textTruncate">
+        <EuiText size="xs">
           <p
-            css={css`
-              margin: 0;
-            `}
+            css={{
+              margin: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
           >
             {entityId}
           </p>
@@ -659,22 +700,8 @@ const SingleEntityMetadataPanel = memo<{
       ) : (
         <DashValue euiTheme={euiTheme} />
       )}
-    </FullWidthMetadataItem>
-
-    {/* Row 4: Asset criticality — EuiHealth dot + label (full-width, always shown) */}
-    <FullWidthMetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
-      {assetCriticality?.length ? (
-        <EuiHealth color={getCriticalityColor(assetCriticality[0].level, euiTheme)} textSize="xs">
-          {formatCriticalityLevel(assetCriticality[0].level)}
-        </EuiHealth>
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
-    </FullWidthMetadataItem>
-
-    {/* Row 5: Risk score — single colored badge (full-width, always shown) */}
-    <FullWidthMetadataItem euiTheme={euiTheme}>
+    </MetadataItem>
+    <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{RISK_SCORE_LABEL}</MetadataLabel>
       {riskScore != null ? (
         <span
@@ -695,16 +722,15 @@ const SingleEntityMetadataPanel = memo<{
       ) : (
         <DashValue euiTheme={euiTheme} />
       )}
-    </FullWidthMetadataItem>
+    </MetadataItem>
   </>
 ));
 SingleEntityMetadataPanel.displayName = 'SingleEntityMetadataPanel';
 
 /**
  * Shared horizontal card node rendered by all entity node shape types
- * (hexagon, pentagon, ellipse, rectangle, diamond). Shows a compact header at
- * default zoom and an expanded metadata panel when the user zooms in past
- * LAYERS_ZOOM_THRESHOLD.
+ * (hexagon, pentagon, ellipse, rectangle, diamond). Always renders the full
+ * card with header and metadata panel.
  */
 export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   const {
@@ -720,6 +746,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
     documentsData,
     interactive,
     expandButtonClick,
+    toolbarItemsFn,
     nodeClick,
   } = props.data as EntityNodeViewModel;
 
@@ -727,20 +754,29 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   const shadow = useEuiShadow('m');
   const fillColor = useNodeFillColor(color ?? 'primary');
   const iconBgColor = getIconColorByRiskScore(riskScore, fillColor);
-  const { zoom } = useViewport();
+  // Hover state for NodeToolbar visibility.
+  // A generous hide-delay (400ms) keeps the toolbar alive while the mouse
+  // travels from the card into the toolbar, which lives in a separate DOM
+  // subtree and has a small visual gap above the card.
+  const [isHovered, setIsHovered] = useState(false);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToolbar = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    setIsHovered(true);
+  }, []);
+  const hideToolbar = useCallback(() => {
+    hideTimerRef.current = setTimeout(() => setIsHovered(false), 300);
+  }, []);
 
-  // Hamburger menu toggle state — mirrors what NodeExpandButton managed internally.
-  const [menuOpen, setMenuOpen] = useState(false);
-  const unToggleMenu = useCallback(() => setMenuOpen(false), []);
-  const onMenuClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      setMenuOpen((prev) => !prev);
-      expandButtonClick?.(e as unknown as React.MouseEvent<HTMLElement>, props, unToggleMenu);
-    },
-    [expandButtonClick, props, unToggleMenu]
+  // Compute toolbar items once per render (reflects current filter/relationship state).
+  const toolbarItems: NodeToolbarItem[] = useMemo(
+    () => (toolbarItemsFn ? toolbarItemsFn(props) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [toolbarItemsFn, props.id]
   );
-
-  const showLayers = zoom >= LAYERS_ZOOM_THRESHOLD;
 
   const isGrouped = showStackedShape(count);
   const countDisplay = count != null && count > 99 ? '99+' : String(count ?? '');
@@ -780,7 +816,45 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   }, [documentsData]);
 
   return (
-    <NodeContainer data-test-subj={GRAPH_ENTITY_NODE_ID}>
+    <NodeContainer
+      data-test-subj={GRAPH_ENTITY_NODE_ID}
+      onMouseEnter={showToolbar}
+      onMouseLeave={hideToolbar}
+    >
+      {/* Floating action toolbar — shown on hover when toolbar items are available */}
+      {interactive && toolbarItems.length > 0 && (
+        <NodeToolbar isVisible={isHovered} position={Position.Top} align="center" offset={4}>
+          <div
+            onMouseEnter={showToolbar}
+            onMouseLeave={hideToolbar}
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: 2px;
+              background: ${euiTheme.colors.backgroundBasePlain};
+              border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
+              border-radius: ${euiTheme.border.radius.medium};
+              padding: 2px;
+              box-shadow: ${shadow};
+            `}
+          >
+            {toolbarItems.map((item, idx) => (
+              <EuiToolTip key={idx} content={item.label} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType={item.iconType}
+                  iconSize="s"
+                  color="text"
+                  size="xs"
+                  aria-label={item.label}
+                  disabled={item.disabled}
+                  onClick={item.onClick}
+                />
+              </EuiToolTip>
+            ))}
+          </div>
+        </NodeToolbar>
+      )}
+
       <NodeShapeContainer>
         {/* Relative wrapper — stacked cards peek from the bottom of EntityCardWrapper */}
         <div
@@ -834,66 +908,39 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 )}
               </EntityInfo>
 
-              {/* Right: risk score badge + hamburger menu */}
+              {/* Right: risk score badge */}
               <RiskBadgeArea data-test-subj={GRAPH_ENTITY_NODE_RISK_BADGE_ID} euiTheme={euiTheme}>
                 {riskScoreDisplay}
               </RiskBadgeArea>
-
-              {interactive && (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'securitySolutionPackages.cspGraph.entityNode.menuButtonAriaLabel',
-                    { defaultMessage: 'Open node actions' }
-                  )}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    iconType="ellipsis"
-                    color="text"
-                    size="xs"
-                    aria-label={i18n.translate(
-                      'securitySolutionPackages.cspGraph.entityNode.menuButtonAriaLabel',
-                      { defaultMessage: 'Open node actions' }
-                    )}
-                    aria-pressed={menuOpen}
-                    onClick={onMenuClick}
-                    css={css`
-                      flex-shrink: 0;
-                    `}
-                  />
-                </EuiToolTip>
-              )}
             </EntityCardHeader>
 
-            {/* Expanded metadata — shown when zoomed in past LAYERS_ZOOM_THRESHOLD */}
-            {showLayers && (
-              <EntityCardMetadata
-                data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
-                euiTheme={euiTheme}
-              >
-                {isGrouped ? (
-                  <GroupedMetadataPanel
-                    ips={ips}
-                    countryCodes={countryCodes}
-                    sources={entitySources}
-                    entityIds={entityIds}
-                    assetCriticality={assetCriticality}
-                    riskScore={riskScore}
-                    euiTheme={euiTheme}
-                  />
-                ) : (
-                  <SingleEntityMetadataPanel
-                    ips={ips}
-                    countryCodes={countryCodes}
-                    sources={entitySources}
-                    entityId={entityIds?.[0]}
-                    assetCriticality={assetCriticality}
-                    riskScore={riskScore}
-                    euiTheme={euiTheme}
-                  />
-                )}
-              </EntityCardMetadata>
-            )}
+            {/* Metadata panel — always visible */}
+            <EntityCardMetadata
+              data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
+              euiTheme={euiTheme}
+            >
+              {isGrouped ? (
+                <GroupedMetadataPanel
+                  ips={ips}
+                  countryCodes={countryCodes}
+                  sources={entitySources}
+                  entityIds={entityIds}
+                  assetCriticality={assetCriticality}
+                  riskScore={riskScore}
+                  euiTheme={euiTheme}
+                />
+              ) : (
+                <SingleEntityMetadataPanel
+                  ips={ips}
+                  countryCodes={countryCodes}
+                  sources={entitySources}
+                  entityId={entityIds?.[0]}
+                  assetCriticality={assetCriticality}
+                  riskScore={riskScore}
+                  euiTheme={euiTheme}
+                />
+              )}
+            </EntityCardMetadata>
           </EntityCardWrapper>
 
           {/* Single stacked card peeking from the bottom edge */}
@@ -909,11 +956,22 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
         </div>
 
         {interactive && (
-          <NodeButton
-            width={NODE_WIDTH}
-            height={NODE_HEIGHT}
-            onClick={(e) => nodeClick?.(e, props)}
-          />
+          <>
+            <NodeButton
+              width={NODE_WIDTH}
+              height={NODE_HEIGHT}
+              onClick={(e) => nodeClick?.(e, props)}
+            />
+            {/* Fallback expand button (hover +/-) — only shown when no toolbar items are wired */}
+            {toolbarItems.length === 0 && (
+              <NodeExpandButton
+                color={color}
+                onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+                x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
+                y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
+              />
+            )}
+          </>
         )}
 
         <Handle

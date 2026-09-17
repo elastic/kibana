@@ -60,6 +60,13 @@ export interface UseNodeExpandGraphPopoverReturn {
    * The popover state.
    */
   state: PopoverState;
+
+  /**
+   * Raw items function — returns the expand items for a given node without any
+   * popover-close wrapping. Intended for consumers (e.g. NodeToolbar) that render
+   * actions directly as buttons rather than inside a popover.
+   */
+  itemsFn?: (node: NodeProps) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
 }
 
 export const useNodeExpandPopover = ({
@@ -166,5 +173,6 @@ export const useNodeExpandPopover = ({
       closePopover: closePopoverHandler,
     },
     state,
+    itemsFn,
   };
 };
