@@ -70,6 +70,9 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       label: alertsAnnotationLabel,
       color: euiTheme.colors.accent,
       icon: 'alert',
+      // Shown as extra rows in the marker's tooltip, so a hover already
+      // answers "which monitor, and what happened" without leaving the chart.
+      extraFields: ['monitor.name', 'kibana.alert.reason'],
     };
 
     return [{ dataView: alertsDataView, annotations: [annotation] }];
