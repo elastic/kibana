@@ -17,11 +17,11 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
-| `GET` | `/internal/nightshift/sources?page&per_page&enabled` | read | Paginated, sorted by title, each source with `health` |
+| `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated, sorted by title, each source with `health` |
 | `POST` | `/internal/nightshift/sources` | manage | Validates the query, writes the saved object, creates the view |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Also probes `FROM <view> \| LIMIT 0` for `unresolvable` |
 | `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view |
-| `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object |
+| `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the saved object, then removes the view (best-effort) |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage | Flips `enabled` only |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_disable` | manage | Flips `enabled` only |
 

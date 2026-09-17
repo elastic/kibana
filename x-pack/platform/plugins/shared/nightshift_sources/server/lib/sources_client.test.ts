@@ -397,6 +397,7 @@ describe('SourcesClient', () => {
       const { client, soClient, viewsClient } = setup();
       const previous = makeAttributes();
       soClient.get.mockResolvedValue(makeSavedObject(previous));
+      soClient.update.mockResolvedValueOnce({ ...makeSavedObject(previous), version: 'v2' });
       viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
 
       await expect(
@@ -408,7 +409,7 @@ describe('SourcesClient', () => {
         NIGHTSHIFT_SOURCE_SO_TYPE,
         'source-1',
         previous,
-        FULL_UPDATE
+        { ...FULL_UPDATE, version: 'v2' }
       );
     });
 

@@ -108,7 +108,7 @@ export class SourcesClient {
       esql_updated_at: esqlChanged ? now : previous.esql_updated_at,
     };
 
-    await soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, {
+    const updated = await soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, {
       ...FULL_UPDATE,
       version: so.version,
     });
@@ -119,7 +119,7 @@ export class SourcesClient {
       await this.compensate(`restore source ${id} after its view could not be updated`, () =>
         soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, previous, {
           ...FULL_UPDATE,
-          version: so.version,
+          version: updated.version,
         })
       );
       throw error;
