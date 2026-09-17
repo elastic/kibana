@@ -12,10 +12,10 @@ import {
   addMonitor,
   deleteMonitors,
   enableSynthetics,
-  testNowMonitor,
 } from '../../../scout/common/fixtures/monitors';
 import {
   getAgentPolicyRevision,
+  getFleetAgentPolicyRevision,
   getPackagePolicyForMonitor,
   setFleetAgentLastCheckin,
 } from '../../../scout/common/fixtures/fleet';
@@ -30,10 +30,13 @@ import {
   waitForSyntheticsCheck,
 } from '../fixtures/wait_for_check';
 
-const TEST_TIMEOUT = 10 * 60 * 1000;
+const TEST_TIMEOUT = 12 * 60 * 1000;
 const CHECK_TIMEOUT = 3 * 60 * 1000;
 const MONITOR_COUNT = 2;
-const SLOW_SCHEDULE = { number: '60', unit: 'm' } as const;
+// 1m so a post-failover check lands inside CHECK_TIMEOUT. test-now cannot be
+// used here: it creates a sibling package policy that re-hashes across every
+// still-enrolled agent, including the one we just stopped.
+const FAILOVER_SCHEDULE = { number: '1', unit: 'm' } as const;
 
 const assignedAgentId = async (
   apiClient: ApiClientFixture,
@@ -48,7 +51,7 @@ const assignedAgentId = async (
 /**
  * Real Elastic Agent + Fleet Server: two lightweight agents on a scalable
  * private location, HTTP monitors get a `${agent.id}` pin, then killing one
- * agent moves its monitors onto the survivor and a test-now actually runs there.
+ * agent moves its monitors onto the survivor and that agent actually runs them.
  *
  * Requires Docker and the `synthetics_agent_e2e` Scout server config:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet synthetics_agent_e2e
@@ -90,7 +93,7 @@ apiTest.describe(
           const res = await addMonitor(apiClient, editorHeaders, {
             ...buildMonitorPayload('http', agentStack),
             name: `agent-e2e-shard-${i}-${agentStack.runId}`,
-            schedule: SLOW_SCHEDULE,
+            schedule: FAILOVER_SCHEDULE,
           });
           createdMonitorIds.push((res.body as { id: string }).id);
         }
@@ -131,11 +134,13 @@ apiTest.describe(
           killedAgentId,
           new Date(Date.now() - STALE_CHECKIN_MS - 30_000).toISOString()
         );
-        await deleteSyntheticsDocsForAgent(esClient, killedAgentId);
 
         await tryForTime(
-          4 * 60_000,
+          5 * 60_000,
           async () => {
+            // Late Heartbeat docs from the just-stopped agent can re-arm the
+            // STALE_DATA_MS veto; drop them on every poll.
+            await deleteSyntheticsDocsForAgent(esClient, killedAgentId);
             for (const monitorId of movedMonitorIds) {
               const agentId = await assignedAgentId(apiClient, adminHeaders, monitorId, locationId);
               expect(agentId, `monitor ${monitorId} should not be dropped`).toBeDefined();
@@ -143,24 +148,29 @@ apiTest.describe(
                 survivorAgentId
               );
             }
-            const revisionAfterFailover = await getAgentPolicyRevision(
+            const deployedRevision = await getAgentPolicyRevision(
               apiClient,
               adminHeaders,
               agentStack.privateLocation.agentPolicyId
             );
-            expect(revisionAfterFailover).toBeGreaterThan(revisionBeforeFailover);
+            expect(deployedRevision).toBeGreaterThan(revisionBeforeFailover);
+            const appliedRevision = await getFleetAgentPolicyRevision(
+              apiClient,
+              adminHeaders,
+              survivorAgentId
+            );
+            expect(
+              appliedRevision,
+              `survivor ${survivorAgentId} should have applied policy revision ${deployedRevision}`
+            ).toBeGreaterThanOrEqual(deployedRevision);
           },
           { intervalMs: 10_000 }
         );
 
         const movedMonitorId = movedMonitorIds[0];
-        const testNowRes = await testNowMonitor(apiClient, editorHeaders, movedMonitorId);
-        const testRunId = (testNowRes.body as { testRunId?: string }).testRunId;
-
         const check = await waitForSyntheticsCheck(esClient, {
           type: 'http',
           configId: movedMonitorId,
-          testRunId,
           agentId: survivorAgentId,
           timeoutMs: CHECK_TIMEOUT,
         });
