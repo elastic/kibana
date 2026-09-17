@@ -898,6 +898,44 @@ describe('conversations utils', () => {
       expect(terminated.trigger_event_id).toBe('round-1::prompt_response::2');
     });
 
+    it('links the prompt_response to the last terminated execution, skipping an interrupted resume', async () => {
+      const conversationClient = createConversationClientMock();
+      // exec_0 paused, exec_1 aborted -> the retry is exec_2 and answers exec_0's pause
+      const conversation: ConversationWithOperation = {
+        ...pausedConversation(),
+        events: [
+          ...(pausedConversation().events ?? []),
+          {
+            id: 'round-1::execution::1::execution_aborted',
+            type: TimelineEventType.executionAborted,
+            created_at: '2024-01-01T00:05:00.000Z',
+            actor: { type: 'agent', id: 'agent-1' } as never,
+            execution_id: 'round-1::execution::1',
+            trigger_event_id: 'round-1::prompt_response::1',
+            data: { time_to_last_token: 1 },
+          },
+        ] as never,
+      };
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      await run(conversation, conversationClient, {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+          resumed: true,
+          resume_execution: { follow_up_round: followUpRound() },
+        },
+      });
+
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args.events[0].id).toBe('round-1::prompt_response::2');
+      expect(args.events[0].data).toMatchObject({
+        prompt_requested_event_id: 'round-1::execution_terminated',
+      });
+      expect(args.events[1].id).toBe('round-1::execution::2::execution_started');
+      expect(args.events[1].execution_id).toBe('round-1::execution::2');
+    });
+
     it('throws when the round_complete carries no resume_execution payload', async () => {
       const conversationClient = createConversationClientMock();
       await expect(

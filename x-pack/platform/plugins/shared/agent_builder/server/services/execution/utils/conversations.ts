@@ -36,6 +36,7 @@ import {
   promptResponseEvent,
   resumeExecutionToEvents,
   executionTerminatedEventId,
+  lastTerminatedExecutionIndex,
   nextResumeIndex,
   resumeExecutionId,
 } from '../../conversation/client/rounds_to_events';
@@ -285,7 +286,15 @@ export const appendResumeExecution$ = ({
               `appendResumeExecution$: no prior execution stored for round ${round.id}; cannot resume`
             );
           }
-          const promptRequestedEventId = executionTerminatedEventId(round.id, resumeIndex - 1);
+          // The prompt being answered belongs to the last execution that *terminated* (paused);
+          // an interrupted resume in between counts for the index but never owns the pause.
+          const terminatedIndex = lastTerminatedExecutionIndex(conversation, round.id);
+          if (terminatedIndex < 0) {
+            throw new Error(
+              `appendResumeExecution$: round ${round.id} has no terminated execution to resume`
+            );
+          }
+          const promptRequestedEventId = executionTerminatedEventId(round.id, terminatedIndex);
 
           const promptResponse = promptResponseEvent({
             roundId: round.id,
