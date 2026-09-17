@@ -421,9 +421,11 @@ export class SyntheticsAppPage {
   }
 
   async selectFilterOption(filterLabel: string, optionText: string) {
-    await this.page.click(`[aria-label="expands filter group for ${filterLabel} filter"]`);
-    await this.page.click(`span >> text="${optionText}"`);
-    await this.page.click(`[aria-label="Apply the selected filters for ${filterLabel}"]`);
+    await this.page.getByLabel(`expands filter group for ${filterLabel} filter`).click();
+    await this.page.components
+      .selectable('o11yFieldValueSelectionSelectable')
+      .selectOption(optionText);
+    await this.page.getByLabel(`Apply the selected filters for ${filterLabel}`).click();
   }
 
   async deleteMonitorFromEditPage() {
