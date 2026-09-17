@@ -9,6 +9,7 @@ import React, { useEffect, useRef } from 'react';
 import type { Subject } from 'rxjs';
 import { useDispatch } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { areFiltersEmpty } from '../common/utils';
 import { getStatsOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
@@ -21,9 +22,11 @@ import type { MonitorFilters } from '../../../../common/types';
 export const StatsOverviewComponent = ({
   reload$,
   filters,
+  viewMode,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
+  viewMode: ViewMode;
 }) => {
   const statsOverviewStore = useRef(getStatsOverviewStore());
 
@@ -36,14 +39,20 @@ export const StatsOverviewComponent = ({
         }}
       >
         <EuiFlexItem>
-          <WithFiltersComponent filters={filters ?? {}} />
+          <WithFiltersComponent filters={filters ?? {}} viewMode={viewMode} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </SyntheticsEmbeddableContext>
   );
 };
 
-const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
+const WithFiltersComponent = ({
+  filters,
+  viewMode,
+}: {
+  filters: MonitorFilters;
+  viewMode: ViewMode;
+}) => {
   const dispatch = useDispatch();
 
   useOverviewStatus({ scopeStatusByLocation: false });
@@ -66,7 +75,7 @@ const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
     <OverviewStatus
       titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
       hideTitle={true}
-      areStatsClickable
+      areStatsClickable={viewMode !== 'preview'}
     />
   );
 };
