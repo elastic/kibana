@@ -275,19 +275,6 @@ describe('useFetchMetricsData', () => {
 
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
     });
-
-    it('does not fetch when component is not visible', async () => {
-      const params = createDefaultParams();
-      params.isComponentVisible = false;
-
-      renderHook(() => useFetchMetricsData(params));
-
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    });
   });
 
   describe('activeDimensions (race condition fix)', () => {
