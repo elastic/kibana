@@ -325,7 +325,7 @@ export const registerGetPipelineDataRoute = (
           // The generation execution is fetched with its step inputs because the
           // resolved `generate_discoveries` step input is the authoritative record
           // of the alerts generation actually received: it feeds Step 5b (gate
-          // inspect) and, for a supplied-alerts run, Step 2.5 (the provided entry).
+          // inspect).
           //
           // Fallback: When the event log hasn't been indexed yet (early polling), the
           // client can pass the generation workflow run ID as a query parameter.
@@ -409,14 +409,20 @@ export const registerGetPipelineDataRoute = (
               : null;
 
           // Step 2.5: For a supplied-alerts run, reconstruct alert retrieval data
-          // from either:
-          // (a) the generation step's input (available after the step completes), or
-          // (b) the event log tracking data written at generate-step-started time
-          //     (available immediately during the running state, before step.input is populated).
-          // This surfaces the provided alerts in the Alert Retrieval section of the flyout
-          // both while the generation is running AND after it completes.
-          const effectiveProvidedAlerts: string[] | null =
-            generationStepAlerts ?? tracking.providedAlerts ?? null;
+          // from the alerts the run was *given* — `tracking.providedAlerts`,
+          // written to the event log at generate-step-started time, so it is
+          // available both while generation is running and after it completes.
+          // This surfaces the provided alerts in the Alert Retrieval section of
+          // the flyout with a count that does not change as the run progresses.
+          //
+          // The resolved `generate_discoveries` step input is deliberately NOT the
+          // value source: it is the set generation actually analysed, which for a
+          // supplied-alerts run also carries any net-new alerts the gate added, and
+          // it is attached to the gate entry in Step 5b for inspect. Sourcing this
+          // entry from it would label gate additions as supplied and pull them into
+          // the combined Alerts-retrieval view, which Step 5 scopes to the
+          // retrieval phase.
+          const effectiveProvidedAlerts: string[] | null = tracking.providedAlerts ?? null;
 
           if (
             alertRetrievalData == null &&

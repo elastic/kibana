@@ -531,24 +531,35 @@ describe('registerGetPipelineDataRoute', () => {
       ]);
     });
 
-    it('prefers the resolved generate_discoveries step input once it is available', async () => {
+    it('keeps the supplied alerts as the provided entry once the generation step input resolves', async () => {
+      // The resolved step input is the set generation analysed — the supplied
+      // alerts plus any net-new ones the gate added — and it belongs to the gate
+      // entry (Step 5b). The provided entry must keep reporting the alerts the run
+      // was given, so its count does not move between the running and completed
+      // states and gate additions are never labelled `provided`.
       mockGetWorkflowExecutionsTracking.mockResolvedValue(providedRunTracking);
       mockGenerationExecutionWithAlerts(resolvedGenerationAlerts);
       mockExtractPipelineGenerationData.mockReturnValue(null);
       mockExtractPipelineValidationData.mockReturnValue(null);
       mockComputeCombinedAlerts.mockReturnValue({
-        alerts: resolvedGenerationAlerts,
-        alerts_context_count: resolvedGenerationAlerts.length,
+        alerts: suppliedAlerts,
+        alerts_context_count: suppliedAlerts.length,
       });
 
       const body = await invokeHandler();
 
       expect(body.alert_retrieval).toEqual([
         expect.objectContaining({
-          alerts: resolvedGenerationAlerts,
-          alerts_context_count: resolvedGenerationAlerts.length,
+          alerts: suppliedAlerts,
+          alerts_context_count: suppliedAlerts.length,
           extraction_strategy: 'provided',
         }),
+      ]);
+      // The gate addition is not smuggled into the provided entry...
+      expect(body.alert_retrieval?.[0]?.alerts).not.toContain(resolvedGenerationAlerts[2]);
+      // ...so the combined Alerts-retrieval view stays on the supplied set.
+      expect(mockComputeCombinedAlerts).toHaveBeenCalledWith([
+        expect.objectContaining({ alerts_context_count: suppliedAlerts.length }),
       ]);
     });
 
