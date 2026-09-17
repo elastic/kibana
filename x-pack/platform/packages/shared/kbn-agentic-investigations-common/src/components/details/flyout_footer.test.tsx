@@ -53,13 +53,13 @@ describe('ConversationDetailsFlyoutFooter', () => {
     expect(screen.getByText('Assign proposal')).toBeInTheDocument();
   });
 
-  it('owns the dismiss modal', () => {
+  it('owns the close investigation modal', () => {
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
     );
 
     openActionsMenu();
-    fireEvent.click(screen.getByText('Dismiss'));
+    fireEvent.click(screen.getByText('Close investigation'));
 
     expect(screen.getByText('Dismiss proposal')).toBeInTheDocument();
   });

@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { type Investigation } from '../../types';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
+import { CONVERSATION_CARD_ACTIONS } from '../conversation_card/translations';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
 import { getActionButtonIconProps, isDecided } from '../helpers';
@@ -65,14 +66,12 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'openIncident' | 'dismiss' | 'assign';
+export type CardActionType = 'openIncident' | 'close' | 'assign';
 export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
   onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
   onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
-  /** Opens this investigation's chat. Supplied by the caller, which owns the route. */
-  onOpenChat: () => void;
   'data-test-subj'?: string;
 }
 
@@ -82,7 +81,6 @@ export const BaseActions = memo<BaseActionsProps>(
     isFlyout = false,
     onClickAction,
     onClickRecommendedAction,
-    onOpenChat,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -116,27 +114,19 @@ export const BaseActions = memo<BaseActionsProps>(
 
     const actionConfigs = useMemo<ActionConfig[]>(
       () => [
+        // First item, and the only one that carries the action's own icon and colour:
+        // it is the decision the card is asking for, the rest are housekeeping.
         ...(onClickRecommendedAction && !decided
           ? [
               {
                 key: 'proposedAction',
                 icon: getActionButtonIconProps(investigation).type,
                 color: getActionButtonIconProps(investigation).color,
-                name: investigation.primaryActionLabel ?? '',
+                name: investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default,
                 onClick: () =>
                   onClickRecommendedAction({
                     id: investigation.id,
                   }),
-              },
-            ]
-          : []),
-        ...(!isFlyout
-          ? [
-              {
-                key: 'openChat',
-                icon: 'productAgent',
-                name: ACTIONS_TRANSLATIONS.buttons.openInChat,
-                onClick: onOpenChat,
               },
             ]
           : []),
@@ -154,17 +144,17 @@ export const BaseActions = memo<BaseActionsProps>(
                 icon: 'user',
                 name: ACTIONS_TRANSLATIONS.buttons.assign,
                 onClick: () => onClickAction('assign', investigation.recordId),
-                separator: true,
               },
               {
-                key: 'dismiss',
-                icon: 'trash',
-                name: ACTIONS_TRANSLATIONS.buttons.dismiss,
-                onClick: () => onClickAction('dismiss', investigation.recordId),
+                key: 'close',
+                icon: 'cross',
+                name: ACTIONS_TRANSLATIONS.buttons.close,
+                onClick: () => onClickAction('close', investigation.recordId),
+                separator: true,
               },
             ]),
       ],
-      [onClickRecommendedAction, decided, investigation, isFlyout, onOpenChat, onClickAction]
+      [onClickRecommendedAction, decided, investigation, onClickAction]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);

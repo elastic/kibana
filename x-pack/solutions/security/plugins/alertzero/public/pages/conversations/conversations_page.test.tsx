@@ -230,12 +230,14 @@ describe('ConversationsPage decisions', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  // The modal's confirm button carries the action name, same as the card's call to
-  // action, so assertions have to be scoped to the dialog.
-  const approvalDialog = () => within(screen.getByRole('dialog'));
+  // The modal is titled with the action name, which distinguishes it from the actions
+  // popover — also a dialog — and from the menu item that opened it.
+  const approvalDialog = () => within(screen.getByRole('dialog', { name: 'Revoke sessions' }));
 
+  // The recommended action lives in the ⋮ menu, not on the card.
   const openApproval = () => {
-    fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+    fireEvent.click(screen.getByText('Revoke sessions'));
   };
 
   it('submits the action input the analyst was shown, so the API can refuse a stale approval', () => {
@@ -257,18 +259,20 @@ describe('ConversationsPage decisions', () => {
 
     // A refusal — expired deadline, someone decided first — must not close the modal as
     // though the decision had landed. onSuccess is the only thing that closes it.
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
 
     const [, handlers] = approveMutate.mock.calls[0];
     act(() => handlers.onSuccess());
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
   });
 
   it('dismisses with the reason the analyst chose rather than a default', () => {
     renderPage('/');
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
-    fireEvent.click(screen.getByText('Dismiss'));
+    // The menu item is "Close investigation"; the modal it opens still dismisses the
+    // underlying proposal, which is the API operation and the confirm button's label.
+    fireEvent.click(screen.getByText('Close investigation'));
 
     // The actions popover is also a dialog, so the modal has to be named.
     const dialog = within(screen.getByRole('dialog', { name: 'Action modal' }));
@@ -300,8 +304,12 @@ describe('ConversationsPage decisions', () => {
     });
 
     renderPage('/');
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
 
-    expect(screen.queryByRole('button', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    // Asserted inside the open menu, since that is now the only place the decision
+    // could appear — a card-level assertion would pass whatever the menu contained.
+    expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
+    expect(screen.queryByText('Dismiss')).not.toBeInTheDocument();
   });
 
   it('counts only undecided proposals as work needing attention', () => {

@@ -65,7 +65,6 @@ export const ConversationDetailsFlyoutFooter = ({
             isFlyout={true}
             onClickAction={onClickAction}
             onClickRecommendedAction={openApproval}
-            onOpenChat={onOpenChat}
             data-test-subj="investigationFlyoutActions"
           />
         </EuiFlexItem>

@@ -76,7 +76,7 @@ export const InvestigationActionModals = ({
       />
     ) : null}
 
-    {action === 'dismiss' && recordId
+    {action === 'close' && recordId
       ? renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
           <BaseActionModal
             type="dismiss"

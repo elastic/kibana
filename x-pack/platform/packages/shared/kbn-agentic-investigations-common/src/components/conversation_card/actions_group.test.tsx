@@ -33,65 +33,110 @@ const renderGroup = (
 ) => {
   const onClickRecommendedAction = jest.fn();
   const onClickAction = jest.fn();
+  const onOpenChat = jest.fn();
 
   renderWithKibanaRenderContext(
     <ConversationsActionsGroup
       investigation={investigation}
       onClickRecommendedAction={withRecommendedAction ? onClickRecommendedAction : undefined}
       onClickAction={onClickAction}
-      onOpenChat={jest.fn()}
+      onOpenChat={onOpenChat}
     />
   );
 
-  return { onClickRecommendedAction, onClickAction };
+  return { onClickRecommendedAction, onClickAction, onOpenChat };
 };
 
 const openMenu = () => fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
 
 describe('ConversationsActionsGroup', () => {
-  it('offers the recommended action while a decision is still open', () => {
-    const { onClickRecommendedAction } = renderGroup(makeInvestigation());
+  describe('on the card', () => {
+    it('offers opening the chat, which is navigation rather than a decision', () => {
+      const { onOpenChat } = renderGroup(makeInvestigation());
 
-    fireEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Open in chat' }));
 
-    expect(onClickRecommendedAction).toHaveBeenCalledWith({ id: 'inv-1' });
+      expect(onOpenChat).toHaveBeenCalled();
+    });
+
+    it('does not put the recommended action on the card', () => {
+      renderGroup(makeInvestigation());
+
+      // The decision lives in the menu, so the card cannot submit one by mis-click.
+      expect(screen.queryByRole('button', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    });
+
+    it('keeps opening the chat available on a decided investigation', () => {
+      const { onOpenChat } = renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open in chat' }));
+
+      expect(onOpenChat).toHaveBeenCalled();
+    });
   });
 
-  it('hides the call to action on a decided investigation', () => {
-    // A decided proposal sits in the Closed bucket. Approving it again submits a
-    // decision the API refuses, so the button must not be there to click.
-    renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+  describe('in the menu', () => {
+    it('offers the recommended action while a decision is still open', () => {
+      const { onClickRecommendedAction } = renderGroup(makeInvestigation());
+      openMenu();
 
-    expect(screen.queryByRole('button', { name: 'Revoke sessions' })).not.toBeInTheDocument();
-  });
+      fireEvent.click(screen.getByText('Revoke sessions'));
 
-  it('hides the call to action when no handler is wired, rather than rendering a dead button', () => {
-    renderGroup(makeInvestigation(), { withRecommendedAction: false });
+      expect(onClickRecommendedAction).toHaveBeenCalledWith({ id: 'inv-1' });
+    });
 
-    expect(screen.queryByRole('button', { name: 'Revoke sessions' })).not.toBeInTheDocument();
-  });
+    it('labels an action-less proposal with the generic fallback', () => {
+      renderGroup(makeInvestigation({ primaryActionLabel: undefined }));
+      openMenu();
 
-  it('drops assign and dismiss from the menu on a decided investigation', () => {
-    renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
-    openMenu();
+      expect(screen.getByText('Review')).toBeInTheDocument();
+    });
 
-    expect(screen.queryByText('Assign')).not.toBeInTheDocument();
-    expect(screen.queryByText('Dismiss')).not.toBeInTheDocument();
-  });
+    it('omits the recommended action on a decided investigation', () => {
+      // A decided proposal sits in the Closed bucket. Approving it again submits a
+      // decision the API refuses, so the item must not be there to click.
+      renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+      openMenu();
 
-  it('keeps the read-only menu items on a decided investigation', () => {
-    renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
-    openMenu();
+      expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
+    });
 
-    expect(screen.getByText('Open an incident')).toBeInTheDocument();
-  });
+    it('omits the recommended action when no handler is wired', () => {
+      renderGroup(makeInvestigation(), { withRecommendedAction: false });
+      openMenu();
 
-  it('keeps assign and dismiss while the decision is open', () => {
-    const { onClickAction } = renderGroup(makeInvestigation());
-    openMenu();
+      expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
+    });
 
-    fireEvent.click(screen.getByText('Dismiss'));
+    it('no longer duplicates opening the chat, which is on the card', () => {
+      renderGroup(makeInvestigation());
+      openMenu();
 
-    expect(onClickAction).toHaveBeenCalledWith('dismiss', 'inv-1');
+      expect(screen.queryByText('Open in chat')).not.toBeInTheDocument();
+    });
+
+    it('drops assign and close on a decided investigation', () => {
+      renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+      openMenu();
+
+      expect(screen.queryByText('Assign')).not.toBeInTheDocument();
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+    });
+
+    it('keeps the read-only items on a decided investigation', () => {
+      renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+      openMenu();
+
+      expect(screen.getByText('Open an incident')).toBeInTheDocument();
+    });
+
+    it('keeps assign and close while the decision is open', () => {
+      const { onClickAction } = renderGroup(makeInvestigation());
+      openMenu();
+
+      fireEvent.click(screen.getByText('Close investigation'));
+
+      expect(onClickAction).toHaveBeenCalledWith('close', 'inv-1');
+    });
   });
 });
