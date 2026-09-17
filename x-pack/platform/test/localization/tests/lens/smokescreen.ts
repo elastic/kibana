@@ -105,6 +105,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
+  function getTranslationPt(term: string, field?: string) {
+    switch (term) {
+      case 'datatable':
+        // xpack.lens.datatable.label
+        return 'Tabela';
+      case 'Number':
+        // xpack.lens.indexPattern.numberFormatLabel
+        return 'Número';
+      case 'Records':
+        // xpack.lens.indexPattern.records
+        return 'Registros';
+      case 'records':
+        // xpack.lens.indexPattern.records
+        return 'Registros';
+      case 'moving_average':
+        // xpack.lens.indexPattern.movingAverage
+        return 'Média móvel';
+      case 'average':
+        // xpack.dataVisualizer.index.lensChart.averageOfLabel
+        return field ? `Média de ${field}` : `Média`;
+      case 'sum':
+        // xpack.maps.aggType.sumLabel
+        return 'soma';
+      default:
+        return term;
+    }
+  }
+
   function getExpectedI18nTranslator(locale: string): (term: string, field?: string) => string {
     const translate = ((): ((term: string, field?: string) => string) => {
       switch (locale) {
@@ -116,6 +144,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return getTranslationFr;
         case 'de-DE':
           return getTranslationDe;
+        case 'pt-BR':
+          return getTranslationPt;
         default:
           return (v: string) => v;
       }

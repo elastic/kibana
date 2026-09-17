@@ -12,6 +12,7 @@ import React from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import {
   EMPTY_LABEL,
+  getEmptyOrMissingLabel,
   isMissingValue,
   NULL_LABEL,
   NULL_PLACEHOLDER,
@@ -230,12 +231,7 @@ export abstract class FieldFormat {
   }
 
   protected checkForMissingValueText(val: unknown): string | void {
-    if (val === '') {
-      return EMPTY_LABEL;
-    }
-    if (isMissingValue(val)) {
-      return NULL_LABEL;
-    }
+    return getEmptyOrMissingLabel(val);
   }
 
   protected checkForMissingValueReact(val: unknown): ReactNode | undefined {

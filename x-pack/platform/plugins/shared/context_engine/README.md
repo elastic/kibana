@@ -61,8 +61,9 @@ record:
 }
 ```
 
-- `enabled` is *desired* state. A schedule also needs credentials bound to it,
-  so the scheduler stays authoritative for whether analysis is really running.
+- `enabled` is *desired* state, reconciled onto the scheduler after the write.
+  Enabling it schedules the analysis under the credentials of whoever asked, so
+  the scheduler stays authoritative for whether analysis is really running.
 - `agent_id` is the Agent Builder agent that analyzes this index's signals. It
   is also the agent the interactive "Analyze & improve" hand-off opens.
 - `schedule.interval` defaults to `24h` and must be at least 15 minutes. Every
@@ -137,27 +138,51 @@ user against the current space's signals index):
 Both routes are gated by the same `contextEngine:enabled` advanced setting as
 the AI index API (they return 404 while it is off).
 
+### Self-referential exclusion
+
+The feedback loop does not generate signals about itself. Two filters exclude
+its own reads.
+
+**By target index.** `server/tasks/self_referential.ts` recognizes reads of the
+loop's own observability surface: the `context-engine-` user namespace (signals,
+improvements), the `.contextengine-` system namespace (the AI index registry),
+and `traces-agent_builder.otel-*`. `build` in `server/tasks/transform.ts` drops
+those spans before round context is computed, so an analysis round emits no
+signals and does not affect the `looped` / `fell_back_to_raw` counters of the
+round it shares a trace with. Matching is on namespace prefixes. A bare `FROM *`
+is not treated as self-referential.
+
+**By round.** `generate_signals` drops every span whose round loaded the
+`analyze-and-improve` skill, identified from the round's `load_skill` span. The
+lookup is scoped by `trace_id`, so a round whose skill load and queries fall in
+different batches is still excluded. The watermark advances over the dropped
+rounds.
+
+The round filter depends on the agent calling `load_skill`; an agent carrying
+the same guidance in its instructions goes unmarked.
+
 ## Improvements
 
 An **improvement** is a proposed change to one AI index's KI pipeline, derived
-from that index's signals. They live in the single global
-`context-engine-improvements` index, exposed to the server as
-`ContextEnginePluginStart.getImprovementsService(esClient)`. There is no HTTP
-surface yet: the analysis runner that produces improvements and the review UI
-that applies them come later.
+from that index's signals. They live in the `context-engine-improvements` index,
+exposed to the server as
+`ContextEnginePluginStart.getImprovementsService(esClient, spaceId)` and written
+by an analysis run (see [Feedback analysis runs](#feedback-analysis-runs)). The
+review UI that applies them comes later.
 
-Unlike signals, the store is **global rather than per-space**: an improvement
-targets an AI index's KI pipeline, and the AI index registry has no space
-dimension. Two consequences are accepted deliberately — the analysis reads
-signals across all spaces, so an improvement's rationale can cite evidence from
-a space the reviewer cannot open; and a single index means one
-`deleteByAiIndex` cleans up completely when an AI index is deleted.
+Improvements are **scoped to the space of the AI index they target**, which is
+the space the service is constructed for. Every read filters on it and every
+write stamps it, so `list`, `get`, `transition` and `deleteByAiIndex` cannot
+reach another space's rows, and the same AI index id in two spaces keeps two
+independent sets of improvements. Documents written before the store was
+space-scoped carry no `space` and are treated as belonging to the default
+space.
 
 The lifecycle is an **append log** rather than a mutable status field, so the
 record of what the loop did to a user's index survives every transition:
 
 - `improvement_id` is the stable lineage key, derived idempotently from
-  `hash(ai_index_id + change_fingerprint)`. The fingerprint describes the
+  `hash(space + ai_index_id + change_fingerprint)`. The fingerprint describes the
   proposed fix (e.g. `remove_workflow:<workflow_id>`) and contains no free text,
   so a re-run over the same latent problem appends a revision instead of
   creating a near-duplicate row.
@@ -198,10 +223,156 @@ halves:
 - **The caller** creates the index on the first write, and Elasticsearch applies
   the template's mappings to it. Every subsequent read and write is authorized
   against that caller too, so `getImprovementsService` takes the client to act
-  through and callers pass a request-scoped one.
+  through, alongside the space to scope to, and callers pass a request-scoped
+  client.
 
 This is what keeps the store off the internal user. Applying mappings lazily per
 operation instead — the usual storage-adapter pattern — would need `manage` on
 the index from whoever performed it, including anyone merely reading the review
 UI. Writers need `create_index` plus `write`; readers need `read`.
+
+## Feedback analysis runs
+
+A **run** is one pass of the loop over a single AI index: read that index's
+signals, work out what would make it serve agents better, and record the
+proposals in the improvements store. Runs are scheduled per AI index by
+`feedback_analysis` (see [Feedback analysis configuration](#feedback-analysis-configuration)).
+
+| Step                                | Description              |
+| ----------------------------------- | ------------------------ |
+| `context-engine.getFeedbackContext` | Everything one run reads |
+| `context-engine.recordImprovements` | Record what a run proposed |
+
+Both are workflow steps, not HTTP routes, and both reach plugin services
+directly: the signal selection code and the improvements service, whose write is
+a read-modify-write under optimistic concurrency control.
+
+Both steps require the `context_engine:feedbackLoop` advanced setting and act as
+the workflow owner. A scheduled run is a managed workflow owned by a real user;
+nothing here reads or writes as Kibana.
+
+### The runner
+
+The runner is the `system-context-engine-feedback-analysis` managed workflow,
+installed once per AI index with the index id and interval templated in. Its
+shape is three steps: fetch the context, run the index's agent against it with
+a forced output schema, record the result.
+
+The briefing is handed over as the agent's `message`. It instructs the agent to
+load the `analyze-and-improve` skill before reading anything, so the run carries
+the analysis playbook whichever agent the index is configured with.
+
+The briefing does not carry prior proposals, only how many there are and where
+they stand. A run cannot be handed the history that matters to it, because until
+it has read the signals it does not know what it is about to suggest, and an
+index accumulates more targets than fit in a prompt. So the briefing hands over
+an ES|QL query instead: once the run knows what it wants to change, it reads that
+target's lineage out of `context-engine-improvements` itself, filtering
+`ai_index_id` and `latest`, then `target.ki_id`, `target.workflow_id` or
+`target.subject`. This is why `resolution` is mapped where `payload` is not —
+ES|QL can only select mapped fields, and a rejection without `resolution.reason`
+tells the run nothing it can act on. The query lives in the briefing rather than
+only in the skill because the briefing is the one part of a run that cannot be
+replaced by configuring a different agent.
+
+The `platform.context_engine.ai_index` attachment is not used: it carries the
+`save_automation` tool and instructions to ask the user questions, which belong
+to the interactive setup conversation.
+
+The `ai.agent` step runs under the workflow owner's identity — the user who
+turned analysis on. The conversation it creates is private to that user, Agent
+Builder's default: a run reads the index's data under the owner's privileges,
+and its rounds quote what it read.
+
+The instance is installed in the space of the AI index it analyzes, so enable,
+disable and delete address that space's schedule and no other. The workflow
+document id has to carry the space itself: it is the ES `_id` and is unique per
+index regardless of the document's `spaceId`, so suffixing it with the AI index
+id alone would point two spaces holding the same id at one shared document. The
+space is folded in as a hash rather than appended, because space ids and AI
+index ids both allow hyphens (`<space>-<aiIndexId>` would make `('a-b', 'c')`
+and `('a', 'b-c')` collide) and space ids have no length cap while the `_id`
+does.
+
+The workflow carries a `concurrency` guard keyed on the AI index with
+`strategy: drop`, so two runs for one index never overlap.
+
+Turning analysis on installs the instance and then enables it; turning it off
+uninstalls it. Both steps matter, because installing a managed workflow only
+writes its document: enabling is what registers the scheduled trigger with Task
+Manager, under an API key minted from the request that enabled it. That is where
+the owner identity above comes from, and why the template ships `enabled: false`
+— an installed-but-never-enabled instance would look configured and never run.
+Disabling needs no such care, since uninstalling drops the trigger along with the
+document.
+
+Enabling an already-enabled instance re-mints that key, so every write of the
+configuration reconciles rather than only the writes that change it. The schedule
+then belongs to whoever saved it last instead of expiring with the account that
+first turned it on.
+
+The definition is `enablement: 'restorable'` rather than `'enforced'` for the
+same reason: enforced enablement reapplies the template's `enabled` on every
+managed update, which would unschedule a running instance the next time this
+definition ships a new version.
+
+Changing the interval reinstalls, since a scheduled trigger's interval is written
+into the YAML at install time. Everything else about a run — which agent, which
+signals, which actions — is read per run through the context step.
+
+Reconciliation is best-effort and happens after the configuration is stored. A
+failure to reconcile does not fail the configuration write.
+
+### Selecting an index's signals
+
+A run selects over everything `signal_time_range` and `signal_filter` admit,
+with no restriction by signal type. A signal's type governs how it is
+*attributed* to an AI index. A signal is admitted by any of three paths:
+
+1. **Retrieval.** A `ki_retrieval` tool call names the KI index it read in
+   `data.target_index`, matched exactly against the AI index's `dest.value`.
+2. **Fallback.** A `raw_access` tool call names no KI index. It is attributed
+   two ways: by target, against the raw indices the index's own ES|QL sources
+   read; and by conversation, against conversations tied to the index by the
+   first pass.
+3. **Everything else.** A signal that is not a tool call carries no `query_kind`
+   or `target_index`, so the window and the index's `signal_filter` are what
+   scope it. It reaches the run's total but forms no pattern, since patterns are
+   keyed on fields it does not have.
+
+**Only the AI index's own space is read.** Signals live one index per space, so
+a run reads `context-engine-signals-<space>` for the space its AI index belongs
+to and nothing else, which keeps an improvement's evidence inside the space its
+reviewer can open. The space is recorded on each improvement's
+`provenance.signal_spaces`.
+
+Signals are folded into ranked patterns — grouped by tag, target index and tool,
+and scored by frequency weighted by tag. The grouping is a `multi_terms`
+aggregation over the whole window, so a pattern's count is the number of signals
+that occurred, not the number a run read. Each bucket carries its own `top_hits`,
+so the example query and provenance ids attached to a pattern are drawn from the
+signals in that pattern: a group that has a count always has evidence to go with
+it. No documents are read outside the aggregation.
+
+Bucketing is on the multi-valued `tags` field, so a signal tagged both
+`query_error` and `coverage_gap` counts in both patterns, and an untagged signal
+produces no bucket. The evidence hits arrive newest first, but an errored signal
+is preferred as the example where the bucket has one, since a failing query
+describes a pattern better than a successful one.
+
+A run happens only when there are patterns, not merely signals.
+
+### What a run may propose
+
+The run answers with structured output. Its schema is built from the index's
+`allowed_actions`, narrowing the `action` enum to what is permitted, or omitting
+the improvements array for an observe-only index. The policy is enforced again
+on write, re-read from the index.
+
+The server derives each `improvement_id` from the action and its target; a run
+cannot name its own.
+
+A bad proposal is skipped, not fatal. Every rejection comes back as a `skipped`
+entry with a reason: `invalid`, `action_not_allowed`, `duplicate`, `conflict`,
+or `limit_exceeded`.
 
