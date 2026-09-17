@@ -13,6 +13,7 @@ import {
   ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowExecutionListDto,
+  type WorkflowExecutionListItemDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import {
@@ -201,27 +202,35 @@ const getExecution = async (
   })) as unknown as WorkflowExecutionDto;
 
 /**
- * Auto-approve one review child's gate, retrying the 409 waiting-step race.
+ * Respond to one review child's gate with the given decision, retrying the 409
+ * waiting-step race.
  *
  * The child reaching `waiting_for_input` does not guarantee its waiting STEP row is
  * queryable yet; `resumeWorkflowExecution` then rejects with 409 `waiting step not
  * found` — a read-after-write race, not a real conflict. Re-poll through it. A genuine
  * double-approval 409 does not match `isWaitingStepNotReady` and still throws.
+ *
+ * `approved` is the arm under test: the review's apply steps interpolate the same payload
+ * (`steps.review_tuning.output.response.approved`) that an analyst's inbox decision sends,
+ * so a reject here is byte-identical to a user clicking Dismiss.
  */
 const resumeApprovalGate = async (
   fetch: HttpHandler,
   log: ToolingLog,
   executionId: string,
-  pollIntervalMs: number
+  pollIntervalMs: number,
+  approved: boolean
 ): Promise<boolean> => {
   try {
     await fetch(`/api/workflows/executions/${executionId}/resume`, {
       method: 'POST',
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      body: JSON.stringify({ input: { approved: true } }),
+      body: JSON.stringify({ input: { approved } }),
     });
-    log.info(`Auto-approved review_tuning gate for review execution ${executionId}`);
+    log.info(
+      `Responded approved=${approved} to the review_tuning gate of review execution ${executionId}`
+    );
     return true;
   } catch (error) {
     if (!isWaitingStepNotReady(error)) {
@@ -237,6 +246,137 @@ const resumeApprovalGate = async (
 };
 
 /**
+ * Cancel every non-terminal execution of the worker and of its review children.
+ *
+ * `/executions/cancel` returns before the runtime has actually torn the executions down,
+ * and both workflows are concurrency-limited — scheduling into a non-drained backlog gets a
+ * new run SKIPPED, which reads downstream as a legitimate 0 score. A leftover review is
+ * also not ours to decide, so both flows start from a clean slate.
+ */
+const cancelStaleExecutions = async ({
+  fetch,
+  log,
+  pollIntervalMs,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  pollIntervalMs: number;
+}): Promise<void> => {
+  for (const workflowId of [RULE_TUNING_WORKER_WORKFLOW_ID, RULE_TUNING_REVIEW_WORKFLOW_ID]) {
+    const stale = await listActiveExecutions(fetch, workflowId);
+    if ((stale.results ?? []).length > 0) {
+      // Route cancels ALL active executions of this workflow (no body needed).
+      await fetch(`/api/workflows/workflow/${workflowId}/executions/cancel`, {
+        method: 'POST',
+        version: WORKFLOWS_API_VERSION,
+        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      });
+      log.info(
+        `Cancelled ${stale.results.length} stale non-terminal execution(s) of ${workflowId} before scheduling`
+      );
+      await waitForNoActiveExecutions({ fetch, log, workflowId, pollIntervalMs });
+    }
+  }
+};
+
+/**
+ * Start the worker sweep. `min_fp_count: 2` is the schema floor (a 1-alert group returns
+ * `alert_ids` as a scalar and fails the review's array input); 2 keeps every seeded cluster
+ * harvested. The old `concurrency_key` input belonged to the unified workflow and has no
+ * post-split meaning.
+ */
+const startWorkerSweep = async ({
+  fetch,
+  log,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+}): Promise<{ workflowExecutionId: string; startedAt: number }> => {
+  const startedAt = Date.now();
+  const { workflowExecutionId } = (await fetch(
+    `/api/workflows/workflow/${RULE_TUNING_WORKER_WORKFLOW_ID}/run`,
+    {
+      method: 'POST',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      body: JSON.stringify({
+        inputs: { min_fp_count: 2 },
+      }),
+    }
+  )) as { workflowExecutionId: string };
+  log.info(`Started rule-tuning worker execution ${workflowExecutionId}`);
+  return { workflowExecutionId, startedAt };
+};
+
+/**
+ * Review children this run opened (started at/after our worker run). Older reviews were
+ * cancelled by `cancelStaleExecutions`, so anything newer belongs to this fixture.
+ */
+const findReviewChildrenSince = async (
+  fetch: HttpHandler,
+  startedAt: number
+): Promise<WorkflowExecutionListItemDto[]> => {
+  const { results = [] } = (await fetch(
+    `/api/workflows/workflow/${RULE_TUNING_REVIEW_WORKFLOW_ID}/executions`,
+    {
+      method: 'GET',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      query: { statuses: [...TerminalExecutionStatuses, ...NonTerminalExecutionStatuses] },
+    }
+  )) as unknown as WorkflowExecutionListDto;
+  return results.filter((r) => Date.parse(r.startedAt) >= startedAt);
+};
+
+/** The seeded fixture must fan out exactly one review; anything else poisons attribution. */
+const assertSoleReviewChild = async ({
+  fetch,
+  workflowExecutionId,
+  workerStatus,
+  startedAt,
+}: {
+  fetch: HttpHandler;
+  workflowExecutionId: string;
+  workerStatus: ExecutionStatus;
+  startedAt: number;
+}): Promise<WorkflowExecutionListItemDto> => {
+  const reviewChildren = await findReviewChildrenSince(fetch, startedAt);
+
+  if (reviewChildren.length === 0) {
+    throw new Error(
+      `Worker execution ${workflowExecutionId} settled (status: ${workerStatus}) but opened no ` +
+        `review children — the seeded rule was not harvested. Check seed_fp_cluster tags/index and ` +
+        `that the rule is enabled.`
+    );
+  }
+  if (reviewChildren.length > 1) {
+    // One seeded rule must yield exactly one review; more means our cancel pass
+    // missed something or the stack is shared — both poison attribution.
+    throw new Error(
+      `Expected exactly 1 review child from the seeded fixture, found ${reviewChildren.length}: ` +
+        `${reviewChildren.map((r) => `${r.id}@${r.status}`).join(', ')}`
+    );
+  }
+  return reviewChildren[0];
+};
+
+/**
+ * The diagnose proposal the review is holding, or a loud failure that names which of the
+ * two indistinguishable causes (agent step timeout vs. a rule that failed the diagnose gate)
+ * actually happened. Either way there is nothing to approve or reject, so no arm can run.
+ */
+const readProposalOrThrow = (review: WorkflowExecutionDto): RuleTuningProposal => {
+  const proposal = readDiagnoseStructuredOutput(review.stepExecutions);
+  if (!proposal?.change_type) {
+    throw new Error(
+      `Review execution ${review.id} (status: ${review.status}) produced no diagnose ` +
+        `proposal — ${explainMissingProposal(review.stepExecutions ?? [])}`
+    );
+  }
+  return proposal;
+};
+
+/**
  * PORTED 2026-09-11 for the post-#290097 split architecture. The fork harness
  * ran the old unified `system-security-rule-tuning` workflow; main splits it
  * into a worker sweep that fans out one review child per rule. New flow:
@@ -244,7 +384,7 @@ const resumeApprovalGate = async (
  *  1. cancel stale worker+review executions (their inputs are not ours; a
  *     leftover non-terminal review also re-harvests nothing but blocks nothing
  *     — cancel anyway so the run starts from a clean slate),
- *  2. run the WORKER with min_fp_count:1 so the seeded rule is harvested,
+ *  2. run the WORKER with min_fp_count at the schema floor so the seeded rule is harvested,
  *  3. while the worker is in flight, discover its review CHILD executions
  *     (workflow-id = review, non-terminal, started after our worker run) and
  *     auto-approve each child's waitForApproval gate exactly like the external
@@ -270,43 +410,8 @@ export const runRuleTuningWorkflow = async ({
   maxWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<RuleTuningVerdict> => {
-  for (const workflowId of [RULE_TUNING_WORKER_WORKFLOW_ID, RULE_TUNING_REVIEW_WORKFLOW_ID]) {
-    const stale = await listActiveExecutions(fetch, workflowId);
-    if ((stale.results ?? []).length > 0) {
-      // Route cancels ALL active executions of this workflow (no body needed).
-      await fetch(`/api/workflows/workflow/${workflowId}/executions/cancel`, {
-        method: 'POST',
-        version: WORKFLOWS_API_VERSION,
-        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      });
-      log.info(
-        `Cancelled ${stale.results.length} stale non-terminal execution(s) of ${workflowId} before scheduling`
-      );
-      // Cancellation is async; scheduling before it settles means a concurrency
-      // group silently SKIPS our run. Wait for the backlog to actually drain.
-      await waitForNoActiveExecutions({ fetch, log, workflowId, pollIntervalMs });
-    }
-  }
-
-  const runStartedAt = Date.now();
-
-  const { workflowExecutionId } = (await fetch(
-    `/api/workflows/workflow/${RULE_TUNING_WORKER_WORKFLOW_ID}/run`,
-    {
-      method: 'POST',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      body: JSON.stringify({
-        // min_fp_count: 2 is the schema floor (a 1-alert group returns alert_ids as
-        // a scalar and fails the review's array input); 2 keeps every seeded
-        // cluster harvested. The old `concurrency_key` input belonged to the
-        // unified workflow and has no post-split meaning.
-        inputs: { min_fp_count: 2 },
-      }),
-    }
-  )) as { workflowExecutionId: string };
-
-  log.info(`Started rule-tuning worker execution ${workflowExecutionId}`);
+  await cancelStaleExecutions({ fetch, log, pollIntervalMs });
+  const { workflowExecutionId, startedAt } = await startWorkerSweep({ fetch, log });
 
   const deadline = Date.now() + maxWaitMs;
   let worker: WorkflowExecutionDto | undefined;
@@ -324,7 +429,7 @@ export const runRuleTuningWorkflow = async ({
     const activeReviews = await listActiveExecutions(fetch, RULE_TUNING_REVIEW_WORKFLOW_ID);
     for (const review of activeReviews.results ?? []) {
       if (!approvedReviews.has(review.id) && isAwaitingApproval(review.status)) {
-        const resumed = await resumeApprovalGate(fetch, log, review.id, pollIntervalMs);
+        const resumed = await resumeApprovalGate(fetch, log, review.id, pollIntervalMs, true);
         if (resumed) approvedReviews.add(review.id);
       }
     }
@@ -355,49 +460,19 @@ export const runRuleTuningWorkflow = async ({
 
   // Every branch has settled once the worker is terminal; pick the review child
   // this run created (started at/after our run) — older reviews were cancelled above.
-  const reviewChildren = (
-    (await fetch(`/api/workflows/workflow/${RULE_TUNING_REVIEW_WORKFLOW_ID}/executions`, {
-      method: 'GET',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      query: { statuses: [...TerminalExecutionStatuses, ...NonTerminalExecutionStatuses] },
-    })) as unknown as WorkflowExecutionListDto
-  ).results.filter((r) => Date.parse(r.startedAt) >= runStartedAt);
+  const reviewChild = await assertSoleReviewChild({
+    fetch,
+    workflowExecutionId,
+    workerStatus: worker.status,
+    startedAt,
+  });
 
-  if (reviewChildren.length === 0) {
-    throw new Error(
-      `Worker execution ${workflowExecutionId} settled (status: ${worker.status}) but opened no ` +
-        `review children — the seeded rule was not harvested. Check seed_fp_cluster tags/index and ` +
-        `that the rule is enabled. Worker steps that ran: [${(worker.stepExecutions ?? [])
-          .map((s) => `${s.stepId}(${s.stepType})`)
-          .join(', ')}]`
-    );
-  }
-  if (reviewChildren.length > 1) {
-    // One seeded rule must yield exactly one review; more means our cancel pass
-    // missed something or the stack is shared — both poison attribution.
-    throw new Error(
-      `Expected exactly 1 review child from the seeded fixture, found ${reviewChildren.length}: ` +
-        `${reviewChildren.map((r) => `${r.id}@${r.status}`).join(', ')}`
-    );
-  }
+  const review = await getExecution(fetch, reviewChild.id);
 
-  const review = await getExecution(fetch, reviewChildren[0].id);
-
-  const proposal = readDiagnoseStructuredOutput(review.stepExecutions);
-
-  // Reachability assert: if the review completed but produced no diagnose proposal,
-  // distinguish the two causes the step list can already tell apart — the agent step
-  // timing out (a real model result: too slow to decide) versus the seeded rule
-  // failing the diagnose gate (a fixture bug). Naming the wrong one sends the reader
-  // to check rule seeding when the model actually exceeded its step budget.
-  if (!proposal?.change_type) {
-    throw new Error(
-      `Review execution ${review.id} settled (status: ${
-        review.status
-      }) but ${explainMissingProposal(review.stepExecutions ?? [])}`
-    );
-  }
+  // Reachability assert: a review that produced no diagnose proposal has nothing to
+  // grade; `readProposalOrThrow` names which of the two causes the step list can tell
+  // apart (agent step timeout vs. the seeded rule failing the diagnose gate).
+  const proposal = readProposalOrThrow(review);
 
   return {
     ...proposal,
@@ -412,3 +487,166 @@ export const runRuleTuningWorkflow = async ({
     stepExecutions: review.stepExecutions,
   };
 };
+
+/** A review child parked on its `waitForApproval` gate, with the proposal it is showing. */
+export interface RuleTuningApprovalRequest {
+  /** The worker sweep that fanned this review out (kept for diagnostics). */
+  workflowExecutionId: string;
+  /** The review child execution currently parked on `review_tuning`. */
+  reviewExecutionId: string;
+  /** The diagnose proposal the gate is waiting on a decision for. */
+  proposal: RuleTuningProposal;
+}
+
+/**
+ * Drive the worker until its review child PARKS on the approval gate, and stop there.
+ *
+ * `runRuleTuningWorkflow` answers every gate with `approved: true`, so it can only ever
+ * observe the apply arm. This harness deliberately leaves the gate unanswered so a spec can
+ * take both arms and assert the observable difference between them — which is the only way
+ * to show the gate is load-bearing rather than decorative.
+ *
+ * The same seeding/harvest contract as the auto-approve path applies: exactly one review
+ * child must be opened, and it must carry a diagnose proposal (there is nothing to approve
+ * or reject otherwise). Every failure path throws with the state that explains it — never
+ * returns a "nothing to do" and never silently skips.
+ */
+export const runRuleTuningToApprovalGate = async ({
+  fetch,
+  log,
+  maxWaitMs = 15 * 60_000,
+  pollIntervalMs = 5_000,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  /**
+   * A review has to run fetch_rule → diagnose (10m step timeout) → previews before it can
+   * park, so this budget covers the whole child, not just the poll. It is not the gate's
+   * own clock: the gate parks for up to 72h once reached.
+   */
+  maxWaitMs?: number;
+  pollIntervalMs?: number;
+}): Promise<RuleTuningApprovalRequest> => {
+  await cancelStaleExecutions({ fetch, log, pollIntervalMs });
+  const { workflowExecutionId, startedAt } = await startWorkerSweep({ fetch, log });
+
+  const deadline = Date.now() + maxWaitMs;
+  let lastReviewStatus: ExecutionStatus | undefined;
+  let lastWorkerStatus: ExecutionStatus | undefined;
+
+  while (Date.now() < deadline) {
+    const worker = await getExecution(fetch, workflowExecutionId);
+    lastWorkerStatus = worker.status;
+
+    if (neverRan(worker.status)) {
+      throw new Error(
+        `Worker execution ${workflowExecutionId} never ran (status: ${worker.status}) — ` +
+          `concurrency collision, not a model result.`
+      );
+    }
+
+    // More than one child means the cancel pass missed something or the stack is shared;
+    // assert it here so the failure names the fixture, not a later ambiguous gate.
+    const child = await assertSoleReviewChild({
+      fetch,
+      workflowExecutionId,
+      workerStatus: worker.status,
+      startedAt,
+    });
+    const review = await getExecution(fetch, child.id);
+    lastReviewStatus = review.status;
+
+    if (isAwaitingApproval(review.status)) {
+      const proposal = readProposalOrThrow(review);
+      log.info(
+        `Review execution ${review.id} is parked on its approval gate ` +
+          `(status: ${review.status}, change_type: ${proposal.change_type})`
+      );
+      return { workflowExecutionId, reviewExecutionId: review.id, proposal };
+    }
+
+    // The child finished without ever pausing: the gate is guarded on the diagnose step
+    // producing a summary, so there is no pending decision to answer. Fail with the state
+    // that distinguishes the two causes instead of polling a review that will never park.
+    if (isTerminal(review.status)) {
+      throw new Error(
+        `Review execution ${review.id} reached ${review.status} without pausing at the ` +
+          `approval gate (pendingApproval=false) — ${explainMissingProposal(
+            review.stepExecutions ?? []
+          )}`
+      );
+    }
+
+    await sleep(pollIntervalMs);
+  }
+
+  throw new Error(
+    `Review execution never paused at the approval gate within ${maxWaitMs}ms ` +
+      `(last review status: ${lastReviewStatus ?? 'no review child discovered'}, ` +
+      `worker status: ${lastWorkerStatus ?? 'unknown'}) — the spec needs ` +
+      `pendingApproval=true to take either arm.`
+  );
+};
+
+/**
+ * Answer a parked review's gate with `approved` and wait for the review to settle.
+ *
+ * Posts the same payload an analyst's inbox decision sends, on the workflow's own resume
+ * route, and retries the 409 `waiting step not found` read-after-write race (see
+ * `resumeApprovalGate`). Returns the terminal review execution so the caller can read the
+ * apply steps' outcomes out of it.
+ */
+export const respondToReviewGate = async ({
+  fetch,
+  log,
+  reviewExecutionId,
+  approved,
+  maxWaitMs = 5 * 60_000,
+  pollIntervalMs = 3_000,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  reviewExecutionId: string;
+  approved: boolean;
+  maxWaitMs?: number;
+  pollIntervalMs?: number;
+}): Promise<WorkflowExecutionDto> => {
+  const deadline = Date.now() + maxWaitMs;
+
+  let answered = false;
+  while (!answered && Date.now() < deadline) {
+    answered = await resumeApprovalGate(fetch, log, reviewExecutionId, pollIntervalMs, approved);
+  }
+  if (!answered) {
+    throw new Error(
+      `Could not answer the approval gate of review execution ${reviewExecutionId} within ` +
+        `${maxWaitMs}ms — the waiting step never became resumable.`
+    );
+  }
+
+  while (Date.now() < deadline) {
+    const review = await getExecution(fetch, reviewExecutionId);
+    if (isTerminal(review.status)) {
+      return review;
+    }
+    await sleep(pollIntervalMs);
+  }
+
+  throw new Error(
+    `Review execution ${reviewExecutionId} did not settle within ${maxWaitMs}ms after ` +
+      `answering its gate (approved=${approved}).`
+  );
+};
+
+/**
+ * One line per step execution of a settled review, for failure messages: which steps ran,
+ * and which of the apply/tag steps errored. A skipped step leaves no record, so an absent
+ * `apply_query_tuning` here is itself the answer to "why was nothing applied?".
+ */
+export const describeStepExecutions = (execution: WorkflowExecutionDto): string =>
+  (execution.stepExecutions ?? [])
+    .map((step) => {
+      const error = step.error ? ` error=${JSON.stringify(step.error).slice(0, 200)}` : '';
+      return `${step.stepId}(${step.stepType})=${step.status}${error}`;
+    })
+    .join(', ');

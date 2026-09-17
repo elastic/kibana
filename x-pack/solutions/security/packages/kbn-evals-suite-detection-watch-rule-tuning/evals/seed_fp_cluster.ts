@@ -41,7 +41,8 @@ interface SeedContext {
   log: ToolingLog;
 }
 
-const ALERTS_INDEX = '.alerts-security.alerts-default';
+/** Alerts index the harvest reads and the review's tag steps write into the space's index. */
+export const ALERTS_INDEX = '.alerts-security.alerts-default';
 
 /** Entity matrix per fixture: what the diagnose step should "see". */
 const ENTITY_PROFILES: Record<

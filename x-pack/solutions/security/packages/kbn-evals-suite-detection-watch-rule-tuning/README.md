@@ -24,13 +24,15 @@ semantics and the (unratified) pass/kill thresholds.
 kbn-evals-suite-detection-watch-rule-tuning/
 ├── evals/
 │   ├── rule_tuning_decision.spec.ts   # fixtures + experiment runner
+│   ├── rule_tuning_approval.spec.ts   # approve/reject arms for the review gate
 │   └── seed_fp_cluster.ts             # seeds one rule + its closed-FP alert cluster
 ├── src/
-│   ├── constants.ts                   # workflow ids, four-branch vocabulary, trace join ids
+│   ├── constants.ts                   # workflow ids, four-branch vocabulary, tag literals
 │   ├── evaluators.ts                  # ChangeTypeAccuracy, ValidProposal
 │   ├── evaluators/tool_routing.ts     # trace-based Tool Routing + setup reachability probe
 │   ├── evaluators/run_summary.ts      # per-evaluator mean ± CI95 (n=N), SATURATED flags
 │   ├── score_stats.ts                 # CI95 / saturation / paired-delta statistics
+│   ├── approval_gate_contract.test.ts # pins the gate the approval spec asserts on
 │   └── workflow_task.ts               # drives worker + review, returns the graded verdict
 └── playwright.config.ts
 ```
@@ -86,6 +88,38 @@ i.e. ~6.8h for 35 fixtures × 3 repetitions. `playwright.config.ts` therefore se
 previous 30m budget killed every attempt with `Test timeout of 1800000ms exceeded` regardless of
 model quality. Re-measure both numbers whenever the fixture count or the workflow's step cost moves.
 
+## Approval gate (approve / reject)
+
+The decision suite grades *what the review proposed*; it never shows that the gate matters,
+because the harness in `src/workflow_task.ts` answers every gate with `approved: true`. A gate
+that ignored its input would score identically.
+
+`evals/rule_tuning_approval.spec.ts` closes that hole with two deterministic tests over the
+`fp-overbroad-query` fixture (a plain `query` rule, so an approval can actually reach
+`apply_query_tuning`):
+
+| Arm | Response | Asserted against |
+|-----|----------|------------------|
+| reject | `approved: false` | rule `query` byte-identical to its pre-run value, `updated_at` untouched, alerts tagged `detection-watch:tuning-dismissed` (and **not** applied/acknowledged) |
+| approve | `approved: true` | rule `query` == the persisted `proposed_query`, alerts tagged `detection-watch:tuning-applied` |
+
+Both arms seed and sweep their own rule, so a failed arm cannot leak a fixture into a later run.
+
+```bash
+# Approval arms alone. The gate mechanics are deterministic, so n=1 is enough here
+# (unlike the judged decision suite, where n=1 sits inside the noise band):
+EVAL_REPETITIONS=1 node scripts/evals run --suite detection-watch-rule-tuning \
+  --grep "approval gate"
+```
+
+Wall time is ~233s per arm per repetition (same worker sweep, preview pair and gate as a decision
+fixture), and each test has its own budget — they do **not** share the decision suite's 8h
+timeout arithmetic in `src/eval_budget.test.ts`.
+
+`src/approval_gate_contract.test.ts` pins the same arms without a stack: it evaluates the review
+workflow's own gate conditions with the engine the workflow runs on. It is the mutation target —
+invert `apply_query_tuning.if` in `rule_tuning_review.yaml` and the reject-arm test goes red.
+
 ## Reading a run
 
 Each dataset run (i.e. each repetition) ends with one line per evaluator:
@@ -112,5 +146,6 @@ final per-model numbers.
 node scripts/jest --config x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-tuning/jest.config.js --maxWorkers=2
 ```
 
-These cover the evaluators, the trace join/diagnosis logic, the score statistics and the summary
-labelling; they need no stack.
+These cover the evaluators, the trace join/diagnosis logic, the score statistics, the summary
+labelling and the approval gate's conditions (evaluated with the workflow's own Liquid engine);
+they need no stack.

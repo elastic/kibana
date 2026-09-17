@@ -52,7 +52,7 @@ Reporting rules that follow from the table:
 | `TuningQuality` at `EVAL_REPETITIONS=3` | ≥ TBD | unratified |
 | Kill: any `ValidProposal` score < 1.0 | any miss | unratified (regression tripwire; a miss is a schema/gate bug or an unhandled branch, not a quality dip) |
 | Kill: `Tool Routing` = 0 on a measured run | any instance | unratified |
-| Kill: a tuning change applied without an approved gate | any instance | **hard rule** |
+| Kill: a tuning change applied without an approved gate | any instance | **hard rule** — the reject arm of `evals/rule_tuning_approval.spec.ts` asserts the rule query is byte-identical after a rejection; its gate conditions are pinned by `src/approval_gate_contract.test.ts` |
 | Kill: golden label edited in the same commit as a score change | any instance | **hard rule** (relabeling goes through `coverage_characterization.test.ts` or not at all) |
 
 ## Threshold tradeoffs
@@ -84,6 +84,10 @@ unratified for an MVP slice but requires sign-off before a Pilot promotion claim
 - Ratifying any numeric threshold (see above).
 - The sweep's harvesting behaviour (`rule_tuning_worker`) — its fan-out is exercised indirectly by
   every fixture run, but it is not scored here.
-- The approval-gate arms (approve → query patched; reject → query byte-identical) — driven by
-  `evals/rule_tuning_approval.spec.ts`.
+- The approval-gate arms — approve → rule query patched + alerts tagged applied; reject → rule
+  query byte-identical + alerts tagged dismissed. Driven end-to-end by
+  `evals/rule_tuning_approval.spec.ts`, and pinned without a stack by
+  `src/approval_gate_contract.test.ts` (which evaluates the workflow's own gate conditions with the
+  real engine). Neither one produces a score: they are deterministic pass/fail gate proofs, so they
+  are never averaged into a model-quality claim.
 - Watch Orchestrator / `watch_detection.yaml`; the rule-creation worker's own capability profile.

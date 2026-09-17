@@ -73,6 +73,18 @@ export const EXCEPTION_OPERATOR_PAYLOAD = {
 export const EVAL_TAG_PREFIX = 'eval-rule-tuning';
 
 /**
+ * Tags the review workflow's `security.setAlertTags` steps write onto the harvested alerts,
+ * mirroring `consts.*_tag` in `rule_tuning_review.yaml`. The approval spec asserts on these
+ * tags as the observable side effect of each gate arm: `dismissed` only on a rejection,
+ * `applied` only once `record_outcome.rule_patched` is true (i.e. the rule was really
+ * patched). Keep in sync with the yaml — `approval_gate_contract.test.ts` fails if they drift.
+ */
+export const REVIEWED_TAG = 'detection-watch:tuning-reviewed';
+export const DISMISSED_TAG = 'detection-watch:tuning-dismissed';
+export const APPLIED_TAG = 'detection-watch:tuning-applied';
+export const ACKNOWLEDGED_TAG = 'detection-watch:tuning-acknowledged';
+
+/**
  * Step ids from the managed review workflow yaml
  * (`kbn-workflows/managed/definitions/alertzero/rule_tuning_review.yaml`). The
  * `diagnose_rule` step is the `ai.agent` step this suite grades, and it is the
