@@ -11,8 +11,10 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiContextMenu, EuiContextMenuItem } from '@elastic/eui';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
+import { toBulkCloseRuntimeMappings } from '../../../common/components/toolbar/bulk_actions/runtime_mappings_for_bulk_close';
 import type { GroupTakeActionItems } from '../../components/alerts_table/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { inputsModel } from '../../../common/store';
@@ -153,6 +155,7 @@ export const useGroupTakeActionsItems = ({
       tableId,
       selectedGroup,
       reason,
+      runtimeMappings,
     }: {
       groupNumber: number;
       query?: string;
@@ -160,6 +163,7 @@ export const useGroupTakeActionsItems = ({
       tableId: string;
       selectedGroup: string;
       reason?: AlertClosingReason;
+      runtimeMappings?: MappingRuntimeFields;
     }) => {
       if (status === 'closed' && query && !(await promptAlertCloseConfirmation({ query }))) {
         return;
@@ -186,6 +190,8 @@ export const useGroupTakeActionsItems = ({
           status,
           query: query ? JSON.parse(query) : {},
           reason,
+          // Convert to the narrower shape the route accepts, preserving scripts.
+          runtimeMappings: toBulkCloseRuntimeMappings(runtimeMappings),
         });
 
         onAlertStatusUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0, status);
@@ -207,7 +213,7 @@ export const useGroupTakeActionsItems = ({
     });
 
   return useCallback(
-    ({ query, tableId, groupNumber, selectedGroup }) => {
+    ({ query, tableId, groupNumber, selectedGroup, runtimeMappings }) => {
       const actionItems: EuiContextMenuPanelItemDescriptor[] = [];
 
       if (!hasAlertsUpdate || !showAlertStatusActions) {
@@ -230,6 +236,7 @@ export const useGroupTakeActionsItems = ({
                     selectedGroup,
                     status: FILTER_OPEN as AlertWorkflowStatus,
                     tableId,
+                    runtimeMappings,
                   })
                 }
               >
@@ -252,6 +259,7 @@ export const useGroupTakeActionsItems = ({
                     selectedGroup,
                     status: FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
                     tableId,
+                    runtimeMappings,
                   })
                 }
               >
@@ -295,6 +303,7 @@ export const useGroupTakeActionsItems = ({
                       selectedGroup,
                       status: workflowStatus as AlertWorkflowStatus,
                       tableId,
+                      runtimeMappings,
                     })
                   }
                 >
@@ -315,6 +324,7 @@ export const useGroupTakeActionsItems = ({
             status: FILTER_CLOSED as AlertWorkflowStatus,
             tableId,
             reason,
+            runtimeMappings,
           });
         },
       }).map((panel) => ({

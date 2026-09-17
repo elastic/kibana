@@ -12,27 +12,19 @@ import { relative } from 'path';
 import type { Task } from '../lib';
 import { exec } from '../lib';
 
-const YARN_EXEC = process.env.npm_execpath || 'yarn';
-const NODE_EXEC = process.execPath || 'node';
-
 export const InstallDependencies: Task = {
   description: 'Installing node_modules, including production builds of packages',
 
   async run(config, log, build) {
     await exec(
       log,
-      YARN_EXEC,
+      'pnpm',
       [
         'install',
-        '--non-interactive',
-        '--production',
-        '--ignore-optional',
-        '--pure-lockfile',
+        '--prod',
+        '--no-frozen-lockfile',
+        '--config.confirmModulesPurge=false',
         '--prefer-offline',
-
-        // We're using --no-bin-links to support systems that don't have symlinks.
-        // This is commonly seen in shared folders on virtual machines
-        '--no-bin-links',
       ],
       {
         cwd: build.resolvePath(),
@@ -41,9 +33,9 @@ export const InstallDependencies: Task = {
 
     await exec(
       log,
-      NODE_EXEC,
+      'pnpm',
       [
-        config.resolveFromRepo('node_modules/.bin/patch-package'),
+        'patch-package',
         '--error-on-fail',
         '--patch-dir',
         relative(build.resolvePath(), config.resolveFromRepo('patches')),

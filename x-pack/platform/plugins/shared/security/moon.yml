@@ -108,6 +108,7 @@ dependsOn:
   - '@kbn/core-user-activity-server'
   - '@kbn/core-user-activity-server-mocks'
   - '@kbn/unsaved-changes-prompt'
+  - '@kbn/core-logging-server'
 tags:
   - plugin
   - prod

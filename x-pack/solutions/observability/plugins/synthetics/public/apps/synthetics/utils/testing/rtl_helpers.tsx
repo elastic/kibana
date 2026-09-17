@@ -355,6 +355,7 @@ export const makeSyntheticsPermissionsCore = (
     configureSettings: boolean;
     save: boolean;
     show: boolean;
+    canManageRules: boolean;
   }>
 ) => {
   return {

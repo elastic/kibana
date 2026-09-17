@@ -26,6 +26,7 @@ describe('Outputs handler', () => {
   const mockResponse = {
     customError: jest.fn().mockImplementation((options) => options),
     ok: jest.fn().mockImplementation((options) => options),
+    badRequest: jest.fn().mockImplementation((options) => options),
   };
 
   beforeEach(() => {
@@ -390,6 +391,92 @@ describe('Outputs handler', () => {
     expect(res).toEqual({
       body: { message: 'Cannot specify both ssl.key and secrets.ssl.key' },
       statusCode: 400,
+    });
+  });
+
+  describe('putOutputHandler ID immutability', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
+      jest.spyOn(outputService, 'get').mockResolvedValue({ id: 'output1' } as any);
+      jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
+    });
+
+    it('should return badRequest when body id does not match path outputId', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      await putOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { id: '../../../some-other-output', type: 'elasticsearch' },
+          params: { outputId: 'output1' },
+        } as any,
+        mockResponse as any
+      );
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('Cannot change output ID'),
+          }),
+        })
+      );
+      expect(outputService.update).not.toHaveBeenCalled();
+    });
+
+    it('should return ok when body id matches path outputId', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      const res = await putOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { id: 'output1', type: 'elasticsearch' },
+          params: { outputId: 'output1' },
+        } as any,
+        mockResponse as any
+      );
+
+      expect(res).toEqual({ body: { item: { id: 'output1' } } });
+    });
+
+    it('should return ok when body has no id field', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      const res = await putOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { type: 'elasticsearch', name: 'Updated name' },
+          params: { outputId: 'output1' },
+        } as any,
+        mockResponse as any
+      );
+
+      expect(res).toEqual({ body: { item: { id: 'output1' } } });
+    });
+
+    it('should not pass id to outputService.update', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      await putOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { id: 'output1', type: 'elasticsearch', name: 'test' },
+          params: { outputId: 'output1' },
+        } as any,
+        mockResponse as any
+      );
+
+      const updateCallArgs = (outputService.update as jest.Mock).mock.calls[0];
+      expect(updateCallArgs[2]).toBe('output1');
+      expect(updateCallArgs[3]).not.toHaveProperty('id');
     });
   });
 });

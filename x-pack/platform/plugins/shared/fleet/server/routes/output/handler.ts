@@ -102,10 +102,18 @@ export const putOutputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const outputUpdate = request.body;
   try {
-    await validateOutputServerless(outputUpdate, soClient, request.params.outputId);
-    validateOutputSslPaths(outputUpdate);
-    ensureNoDuplicateSecrets(outputUpdate);
-    await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
+    const { id: bodyId, ...updateBody } = outputUpdate as typeof outputUpdate & { id?: string };
+    if (bodyId !== undefined && bodyId !== request.params.outputId) {
+      return response.badRequest({
+        body: {
+          message: `Cannot change output ID: body id does not match path outputId "${request.params.outputId}"`,
+        },
+      });
+    }
+    await validateOutputServerless(updateBody, soClient, request.params.outputId);
+    validateOutputSslPaths(updateBody);
+    ensureNoDuplicateSecrets(updateBody);
+    await outputService.update(soClient, esClient, request.params.outputId, updateBody);
     const output = await outputService.get(request.params.outputId);
     await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
       isDefault: output.is_default,
