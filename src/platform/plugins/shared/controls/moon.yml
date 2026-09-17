@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/css-utils'
   - '@kbn/esql-utils'
+  - '@kbn/esql-browser'
   - '@kbn/search-types'
   - '@kbn/controls-constants'
   - '@kbn/controls-schemas'
