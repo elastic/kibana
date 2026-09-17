@@ -15,7 +15,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
@@ -667,7 +667,7 @@ const WATCH_INTROS: Record<string, string> = {
         'Watch grouping for investigation hand-off. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
     }
   ),
-  [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.dark', {
+  [SYSTEM_SECURITY_WATCH_HUNT_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.hunt', {
     defaultMessage:
       'Groups the Continuous Threat Hunt Worker. Findings arrive as reviewable evidence. Settings below belong to that Worker, not to this Watch.',
   }),
