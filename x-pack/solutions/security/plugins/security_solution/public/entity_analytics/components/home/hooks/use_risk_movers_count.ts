@@ -14,8 +14,24 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
+import type { TimeRange } from '../use_time_range_param';
+import {
+  getEntityFilterESQL,
+  EMPTY_ENTITY_FILTERS,
+  type EntityFilters,
+} from '../use_entity_filters_param';
 
-export const useRiskMoversCount = ({ spaceId, skip }: { spaceId: string; skip?: boolean }) => {
+export const useRiskMoversCount = ({
+  spaceId,
+  skip,
+  timeRange = '24h',
+  entityFilters = EMPTY_ENTITY_FILTERS,
+}: {
+  spaceId: string;
+  skip?: boolean;
+  timeRange?: TimeRange;
+  entityFilters?: EntityFilters;
+}) => {
   const { data } = useKibana().services;
   const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
   const { data: resolvedIndex, isLoading: isIndexLoading } =
@@ -30,8 +46,15 @@ export const useRiskMoversCount = ({ spaceId, skip }: { spaceId: string; skip?: 
 
   const query = useMemo(
     () =>
-      resolvedIndex?.indexName ? buildRiskMoversCountQuery(spaceId, resolvedIndex.indexName) : null,
-    [spaceId, resolvedIndex?.indexName]
+      resolvedIndex?.indexName
+        ? buildRiskMoversCountQuery(
+            spaceId,
+            resolvedIndex.indexName,
+            timeRange,
+            getEntityFilterESQL(entityFilters)
+          )
+        : null,
+    [spaceId, resolvedIndex?.indexName, timeRange, entityFilters]
   );
 
   const {

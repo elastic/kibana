@@ -63,10 +63,8 @@ const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
 const V5_CARD_DESCRIPTIONS: Partial<Record<SignalCardId, string>> = {
   entitiesWithAlerts: 'Entities with at least one alert in the last 24h',
   entitiesWithAnomalies: 'Entities with at least one ML anomaly in the last 24h',
-  riskMovers: 'Entities whose risk score rose ≥10 points vs yesterday',
-  newlyHighCritical: 'Entities that crossed into High or Critical risk since yesterday',
   watchlisted: 'Entities on a watchlist with a risk score above zero',
-  newEntity: 'Entities first seen in the last 7 days with a risk score above zero',
+  // riskMovers, newlyHighCritical, newEntity descriptions are dynamic — driven by the selected time range from the page
 };
 
 const displayTitleFor = (card: SignalCardData): string => V3_CARD_TITLES[card.id] ?? card.title;

@@ -115,13 +115,13 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const { count: anomaliesCount, entityIds: anomaliesEntityIds, isLoading: anomaliesLoading } =
     useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId });
   const { count: watchlistedCount, entityIds: watchlistedEntityIds, isLoading: watchlistedLoading } =
-    useWatchlistedCount({ spaceId: resolvedSpaceId });
+    useWatchlistedCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
   const { count: newEntityCount, entityIds: newEntityEntityIds, isLoading: newEntityLoading } =
-    useNewEntityCount({ spaceId: resolvedSpaceId });
+    useNewEntityCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
   const { count: riskMoversCount, entityIds: riskMoversEntityIds, isLoading: riskMoversLoading } =
-    useRiskMoversCount({ spaceId: resolvedSpaceId });
+    useRiskMoversCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
   const { count: newlyHCCount, entityIds: newlyHCEntityIds, isLoading: newlyHCLoading } =
-    useNewlyHighCriticalCount({ spaceId: resolvedSpaceId });
+    useNewlyHighCriticalCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
     setActiveFilter((prev) =>
@@ -177,14 +177,20 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         id: 'riskMovers',
         title: 'Risk movers',
         value: riskMoversLoading ? 0 : riskMoversCount,
-        description: 'Entities whose risk score rose ≥10 points vs yesterday',
+        description:
+          timeRange === '24h'
+            ? 'Entities whose risk score rose ≥10 points vs yesterday'
+            : `Entities whose risk score rose ≥10 points vs the previous ${timeRange}`,
         filterLabel: 'Risk movers',
       },
       {
         id: 'newlyHighCritical',
         title: 'Newly high/critical',
         value: newlyHCLoading ? 0 : newlyHCCount,
-        description: 'Entities that crossed into High or Critical risk since yesterday',
+        description:
+          timeRange === '24h'
+            ? 'Entities that crossed into High or Critical risk since yesterday'
+            : `Entities that crossed into High or Critical risk in the last ${timeRange}`,
         filterLabel: 'Newly high/critical',
       },
       {
@@ -198,8 +204,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         id: 'newEntity',
         title: 'New entity',
         value: newEntityLoading ? 0 : newEntityCount,
-        description: 'Entities first seen in the last 7 days with a risk score above zero',
-        filterLabel: 'New entity (last 7 days)',
+        description: `Entities first seen in the last ${timeRange} with a risk score above zero`,
+        filterLabel: `New entity (last ${timeRange})`,
       },
     ],
     [
@@ -215,6 +221,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       watchlistedLoading,
       newEntityCount,
       newEntityLoading,
+      timeRange,
     ]
   );
 

@@ -12,16 +12,42 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { getEntitiesAlias, ENTITY_LATEST } from '../constants';
+import type { TimeRange } from '../use_time_range_param';
+import {
+  getEntityFilterESQL,
+  EMPTY_ENTITY_FILTERS,
+  type EntityFilters,
+} from '../use_entity_filters_param';
 
-export const useNewEntityCount = ({ spaceId, skip }: { spaceId: string; skip?: boolean }) => {
+const TIME_RANGE_TO_ESQL: Record<TimeRange, string> = {
+  '24h': '24 hours',
+  '7d': '7 days',
+  '30d': '30 days',
+};
+
+export const useNewEntityCount = ({
+  spaceId,
+  skip,
+  timeRange = '7d',
+  entityFilters = EMPTY_ENTITY_FILTERS,
+}: {
+  spaceId: string;
+  skip?: boolean;
+  timeRange?: TimeRange;
+  entityFilters?: EntityFilters;
+}) => {
   const { data } = useKibana().services;
   const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
 
   const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
-  const query = `FROM ${index}
-| WHERE entity.lifecycle.first_seen >= NOW() - 7 days AND entity.risk.calculated_score > 0
-| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`;
+  const parts = [
+    `FROM ${index}`,
+    `| WHERE entity.lifecycle.first_seen >= NOW() - ${TIME_RANGE_TO_ESQL[timeRange]} AND entity.risk.calculated_score > 0`,
+    ...getEntityFilterESQL(entityFilters),
+    `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
+    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,
+  ];
+  const query = parts.join('\n');
 
   const isEnabled =
     !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';

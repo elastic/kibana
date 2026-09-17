@@ -40,6 +40,20 @@ export const getEntityFilterTerms = (filters: EntityFilters): EntityFilterTerm[]
     terms: { [field]: filters[key] as string[] },
   }));
 
+export const getEntityFilterESQL = (filters: EntityFilters): string[] =>
+  FILTER_FIELDS.filter(([key]) => filters[key].length).map(([key, field]) => {
+    const quoted = (filters[key] as string[]).map((v) => `"${v}"`).join(', ');
+    return `| WHERE ${field} IN (${quoted})`;
+  });
+
+export const EMPTY_ENTITY_FILTERS: EntityFilters = {
+  entityTypes: [],
+  riskLevels: [],
+  assetCriticality: [],
+  watchlists: [],
+  dataSources: [],
+};
+
 interface EntityFiltersResult {
   entityFilters: EntityFilters;
   setEntityFilters: (filters: EntityFilters) => void;

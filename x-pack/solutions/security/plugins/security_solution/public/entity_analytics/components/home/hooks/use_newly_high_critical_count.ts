@@ -14,13 +14,23 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_critical_query';
+import type { TimeRange } from '../use_time_range_param';
+import {
+  getEntityFilterESQL,
+  EMPTY_ENTITY_FILTERS,
+  type EntityFilters,
+} from '../use_entity_filters_param';
 
 export const useNewlyHighCriticalCount = ({
   spaceId,
   skip,
+  timeRange = '24h',
+  entityFilters = EMPTY_ENTITY_FILTERS,
 }: {
   spaceId: string;
   skip?: boolean;
+  timeRange?: TimeRange;
+  entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
   const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
@@ -37,9 +47,14 @@ export const useNewlyHighCriticalCount = ({
   const query = useMemo(
     () =>
       resolvedIndex?.indexName
-        ? buildNewlyHighCriticalCountQuery(spaceId, resolvedIndex.indexName)
+        ? buildNewlyHighCriticalCountQuery(
+            spaceId,
+            resolvedIndex.indexName,
+            timeRange,
+            getEntityFilterESQL(entityFilters)
+          )
         : null,
-    [spaceId, resolvedIndex?.indexName]
+    [spaceId, resolvedIndex?.indexName, timeRange, entityFilters]
   );
 
   const {
