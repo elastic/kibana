@@ -158,16 +158,19 @@ export const runGoldenInvestigation = async (
     output.workflow_status = investigation.status;
     output.conversation_id = investigation.conversation_id ?? null;
     if (investigation.status !== 'completed') {
+      output.execution_error = investigation.error || `Investigation ${investigation.status}`;
+      // Workflow details enrich the primary error; their availability must not prevent evidence collection.
       const workflow = await fetch<WorkflowExecutionDto>(
         `/api/workflows/executions/${encodeURIComponent(investigationId)}`,
         { headers: { 'elastic-api-version': '2023-10-31' } }
-      );
-      output.workflow_status = workflow.status;
-      output.execution_error =
-        workflow.stepExecutions.find(({ stepId }) => stepId === 'investigate')?.error?.message ||
-        workflow.error?.message ||
-        investigation.error ||
-        `Investigation ${investigation.status}`;
+      ).catch(() => undefined);
+      if (workflow) {
+        output.workflow_status = workflow.status;
+        output.execution_error =
+          workflow.stepExecutions.find(({ stepId }) => stepId === 'investigate')?.error?.message ||
+          workflow.error?.message ||
+          output.execution_error;
+      }
     }
     const {
       summary,

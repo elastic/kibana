@@ -117,6 +117,67 @@ describe('structured final answer', () => {
 });
 
 describe('failed investigation evidence', () => {
+  it.each([
+    ['Workflow failed', 'Workflow failed'],
+    [undefined, 'Investigation failed'],
+  ])(
+    'retains report and conversation evidence when workflow details fail (error: %s)',
+    async (error, expectedError) => {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce({ investigation_id: 'investigation' })
+        .mockResolvedValueOnce({
+          status: 'failed',
+          conversation_id: 'conversation',
+          error,
+          conclusion: 'Partial investigation evidence',
+        })
+        .mockRejectedValueOnce(new Error('Workflow details unavailable'))
+        .mockResolvedValueOnce({
+          rounds: [
+            {
+              trace_id: 'task-trace',
+              steps: [
+                {
+                  type: ConversationRoundStepType.toolCall,
+                  tool_call_id: 'call',
+                  tool_id: 'bash',
+                  params: { command: 'echo synthetic' },
+                  results: [
+                    {
+                      tool_result_id: 'result',
+                      type: ToolResultType.other,
+                      data: { stdout: 'synthetic' },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
+      const result = await runGoldenInvestigation(fetch, {
+        input: { question: 'Investigate synthetic signal' },
+        output: { reference_answer: 'Synthetic cause' },
+        metadata: { langsmith_example_id: 'source', max_latency_seconds: 300, dataset_split: [] },
+      });
+      expect(result).toMatchObject({
+        investigation_id: 'investigation',
+        conversation_id: 'conversation',
+        workflow_status: 'failed',
+        execution_error: expectedError,
+        final_answer: expect.stringContaining('Partial investigation evidence'),
+        structured_report: { conclusion: 'Partial investigation evidence' },
+        traceId: 'task-trace',
+        total_tool_calls: 1,
+        failed_tool_calls: 0,
+      });
+      expect(result.trajectory).toHaveLength(3);
+      expect(fetch).toHaveBeenLastCalledWith('/api/agent_builder/conversations/conversation', {
+        headers: { 'elastic-api-version': '2023-10-31' },
+      });
+    }
+  );
+
   it('retains the investigate-step error and absent report when conversation retrieval also fails', async () => {
     const fetch = jest
       .fn()
