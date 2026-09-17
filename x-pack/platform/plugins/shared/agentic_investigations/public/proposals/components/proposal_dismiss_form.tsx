@@ -73,6 +73,7 @@ export const ProposalDismissForm = memo<ProposalDismissFormProps>(
           <EuiTextArea
             value={rationale}
             isInvalid={showError}
+            aria-required
             onBlur={() => setTouched(true)}
             onChange={(e) => onRationaleChange(e.target.value)}
             placeholder={i18n.translate(
