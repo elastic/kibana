@@ -82,6 +82,25 @@ describe('Collapsed mode', () => {
 
       /**
        * GIVEN the side navigation is in collapsed mode
+       * AND a primary menu item has static `sections` (not hover lists)
+       * WHEN I hover it
+       * THEN popover rows keep CSS ellipsis and the native title tooltip
+       */
+      it('(with submenu) should keep native title truncation on static popover rows', async () => {
+        render(<TestComponent isCollapsed items={basicMock.navItems} />);
+
+        await user.hover(screen.getByTestId(primaryItemId('apps_overview')));
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(popoverId('Apps'));
+        const row = within(popover).getByTestId(popoverItemId('apps_overview'));
+
+        expect(within(row).getByTitle('Overview')).toBeInTheDocument();
+        expect(within(row).queryByTestId('fullText')).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN the side navigation is in collapsed mode
        * AND a primary menu item with a submenu receives keyboard focus
        * THEN I should see a popover with the submenu
        */

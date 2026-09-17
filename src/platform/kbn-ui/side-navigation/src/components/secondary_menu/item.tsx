@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiTextTruncate, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -31,6 +31,7 @@ export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> 
   hasSubmenu?: boolean;
   href?: string;
   iconType?: IconType;
+  isContentItem?: boolean;
   isCurrent?: boolean;
   isHighlighted: boolean;
   isNew?: boolean;
@@ -49,6 +50,7 @@ export const SecondaryMenuItemComponent = ({
   href,
   iconType,
   id,
+  isContentItem = false,
   isCurrent,
   isExternal,
   isHighlighted,
@@ -94,23 +96,24 @@ export const SecondaryMenuItemComponent = ({
     gap: ${euiTheme.size.xs};
   `;
 
-  const getMaxWidth = () => {
-    const isInSidePanel = testSubjPrefix?.includes('sidePanel');
-    let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
-    // Secondary item label inside side panel (narrower)
-    if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
-    // Secondary item label + badge
-    if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
-    // Secondary item label + right arrow (More menu)
-    if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
-    return maxWidth;
-  };
+  const isInSidePanel = testSubjPrefix?.includes('sidePanel');
+  let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
+  // Secondary item label inside side panel (narrower)
+  if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
+  // Secondary item label + badge
+  if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
+  // Secondary item label + right arrow (More menu)
+  if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
 
   const labelTextStyles = css`
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    max-width: ${getMaxWidth()}px;
+    max-width: ${maxWidth}px;
+  `;
+
+  const truncatedLabelStyles = css`
+    max-width: ${maxWidth}px;
   `;
 
   /* Always show non-new badges. Show new ones if isNew check allows it
@@ -121,11 +124,23 @@ export const SecondaryMenuItemComponent = ({
     if (isNew) return <BetaBadge type="new" />;
   };
 
-  const content = (
-    <div css={labelAndBadgeStyles}>
+  const label =
+    isContentItem && typeof children === 'string' ? (
+      <EuiTextTruncate
+        text={children}
+        truncation="middle"
+        width={maxWidth}
+        css={truncatedLabelStyles}
+      />
+    ) : (
       <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
         {children}
       </span>
+    );
+
+  const content = (
+    <div css={labelAndBadgeStyles}>
+      {label}
       {getBadge()}
     </div>
   );

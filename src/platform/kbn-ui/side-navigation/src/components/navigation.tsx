@@ -224,6 +224,7 @@ export const Navigation = ({
                                     onClick={() => handleItemClick(subItem, closePopover)}
                                     testSubjPrefix={popoverItemPrefix}
                                     {...subItem}
+                                    isContentItem={popoverSections !== undefined}
                                   >
                                     {subItem.label}
                                   </SideNav.SecondaryMenu.Item>
@@ -435,6 +436,7 @@ export const Navigation = ({
                                     onClick={() => handleItemClick(subItem, closePopover)}
                                     {...subItem}
                                     testSubjPrefix={popoverFooterItemPrefix}
+                                    isContentItem={popoverSections !== undefined}
                                   >
                                     {subItem.label}
                                   </SideNav.SecondaryMenu.Item>
