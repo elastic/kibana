@@ -143,14 +143,15 @@ export class NightshiftInvestigationsPlugin
 
         // Start deps are read lazily: tools are registered in setup() but only run after start().
         const getSandboxStart = () => this.sandboxStart;
-        const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart }),
-          telemetryConnectorId,
-          logger: sandboxLogger,
-        });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
           getDeps: () => ({ actions: this.actionsStart }),
           logger: sandboxLogger.get('connector_credentials'),
+        });
+        const sandboxWorkspaceManager = createSandboxWorkspaceManager({
+          getDeps: () => ({ actions: this.actionsStart }),
+          telemetryConnectorId,
+          resolveConnectorCredentials,
+          logger: sandboxLogger,
         });
 
         plugins.agentBuilder.tools.register(

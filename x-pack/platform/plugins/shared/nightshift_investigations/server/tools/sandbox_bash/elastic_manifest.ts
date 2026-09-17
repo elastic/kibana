@@ -9,15 +9,29 @@ import type { Logger } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 
 /** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
-export const renderElasticManifest = (connectorId: string): string =>
-  [
+export const renderElasticManifest = (
+  connectorId: string,
+  auth: 'basic' | 'apiKey' = 'apiKey'
+): string => {
+  const curlAuth =
+    auth === 'basic'
+      ? '-u "$CONNECTOR_SECRET_USER:$CONNECTOR_SECRET_PASSWORD"'
+      : '-H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD"';
+  return [
     '# Elasticsearch telemetry',
     '',
     `Query this cluster by passing \`connector_id: "${connectorId}"\` to \`nightshift_sandbox_bash\`.`,
     'Credentials are not stored here: for that single command only, the environment contains',
     '',
     '- `CONNECTOR_CONFIG_URL` — Elasticsearch URL',
-    '- `CONNECTOR_SECRET_PASSWORD` — Elasticsearch API key, used as `Authorization: ApiKey <key>`',
+    ...(auth === 'basic'
+      ? [
+          '- `CONNECTOR_SECRET_USER` — Elasticsearch username',
+          '- `CONNECTOR_SECRET_PASSWORD` — Elasticsearch password, used with basic auth',
+        ]
+      : [
+          '- `CONNECTOR_SECRET_PASSWORD` — Elasticsearch API key, used as `Authorization: ApiKey <key>`',
+        ]),
     '',
     'Reference those variables directly and never hard-code their values. A command that omits',
     '`connector_id` gets no credentials and cannot reach Elasticsearch.',
@@ -26,25 +40,28 @@ export const renderElasticManifest = (connectorId: string): string =>
     '',
     '```bash',
     '# connector_id must be set on every one of these commands',
-    'curl -s -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
+    `curl -s ${curlAuth} \\`,
     '  -H "Content-Type: application/json" \\',
     '  "$CONNECTOR_CONFIG_URL/logs-*/_count"',
     '',
-    'curl -s -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
+    `curl -s ${curlAuth} \\`,
     '  -H "Content-Type: application/json" \\',
     '  "$CONNECTOR_CONFIG_URL/_query" \\',
     '  -d \'{"query":"FROM logs-* | WHERE @timestamp >= \\"2026-01-01T00:00:00Z\\" AND @timestamp < \\"2026-01-01T01:00:00Z\\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20"}\'',
     '```',
     '',
   ].join('\n');
+};
 
 export const writeElasticManifest = async ({
   session,
   connectorId,
+  auth,
   logger,
 }: {
   session: SandboxSession;
   connectorId: string;
+  auth?: 'basic' | 'apiKey';
   logger: Logger;
 }): Promise<void> => {
   logger.debug(`Writing Elasticsearch manifest`);
@@ -52,7 +69,7 @@ export const writeElasticManifest = async ({
   await session.writeFiles([
     {
       path: '/workspace/elastic.md',
-      content: Buffer.from(renderElasticManifest(connectorId), 'utf8'),
+      content: Buffer.from(renderElasticManifest(connectorId, auth), 'utf8'),
     },
   ]);
 };

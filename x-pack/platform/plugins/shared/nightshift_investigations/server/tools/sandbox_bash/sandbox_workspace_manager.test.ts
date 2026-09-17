@@ -8,6 +8,7 @@
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
+import type { ResolveConnectorCredentials } from './connector_credentials';
 import { createSandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 jest.mock('./connector_manifest', () => ({
@@ -220,6 +221,62 @@ describe('createSandboxWorkspaceManager', () => {
       ).resolves.toBeUndefined();
 
       expect(loggingSystemMock.collect(logger).warn).toHaveLength(1);
+    });
+
+    describe('manifest auth', () => {
+      const writeWithCredentials = async (
+        resolveConnectorCredentials: ResolveConnectorCredentials
+      ) => {
+        const callContext = createCallContext(['elasticsearch-telemetry']);
+        await createSandboxWorkspaceManager({
+          getDeps: () => ({}),
+          telemetryConnectorId: 'elasticsearch-telemetry',
+          resolveConnectorCredentials,
+          logger,
+        }).ensureWorkspaceReady({ session: createSessionMock(true), callContext });
+        return callContext;
+      };
+
+      it('documents basic auth when the connector resolves a user and password', async () => {
+        const resolveConnectorCredentials = jest.fn().mockResolvedValue({
+          env: { CONNECTOR_SECRET_USER: 'reader', CONNECTOR_SECRET_PASSWORD: 'changeme' },
+          secretValues: ['changeme'],
+        });
+
+        const callContext = await writeWithCredentials(resolveConnectorCredentials);
+
+        expect(resolveConnectorCredentials).toHaveBeenCalledWith(
+          'elasticsearch-telemetry',
+          callContext
+        );
+        expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+          expect.objectContaining({ auth: 'basic' })
+        );
+        expect(JSON.stringify(mockWriteElasticManifest.mock.calls)).not.toContain('changeme');
+      });
+
+      it('documents API-key auth when the connector resolves only a password', async () => {
+        await writeWithCredentials(
+          jest.fn().mockResolvedValue({
+            env: { CONNECTOR_SECRET_PASSWORD: 'encoded-key' },
+            secretValues: ['encoded-key'],
+          })
+        );
+
+        expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+          expect.objectContaining({ auth: 'apiKey' })
+        );
+      });
+
+      it('falls back to API-key auth when the connector cannot be resolved', async () => {
+        await writeWithCredentials(
+          jest.fn().mockResolvedValue({ errorMessage: 'not assigned to this agent' })
+        );
+
+        expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+          expect.objectContaining({ auth: 'apiKey' })
+        );
+      });
     });
   });
 });
