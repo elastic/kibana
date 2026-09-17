@@ -717,6 +717,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await sourceDataViewOption.click();
 
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === `DATA VIEW\n${SOURCE_DATA_VIEW}`;
+      });
+
       await testSubjects.click('rulePageFooterSaveButton');
 
       await retry.waitFor('confirmation modal', async () => {

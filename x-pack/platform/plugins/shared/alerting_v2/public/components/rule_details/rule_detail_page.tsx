@@ -33,7 +33,7 @@ import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyou
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useBulkUpdateRuleApiKey } from '../../hooks/use_bulk_update_rule_api_key';
 import { useRunRule } from '../../hooks/use_run_rule';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { useRuleChangeHistoryModal } from '../rule/modals/change_history';
 import { getRuleDetailMenu } from './get_rule_detail_menu';
@@ -74,6 +74,8 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const rule = useRule();
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { euiTheme } = useEuiTheme();
+  const { rulesLocators } = useAlertingLocators();
+  const rulesListHref = rulesLocators.useUrl({});
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const chrome = useService(CoreStart('chrome'));
@@ -223,7 +225,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       <AppHeader
         title={rule.metadata.name}
         back={{
-          href: paths.ruleList,
+          href: rulesListHref,
           label: i18n.translate('xpack.alertingV2.ruleDetails.header.backToRulesLabel', {
             defaultMessage: 'Rules',
           }),

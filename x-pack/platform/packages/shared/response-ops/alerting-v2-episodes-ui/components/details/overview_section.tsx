@@ -20,12 +20,14 @@ export interface AlertEpisodeOverviewSectionProps {
     AlertEpisodeDetailsServices,
     'data' | 'http' | 'expressions' | 'spaces' | 'uiSettings' | 'userProfile' | 'dataViews'
   >;
+  getRuleDetailsHref: (ruleId: string) => string;
 }
 
 export const AlertEpisodeOverviewSection = ({
   episodeId,
   groupHash,
   services,
+  getRuleDetailsHref,
 }: AlertEpisodeOverviewSectionProps) => (
   <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
     <AlertEpisodeOverviewListSection
@@ -35,6 +37,10 @@ export const AlertEpisodeOverviewSection = ({
     />
     <AlertEpisodeTrendChartSection episodeId={episodeId} services={services} />
     <AlertEpisodeTimelineHeatmapsSection episodeId={episodeId} services={services} />
-    <AlertEpisodeRuleOverviewPanelSection episodeId={episodeId} services={services} />
+    <AlertEpisodeRuleOverviewPanelSection
+      episodeId={episodeId}
+      services={services}
+      getRuleDetailsHref={getRuleDetailsHref}
+    />
   </EuiFlexGroup>
 );

@@ -36,7 +36,7 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
-  const { attachments, resetAttachments, browserApiTools, isEmbeddedContext } =
+  const { attachments, resetAttachments, browserApiTools, isEmbeddedContext, onSubmit } =
     useConversationContext();
   const { selectedConnector: connectorId } = useConnectorSelection();
   const { navigateToAgentBuilderUrl } = useNavigation();
@@ -74,7 +74,6 @@ export const useConversationStream = () => {
   const isResponseLoading =
     isMyStreamActive && (isLastRoundInProgress || myStream?.type === 'resume');
   const isResuming = isMyStreamActive && myStream?.type === 'resume';
-  const isRegenerating = isMyStreamActive && myStream?.type === 'regenerate';
 
   const sendMessage = useCallback(
     ({
@@ -87,6 +86,7 @@ export const useConversationStream = () => {
       if (!agentId) {
         throw new Error('agentId is required to send a message');
       }
+      onSubmit?.();
       mutateSendMessage({
         message,
         conversationId: targetConversationId,
@@ -108,34 +108,11 @@ export const useConversationStream = () => {
       conversation?.attachments,
       resetAttachments,
       browserApiTools,
+      onSubmit,
       isEmbeddedContext,
       resetToNewConversation,
     ]
   );
-
-  const regenerate = useCallback(() => {
-    if (!conversationId) {
-      throw new Error('Cannot regenerate without a conversation id');
-    }
-    if (!agentId) {
-      throw new Error('agentId is required to regenerate');
-    }
-    mutateSendMessage({
-      action: 'regenerate',
-      conversationId,
-      agentId,
-      connectorId,
-      conversationAttachments: conversation?.attachments,
-      browserApiTools,
-    });
-  }, [
-    mutateSendMessage,
-    conversationId,
-    agentId,
-    connectorId,
-    conversation?.attachments,
-    browserApiTools,
-  ]);
 
   const resumeRound = useCallback(
     ({ prompts }: { prompts: Record<string, PromptResponse> }) => {
@@ -182,14 +159,12 @@ export const useConversationStream = () => {
   return useMemo(
     () => ({
       sendMessage,
-      regenerate,
       resumeRound,
       retry,
       cancel,
       removeError,
       isResponseLoading,
       isResuming,
-      isRegenerating,
       pendingMessage: record.pendingMessage,
       error: record.error,
       errorSteps: record.errorSteps,
@@ -201,14 +176,12 @@ export const useConversationStream = () => {
     }),
     [
       sendMessage,
-      regenerate,
       resumeRound,
       retry,
       cancel,
       removeError,
       isResponseLoading,
       isResuming,
-      isRegenerating,
       record.pendingMessage,
       record.error,
       record.errorSteps,

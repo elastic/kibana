@@ -12,8 +12,8 @@ import {
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
-  clientTypes as defaultClientTypes,
 } from '@kbn/connector-specs';
+import { clientTypes as defaultClientTypes } from '@kbn/connector-specs/server';
 import type {
   ActionContext,
   ClientTypeSpec,
