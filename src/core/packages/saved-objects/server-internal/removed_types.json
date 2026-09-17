@@ -24,6 +24,7 @@
   "server",
   "siem-detection-engine-rule-execution-info",
   "siem-detection-engine-rule-status",
+  "stream-prompts",
   "streams-significant-events-settings",
   "timelion-sheet",
   "tsvb-validation-telemetry",

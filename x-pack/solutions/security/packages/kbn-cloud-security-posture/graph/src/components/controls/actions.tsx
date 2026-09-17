@@ -84,6 +84,9 @@ export interface ActionsProps extends CommonProps {
    */
   onInvestigateInTimeline?: () => void;
 
+  /** Whether the origin event filters are unavailable. */
+  investigateInTimelineDisabled?: boolean;
+
   /**
    * Whether search is toggled or not. Defaults value is false.
    */
@@ -100,6 +103,7 @@ export const Actions = ({
   showToggleSearch = true,
   showInvestigateInTimeline = true,
   onInvestigateInTimeline,
+  investigateInTimelineDisabled = false,
   onSearchToggle,
   searchFilterCounter = 0,
   searchToggled,
@@ -232,6 +236,7 @@ export const Actions = ({
           >
             <EuiButtonIcon
               iconType="timeline"
+              isDisabled={investigateInTimelineDisabled}
               display="base"
               size="m"
               aria-label={investigateInTimelineTooltip}

@@ -57,7 +57,7 @@ import {
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
-  InvestigationSubjectMissingError,
+  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from './errors';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
@@ -146,6 +146,7 @@ const isInvestigationWorkflowExecution = (execution: {
 
 interface ExecutionInvestigationMetadata {
   subject?: InvestigationSubject;
+  title?: string;
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
 }
@@ -184,6 +185,7 @@ const toSubject = ({
  */
 const LIST_INVESTIGATION_ITEM_FIELDS = {
   investigation_id: [],
+  title: ['title'],
   status: ['status'],
   created_at: ['created_at'],
   started_at: ['started_at'],
@@ -207,6 +209,7 @@ type ListInvestigationRecord = ProjectedInvestigationRecord<
 
 const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
+  title: record.title,
   status: record.status,
   created_at: record.created_at,
   started_at: record.started_at,
@@ -256,6 +259,8 @@ const parseExecutionInvestigationMetadata = (
 
   return {
     subject: recoverSubjectFromInput(inputs),
+    // A required workflow input, so the engine has already rejected a run without one.
+    title: asString(inputs?.title),
     triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
     concurrencyKey,
   };
@@ -384,6 +389,7 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    title,
     trigger_type,
     message,
     stream_names,
@@ -442,6 +448,7 @@ export class NightshiftInvestigationsClient {
 
     const inputs = {
       message: prepared.message,
+      title,
       stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
@@ -468,6 +475,7 @@ export class NightshiftInvestigationsClient {
     await this.create({
       investigationId: executionId,
       subject: resolvedSubject,
+      title,
       triggerType: trigger_type,
       concurrencyKey: concurrency_key,
     }).catch((error) => {
@@ -487,11 +495,13 @@ export class NightshiftInvestigationsClient {
   async create({
     investigationId,
     subject,
+    title,
     triggerType,
     concurrencyKey,
   }: {
     investigationId: string;
     subject: InvestigationSubject;
+    title: string;
     triggerType: InvestigationTriggerType;
     concurrencyKey?: string;
   }): Promise<void> {
@@ -502,6 +512,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'pending',
         ...toSubjectFields(subject),
         trigger_type: triggerType,
@@ -560,12 +571,12 @@ export class NightshiftInvestigationsClient {
       return;
     }
 
-    const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
+    const { subject, title, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
       execution.context
     );
 
-    if (!subject) {
-      throw new InvestigationSubjectMissingError(investigationId);
+    if (!subject || !title) {
+      throw new InvestigationMetadataMissingError(investigationId);
     }
 
     if (concurrencyKey) {
@@ -575,6 +586,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'running',
         ...toSubjectFields(subject),
         trigger_type: triggerType,
