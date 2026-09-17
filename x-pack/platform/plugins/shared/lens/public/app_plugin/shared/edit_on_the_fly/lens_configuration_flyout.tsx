@@ -395,21 +395,24 @@ export function LensEditConfigurationFlyout({
   }, [activeVisualization, visualization.state]);
 
   // Suggestions are single-layer: applying one would silently drop the other
-  // layers (e.g. annotations, reference lines), so hide the panel for
-  // multi-layer ES|QL charts edited via layer tabs. Hidden layers (e.g. the
+  // layers (e.g. annotations, reference lines), so show the panel only for
+  // single-layer ES|QL charts edited via layer tabs. Hidden layers (e.g. the
   // metric trendline) do not render as tabs and must not count here.
-  const visibleLayerCount = useMemo(() => {
+  const hasMultipleVisibleLayers = useMemo(() => {
     if (!activeVisualization || !visualization.state) {
-      return 0;
+      return false;
     }
-    return getVisibleLayerIds({
-      activeVisualization,
-      visualizationState: visualization.state,
-      framePublicAPI,
-      layerIds,
-    }).length;
+
+    return (
+      getVisibleLayerIds({
+        activeVisualization,
+        visualizationState: visualization.state,
+        framePublicAPI,
+        layerIds,
+      }).length > 1
+    );
   }, [activeVisualization, framePublicAPI, layerIds, visualization.state]);
-  const hideSuggestionsForMultiLayerEsql = textBasedMode && visibleLayerCount > 1;
+  const showSuggestions = !textBasedMode || !hasMultipleVisibleLayers;
 
   const showConvertToEsqlButton = useMemo(() => {
     return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;
@@ -673,7 +676,7 @@ export function LensEditConfigurationFlyout({
               </EuiAccordion>
             </EuiFlexItem>
 
-            {!hideSuggestionsForMultiLayerEsql && (
+            {showSuggestions && (
               <EuiFlexItem
                 grow={isSuggestionsAccordionOpen ? 1 : false}
                 data-test-subj="InlineEditingSuggestions"
