@@ -14,18 +14,19 @@ const getActiveInputs = (
   service: AwsServiceMatrixEntry,
   stored: ServiceVars | undefined
 ): string[] => {
+  // A stored empty selection is the user explicitly disabling every data
+  // stream (see useServiceSettings) — contribute no inputs. Only an absent
+  // value falls back to the service defaults.
+  if (stored && stored.enabledDataStreams.length === 0) {
+    return [];
+  }
   const serviceVars: ServiceVars = stored ?? {
     enabledDataStreams: service.dataStreams.length > 0 ? service.dataStreams : [service.id],
     varsByDataStream: {},
   };
 
   const inputs = new Set<string>();
-  const activeDataStreams =
-    serviceVars.enabledDataStreams.length > 0
-      ? serviceVars.enabledDataStreams
-      : service.dataStreams.length > 0
-      ? service.dataStreams
-      : [service.id];
+  const activeDataStreams = serviceVars.enabledDataStreams;
 
   for (const dsId of activeDataStreams) {
     const dsInfo = service.varDefsByDataStream?.[dsId];

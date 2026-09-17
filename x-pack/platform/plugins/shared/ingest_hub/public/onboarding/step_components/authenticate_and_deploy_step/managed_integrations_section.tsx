@@ -92,16 +92,23 @@ export function ManagedIntegrationsSection({
   );
 
   useEffect(() => {
-    if (!showIdentityFederation && preferredMethod === 'identity_federation') {
-      setPreferredMethod('access_keys');
-    }
-  }, [showIdentityFederation, preferredMethod]);
-
-  useEffect(() => {
     if (isDone) setIsOpen(false);
   }, [isDone]);
 
   const [isDeployReady, setIsDeployReady] = useState(false);
+
+  useEffect(() => {
+    if (!showIdentityFederation && preferredMethod === 'identity_federation') {
+      // Mirror the manual switch to Access Keys. Federation can become
+      // unavailable after this step rendered (resolve coverage arrives
+      // asynchronously), and a connector chosen for it must not survive into
+      // deploy — useDeploy selects the identity-federation path whenever a
+      // connectorId is set.
+      setPreferredMethod('access_keys');
+      setIsDeployReady(false);
+      setConnectorId(undefined);
+    }
+  }, [showIdentityFederation, preferredMethod, setConnectorId]);
 
   const handleStaticKeysChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
