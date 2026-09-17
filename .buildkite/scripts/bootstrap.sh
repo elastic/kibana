@@ -78,7 +78,8 @@ if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   rm -rf node_modules
 
   echo "--- pnpm install and bootstrap, attempt 2"
-  pnpm kbn bootstrap --force-install "${BOOTSTRAP_PARAMS[@]}"
+  BOOTSTRAP_PARAMS+=(--force-install)
+  pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
