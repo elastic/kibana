@@ -14,14 +14,16 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { DataStreamField } from './data_stream_field';
 
+const dataStreamIndex = {
+  name: 'logs-genai-default',
+  tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
+  item: { name: 'logs-genai-default' },
+};
+
 const renderField = (
   props: React.ComponentProps<typeof DataStreamField>,
   getIndices = jest.fn().mockResolvedValue([
-    {
-      name: 'logs-genai-default',
-      tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
-      item: { name: 'logs-genai-default' },
-    },
+    dataStreamIndex,
     {
       name: 'metrics-foo',
       tags: [{ key: 'index', name: 'Index', color: 'default' }],
@@ -43,19 +45,26 @@ const renderField = (
   );
 };
 
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+}
+
+const createDeferred = <T,>(): Deferred<T> => {
+  let resolve: (value: T) => void = () => undefined;
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+};
+
 describe('DataStreamField', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('loads data streams from the cluster and calls onChange when one is selected', async () => {
-    const getIndices = jest.fn().mockResolvedValue([
-      {
-        name: 'logs-genai-default',
-        tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
-        item: { name: 'logs-genai-default' },
-      },
-    ]);
+    const getIndices = jest.fn().mockResolvedValue([dataStreamIndex]);
     const onChange = jest.fn();
     renderField({ value: undefined, onChange }, getIndices);
 
@@ -79,12 +88,95 @@ describe('DataStreamField', () => {
     expect(onChange).toHaveBeenCalledWith({ type: 'index', value: 'logs-genai-default' });
   });
 
-  it('shows a validation error for an invalid custom data stream name', async () => {
-    const onChange = jest.fn();
-    renderField({ value: { type: 'index', value: 'bad index' }, onChange });
+  it('shows a translated load error when getIndices rejects', async () => {
+    const getIndices = jest.fn().mockRejectedValue(new Error('cluster exploded'));
+    renderField({ value: undefined, onChange: jest.fn() }, getIndices);
 
-    expect(
-      screen.getByText('Must be a valid Elasticsearch index, data stream, alias, or pattern name.')
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Unable to load data streams.')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('cluster exploded')).not.toBeInTheDocument();
+  });
+
+  it('does not apply a stale getIndices response after a newer request', async () => {
+    const first = createDeferred<Array<typeof dataStreamIndex>>();
+    const second = createDeferred<Array<typeof dataStreamIndex>>();
+    let callCount = 0;
+    const getIndices = jest.fn().mockImplementation(() => {
+      callCount += 1;
+      return callCount === 1 ? first.promise : second.promise;
+    });
+
+    renderField({ value: undefined, onChange: jest.fn() }, getIndices);
+
+    await waitFor(() => {
+      expect(getIndices).toHaveBeenCalledTimes(1);
+    });
+
+    fireEvent.change(screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input')!, {
+      target: { value: 'logs' },
+    });
+
+    await waitFor(
+      () => {
+        expect(getIndices).toHaveBeenCalledTimes(2);
+      },
+      { timeout: 2000 }
+    );
+
+    second.resolve([
+      {
+        name: 'logs-newer',
+        tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
+        item: { name: 'logs-newer' },
+      },
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByText('logs-newer')).toBeInTheDocument();
+    });
+
+    first.resolve([
+      {
+        name: 'stale-stream',
+        tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
+        item: { name: 'stale-stream' },
+      },
+    ]);
+
+    await waitFor(() => {
+      expect(screen.queryByText('stale-stream')).not.toBeInTheDocument();
+    });
+    expect(screen.getByText('logs-newer')).toBeInTheDocument();
+  });
+
+  it('does not call onChange when creating an empty custom option', async () => {
+    const onChange = jest.fn();
+    renderField({ value: undefined, onChange });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextTraceDataStreamComboBox')).toBeInTheDocument();
+    });
+
+    const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input')!;
+    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('calls onChange when creating a valid custom option', async () => {
+    const onChange = jest.fn();
+    renderField({ value: undefined, onChange });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextTraceDataStreamComboBox')).toBeInTheDocument();
+    });
+
+    const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input')!;
+    fireEvent.change(input, { target: { value: 'logs-custom-valid' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onChange).toHaveBeenCalledWith({ type: 'index', value: 'logs-custom-valid' });
   });
 });

@@ -35,6 +35,9 @@ const toTrace = (aiIndex: GetAiIndexResponse | undefined): AiIndexTrace | undefi
   return trace ? { type: trace.type, value: trace.value } : undefined;
 };
 
+const isTraceSaveable = (trace: AiIndexTrace | undefined): boolean =>
+  trace !== undefined && trace.value.trim().length > 0;
+
 export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPanelProps) => {
   const { saveTraces, isSaving } = useSaveAiIndexTraces();
   const { agents } = useAgentBuilderAgents();
@@ -42,21 +45,40 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
   const [draft, setDraft] = useState<AiIndexTrace | undefined>();
 
   const currentTrace = useMemo(() => toTrace(aiIndex), [aiIndex]);
+  const isDraftSaveable = useMemo(() => isTraceSaveable(draft), [draft]);
+  const isEsqlTrace = currentTrace?.type === 'esql';
 
   const startEditing = () => {
     setDraft(currentTrace);
     setIsEditing(true);
   };
 
-  const handleSave = async () => {
+  const handleCancel = () => {
+    setDraft(undefined);
+    setIsEditing(false);
+  };
+
+  const persistTrace = async (trace: AiIndexTrace | undefined) => {
     if (!aiIndex) {
       return;
     }
-    const saved = await saveTraces(aiIndex, draft);
+    const saved = await saveTraces(aiIndex, trace);
     if (saved) {
+      setDraft(undefined);
       setIsEditing(false);
       onSaved();
     }
+  };
+
+  const handleSave = async () => {
+    if (!isDraftSaveable) {
+      return;
+    }
+    await persistTrace(draft);
+  };
+
+  const handleRemove = async () => {
+    await persistTrace(undefined);
   };
 
   const readOnlyContent = useMemo(() => {
@@ -86,6 +108,16 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
       );
     }
 
+    if (currentTrace.type === 'esql') {
+      return (
+        <FormattedMessage
+          id="xpack.contextEngine.aiIndexDetail.traces.esqlValueLabel"
+          defaultMessage="ES|QL query: {value}"
+          values={{ value: currentTrace.value }}
+        />
+      );
+    }
+
     return currentTrace.value;
   }, [agents, currentTrace]);
 
@@ -97,7 +129,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             <h2>
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.title"
-                defaultMessage="Agent Traces"
+                defaultMessage="Agent traces"
               />
             </h2>
           </EuiTitle>
@@ -111,7 +143,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             </p>
           </EuiText>
         </EuiFlexItem>
-        {!isEditing && !isManaged && !isLoading && (
+        {!isEditing && !isManaged && !isLoading && !isEsqlTrace && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
@@ -136,9 +168,24 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
           <TraceSelector value={draft} onChange={setDraft} />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            {currentTrace !== undefined && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="danger"
+                  onClick={handleRemove}
+                  isDisabled={isSaving}
+                  data-test-subj="contextTracesRemoveButton"
+                >
+                  <FormattedMessage
+                    id="xpack.contextEngine.aiIndexDetail.traces.removeButton"
+                    defaultMessage="Remove trace"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancel}
                 isDisabled={isSaving}
                 data-test-subj="contextTracesCancelButton"
               >
@@ -154,6 +201,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
                 size="s"
                 onClick={handleSave}
                 isLoading={isSaving}
+                isDisabled={!isDraftSaveable}
                 data-test-subj="contextTracesSaveButton"
               >
                 <FormattedMessage

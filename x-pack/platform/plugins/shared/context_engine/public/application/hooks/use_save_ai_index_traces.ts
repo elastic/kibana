@@ -16,10 +16,13 @@ import { toProperties, useSaveAiIndexField } from './use_save_ai_index_field';
 const buildProperties = (
   aiIndex: GetAiIndexResponse,
   trace: AiIndexTrace | undefined
-): AiIndexProperties => ({
-  ...toProperties(aiIndex),
-  traces: trace ? [trace] : [],
-});
+): AiIndexProperties => {
+  const { traces: existingTraces, ...rest } = toProperties(aiIndex);
+  return {
+    ...rest,
+    traces: trace ? [trace, ...existingTraces.slice(1)] : existingTraces.slice(1),
+  };
+};
 
 export const useSaveAiIndexTraces = () => {
   const { save, isSaving } = useSaveAiIndexField<AiIndexTrace | undefined>({

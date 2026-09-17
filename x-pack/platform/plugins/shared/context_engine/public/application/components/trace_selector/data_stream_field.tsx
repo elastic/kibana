@@ -8,9 +8,8 @@
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AiIndexTrace } from '../../../../common/http_api/ai_indices';
-import { validateAiIndexTraceIndexName } from '../../../../common/validation';
 import { useKibana } from '../../hooks/use_kibana';
 
 interface DataStreamFieldProps {
@@ -33,10 +32,11 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | undefined>(undefined);
+  // Ignore stale getIndices responses when a newer debounced search starts before the prior one settles.
+  const requestIdRef = useRef(0);
 
   const selectedValue = value?.type === 'index' ? value.value : undefined;
-  const validationError =
-    selectedValue !== undefined ? validateAiIndexTraceIndexName(selectedValue) : undefined;
 
   const selectedOptions = useMemo(() => {
     if (selectedValue === undefined) {
@@ -47,6 +47,7 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
 
   const loadOptions = useCallback(
     async (search: string) => {
+      const requestId = ++requestIdRef.current;
       setIsLoading(true);
       try {
         const pattern = search.length > 0 ? `${search}*` : '*';
@@ -54,13 +55,29 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
           pattern,
           isRollupIndex: () => false,
         });
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
         setOptions(
           matches
             .filter((item) => isDataStreamMatch(item.tags))
             .map((item) => ({ label: item.name, value: item.name }))
         );
+        setLoadError(undefined);
+      } catch {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+        setOptions([]);
+        setLoadError(
+          i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.loadError', {
+            defaultMessage: 'Unable to load data streams.',
+          })
+        );
       } finally {
-        setIsLoading(false);
+        if (requestId === requestIdRef.current) {
+          setIsLoading(false);
+        }
       }
     },
     [dataViews]
@@ -77,9 +94,10 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
 
   const handleCreateOption = (search: string) => {
     const trimmed = search.trim();
-    if (trimmed.length > 0) {
-      onChange({ type: 'index', value: trimmed });
+    if (trimmed.length === 0) {
+      return false;
     }
+    onChange({ type: 'index', value: trimmed });
   };
 
   return (
@@ -89,14 +107,14 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
       })}
       helpText={i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.helpText', {
         defaultMessage:
-          'Data streams carrying OTel GenAI spans from external harnesses — LangChain, LlamaIndex, the OpenAI SDK.',
+          'Data streams carrying OTel GenAI spans from external harnesses such as LangChain, LlamaIndex, or the OpenAI SDK.',
       })}
-      error={validationError}
-      isInvalid={validationError !== undefined}
+      error={loadError}
+      isInvalid={loadError !== undefined}
       fullWidth
     >
       <EuiComboBox
-        isInvalid={validationError !== undefined}
+        isInvalid={loadError !== undefined}
         singleSelection={{ asPlainText: true }}
         fullWidth
         async
@@ -106,7 +124,13 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
         onChange={handleChange}
         onSearchChange={setSearchValue}
         onCreateOption={handleCreateOption}
-        customOptionText="Add {searchValue} as a data stream"
+        customOptionText={i18n.translate(
+          'xpack.contextEngine.traceSelector.dataStreamField.customOptionText',
+          {
+            defaultMessage: 'Add {searchValue} as a data stream',
+            values: { searchValue: '{searchValue}' },
+          }
+        )}
         placeholder={i18n.translate(
           'xpack.contextEngine.traceSelector.dataStreamField.placeholder',
           {

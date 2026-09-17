@@ -66,4 +66,41 @@ describe('ElasticAgentField', () => {
       'Loyalty Support Agent'
     );
   });
+
+  it('renders a translated load error instead of the raw error message', () => {
+    mockUseAgentBuilderAgents.mockReturnValue({
+      agents: [],
+      isLoading: false,
+      error: new Error('upstream exploded with secrets'),
+    });
+
+    renderField({ value: undefined, onChange: jest.fn() });
+
+    expect(screen.getByText('Unable to load Agent Builder agents.')).toBeInTheDocument();
+    expect(screen.queryByText('upstream exploded with secrets')).not.toBeInTheDocument();
+  });
+
+  it('renders an empty agent list without crashing', () => {
+    mockUseAgentBuilderAgents.mockReturnValue({
+      agents: [],
+      isLoading: false,
+      error: undefined,
+    });
+
+    renderField({ value: undefined, onChange: jest.fn() });
+
+    expect(screen.getByTestId('contextTraceAgentComboBox')).toBeInTheDocument();
+  });
+
+  it('calls onChange(undefined) when the selection is cleared', () => {
+    const onChange = jest.fn();
+    renderField({
+      value: { type: 'elastic_agent', value: 'agent-1' },
+      onChange,
+    });
+
+    fireEvent.click(screen.getByTestId('comboBoxClearButton'));
+
+    expect(onChange).toHaveBeenCalledWith(undefined);
+  });
 });
