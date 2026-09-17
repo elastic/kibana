@@ -49,7 +49,22 @@ const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
   accessControl: schema.maybe(
     schema.object({
       owner: schema.string(),
-      accessMode: schema.oneOf([schema.literal('write_restricted'), schema.literal('default')]),
+      accessMode: schema.oneOf([
+        schema.literal('write_restricted'),
+        schema.literal('default'),
+        schema.literal('private'),
+      ]),
+      entries: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            type: schema.literal('user'),
+            id: schema.string(),
+            role: schema.string(),
+            added_at: schema.string(),
+          }),
+          { maxSize: 100 }
+        )
+      ),
     })
   ),
   attributes: schema.recordOf(schema.string(), schema.maybe(schema.any())),

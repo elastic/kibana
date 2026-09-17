@@ -109,7 +109,10 @@ export const performCreate = async <T>(
 
   const accessMode = options.accessControl?.accessMode;
   const typeSupportsAccessControl = registry.supportsAccessControl(type);
-  let accessControlToWrite: SavedObjectAccessControl | undefined;
+  // An overwrite must preserve the access control of the object it replaces, even when the caller
+  // bypasses the security extension and authorizes the write itself (as the actions plugin does).
+  let accessControlToWrite: SavedObjectAccessControl | undefined =
+    preflightResult?.existingDocument?._source?.accessControl;
   if (securityExtension) {
     if (!typeSupportsAccessControl && accessMode) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -123,7 +126,7 @@ export const performCreate = async <T>(
       );
     }
     accessControlToWrite =
-      preflightResult?.existingDocument?._source?.accessControl ??
+      accessControlToWrite ??
       setAccessControl({
         typeSupportsAccessControl,
         createdBy,

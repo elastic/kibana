@@ -33,6 +33,18 @@ export {
   hasMustacheTemplate,
   withoutMustacheTemplate,
 } from './mustache_template';
+export type {
+  ConnectorAccessControlApiResponse,
+  ConnectorAccessPermissions,
+  ConnectorAccessResponse,
+  ConnectorAccessRole,
+  ConnectorAccessUserProfile,
+} from './access_control';
+export {
+  CONNECTOR_ACCESS_CONTROL_API_PATH,
+  CONNECTOR_ACCESS_ROLES,
+  connectorAccessControlSchema,
+} from './access_control';
 export type { ValidateEmailAddressesOptions } from './validate_email_addresses';
 export {
   validateEmailAddressesAsAlwaysValid,

@@ -10,7 +10,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectAccessControl } from '@kbn/core/server';
 import { omit } from 'lodash';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { InMemoryConnector } from '../../../..';
@@ -19,6 +19,7 @@ import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
+import { filterAccessibleConnectors } from '../../../../lib/connector_access_control';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
@@ -32,6 +33,10 @@ interface GetAllHelperOpts {
   namespace?: string;
   savedObjectsClient: SavedObjectClientForFind;
   connectorTypeRegistry: ActionTypeRegistry;
+  /** Hides connectors the current user cannot access. Omitted for unsecured, request-less callers. */
+  filterByAccessControl?: <T extends { id: string; accessControl?: SavedObjectAccessControl }>(
+    connectors: T[]
+  ) => Promise<T[]>;
 }
 
 export async function getAll({
@@ -60,6 +65,7 @@ export async function getAll({
     logger: context.logger,
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     connectorTypeRegistry: context.actionTypeRegistry,
+    filterByAccessControl: (connectors) => filterAccessibleConnectors(context, connectors),
   });
 }
 
@@ -96,10 +102,14 @@ async function getAllHelper({
   namespace,
   savedObjectsClient,
   connectorTypeRegistry,
+  filterByAccessControl,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
-  const savedObjectsActions = (
-    await findConnectorsSo({ savedObjectsClient, namespace })
-  ).saved_objects.map((rawAction) => {
+  const foundConnectors = (await findConnectorsSo({ savedObjectsClient, namespace })).saved_objects;
+  const accessibleConnectors = filterByAccessControl
+    ? await filterByAccessControl(foundConnectors)
+    : foundConnectors;
+
+  const savedObjectsActions = accessibleConnectors.map((rawAction) => {
     const connector = connectorFromSavedObject(
       rawAction,
       isConnectorDeprecated(rawAction.attributes),

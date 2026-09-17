@@ -13,5 +13,10 @@ export { deleteActions } from './delete';
 export { executeAction } from './execute';
 export { updateActionConnector } from './update';
 export { rotateInboundIngress } from './rotate_inbound_ingress';
+export {
+  loadConnectorAccessControl,
+  suggestConnectorUserProfiles,
+  updateConnectorAccessControl,
+} from './access_control';
 export { checkConnectorIdAvailability } from './check_connector_id';
 export { getSkippedPreconfiguredConnectorIds } from './get_skipped_preconfigured_connector_ids';

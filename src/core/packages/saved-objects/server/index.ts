@@ -176,6 +176,7 @@ export type {
 export type {
   SavedObject,
   SavedObjectAccessControl,
+  SavedObjectAccessControlEntry,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,

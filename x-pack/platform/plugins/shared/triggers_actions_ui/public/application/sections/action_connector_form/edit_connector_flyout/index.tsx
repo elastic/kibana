@@ -44,6 +44,7 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { getSpecConnectorTestExecutionParams } from '../../../lib/get_spec_connector_test_execution_params';
 import { TestConnectorForm } from '../test_connector_form';
 import { ConnectorRulesList } from '../connector_rules_list';
+import { ConnectorAccess } from '../connector_access';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
@@ -246,6 +247,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
   const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
+  // Preconfigured and system connectors are not saved objects, so they carry no access control.
+  const hideAccessTab = !!connector.isPreconfigured || !!connector.isSystemAction;
 
   const inboundSettingsContent = useMemo(() => {
     if (!isInboundIngressConnector(connector)) {
@@ -514,6 +517,10 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     return <ConnectorRulesList connector={connector} />;
   }, [connector]);
 
+  const renderAccessTab = useCallback(() => {
+    return <ConnectorAccess connector={connector} />;
+  }, [connector]);
+
   // This specific logic can be removed once inference connectors are no longer experimental. Tracked here https://github.com/elastic/kibana/issues/244985
   const isExperimental: boolean | undefined = useMemo(() => {
     if (
@@ -541,19 +548,21 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         subFeature={actionTypeModel?.subFeature}
         isTestable={isTestable}
         hideRulesTab={hideRulesTab}
+        hideAccessTab={hideAccessTab}
         docsUrl={actionTypeModel?.docsUrl}
       />
       <EuiFlyoutBody>
         {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}
         {selectedTab === EditConnectorTabs.Test && renderTestTab()}
         {selectedTab === EditConnectorTabs.Rules && renderConnectorRulesList()}
+        {selectedTab === EditConnectorTabs.Access && renderAccessTab()}
       </EuiFlyoutBody>
       <FlyoutFooter
         onClose={onCloseAttempt}
         isSaving={isSaving}
         isSaved={isSaved}
         disabled={disabled}
-        showButtons={showButtons}
+        showButtons={showButtons && selectedTab !== EditConnectorTabs.Access}
         onClickSave={onClickSave}
       />
       {showConfirmModal && (

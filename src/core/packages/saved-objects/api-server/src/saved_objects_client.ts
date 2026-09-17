@@ -50,6 +50,7 @@ import type {
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAccessControlEntriesOptions,
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
@@ -493,5 +494,20 @@ export interface SavedObjectsClientContract {
   changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessModeOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
+
+  /**
+   * Changes the access mode of one or more SavedObjects and the principals granted access to them.
+   *
+   * Only types registered with `supportsAccessControl` can be restricted. Clients that exclude the
+   * security extension must pass `owner`, and are responsible for authorizing the operation.
+   *
+   * @param objects - The objects to change access control for
+   * @param options {@link SavedObjectsChangeAccessControlEntriesOptions} - the access mode, principals and supported roles
+   * @returns the {@link SavedObjectsChangeAccessControlResponse}
+   */
+  changeAccessControl(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlEntriesOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

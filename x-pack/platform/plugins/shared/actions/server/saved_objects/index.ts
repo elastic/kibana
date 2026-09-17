@@ -65,6 +65,10 @@ export function setupSavedObjects(
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
+    // Connectors can be restricted to their owner and the users they were shared with. The actions
+    // plugin uses a saved objects client without the security extension, so it enforces the
+    // resulting access control metadata itself, see server/lib/connector_access_control.ts.
+    supportsAccessControl: true,
     convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: actionMappings,
     migrations: getActionsMigrations(encryptedSavedObjects),

@@ -238,6 +238,65 @@ describe('AccessControlService', () => {
     });
   });
 
+  describe('#getTypesRequiringPrivilegeCheck with a restricted access mode', () => {
+    let service: AccessControlService;
+
+    beforeEach(() => {
+      service = new AccessControlService({ typeRegistry });
+    });
+
+    const restricted = {
+      type: 'dashboard',
+      id: 'id_1',
+      accessControl: {
+        accessMode: 'private' as const,
+        owner: 'alice',
+        entries: [
+          { type: 'user' as const, id: 'bob', role: 'executor', added_at: '2026-09-10T00:00:00Z' },
+        ],
+      },
+    };
+
+    const requiresPrivilege = (user: string | null, action: SecurityAction): boolean => {
+      service.setUserForOperation(makeUser(user));
+      const { objects } = service.getObjectsRequiringPrivilegeCheck({
+        objects: [restricted],
+        actions: new Set([action]),
+      });
+      return objects[0].requiresManageAccessControl;
+    };
+
+    it('lets the owner read and write', () => {
+      expect(requiresPrivilege('alice', SecurityAction.GET)).toBe(false);
+      expect(requiresPrivilege('alice', SecurityAction.UPDATE)).toBe(false);
+      expect(requiresPrivilege('alice', SecurityAction.DELETE)).toBe(false);
+      expect(requiresPrivilege('alice', SecurityAction.CHANGE_ACCESS_MODE)).toBe(false);
+    });
+
+    it('lets a granted principal read but not write', () => {
+      expect(requiresPrivilege('bob', SecurityAction.GET)).toBe(false);
+      expect(requiresPrivilege('bob', SecurityAction.BULK_GET)).toBe(false);
+      expect(requiresPrivilege('bob', SecurityAction.UPDATE)).toBe(true);
+      expect(requiresPrivilege('bob', SecurityAction.DELETE)).toBe(true);
+      expect(requiresPrivilege('bob', SecurityAction.CHANGE_ACCESS_MODE)).toBe(true);
+    });
+
+    it('requires the manage access control privilege for everyone else', () => {
+      expect(requiresPrivilege('carol', SecurityAction.GET)).toBe(true);
+      expect(requiresPrivilege('carol', SecurityAction.UPDATE)).toBe(true);
+      expect(requiresPrivilege(null, SecurityAction.GET)).toBe(true);
+    });
+
+    it('ignores restrictions for types that do not support access control', () => {
+      service.setUserForOperation(makeUser('carol'));
+      const { objects } = service.getObjectsRequiringPrivilegeCheck({
+        objects: [{ ...restricted, type: 'visualization' }],
+        actions: new Set([SecurityAction.GET]),
+      });
+      expect(objects[0].requiresManageAccessControl).toBe(false);
+    });
+  });
+
   describe('#enforceAccessControl', () => {
     let service: AccessControlService;
     beforeEach(() => {

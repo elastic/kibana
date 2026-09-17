@@ -14,6 +14,7 @@ import type { Connector } from '../../types';
 import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
+import { ensureConnectorAccess } from '../../../../lib/connector_access_control';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
@@ -75,8 +76,11 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     );
     throw error;
   }
-  const { attributes, references, version } =
+  const { attributes, references, version, accessControl } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+
+  await ensureConnectorAccess(context, { id, accessControl }, 'edit');
+
   const { actionTypeId, authMode } = attributes;
   const { name, config, secrets } = action;
 

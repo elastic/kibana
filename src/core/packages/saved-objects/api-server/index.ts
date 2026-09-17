@@ -67,6 +67,7 @@ export type {
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAccessControlEntriesOptions,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
   SavedObjectsEsqlOptions,
@@ -78,6 +79,7 @@ export { type Left, type Either, type Right, isLeft, isRight, left, right } from
 export type {
   SavedObject,
   SavedObjectAccessControl,
+  SavedObjectAccessControlEntry,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,

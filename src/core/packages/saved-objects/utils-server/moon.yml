@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-saved-objects-api-server'
+  - '@kbn/entity-access-control'
 tags:
   - shared-server
   - package

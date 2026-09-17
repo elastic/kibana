@@ -6,7 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { SavedObjectAccessControl } from '@kbn/core/server';
 import type { RawAction, ActionTypeExecutorResult } from '../../../../types';
+import { ensureConnectorAccess } from '../../../../lib/connector_access_control';
 import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
 import { isPreconfigured } from '../../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../../lib/is_system_action';
@@ -21,6 +23,7 @@ export async function execute(
   const log = context.logger;
   const { actionId, params, source, relatedSavedObjects, signal } = connectorExecuteParams;
   let actionTypeId: string | undefined;
+  let connectorAccessControl: SavedObjectAccessControl | undefined;
 
   try {
     if (isPreconfigured(context, actionId) || isSystemAction(context, actionId)) {
@@ -30,16 +33,24 @@ export async function execute(
 
       actionTypeId = connector?.actionTypeId;
     } else {
-      const { attributes } = await context.unsecuredSavedObjectsClient.get<RawAction>(
-        ACTION_SAVED_OBJECT_TYPE,
-        actionId
-      );
+      const { attributes, accessControl } =
+        await context.unsecuredSavedObjectsClient.get<RawAction>(
+          ACTION_SAVED_OBJECT_TYPE,
+          actionId
+        );
+      connectorAccessControl = accessControl;
 
       actionTypeId = attributes.actionTypeId;
     }
   } catch (err) {
     log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
   }
+
+  await ensureConnectorAccess(
+    context,
+    { id: actionId, accessControl: connectorAccessControl },
+    'execute'
+  );
 
   const additionalPrivileges = getActionKibanaPrivileges(
     context,

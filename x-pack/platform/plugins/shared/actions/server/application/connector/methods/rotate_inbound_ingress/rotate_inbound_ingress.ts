@@ -13,6 +13,7 @@ import { isUndefined, omitBy } from 'lodash';
 
 import type { RawAction } from '../../../../types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
+import { ensureConnectorAccess } from '../../../../lib/connector_access_control';
 import { tryCatch } from '../../../../lib';
 import {
   applyInboundIngressCredentialsIfNeeded,
@@ -32,6 +33,8 @@ export async function rotateInboundIngress({
     id,
     spaceId !== DEFAULT_SPACE_ID ? { namespace: spaceId } : {}
   );
+
+  await ensureConnectorAccess(context, { id, accessControl: rawAction.accessControl }, 'edit');
 
   const actionTypeId = rawAction.attributes.actionTypeId;
   if (!connectorTypeHasInboundEvents(actionTypeId)) {

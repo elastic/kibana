@@ -38,6 +38,22 @@ export type SavedObjectAttributeSingle =
 export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 
 /**
+ * Definition of a principal that has been granted access to a saved object.
+ *
+ * @public
+ */
+export interface SavedObjectAccessControlEntry {
+  /** The type of the principal. Only individual users are supported. */
+  type: 'user';
+  /** The user profile ID of the principal. */
+  id: string;
+  /** The role granted to the principal. The set of valid roles is defined by the saved object type. */
+  role: string;
+  /** The date the principal was granted access. */
+  added_at: string;
+}
+
+/**
  * Definition of the Saved Object access control interface
  *
  * @public
@@ -49,8 +65,13 @@ export interface SavedObjectAccessControl {
   /**
    * The access mode of the object. `write_restricted` is editable only by the owner and admin users.
    * Access mode `default` is editable by all users with write access to the object.
+   * Access mode `private` is only accessible, in any way, by the owner and the principals listed in `entries`.
    */
-  accessMode: 'write_restricted' | 'default';
+  accessMode: 'write_restricted' | 'default' | 'private';
+  /**
+   * The principals that have been granted access to this object. Only meaningful for the `private` access mode.
+   */
+  entries?: SavedObjectAccessControlEntry[];
 }
 
 /**

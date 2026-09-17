@@ -53,6 +53,7 @@ import type {
   SavedObjectsBulkDeleteResponse,
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAccessControlEntriesOptions,
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
   SavedObjectsSearchOptions,
@@ -614,5 +615,17 @@ export interface ISavedObjectsRepository {
   changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessModeOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
+
+  /**
+   * Changes the access mode of one or more SavedObjects and the principals granted access to them.
+   *
+   * @param objects {@link SavedObjectsChangeAccessControlObject} - the objects to update
+   * @param options {@link SavedObjectsChangeAccessControlEntriesOptions} - the access mode, principals and supported roles
+   * @returns the {@link SavedObjectsChangeAccessControlResponse}
+   */
+  changeAccessControl(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlEntriesOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

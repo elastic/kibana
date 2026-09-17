@@ -949,6 +949,45 @@ describe('#create', () => {
           managed: false,
         });
       });
+
+      // Regression test: an overwrite must not drop the access control of the object it replaces,
+      // including for callers that bypass the security extension and authorize writes themselves.
+      it.each([true, false])(
+        'preserves the access control of an overwritten object (security extension: %s)',
+        async (withSecurityExtension) => {
+          const accessControl = {
+            owner: 'u_owner',
+            accessMode: 'private' as const,
+            entries: [
+              {
+                type: 'user' as const,
+                id: 'u_executor',
+                role: 'executor',
+                added_at: '2026-01-01T00:00:00.000Z',
+              },
+            ],
+          };
+          mockPreflightCheckForCreate.mockImplementation(({ objects }) =>
+            Promise.resolve(
+              objects.map(({ type, id: objectId }) => ({
+                type,
+                id: objectId,
+                existingDocument: { _source: { accessControl } } as SavedObjectsRawDoc,
+              }))
+            )
+          );
+
+          const result = await repository.create(ACCESS_CONTROL_TYPE, attributes, {
+            id,
+            namespace,
+            references,
+            overwrite: true,
+            ...(withSecurityExtension ? {} : { disableExtensions: true }),
+          });
+
+          expect(result.accessControl).toEqual(accessControl);
+        }
+      );
     });
   });
 });

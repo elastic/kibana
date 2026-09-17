@@ -102,6 +102,19 @@ export function getBaseMappings(): IndexMappingSafe {
           owner: {
             type: 'keyword',
           },
+          accessMode: {
+            type: 'keyword',
+          },
+          entries: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+              role: {
+                type: 'keyword',
+              },
+            },
+          },
         },
       },
     },
