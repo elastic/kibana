@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
@@ -23,8 +23,7 @@ import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID } from '../constants';
 
 jest.mock('../../../../common/use_cases_local_storage');
 
-// Failing: See https://github.com/elastic/kibana/issues/275455
-describe.skip('Severity form field', () => {
+describe('Severity form field', () => {
   const deselectCases = jest.fn();
   const localStorageKey = 'securitySolution.cases.utilityBar.hideMaxLimitWarning';
 
@@ -129,11 +128,15 @@ describe.skip('Severity form field', () => {
 
     await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
-    const contextMenu = await screen.findByTestId('case-table-bulk-actions-context-menu');
+    await screen.findByTestId('case-table-bulk-actions-context-menu');
 
     await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
-    await waitForElementToBeRemoved(contextMenu);
+    // waitForElementToBeRemoved is unreliable here: in userEvent v14 the element may
+    // already be gone before the call, or still animating out. waitFor handles both.
+    await waitFor(() => {
+      expect(screen.queryByTestId('case-table-bulk-actions-context-menu')).not.toBeInTheDocument();
+    });
   });
 
   it('does not show the bulk actions without update & delete permissions', async () => {

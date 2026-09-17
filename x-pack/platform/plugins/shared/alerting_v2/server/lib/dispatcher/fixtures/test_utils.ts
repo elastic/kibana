@@ -176,7 +176,6 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
-    tags: [],
     groupingMode: DEFAULT_GROUPING_MODE,
     ...overrides,
   };
@@ -188,7 +187,7 @@ export function createRuleScopedActionPolicy(
 ): ActionPolicy {
   return createActionPolicy({
     name: 'Test rule-scoped policy',
-    matcher: `rule.id: "${ruleId}"`,
+    matcher: { expression: `rule.id: "${ruleId}"` },
     ...overrides,
   });
 }

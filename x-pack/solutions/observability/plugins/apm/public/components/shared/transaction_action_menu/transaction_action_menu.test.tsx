@@ -113,9 +113,8 @@ const renderTransaction = async (transaction: Record<string, any>) => {
     }
   );
 
-  await act(async () => {
-    fireEvent.click(rendered.getByText('Investigate'));
-  });
+  fireEvent.click(rendered.getByTestId('apmActionMenuButtonInvestigateButton'));
+
   await waitForEuiPopoverOpen();
 
   return rendered;

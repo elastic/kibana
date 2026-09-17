@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
-import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../../locators';
@@ -49,7 +48,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1 },
+  metadata: { name: 'Test Rule', version: 1, tags: ['prod'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
@@ -63,9 +62,7 @@ const renderSubsection = (rule: RuleApiResponse = baseRule) =>
   render(
     <MockLocatorProvider locators={mockLocators}>
       <I18nProvider>
-        <RuleProvider rule={rule}>
-          <ActionPoliciesArtifactsSubsection />
-        </RuleProvider>
+        <ActionPoliciesArtifactsSubsection rule={rule} />
       </I18nProvider>
     </MockLocatorProvider>
   );
@@ -84,9 +81,9 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     });
   });
 
-  it('loads linked policies for the current rule', () => {
+  it('loads linked policies using the current rule tags', () => {
     renderSubsection();
-    expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith('rule-1');
+    expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith(['prod']);
   });
 
   it('renders loading state on the stat', () => {

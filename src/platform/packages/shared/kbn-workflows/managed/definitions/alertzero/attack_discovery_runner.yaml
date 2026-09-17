@@ -1,0 +1,265 @@
+version: "1"
+name: Attack Discovery Runner
+description: >
+  Runs Attack Discovery generation, then fans out one review workflow per generated
+  attack so every attack is reviewed concurrently on its own execution. Launched by
+  the per-space Attack Discovery workflow, which owns the schedule.
+enabled: true
+tags:
+  - security
+  - attack-discovery
+settings:
+  # The space is in the key only so the group reads clearly in execution history:
+  # concurrency is always checked within a single space.
+  #
+  # `cancel-in-progress` with max 1: the newest discoveries are the ones worth
+  # having, and a backlog must never delay a new run. `drop` and `queue` cannot
+  # deliver that — a run that is merely waiting still occupies the single slot, so
+  # a newer run would either wait behind superseded work or be turned away.
+  #
+  # Accepted cost: a run cancelled after generation persisted but before the fan-out
+  # finished leaves those attacks with no AlertZero review. Duplicates are not part
+  # of the cost — the ad-hoc write path ids each attack by a hash of its alert ids,
+  # connector, owner and space, so an identical attack is dropped on write; only a
+  # regrouped alert set hashes differently and lands as a near-duplicate.
+  #
+  # Cancelling does not interrupt an in-flight generation request today: it runs to
+  # completion and its result is discarded (elastic/kibana#290832 adds a cancellation
+  # probe to the run step).
+  #
+  # Must be an object — unlike a `parallel` step's `concurrency`, workflow-level
+  # `settings.concurrency` does not accept a bare number.
+  concurrency:
+    key: "attack-discovery-worker-{{ workflow.spaceId }}"
+    strategy: cancel-in-progress
+    max: 1
+triggers:
+  # The per-space Attack Discovery workflow owns the schedule. This global workflow
+  # stays manual-only so there is one scheduler authority and no cross-space task
+  # collision, and so the whole chain stays exercisable by hand.
+  - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          maxLength: 512
+          description: >-
+            LLM connector for generation. Omit to let the run step resolve the
+            space's default AI connector.
+        autonomy:
+          type: string
+          enum:
+            - manual
+            - assisted
+            - supervised
+          description: >-
+            Worker autonomy level, passed through to each review so a true-positive
+            or inconclusive verdict knows whether it needs an analyst gate.
+            Defaults to `manual`.
+        settings_version:
+          type: integer
+          minimum: 1
+          description: >-
+            Version of the worker settings that launched this run. Recorded for
+            traceability only; no step reads it.
+        schedule_interval:
+          type: string
+          maxLength: 32
+          description: >-
+            Schedule interval of the worker that launched this run (for example
+            `24h`). Recorded for traceability only; no step reads it. Echoed in the
+            output so a run's cadence is visible in its execution history.
+        parent_run_id:
+          type: string
+          maxLength: 128
+          description: >-
+            Workflow execution id of the per-space Attack Discovery run that launched
+            this run. No step reads it. It stays readable in this execution's inputs,
+            which is the only link back to the parent the engine keeps. Empty on a
+            standalone run.
+      additionalProperties: false
+outputs:
+  # Declared as string because the editor type-checks the YAML source of
+  # `workflow.output` `with:` values. A `type: number` field whose value is
+  # `"${{ ... }}"` is reported as invalid even though Liquid keeps the number
+  # at runtime. `{{ }}` stringifies so the emitted value matches this schema;
+  # `${{ }}` would keep the count as a number and fail output validation.
+  - name: attacks_generated
+    type: string
+  - name: reviews_requested
+    type: string
+  - name: reviews_failed
+    type: string
+  - name: alerts_analyzed
+    type: string
+  - name: schedule_interval
+    type: string
+  # The Attack Discovery generation ids, not this workflow's execution id. Each
+  # keys the AD generations API and lands on that batch's persisted discoveries as
+  # `kibana.alert.rule.execution.uuid`, so a run can be traced to what it produced.
+  # Plural because generation is batched: one id per delivered batch, comma
+  # separated. `type: string` for the same reason as the counts above.
+  - name: execution_uuids
+    type: string
+consts:
+  # Liquid has no array literal, so `| default: []` yields undefined rather than an
+  # empty array. This is an EMPTY-ARRAY FALLBACK ONLY — never synthetic discovery
+  # data. It covers all three empty shapes the run step can produce:
+  # `attack_discoveries` omitted, `null` (validation failed), or `[]` (genuine zero).
+  no_discoveries: []
+steps:
+  # Batched generation (https://github.com/elastic/security-team/issues/18967),
+  # the call site #19276 reserved for it.
+  #
+  # Synchronous (`workflow.execute`, not `executeAsync`): the fan-out below needs
+  # the discoveries inline, and child failure must propagate. Holds the one
+  # per-space concurrency slot for the whole child.
+  #
+  # A failed batch is a gap, not a run failure — the child runs `mode: settled`.
+  # A failed CHILD still fails the run, which is why there is no `on-failure`
+  # here: `continue: true` would fan out over a partial result.
+  - name: run_generation
+    type: workflow.execute
+    # Bounds N pipelines, not one. No literal covers the worst case (100 batches
+    # at `concurrency: max 2` x 30m branch-timeout is ~50 waves); 4h is sized for
+    # a realistic 24h lookback while still bounding a wedged child. A single stuck
+    # batch is attributed by the child's per-branch timeout, not by this.
+    #
+    # Must stay a literal: the engine hands `timeout` to the duration parser
+    # unrendered (elastic/kibana#290258).
+    timeout: '4h'
+    with:
+      workflow-id: system-security-attack-discovery-batched-generation
+      inputs:
+        # `batch_size` and `lookback` are left at the child's defaults. Surfacing
+        # them as Worker settings means threading new values through the Worker
+        # settings template, and is tracked separately.
+        connector_id: "{{ inputs.connector_id }}"
+
+  # The fan-out list, resolved once so the batches, the parallel step, and the
+  # summary agree on it. `| default: consts.no_discoveries` normalizes the three
+  # empty shapes to an empty array.
+  - name: resolve_fanout
+    type: data.set
+    with:
+      attacks: "${{ steps.run_generation.output.attack_discoveries | default: consts.no_discoveries }}"
+      # Computed on its own because comparison operators cannot follow a filter chain.
+      attack_count: "${{ steps.run_generation.output.attack_discoveries | default: consts.no_discoveries | size }}"
+      # 100 is DEFAULT_PARALLEL_MAX_FAN_OUT: a single `parallel` foreach throws
+      # above that. `chunk` drains leftovers in later batches. How many of those
+      # items are reviewed at once is `concurrency.max` below, not this.
+      batches: "${{ steps.run_generation.output.attack_discoveries | default: consts.no_discoveries | chunk: 100 }}"
+
+  # A run that generated nothing is a normal outcome, not a failure: there may
+  # simply be no attack in the alerts. Logged explicitly so an empty execution is
+  # distinguishable from one that failed before generation.
+  - name: log_empty_run
+    type: console
+    if: "${{ steps.resolve_fanout.output.attack_count == 0 }}"
+    with:
+      # Batch counts, not a single `status`: the child emits none, and they
+      # separate a quiet run from one where batches failed.
+      message: >-
+        Attack Discovery generation produced no attacks
+        (alerts analyzed: {{ steps.run_generation.output.alerts_analyzed }},
+        batches: {{ steps.run_generation.output.batches_succeeded }}/{{
+        steps.run_generation.output.batches_total }} succeeded, {{
+        steps.run_generation.output.batches_failed }} failed). Skipping the
+        per-attack fan-out.
+
+  # Failed-review count starts at 0 so an empty generation and the first batch
+  # both have a number to add to. Each batch writes the running total back here.
+  - name: init_review_counts
+    type: data.set
+    with:
+      reviews_failed: 0
+
+  # One review execution per attack. Each `chunk: 100` batch stays under the
+  # parallel fan-out ceiling so a 101+ generation cannot throw. Branches still
+  # run at `concurrency.max` (2). The per-attack body cannot live in a parallel
+  # branch: that body must be a straight-line sequence, so the verdict `switch`
+  # sits in a child workflow. `current_batch` copies `foreach.item` so the inner
+  # parallel's `foreach.item` is the attack, not the batch array.
+  - name: run_review_batches
+    type: foreach
+    foreach: "${{ steps.resolve_fanout.output.batches }}"
+    steps:
+      - name: current_batch
+        type: data.set
+        with:
+          attacks: "${{ foreach.item }}"
+
+      - name: run_reviews
+        type: parallel
+        foreach: "${{ steps.current_batch.output.attacks }}"
+        # Settled: one failed review must not abandon the remaining attacks. Failures
+        # stay visible in the aggregate results and counts.
+        mode: settled
+        concurrency:
+          # 2 is the smallest width that still reviews attacks concurrently — `max: 1`
+          # on a `parallel` step is a sequential `foreach` with extra steps. Each
+          # branch above that is one more child workflow execution running at the same
+          # time, and until #19211 puts a real analysis workflow behind the fan-out
+          # every step in the review child is a `console` stub, so a wider width buys
+          # throughput nothing is using. Widen it with evidence then, not before.
+          # DEFAULT_PARALLEL_MAX_CONCURRENCY (20) is the schema ceiling and is enforced
+          # as a validation error rather than clamped. This is not a cap on how many
+          # attacks are reviewed, only on how many at once.
+          max: 2
+          # `count-waiting` is left at its default (true), which counts a parked branch
+          # against `max`. Every branch here parks as soon as it starts its child,
+          # because `workflow.execute` is synchronous, so at `false` this width would
+          # not restrain the fan-out at all.
+          #
+          # Refill is per slot rather than in lockstep: the engine frees a slot as each
+          # branch terminalizes and starts the next queued one on a following tick, so
+          # the branches in flight do not have to finish together. Revisit alongside
+          # #19214, which adds HITL gates and keeps each branch parked far longer.
+        steps:
+          - name: run_review
+            type: workflow.execute
+            with:
+              workflow-id: system-security-attack-discovery-review
+              inputs:
+                # `${{ }}` preserves the value's type (arrays stay arrays); `{{ }}`
+                # stringifies. `alert_ids` holds DETECTION alert ids; there is no
+                # persisted Attack Discovery `_id` to pass yet (#19022 / #19214).
+                #
+                # Bracket access: these are persisted alert `_source` documents whose
+                # discovery fields are FLAT dotted keys, so `foreach.item.title`
+                # silently resolves to empty.
+                #
+                # Anonymized fields, not `*_with_replacements` — de-anonymizing
+                # reviews is a behaviour change owned by #19022 / #19211.
+                title: '{{ foreach.item["kibana.alert.attack_discovery.title"] }}'
+                alert_ids: '${{ foreach.item["kibana.alert.attack_discovery.alert_ids"] }}'
+                summary_markdown: '{{ foreach.item["kibana.alert.attack_discovery.summary_markdown"] }}'
+                # `${{ }}` so the editor does not type-check the template source
+                # against the child's autonomy enum.
+                autonomy: "${{ inputs.autonomy }}"
+                parent_run_id: "{{ execution.id }}"
+
+      - name: batch_failed
+        type: data.set
+        with:
+          count: "${{ steps.run_reviews.output.failed | default: 0 }}"
+
+      - name: accumulate_failed
+        type: data.set
+        with:
+          reviews_failed: "${{ variables.reviews_failed | plus: steps.batch_failed.output.count }}"
+
+  # Fan-in: every batch has settled. `variables.reviews_failed` needs no `default`
+  # here because `init_review_counts` runs unconditionally before the loop, so the
+  # key is always set; each `accumulate_failed` iteration is its own entry in
+  # `variables`, so the value read here is the last running total written.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      attacks_generated: "{{ steps.resolve_fanout.output.attack_count }}"
+      reviews_requested: "{{ steps.resolve_fanout.output.attack_count }}"
+      reviews_failed: "{{ variables.reviews_failed }}"
+      alerts_analyzed: "{{ steps.run_generation.output.alerts_analyzed | default: 0 }}"
+      schedule_interval: "{{ inputs.schedule_interval }}"
+      execution_uuids: "{{ steps.run_generation.output.execution_uuids | join: ',' }}"
