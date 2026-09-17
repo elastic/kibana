@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { RuleSummaryFlyout } from './rule_summary/rule_summary_flyout';
-export type { RuleSummaryFlyoutProps } from './rule_summary/rule_summary_flyout';
+export { RuleSummaryBody } from './rule_summary_body';
+export type { RuleSummaryBodyProps } from './rule_summary_body';
+export type { RuleSummaryData, RuleSummarySectionProps } from '../types';
