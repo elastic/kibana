@@ -36,13 +36,27 @@ const DELETE_BROWSER_MINUTES = 15;
 const DELETE_LIGHTWEIGHT_MINUTES = 2;
 /** 20m bump retries before falling back to the leftover 24h cadence. */
 export const MAX_FAILED_BUMP_FAST_RETRIES = 3;
+export const TEST_NOW_LIST_PAGE_SIZE = 1000;
 
 export { getFilterForTestNowRun };
 
 export interface CleanUpPackagePoliciesTaskState {
   failedAgentPolicyBumps?: string[];
   failedBumpFastRetries?: number;
+  leftoverRecreateRetries?: number;
 }
+
+/**
+ * Recreate budget survives runs: a rebuild that can never succeed would otherwise
+ * queue a sync for every private location on every scan, forever.
+ */
+const getLeftoverRecreateRetries = (state: ConcreteTaskInstance['state']): number => {
+  const value = state.leftoverRecreateRetries;
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    return DEFAULT_MAX_CLEANUP_RETRIES;
+  }
+  return Math.min(DEFAULT_MAX_CLEANUP_RETRIES, Math.floor(value));
+};
 
 const getFailedAgentPolicyBumps = (state: ConcreteTaskInstance['state']): string[] => {
   const value = state.failedAgentPolicyBumps;
@@ -63,12 +77,18 @@ const getFailedBumpFastRetries = (state: ConcreteTaskInstance['state']): number 
 const nextCleanupSchedule = (
   remainingTestNow: number,
   failedAgentPolicyBumps: string[],
-  failedBumpFastRetries: number
+  failedBumpFastRetries: number,
+  leftoverWorkPending: boolean
 ): '20m' | '24h' => {
   if (remainingTestNow > 0) {
     return '20m';
   }
   if (failedAgentPolicyBumps.length > 0 && failedBumpFastRetries > 0) {
+    return '20m';
+  }
+  // A requested recreate is only confirmed by the next scan; 24h is too long to
+  // leave monitors without their package policy.
+  if (leftoverWorkPending) {
     return '20m';
   }
   return '24h';
@@ -128,26 +148,26 @@ export async function runCleanUpPackagePoliciesTask(
     const previousFailedBumps = getFailedAgentPolicyBumps(state);
     let failedAgentPolicyBumps = previousFailedBumps;
     let failedBumpFastRetries = getFailedBumpFastRetries(state);
+    let leftoverRecreateRetries = getLeftoverRecreateRetries(state);
+    let leftoverWorkPending = false;
     const skipLeftoverScan =
       remainingTestNow === 0 && previousFailedBumps.length > 0 && failedBumpFastRetries > 0;
 
     try {
       if (skipLeftoverScan) {
-        failedAgentPolicyBumps = await bumpAgentPolicyRevisions(
-          previousFailedBumps,
-          soClient,
-          esClient,
-          serverSetup
-        );
+        failedAgentPolicyBumps = await bumpAgentPolicyRevisions(previousFailedBumps, serverSetup);
         failedBumpFastRetries =
           failedAgentPolicyBumps.length === 0 ? 0 : Math.max(0, failedBumpFastRetries - 1);
       } else {
-        failedAgentPolicyBumps = await cleanUpLeftoverPrivateLocationPolicies(
+        const leftover = await cleanUpLeftoverPrivateLocationPolicies(
           serverSetup,
           soClient,
-          esClient,
-          previousFailedBumps
+          previousFailedBumps,
+          leftoverRecreateRetries
         );
+        failedAgentPolicyBumps = leftover.failedAgentPolicyBumps;
+        leftoverRecreateRetries = leftover.recreateRetries;
+        leftoverWorkPending = leftover.recreateRequested;
         const previousFailed = new Set(previousFailedBumps);
         if (failedAgentPolicyBumps.length === 0) {
           failedBumpFastRetries = 0;
@@ -161,14 +181,20 @@ export async function runCleanUpPackagePoliciesTask(
       logger.error(e);
     }
 
-    const nextState = { ...state, failedAgentPolicyBumps, failedBumpFastRetries };
+    const nextState = {
+      ...state,
+      failedAgentPolicyBumps,
+      failedBumpFastRetries,
+      leftoverRecreateRetries,
+    };
     return {
       state: nextState,
       schedule: {
         interval: nextCleanupSchedule(
           remainingTestNow,
           failedAgentPolicyBumps,
-          failedBumpFastRetries
+          failedBumpFastRetries,
+          leftoverWorkPending
         ),
       },
     };
@@ -188,10 +214,20 @@ async function deleteExpiredTestNowPolicies({
   fleet: SyntheticsServerSetup['pluginsStart']['fleet'];
   esClient: ElasticsearchClient;
 }): Promise<number> {
-  const { items } = await fleet.packagePolicyService.list(soClient, {
-    kuery: getFilterForTestNowRun(),
-    fields: ['name', 'created_at'],
-  });
+  // Fleet's default page size is 20, which left every older Test Now policy behind.
+  const items: Array<{ id: string; name?: string; created_at?: string }> = [];
+  for (let page = 1; ; page++) {
+    const { items: pageItems } = await fleet.packagePolicyService.list(soClient, {
+      kuery: getFilterForTestNowRun(),
+      fields: ['name', 'created_at'],
+      page,
+      perPage: TEST_NOW_LIST_PAGE_SIZE,
+    });
+    items.push(...pageItems);
+    if (pageItems.length < TEST_NOW_LIST_PAGE_SIZE) {
+      break;
+    }
+  }
 
   const allItems = items.map((item) => {
     const minutesAgo = moment().diff(moment(item.created_at), 'minutes');
@@ -220,23 +256,31 @@ async function deleteExpiredTestNowPolicies({
 async function cleanUpLeftoverPrivateLocationPolicies(
   serverSetup: SyntheticsServerSetup,
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  previousFailedBumps: string[]
-): Promise<string[]> {
+  previousFailedBumps: string[],
+  recreateRetries: number
+): Promise<{
+  failedAgentPolicyBumps: string[];
+  recreateRetries: number;
+  recreateRequested: boolean;
+}> {
   let failedAgentPolicyIds: string[] = [];
   let attemptedAgentPolicyIds: string[] = [];
+  let recreateRequested = false;
+  // Fresh leftover-scan latch each run: leftovers are not created on the happy
+  // path, so a daily scan is enough and a persisted latch would hide them. Only
+  // the recreate budget carries over.
+  const leftoverState: LeftoverCleanupTaskState = {
+    hasAlreadyDoneCleanup: false,
+    maxCleanUpRetries: recreateRetries,
+    cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION,
+  };
 
   try {
-    // Fresh leftover-scan latch each run: leftovers are not created on the
-    // happy path, so a daily scan is enough and a persisted latch would hide them.
-    const leftoverState: LeftoverCleanupTaskState = {
-      hasAlreadyDoneCleanup: false,
-      maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES,
-      cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION,
-    };
     const leftover = await cleanUpDuplicatedPackagePolicies(serverSetup, soClient, leftoverState);
     failedAgentPolicyIds = leftover.failedAgentPolicyIds ?? [];
     attemptedAgentPolicyIds = leftover.attemptedAgentPolicyIds ?? [];
+
+    recreateRequested = leftover.performCleanupSync;
 
     if (leftover.performCleanupSync) {
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
@@ -254,22 +298,27 @@ async function cleanUpLeftoverPrivateLocationPolicies(
   const attempted = new Set(attemptedAgentPolicyIds);
   const pendingRetry = previousFailedBumps.filter((id) => !attempted.has(id));
   const retriedFailed =
-    pendingRetry.length > 0
-      ? await bumpAgentPolicyRevisions(pendingRetry, soClient, esClient, serverSetup)
-      : [];
+    pendingRetry.length > 0 ? await bumpAgentPolicyRevisions(pendingRetry, serverSetup) : [];
 
-  return [...new Set([...failedAgentPolicyIds, ...retriedFailed])];
+  return {
+    failedAgentPolicyBumps: [...new Set([...failedAgentPolicyIds, ...retriedFailed])],
+    recreateRetries: leftoverState.maxCleanUpRetries,
+    recreateRequested,
+  };
 }
 
-export async function triggerCleanUpPackagePoliciesTask(server: SyntheticsServerSetup) {
+/**
+ * Creates the recurring task without forcing a run, so leftover cleanup exists on
+ * clusters that never trigger it through Test Now or the cleanup API.
+ */
+export async function ensureCleanUpTaskScheduled(server: SyntheticsServerSetup) {
   const { logger, pluginsStart } = server;
-  const interval = SYNTHETICS_SERVICE_CLEAN_UP_INTERVAL_DEFAULT;
 
   const taskInstance = await pluginsStart.taskManager.ensureScheduled({
     id: SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID,
     taskType: SYNTHETICS_SERVICE_CLEAN_UP_TASK_TYPE,
     schedule: {
-      interval,
+      interval: SYNTHETICS_SERVICE_CLEAN_UP_INTERVAL_DEFAULT,
     },
     params: {},
     state: {},
@@ -279,8 +328,35 @@ export async function triggerCleanUpPackagePoliciesTask(server: SyntheticsServer
   logger?.debug(
     `Task ${SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}.`
   );
+}
 
-  await pluginsStart.taskManager.runSoon(SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID);
+/**
+ * Runs cleanup now on an operator's request, clearing the state that would
+ * otherwise make the run skip the leftover scan or refuse to recreate.
+ */
+export async function triggerCleanUpPackagePoliciesTask(server: SyntheticsServerSetup) {
+  const { pluginsStart } = server;
+
+  await ensureCleanUpTaskScheduled(server);
+
+  await pluginsStart.taskManager.bulkUpdateState(
+    [SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID],
+    (state) => ({
+      ...state,
+      failedBumpFastRetries: 0,
+      leftoverRecreateRetries: DEFAULT_MAX_CLEANUP_RETRIES,
+    })
+  );
+
+  const result = await pluginsStart.taskManager.runSoon(SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID);
+
+  // A conflict resolves rather than throws, and reporting success on one would
+  // leave the caller waiting on a run that was never rescheduled.
+  if (result?.conflict) {
+    throw new Error(
+      `Task ${SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID} could not be scheduled to run now due to a conflict.`
+    );
+  }
 }
 
 export const scheduleCleanUpTask = async (server: SyntheticsServerSetup) => {
