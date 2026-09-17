@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type { TraceSpan } from '@kbn/llm-trace-waterfall';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { triggerDownload } from '../../../../utils/download';
 
 const labels = {
   title: i18n.translate('xpack.agentBuilder.round.traceFlyout.title', {
@@ -35,16 +36,6 @@ const labels = {
   localFileNotice: i18n.translate('xpack.agentBuilder.round.traceFlyout.localFileNotice', {
     defaultMessage: 'Showing trace data loaded from a local file.',
   }),
-};
-
-const triggerDownload = (filename: string, content: string) => {
-  const blob = new Blob([content], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
 };
 
 interface RoundTraceFlyoutProps {
@@ -63,10 +54,8 @@ export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({
   const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
   const traceSpansResult = useTraceSpans(traceId ?? null, { fetchTrace });
 
-  const localSpans = initialSpans ?? null;
-
-  const activeSpans = localSpans ?? traceSpansResult.spans;
-  const activeDurationMs = localSpans ? undefined : traceSpansResult.durationMs;
+  const activeSpans = initialSpans ?? traceSpansResult.spans;
+  const activeDurationMs = initialSpans ? undefined : traceSpansResult.durationMs;
 
   const handleDownload = useCallback(() => {
     if (!activeSpans.length) return;
@@ -121,20 +110,32 @@ export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <div style={{ height: '100%', padding: 16, display: 'flex', flexDirection: 'column' }}>
-          {localSpans && (
+        <div
+          css={css`
+            height: 100%;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+          `}
+        >
+          {initialSpans && (
             <>
               <KbnInfoCallout size="s" title={labels.localFileNotice} />
               <EuiSpacer size="s" />
             </>
           )}
-          <div style={{ flex: 1, minHeight: 0 }}>
+          <div
+            css={css`
+              flex: 1;
+              min-height: 0;
+            `}
+          >
             <TraceWaterfall
               spans={activeSpans}
               traceId={traceId}
               durationMs={activeDurationMs}
-              isLoading={!localSpans && traceSpansResult.isLoading}
-              error={!localSpans ? traceSpansResult.error : null}
+              isLoading={!initialSpans && traceSpansResult.isLoading}
+              error={!initialSpans ? traceSpansResult.error : null}
             />
           </div>
         </div>

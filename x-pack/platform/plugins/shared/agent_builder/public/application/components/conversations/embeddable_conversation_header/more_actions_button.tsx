@@ -33,16 +33,7 @@ import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { RoundTraceFlyout } from '../conversation_rounds/round_response/round_trace_flyout';
-
-const triggerDownload = (filename: string, content: string) => {
-  const blob = new Blob([content], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-};
+import { triggerDownload } from '../../../utils/download';
 
 const readFileAsText = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -67,10 +58,10 @@ const exportLabels = {
     'xpack.agentBuilder.conversationActions.loadTraceErrorTitle',
     { defaultMessage: 'Could not load trace file' }
   ),
-  loadTraceErrorBody: i18n.translate(
-    'xpack.agentBuilder.conversationActions.loadTraceErrorBody',
-    { defaultMessage: 'The file does not contain a valid trace. Expected a JSON array of spans or an object with a "spans" array.' }
-  ),
+  loadTraceErrorBody: i18n.translate('xpack.agentBuilder.conversationActions.loadTraceErrorBody', {
+    defaultMessage:
+      'The file does not contain a valid trace. Expected a JSON array of spans or an object with a "spans" array.',
+  }),
 };
 
 const fullscreenLabels = {
@@ -222,7 +213,13 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       conversation,
       rounds: conversationRounds,
     };
-    const filename = conversationId ? `conversation-${conversationId}.json` : 'conversation.json';
+    const titleSlug = conversation.title
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 60);
+    const filename = titleSlug ? `conversation-${titleSlug}.json` : 'conversation.json';
     triggerDownload(filename, JSON.stringify(payload, null, 2));
   }, [conversation, conversationId, agent, conversationRounds]);
 
@@ -231,28 +228,42 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     traceFileInputRef.current?.click();
   }, []);
 
-  const handleTraceFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    try {
-      const text = await readFileAsText(file);
-      const parsed: unknown = JSON.parse(text);
-      const spans: unknown = Array.isArray(parsed)
-        ? parsed
-        : parsed !== null && typeof parsed === 'object' && 'spans' in parsed
-        ? (parsed as { spans: unknown }).spans
-        : null;
-      if (Array.isArray(spans)) {
-        setMenuLoadedSpans(spans as TraceSpan[]);
-        setIsTraceFlyoutOpen(true);
-      } else {
-        addErrorToast({ title: exportLabels.loadTraceErrorTitle, text: exportLabels.loadTraceErrorBody });
+  const handleTraceFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = '';
+      if (!file) return;
+      try {
+        const text = await readFileAsText(file);
+        const parsed: unknown = JSON.parse(text);
+        const spans: unknown = Array.isArray(parsed)
+          ? parsed
+          : parsed !== null && typeof parsed === 'object' && 'spans' in parsed
+          ? (parsed as { spans: unknown }).spans
+          : null;
+        const firstItem = Array.isArray(spans) ? (spans as unknown[])[0] : undefined;
+        const isTraceSpanArray =
+          Array.isArray(spans) &&
+          (firstItem === undefined ||
+            (typeof firstItem === 'object' && firstItem !== null && 'span_id' in firstItem));
+        if (isTraceSpanArray) {
+          setMenuLoadedSpans(spans as TraceSpan[]);
+          setIsTraceFlyoutOpen(true);
+        } else {
+          addErrorToast({
+            title: exportLabels.loadTraceErrorTitle,
+            text: exportLabels.loadTraceErrorBody,
+          });
+        }
+      } catch {
+        addErrorToast({
+          title: exportLabels.loadTraceErrorTitle,
+          text: exportLabels.loadTraceErrorBody,
+        });
       }
-    } catch {
-      addErrorToast({ title: exportLabels.loadTraceErrorTitle, text: exportLabels.loadTraceErrorBody });
-    }
-  }, []);
+    },
+    [addErrorToast]
+  );
 
   const fullScreenMenuItemLabel = useMemo(() => {
     if (conversationId) {
