@@ -299,14 +299,6 @@ export const compareSeverity = (a: AlertEventSeverity, b: AlertEventSeverity): n
 export const sortLevelsBySeverity = (levels: SeverityLevel[]): SeverityLevel[] =>
   [...levels].sort((a, b) => compareSeverity(a.severity, b.severity));
 
-/** Sort multi-severity levels least-to-most severe so `levels[0]` is the least-severe level. */
-export const normalizeSeverityOrder = (
-  severity: SeverityConfig | undefined
-): SeverityConfig | undefined => {
-  if (!severity || severity.mode !== 'multi') return severity;
-  return { ...severity, levels: sortLevelsBySeverity(severity.levels) };
-};
-
 /**
  * Suggest a valid threshold for a newly added band following the breach direction (ascending
  * for `>`/`>=`, descending for `<`/`<=`): strictly more extreme than the neighbouring

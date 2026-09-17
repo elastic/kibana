@@ -12,7 +12,7 @@ import {
   Comparator,
   compareSeverity,
   getSeverityValidationError,
-  normalizeSeverityOrder,
+  sortLevelsBySeverity,
   nextSeverityLevel,
   nextSeverityThreshold,
   isMultiSeveritySupported,
@@ -163,26 +163,19 @@ describe('severity helpers', () => {
     });
   });
 
-  describe('normalizeSeverityOrder', () => {
-    it('sorts multi levels least-to-most severe (keeps each level threshold)', () => {
-      const result = normalizeSeverityOrder({
-        mode: 'multi',
-        singleLevelSeverity: 'high',
-        levels: [
-          { id: 'a', severity: 'critical', threshold: 0.95 },
-          { id: 'b', severity: 'medium', threshold: 0.9 },
-        ],
-      });
-      expect(result?.levels.map((l) => [l.severity, l.threshold])).toEqual([
+  describe('sortLevelsBySeverity', () => {
+    it('returns a copy sorted least-to-most severe, keeping each level threshold', () => {
+      const levels = [
+        { id: 'a', severity: 'critical' as const, threshold: 0.95 },
+        { id: 'b', severity: 'medium' as const, threshold: 0.9 },
+      ];
+      const result = sortLevelsBySeverity(levels);
+      expect(result.map((l) => [l.severity, l.threshold])).toEqual([
         ['medium', 0.9],
         ['critical', 0.95],
       ]);
-    });
-
-    it('leaves single mode and undefined untouched', () => {
-      const single: SeverityConfig = { mode: 'single', singleLevelSeverity: 'high', levels: [] };
-      expect(normalizeSeverityOrder(single)).toBe(single);
-      expect(normalizeSeverityOrder(undefined)).toBeUndefined();
+      // Does not mutate the input.
+      expect(levels[0].severity).toBe('critical');
     });
   });
 

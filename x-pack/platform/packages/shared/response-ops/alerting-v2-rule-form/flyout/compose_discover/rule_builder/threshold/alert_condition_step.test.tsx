@@ -1187,7 +1187,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       expect(next.severity?.levels[1].threshold).toBe(200);
     });
 
-    it('re-normalizes level order when a row is set to an out-of-order severity', () => {
+    it('keeps the stored level order when a row severity changes (no auto-reorder)', () => {
       const onBuilderStateChange = jest.fn();
       const builderState = makeBuilderState({
         severity: {
@@ -1209,13 +1209,13 @@ describe('RuleBuilderAlertConditionStep', () => {
         </Wrapper>
       );
 
-      // Change row 0 (low) to critical — the stored array is kept least-to-most severe,
-      // so critical moves to the end and levels[0] stays the least-severe fallback.
+      // Change row 0 (low) to critical — the row stays put; ES|QL generation sorts a copy,
+      // so the UI never reorders the rows under the user.
       fireEvent.change(screen.getByTestId('ruleBuilderSeverityLevel-0'), {
         target: { value: 'critical' },
       });
       const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
-      expect(next.severity?.levels.map((l) => l.severity)).toEqual(['medium', 'critical']);
+      expect(next.severity?.levels.map((l) => l.severity)).toEqual(['critical', 'medium']);
     });
   });
 });

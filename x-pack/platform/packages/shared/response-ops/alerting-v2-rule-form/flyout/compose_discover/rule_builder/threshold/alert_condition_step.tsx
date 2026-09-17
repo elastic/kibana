@@ -60,7 +60,6 @@ import {
   generateId,
   getAvailableMetricLabels,
   reconcileSeverity,
-  normalizeSeverityOrder,
   isSeveritySupported,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
@@ -446,7 +445,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   const updateSeverity = useCallback(
     (severity: ThresholdFormValues['severity']) => {
-      onThresholdValuesChange({ ...thresholdValues, severity: normalizeSeverityOrder(severity) });
+      onThresholdValuesChange({ ...thresholdValues, severity });
     },
     [thresholdValues, onThresholdValuesChange]
   );
