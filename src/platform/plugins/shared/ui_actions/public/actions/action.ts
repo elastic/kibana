@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC } from 'react';
 import type { Presentable } from '@kbn/ui-actions-browser/src/types';
 import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -70,6 +71,8 @@ export interface Action<Context extends object = object, ActionExtension extends
    * The action type is what determines the context shape.
    */
   readonly type: string;
+
+  readonly MenuItem?: FC<ActionMenuItemProps<Context>>;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
