@@ -1,5 +1,5 @@
 version: '1'
-name: Deductive Investigation
+name: Nightshift Investigation
 description: >
   General-purpose investigation. Ensures the investigator agent exists, persists
   the run, calls the agent with the caller's prompt, then writes the result back.
@@ -7,7 +7,7 @@ enabled: true
 settings:
   timeout: '60m'
   concurrency:
-    key: 'deductive-investigation-{{ inputs.concurrency_key | default: execution.id }}'
+    key: 'nightshift-investigation-{{ inputs.concurrency_key | default: execution.id }}'
     strategy: cancel-in-progress
     max: 1
 tags:
