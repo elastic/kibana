@@ -58415,6 +58415,7 @@
     "xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle": "アクション",
     "xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel": "アクションの追加",
     "xpack.triggersActionsUI.sections.actionForm.getMoreConnectorsTitle": "その他のコネクターを取得",
+    "xpack.triggersActionsUI.sections.actionForm.incidentManagementSystemLabel": "インシデント管理システム",
     "xpack.triggersActionsUI.sections.actionForm.loadingConnectorsDescription": "コネクターを読み込んでいます…",
     "xpack.triggersActionsUI.sections.actionForm.loadingConnectorTypesDescription": "コネクタータイプを読み込んでいます...",
     "xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage": "（構成済み）",

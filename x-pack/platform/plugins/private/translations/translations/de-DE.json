@@ -58220,6 +58220,7 @@
     "xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle": "Aktionen",
     "xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel": "Aktion hinzufügen",
     "xpack.triggersActionsUI.sections.actionForm.getMoreConnectorsTitle": "Holen Sie sich mehr Connectoren",
+    "xpack.triggersActionsUI.sections.actionForm.incidentManagementSystemLabel": "Incident-Management-System",
     "xpack.triggersActionsUI.sections.actionForm.loadingConnectorsDescription": "Konnektoren werden geladen…",
     "xpack.triggersActionsUI.sections.actionForm.loadingConnectorTypesDescription": "Konnektortypen werden geladen…",
     "xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage": "(vorkonfiguriert)",

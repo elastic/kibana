@@ -139,10 +139,12 @@ describe('connectors_selection', () => {
     expect(
       screen.getByRole('combobox', { name: 'Use another Test connector' })
     ).toBeInTheDocument();
-    expect(screen.queryByRole('combobox', { name: 'Test connector' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('combobox', { name: 'Incident management system' })
+    ).not.toBeInTheDocument();
   });
 
-  it('falls back to an action type derived aria-label', () => {
+  it('falls back to a static aria-label when no label element is given', () => {
     render(
       <KibanaThemeProvider {...core}>
         <ConnectorsSelection
@@ -156,6 +158,8 @@ describe('connectors_selection', () => {
       </KibanaThemeProvider>
     );
 
-    expect(screen.getByRole('combobox', { name: 'Test connector' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('combobox', { name: 'Incident management system' })
+    ).toBeInTheDocument();
   });
 });

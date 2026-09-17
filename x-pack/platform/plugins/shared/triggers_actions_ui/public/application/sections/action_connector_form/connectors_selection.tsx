@@ -28,7 +28,7 @@ interface SelectionProps {
   allowGroupConnector?: string[];
   /**
    * ID of the element holding the visible label, so the announced name matches
-   * it. Falls back to a generic `aria-label` when not provided.
+   * it. Falls back to a static `aria-label` when not provided.
    */
   'aria-labelledby'?: string;
   actionItem: RuleUiAction;
@@ -86,7 +86,7 @@ function ConnectorsSelectionComponent({
 
   return (
     <EuiComboBox
-      aria-label={ariaLabelledBy ? undefined : getFallbackAriaLabel(actionItem, actionTypesIndex)}
+      aria-label={ariaLabelledBy ? undefined : incidentManagemSystem}
       aria-labelledby={ariaLabelledBy}
       data-test-subj={`selectActionConnector-${actionItem.actionTypeId}-${accordionIndex}`}
       fullWidth
@@ -155,10 +155,9 @@ const getTitle = (connector: ActionConnector, actionTypeRegistered: ActionTypeMo
   return connector.name;
 };
 
-const getFallbackAriaLabel = (actionItem: RuleUiAction, actionTypesIndex: ActionTypeIndex) =>
-  i18n.translate('xpack.triggersActionsUI.sections.actionForm.connectorsSelectionAriaLabel', {
-    defaultMessage: '{connectorInstance} connector',
-    values: {
-      connectorInstance: actionTypesIndex[actionItem.actionTypeId]?.name ?? actionItem.actionTypeId,
-    },
-  });
+const incidentManagemSystem = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionForm.incidentManagementSystemLabel',
+  {
+    defaultMessage: 'Incident management system',
+  }
+);
