@@ -102,7 +102,7 @@ export SANDBOX_CA_CERT_PATH=/absolute/path/to/sandbox-service/ssl/server.crt
 
 Scout reads the PEM files into the current `sandbox.ssl` configuration and connects with mTLS.
 The sandbox configuration is passed through a mode-0600 temporary file in a private directory,
-so sandbox credentials and the telemetry password do not appear in process arguments. Scout removes the
+so sandbox credentials, connector secrets, and trace-exporter headers do not appear in process arguments. Scout removes the
 temporary directory when its process exits normally.
 The gRPC API listens on `9090`; `8090` is only for probes. Leave the `WORKSPACE_SNAPSHOT_*`
 variables unset so each new conversation starts independently. Persistence is owned by
