@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { EsqlService } from '@kbn/esql-server-utils';
 import { VIEWS_BULK_DELETE_ROUTE, VIEWS_ROUTE } from '@kbn/esql-types';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
@@ -53,7 +53,12 @@ const reportRouteSuccess = (route: string): void => {
   });
 };
 
-export const registerViewsManagementRoutes = (router: IRouter, logger: Logger): void => {
+export const registerViewsManagementRoutes = (
+  router: IRouter,
+  { logger }: PluginInitializerContext
+): void => {
+  const pluginLogger = logger.get();
+
   router.get(
     {
       path: `${VIEWS_ROUTE}/{name}`,
@@ -83,7 +88,7 @@ export const registerViewsManagementRoutes = (router: IRouter, logger: Logger): 
         reportRouteSuccess('views.get');
         return response.ok({ body: view });
       } catch (error) {
-        return response.customError(reportRouteError('views.get', 'get', error, logger));
+        return response.customError(reportRouteError('views.get', 'get', error, pluginLogger));
       }
     }
   );
@@ -116,7 +121,9 @@ export const registerViewsManagementRoutes = (router: IRouter, logger: Logger): 
         reportRouteSuccess('views.upsert');
         return response.ok({ body: result });
       } catch (error) {
-        return response.customError(reportRouteError('views.upsert', 'upsert', error, logger));
+        return response.customError(
+          reportRouteError('views.upsert', 'upsert', error, pluginLogger)
+        );
       }
     }
   );
@@ -144,7 +151,9 @@ export const registerViewsManagementRoutes = (router: IRouter, logger: Logger): 
         reportRouteSuccess('views.delete');
         return response.ok({ body: result });
       } catch (error) {
-        return response.customError(reportRouteError('views.delete', 'delete', error, logger));
+        return response.customError(
+          reportRouteError('views.delete', 'delete', error, pluginLogger)
+        );
       }
     }
   );
@@ -178,7 +187,7 @@ export const registerViewsManagementRoutes = (router: IRouter, logger: Logger): 
         return response.ok({ body: result });
       } catch (error) {
         return response.customError(
-          reportRouteError('views.bulk_delete', 'bulk delete', error, logger)
+          reportRouteError('views.bulk_delete', 'bulk delete', error, pluginLogger)
         );
       }
     }

@@ -96,7 +96,7 @@ describe('ES|QL views routes', () => {
   describe('management routes', () => {
     it('registers the consolidated route paths', () => {
       const mocks = createMocks();
-      registerViewsManagementRoutes(mocks.router, mocks.logger);
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       expect(mocks.routerMocks.get).toHaveBeenCalledWith(
         expect.objectContaining({ path: `${VIEWS_ROUTE}/{name}` }),
@@ -120,7 +120,7 @@ describe('ES|QL views routes', () => {
       const mocks = createMocks();
       const view = { name: 'my-view', query: 'FROM logs-*' };
       service.getView.mockResolvedValue(view);
-      registerViewsManagementRoutes(mocks.router, mocks.logger);
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await expect(
         mocks.handlers.get(
@@ -138,7 +138,7 @@ describe('ES|QL views routes', () => {
     it('returns not found when an exact-name response is empty', async () => {
       const mocks = createMocks();
       service.getView.mockResolvedValue(undefined);
-      registerViewsManagementRoutes(mocks.router, mocks.logger);
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await expect(
         mocks.handlers.get(
@@ -152,7 +152,7 @@ describe('ES|QL views routes', () => {
     it('upserts name, query, and description', async () => {
       const mocks = createMocks();
       service.upsertView.mockResolvedValue({ acknowledged: true });
-      registerViewsManagementRoutes(mocks.router, mocks.logger);
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await expect(
         mocks.handlers.put(
@@ -174,7 +174,7 @@ describe('ES|QL views routes', () => {
     it('deletes one view', async () => {
       const mocks = createMocks();
       service.deleteViews.mockResolvedValue({ acknowledged: true });
-      registerViewsManagementRoutes(mocks.router, mocks.logger);
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await mocks.handlers.delete(
         mocks.requestHandlerContext,
@@ -188,7 +188,7 @@ describe('ES|QL views routes', () => {
     it('bulk deletes views', async () => {
       const mocks = createMocks();
       service.deleteViews.mockResolvedValue({ acknowledged: true });
-      registerViewsManagementRoutes(mocks.router, mocks.logger);
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await mocks.handlers.post(
         mocks.requestHandlerContext,
@@ -203,7 +203,7 @@ describe('ES|QL views routes', () => {
       const mocks = createMocks();
       const error = Object.assign(new Error('Conflict'), { statusCode: 409 });
       service.upsertView.mockRejectedValue(error);
-      registerViewsManagementRoutes(mocks.router, mocks.logger);
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await expect(
         mocks.handlers.put(

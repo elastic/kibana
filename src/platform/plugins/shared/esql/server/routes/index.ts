@@ -34,7 +34,7 @@ export const registerRoutes = (
   registerGetJoinIndicesRoute(router, initContext);
   registerGetTimeseriesIndicesRoute(router, initContext);
   registerGetViewsRoute(router, initContext);
-  registerViewsManagementRoutes(router, initContext.logger.get());
+  registerViewsManagementRoutes(router, initContext);
   registerGetDatasetsRoute(router, initContext);
   registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
   registerGetInferenceEndpointsRoute(router, initContext);
