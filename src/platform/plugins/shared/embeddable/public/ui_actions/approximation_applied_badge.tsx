@@ -48,7 +48,4 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
   execute: async ({ embeddable }: EmbeddableApiContext) => {
     return;
   },
-  extension: {
-    color: 'success',
-  },
 };
