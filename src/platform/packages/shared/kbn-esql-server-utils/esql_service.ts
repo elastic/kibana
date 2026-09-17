@@ -13,6 +13,9 @@ import {
   type IndexAutocompleteItem,
   type ResolveIndexResponse,
   type ESQLFieldWithMetadata,
+  type EsqlView,
+  type EsqlViewMutationResponse,
+  type UpsertEsqlViewRequest,
   SOURCES_TYPES,
 } from '@kbn/esql-types';
 import type { EsqlFieldType, EsqlViewsResult } from '@kbn/esql-types';
@@ -220,13 +223,45 @@ export class EsqlService {
    */
   public async getViews(): Promise<EsqlViewsResult> {
     const { client } = this.options;
-    const response = await client.transport.request<{
-      views: Array<{ name: string; query: string }>;
-    }>({
-      method: 'GET',
-      path: '/_query/view',
-    });
+    const response = await client.esql.getView();
     return response ?? { views: [] };
+  }
+
+  /**
+   * Get an ES|QL view by name.
+   * @param name The exact view name.
+   * @returns The matching view, or undefined when Elasticsearch returns no match.
+   */
+  public async getView(name: string): Promise<EsqlView | undefined> {
+    const { client } = this.options;
+    const { views } = await client.esql.getView({ name });
+    return views[0];
+  }
+
+  /**
+   * Create or update an ES|QL view.
+   * @param request The view definition.
+   * @returns The Elasticsearch acknowledgement response.
+   */
+  public async upsertView(request: UpsertEsqlViewRequest): Promise<EsqlViewMutationResponse> {
+    const { client } = this.options;
+    const { name, query, description } = request;
+
+    return client.esql.putView({
+      name,
+      query,
+      ...(description === undefined ? {} : { body: { description } }),
+    });
+  }
+
+  /**
+   * Delete one or more ES|QL views.
+   * @param names The exact view names.
+   * @returns The Elasticsearch acknowledgement response.
+   */
+  public async deleteViews(names: string[]): Promise<EsqlViewMutationResponse> {
+    const { client } = this.options;
+    return client.esql.deleteView({ name: names });
   }
 
   /**

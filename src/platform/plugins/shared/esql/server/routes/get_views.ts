@@ -39,18 +39,20 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
           body: result,
         });
       } catch (error) {
+        const statusCode = getErrorStatusCode(error);
         esqlRouteRequestCounter.add(1, {
           route: 'views',
           outcome: 'failure',
-          'http.response.status_code': getErrorStatusCode(error),
+          'http.response.status_code': statusCode,
         });
         const message = error instanceof Error ? error.message : String(error);
         logger.get().error(`Failed to fetch ES|QL views: ${message}`, {
           tags: ['esql', 'views'],
           error: { stack_trace: error instanceof Error ? error.stack : undefined },
         });
-        return response.ok({
-          body: { views: [] },
+        return response.customError({
+          statusCode,
+          body: { message },
         });
       }
     }

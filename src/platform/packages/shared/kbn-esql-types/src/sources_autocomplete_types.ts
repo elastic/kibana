@@ -55,6 +55,20 @@ export interface EsqlViewsResult {
   views: EsqlView[];
 }
 
+export interface UpsertEsqlViewRequest {
+  name: string;
+  query: string;
+  description?: string;
+}
+
+export interface DeleteEsqlViewsRequest {
+  names: string[];
+}
+
+export interface EsqlViewMutationResponse {
+  acknowledged: boolean;
+}
+
 export interface EsqlDataset {
   name: string;
   data_source: string;

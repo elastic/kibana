@@ -30,6 +30,9 @@ export {
   type ESQLSourceResult,
   type EsqlView,
   type EsqlViewsResult,
+  type UpsertEsqlViewRequest,
+  type DeleteEsqlViewsRequest,
+  type EsqlViewMutationResponse,
   type EsqlDataset,
   type EsqlDatasetsResult,
 } from './src/sources_autocomplete_types';
@@ -53,6 +56,8 @@ export {
   TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE,
   TIMEFIELD_ROUTE,
   VIEWS_ROUTE,
+  VIEWS_BULK_DELETE_ROUTE,
+  getViewRoute,
   DATASETS_ROUTE,
   NL_TO_ESQL_ROUTE,
   SUGGEST_FIX_ROUTE,

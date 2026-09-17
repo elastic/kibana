@@ -114,3 +114,88 @@ describe('EsqlService.getAllIndices', () => {
     });
   });
 });
+
+describe('EsqlService ES|QL views', () => {
+  const makeViewsClient = (esql: {
+    getView?: jest.Mock;
+    putView?: jest.Mock;
+    deleteView?: jest.Mock;
+  }) => ({ esql } as unknown as ElasticsearchClient);
+
+  it('gets all views through the generated Elasticsearch client', async () => {
+    const response = {
+      views: [{ name: 'my-view', query: 'FROM logs-*', description: 'Logs' }],
+    };
+    const getView = jest.fn().mockResolvedValue(response);
+    const service = new EsqlService({ client: makeViewsClient({ getView }) });
+
+    await expect(service.getViews()).resolves.toEqual(response);
+    expect(getView).toHaveBeenCalledWith();
+  });
+
+  it('gets one view by name', async () => {
+    const view = { name: 'my-view', query: 'FROM logs-*' };
+    const getView = jest.fn().mockResolvedValue({ views: [view] });
+    const service = new EsqlService({ client: makeViewsClient({ getView }) });
+
+    await expect(service.getView('my-view')).resolves.toEqual(view);
+    expect(getView).toHaveBeenCalledWith({ name: 'my-view' });
+  });
+
+  it('returns undefined when an exact-name response has no views', async () => {
+    const getView = jest.fn().mockResolvedValue({ views: [] });
+    const service = new EsqlService({ client: makeViewsClient({ getView }) });
+
+    await expect(service.getView('missing-view')).resolves.toBeUndefined();
+  });
+
+  it('upserts a view with its description', async () => {
+    const response = { acknowledged: true };
+    const putView = jest.fn().mockResolvedValue(response);
+    const service = new EsqlService({ client: makeViewsClient({ putView }) });
+
+    await expect(
+      service.upsertView({
+        name: 'my-view',
+        query: 'FROM logs-*',
+        description: 'Logs',
+      })
+    ).resolves.toEqual(response);
+    expect(putView).toHaveBeenCalledWith({
+      name: 'my-view',
+      query: 'FROM logs-*',
+      body: { description: 'Logs' },
+    });
+  });
+
+  it('omits the optional description body when upserting', async () => {
+    const putView = jest.fn().mockResolvedValue({ acknowledged: true });
+    const service = new EsqlService({ client: makeViewsClient({ putView }) });
+
+    await service.upsertView({ name: 'my-view', query: 'FROM logs-*' });
+
+    expect(putView).toHaveBeenCalledWith({
+      name: 'my-view',
+      query: 'FROM logs-*',
+    });
+  });
+
+  it('deletes multiple views in one Elasticsearch request', async () => {
+    const response = { acknowledged: true };
+    const deleteView = jest.fn().mockResolvedValue(response);
+    const service = new EsqlService({ client: makeViewsClient({ deleteView }) });
+
+    await expect(service.deleteViews(['first-view', 'second-view'])).resolves.toEqual(response);
+    expect(deleteView).toHaveBeenCalledWith({
+      name: ['first-view', 'second-view'],
+    });
+  });
+
+  it('propagates Elasticsearch errors', async () => {
+    const error = new Error('Elasticsearch unavailable');
+    const getView = jest.fn().mockRejectedValue(error);
+    const service = new EsqlService({ client: makeViewsClient({ getView }) });
+
+    await expect(service.getViews()).rejects.toBe(error);
+  });
+});
