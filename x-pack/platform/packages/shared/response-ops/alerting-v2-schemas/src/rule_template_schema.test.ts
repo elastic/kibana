@@ -12,6 +12,7 @@ import {
   ruleTemplateDataSchema,
   ruleTemplateIdParamsSchema,
 } from './rule_template_schema';
+import { FIND_MAX_RESULT_WINDOW, RULE_TEMPLATE_MAX_PER_PAGE } from './constants';
 
 const exampleTemplateAttributes = {
   engine: 'v2' as const,
@@ -120,6 +121,68 @@ describe('ruleTemplateDataSchema', () => {
         },
       })
     ).toThrow(/Signal rules cannot set recovery_strategy/);
+  });
+});
+
+describe('findRuleTemplatesRequestSchema', () => {
+  it('accepts an empty object', () => {
+    expect(findRuleTemplatesRequestSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid query params', () => {
+    expect(
+      findRuleTemplatesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        search: 'kubernetes',
+        sort_field: 'name',
+        sort_order: 'asc',
+        tags: ['Kubernetes'],
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      search: 'kubernetes',
+      sort_field: 'name',
+      sort_order: 'asc',
+      tags: ['Kubernetes'],
+    });
+  });
+
+  it('coerces numeric strings for page and per_page', () => {
+    expect(findRuleTemplatesRequestSchema.parse({ page: '2', per_page: '50' })).toEqual({
+      page: 2,
+      per_page: 50,
+    });
+  });
+
+  it.each([0, 1.5, 'abc', FIND_MAX_RESULT_WINDOW + 1])('rejects page %p', (page) => {
+    expect(findRuleTemplatesRequestSchema.safeParse({ page }).success).toBe(false);
+  });
+
+  it.each([0, 1.5, RULE_TEMPLATE_MAX_PER_PAGE + 1])('rejects per_page %p', (perPage) => {
+    expect(findRuleTemplatesRequestSchema.safeParse({ per_page: perPage }).success).toBe(false);
+  });
+
+  it('rejects a page beyond the result window', () => {
+    const lastPage = FIND_MAX_RESULT_WINDOW / RULE_TEMPLATE_MAX_PER_PAGE;
+
+    expect(
+      findRuleTemplatesRequestSchema.safeParse({
+        page: lastPage,
+        per_page: RULE_TEMPLATE_MAX_PER_PAGE,
+      }).success
+    ).toBe(true);
+    expect(
+      findRuleTemplatesRequestSchema.safeParse({
+        page: lastPage + 1,
+        per_page: RULE_TEMPLATE_MAX_PER_PAGE,
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => findRuleTemplatesRequestSchema.parse({ unknown_field: 'x' })).toThrow();
   });
 });
 
@@ -329,10 +392,12 @@ describe('rule template create-rule schema coupling', () => {
               "properties": Object {
                 "every": Object {
                   "description": "Execution interval, e.g. 1m, 5m, 1h.",
+                  "maxLength": 32,
                   "type": "string",
                 },
                 "lookback": Object {
                   "description": "Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.",
+                  "maxLength": 32,
                   "type": "string",
                 },
               },
@@ -512,6 +577,7 @@ describe('rule template create-rule schema coupling', () => {
                     },
                     "pending_timeframe": Object {
                       "description": "Time window used with \`pending_count\`, for example \`5m\` or \`15m\`.",
+                      "maxLength": 32,
                       "type": "string",
                     },
                     "recovering_count": Object {
@@ -530,6 +596,7 @@ describe('rule template create-rule schema coupling', () => {
                     },
                     "recovering_timeframe": Object {
                       "description": "Time window used with \`recovering_count\`, for example \`5m\` or \`15m\`.",
+                      "maxLength": 32,
                       "type": "string",
                     },
                   },
@@ -604,36 +671,6 @@ describe('rule template create-rule schema coupling', () => {
       rule: createJson,
       createRule: createJson,
     });
-  });
-});
-
-describe('findRuleTemplatesRequestSchema', () => {
-  it('accepts an empty object', () => {
-    expect(findRuleTemplatesRequestSchema.parse({})).toEqual({});
-  });
-
-  it('accepts valid query params', () => {
-    expect(
-      findRuleTemplatesRequestSchema.parse({
-        page: 2,
-        per_page: 50,
-        search: 'kubernetes',
-        sort_field: 'name',
-        sort_order: 'asc',
-        tags: ['Kubernetes'],
-      })
-    ).toEqual({
-      page: 2,
-      per_page: 50,
-      search: 'kubernetes',
-      sort_field: 'name',
-      sort_order: 'asc',
-      tags: ['Kubernetes'],
-    });
-  });
-
-  it('rejects unknown keys', () => {
-    expect(() => findRuleTemplatesRequestSchema.parse({ unknown_field: 'x' })).toThrow();
   });
 });
 
