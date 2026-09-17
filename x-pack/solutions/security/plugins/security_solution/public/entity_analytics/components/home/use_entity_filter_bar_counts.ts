@@ -13,7 +13,11 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
-import { ValidCriticalityLevels } from '../../../../common/entity_analytics/asset_criticality/constants';
+import {
+  CriticalityLevelsForBulkUpload,
+  ValidCriticalityLevels,
+} from '../../../../common/entity_analytics/asset_criticality/constants';
+import { RiskSeverity } from '../../../../common/search_strategy';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
@@ -97,10 +101,15 @@ export const useEntityFilterBarCounts = ({
                 terms: {
                   field: 'entity.risk.calculated_level',
                   size: SEVERITY_UI_SORT_ORDER.length,
+                  missing: RiskSeverity.Unknown,
                 },
               },
               asset_criticality: {
-                terms: { field: 'asset.criticality', size: ValidCriticalityLevels.length },
+                terms: {
+                  field: 'asset.criticality',
+                  size: ValidCriticalityLevels.length,
+                  missing: CriticalityLevelsForBulkUpload.UNASSIGNED,
+                },
               },
               watchlists: { terms: { field: 'entity.attributes.watchlists', size: 200 } },
               data_sources: { terms: { field: 'entity.source', size: 200 } },
