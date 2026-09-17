@@ -117,6 +117,13 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
   spaceTest(
     'removes the annotation layer from the editor and dashboard panel once its library group is deleted',
     async ({ page, pageObjects: { visualize, lens, dashboard } }) => {
+      // Establish the precondition in this test rather than relying on the previous one: both
+      // panels render the linked annotation's marker. Assert the icon, not the text, because the
+      // archive ships the group with text visibility off (a fresh worker restores that state).
+      const annotationIcons = page.testSubj.locator('xyVisAnnotationIcon');
+      await dashboard.openDashboardWithId(dashboardId);
+      await expect(annotationIcons).toHaveCount(2);
+
       await deleteAnnotationGroupFromLibrary(page, ANNOTATION_GROUP_TITLE);
 
       await visualize.goto();
@@ -126,7 +133,7 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
       await expect.poll(() => lens.layers.getLayerCount()).toBe(1);
 
       await dashboard.openDashboardWithId(dashboardId);
-      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveCount(0);
+      await expect(annotationIcons).toHaveCount(0);
     }
   );
 });
