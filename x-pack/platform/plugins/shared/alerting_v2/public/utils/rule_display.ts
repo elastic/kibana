@@ -6,10 +6,9 @@
  */
 
 import { formatDuration } from '@kbn/alerting-plugin/common';
-import type { NoDataStrategy } from '@kbn/alerting-v2-schemas';
+import type { NoDataStrategy, RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { recoveryStrategy, type Query, type RecoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import type { RuleApiResponse } from '../../services/rules_api';
 
 export const EMPTY_VALUE = '-';
 
@@ -24,6 +23,9 @@ const AND_OPERATOR_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.delayCon
 const OR_OPERATOR_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.delayConnectorOr', {
   defaultMessage: 'or',
 });
+
+const QUERY_OVERFLOW_MAX_VISIBLE_LINES = 5;
+const QUERY_OVERFLOW_HEIGHT = 240;
 
 /**
  * Builds a human-readable delay string from a count, timeframe, and operator.
@@ -90,7 +92,7 @@ const recoveryLabel = (n: number) =>
     values: { n },
   });
 
-export function formatAlertDelay(stateTransition: RuleApiResponse['state_transition']): string {
+export function formatAlertDelay(stateTransition: RuleAttachmentData['state_transition']): string {
   if (stateTransition?.pending_count == null && stateTransition?.pending_timeframe == null) {
     return EMPTY_VALUE;
   }
@@ -107,7 +109,9 @@ export function formatAlertDelay(stateTransition: RuleApiResponse['state_transit
   });
 }
 
-export function formatRecoveryDelay(stateTransition: RuleApiResponse['state_transition']): string {
+export function formatRecoveryDelay(
+  stateTransition: RuleAttachmentData['state_transition']
+): string {
   if (stateTransition?.recovering_count == null && stateTransition?.recovering_timeframe == null) {
     return EMPTY_VALUE;
   }
@@ -144,7 +148,7 @@ export function formatNoDataStrategy(strategy?: NoDataStrategy | null): string {
   return NO_DATA_STRATEGY_LABELS[strategy] ?? EMPTY_VALUE;
 }
 
-export function getRecoverEsqlSegment(
+export function getDisplayRecoveryCondition(
   query: Query,
   strategy?: RecoveryStrategy
 ): string | undefined {
@@ -153,6 +157,35 @@ export function getRecoverEsqlSegment(
     return query.recovery.segment;
   }
   return query.recovery.query;
+}
+
+/**
+ * Display parts for the conditions panel. Composed rules use the stored base /
+ * breach segment; standalone rules have a single query and no alert condition.
+ */
+export function getDisplayQueryParts(query: Query): {
+  baseQuery: string;
+  alertCondition?: string;
+} {
+  if (query.format === 'composed') {
+    const segment = query.breach?.segment?.trim();
+    return {
+      baseQuery: query.base,
+      ...(segment ? { alertCondition: segment } : {}),
+    };
+  }
+
+  return { baseQuery: query.breach.query };
+}
+
+export function getQueryOverflowHeight(query: string): number | undefined {
+  if (!query.trim()) {
+    return undefined;
+  }
+
+  return query.split('\n').length > QUERY_OVERFLOW_MAX_VISIBLE_LINES
+    ? QUERY_OVERFLOW_HEIGHT
+    : undefined;
 }
 
 const RECOVERY_STRATEGY_LABELS: Record<RecoveryStrategy, string> = {
