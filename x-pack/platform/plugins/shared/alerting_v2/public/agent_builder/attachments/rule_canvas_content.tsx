@@ -22,10 +22,10 @@ import {
   RuleSummaryBody,
   RuleSummaryInvestigationSection,
 } from '../../components/rule/rule_summary';
+import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
 import { paths } from '../../constants';
 import { RulesApi } from '../../services/rules_api';
 import type { RuleAttachment } from './rule_attachment_definition';
-import { RuleQueryPreviewSection } from './rule_query_preview_section';
 
 export interface RuleCanvasContentProps
   extends AttachmentRenderProps<RuleAttachment>,
@@ -132,7 +132,7 @@ export const RuleCanvasContent = ({
       <EuiPanel paddingSize="l" hasShadow={false}>
         <RuleSummaryBody rule={summaryRule}>
           <RuleSummaryAboutSection />
-          <RuleQueryPreviewSection />
+          <RuleSummaryQueryPreviewSection />
           <RuleSummaryInvestigationSection />
           <RuleSummaryArtifactsSection />
         </RuleSummaryBody>

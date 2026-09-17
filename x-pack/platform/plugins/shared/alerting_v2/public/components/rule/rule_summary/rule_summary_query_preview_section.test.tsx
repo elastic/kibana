@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { RuleSummaryData } from '../../components/rule/types';
-import { RuleSummaryBody } from '../../components/rule/rule_summary';
-import { RuleQueryPreviewSection } from './rule_query_preview_section';
+import type { RuleSummaryData } from '../types';
+import { RuleSummaryBody } from './rule_summary_body';
+import { RuleSummaryQueryPreviewSection } from './rule_summary_query_preview_section';
 
 let capturedProps: Record<string, unknown> = {};
 
@@ -50,11 +50,11 @@ const rule: RuleSummaryData = {
 const renderQueryPreview = (summaryRule: RuleSummaryData = rule) =>
   render(
     <RuleSummaryBody rule={summaryRule}>
-      <RuleQueryPreviewSection />
+      <RuleSummaryQueryPreviewSection />
     </RuleSummaryBody>
   );
 
-describe('RuleQueryPreviewSection', () => {
+describe('RuleSummaryQueryPreviewSection', () => {
   beforeEach(() => {
     capturedProps = {};
     jest.clearAllMocks();

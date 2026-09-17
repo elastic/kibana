@@ -48,8 +48,8 @@ jest.mock('../../components/rule/rule_summary', () => ({
   RuleSummaryArtifactsSection: () => <div data-test-subj="mockArtifactsSection" />,
 }));
 
-jest.mock('./rule_query_preview_section', () => ({
-  RuleQueryPreviewSection: () => <div data-test-subj="mockQueryPreviewSection" />,
+jest.mock('../../components/rule/rule_summary/rule_summary_query_preview_section', () => ({
+  RuleSummaryQueryPreviewSection: () => <div data-test-subj="mockQueryPreviewSection" />,
 }));
 
 const createMockServices = () => ({

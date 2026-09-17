@@ -21,9 +21,9 @@ import { QuerySandbox, RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { i18n } from '@kbn/i18n';
-import { useRuleSummary } from '../../components/rule/rule_summary';
+import { useRuleSummary } from './rule_summary_context';
 
-export const RuleQueryPreviewSection: React.FC = () => {
+export const RuleSummaryQueryPreviewSection: React.FC = () => {
   const rule = useRuleSummary();
   const query = rule.query ? getRootEsqlQuery(rule.query) : '';
   const timeField = rule.time_field ?? '@timestamp';
@@ -52,7 +52,7 @@ export const RuleQueryPreviewSection: React.FC = () => {
 
   return (
     <FlyoutAccordion
-      title={i18n.translate('xpack.alertingV2.ruleAttachment.queryPreview', {
+      title={i18n.translate('xpack.alertingV2.ruleSummary.queryPreview', {
         defaultMessage: 'Query preview',
       })}
       hasBorder={false}
