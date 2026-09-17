@@ -18615,7 +18615,6 @@
     "xpack.dataFederation.createFlyout.authentication.anonymous": "Anonym",
     "xpack.dataFederation.createFlyout.authentication.azure.credentials": "Zugangsdaten",
     "xpack.dataFederation.createFlyout.authentication.federatedIdentity": "Föderierte Identität",
-    "xpack.dataFederation.createFlyout.authentication.helpAriaLabel": "Cloud-Sicherheitsdokumentation öffnen",
     "xpack.dataFederation.createFlyout.authentication.label": "Bevorzugte Methode",
     "xpack.dataFederation.createFlyout.authentication.title": "Authentifizierung",
     "xpack.dataFederation.createFlyout.azure.federated.optional.hide": "Optionale Authentifizierungseinstellungen ausblenden",

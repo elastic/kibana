@@ -18676,7 +18676,6 @@
     "xpack.dataFederation.createFlyout.authentication.anonymous": "匿名",
     "xpack.dataFederation.createFlyout.authentication.azure.credentials": "凭据",
     "xpack.dataFederation.createFlyout.authentication.federatedIdentity": "联邦身份",
-    "xpack.dataFederation.createFlyout.authentication.helpAriaLabel": "打开云安全文档",
     "xpack.dataFederation.createFlyout.authentication.label": "首选方法",
     "xpack.dataFederation.createFlyout.authentication.title": "身份验证",
     "xpack.dataFederation.createFlyout.azure.federated.optional.hide": "隐藏可选身份验证设置",
