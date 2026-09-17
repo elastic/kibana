@@ -350,6 +350,23 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx');
     });
 
+    it('rejects upload of package with security_ai_prompt asset for Fleet-only user — 403', async () => {
+      const aiPromptAsset = {
+        id: 'test-prompt-id',
+        type: 'security-ai-prompt',
+        attributes: { name: 'Test Prompt', content: 'You are a security assistant.' },
+      };
+      const buf = await buildPackageZipWithAssetType('security_ai_prompt', aiPromptAsset);
+
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(403);
+    });
+
     it('rejects upload of package with security_rule asset for Fleet-only user — 403 before any install writes', async () => {
       const securityRuleAsset = {
         id: 'test-rule-id',

@@ -100,6 +100,10 @@ export async function checkUploadPackageAssetPrivileges(
   contentType: string,
   spaceId: string
 ): Promise<void> {
+  if (appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
+    return;
+  }
+
   const signals = await collectArchiveSignals(archiveBuffer, contentType);
 
   if (signals.blockedTypes.length > 0) {

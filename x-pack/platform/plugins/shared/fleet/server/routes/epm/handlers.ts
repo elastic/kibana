@@ -701,9 +701,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const installSource = 'upload';
 
-  if (!appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
-    await checkUploadPackageAssetPrivileges(request, archiveBuffer, contentType, spaceId);
-  }
+  await checkUploadPackageAssetPrivileges(request, archiveBuffer, contentType, spaceId);
 
   const res = await installPackage({
     installSource,
