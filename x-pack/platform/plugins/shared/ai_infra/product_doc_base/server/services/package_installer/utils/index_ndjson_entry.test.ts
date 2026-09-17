@@ -11,19 +11,23 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ZipArchive } from './zip_archive';
 import { indexNdjsonEntry } from './index_ndjson_entry';
 
-const createArchive = (content: string, chunkSize = 7): ZipArchive => {
+const toChunks = (content: string, chunkSize: number) => {
   const buffer = Buffer.from(content);
-  const chunks = times(Math.ceil(buffer.length / chunkSize)).map((i) =>
+  return times(Math.ceil(buffer.length / chunkSize)).map((i) =>
     buffer.subarray(i * chunkSize, (i + 1) * chunkSize)
   );
-  return {
-    hasEntry: () => true,
-    getEntryPaths: () => ['content/content-0.ndjson'],
-    getEntryContent: async () => buffer,
-    getEntryStream: async () => Readable.from(chunks),
-    close: () => undefined,
-  };
 };
+
+const createArchive = (content: string, chunkSize = 7): ZipArchive =>
+  createArchiveFromStream(() => Readable.from(toChunks(content, chunkSize)));
+
+const createArchiveFromStream = (getStream: () => Readable): ZipArchive => ({
+  hasEntry: () => true,
+  getEntryPaths: () => ['content/content-0.ndjson'],
+  getEntryContent: async () => Buffer.alloc(0),
+  getEntryStream: async () => getStream(),
+  close: () => undefined,
+});
 
 const ndjson = (count: number) =>
   times(count)
@@ -89,6 +93,83 @@ describe('indexNdjsonEntry', () => {
     });
 
     expect(esClient.bulk).toHaveBeenCalledTimes(4);
+  });
+
+  it('decodes multi-byte characters split across stream chunks', async () => {
+    await indexNdjsonEntry({
+      archive: createArchive(JSON.stringify({ text: 'héllo wörld ✓' }), 3),
+      entryPath: 'content/content-0.ndjson',
+      indexName: '.foo',
+      esClient,
+      transformDocument: (doc) => doc,
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledWith({
+      refresh: false,
+      operations: [{ index: { _index: '.foo' } }, { text: 'héllo wörld ✓' }],
+    });
+  });
+
+  it('rejects when the entry stream errors after yielding partial data', async () => {
+    const chunks = toChunks(ndjson(3), 7);
+    const stream = new Readable({
+      read() {
+        const chunk = chunks.shift();
+        if (chunk) {
+          this.push(chunk);
+          return;
+        }
+        this.destroy(new Error('truncated entry'));
+      },
+    });
+
+    await expect(
+      indexNdjsonEntry({
+        archive: createArchiveFromStream(() => stream),
+        entryPath: 'content/content-0.ndjson',
+        indexName: '.foo',
+        esClient,
+        transformDocument: (doc) => doc,
+      })
+    ).rejects.toThrow('truncated entry');
+    expect(stream.destroyed).toBe(true);
+  });
+
+  it('stops consuming the entry stream while a bulk request is pending', async () => {
+    const lines = times(50).map((idx) => Buffer.from(`${JSON.stringify({ idx })}\n`));
+    let chunksRead = 0;
+    const stream = new Readable({
+      highWaterMark: 1,
+      read() {
+        chunksRead += 1;
+        this.push(lines.shift() ?? null);
+      },
+    });
+    let resolveBulk: () => void = () => undefined;
+    esClient.bulk.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveBulk = () => resolve({ errors: false, items: [] } as never);
+        })
+    );
+
+    const indexing = indexNdjsonEntry({
+      archive: createArchiveFromStream(() => stream),
+      entryPath: 'content/content-0.ndjson',
+      indexName: '.foo',
+      esClient,
+      transformDocument: (doc) => doc,
+      maxBulkDocs: 5,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    // 5 lines consumed plus at most the stream's internal read-ahead
+    expect(chunksRead).toBeLessThanOrEqual(7);
+
+    resolveBulk();
+    await indexing;
+    expect(esClient.bulk).toHaveBeenCalledTimes(10);
   });
 
   it('throws when a bulk response reports errors', async () => {

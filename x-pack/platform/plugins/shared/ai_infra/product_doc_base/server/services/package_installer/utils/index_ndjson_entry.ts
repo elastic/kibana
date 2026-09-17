@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createInterface } from 'readline';
+import type { Readable } from 'stream';
+import { StringDecoder } from 'string_decoder';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ZipArchive } from './zip_archive';
@@ -40,7 +41,6 @@ export const indexNdjsonEntry = async ({
   maxBulkDocs?: number;
 }): Promise<void> => {
   const stream = await archive.getEntryStream(entryPath);
-  const lines = createInterface({ input: stream, crlfDelay: Infinity });
 
   let operations: BulkOperations = [];
   let batchBytes = 0;
@@ -58,7 +58,7 @@ export const indexNdjsonEntry = async ({
   };
 
   try {
-    for await (const rawLine of lines) {
+    for await (const rawLine of readLines(stream)) {
       const line = rawLine.trim();
       if (line.length === 0) {
         continue;
@@ -72,10 +72,29 @@ export const indexNdjsonEntry = async ({
     }
     await flush();
   } finally {
-    lines.close();
     stream.destroy();
   }
 };
+
+// Pulls chunks through the stream's own async iterator: the stream stays paused while a bulk
+// request is awaited and stream errors reject the iteration, unlike `readline`'s iterator.
+async function* readLines(stream: Readable): AsyncGenerator<string> {
+  const decoder = new StringDecoder('utf8');
+  let buffered = '';
+  for await (const chunk of stream) {
+    buffered += typeof chunk === 'string' ? chunk : decoder.write(chunk);
+    let newlineIndex = buffered.indexOf('\n');
+    while (newlineIndex !== -1) {
+      yield buffered.slice(0, newlineIndex);
+      buffered = buffered.slice(newlineIndex + 1);
+      newlineIndex = buffered.indexOf('\n');
+    }
+  }
+  buffered += decoder.end();
+  if (buffered.length > 0) {
+    yield buffered;
+  }
+}
 
 const bulkIndex = async ({
   esClient,

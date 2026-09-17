@@ -22,8 +22,13 @@ export interface InstallLockManager {
   ): Promise<T>;
 }
 
+const allProductNames = Object.values(DocumentationProduct) as ProductName[];
+
+// Remaining items are at most every product plus the OpenAPI spec
 export const chunkedTaskStateSchema = schema.object({
-  remaining: schema.maybe(schema.arrayOf(schema.string())),
+  remaining: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: allProductNames.length + 1 })
+  ),
 });
 
 export type ChunkedTaskState = TypeOf<typeof chunkedTaskStateSchema>;
@@ -34,8 +39,6 @@ export const chunkedTaskStateSchemaByVersion = {
     up: (state: Record<string, unknown>) => state,
   },
 };
-
-const allProductNames = Object.values(DocumentationProduct) as ProductName[];
 
 export const isProductName = (value: string): value is ProductName =>
   allProductNames.includes(value as ProductName);
