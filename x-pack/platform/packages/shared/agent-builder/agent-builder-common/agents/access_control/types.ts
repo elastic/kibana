@@ -69,9 +69,7 @@ export interface AgentAccessControlEntry {
 }
 
 /** Identity key for an entry: `id` when present, otherwise the legacy `name`. */
-export const getAccessControlEntryKey = (
-  entry: Pick<AgentAccessControlEntry, 'type' | 'id' | 'name'>
-): string =>
+export const getAccessControlEntryKey = (entry: AgentAccessControlEntry): string =>
   entry.id !== undefined ? `${entry.type}:id:${entry.id}` : `${entry.type}:name:${entry.name}`;
 
 export interface AgentAccessControl {
