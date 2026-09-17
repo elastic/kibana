@@ -7,7 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { createRuleDataSchema } from './rule_data_schema';
-import { ruleTemplateDataSchema } from './rule_template_schema';
+import {
+  findRuleTemplatesRequestSchema,
+  ruleTemplateDataSchema,
+  ruleTemplateIdParamsSchema,
+} from './rule_template_schema';
 
 const exampleTemplateAttributes = {
   engine: 'v2' as const,
@@ -600,5 +604,49 @@ describe('rule template create-rule schema coupling', () => {
       rule: createJson,
       createRule: createJson,
     });
+  });
+});
+
+describe('findRuleTemplatesRequestSchema', () => {
+  it('accepts an empty object', () => {
+    expect(findRuleTemplatesRequestSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid query params', () => {
+    expect(
+      findRuleTemplatesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        search: 'kubernetes',
+        sort_field: 'name',
+        sort_order: 'asc',
+        tags: ['Kubernetes'],
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      search: 'kubernetes',
+      sort_field: 'name',
+      sort_order: 'asc',
+      tags: ['Kubernetes'],
+    });
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => findRuleTemplatesRequestSchema.parse({ unknown_field: 'x' })).toThrow();
+  });
+});
+
+describe('ruleTemplateIdParamsSchema', () => {
+  it('accepts a valid id', () => {
+    expect(ruleTemplateIdParamsSchema.parse({ id: 'template-1' })).toEqual({ id: 'template-1' });
+  });
+
+  it('rejects an empty id', () => {
+    expect(() => ruleTemplateIdParamsSchema.parse({ id: '' })).toThrow();
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => ruleTemplateIdParamsSchema.parse({ id: 'template-1', foo: 'bar' })).toThrow();
   });
 });

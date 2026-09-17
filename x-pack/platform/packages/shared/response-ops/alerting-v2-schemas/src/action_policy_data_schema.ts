@@ -275,29 +275,31 @@ export const findActionPoliciesSortFieldSchema = z
 export type FindActionPoliciesSortField = z.infer<typeof findActionPoliciesSortFieldSchema>;
 
 /** Query parameters for the find action policies (list) API. */
-export const findActionPoliciesRequestSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  per_page: z.coerce
-    .number()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('The number of action policies to return per page. Defaults to 20.'),
-  search: z
-    .string()
-    .min(1)
-    .max(256)
-    .optional()
-    .describe('A text string to search across action policy fields.'),
-  enabled: z
-    .enum(['true', 'false'])
-    .transform((v) => v === 'true')
-    .optional()
-    .describe('Filter by enabled status. Accepts the strings true or false.'),
-  sort_field: findActionPoliciesSortFieldSchema
-    .optional()
-    .describe('The field to sort action policies by.'),
-  sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
-});
+export const findActionPoliciesRequestSchema = z
+  .object({
+    page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
+    per_page: z.coerce
+      .number()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('The number of action policies to return per page. Defaults to 20.'),
+    search: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe('A text string to search across action policy fields.'),
+    enabled: z
+      .enum(['true', 'false'])
+      .transform((v) => v === 'true')
+      .optional()
+      .describe('Filter by enabled status. Accepts the strings true or false.'),
+    sort_field: findActionPoliciesSortFieldSchema
+      .optional()
+      .describe('The field to sort action policies by.'),
+    sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
+  })
+  .strict();
 
 export type FindActionPoliciesRequest = z.infer<typeof findActionPoliciesRequestSchema>;

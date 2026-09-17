@@ -23,6 +23,7 @@ import {
   bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
   ruleTagsParamsSchema,
+  findRulesRequestSchema,
 } from './rule_data_schema';
 import { tagsResponseSchema } from './common';
 import {
@@ -1878,6 +1879,36 @@ describe('ruleTagsParamsSchema', () => {
 
   it('rejects unknown keys', () => {
     expect(() => ruleTagsParamsSchema.parse({ foo: 'bar' })).toThrow();
+  });
+});
+
+describe('findRulesRequestSchema', () => {
+  it('accepts an empty object', () => {
+    expect(findRulesRequestSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid query params', () => {
+    expect(
+      findRulesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        filter: 'kind: alert',
+        sort_field: 'name',
+        sort_order: 'asc',
+        search: 'cpu',
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      filter: 'kind: alert',
+      sort_field: 'name',
+      sort_order: 'asc',
+      search: 'cpu',
+    });
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => findRulesRequestSchema.parse({ unknown_key: 'kind: alert' })).toThrow();
   });
 });
 

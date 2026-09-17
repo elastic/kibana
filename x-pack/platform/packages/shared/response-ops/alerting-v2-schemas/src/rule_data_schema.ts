@@ -769,25 +769,27 @@ export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
-export const findRulesRequestSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  per_page: z.coerce
-    .number()
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe('The number of rules to return per page. Defaults to 20.'),
-  filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
-  sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
-  sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(MAX_SEARCH_LENGTH)
-    .optional()
-    .describe('A text string to search across rule fields.'),
-});
+export const findRulesRequestSchema = z
+  .object({
+    page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
+    per_page: z.coerce
+      .number()
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe('The number of rules to return per page. Defaults to 20.'),
+    filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
+    sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+    sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+    search: z
+      .string()
+      .trim()
+      .min(1)
+      .max(MAX_SEARCH_LENGTH)
+      .optional()
+      .describe('A text string to search across rule fields.'),
+  })
+  .strict();
 
 export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 

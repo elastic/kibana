@@ -393,6 +393,21 @@ describe('policy_execution_history_schema', () => {
       };
       expect(listPolicyExecutionHistoryRequestSchema.parse(input)).toEqual(input);
     });
+
+    it('rejects unknown keys (strict mode)', () => {
+      expect(
+        listPolicyExecutionHistoryRequestSchema.safeParse({ page: 1, unknown_field: 'x' }).success
+      ).toBe(false);
+    });
+
+    it('still enforces the page * per_page guard after adding .strict()', () => {
+      expect(
+        listPolicyExecutionHistoryRequestSchema.safeParse({
+          page: EXECUTION_HISTORY_MAX_RESULT_WINDOW,
+          per_page: EXECUTION_HISTORY_MAX_PER_PAGE,
+        }).success
+      ).toBe(false);
+    });
   });
 
   describe('policyExecutionHistoryItemSchema', () => {

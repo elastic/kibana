@@ -9,6 +9,7 @@ import {
   actionPolicyDestinationSchema,
   bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
+  findActionPoliciesRequestSchema,
   snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
@@ -456,6 +457,36 @@ describe('bulkSnoozeActionPoliciesBodySchema', () => {
         unknownField: 'x',
       })
     ).toThrow();
+  });
+});
+
+describe('findActionPoliciesRequestSchema', () => {
+  it('accepts an empty object', () => {
+    expect(findActionPoliciesRequestSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid query params', () => {
+    expect(
+      findActionPoliciesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        search: 'cpu',
+        enabled: 'true',
+        sort_field: 'name',
+        sort_order: 'asc',
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      search: 'cpu',
+      enabled: true,
+      sort_field: 'name',
+      sort_order: 'asc',
+    });
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => findActionPoliciesRequestSchema.parse({ unknown_field: 'x' })).toThrow();
   });
 });
 

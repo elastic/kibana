@@ -40,31 +40,36 @@ export type RuleTemplateResponse = z.infer<typeof ruleTemplateResponseSchema>;
 export const findRuleTemplatesSortFieldSchema = z.enum(['name', 'tags']);
 export type FindRuleTemplatesSortField = z.infer<typeof findRuleTemplatesSortFieldSchema>;
 
-export const findRuleTemplatesRequestSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  per_page: z.coerce
-    .number()
-    .min(1)
-    .max(RULE_TEMPLATE_MAX_PER_PAGE)
-    .optional()
-    .describe('The number of rule templates to return per page. Defaults to 20.'),
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(MAX_SEARCH_LENGTH)
-    .optional()
-    .describe('A text string to search across rule template name and description.'),
-  sort_field: findRuleTemplatesSortFieldSchema
-    .optional()
-    .describe('The field to sort rule templates by. Defaults to name.'),
-  sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rule templates.'),
-  tags: arrayOrSingleSchema(z.string().min(1).max(MAX_TAG_LENGTH), MAX_TAGS)
-    .optional()
-    .describe(
-      'Only return templates carrying at least one of these tags. Accepts a single tag or a repeated parameter.'
-    ),
-});
+export const findRuleTemplatesRequestSchema = z
+  .object({
+    page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
+    per_page: z.coerce
+      .number()
+      .min(1)
+      .max(RULE_TEMPLATE_MAX_PER_PAGE)
+      .optional()
+      .describe('The number of rule templates to return per page. Defaults to 20.'),
+    search: z
+      .string()
+      .trim()
+      .min(1)
+      .max(MAX_SEARCH_LENGTH)
+      .optional()
+      .describe('A text string to search across rule template name and description.'),
+    sort_field: findRuleTemplatesSortFieldSchema
+      .optional()
+      .describe('The field to sort rule templates by. Defaults to name.'),
+    sort_order: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .describe('The direction to sort rule templates.'),
+    tags: arrayOrSingleSchema(z.string().min(1).max(MAX_TAG_LENGTH), MAX_TAGS)
+      .optional()
+      .describe(
+        'Only return templates carrying at least one of these tags. Accepts a single tag or a repeated parameter.'
+      ),
+  })
+  .strict();
 
 export type FindRuleTemplatesRequest = z.infer<typeof findRuleTemplatesRequestSchema>;
 
@@ -79,8 +84,10 @@ export const findRuleTemplatesResponseSchema = z
 
 export type FindRuleTemplatesResponse = z.infer<typeof findRuleTemplatesResponseSchema>;
 
-export const ruleTemplateIdParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule template.'),
-});
+export const ruleTemplateIdParamsSchema = z
+  .object({
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule template.'),
+  })
+  .strict();
 
 export type RuleTemplateIdParams = z.infer<typeof ruleTemplateIdParamsSchema>;
