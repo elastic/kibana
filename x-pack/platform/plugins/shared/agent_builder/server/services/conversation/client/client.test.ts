@@ -77,8 +77,7 @@ jest.mock('./storage', () => ({
   conversationIndexName: '.kibana_agent_builder_conversations',
 }));
 
-// Failing: See https://github.com/elastic/kibana/issues/289049
-describe.skip('ConversationClient', () => {
+describe('ConversationClient', () => {
   let client: ConversationClient;
   let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
 
@@ -222,7 +221,15 @@ describe.skip('ConversationClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // `clearAllMocks` only clears call history — queued `mockResolvedValueOnce` /
+    // `mockRejectedValueOnce` implementations survive it. Reset the ES client mocks fully so a
+    // once-queued 409 left behind by a conflict test cannot leak into the next test (#289049).
     mockRawEsClient.get.mockReset();
+    mockEsClient.search.mockReset();
+    mockEsClient.delete.mockReset();
+    mockEsClient.index.mockReset();
+    // Default OCC-style index response; describes that need something else override it.
+    mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
     agentRegistry = {
       get: jest.fn().mockResolvedValue({ id: 'agent-1' }),
@@ -3305,7 +3312,7 @@ describe.skip('ConversationClient', () => {
       expect(indexed.events).toBeUndefined();
     });
 
-    it('keeps events-native docs events-native on update (re-stamps schema_version, regenerates events)', async () => {
+    it('keeps events-native docs events-native on update (keeps schema_version, preserves stored events verbatim)', async () => {
       const existingRound = createRound({
         id: 'round-1',
         status: ConversationRoundStatus.completed,
@@ -3336,11 +3343,7 @@ describe.skip('ConversationClient', () => {
         };
       };
       expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect(indexed.events?.map((event) => event.id)).toEqual([
-        'round-1::user_message',
-        'round-1::execution_started',
-        'round-1::execution_terminated',
-      ]);
+      expect(indexed.events).toEqual(storedEvents);
     });
   });
 });
