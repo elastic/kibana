@@ -145,7 +145,7 @@ export const servers: ScoutServerConfig = {
              * tool-call content when inspecting eval runs in Phoenix or Kibana's Tracing UI.
              * Every config set that extends this one (agent-builder, security, workflows,
              * entity-analytics, etc.) inherits these overrides, so `Skill Invoked` / `Tool Calls`
-             * evaluators stop reading empty tool-call attributes across the board. See #<PR_NUMBER>. */
+             * evaluators stop reading empty tool-call attributes across the board. See elastic/kibana#291754. */
             '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
             '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',
             '--uiSettings.overrides.agentBuilder:tracing:includeLlmResponses=true',
