@@ -195,8 +195,12 @@ export const TimeoutPropSchema = z.object({
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
+/** Upper bound on a HITL Liquid timeout template. Matches other dynamic expressions in this schema. */
+export const DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH = 2000;
+
 const LiquidTimeoutTemplateSchema = z
   .string()
+  .max(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH)
   .regex(
     /\{\{[\s\S]*\}\}/,
     'Invalid timeout. Use a duration (e.g. "72h") or a template that renders to one.'

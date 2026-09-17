@@ -15,6 +15,7 @@ import {
   DataSetStepSchema,
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   DurationSchema,
+  DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH,
   DynamicTimeoutSchema,
   ElasticsearchStepSchema,
   EventTimestampSchema,
@@ -1303,6 +1304,20 @@ describe('dynamic timeout schema', () => {
     expect(WaitForInputStepSchema.safeParse({ ...input, timeout: '{{ unterminated' }).success).toBe(
       false
     );
+  });
+
+  it('rejects a Liquid timeout longer than DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH', () => {
+    const atLimit = `{{${'x'.repeat(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH - 4)}}}`;
+    const overLimit = `{{${'x'.repeat(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH - 3)}}}`;
+    expect(atLimit).toHaveLength(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH);
+    expect(overLimit).toHaveLength(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH + 1);
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: atLimit }).success).toBe(
+      true
+    );
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: overLimit }).success).toBe(
+      false
+    );
+    expect(WaitForInputStepSchema.safeParse({ ...input, timeout: overLimit }).success).toBe(false);
   });
 
   it('does not accept templates on connector TimeoutPropSchema', () => {
