@@ -175,6 +175,7 @@ spaceTest.describe(
         await expect(page.testSubj.locator('partitionVisChart')).toBeVisible();
         expect(await discover.getVisualizationTitle()).toBe('Treemap');
         expect(await discover.getHistogramSuggestionType()).toBe('lensSuggestion');
+        expect(await discover.getEsqlQueryValue()).toBe(ESQL_STATS_QUERY);
       }
     );
 

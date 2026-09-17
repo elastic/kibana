@@ -86,6 +86,7 @@ spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-clas
       };
 
       await discover.waitUntilSearchingHasFinished();
+      const initialTimeRange = await discover.getChartTimespan();
 
       const stalledSearchResponse = page.waitForResponse((response) => {
         try {
@@ -118,6 +119,10 @@ spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-clas
       await discover.waitUntilSearchingHasFinished();
 
       await expect(discover.getHistogramChart()).toBeVisible();
+      await expect(discover.getHistogramChart()).not.toHaveAttribute(
+        'data-time-range',
+        initialTimeRange
+      );
       await expect(discover.getHitCountLocator()).toHaveText('4,756');
       await expect(discover.getQueryCancelButton()).toBeHidden();
     }

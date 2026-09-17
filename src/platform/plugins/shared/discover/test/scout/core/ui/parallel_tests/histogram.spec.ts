@@ -173,6 +173,7 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
         });
         await discover.waitUntilSearchingHasFinished();
         await expect(discover.getHistogramChart()).toBeHidden();
+        await expect(page.testSubj.locator('discoverNoResults')).toBeVisible();
 
         await datePicker.setAbsoluteRange({
           from: 'Sep 20, 2015 @ 00:00:00.000',
@@ -205,13 +206,18 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
         });
         await discover.waitUntilSearchingHasFinished();
         await expect(discover.getHitCountLocator()).toHaveText('4,756');
+        const narrowedTimeRange = await discover.getChartTimespan();
 
-        await discover.saveSearch(`test-search-${scoutSpace.id}`);
+        await discover.saveSearch(`test-search-${scoutSpace.id}`, { storeTimeRange: true });
         await expect(discover.getHitCountLocator()).toHaveText('4,756');
 
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await expect(discover.getHistogramChart()).toBeVisible();
+        await expect(discover.getHistogramChart()).toHaveAttribute(
+          'data-time-range',
+          narrowedTimeRange
+        );
         await expect(discover.getHitCountLocator()).toHaveText('4,756');
       } finally {
         await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'Europe/Berlin' });
