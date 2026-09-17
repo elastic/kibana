@@ -24,6 +24,7 @@ import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
 import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
+import { useEntityIdsPopover } from '../node/entity_ids/entity_ids';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
@@ -34,7 +35,7 @@ import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
-import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
+import { isLabelNode, isRelationshipNode, showErrorToast, getEntityIdsFromNode } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
 
@@ -49,6 +50,7 @@ const useGraphPopovers = ({
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
+  const [currentEntityIds, setCurrentEntityIds] = useState<string[]>([]);
   const [currentEventAnalysis, setCurrentEventAnalysis] = useState<DocumentAnalysisOutput | null>(
     null
   );
@@ -60,18 +62,31 @@ const useGraphPopovers = ({
   const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
+  const entityIdsPopover = useEntityIdsPopover(currentEntityIds);
   const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
 
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
-      [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover].forEach(
-        ({ actions: { closePopover } }) => {
-          closePopover();
-        }
-      );
+      [
+        nodeExpandPopover,
+        labelExpandPopover,
+        ipPopover,
+        countryFlagsPopover,
+        entityIdsPopover,
+        eventPopover,
+      ].forEach(({ actions: { closePopover } }) => {
+        closePopover();
+      });
       cb(...args);
     },
-    [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover]
+    [
+      nodeExpandPopover,
+      labelExpandPopover,
+      ipPopover,
+      countryFlagsPopover,
+      entityIdsPopover,
+      eventPopover,
+    ]
   );
 
   const createIpClickHandler = useCallback(
@@ -98,6 +113,14 @@ const useGraphPopovers = ({
     [setCurrentCountryCodes, openPopoverCallback, countryFlagsPopover.onCountryClick]
   );
 
+  const createEntityIdClickHandler = useCallback(
+    (entityIds: string[]) => (e: React.MouseEvent<HTMLElement>) => {
+      setCurrentEntityIds(entityIds);
+      openPopoverCallback(entityIdsPopover.onEntityIdClick, e);
+    },
+    [setCurrentEntityIds, openPopoverCallback, entityIdsPopover.onEntityIdClick]
+  );
+
   const createEventClickHandler = useCallback(
     (analysis: DocumentAnalysisOutput, text: string) =>
       (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -113,10 +136,12 @@ const useGraphPopovers = ({
     labelExpandPopover,
     ipPopover,
     countryFlagsPopover,
+    entityIdsPopover,
     eventPopover,
     openPopoverCallback,
     createIpClickHandler,
     createCountryClickHandler,
+    createEntityIdClickHandler,
     createEventClickHandler,
   };
 };
@@ -350,10 +375,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       labelExpandPopover,
       ipPopover,
       countryFlagsPopover,
+      entityIdsPopover,
       eventPopover,
       openPopoverCallback,
       createIpClickHandler,
       createCountryClickHandler,
+      createEntityIdClickHandler,
       createEventClickHandler,
     } = useGraphPopovers({
       scopeId,
@@ -467,6 +494,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           if (isEntityNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
+            const nodeEntityIds = getEntityIdsFromNode(node);
             const isOrigin = originEntityIdsSet.has(node.id);
             return {
               ...node,
@@ -474,6 +502,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               expandButtonClick: nodeExpandButtonClickHandler,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
+              entityIdClickHandler: createEntityIdClickHandler(nodeEntityIds),
             };
           } else if (isLabelNode(node)) {
             const nodeIps = node.ips || [];
@@ -632,6 +661,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         <labelExpandPopover.PopoverComponent />
         <ipPopover.PopoverComponent />
         <countryFlagsPopover.PopoverComponent />
+        <entityIdsPopover.PopoverComponent />
         <eventPopover.PopoverComponent />
       </>
     );
