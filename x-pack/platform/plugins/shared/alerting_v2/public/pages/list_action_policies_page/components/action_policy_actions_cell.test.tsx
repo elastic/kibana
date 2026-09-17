@@ -20,7 +20,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   group_by: null,
-  tags: null,
   grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
   snoozed_until: null,
