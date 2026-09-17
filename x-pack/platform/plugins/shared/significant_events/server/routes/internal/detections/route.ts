@@ -56,7 +56,8 @@ const detectionsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    return (await getDetectionClient()).findLatestPaginated(params.query);
+    const detectionClient = await getDetectionClient();
+    return detectionClient.findLatestPaginated(params.query);
   },
 });
 
@@ -88,7 +89,8 @@ const detectionsHistoryRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    return (await getDetectionClient()).findHistoryByRuleUuid(params.path.id);
+    const detectionClient = await getDetectionClient();
+    return detectionClient.findHistoryByRuleUuid(params.path.id);
   },
 });
 

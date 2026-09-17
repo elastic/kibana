@@ -137,7 +137,8 @@ const eventsSearchRoute = createServerRoute({
       ...rest
     } = params.query ?? {};
 
-    return (await getEventClient()).findLatestByCurrentStatePaginated({
+    const eventClient = await getEventClient();
+    return eventClient.findLatestByCurrentStatePaginated({
       ...rest,
       from,
       to,
@@ -178,21 +179,23 @@ const eventsLifecycleRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { hits: initialHits } = await (await getEventClient()).findByEventUuid(params.path.id);
+    const eventClient = await getEventClient();
+    const { hits: initialHits } = await eventClient.findByEventUuid(params.path.id);
     if (initialHits.length === 0) {
       return { detections: [], events: [] };
     }
 
     const { event_id: eventId } = initialHits[0];
-    const { hits: events } = await (await getEventClient()).findByEventId(eventId);
+    const { hits: events } = await eventClient.findByEventId(eventId);
     if (events.length === 0) {
       return { detections: [], events: [] };
     }
 
     const embedded = collectEmbeddedDetections(events);
-    const { hits: allDetectionHits } = await (
-      await getDetectionClient()
-    ).findByIds(embedded.map((e) => e.detection_id));
+    const detectionClient = await getDetectionClient();
+    const { hits: allDetectionHits } = await detectionClient.findByIds(
+      embedded.map((e) => e.detection_id)
+    );
     const hitsByDetectionId = new Map(
       allDetectionHits.filter(hasChangePointType).map((h) => [h.detection_id, h])
     );
@@ -298,7 +301,8 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { hits } = await (await getEventClient()).findByEventUuid(params.path.id);
+    const eventClient = await getEventClient();
+    const { hits } = await eventClient.findByEventUuid(params.path.id);
     if (hits.length === 0) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
