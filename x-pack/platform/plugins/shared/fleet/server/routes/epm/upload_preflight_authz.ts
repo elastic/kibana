@@ -15,34 +15,14 @@ import { appContextService } from '../../services';
 import { getPathParts } from '../../services/epm/archive';
 import { createArchiveIterator } from '../../services/epm/archive/archive_iterator';
 
-// Asset types whose installation requires explicit authorization beyond base Fleet admin.
-// If an archive contains a type listed here but ASSET_REQUIRED_PRIVILEGES has no entry
-// for it, the upload is rejected (fail closed) until a checker is added.
 const GATED_ASSET_TYPES = new Set<KibanaAssetType>([
   KibanaAssetType.securityRule,
   KibanaAssetType.securityAIPrompt,
-  KibanaAssetType.osquerySavedQuery,
-  KibanaAssetType.osqueryPackAsset,
-  KibanaAssetType.mlModule,
-  KibanaAssetType.alertingRuleTemplate,
-  KibanaAssetType.cloudSecurityPostureRuleTemplate,
-  KibanaAssetType.sloTemplate,
 ]);
 
-// Maps each gated asset type to the Kibana API privilege actions required to install it.
-// Types present in GATED_ASSET_TYPES but absent here are blocked until a checker is added.
 const ASSET_REQUIRED_PRIVILEGES: Partial<Record<KibanaAssetType, readonly string[]>> = {
   [KibanaAssetType.securityRule]: ['rules-all'],
   [KibanaAssetType.securityAIPrompt]: ['elasticAssistant'],
-  [KibanaAssetType.osquerySavedQuery]: ['osquery-writeSavedQueries'],
-  [KibanaAssetType.osqueryPackAsset]: ['osquery-writePacks'],
-  [KibanaAssetType.mlModule]: ['ml:canCreateJob'],
-  // alertingRuleTemplate: no user-facing write privilege exists for this hidden SO type.
-  // Both stackAlerts: all and stackAlerts: read grant api:['rac'], so no static action can
-  // distinguish write-capable callers. Packages containing these assets must come from the
-  // registry, not direct upload. Omitting the entry keeps this type fail-closed.
-  [KibanaAssetType.cloudSecurityPostureRuleTemplate]: ['cloud-security-posture-all'],
-  [KibanaAssetType.sloTemplate]: ['slo_write'],
 };
 
 export interface ArchiveSignals {

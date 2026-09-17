@@ -148,37 +148,22 @@ describe('collectArchiveSignals', () => {
     expect(readBufferFn('mypackage-1.0.0/kibana/security_rule/my-rule.json')).toBe(true);
   });
 
-  it('detects csp_rule_template as gated type', async () => {
+  it('does not gate other kibana asset types (osquery, ml_module, csp, slo, alerting)', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/csp_rule_template/my-rule.json' }])
+      makeIterator([
+        { path: 'mypackage-1.0.0/kibana/osquery_saved_query/my-query.json' },
+        { path: 'mypackage-1.0.0/kibana/osquery_pack_asset/my-pack.json' },
+        { path: 'mypackage-1.0.0/kibana/ml_module/my-module.json' },
+        { path: 'mypackage-1.0.0/kibana/csp_rule_template/my-rule.json' },
+        { path: 'mypackage-1.0.0/kibana/slo_template/my-slo.json' },
+        { path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' },
+      ])
     );
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
-    expect(signals.gatedTypesFound.has('csp_rule_template' as any)).toBe(true);
+    expect(signals.gatedTypesFound.size).toBe(0);
     expect(signals.blockedTypes).toHaveLength(0);
-  });
-
-  it('detects slo_template as gated type', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/slo_template/my-slo.json' }])
-    );
-
-    const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
-
-    expect(signals.gatedTypesFound.has('slo_template' as any)).toBe(true);
-    expect(signals.blockedTypes).toHaveLength(0);
-  });
-
-  it('places alerting_rule_template in blockedTypes (no user-facing write privilege)', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' }])
-    );
-
-    const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
-
-    expect(signals.gatedTypesFound.has('alerting_rule_template' as any)).toBe(false);
-    expect(signals.blockedTypes).toContain('alerting_rule_template');
   });
 });
 
@@ -229,34 +214,11 @@ describe('buildRequiredActions', () => {
     expect(buildRequiredActions(signals, security as any)).toContain('api:elasticAssistant');
   });
 
-  it('returns cloud-security-posture-all for csp_rule_template', () => {
-    const signals = {
-      gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.cloudSecurityPostureRuleTemplate]),
-      blockedTypes: [],
-      hasMlSecurityRules: false,
-    };
-
-    expect(buildRequiredActions(signals, security as any)).toContain(
-      'api:cloud-security-posture-all'
-    );
-  });
-
-  it('returns slo_write for slo_template', () => {
-    const signals = {
-      gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.sloTemplate]),
-      blockedTypes: [],
-      hasMlSecurityRules: false,
-    };
-
-    expect(buildRequiredActions(signals, security as any)).toContain('api:slo_write');
-  });
-
-  it('accumulates actions for multiple gated types', () => {
+  it('accumulates actions for both gated types', () => {
     const signals = {
       gatedTypesFound: new Set<KibanaAssetType>([
         KibanaAssetType.securityRule,
         KibanaAssetType.securityAIPrompt,
-        KibanaAssetType.osquerySavedQuery,
       ]),
       blockedTypes: [],
       hasMlSecurityRules: true,
@@ -265,7 +227,6 @@ describe('buildRequiredActions', () => {
     const actions = buildRequiredActions(signals, security as any);
     expect(actions).toContain('api:rules-all');
     expect(actions).toContain('api:elasticAssistant');
-    expect(actions).toContain('api:osquery-writeSavedQueries');
     expect(actions).toContain('api:ml:canCreateJob');
   });
 });
@@ -418,79 +379,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     );
   });
 
-  it('checks osquery-writeSavedQueries for osquery_saved_query package', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/osquery_saved_query/my-query.json' }])
-    );
-
-    const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId
-    );
-
-    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
-    expect(atSpaces).toHaveBeenCalledWith(
-      [mockSpaceId],
-      expect.objectContaining({ kibana: expect.arrayContaining(['api:osquery-writeSavedQueries']) })
-    );
-  });
-
-  it('checks osquery-writePacks for osquery_pack_asset package', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/osquery_pack_asset/my-pack.json' }])
-    );
-
-    const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId
-    );
-
-    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
-    expect(atSpaces).toHaveBeenCalledWith(
-      [mockSpaceId],
-      expect.objectContaining({ kibana: expect.arrayContaining(['api:osquery-writePacks']) })
-    );
-  });
-
-  it('checks ml:canCreateJob for ml_module package', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/ml_module/my-module.json' }])
-    );
-
-    const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId
-    );
-
-    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
-    expect(atSpaces).toHaveBeenCalledWith(
-      [mockSpaceId],
-      expect.objectContaining({ kibana: expect.arrayContaining(['api:ml:canCreateJob']) })
-    );
-  });
-
   it('accumulates union of required actions for mixed gated types', async () => {
     const mlRuleBuffer = makeAssetBuffer({ type: 'machine_learning' });
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([
         { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer },
         { path: 'mypackage-1.0.0/kibana/security_ai_prompt/my-prompt.json' },
-        { path: 'mypackage-1.0.0/kibana/osquery_saved_query/my-query.json' },
         { path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' },
       ])
     );
@@ -513,112 +407,9 @@ describe('checkUploadPackageAssetPrivileges', () => {
           'api:rules-all',
           'api:ml:canCreateJob',
           'api:elasticAssistant',
-          'api:osquery-writeSavedQueries',
         ]),
       })
     );
-  });
-
-  it('checks cloud-security-posture-all for csp_rule_template package', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/csp_rule_template/my-rule.json' }])
-    );
-
-    const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId
-    );
-
-    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
-    expect(atSpaces).toHaveBeenCalledWith(
-      [mockSpaceId],
-      expect.objectContaining({
-        kibana: expect.arrayContaining(['api:cloud-security-posture-all']),
-      })
-    );
-  });
-
-  it('throws FleetUnauthorizedError when caller lacks cloud-security-posture-all for csp_rule_template package', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/csp_rule_template/my-rule.json' }])
-    );
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(
-      makeSecurity(false, ['api:cloud-security-posture-all'])
-    );
-
-    await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId
-      )
-    ).rejects.toThrow(FleetUnauthorizedError);
-  });
-
-  it('checks slo_write for slo_template package', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/slo_template/my-slo.json' }])
-    );
-
-    const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId
-    );
-
-    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
-    expect(atSpaces).toHaveBeenCalledWith(
-      [mockSpaceId],
-      expect.objectContaining({ kibana: expect.arrayContaining(['api:slo_write']) })
-    );
-  });
-
-  it('throws FleetUnauthorizedError when caller lacks slo_write for slo_template package', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/slo_template/my-slo.json' }])
-    );
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(
-      makeSecurity(false, ['api:slo_write'])
-    );
-
-    await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId
-      )
-    ).rejects.toThrow(FleetUnauthorizedError);
-  });
-
-  it('blocks upload containing alerting_rule_template regardless of caller privileges', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' }])
-    );
-
-    const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-
-    await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId
-      )
-    ).rejects.toThrow(FleetUnauthorizedError);
-
-    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   });
 
   it('throws FleetUnauthorizedError when security plugin is unavailable (fail closed)', async () => {
