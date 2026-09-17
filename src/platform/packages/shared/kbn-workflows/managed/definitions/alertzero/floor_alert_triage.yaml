@@ -118,6 +118,7 @@ steps:
         autoCloseEnabled: false
         autoCloseConfidenceScoreMinThreshold: "${{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
         connectorIdByFeature: alertzero_alert_triage
+        calledByWorker: true
 
   # ---------------------------------------------------------------------------
   # 4. Compute the FP candidate list: verdicts classified as false_positive
