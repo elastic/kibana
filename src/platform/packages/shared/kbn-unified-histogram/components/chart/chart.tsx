@@ -10,8 +10,9 @@
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiBadge, EuiDelayRender, EuiProgress, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ApproximationIcon } from '@kbn/esql-browser';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
@@ -339,26 +340,6 @@ export function UnifiedHistogramChart({
     });
   }
 
-  const approximationTooltip = i18n.translate('unifiedHistogram.approximationAppliedTooltip', {
-    defaultMessage:
-      'This chart shows approximate results because fast mode is enabled or the query enables approximation.',
-  });
-  const approximationIcon =
-    chartVisible && isApproximationApplied ? (
-      <span style={{ marginRight: 4 }}>
-        <EuiToolTip content={approximationTooltip}>
-          <EuiBadge
-            color="success"
-            iconType="bolt"
-            onClick={() => {}}
-            onClickAriaLabel=""
-            aria-label={approximationTooltip}
-            data-test-subj="unifiedHistogramApproximationApplied"
-          />
-        </EuiToolTip>
-      </span>
-    ) : undefined;
-
   return (
     <>
       <ChartSectionTemplate
@@ -368,7 +349,7 @@ export function UnifiedHistogramChart({
           toggleActions: toolbarToggleActions,
           leftSide: toolbarSelectors,
           rightSide: chartVisible ? actions : [],
-          additionalControls: { prependRight: approximationIcon },
+          additionalControls: { prependRight: <ApproximationIcon isApproximationApplied={isApproximationApplied} data-test-subj="unifiedHistogramApproximationApplied" /> },
         }}
       >
         {chartVisible && (

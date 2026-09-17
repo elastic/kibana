@@ -9,16 +9,14 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { ApproximationIcon } from '@kbn/esql-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -419,26 +417,6 @@ function DiscoverDocumentsComponent({
   );
 
   const approximationApplied = documentState.approximationApplied;
-  const approximationTooltip = i18n.translate('discover.approximationAppliedTooltip', {
-    defaultMessage:
-      'This table shows approximate results because fast mode is enabled or the query enables approximation.',
-  });
-  const approximationBadge = useMemo(
-    () =>
-      approximationApplied ? (
-        <EuiToolTip content={approximationTooltip}>
-          <EuiBadge
-            color="success"
-            iconType="bolt"
-            onClick={() => {}}
-            onClickAriaLabel=""
-            aria-label={approximationTooltip}
-            data-test-subj="discoverApproximationApplied"
-          />
-        </EuiToolTip>
-      ) : undefined,
-    [approximationApplied, approximationTooltip]
-  );
 
   const renderCustomToolbarWithElements = useMemo(
     () =>
@@ -615,7 +593,7 @@ function DiscoverDocumentsComponent({
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
-            externalAdditionalControls={approximationBadge}
+            externalAdditionalControls={<ApproximationIcon isApproximationApplied={Boolean(approximationApplied)} data-test-subj="discoverApproximationApplied" />}
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
