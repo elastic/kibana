@@ -3952,6 +3952,12 @@
                           "description": "Whether this is a customized prebuilt rule"
                         }
                       },
+                      "has_base_version": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "Whether this prebuilt rule still has its base (original) prebuilt version"
+                        }
+                      },
                       "elastic_rule": {
                         "type": "boolean",
                         "_meta": {
@@ -7989,6 +7995,34 @@
                       "type": "long",
                       "_meta": {
                         "description": "The number of prebuilt rules with customized timeline_id field"
+                      }
+                    }
+                  }
+                },
+                "elastic_detection_rule_base_version_status": {
+                  "properties": {
+                    "customized_with_base_version": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of customized prebuilt rules that still have a base version"
+                      }
+                    },
+                    "customized_without_base_version": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of customized prebuilt rules that no longer have a base version"
+                      }
+                    },
+                    "noncustomized_with_base_version": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of non-customized prebuilt rules that still have a base version"
+                      }
+                    },
+                    "noncustomized_without_base_version": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of non-customized prebuilt rules that no longer have a base version"
                       }
                     }
                   }
