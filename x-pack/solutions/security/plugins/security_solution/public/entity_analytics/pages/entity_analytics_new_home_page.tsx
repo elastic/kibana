@@ -124,18 +124,36 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const resolvedSpaceId = spaceId ?? 'default';
 
-  const { count: alertsCount, entityIds: alertsEntityIds, isLoading: alertsLoading } =
-    useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId });
-  const { count: anomaliesCount, entityIds: anomaliesEntityIds, isLoading: anomaliesLoading } =
-    useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId });
-  const { count: watchlistedCount, entityIds: watchlistedEntityIds, isLoading: watchlistedLoading } =
-    useWatchlistedCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
-  const { count: newEntityCount, entityIds: newEntityEntityIds, isLoading: newEntityLoading } =
-    useNewEntityCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
-  const { count: riskMoversCount, entityIds: riskMoversEntityIds, isLoading: riskMoversLoading } =
-    useRiskMoversCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
-  const { count: newlyHCCount, entityIds: newlyHCEntityIds, isLoading: newlyHCLoading } =
-    useNewlyHighCriticalCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+  const {
+    count: alertsCount,
+    entityIds: alertsEntityIds,
+    isLoading: alertsLoading,
+  } = useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId });
+  const {
+    count: anomaliesCount,
+    entityIds: anomaliesEntityIds,
+    isLoading: anomaliesLoading,
+  } = useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId });
+  const {
+    count: watchlistedCount,
+    entityIds: watchlistedEntityIds,
+    isLoading: watchlistedLoading,
+  } = useWatchlistedCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+  const {
+    count: newEntityCount,
+    entityIds: newEntityEntityIds,
+    isLoading: newEntityLoading,
+  } = useNewEntityCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+  const {
+    count: riskMoversCount,
+    entityIds: riskMoversEntityIds,
+    isLoading: riskMoversLoading,
+  } = useRiskMoversCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+  const {
+    count: newlyHCCount,
+    entityIds: newlyHCEntityIds,
+    isLoading: newlyHCLoading,
+  } = useNewlyHighCriticalCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
     setActiveFilter((prev) =>
