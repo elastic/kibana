@@ -63,10 +63,6 @@ const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
     },
   ];
 
-  for (const tag of rule.metadata.tags ?? []) {
-    badges.push({ label: tag, color: 'hollow' });
-  }
-
   return badges;
 };
 
@@ -287,18 +283,15 @@ export const RuleDetailPage: React.FunctionComponent = () => {
             data-test-subj="ruleDetailSidebarColumn"
             css={css`
               min-height: 0;
-              ${logicalCSS('padding-top', euiTheme.size.l)}
+              padding: ${euiTheme.size.l};
 
               ${largeMediaQuery} {
-                ${logicalCSS('padding-top', '0')}
                 flex-shrink: 0;
                 flex-basis: 400px;
                 min-width: 40px;
                 max-width: 500px;
                 height: 100%;
                 overflow-y: auto;
-                padding: ${euiTheme.size.l};
-                ${logicalCSS('padding-right', '0')}
                 border-left: ${euiTheme.border.thin};
               }
             `}
