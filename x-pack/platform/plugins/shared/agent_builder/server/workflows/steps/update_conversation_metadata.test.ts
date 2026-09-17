@@ -35,7 +35,10 @@ describe('updateConversationMetadataStepDefinition', () => {
   });
 
   it('calls patchMetadata and returns the changed fields and updated metadata', async () => {
-    const conversation = { id: 'conv-1', metadata: { status: 'resolved', severity: 'low', priority: 'high' } };
+    const conversation = {
+      id: 'conv-1',
+      metadata: { status: 'resolved', severity: 'low', priority: 'high' },
+    };
     const { patchMetadata, getConversationClient } = createWorkflowStepConversationClientMock({
       patchMetadata: jest.fn().mockResolvedValue({ changedFields: ['status', 'severity'] }),
       get: jest.fn().mockResolvedValue(conversation),

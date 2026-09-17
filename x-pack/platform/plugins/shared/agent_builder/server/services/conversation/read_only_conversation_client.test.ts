@@ -155,7 +155,15 @@ describe('createConversationPublicClient', () => {
   it('does not expose delete, upsertRound, or exists methods', () => {
     const clientKeys = Object.keys(publicClient);
     expect(clientKeys).toEqual(
-      expect.arrayContaining(['get', 'bulkGet', 'list', 'search', 'create', 'patchMetadata', 'update'])
+      expect.arrayContaining([
+        'get',
+        'bulkGet',
+        'list',
+        'search',
+        'create',
+        'patchMetadata',
+        'update',
+      ])
     );
     expect(clientKeys).not.toContain('delete');
     expect(clientKeys).not.toContain('upsertRound');
