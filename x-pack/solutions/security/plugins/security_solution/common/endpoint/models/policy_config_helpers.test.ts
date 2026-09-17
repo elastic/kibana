@@ -542,6 +542,38 @@ describe('Policy Config helpers', () => {
       expect(policy.mac.memory_protection.custom_yara_signatures).toBe(true);
       expect(policy.linux.memory_protection.custom_yara_signatures).toBe(true);
     });
+
+    it('also removes the Enterprise-gated advanced rescan interval on all OSes', () => {
+      const policy = policyFactory();
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        (policy[os] as { advanced?: unknown }).advanced = {
+          memory_protection: { user_yara_rescan_interval_seconds: 3600 },
+        };
+      }
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+
+      const result = removeCustomYaraSignatures(policy);
+
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        expect(result[os].advanced).not.toHaveProperty('memory_protection');
+      }
+      expect(policy).toEqual(originalPolicy);
+    });
+
+    it('keeps unrelated advanced settings when removing the rescan interval', () => {
+      const policy = policyFactory();
+      (policy.windows as { advanced?: unknown }).advanced = {
+        memory_protection: { user_yara_rescan_interval_seconds: 3600, shim_cache: true },
+        alerts: { rollback: { self_healing: { enabled: true } } },
+      };
+
+      const result = removeCustomYaraSignatures(policy);
+
+      expect(result.windows.advanced).toEqual({
+        memory_protection: { shim_cache: true },
+        alerts: { rollback: { self_healing: { enabled: true } } },
+      });
+    });
   });
 });
 

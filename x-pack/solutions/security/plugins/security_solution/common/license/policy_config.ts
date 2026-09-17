@@ -16,6 +16,7 @@ import {
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
+import { hasCustomYaraSignaturesAdvancedSettings } from '../endpoint/models/policy_config_helpers';
 
 function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   if (isAtLeast(license, 'platinum')) {
@@ -316,6 +317,10 @@ function isEndpointCustomYaraSignaturesPolicyValidForLicense(
     policy.mac.memory_protection.custom_yara_signatures === true ||
     policy.linux.memory_protection.custom_yara_signatures === true
   ) {
+    return false;
+  }
+
+  if (hasCustomYaraSignaturesAdvancedSettings(policy)) {
     return false;
   }
 

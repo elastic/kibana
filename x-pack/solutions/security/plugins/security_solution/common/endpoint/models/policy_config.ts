@@ -8,7 +8,10 @@
 import type { PolicyConfig } from '../types';
 import { AntivirusRegistrationModes, DeviceControlAccessLevel, ProtectionModes } from '../types';
 
-import { isBillablePolicy } from './policy_config_helpers';
+import {
+  isBillablePolicy,
+  removeCustomYaraSignaturesAdvancedSettings,
+} from './policy_config_helpers';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -221,7 +224,7 @@ export const policyFactory = ({
 export const policyFactoryWithoutPaidEnterpriseFeatures = (
   policy: PolicyConfig = policyFactory()
 ): PolicyConfig => {
-  return {
+  const withoutPaidEnterpriseFeatures: PolicyConfig = {
     ...policy,
     global_manifest_version: 'latest',
     windows: {
@@ -268,6 +271,8 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
       },
     },
   };
+
+  return removeCustomYaraSignaturesAdvancedSettings(withoutPaidEnterpriseFeatures);
 };
 
 /**
@@ -284,7 +289,7 @@ export const policyFactoryWithoutPaidFeatures = (
     },
   };
 
-  return {
+  const withoutPaidFeatures: PolicyConfig = {
     ...policy,
     global_manifest_version: 'latest',
     windows: {
@@ -424,6 +429,8 @@ export const policyFactoryWithoutPaidFeatures = (
       },
     },
   };
+
+  return removeCustomYaraSignaturesAdvancedSettings(withoutPaidFeatures);
 };
 
 /**

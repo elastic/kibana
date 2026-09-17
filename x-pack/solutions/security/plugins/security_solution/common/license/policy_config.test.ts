@@ -1017,5 +1017,72 @@ describe('policy_config and licenses', () => {
         expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
       }
     });
+
+    describe('advanced rescan interval', () => {
+      const osList = ['windows', 'mac', 'linux'] as const;
+
+      const setRescanInterval = (policy: PolicyConfig, os: (typeof osList)[number]) => {
+        const advanced = (policy[os].advanced ?? {}) as Record<string, unknown>;
+        advanced.memory_protection = {
+          ...((advanced.memory_protection as Record<string, unknown>) ?? {}),
+          user_yara_rescan_interval_seconds: 3600,
+        };
+        (policy[os] as { advanced?: unknown }).advanced = advanced;
+      };
+
+      it.each(osList)('is invalid below Enterprise when the rescan interval is set on %s', (os) => {
+        const platinumPolicy = policyFactory();
+        disableEnterpriseFeatures(platinumPolicy);
+        // The policy is otherwise valid on Platinum, so the interval is the only thing under test.
+        expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(true);
+
+        setRescanInterval(platinumPolicy, os);
+        expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(false);
+      });
+
+      it('allows the rescan interval with an Enterprise license', () => {
+        const policy = policyFactory();
+        setRescanInterval(policy, 'windows');
+        expect(isEndpointPolicyValidForLicense(policy, Enterprise)).toBe(true);
+      });
+
+      const policyWithIntervalEverywhere = () => {
+        const policy = policyFactory();
+        for (const os of osList) {
+          setRescanInterval(policy, os);
+        }
+        return policy;
+      };
+
+      it('strips the rescan interval below Enterprise so license_watch can converge', () => {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(
+          policyWithIntervalEverywhere(),
+          Platinum
+        );
+
+        for (const os of osList) {
+          expect(stripped[os].advanced).not.toHaveProperty('memory_protection');
+        }
+        expect(isEndpointPolicyValidForLicense(stripped, Platinum)).toBe(true);
+      });
+
+      it.each([
+        ['Gold', Gold],
+        ['Basic', Basic],
+      ])('strips the rescan interval for %s', (_licenseName, license) => {
+        // Only the removal is asserted here. Below Platinum, any policy carrying an `advanced`
+        // object already fails `isEndpointAdvancedPolicyValidForLicense`, which compares the
+        // rollback setting against defaults whose `advanced` is `undefined`. That predates
+        // custom YARA signatures and is unrelated to this field.
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(
+          policyWithIntervalEverywhere(),
+          license
+        );
+
+        for (const os of osList) {
+          expect(stripped[os].advanced).not.toHaveProperty('memory_protection');
+        }
+      });
+    });
   });
 });
