@@ -14,9 +14,12 @@ export {
   persistRoundInput,
   appendRoundTerminated$,
   appendResumeExecution$,
+  persistExecutionInterruption,
+  isPendingResumeConversation,
   placeholderConversation,
   type ConversationOperation,
   type ConversationWithOperation,
+  type PersistExecutionInterruptionParams,
 } from './conversations';
 export { convertErrors, toClientError } from './convert_errors';
 export { serializeExecutionError } from './serialize_execution_error';

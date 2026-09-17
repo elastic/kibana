@@ -7,6 +7,7 @@
 
 import { lastValueFrom, of, toArray } from 'rxjs';
 import type { Observable } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   AttachmentTimelineEvent,
   ChatEvent,
@@ -16,14 +17,19 @@ import type {
   RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import {
+  AgentBuilderErrorCode,
   ChatEventType,
   CONVERSATION_SCHEMA_VERSION,
   ConversationAccessControlMode,
+  ConversationOriginType,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
   TimelineEventType,
   createConversationAlreadyExistsError,
   createConversationNotFoundError,
+  createRequestAbortedError,
+  isAttachmentEvent,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import {
@@ -36,8 +42,14 @@ import {
   appendResumeExecution$,
   appendRoundTerminated$,
   getConversation,
+  persistExecutionInterruption,
   persistRoundInput,
 } from './conversations';
+import { userMessageEvent } from '../../conversation/client/rounds_to_events';
+
+jest.mock('../../../tracing', () => ({
+  getCurrentTraceId: () => 'trace-1',
+}));
 
 const attachmentAddedEvent = (id = 'att-evt-1'): AttachmentTimelineEvent => ({
   id,
@@ -991,6 +1003,425 @@ describe('conversations utils', () => {
 
       const [args] = conversationClient.appendEvents.mock.calls[0];
       expect(args.title).toBe('Generated title');
+    });
+  });
+
+  describe('persistExecutionInterruption', () => {
+    const T0 = '2024-01-01T00:00:00.000Z';
+    const receivedAt = new Date(T0);
+    const logger = loggingSystemMock.createLogger();
+    const usage = { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 };
+    const ref = { attachment_id: 'a1', version: 1 };
+    const step = {
+      type: ConversationRoundStepType.reasoning,
+      reasoning: 'thinking',
+    } as ConversationRoundStep;
+
+    const freshConversation = (): ConversationWithOperation => ({
+      ...createEmptyConversation({ id: 'c1' }),
+      operation: 'UPDATE',
+      events: [
+        userMessageEvent(
+          { id: 'r1', input: { message: 'hi' }, started_at: T0 },
+          createEmptyConversation({ id: 'c1' })
+        ),
+      ],
+    });
+
+    /** The client echoes back the events it was asked to write (a landed write). */
+    const echoWrite = (client: ReturnType<typeof createConversationClientMock>) => {
+      client.replaceRoundEvents.mockImplementation(async (request) => ({
+        ...createEmptyConversation({ id: request.id }),
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events: request.events,
+      }));
+      client.appendEvents.mockImplementation(async (request) => ({
+        ...createEmptyConversation({ id: request.id }),
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events: request.events,
+      }));
+    };
+
+    const baseParams = (conversationClient: ReturnType<typeof createConversationClientMock>) => ({
+      conversation: freshConversation(),
+      conversationClient,
+      roundId: 'r1',
+      receivedAt,
+      input: { message: 'hi' },
+      logger,
+    });
+
+    const interruptedData = (overrides: Record<string, unknown> = {}) => ({
+      round_id: 'r1',
+      started_at: T0,
+      input: { message: 'hi', attachment_refs: [ref] },
+      steps: [step],
+      summary: { time_to_last_token: 5, model_usage: usage },
+      attachments: [],
+      ...overrides,
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('fresh round, failed: rewrites the round with user_message + started + steps + execution_failed', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+
+      const written = await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        error: new Error('boom'),
+        interrupted: interruptedData(),
+      });
+
+      expect(conversationClient.get).not.toHaveBeenCalled();
+      const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(call.roundId).toBe('r1');
+      expect(call.skipIfTerminalExistsFor).toBe('r1::execution');
+      expect(call.events.map((e) => e.id)).toEqual([
+        'r1::user_message',
+        'r1::execution_started',
+        'r1::step::0',
+        'r1::execution_failed',
+      ]);
+      expect(call.events[0].data).toEqual({ message: 'hi', attachment_refs: [ref] }); // processed input wins
+      expect(call.events[0].created_at).toBe(T0);
+      expect(call).not.toHaveProperty('status');
+      expect(call).not.toHaveProperty('state');
+      // parity: a raw Error is stored exactly as the client receives it
+      expect(call.events[3].data).toEqual({
+        time_to_last_token: 5,
+        model_usage: usage,
+        error: {
+          code: AgentBuilderErrorCode.internalError,
+          message: 'Error executing agent: boom',
+          meta: { statusCode: 500, traceId: 'trace-1' },
+        },
+      });
+      expect(written.map((e) => e.type)).toEqual([TimelineEventType.executionFailed]);
+    });
+
+    it('fresh round, aborted: writes execution_aborted without an error payload', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+
+      const written = await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        error: createRequestAbortedError('stop'),
+        interrupted: interruptedData(),
+      });
+
+      const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+      const terminal = call.events.at(-1)!;
+      expect(terminal.type).toBe(TimelineEventType.executionAborted);
+      expect(terminal.data).toEqual({ time_to_last_token: 5, model_usage: usage });
+      expect(written.map((e) => e.type)).toEqual([TimelineEventType.executionAborted]);
+    });
+
+    it('fresh round: the processed attachment_context is persisted on the rewritten user_message', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+
+      await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        error: new Error('boom'),
+        interrupted: interruptedData({
+          input: { message: 'hi', attachment_refs: [ref], attachment_context: '<attachments/>' },
+        }),
+      });
+
+      const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(call.events[0].data).toMatchObject({ attachment_context: '<attachments/>' });
+    });
+
+    it('fresh round: the rebuilt user_message equals what persistRoundInput wrote', async () => {
+      const receiptClient = createConversationClientMock();
+      const conversation = freshConversation();
+      const author: ConversationRoundAuthor = { id: 'slack-U1', username: 'bob' };
+      const origin = { type: ConversationOriginType.Slack };
+      await persistRoundInput({
+        conversation,
+        conversationClient: receiptClient,
+        roundId: 'r1',
+        receivedAt,
+        input: { message: 'hi', attachment_refs: [ref] },
+        author,
+        origin,
+      });
+      const receipt = receiptClient.appendEvents.mock.calls[0][0].events[0];
+
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+      await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        conversation,
+        input: { message: 'hi', attachment_refs: [ref] },
+        author,
+        origin,
+        error: new Error('boom'),
+      });
+
+      const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(call.events[0]).toEqual(receipt);
+      expect(call.events[0].actor.type).toBe(EventActorType.external);
+    });
+
+    it('fresh round: chat-input and execution attachment events are written and attachments reconciled', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+      const chatInput = {
+        ...attachmentAddedEvent('att-in'),
+        actor: { type: EventActorType.user, id: 'u1' },
+        execution_id: 'r1::execution',
+      } as AttachmentTimelineEvent;
+      const produced = {
+        ...attachmentAddedEvent('att-out'),
+        type: TimelineEventType.attachmentUpdated,
+        actor: { type: EventActorType.agent, id: 'agent' },
+        execution_id: 'r1::execution',
+      } as AttachmentTimelineEvent;
+      const attachments = [{ id: 'a1' }, { id: 'a2' }] as never;
+
+      await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        error: new Error('boom'),
+        interrupted: interruptedData({
+          attachments,
+          attachment_events: [chatInput, produced],
+          workspace_id: 'ws-1',
+        }),
+      });
+
+      const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(call.attachments).toEqual({ snapshot: [], produced: attachments });
+      expect(call.workspaceId).toBe('ws-1');
+      const attachmentEvents = call.events.filter(isAttachmentEvent);
+      expect(attachmentEvents.map((e) => [e.type, e.actor.type, e.execution_id])).toEqual([
+        [TimelineEventType.attachmentAdded, EventActorType.user, 'r1::execution'],
+        [TimelineEventType.attachmentUpdated, EventActorType.agent, 'r1::execution'],
+      ]);
+      // the terminal precedes the attachment events, after the steps
+      expect(call.events.map((e) => e.type)).toEqual([
+        TimelineEventType.userMessage,
+        TimelineEventType.executionStarted,
+        TimelineEventType.executionStep,
+        TimelineEventType.executionFailed,
+        TimelineEventType.attachmentAdded,
+        TimelineEventType.attachmentUpdated,
+      ]);
+    });
+
+    it('fresh round without round_interrupted (setup failure): minimal projection from the receipt-time input', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+
+      const written = await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        error: new Error('registry down'),
+      });
+
+      const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(call.events.map((e) => e.id)).toEqual([
+        'r1::user_message',
+        'r1::execution_started',
+        'r1::execution_failed',
+      ]);
+      expect(call.events[0].data).toEqual({ message: 'hi' });
+      expect(call.events[1].created_at).toBe(T0); // startedAt falls back to receivedAt
+      expect(call.events[2].data).not.toHaveProperty('model_usage');
+      expect(
+        typeof (call.events[2].data as { time_to_last_token: number }).time_to_last_token
+      ).toBe('number');
+      expect(call).not.toHaveProperty('attachments');
+      expect(written).toHaveLength(1);
+    });
+
+    const pausedConversation = (extraEvents: unknown[] = []): ConversationWithOperation => ({
+      ...createEmptyConversation({ id: 'c1' }),
+      operation: 'UPDATE',
+      rounds: [createRound({ id: 'r1', status: ConversationRoundStatus.awaitingPrompt })],
+      events: [
+        {
+          id: 'r1::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: T0,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'r1::execution',
+          trigger_event_id: 'r1::user_message',
+          data: {
+            model_usage: usage,
+            time_to_first_token: 1,
+            time_to_last_token: 1,
+            outcome: { type: 'prompt_requested', prompts: [] },
+          },
+        },
+        ...extraEvents,
+      ] as never,
+    });
+
+    it('HITL resume: appends prompt_response + exec_k events, leaves status/state untouched, links to the last execution_terminated', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+      // exec_0 paused, exec_1 aborted -> this interruption is exec_2 and answers exec_0's pause
+      const conversation = pausedConversation([
+        {
+          id: 'r1::execution::1::execution_aborted',
+          type: TimelineEventType.executionAborted,
+          created_at: T0,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'r1::execution::1',
+          trigger_event_id: 'r1::prompt_response::1',
+          data: { time_to_last_token: 1 },
+        },
+      ]);
+
+      const written = await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        conversation,
+        roundId: 'runner-round-id',
+        input: { prompts: { 'tools.my_tool.confirmation': { allow: true } } },
+        error: new Error('boom'),
+        interrupted: interruptedData({ round_id: 'runner-round-id', input: { message: '' } }),
+      });
+
+      expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
+      const [call] = conversationClient.appendEvents.mock.calls[0];
+      expect(call.skipIfTerminalExistsFor).toBe('r1::execution::2');
+      expect(call.events[0].id).toBe('r1::prompt_response::2');
+      expect(call.events[0].data).toMatchObject({
+        prompt_requested_event_id: 'r1::execution_terminated',
+        responses: { 'tools.my_tool.confirmation': { allow: true } },
+        input: { message: '' },
+      });
+      expect(call.events.slice(1).map((e) => e.id)).toEqual([
+        'r1::execution::2::execution_started',
+        'r1::execution::2::step::0',
+        'r1::execution::2::execution_failed',
+      ]);
+      expect(call).not.toHaveProperty('status');
+      expect(call).not.toHaveProperty('state');
+      expect(written.map((e) => e.id)).toEqual(['r1::execution::2::execution_failed']);
+    });
+
+    it('resume without round_interrupted (setup failure on resume): prompt_response from the raw input + minimal exec_k projection', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+
+      await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        conversation: pausedConversation(),
+        input: { message: 'answer', prompts: {} },
+        error: new Error('registry down'),
+      });
+
+      const [call] = conversationClient.appendEvents.mock.calls[0];
+      expect(call.events.map((e) => e.id)).toEqual([
+        'r1::prompt_response::1',
+        'r1::execution::1::execution_started',
+        'r1::execution::1::execution_failed',
+      ]);
+      expect(call.events[0].data).toMatchObject({ input: { message: 'answer' } });
+    });
+
+    it('resume: attachment events are re-stamped with exec_k and attachments/workspaceId are passed', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+      const attachments = [{ id: 'a1' }] as never;
+
+      await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        conversation: pausedConversation(),
+        input: { prompts: {} },
+        error: new Error('boom'),
+        interrupted: interruptedData({
+          attachments,
+          attachment_events: [attachmentAddedEvent('att-evt-1')],
+          workspace_id: 'ws-1',
+        }),
+      });
+
+      const [call] = conversationClient.appendEvents.mock.calls[0];
+      expect(call.attachments).toEqual({ snapshot: [], produced: attachments });
+      expect(call.workspaceId).toBe('ws-1');
+      const attachmentEvent = call.events.find((e) => e.id === 'att-evt-1');
+      expect(attachmentEvent?.execution_id).toBe('r1::execution::1');
+    });
+
+    it('returns [] and logs at debug when the client skipped the write (terminal already present)', async () => {
+      const conversationClient = createConversationClientMock();
+      // the client returns the stored document unchanged: no execution_failed in it
+      conversationClient.replaceRoundEvents.mockResolvedValue({
+        ...freshConversation(),
+        events: [
+          ...(freshConversation().events ?? []),
+          {
+            id: 'r1::execution_terminated',
+            type: TimelineEventType.executionTerminated,
+          } as never,
+        ],
+      });
+
+      const written = await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        error: new Error('boom'),
+        interrupted: interruptedData(),
+      });
+
+      expect(written).toEqual([]);
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('already had a terminal'));
+    });
+
+    it('never throws: a failing write is logged and resolves to []', async () => {
+      const conversationClient = createConversationClientMock();
+      conversationClient.replaceRoundEvents.mockRejectedValue(new Error('es down'));
+
+      const written = await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        error: new Error('boom'),
+        interrupted: interruptedData(),
+      });
+
+      expect(written).toEqual([]);
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('es down'));
+    });
+
+    it('uses the completed round when the success write failed (completed provided, no interrupted)', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+      const round = {
+        ...createRound({ id: 'r1', status: ConversationRoundStatus.completed }),
+        started_at: T0,
+        steps: [step],
+        time_to_last_token: 42,
+        model_usage: usage,
+        trace_id: 'trace-x',
+        input: { message: 'processed', attachment_refs: [ref] },
+      };
+
+      await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        error: new Error('write failed'),
+        completed: { round, attachments: [{ id: 'a1' }] as never },
+      });
+
+      const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(call.events.map((e) => e.id)).toEqual([
+        'r1::user_message',
+        'r1::execution_started',
+        'r1::step::0',
+        'r1::execution_failed',
+      ]);
+      expect(call.events[0].data).toEqual({ message: 'processed', attachment_refs: [ref] });
+      expect(call.events[2].data).toEqual({ step, sequence: 0 });
+      expect(call.events[3].data).toMatchObject({
+        time_to_last_token: 42,
+        model_usage: usage,
+        trace_id: 'trace-x',
+        error: { message: 'Error executing agent: write failed' },
+      });
+      expect(call.events[3].data).not.toHaveProperty('outcome');
+      expect(call.attachments).toEqual({ snapshot: [], produced: [{ id: 'a1' }] });
     });
   });
 });

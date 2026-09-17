@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { switchMap, from, firstValueFrom } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationAccessControl,
@@ -15,7 +16,12 @@ import type {
   ConversationRoundAuthor,
   ConversationRoundOrigin,
   ConverseInput,
+  ExecutionInterruption,
+  ExecutionPartialRunSummary,
   RoundCompleteEvent,
+  RoundCompleteEventData,
+  RoundInput,
+  RoundInterruptedEventData,
   ExecutionTerminatedEvent,
   TimelineEvent,
   UserIdAndName,
@@ -23,24 +29,31 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationParentRelation,
+  ConversationRoundStatus,
   isConversationAlreadyExistsError,
   isEventsNativeVersion,
+  isExecutionTerminalEvent,
+  isRequestAbortedError,
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import {
+  ROUND_DERIVED_EVENT_ID_SUFFIXES,
   roundToEvents,
   userMessageEvent,
   promptResponseEvent,
   resumeExecutionToEvents,
   executionTerminatedEventId,
+  interruptedExecutionToEvents,
   lastTerminatedExecutionIndex,
   nextResumeIndex,
   resumeExecutionId,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
+import { toClientError } from './convert_errors';
+import { serializeExecutionError } from './serialize_execution_error';
 
 /**
  * Resolves a persisted timeline event by id from the write result we just committed.
@@ -363,6 +376,214 @@ export const appendResumeExecution$ = ({
       });
     })
   );
+};
+
+/** True when the conversation's last round is paused on a prompt: the next input resumes it. */
+export const isPendingResumeConversation = (conversation: Conversation): boolean => {
+  const lastRound = conversation.rounds[conversation.rounds.length - 1];
+  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
+};
+
+export interface PersistExecutionInterruptionParams {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  /** The runner's round id (fresh rounds); a resume uses the pending round's id instead. */
+  roundId: string;
+  receivedAt: Date;
+  /** The converse input as received; the fallback when no processed input is available. */
+  input: ConverseInput;
+  author?: ConversationRoundAuthor;
+  origin?: ConversationRoundOrigin;
+  /**
+   * The raw stream error. `RequestAbortedError` ⇒ `execution_aborted`; anything else ⇒
+   * `execution_failed` carrying the client-normalised error.
+   */
+  error: unknown;
+  /** The handler's partial run summary, when `round_interrupted` was emitted. */
+  interrupted?: RoundInterruptedEventData;
+  /** The `round_complete` payload, when the run completed but the success write failed. */
+  completed?: RoundCompleteEventData;
+  logger: Logger;
+}
+
+/**
+ * Persists a failed or aborted execution as a full projection with exactly one terminal event.
+ *
+ * - Fresh round: `replaceRoundEvents` with `user_message` (rebuilt with the inputs of the receipt
+ *   write, its `data` upgraded to the processed input when known) + `execution_started` + steps +
+ *   terminal + attachment events. No `status`, no `state`.
+ * - HITL resume: `appendEvents` with `prompt_response(k)` + the `exec_k` projection + attachment
+ *   events re-stamped with `exec_k`; the round stays `awaiting_prompt`.
+ *
+ * Both writes carry the client's atomic terminal guard (`skipIfTerminalExistsFor`), so a landed
+ * success write is never overwritten. Returns the written terminal event(s): `[]` when the write
+ * was skipped or failed. Never throws — a write failure is logged; the original error is what the
+ * caller surfaces.
+ */
+export const persistExecutionInterruption = async (
+  params: PersistExecutionInterruptionParams
+): Promise<TimelineEvent[]> => {
+  const {
+    conversation,
+    conversationClient,
+    receivedAt,
+    input,
+    author,
+    origin,
+    error,
+    interrupted,
+    completed,
+    logger,
+  } = params;
+
+  try {
+    const interruption: ExecutionInterruption = isRequestAbortedError(error)
+      ? { type: 'aborted' }
+      : { type: 'failed', error: serializeExecutionError(toClientError(error)) };
+
+    const isResume = isPendingResumeConversation(conversation);
+    const roundId = isResume
+      ? conversation.rounds[conversation.rounds.length - 1].id
+      : params.roundId;
+    const executionIndex = isResume ? nextResumeIndex(conversation, roundId) : 0;
+    const executionId =
+      executionIndex === 0
+        ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`
+        : resumeExecutionId(roundId, executionIndex);
+
+    const startedAt =
+      interrupted?.started_at ?? completed?.round.started_at ?? receivedAt.toISOString();
+    const steps = interrupted?.steps ?? completed?.round.steps ?? [];
+    const summary: ExecutionPartialRunSummary =
+      interrupted?.summary ??
+      (completed
+        ? {
+            model_usage: completed.round.model_usage,
+            time_to_last_token: completed.round.time_to_last_token,
+            ...(completed.round.trace_id ? { trace_id: completed.round.trace_id } : {}),
+            ...(completed.round.configuration_overrides
+              ? { configuration_overrides: completed.round.configuration_overrides }
+              : {}),
+          }
+        : { time_to_last_token: Math.max(0, Date.now() - new Date(startedAt).getTime()) });
+    const processedInput = interrupted?.input ?? completed?.round.input;
+    const attachments = interrupted?.attachments ?? completed?.attachments;
+    const attachmentEvents = interrupted?.attachment_events ?? completed?.attachment_events ?? [];
+    const workspaceId = interrupted?.workspace_id ?? completed?.workspace_id;
+
+    const attachmentsUpdate = attachments
+      ? { attachments: { snapshot: conversation.attachments ?? [], produced: attachments } }
+      : {};
+    const workspaceUpdate = workspaceId ? { workspaceId } : {};
+
+    /** `[]` when the client skipped the write because a terminal already existed. */
+    const writtenTerminals = (
+      persisted: Conversation,
+      executionEvents: TimelineEvent[]
+    ): TimelineEvent[] => {
+      const terminals = executionEvents.filter(isExecutionTerminalEvent);
+      const landed = terminals.every((terminal) =>
+        persisted.events?.some((event) => event.id === terminal.id)
+      );
+      if (!landed) {
+        logger.debug(
+          `Execution ${executionId} already had a terminal event; interruption write skipped`
+        );
+        return [];
+      }
+      return terminals;
+    };
+
+    if (!isResume) {
+      // Rebuilt with the exact inputs `persistRoundInput` used, so id, actor and created_at match
+      // the receipt-time event; only `data` is upgraded to the processed input when known.
+      const receiptInput: RoundInput = {
+        message: input.message ?? '',
+        ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
+      };
+      const userMessage = userMessageEvent(
+        {
+          id: roundId,
+          input: processedInput ?? receiptInput,
+          started_at: receivedAt.toISOString(),
+          ...(author ? { author } : {}),
+          ...(origin ? { origin } : {}),
+        },
+        conversation
+      );
+      const executionEvents = interruptedExecutionToEvents({
+        roundId,
+        executionIndex: 0,
+        startedAt,
+        triggerEventId: userMessage.id,
+        steps,
+        summary,
+        interruption,
+        conversation,
+      });
+      const persisted = await conversationClient.replaceRoundEvents(
+        {
+          id: conversation.id,
+          roundId,
+          events: [userMessage, ...executionEvents, ...attachmentEvents],
+          skipIfTerminalExistsFor: executionId,
+          ...attachmentsUpdate,
+          ...workspaceUpdate,
+        },
+        { access: 'converse' }
+      );
+      return writtenTerminals(persisted, executionEvents);
+    }
+
+    const terminatedIndex = lastTerminatedExecutionIndex(conversation, roundId);
+    if (terminatedIndex < 0) {
+      throw new Error(`round ${roundId} is awaiting a prompt but has no terminated execution`);
+    }
+    const promptResponse = promptResponseEvent({
+      roundId,
+      executionIndex,
+      promptRequestedEventId: executionTerminatedEventId(roundId, terminatedIndex),
+      responses: input.prompts ?? {},
+      input: processedInput ?? { message: input.message ?? '' },
+      conversation,
+      author,
+      createdAt: startedAt,
+    });
+    const executionEvents = interruptedExecutionToEvents({
+      roundId,
+      executionIndex,
+      startedAt,
+      triggerEventId: promptResponse.id,
+      steps,
+      summary,
+      interruption,
+      conversation,
+    });
+    // Attachment events were stamped with the initial execution id by the handler; they belong
+    // to exec_k on a resume, exactly as in `appendResumeExecution$`.
+    const resumeAttachmentEvents = attachmentEvents.map((event) => ({
+      ...event,
+      execution_id: executionId,
+    }));
+    const persisted = await conversationClient.appendEvents(
+      {
+        id: conversation.id,
+        events: [promptResponse, ...executionEvents, ...resumeAttachmentEvents],
+        skipIfTerminalExistsFor: executionId,
+        ...attachmentsUpdate,
+        ...workspaceUpdate,
+      },
+      { access: 'converse' }
+    );
+    return writtenTerminals(persisted, executionEvents);
+  } catch (writeError) {
+    logger.error(
+      `Failed to persist interrupted execution for conversation ${conversation.id}: ${
+        writeError instanceof Error ? writeError.message : String(writeError)
+      }`
+    );
+    return [];
+  }
 };
 
 export type ConversationOperation = 'CREATE' | 'UPDATE';

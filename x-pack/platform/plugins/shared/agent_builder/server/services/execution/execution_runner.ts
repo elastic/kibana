@@ -35,7 +35,6 @@ import {
   isConversationCreatedEvent,
   isAgentBuilderError,
   AgentExecutionMode,
-  ConversationRoundStatus,
   createInternalError,
   normalizeInteractive,
   DEFAULT_CONVERSATION_TITLE,
@@ -64,6 +63,7 @@ import {
   executionStartedEvents$,
   resolveServices,
   convertErrors,
+  isPendingResumeConversation,
   type ConversationWithOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
@@ -497,11 +497,6 @@ const stripResumeExecution = (event: ChatEvent): ChatEvent => {
   }
   const { resume_execution: _resumeExecution, ...data } = event.data;
   return { ...event, data };
-};
-
-const isPendingResumeConversation = (conversation: ConversationWithOperation): boolean => {
-  const lastRound = conversation.rounds[conversation.rounds.length - 1];
-  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
 };
 
 const buildPersistenceEvents = ({
