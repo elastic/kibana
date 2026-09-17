@@ -68,13 +68,9 @@ const createConversation = (roundIds: string[]) =>
 const renderUseIsUnpersistedConversation = ({
   conversation,
   isStreaming = false,
-  pendingMessage,
-  error,
 }: {
   conversation?: Conversation;
   isStreaming?: boolean;
-  pendingMessage?: string;
-  error?: Error;
 } = {}) => {
   mockUseConversationId.mockReturnValue('conversation-1');
   mockUseStreamingContext.mockReturnValue({
@@ -85,13 +81,6 @@ const renderUseIsUnpersistedConversation = ({
     mutateResumeRound: jest.fn(),
     cancelStream: jest.fn(),
     cancelAllStreams: jest.fn(),
-    removeError: jest.fn(),
-    removeAllErrors: jest.fn(),
-  });
-  mockUseStreamRecord.mockReturnValue({
-    pendingMessage,
-    error,
-    errorSteps: [],
   });
 
   return renderHook(() => useIsUnpersistedConversation(conversation));
@@ -111,16 +100,6 @@ describe('useIsUnpersistedConversation', () => {
     expect(result.current).toBe(true);
   });
 
-  it('returns true after an unpersisted new conversation stream fails', () => {
-    const { result } = renderUseIsUnpersistedConversation({
-      conversation: undefined,
-      pendingMessage: 'hello',
-      error: new Error('boom'),
-    });
-
-    expect(result.current).toBe(true);
-  });
-
   it('returns false during later streams on persisted conversations', () => {
     const { result } = renderUseIsUnpersistedConversation({
       conversation: createConversation(['round-1']),
@@ -130,12 +109,8 @@ describe('useIsUnpersistedConversation', () => {
     expect(result.current).toBe(false);
   });
 
-  it('returns false for persisted conversations with rounds after stream errors', () => {
-    const { result } = renderUseIsUnpersistedConversation({
-      conversation: createConversation(['round-1']),
-      pendingMessage: 'hello',
-      error: new Error('boom'),
-    });
+  it('returns false when nothing is streaming', () => {
+    const { result } = renderUseIsUnpersistedConversation({ conversation: undefined });
 
     expect(result.current).toBe(false);
   });
@@ -198,10 +173,8 @@ describe('useConversation polling', () => {
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
       cancelAllStreams: jest.fn(),
-      removeError: jest.fn(),
-      removeAllErrors: jest.fn(),
     });
-    mockUseStreamRecord.mockReturnValue({ errorSteps: [] });
+    mockUseStreamRecord.mockReturnValue({});
   });
 
   afterEach(() => {
@@ -299,8 +272,6 @@ describe('useConversation polling', () => {
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
       cancelAllStreams: jest.fn(),
-      removeError: jest.fn(),
-      removeAllErrors: jest.fn(),
     });
   };
 
@@ -329,6 +300,25 @@ describe('useConversation polling', () => {
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
+
+    queryClient.clear();
+  });
+
+  it('does not poll a shared conversation while this client streams into it', async () => {
+    setStreaming();
+    mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
+    const { queryClient, Wrapper } = createWrapper();
+    queryClient.setQueryData(
+      queryKeys.conversations.byId(conversationId),
+      createFetchedConversation(publicAcl)
+    );
+
+    renderHook(() => useConversation(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
+    await advance(10_000);
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
 
     queryClient.clear();
   });
@@ -375,7 +365,7 @@ describe('useConversationReadOnly', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseConversationId.mockReturnValue(conversationId);
-    mockUseStreamRecord.mockReturnValue({ errorSteps: [] });
+    mockUseStreamRecord.mockReturnValue({});
   });
 
   const setStreaming = (isStreaming: boolean) =>
@@ -387,8 +377,6 @@ describe('useConversationReadOnly', () => {
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
       cancelAllStreams: jest.fn(),
-      removeError: jest.fn(),
-      removeAllErrors: jest.fn(),
     });
 
   it('reports loading while an opened conversation is fetched for the first time', async () => {

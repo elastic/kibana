@@ -115,7 +115,7 @@ export class AgentBuilderApp {
     // has painted on resource-constrained CI runs.
     await this.page.waitForFunction(
       (expected: string) => {
-        const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
+        const els = document.querySelectorAll('[data-test-subj="agentBuilderResponseMessage"]');
         if (els.length === 0) {
           return false;
         }
@@ -149,13 +149,13 @@ export class AgentBuilderApp {
       response: expectedResponse,
       continueConversation: true,
     });
-    const existingCount = await this.page.testSubj.locator('agentBuilderRoundResponse').count();
+    const existingCount = await this.page.testSubj.locator('agentBuilderResponseMessage').count();
     await this.typeMessage(userMessage);
     await this.sendMessage();
     await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
     await this.page.waitForFunction(
       (prev) => {
-        const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
+        const els = document.querySelectorAll('[data-test-subj="agentBuilderResponseMessage"]');
         return els.length > prev;
       },
       existingCount,
@@ -494,7 +494,7 @@ export class AgentBuilderApp {
   async selectAgentLabel(label: string) {
     const contentSelector = subj('agentBuilderAgentsListContent');
     const labelsButtonSelector = `${contentSelector} button[type="button"][aria-label="Labels Selection"]`;
-    const optionSelector = `ul[role="listbox"][aria-label="Labels"] > li[role="option"][title="${label}"]`;
+    const optionSelector = `ul[role="listbox"][aria-label="Labels"] > li[role="option"] span[title="${label}"]`;
     await this.page.locator(labelsButtonSelector).click();
     await this.page.locator(optionSelector).click();
   }

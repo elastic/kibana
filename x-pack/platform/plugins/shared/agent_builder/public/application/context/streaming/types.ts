@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
-
 export type StreamType = 'send' | 'resume';
 
 export interface ActiveStream {
@@ -15,6 +13,4 @@ export interface ActiveStream {
 
 export interface StreamRecord {
   pendingMessage?: string;
-  error?: unknown;
-  errorSteps: ConversationRoundStep[];
 }

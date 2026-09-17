@@ -12,12 +12,7 @@ import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/
 import { firstValueFrom, tap } from 'rxjs';
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { ConversationRoundStep, Conversation } from '@kbn/agent-builder-common';
-import {
-  isConversationCreatedEvent,
-  isExecutionStartedEvent,
-  isExecutionTerminatedEvent,
-} from '@kbn/agent-builder-common';
+import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
 import type {
   Attachment,
   ConversationAttachment,
@@ -26,7 +21,6 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { flattenAttachments } from '../conversation/flatten_attachments';
-import { queryKeys } from '../../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
@@ -48,15 +42,12 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
-  onResetToNewConversation?: (message: string, attachments?: ConversationAttachment[]) => void;
 }
 
 export interface SendMessageMutationBindings {
   conversationStreamService: ConversationStreamService;
   setPendingMessage: (conversationId: string, message: string) => void;
   clearPendingMessage: (conversationId: string) => void;
-  setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
-  clearError: (conversationId: string) => void;
   clearActiveStream: (conversationId: string) => void;
 }
 
@@ -131,8 +122,6 @@ export const useSendMessageMutation = ({
   conversationStreamService,
   setPendingMessage,
   clearPendingMessage,
-  setError,
-  clearError,
   clearActiveStream,
 }: UseSendMessageMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
@@ -152,13 +141,6 @@ export const useSendMessageMutation = ({
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: async (vars: SendMessageVars) => {
-      // Clear any previous error for this conversation before starting the new mutation.
-      // Covers retry and fresh-send-after-error uniformly.
-      clearError(vars.conversationId);
-      const queryKey = queryKeys.conversations.byId(vars.conversationId);
-      const isNewConversation = !queryClient.getQueryData<Conversation>(queryKey);
-      let conversationPersisted = false;
-
       const streamActions = createConversationActions({
         conversationId: vars.conversationId,
         queryClient,
@@ -181,7 +163,6 @@ export const useSendMessageMutation = ({
 
       let timelineExecutionId: string | undefined;
       let triggerEventId: string | undefined;
-      let stepsAtFailure: ConversationRoundStep[] = [];
 
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
@@ -206,63 +187,41 @@ export const useSendMessageMutation = ({
         });
 
         const events$ = rawEvents$.pipe(
-          tap({
-            next: (event) => {
-              if (isConversationCreatedEvent(event)) {
-                conversationPersisted = true;
-              }
-              if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
-                timelineExecutionId ??= event.execution_id;
-                triggerEventId ??= event.trigger_event_id;
-              }
-            },
-            // Runs before the upstream `finalize` that clears the draft on stream end.
-            error: () => {
-              stepsAtFailure =
-                conversationStreamService.getSnapshot(vars.conversationId)?.steps ?? [];
-            },
+          tap((event) => {
+            if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
+              timelineExecutionId ??= event.execution_id;
+              triggerEventId ??= event.trigger_event_id;
+            }
           })
         );
 
+        // Failures are persisted by the server and arrive through the refetch below, so a stream
+        // that errors ends the same way as one that completed or was stopped.
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
-        });
+        }).catch(() => {});
 
         // Skip on cancel: the editor restores the pending message's image chips, so clearing attachments here would break them.
         if (!controller.signal.aborted) {
           vars.resetAttachments?.();
-          clearActiveStream(vars.conversationId);
-          await releaseLocalContent({
-            refetch: streamActions.refetchConversation,
-            triggerEventId,
-            executionId: timelineExecutionId,
-            clearPendingMessage: () => clearPendingMessage(vars.conversationId),
-            clearExecution: (persistedExecutionId) =>
-              conversationStreamService.clearPersistedExecution(
-                vars.conversationId,
-                persistedExecutionId
-              ),
-          });
         }
-      } catch (err) {
-        setError(vars.conversationId, err, stepsAtFailure);
-        throw err;
+        clearActiveStream(vars.conversationId);
+        await releaseLocalContent({
+          refetch: streamActions.refetchConversation,
+          triggerEventId,
+          executionId: timelineExecutionId,
+          clearPendingMessage: () => clearPendingMessage(vars.conversationId),
+          clearExecution: (persistedExecutionId) =>
+            conversationStreamService.clearPersistedExecution(
+              vars.conversationId,
+              persistedExecutionId
+            ),
+        });
       } finally {
-        const abortedNewUnpersisted =
-          controller.signal.aborted &&
-          isNewConversation &&
-          !conversationPersisted &&
-          Boolean(vars.onResetToNewConversation);
-
-        if (abortedNewUnpersisted) {
-          queryClient.removeQueries({ queryKey });
-          clearPendingMessage(vars.conversationId);
-          vars.onResetToNewConversation!(vars.message, vars.attachments);
-        }
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);

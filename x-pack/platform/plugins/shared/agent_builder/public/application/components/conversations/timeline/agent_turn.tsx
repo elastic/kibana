@@ -16,7 +16,7 @@ import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
 import { RoundEvents } from '../conversation_rounds/round_events/round_events';
-import { RoundResponse } from '../conversation_rounds/round_response/round_response';
+import { ResponseMessage } from '../conversation_rounds/round_response/response_message';
 import { executionTerminatedToResponse } from './items/execution_terminated_event';
 import { ExecutionFailedEvent } from './items/execution_failed_event';
 import { ExecutionAbortedEvent } from './items/execution_aborted_event';
@@ -76,8 +76,9 @@ const renderContent = (item: AgentTurnItem, resume: PromptRendering): React.Reac
   }
 
   const awaiting = isAwaitingPromptTurn(item);
-  const completed = isCompletedTurn(item)
-    ? executionTerminatedToResponse(item.terminal, item.steps)
+  const completedTerminal = isCompletedTurn(item) ? item.terminal : undefined;
+  const completed = completedTerminal
+    ? executionTerminatedToResponse(completedTerminal, item.steps)
     : undefined;
 
   const steps = awaiting
@@ -96,17 +97,17 @@ const renderContent = (item: AgentTurnItem, resume: PromptRendering): React.Reac
     );
   } else if (completed) {
     trailing = (
-      <RoundResponse
+      <ResponseMessage
         response={completed.response}
         steps={completed.steps}
         isLoading={false}
         hasError={false}
-        rawRound={completed.rawRound}
+        executionTerminatedEvent={completedTerminal}
       />
     );
   } else if (!isCompletedTurn(item) && (steps.length > 0 || item.response)) {
     trailing = (
-      <RoundResponse
+      <ResponseMessage
         response={{ message: item.response?.message ?? '' }}
         steps={steps}
         isLoading

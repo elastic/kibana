@@ -11,7 +11,6 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Subject } from 'rxjs';
 import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
-import { ChatEventType } from '@kbn/agent-builder-common';
 import { EventsService } from '../../../services/events/events_service';
 import { ConversationStreamService } from '../../../services/events/conversation_stream_service';
 import { propagateEvents } from '../../../services/chat/propagate_events';
@@ -41,7 +40,7 @@ const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::exec
 const setup = () => {
   const eventsService = new EventsService();
   const conversationStreamService = new ConversationStreamService(eventsService);
-  const bindings = { conversationStreamService, setError: jest.fn(), clearActiveStream: jest.fn() };
+  const bindings = { conversationStreamService, clearActiveStream: jest.fn() };
   const source = new Subject<ChatEvent>();
   mockResume.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
 
@@ -79,31 +78,26 @@ describe('useResumeRoundMutation', () => {
 
     await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toBeNull());
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
-    expect(bindings.setError).not.toHaveBeenCalled();
   });
 
-  it('reports the steps and rolls back the optimistic answer when the stream fails unpersisted', async () => {
+  it('ends a stream that errors like a completed one: refetch, release, and roll back the unpersisted optimistic answer', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     const clearPromptResponse = jest.spyOn(conversationStreamService, 'clearPromptResponse');
     mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [] });
 
     act(() => result.current.mutate(vars));
     await waitFor(() => expect(mockResume).toHaveBeenCalled());
-    act(() => {
-      source.next({ type: ChatEventType.reasoning, data: { reasoning: 'thinking' } } as ChatEvent);
-      source.error(new Error('boom'));
-    });
+    act(() => source.error(new Error('boom')));
 
-    await waitFor(() => expect(bindings.setError).toHaveBeenCalled());
-    const [, , steps] = bindings.setError.mock.calls[0];
-    expect(steps).toHaveLength(1);
+    await waitFor(() => expect(mockGet).toHaveBeenCalled());
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
     await waitFor(() =>
       expect(clearPromptResponse).toHaveBeenCalledWith(conversationId, promptRequestedEventId)
     );
   });
 
   it('keeps the optimistic answer when the failed resume was actually persisted', async () => {
-    const { bindings, source, result, conversationStreamService } = setup();
+    const { source, result, conversationStreamService } = setup();
     const clearPromptResponse = jest.spyOn(conversationStreamService, 'clearPromptResponse');
     const persistedResponse = {
       id: 'round-1::prompt_response::1',
@@ -114,12 +108,9 @@ describe('useResumeRoundMutation', () => {
 
     act(() => result.current.mutate(vars));
     await waitFor(() => expect(mockResume).toHaveBeenCalled());
-    act(() => {
-      source.next({ type: ChatEventType.reasoning, data: { reasoning: 'thinking' } } as ChatEvent);
-      source.error(new Error('boom'));
-    });
+    act(() => source.error(new Error('boom')));
 
-    await waitFor(() => expect(bindings.setError).toHaveBeenCalled());
+    await waitFor(() => expect(mockGet).toHaveBeenCalled());
     expect(clearPromptResponse).not.toHaveBeenCalled();
   });
 });

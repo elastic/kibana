@@ -23,7 +23,7 @@ import { createVisualizationRenderer, visualizationTagParser } from './markdown_
 import { VisualizeESQL, InlineVisualization } from '@kbn/agent-builder-visualizations';
 import { ChatMessageText } from './chat_message_text';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
-import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
+import { useStepsFromSavedTurns } from '../../../../hooks/use_steps_from_saved_turns';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -57,8 +57,8 @@ jest.mock('../../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/use_conversation', () => ({
-  useStepsFromPrevRounds: jest.fn(),
+jest.mock('../../../../hooks/use_steps_from_saved_turns', () => ({
+  useStepsFromSavedTurns: jest.fn(),
 }));
 
 jest.mock('../../../../context/conversation/conversation_context', () => ({
@@ -70,8 +70,8 @@ const mockInlineVisualization = InlineVisualization as jest.MockedFunction<any>;
 const useAgentBuilderServicesMock = useAgentBuilderServices as jest.MockedFunction<
   typeof useAgentBuilderServices
 >;
-const useStepsFromPrevRoundsMock = useStepsFromPrevRounds as jest.MockedFunction<
-  typeof useStepsFromPrevRounds
+const useStepsFromSavedTurnsMock = useStepsFromSavedTurns as jest.MockedFunction<
+  typeof useStepsFromSavedTurns
 >;
 const useConversationContextMock = useConversationContext as jest.MockedFunction<
   typeof useConversationContext
@@ -152,7 +152,7 @@ describe('chat_message_text', () => {
       toolsService: {},
       startDependencies: createStartDependencies(),
     } as ReturnType<typeof useAgentBuilderServices>);
-    useStepsFromPrevRoundsMock.mockReturnValue([]);
+    useStepsFromSavedTurnsMock.mockReturnValue([]);
     useConversationContextMock.mockReturnValue({
       isEmbeddedContext: false,
       browserApiTools: undefined,
@@ -265,8 +265,8 @@ describe('chat_message_text', () => {
         http,
         uiSettings,
         startDependencies,
-        stepsFromCurrentRound: [vegaVisualizationStep],
-        stepsFromPrevRounds: [],
+        stepsFromCurrentTurn: [vegaVisualizationStep],
+        stepsFromPreviousTurns: [],
       });
 
       render(renderer({ toolResultId: 'VEGA1' }));
@@ -289,8 +289,8 @@ describe('chat_message_text', () => {
         http,
         uiSettings,
         startDependencies,
-        stepsFromCurrentRound: [toolCallStep],
-        stepsFromPrevRounds: [],
+        stepsFromCurrentTurn: [toolCallStep],
+        stepsFromPreviousTurns: [],
       });
 
       const element = renderer({ toolResultId: '6K4K' });
@@ -315,8 +315,8 @@ describe('chat_message_text', () => {
         http,
         uiSettings,
         startDependencies: createStartDependencies(),
-        stepsFromCurrentRound: [toolCallStep],
-        stepsFromPrevRounds: [],
+        stepsFromCurrentTurn: [toolCallStep],
+        stepsFromPreviousTurns: [],
       });
 
       const element = renderer({ toolResultId: undefined });
@@ -332,8 +332,8 @@ describe('chat_message_text', () => {
         http,
         uiSettings,
         startDependencies: createStartDependencies(),
-        stepsFromCurrentRound: [toolCallStep],
-        stepsFromPrevRounds: [],
+        stepsFromCurrentTurn: [toolCallStep],
+        stepsFromPreviousTurns: [],
       });
 
       const element = renderer({ toolResultId: 'unknown-id' });
@@ -357,8 +357,8 @@ describe('chat_message_text', () => {
         http,
         uiSettings,
         startDependencies: createStartDependencies(),
-        stepsFromCurrentRound: [stepWithoutQuery],
-        stepsFromPrevRounds: [],
+        stepsFromCurrentTurn: [stepWithoutQuery],
+        stepsFromPreviousTurns: [],
       });
 
       const element = renderer({ toolResultId: '6K4K' });
@@ -377,8 +377,8 @@ describe('chat_message_text', () => {
         http,
         uiSettings,
         startDependencies: createStartDependencies(),
-        stepsFromCurrentRound: [],
-        stepsFromPrevRounds: [toolCallStep],
+        stepsFromCurrentTurn: [],
+        stepsFromPreviousTurns: [toolCallStep],
       });
 
       const element = renderer({ toolResultId: '6K4K' });
@@ -393,8 +393,8 @@ describe('chat_message_text', () => {
         http,
         uiSettings,
         startDependencies: createStartDependencies(),
-        stepsFromCurrentRound: [toolCallStep],
-        stepsFromPrevRounds: [],
+        stepsFromCurrentTurn: [toolCallStep],
+        stepsFromPreviousTurns: [],
       });
 
       const element = renderer({ toolResultId: '6K4K', chartType: ChartType.Line });
@@ -415,8 +415,8 @@ describe('chat_message_text', () => {
         http,
         uiSettings,
         startDependencies: createStartDependencies(),
-        stepsFromCurrentRound: [toolCallStep],
-        stepsFromPrevRounds: [],
+        stepsFromCurrentTurn: [toolCallStep],
+        stepsFromPreviousTurns: [],
       });
 
       const element = renderer({ toolResultId: '6K4K' });
@@ -430,7 +430,7 @@ describe('chat_message_text', () => {
 
   describe('<ChatMessageText />', () => {
     it('renders VisualizeESQL for visualization tags with matching tool results', () => {
-      useStepsFromPrevRoundsMock.mockReturnValue([toolCallStep]);
+      useStepsFromSavedTurnsMock.mockReturnValue([toolCallStep]);
 
       const content = 'Here is a visualization:\n<visualization tool-result-id="6K4K" />';
       render(<ChatMessageText content={content} steps={[toolCallStep]} />);
@@ -446,7 +446,7 @@ describe('chat_message_text', () => {
     });
 
     it('uses tool results from previous rounds when current steps are empty', () => {
-      useStepsFromPrevRoundsMock.mockReturnValue([toolCallStep]);
+      useStepsFromSavedTurnsMock.mockReturnValue([toolCallStep]);
 
       const content = 'Here is a visualization:\n<visualization tool-result-id="6K4K" />';
       render(<ChatMessageText content={content} steps={[]} />);
@@ -462,7 +462,7 @@ describe('chat_message_text', () => {
     });
 
     it('passes the chartType to VisualizeESQL', () => {
-      useStepsFromPrevRoundsMock.mockReturnValue([]);
+      useStepsFromSavedTurnsMock.mockReturnValue([]);
 
       const content =
         'Here is a visualization:\n<visualization tool-result-id="6K4K" chart-type="Area" />';
@@ -480,7 +480,7 @@ describe('chat_message_text', () => {
     });
 
     it('renders multiple visualizations with different chart types in a single message', () => {
-      useStepsFromPrevRoundsMock.mockReturnValue([]);
+      useStepsFromSavedTurnsMock.mockReturnValue([]);
 
       const content = `Line Chart
 <visualization tool-result-id="6K4K" chart-type="Line" />

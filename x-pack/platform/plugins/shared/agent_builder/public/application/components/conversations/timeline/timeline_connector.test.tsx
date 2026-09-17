@@ -77,7 +77,7 @@ const setState = ({
   jest
     .mocked(useConversation)
     .mockReturnValue({ conversation } as ReturnType<typeof useConversation>);
-  jest.mocked(useStreamRecord).mockReturnValue({ pendingMessage, errorSteps: [] });
+  jest.mocked(useStreamRecord).mockReturnValue({ pendingMessage });
 };
 
 const conversationWith = (events: TimelineEvent[]) =>

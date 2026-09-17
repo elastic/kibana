@@ -63,8 +63,6 @@ const setup = () => {
     conversationStreamService,
     setPendingMessage: jest.fn(),
     clearPendingMessage: jest.fn(),
-    setError: jest.fn(),
-    clearError: jest.fn(),
     clearActiveStream: jest.fn(),
   };
   const source = new Subject<ChatEvent>();
@@ -110,7 +108,6 @@ describe('useSendMessageMutation', () => {
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
     expect(conversationStreamService.getSnapshot(conversationId)).toBeNull();
-    expect(bindings.setError).not.toHaveBeenCalled();
   });
 
   it('keeps the pending message and draft when the refetch lacks the saved copies', async () => {
@@ -128,7 +125,7 @@ describe('useSendMessageMutation', () => {
     expect(conversationStreamService.getSnapshot(conversationId)?.status).toBe('completed');
   });
 
-  it('clears the pending message when the refetch fails, without treating it as an execution error', async () => {
+  it('clears the pending message when the refetch fails', async () => {
     const { bindings, source, result } = setup();
     mockGet.mockRejectedValue(new Error('refresh failed'));
 
@@ -137,24 +134,23 @@ describe('useSendMessageMutation', () => {
     act(() => streamToCompletion(source));
 
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
-    expect(bindings.setError).not.toHaveBeenCalled();
   });
 
-  it('reports the steps the draft held when the stream fails', async () => {
-    const { bindings, source, result } = setup();
+  it('ends a stream that errors like a completed one: refetch, then release', async () => {
+    const { bindings, source, result, conversationStreamService } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
 
     act(() => result.current.mutate(vars));
     await waitFor(() => expect(mockChat).toHaveBeenCalled());
     act(() => {
+      source.next(started as ChatEvent);
       source.next({ type: ChatEventType.reasoning, data: { reasoning: 'thinking' } } as ChatEvent);
       source.error(new Error('boom'));
     });
 
-    await waitFor(() => expect(bindings.setError).toHaveBeenCalled());
-    const [, error, steps] = bindings.setError.mock.calls[0];
-    expect(error).toEqual(new Error('boom'));
-    expect(steps).toHaveLength(1);
-    expect(bindings.clearPendingMessage).not.toHaveBeenCalled();
-    expect(mockGet).not.toHaveBeenCalled();
+    await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+    expect(conversationStreamService.getSnapshot(conversationId)).toBeNull();
   });
 });

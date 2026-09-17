@@ -58,7 +58,7 @@ test.describe(
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         await expect(async () => {
           await expect(
-            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+            page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
               hasText: MOCKED_RESPONSE,
             })
           ).toContainText(MOCKED_RESPONSE);
@@ -104,7 +104,7 @@ test.describe(
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         await expect(async () => {
           await expect(
-            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+            page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
               hasText: MOCKED_RESPONSE,
             })
           ).toContainText(MOCKED_RESPONSE);
@@ -150,7 +150,7 @@ test.describe(
         }).toPass({ timeout: 60_000 });
         await expect(async () => {
           await expect(
-            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+            page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
               hasText: SUCCESSFUL_RESPONSE,
             })
           ).toContainText(SUCCESSFUL_RESPONSE);
@@ -176,7 +176,7 @@ test.describe(
 
         await expect(async () => {
           await expect(
-            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+            page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
               hasText: FIRST_RESPONSE,
             })
           ).toContainText(FIRST_RESPONSE);
@@ -197,7 +197,7 @@ test.describe(
         await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
         await expect(async () => {
           await expect(
-            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+            page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
               hasText: FIRST_RESPONSE,
             })
           ).toContainText(FIRST_RESPONSE);

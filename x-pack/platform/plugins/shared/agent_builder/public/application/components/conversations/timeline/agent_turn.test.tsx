@@ -25,8 +25,8 @@ import type { TimelineItem } from './to_timeline_items';
 import { activeExecutionToItem, buildSavedItems } from './to_timeline_items';
 import { Timeline } from './timeline';
 
-jest.mock('../conversation_rounds/round_response/round_response', () => ({
-  RoundResponse: ({ isLoading }: { isLoading: boolean }) => (
+jest.mock('../conversation_rounds/round_response/response_message', () => ({
+  ResponseMessage: ({ isLoading }: { isLoading: boolean }) => (
     <div data-test-subj="response">{isLoading ? 'loading' : 'done'}</div>
   ),
 }));

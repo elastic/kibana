@@ -10,11 +10,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type {
-  Conversation,
-  ConversationRoundStep,
-  PromptResponseEvent,
-} from '@kbn/agent-builder-common';
+import type { Conversation, PromptResponseEvent } from '@kbn/agent-builder-common';
 import {
   EventActorType,
   TimelineEventType,
@@ -73,7 +69,6 @@ export interface ResumeRoundVars {
 
 export interface ResumeRoundMutationBindings {
   conversationStreamService: ConversationStreamService;
-  setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
   clearActiveStream: (conversationId: string) => void;
 }
 
@@ -85,7 +80,6 @@ type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
  */
 export const useResumeRoundMutation = ({
   conversationStreamService,
-  setError,
   clearActiveStream,
 }: UseResumeRoundMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
@@ -126,7 +120,6 @@ export const useResumeRoundMutation = ({
       );
 
       let timelineExecutionId: string | undefined;
-      let stepsAtFailure: ConversationRoundStep[] = [];
 
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
@@ -143,27 +136,22 @@ export const useResumeRoundMutation = ({
         });
 
         const events$ = rawEvents$.pipe(
-          tap({
-            next: (event) => {
-              if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
-                timelineExecutionId ??= event.execution_id;
-              }
-            },
-            // Runs before the upstream `finalize` that clears the draft on stream end.
-            error: () => {
-              stepsAtFailure =
-                conversationStreamService.getSnapshot(vars.conversationId)?.steps ?? [];
-            },
+          tap((event) => {
+            if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
+              timelineExecutionId ??= event.execution_id;
+            }
           })
         );
 
+        // Failures are persisted by the server and arrive through the refetch below, so a stream
+        // that errors ends the same way as one that completed or was stopped.
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
-        });
+        }).catch(() => {});
 
         if (!controller.signal.aborted) {
           clearActiveStream(vars.conversationId);
@@ -176,9 +164,7 @@ export const useResumeRoundMutation = ({
                 persistedExecutionId
               ),
           });
-        }
-      } catch (err) {
-        if (!controller.signal.aborted) {
+
           const persisted = await hasPersistedPromptResponse(
             streamActions.refetchConversation,
             vars.promptRequestedEventId
@@ -190,8 +176,6 @@ export const useResumeRoundMutation = ({
             );
           }
         }
-        setError(vars.conversationId, err, stepsAtFailure);
-        throw err;
       } finally {
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {

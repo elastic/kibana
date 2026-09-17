@@ -64,7 +64,7 @@ test.describe(
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       await expect(async () => {
-        await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+        await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
           MOCKED_RESPONSE
         );
       }).toPass({ timeout: 120_000 });
@@ -144,7 +144,7 @@ test.describe(
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       await expect(async () => {
-        await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+        await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
           MOCKED_RESPONSE
         );
       }).toPass({ timeout: 120_000 });
@@ -195,7 +195,7 @@ test.describe(
       }).toPass({ timeout: 60_000 });
 
       await expect(async () => {
-        await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+        await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
           SUCCESSFUL_RESPONSE
         );
       }).toPass({ timeout: 120_000 });
@@ -239,7 +239,7 @@ test.describe(
       await pageObjects.agentBuilder.sendMessage();
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      await expect(page.testSubj.locator('agentBuilderRoundResponse')).toBeVisible({
+      await expect(page.testSubj.locator('agentBuilderResponseMessage')).toBeVisible({
         timeout: 120_000,
       });
 
@@ -266,7 +266,7 @@ test.describe(
       );
 
       await expect(
-        page.locator('[data-test-subj="agentBuilderRoundResponse"]', { hasText: FIRST_RESPONSE })
+        page.locator('[data-test-subj="agentBuilderResponseMessage"]', { hasText: FIRST_RESPONSE })
       ).toContainText(FIRST_RESPONSE);
 
       await setupAgentDirectError({
@@ -287,7 +287,7 @@ test.describe(
       await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
 
       await expect(
-        page.locator('[data-test-subj="agentBuilderRoundResponse"]', { hasText: FIRST_RESPONSE })
+        page.locator('[data-test-subj="agentBuilderResponseMessage"]', { hasText: FIRST_RESPONSE })
       ).toContainText(FIRST_RESPONSE);
     });
   }

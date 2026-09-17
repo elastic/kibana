@@ -7,14 +7,11 @@
 
 import { useCallback, useMemo } from 'react';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
-import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId, useConversation } from './use_conversation';
 import { useConnectorSelection } from './chat/use_connector_selection';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
-import { useNavigation } from './use_navigation';
-import { appPaths } from '../utils/app_paths';
 
 /**
  * Per-conversation scoped slice of the streaming state machine.
@@ -35,32 +32,11 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
-  const { attachments, resetAttachments, browserApiTools, isEmbeddedContext, onSubmit } =
-    useConversationContext();
+  const { attachments, resetAttachments, browserApiTools, onSubmit } = useConversationContext();
   const { selectedConnector: connectorId } = useConnectorSelection();
-  const { navigateToAgentBuilderUrl } = useNavigation();
 
-  const resetToNewConversation = useCallback(
-    (message: string, restoredAttachments?: ConversationAttachment[]) => {
-      if (isEmbeddedContext || !agentId) {
-        return;
-      }
-      navigateToAgentBuilderUrl(
-        appPaths.agent.conversations.new({ agentId }),
-        {},
-        { initialMessage: message, autoSendInitialMessage: false, attachments: restoredAttachments }
-      );
-    },
-    [isEmbeddedContext, agentId, navigateToAgentBuilderUrl]
-  );
-
-  const {
-    activeStreams,
-    mutateSendMessage,
-    mutateResumeRound,
-    cancelStream,
-    removeError: removeErrorCtx,
-  } = useStreamingContext();
+  const { activeStreams, mutateSendMessage, mutateResumeRound, cancelStream } =
+    useStreamingContext();
 
   const record = useStreamRecord(conversationId);
 
@@ -91,8 +67,6 @@ export const useConversationStream = () => {
         conversationAttachments: conversation?.attachments,
         resetAttachments,
         browserApiTools,
-        onResetToNewConversation:
-          !isEmbeddedContext && agentId ? resetToNewConversation : undefined,
       });
     },
     [
@@ -104,8 +78,6 @@ export const useConversationStream = () => {
       resetAttachments,
       browserApiTools,
       onSubmit,
-      isEmbeddedContext,
-      resetToNewConversation,
     ]
   );
 
@@ -135,41 +107,20 @@ export const useConversationStream = () => {
     [mutateResumeRound, conversationId, agentId, connectorId, browserApiTools]
   );
 
-  const retry = useCallback(() => {
-    if (isResponseLoading || !record.error) return;
-    if (!record.pendingMessage) {
-      throw new Error('Pending message is not present');
-    }
-    if (!conversationId) {
-      throw new Error('Cannot retry without a conversation id');
-    }
-    sendMessage({ message: record.pendingMessage, conversationId });
-  }, [isResponseLoading, record.error, record.pendingMessage, conversationId, sendMessage]);
-
   const cancel = useCallback(() => {
     if (conversationId) {
       cancelStream(conversationId);
     }
   }, [cancelStream, conversationId]);
 
-  const removeError = useCallback(() => {
-    if (conversationId) {
-      removeErrorCtx(conversationId);
-    }
-  }, [removeErrorCtx, conversationId]);
-
   return useMemo(
     () => ({
       sendMessage,
       resumeRound,
-      retry,
       cancel,
-      removeError,
       isResponseLoading,
       isResuming,
       pendingMessage: record.pendingMessage,
-      error: record.error,
-      errorSteps: record.errorSteps,
       canCancel: isMyStreamActive,
       // Use this when the question is "is the conversation locked from external action because
       // a mutation is in flight?" — `isResponseLoading` answers a narrower question (round-level loading
@@ -179,14 +130,10 @@ export const useConversationStream = () => {
     [
       sendMessage,
       resumeRound,
-      retry,
       cancel,
-      removeError,
       isResponseLoading,
       isResuming,
       record.pendingMessage,
-      record.error,
-      record.errorSteps,
       isMyStreamActive,
     ]
   );
