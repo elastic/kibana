@@ -328,6 +328,31 @@ describe('EsServiceAccounts', () => {
         path: ACCOUNT_PATH,
         querystring: { force: 'true' },
       });
+      // A rejected `set` does not prove Elasticsearch never committed the document.
+      expect(credentialStore.delete).toHaveBeenCalledWith('kibana/nightshift-relay');
+    });
+
+    it('still rolls back Elasticsearch when the credential delete fails', async () => {
+      mockHappyPath();
+      credentialStore.set.mockRejectedValue(new Error('encryption key rotated'));
+      credentialStore.delete.mockRejectedValue(new Error('saved objects index read-only'));
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+        'encryption key rotated'
+      );
+
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[3][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
+      expect(calls[4][0]).toEqual({
+        method: 'DELETE',
+        path: ACCOUNT_PATH,
+        querystring: { force: 'true' },
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Failed to delete the credential of partially created service account'
+        )
+      );
     });
 
     // The forced account delete exists for exactly this case: Elasticsearch refuses an unforced

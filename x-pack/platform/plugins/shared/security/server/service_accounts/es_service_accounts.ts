@@ -310,8 +310,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * here is logged rather than thrown. An account left behind blocks re-creating that name until
    * an operator removes it, which is why the principal is named in the log.
    *
-   * The two deletes are attempted independently. A token Elasticsearch would not give up is the
+   * All three deletes are attempted independently. A token Elasticsearch would not give up is the
    * case the forced account delete exists for, so it must not also be what stops it from running.
+   * The credential is included because a rejected `set` does not prove Elasticsearch never
+   * committed the document.
    */
   private async rollback(
     esClient: ElasticsearchClient,
@@ -352,6 +354,18 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       this.logger.error(
         `Failed to roll back partially created service account [${principal}]. It may need to be ` +
           `removed manually: ${getDetailedErrorMessage(e)}`
+      );
+    }
+
+    // Last, so a rollback that gives up partway through leaves a credential for an account that
+    // is already gone, rather than a live Elasticsearch token Kibana has no record of. The delete
+    // is idempotent, so the paths that never reached `set` cost nothing here.
+    try {
+      await this.credentialStore.delete(principal);
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete the credential of partially created service account [${principal}]. ` +
+          `It may need to be removed manually: ${getDetailedErrorMessage(e)}`
       );
     }
   }
