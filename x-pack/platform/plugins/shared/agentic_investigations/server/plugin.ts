@@ -20,6 +20,7 @@ import { initializeManagedWorkflows } from './proposals/managed_workflows/initia
 import { registerRoutes } from './proposals/routes/register_routes';
 import { ProposalsService } from './proposals/services/proposals_service';
 import { createProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
+import type { ProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
 import { createProposalUserResolver } from './proposals/services/resolve_proposal_user';
 import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
 import { registerProposalAttachment } from './proposals/attachments';
@@ -46,6 +47,7 @@ export class AgenticInvestigationsPlugin
   // `workflowsManagement` is a required plugin, so this is set in setup() and
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
+  private proposalPrivileges?: ProposalPrivilegesChecker;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
@@ -85,10 +87,7 @@ export class AgenticInvestigationsPlugin
       // Steps register during setup but only run once Kibana has started, so
       // the authorization service is resolved per call rather than captured
       // here — `security.authz` does not exist yet.
-      privileges: createProposalPrivilegesChecker({
-        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
-        logger: this.logger,
-      }),
+      privileges: this.getProposalPrivilegesChecker(coreSetup),
     });
 
     registerRoutes({
@@ -139,6 +138,7 @@ export class AgenticInvestigationsPlugin
 
     return {
       getProposalsService: () => this.requireProposalsService(),
+      getProposalPrivileges: () => this.requireProposalPrivileges(),
     };
   }
 
@@ -158,6 +158,33 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.proposalsService;
+  }
+
+  /**
+   * Built once, at setup — `createProposalPrivilegesChecker` resolves security
+   * lazily via `coreSetup.getStartServices()` on every call, so it works
+   * before `start()` runs (step registration needs it during setup) without
+   * capturing a stale reference.
+   */
+  private getProposalPrivilegesChecker(
+    coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>
+  ): ProposalPrivilegesChecker {
+    if (!this.proposalPrivileges) {
+      this.proposalPrivileges = createProposalPrivilegesChecker({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        logger: this.logger,
+      });
+    }
+    return this.proposalPrivileges;
+  }
+
+  private requireProposalPrivileges(): ProposalPrivilegesChecker {
+    if (!this.proposalPrivileges) {
+      throw new Error(
+        'Proposal privileges checker is not available until the agenticInvestigations plugin has been set up'
+      );
+    }
+    return this.proposalPrivileges;
   }
 
   private getSpaceId(request: KibanaRequest): string {

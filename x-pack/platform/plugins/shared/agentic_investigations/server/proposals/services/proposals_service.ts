@@ -41,6 +41,7 @@ import type {
   ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
+import type { ReviseProposalRequest } from '../../../common/proposals/revision';
 import { isExpired, MAX_PROPOSALS_SIZE } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { toSortRanks } from '../storage/sort_ranks';
@@ -167,6 +168,11 @@ export class ProposalsService {
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
       createdAt: new Date().toISOString(),
       createdBy: user,
+      // A fresh proposal is a single-member revision chain rooted at itself.
+      // `revise()` extends this chain later; `clone()`'s retries deliberately
+      // do NOT touch it, because a retry is not a revision.
+      rootProposalId: id,
+      revision: 1,
     };
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
@@ -659,6 +665,151 @@ export class ProposalsService {
   }
 
   /**
+   * Appends a new revision carrying the caller's overrides and retires the
+   * addressed one, per https://github.com/elastic/security-team/issues/19289.
+   *
+   * `createdAt`, `expiresAt` and `workflowExecutionId` are inherited rather
+   * than restarted — the deadline and the gate execution both belong to the
+   * chain, not to any single revision. This mirrors `clone()`'s inheritance
+   * of the same three fields for the same reason.
+   *
+   * PROVISIONAL: the issue's author flagged in Slack, six minutes after
+   * writing this inheritance rule, that he is personally still unsure about
+   * it and wants to sync before it is final. Implemented as currently
+   * written pending that confirmation — do not treat this as settled.
+   */
+  async revise(
+    { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
+    spaceId: string
+  ): Promise<{ proposalId: string; revision: number }> {
+    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    // Only the live revision may be revised. A revision that already has a
+    // decision, is not `pending`, or was already superseded is not the head
+    // of the chain, and revising it would fork the chain in the same way two
+    // concurrent revisions from the same predecessor would.
+    if (proposal.decision !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already decided as ${proposal.decision} and cannot be revised`
+      );
+    }
+    if (proposal.status !== 'pending') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] has settled as ${proposal.status} and cannot be revised`
+      );
+    }
+    if (proposal.supersededBy !== undefined) {
+      // Overwriting the pointer would fork the chain: two rows would claim to
+      // be the latest revision, with nothing to say which one actually is.
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
+      );
+    }
+
+    const revisionId = uuidv4();
+    const { id: _id, ...original } = proposal;
+    const rootProposalId = original.rootProposalId ?? id;
+    // `?? 1` covers proposals created before this field existed: absent in
+    // storage reads as revision 1, the same value the root schema default
+    // gives a freshly created proposal. Bound to its own `number` local so it
+    // does not get widened back to `number | undefined` once spread into
+    // `document` below — `ProposalDocument['revision']` is optional for that
+    // pre-existing-record case, but this call site always produces one.
+    const revision: number = (original.revision ?? 1) + 1;
+
+    const document: ProposalDocument = {
+      ...original,
+      rootProposalId,
+      supersedes: id,
+      revision,
+      supersededBy: undefined,
+      status: 'pending',
+      decision: undefined,
+      decidedBy: undefined,
+      decidedAt: undefined,
+      dismissReason: undefined,
+      rationale: undefined,
+      executionError: undefined,
+      ...(comment !== undefined ? { comment } : {}),
+      ...(actionInput !== undefined ? { actionInput } : {}),
+      ...(impact !== undefined ? { impact } : {}),
+      ...(confidence !== undefined ? { confidence } : {}),
+    };
+
+    // The new revision is created before the predecessor is marked,
+    // deliberately — the same ordering `clone()` uses and for the same
+    // reason: if the second write loses its race, the queue shows both
+    // records rather than a pointer to a revision that does not exist.
+    await this.deps.storage.index({ id: revisionId, document, op_type: 'create' });
+
+    const superseded: ProposalDocument = {
+      ...original,
+      status: 'superseded',
+      supersededBy: revisionId,
+    };
+
+    await this.writeDocument(id, superseded, { seqNo, primaryTerm });
+
+    return { proposalId: revisionId, revision };
+  }
+
+  /**
+   * Resolves the live revision of the chain a given proposal belongs to,
+   * regardless of which revision's id was passed in. Used by the gate
+   * workflow so a decision is never written against a stale, already
+   * superseded pointer once a revision has landed while the gate was parked.
+   *
+   * A query on `rootProposalId` plus `supersededBy` absent is O(1) — it does
+   * not walk `supersedes` pointers hop by hop, so the cost does not grow with
+   * the length of the chain.
+   */
+  async getLatestRevision(
+    id: string,
+    spaceId: string
+  ): Promise<{
+    proposalId: string;
+    revision: number;
+    status: ProposalStatus;
+    decision: ProposalDecision | undefined;
+  }> {
+    const { proposal } = await this.load(id, spaceId);
+    const rootProposalId = proposal.rootProposalId ?? id;
+
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: {
+          filter: [{ term: { rootProposalId } }, { term: { spaceId } }],
+          must_not: [{ exists: { field: 'supersededBy' } }],
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || hit._id === undefined) {
+      // Should be unreachable: every chain has exactly one live revision by
+      // construction. Falls back to the proposal that was asked about rather
+      // than throwing, so a storage inconsistency degrades to "trust the
+      // caller's id" instead of failing the gate outright.
+      return {
+        proposalId: proposal.id,
+        revision: proposal.revision ?? 1,
+        status: proposal.status,
+        decision: proposal.decision,
+      };
+    }
+
+    const source = hit._source as ProposalDocument;
+    return {
+      proposalId: hit._id,
+      revision: source.revision ?? 1,
+      status: source.status,
+      decision: source.decision,
+    };
+  }
+
+  /**
    * Reads the action workflow's self-declared metadata from `consts.actionMetadata`.
    * Resolved on read so a catalog change is picked up rather than baked into
    * every historical proposal.
@@ -950,6 +1101,10 @@ export interface CloneProposalParams {
   executionError?: string;
 }
 
+export interface ReviseProposalParams extends ReviseProposalRequest {
+  id: string;
+}
+
 type QueryFilterList = Array<Record<string, unknown>>;
 
 /**
@@ -1005,7 +1160,15 @@ const toProposal = (id: string, document: ProposalDocument): Proposal =>
  * proposal can still be moved out of.
  */
 const isTerminal = (status: ProposalStatus): boolean =>
-  status === 'succeeded' || status === 'failed' || status === 'expired' || status === 'no_action';
+  status === 'succeeded' ||
+  status === 'failed' ||
+  status === 'expired' ||
+  status === 'no_action' ||
+  // Undecided, unlike the other four, but equally unable to move: a
+  // superseded proposal is not the live revision anymore, and a caller that
+  // still holds its id (a stale workflow variable, a retried step) must not
+  // be able to resurrect it via update().
+  status === 'superseded';
 
 /**
  * The only legal decision/status pairs. Exhaustive on purpose: the two axes are
@@ -1017,7 +1180,7 @@ const isTerminal = (status: ProposalStatus): boolean =>
  * dismissal, or an approval of a proposal that carries nothing to run.
  */
 const VALID_STATUSES: Record<'undecided' | ProposalDecision, readonly ProposalStatus[]> = {
-  undecided: ['pending', 'expired'],
+  undecided: ['pending', 'expired', 'superseded'],
   dismissed: ['no_action'],
   approved: ['no_action', 'executing', 'succeeded', 'failed'],
 };
