@@ -33,9 +33,8 @@ export const createMemoryRecentChangesTool = ({
     'activity and identifying pages that may need consolidation.',
   schema: memoryRecentChangesSchema,
   handler: async ({ size }, context) => {
-    const memoryService = getMemoryService(context.esClient.asCurrentUser);
-
     try {
+      const memoryService = await getMemoryService(context.esClient.asCurrentUser);
       const changes = await memoryService.getRecentChanges({ size: size ?? 20 });
 
       return {

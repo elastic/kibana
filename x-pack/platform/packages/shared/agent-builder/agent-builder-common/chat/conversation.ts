@@ -739,6 +739,9 @@ export interface ConversationListResult {
   total: number;
 }
 
+/**
+ * @deprecated The regenerate capability has been removed.
+ */
 export type ConversationAction = 'regenerate';
 
 // Compaction summary types

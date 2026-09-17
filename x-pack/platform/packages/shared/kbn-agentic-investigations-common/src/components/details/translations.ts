@@ -22,20 +22,16 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
       defaultMessage: 'Timeline',
     }),
   },
-  header: {
-    since: (time: string) =>
-      i18n.translate('xpack.alertzero.detailsFlyout.header.since', {
-        defaultMessage: 'Since {time} ',
-        values: { time },
-      }),
-    flyoutMenu: {
-      share: i18n.translate('xpack.alertzero.detailsFlyout.header.flyoutMenuAriaLabel', {
-        defaultMessage: 'Share',
-      }),
-      close: i18n.translate('xpack.alertzero.detailsFlyout.header.closeButtonAriaLabel', {
-        defaultMessage: 'Close',
-      }),
-    },
+  flyoutMenu: {
+    share: i18n.translate('xpack.alertzero.detailsFlyout.flyoutMenu.share', {
+      defaultMessage: 'Copy link',
+    }),
+    shareCopied: i18n.translate('xpack.alertzero.detailsFlyout.flyoutMenu.shareCopied', {
+      defaultMessage: 'Link copied',
+    }),
+    close: i18n.translate('xpack.alertzero.detailsFlyout.flyoutMenu.close', {
+      defaultMessage: 'Close',
+    }),
   },
   sections: {
     overview: i18n.translate('xpack.alertzero.detailsFlyout.sections.situation', {
