@@ -608,7 +608,6 @@ describe('TracesPanel', () => {
     it('offers no manual run until analysis is on, since there is no workflow to run', () => {
       mockFeedbackLoopEnabled.mockReturnValue(true);
       renderPanel();
-
       expect(screen.queryByTestId('contextImprovementsRunNowButton')).not.toBeInTheDocument();
     });
 
@@ -627,15 +626,14 @@ describe('TracesPanel', () => {
     });
 
     it('says a run is already going rather than claiming this one started', async () => {
-      // The workflow runs one analysis per index at a time and discards the rest. A success toast
-      // here would promise improvements from a run that was thrown away.
+      mockFeedbackLoopEnabled.mockReturnValue(true);
       mockRunFeedbackAnalysis.mockRejectedValue(
         Object.assign(new Error('Feedback analysis is already running'), {
           body: { statusCode: 409 },
         })
       );
 
-      renderPanel({ aiIndex: buildAiIndex({ enabled: true }) });
+      renderPanel({ aiIndex: buildAiIndex({ feedback_analysis: { enabled: true } } as any) });
 
       fireEvent.click(screen.getByTestId('contextImprovementsRunNowButton'));
 
@@ -644,10 +642,11 @@ describe('TracesPanel', () => {
       expect(mockToasts.addSuccess).not.toHaveBeenCalled();
     });
 
-    it('still reports a run that genuinely failed as an error', async () => {
+    it('reports a run that genuinely failed as an error', async () => {
+      mockFeedbackLoopEnabled.mockReturnValue(true);
       mockRunFeedbackAnalysis.mockRejectedValue(new Error('workflows unavailable'));
 
-      renderPanel({ aiIndex: buildAiIndex({ enabled: true }) });
+      renderPanel({ aiIndex: buildAiIndex({ feedback_analysis: { enabled: true } } as any) });
 
       fireEvent.click(screen.getByTestId('contextImprovementsRunNowButton'));
 
@@ -655,10 +654,9 @@ describe('TracesPanel', () => {
       expect(mockToasts.addWarning).not.toHaveBeenCalled();
     });
 
-    it('leaves the agent, interval and signal window to their defaults', () => {
-      // They are per-index overrides of settings that already have server-side defaults, so the
-      // API keeps taking them while the page stays down to the decision that matters.
-      renderPanel({ aiIndex: buildAiIndex({ enabled: true }) });
+    it('leaves agent, interval and signal window to their server-side defaults', () => {
+      mockFeedbackLoopEnabled.mockReturnValue(true);
+      renderPanel({ aiIndex: buildAiIndex({ feedback_analysis: { enabled: true } } as any) });
 
       expect(screen.queryByTestId('contextImprovementsIntervalSelect')).not.toBeInTheDocument();
       expect(screen.queryByTestId('contextImprovementsSignalWindowSelect')).not.toBeInTheDocument();

@@ -67,7 +67,6 @@ const AutoImproveControl = ({ aiIndex }: { aiIndex: GetAiIndexResponse }) => {
           />
         </EuiFlexItem>
 
-        {/* Only while enabled: turning it off uninstalls the workflow, so there is nothing to run. */}
         {isAnalysisEnabled && (
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -90,7 +89,7 @@ const AutoImproveControl = ({ aiIndex }: { aiIndex: GetAiIndexResponse }) => {
         <p>
           {i18n.translate('xpack.contextEngine.aiIndexDetail.traces.autoImproveHelp', {
             defaultMessage:
-              'Reviews these traces on a schedule and proposes changes in the panels above. Suggestions are never applied on their own.',
+              'Reviews recent queries on a schedule and proposes changes in the panels above. Suggestions are never applied on their own.',
           })}
         </p>
       </EuiText>
