@@ -58,6 +58,13 @@ describe('createEsqlViewsClient', () => {
     });
   });
 
+  it('returns undefined when a view does not exist', async () => {
+    const { http, get } = createHttpMock();
+    get.mockRejectedValue(createHttpError(404, 'Not found'));
+
+    await expect(createEsqlViewsClient(http).getView('missing-view')).resolves.toBeUndefined();
+  });
+
   it('creates a view after an exact-name preflight returns 404', async () => {
     const { http, get, put } = createHttpMock();
     get.mockRejectedValue(createHttpError(404, 'Not found'));

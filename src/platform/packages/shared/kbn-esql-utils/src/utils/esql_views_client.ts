@@ -45,7 +45,7 @@ export class EsqlViewsClientError extends Error {
 
 export interface EsqlViewsClient {
   getViews(signal?: AbortSignal): Promise<EsqlViewsResult>;
-  getView(name: string, signal?: AbortSignal): Promise<EsqlView>;
+  getView(name: string, signal?: AbortSignal): Promise<EsqlView | undefined>;
   createView(request: UpsertEsqlViewRequest): Promise<EsqlViewMutationResponse>;
   updateView(request: UpsertEsqlViewRequest): Promise<EsqlViewMutationResponse>;
   deleteViews(names: string[]): Promise<EsqlViewMutationResponse>;
@@ -81,8 +81,17 @@ export const createEsqlViewsClient = (http: HttpStart): EsqlViewsClient => {
   const getViews = (signal?: AbortSignal) =>
     runRequest(() => http.get<EsqlViewsResult>(VIEWS_ROUTE, { signal }));
 
-  const getView = (name: string, signal?: AbortSignal) =>
-    runRequest(() => http.get<EsqlView>(getViewRoute(name), { signal }));
+  const getView = async (name: string, signal?: AbortSignal): Promise<EsqlView | undefined> => {
+    try {
+      return await runRequest(() => http.get<EsqlView>(getViewRoute(name), { signal }));
+    } catch (error) {
+      const normalizedError = normalizeError(error);
+      if (normalizedError.statusCode === 404) {
+        return undefined;
+      }
+      throw normalizedError;
+    }
+  };
 
   const upsertView = ({ name, query, description }: UpsertEsqlViewRequest) =>
     runRequest(() =>
@@ -92,14 +101,9 @@ export const createEsqlViewsClient = (http: HttpStart): EsqlViewsClient => {
     );
 
   const createView = async (request: UpsertEsqlViewRequest): Promise<EsqlViewMutationResponse> => {
-    try {
-      await getView(request.name);
-    } catch (error) {
-      const normalizedError = normalizeError(error);
-      if (normalizedError.statusCode === 404) {
-        return upsertView(request);
-      }
-      throw normalizedError;
+    const existingView = await getView(request.name);
+    if (existingView === undefined) {
+      return upsertView(request);
     }
 
     throw new EsqlViewsClientError(`An ES|QL view named "${request.name}" already exists`, 409);
