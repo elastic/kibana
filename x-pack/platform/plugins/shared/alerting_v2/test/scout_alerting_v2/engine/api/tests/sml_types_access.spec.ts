@@ -166,14 +166,11 @@ apiTest.describe.skip(
         kind: 'alert',
         metadata: { name: ruleTitle },
         schedule: { every: '1m', lookback: '1m' },
-        recovery_strategy: 'no_breach',
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 10' },
-        },
+        recovery: { strategy: 'no_breach' },
+        query: { base: 'FROM logs-* | LIMIT 10' },
         time_field: '@timestamp',
         grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
       };
 
       const createdRule = await kbnClient.request<RuleResponse>({

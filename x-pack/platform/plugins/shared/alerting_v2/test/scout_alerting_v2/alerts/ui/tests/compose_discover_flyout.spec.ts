@@ -226,11 +226,8 @@ test.describe(
           buildCreateRuleData({
             kind: 'signal',
             state_transition: undefined,
-            recovery_strategy: undefined,
-            query: {
-              format: 'standalone',
-              breach: { query: TEST_QUERY },
-            },
+            recovery: undefined,
+            query: { base: TEST_QUERY },
             metadata: { name: EDIT_RULE_NAME },
             artifacts: [
               {
@@ -292,11 +289,8 @@ test.describe(
           buildCreateRuleData({
             kind: 'signal',
             state_transition: undefined,
-            recovery_strategy: undefined,
-            query: {
-              format: 'standalone',
-              breach: { query: NO_TIME_FIELD_QUERY },
-            },
+            recovery: undefined,
+            query: { base: NO_TIME_FIELD_QUERY },
             metadata: { name: NO_TIME_FIELD_RULE_NAME },
           })
         );
@@ -350,7 +344,6 @@ test.describe(
           buildCreateRuleData({
             kind: 'alert',
             query: {
-              format: 'composed',
               base: TIMESTAMP_ONLY_BASE_QUERY,
               breach: { segment: TIMESTAMP_ONLY_BREACH_SEGMENT },
             },
@@ -403,10 +396,7 @@ test.describe(
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             kind: 'alert',
-            query: {
-              format: 'standalone',
-              breach: { query: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
-            },
+            query: { base: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
             time_field: 'timestamp',
             grouping: { fields: ['Carrier'] },
             metadata: { name: YAML_ONLY_STANDALONE_RULE_NAME },
@@ -439,10 +429,7 @@ test.describe(
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             kind: 'alert',
-            query: {
-              format: 'standalone',
-              breach: { query: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
-            },
+            query: { base: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
             time_field: 'timestamp',
             metadata: { name: 'scout-yaml-clear-tags', tags: ['prod', 'infra'] },
           })
