@@ -8,8 +8,13 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import moment from 'moment';
-import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper, type EuiDataGridObject } from '@kbn/scout';
+import {
+  AppMenu,
+  KibanaCodeEditorWrapper,
+  type EuiDataGridObject,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../../public/components/stream_management/data_management/schema_editor/constants';
 
@@ -71,8 +76,10 @@ export class StreamsApp {
   public readonly streamsAddSourceButton;
   public readonly streamsDestinationsTable;
   public readonly streamsDestinationsSearch;
+  private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
     this.processorFieldComboBox = this.page.components.comboBox(
       'streamsAppProcessorFieldSelectorComboFieldText'
     );
@@ -1446,8 +1453,7 @@ export class StreamsApp {
   }
 
   async openStreamsSettings() {
-    await this.page.getByTestId('app-menu-overflow-button').click();
-    await this.page.getByTestId('streamsAppSettingsButton').click();
+    await this.appMenu.clickItem('streamsAppSettingsButton');
   }
 
   async clickCreateQueryStreamButton() {
@@ -1484,8 +1490,7 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.click('streamsDeleteStreamButton');
+    await this.appMenu.clickItem('streamsDeleteStreamButton');
   }
 
   async fillDeleteQueryStreamModalInput(value: string) {

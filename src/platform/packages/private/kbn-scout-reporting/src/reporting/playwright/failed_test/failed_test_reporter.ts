@@ -140,7 +140,7 @@ export class ScoutFailedTestReporter implements Reporter {
       return;
     }
 
-    const { id, filePath } = getTestIdentity(test);
+    const { id } = getTestIdentity(test);
 
     const consoleErrorsAttachment = result.attachments.find(
       (a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT
@@ -154,7 +154,7 @@ export class ScoutFailedTestReporter implements Reporter {
       target: this.testTarget,
       command: this.command,
       location: stripFilePath(test.location.file),
-      owner: this.getFileOwners(filePath),
+      owner: this.getFileOwners(test.location.file),
       kibanaModule: this.kibanaModule,
       duration: result.duration,
       error: this.formatTestError(result),

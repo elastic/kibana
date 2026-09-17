@@ -36,7 +36,7 @@ regenerate_gh_aw_locks() {
 }
 
 echo --- Deduplicate pnpm-lock.yaml
-cmd="node scripts/deduplicate_dependencies.js && yarn kbn bootstrap && node scripts/deduplicate_dependencies.js"
+cmd="node scripts/deduplicate_dependencies.js && pnpm kbn bootstrap && node scripts/deduplicate_dependencies.js"
 eval "$cmd"
 
 commit_message_parts=()

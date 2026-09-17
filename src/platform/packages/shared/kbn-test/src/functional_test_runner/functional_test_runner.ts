@@ -262,9 +262,9 @@ export class FunctionalTestRunner {
         ? `You are running the standalone functional test runner which requires ` +
           `Elasticsearch and Kibana to already be running.\n\n` +
           `To start the test servers, run in a separate terminal:\n\n` +
-          `  yarn test:ftr:server --config <your-config-file>\n\n` +
+          `  pnpm test:ftr:server --config <your-config-file>\n\n` +
           `Or use the following command to start Elasticsearch and Kibana automatically:\n\n` +
-          `  yarn test:ftr --config <your-config-file>`
+          `  pnpm test:ftr --config <your-config-file>`
         : `Ensure Elasticsearch is running and accessible.`;
 
       throw new Error(
