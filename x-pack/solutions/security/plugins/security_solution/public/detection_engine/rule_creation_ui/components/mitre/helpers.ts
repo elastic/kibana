@@ -15,3 +15,6 @@ export const hasSubtechniqueOptions = (
   technique: ThreatTechnique,
   subtechniques: MitreSubtechniqueSummary[]
 ): boolean => subtechniques.some((subtechnique) => subtechnique.technique_id === technique.id);
+
+export const sortMitreEntitiesByName = <T extends { name: string }>(entities: T[]): T[] =>
+  [...entities].sort((a, b) => a.name.localeCompare(b.name));

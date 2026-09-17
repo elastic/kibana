@@ -24,6 +24,7 @@ import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
+import { sortMitreEntitiesByName } from './helpers';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
@@ -162,7 +163,11 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
   const getSelectSubtechnique = useCallback(
     (index: number, disabled: boolean, subtechnique: ThreatSubtechnique) => {
-      const options = subtechniques.filter((t) => t.technique_id === technique[techniqueIndex]?.id);
+      // Filter subtechniques belonging to the parent technique, then sort alphabetically.
+      // The managed source orders by id, so the picker must apply name order to the subset.
+      const options = sortMitreEntitiesByName(
+        subtechniques.filter((t) => t.technique_id === technique[techniqueIndex]?.id)
+      );
       const isUnsupported = isUnsupportedSubtechnique(subtechnique);
 
       return (

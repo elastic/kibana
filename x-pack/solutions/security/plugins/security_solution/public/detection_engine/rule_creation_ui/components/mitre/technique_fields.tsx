@@ -31,7 +31,7 @@ import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { hasSubtechniqueOptions } from './helpers';
+import { hasSubtechniqueOptions, sortMitreEntitiesByName } from './helpers';
 
 const TechniqueContainer = styled.div`
   ${({ theme }) => css`
@@ -180,9 +180,12 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       disabled: boolean,
       technique: ThreatTechnique
     ) => {
-      // Filter techniques belonging to the parent tactic using MITRE tactic ids
-      // so renames in MITRE upgrades don't blank the list.
-      const options = techniques.filter((t) => t.tactic_ids.includes(parentTactic.id));
+      // Filter techniques belonging to the parent tactic using MITRE tactic ids so renames
+      // in MITRE upgrades don't blank the list. Sort alphabetically: the managed source
+      // orders by id (T1001, T1003…), so the picker must apply name order to the subset.
+      const options = sortMitreEntitiesByName(
+        techniques.filter((t) => t.tactic_ids.includes(parentTactic.id))
+      );
       const isUnsupported = isUnsupportedTechnique(technique);
       const isReassigned = isTechniqueReassignedFromTactic(parentTactic, technique);
       const reassignedOption = isReassigned ? findCurrentTechniqueOption(technique) : undefined;

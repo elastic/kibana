@@ -43,7 +43,8 @@ export const useFetchLegacyMitreQuery = (
         techniques: module.techniques,
         subtechniques: module.subtechniques,
       });
-      if (!types) {
+
+      if (!types || types.length === 0) {
         return allBuckets;
       }
       return {

@@ -47,6 +47,9 @@ export const useMitreConfiguration = (
 
   const activeQuery = isManagedSourceEnabled ? managedQuery : legacyQuery;
 
+  // Bucket order follows the data source and is not guaranteed. Consumers that
+  // display entities must sort them explicitly for their own presentation needs.
+
   // On the managed path, framework_version is undefined when the index has no documents
   // (e.g. ES wasn't ready at startup and population hasn't run). This signal is
   // independent of the types filter, so it remains correct even for technique- or

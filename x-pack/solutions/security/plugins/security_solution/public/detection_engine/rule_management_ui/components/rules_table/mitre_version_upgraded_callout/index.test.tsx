@@ -9,14 +9,15 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
-import { MITRE_ATTACK_VERSION } from '../../../../../../common/detection_engine/mitre/mitre_version';
 import { MitreVersionUpgradedCallout } from '.';
 
-// The callout is gated behind the mitreAttackUpdatesUIEnabled feature flag,
-// which is off by default. Force it on for this test suite.
+const dismissalKeyFor = (displayVersion: string) =>
+  `securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.${displayVersion}`;
+
+const mockUseIsExperimentalFeatureEnabled = jest.fn();
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+  useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
+    mockUseIsExperimentalFeatureEnabled(...args),
 }));
 
 const mockUseMitreConfiguration = jest.fn();
@@ -24,7 +25,11 @@ jest.mock('../../../../../common/hooks/mitre/use_mitre_configuration', () => ({
   useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
 }));
 
-const DISMISSAL_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.MITRE_VERSION_UPGRADED_CALLOUT;
+// Version returned by the mock — raw (adapter-normalised, no leading 'v').
+const MOCK_RAW_VERSION = '16.1';
+// Display form used in localStorage keys and UI text.
+const MOCK_DISPLAY_VERSION = `v${MOCK_RAW_VERSION}`;
+const MOCK_DISMISSAL_KEY = dismissalKeyFor(MOCK_DISPLAY_VERSION);
 
 const renderCallout = () =>
   render(
@@ -35,9 +40,14 @@ const renderCallout = () =>
 
 describe('MitreVersionUpgradedCallout', () => {
   beforeEach(() => {
-    localStorage.removeItem(DISMISSAL_STORAGE_KEY);
-    // Default: no managed version available — falls back to the legacy constant.
-    mockUseMitreConfiguration.mockReturnValue({ frameworkVersion: undefined });
+    localStorage.clear();
+    // The callout is gated behind the mitreAttackUpdatesUIEnabled feature flag.
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    // Default: managed version is resolved and available.
+    mockUseMitreConfiguration.mockReturnValue({
+      frameworkVersion: MOCK_RAW_VERSION,
+      isError: false,
+    });
   });
 
   it('renders the callout when no dismissal flag is present', async () => {
@@ -58,32 +68,22 @@ describe('MitreVersionUpgradedCallout', () => {
     // covered by the standard deep-link infrastructure shared with RuleGapsCallout.
   });
 
-  it('mentions the currently bundled MITRE ATT&CK version in the title', async () => {
+  it('displays the resolved framework version (v-prefixed) in the title', async () => {
     renderCallout();
 
     const callout = await screen.findByTestId('mitreVersionUpgradedCallout');
-    expect(callout.textContent).toContain(`MITRE ATT&CK® updated to ${MITRE_ATTACK_VERSION}`);
+    expect(callout.textContent).toContain(`MITRE ATT&CK® updated to ${MOCK_DISPLAY_VERSION}`);
   });
 
-  it('displays the managed framework version in the title when available', async () => {
-    mockUseMitreConfiguration.mockReturnValue({ frameworkVersion: '16.1' });
-
-    renderCallout();
-
-    const callout = await screen.findByTestId('mitreVersionUpgradedCallout');
-    // The managed adapter strips the leading 'v'; the component re-adds it at the display site.
-    expect(callout.textContent).toContain('MITRE ATT&CK® updated to v16.1');
-  });
-
-  it('does not render when the dismissal flag is already set', () => {
-    localStorage.setItem(DISMISSAL_STORAGE_KEY, 'true');
+  it('does not render when the dismissal flag is already set for the resolved version', () => {
+    localStorage.setItem(MOCK_DISMISSAL_KEY, 'true');
 
     renderCallout();
 
     expect(screen.queryByTestId('mitreVersionUpgradedCallout')).not.toBeInTheDocument();
   });
 
-  it('persists dismissal and unmounts after the close button is clicked', async () => {
+  it('persists dismissal under the resolved-version key and unmounts after the close button is clicked', async () => {
     const user = userEvent.setup();
 
     renderCallout();
@@ -95,6 +95,49 @@ describe('MitreVersionUpgradedCallout', () => {
     await user.click(dismissButton);
 
     expect(screen.queryByTestId('mitreVersionUpgradedCallout')).not.toBeInTheDocument();
-    expect(localStorage.getItem(DISMISSAL_STORAGE_KEY)).toBe('true');
+    expect(localStorage.getItem(MOCK_DISMISSAL_KEY)).toBe('true');
+  });
+
+  it('a dismissal stored under version A does not suppress the callout for version B', async () => {
+    const versionAKey = dismissalKeyFor('v15.0');
+    localStorage.setItem(versionAKey, 'true');
+
+    // Component receives a different resolved version.
+    mockUseMitreConfiguration.mockReturnValue({
+      frameworkVersion: MOCK_RAW_VERSION,
+      isError: false,
+    });
+
+    renderCallout();
+
+    // Callout for the new version must still appear.
+    expect(await screen.findByTestId('mitreVersionUpgradedCallout')).toBeInTheDocument();
+  });
+
+  it('renders nothing when frameworkVersion is undefined', () => {
+    mockUseMitreConfiguration.mockReturnValue({ frameworkVersion: undefined, isError: false });
+
+    renderCallout();
+
+    expect(screen.queryByTestId('mitreVersionUpgradedCallout')).not.toBeInTheDocument();
+  });
+
+  it('renders nothing when isError is true', () => {
+    mockUseMitreConfiguration.mockReturnValue({
+      frameworkVersion: MOCK_RAW_VERSION,
+      isError: true,
+    });
+
+    renderCallout();
+
+    expect(screen.queryByTestId('mitreVersionUpgradedCallout')).not.toBeInTheDocument();
+  });
+
+  it('renders nothing when the mitreAttackUpdatesUIEnabled experimental flag is off', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+
+    renderCallout();
+
+    expect(screen.queryByTestId('mitreVersionUpgradedCallout')).not.toBeInTheDocument();
   });
 });
