@@ -14,7 +14,10 @@ import type { Improvement } from '../../../../common/http_api/improvements';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useDecideImprovement } from '../../hooks/use_decide_improvement';
 import { useKibana } from '../../hooks/use_kibana';
-import { useScopedImprovements, useScopedImprovementsHistory } from '../../hooks/use_scoped_improvements';
+import {
+  useScopedImprovements,
+  useScopedImprovementsHistory,
+} from '../../hooks/use_scoped_improvements';
 import { analyzeAndImprove } from '../../utils/analyze_and_improve';
 import { ImprovementRow } from './improvement_row';
 import { RejectImprovementModal } from './reject_improvement_modal';

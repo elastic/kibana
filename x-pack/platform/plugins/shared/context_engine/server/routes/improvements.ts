@@ -128,7 +128,10 @@ export interface ImprovementRouteDeps {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
   /** Request-scoped: the improvements store is a user-owned index, authorized per call by ES. */
-  getImprovementsService: (esClient: ElasticsearchClient, spaceId: string) => ImprovementsServiceApi;
+  getImprovementsService: (
+    esClient: ElasticsearchClient,
+    spaceId: string
+  ) => ImprovementsServiceApi;
   /** Absent until `contextEngineAgentBuilder` registers it, which rules out the workflow actions. */
   getWorkflowProvider: () => WorkflowProvider | undefined;
   getScheduleService: () => FeedbackAnalysisScheduleService;
@@ -188,12 +191,14 @@ export const registerImprovementRoutes = ({
         const spaceId = resolveSpaceId(await getSpaces(), request);
         const { status, from, size } = request.query;
 
-        const body: ListImprovementsResponse = await getImprovementsService(esClient, spaceId).list({
-          aiIndexId: request.params.aiIndexId,
-          status: (status ?? OPEN_IMPROVEMENT_STATUSES) as ImprovementStatus[],
-          from,
-          size,
-        });
+        const body: ListImprovementsResponse = await getImprovementsService(esClient, spaceId).list(
+          {
+            aiIndexId: request.params.aiIndexId,
+            status: (status ?? OPEN_IMPROVEMENT_STATUSES) as ImprovementStatus[],
+            from,
+            size,
+          }
+        );
 
         return response.ok({ body });
       })
