@@ -261,17 +261,26 @@ describe('createRuleSmlType', () => {
     const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => {
       const originId = overrides.origin_id ?? 'rule-1';
       return {
-        id: 'sml-1',
         type: RULE_KI_TYPE,
         title: 'High CPU',
-        origin_id: originId,
-        origin: { uri: `${RULE_KI_TYPE}://${originId}` },
         content: '',
-        created_at: '2026-04-10T00:00:00.000Z',
-        updated_at: '2026-04-10T00:00:00.000Z',
-        spaces: ['default'],
         permissions: { kibana: { privileges: [] } },
-        ingestion_method: 'crawled' as const,
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        references: [{ uri: `${RULE_KI_TYPE}://${originId}`, relation: 'derived_from' as const }],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
+        },
       };
     };
 
