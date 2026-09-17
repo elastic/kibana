@@ -118,7 +118,7 @@ export const runIacUpgradeCheckTask = async (
         // abort the run and silently skip everything after it — count it and move on.
         let outcome: ConnectorOutcome;
         try {
-          outcome = await checkConnector(soClient, connector, logger);
+          outcome = await checkConnector(soClient, connector, logger, signal);
         } catch (error) {
           throwIfAborted(signal);
           logger.error(
@@ -157,13 +157,17 @@ export const runIacUpgradeCheckTask = async (
 const checkConnector = async (
   soClient: SavedObjectsClientContract,
   { id, attributes }: SavedObject<CloudConnectorSOAttributes>,
-  logger: Logger
+  logger: Logger,
+  signal: AbortSignal
 ): Promise<ConnectorOutcome> => {
   const selections = await getCloudConnectorIntegrationSelections(soClient, id);
   const outcome = await getIacKeyOutcome(soClient, attributes, selections, {
     flow: IAC_UPGRADE_TASK_FLOW,
     contextForLog: `connector ${id}`,
   });
+  // The IaCP round trip is the slow step; a run cancelled while it was pending must not go on to
+  // write a status (and check time) on behalf of a task that has already been given up on.
+  throwIfAborted(signal);
   const status = toUpgradeStatus(outcome);
   if (status === undefined) {
     // getIacKeyOutcome already warned for key_unavailable; the other two are expected states.

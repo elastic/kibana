@@ -93,6 +93,11 @@ const VALID_STACK_ARN =
   'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/guid-guid-guid';
 // Blueprint details the hook reports with every rendered key.
 const RENDERED_BLUEPRINT = { blueprintId: 'federated-identity', blueprintVersion: '1.0.0' };
+// What the on-open read answers by default: one attached integration, so every stack action has
+// something to render. Tests about an empty or unreadable set override it.
+const DEFAULT_INTEGRATIONS = [
+  { name: 'aws', policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }] },
+];
 
 describe('CloudConnectorPoliciesFlyout', () => {
   let queryClient: QueryClient;
@@ -181,7 +186,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     } as unknown as ReturnType<typeof useDeleteCloudConnector>);
 
     mockUseVerifyIacKey.mockReturnValue({
-      data: undefined,
+      data: { matches: true, outcome: 'not_checked', integrations: DEFAULT_INTEGRATIONS },
     } as unknown as ReturnType<typeof useVerifyIacKey>);
 
     mockUseCloudConnectorTemplate.mockReturnValue({
@@ -859,6 +864,8 @@ describe('CloudConnectorPoliciesFlyout', () => {
         CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON
       );
       expect(updateButton).toBeDisabled();
+      // The set is renderable, so the missing ARN is the only thing holding Update back.
+      expect(screen.getByText(/Fill in the Deployment ID below first/)).toBeInTheDocument();
 
       // Lives inside the stack details section, above the Deployment ID field.
       const section = screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION);
@@ -1108,9 +1115,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
       ).toBeInTheDocument();
     });
 
-    it('(i-read-forbidden) tolerates a 403 on the on-open read: callout from the stored status, no Redeploy or Launch', () => {
+    it('(i-read-forbidden) tolerates a 403 on the on-open read: the stack details still render, with no action offered', () => {
       // The verify route is gated like the connector update; a read-only user cannot read the
-      // integration set, so there is nothing to render from, but the stored status still shows.
+      // integration set, so there is nothing to render a stack action from.
       mockUseVerifyIacKey.mockReturnValue({
         data: undefined,
         isError: true,
@@ -1125,29 +1132,45 @@ describe('CloudConnectorPoliciesFlyout', () => {
       });
 
       expect(
-        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION)
       ).toBeInTheDocument();
-      // No integration set → Update cannot render either.
       expect(
-        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON)
-      ).toBeDisabled();
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_REDEPLOY_BUTTON)
+      ).not.toBeInTheDocument();
+    });
+
+    it('(i-no-integrations) hides the callout and every stack action when upgrade_available is stored but nothing is attached', () => {
+      // The daily task skips connectors without integrations instead of clearing their status, so
+      // a stale upgrade_available can outlive the last policy; there is nothing to update then.
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: true, outcome: 'not_checked', integrations: [] },
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      renderFlyout({
+        provider: 'aws',
+        iacKey: 'sha256:old',
+        iacUpgradeStatus: 'upgrade_available',
+      });
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON)
+      ).not.toBeInTheDocument();
       expect(
         screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_REDEPLOY_BUTTON)
       ).not.toBeInTheDocument();
       expect(
         screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_LAUNCH_BUTTON)
       ).not.toBeInTheDocument();
-      expect(
-        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION)
-      ).toBeInTheDocument();
     });
 
-    it('(i-status-only) the callout follows the stored status, whatever the on-open read says', () => {
+    it('(i-status-only) the callout follows the stored status, not the outcome the on-open read reports', () => {
       // Nothing in the flyout compares templates: only the daily task discovers upgrades.
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: true, outcome: 'not_checked', integrations: [] },
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-
       const { unmount } = renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
       expect(
         screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
@@ -1161,9 +1184,6 @@ describe('CloudConnectorPoliciesFlyout', () => {
     });
 
     it('(i-open-is-a-read) opening the flyout writes nothing, compares nothing and invalidates nothing', async () => {
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: true, outcome: 'not_checked', integrations: [] },
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
       const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
 
       renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
@@ -1286,9 +1306,6 @@ describe('CloudConnectorPoliciesFlyout', () => {
     });
 
     it('(k3) renders the template generation error below the upgrade callout', () => {
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: false, reason: 'key_mismatch', integrations: [] },
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
       mockUseCloudConnectorTemplate.mockReturnValue({
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
@@ -1306,7 +1323,11 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(screen.getByText('boom')).toBeInTheDocument();
     });
 
-    it('(k4) does not render the template generation error when there is no upgrade callout', () => {
+    it('(k4) does not render the template generation error when no stack action is offered', () => {
+      // No integrations: no callout, no Redeploy, no Launch, so no render to have failed.
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: true, outcome: 'no_integrations', integrations: [] },
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
       mockUseCloudConnectorTemplate.mockReturnValue({
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,

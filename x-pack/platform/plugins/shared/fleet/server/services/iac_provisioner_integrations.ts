@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { RegistryPolicyTemplate } from '../../common/types/models/epm';
 import type {
   IacPolicyTemplateSelection,
   RenderIacTemplateIntegration,
@@ -41,6 +42,18 @@ interface BuildIacProvisionerIntegrationsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   requestedIntegrations: RenderIacTemplateIntegration[];
 }
+
+// Integration packages declare their inputs as `inputs: [{ type }]`; input packages (e.g. the
+// OTel CloudWatch collector) declare the single input they collect with as `input: string`.
+const getDeclaredInputTypes = (template: RegistryPolicyTemplate): string[] => {
+  if ('inputs' in template) {
+    return (template.inputs ?? []).map(({ type }) => type);
+  }
+  if ('input' in template) {
+    return [template.input];
+  }
+  return [];
+};
 
 /**
  * Merges duplicate package entries and unions enabledInputs per policy template, then loads each
@@ -94,8 +107,7 @@ export const buildIacProvisionerIntegrations = async ({
               errorMessage: `${pkgName} has no policy template named ${templateName}`,
             };
           }
-          const inputs = 'inputs' in template ? template.inputs ?? [] : [];
-          const declaredInputs = new Set(inputs.map(({ type }) => type));
+          const declaredInputs = new Set(getDeclaredInputTypes(template));
           const enabledInputs = Array.from(enabledInputSet);
           const unknown = enabledInputs.filter((type) => !declaredInputs.has(type));
           if (unknown.length) {

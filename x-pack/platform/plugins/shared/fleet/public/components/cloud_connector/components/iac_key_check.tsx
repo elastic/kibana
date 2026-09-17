@@ -36,6 +36,12 @@ export interface IacRenderedTemplate {
   iac_blueprint_version?: string;
 }
 
+/** What a rendered template belongs to: the identity and the exact integration set it was rendered for. */
+export interface IacTemplateLaunchedFor {
+  cloudConnectorId: string;
+  integrations: RenderIacTemplateIntegration[];
+}
+
 export interface IacKeyCheckProps {
   cloudConnectorId: string | undefined;
   /** Integrations the connector will have to cover on top of its saved package policies. */
@@ -52,10 +58,11 @@ export interface IacKeyCheckProps {
   writeOnRender?: boolean;
   /**
    * Called with the rendered template details when `writeOnRender` is false, together with the
-   * id of the identity the update was launched for. The render is asynchronous, so by the time
-   * it lands the host may have selected another identity; the details belong to this one.
+   * identity and the integration set the update was launched for. The render is asynchronous, so
+   * by the time it lands the host may have selected another identity or changed the selection;
+   * the details belong to this identity and this set.
    */
-  onTemplateRecorded?: (iac: IacRenderedTemplate, cloudConnectorId: string) => void;
+  onTemplateRecorded?: (iac: IacRenderedTemplate, launchedFor: IacTemplateLaunchedFor) => void;
 }
 
 /**
@@ -123,7 +130,7 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
             iac_blueprint_id: blueprintId,
             iac_blueprint_version: blueprintVersion,
           },
-          cloudConnectorId
+          { cloudConnectorId, integrations }
         );
         return;
       }
@@ -142,7 +149,7 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
           // Silent: the daily iac_upgrade_check task self-heals key mismatches.
         });
     },
-    [cloudConnectorId, http, integrationsKey, queryClient, writeOnRender]
+    [cloudConnectorId, http, integrations, integrationsKey, queryClient, writeOnRender]
   );
 
   const { launchButtonProps, isGeneratingTemplate, templateGenerationError } =

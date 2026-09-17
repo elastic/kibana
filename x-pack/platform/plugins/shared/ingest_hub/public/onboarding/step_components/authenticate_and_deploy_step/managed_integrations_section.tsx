@@ -40,6 +40,7 @@ import type {
   AwsStaticKeyCredentials,
   CloudSetupForCloudConnector,
   IacRenderedTemplate,
+  IacTemplateLaunchedFor,
   RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -77,12 +78,17 @@ export function ManagedIntegrationsSection({
 
   // The Existing Identity check renders the stack update without writing the key; the template
   // details are parked on the flow and written to the connector after Deploy succeeds. They are
-  // tagged with the identity the render was launched for, not the one selected when it lands:
-  // the render is asynchronous and the user may have switched identities meanwhile. Deploy only
-  // writes the parked details when they match the identity it deploys.
+  // tagged with the identity and the integration set the render was launched for, not the ones
+  // current when it lands: the render is asynchronous and the user may have switched identities
+  // or changed the enabled inputs meanwhile. Deploy only writes the parked details when both
+  // match what it deploys.
   const handleIacTemplateRecorded = useCallback(
-    (iac: IacRenderedTemplate, connectorId: string) => {
-      setPendingIacTemplate({ connectorId, ...iac });
+    (iac: IacRenderedTemplate, { cloudConnectorId, integrations }: IacTemplateLaunchedFor) => {
+      setPendingIacTemplate({
+        connectorId: cloudConnectorId,
+        integrationsKey: JSON.stringify(integrations),
+        ...iac,
+      });
     },
     [setPendingIacTemplate]
   );

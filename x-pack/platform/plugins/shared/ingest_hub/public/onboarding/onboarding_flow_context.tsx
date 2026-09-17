@@ -29,6 +29,12 @@ const DEFAULT_DEPLOYMENT_METHOD: DeploymentMethod = 'managed_integration';
 export interface PendingIacTemplate extends IacRenderedTemplate {
   /** The identity the template was rendered for; the write is skipped if the selection changed. */
   connectorId: string;
+  /**
+   * JSON of the integration set (as built by buildIacIntegrations, which sorts, so equal sets give
+   * equal strings) the template was rendered for; Deploy writes the details only when the set it
+   * deploys is the same.
+   */
+  integrationsKey: string;
 }
 
 export interface AuthenticateAndDeployStepState {

@@ -550,7 +550,7 @@ describe('AwsIdentityFederationSetup', () => {
             iac_blueprint_id: 'federated-identity',
             iac_blueprint_version: '1.0.0',
           },
-          'connector-1'
+          { cloudConnectorId: 'connector-1', integrations }
         );
         lastIacKeyCheckProps()?.onValidityChange?.(true);
       });
@@ -561,7 +561,7 @@ describe('AwsIdentityFederationSetup', () => {
           iac_blueprint_id: 'federated-identity',
           iac_blueprint_version: '1.0.0',
         },
-        'connector-1'
+        { cloudConnectorId: 'connector-1', integrations }
       );
       expect(lastReadyValue(onReadyChange)).toBe(true);
     });

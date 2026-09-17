@@ -253,5 +253,21 @@ describe('iac_upgrade_check_task', () => {
       expect(finder.close).toHaveBeenCalled();
       expect(reportIacProvisionerUpgradeCheckCompleted).not.toHaveBeenCalled();
     });
+
+    it('does not write a status the IaCP round trip resolved after the abort', async () => {
+      const abortCtrl = new AbortController();
+      mockSoClient.createPointInTimeFinder.mockReturnValue(
+        finderFor([[makeConnector('slow', { iac_key: 'sha256:a' })]])
+      );
+      // The task is cancelled while the comparison is still pending; the answer lands afterwards.
+      mockedGetIacKeyOutcome.mockImplementationOnce(async () => {
+        abortCtrl.abort();
+        return 'matches';
+      });
+
+      await expect(runIacUpgradeCheckTask(abortCtrl.signal)).rejects.toThrow(/aborted/i);
+      expect(mockSoClient.update).not.toHaveBeenCalled();
+      expect(reportIacProvisionerUpgradeCheckCompleted).not.toHaveBeenCalled();
+    });
   });
 });

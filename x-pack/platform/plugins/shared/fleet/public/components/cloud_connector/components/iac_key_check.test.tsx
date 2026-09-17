@@ -72,9 +72,15 @@ const integrations: RenderIacTemplateIntegration[] = [
   { name: 'aws_logs', policyTemplates: [{ name: 'generic', enabledInputs: ['aws-s3'] }] },
 ];
 
-const mockVerifyResult = (data: unknown) =>
+const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc';
+
+/**
+ * A verify verdict. Carries a stack ARN unless the test says otherwise: without one the callout
+ * offers no Update, since there is no stack to update.
+ */
+const mockVerifyResult = (data: Record<string, unknown>) =>
   mockUseVerifyIacKey.mockReturnValue({
-    data,
+    data: { deploymentId: STACK_ARN, ...data },
   } as unknown as ReturnType<typeof useVerifyIacKey>);
 
 const defaultProps = {
@@ -328,12 +334,7 @@ describe('IacKeyCheck', () => {
 
   describe('actions', () => {
     it('clicking Update reports telemetry and invokes launchButtonProps.onClick', async () => {
-      mockVerifyResult({
-        matches: false,
-        reason: 'key_mismatch',
-        integrations: [],
-        deploymentId: undefined,
-      });
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
 
       renderWithIntl(<IacKeyCheck {...defaultProps} />);
 
@@ -347,10 +348,31 @@ describe('IacKeyCheck', () => {
           surface: 'onboarding',
           action: 'update_stack_clicked',
           reason: 'key_mismatch',
-          hasDeploymentId: false,
+          hasDeploymentId: true,
         })
       );
       expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('offers no Update, and so never unblocks, while the identity has no stack ARN on record', async () => {
+      // The only link Kibana could build would create a new stack and a new role the identity
+      // does not use; the ARN is recorded from the identity's details first.
+      mockVerifyResult({
+        matches: false,
+        reason: 'key_mismatch',
+        integrations: [],
+        deploymentId: undefined,
+      });
+      const onValidityChange = jest.fn();
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
+
+      await screen.findByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT);
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
+      ).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenCalledWith(false);
+      expect(onValidityChange).not.toHaveBeenCalledWith(true);
     });
 
     it('onTemplateRendered stores the key, invalidates both query keys, and does not toast', async () => {
@@ -605,15 +627,16 @@ describe('IacKeyCheck', () => {
         });
 
         expect(onTemplateRecorded).toHaveBeenCalledTimes(1);
-        // Tagged with the identity the update was launched for: the host may have selected
-        // another one by the time the asynchronous render lands.
+        // Tagged with the identity and the integration set the update was launched for: the host
+        // may have selected another identity or changed the set by the time the asynchronous
+        // render lands.
         expect(onTemplateRecorded).toHaveBeenCalledWith(
           {
             iac_key: 'sha256:new',
             iac_blueprint_id: 'federated-identity',
             iac_blueprint_version: '1.0.0',
           },
-          'connector-1'
+          { cloudConnectorId: 'connector-1', integrations }
         );
         expect(mockUpdateCloudConnector).not.toHaveBeenCalled();
         expect(invalidateQueriesSpy).not.toHaveBeenCalled();

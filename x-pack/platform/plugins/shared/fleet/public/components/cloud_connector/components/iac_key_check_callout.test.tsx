@@ -23,6 +23,9 @@ const baseProps = {
   isUpdating: false,
 };
 
+// A stack on record: without it the callout offers no Update, since there is nothing to update.
+const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123:stack/my-stack/abc';
+
 describe('IacKeyCheckCallout', () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -51,7 +54,13 @@ describe('IacKeyCheckCallout', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
-        result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
+        result={{
+          matches: false,
+          reason: 'no_key',
+          outcome: 'no_key',
+          integrations: [],
+          deploymentId: STACK_ARN,
+        }}
       />
     );
     expect(screen.getByText('CloudFormation stack update required')).toBeInTheDocument();
@@ -97,7 +106,9 @@ describe('IacKeyCheckCallout', () => {
     expect(screen.queryByText('this integration')).not.toBeInTheDocument();
   });
 
-  it('shows the no-deployment-id note when deploymentId is absent', () => {
+  it('offers no Update and sends the user to the identity details when the stack ARN is unknown', () => {
+    // Without the ARN the only link Kibana could build creates a new stack and a new role the
+    // identity does not use, so the block stays until the ARN is recorded from the flyout.
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
@@ -110,9 +121,12 @@ describe('IacKeyCheckCallout', () => {
       />
     );
     expect(screen.getByText(/stack ARN for this identity isn't recorded/i)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
+    ).not.toBeInTheDocument();
   });
 
-  it('hides the no-deployment-id note when deploymentId is present', () => {
+  it('hides the no-deployment-id note and offers Update when deploymentId is present', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
@@ -121,13 +135,16 @@ describe('IacKeyCheckCallout', () => {
           reason: 'key_mismatch',
           outcome: 'key_mismatch',
           integrations: [],
-          deploymentId: 'arn:aws:cloudformation:us-east-1:123:stack/my-stack/abc',
+          deploymentId: STACK_ARN,
         }}
       />
     );
     expect(
       screen.queryByText(/stack ARN for this identity isn't recorded/i)
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
+    ).toBeInTheDocument();
   });
 
   it('calls onUpdateStack when the Update button is clicked', async () => {
@@ -141,6 +158,7 @@ describe('IacKeyCheckCallout', () => {
           reason: 'key_mismatch',
           outcome: 'key_mismatch',
           integrations: [],
+          deploymentId: STACK_ARN,
         }}
       />
     );
@@ -156,6 +174,7 @@ describe('IacKeyCheckCallout', () => {
       reason: 'key_mismatch',
       outcome: 'key_mismatch',
       integrations: [],
+      deploymentId: STACK_ARN,
     };
 
     it('switches to the launched copy on key_mismatch once the update has been launched', () => {

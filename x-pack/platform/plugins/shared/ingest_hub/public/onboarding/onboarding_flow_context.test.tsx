@@ -200,6 +200,7 @@ describe('OnboardingFlowProvider', () => {
     // until Deploy succeeds.
     const pendingIacTemplate = {
       connectorId: 'connector-1',
+      integrationsKey: '[]',
       iac_key: 'sha256:new',
       iac_blueprint_id: 'federated-identity',
       iac_blueprint_version: '1.0.0',

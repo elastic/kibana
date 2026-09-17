@@ -14,7 +14,8 @@ import {
   toSOServiceVars,
   useDeploy,
 } from './use_deploy';
-import { collectDeployResults, buildInstanceStatuses } from './deploy_groups';
+import { collectDeployResults, buildInstanceStatuses, buildDeployGroups } from './deploy_groups';
+import { buildIacIntegrations } from './package_inputs';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
@@ -41,6 +42,7 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateCloudOnboardingDeployment: jest.fn(),
   sendUpdateCloudOnboardingDeployment: jest.fn(),
   sendUpdateCloudConnector: jest.fn(),
+  sendVerifyCloudConnectorIacKey: jest.fn(),
 }));
 
 jest.mock('../../use_aws_service_matrix', () => {
@@ -148,6 +150,7 @@ import {
   sendCreateCloudOnboardingDeployment,
   sendUpdateCloudOnboardingDeployment,
   sendUpdateCloudConnector,
+  sendVerifyCloudConnectorIacKey,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { PendingIacTemplate } from '../../onboarding_flow_context';
@@ -161,6 +164,7 @@ const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
 const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeployment as jest.Mock;
 const mockSendUpdateCloudOnboardingDeployment = sendUpdateCloudOnboardingDeployment as jest.Mock;
 const mockSendUpdateCloudConnector = sendUpdateCloudConnector as jest.Mock;
+const mockSendVerifyCloudConnectorIacKey = sendVerifyCloudConnectorIacKey as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockUseHistory = useHistory as jest.Mock;
@@ -741,6 +745,7 @@ function setupMocks({
 
   mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {}, instances }, jest.fn()]);
   mockSendUpdateCloudConnector.mockResolvedValue({ data: { item: {} }, error: undefined });
+  mockSendVerifyCloudConnectorIacKey.mockResolvedValue({ data: {}, error: undefined });
 
   mockSendGetPackageInfoByKey.mockResolvedValue({
     data: {
@@ -1410,8 +1415,21 @@ describe('useDeploy', () => {
   describe('pending IaC template', () => {
     // The Existing Identity check renders the stack update without writing the connector; the
     // key lands only once Deploy succeeds.
+    // The set the hook derives for the mocked setup (selectedServiceIds ['ec2'], no persisted
+    // instances, empty serviceVars), computed with the real builders rather than spelled out so the
+    // fixture follows the service matrix mock instead of hard-coding its input types.
+    const deployedIntegrationsKey = () =>
+      JSON.stringify(
+        buildIacIntegrations(
+          buildDeployGroups([], ['ec2'], (useAwsServicesMap as jest.Mock)()).flatMap(
+            (group) => group.members
+          ),
+          {}
+        )
+      );
     const pendingIacTemplate: PendingIacTemplate = {
       connectorId: 'connector-abc',
+      integrationsKey: deployedIntegrationsKey(),
       iac_key: 'sha256:new',
       iac_blueprint_id: 'federated-identity',
       iac_blueprint_version: '1.0.0',
@@ -1436,8 +1454,26 @@ describe('useDeploy', () => {
         iac_blueprint_id: 'federated-identity',
         iac_blueprint_version: '1.0.0',
       });
+      // The stored status flips to up_to_date now rather than at the next daily check.
+      expect(mockSendVerifyCloudConnectorIacKey).toHaveBeenCalledTimes(1);
+      expect(mockSendVerifyCloudConnectorIacKey).toHaveBeenCalledWith('connector-abc', {});
       expect(setPendingIacMock()).toHaveBeenCalledWith(undefined);
       expect(addWarningMock()).not.toHaveBeenCalled();
+    });
+
+    it('clears the pending template details without warning when the re-check after the write fails', async () => {
+      // The re-check is best-effort: the key is stored, so the daily task will derive the status.
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });
+      mockSendVerifyCloudConnectorIacKey.mockRejectedValue(new Error('network down'));
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendUpdateCloudConnector).toHaveBeenCalledTimes(1);
+      expect(addWarningMock()).not.toHaveBeenCalled();
+      expect(setPendingIacMock()).toHaveBeenCalledWith(undefined);
     });
 
     it('does not write when any integration failed to deploy', async () => {
@@ -1573,6 +1609,32 @@ describe('useDeploy', () => {
       expect(mockSendUpdateCloudConnector).not.toHaveBeenCalled();
     });
 
+    it('does not write a template rendered for a different integration set than the one deployed', async () => {
+      // Enabled inputs live in session storage and can change after the launch without the flow
+      // context clearing the pending details. The key only covers the set it was rendered for, so
+      // it must not be written against another set, and it stays parked (not cleared) for the
+      // check on the new set to decide.
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: 'connector-abc',
+        pendingIacTemplate: {
+          ...pendingIacTemplate,
+          integrationsKey: JSON.stringify([
+            { name: 'aws', policyTemplates: [{ name: 'ec2', enabledInputs: ['aws-cloudwatch'] }] },
+          ]),
+        },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(result.current.failedInstances).toHaveLength(0);
+      expect(mockSendUpdateCloudConnector).not.toHaveBeenCalled();
+      expect(setPendingIacMock()).not.toHaveBeenCalled();
+    });
+
     it('does not write on the static-keys path', async () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
@@ -1604,10 +1666,12 @@ describe('useDeploy', () => {
       expect(addWarningMock()).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Template details were not saved on the identity',
-          text: expect.stringContaining('Kibana will retry if you deploy again'),
+          text: expect.stringContaining("update it from the identity's details"),
         })
       );
       expect(setPendingIacMock()).not.toHaveBeenCalled();
+      // Nothing new was stored, so there is nothing to re-check.
+      expect(mockSendVerifyCloudConnectorIacKey).not.toHaveBeenCalled();
       // The deploy itself is unaffected.
       expect(result.current.failedInstances).toHaveLength(0);
       expect(result.current.isDeploying).toBe(false);

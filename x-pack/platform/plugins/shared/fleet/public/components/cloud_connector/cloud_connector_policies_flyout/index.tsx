@@ -262,13 +262,17 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     [analytics, hasValidDeploymentId, iacKey, launchButtonProps]
   );
 
-  // The stored status alone drives the callout: nothing in the flyout compares templates, and
-  // the re-check after Update refreshes the status through the connector queries.
-  const showUpgradeCallout = showIac && iacUpgradeStatus === 'upgrade_available';
+  // The stored status drives the callout: nothing in the flyout compares templates, and the
+  // re-check after Update refreshes the status through the connector queries. It also needs
+  // something to render: with no integrations attached (or the set still loading) there is
+  // nothing to update, and the stored status is stale then, as the daily task skips connectors
+  // without integrations rather than clearing them.
+  const showUpgradeCallout =
+    showIac && iacUpgradeStatus === 'upgrade_available' && hasRenderableIntegrations;
   // Redeploy is a forced render for identities whose stack is current as far as Kibana knows,
   // for when the stack was not deployed or updated when the user was asked to. Offered to
   // keyless connectors too, but not alongside the upgrade callout, whose Update is the action
-  // then.
+  // then. Every stack action needs the integration set the render is built from.
   const showRedeploy =
     showIac && !showUpgradeCallout && hasRenderableIntegrations && hasValidDeploymentId;
   // With no stack ARN on record (legacy identity, or an ARN never saved) there is no stack to
@@ -522,7 +526,9 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                     {showUpgradeCallout && (
                       <IacUpgradeCallout
                         checkedAt={iacUpgradeCheckedAt}
-                        canUpdate={hasValidDeploymentId && hasRenderableIntegrations}
+                        // The callout only shows with a renderable set, so the ARN is the
+                        // one thing left that can hold Update back, and its hint says so.
+                        canUpdate={hasValidDeploymentId}
                         isUpdating={isGeneratingTemplate}
                         onUpdateStack={() => launchTemplate('update_stack_clicked')}
                       />

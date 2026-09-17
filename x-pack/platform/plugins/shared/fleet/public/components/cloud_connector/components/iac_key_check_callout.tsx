@@ -79,15 +79,21 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
     />
   );
 
+  // Without the identity's stack ARN there is no stack to update: the only link Kibana could
+  // build is quick-create, which makes a new stack and a new role the identity does not use. The
+  // flyout on the identity's details captures the ARN (or launches a stack and records it), so
+  // send the user there instead of offering an Update that cannot apply.
+  const canUpdate = Boolean(result.deploymentId);
+
   const text = (
     <>
       <p>{bodyText}</p>
-      {!result.deploymentId && (
+      {!canUpdate && (
         <p>
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.fleet.cloudConnector.iacCheck.noDeploymentId"
-              defaultMessage="The stack ARN for this identity isn't recorded, so the button opens the CloudFormation console. Select your stack there and apply the rendered template. You can add the stack ARN from the identity's details."
+              defaultMessage="The stack ARN for this identity isn't recorded, so Kibana cannot open its stack update. Add the stack ARN from the identity's details in Fleet, then come back to complete setup."
             />
           </EuiTextColor>
         </p>
@@ -104,20 +110,24 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
       announceOnMount
       data-test-subj={CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT}
       text={text}
-      actionProps={{
-        primary: {
-          iconType: 'rocket',
-          isLoading: isUpdating,
-          onClick: onUpdateStack,
-          'data-test-subj': CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON,
-          children: (
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.iacCheck.updateStackButton"
-              defaultMessage="Update CloudFormation stack"
-            />
-          ),
-        },
-      }}
+      {...(canUpdate
+        ? {
+            actionProps: {
+              primary: {
+                iconType: 'rocket',
+                isLoading: isUpdating,
+                onClick: onUpdateStack,
+                'data-test-subj': CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON,
+                children: (
+                  <FormattedMessage
+                    id="xpack.fleet.cloudConnector.iacCheck.updateStackButton"
+                    defaultMessage="Update CloudFormation stack"
+                  />
+                ),
+              },
+            },
+          }
+        : {})}
     />
   );
 };

@@ -120,7 +120,7 @@ function setupMocks({
           iac_blueprint_id?: string;
           iac_blueprint_version?: string;
         },
-        cloudConnectorId: string
+        launchedFor: { cloudConnectorId: string; integrations: RenderIacTemplateIntegration[] }
       ) => void;
       initialConnectorId?: string;
     }) => (
@@ -137,7 +137,7 @@ function setupMocks({
                 iac_blueprint_id: 'federated-identity',
                 iac_blueprint_version: '1.0.0',
               },
-              'launched-for-connector'
+              { cloudConnectorId: 'launched-for-connector', integrations: IAC_INTEGRATIONS }
             )
           }
         >
@@ -341,10 +341,11 @@ describe('ManagedIntegrationsSection', () => {
   describe('Federated Identity template details', () => {
     // The Existing Identity check hands the rendered key here instead of writing the connector;
     // it is parked on the flow for the post-Deploy write.
-    it('parks the rendered template details tagged with the identity the render was launched for, not the one selected', () => {
-      // The render is asynchronous: the user may select another identity before it lands. The
-      // flow carries 'persisted-connector' now, but the details belong to the identity whose
-      // Update started the render; Deploy only writes them when the two match.
+    it('parks the rendered template details tagged with the identity and set the render was launched for, not the ones selected', () => {
+      // The render is asynchronous: the user may select another identity or change the enabled
+      // inputs before it lands. The flow carries 'persisted-connector' now, but the details belong
+      // to the identity and set whose Update started the render; Deploy only writes them when
+      // both match.
       const setPendingIacTemplate = jest.fn();
       setupMocks({ setPendingIacTemplate, connectorId: 'persisted-connector' });
       renderSection({ showIdentityFederation: true });
@@ -356,6 +357,7 @@ describe('ManagedIntegrationsSection', () => {
       expect(setPendingIacTemplate).toHaveBeenCalledTimes(1);
       expect(setPendingIacTemplate).toHaveBeenCalledWith({
         connectorId: 'launched-for-connector',
+        integrationsKey: JSON.stringify(IAC_INTEGRATIONS),
         iac_key: 'sha256:new',
         iac_blueprint_id: 'federated-identity',
         iac_blueprint_version: '1.0.0',

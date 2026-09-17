@@ -35,7 +35,11 @@ import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_t
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
-import { IacKeyCheck, type IacRenderedTemplate } from '../components/iac_key_check';
+import {
+  IacKeyCheck,
+  type IacRenderedTemplate,
+  type IacTemplateLaunchedFor,
+} from '../components/iac_key_check';
 import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
 import { StackArnField } from '../components/stack_arn_field';
 import { getCloudConnectorNameError, isStackArnInvalid } from '../utils';
@@ -66,11 +70,11 @@ export interface AwsIdentityFederationSetupProps {
   onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
   /**
    * Existing Identity only. When given, the stack-update launch does not write the rendered key
-   * to the connector; the template details are handed here instead, with the id of the identity
-   * they were rendered for, for the host to store once its own flow succeeds (the onboarding
-   * writes them after Deploy). Readiness still lifts on the launch.
+   * to the connector; the template details are handed here instead, with the identity and the
+   * integration set they were rendered for, for the host to store once its own flow succeeds
+   * (the onboarding writes them after Deploy). Readiness still lifts on the launch.
    */
-  onIacTemplateRecorded?: (iac: IacRenderedTemplate, cloudConnectorId: string) => void;
+  onIacTemplateRecorded?: (iac: IacRenderedTemplate, launchedFor: IacTemplateLaunchedFor) => void;
 }
 
 export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProps> = ({
