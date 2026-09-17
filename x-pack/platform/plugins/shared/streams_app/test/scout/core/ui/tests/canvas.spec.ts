@@ -120,6 +120,24 @@ test.describe(
       await expect(streams.canvasUndo).toBeEnabled();
     });
 
+    test('keeps the zoom level when tidying up and when opening a node flyout', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.zoomInCanvas();
+      await streams.zoomInCanvas();
+      const zoom = await streams.getCanvasZoom();
+
+      // Tidying up relayouts the nodes without reframing the viewport.
+      await streams.tidyUpCanvasFromPane();
+      expect(await streams.getCanvasZoom()).toBeCloseTo(zoom, 2);
+
+      // Selecting a node to open its flyout must not reframe the viewport either.
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM));
+      await expect(page.testSubj.locator('streamsCanvasFlyout')).toBeVisible();
+      expect(await streams.getCanvasZoom()).toBeCloseTo(zoom, 2);
+    });
+
     test('renders the canvas toolbar with undo/redo and add-node placeholders', async ({
       pageObjects: { streams },
     }) => {

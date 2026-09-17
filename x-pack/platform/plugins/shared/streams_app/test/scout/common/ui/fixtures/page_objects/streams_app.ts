@@ -220,6 +220,29 @@ export class StreamsApp {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
   }
 
+  async getCanvasZoom(): Promise<number> {
+    const transform = await this.page
+      .locator('.react-flow__viewport')
+      .evaluate((element) => window.getComputedStyle(element).transform);
+
+    if (transform === 'none') {
+      return 1;
+    }
+
+    const [scaleX] = transform
+      .replace(/^matrix\(|\)$/g, '')
+      .split(',')
+      .map(Number);
+    return scaleX;
+  }
+
+  /** Zooms in once and resolves after the zoom animation has settled. */
+  async zoomInCanvas() {
+    const previousZoom = await this.getCanvasZoom();
+    await this.canvasZoomIn.click();
+    await expect.poll(() => this.getCanvasZoom()).toBeGreaterThan(previousZoom);
+  }
+
   /**
    * Click near the top of a node card so the floating toolbar (bottom-center)
    * cannot intercept the pointer when a node sits toward the bottom of the pane.
