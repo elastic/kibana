@@ -525,22 +525,18 @@ export async function deleteAnnotationGroupFromLibrary(page: ScoutPage, title: s
 export async function convertToEsqlViaModal({
   pageObjects,
   page,
-  selectAllLayers = false,
 }: {
   pageObjects: DashboardAndLens;
   page: ScoutPage;
-  selectAllLayers?: boolean;
 }) {
   const { lens } = pageObjects;
 
   // Click on the "Conver to ES|QL" button in the in-line editor
   await lens.workspace.convertToEsqlButton.click();
 
-  // Click on the confirmation button in the modal
+  // Conversion is chart-level, so the modal summarizes the result without layer selection.
   const modal = lens.workspace.convertToEsqlModal;
-  if (selectAllLayers) {
-    await modal.getByRole('checkbox', { name: 'Select all rows' }).click();
-  }
+  await expect(modal.getByRole('checkbox')).toHaveCount(0);
   await lens.workspace.convertToEsqlModalConfirmButton.click();
   await expect(modal).toBeHidden();
 
