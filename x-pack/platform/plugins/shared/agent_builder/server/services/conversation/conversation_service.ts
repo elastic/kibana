@@ -11,15 +11,35 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  TimelineEventType,
+  createBadRequestError,
+  isEventsNativeVersion,
+} from '@kbn/agent-builder-common';
 import type { ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
+import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceStart } from '../agents';
+import type { AttachmentServiceStart } from '../attachments/types';
 import type { ConversationClient } from './client';
 import { createClient } from './client';
+import { userMessageActor } from './client/rounds_to_events';
+import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
+import { createScopedConversationEventEmitter } from '../../workflows/triggers/conversation_event_bus';
+
+export interface AppendUserMessageOptions {
+  request: KibanaRequest;
+  conversationId: string;
+  message?: string;
+  attachments?: AttachmentInput[];
+}
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
@@ -27,6 +47,7 @@ export interface ConversationService {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
   }): Promise<ConversationRoundAuthor | undefined>;
+  appendUserMessage(options: AppendUserMessageOptions): Promise<ConversationWithPermissions>;
 }
 
 interface ConversationServiceDeps {
@@ -35,6 +56,7 @@ interface ConversationServiceDeps {
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   agents: AgentsServiceStart;
+  attachments: AttachmentServiceStart;
   eventBus?: ConversationEventBus;
 }
 
@@ -44,6 +66,7 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly elasticsearch: ElasticsearchServiceStart;
   private readonly spaces?: SpacesPluginStart;
   private readonly agents: AgentsServiceStart;
+  private readonly attachments: AttachmentServiceStart;
   private readonly eventBus?: ConversationEventBus;
 
   constructor({
@@ -52,6 +75,7 @@ export class ConversationServiceImpl implements ConversationService {
     elasticsearch,
     spaces,
     agents,
+    attachments,
     eventBus,
   }: ConversationServiceDeps) {
     this.logger = logger;
@@ -59,6 +83,7 @@ export class ConversationServiceImpl implements ConversationService {
     this.elasticsearch = elasticsearch;
     this.spaces = spaces;
     this.agents = agents;
+    this.attachments = attachments;
     this.eventBus = eventBus;
   }
 
@@ -75,10 +100,60 @@ export class ConversationServiceImpl implements ConversationService {
       logger: this.logger,
       space,
       agentRegistry,
-      onMetadataPatched: eventBus
-        ? (payload) => eventBus.emitMetadataPatched(request, payload)
-        : undefined,
+      eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
     });
+  }
+
+  async appendUserMessage({
+    request,
+    conversationId,
+    message = '',
+    attachments = [],
+  }: AppendUserMessageOptions): Promise<ConversationWithPermissions> {
+    const client = await this.getScopedClient({ request });
+    const conversation = await client.get(conversationId);
+
+    if (!isEventsNativeVersion(conversation.schema_version)) {
+      throw createBadRequestError('User messages require canonical event storage');
+    }
+
+    const snapshot = conversation.attachments ?? [];
+    const stateManager = this.attachments.createStateManager(snapshot);
+
+    await this.attachments.mergeAttachmentInputs({
+      stateManager,
+      inputs: attachments,
+      request,
+      actor: ATTACHMENT_REF_ACTOR.user,
+    });
+
+    const user = await this.getCurrentUser({ request });
+    const author = await this.getConversationRoundAuthor({ request });
+    const actor = userMessageActor({ ...conversation, user }, { author });
+    const createdAt = new Date().toISOString();
+
+    const attachmentEvents = attachmentChangesToEvents(stateManager.drainChanges(), {
+      source: 'chat_input',
+      actor,
+      created_at: createdAt,
+    });
+
+    await client.appendEvents({
+      id: conversationId,
+      events: [
+        {
+          id: uuidv4(),
+          type: TimelineEventType.userMessage,
+          created_at: createdAt,
+          actor,
+          data: { message: message.trim(), attachment_refs: stateManager.getAccessedRefs() },
+        },
+        ...attachmentEvents,
+      ],
+      attachments: { snapshot, produced: stateManager.getAll() },
+    });
+
+    return client.get(conversationId);
   }
 
   /**

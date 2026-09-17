@@ -6,11 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import {
-  TEST_CONNECTOR_SUB_ACTION,
-  connectorSpecHasEvents,
-  ingestTokenHashSchema,
-} from '@kbn/connector-specs';
+import { TEST_CONNECTOR_SUB_ACTION, connectorSpecHasEvents } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 
@@ -26,7 +22,10 @@ import { generateParamsSchema } from './generate_params_schema';
 import { generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
 import { generateConfigSchema } from './generate_config_schema';
-import { createConnectorNetworkSettings } from './create_connector_network_settings';
+import {
+  createConnectorNetworkSettings,
+  createPlatformServices,
+} from './create_connector_network_settings';
 
 const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] => {
   if (spec.actions?.[TEST_CONNECTOR_SUB_ACTION]) {
@@ -57,6 +56,7 @@ export const createConnectorTypeFromSpec = (
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
   const networkSettings = createConnectorNetworkSettings(configUtils);
+  const platform = createPlatformServices(configUtils);
 
   const hasTest = Boolean(spec.test.enabled);
   const hasActions = Object.keys(spec.actions ?? {}).length > 0;
@@ -74,9 +74,7 @@ export const createConnectorTypeFromSpec = (
 
   const executableActions = buildExecutableActions(spec);
   const hasExecutableActions = hasActions || hasTest;
-  const schemaForConfig = connectorSpecHasEvents(spec)
-    ? (spec.schema ?? z4.object({})).extend({ ingestTokenHash: ingestTokenHashSchema })
-    : spec.schema;
+  const schemaForConfig = spec.schema;
 
   const executor = hasExecutableActions
     ? generateExecutorFunction({
@@ -86,6 +84,7 @@ export const createConnectorTypeFromSpec = (
         getClientLeasePool: actions.getClientLeasePool,
         getRelayClient: actions.getRelayClient,
         networkSettings,
+        platform,
       })
     : undefined;
 
