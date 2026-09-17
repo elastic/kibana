@@ -92,11 +92,15 @@ export const EXEMPLARS_INDEX_PREFIX = 'exemplars-';
 // dataset produces a name that does not exist, and ES|QL answers that with an HTTP 400
 // rather than an empty result.
 export const EXEMPLARS_OTEL_DATASET_MARKER = '.otel';
-// ES|QL applies an implicit `LIMIT 1000` when no limit is given, returning an arbitrary
-// (and therefore unstable across refreshes) subset. An explicit limit keeps the cap
-// deliberate and, paired with `SORT @timestamp DESC`, stable.
-// TODO(observability-dev#6073): placeholder pending the product decision on sampling.
-export const EXEMPLARS_MAX_ROWS = 500;
+// The metric chart aggregates into this many time buckets (`TBUCKET(n)`). Exemplar
+// sampling groups by the same count so exemplar coverage lines up with the x-axis.
+export const METRICS_CHART_TARGET_BUCKETS = 100;
+// Exemplars kept per time bucket. A global `LIMIT n` piles the newest n rows at the right
+// edge of any window with more than n exemplars, and ES|QL silently truncates at 10,000
+// rows anyway. Limiting per bucket instead bounds the response at
+// `METRICS_CHART_TARGET_BUCKETS * EXEMPLARS_PER_BUCKET` rows while covering the whole window.
+// TODO(observability-dev#6073): revisit once `TS_EXEMPLARS` owns sampling server-side.
+export const EXEMPLARS_PER_BUCKET = 10;
 
 // Metrics grid sort options
 export const METRICS_SORT_BY = {

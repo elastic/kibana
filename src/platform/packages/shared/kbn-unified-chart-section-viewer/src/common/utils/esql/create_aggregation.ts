@@ -17,6 +17,7 @@ import {
   type MetricsGridSettings,
   type SimpleAggregation,
 } from '@kbn/discover-utils';
+import { METRICS_CHART_TARGET_BUCKETS } from '../../constants';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
 import { HISTOGRAM_PERCENTILE_VALUES } from '../../../components/flyout/metrics_grid_settings_flyout/constants';
@@ -172,6 +173,10 @@ export function createMetricAggregation({
  * @param targetBuckets - The desired number of buckets for the time series.
  * @returns The ES|QL TBUCKET function string.
  */
-export function createTimeBucketAggregation({ targetBuckets = 100 }: { targetBuckets?: number }) {
+export function createTimeBucketAggregation({
+  targetBuckets = METRICS_CHART_TARGET_BUCKETS,
+}: {
+  targetBuckets?: number;
+}) {
   return `TBUCKET(${targetBuckets})`;
 }

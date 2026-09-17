@@ -31,14 +31,15 @@ describe('createExemplarsQuery', () => {
       `
 FROM exemplars-generic.otel-default
   | WHERE \`metrics.http.server.request.duration\` IS NOT NULL
+  | SORT @timestamp DESC, span_id ASC
+  | LIMIT 10 BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | LIMIT 1000
   | KEEP @timestamp, \`metrics.http.server.request.duration\`, trace_id, span_id, \`attributes.http.route\`, \`resource.attributes.service.name\`
-  | SORT @timestamp DESC
-  | LIMIT 500
 `.trim()
     );
   });
 
-  it('appends each non-empty where statement as its own WHERE pipe before KEEP', () => {
+  it('appends each non-empty where statement as its own WHERE pipe before sorting', () => {
     expect(
       createExemplarsQuery({
         metricItem: mockMetric,
@@ -55,9 +56,10 @@ FROM exemplars-generic.otel-default
   | WHERE \`metrics.http.server.request.duration\` IS NOT NULL
   | WHERE attributes.http.route == "/orders"
   | WHERE attributes.http.response.status_code >= 500
+  | SORT @timestamp DESC, span_id ASC
+  | LIMIT 10 BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | LIMIT 1000
   | KEEP @timestamp, \`metrics.http.server.request.duration\`, trace_id, span_id, \`attributes.http.route\`, \`resource.attributes.service.name\`
-  | SORT @timestamp DESC
-  | LIMIT 500
 `.trim()
     );
   });
@@ -67,28 +69,45 @@ FROM exemplars-generic.otel-default
       `
 FROM exemplars-generic.otel-default
   | WHERE \`metrics.http.server.request.duration\` IS NOT NULL
+  | SORT @timestamp DESC, span_id ASC
+  | LIMIT 10 BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | LIMIT 1000
   | KEEP @timestamp, \`metrics.http.server.request.duration\`, trace_id, span_id
-  | SORT @timestamp DESC
-  | LIMIT 500
 `.trim()
     );
   });
 
-  it('honours an explicit maxRows override', () => {
-    expect(
-      createExemplarsQuery({
+  describe('per-bucket sampling', () => {
+    it('honours explicit perBucket and targetBuckets overrides and sizes the ceiling to match', () => {
+      const query = createExemplarsQuery({
         metricItem: { ...mockMetric, dimensionFields: [] },
-        maxRows: 25,
-      })
-    ).toBe(
-      `
-FROM exemplars-generic.otel-default
-  | WHERE \`metrics.http.server.request.duration\` IS NOT NULL
-  | KEEP @timestamp, \`metrics.http.server.request.duration\`, trace_id, span_id
-  | SORT @timestamp DESC
-  | LIMIT 25
-`.trim()
-    );
+        perBucket: 3,
+        targetBuckets: 50,
+      });
+
+      expect(query).toContain('| LIMIT 3 BY BUCKET(@timestamp, 50, ?_tstart, ?_tend)');
+      expect(query).toContain('| LIMIT 150\n');
+    });
+
+    it('keeps the largest metric values per bucket when ordered by highest', () => {
+      const query = createExemplarsQuery({
+        metricItem: { ...mockMetric, dimensionFields: [] },
+        orderBy: 'highest',
+      });
+
+      expect(query).toContain(
+        '| SORT `metrics.http.server.request.duration` DESC, @timestamp DESC, span_id ASC'
+      );
+      expect(query).toContain('| LIMIT 10 BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+    });
+
+    it('binds the bucket range to the host time range instead of literal dates', () => {
+      const query = createExemplarsQuery({ metricItem: mockMetric });
+
+      expect(query).toContain('?_tstart');
+      expect(query).toContain('?_tend');
+      expect(query).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+    });
   });
 
   it('escapes identifiers that contain backticks', () => {
@@ -104,9 +123,10 @@ FROM exemplars-generic.otel-default
       `
 FROM exemplars-generic.otel-default
   | WHERE \`metrics.odd\`\`name\` IS NOT NULL
+  | SORT @timestamp DESC, span_id ASC
+  | LIMIT 10 BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | LIMIT 1000
   | KEEP @timestamp, \`metrics.odd\`\`name\`, trace_id, span_id, \`attributes.odd\`\`dimension\`
-  | SORT @timestamp DESC
-  | LIMIT 500
 `.trim()
     );
   });
@@ -166,14 +186,16 @@ FROM exemplars-generic.otel-default
 
   // AC 5: breaking down by a dimension must not change which exemplars are fetched.
   // `createExemplarsQuery` takes no `splitAccessors`, so the guard is that the emitted
-  // query never carries an aggregation to break down by.
+  // query never aggregates or groups by anything other than the time bucket.
   describe('AC 5 regression guard: no breakdown reaches the query', () => {
-    it('emits no STATS or BY clause', () => {
+    it('emits no STATS and groups only on the time bucket', () => {
       const query = createExemplarsQuery({ metricItem: mockMetric });
 
       expect(query).not.toMatch(/\bSTATS\b/);
-      expect(query).not.toMatch(/\bBY\b/);
       expect(query).not.toMatch(/\bTBUCKET\b/);
+      // The only `BY` is the per-bucket limit, keyed on `@timestamp` alone.
+      expect(query.match(/\bBY\b/g)).toHaveLength(1);
+      expect(query).toMatch(/LIMIT \d+ BY BUCKET\(@timestamp, \d+, \?_tstart, \?_tend\)/);
     });
 
     it('emits the same query regardless of which dimensions the grid is broken down by', () => {

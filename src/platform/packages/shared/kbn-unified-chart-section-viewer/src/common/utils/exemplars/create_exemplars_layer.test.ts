@@ -33,9 +33,10 @@ describe('createExemplarsLayer', () => {
       query: `
 FROM exemplars-generic.otel-default
   | WHERE \`metrics.http.server.request.duration\` IS NOT NULL
+  | SORT @timestamp DESC, span_id ASC
+  | LIMIT 10 BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | LIMIT 1000
   | KEEP @timestamp, \`metrics.http.server.request.duration\`, trace_id, span_id, \`attributes.http.route\`
-  | SORT @timestamp DESC
-  | LIMIT 500
 `.trim(),
     });
   });
