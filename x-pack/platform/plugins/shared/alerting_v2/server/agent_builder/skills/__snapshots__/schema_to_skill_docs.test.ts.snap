@@ -49,7 +49,7 @@ Use \`set_throttle\` to limit how often notifications fire so the user is not fl
 |---|---|---|---|
 | \`operation\` | \\"set_throttle\\" | required |  |
 | \`strategy\` | \\"on_status_change\\" \\\\| \\"per_status_interval\\" \\\\| \\"time_interval\\" \\\\| \\"every_time\\" | optional | The throttle strategy. |
-| \`interval\` | string | optional | The throttle interval (e.g. 5m, 1h). |
+| \`interval\` | string | optional | The throttle interval (e.g. 5m, 1h). (max length: 32) |
 
 #### \`operation: \\"validate\\"\`
 
@@ -346,8 +346,8 @@ Use \`set_schedule\` to control how often the rule runs (\`every\`) and how far 
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`every\` | string | optional | Execution interval, e.g. 1m, 5m, 1h. |
-| \`lookback\` | string | optional | Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES\\\\|QL. |
+| \`every\` | string | optional | Execution interval, e.g. 1m, 5m, 1h. (max length: 32) |
+| \`lookback\` | string | optional | Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES\\\\|QL. (max length: 32) |
 | \`operation\` | \\"set_schedule\\" | required |  |
 
 #### \`operation: \\"set_query\\"\`
@@ -377,9 +377,9 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`pending_count\` | integer | optional | Number of consecutive matches required before the alert becomes \`active\`. (min: 0, max: 1000) |
-| \`pending_timeframe\` | string | optional | Time window used with \`pending_count\`, for example \`5m\` or \`15m\`. |
+| \`pending_timeframe\` | string | optional | Time window used with \`pending_count\`, for example \`5m\` or \`15m\`. (max length: 32) |
 | \`recovering_count\` | integer | optional | Number of consecutive recoveries required before the alert becomes \`inactive\`. (min: 0, max: 1000) |
-| \`recovering_timeframe\` | string | optional | Time window used with \`recovering_count\`, for example \`5m\` or \`15m\`. |
+| \`recovering_timeframe\` | string | optional | Time window used with \`recovering_count\`, for example \`5m\` or \`15m\`. (max length: 32) |
 | \`operation\` | \\"set_state_transition\\" | required |  |
 
 #### \`operation: \\"set_dashboards\\"\`
