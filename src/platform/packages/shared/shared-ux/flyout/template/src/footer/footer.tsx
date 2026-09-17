@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
-import type { FlyoutFooterPrimaryActionMenuProps, FlyoutFooterProps } from '../types';
+import type { FlyoutFooterProps } from '../types';
 import { flyoutAssembly, footerAssembly, partsOf } from '../assembly';
 import { resolveZoneTestSubj, useFlyoutTemplateConfig } from '../context';
 import {
@@ -50,7 +50,7 @@ export const FooterZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutF
   // A menu with no panels has nothing to open, so it does not claim the primary slot;
   // skip past any such menu rather than letting it mask a later one that has content.
   const activeMenu = partsOf(items, PRIMARY_ACTION_MENU_PART_NAME).find(
-    (part) => (part.attributes as unknown as FlyoutFooterPrimaryActionMenuProps).panels?.length
+    (part) => Array.isArray(part.attributes.panels) && part.attributes.panels.length > 0
   );
 
   if (process.env.NODE_ENV !== 'production' && primary && activeMenu) {

@@ -65,7 +65,7 @@ const resolvePanels = (
           const asEntry = item as {
             isSeparator?: boolean;
             panel?: unknown;
-            onClick?: (e: MouseEvent) => void;
+            onClick?: (e: React.MouseEvent) => void;
           };
           const { onClick } = asEntry;
           // Only wrap items that are already clickable.
@@ -76,7 +76,7 @@ const resolvePanels = (
           return {
             ...item,
             onClick: (event: React.MouseEvent<Element, globalThis.MouseEvent>) => {
-              onClick(event as unknown as globalThis.MouseEvent);
+              onClick(event);
               closePopover();
             },
           };
