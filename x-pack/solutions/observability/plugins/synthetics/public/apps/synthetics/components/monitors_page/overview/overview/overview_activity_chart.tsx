@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -13,57 +13,33 @@ import React, { useMemo } from 'react';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useOverviewRefreshedRange } from '../../common/use_overview_date_range';
 import { AlertsLink } from '../../../common/links/view_alerts';
-import {
-  ERRORS_LABEL,
-  ERROR_STATES_TOOLTIP,
-} from '../../../monitor_details/monitor_summary/monitor_errors_count';
-import { useErrorStats } from '../../hooks/use_error_stats';
+import { ERRORS_LABEL } from '../../../monitor_details/monitor_summary/monitor_errors_count';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
 import { useOverviewAlertsCount } from '../../hooks/use_overview_alerts_count';
 import { useOverviewDataViewIndexPatterns } from '../../hooks/use_overview_data_view_index_patterns';
-import { MonitorStat } from './overview_status';
+import type { MonitorStatProps } from './overview_status';
 
-// Rendered as extra stats inside the Monitors status panel (see `OverviewStatus`'s
-// `children` slot), so the Errors/Alerts counts sit alongside Up/Down/Pending —
-// plain EuiStat via `MonitorStat`, matching those, rather than a Lens embeddable
-// (which doesn't align visually with the rest of the panel).
-export const OverviewActivityStats = () => {
-  const { stats: errorStats } = useErrorStats();
+// Fed into the Monitors status panel's `extraStats` (see `OverviewStatus`), so the
+// Alerts count sits alongside Up/Down/Pending as a plain EuiStat — matching those,
+// rather than a Lens embeddable (which doesn't align visually with the rest of the
+// row). No standalone Errors stat: the chart below already shows error states as a
+// line, and `Down` already covers current status, so a separate count would just
+// restate the chart.
+export const useOverviewActivityStats = (): MonitorStatProps[] => {
   const { count: alertsCount } = useOverviewAlertsCount(useOverviewRefreshedRange());
 
-  return (
-    <>
-      <EuiFlexItem grow={false}>
-        <MonitorStat
-          dataTestSubj="overviewActivityErrorStates"
-          statName={ERRORS_LABEL}
-          statNo={errorStats?.errorCount ?? 0}
-          numberColor="danger"
-          isClickable={false}
-          onClickStat={() => {}}
-          tooltipContent={ERROR_STATES_TOOLTIP}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <MonitorStat
-              dataTestSubj="overviewActivityAlertsCount"
-              statName={alertsLabel}
-              statNo={alertsCount}
-              numberColor="danger"
-              isClickable={false}
-              onClickStat={() => {}}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={{ paddingTop: 4 }}>
-            <AlertsLink />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </>
-  );
+  return [
+    {
+      dataTestSubj: 'overviewActivityAlertsCount',
+      statName: alertsLabel,
+      statNo: alertsCount,
+      numberColor: 'danger',
+      isClickable: false,
+      onClickStat: () => {},
+      append: <AlertsLink />,
+    },
+  ];
 };
 
 const ACTIVITY_CHART_HEIGHT = '220px';

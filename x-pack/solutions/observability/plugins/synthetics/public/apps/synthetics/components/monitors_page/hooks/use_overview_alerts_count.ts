@@ -38,8 +38,14 @@ export function useOverviewAlertsCount({ from, to }: Props) {
     bool: {
       filter: [
         { range: { '@timestamp': { gte: from, lte: to } } },
-        ...alertsFilters.map((filter) => ({ terms: { [filter.field]: filter.values } })),
-        ...(locations?.length ? [{ terms: { 'observer.geo.name': locations } }] : []),
+        ...alertsFilters.map(
+          (filter): estypes.QueryDslQueryContainer => ({
+            terms: { [filter.field]: (filter.values ?? []).map(String) },
+          })
+        ),
+        ...(locations?.length
+          ? [{ terms: { 'observer.geo.name': locations } } as estypes.QueryDslQueryContainer]
+          : []),
       ],
     },
   };
@@ -92,9 +98,8 @@ async function fetchAlertsCount({
     }
   );
 
-  const countAggs = response.aggregations
-    ?.count as estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
-  const buckets = countAggs?.buckets ?? [];
+  const countAggs = response.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase;
+  const buckets = (countAggs?.buckets as estypes.AggregationsStringTermsBucketKeys[]) ?? [];
 
   return buckets.reduce((total, bucket) => {
     if (bucket.key === ALERT_STATUS_ACTIVE || bucket.key === ALERT_STATUS_RECOVERED) {

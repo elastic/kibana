@@ -36,7 +36,14 @@ export interface MonitorStatProps {
   isClickable: boolean;
   onClickStat: () => void;
   tooltipContent?: string;
+  // Companion content rendered next to the stat, e.g. the "View alerts" link.
+  append?: React.ReactNode;
 }
+
+const STATS_PER_ROW = 3;
+// Fixed per-column width so a stat in row 2 (e.g. Alerts) lines up under the
+// column above it (Down) instead of drifting with each row's own content width.
+const STAT_COLUMN_WIDTH = 100;
 
 export const MonitorStat = ({
   dataTestSubj,
@@ -46,6 +53,7 @@ export const MonitorStat = ({
   isClickable,
   onClickStat,
   tooltipContent,
+  append,
 }: MonitorStatProps) => {
   const description = tooltipContent ? (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -68,12 +76,23 @@ export const MonitorStat = ({
       titleSize="m"
     />
   );
-  return isClickable ? (
+  const stat = isClickable ? (
     <EuiButtonEmpty data-test-subj={`${dataTestSubj}Btn`} onClick={onClickStat}>
       {statComponent}
     </EuiButtonEmpty>
   ) : (
     statComponent
+  );
+
+  return append ? (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>{stat}</EuiFlexItem>
+      <EuiFlexItem grow={false} css={{ paddingTop: 4 }}>
+        {append}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    stat
   );
 };
 
@@ -81,12 +100,12 @@ export function OverviewStatus({
   titleAppend,
   hideTitle,
   areStatsClickable = false,
-  children,
+  extraStats = [],
 }: {
   titleAppend?: React.ReactNode;
   hideTitle?: boolean;
   areStatsClickable?: boolean;
-  children?: React.ReactNode;
+  extraStats?: MonitorStatProps[];
 }) {
   const { statusFilter } = useGetUrlParams();
   const { application } = useKibana().services;
@@ -236,6 +255,15 @@ export function OverviewStatus({
     return stats;
   }, [areStatsClickable, getOnClickStat, statusConfig]);
 
+  const statRows = useMemo(() => {
+    const allStats = [...monitorStatData, ...extraStats];
+    const rows: MonitorStatProps[][] = [];
+    for (let i = 0; i < allStats.length; i += STATS_PER_ROW) {
+      rows.push(allStats.slice(i, i + STATS_PER_ROW));
+    }
+    return rows;
+  }, [monitorStatData, extraStats]);
+
   return (
     <EmbeddablePanelWrapper
       title={headingText}
@@ -243,22 +271,18 @@ export function OverviewStatus({
       titleAppend={titleAppend}
       hideTitle={hideTitle}
     >
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
-        {monitorStatData.map((props) => (
-          <EuiFlexItem grow={false} key={props.dataTestSubj}>
-            <MonitorStat {...props} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-      {children && (
-        <>
+      {statRows.map((row, rowIndex) => (
+        <React.Fragment key={rowIndex}>
           <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
-            {children}
+          <EuiFlexGroup gutterSize="xl">
+            {row.map((props) => (
+              <EuiFlexItem grow={false} css={{ width: STAT_COLUMN_WIDTH }} key={props.dataTestSubj}>
+                <MonitorStat {...props} />
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
-        </>
-      )}
+        </React.Fragment>
+      ))}
     </EmbeddablePanelWrapper>
   );
 }

@@ -116,6 +116,7 @@ jest.mock('./overview/overview_status', () => ({
 
 jest.mock('./overview/overview_activity_chart', () => ({
   OverviewActivityChart: () => null,
+  useOverviewActivityStats: () => [],
 }));
 
 jest.mock('../common/no_monitors_found', () => ({
