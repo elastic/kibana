@@ -27,7 +27,7 @@ import {
   V2_EPISODE_TAG,
   waitForV1RuleAlert,
 } from '../fixtures/privilege_test_data';
-import { OBSERVABILITY_ALERTING_INBOX_PATH } from '../../../../public/constants';
+import { OBSERVABILITY_ALERTING_ALERTS_PATH } from '../../../../public/constants';
 
 type ElasticsearchPrivileges = KibanaRole['elasticsearch'];
 
@@ -211,7 +211,7 @@ test.describe(
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(LOGS_READ_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
       await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, [
         V1_EPISODE_TAG,
         V2_EPISODE_TAG,
@@ -223,13 +223,13 @@ test.describe(
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
       await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, [V2_EPISODE_TAG]);
     });
 
     test('user with no alerting privileges is blocked', async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(NO_ALERTING_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
 
       await expect(pageObjects.observabilityAlerting.requiredPrivilegesPrompt).toBeVisible({
         timeout: 60_000,

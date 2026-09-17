@@ -40,7 +40,7 @@ const ALERTS_DEEP_LINK = 'observability-overview:alerts';
 const CLASSIC_ALERTS_TITLE = 'Alerts';
 
 const PANEL_LINKS = {
-  inbox: 'observabilityAlerting:inbox',
+  alerts: 'observabilityAlerting:alerts',
   rulesV2: 'observabilityAlerting:rules-v2',
   rulesV1: 'observabilityAlerting:rules-v1',
   ruleLibrary: 'observabilityAlerting:rule-library',
@@ -55,7 +55,7 @@ const PANEL_LINKS = {
  * `rules-v1` stays hidden in the side nav and is covered by the URL suite.
  */
 const V2_PANEL_PAGES = [
-  { name: 'Inbox', deepLinkId: PANEL_LINKS.inbox, title: 'Alert episodes' },
+  { name: 'Alerts', deepLinkId: PANEL_LINKS.alerts, title: 'Alert episodes' },
   { name: 'Rules', deepLinkId: PANEL_LINKS.rulesV2, title: 'Rules' },
   { name: 'Action Policies', deepLinkId: PANEL_LINKS.actionPolicies, title: 'Action Policies' },
   {
@@ -84,7 +84,7 @@ const expectPlainAlertsLink = async (nav: ObservabilityNavigation) => {
 };
 
 const ALL_PANEL_LINKS = [
-  PANEL_LINKS.inbox,
+  PANEL_LINKS.alerts,
   ALERTS_DEEP_LINK,
   PANEL_LINKS.rulesV2,
   PANEL_LINKS.rulesV1,
@@ -103,7 +103,7 @@ const PRIVILEGE_CASES = [
   {
     name: 'v2 alerts read',
     role: observabilityAlertingNavRole({ alerting_v2_alerts: ['read'] }),
-    visible: [PANEL_LINKS.inbox],
+    visible: [PANEL_LINKS.alerts],
   },
   {
     name: 'v2 rules read',
@@ -128,12 +128,12 @@ const PRIVILEGE_CASES = [
   {
     name: 'v1 observability alerts read',
     role: observabilityAlertingNavRole({ observabilityAlerts: ['read'] }),
-    visible: [PANEL_LINKS.inbox],
+    visible: [PANEL_LINKS.alerts],
   },
   {
     name: 'v1 logs alerts and rules read',
     role: observabilityAlertingNavRole({ logs: ['read'] }),
-    visible: [PANEL_LINKS.inbox, PANEL_LINKS.rulesV1],
+    visible: [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1],
   },
 ] as const;
 
@@ -248,9 +248,9 @@ test.describe(
         await nav.openPanelById(ALERTS_PANEL_ID);
       });
 
-      await test.step('panel contains Inbox but not Alerts V1', async () => {
+      await test.step('panel contains Alerts but not Alerts V1', async () => {
         await expect(
-          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.inbox)
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.alerts)
         ).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
@@ -323,7 +323,7 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
       await nav.openPanelById(ALERTS_PANEL_ID);
 
-      await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.inbox)).toBeVisible({
+      await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.alerts)).toBeVisible({
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
       await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)).toBeVisible({
@@ -385,7 +385,7 @@ test.describe(
             nav,
             observabilityAlertingNavRole({ observabilityAlerts: ['read'] })
           );
-          await expectPanelLinks(nav, [PANEL_LINKS.inbox, ALERTS_DEEP_LINK]);
+          await expectPanelLinks(nav, [PANEL_LINKS.alerts, ALERTS_DEEP_LINK]);
         } finally {
           await scoutSpace.uiSettings.set({
             [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,

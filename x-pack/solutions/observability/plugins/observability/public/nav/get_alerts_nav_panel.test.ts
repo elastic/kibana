@@ -96,8 +96,8 @@ describe('getAlertsNavPanel', () => {
         breadcrumbStatus: 'hidden',
         children: [
           expect.objectContaining({
-            link: 'observabilityAlerting:inbox',
-            title: 'Inbox',
+            link: 'observabilityAlerting:alerts',
+            title: 'Alerts',
             badgeType: 'new',
           }),
         ],
@@ -137,41 +137,41 @@ describe('getAlertsNavPanel', () => {
     expect(getAlertsNavPanel(core)).toEqual([]);
   });
 
-  describe('inbox section', () => {
+  describe('alerts section', () => {
     beforeEach(() => {
       enableV2(core);
     });
 
-    it('shows Inbox when the user has v2 alerts read', () => {
+    it('shows Alerts when the user has v2 alerts read', () => {
       setCapabilities(core, { alerting_v2_alerts: { read: true } });
 
       expect(getSectionByTitle(core)?.children).toEqual([
-        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
       ]);
     });
 
-    it('shows Inbox when the user has v2 alerts all', () => {
+    it('shows Alerts when the user has v2 alerts all', () => {
       setCapabilities(core, { alerting_v2_alerts: { all: true } });
 
       expect(getSectionByTitle(core)?.children).toEqual([
-        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
       ]);
     });
 
-    it('shows Inbox when the user has v1 alerts read', () => {
+    it('shows Alerts when the user has v1 alerts read', () => {
       setCapabilities(core, { observabilityAlerts: { show: true } });
 
       expect(getSectionByTitle(core)?.children).toEqual([
-        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
       ]);
     });
 
-    it('shows Inbox and Alerts V1 when the user has v1 alerts read and the classic table setting is on', () => {
+    it('shows Alerts and Alerts V1 when the user has v1 alerts read and the classic table setting is on', () => {
       core.settings.client.get = <T>(_key: string) => true as T;
       setCapabilities(core, { observabilityAlerts: { show: true } });
 
       expect(getSectionByTitle(core)?.children).toEqual([
-        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
         expect.objectContaining({
           link: 'observability-overview:alerts',
           title: 'Alerts V1',
@@ -179,14 +179,14 @@ describe('getAlertsNavPanel', () => {
       ]);
     });
 
-    it('shows Inbox and Alerts V1 when the user has the v1 alerts management capability', () => {
+    it('shows Alerts and Alerts V1 when the user has the v1 alerts management capability', () => {
       core.settings.client.get = <T>(_key: string) => true as T;
       setCapabilities(core, {
         management: { insightsAndAlerting: { triggersActionsAlerts: true } },
       });
 
       expect(getSectionByTitle(core)?.children).toEqual([
-        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
         expect.objectContaining({ link: 'observability-overview:alerts' }),
       ]);
     });
@@ -195,11 +195,11 @@ describe('getAlertsNavPanel', () => {
       setCapabilities(core, { observabilityAlerts: { show: true } });
 
       expect(getSectionByTitle(core)?.children).toEqual([
-        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
       ]);
     });
 
-    it('shows Inbox and Alerts V1 when the user has both v1 and v2 alerts read', () => {
+    it('shows Alerts and Alerts V1 when the user has both v1 and v2 alerts read', () => {
       core.settings.client.get = <T>(_key: string) => true as T;
       setCapabilities(core, {
         alerting_v2_alerts: { read: true },
@@ -207,7 +207,7 @@ describe('getAlertsNavPanel', () => {
       });
 
       expect(getSectionByTitle(core)?.children).toEqual([
-        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
         expect.objectContaining({ link: 'observability-overview:alerts' }),
       ]);
     });

@@ -15,8 +15,8 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ObservabilityAlertingPlugin } from './plugin';
 import {
   OBSERVABILITY_ALERTING_BASE_PATH,
-  OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
 } from './constants';
 
 const APP_STUB: App = {
@@ -97,8 +97,8 @@ describe('ObservabilityAlertingPlugin', () => {
         visibleIn: [],
         deepLinks: expect.arrayContaining([
           expect.objectContaining({
-            id: OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
-            path: OBSERVABILITY_ALERTING_INBOX_PATH,
+            id: OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
+            path: OBSERVABILITY_ALERTING_ALERTS_PATH,
             visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({

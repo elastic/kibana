@@ -19,8 +19,8 @@ import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
 import { from, map, switchMap } from 'rxjs';
 import {
   OBSERVABILITY_ALERTING_BASE_PATH,
-  OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
@@ -77,13 +77,13 @@ export class ObservabilityAlertingPlugin
       ),
       deepLinks: [
         {
-          id: OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
-          title: i18n.translate('xpack.observabilityAlerting.deepLinks.inboxTitle', {
-            defaultMessage: 'Alerts (Inbox)',
+          id: OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
+          title: i18n.translate('xpack.observabilityAlerting.deepLinks.alertsTitle', {
+            defaultMessage: 'Alerts',
           }),
-          path: OBSERVABILITY_ALERTING_INBOX_PATH,
+          path: OBSERVABILITY_ALERTING_ALERTS_PATH,
           visibleIn: ['globalSearch', 'projectSideNav'],
-          keywords: ['alerting', 'episodes', 'inbox'],
+          keywords: ['alerting', 'episodes', 'alerts', 'inbox'],
         },
         {
           id: OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,

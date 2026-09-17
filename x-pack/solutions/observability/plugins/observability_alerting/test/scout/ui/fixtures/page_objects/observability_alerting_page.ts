@@ -11,14 +11,14 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../../../../../public/constants';
 
 export const OBSERVABILITY_ALERTING_SURFACES = [
-  { name: 'Inbox', path: OBSERVABILITY_ALERTING_INBOX_PATH, title: 'Alert episodes' },
+  { name: 'Alerts', path: OBSERVABILITY_ALERTING_ALERTS_PATH, title: 'Alert episodes' },
   { name: 'Rules (v1)', path: OBSERVABILITY_ALERTING_RULES_V1_PATH, title: 'Rules' },
   { name: 'Rules', path: OBSERVABILITY_ALERTING_RULES_V2_PATH, title: 'Rules' },
   { name: 'Rule library', path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, title: 'Rule library' },
@@ -38,8 +38,8 @@ export const OBSERVABILITY_ALERTING_RULES_V1_URL_RE =
   /\/app\/observability\/alerting\/rules\/v1(\/|$|\?|#)/;
 export const OBSERVABILITY_ALERTING_RULES_V2_URL_RE =
   /\/app\/observability\/alerting\/rules\/v2(\/|$|\?|#)/;
-export const OBSERVABILITY_ALERTING_INBOX_EPISODE_URL_RE =
-  /\/app\/observability\/alerting\/inbox\/[^/?#]+/;
+export const OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE =
+  /\/app\/observability\/alerting\/alerts\/[^/?#]+/;
 export const OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE =
   /\/app\/observability\/alerting\/rules\/v2\/[^/?#]+/;
 export const MANAGEMENT_ALERTING_V2_EPISODES_URL_RE = /\/app\/management\/alertingV2\/episodes/;
@@ -146,7 +146,7 @@ export class ObservabilityAlertingPage {
     const search = new URLSearchParams({
       _a: `(episodesList:(ruleId:'${ruleId}'))`,
     });
-    await this.goto(`${OBSERVABILITY_ALERTING_INBOX_PATH}?${search.toString()}`);
+    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}?${search.toString()}`);
     await this.inboxPage.waitFor({ state: 'visible' });
   }
 
@@ -165,7 +165,7 @@ export class ObservabilityAlertingPage {
   }
 
   async gotoEpisodeDetails(episodeId: string): Promise<void> {
-    await this.goto(`${OBSERVABILITY_ALERTING_INBOX_PATH}/${encodeURIComponent(episodeId)}`);
+    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}/${encodeURIComponent(episodeId)}`);
     await this.episodeDetailsPage.waitFor({ state: 'visible' });
   }
 

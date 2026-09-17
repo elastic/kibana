@@ -57,21 +57,21 @@ const maybeSection = (
   return [{ ...section, children }];
 };
 
-const getInboxSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
-  const inboxChildren: PanelOpenerChildDefinition[] = [];
+const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
+  const alertsChildren: PanelOpenerChildDefinition[] = [];
 
   if (hasAlertingV2Capability(core, 'alerts') || canReadV1Alerts(core)) {
-    inboxChildren.push({
-      link: obsAlertingLink('inbox'),
-      title: i18n.translate('xpack.observability.nav.inbox', {
-        defaultMessage: 'Inbox',
+    alertsChildren.push({
+      link: obsAlertingLink('alerts'),
+      title: i18n.translate('xpack.observability.nav.alerts', {
+        defaultMessage: 'Alerts',
       }),
       badgeType: 'new',
     });
   }
 
   if (canReadV1Alerts(core) && shouldShowClassicObservabilityAlertsTable(core)) {
-    inboxChildren.push({
+    alertsChildren.push({
       link: ALERTS_LINK,
       title: i18n.translate('xpack.observability.nav.alertsV1', {
         defaultMessage: 'Alerts V1',
@@ -79,7 +79,7 @@ const getInboxSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
     });
   }
 
-  return maybeSection(inboxChildren, { breadcrumbStatus: 'hidden' });
+  return maybeSection(alertsChildren, { breadcrumbStatus: 'hidden' });
 };
 
 const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
@@ -156,7 +156,7 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
   }
 
   const children = [
-    ...getInboxSection(core),
+    ...getAlertsSection(core),
     ...getRuleManagementSection(core),
     ...getNotificationsSection(core),
     ...getOperationsSection(core),
