@@ -27,12 +27,12 @@ import type { DataFederationKibanaServices } from '../types';
 import {
   buildDatasetSettingsFromFormValues,
   type CreateDatasetFormValues,
-} from '../create_dataset_flyout/create_dataset_flyout_form_state';
-import { createDatasetFlyoutStrings } from '../create_dataset_flyout/create_dataset_flyout_i18n';
+} from './create_dataset_flyout_form_state';
+import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import {
   dataSetToFlyoutFormValues,
   emptyDatasetFlyoutFormValues,
-} from '../create_dataset_flyout/dataset_flyout_initial_values';
+} from './dataset_flyout_initial_values';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { StepAdvanced } from './step_advanced';
 import { StepDataset } from './step_dataset';

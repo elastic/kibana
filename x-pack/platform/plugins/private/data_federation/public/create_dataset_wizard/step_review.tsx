@@ -19,8 +19,8 @@ import {
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useFormContext } from 'react-hook-form';
 
-import type { CreateDatasetFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
-import { createDatasetFlyoutStrings } from '../create_dataset_flyout/create_dataset_flyout_i18n';
+import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
+import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { DatasetWizardSection } from './types';
 

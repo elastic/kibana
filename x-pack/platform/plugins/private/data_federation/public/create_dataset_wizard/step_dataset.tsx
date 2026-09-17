@@ -11,12 +11,12 @@ import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import type { DataSource } from '../../common';
-import { CreateDatasetDetailsFields } from '../create_dataset_flyout/create_dataset_details_fields';
-import type { CreateDatasetFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
+import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
+import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 import {
   CreateDatasetFormatField,
   CreateDatasetPartitionDetectionField,
-} from '../create_dataset_flyout/create_dataset_flyout_settings';
+} from './create_dataset_flyout_settings';
 import type { DatasetWizardContent } from './types';
 
 export function StepDataset({
