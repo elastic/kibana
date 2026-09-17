@@ -85,7 +85,6 @@ packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-moon @elastic/kibana-operations
-packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-perf-page-load @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
@@ -1488,7 +1487,6 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 # limits.yml files change frequently as bundle sizes shift; no owner means the
 # ops team isn't auto-requested as reviewer on every bump. A GitHub Actions
 # workflow (bundle-size-limits-comment.yml) flags increases ≥15% instead.
-packages/kbn-optimizer/limits.yml
 packages/kbn-rspack-optimizer/limits.yml
 
 # The #CC# prefix delineates Code Coverage,

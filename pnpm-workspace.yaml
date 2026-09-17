@@ -274,7 +274,6 @@ packages:
   - 'packages/kbn-manifest'
   - 'packages/kbn-mock-idp-plugin'
   - 'packages/kbn-moon'
-  - 'packages/kbn-optimizer'
   - 'packages/kbn-peggy-loader'
   - 'packages/kbn-perf-page-load'
   - 'packages/kbn-performance-testing-dataset-extractor'

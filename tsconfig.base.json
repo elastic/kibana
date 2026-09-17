@@ -1991,8 +1991,6 @@
       "@kbn/opentelemetry-attributes/*": ["./src/platform/packages/shared/kbn-opentelemetry-attributes/*"],
       "@kbn/opentelemetry-utils": ["./src/platform/packages/shared/kbn-opentelemetry-utils"],
       "@kbn/opentelemetry-utils/*": ["./src/platform/packages/shared/kbn-opentelemetry-utils/*"],
-      "@kbn/optimizer": ["./packages/kbn-optimizer"],
-      "@kbn/optimizer/*": ["./packages/kbn-optimizer/*"],
       "@kbn/optimizer-webpack-helpers": ["./src/platform/packages/private/kbn-optimizer-webpack-helpers"],
       "@kbn/optimizer-webpack-helpers/*": ["./src/platform/packages/private/kbn-optimizer-webpack-helpers/*"],
       "@kbn/osquery-io-ts-types": ["./src/platform/packages/shared/kbn-osquery-io-ts-types"],
