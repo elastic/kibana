@@ -1444,6 +1444,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         context: {
           inputs: {
             message: 'Investigate last error',
+            title: 'Investigate last error',
             context: {
               source: 'manual',
               manual_id: 'manual',
