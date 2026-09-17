@@ -79,6 +79,7 @@ export const useEntityFilterBarCounts = ({
   const { data, error } = useQuery({
     queryKey: ['entity-filter-aggregations', spaceId, view, filter],
     enabled: !!spaceId,
+    keepPreviousData: true,
     queryFn: async (): Promise<EntityFilterBarCounts> => {
       const index = getEntitiesAlias(ENTITY_LATEST, spaceId as string);
 
