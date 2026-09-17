@@ -45,10 +45,7 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
-import {
-  episodeSupportsActions,
-  episodeSupportsTimeline,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { episodeSupportsTimeline } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
@@ -461,9 +458,10 @@ const AlertEpisodesListPageContent = () => {
     () =>
       episodeActions.map((action) => ({
         id: action.id,
-        isAvailable: ({ record }: RowControlRowProps) =>
-          episodeSupportsActions(dataTableRecordToEpisode(record)) &&
-          action.isCompatible({ episodes: [dataTableRecordToEpisode(record)] }),
+        isAvailable: ({ record }: RowControlRowProps) => {
+          const episodes = [dataTableRecordToEpisode(record)];
+          return action.showWhenDisabled?.({ episodes }) || action.isCompatible({ episodes });
+        },
         render: (Control, { record }) => {
           const episodes = [dataTableRecordToEpisode(record)];
           return (

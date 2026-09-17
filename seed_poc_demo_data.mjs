@@ -118,8 +118,9 @@ async function bulkIndex(ops) {
     if (errs.length) console.warn('  bulk errors (first 5):', errs);
   }
   const created = data.items.filter((i) => (i.create ?? i.index)?.result === 'created').length;
+  const updated = data.items.filter((i) => (i.create ?? i.index)?.result === 'updated').length;
   const skipped = data.items.filter((i) => (i.create ?? i.index)?.status === 409).length;
-  console.log(`  bulk: ${created} created, ${skipped} already-existed`);
+  console.log(`  bulk: ${created} created, ${updated} updated, ${skipped} already-existed`);
 }
 
 function nowIso(offsetMs = 0) {
@@ -397,8 +398,8 @@ async function seedV1Rules() {
         groupBy: 'all',
         thresholdComparator: '>',
         threshold: [0],
-        timeWindowSize: 15,
-        timeWindowUnit: 'm',
+        timeWindowSize: 24,
+        timeWindowUnit: 'h',
         excludeHitsFromPreviousRun: false,
       },
     });

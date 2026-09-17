@@ -284,7 +284,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
   },
   {
     actionId: 'ALERTING_V2_EDIT_EPISODE_TAGS',
-    isCompatible: () => true,
+    isCompatible: (ep) => isClassicAlertActionContext(ep.source_action_context),
     execute: (eps, http, context) => updateWorkflowTags(eps, http, context),
   },
 ];

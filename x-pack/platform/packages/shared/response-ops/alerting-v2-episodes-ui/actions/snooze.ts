@@ -36,7 +36,7 @@ export const createSnoozeAction = (
   iconType: 'bellSlash',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.some((ep) =>
-      ep.source_id == null
+      ep.source_id == null && (ep.source == null || ep.source === 'internal')
         ? !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)
         : extension?.isCompatible(ep) ?? false
     ),
