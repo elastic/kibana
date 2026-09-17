@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as tracing } from '../../evals_tracing/stateful/classic.stateful.config';
 
@@ -38,6 +40,25 @@ const exporters: Array<{ http?: { url: string; headers?: Record<string, string> 
   ? JSON.parse(exporterArg.slice(exporterPrefix.length))
   : [];
 
+const sandboxConfig = {
+  'xpack.nightshift_investigations.sandbox': {
+    host: process.env.SANDBOX_API_HOST ?? 'localhost',
+    port: Number(process.env.SANDBOX_API_PORT ?? 9090),
+    api_key: sandboxKey,
+    ssl: {
+      certificate: readFileSync(certificatePath, 'utf8'),
+      key: readFileSync(keyPath, 'utf8'),
+      ...(caPath ? { certificate_authorities: readFileSync(caPath, 'utf8') } : {}),
+    },
+    telemetry_connector_id: 'nightshift-evals-telemetry',
+  },
+};
+// Keep the API key and mTLS private key out of process arguments and launcher logs.
+const configDirectory = mkdtempSync(join(tmpdir(), 'nightshift-evals-'));
+const sandboxConfigPath = join(configDirectory, 'sandbox.yml');
+process.once('exit', () => rmSync(configDirectory, { recursive: true, force: true }));
+writeFileSync(sandboxConfigPath, JSON.stringify(sandboxConfig), { mode: 0o600 });
+
 export const servers: ScoutServerConfig = {
   ...tracing,
   kbnTestServer: {
@@ -46,17 +67,7 @@ export const servers: ScoutServerConfig = {
       ...parentArgs.filter((arg) => !arg.startsWith(connectorPrefix)),
       '--xpack.nightshift_investigations.enabled=true',
       '--xpack.nightshift_investigations.cortex.enabled=false',
-      `--xpack.nightshift_investigations.sandbox=${JSON.stringify({
-        host: process.env.SANDBOX_API_HOST ?? 'localhost',
-        port: Number(process.env.SANDBOX_API_PORT ?? 9090),
-        api_key: sandboxKey,
-        ssl: {
-          certificate: readFileSync(certificatePath, 'utf8'),
-          key: readFileSync(keyPath, 'utf8'),
-          ...(caPath ? { certificate_authorities: readFileSync(caPath, 'utf8') } : {}),
-        },
-        telemetry_connector_id: 'nightshift-evals-telemetry',
-      })}`,
+      `--config=${sandboxConfigPath}`,
       `${connectorPrefix}${JSON.stringify({
         ...connectors,
         'nightshift-evals-telemetry': {
