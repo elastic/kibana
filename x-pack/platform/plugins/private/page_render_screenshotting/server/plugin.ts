@@ -12,13 +12,21 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { PluginConfig } from './config';
+import { createDispatcher } from './render/dispatcher';
 import { createGetScreenshots } from './get_screenshots';
 import type { PageRenderScreenshottingStart } from './get_screenshots';
 
 export type { PageRenderScreenshottingStart } from './get_screenshots';
 
-export class PageRenderScreenshottingPlugin implements Plugin<void, PageRenderScreenshottingStart> {
+interface StartDeps {
+  security: SecurityPluginStart;
+}
+
+export class PageRenderScreenshottingPlugin
+  implements Plugin<void, PageRenderScreenshottingStart, {}, StartDeps>
+{
   private readonly logger: Logger;
   private readonly config: PluginConfig;
 
@@ -35,7 +43,7 @@ export class PageRenderScreenshottingPlugin implements Plugin<void, PageRenderSc
     }
   }
 
-  public start(core: CoreStart): PageRenderScreenshottingStart {
+  public start(core: CoreStart, plugins: StartDeps): PageRenderScreenshottingStart {
     // Reporting builds capture URLs from `xpack.reporting.kibanaServer.*`, which defaults to
     // `server.host`/`server.port` — and `create_config.ts` silently rewrites a `0.0.0.0` host to
     // `localhost`. That is correct for the real screenshotting plugin, whose Chromium runs inside
@@ -50,12 +58,20 @@ export class PageRenderScreenshottingPlugin implements Plugin<void, PageRenderSc
       );
     }
 
+    if (this.config.enabled && !plugins.security.authc.systemIdentity) {
+      this.logger.warn(
+        'xpack.security.uiam is not configured — every render request will fail, because page-render-service authenticates the caller against UIAM.'
+      );
+    }
+
     return {
       getScreenshots: createGetScreenshots({
         config: this.config,
         logger: this.logger,
         security: core.security,
         publicBaseUrl,
+        getSystemIdentity: () => plugins.security.authc.systemIdentity,
+        dispatcher: createDispatcher(this.config.ssl),
       }),
     };
   }

@@ -15,7 +15,9 @@
       "xpack",
       "pageRenderScreenshotting"
     ],
-    "requiredPlugins": [],
+    "requiredPlugins": [
+      "security"
+    ],
     "optionalPlugins": [],
     "requiredBundles": [],
     "extraPublicDirs": []

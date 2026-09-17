@@ -24,12 +24,24 @@ const pluginConfigSchema = schema.object({
   url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
 
   /**
-   * Shared secret sent as `x-render-service-secret` on every request. Hardcoded POC default —
-   * matches the value baked into page-render-service's local `.env.example` and its Helm chart
-   * (`dev-poc-shared-secret`). Intentionally not a real secret; replace with a proper one before
-   * this goes beyond a POC.
+   * Client certificate presented to page-render-service, and the CAs used to trust it.
+   *
+   * This must be the same certificate configured under `xpack.security.uiam.ssl`: the
+   * service reads the caller's identity off this certificate and forwards it to UIAM
+   * alongside the token minted for it, and UIAM only honours the token together with
+   * the identity it was minted for.
    */
-  secret: schema.string({ defaultValue: 'dev-poc-shared-secret' }),
+  ssl: schema.object({
+    verificationMode: schema.oneOf(
+      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+      { defaultValue: 'full' }
+    ),
+    certificate: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+    ),
+  }),
 });
 
 export type PluginConfig = TypeOf<typeof pluginConfigSchema>;

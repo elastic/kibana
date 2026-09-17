@@ -9,6 +9,7 @@ import * as Rx from 'rxjs';
 import { map } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SystemIdentity } from '@kbn/security-plugin-types-server';
 import type {
   PdfScreenshotResult,
   PngScreenshotResult,
@@ -57,10 +58,18 @@ export function createGetScreenshots({
   logger,
   security,
   publicBaseUrl,
+  getSystemIdentity,
+  dispatcher,
 }: {
   config: PluginConfig;
   logger: Logger;
   security: SecurityServiceStart;
+  /** Kibana's own UIAM identity, resolved per call because the security plugin's start
+   * contract does not exist when this plugin is set up. Undefined when UIAM is not
+   * configured, which is a misconfiguration once this plugin is enabled. */
+  getSystemIdentity: () => SystemIdentity | undefined;
+  /** Presents Kibana's client certificate to the service. */
+  dispatcher?: unknown;
   /** `server.publicBaseUrl`, substituted into capture URLs so the remote render service can
    * reach Kibana. See the note in `server/plugin.ts`. */
   publicBaseUrl?: string;
@@ -97,7 +106,19 @@ export function createGetScreenshots({
 
     const result$ = renderPage(
       payload,
-      { url: config.url, secret: config.secret },
+      {
+        url: config.url,
+        createToken: async (signal) => {
+          const systemIdentity = getSystemIdentity();
+          if (!systemIdentity) {
+            throw new Error(
+              'Cannot authenticate to page-render-service: xpack.pageRenderScreenshotting is enabled but UIAM is not configured for this Kibana.'
+            );
+          }
+          return systemIdentity.createEphemeralToken(signal);
+        },
+        dispatcher,
+      },
       options.taskInstanceFields.retryAt,
       logger
     );

@@ -11,10 +11,14 @@ import type { RenderPageErrorBody, RenderPageRequest, RenderPageResult } from '.
 
 export interface PageRenderServiceConfig {
   url: string;
-  secret: string;
+  /** Mints a fresh, short-lived token for this Kibana's own UIAM identity. Called once
+   * per render request — the tokens are not refreshable and must not be persisted. */
+  createToken: (signal: AbortSignal) => Promise<string>;
+  /** Presents this Kibana's client certificate. The service reads our identity off it
+   * and forwards it to UIAM with the token; the token does not validate without it. */
+  dispatcher?: unknown;
 }
 
-const SERVICE_SECRET_HEADER = 'x-render-service-secret';
 const RENDER_PATH = '/v1/render-page';
 const DEFAULT_RETRY_AFTER_SECONDS = 30;
 // Keep enough runway before the task's own hard timeout (report:execute's queue.timeout, ~4
@@ -55,11 +59,19 @@ async function postWithRetry(
   logger: Logger
 ): Promise<RenderPageResult> {
   for (;;) {
+    // Minted inside the loop: a retry may happen minutes later, by which time the
+    // previous token could have expired.
+    const token = await config.createToken(signal);
     const response = await fetch(`${config.url}${RENDER_PATH}`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', [SERVICE_SECRET_HEADER]: config.secret },
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(payload),
       signal,
+      // @ts-expect-error Undici `fetch` supports `dispatcher`, see https://github.com/nodejs/undici/pull/1411.
+      dispatcher: config.dispatcher,
     });
 
     if (response.status === 429) {

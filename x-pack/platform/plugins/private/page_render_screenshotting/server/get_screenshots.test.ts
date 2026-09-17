@@ -43,7 +43,15 @@ function pngOptions(overrides: Partial<PngScreenshotOptions> = {}): PngScreensho
 describe('createGetScreenshots', () => {
   const logger = loggerMock.create();
   const security = securityServiceMock.createStart();
-  const config = { enabled: true, url: 'http://localhost:3001', secret: 'shh' };
+  const config = {
+    enabled: true,
+    url: 'http://localhost:3001',
+    ssl: { verificationMode: 'full' as const },
+  };
+
+  /** Kibana's own UIAM identity. Every render mints a fresh token from it. */
+  const systemIdentity = { createEphemeralToken: jest.fn(async () => 'ephemeral-token') };
+  const getSystemIdentity = () => systemIdentity;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -52,7 +60,7 @@ describe('createGetScreenshots', () => {
   it('maps a successful render to a flat PdfScreenshotResult for pdf calls', async () => {
     mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('pdf-bytes'), renderErrors: [] }));
 
-    const getScreenshots = createGetScreenshots({ config, logger, security });
+    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
     const result = await firstValueFrom(getScreenshots(pdfOptions()));
 
     expect(result).toEqual({
@@ -71,7 +79,7 @@ describe('createGetScreenshots', () => {
       })
     );
 
-    const getScreenshots = createGetScreenshots({ config, logger, security });
+    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
     const result = await firstValueFrom(getScreenshots(pngOptions()));
 
     expect(result).toEqual({
@@ -87,7 +95,7 @@ describe('createGetScreenshots', () => {
   });
 
   it('rejects expression-based (Canvas) input without calling the render service', async () => {
-    const getScreenshots = createGetScreenshots({ config, logger, security });
+    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
 
     await expect(
       firstValueFrom(getScreenshots({ ...pdfOptions(), expression: 'some canvas expression' }))
@@ -100,6 +108,7 @@ describe('createGetScreenshots', () => {
       config: { ...config, url: undefined },
       logger,
       security,
+      getSystemIdentity,
     });
 
     await expect(firstValueFrom(getScreenshots(pdfOptions()))).rejects.toThrow(/not configured/);
@@ -107,7 +116,7 @@ describe('createGetScreenshots', () => {
   });
 
   it('propagates a synchronous payload-build error (e.g. no urls) as an observable error', async () => {
-    const getScreenshots = createGetScreenshots({ config, logger, security });
+    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
 
     await expect(firstValueFrom(getScreenshots(pdfOptions({ urls: [] })))).rejects.toThrow(
       /no URLs to render/
@@ -118,7 +127,7 @@ describe('createGetScreenshots', () => {
   it('propagates a render failure (e.g. exhausted 429 retries) as an observable error', async () => {
     mockRenderPage.mockReturnValue(Rx.throwError(() => new Error('service saturated')));
 
-    const getScreenshots = createGetScreenshots({ config, logger, security });
+    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
 
     await expect(firstValueFrom(getScreenshots(pdfOptions()))).rejects.toThrow('service saturated');
   });
@@ -126,7 +135,7 @@ describe('createGetScreenshots', () => {
   it('warns and drops extra urls, still rendering the first', async () => {
     mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('pdf-bytes'), renderErrors: [] }));
 
-    const getScreenshots = createGetScreenshots({ config, logger, security });
+    const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
     await firstValueFrom(
       getScreenshots(
         pdfOptions({
@@ -141,5 +150,48 @@ describe('createGetScreenshots', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('page-render-service only supports one page per call')
     );
+  });
+
+  describe('authenticating to the service', () => {
+    it('mints a fresh token per render rather than reusing one', async () => {
+      mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('x'), renderErrors: [] }));
+      const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
+
+      await firstValueFrom(getScreenshots(pdfOptions()));
+      const { createToken } = mockRenderPage.mock.calls[0][1];
+
+      await expect(createToken(new AbortController().signal)).resolves.toBe('ephemeral-token');
+      await expect(createToken(new AbortController().signal)).resolves.toBe('ephemeral-token');
+      expect(systemIdentity.createEphemeralToken).toHaveBeenCalledTimes(2);
+    });
+
+    it("forwards the caller's abort signal, so a mint cannot outlive the render", async () => {
+      mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('x'), renderErrors: [] }));
+      const getScreenshots = createGetScreenshots({ config, logger, security, getSystemIdentity });
+
+      await firstValueFrom(getScreenshots(pdfOptions()));
+      const { createToken } = mockRenderPage.mock.calls[0][1];
+      const { signal } = new AbortController();
+      await createToken(signal);
+
+      expect(systemIdentity.createEphemeralToken).toHaveBeenCalledWith(signal);
+    });
+
+    it('fails the render when UIAM is not configured, rather than calling unauthenticated', async () => {
+      mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('x'), renderErrors: [] }));
+      const getScreenshots = createGetScreenshots({
+        config,
+        logger,
+        security,
+        getSystemIdentity: () => undefined,
+      });
+
+      await firstValueFrom(getScreenshots(pdfOptions()));
+      const { createToken } = mockRenderPage.mock.calls[0][1];
+
+      await expect(createToken(new AbortController().signal)).rejects.toThrow(
+        /UIAM is not configured/
+      );
+    });
   });
 });

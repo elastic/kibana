@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/core-security-server'
+  - '@kbn/security-plugin-types-server'
   - '@kbn/screenshotting-plugin'
   - '@kbn/screenshot-mode-plugin'
   - '@kbn/logging'
