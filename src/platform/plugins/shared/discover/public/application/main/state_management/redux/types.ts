@@ -215,6 +215,9 @@ export interface TabState extends TabItem {
     | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
     | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
 
+  // Indicates the tab was created via "+" and should not auto-fetch on init.
+  skipInitialFetch?: boolean;
+
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
@@ -270,7 +273,7 @@ export enum TabsBarVisibility {
 }
 
 export interface DiscoverInternalState {
-  initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  initializationState: { hasESData: boolean; hasDataView: boolean };
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
