@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   EuiBadge,
   EuiFilterGroup,
@@ -122,6 +122,8 @@ export const EntityFiltersBar: React.FC<Props> = ({
     [esFilter, filters]
   );
   const filterCounts = useEntityFilterBarCounts({ spaceId, view, filter: baseFilter });
+
+  // static options
   const entityTypeOptions = ENTITY_TYPE_OPTIONS.map((value) => ({
     value,
     count: filterCounts.entity_types[value] ?? 0,
@@ -137,9 +139,12 @@ export const EntityFiltersBar: React.FC<Props> = ({
     count: filterCounts.asset_criticality[value] ?? 0,
   }));
 
-  const dataSourceOptions = Object.entries(filterCounts.data_sources).map(([value, count]) => ({
+  // dynamic options
+  const seenDataSources = useRef(new Set<string>());
+  Object.keys(filterCounts.data_sources).forEach((v) => seenDataSources.current.add(v));
+  const dataSourceOptions = [...seenDataSources.current].map((value) => ({
     value,
-    count,
+    count: filterCounts.data_sources[value] ?? 0,
   }));
 
   const watchlistOptions = [...watchlistNames.entries()].map(([id, name]) => ({
