@@ -46,25 +46,27 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       const capabilities = await coreStart?.capabilities.resolveCapabilities(request, {
         capabilityPath: 'uptime.*',
       });
+      const canSave = Boolean(capabilities?.uptime?.save);
       const canRevealParams = canRevealParameterValues({
-        canSave: Boolean(capabilities?.uptime?.save),
+        canSave,
         canReadParamValues: Boolean(capabilities?.uptime?.canReadParamValues),
       });
 
-      if (canRevealParams) {
+      if (canSave) {
         // only user with write permissions can decrypt the monitor
         const monitor = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
-        const normalizedMonitor = hideParams
-          ? {
-              ...monitor.normalizedMonitor,
-              attributes: {
-                ...monitor.normalizedMonitor.attributes,
-                [ConfigKey.PARAMS]: maskMonitorParams(
-                  monitor.normalizedMonitor.attributes[ConfigKey.PARAMS]
-                ),
-              },
-            }
-          : monitor.normalizedMonitor;
+        const normalizedMonitor =
+          hideParams || !canRevealParams
+            ? {
+                ...monitor.normalizedMonitor,
+                attributes: {
+                  ...monitor.normalizedMonitor.attributes,
+                  [ConfigKey.PARAMS]: maskMonitorParams(
+                    monitor.normalizedMonitor.attributes[ConfigKey.PARAMS]
+                  ),
+                },
+              }
+            : monitor.normalizedMonitor;
         return {
           ...mapSavedObjectToMonitor({ monitor: normalizedMonitor, internal }),
           spaceId,
