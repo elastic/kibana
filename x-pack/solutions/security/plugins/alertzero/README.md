@@ -11,7 +11,7 @@ xpack.alertzero.enabled: true
 ```
 
 - **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
-- **`xpack.alertzero.ui.useMockData`** — optional presentation-source toggle (default `true`). It still feeds mock Skills / Investigations. Worker settings and Watch grouping are live either way.
+- **`xpack.alertzero.ui.useMockData`** — optional presentation-source toggle (default `false`). Set to `true` to serve the mock Investigation catalog from `@kbn/alertzero-common` instead of real data — useful for demos and UI work without a live stack. Worker settings and Watch grouping are live either way.
 
 Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space.
 
@@ -41,9 +41,9 @@ Definitions still exist in `@kbn/workflows/managed` (code registry only). Worker
 
 The only always-on cost of a soft flag is the tiny public plugin entry bundle (~page-load limit); it registers nothing when disabled.
 
-### Live mode caveats (`useMockData: false`)
+### Live data mode (default)
 
-Before enabling live projection in shared or production environments:
+Real data is served by default. Keep these in mind when running AlertZero in shared or production environments:
 
 - Watch reads require only `alertzero_read`; AlertZero owns the catalog projection and its managed definitions. Recent-run enrichment soft-fails when execution history is unavailable.
 - Settings writes require `alertzero_write`; managed install is requestless, so the AlertZero route is the authorization boundary.
@@ -114,7 +114,7 @@ OpenAPI → Zod schemas live in `@kbn/alertzero-common`. Regenerate with:
 
 ```bash
 cd x-pack/solutions/security/packages/kbn-alertzero-common
-yarn openapi:generate
+pnpm openapi:generate
 ```
 
 ## Managed workflows
