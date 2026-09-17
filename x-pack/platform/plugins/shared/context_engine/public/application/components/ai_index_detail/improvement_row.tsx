@@ -80,7 +80,7 @@ const ChangeField = ({
           size="xs"
           flush="left"
           onClick={() => setIsExpanded(!isExpanded)}
-          data-test-subj="contextImprovementShowMore"
+          data-test-subj="contextImprovementChangeFieldShowMore"
         >
           {isExpanded
             ? i18n.translate('xpack.contextEngine.aiIndexDetail.improvements.showLess', {
@@ -155,7 +155,7 @@ export const ImprovementRow = ({
           size="xs"
           flush="left"
           onClick={() => setIsExpanded(!isExpanded)}
-          data-test-subj="contextImprovementShowMore"
+          data-test-subj="contextImprovementRationaleShowMore"
         >
           {isExpanded
             ? i18n.translate('xpack.contextEngine.aiIndexDetail.improvements.showLess', {

@@ -108,7 +108,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
             <p>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.feedbackAgent.prompt', {
                 defaultMessage:
-                  'Select an analysis agent in the Improvements panel to enable "Analyze & improve".',
+                  'Enable the feedback loop in the Feedback loop panel to run "Analyze & improve" automatically.',
               })}
             </p>
           </EuiText>
