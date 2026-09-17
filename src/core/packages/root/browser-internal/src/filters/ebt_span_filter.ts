@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const ignorePaths = ['/kibana-browser'];
+import type { FilterFn, Payload } from './types';
 
-// Copied from @elastic/apm-rum/src/common/types.ts
-export type FilterFn = (payload: Payload) => Payload | boolean | void;
-export interface Payload {
-  transactions: Array<Record<string, any>>;
-  errors: Array<Record<string, any>>;
-  [key: string]: any;
-}
+const ignorePaths = ['/kibana-browser'];
 
 const hasTrackedSpan = (spans: any): boolean => {
   // Check if there is any span with a URL other than ignorePaths
