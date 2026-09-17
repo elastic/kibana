@@ -32,7 +32,7 @@ export const createGenerateConfigPrompt = ({
   schema,
   existingConfig,
   parsedExistingConfig,
-  appearanceOnly = false,
+  preserveESQL = false,
   presentationMode = 'focused',
   additionalContext,
 }: {
@@ -42,11 +42,11 @@ export const createGenerateConfigPrompt = ({
   schema: object;
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
-  appearanceOnly?: boolean;
+  preserveESQL?: boolean;
   presentationMode?: PresentationMode;
   additionalContext?: string;
 }): BaseMessageLike[] => {
-  const keepsExistingQueries = appearanceOnly && Boolean(existingConfig);
+  const keepsExistingQueries = preserveESQL && Boolean(existingConfig);
 
   const segments = [
     `You are a Kibana Lens visualization configuration expert. Generate a valid configuration for a ${chartType} visualization based on the provided schema and ES|QL query.

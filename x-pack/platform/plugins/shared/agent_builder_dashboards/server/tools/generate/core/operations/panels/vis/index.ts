@@ -53,8 +53,8 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
    * renderer.
    */
   renderer?: VisualizationRenderer;
-  /** Edit only the panel's presentation; keep its query and column bindings. */
-  appearanceOnly?: boolean;
+  /** Keep the panel's existing ES|QL query and column bindings instead of regenerating them. */
+  preserveESQL?: boolean;
   presentationMode?: PresentationMode;
 }
 
@@ -194,16 +194,16 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
       .describe(
         '(optional) Change the existing panel to this chart type. Omit it to let the visualization resolver interpret the edit using the existing configuration.'
       ),
-    appearanceOnly: z
+    preserveESQL: z
       .boolean()
       .optional()
       .describe(
-        '(optional) Set true when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds). The existing query is kept and not regenerated. Omit it when the edit changes what the panel measures.'
+        '(optional) Set true to keep the existing ES|QL query of the panel instead of regenerating it, e.g. when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds) or chart type. Omit it when the edit changes what the panel measures.'
       ),
     presentationMode: presentationModeSchema
       .optional()
       .describe(
-        'Lens only. "enhance" applies all presentation defaults, replacing custom styling. "focused" (default) changes only requested settings. Independent of appearanceOnly, so enhancement can accompany a query change.'
+        'Lens only. "enhance" applies all presentation defaults, replacing custom styling. "focused" (default) changes only requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
       ),
   });
 

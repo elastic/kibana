@@ -130,19 +130,19 @@ describe('buildLensConfig', () => {
     expect(mockedCreateGraph).not.toHaveBeenCalled();
   });
 
-  it('rejects an appearance-only edit when the existing config has no ES|QL query', async () => {
+  it('rejects preserving ES|QL when the existing config has no ES|QL query', async () => {
     await expect(
       buildLensConfig({
         nlQuery: 'hide the title',
         parsedExistingConfig: { type: SupportedChartType.XY, layers: [] },
-        appearanceOnly: true,
+        preserveESQL: true,
         modelProvider,
         logger,
         events,
         esClient,
       })
     ).rejects.toThrow(
-      'An appearance-only edit requires an existing ES|QL-backed Lens configuration'
+      'Preserving the ES|QL query requires an existing ES|QL-backed Lens configuration'
     );
     expect(invoke).not.toHaveBeenCalled();
   });
@@ -201,9 +201,9 @@ describe('buildLensConfig', () => {
   });
 
   it.each([
-    { appearanceOnly: true, presentationMode: undefined },
-    { appearanceOnly: true, presentationMode: 'enhance' as const },
-    { appearanceOnly: false, presentationMode: 'enhance' as const },
+    { preserveESQL: true, presentationMode: undefined },
+    { preserveESQL: true, presentationMode: 'enhance' as const },
+    { preserveESQL: false, presentationMode: 'enhance' as const },
   ])('keeps query resolution independent of presentation mode: %j', async (options) => {
     const existingQuery = 'FROM logs-* | STATS count = COUNT(*)';
 
@@ -224,9 +224,9 @@ describe('buildLensConfig', () => {
     });
 
     expect(invoke.mock.calls[0][0]).toMatchObject({
-      appearanceOnly: options.appearanceOnly,
+      preserveESQL: options.preserveESQL,
       presentationMode: options.presentationMode ?? 'focused',
-      esqlQuery: options.appearanceOnly ? existingQuery : '',
+      esqlQuery: options.preserveESQL ? existingQuery : '',
     });
   });
 });

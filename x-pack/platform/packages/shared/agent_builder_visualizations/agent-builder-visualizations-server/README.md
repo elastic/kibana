@@ -22,7 +22,7 @@ plugins.
 
 Lens edits accept `presentationMode: 'enhance'` to apply all chart presentation
 defaults and replace custom styling. The default mode, `'focused'`, preserves
-unrelated presentation settings. The mode is independent of `appearanceOnly`.
-Set `appearanceOnly` to keep the existing queries, or omit it to combine a query
+unrelated presentation settings. The mode is independent of `preserveESQL`.
+Set `preserveESQL` to keep the existing queries, or omit it to combine a query
 change with enhancement. The dashboard agent owns layout. The Lens author applies
 and checks chart defaults on its own.

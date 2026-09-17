@@ -38,10 +38,10 @@ export interface BuildLensConfigParams {
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
   /**
-   * Edit only the presentation of `parsedExistingConfig`. Skips query
-   * generation and keeps the existing query and column bindings.
+   * Keep the existing ES|QL query and column bindings of
+   * `parsedExistingConfig` instead of regenerating the query.
    */
-  appearanceOnly?: boolean;
+  preserveESQL?: boolean;
   presentationMode?: PresentationMode;
   modelProvider: ModelProvider;
   logger: Logger;
@@ -63,7 +63,7 @@ export const buildLensConfig = async ({
   esql,
   existingConfig,
   parsedExistingConfig = null,
-  appearanceOnly = false,
+  preserveESQL = false,
   presentationMode = 'focused',
   modelProvider,
   logger,
@@ -101,13 +101,13 @@ export const buildLensConfig = async ({
     }
   }
 
-  // An appearance-only edit reuses the existing query, which also routes the
+  // Preserving ES|QL reuses the existing query, which also routes the
   // graph straight to config generation. The graph re-pins every layer's own
   // data_source, so the first query only seeds the prompt.
-  const [existingEsql] = appearanceOnly ? getExistingEsqlQueries(parsedExistingConfig) : [];
-  if (appearanceOnly && !existingEsql) {
+  const [existingEsql] = preserveESQL ? getExistingEsqlQueries(parsedExistingConfig) : [];
+  if (preserveESQL && !existingEsql) {
     throw new Error(
-      'An appearance-only edit requires an existing ES|QL-backed Lens configuration.'
+      'Preserving the ES|QL query requires an existing ES|QL-backed Lens configuration.'
     );
   }
 
@@ -118,7 +118,7 @@ export const buildLensConfig = async ({
     schema,
     existingConfig,
     parsedExistingConfig,
-    appearanceOnly,
+    preserveESQL,
     presentationMode,
     esqlQuery: providedEsql || existingEsql || '',
     currentAttempt: 0,

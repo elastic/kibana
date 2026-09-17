@@ -21,10 +21,10 @@ export interface BuildVegaConfigParams {
   /** Existing serialized Vega spec to edit, if any. */
   existingSpec?: string;
   /**
-   * Edit only the presentation of `existingSpec`. Reuses the ES|QL query
-   * recovered from the spec instead of regenerating one.
+   * Keep the ES|QL query recovered from `existingSpec` instead of regenerating
+   * one. The edit then only re-authors the spec around it.
    */
-  appearanceOnly?: boolean;
+  preserveESQL?: boolean;
   /** Optional chart-type hint for the intended visual form (Vega authors free-form). */
   chartType?: SupportedChartType;
   modelProvider: ModelProvider;
@@ -56,7 +56,7 @@ export const buildVegaConfig = async ({
   index,
   esql,
   existingSpec,
-  appearanceOnly = false,
+  preserveESQL = false,
   chartType,
   modelProvider,
   logger,
@@ -94,9 +94,9 @@ export const buildVegaConfig = async ({
   if (existingEsql) {
     logger.debug('Recovered ES|QL from the existing Vega spec to seed this edit');
   }
-  if (appearanceOnly && !existingEsql) {
+  if (preserveESQL && !existingEsql) {
     throw new Error(
-      'An appearance-only edit requires an existing Vega spec with a recoverable ES|QL query.'
+      'Preserving the ES|QL query requires an existing Vega spec with a recoverable ES|QL query.'
     );
   }
 
@@ -108,9 +108,9 @@ export const buildVegaConfig = async ({
     existingSpec,
     existingEsql,
     chartType,
-    // An appearance-only edit reuses the recovered query as the trusted query,
+    // Preserving ES|QL reuses the recovered query as the trusted query,
     // so the graph skips regeneration and only re-authors the spec around it.
-    esqlQuery: providedEsql || (appearanceOnly ? existingEsql : '') || '',
+    esqlQuery: providedEsql || (preserveESQL ? existingEsql : '') || '',
     currentAttempt: 0,
     actions: [],
     spec: null,

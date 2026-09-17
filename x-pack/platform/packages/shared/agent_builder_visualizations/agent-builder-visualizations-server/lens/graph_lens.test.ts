@@ -390,7 +390,7 @@ describe('createVisualizationGraph', () => {
       schema: {},
       existingConfig: JSON.stringify(parsedExistingConfig),
       parsedExistingConfig,
-      appearanceOnly: true,
+      preserveESQL: true,
       presentationMode: mode,
       esqlQuery: firstQuery,
       currentAttempt: 0,

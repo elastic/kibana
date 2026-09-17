@@ -47,13 +47,13 @@ describe('visualization panel request schemas', () => {
     ).toBe(true);
   });
 
-  it.each([true, false])('accepts enhancement with appearanceOnly: %s', (appearanceOnly) => {
+  it.each([true, false])('accepts enhancement with preserveESQL: %s', (preserveESQL) => {
     const request = {
       source: 'request',
       type: 'vis',
       panelId: 'panel-1',
       query: 'Enhance this panel',
-      appearanceOnly,
+      preserveESQL,
       presentationMode: 'enhance',
     };
 

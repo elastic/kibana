@@ -194,11 +194,11 @@ describe('buildVegaConfig', () => {
       });
     });
 
-    it('reuses the recovered ES|QL as the trusted query for an appearance-only edit', async () => {
+    it('reuses the recovered ES|QL as the trusted query when preserving ES|QL', async () => {
       await buildVegaConfig({
         nlQuery: 'make the bars blue',
         existingSpec,
-        appearanceOnly: true,
+        preserveESQL: true,
         modelProvider,
         logger,
         events,
@@ -211,18 +211,18 @@ describe('buildVegaConfig', () => {
       });
     });
 
-    it('rejects an appearance-only edit when the spec has no ES|QL to recover', async () => {
+    it('rejects preserving ES|QL when the spec has no ES|QL to recover', async () => {
       await expect(
         buildVegaConfig({
           nlQuery: 'make the bars blue',
           existingSpec: JSON.stringify({ mark: 'bar', data: { values: [{ a: 1 }] } }),
-          appearanceOnly: true,
+          preserveESQL: true,
           modelProvider,
           logger,
           events,
           esClient,
         })
-      ).rejects.toThrow('An appearance-only edit requires an existing Vega spec');
+      ).rejects.toThrow('Preserving the ES|QL query requires an existing Vega spec');
       expect(invoke).not.toHaveBeenCalled();
     });
 

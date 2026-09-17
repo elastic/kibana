@@ -108,10 +108,10 @@ const VisualizationStateAnnotation = Annotation.Root({
   existingConfig: Annotation<string | undefined>(),
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
   /**
-   * Appearance-only edit. Each layer keeps its existing `data_source` instead
-   * of receiving the single resolved query.
+   * Preserve the existing ES|QL queries. Each layer keeps its existing
+   * `data_source` instead of receiving the single resolved query.
    */
-  appearanceOnly: Annotation<boolean>(),
+  preserveESQL: Annotation<boolean>(),
   presentationMode: Annotation<PresentationMode>(),
   // internal
   esqlQuery: Annotation<string>(),
@@ -228,7 +228,7 @@ export const createVisualizationGraph = async (
       schema: state.schema,
       existingConfig: state.existingConfig,
       parsedExistingConfig: state.parsedExistingConfig,
-      appearanceOnly: state.appearanceOnly,
+      preserveESQL: state.preserveESQL,
       presentationMode: state.presentationMode,
       additionalContext,
     });
@@ -241,9 +241,9 @@ export const createVisualizationGraph = async (
       const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
       // Pin the ES|QL query before config validation. ES|QL generation owns the query,
-      // and config generation only binds columns from it. An appearance-only edit keeps
+      // and config generation only binds columns from it. Preserving ES|QL keeps
       // each layer's existing data_source instead, so layers with different queries keep them.
-      const existingCarriers = state.appearanceOnly
+      const existingCarriers = state.preserveESQL
         ? getEsqlDataSourceCarriers(state.parsedExistingConfig)
         : [];
       getEsqlDataSourceCarriers(configResponse).forEach((carrier, index) => {

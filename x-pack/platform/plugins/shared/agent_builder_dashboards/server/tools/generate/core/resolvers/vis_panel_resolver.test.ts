@@ -131,7 +131,7 @@ describe('createVisPanelResolver', () => {
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'change the title',
-      appearanceOnly: true,
+      preserveESQL: true,
       presentationMode: 'enhance',
       existingPanel: {
         id: 'panel-1',
@@ -145,7 +145,7 @@ describe('createVisPanelResolver', () => {
       expect.objectContaining({
         existingConfig: JSON.stringify({ type: 'xy' }),
         parsedExistingConfig: { type: 'xy' },
-        appearanceOnly: true,
+        preserveESQL: true,
         presentationMode: 'enhance',
       })
     );
@@ -219,7 +219,7 @@ describe('createVisPanelResolver', () => {
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'make it a line chart',
-      appearanceOnly: true,
+      preserveESQL: true,
       // A stale "lens" request must be ignored: edits keep the existing renderer.
       renderer: 'lens',
       existingPanel: {
@@ -239,7 +239,7 @@ describe('createVisPanelResolver', () => {
       authoringNote: 'Changed the panel to a line chart.',
     });
     expect(mockedBuildVegaConfig).toHaveBeenCalledWith(
-      expect.objectContaining({ existingSpec, appearanceOnly: true })
+      expect.objectContaining({ existingSpec, preserveESQL: true })
     );
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
   });
@@ -253,7 +253,7 @@ describe('createVisPanelResolver', () => {
       identifier: 'panel-1',
       nlQuery: 'Enhance this panel',
       presentationMode: 'enhance',
-      appearanceOnly: true,
+      preserveESQL: true,
       existingPanel: {
         id: 'panel-1',
         type: VEGA_VIS_TYPE,

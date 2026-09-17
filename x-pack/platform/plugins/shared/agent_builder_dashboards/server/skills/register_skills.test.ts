@@ -39,7 +39,7 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Improving an Existing Dashboard (Prettify)');
     expect(skill.content).toContain('presentationMode: "enhance"');
     expect(skill.content).toContain('for every existing ES|QL Lens panel');
-    expect(skill.content).toContain('appearanceOnly: true');
+    expect(skill.content).toContain('preserveESQL: true');
     expect(skill.content).toContain(
       'a query change and presentation enhancement can share one edit'
     );

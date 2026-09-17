@@ -123,7 +123,7 @@ export const editPanelsOperation = defineOperation({
             nlQuery: panelInput.query,
             chartType: panelInput.chartType,
             esql: panelInput.esql,
-            appearanceOnly: panelInput.appearanceOnly,
+            preserveESQL: panelInput.preserveESQL,
             presentationMode: panelInput.presentationMode,
             existingPanel,
           })

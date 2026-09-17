@@ -19,7 +19,7 @@ describe('Lens config prompt', () => {
         schema: {},
         existingConfig: JSON.stringify({ type: 'xy', layers: [] }),
         presentationMode,
-        appearanceOnly: true,
+        preserveESQL: true,
       })
     );
 
@@ -75,7 +75,7 @@ describe('Lens config prompt', () => {
       chartType: SupportedChartType.Metric,
       schema: {},
       existingConfig,
-      appearanceOnly: true,
+      preserveESQL: true,
       presentationMode: 'enhance',
     });
 

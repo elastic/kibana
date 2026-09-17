@@ -1716,7 +1716,7 @@ describe('executeDashboardOperations', () => {
                 panelId: 'panel-1',
                 query: 'make this a bar chart',
                 presentationMode: 'enhance',
-                appearanceOnly: true,
+                preserveESQL: true,
               },
               {
                 source: 'request',
@@ -1724,7 +1724,7 @@ describe('executeDashboardOperations', () => {
                 panelId: 'panel-2',
                 query: 'make this a line chart',
                 presentationMode: 'enhance',
-                appearanceOnly: false,
+                preserveESQL: false,
               },
             ],
           },
@@ -1742,14 +1742,14 @@ describe('executeDashboardOperations', () => {
         expect.objectContaining({
           identifier: 'panel-1',
           presentationMode: 'enhance',
-          appearanceOnly: true,
+          preserveESQL: true,
         })
       );
       expect(resolvePanelContent).toHaveBeenCalledWith(
         expect.objectContaining({
           identifier: 'panel-2',
           presentationMode: 'enhance',
-          appearanceOnly: false,
+          preserveESQL: false,
         })
       );
 
