@@ -64,7 +64,7 @@ export const indexNdjsonEntry = async ({
         continue;
       }
       operations.push({ index: { _index: indexName } }, transformDocument(JSON.parse(line)));
-      batchBytes += line.length;
+      batchBytes += Buffer.byteLength(line, 'utf8');
       batchDocs += 1;
       if (batchBytes >= maxBulkBytes || batchDocs >= maxBulkDocs) {
         await flush();
