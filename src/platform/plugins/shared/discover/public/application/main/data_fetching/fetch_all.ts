@@ -13,6 +13,7 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DataViewSource, type EsqlSource } from '@kbn/data-source';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -31,6 +32,7 @@ import type {
   DataMsg,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
+import type { RecordsFetchResponse } from '../../types';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
@@ -49,6 +51,8 @@ export interface CommonFetchParams {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   getCurrentTab: () => TabState;
+  esqlTimeFieldName?: string;
+  fullEsqlSourcePromise?: Promise<EsqlSource>;
 }
 
 /**
@@ -76,6 +80,8 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    esqlTimeFieldName,
+    fullEsqlSourcePromise,
   } = params;
   const { data, expressions } = services;
 
@@ -102,16 +108,33 @@ export function fetchAll(
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
-    sendLoadingMsg(dataSubjects.documents$, { query });
+    sendLoadingMsg(dataSubjects.documents$, {
+      query,
+      ...(!isEsqlQuery && dataView.id ? { dataSource: new DataViewSource(dataView) } : {}),
+    });
     sendLoadingMsg(dataSubjects.totalHits$, {
       result: dataSubjects.totalHits$.getValue().result,
     });
 
-    // Start fetching all required requests
-    const response = isEsqlQuery
+    // When the full EsqlSource (with columns) resolves, update the LOADING
+    // emit so the sidebar shows the real field list while the table is still
+    // fetching.
+    if (isEsqlQuery && fullEsqlSourcePromise) {
+      fullEsqlSourcePromise
+        .then((fullSource) => {
+          if (abortController.signal.aborted) return;
+          const current = dataSubjects.documents$.getValue();
+          if (current.fetchStatus === FetchStatus.LOADING) {
+            dataSubjects.documents$.next({ ...current, dataSource: fullSource });
+          }
+        })
+        .catch(() => {});
+    }
+
+    const response: Promise<RecordsFetchResponse> = isEsqlQuery
       ? fetchEsql({
           query,
-          dataView,
+          timeFieldName: esqlTimeFieldName,
           abortSignal: abortController.signal,
           inspectorAdapters,
           data,
@@ -132,7 +155,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
+      .then(async ({ records, interceptedWarnings = [], esqlHeaderWarning, esqlColumns }) => {
         fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
         if (isEsqlQuery) {
@@ -171,10 +194,26 @@ export function fetchAll(
          */
         const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
+        // For ES|QL, ensure the PARTIAL emit carries the full EsqlSource updated
+        // with the actual query columns (correct isNull values for the sidebar).
+        // getESQLSourceInfo (LIMIT 0) always resolves before the full table fetch
+        // completes, so this await is effectively instant.
+        const baseEsqlSource = isEsqlQuery
+          ? await fullEsqlSourcePromise?.catch(() => undefined)
+          : undefined;
+        const latestEsqlSource =
+          baseEsqlSource && esqlColumns?.length
+            ? baseEsqlSource.withColumns(esqlColumns)
+            : baseEsqlSource;
+
         dataSubjects.documents$.next({
           fetchStatus,
           result: records,
-          esqlQueryColumns,
+          dataSource: isEsqlQuery
+            ? latestEsqlSource
+            : dataView.id
+            ? new DataViewSource(dataView)
+            : undefined,
           esqlHeaderWarning,
           interceptedWarnings,
           query,

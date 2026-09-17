@@ -10,7 +10,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataSource } from '@kbn/data-source';
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type {
   UnifiedHistogramBucketInterval,
@@ -24,7 +24,7 @@ import type { LensProps } from './hooks/use_lens_props';
 export interface HistogramProps {
   abortController: AbortController | undefined;
   services: UnifiedHistogramServices;
-  dataView: DataView;
+  dataSource: DataSource;
   chart: UnifiedHistogramChartContext;
   bucketInterval: UnifiedHistogramBucketInterval | undefined;
   isPlainRecord: boolean;
@@ -40,7 +40,7 @@ export interface HistogramProps {
 
 export function Histogram({
   services: { lens, uiSettings },
-  dataView,
+  dataSource,
   chart: { timeInterval },
   bucketInterval,
   isPlainRecord,
@@ -60,7 +60,7 @@ export function Histogram({
     timeRange: lensProps.timeRange!,
     timeInterval,
     isPlainRecord,
-    timeField: dataView.timeFieldName,
+    timeField: dataSource.timeFieldName,
   });
   const { attributes } = visContext;
   const { euiTheme } = useEuiTheme();

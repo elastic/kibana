@@ -25,6 +25,8 @@ dependsOn:
   - '@kbn/core-saved-objects-common'
   - '@kbn/crypto-browser'
   - '@kbn/data-view-utils'
+  - '@kbn/esql-types'
+  - '@kbn/core'
 tags:
   - shared-common
   - package

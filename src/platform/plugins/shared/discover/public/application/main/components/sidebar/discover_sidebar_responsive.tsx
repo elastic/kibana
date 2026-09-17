@@ -45,7 +45,6 @@ import {
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
   useAppStateSelector,
@@ -174,7 +173,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const chromeStyle = useObservable(services.core.chrome.getChromeStyle$(), 'classic');
-  const isEsqlMode = useIsEsqlMode();
   const {
     fieldListVariant,
     selectedDataView,
@@ -214,7 +212,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
             payload: {
-              isEsqlMode,
+              dataSource: documentState.dataSource,
             },
           });
           break;
@@ -222,10 +220,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
-              dataView: selectedDataViewRef.current,
-              fieldCounts: isEsqlMode ? EMPTY_FIELD_COUNTS : calcFieldCounts(documentState.result),
-              esqlQueryColumns: documentState.esqlQueryColumns,
-              isEsqlMode,
+              dataSource: documentState.dataSource,
+              fieldCounts:
+                documentState.dataSource?.kind === 'esql'
+                  ? EMPTY_FIELD_COUNTS
+                  : calcFieldCounts(documentState.result),
             },
           });
           break;
@@ -233,9 +232,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
-              dataView: selectedDataViewRef.current,
+              dataSource: documentState.dataSource,
               fieldCounts: EMPTY_FIELD_COUNTS,
-              isEsqlMode,
             },
           });
           break;
@@ -244,7 +242,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, isEsqlMode]);
+  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {

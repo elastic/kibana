@@ -814,7 +814,7 @@ describe('tab_state actions', () => {
       });
 
       // Transition to data view mode
-      internalState.dispatch(
+      await internalState.dispatch(
         internalStateActions.transitionFromESQLToDataView({
           tabId,
           dataView,
@@ -830,10 +830,12 @@ describe('tab_state actions', () => {
         query: '',
       });
       expect(tab.appState.columns).toEqual([]);
-      expect(tab.appState.sort).toEqual([[dataView.timeFieldName, 'desc']]);
+      // The transition resolves a DataView for the current ES|QL query ('FROM test-index'),
+      // which creates an ad-hoc DataView without a time field, so sort is empty.
+      expect(tab.appState.sort).toEqual([]);
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.DataView,
-        dataViewId: dataView.id,
+        dataViewId: 'test-index-id',
       });
       expect(getCurrentTab().appState.expandedDoc).toBeUndefined();
 

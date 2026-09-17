@@ -34,6 +34,7 @@ import {
   type CascadedDocumentsStateManager,
 } from '../../../../data_fetching/cascaded_documents_fetcher';
 import type { DiscoverServices } from '../../../../../../build_services';
+import type { DataSource } from '@kbn/data-source';
 
 jest.mock('@kbn/unified-data-table', () => ({
   ...jest.requireActual('@kbn/unified-data-table'),
@@ -69,7 +70,12 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
     toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
 
-  return new CascadedDocumentsFetcher(services, scopedProfilesManager, stateManager);
+  return new CascadedDocumentsFetcher(
+    services,
+    scopedProfilesManager,
+    stateManager,
+    new BehaviorSubject<DataSource | undefined>(undefined)
+  );
 };
 
 const renderLeafCellWithContext = ({

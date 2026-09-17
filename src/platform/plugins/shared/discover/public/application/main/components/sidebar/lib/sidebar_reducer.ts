@@ -8,7 +8,7 @@
  */
 
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import { getDataViewFieldList, getEsqlQueryFieldList } from './get_field_list';
 
 export enum DiscoverSidebarReducerActionType {
@@ -34,16 +34,14 @@ type DiscoverSidebarReducerAction =
   | {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING;
       payload: {
-        isEsqlMode: boolean;
+        dataSource: DataSource | undefined;
       };
     }
   | {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED;
       payload: {
+        dataSource: DataSource | undefined;
         fieldCounts: DiscoverSidebarReducerState['fieldCounts'];
-        esqlQueryColumns?: DatatableColumn[]; // from ES|QL searches
-        isEsqlMode: boolean;
-        dataView: DataView | null | undefined;
       };
     };
 
@@ -55,6 +53,7 @@ export enum DiscoverSidebarReducerStatus {
 
 export interface DiscoverSidebarReducerState {
   dataView: DataView | null | undefined;
+  dataSource: DataSource | undefined;
   allFields: DataViewField[] | null;
   fieldCounts: Record<string, number> | null;
   status: DiscoverSidebarReducerStatus;
@@ -63,6 +62,7 @@ export interface DiscoverSidebarReducerState {
 export function getInitialState(dataView?: DataView | null): DiscoverSidebarReducerState {
   return {
     dataView,
+    dataSource: undefined,
     allFields: null,
     fieldCounts: null,
     status: DiscoverSidebarReducerStatus.INITIAL,
@@ -77,39 +77,66 @@ export function discoverSidebarReducer(
     case DiscoverSidebarReducerActionType.RESET:
       return getInitialState(action.payload.dataView);
     case DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED:
-      return state.dataView === action.payload.dataView
-        ? state // already updated in `DOCUMENTS_LOADED`
-        : {
-            ...state,
-            dataView: action.payload.dataView,
-            fieldCounts: null,
-            allFields: null,
-            status:
-              state.status === DiscoverSidebarReducerStatus.COMPLETED
-                ? DiscoverSidebarReducerStatus.INITIAL
-                : state.status,
-          };
-    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING:
-      return {
-        ...state,
-        fieldCounts: null,
-        allFields: action.payload.isEsqlMode ? null : state.allFields,
-        status: DiscoverSidebarReducerStatus.PROCESSING,
-      };
-    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED:
-      const mappedAndUnmappedFields = action.payload.isEsqlMode
-        ? getEsqlQueryFieldList(action.payload.esqlQueryColumns)
-        : getDataViewFieldList(action.payload.dataView, action.payload.fieldCounts);
+      if (state.dataView === action.payload.dataView) {
+        return state; // already updated in `DOCUMENTS_LOADED`
+      }
+      if (state.dataSource?.kind === 'esql') {
+        // In ES|QL mode the DataView switch is synthetic (registered after fetch).
+        // The field list was just populated from the query result, so keep it as-is.
+        return { ...state, dataView: action.payload.dataView };
+      }
       return {
         ...state,
         dataView: action.payload.dataView,
-        fieldCounts: action.payload.fieldCounts,
+        fieldCounts: null,
+        allFields: null,
+        status:
+          state.status === DiscoverSidebarReducerStatus.COMPLETED
+            ? DiscoverSidebarReducerStatus.INITIAL
+            : state.status,
+      };
+    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING: {
+      const wasEsql = state.dataSource?.kind === 'esql';
+      const { dataSource } = action.payload;
+      let allFields: DataViewField[] | null;
+      if (dataSource?.kind === 'esql') {
+        allFields = getEsqlQueryFieldList(dataSource.resultColumns);
+      } else if (dataSource && !wasEsql) {
+        allFields = state.allFields;
+      } else {
+        allFields = null;
+      }
+      return {
+        ...state,
+        dataSource,
+        fieldCounts: null,
+        allFields,
+        status: DiscoverSidebarReducerStatus.PROCESSING,
+      };
+    }
+    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED: {
+      const { dataSource, fieldCounts } = action.payload;
+      const mappedAndUnmappedFields =
+        dataSource?.kind === 'esql'
+          ? getEsqlQueryFieldList(dataSource.resultColumns)
+          : getDataViewFieldList(
+              dataSource?.getDataView() ?? state.dataView ?? undefined,
+              fieldCounts
+            );
+      const nextDataView =
+        dataSource?.kind === 'index-pattern' ? dataSource.getDataView() : state.dataView;
+      return {
+        ...state,
+        dataView: nextDataView,
+        dataSource,
+        fieldCounts,
         allFields: mappedAndUnmappedFields,
         status:
           mappedAndUnmappedFields === null
             ? DiscoverSidebarReducerStatus.PROCESSING
             : DiscoverSidebarReducerStatus.COMPLETED,
       };
+    }
   }
 
   return state;

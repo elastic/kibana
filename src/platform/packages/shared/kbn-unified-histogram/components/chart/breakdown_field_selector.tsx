@@ -18,7 +18,9 @@ import {
 } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import { isESQLColumnGroupable } from '@kbn/esql-utils';
-import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
+import { DataViewSource } from '@kbn/data-source';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
@@ -81,7 +83,7 @@ const FieldNameTruncate = ({ text }: { text: string }) => (
 );
 
 export interface BreakdownFieldSelectorProps {
-  dataView: DataView;
+  dataSource: DataSource;
   breakdown: UnifiedHistogramBreakdownContext;
   esqlColumns?: DatatableColumn[];
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
@@ -89,7 +91,7 @@ export interface BreakdownFieldSelectorProps {
   fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
-const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
+const mapToDropdownFields = (dataSource: DataSource, esqlColumns?: DatatableColumn[]) => {
   if (esqlColumns) {
     return (
       // filter out unsupported field types and counter time series metrics
@@ -99,18 +101,25 @@ const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]
     );
   }
 
-  return dataView.fields.filter(fieldSupportsBreakdown);
+  if (dataSource instanceof DataViewSource) {
+    return dataSource.getDataView().fields.filter(fieldSupportsBreakdown);
+  }
+
+  return [];
 };
 
 export const BreakdownFieldSelector = ({
-  dataView,
+  dataSource,
   breakdown,
   esqlColumns,
   onBreakdownFieldChange,
   recommendedFields,
   fieldsMetadata,
 }: BreakdownFieldSelectorProps) => {
-  const fields = useMemo(() => mapToDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
+  const fields = useMemo(
+    () => mapToDropdownFields(dataSource, esqlColumns),
+    [dataSource, esqlColumns]
+  );
   const fieldNames = useMemo(() => fields.map((f) => f.name), [fields]);
   const ecsFieldNames = useEcsFieldNames(fieldNames, fieldsMetadata);
 

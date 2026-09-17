@@ -19,13 +19,15 @@ import {
   getInitialState,
 } from './sidebar_reducer';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 describe('sidebar reducer', function () {
   it('should set an initial state', function () {
     expect(getInitialState(dataView)).toEqual(
       expect.objectContaining({
         dataView,
+        dataSource: undefined,
         allFields: null,
         fieldCounts: null,
         status: DiscoverSidebarReducerStatus.INITIAL,
@@ -38,29 +40,80 @@ describe('sidebar reducer', function () {
       ...getInitialState(dataView),
       allFields: [dataView.fields[0]],
     };
+
+    const dataViewSource = new DataViewSource(dataView);
+
+    // DataView → DataView: keep allFields to avoid a loading flash
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        isEsqlMode: false,
+        dataSource: dataViewSource,
       },
     });
     expect(resultForDocuments).toEqual(
       expect.objectContaining({
         dataView,
+        dataSource: dataViewSource,
         allFields: state.allFields,
         fieldCounts: null,
         status: DiscoverSidebarReducerStatus.PROCESSING,
       })
     );
+
+    // No source yet (first load): clear allFields
+    const resultForNoSource = discoverSidebarReducer(state, {
+      type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+      payload: {
+        dataSource: undefined,
+      },
+    });
+    expect(resultForNoSource).toEqual(
+      expect.objectContaining({
+        dataView,
+        dataSource: undefined,
+        allFields: null,
+        fieldCounts: null,
+        status: DiscoverSidebarReducerStatus.PROCESSING,
+      })
+    );
+
+    // ES|QL fetch: populate allFields immediately from resultColumns
+    const esqlSource = createMockEsqlSource(
+      [],
+      [{ id: '1', name: 'AVG(bytes)', meta: { type: 'number' } }]
+    );
     const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        isEsqlMode: true,
+        dataSource: esqlSource,
       },
     });
     expect(resultForEsqlQuery).toEqual(
       expect.objectContaining({
         dataView,
+        dataSource: esqlSource,
+        allFields: expect.arrayContaining([expect.objectContaining({ name: 'AVG(bytes)' })]),
+        fieldCounts: null,
+        status: DiscoverSidebarReducerStatus.PROCESSING,
+      })
+    );
+
+    // ES|QL → DataView transition: clear allFields
+    const esqlState: DiscoverSidebarReducerState = {
+      ...state,
+      dataSource: esqlSource,
+      allFields: [dataView.fields[0]], // stale ES|QL columns
+    };
+    const resultForEsqlToDataView = discoverSidebarReducer(esqlState, {
+      type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+      payload: {
+        dataSource: dataViewSource,
+      },
+    });
+    expect(resultForEsqlToDataView).toEqual(
+      expect.objectContaining({
+        dataView,
+        dataSource: dataViewSource,
         allFields: null,
         fieldCounts: null,
         status: DiscoverSidebarReducerStatus.PROCESSING,
@@ -76,13 +129,14 @@ describe('sidebar reducer', function () {
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isEsqlMode: false,
-        dataView: stubDataViewWithoutTimeField,
+        dataSource: new DataViewSource(stubDataViewWithoutTimeField),
         fieldCounts,
       },
     });
+    const dataViewSource = new DataViewSource(stubDataViewWithoutTimeField);
     expect(resultForDocuments).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
+      dataSource: dataViewSource,
       allFields: [
         ...stubDataViewWithoutTimeField.fields,
         // merging in unmapped fields
@@ -97,34 +151,32 @@ describe('sidebar reducer', function () {
       status: DiscoverSidebarReducerStatus.COMPLETED,
     });
 
+    const esqlSource = createMockEsqlSource(
+      [],
+      [
+        {
+          id: '1',
+          name: 'text1',
+          meta: { type: 'number' },
+          isNull: true,
+        },
+        {
+          id: '2',
+          name: 'text2',
+          meta: { type: 'string', esType: 'keyword' },
+        },
+      ]
+    );
     const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isEsqlMode: true,
-        dataView: stubDataViewWithoutTimeField,
+        dataSource: esqlSource,
         fieldCounts: {},
-        esqlQueryColumns: [
-          {
-            id: '1',
-            name: 'text1',
-            meta: {
-              type: 'number',
-            },
-            isNull: true,
-          },
-          {
-            id: '2',
-            name: 'text2',
-            meta: {
-              type: 'string',
-              esType: 'keyword',
-            },
-          },
-        ] as DatatableColumn[],
       },
     });
     expect(resultForEsqlQuery).toStrictEqual({
-      dataView: stubDataViewWithoutTimeField,
+      dataView,
+      dataSource: esqlSource,
       allFields: [
         new DataViewField({
           name: 'text1',
@@ -149,16 +201,17 @@ describe('sidebar reducer', function () {
       status: DiscoverSidebarReducerStatus.COMPLETED,
     });
 
+    const dataViewSource2 = new DataViewSource(stubDataViewWithoutTimeField);
     const resultWhileLoading = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isEsqlMode: false,
-        dataView: stubDataViewWithoutTimeField,
+        dataSource: dataViewSource2,
         fieldCounts: null,
       },
     });
     expect(resultWhileLoading).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
+      dataSource: dataViewSource2,
       allFields: null,
       fieldCounts: null,
       status: DiscoverSidebarReducerStatus.PROCESSING,
@@ -183,6 +236,7 @@ describe('sidebar reducer', function () {
     });
     expect(resultForAnotherDataView).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
+      dataSource: undefined,
       allFields: null,
       fieldCounts: null,
       status: DiscoverSidebarReducerStatus.INITIAL,
@@ -202,6 +256,7 @@ describe('sidebar reducer', function () {
     );
     expect(resultForAnotherDataViewAfterProcessing).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
+      dataSource: undefined,
       allFields: null,
       fieldCounts: null,
       status: DiscoverSidebarReducerStatus.PROCESSING,
@@ -221,9 +276,34 @@ describe('sidebar reducer', function () {
     );
     expect(resultForAnotherDataViewAfterCompleted).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
+      dataSource: undefined,
       allFields: null,
       fieldCounts: null,
       status: DiscoverSidebarReducerStatus.INITIAL,
+    });
+
+    // In ES|QL mode the DataView change (synthetic DataView registered after fetch) should not
+    // clear the field list — it was just populated by DOCUMENTS_LOADED from the query result.
+    const esqlSource = createMockEsqlSource(
+      [],
+      [{ id: '1', name: 'col1', meta: { type: 'number' } }]
+    );
+    const esqlAllFields = [dataView.fields[0]];
+    const esqlState: DiscoverSidebarReducerState = {
+      ...state,
+      dataSource: esqlSource,
+      allFields: esqlAllFields,
+      status: DiscoverSidebarReducerStatus.COMPLETED,
+    };
+    const resultForEsqlDataViewSwitch = discoverSidebarReducer(esqlState, {
+      type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
+      payload: {
+        dataView: stubDataViewWithoutTimeField,
+      },
+    });
+    expect(resultForEsqlDataViewSwitch).toStrictEqual({
+      ...esqlState,
+      dataView: stubDataViewWithoutTimeField,
     });
   });
 
@@ -243,6 +323,7 @@ describe('sidebar reducer', function () {
     expect(resultForDocuments).toEqual(
       expect.objectContaining({
         dataView: stubDataViewWithoutTimeField,
+        dataSource: undefined,
         allFields: null,
         fieldCounts: null,
         status: DiscoverSidebarReducerStatus.INITIAL,

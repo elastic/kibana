@@ -35,9 +35,10 @@ import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/in
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
+import { createEsqlSource } from '../application/main/data_fetching/create_esql_source';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
@@ -46,6 +47,7 @@ import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { columnsToColumnsMeta } from '../utils/columns_to_columns_meta';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -149,6 +151,7 @@ export function initializeFetch({
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
+  let cachedEsqlSource: { esql: string; source: EsqlSource } | undefined;
 
   const observables = [fetch$(api), api.savedSearch$, api.dataViews$, refreshTrigger$] as const;
 
@@ -210,15 +213,29 @@ export function initializeFetch({
           if (
             esqlMode &&
             searchSourceQuery &&
+            isOfAggregateQueryType(searchSourceQuery) &&
             (!fetchContext.query || isOfQueryType(fetchContext.query))
           ) {
+            if (!cachedEsqlSource || cachedEsqlSource.esql !== searchSourceQuery.esql) {
+              cachedEsqlSource = {
+                esql: searchSourceQuery.esql,
+                source: await createEsqlSource({
+                  esql: searchSourceQuery.esql,
+                  http: discoverServices.http,
+                  projectRoutingFallback: fetchContext.projectRouting,
+                  timeRange: getTimeRangeFromFetchContext(fetchContext),
+                  esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
+                }),
+              };
+            }
+            const embeddableEsqlSource = cachedEsqlSource.source;
             // Request ES|QL data
             const result = await fetchEsql({
               query: searchSourceQuery,
               timeRange: getTimeRangeFromFetchContext(fetchContext),
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
-              dataView,
+              timeFieldName: embeddableEsqlSource.timeFieldName,
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,
@@ -230,9 +247,7 @@ export function initializeFetch({
               esqlApproximation: fetchContext.isApproximate,
             });
             return {
-              columnsMeta: result.esqlQueryColumns
-                ? getTextBasedColumnsMeta(result.esqlQueryColumns)
-                : undefined,
+              columnsMeta: columnsToColumnsMeta(embeddableEsqlSource.getColumns()),
               rows: result.records,
               hitCount: result.records.length,
               approximationApplied: result.approximationApplied,

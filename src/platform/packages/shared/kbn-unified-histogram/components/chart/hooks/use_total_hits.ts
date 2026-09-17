@@ -8,12 +8,12 @@
  */
 
 import { isRunningResponse } from '@kbn/data-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { MutableRefObject } from 'react';
 import { useEffect, useRef, useCallback } from 'react';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import { useStableCallback } from '@kbn/react-hooks';
+import { DataViewSource } from '@kbn/data-source';
 import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetch$Arguments,
@@ -43,7 +43,7 @@ export const useTotalHits = ({
     fetchTotalHits({
       services,
       abortController,
-      dataView: fetchParams.dataView,
+      dataSource: fetchParams.dataSource,
       searchSessionId: fetchParams.searchSessionId,
       requestAdapter: fetchParams.requestAdapter,
       hits,
@@ -76,7 +76,7 @@ export const useTotalHits = ({
 const fetchTotalHits = async ({
   services,
   abortController,
-  dataView,
+  dataSource,
   searchSessionId,
   requestAdapter,
   hits,
@@ -88,7 +88,7 @@ const fetchTotalHits = async ({
   isPlainRecord,
 }: Pick<
   UnifiedHistogramFetch$Arguments['fetchParams'],
-  'dataView' | 'searchSessionId' | 'requestAdapter' | 'filters' | 'query' | 'timeRange'
+  'dataSource' | 'searchSessionId' | 'requestAdapter' | 'filters' | 'query' | 'timeRange'
 > & {
   services: UnifiedHistogramServices;
   abortController: MutableRefObject<AbortController | undefined>;
@@ -117,7 +117,7 @@ const fetchTotalHits = async ({
   const response = await fetchTotalHitsSearchSource({
     services,
     abortController: newAbortController,
-    dataView,
+    dataSource,
     searchSessionId,
     requestAdapter,
     filters,
@@ -135,7 +135,7 @@ const fetchTotalHits = async ({
 const fetchTotalHitsSearchSource = async ({
   services: { data },
   abortController,
-  dataView,
+  dataSource,
   searchSessionId,
   requestAdapter,
   filters: originalFilters,
@@ -143,11 +143,16 @@ const fetchTotalHitsSearchSource = async ({
   timeRange,
 }: Pick<
   UnifiedHistogramFetch$Arguments['fetchParams'],
-  'dataView' | 'searchSessionId' | 'requestAdapter' | 'filters' | 'query' | 'timeRange'
+  'dataSource' | 'searchSessionId' | 'requestAdapter' | 'filters' | 'query' | 'timeRange'
 > & {
   services: UnifiedHistogramServices;
   abortController: AbortController;
 }) => {
+  if (!(dataSource instanceof DataViewSource)) {
+    return undefined;
+  }
+
+  const dataView = dataSource.getDataView();
   const searchSource = data.search.searchSource.createEmpty();
 
   searchSource
@@ -158,7 +163,7 @@ const fetchTotalHitsSearchSource = async ({
 
   let filters = originalFilters;
 
-  if (dataView.type === DataViewType.ROLLUP) {
+  if (dataSource.isRollup()) {
     // We treat that data view as "normal" even if it was a rollup data view,
     // since the rollup endpoint does not support querying individual documents, but we
     // can get them from the regular _search API that will be used if the data view

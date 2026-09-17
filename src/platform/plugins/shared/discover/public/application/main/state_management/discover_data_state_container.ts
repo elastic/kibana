@@ -21,7 +21,6 @@ import {
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -33,16 +32,21 @@ import {
   getChartHidden,
   getTableHidden,
   getSidebarHidden,
-  getEsqlDataView,
 } from '@kbn/discover-utils';
+import type { DataSource, EsqlSource } from '@kbn/data-source';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import {
+  getESQLStatsQueryMeta,
+  getESQLTimeField,
+  getProjectRoutingFromEsqlQuery,
+} from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
+import { createEsqlSource } from '../data_fetching/create_esql_source';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getProfileAppStateDefaults } from './utils/profile_app_state_defaults';
@@ -79,7 +83,7 @@ export interface DataMainMsg extends DataMsg {
 
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
-  esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
+  dataSource?: DataSource;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
 }
@@ -240,6 +244,8 @@ export function getDataStateContainer({
     dataSubjects,
     getCurrentTab,
     injectCurrentTab,
+    dataSourceService: services.dataSourceService,
+    dataViews: services.dataViews,
   });
 
   // The main subscription to handle state changes
@@ -293,10 +299,42 @@ export function getDataStateContainer({
             appState,
             globalState,
           } = tabState;
-          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
-            selectTabRuntimeState(runtimeStateManager, currentTabId);
+          const {
+            scopedProfilesManager$,
+            scopedEbtManager$,
+            currentDataView$,
+            currentDataSource$,
+          } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
+          let esqlTimeFieldName: string | undefined;
+          let fullEsqlSourcePromise: Promise<EsqlSource> | undefined;
+
+          if (isOfAggregateQueryType(appState.query)) {
+            const esql = appState.query.esql;
+            const projectRoutingFallback = services.cps?.cpsManager?.getProjectRouting();
+            const projectRouting =
+              getProjectRoutingFromEsqlQuery(esql) ?? projectRoutingFallback ?? undefined;
+
+            esqlTimeFieldName = await getESQLTimeField({
+              query: esql,
+              http: services.http,
+              projectRouting,
+            });
+
+            fullEsqlSourcePromise = createEsqlSource({
+              esql,
+              http: services.http,
+              projectRoutingFallback,
+              timeRange: timefilter.getTime(),
+              esqlVariables: getCurrentTab().esqlVariables ?? undefined,
+              timeFieldName: esqlTimeFieldName,
+            });
+
+            fullEsqlSourcePromise
+              .then((fullSource) => currentDataSource$.next(fullSource))
+              .catch(() => {});
+          }
 
           let searchSessionId: string;
           let isSearchSessionRestored: boolean;
@@ -327,6 +365,8 @@ export function getDataStateContainer({
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,
+            esqlTimeFieldName,
+            fullEsqlSourcePromise,
           };
 
           cancel(AbortReason.REPLACED);
@@ -476,18 +516,66 @@ export function getDataStateContainer({
           }
 
           abortController = new AbortController();
+          const fetchAbortController = abortController;
 
           const query = getCurrentTab().appState.query;
           const isEsqlQuery = isOfAggregateQueryType(query);
-          const latestFetchDetails: DiscoverLatestFetchDetails = {
-            abortController,
-          };
 
-          // Trigger chart fetching after the pre fetch state has been updated
-          // to ensure state values that would affect data fetching are set
-          if (!isEsqlQuery) {
-            // trigger in parallel with the main request for Classic mode
-            fetchChart$.next(latestFetchDetails);
+          // Trigger chart fetching in parallel with the main request.
+          // For ES|QL, wait for fullEsqlSourcePromise so currentDataSource$ is
+          // already populated when the histogram reads it. For non-ES|QL, trigger immediately.
+          if (isEsqlQuery && fullEsqlSourcePromise) {
+            fullEsqlSourcePromise
+              .then(() => {
+                if (!fetchAbortController.signal.aborted) {
+                  fetchChart$.next({ abortController: fetchAbortController });
+                }
+              })
+              .catch(() => {
+                if (!fetchAbortController.signal.aborted) {
+                  fetchChart$.next({ abortController: fetchAbortController });
+                }
+              });
+          } else {
+            fetchChart$.next({ abortController });
+          }
+
+          // Cascade groups are derived purely from the query structure — update them synchronously
+          // before fetchAll fires so they're already committed when main$ reaches COMPLETE.
+          if (isEsqlQuery && services.discoverFeatureFlags.getCascadeLayoutEnabled()) {
+            const { availableCascadeGroups, selectedCascadeGroups } =
+              getCurrentTab().cascadedDocumentsState;
+            const newAvailableGroups = getESQLStatsQueryMeta(query.esql).groupByFields.map(
+              (group) => group.field
+            );
+            const haveAvailableGroupsChanged = !isEqual(
+              sortBy(availableCascadeGroups),
+              sortBy(newAvailableGroups)
+            );
+            const newSelectedGroups = haveAvailableGroupsChanged
+              ? newAvailableGroups.length > 0
+                ? [newAvailableGroups[0]]
+                : []
+              : selectedCascadeGroups;
+            internalState.dispatch(
+              injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+                cascadedDocumentsState: {
+                  ...getCurrentTab().cascadedDocumentsState,
+                  availableCascadeGroups: newAvailableGroups,
+                  selectedCascadeGroups: newSelectedGroups,
+                },
+              })
+            );
+          } else if (!isEsqlQuery) {
+            internalState.dispatch(
+              injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+                cascadedDocumentsState: {
+                  ...getCurrentTab().cascadedDocumentsState,
+                  availableCascadeGroups: [],
+                  selectedCascadeGroups: [],
+                },
+              })
+            );
           }
 
           const prevAutoRefreshDone = autoRefreshDone;
@@ -502,64 +590,17 @@ export function getDataStateContainer({
             reset: options.reset,
             abortController,
             onFetchRecordsComplete: async () => {
-              if (isEsqlQuery && !abortController.signal.aborted) {
-                // defer triggering chart fetching until after main request completes for ES|QL mode
-                fetchChart$.next(latestFetchDetails);
-              }
-
-              // Update cascaded documents state based on the fetched query,
-              // defaulting to the first available group whenever the available groups change
-              if (isEsqlQuery && services.discoverFeatureFlags.getCascadeLayoutEnabled()) {
-                const { availableCascadeGroups, selectedCascadeGroups } =
-                  getCurrentTab().cascadedDocumentsState;
-
-                const newAvailableGroups = getESQLStatsQueryMeta(query.esql).groupByFields.map(
-                  (group) => group.field
-                );
-
-                const haveAvilableGroupsChanged = !isEqual(
-                  sortBy(availableCascadeGroups),
-                  sortBy(newAvailableGroups)
-                );
-
-                const newSelectedGroups = haveAvilableGroupsChanged
-                  ? newAvailableGroups.length > 0
-                    ? [newAvailableGroups[0]]
-                    : []
-                  : selectedCascadeGroups;
-
-                internalState.dispatch(
-                  injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
-                    cascadedDocumentsState: {
-                      ...getCurrentTab().cascadedDocumentsState,
-                      availableCascadeGroups: newAvailableGroups,
-                      selectedCascadeGroups: newSelectedGroups,
-                    },
-                  })
-                );
-              } else {
-                internalState.dispatch(
-                  injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
-                    cascadedDocumentsState: {
-                      ...getCurrentTab().cascadedDocumentsState,
-                      availableCascadeGroups: [],
-                      selectedCascadeGroups: [],
-                    },
-                  })
-                );
-              }
-
               const { profileAppStateDefaults: currentProfileAppStateDefaults } = getCurrentTab();
 
               if (currentProfileAppStateDefaults.resetId !== profileAppStateDefaults.resetId) {
                 return;
               }
 
-              const { esqlQueryColumns } = dataSubjects.documents$.getValue();
+              const { dataSource } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = resolvedProfileAppStateDefaults?.getPostFetchState({
                 defaultColumns,
-                esqlQueryColumns,
+                esqlQueryColumns: dataSource?.getColumns(),
               });
 
               if (postFetchStateUpdate) {
@@ -613,21 +654,7 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async () => {
-    const query = getCurrentTab().appState.query;
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
-    const currentDataView = currentDataView$.getValue();
-
-    if (isOfAggregateQueryType(query)) {
-      const nextDataView = await getEsqlDataView(query, currentDataView, services);
-      if (nextDataView !== currentDataView) {
-        internalState.dispatch(
-          injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })
-        );
-      }
-    }
-
     refetch$.next(undefined);
-
     return refetch$;
   };
 

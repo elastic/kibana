@@ -37,6 +37,12 @@ export interface QueryParams {
   columns?: DatatableColumn[];
   columnsMap?: Record<string, DatatableColumn>;
   timeRange?: TimeRange;
+  /**
+   * Overrides `dataView.timeFieldName` for ES|QL mode. `EsqlSource` always carries the
+   * correct time field derived from the current query, whereas the DataView in the
+   * histogram may be stale after a query change.
+   */
+  timeFieldName?: string;
 }
 
 export const exportVisContext = (

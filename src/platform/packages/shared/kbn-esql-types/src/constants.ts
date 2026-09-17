@@ -13,6 +13,7 @@ export const JOIN_INDICES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/join
 export const TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE =
   '/internal/esql/autocomplete/timeseries/indices';
 export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield';
+export const SOURCE_INFO_ROUTE = '/internal/esql/source_info';
 export const VIEWS_ROUTE = '/internal/esql/views';
 export const DATASETS_ROUTE = '/internal/esql/datasets';
 export const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';

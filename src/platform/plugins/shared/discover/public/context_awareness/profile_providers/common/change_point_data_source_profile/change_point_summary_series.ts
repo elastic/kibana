@@ -154,11 +154,13 @@ const loadLineSeries = async ({
   }
 
   const timeRange = getSummarySeriesTimeRange(fetchParams.timeRange, earliestAnnotationMs);
-  const timeFilter = getTime(fetchParams.dataView, timeRange);
+  const timeFilter = getTime(undefined, timeRange, {
+    fieldName: fetchParams.dataSource.timeFieldName,
+  });
   let filter: ReturnType<typeof buildEsQuery> | undefined;
   try {
     filter = buildEsQuery(
-      fetchParams.dataView,
+      undefined,
       [],
       [...(fetchParams.filters ?? []), ...(timeFilter ? [timeFilter] : [])]
     );

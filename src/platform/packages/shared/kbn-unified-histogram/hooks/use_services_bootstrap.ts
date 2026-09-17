@@ -95,7 +95,7 @@ export const useServicesBootstrap = (
 
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: async (params) => {
-      const nextFetchParams = processFetchParams({
+      const { fetchParams: nextFetchParams, lensDataView } = await processFetchParams({
         params,
         services,
         initialBreakdownField,
@@ -109,17 +109,21 @@ export const useServicesBootstrap = (
         });
       }
       let updatedLensVisServiceState: LensVisServiceState | undefined;
-      if (updatedLensVisService && enableLensVisService) {
+      if (updatedLensVisService && enableLensVisService && lensDataView) {
         updatedLensVisServiceState = updatedLensVisService.update({
           externalVisContext: nextFetchParams.externalVisContext,
           queryParams: {
-            dataView: nextFetchParams.dataView,
+            dataView: lensDataView,
             query: nextFetchParams.query,
             filters: nextFetchParams.filters,
             timeRange: nextFetchParams.timeRange,
             isPlainRecord: nextFetchParams.isESQLQuery,
             columns: nextFetchParams.columns,
             columnsMap: nextFetchParams.columnsMap,
+            timeFieldName:
+              nextFetchParams.dataSource.kind === 'esql'
+                ? nextFetchParams.dataSource.timeFieldName
+                : undefined,
           },
           timeInterval:
             !nextFetchParams.isTimeBased && !nextFetchParams.isESQLQuery

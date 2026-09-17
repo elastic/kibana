@@ -27,6 +27,7 @@ import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -45,7 +46,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   type InitialUnifiedHistogramLayoutProps,
   internalStateActions,
-  useCurrentDataView,
+  useCurrentDataSource,
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
@@ -198,7 +199,7 @@ export const useDiscoverHistogram = (
     searchSessionId,
   } = requestParams;
 
-  const dataView = useCurrentDataView();
+  const currentDataSource = useCurrentDataSource();
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
@@ -222,7 +223,7 @@ export const useDiscoverHistogram = (
     return {
       searchSessionId,
       requestAdapter: inspectorAdapters.requests,
-      dataView,
+      dataSource: currentDataSource,
       query,
       filters,
       timeRange,
@@ -240,7 +241,7 @@ export const useDiscoverHistogram = (
     breakdownField,
     timeInterval,
     currentTabControlState,
-    dataView,
+    currentDataSource,
     esqlVariables,
     esqlApproximation,
     filters,
@@ -258,8 +259,13 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
+      const dataSourceForColumns =
+        isEsqlMode && currentDataSource?.kind === 'esql'
+          ? (currentDataSource as EsqlSource)
+          : undefined;
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
+        currentDataSource: dataSourceForColumns,
         isEsqlMode,
       });
 
@@ -471,30 +477,37 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 
 function getUnifiedHistogramTableForEsql({
   documentsValue,
+  currentDataSource,
   isEsqlMode,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
+  currentDataSource: EsqlSource | undefined;
   isEsqlMode: boolean;
 }) {
-  if (
-    !isEsqlMode ||
-    !documentsValue?.result ||
-    ![FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus)
-  ) {
+  if (!isEsqlMode || !currentDataSource) {
     return {
       table: undefined,
       esqlQueryColumns: EMPTY_ESQL_COLUMNS,
     };
   }
 
-  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
-  return {
-    table: {
-      type: 'datatable' as const,
-      rows: documentsValue.result.map((r) => r.raw),
-      columns: esqlQueryColumns,
-      meta: { type: ESQL_TABLE_TYPE },
-    },
-    esqlQueryColumns,
-  };
+  // EsqlSource has columns from its eager LIMIT 0 query — no need to wait for documents.
+  const esqlQueryColumns = [...currentDataSource.resultColumns];
+
+  // Provide a pre-fetched data table only when documents are already available,
+  // so Lens can reuse the rows for suggestion enrichment without an extra request.
+  const isDocumentsComplete =
+    documentsValue?.result &&
+    [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus);
+
+  const table = isDocumentsComplete
+    ? {
+        type: 'datatable' as const,
+        rows: documentsValue!.result!.map((r) => r.raw),
+        columns: esqlQueryColumns,
+        meta: { type: ESQL_TABLE_TYPE },
+      }
+    : undefined;
+
+  return { table, esqlQueryColumns };
 }

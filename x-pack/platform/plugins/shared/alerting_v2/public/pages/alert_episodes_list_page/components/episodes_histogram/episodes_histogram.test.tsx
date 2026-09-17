@@ -50,6 +50,7 @@ const mockServices = {
 } as any;
 
 const mockDataView = {
+  id: 'mock-data-view-id',
   fields: [],
 } as any;
 
