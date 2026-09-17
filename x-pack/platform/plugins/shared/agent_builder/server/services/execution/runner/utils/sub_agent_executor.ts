@@ -8,8 +8,9 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SubAgentExecutor } from '@kbn/agent-builder-server';
 import { AgentExecutionMode, createNonInteractiveConfig } from '@kbn/agent-builder-common';
-import type { InteractivityConfig } from '@kbn/agent-builder-common';
+import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import { unionBy } from 'lodash';
 
 export const createSubAgentExecutor = ({
   request,
@@ -23,14 +24,22 @@ export const createSubAgentExecutor = ({
   projectRouting?: string;
   interactivity: InteractivityConfig;
 }): SubAgentExecutor => {
-  const subAgentInteractivity = createNonInteractiveConfig(interactivity.auto_approved_apis);
+  const inheritedApis = interactivity.auto_approved_apis;
+  const subAgentInteractivity = createNonInteractiveConfig(inheritedApis);
+
+  const interactivityWith = (autoApprovedApis?: AutoApprovedApi[]): InteractivityConfig =>
+    autoApprovedApis?.length
+      ? createNonInteractiveConfig(
+          unionBy(inheritedApis ?? [], autoApprovedApis, ({ target, api }) => `${target}:${api}`)
+        )
+      : subAgentInteractivity;
 
   return {
     executeSubAgent: async (params) => {
       const executionService = getExecutionService();
       return executionService.executeAgent({
         mode: AgentExecutionMode.standalone,
-        interactive: subAgentInteractivity,
+        interactive: interactivityWith(params.autoApprovedApis),
         request,
         params: {
           agentId: params.agentId,
@@ -47,7 +56,7 @@ export const createSubAgentExecutor = ({
       const executionService = getExecutionService();
       return executionService.executeAgent({
         mode: AgentExecutionMode.conversation,
-        interactive: subAgentInteractivity,
+        interactive: interactivityWith(params.autoApprovedApis),
         request,
         params: {
           agentId: params.agentId,
