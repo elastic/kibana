@@ -7,12 +7,16 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InvestigationStatus } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import { installDeductiveInvestigationAgent } from '../lib/install_deductive_investigation_agent';
 import type {
   FindInvestigationsResult,
   InvestigationAttributes,
@@ -34,9 +38,18 @@ jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('../lib/install_deductive_investigation_agent', () => ({
+  installDeductiveInvestigationAgent: jest.fn().mockResolvedValue(undefined),
+}));
+
 const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
   typeof installInvestigationAgent
 >;
+
+const installDeductiveInvestigationAgentMock =
+  installDeductiveInvestigationAgent as jest.MockedFunction<
+    typeof installDeductiveInvestigationAgent
+  >;
 
 const SPACE_ID = 'test-space';
 
@@ -127,6 +140,7 @@ const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
 beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
+  installDeductiveInvestigationAgentMock.mockResolvedValue(undefined);
   investigationQuotaCallback.mockResolvedValue({ allowed: true });
   repository = createMockRepository();
 });
@@ -421,6 +435,156 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
     expect(result).toEqual({ investigation_id: 'exec-123' });
     expect(investigationQuotaCallback).not.toHaveBeenCalled();
+  });
+
+  it('starts manual runs on the deductive investigation workflow', async () => {
+    const deductiveWorkflow = {
+      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    };
+    mockManagement.getWorkflow.mockResolvedValue(deductiveWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    const result = await makeClient().start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: 'Why did payment timeouts increase?',
+    });
+
+    expect(mockManagement.getWorkflow).toHaveBeenCalledWith(
+      DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      SPACE_ID
+    );
+    // The deductive workflow calls its own agent, so the pre-install must follow the split.
+    expect(installDeductiveInvestigationAgentMock).toHaveBeenCalledWith({
+      agentBuilder: mockAgentBuilder,
+      spaceId: SPACE_ID,
+    });
+    expect(installInvestigationAgentMock).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID }),
+      SPACE_ID,
+      expect.objectContaining({
+        message: 'Why did payment timeouts increase?',
+        context: expect.objectContaining({ source: 'manual', manual_id: 'manual' }),
+      }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+    expect(result).toEqual({ investigation_id: 'exec-manual' });
+  });
+
+  it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: '  Why did payment\n  timeouts increase?  ',
+    });
+
+    // The workflow context feeds ensureOrCreate(), the record write feeds the list immediately;
+    // both have to carry the same summary or the headline changes when the workflow catches up.
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({
+        context: expect.objectContaining({ summary: 'Why did payment timeouts increase?' }),
+      }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attributes: expect.objectContaining({
+          subject_summary: 'Why did payment timeouts increase?',
+        }),
+      })
+    );
+  });
+
+  it('truncates a long prompt rather than storing it whole as the headline', async () => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: 'a'.repeat(500),
+    });
+
+    const { context } = mockManagement.runWorkflow.mock.calls[0][2] as {
+      context: { summary: string };
+    };
+    expect(context.summary).toHaveLength(200);
+    expect(context.summary.endsWith('…')).toBe(true);
+  });
+
+  it('keeps an explicit subject summary over the prompt', async () => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual', summary: 'Checkout latency' },
+      trigger_type: 'manual',
+      message: 'Why did payment timeouts increase?',
+    });
+
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({
+        context: expect.objectContaining({ summary: 'Checkout latency' }),
+      }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+  });
+
+  it('leaves a non-manual subject without a summary alone', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-sig');
+
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'event-1' },
+      trigger_type: 'manual',
+      message: 'Why did payment timeouts increase?',
+    });
+
+    const { context } = mockManagement.runWorkflow.mock.calls[0][2] as {
+      context: Record<string, unknown>;
+    };
+    expect(context).not.toHaveProperty('summary');
+  });
+
+  it('keeps significant event runs on the significant events investigation workflow', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-sig');
+
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'event-1' },
+      trigger_type: 'manual',
+    });
+
+    expect(mockManagement.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID);
   });
 
   it('persists an explicit trigger_type into the workflow context', async () => {
@@ -1148,6 +1312,36 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       InvestigationNotFoundError
     );
     expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('accepts a manual execution of the deductive investigation workflow', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeEnsureExecution({
+        workflowId: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+        originManagedWorkflowId: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+        context: {
+          inputs: {
+            message: 'Investigate last error',
+            context: {
+              source: 'manual',
+              manual_id: 'manual',
+              trigger_type: 'manual',
+            },
+          },
+        },
+      })
+    );
+
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: EXECUTION_ID,
+        attributes: expect.objectContaining({
+          subject_type: 'manual',
+          subject_id: 'manual',
+        }),
+      })
+    );
   });
 
   it('throws InvestigationNotFoundError for an execution of an unrelated workflow', async () => {

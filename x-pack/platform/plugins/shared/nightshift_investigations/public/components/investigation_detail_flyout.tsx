@@ -27,24 +27,46 @@ import {
   type InvestigationDiscoverParams,
 } from '@kbn/investigation-output';
 import type { InvestigationState } from '@kbn/significant-events-schema';
-import type { GetInvestigationResponse } from '../../common';
+import {
+  DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
+  type GetInvestigationResponse,
+} from '../../common';
 import { InvestigationRunStatusBadge } from './investigation_run_status_badge';
 import { formatDate, formatDuration } from './utils';
 
 /**
  * Bridges `GetInvestigationResponse` (where `summary` and `hypotheses` are optional —
- * they may not yet exist mid-run) to `InvestigationState` (which requires both).
- * Defaults are safe: an empty summary shows nothing; empty hypotheses render nothing.
+ * they may not yet exist mid-run) to `InvestigationState` (which requires both), filling
+ * the gaps from the live progress snapshot while the agent is still streaming.
+ *
+ * The record is only written once the run ends, so mid-run every field falls through to
+ * `progress`; once persisted, the record wins so a late-arriving snapshot can't overwrite
+ * the final result. Defaults are safe: an empty summary shows nothing; empty hypotheses
+ * render nothing.
  */
-function toInvestigationState(inv: GetInvestigationResponse): InvestigationState {
+function toInvestigationState(
+  inv: GetInvestigationResponse,
+  progress?: InvestigationState
+): InvestigationState {
   return {
-    summary: inv.summary ?? '',
-    hypotheses: inv.hypotheses ?? [],
-    conclusion: inv.conclusion,
-    recommendations: inv.recommendations,
-    blind_spots: inv.blind_spots,
+    summary: inv.summary ?? progress?.summary ?? '',
+    hypotheses: inv.hypotheses ?? progress?.hypotheses ?? [],
+    conclusion: inv.conclusion ?? progress?.conclusion,
+    recommendations: inv.recommendations ?? progress?.recommendations,
+    blind_spots: inv.blind_spots ?? progress?.blind_spots,
   };
 }
+
+const isInvestigationRunning = (inv: GetInvestigationResponse): boolean =>
+  inv.status === 'pending' || inv.status === 'running';
+
+/**
+ * Whether the subject points at something worth showing. A manual run is defined by its prompt,
+ * not by an entity, so when the caller named no subject the placeholder id would render against
+ * its own type as "manual — manual" — and the prompt is already the flyout's headline.
+ */
+const hasSubjectWorthShowing = (inv: GetInvestigationResponse): boolean =>
+  !(inv.subject.type === 'manual' && inv.subject.id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID);
 
 export interface InvestigationDetailFlyoutProps {
   investigation: GetInvestigationResponse | null;
@@ -59,6 +81,12 @@ export interface InvestigationDetailFlyoutProps {
    * When absent, evidence items render as plain text with no link.
    */
   getQueryHref?: (params: InvestigationDiscoverParams) => string | undefined;
+  /**
+   * Optional: latest snapshot streamed by the running agent. Fills in summary, hypotheses
+   * and conclusion before the workflow persists them, so a live run shows its progress
+   * instead of an empty body.
+   */
+  progress?: InvestigationState;
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }): React.ReactElement {
@@ -82,6 +110,7 @@ export function InvestigationDetailFlyout({
   flyoutMenuProps,
   onClickCapture,
   getQueryHref,
+  progress,
 }: InvestigationDetailFlyoutProps): React.ReactElement {
   const primaryText = investigation
     ? getPrimaryText(investigation)
@@ -117,11 +146,14 @@ export function InvestigationDetailFlyout({
       return null;
     }
 
-    const invState = toInvestigationState(investigation);
+    const invState = toInvestigationState(investigation, progress);
+    const isRunning = isInvestigationRunning(investigation);
+    const hasFindings = Boolean(invState.summary) || invState.hypotheses.length > 0;
+    const hasSubject = hasSubjectWorthShowing(investigation);
 
     return (
       <>
-        {investigation.summary && (
+        {invState.summary && (
           <>
             <SectionTitle>
               {i18n.translate('xpack.nightshiftInvestigations.flyout.summaryTitle', {
@@ -130,36 +162,63 @@ export function InvestigationDetailFlyout({
             </SectionTitle>
             <EuiSpacer size="s" />
             <EuiText size="s">
-              <p>{investigation.summary}</p>
+              <p>{invState.summary}</p>
             </EuiText>
             <EuiSpacer size="l" />
           </>
         )}
 
-        <SectionTitle>
-          {i18n.translate('xpack.nightshiftInvestigations.flyout.subjectTitle', {
-            defaultMessage: 'Subject',
-          })}
-        </SectionTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          <p>
-            <span>{investigation.subject.type}</span>
-            {' — '}
-            <span
-              className="eui-textTruncate"
-              title={investigation.subject.id}
-              css={css`
-                display: inline-block;
-                max-width: 100%;
-                vertical-align: bottom;
-              `}
+        {isRunning && !hasFindings && (
+          <>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+              data-test-subj="nightshiftInvestigationDetailFlyoutProgressPending"
             >
-              {investigation.subject.id}
-            </span>
-          </p>
-        </EuiText>
-        <EuiSpacer size="l" />
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.nightshiftInvestigations.flyout.investigatingLabel', {
+                    defaultMessage: 'Investigating…',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {hasSubject && (
+          <>
+            <SectionTitle>
+              {i18n.translate('xpack.nightshiftInvestigations.flyout.subjectTitle', {
+                defaultMessage: 'Subject',
+              })}
+            </SectionTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <span>{investigation.subject.type}</span>
+                {' — '}
+                <span
+                  className="eui-textTruncate"
+                  title={investigation.subject.id}
+                  css={css`
+                    display: inline-block;
+                    max-width: 100%;
+                    vertical-align: bottom;
+                  `}
+                >
+                  {investigation.subject.id}
+                </span>
+              </p>
+            </EuiText>
+            <EuiSpacer size="l" />
+          </>
+        )}
 
         {invState.hypotheses.length > 0 && (
           <>
@@ -180,7 +239,8 @@ export function InvestigationDetailFlyout({
           </>
         )}
 
-        <FinalResults state={invState} />
+        {/* A mid-run conclusion is still a draft, so it is held back until the run ends. */}
+        {!isRunning && <FinalResults state={invState} />}
 
         <EuiSpacer size="l" />
         <SectionTitle>

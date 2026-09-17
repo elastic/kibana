@@ -20,6 +20,7 @@ import {
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { KiVerificationSummary } from '../ki_verification';
+import { WORKFLOW_VERIFIER_ID_PREFIX } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
 import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 
@@ -117,20 +118,30 @@ export const withKiWriteTelemetry = async <Output extends { id: string }>({
 export const withKiVerificationTelemetry = async ({
   analyticsService,
   logger,
+  workflowId,
+  aiIndexId,
   run,
 }: {
   analyticsService: ContextEngineAnalyticsService;
   logger: Logger;
+  workflowId: string;
+  aiIndexId?: string;
   run: () => Promise<KiVerificationSummary>;
 }): Promise<KiVerificationSummary> => {
   try {
     const summary = await run();
     const failures = summary.results.filter((result) => !result.passed);
+    const failedWorkflowVerifierCount = failures.filter(({ verifier }) =>
+      verifier.startsWith(WORKFLOW_VERIFIER_ID_PREFIX)
+    ).length;
     analyticsService.reportKiVerification({
       outcome: 'success',
       passed: summary.passed,
       verifiersRun: summary.results.length,
-      failedVerifierIds: failures.map(({ verifier }) => verifier),
+      failedVerifierIds: [...new Set(failures.map(({ verifier }) => verifier))],
+      failedWorkflowVerifierCount,
+      workflowId,
+      aiIndexId,
     });
     if (summary.passed) {
       logger.debug(`KI verification passed (verifiers run: ${summary.results.length})`);
@@ -145,6 +156,7 @@ export const withKiVerificationTelemetry = async ({
     const errorType = aborted ? undefined : errorTypeForTelemetry(error);
     analyticsService.reportKiVerification({
       outcome: aborted ? 'aborted' : 'failure',
+      workflowId,
       errorType,
     });
     logger.debug(aborted ? 'KI verification aborted' : `KI verification errored: ${errorType}`);
