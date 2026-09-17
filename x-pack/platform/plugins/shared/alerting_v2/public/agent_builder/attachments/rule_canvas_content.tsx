@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import {
   ActionButtonType,
   type AttachmentRenderProps,
@@ -15,15 +15,17 @@ import {
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
-import { RuleProvider } from '../../components/rule_details/rule_context';
 import {
-  RuleHeaderDescription,
-  RuleTagsList,
-} from '../../components/rule_details/rule_summary_header';
-import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
+  RuleSummaryAboutSection,
+  RuleSummaryActionPoliciesSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+  RuleSummaryInvestigationSection,
+} from '../../components/rule/rule_summary';
 import { paths } from '../../constants';
-import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
+import { RulesApi } from '../../services/rules_api';
 import type { RuleAttachment } from './rule_attachment_definition';
+import { RuleQueryPreviewSection } from './rule_query_preview_section';
 
 export interface RuleCanvasContentProps
   extends AttachmentRenderProps<RuleAttachment>,
@@ -41,6 +43,10 @@ export const RuleCanvasContent = ({
 
   const { data, origin: savedObjectId } = attachment;
   const isPersisted = isPersistedSavedObject(savedObjectId);
+  const summaryRule = useMemo(
+    () => ({ ...data, id: isPersisted ? savedObjectId : undefined }),
+    [data, isPersisted, savedObjectId]
+  );
 
   const [mounted, setMounted] = React.useState(false);
 
@@ -63,8 +69,10 @@ export const RuleCanvasContent = ({
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
-            await rulesApi.upsertRule(data.id!, buildRulePayload(data));
-            await updateOrigin(data.id!);
+            const savedRule = data.id
+              ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
+              : await rulesApi.createRule(buildRulePayload(data));
+            await updateOrigin(savedRule.id);
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
                 defaultMessage: 'Rule "{name}" created',
@@ -122,23 +130,15 @@ export const RuleCanvasContent = ({
   ]);
 
   return (
-    <RuleProvider rule={data as unknown as RuleApiResponse}>
-      <EuiPanel paddingSize="l" hasShadow={false}>
-        {data.metadata.description && (
-          <>
-            <RuleHeaderDescription />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {data.metadata.tags && data.metadata.tags.length > 0 && (
-          <>
-            <RuleTagsList />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <RuleSidebar showQueryPreview />
-      </EuiPanel>
-    </RuleProvider>
+    <EuiPanel paddingSize="l" hasShadow={false}>
+      <RuleSummaryBody rule={summaryRule}>
+        <RuleSummaryAboutSection />
+        <RuleSummaryInvestigationSection />
+        <RuleQueryPreviewSection />
+        <RuleSummaryActionPoliciesSection />
+        <RuleSummaryArtifactsSection />
+      </RuleSummaryBody>
+    </EuiPanel>
   );
 };
 

@@ -10,10 +10,12 @@ import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { RuleCanvasContent } from './rule_canvas_content';
 
-const mockUpsertRule = jest.fn().mockResolvedValue({});
+const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
+const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
 const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
+let capturedSummaryRule: Record<string, unknown> = {};
 
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
@@ -27,21 +29,29 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
-    return { upsertRule: mockUpsertRule };
+    return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
   },
 }));
 
-jest.mock('../../components/rule_details/rule_context', () => ({
-  RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('../../components/rule/rule_summary', () => ({
+  RuleSummaryBody: ({
+    rule,
+    children,
+  }: {
+    rule: Record<string, unknown>;
+    children: React.ReactNode;
+  }) => {
+    capturedSummaryRule = rule;
+    return <div data-test-subj="mockRuleSummaryBody">{children}</div>;
+  },
+  RuleSummaryAboutSection: () => <div data-test-subj="mockAboutSection" />,
+  RuleSummaryInvestigationSection: () => <div data-test-subj="mockInvestigationSection" />,
+  RuleSummaryActionPoliciesSection: () => <div data-test-subj="mockActionPoliciesSection" />,
+  RuleSummaryArtifactsSection: () => <div data-test-subj="mockArtifactsSection" />,
 }));
 
-jest.mock('../../components/rule_details/rule_summary_header', () => ({
-  RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
-  RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
-}));
-
-jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
-  RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
+jest.mock('./rule_query_preview_section', () => ({
+  RuleQueryPreviewSection: () => <div data-test-subj="mockQueryPreviewSection" />,
 }));
 
 jest.mock('../../services/rules_api', () => ({
@@ -103,17 +113,31 @@ const getLastRegisteredButtons = (registerActionButtons: jest.Mock) => {
 describe('RuleCanvasContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedSummaryRule = {};
   });
 
   describe('rendering', () => {
-    it('renders the RuleSidebar', () => {
+    it('renders the Agent Builder summary composition', () => {
       const { getByTestId } = renderCanvas();
-      expect(getByTestId('mockRuleSidebar')).toBeDefined();
+
+      expect(getByTestId('mockRuleSummaryBody')).toBeDefined();
+      expect(getByTestId('mockAboutSection')).toBeDefined();
+      expect(getByTestId('mockInvestigationSection')).toBeDefined();
+      expect(getByTestId('mockQueryPreviewSection')).toBeDefined();
+      expect(getByTestId('mockActionPoliciesSection')).toBeDefined();
+      expect(getByTestId('mockArtifactsSection')).toBeDefined();
     });
 
-    it('renders the RuleHeaderDescription', () => {
-      const { getByTestId } = renderCanvas();
-      expect(getByTestId('mockRuleHeaderDescription')).toBeDefined();
+    it('does not expose a proposed data id as a persisted summary id', () => {
+      renderCanvas({ dataId: 'proposed-rule-id' });
+
+      expect(capturedSummaryRule.id).toBeUndefined();
+    });
+
+    it('uses the attachment origin as the persisted summary id', () => {
+      renderCanvas({ origin: 'persisted-rule-id', dataId: 'stale-data-id' });
+
+      expect(capturedSummaryRule.id).toBe('persisted-rule-id');
     });
   });
 
@@ -147,6 +171,19 @@ describe('RuleCanvasContent', () => {
       );
       expect(updateOrigin).toHaveBeenCalledWith('pre-assigned-id');
       expect(mockAddSuccess).toHaveBeenCalled();
+    });
+
+    it('creates a rule and stores its generated id when the proposal has no id', async () => {
+      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const { registerActionButtons } = renderCanvas({}, { updateOrigin });
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      const createButton = buttons.find((button) => button.label === 'Create rule')!;
+      await createButton.handler();
+
+      expect(mockCreateRule).toHaveBeenCalledWith(expect.objectContaining({ kind: 'signal' }));
+      expect(mockUpsertRule).not.toHaveBeenCalled();
+      expect(updateOrigin).toHaveBeenCalledWith('generated-rule-id');
     });
   });
 
