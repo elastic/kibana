@@ -33,7 +33,7 @@ import { initialData, useGetCases } from '../../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useCasesConfig } from '../../../common/lib/kibana';
-import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../../utils/permissions';
+import { getAllPermissionsExceptFrom } from '../../../utils/permissions';
 import { useIsLoadingCases } from '../../all_cases/use_is_loading_cases';
 import { useAllCasesState } from '../../all_cases/use_all_cases_state';
 import { useAvailableCasesOwners } from '../../app/use_available_owners';
@@ -152,7 +152,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       setSelectedCases(data.cases);
     }, [data.cases]);
 
-    const isSelectable = !isReadOnlyPermissions(permissions);
+    const isSelectable =
+      permissions.update || permissions.delete || permissions.reopenCase || permissions.assign;
 
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
