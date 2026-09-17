@@ -5,14 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFieldText, EuiFormRow, EuiSelect, EuiTextArea, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiSuperSelect,
+  EuiTextArea,
+  useEuiTheme,
+  type EuiSuperSelectOption,
+} from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { DataSource } from '../../common';
-import { validateIndexNameRules } from '../../common';
+import type { DataSource, DataSourceWithSecrets } from '../../common';
+import { DATA_SOURCE_TYPES_TO_ICONS, validateIndexNameRules } from '../../common';
+import { CreateDataSourceFlyout } from '../create_data_source_flyout';
+import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
+import type { DataFederationKibanaServices } from '../types';
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 
@@ -21,6 +35,22 @@ const trimRequired =
   (value: string): true | string =>
     value?.trim() ? true : message;
 
+const CONNECT_NEW_DATA_SOURCE = '__connect_new_data_source__';
+
+const dataSourceOptionDisplay = (dataSource: DataSource) => {
+  const iconType = DATA_SOURCE_TYPES_TO_ICONS[dataSource.type];
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      {iconType ? (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={iconType} size="m" aria-hidden={true} />
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>{dataSource.name}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export interface CreateDatasetDetailsFieldsProps {
   control: Control<CreateDatasetFormValues>;
   dataSources: DataSource[];
@@ -28,6 +58,7 @@ export interface CreateDatasetDetailsFieldsProps {
   isEditMode?: boolean;
   initialIdNormalized?: string;
   autoFocusName?: boolean;
+  loadDataSources: () => Promise<void>;
 }
 
 export function CreateDatasetDetailsFields({
@@ -37,8 +68,13 @@ export function CreateDatasetDetailsFields({
   isEditMode = false,
   initialIdNormalized = '',
   autoFocusName = false,
+  loadDataSources,
 }: CreateDatasetDetailsFieldsProps) {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { dataSourcesClient },
+  } = useKibana<DataFederationKibanaServices>();
+  const [isCreateDataSourceOpen, setIsCreateDataSourceOpen] = useState(false);
   const { field: nameField, fieldState: nameFieldState } = useController({
     name: 'name',
     control,
@@ -89,25 +125,76 @@ export function CreateDatasetDetailsFields({
   });
 
   const isDataSourceEmpty = !dataSourceIdField.value;
+  const existingDataSourceNames = useMemo(
+    () => dataSources.map((dataSource) => dataSource.name),
+    [dataSources]
+  );
 
-  const dataSourceOptions = useMemo(() => {
-    const placeholder = {
-      value: '',
-      text: createDatasetFlyoutStrings.dataSourcePlaceholder(),
+  const dataSourceOptions = useMemo((): Array<EuiSuperSelectOption<string>> => {
+    const fromSources = dataSources.map((dataSource) => {
+      const display = dataSourceOptionDisplay(dataSource);
+      return {
+        value: dataSource.name,
+        inputDisplay: display,
+        dropdownDisplay: display,
+        'data-test-subj': `createDatasetFlyoutDataSource-${dataSource.name}`,
+      };
+    });
+    const connectLabel = createDatasetFlyoutStrings.connectNewDataSourceDropDownOptionLabel();
+    const connectOption = {
+      value: CONNECT_NEW_DATA_SOURCE,
+      inputDisplay: connectLabel,
+      dropdownDisplay: (
+        <div
+          css={css({
+            marginBlockStart: `calc(${euiTheme.size.s} * -1)`,
+            marginInline: `calc(${euiTheme.size.m} * -1)`,
+            paddingBlockStart: euiTheme.size.m,
+            paddingInline: euiTheme.size.m,
+            borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+            textAlign: 'center',
+            color: euiTheme.colors.textPrimary,
+            fontWeight: euiTheme.font.weight.medium,
+          })}
+        >
+          {connectLabel}
+        </div>
+      ),
+      'data-test-subj': 'createDatasetFlyoutDataSource-connectNew',
+      showIndicator: false,
     };
-    const fromSources = dataSources.map((ds) => ({
-      value: ds.name,
-      text: ds.name,
-    }));
-    return [placeholder, ...fromSources];
-  }, [dataSources]);
+    return [...fromSources, connectOption];
+  }, [dataSources, euiTheme]);
 
-  const dataSourceSelectCss = css({
-    color: isDataSourceEmpty ? euiTheme.colors.textSubdued : undefined,
-    '& option': {
-      color: euiTheme.colors.textParagraph,
+  const onDataSourceChange = useCallback(
+    (value: string) => {
+      if (value === CONNECT_NEW_DATA_SOURCE) {
+        setIsCreateDataSourceOpen(true);
+        return;
+      }
+      dataSourceIdField.onChange(value);
     },
-  });
+    [dataSourceIdField]
+  );
+
+  const onCloseCreateDataSource = useCallback(() => {
+    setIsCreateDataSourceOpen(false);
+  }, []);
+
+  const onSaveCreateDataSource = useCallback(
+    async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
+      try {
+        await dataSourcesClient.add(dataSource);
+        await loadDataSources();
+        dataSourceIdField.onChange(dataSource.name);
+        setIsCreateDataSourceOpen(false);
+        return null;
+      } catch (error) {
+        return getFlyoutSaveErrorMessage(error);
+      }
+    },
+    [dataSourceIdField, dataSourcesClient, loadDataSources]
+  );
 
   return (
     <>
@@ -117,18 +204,17 @@ export function CreateDatasetDetailsFields({
         isInvalid={Boolean(dataSourceFieldState.error)}
         error={dataSourceFieldState.error?.message}
       >
-        <EuiSelect
+        <EuiSuperSelect
           options={dataSourceOptions}
           data-test-subj="createDatasetFlyoutDataSource"
           fullWidth
-          aria-label={createDatasetFlyoutStrings.dataSourceLabel()}
-          value={dataSourceIdField.value}
-          onChange={(e) => dataSourceIdField.onChange(e.target.value)}
           name={dataSourceIdField.name}
-          inputRef={dataSourceIdField.ref}
-          disabled={dataSources.length === 0}
+          aria-label={createDatasetFlyoutStrings.dataSourceLabel()}
+          valueOfSelected={isDataSourceEmpty ? undefined : dataSourceIdField.value}
+          onChange={onDataSourceChange}
+          onBlur={dataSourceIdField.onBlur}
+          placeholder={createDatasetFlyoutStrings.dataSourcePlaceholder()}
           isInvalid={Boolean(dataSourceFieldState.error)}
-          css={dataSourceSelectCss}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -184,6 +270,13 @@ export function CreateDatasetDetailsFields({
           inputRef={resourceField.ref}
         />
       </EuiFormRow>
+      {isCreateDataSourceOpen ? (
+        <CreateDataSourceFlyout
+          existingDataSourceNames={existingDataSourceNames}
+          onClose={onCloseCreateDataSource}
+          onSave={onSaveCreateDataSource}
+        />
+      ) : null}
     </>
   );
 }

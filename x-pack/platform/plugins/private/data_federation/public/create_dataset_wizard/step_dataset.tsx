@@ -22,9 +22,15 @@ import type { DatasetWizardContent } from './types';
 export function StepDataset({
   dataSources,
   existingDataSetNames,
+  loadDataSources,
+  isEditMode = false,
+  initialIdNormalized = '',
 }: {
   dataSources: DataSource[];
   existingDataSetNames: readonly string[];
+  loadDataSources: () => Promise<void>;
+  isEditMode?: boolean;
+  initialIdNormalized?: string;
 }) {
   const { control, getValues, trigger } = useFormContext<CreateDatasetFormValues>();
   const { updateContent } = Forms.useContent<DatasetWizardContent, 'dataset'>('dataset');
@@ -63,7 +69,10 @@ export function StepDataset({
         control={control}
         dataSources={dataSources}
         existingDataSetNames={existingDataSetNames}
-        autoFocusName={true}
+        isEditMode={isEditMode}
+        initialIdNormalized={initialIdNormalized}
+        autoFocusName={!isEditMode}
+        loadDataSources={loadDataSources}
       />
       <EuiSpacer size="m" />
       <CreateDatasetFormatField control={control} />

@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../common';
-import { CREATE_DATASET_PATH } from './app_paths';
+import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
@@ -37,7 +37,6 @@ export interface DatasetsTableProps {
   isCreateDisabled: boolean;
   onSelectionChange: (next: DataSetListRow[]) => void;
   onDataSourceFilterChange: (next: string) => void;
-  onEdit: (item: DataSetListRow) => void;
   onDelete: (item: DataSetListRow) => void;
   onDeleteSelected: (items: DataSetListRow[]) => void;
 }
@@ -50,7 +49,6 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   isCreateDisabled,
   onSelectionChange,
   onDataSourceFilterChange,
-  onEdit,
   onDelete,
   onDeleteSelected,
 }) => {
@@ -122,7 +120,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
             icon: 'pencil',
             type: 'icon',
             onClick: (item) => {
-              onEdit(item);
+              history.push(getEditDatasetPath(item.name));
             },
             'data-test-subj': 'dataSetsSetsEditButton',
           },
@@ -140,7 +138,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         ],
       },
     ],
-    [onDelete, onEdit]
+    [history, onDelete]
   );
 
   return (

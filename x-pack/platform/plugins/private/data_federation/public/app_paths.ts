@@ -7,4 +7,11 @@
 
 export const DATASETS_PATH = '/datasets' as const;
 export const CREATE_DATASET_PATH = '/datasets/create' as const;
+export const EDIT_DATASET_PATH = '/datasets/edit/:datasetName' as const;
 export const DATA_SOURCES_PATH = '/data_sources' as const;
+
+export const getEditDatasetPath = (datasetName: string): string =>
+  `/datasets/edit/${encodeURIComponent(datasetName)}`;
+
+export const isDatasetWizardPath = (pathname: string): boolean =>
+  pathname === CREATE_DATASET_PATH || pathname.startsWith(`${DATASETS_PATH}/edit/`);

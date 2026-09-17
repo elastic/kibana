@@ -7,24 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-/** Localized strings for the create / edit dataset flyout. */
+/** Localized strings for dataset create/edit forms. */
 export const createDatasetFlyoutStrings = {
-  createTitle: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.createTitle', {
-      defaultMessage: 'Add dataset',
-    }),
-
-  createDescription: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.createDescription', {
-      defaultMessage:
-        'Select the data within a connected data source you want to query with ES|QL.',
-    }),
-
-  editTitle: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.editTitle', {
-      defaultMessage: 'Edit dataset',
-    }),
-
   editTitleWithId: (id: string) =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.editTitleWithId', {
       defaultMessage: 'Edit dataset: {id}',
@@ -81,6 +65,14 @@ export const createDatasetFlyoutStrings = {
     i18n.translate('xpack.dataFederation.createDatasetFlyout.descriptionPlaceholder', {
       defaultMessage: 'Type text',
     }),
+
+  connectNewDataSourceDropDownOptionLabel: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.connectNewDataSourceDropDownOptionLabel',
+      {
+        defaultMessage: 'Connect new data source',
+      }
+    ),
 
   dataSourceLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.dataSourceLabel', {

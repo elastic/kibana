@@ -13,7 +13,7 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import type { DataSetWithName } from '../common';
-import { CREATE_DATASET_PATH } from './app_paths';
+import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
 import type { DataSetListRow } from './datasets_table';
 import { DatasetsTable } from './datasets_table';
 
@@ -77,7 +77,6 @@ describe('DatasetsTable', () => {
               isCreateDisabled={false}
               onSelectionChange={jest.fn()}
               onDataSourceFilterChange={jest.fn()}
-              onEdit={jest.fn()}
               onDelete={jest.fn()}
               onDeleteSelected={jest.fn()}
               {...props}
@@ -115,15 +114,13 @@ describe('DatasetsTable', () => {
     expect(onDataSourceFilterChange).toHaveBeenCalledWith('ds1');
   });
 
-  it('calls onEdit and onDelete for row actions', async () => {
-    const onEdit = jest.fn();
+  it('navigates to the edit wizard and calls onDelete for row actions', async () => {
     const onDelete = jest.fn();
-    const { getAllByTestId } = renderTable({
+    const { getAllByTestId, history } = renderTable({
       filteredItems: [
         createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
         createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
       ],
-      onEdit,
       onDelete,
     });
 
@@ -133,8 +130,7 @@ describe('DatasetsTable', () => {
     expect(deleteButtons).toHaveLength(2);
 
     fireEvent.click(editButtons[0]);
-    expect(onEdit).toHaveBeenCalledTimes(1);
-    expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ name: 'set1' }));
+    expect(history.location.pathname).toBe(getEditDatasetPath('set1'));
 
     fireEvent.click(deleteButtons[1]);
     expect(onDelete).toHaveBeenCalledTimes(1);

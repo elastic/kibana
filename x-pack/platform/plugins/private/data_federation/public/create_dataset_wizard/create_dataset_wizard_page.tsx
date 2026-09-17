@@ -29,7 +29,10 @@ import {
   type CreateDatasetFormValues,
 } from '../create_dataset_flyout/create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from '../create_dataset_flyout/create_dataset_flyout_i18n';
-import { emptyDatasetFlyoutFormValues } from '../create_dataset_flyout/dataset_flyout_initial_values';
+import {
+  dataSetToFlyoutFormValues,
+  emptyDatasetFlyoutFormValues,
+} from '../create_dataset_flyout/dataset_flyout_initial_values';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { StepAdvanced } from './step_advanced';
 import { StepDataset } from './step_dataset';
@@ -45,35 +48,46 @@ const wizardContentCss = css({
   margin: '0 auto',
 });
 
-const emptyWizardValue: DatasetWizardContent = {
+const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWizardContent => ({
   dataset: {
-    name: '',
-    description: '',
-    data_source: '',
-    resource: '',
-    format: '',
-    partition_detection: '',
+    name: values.name,
+    description: values.description,
+    data_source: values.data_source,
+    resource: values.resource,
+    format: values.settings.format,
+    partition_detection: values.settings.partition_detection,
   },
-  settings: emptyDatasetFlyoutFormValues().settings,
-};
+  settings: values.settings,
+});
 
 export function CreateDatasetWizardPage({
   dataSources,
   existingDataSetNames,
   loadDataSets,
+  loadDataSources,
+  initialDataSet,
 }: {
   dataSources: DataSource[];
   existingDataSetNames: readonly string[];
   loadDataSets: () => Promise<void>;
+  loadDataSources: () => Promise<void>;
+  initialDataSet?: DataSetWithName;
 }) {
   const history = useHistory();
   const {
     services: { datasetsClient },
   } = useKibana<DataFederationKibanaServices>();
+  const isEditMode = initialDataSet !== undefined;
+  const initialIdNormalized = initialDataSet?.name.trim().toLowerCase() ?? '';
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const formDefaultValues = useMemo(
+    (): CreateDatasetFormValues =>
+      initialDataSet ? dataSetToFlyoutFormValues(initialDataSet) : emptyDatasetFlyoutFormValues(),
+    [initialDataSet]
+  );
   const methods = useForm<CreateDatasetFormValues>({
-    defaultValues: emptyDatasetFlyoutFormValues(),
+    defaultValues: formDefaultValues,
   });
 
   const goToDatasets = useCallback(() => {
@@ -102,6 +116,12 @@ export function CreateDatasetWizardPage({
         ...(settings ? { settings } : {}),
       };
       await datasetsClient.add(payload);
+
+      const previousId = initialDataSet?.name.trim();
+      if (previousId && previousId !== payload.name) {
+        await datasetsClient.delete(previousId);
+      }
+
       await loadDataSets();
       goToDatasets();
     } catch (error) {
@@ -109,7 +129,7 @@ export function CreateDatasetWizardPage({
     } finally {
       setIsSaving(false);
     }
-  }, [datasetsClient, goToDatasets, loadDataSets, methods]);
+  }, [datasetsClient, goToDatasets, initialDataSet, loadDataSets, methods]);
 
   const apiError = useMemo(
     () =>
@@ -126,7 +146,11 @@ export function CreateDatasetWizardPage({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="m">
-            <h2>{createDatasetWizardStrings.pageTitle()}</h2>
+            <h2>
+              {initialDataSet
+                ? createDatasetWizardStrings.editPageTitle(initialDataSet.name)
+                : createDatasetWizardStrings.pageTitle()}
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -143,11 +167,16 @@ export function CreateDatasetWizardPage({
 
       <FormProvider {...methods}>
         <FormWizard<DatasetWizardContent, DatasetWizardSection>
-          defaultValue={emptyWizardValue}
+          defaultValue={wizardContentFromFormValues(formDefaultValues)}
+          isEditing={isEditMode}
           onSave={onSave}
           isSaving={isSaving}
           apiError={apiError}
-          texts={{ save: createDatasetFlyoutStrings.addButton() }}
+          texts={{
+            save: isEditMode
+              ? createDatasetFlyoutStrings.saveButton()
+              : createDatasetFlyoutStrings.addButton(),
+          }}
           contentWrapper={(content) => (
             <div css={wizardContentCss} data-test-subj="createDatasetWizardContent">
               {content}
@@ -159,7 +188,13 @@ export function CreateDatasetWizardPage({
             label={createDatasetWizardStrings.datasetStepLabel()}
             isRequired
           >
-            <StepDataset dataSources={dataSources} existingDataSetNames={existingDataSetNames} />
+            <StepDataset
+              dataSources={dataSources}
+              existingDataSetNames={existingDataSetNames}
+              loadDataSources={loadDataSources}
+              isEditMode={isEditMode}
+              initialIdNormalized={initialIdNormalized}
+            />
           </FormWizardStep>
           <FormWizardStep id="settings" label={createDatasetWizardStrings.advancedStepLabel()}>
             <StepAdvanced />

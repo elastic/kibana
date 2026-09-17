@@ -12,6 +12,11 @@ export const createDatasetWizardStrings = {
     i18n.translate('xpack.dataFederation.createDatasetWizard.pageTitle', {
       defaultMessage: 'Add dataset',
     }),
+  editPageTitle: (id: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.editPageTitle', {
+      defaultMessage: 'Edit dataset: {id}',
+      values: { id },
+    }),
   datasetStepLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetWizard.datasetStepLabel', {
       defaultMessage: 'Define dataset',

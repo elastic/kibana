@@ -21,7 +21,13 @@ import { CreateDatasetWizardPage } from './create_dataset_wizard';
 import type { DataFederationKibanaServices } from './types';
 import { useLoadList } from './use_load_list';
 
-import { CREATE_DATASET_PATH, DATASETS_PATH, DATA_SOURCES_PATH } from './app_paths';
+import {
+  CREATE_DATASET_PATH,
+  DATASETS_PATH,
+  DATA_SOURCES_PATH,
+  EDIT_DATASET_PATH,
+  isDatasetWizardPath,
+} from './app_paths';
 
 export const Main: FunctionComponent = () => {
   const {
@@ -56,7 +62,7 @@ export const Main: FunctionComponent = () => {
 
   useEffect(() => {
     if (
-      pathname === CREATE_DATASET_PATH ||
+      isDatasetWizardPath(pathname) ||
       hasUserSelectedTab ||
       !hasLoadedDataSources ||
       !hasLoadedDataSets
@@ -144,8 +150,33 @@ export const Main: FunctionComponent = () => {
               dataSources={dataSources}
               existingDataSetNames={dataSets.map((ds) => ds.name)}
               loadDataSets={reloadDataSets}
+              loadDataSources={reloadDataSources}
             />
           )}
+        />
+        <Route
+          exact
+          path={EDIT_DATASET_PATH}
+          render={({ match }) => {
+            const datasetName = decodeURIComponent(match.params.datasetName);
+            const initialDataSet = dataSets.find((dataSet) => dataSet.name === datasetName);
+            if (!hasLoadedDataSets) {
+              return null;
+            }
+            if (!initialDataSet) {
+              return <Redirect to={DATASETS_PATH} />;
+            }
+            return (
+              <CreateDatasetWizardPage
+                key={initialDataSet.name}
+                initialDataSet={initialDataSet}
+                dataSources={dataSources}
+                existingDataSetNames={dataSets.map((ds) => ds.name)}
+                loadDataSets={reloadDataSets}
+                loadDataSources={reloadDataSources}
+              />
+            );
+          }}
         />
         <Route
           exact
