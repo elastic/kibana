@@ -85,7 +85,7 @@ const templateValuesEqual = (
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
-  | { outcome: 'rejected'; what: string }
+  | { outcome: 'rejected'; what: string; settingsPath?: string }
   | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
@@ -250,16 +250,25 @@ export class WorkersService {
         if (!status.installed) return { outcome: 'unavailable' };
       }
 
-      const isAlertTriageWorker =
+      const isAlertTriageEnabled =
         workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID &&
-        this.alertTriageOpts.alertTriageWorkerEnabled &&
-        this.alertTriageOpts.getAttachmentService != null;
+        this.alertTriageOpts.alertTriageWorkerEnabled;
+
+      const isAlertTriageWorker =
+        isAlertTriageEnabled && this.alertTriageOpts.getAttachmentService != null;
+
+      if (isAlertTriageEnabled && patch.enabled) {
+        const preflight = await this.checkAlertAnalysisPreflight(request);
+        if (preflight) {
+          return {
+            outcome: 'rejected',
+            what: preflight.message,
+            settingsPath: preflight.settingsPath,
+          };
+        }
+      }
 
       if (isAlertTriageWorker && patch.enabled) {
-        const preflightError = await this.checkAlertAnalysisPreflight(request);
-        if (preflightError) {
-          return { outcome: 'rejected', what: preflightError };
-        }
         // Attach-then-enable: a failed bulk edit leaves the Worker off, not enabled-but-unattached.
         await this.attachAlertTriageWorkerToAllRules(request).catch((err: Error) => {
           this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
@@ -305,7 +314,9 @@ export class WorkersService {
    * Refusing rather than switching it on is deliberate: that setting is `readonly` and owned
    * by security_solution, so it is not ours to flip. See FOLLOW_UPS.md.
    */
-  private async checkAlertAnalysisPreflight(request: KibanaRequest): Promise<string | null> {
+  private async checkAlertAnalysisPreflight(
+    request: KibanaRequest
+  ): Promise<{ message: string; settingsPath?: string } | null> {
     const management = this.management;
     if (!management) return null;
     try {
@@ -314,7 +325,10 @@ export class WorkersService {
         GLOBAL_WORKFLOW_SPACE_ID
       );
       if (workflow && !workflow.enabled) {
-        return 'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.';
+        return {
+          message:
+            'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.',
+        };
       }
     } catch (err) {
       this.logger.warn(
@@ -328,7 +342,11 @@ export class WorkersService {
     if (isAlertAnalysisRuntimeEnabled) {
       try {
         if (!(await isAlertAnalysisRuntimeEnabled(request))) {
-          return 'Alert Triage requires alert analysis to be turned on for this space. Enable it under Security → Manage → Alert analysis, then turn on the Alert Triage Worker.';
+          return {
+            message:
+              'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
+            settingsPath: '/rules/alert_analysis_workflow',
+          };
         }
       } catch (err) {
         // Refusing on an unreadable setting would make the Worker un-enableable whenever the

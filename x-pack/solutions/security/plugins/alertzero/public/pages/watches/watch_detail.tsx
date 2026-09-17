@@ -289,7 +289,46 @@ export const WatchDetailPage: React.FC = () => {
         ) : null}
 
         <EuiFlexItem grow={false}>
-          <div data-test-subj="alertZeroWatchWorkersSection">{renderWorkers()}</div>
+          <SettingsSection
+            title={settingsI18n.WORKERS_SECTION_TITLE}
+            subtitle={settingsI18n.WORKERS_SECTION_SUBTITLE}
+            data-test-subj="alertZeroWatchWorkersSection"
+          >
+            {workersError ? (
+              <EuiEmptyPrompt
+                iconType="error"
+                title={<h2>{i18n.WORKERS_LOAD_ERROR_TITLE}</h2>}
+                body={<p>{i18n.WORKERS_LOAD_ERROR_BODY}</p>}
+                actions={
+                  <EuiButtonEmpty onClick={() => refetchWorkers()}>{i18n.RETRY}</EuiButtonEmpty>
+                }
+                data-test-subj="alertZeroWatchWorkersLoadError"
+              />
+            ) : workersLoading && members.length === 0 ? (
+              <EuiLoadingSpinner size="m" aria-label={i18n.LOADING_WATCH} />
+            ) : (
+              <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+                {members.map((worker) => {
+                  const draft = resolve(worker);
+                  return (
+                    <EuiFlexItem key={worker.id} grow={false}>
+                      <WorkerSettingsPanel
+                        worker={worker}
+                        enabled={draft.enabled}
+                        settings={draft.settings}
+                        error={draft.error}
+                        errorLink={draft.errorLink}
+                        settingsLocked={worker.state === 'unavailable'}
+                        isSaving={isSaving}
+                        onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
+                        onSettingsChange={(patch) => updateSettings(worker, patch)}
+                      />
+                    </EuiFlexItem>
+                  );
+                })}
+              </EuiFlexGroup>
+            )}
+          </SettingsSection>
         </EuiFlexItem>
       </EuiFlexGroup>
     </WatchesSectionLayout>
