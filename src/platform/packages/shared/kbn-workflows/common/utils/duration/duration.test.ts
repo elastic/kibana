@@ -39,12 +39,6 @@ describe('isValidDuration', () => {
     expect(isValidDuration(atLimit)).toBe(true);
     expect(isValidDuration(overLimit)).toBe(false);
   });
-
-  it('rejects a 65-character duration', () => {
-    const duration = `${'1'.repeat(64)}s`;
-    expect(duration).toHaveLength(65);
-    expect(isValidDuration(duration)).toBe(false);
-  });
 });
 
 describe('assertValidDuration', () => {
