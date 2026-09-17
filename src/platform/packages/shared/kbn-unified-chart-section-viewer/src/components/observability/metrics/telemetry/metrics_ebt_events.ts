@@ -119,7 +119,7 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
         type: 'keyword',
         _meta: {
           description:
-            'Elasticsearch error type of the failed ES|QL query (e.g. circuit_breaking_exception, verification_exception, parsing_exception)',
+            'Elasticsearch error type of the failed ES|QL query, read from the cause chain so a generic wrapper does not hide the reason (e.g. circuit_breaking_exception, verification_exception, parsing_exception)',
           optional: true,
         },
       },

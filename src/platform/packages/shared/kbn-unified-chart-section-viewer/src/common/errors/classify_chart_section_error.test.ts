@@ -304,6 +304,59 @@ describe('getChartSectionErrorMeta', () => {
     expect(getChartSectionErrorMeta(error)).toEqual({ type: 'parsing_exception', status: 400 });
   });
 
+  it('reports the resource-limit cause nested under a generic wrapper', () => {
+    const error = createEsErrorLike(
+      {
+        type: 'search_phase_execution_exception',
+        reason: 'all shards failed',
+        root_cause: [
+          { type: 'circuit_breaking_exception', reason: 'data too large' },
+        ] as estypes.ErrorCause[],
+      },
+      { status: 429 }
+    );
+
+    expect(getChartSectionErrorMeta(error)).toEqual({
+      type: 'circuit_breaking_exception',
+      status: 429,
+    });
+  });
+
+  it('reports the user-input cause nested under a generic wrapper', () => {
+    const error = createEsErrorLike({
+      type: 'illegal_argument_exception',
+      reason: 'remote cluster rejected the query',
+      caused_by: {
+        type: 'parsing_exception',
+        reason: "line 1:1: mismatched input ':'",
+      } as estypes.ErrorCause,
+    });
+
+    expect(getChartSectionErrorMeta(error)).toEqual({ type: 'parsing_exception' });
+  });
+
+  it('reports the resource-limit cause nested under an EsqlResponseError root cause', () => {
+    const error = new EsqlResponseError({
+      type: 'search_phase_execution_exception',
+      reason: 'all shards failed',
+      root_cause: [
+        { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+      ] as estypes.ErrorCause[],
+    });
+
+    expect(getChartSectionErrorMeta(error)).toEqual({ type: 'es_rejected_execution_exception' });
+  });
+
+  it('falls back to the outermost type when no nested cause is recognized', () => {
+    const error = createEsErrorLike({
+      type: 'search_phase_execution_exception',
+      reason: 'all shards failed',
+      root_cause: [{ type: 'illegal_state_exception' }] as estypes.ErrorCause[],
+    });
+
+    expect(getChartSectionErrorMeta(error)).toEqual({ type: 'search_phase_execution_exception' });
+  });
+
   it('returns no metadata for errors that carry no Elasticsearch attributes', () => {
     expect(getChartSectionErrorMeta(new Error('network blew up'))).toEqual({});
     expect(getChartSectionErrorMeta('plain string')).toEqual({});

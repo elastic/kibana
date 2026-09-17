@@ -44,6 +44,27 @@ describe('buildEsqlQueryFailureEvent', () => {
     });
   });
 
+  it('reports the resource-limit cause nested under a generic wrapper', () => {
+    const error = Object.assign(new Error('all shards failed'), {
+      attributes: {
+        error: {
+          type: 'search_phase_execution_exception',
+          reason: 'all shards failed',
+          root_cause: [{ type: 'circuit_breaking_exception', reason: 'data too large' }],
+        },
+        rawResponse: { status: 429 },
+      },
+    });
+
+    expect(buildEsqlQueryFailureEvent({ error, esqlQuery: TS_QUERY })).toEqual({
+      error_type: 'circuit_breaking_exception',
+      error_category: 'resource_limit',
+      status_code: 429,
+      query_type: 'TS',
+      profile: METRICS_PROFILE_TELEMETRY_NAME,
+    });
+  });
+
   it('classifies a rejected query as user input', () => {
     const error = new EsqlResponseError(
       { type: 'parsing_exception', reason: "extraneous input '|' expecting <EOF>" },

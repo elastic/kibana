@@ -118,13 +118,30 @@ const collectCauseTypes = (cause: unknown, types: string[] = []): string[] => {
 };
 
 /**
+ * Picks the cause type the classification matched, so a generic wrapper (e.g.
+ * a `circuit_breaking_exception` nested under a `search_phase_execution_exception`)
+ * does not hide the reason behind the failure. Falls back to the outermost type
+ * when nothing in the chain is recognized.
+ */
+const getClassifiedCauseType = (error: unknown): string | undefined => {
+  const causeTypes = collectCauseTypes(getErrorCause(error));
+
+  return (
+    causeTypes.find((type) => RESOURCE_LIMIT_ERROR_TYPES.includes(type)) ??
+    causeTypes.find((type) => USER_INPUT_ERROR_TYPES.includes(type)) ??
+    causeTypes[0]
+  );
+};
+
+/**
  * Extracts the Elasticsearch error type and HTTP status behind a failed
  * chart-section fetch, for use as the `esql_error_type` / `esql_status` APM
- * labels and as the classification input.
+ * labels and as the classification input. The type is read from the cause
+ * chain rather than the outermost error, matching how the category is chosen.
  */
 export const getChartSectionErrorMeta = (error: unknown): ChartSectionErrorMeta => {
   if (isEsqlResponseError(error)) {
-    return { type: error.type, status: error.status };
+    return { type: getClassifiedCauseType(error), status: error.status };
   }
 
   const attributes = getSearchErrorAttributes(error);
@@ -132,10 +149,10 @@ export const getChartSectionErrorMeta = (error: unknown): ChartSectionErrorMeta 
     return {};
   }
 
-  const { error: cause, rawResponse } = attributes;
+  const { rawResponse } = attributes;
 
   return {
-    type: cause?.type,
+    type: getClassifiedCauseType(error),
     // `EsError` does not copy the HTTP `statusCode` off the rejected request,
     // so the Elasticsearch body kept in `rawResponse` is normally the only
     // place a status survives the search interceptor.
