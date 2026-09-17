@@ -7,12 +7,12 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
-  agenticInvestigations: 10312
+  agenticInvestigations: 13459
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 4489
+  alertzero: 10276
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 1174

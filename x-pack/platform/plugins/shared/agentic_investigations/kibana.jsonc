@@ -11,7 +11,8 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["features", "workflowsExtensions", "workflowsManagement"],
-    "optionalPlugins": ["spaces"],
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": ["spaces", "agentBuilder"],
     "extraPublicDirs": ["common"]
   }
 }
