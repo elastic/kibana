@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiFilterGroup,
@@ -134,16 +134,15 @@ export const EntityFiltersBar: React.FC<Props> = ({
     count: filterCounts.asset_criticality[value] ?? 0,
   }));
 
-  // dynamic options — seed from both agg results and current selection so stale/zero-hit
-  // values remain visible and clearable
-  const seenDataSources = useRef(new Set<string>());
-  [...Object.keys(filterCounts.data_sources), ...filters.dataSources].forEach((v) =>
-    seenDataSources.current.add(v)
-  );
-  const dataSourceOptions = [...seenDataSources.current].map((value) => ({
-    value,
-    count: filterCounts.data_sources[value] ?? 0,
-  }));
+  const dataSourceOptions = [
+    ...Object.keys(filterCounts.data_sources).map((value) => ({
+      value,
+      count: filterCounts.data_sources[value],
+    })),
+    ...filters.dataSources
+      .filter((v) => !(v in filterCounts.data_sources))
+      .map((v) => ({ value: v, count: 0 })),
+  ];
 
   const watchlistOptions = [
     ...[...watchlistNames.entries()].map(([id, name]) => ({
