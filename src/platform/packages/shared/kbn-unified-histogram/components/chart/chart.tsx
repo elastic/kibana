@@ -349,7 +349,7 @@ export function UnifiedHistogramChart({
           toggleActions: toolbarToggleActions,
           leftSide: toolbarSelectors,
           rightSide: chartVisible ? actions : [],
-          additionalControls: { prependRight: <ApproximationIcon isApproximationApplied={isApproximationApplied} data-test-subj="unifiedHistogramApproximationApplied" /> },
+          additionalControls: { prependRight: <span style={{ marginRight: 4 }}><ApproximationIcon isApproximationApplied={isApproximationApplied} data-test-subj="unifiedHistogramApproximationApplied" /></span> },
         }}
       >
         {chartVisible && (

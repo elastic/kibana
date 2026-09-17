@@ -21,17 +21,13 @@ export const ApproximationIcon: React.FC<{
   'data-test-subj'?: string;
 }> = ({ isApproximationApplied, 'data-test-subj': dataTestSubj = 'approximationApplied' }) => {
   return isApproximationApplied ? (
-    <span style={{ marginRight: 4 }}>
-      <EuiToolTip content={approximationTooltip}>
-        <EuiBadge
-          color="success"
-          iconType="bolt"
-          onClick={() => {}}
-          onClickAriaLabel=""
-          aria-label={approximationTooltip}
-          data-test-subj={dataTestSubj}
-        />
-      </EuiToolTip>
-    </span>
+    <EuiToolTip content={approximationTooltip}>
+      <EuiBadge
+        color="success"
+        iconType="bolt"
+        aria-label={approximationTooltip}
+        data-test-subj={dataTestSubj}
+      />
+    </EuiToolTip>
   ) : null;
 };

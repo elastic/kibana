@@ -593,7 +593,7 @@ function DiscoverDocumentsComponent({
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
-            externalAdditionalControls={<ApproximationIcon isApproximationApplied={Boolean(approximationApplied)} data-test-subj="discoverApproximationApplied" />}
+            externalAdditionalControls={<span style={{ marginRight: 4 }}><ApproximationIcon isApproximationApplied={Boolean(approximationApplied)} data-test-subj="discoverApproximationApplied" /></span>}
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
