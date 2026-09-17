@@ -11,7 +11,10 @@ import {
   createConversationNotFoundError,
   createConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
-import { ESCALATIONS_INTERNAL_URL, ESCALATION_BY_ID_URL } from '../../../common/escalations/constants';
+import {
+  ESCALATIONS_INTERNAL_URL,
+  ESCALATION_BY_ID_URL,
+} from '../../../common/escalations/constants';
 import { ESCALATIONS_API_PRIVILEGE_MANAGE, ESCALATIONS_API_PRIVILEGE_READ } from '../constants';
 import type { EscalationsService } from '../services/escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from '../services/errors';
@@ -271,9 +274,7 @@ describe('escalation routes', () => {
     });
 
     it('maps NotAnEscalationError to 404', async () => {
-      const update = jest
-        .fn()
-        .mockRejectedValue(new NotAnEscalationError('conv-1'));
+      const update = jest.fn().mockRejectedValue(new NotAnEscalationError('conv-1'));
       const { byPath, patches } = registerAndCollect({ update });
       const response = httpServerMock.createResponseFactory();
 
@@ -294,7 +295,9 @@ describe('escalation routes', () => {
     it('maps a conversationWriteConflict to 409', async () => {
       const update = jest
         .fn()
-        .mockRejectedValue(createConversationWriteConflictError({ conversationId: 'escalation-1' }));
+        .mockRejectedValue(
+          createConversationWriteConflictError({ conversationId: 'escalation-1' })
+        );
       const { byPath, patches } = registerAndCollect({ update });
       const response = httpServerMock.createResponseFactory();
 

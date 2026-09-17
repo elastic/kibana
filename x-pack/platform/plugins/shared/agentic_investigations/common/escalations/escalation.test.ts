@@ -134,7 +134,9 @@ describe('createEscalationRequestSchema', () => {
 
 describe('updateEscalationRequestSchema', () => {
   it('accepts a title-only update', () => {
-    expect(() => updateEscalationRequestSchema.parse({ title: 'Renamed escalation' })).not.toThrow();
+    expect(() =>
+      updateEscalationRequestSchema.parse({ title: 'Renamed escalation' })
+    ).not.toThrow();
   });
 
   it('accepts a links-only update', () => {

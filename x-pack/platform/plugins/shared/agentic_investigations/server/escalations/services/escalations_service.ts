@@ -56,7 +56,10 @@ export class EscalationsService {
     this.conversationTemplates = conversationTemplates;
   }
 
-  async create(request: KibanaRequest, body: CreateEscalationRequest): Promise<EscalationConversation> {
+  async create(
+    request: KibanaRequest,
+    body: CreateEscalationRequest
+  ): Promise<EscalationConversation> {
     const client = await this.getConversationClient(request);
 
     const investigation = await client.get(body.linked_investigation_id);
@@ -145,7 +148,10 @@ export class EscalationsService {
     return result;
   }
 
-  async list(request: KibanaRequest, query: ListEscalationsQuery): Promise<ListEscalationsResponse> {
+  async list(
+    request: KibanaRequest,
+    query: ListEscalationsQuery
+  ): Promise<ListEscalationsResponse> {
     const client = await this.getConversationClient(request);
 
     const { results, total } = await client.search({
