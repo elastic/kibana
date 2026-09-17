@@ -16,15 +16,12 @@ import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { StackConnectorsPlugin } from './plugin';
 import type { ConnectorsPluginsStart } from './plugin';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { experimentalFeaturesMock } from '../public/mocks';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { DeclarativeCatalogService } from './declarative_connectors';
 import { CatalogSpecSource } from './declarative_connectors/catalog_spec_source';
-import {
-  LIVE_ABUSEIPDB_1_1_0_YAML,
-  LIVE_ABUSEIPDB_ICON,
-} from './declarative_connectors/test_fixtures';
 
 jest.mock('../common/experimental_features');
 
@@ -54,7 +51,10 @@ describe('Stack Connectors Plugin', () => {
         ssl: { pfx: { enabled: true } },
       });
 
-      plugin.setup(coreSetup, { actions: actionsSetup });
+      plugin.setup(coreSetup, {
+        actions: actionsSetup,
+        taskManager: taskManagerMock.createSetup(),
+      });
 
       const specConnectorTypes = Object.values(connectorsSpecs).filter(
         (spec) =>
@@ -308,11 +308,17 @@ describe('Stack Connectors Plugin', () => {
       return actionsSetup;
     };
 
+    const createTaskManagerSetup = () => taskManagerMock.createSetup();
+    const createTaskManagerStart = () => taskManagerMock.createStart();
+
     it('does not build a catalog service or register catalog routes when the flag is off', async () => {
       const startSpy = jest
         .spyOn(DeclarativeCatalogService.prototype, 'start')
         .mockResolvedValue(undefined);
-      plugin.setup(coreSetup, { actions: createActionsSetup() });
+      plugin.setup(coreSetup, {
+        actions: createActionsSetup(),
+        taskManager: createTaskManagerSetup(),
+      });
 
       const router = coreSetup.http.createRouter.mock.results[0].value;
       const catalogPaths = [
@@ -347,7 +353,18 @@ describe('Stack Connectors Plugin', () => {
       const enabledPlugin = new StackConnectorsPlugin(enabledContext);
       const enabledCoreSetup = coreMock.createSetup();
 
-      enabledPlugin.setup(enabledCoreSetup, { actions: createActionsSetup() });
+      const taskManagerSetup = createTaskManagerSetup();
+      enabledPlugin.setup(enabledCoreSetup, {
+        actions: createActionsSetup(),
+        taskManager: taskManagerSetup,
+      });
+      expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          'stack_connectors:catalog_refresh': expect.objectContaining({
+            timeout: '2m',
+          }),
+        })
+      );
 
       const router = enabledCoreSetup.http.createRouter.mock.results[0].value;
       expect(router.get).toHaveBeenCalledWith(
@@ -363,28 +380,25 @@ describe('Stack Connectors Plugin', () => {
         expect.any(Function)
       );
 
+      const taskManagerStart = createTaskManagerStart();
       await enabledPlugin.start(coreMock.createStart(), {
         licensing: licensingMock.createStart(),
+        actions: actionsMock.createStart(),
+        taskManager: taskManagerStart,
       } as unknown as ConnectorsPluginsStart);
       expect(startSpy).toHaveBeenCalledTimes(1);
+      expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'stack_connectors-catalog_refresh',
+          taskType: 'stack_connectors:catalog_refresh',
+          schedule: { interval: '60s' },
+        })
+      );
       startSpy.mockRestore();
     });
 
-    it('does not register .abuseipdb in setup() and registers it from the catalog during start()', async () => {
-      const loadSnapshot = jest
-        .spyOn(CatalogSpecSource.prototype, 'loadSnapshot')
-        .mockResolvedValue({
-          catalogVersion: 'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
-          versions: [{ id: '.abuseipdb', version: '1.1.0', status: 'active' }],
-          assets: [
-            {
-              yamlPath: 'http://127.0.0.1:8089/connectors/abuseipdb/1.1.0.yaml',
-              yaml: LIVE_ABUSEIPDB_1_1_0_YAML,
-              icon: LIVE_ABUSEIPDB_ICON,
-            },
-          ],
-          skipped: [],
-        });
+    it('registers a spec provider in setup() and does not fetch the catalog during start()', async () => {
+      const loadSnapshot = jest.spyOn(CatalogSpecSource.prototype, 'loadSnapshot');
       const enabledContext = coreMock.createPluginInitializerContext({
         declarativeCatalog: {
           enabled: true,
@@ -399,7 +413,11 @@ describe('Stack Connectors Plugin', () => {
       const enabledCoreSetup = coreMock.createSetup();
       const actionsSetup = createActionsSetup();
 
-      enabledPlugin.setup(enabledCoreSetup, { actions: actionsSetup });
+      enabledPlugin.setup(enabledCoreSetup, {
+        actions: actionsSetup,
+        taskManager: createTaskManagerSetup(),
+      });
+      expect(actionsSetup.registerSpecProvider).toHaveBeenCalledTimes(1);
       expect(actionsSetup.registerType).not.toHaveBeenCalledWith(
         expect.objectContaining({ id: '.abuseipdb' })
       );
@@ -409,14 +427,10 @@ describe('Stack Connectors Plugin', () => {
       await enabledPlugin.start(coreMock.createStart(), {
         licensing: licensingMock.createStart(),
         actions: actionsStart,
+        taskManager: createTaskManagerStart(),
       } as unknown as ConnectorsPluginsStart);
 
-      expect(actionsSetup.registerType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: '.abuseipdb',
-          source: 'spec',
-        })
-      );
+      expect(loadSnapshot).not.toHaveBeenCalled();
       enabledPlugin.stop();
       loadSnapshot.mockRestore();
     });
@@ -433,7 +447,11 @@ describe('Stack Connectors Plugin', () => {
         actionsSetup.getActionsConfigurationUtilities().getWebhookSettings as jest.Mock
       ).mockReturnValue({ ssl: { pfx: { enabled: true } } });
 
-      plugin.setup(coreMock.createSetup(), { actions: actionsSetup, cloud });
+      plugin.setup(coreMock.createSetup(), {
+        actions: actionsSetup,
+        taskManager: taskManagerMock.createSetup(),
+        cloud,
+      });
       return plugin;
     };
 

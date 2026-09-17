@@ -16,9 +16,11 @@ const healthy = (): DeclarativeCatalogHealth => ({
   sourceUrl: 'http://127.0.0.1:8089',
   activeCatalogVersion: 'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
   versions: [{ id: '.abuseipdb', version: '1.1.0', status: 'active' }],
-  registeredTypeIds: [],
+  registeredTypeIds: ['.abuseipdb'],
   skipped: [{ id: '.declarative-okta', version: '1.0.0', reason: 'reserved_prefix' }],
   lastRefreshAt: '2026-09-17T12:00:00.000Z',
+  indexReady: true,
+  indexCatalogVersion: 'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
 });
 
 const createService = (
@@ -59,6 +61,7 @@ describe('registerDeclarativeCatalogRoutes', () => {
       registeredTypeIds: [],
       skipped: [],
       lastError: { message: 'connect ECONNREFUSED', at: '2026-09-17T12:00:01.000Z' },
+      indexReady: false,
     };
     const service = createService({
       getHealth: jest.fn().mockReturnValue(degraded),
@@ -97,7 +100,8 @@ describe('registerDeclarativeCatalogRoutes', () => {
     const router = httpServiceMock.createRouter();
     const degraded: DeclarativeCatalogHealth = {
       ...healthy(),
-      ready: false,
+      ready: true,
+      registeredTypeIds: ['.abuseipdb'],
       lastError: { message: 'connect ECONNREFUSED', at: '2026-09-17T12:00:01.000Z' },
     };
     const service = createService({
@@ -112,5 +116,62 @@ describe('registerDeclarativeCatalogRoutes', () => {
 
     expect(response.ok).toHaveBeenCalledWith({ body: degraded });
     expect(response.customError).not.toHaveBeenCalled();
+  });
+
+  it('reports ready when types came from the index even if a later refresh failed', async () => {
+    const router = httpServiceMock.createRouter();
+    const degradedRefresh: DeclarativeCatalogHealth = {
+      ...healthy(),
+      ready: true,
+      lastError: { message: 'connect ECONNREFUSED', at: '2026-09-17T12:00:01.000Z' },
+    };
+    const service = createService({
+      getHealth: jest.fn().mockReturnValue(degradedRefresh),
+    });
+    registerDeclarativeCatalogRoutes({ router, service });
+
+    const [, handler] = router.get.mock.calls[0];
+    const response = httpServerMock.createResponseFactory();
+    await handler({}, httpServerMock.createKibanaRequest(), response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        ready: true,
+        indexReady: true,
+        registeredTypeIds: ['.abuseipdb'],
+        lastError: expect.objectContaining({ message: 'connect ECONNREFUSED' }),
+      }),
+    });
+  });
+
+  it('reports not ready when the fleet is empty and no type was registered', async () => {
+    const router = httpServiceMock.createRouter();
+    const emptyFleet: DeclarativeCatalogHealth = {
+      enabled: true,
+      ready: false,
+      sourceUrl: 'http://127.0.0.1:8089',
+      versions: [],
+      registeredTypeIds: [],
+      skipped: [],
+      lastError: { message: 'ENOENT: snapshot missing', at: '2026-09-17T12:00:01.000Z' },
+      indexReady: false,
+    };
+    const service = createService({
+      getHealth: jest.fn().mockReturnValue(emptyFleet),
+    });
+    registerDeclarativeCatalogRoutes({ router, service });
+
+    const [, handler] = router.get.mock.calls[0];
+    const response = httpServerMock.createResponseFactory();
+    await handler({}, httpServerMock.createKibanaRequest(), response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        ready: false,
+        indexReady: false,
+        registeredTypeIds: [],
+        lastError: expect.objectContaining({ message: 'ENOENT: snapshot missing' }),
+      }),
+    });
   });
 });

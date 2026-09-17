@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "snapshot:abuseipdb-1.1.0",
+  "activeVersions": {
+    ".abuseipdb": "1.1.0"
+  },
+  "connectors": [
+    {
+      "id": ".abuseipdb",
+      "version": "1.1.0",
+      "definitionUrl": "abuseipdb.yaml",
+      "contentHash": "sha256:9365bb3b9f22afa3ac5b4aaaf4d720a2f3faf0b6189e06b0c7665c1c256f6221"
+    }
+  ]
+}

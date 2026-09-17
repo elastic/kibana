@@ -134,6 +134,10 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
+import type { CatalogSpecProvider } from './catalog_spec_provider';
+import { createConnectorTypeFromSpec } from './lib';
+
+export type { CatalogSpecProvider } from './catalog_spec_provider';
 
 export interface PluginSetupContract {
   registerType<
@@ -185,6 +189,8 @@ export interface PluginSetupContract {
    * Throws if an emitter is already registered (exactly one emitter is supported).
    */
   registerConnectorEventEmitter(emitter: ConnectorEventEmitter): void;
+
+  registerSpecProvider(provider: CatalogSpecProvider): void;
 }
 
 export interface PluginStartContract {
@@ -309,6 +315,8 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private specProvider?: CatalogSpecProvider;
+  private setupApi?: PluginSetupContract;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -528,7 +536,7 @@ export class ActionsPlugin
       inboundEvents,
     });
 
-    return {
+    const setupApi: PluginSetupContract = {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -597,10 +605,15 @@ export class ActionsPlugin
         }
         this.connectorEventEmitter = emitter;
       },
+      registerSpecProvider: (provider: CatalogSpecProvider) => {
+        this.specProvider = provider;
+      },
     };
+    this.setupApi = setupApi;
+    return setupApi;
   }
 
-  public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+  public async start(core: CoreStart, plugins: ActionsPluginsStart): Promise<PluginStartContract> {
     const {
       logger,
       licenseState,
@@ -620,6 +633,8 @@ export class ActionsPlugin
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
+
+    await this.registerCatalogSpecs(core);
 
     this.throwIfSystemActionsInConfig();
 
@@ -1206,6 +1221,25 @@ export class ActionsPlugin
     this.logger.info(`Unregistered dynamic connector with id ${connectorId}`);
     return true;
   };
+
+  private async registerCatalogSpecs(core: CoreStart): Promise<void> {
+    const { specProvider, setupApi, actionTypeRegistry } = this;
+    if (!specProvider || !setupApi || !actionTypeRegistry) {
+      return;
+    }
+
+    const specs = await specProvider.load({
+      esClient: core.elasticsearch.client.asInternalUser,
+    });
+    for (const spec of specs) {
+      if (actionTypeRegistry.has(spec.metadata.id)) {
+        continue;
+      }
+      const actionType = createConnectorTypeFromSpec(spec, setupApi);
+      ensureSufficientLicense(actionType);
+      actionTypeRegistry.register(actionType);
+    }
+  }
 
   public stop() {
     if (this.licenseState) {

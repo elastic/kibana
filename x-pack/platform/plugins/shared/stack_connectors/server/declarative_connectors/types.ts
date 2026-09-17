@@ -117,4 +117,6 @@ export interface DeclarativeCatalogHealth {
   skipped: DeclarativeCatalogSkippedEntry[];
   lastRefreshAt?: string;
   lastError?: { message: string; at: string };
+  indexReady: boolean;
+  indexCatalogVersion?: string;
 }

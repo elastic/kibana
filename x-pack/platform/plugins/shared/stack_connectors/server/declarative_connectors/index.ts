@@ -10,6 +10,16 @@ export { ConnectorSpecSource } from './spec_source';
 export { CatalogSpecSource } from './catalog_spec_source';
 export { DeclarativeCatalogService } from './catalog_service';
 export { registerDeclarativeCatalogRoutes } from './catalog_routes';
+export { DiskSnapshotSource } from './disk_snapshot_source';
+export { createCatalogSpecProvider, toKibanaMinor } from './catalog_spec_provider';
+export {
+  CATALOG_REFRESH_TASK_ID,
+  CATALOG_REFRESH_TASK_TYPE,
+  refreshIntervalToSchedule,
+  registerCatalogRefreshTask,
+  scheduleCatalogRefreshTask,
+} from './catalog_refresh_task';
+export { catalogDocId, createConnectorCatalogStorage, definitionDocId } from './catalog_storage';
 export type {
   DeclarativeCatalogEntry,
   DeclarativeCatalogHealth,

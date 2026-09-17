@@ -60,6 +60,8 @@
     "@kbn/mcp-client",
     "@kbn/std",
     "@kbn/ui-callout",
+    "@kbn/storage-adapter",
+    "@kbn/es-errors",
   ],
   "exclude": [
     "target/**/*",

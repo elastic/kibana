@@ -37,6 +37,7 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { getConnectorType } from './fixtures';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { LeasePool } from './lib';
@@ -455,7 +456,7 @@ describe('Actions Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           eventLog: eventLogMock.createStart(),
         };
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(slackConnectorType);
@@ -491,7 +492,7 @@ describe('Actions Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           eventLog: eventLogMock.createStart(),
         };
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(indexConnectorType);
@@ -512,7 +513,7 @@ describe('Actions Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           eventLog: eventLogMock.createStart(),
         };
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(indexConnectorType);
@@ -596,6 +597,77 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
         eventLog: eventLogMock.createStart(),
       };
+    });
+
+    const catalogSpec = (overrides: Partial<ConnectorSpec['metadata']> = {}): ConnectorSpec =>
+      ({
+        metadata: {
+          id: '.abuseipdb',
+          displayName: 'AbuseIPDB (Declarative PoC)',
+          minimumLicense: 'gold',
+          supportedFeatureIds: ['workflows'],
+          ...overrides,
+        },
+        schema: z.object({}),
+        auth: { types: ['none'] },
+        actions: {
+          checkIp: {
+            scope: 'read',
+            input: z.object({ ipAddress: z.string() }),
+            handler: jest.fn(),
+          },
+        },
+        test: { handler: jest.fn(), enabled: false },
+      } as ConnectorSpec);
+
+    it('does not return the start contract until the spec provider load and register complete', async () => {
+      const pluginSetup = await plugin.setup(coreSetup, {
+        ...pluginsSetup,
+        encryptedSavedObjects: {
+          ...pluginsSetup.encryptedSavedObjects,
+          canEncrypt: true,
+        },
+      });
+
+      let resolveLoad: (specs: ConnectorSpec[]) => void = () => {};
+      const load = jest.fn(
+        () =>
+          new Promise<ConnectorSpec[]>((resolve) => {
+            resolveLoad = resolve;
+          })
+      );
+      pluginSetup.registerSpecProvider({ load });
+
+      let startResolved = false;
+      const startPromise = plugin.start(coreStart, pluginsStart).then((contract) => {
+        startResolved = true;
+        return contract;
+      });
+
+      await Promise.resolve();
+      expect(load).toHaveBeenCalledWith({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+      });
+      expect(startResolved).toBe(false);
+
+      resolveLoad([catalogSpec()]);
+      const pluginStart = await startPromise;
+      expect(startResolved).toBe(true);
+      expect(pluginStart.getAllTypes()).toContain('.abuseipdb');
+    });
+
+    it('still returns a start contract when the spec provider is empty', async () => {
+      const pluginSetup = await plugin.setup(coreSetup, {
+        ...pluginsSetup,
+        encryptedSavedObjects: {
+          ...pluginsSetup.encryptedSavedObjects,
+          canEncrypt: true,
+        },
+      });
+      pluginSetup.registerSpecProvider({ load: jest.fn().mockResolvedValue([]) });
+
+      const pluginStart = await plugin.start(coreStart, pluginsStart);
+      expect(pluginStart.getAllTypes()).not.toContain('.abuseipdb');
     });
 
     it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
@@ -844,16 +916,15 @@ describe('Actions Plugin', () => {
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
           pluginSetup.registerType(serverLogConnectorType);
 
-          const pluginStart = plugin.start(coreStart, pluginsStart);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
 
           await new Promise<void>((resolve) => setImmediate(resolve));
 
           expect(context.logger.get().error).toHaveBeenCalledWith(
             expect.stringContaining('preconfiguredServerLog')
           );
-          const startResult = await pluginStart;
           expect(
-            startResult.inMemoryConnectors.find((c) => c.id === 'preconfiguredServerLog')
+            pluginStart.inMemoryConnectors.find((c) => c.id === 'preconfiguredServerLog')
           ).toBeUndefined();
         });
 
@@ -868,7 +939,7 @@ describe('Actions Plugin', () => {
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
           pluginSetup.registerType(serverLogConnectorType);
 
-          plugin.start(coreStart, pluginsStart);
+          await plugin.start(coreStart, pluginsStart);
 
           await new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -1055,7 +1126,7 @@ describe('Actions Plugin', () => {
 
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         pluginSetup.registerType(actionType);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginStart.isActionTypeEnabled('my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
@@ -1085,7 +1156,7 @@ describe('Actions Plugin', () => {
             },
           })
         );
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         const result = pluginStart.listTypes('alerting');
         expect(result).toEqual([
@@ -1142,7 +1213,7 @@ describe('Actions Plugin', () => {
 
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         pluginSetup.registerType(actionType);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         pluginStart.isActionExecutable('123', 'my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(

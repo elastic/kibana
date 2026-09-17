@@ -5,85 +5,89 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { DeclarativeCatalogHealth, DeclarativeCatalogSkippedEntry } from './types';
 import type { CatalogSnapshot, CatalogSpecSource } from './catalog_spec_source';
+import type { ConnectorCatalogStorage, StoredCatalogView } from './catalog_storage';
+import { createConnectorCatalogStorage, definitionDocId } from './catalog_storage';
+import { getContentHash } from './icon';
 import { loadDeclarativeConnectorSpec } from './load_declarative_specs';
 import { parseDeclarativeConnectorSpec } from './parse_spec';
+import type { RawConnectorSpecAsset } from './spec_source';
 
 export interface DeclarativeCatalogServiceOptions {
   source: CatalogSpecSource;
   registryUrl: string;
   refreshIntervalMs: number;
-  startupBudgetMs?: number;
+  kibanaMinor: string;
   logger: Logger;
+  createStorage?: (esClient: ElasticsearchClient, logger: Logger) => ConnectorCatalogStorage;
 }
 
 export interface DeclarativeCatalogRegistrationDeps {
   registerSpec: (spec: ConnectorSpec) => void;
   isTypeRegistered: (actionTypeId: string) => boolean;
+  esClient: ElasticsearchClient;
 }
 
-const DEFAULT_STARTUP_BUDGET_MS = 6_000;
-
-/** Loads catalog snapshots on an interval and exposes health for the internal routes. */
+/** Persists catalog snapshots and late-registers new spec ids. */
 export class DeclarativeCatalogService {
   private snapshot?: CatalogSnapshot;
   private refreshing?: Promise<void>;
-  private refreshTimer?: NodeJS.Timeout;
   private lastRefreshAt?: string;
   private lastError?: { message: string; at: string };
   private deps?: DeclarativeCatalogRegistrationDeps;
   private registeredTypeIds: string[] = [];
+  private indexReady = false;
+  private indexCatalogVersion?: string;
+  private readonly createStorage: (
+    esClient: ElasticsearchClient,
+    logger: Logger
+  ) => ConnectorCatalogStorage;
 
-  constructor(private readonly options: DeclarativeCatalogServiceOptions) {}
+  constructor(private readonly options: DeclarativeCatalogServiceOptions) {
+    this.createStorage = options.createStorage ?? createConnectorCatalogStorage;
+  }
 
   public async start(deps: DeclarativeCatalogRegistrationDeps): Promise<void> {
     this.deps = deps;
-    const budgetMs = this.options.startupBudgetMs ?? DEFAULT_STARTUP_BUDGET_MS;
-    const firstRefresh = this.refresh().catch((error) => {
-      this.options.logger.warn(
-        `Declarative connector catalog refresh failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    });
-    let budgetTimer: NodeJS.Timeout | undefined;
-    const budget = new Promise<void>((resolve) => {
-      budgetTimer = setTimeout(resolve, budgetMs);
-    });
-    await Promise.race([firstRefresh, budget]);
-    if (budgetTimer) {
-      clearTimeout(budgetTimer);
-    }
-
-    if (this.options.refreshIntervalMs > 0) {
-      this.refreshTimer = setInterval(() => {
-        void this.refresh().catch((error) => {
-          this.options.logger.warn(
-            `Declarative connector catalog refresh failed: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        });
-      }, this.options.refreshIntervalMs);
-      this.refreshTimer.unref?.();
-    }
   }
 
-  public stop(): void {
-    if (this.refreshTimer) {
-      clearInterval(this.refreshTimer);
-      this.refreshTimer = undefined;
+  public stop(): void {}
+
+  public recordIndexBoot({
+    specs,
+    view,
+  }: {
+    specs: ConnectorSpec[];
+    view?: StoredCatalogView;
+  }): void {
+    this.registeredTypeIds = specs.map((spec) => spec.metadata.id);
+    if (!view) {
+      return;
     }
+    this.indexReady = true;
+    this.indexCatalogVersion = view.catalogVersion;
+    this.snapshot = {
+      catalogVersion: view.catalogVersion,
+      versions: view.rows.map((row) => ({
+        id: row.id,
+        version: row.version,
+        status: 'active',
+      })),
+      assets: [],
+      skipped: [],
+    };
   }
 
-  public refresh = async (): Promise<void> => {
+  public refresh = async (): Promise<void> => this.refreshFromRegistry();
+
+  public refreshFromRegistry = async (): Promise<void> => {
     if (this.refreshing) {
       return this.refreshing;
     }
-    this.refreshing = this.runRefresh().finally(() => {
+    this.refreshing = this.runRefreshFromRegistry().finally(() => {
       this.refreshing = undefined;
     });
     return this.refreshing;
@@ -92,7 +96,7 @@ export class DeclarativeCatalogService {
   public getHealth(): DeclarativeCatalogHealth {
     return {
       enabled: true,
-      ready: this.lastError === undefined && this.snapshot !== undefined,
+      ready: this.registeredTypeIds.length > 0 || this.indexReady,
       sourceUrl: this.options.registryUrl,
       activeCatalogVersion: this.snapshot?.catalogVersion,
       versions: this.snapshot?.versions ?? [],
@@ -100,12 +104,15 @@ export class DeclarativeCatalogService {
       skipped: this.snapshot?.skipped ?? [],
       lastRefreshAt: this.lastRefreshAt,
       lastError: this.lastError,
+      indexReady: this.indexReady,
+      indexCatalogVersion: this.indexCatalogVersion,
     };
   }
 
-  private async runRefresh(): Promise<void> {
+  private async runRefreshFromRegistry(): Promise<void> {
     try {
       const snapshot = await this.options.source.loadSnapshot();
+      await this.persistSnapshot(snapshot);
       this.registerSnapshot(snapshot);
       this.lastRefreshAt = new Date().toISOString();
       this.lastError = undefined;
@@ -113,6 +120,89 @@ export class DeclarativeCatalogService {
       this.recordError(error);
       throw error;
     }
+  }
+
+  private async persistSnapshot(snapshot: CatalogSnapshot): Promise<void> {
+    const esClient = this.deps?.esClient;
+    if (!esClient) {
+      return;
+    }
+    const storage = this.createStorage(esClient, this.options.logger);
+    const existing = await storage.getCatalogView(this.options.kibanaMinor);
+    const storedHashes = new Map(
+      (existing?.view.rows ?? []).map((row) => [`${row.id}@${row.version}`, row.contentHash])
+    );
+    const rows: StoredCatalogView['rows'] = [];
+
+    for (const asset of snapshot.assets) {
+      const parsedRow = tryParseAsset(asset);
+      if (!parsedRow) {
+        continue;
+      }
+      const { id, version, contentHash } = parsedRow;
+      if (storedHashes.get(`${id}@${version}`) !== contentHash) {
+        await storage.putDefinitionCreate({
+          id,
+          version,
+          yaml: asset.yaml,
+          iconSvg: asset.icon,
+          contentHash,
+          addedAt: new Date().toISOString(),
+        });
+      }
+      rows.push({
+        id,
+        version,
+        contentHash,
+        definitionId: definitionDocId(id, version),
+      });
+    }
+
+    const view: StoredCatalogView = {
+      catalogVersion: snapshot.catalogVersion,
+      fetchedAt: new Date().toISOString(),
+      kibanaMinor: this.options.kibanaMinor,
+      rows,
+    };
+    await this.writeCatalogView(storage, existing, view);
+    this.indexReady = true;
+    this.indexCatalogVersion = view.catalogVersion;
+  }
+
+  private async writeCatalogView(
+    storage: ConnectorCatalogStorage,
+    existing: Awaited<ReturnType<ConnectorCatalogStorage['getCatalogView']>>,
+    view: StoredCatalogView
+  ): Promise<void> {
+    if (!existing) {
+      await storage.putCatalogView(view);
+      return;
+    }
+    if (existing.view.catalogVersion === view.catalogVersion) {
+      return;
+    }
+    if (existing.seqNo === undefined || existing.primaryTerm === undefined) {
+      await storage.putCatalogView(view);
+      return;
+    }
+
+    const first = await storage.putCatalogViewCas(view, existing.seqNo, existing.primaryTerm);
+    if (first !== 'conflict') {
+      return;
+    }
+
+    const retry = await storage.getCatalogView(this.options.kibanaMinor);
+    if (!retry) {
+      await storage.putCatalogView(view);
+      return;
+    }
+    if (retry.view.catalogVersion === view.catalogVersion) {
+      return;
+    }
+    if (retry.seqNo === undefined || retry.primaryTerm === undefined) {
+      return;
+    }
+    await storage.putCatalogViewCas(view, retry.seqNo, retry.primaryTerm);
   }
 
   private registerSnapshot(snapshot: CatalogSnapshot): void {
@@ -163,5 +253,20 @@ const identityFromYaml = (yaml: string): { id: string; version?: string } => {
     return { id: parsed.id, version: parsed.version };
   } catch {
     return { id: 'unknown' };
+  }
+};
+
+const tryParseAsset = (
+  asset: RawConnectorSpecAsset
+): { id: string; version: string; contentHash: string } | undefined => {
+  try {
+    const parsed = parseDeclarativeConnectorSpec(asset.yaml);
+    return {
+      id: parsed.id,
+      version: parsed.version,
+      contentHash: getContentHash(asset.yaml),
+    };
+  } catch {
+    return undefined;
   }
 };

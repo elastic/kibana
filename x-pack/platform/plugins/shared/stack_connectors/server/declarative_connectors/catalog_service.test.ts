@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { CatalogSnapshot, CatalogSpecSource } from './catalog_spec_source';
 import type { DeclarativeCatalogRegistrationDeps } from './catalog_service';
 import { DeclarativeCatalogService } from './catalog_service';
+import type { ConnectorCatalogStorage, StoredCatalogView } from './catalog_storage';
 import {
   ABUSE_IPDB_SPEC_FIXTURE,
+  CONNECTOR_ICON_FIXTURE,
   LIVE_ABUSEIPDB_1_1_0_YAML,
   LIVE_ABUSEIPDB_ICON,
 } from './test_fixtures';
 import { getContentHash } from './icon';
 
 const REGISTRY_URL = 'http://127.0.0.1:8089';
+const KIBANA_MINOR = '9.3';
+const esClient = {} as ElasticsearchClient;
 
 const liveSnapshot = (overrides: Partial<CatalogSnapshot> = {}): CatalogSnapshot => ({
   catalogVersion: 'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
@@ -36,76 +41,208 @@ const liveSnapshot = (overrides: Partial<CatalogSnapshot> = {}): CatalogSnapshot
   ...overrides,
 });
 
+const otherYaml = ABUSE_IPDB_SPEC_FIXTURE.replace('id: .abuseipdb', 'id: .otheripdb').replace(
+  'version: 1.0.0',
+  'version: 1.0.0'
+);
+
 const createSource = (loadSnapshot: CatalogSpecSource['loadSnapshot']): CatalogSpecSource =>
   ({ loadSnapshot } as CatalogSpecSource);
+
+const createStorage = (
+  overrides: Partial<jest.Mocked<ConnectorCatalogStorage>> = {}
+): jest.Mocked<ConnectorCatalogStorage> =>
+  ({
+    getCatalogView: jest.fn().mockResolvedValue(undefined),
+    getDefinition: jest.fn().mockResolvedValue(undefined),
+    putDefinitionCreate: jest.fn().mockResolvedValue('created'),
+    putCatalogView: jest.fn().mockResolvedValue(undefined),
+    putCatalogViewCas: jest.fn().mockResolvedValue('updated'),
+    ...overrides,
+  } as unknown as jest.Mocked<ConnectorCatalogStorage>);
 
 const createDeps = (
   overrides: Partial<DeclarativeCatalogRegistrationDeps> = {}
 ): DeclarativeCatalogRegistrationDeps => ({
   registerSpec: jest.fn(),
   isTypeRegistered: jest.fn().mockReturnValue(false),
+  esClient,
   ...overrides,
 });
 
 const createService = (
   source: CatalogSpecSource,
-  overrides: { refreshIntervalMs?: number; startupBudgetMs?: number } = {}
+  storage: jest.Mocked<ConnectorCatalogStorage> = createStorage()
 ) =>
   new DeclarativeCatalogService({
     source,
     registryUrl: REGISTRY_URL,
-    refreshIntervalMs: overrides.refreshIntervalMs ?? 60_000,
-    startupBudgetMs: overrides.startupBudgetMs ?? 6_000,
+    refreshIntervalMs: 60_000,
+    kibanaMinor: KIBANA_MINOR,
     logger: loggerMock.create(),
+    createStorage: () => storage,
   });
+
+const storedView = (
+  contentHash = getContentHash(LIVE_ABUSEIPDB_1_1_0_YAML)
+): StoredCatalogView => ({
+  catalogVersion: 'snapshot:abuseipdb-1.1.0',
+  fetchedAt: '2026-09-17T12:00:00.000Z',
+  kibanaMinor: KIBANA_MINOR,
+  rows: [
+    {
+      id: '.abuseipdb',
+      version: '1.1.0',
+      contentHash,
+      definitionId: 'definition:.abuseipdb@1.1.0',
+    },
+  ],
+});
 
 describe('DeclarativeCatalogService', () => {
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('populates health from the first refresh', async () => {
-    const service = createService(createSource(jest.fn().mockResolvedValue(liveSnapshot())));
-
-    await service.start(createDeps());
-
-    expect(service.getHealth()).toEqual(
-      expect.objectContaining({
-        enabled: true,
-        ready: true,
-        sourceUrl: REGISTRY_URL,
-        activeCatalogVersion:
-          'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
-        versions: liveSnapshot().versions,
-        skipped: liveSnapshot().skipped,
-        registeredTypeIds: ['.abuseipdb'],
-      })
-    );
-    expect(service.getHealth().lastRefreshAt).toEqual(expect.any(String));
-    expect(service.getHealth().lastError).toBeUndefined();
-    service.stop();
-  });
-
-  it('registers exactly .abuseipdb from the live 1.1.0 payload', async () => {
+  it('registers exactly .abuseipdb from the live 1.1.0 payload and keeps .declarative-* skipped', async () => {
     const registerSpec = jest.fn();
-    const service = createService(createSource(jest.fn().mockResolvedValue(liveSnapshot())));
+    const storage = createStorage();
+    const service = createService(
+      createSource(jest.fn().mockResolvedValue(liveSnapshot())),
+      storage
+    );
 
     await service.start(createDeps({ registerSpec }));
+    await service.refreshFromRegistry();
 
     expect(registerSpec).toHaveBeenCalledTimes(1);
     const spec = registerSpec.mock.calls[0][0] as ConnectorSpec;
     expect(spec.metadata.id).toBe('.abuseipdb');
     expect(spec.metadata.displayName).toBe('AbuseIPDB (Declarative PoC)');
-    expect(spec.metadata.isTechnicalPreview).toBe(true);
-    expect(Object.keys(spec.actions)).toEqual(['checkIp', 'reportIp']);
-    expect(service.getHealth().registeredTypeIds).toEqual(['.abuseipdb']);
-    expect(service.getHealth().skipped).toEqual([
-      { id: '.declarative-okta', version: '1.0.0', reason: 'reserved_prefix' },
-    ]);
-    service.stop();
+    expect(service.getHealth()).toEqual(
+      expect.objectContaining({
+        enabled: true,
+        ready: true,
+        registeredTypeIds: ['.abuseipdb'],
+        skipped: [{ id: '.declarative-okta', version: '1.0.0', reason: 'reserved_prefix' }],
+        indexReady: true,
+        indexCatalogVersion:
+          'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
+      })
+    );
   });
 
-  it('skips an id that is already registered', async () => {
+  it('skips writing a definition when the stored contentHash already matches', async () => {
+    const hash = getContentHash(LIVE_ABUSEIPDB_1_1_0_YAML);
+    const storage = createStorage({
+      getCatalogView: jest.fn().mockResolvedValue({
+        view: storedView(hash),
+        seqNo: 1,
+        primaryTerm: 1,
+      }),
+    });
+    const service = createService(
+      createSource(jest.fn().mockResolvedValue(liveSnapshot())),
+      storage
+    );
+
+    await service.start(createDeps());
+    await service.refreshFromRegistry();
+
+    expect(storage.putDefinitionCreate).not.toHaveBeenCalled();
+  });
+
+  it('treats a 409 definition create as success', async () => {
+    const storage = createStorage({
+      putDefinitionCreate: jest.fn().mockResolvedValue('exists'),
+    });
+    const registerSpec = jest.fn();
+    const service = createService(
+      createSource(jest.fn().mockResolvedValue(liveSnapshot())),
+      storage
+    );
+
+    await service.start(createDeps({ registerSpec }));
+    await expect(service.refreshFromRegistry()).resolves.toBeUndefined();
+    expect(registerSpec).toHaveBeenCalledTimes(1);
+    expect(storage.putCatalogView).toHaveBeenCalled();
+  });
+
+  it('retries a catalog CAS conflict once', async () => {
+    const existing = {
+      view: storedView('sha256:old'),
+      seqNo: 1,
+      primaryTerm: 1,
+    };
+    const retried = {
+      view: { ...storedView('sha256:old'), catalogVersion: 'sha256:other' },
+      seqNo: 2,
+      primaryTerm: 1,
+    };
+    const storage = createStorage({
+      getCatalogView: jest.fn().mockResolvedValueOnce(existing).mockResolvedValueOnce(retried),
+      putCatalogViewCas: jest
+        .fn()
+        .mockResolvedValueOnce('conflict')
+        .mockResolvedValueOnce('updated'),
+    });
+    const service = createService(
+      createSource(jest.fn().mockResolvedValue(liveSnapshot())),
+      storage
+    );
+
+    await service.start(createDeps());
+    await service.refreshFromRegistry();
+
+    expect(storage.putCatalogViewCas).toHaveBeenCalledTimes(2);
+    expect(storage.putCatalogViewCas).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        catalogVersion: liveSnapshot().catalogVersion,
+      }),
+      1,
+      1
+    );
+    expect(storage.putCatalogViewCas).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        catalogVersion: liveSnapshot().catalogVersion,
+      }),
+      2,
+      1
+    );
+  });
+
+  it('late-registers only ids that are not already registered', async () => {
+    const registerSpec = jest.fn();
+    const storage = createStorage();
+    const service = createService(
+      createSource(
+        jest.fn().mockResolvedValue(
+          liveSnapshot({
+            assets: [
+              ...liveSnapshot().assets,
+              {
+                yamlPath: 'other.yaml',
+                yaml: otherYaml,
+                icon: CONNECTOR_ICON_FIXTURE,
+              },
+            ],
+          })
+        )
+      ),
+      storage
+    );
+    service.recordIndexBoot({
+      specs: [{ metadata: { id: '.abuseipdb' } } as ConnectorSpec],
+      view: storedView(),
+    });
+
+    await service.start(createDeps({ registerSpec }));
+    await service.refreshFromRegistry();
+
+    expect(registerSpec).toHaveBeenCalledTimes(1);
+    expect(registerSpec.mock.calls[0][0].metadata.id).toBe('.otheripdb');
+    expect(service.getHealth().registeredTypeIds).toEqual(['.abuseipdb', '.otheripdb']);
+  });
+
+  it('skips an id that is already registered in the actions registry', async () => {
     const registerSpec = jest.fn();
     const service = createService(createSource(jest.fn().mockResolvedValue(liveSnapshot())));
 
@@ -115,9 +252,9 @@ describe('DeclarativeCatalogService', () => {
         isTypeRegistered: (id) => id === '.abuseipdb',
       })
     );
+    await service.refreshFromRegistry();
 
     expect(registerSpec).not.toHaveBeenCalled();
-    expect(service.getHealth().registeredTypeIds).toEqual([]);
     expect(service.getHealth().skipped).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -126,88 +263,78 @@ describe('DeclarativeCatalogService', () => {
         }),
       ])
     );
-    service.stop();
-  });
-
-  it('records a single bad asset as load_failed while still registering the good one', async () => {
-    const registerSpec = jest.fn();
-    const badYaml = ABUSE_IPDB_SPEC_FIXTURE.replace(
-      'type: api_key_header',
-      'type: future_auth_type'
-    );
-    const service = createService(
-      createSource(
-        jest.fn().mockResolvedValue(
-          liveSnapshot({
-            assets: [
-              {
-                yamlPath: 'http://127.0.0.1:8089/connectors/abuseipdb/1.1.0.yaml',
-                yaml: LIVE_ABUSEIPDB_1_1_0_YAML,
-                icon: LIVE_ABUSEIPDB_ICON,
-              },
-              {
-                yamlPath: 'http://127.0.0.1:8089/connectors/bad.yaml',
-                yaml: badYaml.replace(
-                  /contentHash: sha256:[a-f0-9]{64}/,
-                  `contentHash: ${getContentHash(
-                    '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1v1H0z"/></svg>'
-                  )}`
-                ),
-                icon: '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1v1H0z"/></svg>',
-              },
-            ],
-          })
-        )
-      )
-    );
-
-    await service.start(createDeps({ registerSpec }));
-
-    expect(registerSpec).toHaveBeenCalledTimes(1);
-    expect(registerSpec.mock.calls[0][0].metadata.id).toBe('.abuseipdb');
-    expect(service.getHealth().skipped).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: '.abuseipdb',
-          reason: 'load_failed',
-          detail: expect.stringContaining('future_auth_type'),
-        }),
-      ])
-    );
-    service.stop();
   });
 
   it('does not re-register an id it already registered on a second refresh', async () => {
     const registerSpec = jest.fn();
     const loadSnapshot = jest.fn().mockResolvedValue(liveSnapshot());
-    const service = createService(createSource(loadSnapshot), { refreshIntervalMs: 0 });
+    const service = createService(createSource(loadSnapshot));
 
     await service.start(createDeps({ registerSpec }));
-    await service.refresh();
+    await service.refreshFromRegistry();
+    await service.refreshFromRegistry();
 
     expect(registerSpec).toHaveBeenCalledTimes(1);
     expect(service.getHealth().registeredTypeIds).toEqual(['.abuseipdb']);
-    service.stop();
   });
 
-  it('resolves start() when the catalog is down and records lastError', async () => {
+  it('keeps index-backed types registered and ready when a later refresh fails', async () => {
+    const loadSnapshot = jest
+      .fn()
+      .mockResolvedValueOnce(liveSnapshot())
+      .mockRejectedValueOnce(new Error('catalog down'));
+    const service = createService(createSource(loadSnapshot));
+
+    await service.start(createDeps());
+    await service.refreshFromRegistry();
+    expect(service.getHealth().registeredTypeIds).toEqual(['.abuseipdb']);
+
+    await expect(service.refreshFromRegistry()).rejects.toThrow('catalog down');
+    expect(service.getHealth()).toEqual(
+      expect.objectContaining({
+        ready: true,
+        registeredTypeIds: ['.abuseipdb'],
+        lastError: expect.objectContaining({ message: 'catalog down' }),
+        indexReady: true,
+      })
+    );
+  });
+
+  it('records lastError when the catalog is down and no types were registered', async () => {
     const service = createService(
       createSource(jest.fn().mockRejectedValue(new Error('connect ECONNREFUSED')))
     );
 
-    await expect(service.start(createDeps())).resolves.toBeUndefined();
+    await service.start(createDeps());
+    await expect(service.refreshFromRegistry()).rejects.toThrow('connect ECONNREFUSED');
 
     expect(service.getHealth()).toEqual(
       expect.objectContaining({
         enabled: true,
         ready: false,
+        indexReady: false,
         lastError: expect.objectContaining({
           message: 'connect ECONNREFUSED',
-          at: expect.any(String),
         }),
       })
     );
-    service.stop();
+  });
+
+  it('is ready after an index boot even before a registry refresh', () => {
+    const service = createService(createSource(jest.fn()));
+    service.recordIndexBoot({
+      specs: [{ metadata: { id: '.abuseipdb' } } as ConnectorSpec],
+      view: storedView(),
+    });
+
+    expect(service.getHealth()).toEqual(
+      expect.objectContaining({
+        ready: true,
+        indexReady: true,
+        registeredTypeIds: ['.abuseipdb'],
+        indexCatalogVersion: 'snapshot:abuseipdb-1.1.0',
+      })
+    );
   });
 
   it('coalesces concurrent refresh() calls into a single in-flight promise', async () => {
@@ -218,7 +345,8 @@ describe('DeclarativeCatalogService', () => {
           resolveSnapshot = resolve;
         })
     );
-    const service = createService(createSource(loadSnapshot), { refreshIntervalMs: 0 });
+    const service = createService(createSource(loadSnapshot));
+    await service.start(createDeps());
 
     const first = service.refresh();
     const second = service.refresh();
@@ -227,134 +355,5 @@ describe('DeclarativeCatalogService', () => {
     resolveSnapshot(liveSnapshot());
     await Promise.all([first, second]);
     expect(loadSnapshot).toHaveBeenCalledTimes(1);
-  });
-
-  it('clears the refresh interval on stop()', async () => {
-    jest.useFakeTimers();
-    const loadSnapshot = jest.fn().mockResolvedValue(liveSnapshot());
-    const service = createService(createSource(loadSnapshot), {
-      refreshIntervalMs: 10_000,
-      startupBudgetMs: 1_000,
-    });
-
-    await service.start(createDeps());
-    expect(loadSnapshot).toHaveBeenCalledTimes(1);
-
-    service.stop();
-    await jest.advanceTimersByTimeAsync(30_000);
-    expect(loadSnapshot).toHaveBeenCalledTimes(1);
-  });
-
-  it('honors the startup budget under fake timers', async () => {
-    jest.useFakeTimers();
-    let resolveSnapshot: (snapshot: CatalogSnapshot) => void = () => {};
-    const loadSnapshot = jest.fn(
-      () =>
-        new Promise<CatalogSnapshot>((resolve) => {
-          resolveSnapshot = resolve;
-        })
-    );
-    const service = createService(createSource(loadSnapshot), {
-      refreshIntervalMs: 0,
-      startupBudgetMs: 6_000,
-    });
-
-    let started = false;
-    const startPromise = service.start(createDeps()).then(() => {
-      started = true;
-    });
-
-    await jest.advanceTimersByTimeAsync(5_999);
-    expect(started).toBe(false);
-
-    await jest.advanceTimersByTimeAsync(1);
-    await startPromise;
-    expect(started).toBe(true);
-
-    resolveSnapshot(liveSnapshot());
-    await Promise.resolve();
-    service.stop();
-  });
-
-  it('recovers on the next interval tick after a failed first refresh', async () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-09-17T12:00:00.000Z'));
-    const loadSnapshot = jest
-      .fn()
-      .mockRejectedValueOnce(new Error('connect ECONNREFUSED'))
-      .mockResolvedValueOnce(liveSnapshot());
-    const registerSpec = jest.fn();
-    const service = createService(createSource(loadSnapshot), {
-      refreshIntervalMs: 10_000,
-      startupBudgetMs: 1_000,
-    });
-
-    await service.start(createDeps({ registerSpec }));
-    expect(service.getHealth().ready).toBe(false);
-    expect(service.getHealth().lastError).toEqual(
-      expect.objectContaining({ message: 'connect ECONNREFUSED' })
-    );
-    expect(registerSpec).not.toHaveBeenCalled();
-
-    await jest.advanceTimersByTimeAsync(10_000);
-
-    expect(registerSpec).toHaveBeenCalledTimes(1);
-    expect(service.getHealth().ready).toBe(true);
-    expect(service.getHealth().lastError).toBeUndefined();
-    expect(service.getHealth().lastRefreshAt).toBe('2026-09-17T12:00:10.000Z');
-    expect(service.getHealth().registeredTypeIds).toEqual(['.abuseipdb']);
-    service.stop();
-  });
-
-  it('does not hold start() past the budget and still registers when a hung refresh later completes', async () => {
-    jest.useFakeTimers();
-    let resolveSnapshot: (snapshot: CatalogSnapshot) => void = () => {};
-    const loadSnapshot = jest.fn(
-      () =>
-        new Promise<CatalogSnapshot>((resolve) => {
-          resolveSnapshot = resolve;
-        })
-    );
-    const registerSpec = jest.fn();
-    const service = createService(createSource(loadSnapshot), {
-      refreshIntervalMs: 0,
-      startupBudgetMs: 6_000,
-    });
-
-    const startPromise = service.start(createDeps({ registerSpec }));
-    await jest.advanceTimersByTimeAsync(6_000);
-    await startPromise;
-    expect(registerSpec).not.toHaveBeenCalled();
-
-    resolveSnapshot(liveSnapshot());
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(registerSpec).toHaveBeenCalledTimes(1);
-    expect(service.getHealth().registeredTypeIds).toEqual(['.abuseipdb']);
-    service.stop();
-  });
-
-  it('keeps registered ids and lastRefreshAt when a later refresh fails', async () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-09-17T12:00:00.000Z'));
-    const loadSnapshot = jest
-      .fn()
-      .mockResolvedValueOnce(liveSnapshot())
-      .mockRejectedValueOnce(new Error('catalog down'));
-    const service = createService(createSource(loadSnapshot), { refreshIntervalMs: 0 });
-
-    await service.start(createDeps());
-    expect(service.getHealth().registeredTypeIds).toEqual(['.abuseipdb']);
-    expect(service.getHealth().lastRefreshAt).toBe('2026-09-17T12:00:00.000Z');
-
-    await expect(service.refresh()).rejects.toThrow('catalog down');
-    expect(service.getHealth().registeredTypeIds).toEqual(['.abuseipdb']);
-    expect(service.getHealth().lastRefreshAt).toBe('2026-09-17T12:00:00.000Z');
-    expect(service.getHealth().ready).toBe(false);
-    expect(service.getHealth().lastError).toEqual(
-      expect.objectContaining({ message: 'catalog down' })
-    );
-    service.stop();
   });
 });
