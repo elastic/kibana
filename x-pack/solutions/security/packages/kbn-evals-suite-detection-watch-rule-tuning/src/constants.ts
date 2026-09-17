@@ -71,3 +71,24 @@ export const EXCEPTION_OPERATOR_PAYLOAD = {
 
 /** Tag prefix the workflow writes to harvested alerts. Isolated to the eval namespace. */
 export const EVAL_TAG_PREFIX = 'eval-rule-tuning';
+
+/**
+ * Step ids from the managed review workflow yaml
+ * (`kbn-workflows/managed/definitions/alertzero/rule_tuning_review.yaml`). The
+ * `diagnose_rule` step is the `ai.agent` step this suite grades, and it is the
+ * step whose persisted `conversation_id` the trace evaluators use as their
+ * second join key.
+ */
+export const DIAGNOSE_STEP_ID = 'diagnose_rule';
+
+/**
+ * Agent Builder tool the review's `diagnose_rule` step is instructed to call to
+ * retrieve the harvested false positives. Consumed by the Tool Routing evaluator
+ * (src/evaluators/tool_routing.ts) via tool-span counting on the run's trace.
+ *
+ * Note the tuning review drives the agent through the `investigate-rule` skill
+ * (ALERTS_BY_IDS_MAX is why the workflow caps alert_ids at 100), NOT the
+ * `security.create_detection_rule` tool the rule-creation suite's evaluator
+ * counts — that line must not be copied over.
+ */
+export const RULE_TUNING_INVESTIGATE_TOOL_ID = 'investigate-rule.get_alerts_by_ids';

@@ -59,6 +59,20 @@ export interface RuleTuningProposal {
 export interface RuleTuningVerdict extends RuleTuningProposal {
   executionId: string;
   executionStatus: ExecutionStatus;
+  /**
+   * Review execution's trace id. Stage-1 join key for the trace-based
+   * evaluators (src/evaluators/tool_routing.ts): the tuning review runs as its
+   * own workflow execution, so its agent spans hang under this root span, not
+   * under the worker sweep's.
+   */
+  traceId?: string;
+  /**
+   * The review's step executions. Carries the diagnose step's output, whose
+   * persisted `conversation_id` is the stage-2 join key — Agent Builder can fork
+   * its own root trace for the step's conversation, which leaves the trace-id
+   * join with zero TOOL spans.
+   */
+  stepExecutions?: WorkflowStepExecutionDto[];
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -255,11 +269,7 @@ export const runRuleTuningWorkflow = async ({
    */
   maxWaitMs?: number;
   pollIntervalMs?: number;
-}): Promise<{
-  executionId: string;
-  executionStatus: ExecutionStatus;
-  proposal?: RuleTuningProposal;
-}> => {
+}): Promise<RuleTuningVerdict> => {
   for (const workflowId of [RULE_TUNING_WORKER_WORKFLOW_ID, RULE_TUNING_REVIEW_WORKFLOW_ID]) {
     const stale = await listActiveExecutions(fetch, workflowId);
     if ((stale.results ?? []).length > 0) {
@@ -393,5 +403,12 @@ export const runRuleTuningWorkflow = async ({
     ...proposal,
     executionId: review.id,
     executionStatus: review.status,
+    // Trace-evaluator join keys, carried out of the harness so the evaluators
+    // grade THIS run's trace rather than a stack-wide aggregate:
+    //   stage 1 — the review execution's own trace id;
+    //   stage 2 — the diagnose step's persisted conversation_id, read from the
+    //             step executions (see extractConversationId).
+    traceId: review.traceId,
+    stepExecutions: review.stepExecutions,
   };
 };

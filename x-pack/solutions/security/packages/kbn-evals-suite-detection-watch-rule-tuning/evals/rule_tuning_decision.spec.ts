@@ -22,22 +22,40 @@
  *
  * Evaluators:
  *   - ChangeTypeAccuracy (CODE, primary): predicted tuning path == golden label.
- *   - ValidProposal (CODE): structured output conforms to the workflow's fail-closed gate
- *     contract (a summary on every branch plus that branch's payload fields; a query only
- *     on a rule type the workflow can actually preview and apply).
- *   - RationaleQuality (LLM): the summary is grounded in the seeded FP evidence.
+ *   - ValidProposal (CODE, structural): structured output conforms to the workflow's
+ *     fail-closed gate contract (a summary on every branch plus that branch's payload
+ *     fields; a query only on a rule type the workflow can actually preview and apply).
+ *     Expected to saturate at 1.0 — it is a smoke check, never a discriminating metric.
+ *   - Tool Routing (CODE, trace-based): the diagnose step actually invoked
+ *     `investigate-rule.get_alerts_by_ids` rather than answering from the prompt alone.
+ *   - TuningQuality (LLM): the summary is grounded in the seeded FP evidence.
+ *
+ * Every dataset run ends with a per-evaluator reliability line
+ * (see src/evaluators/run_summary.ts): mean ± CI95 (n=N) plus SATURATED(no signal) for
+ * evaluators that discriminated nothing. Saturated evaluators are reported, never
+ * averaged into a pass/fail claim.
  */
 
+import type { Client as TraceEsClient } from '@elastic/elasticsearch';
+import type { HttpHandler } from '@kbn/core/public';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import { runRuleTuningWorkflow } from '../src/workflow_task';
+import { runRuleTuningWorkflow, type RuleTuningVerdict } from '../src/workflow_task';
 import { changeTypeAccuracy, validProposal } from '../src/evaluators';
+import {
+  assertToolSpansReachable,
+  createToolRoutingEvaluator,
+} from '../src/evaluators/tool_routing';
+import { logRunSummary, withScoreCollection, type ScoreSink } from '../src/evaluators/run_summary';
 import { type ChangeType } from '../src/constants';
 import { seedRuleAndFpAlerts, cleanupSeededArtifacts } from './seed_fp_cluster';
+
+/** Experiment/dataset name. Also the label on every per-evaluator summary line. */
+const DATASET_NAME = 'security: rule-tuning-workflow-decision';
 
 const SUMMARY_CRITERIA = [
   'The summary references the specific alert entities or rule behavior that drove the false positives, ' +
@@ -335,6 +353,51 @@ evaluate.describe(
   () => {
     const createdRuleIds = new Set<string>();
 
+    // Setup probe. A trace cluster that never received Agent Builder spans silently degrades
+    // every trace-based evaluator to N/A, and N/A is not a failure — the suite would still
+    // report a pass. Drive one real fixture through the workflow here and assert that the
+    // resulting review trace exposes TOOL spans, using the SAME join clauses the Tool Routing
+    // evaluator scores with (a probe that proved reachability on a different key would arm the
+    // evaluators dishonestly). Costs one fixture run (~233s measured) per repetition; that is
+    // cheap next to an 8h run that N/A-s every trace evaluator and calls it green.
+    evaluate.beforeAll(
+      async ({
+        fetch,
+        log,
+        esClient,
+        traceEsClient,
+      }: {
+        fetch: HttpHandler;
+        log: ToolingLog;
+        esClient: EsClient;
+        traceEsClient: TraceEsClient;
+      }) => {
+        const probeFixture = TUNING_FIXTURES[0];
+        const { seededUuid, ruleId } = await seedRuleAndFpAlerts(
+          { fetch, esClient, log },
+          probeFixture,
+          `probe-${probeFixture.id}-${Date.now()}`
+        );
+
+        let probe: RuleTuningVerdict;
+        try {
+          probe = await runRuleTuningWorkflow({ fetch, log });
+        } finally {
+          await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, ruleId);
+        }
+
+        if (!probe.traceId) {
+          throw new Error(
+            'Review execution carried no traceId — trace-based evaluators (Tool Routing) would ' +
+              'silently score N/A and the suite would report a false pass. This stack is not ' +
+              'persisting OTEL trace ids (see #284701); fix the stack, not the suite.'
+          );
+        }
+        await assertToolSpansReachable({ traceEsClient, probe, log });
+        log.info(`trace reachability verified (${probe.traceId}) — trace-based evaluators armed`);
+      }
+    );
+
     evaluate.afterAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
       if (createdRuleIds.size === 0) {
         return;
@@ -347,7 +410,15 @@ evaluate.describe(
 
     evaluate(
       'proposes the golden tuning path for each seeded FP cluster',
-      async ({ executorClient, evaluators, fetch, log, esClient, connector: _judgeConnector }) => {
+      async ({
+        executorClient,
+        evaluators,
+        fetch,
+        log,
+        esClient,
+        traceEsClient,
+        connector: _judgeConnector,
+      }) => {
         const examples: RuleTuningExample[] = TUNING_FIXTURES.map((fixture) => ({
           id: fixture.id,
           input: { fixtureId: fixture.id },
@@ -360,11 +431,26 @@ evaluate.describe(
           },
         }));
 
+        // The LLM judge is reported as `TuningQuality`: the per-evaluator summary keys its
+        // reliability lines by evaluator name, and the criteria evaluator's default name
+        // (`criteria`) does not say which judge produced the score.
+        const tuningQualityJudge = {
+          ...evaluators.criteria(SUMMARY_CRITERIA),
+          name: 'TuningQuality',
+        };
+
         const selectedEvaluators = selectEvaluators([
           changeTypeAccuracy,
           validProposal,
-          evaluators.criteria(SUMMARY_CRITERIA),
+          createToolRoutingEvaluator({ traceEsClient, log }),
+          tuningQualityJudge,
         ]);
+
+        // Observe every score so the run states its own resolution limits: per-evaluator
+        // mean ± CI95 (n=N), a SATURATED(no signal) flag for evaluators that discriminated
+        // nothing this run, and N/A counts as measurement gaps. A saturated evaluator is
+        // reported, never averaged into a pass/fail claim.
+        const scoreSink: ScoreSink = new Map();
 
         await executorClient.runExperiment(
           {
@@ -373,7 +459,7 @@ evaluate.describe(
             concurrency: 1,
             datasets: [
               {
-                name: 'security: rule-tuning-workflow-decision',
+                name: DATASET_NAME,
                 description:
                   'Runs the managed system-security-rule-tuning-worker/review workflows ' +
                   'end-to-end against ' +
@@ -411,8 +497,10 @@ evaluate.describe(
               }
             },
           },
-          selectedEvaluators
+          withScoreCollection(selectedEvaluators, scoreSink)
         );
+
+        logRunSummary({ sink: scoreSink, datasetName: DATASET_NAME, log });
       }
     );
 
