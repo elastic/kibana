@@ -146,6 +146,32 @@ describe('transformWorkflowToGraph', () => {
     expect(computeTopologyFingerprint(base)).not.toBe(computeTopologyFingerprint(withExtra));
   });
 
+  it('foreach with iteration-on-failure uses steps body, not fallback, as inner nodes', () => {
+    // iteration-on-failure.fallback must not overwrite the loop body.
+    // If the last-wins bug regresses, innerNodes will contain only 'error-handler'
+    // instead of 'item-process'.
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'loop',
+            type: 'foreach',
+            foreach: '{{ items }}',
+            steps: [{ name: 'item-process', type: 'http' }],
+            'iteration-on-failure': {
+              fallback: [{ name: 'error-handler', type: 'console' }],
+            },
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    expect(r.foreachGroups).toHaveLength(1);
+    const group = r.foreachGroups[0];
+    expect(group.innerNodes).toHaveLength(1);
+    expect(group.innerNodes[0].data.label).toBe('item-process');
+  });
+
   it('connects branch leaves to the step that follows an if', () => {
     const r = transformWorkflowToGraph(
       minimal({
@@ -653,6 +679,35 @@ describe('computeTopologyFingerprint', () => {
       ] as unknown as WorkflowYaml['steps'],
     });
     expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfMutated));
+  });
+
+  it('changes when a step is added inside on-failure.fallback', () => {
+    const wfBase = minimal({
+      steps: [
+        {
+          name: 'act',
+          type: 'http',
+          'on-failure': { fallback: [{ name: 'handler', type: 'http' }] },
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    const wfWithExtra = minimal({
+      steps: [
+        {
+          name: 'act',
+          type: 'http',
+          'on-failure': {
+            fallback: [
+              { name: 'handler', type: 'http' },
+              { name: 'extra', type: 'http' },
+            ],
+          },
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    expect(computeTopologyFingerprint(wfBase)).not.toEqual(
+      computeTopologyFingerprint(wfWithExtra)
+    );
   });
 });
 

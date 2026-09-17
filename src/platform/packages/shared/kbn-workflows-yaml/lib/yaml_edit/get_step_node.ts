@@ -9,7 +9,9 @@
 
 import type { Document, YAMLMap } from 'yaml';
 import { isMap, isPair, isScalar, isSeq } from 'yaml';
-import { isNestedStepKey } from '../../common/yaml/build_workflow_lookup';
+import { STEP_CHILD_CONTAINER_KEYS } from '@kbn/workflows';
+
+const STEP_CHILD_CONTAINER_KEY_SET: ReadonlySet<string> = new Set(STEP_CHILD_CONTAINER_KEYS);
 
 function findInNode(node: unknown, stepName: string): YAMLMap | null {
   if (isSeq(node)) {
@@ -21,7 +23,12 @@ function findInNode(node: unknown, stepName: string): YAMLMap | null {
     if (node.get('name') === stepName) return node;
 
     for (const pair of node.items) {
-      if (isPair(pair) && isScalar(pair.key) && isNestedStepKey(pair.key.value)) {
+      if (
+        isPair(pair) &&
+        isScalar(pair.key) &&
+        typeof pair.key.value === 'string' &&
+        STEP_CHILD_CONTAINER_KEY_SET.has(pair.key.value)
+      ) {
         const found = findInNode(pair.value, stepName);
         if (found) return found;
       }

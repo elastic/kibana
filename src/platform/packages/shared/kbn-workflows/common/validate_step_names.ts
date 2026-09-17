@@ -8,6 +8,8 @@
  */
 
 import type { WorkflowYaml } from '../spec/schema';
+import { walkStepTree } from '../graph_layout/walk_step_tree';
+import type { Step } from '../graph_layout/types';
 
 interface StepNameValidationError {
   stepName: string;
@@ -21,99 +23,34 @@ export interface StepNameValidationResult {
 }
 
 /**
- * Collects all step names from a workflow definition recursively
- */
-function collectAllStepNames(steps: WorkflowYaml['steps']): string[] {
-  const stepNames: string[] = [];
-
-  if (!steps || !Array.isArray(steps)) {
-    return stepNames;
-  }
-
-  for (const step of steps) {
-    if (step.name) {
-      stepNames.push(step.name);
-    }
-
-    // Collect nested step names using a generic approach
-    stepNames.push(...collectNestedStepNames(step));
-  }
-
-  return stepNames;
-}
-
-/**
- * Extracts the fallback steps array from an on-failure block, if present.
- */
-function getOnFailureFallbackSteps(
-  obj: { 'on-failure'?: { fallback?: unknown } } | undefined
-): WorkflowYaml['steps'] | undefined {
-  const fallback = obj?.['on-failure']?.fallback;
-  return Array.isArray(fallback) ? (fallback as WorkflowYaml['steps']) : undefined;
-}
-
-/**
- * Helper function to collect step names from nested structures
- */
-function collectNestedStepNames(step: unknown): string[] {
-  const stepNames: string[] = [];
-
-  const s = step as {
-    steps?: unknown;
-    else?: unknown;
-    branches?: Array<{ steps?: unknown }>;
-    'on-failure'?: { fallback?: unknown };
-  };
-
-  // Handle steps property (foreach, if, atomic, merge)
-  if (s.steps && Array.isArray(s.steps)) {
-    stepNames.push(...collectAllStepNames(s.steps as WorkflowYaml['steps']));
-  }
-
-  // Handle else branch for if steps
-  if (s.else && Array.isArray(s.else)) {
-    stepNames.push(...collectAllStepNames(s.else as WorkflowYaml['steps']));
-  }
-
-  // Handle branches for parallel steps
-  if (s.branches && Array.isArray(s.branches)) {
-    for (const branch of s.branches) {
-      if (branch.steps && Array.isArray(branch.steps)) {
-        stepNames.push(...collectAllStepNames(branch.steps as WorkflowYaml['steps']));
-      }
-    }
-  }
-
-  const fallbackSteps = getOnFailureFallbackSteps(s);
-  if (fallbackSteps) {
-    stepNames.push(...collectAllStepNames(fallbackSteps));
-  }
-
-  return stepNames;
-}
-
-/**
- * Validates that all step names in a workflow are unique
+ * Validates that all step names in a workflow are unique.
+ * Uses `walkStepTree` to cover every slot: `steps`, `else`, `branches[]`,
+ * `cases[]`, `default`, `on-failure.fallback`, `iteration-on-failure.fallback`.
  */
 export function validateStepNameUniqueness(workflow: WorkflowYaml): StepNameValidationResult {
-  const stepNames = collectAllStepNames(workflow.steps);
-
-  const workflowLevelFallback = getOnFailureFallbackSteps(
-    workflow.settings as { 'on-failure'?: { fallback?: unknown } } | undefined
-  );
-  if (workflowLevelFallback) {
-    stepNames.push(...collectAllStepNames(workflowLevelFallback));
-  }
-
+  const steps = (workflow.steps ?? []) as ReadonlyArray<Step>;
   const stepNameCounts = new Map<string, number>();
-  const errors: StepNameValidationError[] = [];
 
-  // Count occurrences of each step name
-  for (const stepName of stepNames) {
-    stepNameCounts.set(stepName, (stepNameCounts.get(stepName) || 0) + 1);
+  walkStepTree(steps, (step) => {
+    if (step.name) {
+      stepNameCounts.set(step.name, (stepNameCounts.get(step.name) ?? 0) + 1);
+    }
+  });
+
+  // Also walk any workflow-level on-failure.fallback steps
+  const workflowSettings = workflow.settings as
+    | { 'on-failure'?: { fallback?: unknown } }
+    | undefined;
+  const workflowFallback = workflowSettings?.['on-failure']?.fallback;
+  if (Array.isArray(workflowFallback)) {
+    walkStepTree(workflowFallback as ReadonlyArray<Step>, (step) => {
+      if (step.name) {
+        stepNameCounts.set(step.name, (stepNameCounts.get(step.name) ?? 0) + 1);
+      }
+    });
   }
 
-  // Find duplicates
+  const errors: StepNameValidationError[] = [];
   for (const [stepName, count] of stepNameCounts) {
     if (count > 1) {
       errors.push({

@@ -18,8 +18,12 @@ export interface StepInfo {
   lineEnd: number;
   propInfos: Record<string, StepPropInfo>;
   parentStepId?: string;
-  /** Which nested key under the parent this step belongs to ('steps', 'else', 'on-failure', …). */
-  branchKey?: NestedStepKey;
+  /**
+   * Which nested key under the parent this step belongs to.
+   * For simple slots: `'steps'`, `'else'`, `'on-failure'`, `'fallback'`.
+   * For indexed slots: `'cases[0].steps'`, `'branches[1].steps'`.
+   */
+  branchKey?: string;
 }
 
 export interface StepPropInfo {
@@ -88,7 +92,19 @@ export function buildWorkflowLookup(
   };
 }
 
-export const NESTED_STEP_KEYS = [
+/**
+ * Keys that identify a step *body* rather than a step *property*.
+ * Used to exclude these from `propInfos` so downstream validators (e.g.
+ * `validate_parallel_mode`, `validate_parallel_fan_out`) can use
+ * `propInfos` to inspect step-level config keys like `foreach`, `branches`,
+ * `cases` without confusing them with step body containers.
+ *
+ * `branches`, `cases`, and `default` are intentionally **not** in this list —
+ * they must appear in `propInfos` so the parallel-mode validators can detect
+ * whether a parallel step uses static branches or dynamic fan-out. Widening
+ * this set to include those keys would silently break those validators.
+ */
+export const STEP_BODY_KEYS = [
   'steps',
   'else',
   'on-failure',
@@ -96,17 +112,45 @@ export const NESTED_STEP_KEYS = [
   'fallback',
 ] as const;
 
-export type NestedStepKey = (typeof NESTED_STEP_KEYS)[number];
+export type StepBodyKey = (typeof STEP_BODY_KEYS)[number];
 
-export function isNestedStepKey(value: unknown): value is NestedStepKey {
-  return typeof value === 'string' && (NESTED_STEP_KEYS as readonly string[]).includes(value);
+/**
+ * @deprecated Use `STEP_BODY_KEYS` instead.
+ * Kept for backward compatibility with existing consumers.
+ */
+export const NESTED_STEP_KEYS = STEP_BODY_KEYS;
+
+/**
+ * @deprecated Use the type guard against `STEP_BODY_KEYS` directly.
+ */
+export type NestedStepKey = StepBodyKey;
+
+export function isNestedStepKey(value: unknown): value is StepBodyKey {
+  return typeof value === 'string' && (STEP_BODY_KEYS as readonly string[]).includes(value);
 }
+
+/**
+ * Keys under which branch *identity* is recorded in `StepInfo.branchKey`.
+ * Superset of `STEP_BODY_KEYS` — adds `branches`, `cases`, and `default` so
+ * switch-case and parallel-branch steps get distinct `branchKey` values
+ * (e.g. `'cases[0].steps'`) rather than inheriting the parent's key.
+ */
+const STEP_CHILD_CONTAINER_KEY_SET: ReadonlySet<string> = new Set([
+  'steps',
+  'else',
+  'branches',
+  'cases',
+  'default',
+  'on-failure',
+  'iteration-on-failure',
+  'fallback',
+]);
 
 export function inspectStep(
   node: any,
   lineCounter: LineCounter,
   parentStepId?: string,
-  branchKey?: NestedStepKey
+  branchKey?: string
 ): Record<string, StepInfo> {
   const result: Record<string, StepInfo> = {};
 
@@ -124,8 +168,12 @@ export function inspectStep(
           }
         }
 
+        // Pass 1 (catch-all): descend into non-container keys carrying the
+        // current branchKey through (e.g. `with:` block, `retry:` config).
+        // Use the wider STEP_CHILD_CONTAINER_KEY_SET so branches/cases/default
+        // are excluded from catch-all descent — they are handled in Pass 2.
         const keyValue = YAML.isScalar(item.key) ? item.key.value : undefined;
-        if (!isNestedStepKey(keyValue)) {
+        if (typeof keyValue !== 'string' || !STEP_CHILD_CONTAINER_KEY_SET.has(keyValue)) {
           const currentParentStepId = stepId ?? parentStepId;
           Object.assign(
             result,
@@ -137,13 +185,34 @@ export function inspectStep(
 
     node.items.forEach((item) => {
       if (YAML.isPair(item) && YAML.isScalar(item.key)) {
-        // Hoist to a local so the isNestedStepKey predicate narrows the type,
-        // exactly as the sibling forEach above already does with `keyValue`.
         const nestedKeyValue = item.key.value;
-        if (isNestedStepKey(nestedKeyValue)) {
+        if (typeof nestedKeyValue !== 'string') return;
+        if (!STEP_CHILD_CONTAINER_KEY_SET.has(nestedKeyValue)) return;
+
+        const childParentStepId = stepId ?? parentStepId;
+
+        // Pass 2 (branch identity): generate indexed branchKey paths for
+        // sequences of branch/case maps so each step gets a distinct branchKey.
+        if (
+          (nestedKeyValue === 'branches' || nestedKeyValue === 'cases') &&
+          YAML.isSeq(item.value)
+        ) {
+          item.value.items.forEach((seqItem: any, idx: number) => {
+            // The inner steps of each branch/case are under the `steps` key.
+            if (YAML.isMap(seqItem)) {
+              const innerSteps = seqItem.get('steps', true);
+              if (innerSteps) {
+                Object.assign(
+                  result,
+                  inspectStep(innerSteps, lineCounter, childParentStepId, `${nestedKeyValue}[${idx}].steps`)
+                );
+              }
+            }
+          });
+        } else {
           Object.assign(
             result,
-            inspectStep(item.value, lineCounter, stepId ?? parentStepId, nestedKeyValue)
+            inspectStep(item.value, lineCounter, childParentStepId, nestedKeyValue)
           );
         }
       }
@@ -158,6 +227,8 @@ export function inspectStep(
     const propNodes: Record<string, StepPropInfo> = {};
     node.items.forEach((innerNode) => {
       if (YAML.isPair(innerNode) && YAML.isScalar(innerNode.key)) {
+        // propInfos excludes only STEP_BODY_KEYS — branches/cases/default are
+        // intentionally kept so parallel-mode validators can detect the step shape.
         if (!isNestedStepKey(innerNode.key.value)) {
           Object.assign(propNodes, visitStepProps(innerNode));
         }

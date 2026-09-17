@@ -243,6 +243,58 @@ steps:
     });
   });
 
+  describe('switch / parallel / default branches (currently missing from isNestedStepKey)', () => {
+    it('should find a step inside a switch case', () => {
+      const doc = parse(`
+steps:
+  - name: branch-step
+    type: switch
+    cases:
+      - match: "true"
+        steps:
+          - name: inner-step
+            type: wait
+`);
+      expect(getStepNode(doc, 'inner-step')).not.toBeNull();
+    });
+
+    it('should find a step inside a switch default', () => {
+      const doc = parse(`
+steps:
+  - name: branch-step
+    type: switch
+    cases:
+      - match: "true"
+        steps:
+          - name: case-step
+            type: wait
+    default:
+      - name: default-step
+        type: wait
+`);
+      expect(getStepNode(doc, 'default-step')).not.toBeNull();
+    });
+
+    it('should find a step inside a parallel branch', () => {
+      const doc = parse(`
+steps:
+  - name: par
+    type: parallel
+    branches:
+      - name: left
+        steps:
+          - name: left-step
+            type: wait
+      - name: right
+        steps:
+          - name: right-step
+            type: wait
+`);
+      expect(getStepNode(doc, 'left-step')).not.toBeNull();
+      expect(getStepNode(doc, 'right-step')).not.toBeNull();
+    });
+  });
+
   describe('node identity', () => {
     it('should return the same YAMLMap node from the document AST', () => {
       const doc = parse(`

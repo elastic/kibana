@@ -20,7 +20,7 @@ import type {
   Step,
 } from './types';
 import { CONTAINER_STEP_TYPES, DEFAULT_NODE_STYLE } from './types';
-import { visitStepChildren } from './walk_step_tree';
+import { visitStepChildSlots } from './walk_step_tree';
 import type { IfStep, MergeStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
 
 const TRIGGER_LABEL: Record<string, string> = {
@@ -166,11 +166,13 @@ function transformInternal(
       };
       nodes.push(groupNode);
 
-      // Use visitStepChildren (the same enumerator as the topology fingerprint)
-      // to extract the inner steps — keeps both traversals in sync.
+      // Explicitly select the 'steps' slot (not iteration-on-failure.fallback,
+      // which visitStepChildSlots also enumerates for foreach/while). Using
+      // last-wins over all slots would silently swap the loop body for the
+      // fallback body when iteration-on-failure is present.
       let childSteps: Step[] = [];
-      visitStepChildren(step, (children) => {
-        childSteps = children;
+      visitStepChildSlots(step, (slot, children) => {
+        if (slot.kind === 'steps') childSteps = children;
       });
       const inner = transformInternal([], childSteps, ids);
       Object.assign(nodeRefs, inner.nodeRefs);

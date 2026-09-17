@@ -506,6 +506,58 @@ steps:
       expect(result.error).toContain('no_such_step');
       expect(result.error).toContain('not found');
     });
+
+    it('inserts after a step inside a switch case', () => {
+      const switchWorkflow = `
+name: switch-workflow
+steps:
+  - name: branch-step
+    type: switch
+    cases:
+      - match: "true"
+        steps:
+          - name: inner-step
+            type: wait
+`;
+      const result = insertStep(
+        switchWorkflow,
+        { name: 'new-step', type: 'wait' },
+        'inner-step'
+      );
+
+      expect(result.success).toBe(true);
+      const parsed = parseDocument(result.yaml).toJSON();
+      const caseSteps = parsed.steps[0].cases[0].steps;
+      expect(caseSteps).toHaveLength(2);
+      expect(caseSteps[0].name).toBe('inner-step');
+      expect(caseSteps[1].name).toBe('new-step');
+    });
+
+    it('inserts after a step inside a parallel branch', () => {
+      const parallelWorkflow = `
+name: parallel-workflow
+steps:
+  - name: par
+    type: parallel
+    branches:
+      - name: left
+        steps:
+          - name: left-step
+            type: wait
+`;
+      const result = insertStep(
+        parallelWorkflow,
+        { name: 'new-step', type: 'wait' },
+        'left-step'
+      );
+
+      expect(result.success).toBe(true);
+      const parsed = parseDocument(result.yaml).toJSON();
+      const branchSteps = parsed.steps[0].branches[0].steps;
+      expect(branchSteps).toHaveLength(2);
+      expect(branchSteps[0].name).toBe('left-step');
+      expect(branchSteps[1].name).toBe('new-step');
+    });
   });
 
   describe('deleteStep', () => {
