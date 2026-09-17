@@ -2215,6 +2215,15 @@
       "enabled": true
     },
     {
+      "groupName": "mongodb",
+      "matchDepNames": ["mongodb", "mongodb-connection-string-url"],
+      "reviewers": ["team:response-ops", "team:workchat-eng"],
+      "addLabels": ["Team:ResponseOps"],
+      "matchBaseBranches": ["main"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "antlr4",
       "matchDepNames": ["antlr4"],
       "reviewers": ["team:appex-sharedux", "team:kibana-discover"],
@@ -2554,6 +2563,15 @@
       "addLabels": ["Team:ResponseOps"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "mysql2",
+      "matchDepNames": ["mysql2"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:ResponseOps"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
     },
     {
       "groupName": "react-day-picker",

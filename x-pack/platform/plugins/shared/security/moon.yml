@@ -21,6 +21,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/cps'
   - '@kbn/cps-utils'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/es-query'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'

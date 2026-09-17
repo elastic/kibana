@@ -8,6 +8,8 @@
 import React, { useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { CANCEL_DISCOVERY_LABEL, FIND_SIGNIFICANT_EVENTS_LABEL } from '../shared/translations';
 import { ContextMenuSplitButton } from '../shared/context_menu_split_button';
 import type { MenuHelpers, ContextMenuSplitButtonProps } from '../shared/context_menu_split_button';
@@ -39,6 +41,15 @@ export const FindSignificantEventsButton = ({
   size = 's',
   primaryDataTestSubj = 'significant_events_discovery_button',
 }: FindSignificantEventsButtonProps) => {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  const { canManage } = getNightshiftCapabilities(nightshift);
+
   const buildPanels = useCallback(
     ({ closeMenu }: MenuHelpers) => [
       {
@@ -60,6 +71,10 @@ export const FindSignificantEventsButton = ({
   );
 
   const isPrimaryDisabled = isDisabled || isRunning;
+
+  if (!canManage) {
+    return null;
+  }
 
   return (
     <ContextMenuSplitButton
