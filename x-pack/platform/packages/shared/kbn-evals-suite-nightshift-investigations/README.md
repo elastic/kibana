@@ -101,6 +101,9 @@ export SANDBOX_CA_CERT_PATH=/absolute/path/to/sandbox-service/ssl/server.crt
 ```
 
 Scout reads the PEM files into the current `sandbox.ssl` configuration and connects with mTLS.
+The sandbox configuration is passed through a mode-0600 temporary file in a private directory,
+so the API key and mTLS private key do not appear in process arguments. Scout removes the
+temporary directory when its process exits normally.
 The gRPC API listens on `9090`; `8090` is only for probes. Leave the `WORKSPACE_SNAPSHOT_*`
 variables unset so each new conversation starts independently. Persistence is owned by
 sandbox-api; the Kibana workspace manager and backup hook were removed in #289300. The shared
