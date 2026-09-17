@@ -136,3 +136,25 @@ export const canSuggestTargetAssignment = (
  */
 export const isPendingSuffixModifier = (command: ESQLAstDenseVectorCommand): boolean =>
   command.targetField?.name.toLowerCase() === DENSE_VECTOR_SUFFIX_KEYWORD;
+
+/**
+ * Names of the `dense_vector` columns the command generates. The source fields are kept, so
+ * these are always additional — unlike the sibling TEXT command, which replaces them.
+ *
+ * One name per input field, suffixed. `target = <input>` instead names a single output column,
+ * whatever the input is.
+ *
+ * A bare string literal (`DENSE_VECTOR "some text"`) generates a column whose name is not
+ * specified by the design doc, so none is reported rather than guessing one.
+ */
+export const getDenseVectorColumnNames = (command: ESQLAstDenseVectorCommand): string[] => {
+  const { targetField, suffix, fields } = command;
+
+  if (targetField !== undefined) {
+    return [targetField.name];
+  }
+
+  const appliedSuffix = suffix?.valueUnquoted ?? DENSE_VECTOR_DEFAULT_SUFFIX;
+
+  return (fields ?? []).filter(({ name }) => name).map(({ name }) => `${name}${appliedSuffix}`);
+};

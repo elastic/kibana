@@ -12,10 +12,12 @@ import type { ICommand, ICommandMethods } from '../registry';
 import type { ICommandContext } from '../types';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
+import { columnsAfter } from './columns_after';
 
 const denseVectorCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
+  columnsAfter,
 };
 
 export const denseVectorCommand: ICommand = {
