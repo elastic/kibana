@@ -42,6 +42,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       hidden: true,
       template: {
         mappings: DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+        settings: { auto_expand_replicas: '0-1' },
         lifecycle: { data_retention: this.deps.dataRetention },
       },
     });
@@ -51,6 +52,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       hidden: true,
       template: {
         mappings: DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+        settings: { auto_expand_replicas: '0-1' },
         lifecycle: { data_retention: this.deps.dataRetention },
       },
     });
