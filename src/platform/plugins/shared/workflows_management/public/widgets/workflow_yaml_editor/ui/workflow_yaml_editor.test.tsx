@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
@@ -199,8 +199,12 @@ jest.mock('../styles/global_workflow_editor_styles', () => ({
   GlobalWorkflowEditorStyles: () => null,
 }));
 
+let mockCloseActionsPopover: (() => void) | undefined;
 jest.mock('../../../features/actions_menu_popover', () => ({
-  ActionsMenuPopover: () => null,
+  ActionsMenuPopover: ({ closePopover }: { closePopover: () => void }) => {
+    mockCloseActionsPopover = closePopover;
+    return null;
+  },
 }));
 
 jest.mock('../lib/utils', () => ({
@@ -300,6 +304,8 @@ describe('WorkflowYAMLEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedKeyboardHandlers = {};
+    mockCloseActionsPopover = undefined;
+    defaultProps.editorRef.current = null;
     mockSaveYaml.mockResolvedValue(undefined);
     // useSaveYaml now returns just the function, not an array
     mockUseSaveYaml.mockReturnValue(mockSaveYaml);
@@ -313,6 +319,33 @@ describe('WorkflowYAMLEditor', () => {
     await waitFor(() => {
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
     });
+  });
+
+  it('restores editor focus when the actions menu closes', async () => {
+    renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(mockCloseActionsPopover).toBeDefined();
+      expect(defaultProps.editorRef.current).not.toBeNull();
+    });
+
+    const requestAnimationFrame = jest
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((callback) => {
+        callback(0);
+        return 0;
+      });
+
+    try {
+      const focus = defaultProps.editorRef.current?.focus as jest.Mock;
+      focus.mockClear();
+
+      act(() => mockCloseActionsPopover?.());
+
+      expect(focus).toHaveBeenCalledTimes(1);
+    } finally {
+      requestAnimationFrame.mockRestore();
+    }
   });
 
   it('updates store when editor content changes', async () => {

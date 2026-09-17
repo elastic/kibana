@@ -12,6 +12,7 @@ import {
 } from '@kbn/workflows-extensions/public';
 import { getConversationMetadataStepCommonDefinition } from '../../common/workflows/steps/get_conversation_metadata';
 import { updateConversationMetadataStepCommonDefinition } from '../../common/workflows/steps/update_conversation_metadata';
+import { createConversationStepCommonDefinition } from '../../common/workflows/steps/create_conversation';
 
 export const sharedIcon: React.ComponentType = React.lazy(() =>
   import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
@@ -36,4 +37,8 @@ export const getConversationMetadataStepDefinition = createPublicStepDefinition(
 
 export const updateConversationMetadataStepDefinition = createPublicStepDefinition(
   updateConversationMetadataStepCommonDefinition
+);
+
+export const createConversationStepDefinition = createPublicStepDefinition(
+  createConversationStepCommonDefinition
 );

@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { BASE_BUCKET_DAILY } from './bucket_config';
+import { BASE_BUCKET_DAILY } from './bucket_config.ts';
 
 interface ManifestEntry {
   filename?: string;
@@ -24,7 +24,7 @@ interface ManifestEntry {
 (async () => {
   console.log('--- Create ES Snapshot Manifest');
 
-  const destination = process.argv[2] || __dirname + '/test';
+  const destination = process.argv[2] || `${import.meta.dirname}/test`;
 
   const ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
   const ES_CLOUD_IMAGE = process.env.ELASTICSEARCH_CLOUD_IMAGE;

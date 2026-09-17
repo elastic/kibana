@@ -120,25 +120,49 @@ export function evaluateStreamlangCondition(doc: any, condition: unknown): boole
   return false;
 }
 
+export interface EuidGateOptions {
+  /** Also gate on `postAggFilter`, the rule for putting an entity in the store. @default true */
+  applyPostAggFilter?: boolean;
+}
+
+/** `ALERT_RULE_UUID` from `@kbn/rule-data-utils`. The flyout's ECS projection drops `kibana.alert.uuid` but keeps this. */
+const ALERT_RULE_UUID_FIELD = 'kibana.alert.rule.uuid';
+
+/** An alert never creates an entity: extraction reads log indices, not `.alerts-*`. */
+const DOCUMENT_IS_ALERT: Condition = { field: ALERT_RULE_UUID_FIELD, exists: true };
+
+/** ORs {@link DOCUMENT_IS_ALERT} in front of `postAggFilter` so alerts satisfy it. */
+export function waiveForAlerts(postAggFilter?: Condition): Condition | undefined {
+  if (!postAggFilter) {
+    return undefined;
+  }
+  return { or: [DOCUMENT_IS_ALERT, postAggFilter] };
+}
+
 /**
- * True when the document matches `documentsFilter` ∧ `postAggFilter` (same predicate as
- * `getEuidDslDocumentsContainsIdFilter` / logs extraction WHERE). `postAggFilter` uses
- * logical field names; main extraction ESQL applies `recent.` only when building the post-join WHERE.
+ * True when the document matches `documentsFilter`, and `postAggFilter` too unless it is an alert.
+ * `postAggFilter` uses logical field names; main extraction ESQL applies `recent.` only when
+ * building the post-join WHERE.
  *
  * For single-field identity definitions, returns true (callers only use this on the
  * calculated-identity path after field evaluations).
  */
 export function documentPassesCalculatedIdentityPipelineGate(
   doc: any,
-  entityDefinition: EntityDefinitionWithoutId
+  entityDefinition: EntityDefinitionWithoutId,
+  options?: EuidGateOptions
 ): boolean {
   const { identityField, postAggFilter } = entityDefinition;
+  const { applyPostAggFilter = true } = options ?? {};
   if (isSingleFieldIdentity(identityField)) {
     return true;
   }
   return evaluateStreamlangCondition(
     doc,
-    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, postAggFilter)
+    mergeDocumentsFilterAndPostAgg(
+      identityField.documentsFilter,
+      applyPostAggFilter ? waiveForAlerts(postAggFilter) : undefined
+    )
   );
 }
 

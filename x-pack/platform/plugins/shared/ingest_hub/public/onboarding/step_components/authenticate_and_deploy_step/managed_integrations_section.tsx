@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -29,19 +29,29 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLocation } from 'react-router-dom';
 import {
   LazyAwsIdentityFederationSetup,
   LazyAwsStaticKeysForm,
   useGetPackageInfoByKeyQuery,
   getAnyCloudConnectorIacTemplateUrl,
 } from '@kbn/fleet-plugin/public';
-import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
+import type {
+  AwsStaticKeyCredentials,
+  CloudSetupForCloudConnector,
+  RenderIacTemplateIntegration,
+} from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { StaticKeysReplaceView } from './static_keys_replace_view';
+import { getIacRenderIntegrations } from './iac_render_integrations';
+import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
+  serviceIds: string[];
+  serviceVars: Record<string, ServiceVars>;
   showIdentityFederation: boolean;
   onDeploy: () => void;
   isDeploying: boolean;
@@ -51,6 +61,8 @@ interface ManagedIntegrationsSectionProps {
 
 export function ManagedIntegrationsSection({
   serviceCount,
+  serviceIds,
+  serviceVars,
   showIdentityFederation,
   onDeploy,
   isDeploying,
@@ -58,12 +70,21 @@ export function ManagedIntegrationsSection({
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { setConnectorId } = useOnboardingFlow();
+  const { setConnectorId, setStaticKeys, authenticateAndDeployStep, awsServicesMap } =
+    useOnboardingFlow();
+  const { connectorId: initialConnectorId } = authenticateAndDeployStep;
+  const location = useLocation();
+  const isEditMode = new URLSearchParams(location.search).has('deploymentId');
+  const isStaticKeysEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'static_keys';
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(!isDone);
   const [preferredMethod, setPreferredMethod] = useState<PreferredMethod>(
-    showIdentityFederation ? 'identity_federation' : 'access_keys'
+    isStaticKeysEditMode
+      ? 'access_keys'
+      : showIdentityFederation
+      ? 'identity_federation'
+      : 'access_keys'
   );
 
   useEffect(() => {
@@ -78,6 +99,13 @@ export function ManagedIntegrationsSection({
 
   const [isDeployReady, setIsDeployReady] = useState(false);
 
+  const handleStaticKeysChange = useCallback(
+    (fields: AwsStaticKeyCredentials | undefined) => {
+      setStaticKeys(fields);
+    },
+    [setStaticKeys]
+  );
+
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
     'aws',
     undefined,
@@ -87,6 +115,10 @@ export function ManagedIntegrationsSection({
   const iacTemplateUrl = useMemo(
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
+  );
+  const iacIntegrations: RenderIacTemplateIntegration[] = useMemo(
+    () => getIacRenderIntegrations(serviceIds, awsServicesMap, serviceVars),
+    [serviceIds, awsServicesMap, serviceVars]
   );
   const cloud = services.cloud as CloudSetupForCloudConnector | undefined;
 
@@ -226,11 +258,22 @@ export function ManagedIntegrationsSection({
                 <LazyAwsIdentityFederationSetup
                   cloud={cloud}
                   iacTemplateUrl={iacTemplateUrl}
+                  integrations={iacIntegrations}
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
+                  initialConnectorId={initialConnectorId}
+                />
+              ) : isStaticKeysEditMode ? (
+                <StaticKeysReplaceView
+                  onReadyChange={setIsDeployReady}
+                  onFieldsChange={handleStaticKeysChange}
                 />
               ) : (
-                <LazyAwsStaticKeysForm onReadyChange={setIsDeployReady} />
+                <LazyAwsStaticKeysForm
+                  initialValues={authenticateAndDeployStep.staticKeys}
+                  onReadyChange={setIsDeployReady}
+                  onFieldsChange={handleStaticKeysChange}
+                />
               )}
             </Suspense>
 

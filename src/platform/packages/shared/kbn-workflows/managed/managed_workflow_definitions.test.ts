@@ -12,21 +12,28 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
+  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
-  PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-  PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
-  PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
-  PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
-import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/pnd/dark_continuous_threat_hunt.yaml';
-import DETECTION_RULE_CREATION_YAML from './definitions/pnd/detection_rule_creation.yaml';
-import DETECTION_RULE_TUNING_YAML from './definitions/pnd/detection_rule_tuning.yaml';
-import FLOOR_ALERT_TRIAGE_YAML from './definitions/pnd/floor_alert_triage.yaml';
-import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/pnd/floor_attack_discovery.yaml';
+import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
+import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
+import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
+import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule_creation.yaml';
+import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
+import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
+import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
+import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/hunt_continuous_threat_hunt.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -50,23 +57,30 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
-  [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
+  [CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    intervalMinutes: 1440,
+  },
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+    scheduleInterval: '24h',
+  },
+  [ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    scheduleInterval: '2h',
+    extras: { analysisWindowDays: 14 },
   },
-  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
-    settingsVersion: 1,
-    autonomyLevel: 'manual',
-  },
-  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
@@ -144,15 +158,22 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '1:d6a82eff'],
-  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '1:149ca943'],
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '2:275b444e'],
+  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '3:17a26220'],
   [
-    PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-    DARK_CONTINUOUS_THREAT_HUNT_YAML,
-    '2:de85a75a',
+    ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+    HUNT_CONTINUOUS_THREAT_HUNT_YAML,
+    '1:83a50923',
   ],
-  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '1:f39d6360'],
-  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID, DETECTION_RULE_CREATION_YAML, '1:a6804a44'],
+  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '6:01d470b4'],
+  [
+    ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+    DETECTION_RULE_CREATION_YAML,
+    '1:a6804a44',
+  ],
+  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '1:f2aacd90'],
+  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '1:1437f9a0'],
+  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '1:5f7bc458'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {

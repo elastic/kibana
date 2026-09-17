@@ -23,6 +23,11 @@ export type {
   AppHeaderFavoriteAction,
   AppHeaderFavoriteStatus,
   AppHeaderShareAction,
+  /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  AppHeaderExperimentalDashboardAiAction,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,
@@ -36,9 +41,10 @@ export type {
   AppHeaderTabIconBadge,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
-  ChromeNext,
-  GlobalHeaderAiButton,
-} from './chrome_next';
+} from './app_header';
+export type { ChromeNext } from './chrome_next';
+export type { ChromeAiButton, ChromeControls, GlobalSearchConfig } from './controls';
+export type { ChromeHelp, ChromeNewsfeedHandler } from './help';
 export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
@@ -82,6 +88,9 @@ export type {
   NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
+  ProjectNavigationLinkItem,
+  ProjectNavigationLinkList,
+  ProjectNavigationLinks,
 } from './project_navigation';
 
 export type {
@@ -91,5 +100,3 @@ export type {
   SidebarSetup,
   SidebarStart,
 } from './sidebar';
-
-export type { GlobalSearchConfig } from './chrome_next/global_search';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { YARA_META_KEYS_OF_INTEREST } from './constants';
+import type { YaraMetaKeyOfInterest } from '../../../../common/endpoint/types';
 
 export type YaraDiagnosticSeverity = 'error' | 'warning';
 
@@ -15,8 +15,6 @@ export interface YaraDiagnostic {
   /** 1-based line number from libyara (0 if unknown). */
   line: number;
 }
-
-export type YaraMetaKeyOfInterest = (typeof YARA_META_KEYS_OF_INTEREST)[number];
 
 export type YaraCompiledRuleMeta = {
   [key in YaraMetaKeyOfInterest]?: string;

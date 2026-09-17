@@ -105,7 +105,7 @@ describe('runDefaultAgentMode', () => {
     } as any);
 
     prepareConversationMock.mockResolvedValue({
-      previousRounds: [],
+      timeline: [],
       nextInput: { message: 'hello', attachments: [] },
       attachments: [],
       attachmentTypes: [],
@@ -183,7 +183,7 @@ describe('runDefaultAgentMode', () => {
     } as any);
 
     prepareConversationMock.mockResolvedValue({
-      previousRounds: [],
+      timeline: [],
       nextInput: { message: 'hello', attachments: [] },
       attachments: [],
       attachmentTypes: [],
@@ -222,7 +222,7 @@ describe('runDefaultAgentMode', () => {
       getPendingRoundMock.mockReturnValue(undefined);
       selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
       prepareConversationMock.mockResolvedValue({
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: 'hello', attachments: [] },
         attachments: [],
         attachmentTypes: [],
@@ -303,7 +303,7 @@ describe('runDefaultAgentMode', () => {
       getPendingRoundMock.mockReturnValue(undefined);
       selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
       prepareConversationMock.mockResolvedValue({
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: 'hello', attachments: [] },
         attachments: [],
         attachmentTypes: [],
@@ -362,7 +362,7 @@ describe('runDefaultAgentMode', () => {
     getPendingRoundMock.mockReturnValue(undefined);
     selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
     prepareConversationMock.mockResolvedValue({
-      previousRounds: [],
+      timeline: [],
       nextInput: { message: 'hello', attachments: [] },
       attachments: [],
       attachmentTypes: [],

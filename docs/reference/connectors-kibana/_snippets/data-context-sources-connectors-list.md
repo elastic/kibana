@@ -33,6 +33,7 @@
 - [Kubernetes](/reference/connectors-kibana/kubernetes-action-type.md): Read and modify resources in a Kubernetes cluster through its REST API.
 - [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams.
 - [Monday.com](/reference/connectors-kibana/monday-com-action-type.md): Search boards, read and create items, post updates, and manage workspaces in Monday.com.
+- [MySQL](/reference/connectors-kibana/mysql-action-type.md): Query tables, search rows, explore schema, and execute SQL in a MySQL database.
 - [New Relic](/reference/connectors-kibana/new-relic-action-type.md): Acknowledge and resolve AI issues, manage muting rules, and run NRQL queries.
 - [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
 - [OneDrive](/reference/connectors-kibana/one-drive-action-type.md): Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive.
@@ -45,6 +46,8 @@
 - [Salesforce](/reference/connectors-kibana/salesforce-action-type.md): Query and retrieve data from your Salesforce org using SOQL and the REST API.
 - [Sentry](/reference/connectors-kibana/sentry-action-type.md): Triage Sentry issues and provision issue alert rules.
 - [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow.
+
+  {applies_to}`stack: ga 9.6+` {applies_to}`serverless: ga` You can also read, create, update, and delete records, incidents, and events in {{sn}}.
 - [SharePoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 - [SharePoint Server](/reference/connectors-kibana/sharepoint-server-action-type.md): Search and retrieve documents, list items, folders, and site pages from an on-premises SharePoint Server instance.
 - [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.
@@ -73,6 +76,7 @@
 - [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.
 - [AlienVault OTX](/reference/connectors-kibana/alienvault-otx-action-type.md): Retrieve community-driven threat intelligence.
 - [Censys](/reference/connectors-kibana/censys-action-type.md): Enrich hosts, web properties, and certificates, submit assets for rescanning, and run CensEye threat-hunting jobs.
+- [Google Threat Intelligence](/reference/connectors-kibana/google-threat-intelligence-action-type.md): Search threat collections and IOC streams, enrich IP, domain, URL, and file indicators, and scan URLs.
 - [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
 - [MISP](/reference/connectors-kibana/misp-action-type.md): Search attributes and events, check indicators and warninglists, and write sightings, events, attributes, and tags back to MISP.
 - [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.

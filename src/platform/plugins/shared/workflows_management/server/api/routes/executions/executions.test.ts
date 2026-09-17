@@ -26,6 +26,7 @@ describe('Execution Routes', () => {
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockRouter: IRouter;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const mockContext = {
     workflows: Promise.resolve({
@@ -89,6 +90,7 @@ describe('Execution Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
+    mockLogger = loggingSystemMock.createLogger();
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
     mockApi = {
       getWorkflow: jest.fn(),
@@ -155,7 +157,7 @@ describe('Execution Routes', () => {
     registerExecutionRoutes({
       router,
       api: mockApi as any,
-      logger: loggingSystemMock.createLogger(),
+      logger: mockLogger,
       spaces: mockSpaces as any,
       audit: createWorkflowManagementAuditLogMock(),
       config: { hitlExternalResume: { enabled: true } } as WorkflowsManagementConfig,
@@ -260,6 +262,15 @@ describe('Execution Routes', () => {
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Workflows API request failed',
+        expect.objectContaining({
+          route: 'POST /api/workflows/workflow/{id}/run',
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          errorMessage: 'engine failed',
+        })
+      );
       expect(mockResponse.customError).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'customError', body: expect.objectContaining({}) });
     });
@@ -766,7 +777,7 @@ describe('Execution Routes', () => {
         'default',
         { resume: true },
         request,
-        { channel: 'kibana_execution_view' }
+        { channel: 'kibana_execution_view', stepExecutionId: undefined }
       );
       expect(result).toMatchObject({
         type: 'ok',
@@ -776,6 +787,27 @@ describe('Execution Routes', () => {
           message: 'Workflow resume scheduled',
         },
       });
+    });
+
+    it('forwards stepExecutionId so the HITL claim skips search lookup', async () => {
+      mockApi.resumeWorkflowExecution.mockResolvedValue({
+        resumedBy: 'user',
+      });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        body: { input: { resume: true }, stepExecutionId: 'step-exec-1' },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'ex-1',
+        'default',
+        { resume: true },
+        request,
+        { channel: 'kibana_execution_view', stepExecutionId: 'step-exec-1' }
+      );
     });
   });
 

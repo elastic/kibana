@@ -46,13 +46,17 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
     ? colors.success
     : isFailed
     ? colors.danger
-    : colors.backgroundLightPrimary;
+    : colors.borderBasePlain;
   const headerBg = isSuccess
     ? colors.backgroundBaseSuccess
     : isFailed
     ? colors.backgroundBaseDanger
-    : colors.backgroundLightPrimary;
-  const iconColor = isSuccess ? colors.success : isFailed ? colors.danger : colors.primary;
+    : colors.backgroundBaseAccentSecondary;
+  const iconColor = isSuccess
+    ? colors.success
+    : isFailed
+    ? colors.danger
+    : colors.textAccentSecondary;
 
   return (
     <>
@@ -65,7 +69,7 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
           // through softly; token-based so it adapts to dark mode.
           background: transparentize(colors.backgroundBasePlain, 0.5),
           border: `1px solid ${borderColor}`,
-          borderRadius: 10,
+          borderRadius: euiTheme.border.radius.medium,
           position: 'relative',
           transition: 'border-color 120ms ease',
         }}
@@ -80,8 +84,8 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
             gap: 16,
             padding: '8px 16px',
             background: headerBg,
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 10,
+            borderTopLeftRadius: euiTheme.border.radius.medium,
+            borderTopRightRadius: euiTheme.border.radius.medium,
             borderBottom: `1px solid ${borderColor}`,
             fontFamily: euiTheme.font.family,
             fontSize: 12,

@@ -13,6 +13,8 @@ import { apiTargets } from '@kbn/agent-builder-common';
 // The backend an API operation belongs to.
 export const targetSchema = z.enum(apiTargets);
 
+export const BODY_ROOT_KEY = 'x-body-root';
+
 export type { ApiRegistry, ApiRegistryMeta };
 export type LoadedApi = Awaited<ReturnType<ApiRegistry['loadApi']>>;
 export type ApiRegistryDefinition = LoadedApi['definition'];

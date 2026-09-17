@@ -18,11 +18,13 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useGetCurrentUserProfile } from '../../../common/components/user_profiles/use_get_current_user_profile';
+import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../../common/components/user_profiles/use_suggest_users';
 
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/hooks/use_license');
 jest.mock('../../../common/components/user_profiles/use_get_current_user_profile');
+jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../common/components/user_profiles/use_suggest_users');
 
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
@@ -48,12 +50,20 @@ const user: UserProfileWithAvatar = {
   data: {},
 };
 
+const noProfiles: UserProfileWithAvatar[] = [];
+const selectedProfiles: UserProfileWithAvatar[] = [user];
+
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('AlertsPageContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
+    // Stable references per uid set, mirroring the memoized react-query hook, so the sync effect in `AssigneesSelectable` doesn't loop.
+    (useBulkGetUserProfiles as jest.Mock).mockImplementation(({ uids }: { uids: Set<string> }) => ({
+      isLoading: false,
+      data: uids.has(user.uid) ? selectedProfiles : noProfiles,
+    }));
     mockUseUserPrivileges.mockReturnValue(
       getUserPrivilegesMockDefaultValue({
         rulesPrivileges: {
