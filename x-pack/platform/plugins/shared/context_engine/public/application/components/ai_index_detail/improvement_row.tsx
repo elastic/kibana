@@ -267,6 +267,13 @@ export const ImprovementRow = ({
               <EuiButtonEmpty
                 size="s"
                 color="danger"
+                aria-label={i18n.translate(
+                  'xpack.contextEngine.aiIndexDetail.improvements.rejectAriaLabel',
+                  {
+                    defaultMessage: 'Reject: {title}',
+                    values: { title: improvement.title },
+                  }
+                )}
                 onClick={() => onReject(improvement)}
                 isLoading={isRejecting}
                 isDisabled={isBusy}
@@ -281,6 +288,23 @@ export const ImprovementRow = ({
               <EuiButton
                 size="s"
                 fill
+                aria-label={
+                  improvement.status === 'failed'
+                    ? i18n.translate(
+                        'xpack.contextEngine.aiIndexDetail.improvements.retryAriaLabel',
+                        {
+                          defaultMessage: 'Retry: {title}',
+                          values: { title: improvement.title },
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.contextEngine.aiIndexDetail.improvements.approveAriaLabel',
+                        {
+                          defaultMessage: 'Approve: {title}',
+                          values: { title: improvement.title },
+                        }
+                      )
+                }
                 onClick={() => onApprove(improvement)}
                 isLoading={isApproving}
                 isDisabled={isBusy}

@@ -93,7 +93,12 @@ export const addWorkflow = async ({
         { error: deleteError }
       );
     }
-    throw error;
+    if (error instanceof ApplyImprovementError) {
+      throw error;
+    }
+    throw new ApplyImprovementError(
+      error instanceof Error ? error.message : String(error)
+    );
   }
 };
 
@@ -147,11 +152,13 @@ export const removeWorkflow = async ({
     );
   }
 
+  // Detach before disabling: if detach fails the workflow stays enabled but linked (retriable),
+  // whereas disabling first and then failing to detach leaves an orphaned disabled workflow.
+  await aiIndexService.removeAutomation(aiIndexId, { type: 'workflow', value: workflowId });
+
   if (workflow.enabled) {
     await workflows.setEnabled({ ...context, workflowId, enabled: false });
   }
-
-  await aiIndexService.removeAutomation(aiIndexId, { type: 'workflow', value: workflowId });
 
   return workflowId;
 };
