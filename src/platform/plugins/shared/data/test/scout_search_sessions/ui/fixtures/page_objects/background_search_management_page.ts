@@ -16,9 +16,11 @@ import { expect } from '@kbn/scout/ui';
  */
 export class BackgroundSearchManagementPage {
   private readonly table: Locator;
+  private readonly actionsMenuButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.table = this.page.testSubj.locator('searchSessionsMgmtUiTable');
+    this.actionsMenuButton = this.table.getByTestId('sessionManagementActionsCol');
   }
 
   async goTo() {
@@ -69,7 +71,7 @@ export class BackgroundSearchManagementPage {
   }
 
   async renameRow(newName: string) {
-    await this.table.getByTestId('sessionManagementActionsCol').click();
+    await this.actionsMenuButton.click();
     await this.page.testSubj.click('sessionManagementPopoverAction-rename');
     const input = this.page.testSubj.locator('editNameInput');
     await input.fill(newName);
@@ -81,5 +83,33 @@ export class BackgroundSearchManagementPage {
 
   async viewRow() {
     await this.table.getByTestId('sessionManagementNameLink').click();
+  }
+
+  async openActionsMenu() {
+    await this.actionsMenuButton.click();
+  }
+
+  async openInspect() {
+    await this.page.testSubj.click('sessionManagementPopoverAction-inspect');
+  }
+
+  async closeInspect() {
+    await this.page.testSubj.click('euiFlyoutCloseButton');
+  }
+
+  async openRename() {
+    await this.page.testSubj.click('sessionManagementPopoverAction-rename');
+  }
+
+  async cancelRename() {
+    await this.page.testSubj.click('cancelEditName');
+  }
+
+  async openDelete() {
+    await this.page.testSubj.click('sessionManagementPopoverAction-delete');
+  }
+
+  async cancelDelete() {
+    await this.page.testSubj.click('confirmModalCancelButton');
   }
 }
