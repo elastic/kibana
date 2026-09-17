@@ -202,30 +202,29 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | \`severity\` | \`info\`, \`low\`, \`medium\`, \`high\`, \`critical\` | Episode severity when present |
 | \`data\` | \`data.*\` object | Rule-specific ES\\\\|QL output columns (query as \`data.*\`, e.g. \`data.host.name\`, \`data.error_count\`) |
 
-An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use \`rule.id: \\"<ruleId>\\"\`."
+An empty matcher is a catch-all that matches all episodes in the space."
 `;
 
 exports[`schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Multi-rule Action Policies
 
 Use this path when the user wants **one policy across several rules**, a space-wide
-catch-all, or routing by tag/severity — not a policy tied to a single \`rule.id\`.
+catch-all, or routing by tag/severity.
 
 Create the policy with \`set_metadata\` (name by intent, not by one rule),
 \`set_destinations\` (same \`workflowId\` rule as the single-rule path), a matcher from
 the options below, then \`set_grouping\` / \`set_throttle\`.
 
 A policy matches **episodes**, not a rule object. Policies are space-scoped and are
-not bound to a single rule. The matcher is optional KQL over
+not bound to a single rule. The matcher supports a \`tags\` array (matched against rule
+tags) and an optional KQL \`expression\` over
 [matcher context fields](./action-policy-matchers.md).
 
 - **Catch-all**: omit \`set_matcher\` or set matcher to empty/\`null\`. Confirm with the
   user first — this notifies on every \`kind: alert\` episode in the space, including
   rules created later.
-- **Several specific rules**: \`rule.id: \\"<id1>\\" or rule.id: \\"<id2>\\"\`. Collect each
-  \`ruleId\` from \`manage_rule\` / \`sml_search\` (pre-assigned IDs work for unsaved drafts).
-- **A family of rules**: \`rule.tags: \\"production\\"\` or \`rule.name: \\"CPU*\\"\`. Prefer tags
-  when the set will grow.
+- **A family of rules by tag**: \`tags: [\\"production\\"]\`. Matched against the rule's tags.
+  Prefer this when the set of rules will grow.
 - **Route by severity across rules**: \`severity: \\"critical\\"\` (or combine with tags).
   Useful for a PagerDuty policy vs an email policy.
 - **Reuse destinations**: one workflow can serve many rules. Keep Liquid generic —
@@ -483,12 +482,9 @@ Create the policy with these operations in order:
 1. \`set_metadata\`: name = \`\\"Notify on <rule-name>\\"\`, description = \`\\"Default notification for <rule-name>\\"\`
 2. \`set_destinations\`: \`[{ type: \\"workflow\\", id: \\"<workflowId>\\" }]\`
    - Use the \`workflowId\` passed to \`generate_workflow\`, **not** the workflow \`attachmentId\`.
-3. \`set_matcher\`: \`rule.id: \\"<ruleId>\\"\`
-   - \`ruleId\` comes from the \`manage_rule\` tool result. It is pre-assigned when the
-     rule attachment is created and becomes the saved-object ID when the user clicks
-     \\"Create rule\\".
-   - It is available even for unsaved/proposed rules — do not ask the user to save
-     the rule first.
+3. \`set_matcher\`: omit (leave as catch-all). The policy name and description already
+   express the intent. Use \`tags: [\\"<unique-tag>\\"]\` only when the rule carries a tag
+   that uniquely identifies it — \`rule.id\` is no longer available as a KQL field.
 4. \`set_grouping\`: \`per_episode\`
 5. \`set_throttle\`: \`{ strategy: \\"on_status_change\\" }\`
 

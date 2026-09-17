@@ -632,12 +632,12 @@ describe('schema_to_skill_docs', () => {
       expect(generateSingleRuleActionPolicyDoc()).toMatchSnapshot();
     });
 
-    it('scopes with rule.id and defers shared policies to the multi-rule reference', () => {
+    it('advises omitting matcher or using tags, defers shared policies to the multi-rule reference', () => {
       const doc = generateSingleRuleActionPolicyDoc();
       expect(doc).toContain('# Single-rule Action Policies');
       expect(doc).toContain('set_metadata');
       expect(doc).toContain('set_destinations');
-      expect(doc).toContain('rule.id:');
+      expect(doc).not.toContain('rule.id:');
       expect(doc).toContain('kind: signal');
       expect(doc).toContain('(./action-policy-multi-rule.md)');
       expect(doc).not.toContain('./references/');
@@ -653,7 +653,9 @@ describe('schema_to_skill_docs', () => {
       const doc = generateMultiRuleActionPolicyDoc();
       expect(doc).toContain('# Multi-rule Action Policies');
       expect(doc).toContain('Catch-all');
-      expect(doc).toContain('rule.tags');
+      expect(doc).not.toContain('rule.tags');
+      expect(doc).not.toContain('rule.id');
+      expect(doc).toContain('tags: [');
       expect(doc).toContain('(./action-policy-matchers.md)');
       expect(doc).toContain('(./action-policy-single-rule.md)');
       expect(doc).not.toContain('./references/');

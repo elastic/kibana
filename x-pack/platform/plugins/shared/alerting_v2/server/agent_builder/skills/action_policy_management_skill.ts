@@ -208,7 +208,7 @@ After creating the defaults, briefly mention:
 ## When to Load References
 
 ### Single-rule Action Policies
-When notifying on one specific rule (\`rule.id\` matcher, pre-assigned \`ruleId\`), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
+When notifying on one specific rule (omit matcher or use \`tags\` for a unique rule tag), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
 
 ### Multi-rule Action Policies
 When the user wants one policy across several rules, a catch-all, or routing by tag/severity, consult the [action-policy-multi-rule reference](./references/action-policy-multi-rule.md).
