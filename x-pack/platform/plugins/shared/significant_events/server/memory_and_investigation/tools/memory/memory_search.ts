@@ -65,9 +65,8 @@ export const createMemorySearchTool = ({
     'Memory contains persistent knowledge accumulated across conversations.',
   schema: memorySearchSchema,
   handler: async ({ query, tags, categories, references, size, mode }, context) => {
-    const memoryService = getMemoryService(context.esClient.asCurrentUser);
-
     try {
+      const memoryService = await getMemoryService(context.esClient.asCurrentUser);
       const results = await memoryService.search({
         query,
         tags,
