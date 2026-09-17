@@ -14,17 +14,17 @@ import {
   PROPOSALS_UI_CAPABILITY_SHOW,
 } from '../common/proposals/constants';
 import {
-  INCIDENTS_UI_CAPABILITY_MANAGE,
-  INCIDENTS_UI_CAPABILITY_SHOW,
-} from '../common/incidents/constants';
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+  ESCALATIONS_UI_CAPABILITY_SHOW,
+} from '../common/escalations/constants';
 import {
   PROPOSALS_API_PRIVILEGE_MANAGE,
   PROPOSALS_API_PRIVILEGE_READ,
 } from './proposals/constants';
 import {
-  INCIDENTS_API_PRIVILEGE_MANAGE,
-  INCIDENTS_API_PRIVILEGE_READ,
-} from './incidents/constants';
+  ESCALATIONS_API_PRIVILEGE_MANAGE,
+  ESCALATIONS_API_PRIVILEGE_READ,
+} from './escalations/constants';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -58,32 +58,32 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     },
     subFeatures: [
       {
-        name: i18n.translate('xpack.agenticInvestigations.incidentsSubFeatureName', {
-          defaultMessage: 'Incidents',
+        name: i18n.translate('xpack.agenticInvestigations.escalationsSubFeatureName', {
+          defaultMessage: 'Escalations',
         }),
         privilegeGroups: [
           {
             groupType: 'mutually_exclusive',
             privileges: [
               {
-                id: 'incidents_all',
-                name: i18n.translate('xpack.agenticInvestigations.incidentsAllPrivilegeName', {
-                  defaultMessage: 'Create, update, and view incidents',
+                id: 'escalations_all',
+                name: i18n.translate('xpack.agenticInvestigations.escalationsAllPrivilegeName', {
+                  defaultMessage: 'Create, update, and view escalations',
                 }),
                 includeIn: 'all',
-                api: [INCIDENTS_API_PRIVILEGE_READ, INCIDENTS_API_PRIVILEGE_MANAGE],
+                api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
                 savedObject: { all: [], read: [] },
-                ui: [INCIDENTS_UI_CAPABILITY_SHOW, INCIDENTS_UI_CAPABILITY_MANAGE],
+                ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
               },
               {
-                id: 'incidents_read',
-                name: i18n.translate('xpack.agenticInvestigations.incidentsReadPrivilegeName', {
-                  defaultMessage: 'View incidents',
+                id: 'escalations_read',
+                name: i18n.translate('xpack.agenticInvestigations.escalationsReadPrivilegeName', {
+                  defaultMessage: 'View escalations',
                 }),
                 includeIn: 'read',
-                api: [INCIDENTS_API_PRIVILEGE_READ],
+                api: [ESCALATIONS_API_PRIVILEGE_READ],
                 savedObject: { all: [], read: [] },
-                ui: [INCIDENTS_UI_CAPABILITY_SHOW],
+                ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
               },
             ],
           },

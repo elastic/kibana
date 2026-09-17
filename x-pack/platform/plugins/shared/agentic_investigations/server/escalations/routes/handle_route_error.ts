@@ -10,7 +10,7 @@ import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import { InvalidLinkedInvestigationError } from '../services/errors';
 
 /**
- * Maps service errors to HTTP responses for incident routes.
+ * Maps service errors to HTTP responses for escalation routes.
  *
  * AgentBuilderErrors carry their own statusCode in meta, so we map the 4xx
  * range through rather than re-stating the taxonomy:
@@ -22,9 +22,9 @@ import { InvalidLinkedInvestigationError } from '../services/errors';
  *
  * Note on 404 vs 403: `getDocumentWithAccess` (client.ts:1078-1080) throws
  * conversationNotFound — *not* forbidden — when access is denied. A collaborator
- * trying to update a private incident they do not own receives 404, not 403.
+ * trying to update a private escalation they do not own receives 404, not 403.
  */
-export const handleIncidentRouteError = (
+export const handleEscalationRouteError = (
   error: unknown,
   response: KibanaResponseFactory,
   logger: Logger
@@ -41,6 +41,6 @@ export const handleIncidentRouteError = (
   }
 
   const message = error instanceof Error ? error.message : String(error);
-  logger.error(`Incident route failed: ${message}`);
+  logger.error(`Escalation route failed: ${message}`);
   return response.customError({ statusCode: 500, body: { message } });
 };

@@ -24,8 +24,8 @@ import type { ResolveProposalUser } from './proposals/services/resolve_proposal_
 import { registerProposalAttachment } from './proposals/attachments';
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
-import { IncidentsService } from './incidents/services/incidents_service';
-import { registerIncidentRoutes } from './incidents/routes/register_routes';
+import { EscalationsService } from './escalations/services/escalations_service';
+import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -47,7 +47,7 @@ export class AgenticInvestigationsPlugin
   // `workflowsManagement` is a required plugin, so this is set in setup() and
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
-  private incidentsService?: IncidentsService;
+  private escalationsService?: EscalationsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
@@ -96,10 +96,10 @@ export class AgenticInvestigationsPlugin
       resolveUser: (request) => this.requireUserResolver()(request),
     });
 
-    registerIncidentRoutes({
+    registerEscalationRoutes({
       router,
       logger: this.logger,
-      getIncidentsService: () => this.requireIncidentsService(),
+      getEscalationsService: () => this.requireEscalationsService(),
     });
 
     return {};
@@ -129,7 +129,7 @@ export class AgenticInvestigationsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
     });
 
-    this.incidentsService = new IncidentsService({
+    this.escalationsService = new EscalationsService({
       logger: this.logger,
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
@@ -149,7 +149,7 @@ export class AgenticInvestigationsPlugin
 
     return {
       getProposalsService: () => this.requireProposalsService(),
-      getIncidentsService: () => this.requireIncidentsService(),
+      getEscalationsService: () => this.requireEscalationsService(),
     };
   }
 
@@ -171,13 +171,13 @@ export class AgenticInvestigationsPlugin
     return this.proposalsService;
   }
 
-  private requireIncidentsService(): IncidentsService {
-    if (!this.incidentsService) {
+  private requireEscalationsService(): EscalationsService {
+    if (!this.escalationsService) {
       throw new Error(
-        'Incidents service is not available until the agenticInvestigations plugin has started'
+        'Escalations service is not available until the agenticInvestigations plugin has started'
       );
     }
-    return this.incidentsService;
+    return this.escalationsService;
   }
 
   private getSpaceId(request: KibanaRequest): string {

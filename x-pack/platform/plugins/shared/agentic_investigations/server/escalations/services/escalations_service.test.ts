@@ -11,13 +11,13 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
-import { IncidentsService } from './incidents_service';
+import { EscalationsService } from './escalations_service';
 import { InvalidLinkedInvestigationError } from './errors';
 import {
-  INCIDENT_TEMPLATE_ID,
+  ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
-  INCIDENT_LINKED_INVESTIGATIONS_FIELD,
-} from '../../../common/incidents/constants';
+  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+} from '../../../common/escalations/constants';
 
 const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
@@ -26,7 +26,7 @@ const INVESTIGATION_METADATA = {
   status: 'open',
   severity: 'high',
   summary: 'Suspicious activity',
-  workflow_execution_id: 'wf-123', // investigation-only; must not reach the incident
+  workflow_execution_id: 'wf-123', // investigation-only; must not reach the escalation
 };
 
 const MOCK_INVESTIGATION = {
@@ -37,17 +37,17 @@ const MOCK_INVESTIGATION = {
   metadata: INVESTIGATION_METADATA,
 };
 
-const MOCK_INCIDENT = {
-  id: 'incident-1',
-  template_id: INCIDENT_TEMPLATE_ID,
+const MOCK_ESCALATION = {
+  id: 'escalation-1',
+  template_id: ESCALATION_TEMPLATE_ID,
   title: 'My Investigation',
 };
 
-const INCIDENT_TEMPLATE = {
-  id: INCIDENT_TEMPLATE_ID,
+const ESCALATION_TEMPLATE = {
+  id: ESCALATION_TEMPLATE_ID,
   version: 1,
-  name: 'Incident',
-  description: 'Use for incidents',
+  name: 'Escalation',
+  description: 'Use for escalations',
   fields: {
     status: {
       input_type: 'SELECT',
@@ -77,12 +77,12 @@ const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   get: jest.fn().mockResolvedValue(MOCK_INVESTIGATION),
   list: jest.fn(),
   search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-  create: jest.fn().mockResolvedValue(MOCK_INCIDENT),
+  create: jest.fn().mockResolvedValue(MOCK_ESCALATION),
   patchMetadata: jest.fn().mockResolvedValue({
-    conversation: MOCK_INCIDENT,
-    changedFields: [INCIDENT_LINKED_INVESTIGATIONS_FIELD],
+    conversation: MOCK_ESCALATION,
+    changedFields: [ESCALATION_LINKED_INVESTIGATIONS_FIELD],
   }),
-  update: jest.fn().mockResolvedValue(MOCK_INCIDENT),
+  update: jest.fn().mockResolvedValue(MOCK_ESCALATION),
   ...overrides,
 });
 
@@ -90,11 +90,11 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
   const client = makeClient(clientOverrides);
   const getConversationClient = jest.fn().mockResolvedValue(client);
   const conversationTemplates = {
-    get: jest.fn().mockResolvedValue(INCIDENT_TEMPLATE),
+    get: jest.fn().mockResolvedValue(ESCALATION_TEMPLATE),
     list: jest.fn(),
   };
 
-  const service = new IncidentsService({
+  const service = new EscalationsService({
     logger,
     getConversationClient,
     conversationTemplates,
@@ -103,8 +103,8 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
   return { service, client, getConversationClient, conversationTemplates };
 };
 
-describe('IncidentsService.create', () => {
-  it('creates with templateId: "incident"', async () => {
+describe('EscalationsService.create', () => {
+  it('creates with templateId: "escalation"', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
@@ -114,7 +114,7 @@ describe('IncidentsService.create', () => {
     });
 
     expect(client.create).toHaveBeenCalledWith(
-      expect.objectContaining({ templateId: INCIDENT_TEMPLATE_ID })
+      expect.objectContaining({ templateId: ESCALATION_TEMPLATE_ID })
     );
   });
 
@@ -127,16 +127,12 @@ describe('IncidentsService.create', () => {
       collaborators: [],
     });
 
-    // The public client resolves agentBuilderDefaultAgentId when agentId is absent.
-    // Assert the key is absent (not undefined) so the test doesn't pass on
-    // `agentId: undefined` which would still invoke the default-resolution path correctly
-    // but makes the intent explicit.
     expect(client.create).toHaveBeenCalledWith(
       expect.not.objectContaining({ agentId: expect.anything() })
     );
   });
 
-  it('never calls applyTemplate — incident is born with the incident template', async () => {
+  it('never calls applyTemplate — escalation is born with the escalation template', async () => {
     const { service, client } = makeService();
     const applyTemplate = jest.fn();
     Object.assign(client, { applyTemplate });
@@ -154,7 +150,7 @@ describe('IncidentsService.create', () => {
     const { service } = makeService({
       get: jest.fn().mockResolvedValue({
         ...MOCK_INVESTIGATION,
-        template_id: 'incident', // not an investigation
+        template_id: 'escalation', // not an investigation
       }),
     });
 
@@ -190,7 +186,7 @@ describe('IncidentsService.create', () => {
     });
 
     const { metadata } = client.create.mock.calls[0][0];
-    expect(metadata[INCIDENT_LINKED_INVESTIGATIONS_FIELD]).toEqual(['inv-1']);
+    expect(metadata[ESCALATION_LINKED_INVESTIGATIONS_FIELD]).toEqual(['inv-1']);
   });
 
   it('copies the overlapping metadata fields from the investigation', async () => {
@@ -208,7 +204,7 @@ describe('IncidentsService.create', () => {
     expect(metadata).toHaveProperty('summary', 'Suspicious activity');
   });
 
-  it('does NOT copy status — lets the incident template default (open) apply', async () => {
+  it('does NOT copy status — lets the escalation template default (open) apply', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         ...MOCK_INVESTIGATION,
@@ -260,7 +256,7 @@ describe('IncidentsService.create', () => {
     expect(accessControl.entries[0]).not.toHaveProperty('added_at');
   });
 
-  it('uses the investigation title as the incident initial title', async () => {
+  it('uses the investigation title as the escalation initial title', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
@@ -273,7 +269,7 @@ describe('IncidentsService.create', () => {
     expect(title).toBe(MOCK_INVESTIGATION.title);
   });
 
-  it('throws when the incident template is not found', async () => {
+  it('throws when the escalation template is not found', async () => {
     const { service, conversationTemplates } = makeService();
     conversationTemplates.get.mockResolvedValue(undefined);
 
@@ -283,12 +279,12 @@ describe('IncidentsService.create', () => {
         visibility: 'public',
         collaborators: [],
       })
-    ).rejects.toThrow(/"incident" not found/);
+    ).rejects.toThrow(/"escalation" not found/);
   });
 });
 
-describe('IncidentsService.update', () => {
-  it('throws InvalidLinkedInvestigationError when target is not an incident', async () => {
+describe('EscalationsService.update', () => {
+  it('throws InvalidLinkedInvestigationError when target is not an escalation', async () => {
     const { service } = makeService({
       get: jest.fn().mockResolvedValue({
         ...MOCK_INVESTIGATION,
@@ -297,27 +293,27 @@ describe('IncidentsService.update', () => {
     });
 
     await expect(
-      service.update(request, 'not-an-incident', { title: 'New title' })
+      service.update(request, 'not-an-escalation', { title: 'New title' })
     ).rejects.toBeInstanceOf(InvalidLinkedInvestigationError);
   });
 
   it('calls patchMetadata when linked_investigations are provided (appends, not replaces)', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
-        id: 'incident-1',
-        template_id: INCIDENT_TEMPLATE_ID,
-        metadata: { [INCIDENT_LINKED_INVESTIGATIONS_FIELD]: ['inv-1'] },
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
+        metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1'] },
       }),
     });
 
-    await service.update(request, 'incident-1', {
+    await service.update(request, 'escalation-1', {
       linked_investigations: ['inv-2'],
     });
 
     expect(client.patchMetadata).toHaveBeenCalledWith(
-      'incident-1',
+      'escalation-1',
       expect.objectContaining({
-        [INCIDENT_LINKED_INVESTIGATIONS_FIELD]: ['inv-1', 'inv-2'],
+        [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1', 'inv-2'],
       })
     );
   });
@@ -325,17 +321,17 @@ describe('IncidentsService.update', () => {
   it('deduplicates linked_investigations — does not add an existing id again', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
-        id: 'incident-1',
-        template_id: INCIDENT_TEMPLATE_ID,
-        metadata: { [INCIDENT_LINKED_INVESTIGATIONS_FIELD]: ['inv-1', 'inv-2'] },
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
+        metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1', 'inv-2'] },
       }),
     });
 
-    await service.update(request, 'incident-1', {
+    await service.update(request, 'escalation-1', {
       linked_investigations: ['inv-2', 'inv-3'],
     });
 
-    const { [INCIDENT_LINKED_INVESTIGATIONS_FIELD]: updated } =
+    const { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: updated } =
       client.patchMetadata.mock.calls[0][1];
     expect(updated).toEqual(['inv-1', 'inv-2', 'inv-3']);
   });
@@ -343,27 +339,27 @@ describe('IncidentsService.update', () => {
   it('calls client.update when title is provided', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
-        id: 'incident-1',
-        template_id: INCIDENT_TEMPLATE_ID,
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
         metadata: {},
       }),
     });
 
-    await service.update(request, 'incident-1', { title: 'Renamed' });
+    await service.update(request, 'escalation-1', { title: 'Renamed' });
 
-    expect(client.update).toHaveBeenCalledWith({ id: 'incident-1', title: 'Renamed' });
+    expect(client.update).toHaveBeenCalledWith({ id: 'escalation-1', title: 'Renamed' });
   });
 
   it('does not call patchMetadata for a title-only update', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
-        id: 'incident-1',
-        template_id: INCIDENT_TEMPLATE_ID,
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
         metadata: {},
       }),
     });
 
-    await service.update(request, 'incident-1', { title: 'Renamed' });
+    await service.update(request, 'escalation-1', { title: 'Renamed' });
 
     expect(client.patchMetadata).not.toHaveBeenCalled();
   });
@@ -371,13 +367,13 @@ describe('IncidentsService.update', () => {
   it('does not call client.update for a links-only update', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
-        id: 'incident-1',
-        template_id: INCIDENT_TEMPLATE_ID,
-        metadata: { [INCIDENT_LINKED_INVESTIGATIONS_FIELD]: [] },
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
+        metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [] },
       }),
     });
 
-    await service.update(request, 'incident-1', {
+    await service.update(request, 'escalation-1', {
       linked_investigations: ['inv-1'],
     });
 
@@ -385,14 +381,14 @@ describe('IncidentsService.update', () => {
   });
 });
 
-describe('IncidentsService.list', () => {
+describe('EscalationsService.list', () => {
   const MOCK_SUMMARY = {
-    id: 'incident-1',
-    template_id: INCIDENT_TEMPLATE_ID,
-    title: 'My Incident',
+    id: 'escalation-1',
+    template_id: ESCALATION_TEMPLATE_ID,
+    title: 'My Escalation',
   };
 
-  it('calls client.search with the fixed non-closed incidents filter', async () => {
+  it('calls client.search with the fixed non-closed escalations filter', async () => {
     const { service, client } = makeService({
       search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 1 }),
     });
@@ -402,15 +398,13 @@ describe('IncidentsService.list', () => {
     expect(client.search).toHaveBeenCalledWith(
       expect.objectContaining({
         // The filter must reference `metadata.status`, not the bare `status` field,
-        // which maps to ConversationRoundStatus — not the incident template field.
-        // Regression guard: filtering `status: "closed"` would compile silently but
-        // return closed incidents.
+        // which maps to ConversationRoundStatus — not the escalation template field.
         filter: expect.stringContaining('metadata.status'),
       })
     );
     expect(client.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        filter: expect.stringContaining(`template_id: "${INCIDENT_TEMPLATE_ID}"`),
+        filter: expect.stringContaining(`template_id: "${ESCALATION_TEMPLATE_ID}"`),
       })
     );
     expect(client.search).toHaveBeenCalledWith(

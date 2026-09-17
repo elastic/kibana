@@ -16,47 +16,47 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { ConversationSearchSort } from '@kbn/agent-builder-common';
 import type {
-  CreateIncidentRequest,
-  IncidentConversation,
-  ListIncidentsQuery,
-  ListIncidentsResponse,
-  UpdateIncidentRequest,
-} from '../../../common/incidents/incident';
+  CreateEscalationRequest,
+  EscalationConversation,
+  ListEscalationsQuery,
+  ListEscalationsResponse,
+  UpdateEscalationRequest,
+} from '../../../common/escalations/escalation';
 import {
-  INCIDENT_LINKED_INVESTIGATIONS_FIELD,
-  INCIDENT_TEMPLATE_ID,
+  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
-} from '../../../common/incidents/constants';
+} from '../../../common/escalations/constants';
 import { InvalidLinkedInvestigationError } from './errors';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
-// Scopes list results to incidents and hides closed ones. Uses `metadata.status` (the
+// Scopes list results to escalations and hides closed ones. Uses `metadata.status` (the
 // template field), not the bare `status` field (which tracks round execution state).
-const NON_CLOSED_INCIDENTS_FILTER =
-  `template_id: "${INCIDENT_TEMPLATE_ID}" and not (metadata.status: "closed")` as const;
+const NON_CLOSED_ESCALATIONS_FILTER =
+  `template_id: "${ESCALATION_TEMPLATE_ID}" and not (metadata.status: "closed")` as const;
 
-const INCIDENTS_LIST_SORT: ConversationSearchSort = { field: 'updated_at', order: 'desc' };
+const ESCALATIONS_LIST_SORT: ConversationSearchSort = { field: 'updated_at', order: 'desc' };
 
-export interface IncidentsServiceDeps {
+export interface EscalationsServiceDeps {
   logger: Logger;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
   conversationTemplates: ConversationTemplatesStart;
 }
 
-export class IncidentsService {
+export class EscalationsService {
   private readonly logger: Logger;
   private readonly getConversationClient: (
     request: KibanaRequest
   ) => Promise<ConversationPublicClient>;
   private readonly conversationTemplates: ConversationTemplatesStart;
 
-  constructor({ logger, getConversationClient, conversationTemplates }: IncidentsServiceDeps) {
+  constructor({ logger, getConversationClient, conversationTemplates }: EscalationsServiceDeps) {
     this.logger = logger;
     this.getConversationClient = getConversationClient;
     this.conversationTemplates = conversationTemplates;
   }
 
-  async create(request: KibanaRequest, body: CreateIncidentRequest): Promise<IncidentConversation> {
+  async create(request: KibanaRequest, body: CreateEscalationRequest): Promise<EscalationConversation> {
     const client = await this.getConversationClient(request);
 
     const investigation = await client.get(body.linked_investigation_id);
@@ -64,26 +64,26 @@ export class IncidentsService {
       throw new InvalidLinkedInvestigationError(body.linked_investigation_id);
     }
 
-    const incidentTemplate = await this.conversationTemplates.get(INCIDENT_TEMPLATE_ID);
-    if (!incidentTemplate) {
+    const escalationTemplate = await this.conversationTemplates.get(ESCALATION_TEMPLATE_ID);
+    if (!escalationTemplate) {
       throw new Error(
-        `Incident template "${INCIDENT_TEMPLATE_ID}" not found — check that agent_builder_platform is enabled`
+        `Escalation template "${ESCALATION_TEMPLATE_ID}" not found — check that agent_builder_platform is enabled`
       );
     }
 
-    // Copy investigation metadata to the incident, filtered to the keys the incident template
+    // Copy investigation metadata to the escalation, filtered to the keys the escalation template
     // declares. Excludes linked_investigations (set below) and status (let the template default apply).
     const filteredMetadata = filterMetadataToTemplateFields({
       metadata: investigation.metadata as
         | Record<string, string | number | boolean | string[]>
         | undefined,
-      declaredFields: Object.keys(incidentTemplate.fields),
-      exclude: [INCIDENT_LINKED_INVESTIGATIONS_FIELD, 'status'],
+      declaredFields: Object.keys(escalationTemplate.fields),
+      exclude: [ESCALATION_LINKED_INVESTIGATIONS_FIELD, 'status'],
     });
 
     const metadata = {
       ...filteredMetadata,
-      [INCIDENT_LINKED_INVESTIGATIONS_FIELD]: [body.linked_investigation_id],
+      [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [body.linked_investigation_id],
     };
 
     const accessControl =
@@ -99,15 +99,15 @@ export class IncidentsService {
           };
 
     this.logger.debug(
-      `Creating incident from investigation ${body.linked_investigation_id} with visibility ${body.visibility}`
+      `Creating escalation from investigation ${body.linked_investigation_id} with visibility ${body.visibility}`
     );
 
     return client.create({
       // Omit agentId so it defaults to the shared default agent, which all users can access.
-      // Inheriting the investigation's agent_id would hide the incident from collaborators
+      // Inheriting the investigation's agent_id would hide the escalation from collaborators
       // who lack access to that agent.
       title: investigation.title,
-      templateId: INCIDENT_TEMPLATE_ID,
+      templateId: ESCALATION_TEMPLATE_ID,
       metadata,
       accessControl,
     });
@@ -115,42 +115,42 @@ export class IncidentsService {
 
   async update(
     request: KibanaRequest,
-    incidentId: string,
-    body: UpdateIncidentRequest
-  ): Promise<IncidentConversation> {
+    escalationId: string,
+    body: UpdateEscalationRequest
+  ): Promise<EscalationConversation> {
     const client = await this.getConversationClient(request);
 
-    const current = await client.get(incidentId);
-    if (current.template_id !== INCIDENT_TEMPLATE_ID) {
-      throw new InvalidLinkedInvestigationError(incidentId);
+    const current = await client.get(escalationId);
+    if (current.template_id !== ESCALATION_TEMPLATE_ID) {
+      throw new InvalidLinkedInvestigationError(escalationId);
     }
 
-    let result: IncidentConversation = current;
+    let result: EscalationConversation = current;
 
     if (body.linked_investigations?.length) {
-      const prev = (current.metadata?.[INCIDENT_LINKED_INVESTIGATIONS_FIELD] ?? []) as string[];
+      const prev = (current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as string[];
       const toAdd = body.linked_investigations;
       const union = [...prev, ...toAdd.filter((id) => !prev.includes(id))];
 
-      const { conversation } = await client.patchMetadata(incidentId, {
-        [INCIDENT_LINKED_INVESTIGATIONS_FIELD]: union,
+      const { conversation } = await client.patchMetadata(escalationId, {
+        [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: union,
       });
       result = conversation;
     }
 
     if (body.title !== undefined) {
-      result = await client.update({ id: incidentId, title: body.title });
+      result = await client.update({ id: escalationId, title: body.title });
     }
 
     return result;
   }
 
-  async list(request: KibanaRequest, query: ListIncidentsQuery): Promise<ListIncidentsResponse> {
+  async list(request: KibanaRequest, query: ListEscalationsQuery): Promise<ListEscalationsResponse> {
     const client = await this.getConversationClient(request);
 
     const { results, total } = await client.search({
-      filter: NON_CLOSED_INCIDENTS_FILTER,
-      sort: INCIDENTS_LIST_SORT,
+      filter: NON_CLOSED_ESCALATIONS_FILTER,
+      sort: ESCALATIONS_LIST_SORT,
       page: query.page,
       perPage: query.per_page,
     });

@@ -8,7 +8,7 @@
 export { apiTest } from '@kbn/scout';
 export {
   INTERNAL_HEADERS,
-  LIST_INCIDENTS_PATH,
-  CREATE_INCIDENT_PATH,
-  INCIDENT_BY_ID_PATH,
+  LIST_ESCALATIONS_PATH,
+  CREATE_ESCALATION_PATH,
+  ESCALATION_BY_ID_PATH,
 } from './constants';

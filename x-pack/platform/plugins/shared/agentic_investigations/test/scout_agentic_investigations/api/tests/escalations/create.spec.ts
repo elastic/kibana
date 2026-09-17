@@ -7,16 +7,16 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, INTERNAL_HEADERS, CREATE_INCIDENT_PATH } from '../../fixtures';
+import { apiTest, INTERNAL_HEADERS, CREATE_ESCALATION_PATH } from '../../fixtures';
 
 // Seed an investigation conversation directly in ES so we have a real id to escalate.
 // We write it through the Agent Builder conversation index that the plugin itself uses.
 const INVESTIGATION_TEMPLATE_ID = 'investigation';
-const INCIDENT_TEMPLATE_ID = 'incident';
+const ESCALATION_TEMPLATE_ID = 'escalation';
 const INVESTIGATION_INDEX = '.chat-conversations';
 
 apiTest.describe(
-  'POST /internal/investigations/incidents — create incident',
+  'POST /internal/investigations/escalations — create escalation',
   { tag: [...tags.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
@@ -55,8 +55,8 @@ apiTest.describe(
       }
     });
 
-    apiTest('creates a public incident and returns 200', async ({ apiClient }) => {
-      const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+    apiTest('creates a public escalation and returns 200', async ({ apiClient }) => {
+      const response = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: {
           linked_investigation_id: investigationId,
@@ -66,14 +66,14 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.template_id).toBe(INCIDENT_TEMPLATE_ID);
+      expect(response.body.template_id).toBe(ESCALATION_TEMPLATE_ID);
       expect(response.body.title).toBe('Scout test investigation');
     });
 
     apiTest(
       'copies overlapping metadata from the investigation (severity, summary)',
       async ({ apiClient }) => {
-        const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+        const response = await apiClient.post(CREATE_ESCALATION_PATH, {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
           body: {
             linked_investigation_id: investigationId,
@@ -92,7 +92,7 @@ apiTest.describe(
     apiTest(
       'does NOT copy workflow_execution_id — investigation-only field',
       async ({ apiClient }) => {
-        const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+        const response = await apiClient.post(CREATE_ESCALATION_PATH, {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
           body: {
             linked_investigation_id: investigationId,
@@ -109,7 +109,7 @@ apiTest.describe(
     apiTest(
       'sets status to "open" regardless of the investigation status',
       async ({ apiClient }) => {
-        const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+        const response = await apiClient.post(CREATE_ESCALATION_PATH, {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
           body: {
             linked_investigation_id: investigationId,
@@ -124,7 +124,7 @@ apiTest.describe(
     );
 
     apiTest('sets linked_investigations to [linked_investigation_id]', async ({ apiClient }) => {
-      const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+      const response = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: {
           linked_investigation_id: investigationId,
@@ -138,7 +138,7 @@ apiTest.describe(
     });
 
     apiTest('returns 400 when public + collaborators is provided', async ({ apiClient }) => {
-      const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+      const response = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: {
           linked_investigation_id: investigationId,
@@ -152,7 +152,7 @@ apiTest.describe(
     });
 
     apiTest('returns 400 when private + no collaborators', async ({ apiClient }) => {
-      const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+      const response = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: {
           linked_investigation_id: investigationId,
@@ -168,12 +168,12 @@ apiTest.describe(
     apiTest(
       'returns 400 when linked_investigation_id points at a non-investigation',
       async ({ apiClient, esClient }) => {
-        // Seed a second conversation that is an incident (wrong template)
-        const { _id: incidentId } = await esClient.index({
+        // Seed a second conversation that is an escalation (wrong template)
+        const { _id: escalationId } = await esClient.index({
           index: INVESTIGATION_INDEX,
           refresh: true,
           document: {
-            template_id: INCIDENT_TEMPLATE_ID,
+            template_id: ESCALATION_TEMPLATE_ID,
             title: 'Wrong template',
             agent_id: 'default',
             space_id: 'default',
@@ -183,10 +183,10 @@ apiTest.describe(
           },
         });
 
-        const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+        const response = await apiClient.post(CREATE_ESCALATION_PATH, {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
           body: {
-            linked_investigation_id: incidentId,
+            linked_investigation_id: escalationId,
             visibility: 'public',
           },
           responseType: 'json',
@@ -194,14 +194,14 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(400);
 
-        await esClient.delete({ index: INVESTIGATION_INDEX, id: incidentId }).catch(() => {});
+        await esClient.delete({ index: INVESTIGATION_INDEX, id: escalationId }).catch(() => {});
       }
     );
 
     apiTest(
-      'returns 403 for a caller without the manage_incidents privilege',
+      'returns 403 for a caller without the manage_escalations privilege',
       async ({ apiClient }) => {
-        const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+        const response = await apiClient.post(CREATE_ESCALATION_PATH, {
           headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
           body: {
             linked_investigation_id: investigationId,
@@ -210,13 +210,13 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        // viewer has read on agenticInvestigations but not manage_incidents
+        // viewer has read on agenticInvestigations but not manage_escalations
         expect(response).toHaveStatusCode(403);
       }
     );
 
     apiTest('returns 404 when linked_investigation_id does not exist', async ({ apiClient }) => {
-      const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+      const response = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: {
           linked_investigation_id: 'nonexistent-id-00000000',

@@ -13,7 +13,7 @@ import type { MetadataFieldValue } from '@kbn/agent-builder-common';
  *
  * Necessary because `client.create` rejects any metadata key not declared in the
  * target template (e.g. `workflow_execution_id` exists on investigations but not
- * incidents), and copying an empty required field would fail validation instead of
+ * escalations), and copying an empty required field would fail validation instead of
  * falling back to the template default.
  */
 export const filterMetadataToTemplateFields = ({

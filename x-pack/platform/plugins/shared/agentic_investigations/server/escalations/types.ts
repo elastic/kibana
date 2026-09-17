@@ -6,10 +6,10 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { IncidentsService } from './services/incidents_service';
+import type { EscalationsService } from './services/escalations_service';
 
-export interface IncidentRouteDependencies {
+export interface EscalationRouteDependencies {
   router: IRouter;
   logger: Logger;
-  getIncidentsService: () => IncidentsService;
+  getEscalationsService: () => EscalationsService;
 }

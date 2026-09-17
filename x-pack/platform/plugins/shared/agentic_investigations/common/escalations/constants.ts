@@ -7,29 +7,29 @@
 
 import { AGENTIC_INVESTIGATIONS_INTERNAL_URL } from '../constants';
 
-export const INCIDENTS_INTERNAL_URL = `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/incidents` as const;
-export const INCIDENT_BY_ID_URL = `${INCIDENTS_INTERNAL_URL}/{id}` as const;
+export const ESCALATIONS_INTERNAL_URL = `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/escalations` as const;
+export const ESCALATION_BY_ID_URL = `${ESCALATIONS_INTERNAL_URL}/{id}` as const;
 
 /** Template ids. Owned by agent_builder_platform; referenced here for guard checks. */
-export const INCIDENT_TEMPLATE_ID = 'incident' as const;
+export const ESCALATION_TEMPLATE_ID = 'escalation' as const;
 export const INVESTIGATION_TEMPLATE_ID = 'investigation' as const;
 
-/** The incident template field that holds linked investigation conversation ids. */
-export const INCIDENT_LINKED_INVESTIGATIONS_FIELD = 'linked_investigations' as const;
+/** The escalation template field that holds linked investigation conversation ids. */
+export const ESCALATION_LINKED_INVESTIGATIONS_FIELD = 'linked_investigations' as const;
 
 /**
- * An incident must never list more linked investigations than this. Chosen to match
- * CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES (100) so a private incident can have one
+ * An escalation must never list more linked investigations than this. Chosen to match
+ * CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES (100) so a private escalation can have one
  * collaborator per linked investigation without hitting a separate limit.
  */
-export const MAX_INCIDENT_LINKED_INVESTIGATIONS = 100;
+export const MAX_ESCALATION_LINKED_INVESTIGATIONS = 100;
 
 /**
  * UI capabilities. Capabilities are namespaced by feature id rather than by
  * sub-feature, so each entity scopes its own names.
  */
-export const INCIDENTS_UI_CAPABILITY_SHOW = 'showIncidents' as const;
-export const INCIDENTS_UI_CAPABILITY_MANAGE = 'manageIncidents' as const;
+export const ESCALATIONS_UI_CAPABILITY_SHOW = 'showEscalations' as const;
+export const ESCALATIONS_UI_CAPABILITY_MANAGE = 'manageEscalations' as const;
 
 /**
  * Pagination bounds for the list endpoint.
@@ -39,5 +39,5 @@ export const INCIDENTS_UI_CAPABILITY_MANAGE = 'manageIncidents' as const;
  * not importable cross-plugin. They are intentionally kept in sync with those
  * upstream values — update here if agent_builder changes them.
  */
-export const MAX_INCIDENTS_PAGE_SIZE = 50;
-export const MAX_INCIDENTS_RESULT_WINDOW = 10_000;
+export const MAX_ESCALATIONS_PAGE_SIZE = 50;
+export const MAX_ESCALATIONS_RESULT_WINDOW = 10_000;

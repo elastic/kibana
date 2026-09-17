@@ -10,22 +10,22 @@ import { expect } from '@kbn/scout/api';
 import {
   apiTest,
   INTERNAL_HEADERS,
-  CREATE_INCIDENT_PATH,
-  INCIDENT_BY_ID_PATH,
+  CREATE_ESCALATION_PATH,
+  ESCALATION_BY_ID_PATH,
 } from '../../fixtures';
 
 const INVESTIGATION_INDEX = '.chat-conversations';
 const INVESTIGATION_TEMPLATE_ID = 'investigation';
 
 apiTest.describe(
-  'PATCH /internal/investigations/incidents/{id} — update incident',
+  'PATCH /internal/investigations/escalations/{id} — update escalation',
   { tag: [...tags.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     let viewerCookieHeader: Record<string, string>;
     let investigationId: string;
     let secondInvestigationId: string;
-    let incidentId: string;
+    let escalationId: string;
 
     apiTest.beforeAll(async ({ samlAuth, esClient, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
@@ -63,25 +63,25 @@ apiTest.describe(
       investigationId = inv1._id;
       secondInvestigationId = inv2._id;
 
-      // Create the incident to update
-      const createResponse = await apiClient.post(CREATE_INCIDENT_PATH, {
+      // Create the escalation to update
+      const createResponse = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: { linked_investigation_id: investigationId, visibility: 'public' },
         responseType: 'json',
       });
-      incidentId = createResponse.body.id;
+      escalationId = createResponse.body.id;
     });
 
     apiTest.afterAll(async ({ esClient }) => {
       await Promise.allSettled([
         esClient.delete({ index: INVESTIGATION_INDEX, id: investigationId }),
         esClient.delete({ index: INVESTIGATION_INDEX, id: secondInvestigationId }),
-        esClient.delete({ index: INVESTIGATION_INDEX, id: incidentId }),
+        esClient.delete({ index: INVESTIGATION_INDEX, id: escalationId }),
       ]);
     });
 
-    apiTest('renames the incident and returns 200', async ({ apiClient }) => {
-      const response = await apiClient.patch(INCIDENT_BY_ID_PATH(incidentId), {
+    apiTest('renames the escalation and returns 200', async ({ apiClient }) => {
+      const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: { title: 'Renamed by Scout test' },
         responseType: 'json',
@@ -92,7 +92,7 @@ apiTest.describe(
     });
 
     apiTest('appends a second linked investigation (does not replace)', async ({ apiClient }) => {
-      const response = await apiClient.patch(INCIDENT_BY_ID_PATH(incidentId), {
+      const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: { linked_investigations: [secondInvestigationId] },
         responseType: 'json',
@@ -108,7 +108,7 @@ apiTest.describe(
       'deduplicates — patching the same id twice produces no duplicate',
       async ({ apiClient }) => {
         // Patch secondInvestigationId again (it was appended in the previous test)
-        const response = await apiClient.patch(INCIDENT_BY_ID_PATH(incidentId), {
+        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
           body: { linked_investigations: [secondInvestigationId] },
           responseType: 'json',
@@ -124,7 +124,7 @@ apiTest.describe(
     );
 
     apiTest('returns 400 for an empty body', async ({ apiClient }) => {
-      const response = await apiClient.patch(INCIDENT_BY_ID_PATH(incidentId), {
+      const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: {},
         responseType: 'json',
@@ -134,7 +134,7 @@ apiTest.describe(
     });
 
     apiTest('returns 400 for an empty linked_investigations array', async ({ apiClient }) => {
-      const response = await apiClient.patch(INCIDENT_BY_ID_PATH(incidentId), {
+      const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: { linked_investigations: [] },
         responseType: 'json',
@@ -144,9 +144,9 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns 403 for a caller without the manage_incidents privilege',
+      'returns 403 for a caller without the manage_escalations privilege',
       async ({ apiClient }) => {
-        const response = await apiClient.patch(INCIDENT_BY_ID_PATH(incidentId), {
+        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
           headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
           body: { title: 'Should not work' },
           responseType: 'json',
@@ -156,8 +156,8 @@ apiTest.describe(
       }
     );
 
-    apiTest('returns 404 for a nonexistent incident id', async ({ apiClient }) => {
-      const response = await apiClient.patch(INCIDENT_BY_ID_PATH('nonexistent-id-00000000'), {
+    apiTest('returns 404 for a nonexistent escalation id', async ({ apiClient }) => {
+      const response = await apiClient.patch(ESCALATION_BY_ID_PATH('nonexistent-id-00000000'), {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: { title: 'Does not matter' },
         responseType: 'json',

@@ -11,6 +11,6 @@ export const INTERNAL_HEADERS = {
   'elastic-api-version': '1',
 } as const;
 
-export const LIST_INCIDENTS_PATH = 'internal/investigations/incidents';
-export const CREATE_INCIDENT_PATH = 'internal/investigations/incidents';
-export const INCIDENT_BY_ID_PATH = (id: string) => `internal/investigations/incidents/${id}`;
+export const LIST_ESCALATIONS_PATH = 'internal/investigations/escalations';
+export const CREATE_ESCALATION_PATH = 'internal/investigations/escalations';
+export const ESCALATION_BY_ID_PATH = (id: string) => `internal/investigations/escalations/${id}`;

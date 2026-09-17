@@ -7,7 +7,7 @@
 
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
-const INCIDENT_FIELDS = [
+const ESCALATION_FIELDS = [
   'status',
   'severity',
   'assignees',
@@ -22,12 +22,12 @@ describe('filterMetadataToTemplateFields', () => {
   it('drops keys not declared by the target template', () => {
     const result = filterMetadataToTemplateFields({
       metadata: {
-        // Present on investigation template, absent on incident — the exact 400 this filter prevents.
+        // Present on investigation template, absent on escalation — the exact 400 this filter prevents.
         workflow_execution_id: 'wf-123',
         severity: 'high',
         summary: 'Suspicious activity',
       },
-      declaredFields: INCIDENT_FIELDS,
+      declaredFields: ESCALATION_FIELDS,
     });
 
     expect(result).not.toHaveProperty('workflow_execution_id');
@@ -41,7 +41,7 @@ describe('filterMetadataToTemplateFields', () => {
         linked_investigations: ['inv-1'],
         severity: 'low',
       },
-      declaredFields: INCIDENT_FIELDS,
+      declaredFields: ESCALATION_FIELDS,
       exclude: ['linked_investigations'],
     });
 
@@ -52,7 +52,7 @@ describe('filterMetadataToTemplateFields', () => {
   it('drops empty string values', () => {
     const result = filterMetadataToTemplateFields({
       metadata: { severity: '', summary: 'A summary' },
-      declaredFields: INCIDENT_FIELDS,
+      declaredFields: ESCALATION_FIELDS,
     });
 
     expect(result).not.toHaveProperty('severity');
@@ -62,7 +62,7 @@ describe('filterMetadataToTemplateFields', () => {
   it('drops empty array values', () => {
     const result = filterMetadataToTemplateFields({
       metadata: { assignees: [], summary: 'A summary' },
-      declaredFields: INCIDENT_FIELDS,
+      declaredFields: ESCALATION_FIELDS,
     });
 
     expect(result).not.toHaveProperty('assignees');
@@ -72,7 +72,7 @@ describe('filterMetadataToTemplateFields', () => {
   it('returns an empty object when metadata is undefined', () => {
     const result = filterMetadataToTemplateFields({
       metadata: undefined,
-      declaredFields: INCIDENT_FIELDS,
+      declaredFields: ESCALATION_FIELDS,
     });
 
     expect(result).toEqual({});
@@ -81,7 +81,7 @@ describe('filterMetadataToTemplateFields', () => {
   it('returns an empty object when metadata is empty', () => {
     const result = filterMetadataToTemplateFields({
       metadata: {},
-      declaredFields: INCIDENT_FIELDS,
+      declaredFields: ESCALATION_FIELDS,
     });
 
     expect(result).toEqual({});
@@ -90,7 +90,7 @@ describe('filterMetadataToTemplateFields', () => {
   it('preserves non-empty arrays', () => {
     const result = filterMetadataToTemplateFields({
       metadata: { assignees: ['user-1', 'user-2'] },
-      declaredFields: INCIDENT_FIELDS,
+      declaredFields: ESCALATION_FIELDS,
     });
 
     expect(result).toHaveProperty('assignees', ['user-1', 'user-2']);
@@ -110,7 +110,7 @@ describe('filterMetadataToTemplateFields', () => {
 
     const result = filterMetadataToTemplateFields({
       metadata: investigationMetadata,
-      declaredFields: INCIDENT_FIELDS,
+      declaredFields: ESCALATION_FIELDS,
       exclude: ['linked_investigations'],
     });
 

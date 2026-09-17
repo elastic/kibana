@@ -15,7 +15,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './proposals/services/proposals_service';
-import type { IncidentsService } from './incidents/services/incidents_service';
+import type { EscalationsService } from './escalations/services/escalations_service';
 
 export interface AgenticInvestigationsSetupDependencies {
   features: FeaturesPluginSetup;
@@ -37,7 +37,7 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   getProposalsService: () => ProposalsService;
-  getIncidentsService: () => IncidentsService;
+  getEscalationsService: () => EscalationsService;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

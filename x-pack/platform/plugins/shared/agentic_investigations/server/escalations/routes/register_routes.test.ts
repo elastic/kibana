@@ -11,12 +11,12 @@ import {
   createConversationNotFoundError,
   createConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
-import { INCIDENTS_INTERNAL_URL, INCIDENT_BY_ID_URL } from '../../../common/incidents/constants';
-import { INCIDENTS_API_PRIVILEGE_MANAGE, INCIDENTS_API_PRIVILEGE_READ } from '../constants';
-import type { IncidentsService } from '../services/incidents_service';
+import { ESCALATIONS_INTERNAL_URL, ESCALATION_BY_ID_URL } from '../../../common/escalations/constants';
+import { ESCALATIONS_API_PRIVILEGE_MANAGE, ESCALATIONS_API_PRIVILEGE_READ } from '../constants';
+import type { EscalationsService } from '../services/escalations_service';
 import { InvalidLinkedInvestigationError } from '../services/errors';
-import type { IncidentRouteDependencies } from '../types';
-import { registerIncidentRoutes } from './register_routes';
+import type { EscalationRouteDependencies } from '../types';
+import { registerEscalationRoutes } from './register_routes';
 
 type Handler = (
   context: unknown,
@@ -33,9 +33,9 @@ interface RegisteredRoute {
   handler: Handler;
 }
 
-const MOCK_INCIDENT = { id: 'incident-1', template_id: 'incident', title: 'Test Incident' };
+const MOCK_ESCALATION = { id: 'escalation-1', template_id: 'escalation', title: 'Test Escalation' };
 
-const registerAndCollect = (service: Partial<IncidentsService>) => {
+const registerAndCollect = (service: Partial<EscalationsService>) => {
   const router = httpServiceMock.createRouter();
   const gets: RegisteredRoute[] = [];
   const posts: RegisteredRoute[] = [];
@@ -51,11 +51,11 @@ const registerAndCollect = (service: Partial<IncidentsService>) => {
     addVersion: (_version: unknown, handler: Handler) => patches.push({ config, handler }),
   }));
 
-  registerIncidentRoutes({
+  registerEscalationRoutes({
     router,
     logger: loggingSystemMock.createLogger(),
-    getIncidentsService: () => service as IncidentsService,
-  } as unknown as IncidentRouteDependencies);
+    getEscalationsService: () => service as EscalationsService,
+  } as unknown as EscalationRouteDependencies);
 
   const byPath = (routes: RegisteredRoute[], path: string) =>
     routes.find(({ config }) => config.path === path)!;
@@ -63,45 +63,45 @@ const registerAndCollect = (service: Partial<IncidentsService>) => {
   return { router, gets, posts, patches, byPath };
 };
 
-describe('incident routes', () => {
+describe('escalation routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('privilege wiring', () => {
-    it('gates list on INCIDENTS_API_PRIVILEGE_READ', () => {
+    it('gates list on ESCALATIONS_API_PRIVILEGE_READ', () => {
       const { byPath, gets } = registerAndCollect({});
       expect(
-        byPath(gets, INCIDENTS_INTERNAL_URL).config.security?.authz?.requiredPrivileges
-      ).toEqual([INCIDENTS_API_PRIVILEGE_READ]);
+        byPath(gets, ESCALATIONS_INTERNAL_URL).config.security?.authz?.requiredPrivileges
+      ).toEqual([ESCALATIONS_API_PRIVILEGE_READ]);
     });
 
-    it('gates create on INCIDENTS_API_PRIVILEGE_MANAGE', () => {
+    it('gates create on ESCALATIONS_API_PRIVILEGE_MANAGE', () => {
       const { byPath, posts } = registerAndCollect({});
       expect(
-        byPath(posts, INCIDENTS_INTERNAL_URL).config.security?.authz?.requiredPrivileges
-      ).toEqual([INCIDENTS_API_PRIVILEGE_MANAGE]);
+        byPath(posts, ESCALATIONS_INTERNAL_URL).config.security?.authz?.requiredPrivileges
+      ).toEqual([ESCALATIONS_API_PRIVILEGE_MANAGE]);
     });
 
-    it('gates update on INCIDENTS_API_PRIVILEGE_MANAGE', () => {
+    it('gates update on ESCALATIONS_API_PRIVILEGE_MANAGE', () => {
       const { byPath, patches } = registerAndCollect({});
       expect(
-        byPath(patches, INCIDENT_BY_ID_URL).config.security?.authz?.requiredPrivileges
-      ).toEqual([INCIDENTS_API_PRIVILEGE_MANAGE]);
+        byPath(patches, ESCALATION_BY_ID_URL).config.security?.authz?.requiredPrivileges
+      ).toEqual([ESCALATIONS_API_PRIVILEGE_MANAGE]);
     });
 
     it('marks all routes as internal', () => {
       const { byPath, gets, posts, patches } = registerAndCollect({});
-      expect(byPath(gets, INCIDENTS_INTERNAL_URL).config.access).toBe('internal');
-      expect(byPath(posts, INCIDENTS_INTERNAL_URL).config.access).toBe('internal');
-      expect(byPath(patches, INCIDENT_BY_ID_URL).config.access).toBe('internal');
+      expect(byPath(gets, ESCALATIONS_INTERNAL_URL).config.access).toBe('internal');
+      expect(byPath(posts, ESCALATIONS_INTERNAL_URL).config.access).toBe('internal');
+      expect(byPath(patches, ESCALATION_BY_ID_URL).config.access).toBe('internal');
     });
   });
 
   describe('route shape', () => {
-    it('registers a GET route at INCIDENTS_INTERNAL_URL for the list endpoint', () => {
+    it('registers a GET route at ESCALATIONS_INTERNAL_URL for the list endpoint', () => {
       const { byPath, gets } = registerAndCollect({});
-      expect(byPath(gets, INCIDENTS_INTERNAL_URL)).toBeDefined();
+      expect(byPath(gets, ESCALATIONS_INTERNAL_URL)).toBeDefined();
     });
 
     it('does not register a PUT or DELETE route', () => {
@@ -111,13 +111,13 @@ describe('incident routes', () => {
     });
   });
 
-  describe('create incident handler', () => {
-    it('calls service.create and returns 200 with the incident', async () => {
-      const create = jest.fn().mockResolvedValue(MOCK_INCIDENT);
+  describe('create escalation handler', () => {
+    it('calls service.create and returns 200 with the escalation', async () => {
+      const create = jest.fn().mockResolvedValue(MOCK_ESCALATION);
       const { byPath, posts } = registerAndCollect({ create });
       const response = httpServerMock.createResponseFactory();
 
-      await byPath(posts, INCIDENTS_INTERNAL_URL).handler(
+      await byPath(posts, ESCALATIONS_INTERNAL_URL).handler(
         {},
         httpServerMock.createKibanaRequest({
           body: {
@@ -130,7 +130,7 @@ describe('incident routes', () => {
       );
 
       expect(create).toHaveBeenCalledTimes(1);
-      expect(response.ok).toHaveBeenCalledWith({ body: MOCK_INCIDENT });
+      expect(response.ok).toHaveBeenCalledWith({ body: MOCK_ESCALATION });
     });
 
     it('maps InvalidLinkedInvestigationError to 400', async () => {
@@ -140,7 +140,7 @@ describe('incident routes', () => {
       const { byPath, posts } = registerAndCollect({ create });
       const response = httpServerMock.createResponseFactory();
 
-      await byPath(posts, INCIDENTS_INTERNAL_URL).handler(
+      await byPath(posts, ESCALATIONS_INTERNAL_URL).handler(
         {},
         httpServerMock.createKibanaRequest({
           body: { linked_investigation_id: 'not-an-investigation', visibility: 'public' },
@@ -158,7 +158,7 @@ describe('incident routes', () => {
       const { byPath, posts } = registerAndCollect({ create });
       const response = httpServerMock.createResponseFactory();
 
-      await byPath(posts, INCIDENTS_INTERNAL_URL).handler(
+      await byPath(posts, ESCALATIONS_INTERNAL_URL).handler(
         {},
         httpServerMock.createKibanaRequest({
           body: { linked_investigation_id: 'inv-1', visibility: 'public' },
@@ -176,7 +176,7 @@ describe('incident routes', () => {
       const { byPath, posts } = registerAndCollect({ create });
       const response = httpServerMock.createResponseFactory();
 
-      await byPath(posts, INCIDENTS_INTERNAL_URL).handler(
+      await byPath(posts, ESCALATIONS_INTERNAL_URL).handler(
         {},
         httpServerMock.createKibanaRequest({
           body: { linked_investigation_id: 'inv-1', visibility: 'public' },
@@ -190,10 +190,10 @@ describe('incident routes', () => {
     });
   });
 
-  describe('list incidents handler', () => {
+  describe('list escalations handler', () => {
     const MOCK_LIST_RESPONSE = {
       pagination: { total: 2, page: 1, per_page: 50 },
-      results: [MOCK_INCIDENT, { ...MOCK_INCIDENT, id: 'incident-2' }],
+      results: [MOCK_ESCALATION, { ...MOCK_ESCALATION, id: 'escalation-2' }],
     };
 
     it('calls service.list with request.query and returns 200', async () => {
@@ -201,7 +201,7 @@ describe('incident routes', () => {
       const { byPath, gets } = registerAndCollect({ list });
       const response = httpServerMock.createResponseFactory();
 
-      await byPath(gets, INCIDENTS_INTERNAL_URL).handler(
+      await byPath(gets, ESCALATIONS_INTERNAL_URL).handler(
         {},
         httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 50 } }),
         response
@@ -216,7 +216,7 @@ describe('incident routes', () => {
       const { byPath, gets } = registerAndCollect({ list });
       const response = httpServerMock.createResponseFactory();
 
-      await byPath(gets, INCIDENTS_INTERNAL_URL).handler(
+      await byPath(gets, ESCALATIONS_INTERNAL_URL).handler(
         {},
         httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 50 } }),
         response
@@ -234,7 +234,7 @@ describe('incident routes', () => {
       const { byPath, gets } = registerAndCollect({ list });
       const response = httpServerMock.createResponseFactory();
 
-      await byPath(gets, INCIDENTS_INTERNAL_URL).handler(
+      await byPath(gets, ESCALATIONS_INTERNAL_URL).handler(
         {},
         httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 50 } }),
         response
@@ -246,16 +246,16 @@ describe('incident routes', () => {
     });
   });
 
-  describe('update incident handler', () => {
-    it('reads the incident id from request.params, never from request.body', async () => {
-      const update = jest.fn().mockResolvedValue(MOCK_INCIDENT);
+  describe('update escalation handler', () => {
+    it('reads the escalation id from request.params, never from request.body', async () => {
+      const update = jest.fn().mockResolvedValue(MOCK_ESCALATION);
       const { byPath, patches } = registerAndCollect({ update });
       const response = httpServerMock.createResponseFactory();
 
-      await byPath(patches, INCIDENT_BY_ID_URL).handler(
+      await byPath(patches, ESCALATION_BY_ID_URL).handler(
         {},
         httpServerMock.createKibanaRequest({
-          params: { id: 'incident-1' },
+          params: { id: 'escalation-1' },
           body: { title: 'New title' },
         }),
         response
@@ -264,23 +264,23 @@ describe('incident routes', () => {
       // id comes from params, not from body
       expect(update).toHaveBeenCalledWith(
         expect.anything(), // KibanaRequest
-        'incident-1',
+        'escalation-1',
         expect.objectContaining({ title: 'New title' })
       );
-      expect(response.ok).toHaveBeenCalledWith({ body: MOCK_INCIDENT });
+      expect(response.ok).toHaveBeenCalledWith({ body: MOCK_ESCALATION });
     });
 
     it('maps a conversationWriteConflict to 409', async () => {
       const update = jest
         .fn()
-        .mockRejectedValue(createConversationWriteConflictError({ conversationId: 'incident-1' }));
+        .mockRejectedValue(createConversationWriteConflictError({ conversationId: 'escalation-1' }));
       const { byPath, patches } = registerAndCollect({ update });
       const response = httpServerMock.createResponseFactory();
 
-      await byPath(patches, INCIDENT_BY_ID_URL).handler(
+      await byPath(patches, ESCALATION_BY_ID_URL).handler(
         {},
         httpServerMock.createKibanaRequest({
-          params: { id: 'incident-1' },
+          params: { id: 'escalation-1' },
           body: { title: 'New title' },
         }),
         response

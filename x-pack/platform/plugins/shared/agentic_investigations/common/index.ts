@@ -74,21 +74,21 @@ export type {
 } from './proposals';
 
 export {
-  INCIDENT_BY_ID_URL,
-  INCIDENT_LINKED_INVESTIGATIONS_FIELD,
-  INCIDENT_TEMPLATE_ID,
-  INCIDENTS_INTERNAL_URL,
-  INCIDENTS_UI_CAPABILITY_MANAGE,
+  ESCALATION_BY_ID_URL,
+  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_TEMPLATE_ID,
+  ESCALATIONS_INTERNAL_URL,
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATION_TEMPLATE_ID,
-  MAX_INCIDENT_LINKED_INVESTIGATIONS,
-  createIncidentRequestSchema,
-  incidentVisibilitySchema,
-  updateIncidentRequestSchema,
-} from './incidents';
+  MAX_ESCALATION_LINKED_INVESTIGATIONS,
+  createEscalationRequestSchema,
+  escalationVisibilitySchema,
+  updateEscalationRequestSchema,
+} from './escalations';
 
 export type {
-  CreateIncidentRequest,
-  IncidentConversation,
-  IncidentVisibility,
-  UpdateIncidentRequest,
-} from './incidents';
+  CreateEscalationRequest,
+  EscalationConversation,
+  EscalationVisibility,
+  UpdateEscalationRequest,
+} from './escalations';

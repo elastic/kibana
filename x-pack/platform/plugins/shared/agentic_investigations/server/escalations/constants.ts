@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { ApiPrivileges } from '@kbn/core-security-server';
 
-export const incidentIdParamsSchema = z.object({
-  id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH),
-});
+export const ESCALATIONS_API_PRIVILEGE_READ = ApiPrivileges.read('escalations');
+export const ESCALATIONS_API_PRIVILEGE_MANAGE = ApiPrivileges.manage('escalations');
