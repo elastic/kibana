@@ -84,9 +84,9 @@ describe('unit repository', () => {
       unit: {
         sources: [
           {
-            id: 'otlp-input',
-            name: 'OTLP',
-            type: 'otlp',
+            id: 'nop-input',
+            name: 'Nop',
+            type: 'nop',
             supported_telemetry: ['logs', 'metrics', 'traces'],
           },
         ],
@@ -103,7 +103,7 @@ describe('unit repository', () => {
             id: 'main',
             supported_telemetry: ['logs', 'metrics', 'traces'],
             config: [
-              { name: 'sources', value: ['otlp-input'] },
+              { name: 'sources', value: ['nop-input'] },
               { name: 'destinations', value: ['debug-out'] },
             ],
           },

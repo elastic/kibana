@@ -17,7 +17,7 @@ export interface UnitRepository {
   persist: (unit: Unit) => Promise<Unit>;
 }
 
-const DEFAULT_SOURCE_ID = 'otlp-input';
+const DEFAULT_SOURCE_ID = 'nop-input';
 const DEFAULT_DESTINATION_ID = 'debug-out';
 const DEFAULT_PIPELINE_ID = 'main';
 const DEFAULT_SUPPORTED_TELEMETRY = ['logs', 'metrics', 'traces'] as const;
@@ -34,8 +34,8 @@ export const createDefaultUnit = (): Unit => ({
     sources: [
       {
         id: DEFAULT_SOURCE_ID,
-        name: 'OTLP',
-        type: 'otlp',
+        name: 'Nop',
+        type: 'nop',
         supported_telemetry: [...DEFAULT_SUPPORTED_TELEMETRY],
       },
     ],
