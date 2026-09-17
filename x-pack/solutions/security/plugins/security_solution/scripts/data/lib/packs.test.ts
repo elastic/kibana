@@ -151,6 +151,19 @@ describe('ensureEcsSourceIp', () => {
   });
 });
 
+describe('aws-iam AssumeRole hunt (Phase 5 technique closure)', () => {
+  it('registers exactly six aws-iam hunts including AssumeRole with T1078.004', () => {
+    const awsIam = getPack('aws-iam');
+    expect(awsIam).toBeDefined();
+    expect(awsIam!.hunts).toHaveLength(6);
+
+    const assumeRole = awsIam!.hunts.find((h) => h.name === 'AssumeRole');
+    expect(assumeRole).toBeDefined();
+    expect(assumeRole?.query).toEqual('event.action: "AssumeRole" and cloud.provider: "aws"');
+    expect(assumeRole?.mitre.map((m) => m.technique)).toEqual(['T1078.004']);
+  });
+});
+
 describe('aws-iam AssumeRole host pin (DC2 entity join)', () => {
   const PINNED_HOST = 'WIN-ANALYST01';
 
