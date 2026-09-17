@@ -12,6 +12,7 @@ import type {
   Error,
   IWaterfallGetRelatedErrorsHref,
   IWaterfallLegend,
+  TraceErrorSource,
   TraceItem,
   WaterfallGetErrorMarkerHref,
   WaterfallGetServiceBadgeHref,
@@ -113,6 +114,7 @@ export type OnErrorClick = (params: {
   errorCount: number;
   errorDocId?: string;
   docIndex?: string;
+  errorSource?: TraceErrorSource;
 }) => void;
 
 interface Props {

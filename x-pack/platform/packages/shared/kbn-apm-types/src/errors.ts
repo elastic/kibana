@@ -18,6 +18,8 @@ export interface ErrorData {
   };
 }
 
+export type TraceErrorSource = 'apm' | 'unprocessedOtel';
+
 export interface Error {
   id: string;
   index?: string;
@@ -29,9 +31,10 @@ export interface Error {
   eventName?: string;
   error: ErrorData;
   timestamp: TimestampUs;
+  /** Identifies where this error document was fetched from. */
+  source: TraceErrorSource;
 }
 
 export interface ErrorsByTraceId {
   traceErrors: Error[];
-  source: 'apm' | 'unprocessedOtel';
 }

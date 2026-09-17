@@ -187,6 +187,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                       errorCount,
                       errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
                       docIndex: errorCount > 1 ? undefined : item.errors[0].errorDocIndex,
+                      errorSource: errorCount > 1 ? undefined : item.errors[0].source,
                     });
                   }
                 }}

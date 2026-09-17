@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import type { TraceItem } from '@kbn/apm-types';
 import type { OnErrorClick } from '@kbn/apm-ui-shared';
+import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import { isMobileAgentName } from '../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
 import { toAnyOfKuery } from '../../../../../../common/utils/kuery_utils';
@@ -15,11 +16,25 @@ import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_p
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 
+export interface OpenDocFlyoutParams {
+  type: UnifiedDocViewerObservabilityTracesDocumentType;
+  docId: string;
+  docIndex: string | undefined;
+  activeSection: 'errors-table' | undefined;
+}
+
 /**
  * Hook that provides a callback for handling error clicks in the trace waterfall.
- * Navigates to the appropriate error page based on the agent type (mobile vs standard).
+ *
+ * Routing:
+ *  - multiple errors on a row  → span flyout scrolled to the Errors table (any source)
+ *  - single unprocessed OTel error → log flyout for the individual error doc
+ *  - single classic APM error  → navigate to the APM Errors page
  */
-export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
+export function useErrorClickHandler(
+  traceItems: TraceItem[],
+  onOpenDocFlyout: (params: OpenDocFlyoutParams) => void
+): OnErrorClick {
   const apmRouter = useApmRouter();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
@@ -33,7 +48,20 @@ export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
   } = useApmPluginContext();
 
   return useCallback(
-    ({ traceId: errorTraceId, docId }) => {
+    ({ traceId: errorTraceId, docId, errorCount, errorDocId, docIndex, errorSource }) => {
+      // Multiple errors on this row → open the span flyout's Errors tab regardless of source.
+      if (errorCount > 1) {
+        onOpenDocFlyout({ type: 'span', docId, docIndex: undefined, activeSection: 'errors-table' });
+        return;
+      }
+
+      // Single unprocessed OTel error → open the log doc flyout.
+      if (errorSource === 'unprocessedOtel' && errorDocId) {
+        onOpenDocFlyout({ type: 'log', docId: errorDocId, docIndex, activeSection: undefined });
+        return;
+      }
+
+      // Single classic APM error → navigate to the Errors page (unchanged).
       const item = traceItems?.find((i) => i.id === docId);
       if (!item) return;
 
@@ -58,6 +86,6 @@ export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
 
       navigateToUrl(href);
     },
-    [traceItems, apmRouter, query, navigateToUrl]
+    [traceItems, apmRouter, query, navigateToUrl, onOpenDocFlyout]
   );
 }

@@ -17,9 +17,9 @@ import {
   TRACE_ID,
   SPAN_ID,
   PROCESSOR_EVENT,
-  EVENT_NAME,
   ERROR_ID,
   EXCEPTION_MESSAGE,
+  OTEL_EVENT_NAME,
 } from '@kbn/apm-types';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import type { ESQLAstExpression } from '@elastic/esql/types';
@@ -38,12 +38,10 @@ const errorEbt = {
 function createWhereClause({
   traceId,
   docId,
-  source,
   item,
 }: {
   traceId: string;
   docId?: string;
-  source: ErrorsByTraceId['source'];
   item: ErrorsByTraceId['traceErrors'][0];
 }): ESQLAstExpression {
   const conditions: NonEmptyArray<ESQLAstExpression> = [esqlEquals(TRACE_ID, traceId)];
@@ -52,16 +50,18 @@ function createWhereClause({
     conditions.push(esqlEquals(SPAN_ID, docId));
   }
 
-  if (source === 'apm') {
+  if (item.source === 'apm') {
     conditions.push(esqlEquals(PROCESSOR_EVENT, 'error'));
     if (item.error.id) {
       conditions.push(esqlEquals(ERROR_ID, item.error.id));
     }
   }
 
-  if (source === 'unprocessedOtel') {
+  if (item.source === 'unprocessedOtel') {
+    // OTEL_EVENT_NAME is the flattened name `event_name` as stored in the doc.
+    // EVENT_NAME (`event.name`) is a different field — using it here would match nothing.
     if (item?.eventName) {
-      conditions.push(esqlEquals(EVENT_NAME, item.eventName));
+      conditions.push(esqlEquals(OTEL_EVENT_NAME, item.eventName));
     }
     if (item?.error?.exception?.message) {
       conditions.push(esqlEquals(EXCEPTION_MESSAGE, item.error.exception.message));
@@ -74,26 +74,31 @@ function createWhereClause({
 const ErrorMessageLinkCell = ({
   traceId,
   docId,
-  source,
   item,
 }: {
   traceId: string;
   docId?: string;
-  source: ErrorsByTraceId['source'];
   item: ErrorsByTraceId['traceErrors'][0];
 }) => {
   const { indexes } = useDataSourcesContext();
   const errorLabel = getErrorMessage(item.error);
   const whereClause = useMemo(
-    () => createWhereClause({ traceId, docId, source, item }),
-    [traceId, docId, source, item]
+    () => createWhereClause({ traceId, docId, item }),
+    [traceId, docId, item]
   );
+
+  // For unprocessed OTel errors, target the configured log sources so that datasets outside
+  // `logs-apm*,apm-*,logs-*.otel-*` (e.g. `logs-generic.otel-default`) are reachable.
+  const indexPattern =
+    item.source === 'unprocessedOtel' && indexes.logs
+      ? indexes.logs
+      : indexes.apm.errors;
 
   const content = <EuiTextTruncate data-test-subj="error-exception-message" text={errorLabel} />;
 
   return (
     <DiscoverEsqlLink
-      indexPattern={indexes.apm.errors}
+      indexPattern={indexPattern}
       whereClause={whereClause}
       tabLabel={errorLabel}
       dataTestSubj="error-group-link"
@@ -119,11 +124,9 @@ const getErrorMessage = (error: ErrorData) => {
 export const getColumns = ({
   traceId,
   docId,
-  source,
 }: {
   traceId: string;
   docId?: string;
-  source: ErrorsByTraceId['source'];
 }): Array<EuiBasicTableColumn<ErrorsByTraceId['traceErrors'][0]>> => [
   {
     field: 'name',
@@ -139,7 +142,7 @@ export const getColumns = ({
             width: 100%;
           `}
         >
-          <ErrorMessageLinkCell traceId={traceId} docId={docId} source={source} item={item} />
+          <ErrorMessageLinkCell traceId={traceId} docId={docId} item={item} />
           <EuiText size="s" />
 
           <EuiText size="xs" color="subdued">
