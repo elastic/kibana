@@ -353,8 +353,8 @@ const WorkflowYamlCanvasContent: React.FC<{
 // Dense inline preview: stretches to the panel's full width and uses a
 // horizontal (LR) dagre layout, so the whole workflow fits in a short strip.
 // Sidebar keeps a smaller strip since the panel is narrower.
-const INLINE_PREVIEW_HEIGHT_SIDEBAR = 180;
-const INLINE_PREVIEW_HEIGHT_DEFAULT = 220;
+const INLINE_PREVIEW_HEIGHT_SIDEBAR = 540;
+const INLINE_PREVIEW_HEIGHT_DEFAULT = 540;
 
 // Guards against valid-YAML/wrong-shape (e.g. LLM emits `steps:` as a mapping):
 // WorkflowGraphPreview iterates `workflow.steps` / `workflow.triggers`, which

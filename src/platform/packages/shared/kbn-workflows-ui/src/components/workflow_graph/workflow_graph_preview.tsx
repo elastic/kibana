@@ -59,10 +59,10 @@ const noop = () => {};
 export function WorkflowGraphPreview({
   workflow,
   width = '100%',
-  height = 240,
+  height = 540,
   renderStepIcon,
   maxSteps = DEFAULT_MAX_PREVIEW_STEPS,
-  direction = 'LR',
+  direction = 'TB',
   rankSep = 32,
   nodeSep = 24,
   nodeWidth = 200,
