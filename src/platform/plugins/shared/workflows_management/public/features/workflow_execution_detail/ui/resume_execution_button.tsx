@@ -89,8 +89,11 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   }, [autoOpen, approvalLabels]);
 
   useEffect(() => {
-    setIsSubmitted(false);
-  }, [setIsSubmitted, waitingStepExecutionId]);
+    if (submitState) {
+      return;
+    }
+    setLocalSubmitted(false);
+  }, [submitState, waitingStepExecutionId]);
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
     if (!resumeSchema || isApprovalMode) return undefined;

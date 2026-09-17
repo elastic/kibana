@@ -149,6 +149,27 @@ describe('useWaitingStepResume', () => {
     expect(result.current.approvalLabels).toBeUndefined();
   });
 
+  it('does not return a waiting step when getStepExecution fails (data undefined, isLoading false)', () => {
+    mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: false } as ReturnType<
+      typeof useStepExecution
+    >);
+
+    const execution = createMockWorkflowExecutionDto({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'step-wait',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() => useWaitingStepResume('exec-1', execution));
+
+    expect(result.current.waitingStepExecutionId).toBeUndefined();
+    expect(result.current.resumeMessage).toBeUndefined();
+  });
+
   it('ignores a stale waiting execution after executionId changes', () => {
     mockUseStepExecution.mockReturnValue({
       data: {

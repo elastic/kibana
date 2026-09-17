@@ -64,7 +64,11 @@ export function useWaitingStepResume(
   }, [waitingStepExecutionId, executionId, queryClient]);
 
   return useMemo(() => {
-    if (!waitingStepExecutionId || isPausedStepLoading) {
+    if (
+      !waitingStepExecutionId ||
+      isPausedStepLoading ||
+      pausedStepFullData?.id !== waitingStepExecutionId
+    ) {
       return {
         waitingStepExecutionId: undefined,
         waitingStepStartedAt: undefined,

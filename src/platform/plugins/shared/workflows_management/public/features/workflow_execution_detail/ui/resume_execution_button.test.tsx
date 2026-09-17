@@ -284,6 +284,47 @@ describe('ResumeExecutionButton', () => {
       expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
     });
 
+    it('does not re-enable shared submit state when a second instance mounts', async () => {
+      const SharedResume = ({ showSecond }: { showSecond: boolean }) => {
+        const [isSubmitting, setSubmitting] = React.useState(false);
+        const [isSubmitted, setSubmitted] = React.useState(false);
+        const submitState = { isSubmitting, isSubmitted, setSubmitting, setSubmitted };
+        return (
+          <>
+            <ResumeExecutionButton {...defaultProps} submitState={submitState} />
+            {showSecond && <ResumeExecutionButton {...defaultProps} submitState={submitState} />}
+          </>
+        );
+      };
+
+      const { rerender } = render(
+        <TestWrapper queryClient={queryClient}>
+          <SharedResume showSecond={false} />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        capturedOnSubmit!({ stepInputs: {} });
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('provideActionButton')).toBeDisabled();
+      });
+
+      rerender(
+        <TestWrapper queryClient={queryClient}>
+          <SharedResume showSecond />
+        </TestWrapper>
+      );
+
+      expect(
+        screen
+          .getAllByTestId('provideActionButton')
+          .every((button) => button.hasAttribute('disabled'))
+      ).toBe(true);
+    });
+
     it('disables both instances when they share submit state', async () => {
       const SharedResume = () => {
         const [isSubmitting, setSubmitting] = React.useState(false);
