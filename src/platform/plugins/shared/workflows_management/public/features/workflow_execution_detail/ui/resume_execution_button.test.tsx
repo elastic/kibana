@@ -283,6 +283,41 @@ describe('ResumeExecutionButton', () => {
       );
       expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
     });
+
+    it('disables both instances when they share submit state', async () => {
+      const SharedResume = () => {
+        const [isSubmitting, setSubmitting] = React.useState(false);
+        const [isSubmitted, setSubmitted] = React.useState(false);
+        const submitState = { isSubmitting, isSubmitted, setSubmitting, setSubmitted };
+        return (
+          <>
+            <ResumeExecutionButton {...defaultProps} submitState={submitState} />
+            <ResumeExecutionButton {...defaultProps} submitState={submitState} />
+          </>
+        );
+      };
+
+      render(
+        <TestWrapper queryClient={queryClient}>
+          <SharedResume />
+        </TestWrapper>
+      );
+
+      const buttons = screen.getAllByTestId('provideActionButton');
+      expect(buttons).toHaveLength(2);
+      fireEvent.click(buttons[0]);
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        capturedOnSubmit!({ stepInputs: {} });
+      });
+      await waitFor(() => {
+        expect(
+          screen
+            .getAllByTestId('provideActionButton')
+            .every((button) => button.hasAttribute('disabled'))
+        ).toBe(true);
+      });
+    });
   });
 
   describe('approval mode', () => {

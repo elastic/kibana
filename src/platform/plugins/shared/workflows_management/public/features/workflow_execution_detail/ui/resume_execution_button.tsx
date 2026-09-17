@@ -45,6 +45,13 @@ interface ResumeExecutionButtonProps {
   autoOpen?: boolean;
   /** Step execution document id for the active waitForInput pause; when it changes, re-enable after a prior submit */
   waitingStepExecutionId?: string;
+  /** Shared across header and step-detail instances so one submit disables both. */
+  submitState?: {
+    isSubmitting: boolean;
+    isSubmitted: boolean;
+    setSubmitting: (value: boolean) => void;
+    setSubmitted: (value: boolean) => void;
+  };
 }
 
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
@@ -56,6 +63,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   approvalLabels,
   autoOpen = false,
   waitingStepExecutionId,
+  submitState,
 }) => {
   const { notifications } = useKibana().services;
   const queryClient = useQueryClient();
@@ -64,8 +72,12 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const { clearResumeParam } = useWorkflowUrlState();
   const telemetry = useTelemetry();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen && !approvalLabels);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [localSubmitting, setLocalSubmitting] = useState(false);
+  const [localSubmitted, setLocalSubmitted] = useState(false);
+  const isSubmitting = submitState?.isSubmitting ?? localSubmitting;
+  const isSubmitted = submitState?.isSubmitted ?? localSubmitted;
+  const setIsSubmitting = submitState?.setSubmitting ?? setLocalSubmitting;
+  const setIsSubmitted = submitState?.setSubmitted ?? setLocalSubmitted;
   const modalOpenedAtRef = useRef<number | null>(null);
   const isApprovalMode = Boolean(approvalLabels);
 
@@ -78,7 +90,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
 
   useEffect(() => {
     setIsSubmitted(false);
-  }, [waitingStepExecutionId]);
+  }, [setIsSubmitted, waitingStepExecutionId]);
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
     if (!resumeSchema || isApprovalMode) return undefined;
@@ -165,6 +177,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       telemetry,
       closeModal,
       waitingStepExecutionId,
+      setIsSubmitted,
+      setIsSubmitting,
     ]
   );
 
