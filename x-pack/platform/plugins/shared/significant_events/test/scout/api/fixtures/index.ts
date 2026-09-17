@@ -21,6 +21,7 @@ import { getStreamsUsers } from './constants';
 
 export interface StreamsSamlAuthFixture extends SamlAuth {
   asStreamsAdmin: () => Promise<RoleSessionCredentials>;
+  asNightshiftEngineAdmin: () => Promise<RoleSessionCredentials>;
   asStreamsReadOnly: () => Promise<RoleSessionCredentials>;
   asStreamsUnauthorized: () => Promise<RoleSessionCredentials>;
 }
@@ -61,6 +62,9 @@ export const significantEventsApiTest = apiTest.extend<{
 
     const asStreamsAdmin = async () => samlAuth.asInteractiveUser(streamsUsers.streamsAdmin);
 
+    const asNightshiftEngineAdmin = async () =>
+      samlAuth.asInteractiveUser(streamsUsers.nightshiftEngineAdmin);
+
     const asStreamsReadOnly = async () => samlAuth.asInteractiveUser(streamsUsers.streamsReadOnly);
 
     const asStreamsUnauthorized = async () =>
@@ -69,6 +73,7 @@ export const significantEventsApiTest = apiTest.extend<{
     const extendedSamlAuth: StreamsSamlAuthFixture = {
       ...samlAuth,
       asStreamsAdmin,
+      asNightshiftEngineAdmin,
       asStreamsReadOnly,
       asStreamsUnauthorized,
     };
