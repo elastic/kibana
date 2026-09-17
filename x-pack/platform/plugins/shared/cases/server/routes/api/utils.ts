@@ -8,10 +8,17 @@
 import type { Boom } from '@hapi/boom';
 import { boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import type { CustomHttpResponseOptions, ResponseError, Logger } from '@kbn/core/server';
+import type {
+  CustomHttpResponseOptions,
+  ResponseError,
+  Logger,
+  RouteValidationFunction,
+} from '@kbn/core/server';
+import type * as rt from 'io-ts';
 import type { CaseError, HTTPError } from '../../common/error';
 import { isCaseError, isHTTPError } from '../../common/error';
 import { getTypedApiErrorAttributes } from '../../common/api_errors';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 /**
  * Transforms an error into the correct format for a kibana response.
@@ -43,6 +50,17 @@ export function wrapError(
 }
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
+
+/** Same io-ts decode as the client, run as Core `validate.body`. */
+export const createIoTsBodyValidation =
+  <A, O, I>(runtimeType: rt.Type<A, O, I>): RouteValidationFunction<A> =>
+  (inputValue, { ok, badRequest }) => {
+    try {
+      return ok(decodeWithExcessOrThrow(runtimeType)(inputValue));
+    } catch (error) {
+      return badRequest(isBoom(error) || error instanceof Error ? error.message : error);
+    }
+  };
 
 /**
  * Creates a warning header with a message formatted according to RFC7234.

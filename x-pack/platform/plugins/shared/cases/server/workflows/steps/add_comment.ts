@@ -23,13 +23,18 @@ export const addCommentStepDefinition = (
     ...addCommentStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddCommentStepInput) => {
       return withCaseOwner(client, input.case_id, async (owner) => {
-        const updatedCase = await client.attachments.add({
+        await client.attachments.add({
           caseId: input.case_id,
           comment: {
             type: COMMENT_ATTACHMENT_TYPE,
             data: { content: input.comment },
             owner,
           },
+        });
+
+        const updatedCase = await client.cases.get({
+          id: input.case_id,
+          includeComments: true,
         });
 
         // The client returns unified comments; the output schema mirrors the

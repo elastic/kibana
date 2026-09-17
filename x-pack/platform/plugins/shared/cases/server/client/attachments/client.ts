@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Case, AttachmentsV2, AttachmentV2 } from '../../../common/types/domain';
+import type {
+  Case,
+  AttachmentsV2,
+  AttachmentV2,
+  UnifiedAttachment,
+} from '../../../common/types/domain';
 import type {
   DocumentResponse,
   AttachmentsFindResponseV2,
@@ -44,9 +49,9 @@ import { withUsageCounter } from '../usage_counters';
  */
 export interface AttachmentsSubClient {
   /**
-   * Adds an attachment to a case.
+   * Creates an attachment and returns it in its unified shape.
    */
-  add(params: AddArgs): Promise<Case>;
+  add(params: AddArgs): Promise<UnifiedAttachment>;
   bulkCreate(params: BulkCreateArgs): Promise<Case>;
   bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponseV2>;
   /**
@@ -75,11 +80,10 @@ export interface AttachmentsSubClient {
    */
   get(getArgs: GetArgs): Promise<AttachmentV2>;
   /**
-   * Updates a specific attachment.
-   *
-   * The request must include all fields for the attachment. Even the fields that are not changing.
+   * Replaces an attachment and returns it in its unified shape. `PUT` semantics —
+   * the request must include every field; there are no partial updates.
    */
-  update(updateArgs: UpdateArgs): Promise<Case>;
+  update(updateArgs: UpdateArgs): Promise<UnifiedAttachment>;
   /**
    * Adds a file attachment to a case. Returns the case with comments.
    */
@@ -113,9 +117,10 @@ export const createAttachmentsSubClient = (
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
-    add: withUsageCounter(usageCounterByMethod.add, clientArgs, (params: AddArgs) =>
-      addComment(params, clientArgs)
-    ),
+    add: withUsageCounter(usageCounterByMethod.add, clientArgs, async (params: AddArgs) => {
+      const { attachment } = await addComment(params, clientArgs);
+      return attachment;
+    }),
     bulkCreate: withUsageCounter(
       usageCounterByMethod.bulkCreate,
       clientArgs,
@@ -140,8 +145,13 @@ export const createAttachmentsSubClient = (
       getAllDocumentsAttachedToCase(params, clientArgs, casesClient),
     getAll: (params: GetAllArgs) => getAll(params, clientArgs),
     get: (params: GetArgs) => get(params, clientArgs),
-    update: withUsageCounter(usageCounterByMethod.update, clientArgs, (params: UpdateArgs) =>
-      update(params, clientArgs)
+    update: withUsageCounter(
+      usageCounterByMethod.update,
+      clientArgs,
+      async (params: UpdateArgs) => {
+        const { attachment } = await update(params, clientArgs);
+        return attachment;
+      }
     ),
     addFile: withUsageCounter(usageCounterByMethod.addFile, clientArgs, (params: AddFileArgs) =>
       addFile(params, clientArgs, casesClient)

@@ -16,6 +16,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/patch_comment'));
     loadTestFile(require.resolve('./comments/post_comment'));
     loadTestFile(require.resolve('./files/post_file'));
+    loadTestFile(require.resolve('./attachments/post_attachment'));
+    loadTestFile(require.resolve('./attachments/put_attachment'));
     loadTestFile(require.resolve('./cases/delete_cases'));
     loadTestFile(require.resolve('./cases/find_cases'));
     loadTestFile(require.resolve('./cases/get_case'));

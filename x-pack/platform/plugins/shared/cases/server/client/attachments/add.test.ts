@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { MAX_USER_ACTIONS_PER_CASE, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { mockCases, mockCaseUnifiedAttachments } from '../../mocks';
 import {
   createAttachmentServiceMock,
@@ -13,7 +15,10 @@ import {
   createUserActionServiceMock,
 } from '../../services/mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { commentAttachmentType } from '../../attachment_framework/attachments';
+import {
+  commentAttachmentType,
+  stackAlertAttachmentType,
+} from '../../attachment_framework/attachments';
 import { addComment } from './add';
 
 describe('addComment', () => {
@@ -33,9 +38,19 @@ describe('addComment', () => {
   clientArgs.services.caseService = caseService;
   clientArgs.services.attachmentService = attachmentService;
   clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
+  clientArgs.unifiedAttachmentTypeRegistry.register(stackAlertAttachmentType);
+
+  let generateIdSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    generateIdSpy = jest
+      .spyOn(SavedObjectsUtils, 'generateId')
+      .mockReturnValue('mock-saved-object-id');
+  });
+
+  afterEach(() => {
+    generateIdSpy.mockRestore();
   });
 
   it('throws with excess fields', async () => {
@@ -64,14 +79,22 @@ describe('addComment', () => {
     );
   });
 
-  it('accepts unified type (v2) request', async () => {
+  it('returns the created attachment, not the case', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    // This is the id `addComment` generates (see `generateIdSpy` above), and the id
+    // `getAllCaseComments` must echo back for the pick-from-case lookup to succeed.
+    const createdAttachment = {
+      ...mockCaseUnifiedAttachments[0],
+      id: 'mock-saved-object-id',
+      score: 0,
+    };
 
     const theCase = { ...mockCases[0], id: caseId };
     caseService.getCase.mockResolvedValue(theCase);
     caseService.patchCase.mockResolvedValue(theCase);
     caseService.getAllCaseComments.mockResolvedValue({
-      saved_objects: [],
+      saved_objects: [createdAttachment],
       total: 1,
       per_page: 1,
       page: 1,
@@ -79,11 +102,20 @@ describe('addComment', () => {
     attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
       new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
     );
-    attachmentService.create.mockResolvedValue(mockCaseUnifiedAttachments[0]);
+    attachmentService.create.mockResolvedValue(createdAttachment);
 
-    await expect(
-      addComment({ comment: unifiedComment, caseId }, clientArgs)
-    ).resolves.toBeDefined();
+    const res = await addComment({ comment: unifiedComment, caseId }, clientArgs);
+
+    expect(res.attachment).toStrictEqual(
+      expect.objectContaining({
+        id: 'mock-saved-object-id',
+        type: createdAttachment.attributes.type,
+        data: createdAttachment.attributes.data,
+      })
+    );
+    // Not a `Case` — no case-shaped fields on the returned attachment.
+    expect(res.attachment).not.toHaveProperty('comments');
+    expect(res.theCase).toHaveProperty('comments');
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -97,11 +129,17 @@ describe('addComment', () => {
   it('emits attachmentAdded event after creating a comment', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
 
+    const createdAttachment = {
+      ...mockCaseUnifiedAttachments[0],
+      id: 'mock-saved-object-id',
+      score: 0,
+    };
+
     const theCase = { ...mockCases[0], id: caseId };
     caseService.getCase.mockResolvedValue(theCase);
     caseService.patchCase.mockResolvedValue(theCase);
     caseService.getAllCaseComments.mockResolvedValue({
-      saved_objects: [],
+      saved_objects: [createdAttachment],
       total: 1,
       per_page: 1,
       page: 1,
@@ -109,7 +147,7 @@ describe('addComment', () => {
     attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
       new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
     );
-    attachmentService.create.mockResolvedValue(mockCaseUnifiedAttachments[0]);
+    attachmentService.create.mockResolvedValue(createdAttachment);
 
     await addComment({ comment: unifiedComment, caseId }, clientArgs);
 
@@ -122,5 +160,69 @@ describe('addComment', () => {
         owner: SECURITY_SOLUTION_OWNER,
       })
     );
+  });
+
+  it('returns the existing alert attachment when every id is already on the case', async () => {
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    const existingAlertId = 'existing-alert-so';
+    const alertId = 'alert-1';
+    const existingAlert = {
+      type: 'cases-attachments',
+      id: existingAlertId,
+      version: 'WzAsMV0=',
+      score: 0,
+      attributes: {
+        type: STACK_ALERT_ATTACHMENT_TYPE,
+        attachmentId: alertId,
+        metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2019-11-25T21:55:00.177Z',
+        created_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      },
+      references: [{ type: 'cases', name: 'associated-cases', id: caseId }],
+    };
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [existingAlert],
+      total: 1,
+      per_page: 1,
+      page: 1,
+    });
+    attachmentService.getter.getAllAlertIds.mockResolvedValue(new Set([alertId]));
+    attachmentService.getter.getAllEventIds.mockResolvedValue(new Set());
+
+    const res = await addComment(
+      {
+        comment: {
+          type: STACK_ALERT_ATTACHMENT_TYPE,
+          attachmentId: alertId,
+          metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'rule-1' } },
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        caseId,
+      },
+      clientArgs
+    );
+
+    expect(res.attachment).toStrictEqual(
+      expect.objectContaining({
+        id: existingAlertId,
+        type: STACK_ALERT_ATTACHMENT_TYPE,
+        attachmentId: alertId,
+      })
+    );
+    expect(attachmentService.create).not.toHaveBeenCalled();
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).not.toHaveBeenCalled();
   });
 });

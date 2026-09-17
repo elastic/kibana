@@ -12,6 +12,7 @@ import { createCasesRoute } from '../create_cases_route';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { toLegacyCaseResponse, toUnifiedAttachmentRequest } from '../../../common/attachments';
+import { addComment } from '../../../client/attachments/add';
 
 export const postCommentRoute = createCasesRoute({
   method: 'post',
@@ -35,12 +36,9 @@ export const postCommentRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
 
-      // 1. v1 request body -> unified payload
       const comment = toUnifiedAttachmentRequest(request.body);
-      // 2. add the unified attachment
-      const updatedCase = await casesClient.attachments.add({ caseId, comment });
-      // 3. unified case -> v1 response
-      const res: caseDomainV1.Case = toLegacyCaseResponse(updatedCase);
+      const { theCase } = await addComment({ caseId, comment }, casesClient.getClientArgs());
+      const res: caseDomainV1.Case = toLegacyCaseResponse(theCase);
 
       return response.ok({
         body: res,

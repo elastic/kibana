@@ -12,6 +12,7 @@ import { createCasesRoute } from '../create_cases_route';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { toLegacyCaseResponse, toUnifiedAttachmentPatchRequest } from '../../../common/attachments';
+import { update } from '../../../client/attachments/update';
 
 export const patchCommentRoute = createCasesRoute({
   method: 'patch',
@@ -34,15 +35,12 @@ export const patchCommentRoute = createCasesRoute({
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
 
-      // 1. v1 request body -> unified patch payload
       const updateRequest = toUnifiedAttachmentPatchRequest(request.body);
-      // 2. update the unified attachment
-      const updatedCase = await client.attachments.update({
-        caseID: request.params.case_id,
-        updateRequest,
-      });
-      // 3. unified case -> v1 response
-      const res: caseDomainV1.Case = toLegacyCaseResponse(updatedCase);
+      const { theCase } = await update(
+        { caseID: request.params.case_id, updateRequest },
+        client.getClientArgs()
+      );
+      const res: caseDomainV1.Case = toLegacyCaseResponse(theCase);
 
       return response.ok({
         body: res,
