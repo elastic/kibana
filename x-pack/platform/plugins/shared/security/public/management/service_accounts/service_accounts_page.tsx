@@ -6,9 +6,9 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButton, EuiButtonIcon, EuiContextMenuItem, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -20,22 +20,11 @@ const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   border-block-end: ${euiTheme.border.thin};
 `;
 
-const serviceAccountsDocsUrl =
-  'https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/service-accounts';
-
 export interface ServiceAccountsPageProps {
   onCreateAccount: () => void;
 }
 
 export const ServiceAccountsPage = ({ onCreateAccount }: ServiceAccountsPageProps) => {
-  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-  const moreActionsLabel = i18n.translate(
-    'xpack.security.management.serviceAccounts.moreActionsButton',
-    {
-      defaultMessage: 'More actions',
-    }
-  );
-
   return (
     <>
       <KibanaPageTemplate.Header
@@ -59,41 +48,10 @@ export const ServiceAccountsPage = ({ onCreateAccount }: ServiceAccountsPageProp
               defaultMessage: 'Create account',
             })}
           </EuiButton>,
-          <EuiPopover
-            key="moreActions"
-            aria-label={moreActionsLabel}
-            isOpen={isActionsPopoverOpen}
-            closePopover={() => setIsActionsPopoverOpen(false)}
-            panelPaddingSize="none"
-            button={
-              <EuiToolTip content={moreActionsLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  aria-label={moreActionsLabel}
-                  color="text"
-                  iconType="boxesVertical"
-                  onClick={() => setIsActionsPopoverOpen((isOpen) => !isOpen)}
-                  data-test-subj="serviceAccountsPageMoreActionsButton"
-                />
-              </EuiToolTip>
-            }
-          >
-            <EuiContextMenuItem
-              href={serviceAccountsDocsUrl}
-              target="_blank"
-              onClick={() => setIsActionsPopoverOpen(false)}
-            >
-              {i18n.translate('xpack.security.management.serviceAccounts.moreActionsDocsLink', {
-                defaultMessage: 'Learn more in docs',
-              })}
-            </EuiContextMenuItem>
-          </EuiPopover>,
         ]}
       />
       <KibanaPageTemplate.Section alignment="center" grow>
-        <ServiceAccountsEmptyPrompt
-          docsUrl={serviceAccountsDocsUrl}
-          onCreateAccount={onCreateAccount}
-        />
+        <ServiceAccountsEmptyPrompt onCreateAccount={onCreateAccount} />
       </KibanaPageTemplate.Section>
     </>
   );

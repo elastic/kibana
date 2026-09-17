@@ -15,7 +15,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ServiceAccountsPage } from './service_accounts_page';
 
 describe('ServiceAccountsPage', () => {
-  it('renders the page actions and opens the documentation menu', async () => {
+  it('starts account creation from the page action', async () => {
     const onCreateAccount = jest.fn();
 
     renderWithI18n(
@@ -26,8 +26,6 @@ describe('ServiceAccountsPage', () => {
 
     await user.click(screen.getByTestId('serviceAccountsPageCreateButton'));
     expect(onCreateAccount).toHaveBeenCalledTimes(1);
-
-    await user.click(screen.getByTestId('serviceAccountsPageMoreActionsButton'));
-    expect(screen.getAllByRole('link', { name: /Learn more in docs/ })).toHaveLength(2);
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 });

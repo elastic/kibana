@@ -17,21 +17,17 @@ import { ServiceAccountsEmptyPrompt } from './service_accounts_empty_prompt';
 describe('ServiceAccountsEmptyPrompt', () => {
   it('renders the empty state and starts account creation', async () => {
     const onCreateAccount = jest.fn();
-    const docsUrl = 'https://example.com/service-accounts';
 
     renderWithI18n(
       <EuiProvider>
-        <ServiceAccountsEmptyPrompt docsUrl={docsUrl} onCreateAccount={onCreateAccount} />
+        <ServiceAccountsEmptyPrompt onCreateAccount={onCreateAccount} />
       </EuiProvider>
     );
 
     expect(screen.getByRole('heading', { name: 'No service accounts available' })).toBeVisible();
     expect(screen.getByText('Create a dedicated identity to execute workloads.')).toBeVisible();
     expect(screen.getByTestId('serviceAccountsEmptyPromptIllustration')).toBeVisible();
-    expect(screen.getByTestId('serviceAccountsEmptyPromptDocsLink')).toHaveAttribute(
-      'href',
-      docsUrl
-    );
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId('serviceAccountsEmptyPromptCreateButton'));
 

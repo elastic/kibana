@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiImage } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -14,12 +14,10 @@ import serviceAccountsEmptyIllustration from './assets/service_accounts_empty.sv
 
 export interface ServiceAccountsEmptyPromptProps {
   onCreateAccount: () => void;
-  docsUrl: string;
 }
 
 export const ServiceAccountsEmptyPrompt = ({
   onCreateAccount,
-  docsUrl,
 }: ServiceAccountsEmptyPromptProps) => (
   <EuiEmptyPrompt
     data-test-subj="serviceAccountsEmptyPrompt"
@@ -45,7 +43,7 @@ export const ServiceAccountsEmptyPrompt = ({
         })}
       </p>
     }
-    actions={[
+    actions={
       <EuiButton
         fill
         onClick={onCreateAccount}
@@ -54,17 +52,7 @@ export const ServiceAccountsEmptyPrompt = ({
         {i18n.translate('xpack.security.management.serviceAccounts.emptyPrompt.createButton', {
           defaultMessage: 'Create account',
         })}
-      </EuiButton>,
-      <EuiLink
-        external
-        href={docsUrl}
-        target="_blank"
-        data-test-subj="serviceAccountsEmptyPromptDocsLink"
-      >
-        {i18n.translate('xpack.security.management.serviceAccounts.emptyPrompt.docsLink', {
-          defaultMessage: 'Learn more in docs',
-        })}
-      </EuiLink>,
-    ]}
+      </EuiButton>
+    }
   />
 );
