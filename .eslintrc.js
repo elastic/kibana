@@ -3066,10 +3066,11 @@ module.exports = {
       // framework's own page objects (the block above excludes kbn-scout* src).
       // The restricted classes come from the `Eui*Selectors` objects exported by
       // `@elastic/eui-test-helpers`, so the list grows with the helpers and is
-      // not maintained here. `warn` until the existing sites are migrated.
+      // not maintained here. When no object method fits, import the selector
+      // constant from the package instead of writing the class by hand.
       files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       rules: {
-        '@kbn/eslint/scout_no_raw_eui_selectors': 'warn',
+        '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
       },
     },
     {

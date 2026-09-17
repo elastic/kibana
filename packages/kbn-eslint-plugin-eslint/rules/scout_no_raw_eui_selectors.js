@@ -90,7 +90,8 @@ module.exports = {
         node,
         message:
           '`{{selector}}` is an internal of {{component}}. Use the {{object}} Component Object ' +
-          'from @elastic/eui-test-helpers (page.components in Scout) instead of a raw selector.',
+          'from @elastic/eui-test-helpers (page.components in Scout). If no method covers your ' +
+          'case, build the locator from the exported {{component}}Selectors constants instead.',
         data: entry,
       });
     }
