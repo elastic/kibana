@@ -41,7 +41,7 @@ const renderContent = (item: AgentTurnItem): React.ReactNode => {
         steps={completed.steps}
         response={completed.response}
         isLoading={false}
-        rawRound={completed.rawRound}
+        executionTerminatedEvent={item.terminal}
       />
     );
   }

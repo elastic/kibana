@@ -10,24 +10,37 @@ import { EuiCodeBlock, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } fro
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
 
 const title = i18n.translate('xpack.agentBuilder.round.jsonFlyout.title', {
   defaultMessage: 'Raw response',
 });
 
-interface RoundJsonFlyoutProps {
-  rawRound: ConversationRound;
+interface ExecutionJsonFlyoutProps {
+  executionTerminatedEvent: ExecutionTerminatedEvent;
+  /** The execution's steps, which the saved event omits because they are stored as separate events. */
+  steps?: ConversationRoundStep[];
   onClose: () => void;
 }
 
-export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({ rawRound, onClose }) => {
-  const formattedJson = useMemo(() => JSON.stringify(rawRound, null, 2), [rawRound]);
+export const ExecutionJsonFlyout: React.FC<ExecutionJsonFlyoutProps> = ({
+  executionTerminatedEvent,
+  steps,
+  onClose,
+}) => {
+  const formattedJson = useMemo(() => {
+    const { data } = executionTerminatedEvent;
+    return JSON.stringify(
+      { ...executionTerminatedEvent, data: { ...data, steps: data.steps ?? steps } },
+      null,
+      2
+    );
+  }, [executionTerminatedEvent, steps]);
 
   return (
     <EuiFlyout
       onClose={onClose}
-      aria-labelledby="agentBuilderRoundJsonFlyoutTitle"
+      aria-labelledby="agentBuilderExecutionJsonFlyoutTitle"
       size="m"
       ownFocus={false}
       css={css`
@@ -36,7 +49,7 @@ export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({ rawRound, onCl
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="agentBuilderRoundJsonFlyoutTitle">{title}</h2>
+          <h2 id="agentBuilderExecutionJsonFlyoutTitle">{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

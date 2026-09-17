@@ -71,7 +71,7 @@ test.describe('Agent Builder — conversation history', { tag: [...tags.stateful
         const convId = conversationIds[i];
         await pageObjects.agentBuilder.navigateToConversationViaHistory(convId);
         await expect(
-          page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+          page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
             hasText: conv.expectedResponse,
           })
         ).toContainText(conv.expectedResponse);
@@ -84,7 +84,7 @@ test.describe('Agent Builder — conversation history', { tag: [...tags.stateful
         const convId = conversationIds[i];
         await pageObjects.agentBuilder.navigateToConversationById(convId);
         await expect(
-          page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+          page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
             hasText: conv.expectedResponse,
           })
         ).toContainText(conv.expectedResponse);

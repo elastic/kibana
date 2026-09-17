@@ -10,8 +10,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
   AssistantResponse,
-  ConversationRound,
   ConversationRoundStep,
+  ExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
 import type {
   VersionedAttachment,
@@ -20,9 +20,9 @@ import type {
 import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
-import { RoundResponseActions } from './round_response_actions';
+import { ResponseActions } from './response_actions';
 
-export interface RoundResponseProps {
+export interface ResponseMessageProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
@@ -30,10 +30,10 @@ export interface RoundResponseProps {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
-  rawRound?: ConversationRound;
+  executionTerminatedEvent?: ExecutionTerminatedEvent;
 }
 
-export const RoundResponse: React.FC<RoundResponseProps> = ({
+export const ResponseMessage: React.FC<ResponseMessageProps> = ({
   hasError,
   response,
   steps,
@@ -41,7 +41,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   conversationAttachments,
   attachmentRefs,
   conversationId,
-  rawRound,
+  executionTerminatedEvent,
 }) => {
   const hasMessage = Boolean(response.message);
 
@@ -55,7 +55,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
         defaultMessage: 'Assistant response',
       })}
-      data-test-subj="agentBuilderRoundResponse"
+      data-test-subj="agentBuilderResponseMessage"
       css={css`
         position: relative;
       `}
@@ -81,7 +81,12 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       </EuiFlexItem>
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
-          <RoundResponseActions content={response.message} isVisible rawRound={rawRound} />
+          <ResponseActions
+            content={response.message}
+            isVisible
+            executionTerminatedEvent={executionTerminatedEvent}
+            steps={steps}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

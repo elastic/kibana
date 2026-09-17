@@ -17,12 +17,12 @@ const title = i18n.translate('xpack.agentBuilder.round.traceFlyout.title', {
   defaultMessage: 'Trace',
 });
 
-interface RoundTraceFlyoutProps {
+interface TraceFlyoutProps {
   traceId: string;
   onClose: () => void;
 }
 
-export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({ traceId, onClose }) => {
+export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) => {
   const { services } = useKibana();
   const { data } = services.plugins;
   const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
@@ -31,7 +31,7 @@ export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({ traceId, onC
   return (
     <EuiFlyoutResizable
       onClose={onClose}
-      aria-labelledby="agentBuilderRoundTraceFlyoutTitle"
+      aria-labelledby="agentBuilderTraceFlyoutTitle"
       size={620}
       minWidth={400}
       maxWidth={1200}
@@ -49,7 +49,7 @@ export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({ traceId, onC
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id="agentBuilderRoundTraceFlyoutTitle" style={{ wordBreak: 'break-all' }}>
+          <h2 id="agentBuilderTraceFlyoutTitle" style={{ wordBreak: 'break-all' }}>
             {title}: {traceId}
           </h2>
         </EuiTitle>

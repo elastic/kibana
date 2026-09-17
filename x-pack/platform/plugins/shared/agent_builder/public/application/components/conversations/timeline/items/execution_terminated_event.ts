@@ -7,34 +7,14 @@
 
 import type {
   ExecutionTerminatedEvent,
-  ConversationRound,
   ConversationRoundStep,
   AssistantResponse,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 
 export interface TerminatedResponse {
   steps: ConversationRoundStep[];
   response: AssistantResponse;
-  rawRound: ConversationRound;
 }
-
-const toSyntheticRound = (
-  event: ExecutionTerminatedEvent,
-  steps: ConversationRound['steps']
-): ConversationRound => ({
-  id: event.execution_id ?? event.id,
-  status: ConversationRoundStatus.completed,
-  // input is not available in this event; stub required field
-  input: { message: '' },
-  steps,
-  response: { message: '' },
-  started_at: event.created_at,
-  time_to_first_token: event.data.time_to_first_token,
-  time_to_last_token: event.data.time_to_last_token,
-  model_usage: event.data.model_usage,
-  trace_id: event.data.trace_id,
-});
 
 /**
  * Props for `AgentResponse` from a terminal event. Server-derived terminated events omit `steps`
@@ -50,5 +30,5 @@ export const executionTerminatedToResponse = (
     return undefined;
   }
   const steps = event.data.steps ?? groupedSteps;
-  return { steps, response: outcome.response, rawRound: toSyntheticRound(event, steps) };
+  return { steps, response: outcome.response };
 };
