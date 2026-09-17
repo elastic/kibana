@@ -10,6 +10,9 @@ import { expect } from '@kbn/scout/api';
 
 const CREATE_ENDPOINT = 'internal/security/service_account';
 const NAMESPACE = 'kibana';
+const CREDENTIAL_TYPE = 'service-account-credential';
+/** Raw field path of an attribute on a saved object document, which nests them under the type. */
+const CREDENTIAL_ACCOUNT_FIELD = `${CREDENTIAL_TYPE}.serviceAccountId`;
 
 /** Unique per run, so a failed cleanup cannot make the next run collide. */
 const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
@@ -17,18 +20,59 @@ const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Mat
 apiTest.describe('Create Elasticsearch service accounts', { tag: tags.stateful.classic }, () => {
   const created: string[] = [];
 
-  apiTest.afterAll(async ({ esClient, log }) => {
+  apiTest.afterAll(async ({ esClient }) => {
+    const failures: string[] = [];
+
     for (const name of created) {
       try {
-        // `force`, since the account still holds the token Kibana minted for it.
-        await esClient.transport.request({
-          method: 'DELETE',
-          path: `/_security/service/${NAMESPACE}/${name}`,
-          querystring: { force: 'true' },
+        // `force`, since the account still holds the token Kibana minted for it. A 404 is the
+        // expected answer for a name a failing test registered but never got created.
+        await esClient.transport.request(
+          {
+            method: 'DELETE',
+            path: `/_security/service/${NAMESPACE}/${name}`,
+            querystring: { force: 'true' },
+          },
+          { ignore: [404] }
+        );
+      } catch (err) {
+        failures.push(`service account [${NAMESPACE}/${name}]: ${err.message}`);
+      }
+    }
+
+    // Every successful create also writes an encrypted credential saved object, and there is no
+    // API to remove one yet, so it is deleted straight out of the index. The type registers no
+    // `indexPattern`, which puts it in the main saved objects index, and `serviceAccountId` is
+    // mapped as a keyword. Matching on that rather than re-deriving the hashed document ID keeps
+    // this working if the derivation ever changes.
+    if (created.length > 0) {
+      try {
+        await esClient.deleteByQuery({
+          index: '.kibana',
+          refresh: true,
+          conflicts: 'proceed',
+          query: {
+            bool: {
+              filter: [
+                { term: { type: CREDENTIAL_TYPE } },
+                {
+                  terms: {
+                    [CREDENTIAL_ACCOUNT_FIELD]: created.map((name) => `${NAMESPACE}/${name}`),
+                  },
+                },
+              ],
+            },
+          },
         });
       } catch (err) {
-        log.warning(`Failed to clean up service account [${NAMESPACE}/${name}]: ${err.message}`);
+        failures.push(`credential saved objects: ${err.message}`);
       }
+    }
+
+    // Thrown rather than warned: these accounts are cluster-scoped and several of them hold
+    // `superuser`, so a leak has to fail the suite instead of scrolling past in the log.
+    if (failures.length > 0) {
+      throw new Error(`Failed to clean up after the suite:\n${failures.join('\n')}`);
     }
   });
 

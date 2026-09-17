@@ -309,6 +309,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * Best effort: the error that triggered the rollback is the one the caller needs, so a failure
    * here is logged rather than thrown. An account left behind blocks re-creating that name until
    * an operator removes it, which is why the principal is named in the log.
+   *
+   * The two deletes are attempted independently. A token Elasticsearch would not give up is the
+   * case the forced account delete exists for, so it must not also be what stops it from running.
    */
   private async rollback(
     esClient: ElasticsearchClient,
@@ -316,6 +319,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     name: string
   ): Promise<void> {
     const principal = `${namespace}/${name}`;
+
     try {
       await esClient.transport.request(
         {
@@ -326,6 +330,14 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         },
         { ignore: [404] }
       );
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete the token of partially created service account [${principal}]: ` +
+          getDetailedErrorMessage(e)
+      );
+    }
+
+    try {
       // `force`, so the account still goes away if the token delete above did not land:
       // Elasticsearch refuses an unforced delete while any token remains.
       await esClient.transport.request(
@@ -338,7 +350,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     } catch (e) {
       this.logger.error(
-        `Failed to roll back partially created service account [${principal}]; it may need to be ` +
+        `Failed to roll back partially created service account [${principal}]. It may need to be ` +
           `removed manually: ${getDetailedErrorMessage(e)}`
       );
     }

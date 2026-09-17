@@ -330,6 +330,32 @@ describe('EsServiceAccounts', () => {
       });
     });
 
+    // The forced account delete exists for exactly this case: Elasticsearch refuses an unforced
+    // delete while a token remains, so a token Kibana could not delete must not also stop the
+    // account from going away.
+    it('still deletes the account when the token delete fails', async () => {
+      mockHappyPath();
+      esClient.asCurrentUser.transport.request.mockRejectedValueOnce(
+        new Error('cluster unreachable')
+      );
+      credentialStore.set.mockRejectedValue(new Error('encryption key rotated'));
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+        'encryption key rotated'
+      );
+
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[3][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
+      expect(calls[4][0]).toEqual({
+        method: 'DELETE',
+        path: ACCOUNT_PATH,
+        querystring: { force: 'true' },
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete the token of partially created service account')
+      );
+    });
+
     it('surfaces the original failure even when the rollback itself fails', async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce({})
@@ -341,6 +367,14 @@ describe('EsServiceAccounts', () => {
       await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
         'encryption key rotated'
       );
+
+      // Both deletes were attempted, and neither failure replaced the error the caller needs.
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[4][0]).toEqual({
+        method: 'DELETE',
+        path: ACCOUNT_PATH,
+        querystring: { force: 'true' },
+      });
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to roll back partially created service account')
       );
