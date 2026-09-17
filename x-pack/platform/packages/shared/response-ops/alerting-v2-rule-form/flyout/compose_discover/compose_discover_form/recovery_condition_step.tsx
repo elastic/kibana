@@ -151,8 +151,12 @@ export function RecoveryConditionStep({
         </>
       )}
 
-      <EuiSpacer size="m" />
-      <RecoveryDelayField />
+      {recoveryStrategy !== 'none' && (
+        <>
+          <EuiSpacer size="m" />
+          <RecoveryDelayField />
+        </>
+      )}
     </>
   );
 }

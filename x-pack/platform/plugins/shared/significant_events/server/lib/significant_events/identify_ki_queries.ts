@@ -16,14 +16,15 @@ import {
 import {
   identifyKIQueries as identifyKIQueriesThroughAgent,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
-} from '@kbn/streams-ai';
-import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+} from '@kbn/nightshift-ai';
+import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { ReasoningPromptDiagnostics } from '@kbn/inference-prompt-utils';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { MemoryDiscoveryTools } from './memory_discovery_tools';
 import type { KiExtractionContextTools } from './ki_extraction_context_tools';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
+import { streamToAnalysisTarget } from './stream_to_analysis_target';
 
 /**
  * Step budget for the query-generation reasoning agent when semantic code
@@ -127,7 +128,7 @@ export async function identifyKIQueries(
 
   const { queries, tokensUsed, toolUsage, reasoningDiagnostics } =
     await identifyKIQueriesThroughAgent({
-      stream: definition,
+      target: streamToAnalysisTarget(definition),
       esClient,
       inferenceClient: boundInferenceClient,
       logger,

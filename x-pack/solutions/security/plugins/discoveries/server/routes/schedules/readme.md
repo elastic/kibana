@@ -10,7 +10,7 @@ These routes provide the same capabilities as the existing public schedule API i
 
 - **Always alerting-backed**: Schedules are always alerting rules of type `attack-discovery`, managed via the `AttackDiscoveryScheduleDataClient` from `@kbn/attack-discovery-schedules-common`. This is true regardless of feature flag state — the hybrid architecture ensures the Alerting Framework always owns scheduling, alert persistence, and action execution (with full throttling/frequency support). See the [ADR](../../../../packages/kbn-attack-discovery-schedules-common/docs/adr_scheduling_strategy.md) for rationale.
 - **Asymmetric tag visibility**: The internal API `applyTags` tags every write with `attack-discovery-schedule`, but it does **not** apply a read `filterTags`. As a result the internal API surfaces **all** schedules — both workflow-tagged schedules and legacy (untagged) schedules created via the public API. The legacy public API is the side that filters: it `excludeTags` the `attack-discovery-schedule` tag so it never surfaces workflow schedules. See [Why asymmetric visibility?](#why-asymmetric-visibility) for the rationale.
-- **Shared infrastructure**: Both APIs share the same data client, field maps, and transforms from `@kbn/attack-discovery-schedules-common`, minimizing duplication.
+- **Shared infrastructure**: Both APIs share the same data client and transforms from `@kbn/attack-discovery-schedules-common`, minimizing duplication. **The AD alert field map is _not_ shared**: `@kbn/discoveries` keeps a deliberate fork of `attackDiscoveryAlertFieldMap` (and of the `ATTACK_DISCOVERY_ALERTS_CONTEXT` constant) so the package can eventually become standalone. Both copies install the same component template and must stay identical; parity is enforced by [`attack_discovery_index_parity.test.ts`](../../attack_discovery_index_parity.test.ts). See ADR-015 in the [plugin README](../../../README.md).
 - **snake_case**: All request/response parameters use snake_case, matching the OpenAPI schemas in `@kbn/discoveries-schemas`.
 
 ### Why asymmetric visibility?
@@ -171,7 +171,7 @@ Disables an enabled schedule.
             │ @kbn/attack-discovery-schedules-common│
             │ - AttackDiscoveryScheduleDataClient   │
             │ - Transforms (API ↔ internal)         │
-            │ - Field maps, constants               │
+            │ - Schedule constants                  │
             └──────────────┬──────────────────────┘
                            │
             ┌──────────────▼──────────────────────┐
@@ -182,6 +182,8 @@ Disables an enabled schedule.
             │ - Actions (notifications)             │
             └──────────────────────────────────────┘
 ```
+
+> **Not shared: the AD alert field map.** `attackDiscoveryAlertFieldMap` and `ATTACK_DISCOVERY_ALERTS_CONTEXT` are deliberately forked into `@kbn/discoveries/impl/attack_discovery/alert_fields` (a step toward a standalone `@kbn/discoveries`). `elastic_assistant` installs the canonical copy from `@kbn/attack-discovery-schedules-common`; the `discoveries` plugin installs the fork — into the **same** component template, so the two must stay identical. Enforced by [`attack_discovery_index_parity.test.ts`](../../attack_discovery_index_parity.test.ts).
 
 ### Route Differences from Public API
 

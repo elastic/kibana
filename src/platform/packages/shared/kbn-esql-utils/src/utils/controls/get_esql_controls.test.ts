@@ -44,6 +44,7 @@ const createControlApi = (
   serializeState: () => state,
   applySerializedState: () => undefined,
   anyStateChange$: EMPTY,
+  latestState$: () => state,
 });
 
 describe('getAllEsqlControls', () => {
@@ -60,7 +61,6 @@ describe('getAllEsqlControls', () => {
       { type: ESQL_CONTROL, serializeState: () => matchingState },
       null,
     ]);
-
     expect(getAllEsqlControls(presentationContainer)).toStrictEqual({
       'matching-control': {
         type: ESQL_CONTROL,

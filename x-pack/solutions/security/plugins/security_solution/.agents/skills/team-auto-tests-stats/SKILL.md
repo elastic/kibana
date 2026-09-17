@@ -114,7 +114,7 @@ rm -f "$TMP_JSON"
 
 Scout **Skipped** inventory follows §2 only (suite/test `.skip` patterns). **Do not** apply Cypress **`@skipIn…`** tag rules to the Scout row.
 
-Bootstrap: match root **`engines.node`**, run **`yarn kbn bootstrap`** if `@kbn/*` resolution fails during `--list`.
+Bootstrap: match root **`engines.node`**, run **`pnpm kbn bootstrap`** if `@kbn/*` resolution fails during `--list`.
 
 **Skipped column (format):** Do **not** repeat the column name. Use **`<br>`** for line breaks.
 

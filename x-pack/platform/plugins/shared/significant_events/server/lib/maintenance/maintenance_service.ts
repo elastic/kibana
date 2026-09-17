@@ -202,10 +202,19 @@ export const createSignificantEventsMaintenanceService = ({
     return next;
   };
 
-  const getSoClient = (request: KibanaRequest): SavedObjectsClientContract =>
-    server.core.savedObjects.getScopedClient(request, {
-      includedHiddenTypes: [SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE],
-    });
+  // Lazy: this factory runs in plugin setup, before `server.core` is assigned
+  // in start(). Route authz is the user gate (Nightshift read for status, Nightshift
+  // manage for pause/resume). This SO is hidden, agnostic, and not listed on
+  // any Nightshift privilege `savedObject` array. A scoped client then checks
+  // `saved_object:significant-events-maintenance-state/get` and 403s every
+  // Nightshift-only user once the document exists. Same pattern as run quotas.
+  let soClient: SavedObjectsClientContract | undefined;
+  const getSoClient = (): SavedObjectsClientContract => {
+    soClient ??= server.core.savedObjects.createInternalRepository([
+      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+    ]);
+    return soClient;
+  };
 
   const normalizePausedSettings = (
     raw: SignificantEventsMaintenanceStateAttributes['pausedSettings']
@@ -224,11 +233,9 @@ export const createSignificantEventsMaintenanceService = ({
   ): MaintenanceWorkflowTarget[] =>
     (workflows ?? []).map(({ id, spaceId }) => ({ id, spaceId: brandSpaceId(spaceId) }));
 
-  const readState = async (
-    soClient: SavedObjectsClientContract
-  ): Promise<LoadedMaintenanceState | undefined> => {
+  const readState = async (): Promise<LoadedMaintenanceState | undefined> => {
     try {
-      const so = await soClient.get<SignificantEventsMaintenanceStateAttributes>(
+      const so = await getSoClient().get<SignificantEventsMaintenanceStateAttributes>(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
       );
@@ -247,10 +254,9 @@ export const createSignificantEventsMaintenanceService = ({
   };
 
   const writeState = async (
-    soClient: SavedObjectsClientContract,
     attributes: SignificantEventsMaintenanceStateAttributes
   ): Promise<void> => {
-    await soClient.create<SignificantEventsMaintenanceStateAttributes>(
+    await getSoClient().create<SignificantEventsMaintenanceStateAttributes>(
       SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
       attributes,
       { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
@@ -527,13 +533,11 @@ export const createSignificantEventsMaintenanceService = ({
    * Reassert still throws so workflow install cannot succeed while reassert fails.
    */
   const persistPause = async ({
-    soClient,
     request,
     existing,
     mode,
     updatedBy,
   }: {
-    soClient: SavedObjectsClientContract;
     request: KibanaRequest;
     existing: LoadedMaintenanceState | undefined;
     mode: 'pause' | 'reassert';
@@ -548,7 +552,7 @@ export const createSignificantEventsMaintenanceService = ({
     // 1. Blocking intent first (skip when already paused — reassert/re-pause).
     if (normalizeState(existing?.state) !== 'paused') {
       try {
-        await writeState(soClient, {
+        await writeState({
           state: 'paused',
           updatedAt: new Date().toISOString(),
           updatedBy: actor,
@@ -621,7 +625,7 @@ export const createSignificantEventsMaintenanceService = ({
 
     // 3. Final snapshot write.
     try {
-      await writeState(soClient, {
+      await writeState({
         state: 'paused',
         updatedAt: new Date().toISOString(),
         updatedBy: actor,
@@ -663,15 +667,13 @@ export const createSignificantEventsMaintenanceService = ({
 
   return {
     async getState({ request }) {
-      return normalizeState((await readState(getSoClient(request)))?.state);
+      return normalizeState((await readState())?.state);
     },
 
     async pause({ request, updatedBy }) {
       return withTransitionLock(async () => {
-        const soClient = getSoClient(request);
-        const existing = await readState(soClient);
+        const existing = await readState();
         const { summary, sweep } = await persistPause({
-          soClient,
           request,
           existing,
           mode: 'pause',
@@ -689,8 +691,7 @@ export const createSignificantEventsMaintenanceService = ({
 
     async resume({ request, updatedBy }) {
       return withTransitionLock(async () => {
-        const soClient = getSoClient(request);
-        const existing = await readState(soClient);
+        const existing = await readState();
         const currentState = normalizeState(existing?.state);
         const recordedWorkflows = existing?.disabledWorkflows ?? [];
         const recordedRuleIds = existing?.disabledRuleIds ?? [];
@@ -760,7 +761,7 @@ export const createSignificantEventsMaintenanceService = ({
         };
 
         try {
-          await writeState(soClient, {
+          await writeState({
             state: 'enabled',
             updatedAt: new Date().toISOString(),
             updatedBy,
@@ -795,14 +796,12 @@ export const createSignificantEventsMaintenanceService = ({
 
     async reassertPausedWorkflows({ request }) {
       return withTransitionLock(async () => {
-        const soClient = getSoClient(request);
-        const existing = await readState(soClient);
+        const existing = await readState();
         if (normalizeState(existing?.state) !== 'paused') {
           return;
         }
 
         const { summary, sweep } = await persistPause({
-          soClient,
           request,
           existing,
           mode: 'reassert',
@@ -819,8 +818,7 @@ export const createSignificantEventsMaintenanceService = ({
     },
 
     async getStatus({ request }) {
-      const soClient = getSoClient(request);
-      const existing = await readState(soClient);
+      const existing = await readState();
       const state = normalizeState(existing?.state);
       let featureSettingsStatus:
         | Awaited<ReturnType<typeof featureSettings.readFeatureSettingsStatus>>

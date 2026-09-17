@@ -40,6 +40,7 @@ export function TransactionDetails() {
     kuery,
     traceId,
     transactionId,
+    latencyAggregationType,
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
@@ -168,6 +169,7 @@ export function TransactionDetails() {
           isServerlessContext={isServerless}
           comparisonEnabled={comparisonEnabled}
           offset={offset}
+          latencyAggregationType={latencyAggregationType}
         />
       </ChartPointerEventContextProvider>
 

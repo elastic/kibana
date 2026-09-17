@@ -1,6 +1,6 @@
 # Significant Events app
 
-Owner: `@elastic/obs-sig-events-team`
+Owner: `@elastic/nightshift-sre-agent-team`
 
 Browser-only plugin serving the Significant Events UI at `/app/significant_events`.
 

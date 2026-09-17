@@ -7,8 +7,12 @@
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { escapeQuotes } from '@kbn/es-query';
+import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
+import {
+  buildBaseInvestigationFilter,
+  buildInvestigationFilter,
+} from './build_investigation_filter';
 import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
 import type {
   FindInvestigationsQuery,
@@ -17,6 +21,8 @@ import type {
   InvestigationPatch,
   InvestigationRecord,
   InvestigationRepository,
+  SeverityCounts,
+  SeverityCountsQuery,
 } from './types';
 
 const toRecord = <Attributes extends Partial<InvestigationAttributes>>({
@@ -28,6 +34,14 @@ const toRecord = <Attributes extends Partial<InvestigationAttributes>>({
   version,
   ...attributes,
 });
+
+interface SeverityAggregation {
+  severity: { buckets: Array<{ key: string; doc_count: number }> };
+}
+
+/** Text-mapped attributes the free-text `query` searches across. */
+const buildSearchFields = (query: SeverityCountsQuery): string[] | undefined =>
+  query.query ? ['subject_summary', 'summary', 'conclusion'] : undefined;
 
 export type InvestigationSavedObjectsClient = Pick<
   SavedObjectsClientContract,
@@ -108,38 +122,11 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
   async find<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
     query: FindInvestigationsQuery<Fields>
   ): Promise<FindInvestigationsResult<Fields>> {
-    const filters: string[] = [];
-    const attr = (field: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${field}`;
-
-    if (query.statuses?.length) {
-      const statusFilter = query.statuses
-        .map((status) => `${attr('status')}: "${escapeQuotes(status)}"`)
-        .join(' OR ');
-      filters.push(`(${statusFilter})`);
-    }
-
-    if (query.concurrencyKey) {
-      filters.push(`${attr('concurrency_key')}: "${escapeQuotes(query.concurrencyKey)}"`);
-    }
-
-    const rangeFilters: Array<[string, string | undefined, '>=' | '<=']> = [
-      ['created_at', query.createdAfter, '>='],
-      ['created_at', query.createdBefore, '<='],
-      ['started_at', query.startedAfter, '>='],
-      ['started_at', query.startedBefore, '<='],
-      ['completed_at', query.completedAfter, '>='],
-      ['completed_at', query.completedBefore, '<='],
-    ];
-
-    for (const [field, value, op] of rangeFilters) {
-      if (value) {
-        filters.push(`${attr(field)} ${op} "${escapeQuotes(value)}"`);
-      }
-    }
-
     const result = await this.savedObjectsClient.find<Pick<InvestigationAttributes, Fields>>({
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-      filter: filters.length > 0 ? filters.join(' AND ') : undefined,
+      filter: buildInvestigationFilter(query),
+      search: query.query,
+      searchFields: buildSearchFields(query),
       sortField: query.sortField ?? 'created_at',
       sortOrder: query.sortOrder ?? 'desc',
       page: query.page,
@@ -152,6 +139,50 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
       total: result.total,
       page: result.page,
       size: result.per_page,
+    };
+  }
+
+  /**
+   * Severity facet counts for the investigations matching `query`.
+   *
+   * Uses `buildBaseInvestigationFilter` rather than the full filter: the counts describe how many
+   * investigations sit in each tier under the *other* active filters, so narrowing by the selected
+   * tier would make them self-referential and zero out the tiles the user did not pick.
+   *
+   * Pagination and sort are irrelevant to a facet and are not read from `query` — which is why
+   * this is its own method (and its own route) rather than riding along with the list, where it
+   * would recompute an identical aggregation on every page change.
+   */
+  async countBySeverity(query: SeverityCountsQuery): Promise<SeverityCounts> {
+    const result = await this.savedObjectsClient.find<
+      Pick<InvestigationAttributes, never>,
+      SeverityAggregation
+    >({
+      type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+      filter: buildBaseInvestigationFilter(query),
+      search: query.query,
+      searchFields: buildSearchFields(query),
+      perPage: 0,
+      aggs: {
+        severity: {
+          terms: {
+            field: `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.severity`,
+            size: SEVERITY_OPTIONS.length,
+          },
+        },
+      },
+    });
+
+    const buckets = new Map(
+      (result.aggregations?.severity?.buckets ?? []).map((b) => [b.key, b.doc_count])
+    );
+
+    // Explicit per-tier assignment so the type is earned rather than asserted.
+    return {
+      '80-critical': buckets.get('80-critical') ?? 0,
+      '60-high': buckets.get('60-high') ?? 0,
+      '40-medium': buckets.get('40-medium') ?? 0,
+      '20-low': buckets.get('20-low') ?? 0,
     };
   }
 }
