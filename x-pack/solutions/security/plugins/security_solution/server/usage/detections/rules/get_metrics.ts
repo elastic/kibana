@@ -37,7 +37,10 @@ import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
 import { calculateRuleUpgradeStatus } from './calculate_rules_upgrade_status';
 import type { ExternalRuleSourceInfo } from './get_rule_customization_status';
-import { getRuleCustomizationStatus } from './get_rule_customization_status';
+import {
+  getRuleCustomizationStatus,
+  getRuleCustomizationMissingBaseVersionStatus,
+} from './get_rule_customization_status';
 import { getRuleBaseVersionStatus } from './get_rule_base_version_status';
 
 export interface GetRuleMetricsOptions {
@@ -75,6 +78,8 @@ export const getRuleMetrics = async ({
         detection_rule_status: getInitialEventLogUsage(),
         elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
         elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+        elastic_detection_rule_customization_status_missing_base_version:
+          getInitialRuleCustomizationStatus(),
         elastic_detection_rule_base_version_status: getInitialRuleBaseVersionStatus(),
         elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
         ai_created_rules: getInitialAiCreatedRulesUsage(),
@@ -192,6 +197,10 @@ export const getRuleMetrics = async ({
         externalRuleSources.length === 0
           ? getInitialRuleCustomizationStatus()
           : getRuleCustomizationStatus(externalRuleSources),
+      elastic_detection_rule_customization_status_missing_base_version:
+        externalRuleSources.length === 0
+          ? getInitialRuleCustomizationStatus()
+          : getRuleCustomizationMissingBaseVersionStatus(externalRuleSources),
       elastic_detection_rule_base_version_status:
         externalRuleSources.length === 0
           ? getInitialRuleBaseVersionStatus()
@@ -212,6 +221,8 @@ export const getRuleMetrics = async ({
       detection_rule_status: getInitialEventLogUsage(),
       elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
       elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+      elastic_detection_rule_customization_status_missing_base_version:
+        getInitialRuleCustomizationStatus(),
       elastic_detection_rule_base_version_status: getInitialRuleBaseVersionStatus(),
       elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
       ai_created_rules: getInitialAiCreatedRulesUsage(),
