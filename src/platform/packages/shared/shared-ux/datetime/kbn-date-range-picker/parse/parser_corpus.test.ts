@@ -55,7 +55,7 @@ type CheckedFields = Pick<
 interface CorpusRow {
   /** What the user types into the input. */
   input: string;
-  /** Options passed to the parser (presets, delimiter, roundRelativeTime, dateFormat). */
+  /** Options passed to the parser (presets, delimiter, roundRelativeTime, inputDateFormats). */
   options?: TimeRangeTransformOptions;
   /** Why this row exists / what behaviour it documents. */
   note: string;

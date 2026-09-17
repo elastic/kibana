@@ -1,3 +1,25 @@
 #!/usr/bin/env bash
 
-source .buildkite/scripts/lifecycle/pre_command.sh
+set -euo pipefail
+
+if [[ "${BUILDKITE_LABEL:-}" == *"Run Dynamic Pipeline"* || "${BUILDKITE_LABEL:-}" == *"Upload Pipeline"* ]]; then
+  cat << EOF | buildkite-agent annotate --context "ctx-gobld-metrics" --style "info" || true
+<details>
+
+<summary>Agent information from gobld</summary>
+EOF
+
+fi
+
+if [[ "${BUILDKITE_LABEL:-}" == *"Upload Pipeline"* ]]; then
+  # We only need to run the pre_command.sh for dynamic pipelines
+  exit 0
+fi
+
+
+if [[ -f .buildkite/scripts/lifecycle/pre_command.sh ]]; then
+  source .buildkite/scripts/lifecycle/pre_command.sh
+else
+  echo "Missing .buildkite/scripts/lifecycle/pre_command.sh" >&2
+  exit 1
+fi

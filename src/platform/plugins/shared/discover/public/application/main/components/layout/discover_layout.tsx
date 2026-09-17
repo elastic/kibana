@@ -402,17 +402,17 @@ export function DiscoverLayout() {
         onCancelClick={onCancelClick}
       />
       <EuiPageBody css={styles.pageBody}>
+        <SavedSearchURLConflictCallout
+          discoverSession={discoverSession}
+          spaces={spaces}
+          history={history}
+        />
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
             </EuiDelayRender>
           )}
-          <SavedSearchURLConflictCallout
-            discoverSession={discoverSession}
-            spaces={spaces}
-            history={history}
-          />
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
+  AppMenu,
   extendPlaywrightPage,
   KibanaCodeEditorWrapper,
   QueryBar,
   ContentListWrapper,
+  type ApiServicesFixture,
   type KibanaUrl,
   type Locator,
   type ScoutPage,
@@ -43,7 +46,9 @@ export async function createAdHocDataViewFromLens(page: ScoutPage, name: string)
   await page.testSubj.click('exploreIndexPatternButton');
   await flyout.waitFor({ state: 'hidden' });
   // Wait until the switcher reflects the new DV name
-  await expect(page.testSubj.locator('lns-dataView-switch-link')).toContainText(name);
+  await expect(
+    page.testSubj.locator('lns-dataView-switch-link').getByTestId('fullText')
+  ).toHaveText(name);
 }
 
 /**
@@ -99,10 +104,13 @@ export async function createRuntimeFieldFromEditor(
  * Dual-path handling lives here (not in the spec) for `playwright/no-conditional-in-test`.
  */
 export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
-  const exportButton = page.testSubj.locator('lnsApp_exportButton');
   const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
+  const exportButton = page.testSubj.locator('lnsApp_exportButton');
 
+  // Toasts sit over the AppMenu; closing them after overflow is open dismisses the menu.
+  await page.components.toast().closeAll();
   // Readiness before click: csvEnabled / shareUrlEnabled both require hasData.
+  await new AppMenu(page).openOverflow();
   await expect(exportButton).toBeEnabled();
   await exportButton.click();
 
@@ -396,6 +404,54 @@ export function createLogstashLensEditorSuiteSetup(options?: {
   };
 }
 
+/** Creates a dashboard whose first panel is a library-linked Lens visualization. */
+export async function createDashboardWithLibraryLensPanel(
+  apiServices: Pick<ApiServicesFixture, 'dashboard'>,
+  spaceId: string,
+  params: { dashboardTitle: string; lensSavedObjectId: string }
+): Promise<string> {
+  return apiServices.dashboard.create(
+    {
+      title: params.dashboardTitle,
+      time_range: LOGSTASH_IN_RANGE_DATES,
+      panels: [
+        {
+          type: LENS_EMBEDDABLE_TYPE,
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+          config: { ref_id: params.lensSavedObjectId },
+        },
+      ],
+    },
+    spaceId
+  );
+}
+
+/**
+ * Clicks the Elastic Charts canvas at an offset from the canvas **center**.
+ * Matches FTR WebDriver `move({ x, y, origin: canvas })` (center-relative), not
+ * Playwright's default top-left `position`. Coordinates match FTR lens/group4
+ * dashboard chart clicks at viewport {@link LENS_EDITOR_VIEWPORT}.
+ */
+export async function clickElasticChartCanvas(
+  page: ScoutPage,
+  offset: { x: number; y: number },
+  options?: { button?: 'left' | 'right' }
+): Promise<void> {
+  const canvas = page.locator('.echChart canvas:last-of-type');
+  await canvas.waitFor({ state: 'visible' });
+  const box = await canvas.boundingBox();
+  if (!box) {
+    throw new Error('Elastic Charts canvas has no bounding box');
+  }
+  await canvas.click({
+    button: options?.button ?? 'left',
+    position: {
+      x: box.width / 2 + offset.x,
+      y: box.height / 2 + offset.y,
+    },
+  });
+}
+
 /**
  * Opens a fresh empty Lens editor with `_g` time already in the URL hash.
  * Defaults to {@link LOGSTASH_IN_RANGE_DATES}. Pass `timeRange` when the suite uses a
@@ -419,6 +475,19 @@ export async function openDimensionEditorAndWaitForFlyout(
   // Confirm that the secondary flyout is opened
   await expect(lens.workspace.secondaryFlyoutBackButton).toBeVisible();
   await expect(page.getByTestId('text-based-languages-field-selection-row')).toBeVisible();
+}
+
+/**
+ * Opens the Lens inline editor for a panel via its hover/context action and waits for the
+ * flyout. Complements {@link openInlineEditorAndWaitVisible} for panels without a known
+ * embeddable id (e.g. freshly created, unsaved panels).
+ */
+export async function openPanelInlineEditorAndWaitVisible(
+  { dashboard, lens }: DashboardAndLens,
+  panelTitle?: string
+) {
+  await dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
+  await expect(lens.workspace.inlineEditor).toBeVisible();
 }
 
 export async function openInlineEditorAndWaitVisible(

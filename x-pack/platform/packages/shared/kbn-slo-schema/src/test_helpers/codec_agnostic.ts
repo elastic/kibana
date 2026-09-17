@@ -8,8 +8,9 @@
 import { isZod, z } from '@kbn/zod';
 import { isRight } from 'fp-ts/Either';
 import type * as t from 'io-ts';
+import { is as isZodDecodedForm } from '../schema/zod/guards';
 
-type DecodeOutcome<T> = { success: true; value: T } | { success: false; errors: unknown };
+export type DecodeOutcome<T> = { success: true; value: T } | { success: false; errors: unknown };
 
 /**
  * Decodes an input with either an io-ts codec or a zod schema, so characterization
@@ -51,7 +52,9 @@ export function is<A, O>(codec: t.Type<A, O, unknown>, value: unknown): value is
 export function is<S extends z.ZodType>(codec: S, value: unknown): value is z.output<S>;
 export function is(codec: t.Any | z.ZodType, value: unknown): boolean {
   if (isZod(codec)) {
-    return z.safeEncode(codec, value).success;
+    // Delegates to the production guard so the characterization tests exercise
+    // the exact implementation consumers will use, not a parallel copy.
+    return isZodDecodedForm(codec, value);
   }
 
   return codec.is(value);

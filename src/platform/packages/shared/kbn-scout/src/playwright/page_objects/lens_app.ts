@@ -157,6 +157,14 @@ export class LensApp {
     await this.page.testSubj.locator('dshDashboardViewport').waitFor({ state: 'visible' });
   }
 
+  /** Opens the Save and return split menu when Save as lives under it. */
+  async openSaveOptionsIfNeeded() {
+    const saveOptions = this.page.testSubj.locator('lnsApp_saveAndReturnButton-secondary-button');
+    if (await saveOptions.isVisible()) {
+      await saveOptions.click();
+    }
+  }
+
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
    * a dashboard target, and confirms. Waits for the modal to close.
@@ -177,6 +185,7 @@ export class LensApp {
           addToDashboard: 'none';
         }
   ) {
+    await this.openSaveOptionsIfNeeded();
     await this.saveButton.click();
     await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
@@ -283,9 +292,31 @@ export class LensApp {
     }
   }
 
+  async configureTextBasedDimension({
+    dimension,
+    field,
+  }: {
+    dimension: string;
+    field: string;
+  }): Promise<void> {
+    await this.page.testSubj.locator(dimension).click();
+
+    const fieldPicker = this.page.components.comboBox('text-based-dimension-field');
+    await fieldPicker.setSelectedOptions([field]);
+
+    await this.closeDimensionEditor();
+    await this.applyFlyoutButton.click();
+  }
+
   private async openDimensionSelector(dimension: string) {
     await this.page.testSubj.locator(dimension).click();
     await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
+  }
+
+  async removeDimension(dimensionTestSubj: string) {
+    await this.page.testSubj
+      .locator(`${dimensionTestSubj} > indexPattern-dimension-remove`)
+      .click();
   }
 
   async switchToFormula() {
@@ -296,10 +327,10 @@ export class LensApp {
     const operationSelector = isPreviousIncompatible
       ? `lns-indexPatternDimension-${operation} incompatible`
       : `lns-indexPatternDimension-${operation}`;
-    const operationButton = this.page.testSubj.locator(operationSelector);
-    await operationButton.waitFor({ state: 'visible' });
-    await operationButton.scrollIntoViewIfNeeded();
-    await operationButton.click();
+    const operationLabel = this.page.testSubj.locator(`${operationSelector}-label`);
+    await operationLabel.waitFor({ state: 'visible' });
+    await operationLabel.scrollIntoViewIfNeeded();
+    await operationLabel.click();
     await this.page.waitForFunction(
       (selector) =>
         document.querySelector(`[data-test-subj="${selector}"]`)?.getAttribute('aria-pressed') ===
@@ -315,6 +346,18 @@ export class LensApp {
       .setSelectedOptions([field], {
         timeout: 10_000,
       });
+    // ComboBox can show the typed option before Lens layer state commits.
+    // data-selected-field is the committed display name and updates only after
+    // insertOrReplaceColumn. Poll the attribute as data so labels with CSS
+    // metacharacters are not interpolated into a selector.
+    await this.page.waitForFunction(
+      (expected) =>
+        document
+          .querySelector('[data-test-subj="indexPattern-dimension-field"]')
+          ?.getAttribute('data-selected-field') === expected,
+      field,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
   }
 
   /**

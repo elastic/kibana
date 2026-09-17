@@ -15,9 +15,15 @@ interface Deps {
   getSavedObjects: () => Promise<Pick<SavedObjectsServiceStart, 'createInternalRepository'>>;
   logger: Logger;
   solution?: SolutionId;
+  solutionSetupRequired?: boolean;
 }
 
-export async function createDefaultSpace({ getSavedObjects, logger, solution }: Deps) {
+export async function createDefaultSpace({
+  getSavedObjects,
+  logger,
+  solution,
+  solutionSetupRequired,
+}: Deps) {
   const { createInternalRepository } = await getSavedObjects();
 
   const savedObjectsRepository = createInternalRepository(['space']);
@@ -50,6 +56,7 @@ export async function createDefaultSpace({ getSavedObjects, logger, solution }: 
         disabledFeatures: [],
         _reserved: true,
         ...(solution ? { solution } : {}),
+        ...(solutionSetupRequired && !solution ? { solutionSetupRequired: true } : {}),
       },
       options
     );

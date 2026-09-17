@@ -11,7 +11,9 @@
     "test/scout/**/*",
     "test/scout_ai_value_report/**/*",
     "test/scout_cps_local/**/*",
+    "test/scout_es_max_response_size/**/*",
     "test/scout_security_attacks_alignment/**/*",
+    "test/scout_threat_intel/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -54,6 +56,7 @@
     "@kbn/core-spaces-common",
     "@kbn/timelines-plugin",
     "@kbn/es-query",
+    "@kbn/es-errors",
     "@kbn/as-code-shared-transforms",
     "@kbn/utility-types",
     "@kbn/securitysolution-list-utils",
@@ -119,6 +122,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/apm-utils",
+    "@kbn/tracing-utils",
     "@kbn/core-saved-objects-server",
     "@kbn/es-types",
     "@kbn/utils",
@@ -310,5 +314,6 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/ui-callout",
     "@kbn/shared-ux-utility",
+    "@kbn/app-header",
   ]
 }

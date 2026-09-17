@@ -25,7 +25,7 @@ export const PersistPinnedEventResponse = lazySchema(() =>
       /**
        * Indicates whether the event was successfully unpinned
        */
-      unpinned: z.boolean(),
+      unpinned: z.boolean().describe('Indicates whether the event was successfully unpinned'),
     }),
   ])
 );
@@ -36,15 +36,23 @@ export const PersistPinnedEventRouteRequestBody = lazySchema(() =>
     /**
      * The `_id` of the associated event for this pinned event.
      */
-    eventId: z.string(),
+    eventId: z.string().describe('The `_id` of the associated event for this pinned event.'),
     /**
      * The `savedObjectId` of the timeline that you want this pinned event unpinned from.
      */
-    timelineId: z.string(),
+    timelineId: z
+      .string()
+      .describe(
+        'The `savedObjectId` of the timeline that you want this pinned event unpinned from.'
+      ),
     /**
      * The `savedObjectId` of the pinned event you want to unpin.
      */
-    pinnedEventId: z.string().nullable().optional(),
+    pinnedEventId: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The `savedObjectId` of the pinned event you want to unpin.'),
   })
 );
 export type PersistPinnedEventRouteRequestBody = z.infer<typeof PersistPinnedEventRouteRequestBody>;

@@ -164,6 +164,7 @@ export class ProjectMonitorFormatter {
         monitor,
         publicLocations: this.publicLocations,
         privateLocations: this.privateLocations,
+        isNewMonitor: !previousMonitor,
       });
       if (normM) {
         if (
@@ -207,10 +208,12 @@ export class ProjectMonitorFormatter {
     monitor,
     publicLocations,
     privateLocations,
+    isNewMonitor,
   }: {
     monitor: ProjectMonitor;
     publicLocations: Locations;
     privateLocations: SyntheticsPrivateLocations;
+    isNewMonitor: boolean;
   }) => {
     try {
       const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
@@ -228,6 +231,11 @@ export class ProjectMonitorFormatter {
         return null;
       }
 
+      // Only gate brand-new API Journey monitors on Serverless; re-pushing an
+      // already-existing project monitor (e.g. one grandfathered in before
+      // this restriction) must not fail just because it's unchanged.
+      const isServerless = Boolean(this.server.cloud?.isServerlessEnabled) && isNewMonitor;
+
       /* Validates that the payload sent from the synthetics agent is valid */
       const { valid: isMonitorPayloadValid } = this.validateMonitor({
         validationResult: validateProjectMonitor(
@@ -236,7 +244,8 @@ export class ProjectMonitorFormatter {
             type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
           },
           publicLocations,
-          privateLocations
+          privateLocations,
+          isServerless
         ),
         monitorId: monitor.id,
       });
@@ -247,7 +256,11 @@ export class ProjectMonitorFormatter {
 
       /* Validates that the normalized monitor is a valid monitor saved object type */
       const { valid: isNormalizedMonitorValid, decodedMonitor } = this.validateMonitor({
-        validationResult: validateMonitor(normalizedMonitor as MonitorFields, this.spaceId),
+        validationResult: validateMonitor(
+          normalizedMonitor as MonitorFields,
+          this.spaceId,
+          isServerless
+        ),
         monitorId: monitor.id,
       });
 

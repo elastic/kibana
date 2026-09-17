@@ -18,6 +18,7 @@ import type { DatasetService } from './storage/datasets/dataset_service';
 import type { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
 import type { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import type { EvaluatorOrigin, EvaluatorRegistry } from './evaluators/types';
+import type { OnlineScoreService } from './storage/scores/online_score_service';
 import type { EvalsTaskProvider } from './task_providers/types';
 
 export interface EvalsPluginSetup {
@@ -47,6 +48,7 @@ export interface EvalsPluginStart {
   listEvaluators?: (options: { spaceId: string }) => Promise<EvaluatorSummary[]>;
 
   listModelConnectors?: (request: KibanaRequest) => Promise<ModelConnectorSummary[]>;
+  onlineScoreService?: OnlineScoreService;
 }
 
 export type EvalsWorkflowsManagementSetup = Pick<WorkflowsServerPluginSetup, 'management'>;
@@ -70,6 +72,7 @@ export interface EvalsStartDependencies {
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
   evaluationScoreService: EvaluationScoreService;
+  onlineScoreService: OnlineScoreService;
   evaluatorDefinitionService: EvaluatorDefinitionService;
   evaluatorRegistry: EvaluatorRegistry;
 }

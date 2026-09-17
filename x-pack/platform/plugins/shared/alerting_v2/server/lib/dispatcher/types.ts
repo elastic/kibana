@@ -11,6 +11,8 @@ import type {
 } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type {
+  DispatchOutcome,
+  DispatchPlan,
   EpisodeScan,
   EpisodeTriage,
   PolicyCatalog,
@@ -87,18 +89,21 @@ export interface Rule {
   tags: string[];
 }
 
+export interface PolicyMatcherAttributes {
+  tags?: string[] | null;
+  expression?: string | null;
+}
+
 export interface ActionPolicy {
   id: ActionPolicyId;
   spaceId: string;
   name: string;
   enabled: boolean;
-  /** KQL expression evaluated against the alert episode context.
-   *  An empty matcher matches all episodes (catch-all). */
-  matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'
+  /** Structured matcher evaluated against the alert episode context.
+   *  Null or absent means catch-all (matches every episode). */
+  matcher?: PolicyMatcherAttributes | null;
   /** data.* fields used to group episodes into a single action group */
   groupBy: string[];
-  /** User-defined tags for organizing and filtering policies */
-  tags: string[];
   /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
   groupingMode: 'per_episode' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
@@ -190,10 +195,10 @@ export interface DispatcherPipelineState {
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
-  readonly dispatch?: ActionGroup[];
-  readonly throttled?: ActionGroup[];
-  readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
-  readonly dispatchFailures?: DispatchFailure[];
+  /** Delivery decision: groups eligible to dispatch now vs groups held back. */
+  readonly plan?: DispatchPlan;
+  /** Dispatch results: workflow executions per group and failed attempts. */
+  readonly outcome?: DispatchOutcome;
 }
 
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
