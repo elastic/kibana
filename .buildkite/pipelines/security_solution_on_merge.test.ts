@@ -75,24 +75,18 @@ describe('security_solution_on_merge Slack routing', () => {
     expect(steps.every((step) => step.label?.includes('Cypress Tests'))).toBe(true);
   });
 
-  it('notifies an owning team for every suite', () => {
-    const unrouted = suiteSteps()
-      .filter((step) => !step.notify?.some((entry) => entry.slack))
-      .map((step) => step.label);
+  it('notifies exactly one owning-team channel per suite', () => {
+    // Asserting the exact channel list rather than filtering it: an empty
+    // `channels` array notifies nobody, and a second entry pages twice, but
+    // both satisfy a presence-or-membership check.
+    const routing = suiteSteps().map((step) => [
+      step.label,
+      (step.notify ?? []).filter((entry) => entry.slack).map((entry) => entry.slack.channels),
+    ]);
 
-    expect(unrouted).toEqual([]);
-  });
-
-  it('routes every suite to its owning team', () => {
-    const misrouted = suiteSteps().flatMap((step) =>
-      (step.notify ?? []).flatMap((entry) =>
-        entry.slack.channels
-          .filter((channel) => channel !== expectedChannel(step.label!))
-          .map((channel) => `${step.label} -> ${channel}`)
-      )
+    expect(routing).toEqual(
+      suiteSteps().map((step) => [step.label, [[expectedChannel(step.label!)]]])
     );
-
-    expect(misrouted).toEqual([]);
   });
 
   it('has an unambiguous owning team for every suite', () => {
