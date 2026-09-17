@@ -188,7 +188,7 @@ const CustomYaraSignaturesSwitch = memo<CustomYaraSignaturesSwitchProps>(
 
     const isEditMode = mode === 'edit';
     const isDisabled =
-      !isAvailable || policy.windows.memory_protection.mode === 'off' || !isEditMode;
+      !isAvailable || policy.windows.memory_protection.mode === ProtectionModes.off || !isEditMode;
 
     const tooltipContent = isAvailable
       ? CUSTOM_YARA_SIGNATURES_HINT

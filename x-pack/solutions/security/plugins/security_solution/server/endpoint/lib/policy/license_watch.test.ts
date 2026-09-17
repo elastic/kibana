@@ -213,7 +213,7 @@ describe('Policy-Changing license watcher', () => {
       expect(packagePolicySvcMock.update).not.toHaveBeenCalled();
     });
 
-    it('strips custom_yara_signatures while leaving memory protection enabled, then converges', async () => {
+    it('sets custom_yara_signatures to false while leaving memory protection enabled, then converges', async () => {
       packagePolicySvcMock.list.mockResolvedValueOnce({
         items: [
           MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {

@@ -293,6 +293,21 @@ export const getPackagePolicyUpdateCallback = (
     // Validate that Endpoint Security policy uses only enabled App Features
     validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
 
+    // Strip Custom YARA Signatures before license validation. The license validator sets
+    // `passThroughApi`, but Fleet checks `apiPassThrough`, so that 403 is swallowed and Fleet
+    // persists the raw client payload. `endpointIntegrationData` is an alias (this callback does
+    // not clone `newPackagePolicy`); stripping first mutates the shared
+    // `inputs[0].config.policy.value` Fleet falls back to, keeping the flag-off invariant.
+    if (
+      (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
+        !experimentalFeatures.customYaraSignaturesEnabled) &&
+      endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+    ) {
+      endpointIntegrationData.inputs[0].config.policy.value = removeCustomYaraSignatures(
+        endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+      );
+    }
+
     // Validate that Endpoint Security policy is valid against current license
     if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
       validatePolicyAgainstLicense(
@@ -364,15 +379,6 @@ export const getPackagePolicyUpdateCallback = (
     ) {
       endpointIntegrationData.inputs[0].config.policy.value =
         removeDeviceControl(newEndpointPackagePolicy);
-    }
-    if (
-      !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
-      !experimentalFeatures.customYaraSignaturesEnabled
-    ) {
-      // Use the current policy value so this strip composes with removeDeviceControl.
-      endpointIntegrationData.inputs[0].config.policy.value = removeCustomYaraSignatures(
-        endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
-      );
     }
 
     updateAntivirusRegistrationEnabled(newEndpointPackagePolicy);

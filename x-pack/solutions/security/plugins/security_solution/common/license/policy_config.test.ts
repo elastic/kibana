@@ -54,6 +54,7 @@ describe('policy_config and licenses', () => {
     });
     it('blocks windows malware notification changes below Platinum licenses', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.popup.malware.enabled = false; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -64,6 +65,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks mac malware notification changes below Platinum licenses', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.mac.popup.malware.enabled = false; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -81,6 +83,7 @@ describe('policy_config and licenses', () => {
     });
     it('blocks windows malware notification message changes below Platinum licenses', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.popup.malware.message = 'BOOM'; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -90,6 +93,7 @@ describe('policy_config and licenses', () => {
     });
     it('blocks mac malware notification message changes below Platinum licenses', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.mac.popup.malware.message = 'BOOM'; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -159,6 +163,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks advanced rollback option when below Platinum', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.advanced = { alerts: { rollback: { self_healing: { enabled: true } } } }; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -177,6 +182,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks credential hardening option when below Platinum', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.attack_surface_reduction.credential_hardening.enabled = true; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -194,6 +200,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks protection updates custom date for Platinum and below license', () => {
       const policy = policyFactoryWithSupportedFeatures();
+      disableEnterpriseFeatures(policy);
       policy.global_manifest_version = '2022-01-10';
       [Platinum, Gold, Basic].forEach((license) => {
         const valid = isEndpointPolicyValidForLicense(policy, license);
@@ -234,6 +241,7 @@ describe('policy_config and licenses', () => {
       });
       it('blocks ransomware notification message changes for Gold and below licenses', () => {
         const policy = policyFactory();
+        disableEnterpriseFeatures(policy);
         policy.windows.popup.ransomware.message = 'BOOM';
         policy.mac.popup.ransomware.message = 'BOOM';
         let valid = isEndpointPolicyValidForLicense(policy, Gold);
@@ -282,6 +290,7 @@ describe('policy_config and licenses', () => {
 
       it('blocks memory_protection notification message changes for Gold and below licenses', () => {
         const policy = policyFactory();
+        disableEnterpriseFeatures(policy);
         policy.windows.popup.memory_protection.message = 'BOOM';
         policy.mac.popup.memory_protection.message = 'BOOM';
         policy.linux.popup.memory_protection.message = 'BOOM';
@@ -330,6 +339,7 @@ describe('policy_config and licenses', () => {
 
       it('blocks behavior_protection notification message changes for Gold and below licenses', () => {
         const policy = policyFactory();
+        disableEnterpriseFeatures(policy);
         policy.windows.popup.behavior_protection.message = 'BOOM';
         policy.mac.popup.behavior_protection.message = 'BOOM';
         policy.linux.popup.behavior_protection.message = 'BOOM';
@@ -792,6 +802,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Windows device control when enabled with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.device_control) {
         policy.windows.device_control.enabled = true;
       }
@@ -808,6 +819,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Mac device control when enabled with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.mac.device_control) {
         policy.mac.device_control.enabled = true;
       }
@@ -824,6 +836,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Windows popup device control when enabled with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.popup.device_control) {
         policy.windows.popup.device_control.enabled = true;
       }
@@ -840,6 +853,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Mac popup device control when enabled with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.mac.popup.device_control) {
         policy.mac.popup.device_control.enabled = true;
       }
@@ -856,6 +870,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Windows popup device control custom message with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.popup.device_control) {
         policy.windows.popup.device_control.enabled = false;
         policy.windows.popup.device_control.message = 'Custom message';
@@ -873,6 +888,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Mac popup device control custom message with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.mac.popup.device_control) {
         policy.mac.popup.device_control.enabled = false;
         policy.mac.popup.device_control.message = 'Custom message';
@@ -934,6 +950,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks device control with null license when features are enabled', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.device_control) {
         policy.windows.device_control.enabled = true;
       }

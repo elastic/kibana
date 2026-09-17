@@ -8,7 +8,10 @@ import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import {
+  ALL_PRODUCT_FEATURE_KEYS,
+  ProductFeatureSecurityKey,
+} from '@kbn/security-solution-features/keys';
 import { LicenseService } from '../../../common/license';
 import { isEndpointPolicyValidForLicense } from '../../../common/license/policy_config';
 import { createDefaultPolicy } from './create_default_policy';
@@ -599,7 +602,9 @@ describe('Create Default Policy tests ', () => {
     it('should omit custom YARA signatures when the endpointCustomYaraSignatures product feature is off', async () => {
       licenseEmitter.next(Enterprise);
       productFeaturesService = createProductFeaturesServiceMock(
-        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_custom_yara_signatures')
+        ALL_PRODUCT_FEATURE_KEYS.filter(
+          (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
+        )
       );
 
       const policy = await createDefaultPolicyCallback(edrCompleteConfig);

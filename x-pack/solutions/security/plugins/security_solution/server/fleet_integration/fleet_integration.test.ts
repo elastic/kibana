@@ -1360,6 +1360,69 @@ describe('Fleet integrations', () => {
         expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
         expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
       });
+
+      describe('when the license is below Enterprise so the callback throws', () => {
+        beforeEach(() => {
+          licenseEmitter.next(Platinum);
+        });
+
+        it('should strip custom YARA signatures from the shared inbound payload before throwing a license 403 when the experimental flag is off', async () => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            customYaraSignaturesEnabled: false,
+          };
+
+          const mockPolicy = policyFactory();
+          setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            'Platinum license does not support this action. Please upgrade your license.'
+          );
+
+          expectCustomYaraSignaturesAbsent(policyConfig.inputs[0]!.config!.policy.value);
+        });
+
+        it('should strip custom YARA signatures from the shared inbound payload before throwing a license 403 when the product feature is disabled', async () => {
+          productFeaturesService = createProductFeaturesServiceMock(
+            ALL_PRODUCT_FEATURE_KEYS.filter(
+              (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
+            )
+          );
+
+          const mockPolicy = policyFactory();
+          setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            'Platinum license does not support this action. Please upgrade your license.'
+          );
+
+          expectCustomYaraSignaturesAbsent(policyConfig.inputs[0]!.config!.policy.value);
+        });
+      });
     });
 
     describe('when `antivirus_registration.mode` is changed', () => {
