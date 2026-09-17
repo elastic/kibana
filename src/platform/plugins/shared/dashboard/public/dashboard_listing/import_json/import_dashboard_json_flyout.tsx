@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { ImportJsonFlyoutContent } from '@kbn/as-code-import-flyout-component';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
@@ -36,6 +37,19 @@ export const ImportDashboardJsonFlyout = ({
       dataTestSubjPrefix="importDashboardJson"
       services={coreServices}
       isTechnicalPreview
+      description={
+        <EuiText size="s">
+          <p>
+            {importDashboardJsonStrings.getExportSourceNote()}{' '}
+            <EuiLink
+              href="https://www.elastic.co/docs/explore-analyze/dashboards/sharing#export-dashboards"
+              target="_blank"
+            >
+              {importDashboardJsonStrings.getLearnMoreLabel()}
+            </EuiLink>
+          </p>
+        </EuiText>
+      }
       serverValidationErrorTitle={importDashboardJsonStrings.getServerValidationErrorTitle()}
       serverValidationErrorText={importDashboardJsonStrings.getServerValidationErrorText()}
       getWarningsSummary={importDashboardJsonStrings.getWarningsBody}

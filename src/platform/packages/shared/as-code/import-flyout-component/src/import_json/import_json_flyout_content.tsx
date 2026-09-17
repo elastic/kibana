@@ -41,6 +41,8 @@ export interface ImportJsonFlyoutContentProps<SanitizedState> {
   dataTestSubjPrefix: string;
   services: ImportJsonFlyoutServices;
   isTechnicalPreview?: boolean;
+  /** Application-specific description shown above the NDJSON note. */
+  description?: ReactNode;
   serverValidationErrorTitle: string;
   serverValidationErrorText?: ReactNode;
   /** Override the default generic warnings summary. */
@@ -57,6 +59,7 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
   dataTestSubjPrefix,
   services,
   isTechnicalPreview = false,
+  description,
   serverValidationErrorTitle,
   serverValidationErrorText,
   getWarningsSummary,
@@ -110,15 +113,7 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
 
       <EuiFlyoutBody>
         <EuiText size="s">
-          <p>
-            {importJsonFlyoutStrings.getExportSourceNote()}{' '}
-            <EuiLink
-              href="https://www.elastic.co/docs/explore-analyze/dashboards/sharing#export-dashboards"
-              target="_blank"
-            >
-              {importJsonFlyoutStrings.getLearnMoreLabel()}
-            </EuiLink>
-          </p>
+          {description}
           <p>
             <FormattedMessage
               id="asCodeImport.importJson.ndjsonNote"

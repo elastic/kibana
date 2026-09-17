@@ -86,8 +86,6 @@ describe('ImportJsonFlyoutContent', () => {
     renderFlyout();
     expect(screen.getByTestId('testFilePicker')).toBeInTheDocument();
     expect(screen.getByTestId('testTechnicalPreviewBadge')).toBeInTheDocument();
-    expect(screen.getByText(/Use a JSON file obtained from/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Learn more' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'the Saved Objects page' })).toHaveAttribute(
       'href',
       '/app/management/kibana/objects'

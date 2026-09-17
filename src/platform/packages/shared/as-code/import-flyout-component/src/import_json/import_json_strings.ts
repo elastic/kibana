@@ -41,16 +41,7 @@ export const importJsonFlyoutStrings = {
   getTechnicalPreviewBadgeTooltip: () =>
     i18n.translate('asCodeImport.importJson.technicalPreviewBadgeTooltip', {
       defaultMessage:
-        'This functionality is experimental and not supported. It may change or be removed at any time.',
-    }),
-  getExportSourceNote: () =>
-    i18n.translate('asCodeImport.importJson.exportSourceNote', {
-      defaultMessage:
-        'Use a JSON file obtained from the "Export JSON" option available on any dashboard.',
-    }),
-  getLearnMoreLabel: () =>
-    i18n.translate('asCodeImport.importJson.learnMore', {
-      defaultMessage: 'Learn more',
+        'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
     }),
   getNdjsonNoteLinkLabel: () =>
     i18n.translate('asCodeImport.importJson.ndjsonNoteLink', {
