@@ -54,6 +54,7 @@ const TITLE_CASE_GLOSSARY = [
   'AWS EC2',
   'AWS Lambda',
   'AWS RDS',
+  'AI/ML',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));

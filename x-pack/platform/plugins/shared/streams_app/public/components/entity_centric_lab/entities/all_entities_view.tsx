@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useHistory, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, Query } from '@kbn/es-query';
@@ -29,6 +30,9 @@ import {
   EuiSuperDatePicker,
   EuiSwitch,
   EuiTitle,
+  EuiTourStep,
+  EuiEmptyPrompt,
+  EuiLink,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -131,9 +135,12 @@ import { EntitiesTagFilters } from './entities_tag_filters';
 import { EntityExtraFilters } from './entity_extra_filters';
 import { EntityGroupByControls } from './entity_group_by_controls';
 import { labThing, labThings, labThingsLabel } from '../lab_terminology';
-import { VariationProvider, useVariation } from './variation_context';
+import { VariationProvider, useVariation, useVariationContext } from './variation_context';
 import { VariationSwitcher } from './variation_switcher';
 import type { DataVariation, DetailVariation, TableStyleVariation } from './variation_registry';
+import emptyStateIllustration from './assets/empty_state_illustration.png';
+import addDataPageImage from './assets/add_data_page.png';
+import { OldExperiencePage, consumeTourFlag } from './transition_modal';
 import { SecurityGroupingView } from './security_grouping_view';
 import {
   DEFAULT_GROUP_BY,
@@ -419,15 +426,71 @@ interface AllEntitiesViewProps {
  * Compute the Phase 1 alerts badge from an entity's `alerts` field.
  * Returns an `{ label, color }` object suitable for `EntityFlyout.alertsBadge`.
  */
+/** Maps our internal category IDs to the onboarding page's `?category=` param. */
+const ONBOARDING_CATEGORY_MAP: Partial<Record<EntityCategoryId, string>> = {
+  hosts: 'host',
+  cloud: 'cloud',
+  kubernetes: 'kubernetes',
+  databases: 'database',
+  services: 'application',
+  networking: 'network',
+  middlewares: 'messaging',
+  llms: 'aiml',
+};
+
 const computeAlertsBadge = (
   entity: Entity | undefined
 ): { label: string; color: string } | undefined => {
   if (!entity) return undefined;
-  if (!entity.alerts) return { label: 'N/A', color: 'hollow' };
-  const { total, active } = entity.alerts;
-  if (active > 0) return { label: `${active} active alert${active > 1 ? 's' : ''}`, color: 'danger' };
+  // Derive the active alert count from entity health to stay coherent
+  // with the flyout's Alerts tab (which uses the same health-based logic
+  // in `alertsByHealth` inside `kind_templates.ts`).
+  const health = entity.health;
+  if (health === 'unhealthy') {
+    return { label: '5 active alerts', color: 'danger' };
+  }
+  if (health === 'atRisk') {
+    return { label: '1 active alert', color: 'danger' };
+  }
   return { label: '0 active alerts', color: 'success' };
 };
+
+const AddDataOverlay = ({ onClose }: { readonly onClose: () => void }) =>
+  createPortal(
+    <div
+      css={css`
+        position: fixed;
+        inset: 0;
+        z-index: 100000;
+        background: #fff;
+        overflow-y: auto;
+      `}
+    >
+      <EuiButtonIcon
+        iconType="cross"
+        aria-label="Close"
+        onClick={onClose}
+        css={css`
+          position: fixed;
+          top: 16px;
+          right: 16px;
+          z-index: 100001;
+        `}
+        color="text"
+        display="base"
+        size="m"
+      />
+      <img
+        src={addDataPageImage}
+        alt="Add Observability data"
+        css={css`
+          width: 100%;
+          display: block;
+        `}
+      />
+    </div>,
+    document.body
+  );
 
 const MoreActionsMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -564,6 +627,7 @@ const AllEntitiesViewInner = ({
   // the hex map visibly "lives". The grid consumes the tick to re-seed the
   // reading salt (see GroupedGridView), keeping tiles + tooltips consistent.
   const [refreshTick, setRefreshTick] = useState(0);
+  const [showAddDataOverlay, setShowAddDataOverlay] = useState(false);
   const handleLiveRefresh = useCallback(() => {
     setRefreshTick((tick) => tick + 1);
     refresh();
@@ -581,6 +645,59 @@ const AllEntitiesViewInner = ({
   const phaseVariation = useVariation('phase');
   const isPhase1 = phaseVariation === 'phase1';
   const tableStyleVariation = useVariation('tableStyle') as TableStyleVariation;
+  const scenarioVariation = useVariation('scenario');
+  const variationCtx = useVariationContext();
+
+  // Feature tour state: auto-starts after transition switch
+  const [tourStep, setTourStep] = useState(0);
+  const [isTourActive, setIsTourActive] = useState(false);
+  const tourStepCount = 5;
+
+  useEffect(() => {
+    if (consumeTourFlag()) {
+      setIsTourActive(true);
+      setTourStep(1);
+    }
+  }, [scenarioVariation]);
+
+  const advanceTour = useCallback(() => {
+    setTourStep((prev) => {
+      if (prev >= tourStepCount) {
+        setIsTourActive(false);
+        return 0;
+      }
+      return prev + 1;
+    });
+  }, []);
+
+  const closeTour = useCallback(() => {
+    setIsTourActive(false);
+    setTourStep(0);
+  }, []);
+
+  const handleTransitionSwitch = useCallback(() => {
+    variationCtx.set('scenario', 'default');
+  }, [variationCtx]);
+
+  const handleRevertToClassic = useCallback(() => {
+    variationCtx.set('scenario', 'transition');
+  }, [variationCtx]);
+
+  // Subscribe to the Stack Management toggle so flipping it off
+  // triggers the revert to classic immediately (no page reload needed).
+  const newInfraEnabled = useObservable(
+    uiSettings.get$<boolean>('observability:newInfraExperience', true),
+    uiSettings.get<boolean>('observability:newInfraExperience', true)
+  );
+  const prevNewInfraRef = useRef(newInfraEnabled);
+  useEffect(() => {
+    if (prevNewInfraRef.current && !newInfraEnabled) {
+      handleRevertToClassic();
+    }
+    prevNewInfraRef.current = newInfraEnabled;
+  }, [newInfraEnabled, handleRevertToClassic]);
+
+  const isTransitionScenario = scenarioVariation === 'transition';
 
   const flyoutSize = detailVariation === 'largeFlyout' ? 'l' : 'm';
   const dataset = useMemo(() => buildFakeEntities(dataVariation), [dataVariation]);
@@ -1402,6 +1519,15 @@ const AllEntitiesViewInner = ({
     : VIEW_MODE_OPTIONS;
   const effectiveViewMode: ViewMode = isElasticOn && viewMode === 'geomap' ? 'grid' : viewMode;
 
+  if (isTransitionScenario) {
+    return (
+      <>
+        <OldExperiencePage onSwitch={handleTransitionSwitch} />
+        {isElasticOn ? <VariationSwitcher /> : null}
+      </>
+    );
+  }
+
   return (
     <>
       <StreamsAppPageTemplate.Header
@@ -1510,23 +1636,85 @@ const AllEntitiesViewInner = ({
                     ]),
                 ...(isElasticOn
                   ? [
-                      <SaveViewButton
-                        key="save-view"
-                        currentState={currentViewState}
-                        loadedView={loadedView}
-                        isModified={isLoadedViewModified}
-                        onUpdate={handleUpdateLoadedView}
-                        onSaveAsNew={handleSaveAsNewView}
-                        showMakeDefault
-                        isLoadedViewDefault={
-                          Boolean(loadedView) &&
-                          savedViewsApi.defaultViewId === loadedView?.id
+                      <EuiTourStep
+                        key="save-view-tour"
+                        step={4}
+                        stepsTotal={tourStepCount}
+                        isStepOpen={isTourActive && tourStep === 4}
+                        subtitle="New infrastructure inventory"
+                        title="Save and share views"
+                        content={
+                          <p>
+                            Capture your current filters, grouping, and layout as a saved view.
+                            Access it from the left nav or share the link with your team.
+                          </p>
                         }
-                        compact
-                        neutral
-                        hideBadge
-                      />,
-                      <MoreActionsMenu key="more-actions" />,
+                        onFinish={closeTour}
+                        footerAction={
+                          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonEmpty size="s" onClick={closeTour}>
+                                Close tour
+                              </EuiButtonEmpty>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButton size="s" onClick={advanceTour}>
+                                Next
+                              </EuiButton>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        }
+                        anchorPosition="downRight"
+                      >
+                        <SaveViewButton
+                          currentState={currentViewState}
+                          loadedView={loadedView}
+                          isModified={isLoadedViewModified}
+                          onUpdate={handleUpdateLoadedView}
+                          onSaveAsNew={handleSaveAsNewView}
+                          showMakeDefault
+                          isLoadedViewDefault={
+                            Boolean(loadedView) &&
+                            savedViewsApi.defaultViewId === loadedView?.id
+                          }
+                          compact
+                          neutral
+                          hideBadge
+                        />
+                      </EuiTourStep>,
+                      <EuiTourStep
+                        key="more-actions-tour"
+                        step={5}
+                        stepsTotal={tourStepCount}
+                        isStepOpen={isTourActive && tourStep === 5}
+                        subtitle="New infrastructure inventory"
+                        title="Help us improve"
+                        content={
+                          <p>
+                            Have feedback? Found something that could work better? Let us know —
+                            your input shapes what comes next. You can switch back to the classic
+                            view anytime from <strong>Advanced Settings &gt; Observability</strong>.
+                          </p>
+                        }
+                        onFinish={closeTour}
+                        footerAction={
+                          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonEmpty size="s" onClick={closeTour}>
+                                Close tour
+                              </EuiButtonEmpty>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButton size="s" onClick={closeTour}>
+                                Done
+                              </EuiButton>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        }
+                        anchorPosition="downRight"
+                      >
+                        <MoreActionsMenu />
+                      </EuiTourStep>,
                     ]
                   : []),
               ]
@@ -1568,6 +1756,47 @@ const AllEntitiesViewInner = ({
               ) : (
                 <AllEntitiesOverviewView onSelectEntity={openEntity} />
               )
+            ) : isElasticOn && dataVariation === 'empty' ? (
+              <EuiEmptyPrompt
+                icon={<img src={emptyStateIllustration} alt="" width={120} />}
+                title={
+                  <h2>
+                    {i18n.translate(
+                      'xpack.streams.entityCentricLab.entities.emptyState.title',
+                      { defaultMessage: 'Add Observability data' }
+                    )}
+                  </h2>
+                }
+                body={
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.entityCentricLab.entities.emptyState.body',
+                      {
+                        defaultMessage:
+                          'Connect your systems and get full visibility into logs, metrics, and traces.',
+                      }
+                    )}
+                  </p>
+                }
+                actions={[
+                  <EuiButton
+                    fill
+                    iconType="plusInCircle"
+                    key="add-data"
+                    href={
+                      '/alb/s/nicolas-prouvost/app/observabilityOnboarding' +
+                      (categoryScope
+                        ? `?category=${ONBOARDING_CATEGORY_MAP[categoryScope] ?? categoryScope}`
+                        : '')
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.streams.entityCentricLab.entities.emptyState.addData',
+                      { defaultMessage: 'Add data' }
+                    )}
+                  </EuiButton>,
+                ]}
+              />
             ) : isElasticOn ? (
               <>
                 {/*
@@ -1582,43 +1811,73 @@ const AllEntitiesViewInner = ({
                     2. Independent facet filters (region, environment, …).
                     3. Summary + Group-by-provider + view-mode toggle + Save view.
                 */}
-                <div css={NO_GROW}>
-                  <unifiedSearch.ui.SearchBar
-                    appName="streamsApp"
-                    indexPatterns={labDataView ? [labDataView] : []}
-                    showQueryInput
-                    showQueryMenu
-                    showFilterBar
-                    showDatePicker
-                    isAutoRefreshDisabled={false}
-                    displayStyle="inPage"
-                    query={{ query: search, language: 'kuery' } as Query}
-                    filters={labFilters}
-                    dateRangeFrom={rangeFrom}
-                    dateRangeTo={rangeTo}
-                    onQuerySubmit={(payload, isUpdate) => {
-                      const nextQuery = payload.query?.query;
-                      setSearch(typeof nextQuery === 'string' ? nextQuery : '');
-                      if (payload.dateRange) {
-                        handleTimeChange({
-                          start: payload.dateRange.from,
-                          end: payload.dateRange.to,
-                        });
-                      }
-                      if (!isUpdate) handleLiveRefresh();
-                    }}
-                    onFiltersUpdated={setLabFilters}
-                    onRefresh={handleLiveRefresh}
-                    placeholder={i18n.translate(
-                      'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
-                      {
-                        defaultMessage:
-                          'Search {things} — e.g. health:unhealthy AND environment:production',
-                        values: { things: labThings(isElasticOn) },
-                      }
-                    )}
-                  />
-                </div>
+                <EuiTourStep
+                  step={1}
+                  stepsTotal={tourStepCount}
+                  isStepOpen={isTourActive && tourStep === 1}
+                  subtitle="New infrastructure inventory"
+                  title="Search and filter"
+                  content={
+                    <p>
+                      Filter resources by name, health, environment, or any attribute using KQL.
+                      Add structured filters with the + button.
+                    </p>
+                  }
+                  onFinish={closeTour}
+                  footerAction={
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty size="s" onClick={closeTour}>
+                          Close tour
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton size="s" onClick={advanceTour}>
+                          Next
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  }
+                  anchorPosition="downCenter"
+                >
+                  <div css={NO_GROW}>
+                    <unifiedSearch.ui.SearchBar
+                      appName="streamsApp"
+                      indexPatterns={labDataView ? [labDataView] : []}
+                      showQueryInput
+                      showQueryMenu
+                      showFilterBar
+                      showDatePicker
+                      isAutoRefreshDisabled={false}
+                      displayStyle="inPage"
+                      query={{ query: search, language: 'kuery' } as Query}
+                      filters={labFilters}
+                      dateRangeFrom={rangeFrom}
+                      dateRangeTo={rangeTo}
+                      onQuerySubmit={(payload, isUpdate) => {
+                        const nextQuery = payload.query?.query;
+                        setSearch(typeof nextQuery === 'string' ? nextQuery : '');
+                        if (payload.dateRange) {
+                          handleTimeChange({
+                            start: payload.dateRange.from,
+                            end: payload.dateRange.to,
+                          });
+                        }
+                        if (!isUpdate) handleLiveRefresh();
+                      }}
+                      onFiltersUpdated={setLabFilters}
+                      onRefresh={handleLiveRefresh}
+                      placeholder={i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
+                        {
+                          defaultMessage:
+                            'Search {things} — e.g. health:unhealthy AND environment:production',
+                          values: { things: labThings(isElasticOn) },
+                        }
+                      )}
+                    />
+                  </div>
+                </EuiTourStep>
                 <EuiSpacer size="s" />
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={NO_GROW}>
                   <EuiFlexItem grow={false}>
@@ -1706,19 +1965,49 @@ const AllEntitiesViewInner = ({
                   </EuiFlexItem>
                   <EuiFlexItem />
                   <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend={i18n.translate(
-                        'xpack.streams.entityCentricLab.entities.viewMode.legend',
-                        { defaultMessage: 'View mode' }
-                      )}
-                      options={viewModeOptions}
-                      idSelected={effectiveViewMode}
-                      onChange={(id) => setViewMode(id as ViewMode)}
-                      isIconOnly
-                      buttonSize="compressed"
-                      color="text"
-                      data-test-subj="entityCentricLabEntitiesViewModeToggle"
-                    />
+                    <EuiTourStep
+                      step={2}
+                      stepsTotal={tourStepCount}
+                      isStepOpen={isTourActive && tourStep === 2}
+                      subtitle="New infrastructure inventory"
+                      title="Toggle between views"
+                      content={
+                        <p>
+                          Switch between the hexagon map for an at-a-glance overview and
+                          the list view when you need to find something specific.
+                        </p>
+                      }
+                      onFinish={closeTour}
+                      footerAction={
+                        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty size="s" onClick={closeTour}>
+                              Close tour
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButton size="s" onClick={advanceTour}>
+                              Next
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      }
+                      anchorPosition="downCenter"
+                    >
+                      <EuiButtonGroup
+                        legend={i18n.translate(
+                          'xpack.streams.entityCentricLab.entities.viewMode.legend',
+                          { defaultMessage: 'View mode' }
+                        )}
+                        options={viewModeOptions}
+                        idSelected={effectiveViewMode}
+                        onChange={(id) => setViewMode(id as ViewMode)}
+                        isIconOnly
+                        buttonSize="compressed"
+                        color="text"
+                        data-test-subj="entityCentricLabEntitiesViewModeToggle"
+                      />
+                    </EuiTourStep>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EntityGroupByControls
@@ -1749,6 +2038,17 @@ const AllEntitiesViewInner = ({
                     refreshTick={refreshTick}
                     customGroupBy={customGroupBy}
                     hideCategoryHeader={!!categoryScope}
+                    colorByTourStep={
+                      isTourActive && tourStep === 3
+                        ? {
+                            isOpen: true,
+                            step: 3,
+                            stepsTotal: tourStepCount,
+                            onNext: advanceTour,
+                            onClose: closeTour,
+                          }
+                        : undefined
+                    }
                   />
                 ) : tableStyleVariation === 'security' ? (
                   <SecurityGroupingView
@@ -1969,6 +2269,7 @@ const AllEntitiesViewInner = ({
             hideHealthBadge={isPhase1}
             alertsBadge={isPhase1 ? computeAlertsBadge(selectedEntity) : undefined}
             hideAiSummary={isPhase1}
+            hideOwnership={isPhase1}
             hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
           />
           {childEntityName ? (
@@ -1989,10 +2290,14 @@ const AllEntitiesViewInner = ({
               hideHealthBadge={isPhase1}
               alertsBadge={isPhase1 ? computeAlertsBadge(childEntity) : undefined}
               hideAiSummary={isPhase1}
+              hideOwnership={isPhase1}
               hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
             />
           ) : null}
         </EntityFlyoutServicesProvider>
+      ) : null}
+      {showAddDataOverlay ? (
+        <AddDataOverlay onClose={() => setShowAddDataOverlay(false)} />
       ) : null}
       {isElasticOn ? <VariationSwitcher /> : null}
     </>

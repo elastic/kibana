@@ -861,6 +861,17 @@ const buildKubernetesEntitiesWithScenario = (
 export const buildFakeEntities = (
   scenario: DataVariation = 'default'
 ): FakeEntitiesDataset => {
+  if (scenario === 'empty') {
+    return {
+      entities: [],
+      totalEntities: 0,
+      totalGroups: 0,
+      categoryCounts: ENTITY_CATEGORIES.map((c) => ({
+        category: c.id,
+        total: 0,
+      })),
+    };
+  }
   const healthFn =
     scenario === 'degraded' ? degradedHealth : undefined;
   const multiplier =

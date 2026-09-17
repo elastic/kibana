@@ -296,4 +296,18 @@ export const getUiSettings: (
     ]),
     requiresPageReload: true,
   },
+  'observability:newInfraExperience': {
+    name: i18n.translate('discover.advancedSettings.newInfraExperience.title', {
+      defaultMessage: 'New infrastructure experience',
+    }),
+    value: true,
+    type: 'boolean',
+    category: ['observability'],
+    description: i18n.translate('discover.advancedSettings.newInfraExperience.description', {
+      defaultMessage:
+        'When enabled, the Infrastructure inventory uses the new experience with hexagon health maps, resource flyouts, and saved views. Turn off to revert to the classic Infrastructure inventory.',
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: false,
+  },
 });

@@ -9,6 +9,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -47,6 +48,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  EuiTourStep,
   useEuiTheme,
   useGeneratedHtmlId,
   type EuiColorPalettePickerPaletteProps,
@@ -183,6 +185,17 @@ interface Props {
    * the built-in Category → Type layout untouched.
    */
   readonly customGroupBy?: readonly GroupByFieldDef[];
+  /**
+   * When set, wraps the first Color By dropdown with an `EuiTourStep`.
+   * Managed by the feature tour in `all_entities_view.tsx`.
+   */
+  readonly colorByTourStep?: {
+    isOpen: boolean;
+    step: number;
+    stepsTotal: number;
+    onNext: () => void;
+    onClose: () => void;
+  };
 }
 
 /**
@@ -191,6 +204,15 @@ interface Props {
  * without every intermediate component having to forward the prop.
  */
 const SelectedEntityContext = createContext<string | null>(null);
+
+/**
+ * Tour step config for the Color By dropdown. Only the first rendered
+ * `ColorByPopover` consumes this (via `useRef` flag) so the tour anchors
+ * to a single dropdown rather than wrapping every card.
+ */
+type ColorByTourConfig = Props['colorByTourStep'];
+const ColorByTourContext = createContext<ColorByTourConfig>(undefined);
+const ColorByTourClaimedContext = createContext<React.MutableRefObject<boolean> | null>(null);
 
 /**
  * Whether value-ramp palette coloring is available (ElasticOn). Threaded
@@ -1391,6 +1413,14 @@ const ColorByPopover = ({
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<ColorByPopoverMode>('select');
+
+  const tourConfig = useContext(ColorByTourContext);
+  const claimedRef = useContext(ColorByTourClaimedContext);
+  const isTourAnchor = useMemo(() => {
+    if (!tourConfig || !claimedRef || claimedRef.current) return false;
+    claimedRef.current = true;
+    return true;
+  }, [tourConfig, claimedRef]);
   const [draftAggregation, setDraftAggregation] = useState<AggregationType>('avg');
   const [draftField, setDraftField] = useState('');
   const [draftLabel, setDraftLabel] = useState('');
@@ -1497,7 +1527,7 @@ const ColorByPopover = ({
     />
   );
 
-  return (
+  const popover = (
     <EuiPopover
       button={popoverButton}
       isOpen={isOpen}
@@ -1728,6 +1758,44 @@ const ColorByPopover = ({
       </div>
     </EuiPopover>
   );
+
+  if (isTourAnchor && tourConfig) {
+    return (
+      <EuiTourStep
+        step={tourConfig.step}
+        stepsTotal={tourConfig.stepsTotal}
+        isStepOpen={tourConfig.isOpen}
+        subtitle="New infrastructure inventory"
+        title="Color by what matters"
+        content={
+          <p>
+            Change coloring and group by options depending on your use case, then click
+            a hexagon or resource name in the table view to drill down.
+          </p>
+        }
+        onFinish={tourConfig.onClose}
+        footerAction={
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="s" onClick={tourConfig.onClose}>
+                Close tour
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" onClick={tourConfig.onNext}>
+                Next
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        anchorPosition="downLeft"
+      >
+        {popover}
+      </EuiTourStep>
+    );
+  }
+
+  return popover;
 };
 
 /**
@@ -3542,7 +3610,14 @@ export const GroupedGridView = ({
   refreshTick = 0,
   customGroupBy,
   hideCategoryHeader = false,
+  colorByTourStep,
 }: Props) => {
+  const tourClaimedRef = useRef(false);
+  // Reset the claim flag when the tour step changes so it re-anchors
+  // to the first Color By on each render cycle.
+  useEffect(() => {
+    tourClaimedRef.current = false;
+  }, [colorByTourStep?.isOpen]);
   // Subscribe to chaos-mode flips so PayFlow storyline tiles can
   // swap colour the moment the user rolls back. `getEffectiveEntityHealth`
   // is a no-op for everything outside the storyline, so the rest of
@@ -3631,6 +3706,8 @@ export const GroupedGridView = ({
       <PaletteColoringEnabledContext.Provider value={enablePaletteColoring}>
         <HideCategoryHeaderContext.Provider value={hideCategoryHeader}>
         <RefreshTickContext.Provider value={refreshTick}>
+        <ColorByTourContext.Provider value={colorByTourStep}>
+        <ColorByTourClaimedContext.Provider value={tourClaimedRef}>
           <EuiFlexGroup direction="column" gutterSize="m">
             {useCustomGrouping
               ? customGroups.map((node) => (
@@ -3660,6 +3737,8 @@ export const GroupedGridView = ({
                   )
                 )}
           </EuiFlexGroup>
+        </ColorByTourClaimedContext.Provider>
+        </ColorByTourContext.Provider>
         </RefreshTickContext.Provider>
         </HideCategoryHeaderContext.Provider>
       </PaletteColoringEnabledContext.Provider>

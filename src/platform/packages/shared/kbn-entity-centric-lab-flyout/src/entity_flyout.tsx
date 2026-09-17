@@ -176,6 +176,8 @@ interface EntityFlyoutProps {
   readonly alertsBadge?: { label: string; color: string };
   /** When true the AI-generated summary is hidden from the Overview tab (Phase 1). */
   readonly hideAiSummary?: boolean;
+  /** When true the Ownership section is hidden from the Overview tab (Phase 1). */
+  readonly hideOwnership?: boolean;
   /**
    * Tab IDs to exclude from the flyout. Used by Phase 1 to hide
    * Relationships and Custom. Filtered after the allowed-set and
@@ -270,6 +272,7 @@ export const EntityFlyout = ({
   hideHealthBadge = false,
   alertsBadge,
   hideAiSummary = false,
+  hideOwnership = false,
   hiddenTabIds,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
@@ -621,6 +624,8 @@ export const EntityFlyout = ({
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.alerts', {
           defaultMessage: 'Alerts',
         }),
+        appendBadge:
+          tabsData.alerts.activeCount > 0 ? tabsData.alerts.activeCount : undefined,
       },
       // Relationships (the topology map) only surfaces in the long-term
       // entity-centric scenario — filtered out below when `minimalTabs` is set.
@@ -851,6 +856,7 @@ export const EntityFlyout = ({
           linkedDashboards={templateOverride?.linkedDashboards}
           onSelectEntity={onSelectEntity}
           hideAiSummary={hideAiSummary}
+          hideOwnership={hideOwnership}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -951,6 +957,7 @@ const TabContent = ({
   linkedDashboards,
   onSelectEntity,
   hideAiSummary = false,
+  hideOwnership = false,
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
@@ -962,6 +969,7 @@ const TabContent = ({
   readonly linkedDashboards?: readonly LinkedDashboardOverride[];
   readonly onSelectEntity?: OnSelectEntity;
   readonly hideAiSummary?: boolean;
+  readonly hideOwnership?: boolean;
 }) => {
   const { resourceCopy = false, renderTabDashboard } = useEntityFlyoutServices();
 
@@ -990,7 +998,7 @@ const TabContent = ({
 
   switch (activeTab) {
     case 'overview':
-      return <OverviewTab overview={overview} hideAiSummary={hideAiSummary} />;
+      return <OverviewTab overview={overview} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} />;
     case 'metrics':
       return <MetricsTab metrics={tabsData.metrics} />;
     case 'logs':

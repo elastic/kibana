@@ -407,6 +407,9 @@ function createNavTree({
   const llmsCategoryNode = {
     id: 'entityCentricLab-entitiesLlms',
     link: 'streams:entitiesLlms' as const,
+    title: i18n.translate('xpack.observability.obltNav.entityCentric.llms', {
+      defaultMessage: 'AI/ML',
+    }),
   };
   // Flat Cloud link for ElasticOn (no nested AWS/GCP/Azure panels — the
   // provider filter lives on the page instead).

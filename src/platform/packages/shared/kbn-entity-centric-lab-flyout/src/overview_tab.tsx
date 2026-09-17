@@ -38,9 +38,11 @@ interface OverviewTabProps {
   readonly overview: EntityOverview;
   /** When true the AI-generated summary section is hidden (e.g. Phase 1). */
   readonly hideAiSummary?: boolean;
+  /** When true the Ownership section is hidden (e.g. Phase 1). */
+  readonly hideOwnership?: boolean;
 }
 
-export const OverviewTab = ({ overview, hideAiSummary = false }: OverviewTabProps) => {
+export const OverviewTab = ({ overview, hideAiSummary = false, hideOwnership = false }: OverviewTabProps) => {
   const { resourceCopy = false } = useEntityFlyoutServices();
   const summaryAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSummary' });
   const signalsAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSignals' });
@@ -123,29 +125,33 @@ export const OverviewTab = ({ overview, hideAiSummary = false }: OverviewTabProp
         />
       </EuiAccordion>
 
-      <EuiSpacer size="m" />
+      {!hideOwnership && (
+        <>
+          <EuiSpacer size="m" />
 
-      <EuiAccordion
-        id={ownershipAccordionId}
-        initialIsOpen
-        buttonContent={
-          <SectionTitle
-            title={i18n.translate('entityCentricLabFlyout.flyout.overview.ownershipTitle', {
-              defaultMessage: 'Ownership',
-            })}
-          />
-        }
-        paddingSize="s"
-        data-test-subj="entityCentricLabOverviewOwnership"
-      >
-        <KeyValueGrid
-          rows={overview.ownership}
-          ariaLabel={i18n.translate(
-            'entityCentricLabFlyout.flyout.overview.ownershipAriaLabel',
-            { defaultMessage: 'Ownership' }
-          )}
-        />
-      </EuiAccordion>
+          <EuiAccordion
+            id={ownershipAccordionId}
+            initialIsOpen
+            buttonContent={
+              <SectionTitle
+                title={i18n.translate('entityCentricLabFlyout.flyout.overview.ownershipTitle', {
+                  defaultMessage: 'Ownership',
+                })}
+              />
+            }
+            paddingSize="s"
+            data-test-subj="entityCentricLabOverviewOwnership"
+          >
+            <KeyValueGrid
+              rows={overview.ownership}
+              ariaLabel={i18n.translate(
+                'entityCentricLabFlyout.flyout.overview.ownershipAriaLabel',
+                { defaultMessage: 'Ownership' }
+              )}
+            />
+          </EuiAccordion>
+        </>
+      )}
     </>
   );
 };

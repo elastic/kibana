@@ -34,7 +34,7 @@ export interface VariationDimension {
 // Starter dimensions
 // ---------------------------------------------------------------------------
 
-export type DataVariation = 'default' | 'full' | 'degraded' | 'overflow';
+export type DataVariation = 'default' | 'full' | 'degraded' | 'overflow' | 'empty';
 
 /** Maximum number of entities surfaced in the UI at once. */
 export const MAX_VISIBLE_ENTITIES = 10_000;
@@ -55,6 +55,11 @@ export const DATA_DIMENSION: VariationDimension = {
       id: 'overflow',
       label: '10k+',
       description: 'More than 10,000 resources — tests truncation banner',
+    },
+    {
+      id: 'empty',
+      label: 'Empty',
+      description: 'No data ingested yet — shows empty-state prompts',
     },
   ],
 };
@@ -97,6 +102,22 @@ export const PHASE_DIMENSION: VariationDimension = {
   ],
 };
 
+export type ScenarioVariation = 'default' | 'transition';
+
+export const SCENARIO_DIMENSION: VariationDimension = {
+  id: 'scenario',
+  label: 'Scenario',
+  defaultOption: 'default',
+  options: [
+    { id: 'default', label: 'Default', description: 'Normal experience — no onboarding flow' },
+    {
+      id: 'transition',
+      label: 'Transition',
+      description: 'Old experience → modal → new experience with feature tour',
+    },
+  ],
+};
+
 export type TableStyleVariation = 'default' | 'security';
 
 export const TABLE_STYLE_DIMENSION: VariationDimension = {
@@ -116,6 +137,7 @@ export const TABLE_STYLE_DIMENSION: VariationDimension = {
 /** All registered dimensions, in display order. */
 export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   PHASE_DIMENSION,
+  SCENARIO_DIMENSION,
   DATA_DIMENSION,
   DETAIL_DIMENSION,
   TABLE_STYLE_DIMENSION,
