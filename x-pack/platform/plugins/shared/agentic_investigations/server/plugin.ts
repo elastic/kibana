@@ -19,6 +19,7 @@ import { registerFeatures } from './features';
 import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
 import { registerRoutes } from './proposals/routes/register_routes';
 import { ProposalsService } from './proposals/services/proposals_service';
+import { createProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
 import { createProposalUserResolver } from './proposals/services/resolve_proposal_user';
 import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
 import { registerProposalAttachment } from './proposals/attachments';
@@ -81,6 +82,13 @@ export class AgenticInvestigationsPlugin
       workflowsExtensions,
       getProposalsService: () => this.requireProposalsService(),
       resolveUser: (request) => this.requireUserResolver()(request),
+      // Steps register during setup but only run once Kibana has started, so
+      // the authorization service is resolved per call rather than captured
+      // here — `security.authz` does not exist yet.
+      privileges: createProposalPrivilegesChecker({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        logger: this.logger,
+      }),
     });
 
     registerRoutes({
