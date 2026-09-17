@@ -36,7 +36,7 @@ export type TriggerSelectionType = 'alert' | 'document';
  * Reads the explicit (id, index) pairs from `inputs.event.alertIds`.
  *
  * Malformed entries are rejected, never skipped. The pairs returned here are the ones
- * `validateOrigin` checks for case membership, while alert preprocessing fetches from the *raw*
+ * `validateOrigin` checks for case membership, while trigger preprocessing fetches from the *raw*
  * `inputs.event.alertIds` array — so dropping an entry would let it escape the membership check
  * and still be fetched and injected into the workflow event. A nullish `alertIds` is treated as
  * "no alert inputs" to match how preprocessing decides whether to expand alerts at all.

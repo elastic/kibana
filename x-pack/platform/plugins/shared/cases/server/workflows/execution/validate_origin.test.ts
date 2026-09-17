@@ -26,7 +26,7 @@ const theCase = {
  * Test wrapper: derives `attachedAlerts` from the case comments (mirroring the source used in
  * production for the legacy alert attachment shape) and parses `inputs` through
  * `parseSelectedAlertPairs` — the same code path the service uses — so the validated set is
- * identical to what alert preprocessing later fetches.
+ * identical to what trigger preprocessing later fetches.
  */
 const validateOrigin = (
   params: Omit<

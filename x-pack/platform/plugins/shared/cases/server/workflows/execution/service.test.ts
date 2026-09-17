@@ -161,7 +161,7 @@ describe('CasesWorkflowRunService', () => {
     expect(management.runWorkflowWithPreprocessing).toHaveBeenCalledWith(
       expect.objectContaining({
         // caseIds is passed via eventOverrides, not pre-merged into inputs.event, so that it
-        // survives alert-input preprocessing, which replaces the entire event object.
+        // survives trigger-input preprocessing, which replaces the entire event object.
         inputs: {
           event: {
             triggerType: 'alert',
