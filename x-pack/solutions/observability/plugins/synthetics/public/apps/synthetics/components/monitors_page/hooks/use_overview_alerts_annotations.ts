@@ -66,13 +66,23 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       type: 'query',
       key: { type: 'point_in_time' },
       filter: { type: 'kibana_query', query: kqlClauses, language: 'kuery' },
-      timeField: '@timestamp',
+      // `kibana.alert.start`, not `@timestamp` — for a since-recovered alert,
+      // `@timestamp` is the last write (the recovery check), which lands the
+      // marker well after the down period it refers to, next to healthy
+      // pings. Anchoring on the actual onset keeps it lined up with the down
+      // bars it's annotating, whether the alert is still active or not.
+      timeField: 'kibana.alert.start',
       label: alertsAnnotationLabel,
       color: euiTheme.colors.accent,
       icon: 'alert',
       // Shown as extra rows in the marker's tooltip, so a hover already
-      // answers "which monitor, and what happened" without leaving the chart.
-      extraFields: ['monitor.name', 'kibana.alert.reason'],
+      // answers "which monitor, what happened, and how long it's been (or
+      // was) down" without leaving the chart. Deliberately not
+      // `kibana.alert.end`: Lens renders a requested extra field's row even
+      // when the matched doc doesn't have it (as a literal "(null)"), and a
+      // still-active alert has no end time — `duration.us` alone already
+      // covers "how long" for both an active and a recovered alert.
+      extraFields: ['monitor.name', 'kibana.alert.reason', 'kibana.alert.duration.us'],
     };
 
     return [{ dataView: alertsDataView, annotations: [annotation] }];
