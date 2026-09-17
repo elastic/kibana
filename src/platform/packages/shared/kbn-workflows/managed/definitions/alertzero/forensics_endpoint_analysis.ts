@@ -15,6 +15,10 @@ import type { ManagedWorkflowDefinition } from '../../types';
 export const ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID =
   'system-security-forensics-endpoint-analysis';
 
+/**
+ * Per-space forensics worker. Owns the indicator sweep cadence and dispatches the
+ * global analysis workflow per indicator.
+ */
 export const ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW = {
   billable: false,
   id: ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,

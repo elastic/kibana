@@ -11,21 +11,21 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_YAML from './forensics_sweep_for_analyze_endpoint_kis.yaml';
+import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './forensics_run_endpoint_analysis.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID =
-  'system-security-forensics-sweep-for-analyze-endpoint-kis';
+export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
+  'system-security-forensics-run-endpoint-analysis';
 
 /**
- * Global KI sweep. Starts the per-space Endpoint analysis worker via the
- * space-scoped run API.
+ * The forensic pass itself, installed once globally and dispatched per indicator by
+ * the per-space Endpoint analysis worker, which is the only scheduler authority.
  */
-export const ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW = {
+export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW = {
   billable: false,
-  id: ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID,
+  id: ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yaml: FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_YAML,
+  yaml: FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
 } as const satisfies ManagedWorkflowDefinition;

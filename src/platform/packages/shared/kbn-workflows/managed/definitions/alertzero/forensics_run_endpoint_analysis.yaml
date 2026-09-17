@@ -1,0 +1,520 @@
+version: "1"
+name: Endpoint analysis run
+description: >
+  Given an `analyze_endpoint` knowledge indicator, resolves the associated
+  Attack Discovery alert and host, runs a forensic agent to reconstruct the
+  attack timeline and extract IoCs, attaches the findings and a containment
+  assessment to the investigation, and proposes any justified containment
+  actions for human approval.
+enabled: true
+tags:
+  - security
+  - endpoint-analysis
+
+settings:
+  # One run per indicator. The per-space worker re-dispatches an indicator on every
+  # tick until `mark_processed` lands, so this is what collapses those repeats into
+  # the run already in flight instead of re-analyzing the same host.
+  concurrency:
+    key: "endpoint-analysis-{{ inputs.ki_id }}"
+    strategy: drop
+    max: 1
+
+triggers:
+  # Dispatched by the per-space Endpoint analysis worker, which owns the sweep
+  # cadence. Manual-only because this workflow is installed once globally: a
+  # schedule here would be a single cross-space timer with no space to run in.
+  - type: manual
+    inputs:
+      properties:
+        ki_id:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Id of the security.analyze_endpoint knowledge indicator to analyze.
+        ai_index_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: AI index that holds the indicator. The result is written to the same index.
+      required:
+        - ki_id
+        - ai_index_id
+      additionalProperties: false
+
+outputs:
+  properties:
+    ki_id:
+      type: string
+    ki_processed:
+      type: boolean
+
+steps:
+  # Fail closed: if the read errors, the run fails, the indicator stays pending,
+  # and the next sweep starts a new run. Zero hits continue into resolve_request
+  # with blank ids; mark_processed is skipped.
+  - name: read_ki
+    type: elasticsearch.search
+    with:
+      index: "ai-index-idx-{{ inputs.ai_index_id }}"
+      size: 1
+      query:
+        ids:
+          values:
+            - "{{ inputs.ki_id }}"
+
+  - name: resolve_request
+    type: data.set
+    with:
+      attack_discovery_alert_id: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id }}"
+      investigation_id: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.investigation_id }}"
+
+  - name: when_ki_valid
+    type: if
+    condition: >-
+      ${{ steps.resolve_request.output.attack_discovery_alert_id != blank
+        and steps.resolve_request.output.investigation_id != blank }}
+    steps:
+      # `workflow.spaceId` is the space of the worker that dispatched this run, not
+      # the global space this workflow is installed in: a child execution inherits
+      # its parent's space. That is what keeps these alert indices space-scoped.
+      - name: fetch_attack_discovery_alert
+        type: elasticsearch.search
+        on-failure:
+          continue: true
+        with:
+          index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}*,.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}*"
+          ignore_unavailable: true
+          size: 1
+          _source:
+            - host.name
+            - kibana.alert.attack_discovery.alert_ids
+          query:
+            bool:
+              should:
+                - ids:
+                    values:
+                      - "{{ steps.resolve_request.output.attack_discovery_alert_id }}"
+                - term:
+                    kibana.alert.uuid: "{{ steps.resolve_request.output.attack_discovery_alert_id }}"
+              minimum_should_match: 1
+
+      - name: extract_host_from_ad_constituent_alerts
+        type: elasticsearch.search
+        if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
+        on-failure:
+          continue: true
+        with:
+          index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+          ignore_unavailable: true
+          size: 0
+          query:
+            ids:
+              values: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
+          aggregations:
+            host_name:
+              terms:
+                field: host.name
+                size: 1
+
+      - name: attach_fetch_alert_problem
+        type: ai.attachment.add
+        if: >-
+          ${{ steps.fetch_attack_discovery_alert.error != null
+            or steps.fetch_attack_discovery_alert.output.hits.hits[0]._id == blank }}
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+          type: text
+          description: Could not fetch Attack Discovery alert
+          data:
+            content: |-
+              Could not fetch Attack Discovery alert `{{ steps.resolve_request.output.attack_discovery_alert_id }}`.
+              {% if steps.fetch_attack_discovery_alert.error != null %}Error: {{ steps.fetch_attack_discovery_alert.error.message }}{% else %}No matching alert document was found.{% endif %}
+
+      - name: attach_extract_host_problem
+        type: ai.attachment.add
+        if: "${{ steps.extract_host_from_ad_constituent_alerts.error != null }}"
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+          type: text
+          description: Could not extract host from constituent alerts
+          data:
+            content: |-
+              Could not extract a host from the Attack Discovery constituent alerts.
+              Error: {{ steps.extract_host_from_ad_constituent_alerts.error.message }}
+
+      - name: resolve_host
+        type: data.set
+        with:
+          host_name: "{{ event.host.name | default: event['host.name'] | default: steps.fetch_attack_discovery_alert.output.hits.hits[0]._source.host.name | default: steps.extract_host_from_ad_constituent_alerts.output.aggregations.host_name.buckets[0].key | default: '' }}"
+      - name: when_host_known
+        type: if
+        condition: "${{ steps.resolve_host.output.host_name != blank }}"
+        steps:
+          - name: forensic_analysis
+            type: ai.agent
+            agent-id: alertzero-thin-agent
+            timeout: "15m"
+            create-conversation: false
+            with:
+              configuration_overrides:
+                skill_ids:
+                  - endpoint-forensic-analysis
+                tools:
+                  - tool_ids:
+                      - security.alertzero.actions.list
+              message: >
+                I have an alert on {{ steps.resolve_host.output.host_name }}.
+                Perform forensic analysis and extract all IoCs.
+                Write the reconstruction to `timeline.events` and the indicators to `iocs`,
+                matching this step's schema. Use `rationale` only for the assessment:
+                - Whether this is a real incident, which other hosts are affected, what the
+                  data gaps are, and why the evidence supports any actions you recommend.
+                  Do not restate `timeline` or `iocs` there.
+
+                After the forensic reconstruction,
+                - Assess whether this represents a real incident that warrants containment.
+                - Call `security.alertzero.actions.list` with categories `["contain"]` before proposing anything.
+                  Use the returned catalog as the only allowed actions. Set each `actionId` to a catalog
+                  `workflowId`. Do not invent workflow ids and do not recommend an action that is not in the
+                  catalog. If the catalog is empty, set propose=false and return an empty `recommendedActions` list.
+                - If this reconstruction justifies containment, recommend specific containment actions in
+                  `recommendedActions` from that catalog. Each action requires endpoint_ids taken from Elastic
+                  Defend agent.id on involved hosts. Recommend only what you can tie to the timeline and
+                  indicators you returned.
+
+                Rules
+                - Pick the most specific catalog action the evidence supports. Prefer kill/suspend when a process
+                  entity_id or pid is present; isolate when only the host is known.
+                - If no Elastic Defend endpoint_id is present, or required extra fields are missing, set
+                  propose=false. Do not guess ids, pids, paths, or commands.
+                - Cite hosts, process/path, tactics, and why this action now in rationale.
+
+                For each recommended action set actionInput to the shape that action's catalog description implies:
+                - Host isolation → { "endpoint_ids": [agentId] }
+                - Kill or suspend process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
+                  or { "endpoint_ids": [agentId], "parameters": { "entity_id": "<entity_id>" } }
+                agentId must come from Elastic Defend agent.id in the telemetry.
+                For process actions include pid when present in telemetry, otherwise entity_id.
+                Never guess pids, entity_ids, or agent IDs that are not in the evidence.
+                Optionally add a short comment (one sentence) explaining why you chose this action.
+
+              schema:
+                type: object
+                required:
+                  - propose
+                  - rationale
+                  - timeline
+                  - iocs
+                properties:
+                  propose:
+                    type: boolean
+                    description: >
+                      True only when the agent recommends one or more specific containment actions
+                  rationale:
+                    type: string
+                    maxLength: 16000
+                    description: >
+                      Assessment only: whether this is a real incident, other affected hosts,
+                      data gaps, and why the evidence supports the recommended actions. The
+                      reconstruction itself belongs in `timeline`, the indicators in `iocs`.
+                  # `timeline` and `iocs` mirror the `security.investigation.timeline` and
+                  # `security.investigation.iocs` attachment payloads exactly, so the attach steps
+                  # below can pass them through untouched. Changing a field name here without
+                  # changing it there makes the attachment fail validation at runtime.
+                  # Both are required but may be empty: an empty `events` list is a real forensic
+                  # result, and required-but-empty stops the model from folding them back into
+                  # `rationale`.
+                  timeline:
+                    type: object
+                    required:
+                      - events
+                    description: >
+                      Chronological attack reconstruction. Same shape as the
+                      `security.investigation.timeline` attachment payload, so the attach
+                      step can pass it through untouched.
+                    properties:
+                      events:
+                        type: array
+                        maxItems: 50
+                        description: Reconstructed events, ordered earliest first.
+                        items:
+                          type: object
+                          required:
+                            - timestamp
+                            - host
+                            - description
+                          properties:
+                            timestamp:
+                              type: string
+                              maxLength: 64
+                              description: Event `@timestamp`, copied verbatim from the telemetry.
+                            host:
+                              type: string
+                              maxLength: 256
+                              description: Host this event occurred on.
+                            description:
+                              type: string
+                              maxLength: 2000
+                              description: >
+                                What happened, with the specifics an analyst can act on: process and parent
+                                names, PIDs, acting user, command line, file paths, destination address and
+                                port, registry key, alert rule name, MITRE technique.
+                  iocs:
+                    type: object
+                    description: >
+                      Indicators of compromise, grouped by category. Omit a category entirely when the
+                      reconstruction found nothing in it.
+                    properties:
+                      # Every category is the same { value, comment } list. The shape is repeated rather
+                      # than $ref'd because this schema is handed to the model as a structured output
+                      # schema, and reference resolution is not guaranteed across providers.
+                      shas:
+                        type: array
+                        maxItems: 50
+                        description: File hashes.
+                        items:
+                          type: object
+                          required: [value]
+                          properties:
+                            value: { type: string, maxLength: 2048 }
+                            comment:
+                              type: string
+                              maxLength: 1000
+                              description: What it was dropped as and on which hosts.
+                      ips:
+                        type: array
+                        maxItems: 50
+                        description: C2 and other network destinations.
+                        items:
+                          type: object
+                          required: [value]
+                          properties:
+                            value: { type: string, maxLength: 2048 }
+                            comment:
+                              type: string
+                              maxLength: 1000
+                              description: Which hosts contacted it and over what protocol.
+                      file_paths:
+                        type: array
+                        maxItems: 50
+                        description: Dropped payloads, staging paths, persistence keys.
+                        items:
+                          type: object
+                          required: [value]
+                          properties:
+                            value: { type: string, maxLength: 2048 }
+                            comment: { type: string, maxLength: 1000 }
+                      ransom_note:
+                        type: array
+                        maxItems: 50
+                        description: Ransom note paths.
+                        items:
+                          type: object
+                          required: [value]
+                          properties:
+                            value: { type: string, maxLength: 2048 }
+                            comment: { type: string, maxLength: 1000 }
+                      encryption_marker:
+                        type: array
+                        maxItems: 50
+                        description: Markers of encryption, such as a renamed file extension.
+                        items:
+                          type: object
+                          required: [value]
+                          properties:
+                            value: { type: string, maxLength: 2048 }
+                            comment: { type: string, maxLength: 1000 }
+                      malicious_commands:
+                        type: array
+                        maxItems: 50
+                        description: Command lines attributed to the attack.
+                        items:
+                          type: object
+                          required: [value]
+                          properties:
+                            value: { type: string, maxLength: 2048 }
+                            comment: { type: string, maxLength: 1000 }
+                      compromised_identities:
+                        type: array
+                        maxItems: 50
+                        description: Accounts used by the attacker or stolen.
+                        items:
+                          type: object
+                          required: [value]
+                          properties:
+                            value: { type: string, maxLength: 2048 }
+                            comment:
+                              type: string
+                              maxLength: 1000
+                              description: How it was compromised and what it was then used for.
+                      affected_hosts:
+                        type: array
+                        maxItems: 50
+                        description: Every host the attack touched.
+                        items:
+                          type: object
+                          required: [value]
+                          properties:
+                            value: { type: string, maxLength: 2048 }
+                            comment:
+                              type: string
+                              maxLength: 1000
+                              description: >
+                                This host's role — patient zero, encrypted domain controller,
+                                spread with no alert coverage.
+                  recommendedActions:
+                    type: array
+                    maxItems: 8
+                    description: >
+                      Containment this reconstruction justifies, taken from
+                      `security.alertzero.actions.list`. Empty when the evidence
+                      justifies none or the catalog returned nothing.
+                    items:
+                      type: object
+                      required:
+                        - actionId
+                        - actionInput
+                      properties:
+                        agentId:
+                          type: string
+                        actionId:
+                          type: string
+                          maxLength: 256
+                          description: >
+                            workflowId from `security.alertzero.actions.list`. Must match a catalog
+                            entry exactly. Never invent an id.
+                        comment:
+                          type: string
+                          maxLength: 500
+                          description: One sentence explaining why this action is justified.
+                        actionInput:
+                          type: object
+                          description: >
+                            Input for the catalog action. Host isolation → { endpoint_ids }.
+                            Kill or suspend process → { endpoint_ids, parameters: { pid } or { entity_id } }.
+                          required:
+                            - endpoint_ids
+                          properties:
+                            endpoint_ids:
+                              type: array
+                              items:
+                                type: string
+                              description: Elastic Defend agent IDs (agent.id) from the evidence.
+                            parameters:
+                              type: object
+                              description: Required for kill/suspend — exactly one of pid or entity_id.
+                              properties:
+                                pid:
+                                  type: number
+                                  description: Process ID from endpoint telemetry.
+                                entity_id:
+                                  type: string
+                                  description: Elastic Defend process entity_id from endpoint telemetry.
+
+          # Timeline and IoCs are investigation attachments. The forensic agent run is
+          # ephemeral (no conversation), so the ES|QL transcript never lands on the
+          # investigation. Continue on failure so a payload the attachment type rejects
+          # cannot cost us the assessment notes or containment proposals.
+          - name: attach_timeline
+            type: ai.attachment.add
+            if: >-
+              ${{ steps.forensic_analysis.output.structured_output.timeline != null
+                and steps.forensic_analysis.output.structured_output.timeline.events.size > 0 }}
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+              type: security.investigation.timeline
+              # The timeline payload is `{ events }`, so `description` is also what labels the
+              # attachment pill in the UI — keep it short and name the host it started from.
+              description: "Attack timeline: {{ steps.resolve_host.output.host_name }}"
+              data: "${{ steps.forensic_analysis.output.structured_output.timeline }}"
+
+          - name: attach_iocs
+            type: ai.attachment.add
+            if: >-
+              ${{ steps.forensic_analysis.output.structured_output.iocs != null }}
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+              type: security.investigation.iocs
+              description: Extracted indicators of compromise
+              data: "${{ steps.forensic_analysis.output.structured_output.iocs }}"
+
+          - name: attach_rationale
+            type: ai.attachment.add
+            if: >-
+              ${{ steps.forensic_analysis.error == null
+                and steps.forensic_analysis.output.structured_output.rationale != blank }}
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+              type: text
+              description: Forensic assessment
+              data:
+                content: "{{ steps.forensic_analysis.output.structured_output.rationale }}"
+
+          # Containment is proposed on the investigation, not returned as run output.
+          # `executeAsync` so this run does not sit in the 72h approval gate; each
+          # proposal workflow parks on its own. Continue on failure so a single bad
+          # action cannot fail the run.
+          - name: propose_actions
+            type: foreach
+            if: "${{ steps.forensic_analysis.error == null and steps.forensic_analysis.output.structured_output.propose == true }}"
+            foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | default: [] }}"
+            steps:
+              - name: propose_action
+                type: workflow.executeAsync
+                with:
+                  workflow-id: system-create-investigation-proposal
+                  inputs:
+                    conversationId: "{{ steps.resolve_request.output.investigation_id }}"
+                    comment: "{{ foreach.item.comment | default: steps.forensic_analysis.output.structured_output.proposal }}"
+                    actionWorkflowId: "{{ foreach.item.actionId }}"
+                    actionInput: '${{ foreach.item.actionInput }}'
+            on-failure:
+              continue: true
+
+        else:
+          - name: attach_no_host
+            type: ai.attachment.add
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+              type: text
+              description: Could not resolve host
+              data:
+                content: |-
+                  Could not resolve a host for Attack Discovery alert `{{ steps.resolve_request.output.attack_discovery_alert_id }}`.
+                  Endpoint analysis was not run.
+
+    # Only `attributes.status` is written. `attributes` merges on update; `tags`
+    # is a list and a partial update would replace the full list.
+  - name: mark_processed
+    type: context-engine.updateKi
+    on-failure:
+      continue: true
+    if: >-
+      ${{ steps.resolve_request.output.attack_discovery_alert_id != blank
+        and steps.resolve_request.output.investigation_id != blank }}
+    with:
+      ai_index_id: "{{ inputs.ai_index_id }}"
+      ki_id: "{{ inputs.ki_id }}"
+      ki:
+        attributes:
+          status: processed
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      ki_id: "{{ inputs.ki_id }}"
+      ki_processed: "${{ steps.mark_processed.output.result != null }}"

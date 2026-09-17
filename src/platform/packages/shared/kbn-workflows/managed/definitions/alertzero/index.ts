@@ -24,7 +24,7 @@ import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_
 import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_triage';
 import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_attack_discovery';
 import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_endpoint_analysis';
-import { ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID } from './forensics_sweep_for_analyze_endpoint_kis';
+import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_run_endpoint_analysis';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './hunt_continuous_threat_hunt';
 import {
   ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID,
@@ -96,9 +96,9 @@ export {
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from './forensics_endpoint_analysis';
 export {
-  ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW,
-  ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID,
-} from './forensics_sweep_for_analyze_endpoint_kis';
+  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
+  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+} from './forensics_run_endpoint_analysis';
 
 export const ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS = [
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
@@ -130,11 +130,12 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Endpoint analysis sweep: the global scheduled dispatcher. Installed globally
- * so it can start the per-space Watch worker in each indicator's space.
+ * The forensic pass the per-space Endpoint analysis worker dispatches. Installed
+ * globally so every space's worker shares one copy; it inherits the dispatching
+ * worker's space at run time.
  */
 export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
-  ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 ] as const;
 
 /**

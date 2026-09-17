@@ -284,7 +284,7 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows Forensics Watch with one Worker that has enablement and autonomy', () => {
+  it('shows Forensics Watch with one Worker that has enablement and fixed autonomy', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, [
       ...floorWorkers,
       huntWorker,
@@ -306,7 +306,10 @@ describe('WatchDetailPage', () => {
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
       )
     ).toBeInTheDocument();
-    expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
+    // Endpoint analysis allows manual only, so the level renders as fixed text rather
+    // than a slider, and its sweep cadence is fixed in the definition, not a setting.
+    expect(within(section).getByTestId('alertZeroAutonomyFixed')).toHaveTextContent('Manual');
+    expect(within(section).queryByTestId('alertZeroAutonomySlider')).not.toBeInTheDocument();
     expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
   });
 

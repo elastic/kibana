@@ -15,7 +15,7 @@ import {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
-  ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
@@ -36,7 +36,7 @@ import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_t
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
-import FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_YAML from './definitions/alertzero/forensics_sweep_for_analyze_endpoint_kis.yaml';
+import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
 import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/hunt_continuous_threat_hunt.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -171,12 +171,12 @@ it.each([
   [
     ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
     FORENSICS_ENDPOINT_ANALYSIS_YAML,
-    '1:8ae50c2d',
+    '1:1b7f9eca',
   ],
   [
-    ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID,
-    FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_YAML,
-    '1:655caed4',
+    ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+    FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
+    '1:cbc1dd9e',
   ],
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,

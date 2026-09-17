@@ -8,7 +8,10 @@
  */
 
 import { parse } from 'yaml';
-import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW } from '.';
+import {
+  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW,
+} from '.';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
 import { renderCommonWorkerYaml } from './worker_template_values';
 
@@ -30,6 +33,7 @@ const definition = parse(yaml) as {
   settings?: { concurrency?: { key?: string; strategy?: string; max?: number } };
   triggers?: Array<{
     type: string;
+    with?: { every?: string };
     inputs?: { required?: string[] };
   }>;
   steps: YamlStep[];
@@ -42,44 +46,64 @@ const allSteps = flatten(definition.steps);
 const stepByName = (name: string) => allSteps.find((step) => step.name === name);
 
 describe('Endpoint analysis worker', () => {
-  it('is the Watch-tagged forensic pass with a manual trigger', () => {
+  it('is the Watch-tagged dispatcher on a fixed one-minute sweep', () => {
     expect(ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW.id).toBe(
       'system-security-forensics-endpoint-analysis'
     );
     expect(definition.tags).toEqual(expect.arrayContaining(['watch', 'watch-forensics']));
-    expect(definition.triggers?.map(({ type }) => type)).toEqual(['manual']);
+    expect(definition.triggers?.map(({ type }) => type)).toEqual(['scheduled', 'manual']);
+    expect(definition.triggers?.[0]?.with?.every).toBe('1m');
   });
 
-  it('requires ki_id and ai_index_id only', () => {
-    expect(definition.triggers?.[0]?.inputs?.required).toEqual(['ki_id', 'ai_index_id']);
+  // The cadence is the poll rate of an indicator queue, not a Watch setting, so it
+  // stays a literal. A `scheduleInterval` placeholder here would need a matching
+  // settings declaration before the Worker could be saved.
+  it('keeps the interval out of the settings contract', () => {
+    expect(yaml).not.toContain('scheduleInterval');
+    expect(yaml).not.toContain('__WORKER_SCHEDULE_INTERVAL__');
   });
 
-  it('allows two analyses in the same space', () => {
+  it('takes only sweep overrides on its manual trigger', () => {
+    const manual = definition.triggers?.find(({ type }) => type === 'manual');
+    expect(manual?.inputs?.required).toBeUndefined();
+  });
+
+  it('runs one sweep at a time per space', () => {
     expect(definition.settings?.concurrency).toEqual({
-      key: 'endpoint-analysis',
+      key: 'endpoint-analysis-sweep',
       strategy: 'drop',
-      max: 2,
+      max: 1,
     });
   });
 
-  it('reads the indicator before any forensic step', () => {
-    expect(definition.steps[0]?.name).toBe('read_ki');
-    expect(stepByName('fetch_attack_discovery_alert')).toBeDefined();
-    expect(definition.steps.findIndex((s) => s.name === 'read_ki')).toBeLessThan(
-      definition.steps.findIndex((s) => s.name === 'when_ki_valid')
-    );
+  it('searches this space for pending analysis indicators', () => {
+    const search = stepByName('search_pending_indicators');
+    expect(search?.type).toBe('elasticsearch.search');
+    expect(search?.with?.size).toBe('${{ steps.resolve_batch_size.output.size }}');
+
+    const query = JSON.stringify(search?.with);
+    expect(query).toContain('security.analyze_endpoint');
+    expect(query).toContain('attributes.status');
+    expect(query).toContain('{{ workflow.spaceId }}');
   });
 
-  it('marks the indicator processed only after a valid request', () => {
-    const mark = stepByName('mark_processed');
-    expect(mark?.type).toBe('context-engine.updateKi');
-    expect(mark?.if).toContain('attack_discovery_alert_id');
-    expect(mark?.if).toContain('investigation_id');
-    expect(mark?.with).toEqual(
-      expect.objectContaining({
-        ai_index_id: '{{ inputs.ai_index_id }}',
-        ki_id: '{{ inputs.ki_id }}',
-      })
+  it('dispatches the global analysis asynchronously and writes no indicators', () => {
+    const start = stepByName('start_run');
+    expect(start?.type).toBe('workflow.executeAsync');
+    expect(start?.with?.['workflow-id']).toBe(
+      ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID
     );
+    expect(start?.with?.inputs).toEqual({
+      ki_id: '{{ foreach.item._id }}',
+      ai_index_id: '{{ inputs.ai_index_id | default: consts.ai_index_id }}',
+    });
+
+    expect(allSteps.some(({ type }) => type === 'context-engine.updateKi')).toBe(false);
+    expect(allSteps.some(({ type }) => type === 'context-engine.createKi')).toBe(false);
+    expect(allSteps.some(({ type }) => type === 'ai.agent')).toBe(false);
+  });
+
+  it('starts up to two analyses per sweep', () => {
+    expect(yaml).toContain('batch_size: 2');
   });
 });
