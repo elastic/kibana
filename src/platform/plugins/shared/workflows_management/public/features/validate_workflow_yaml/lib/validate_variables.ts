@@ -75,7 +75,7 @@ export function validateVariables(
       }
 
       context = pathSchema;
-      if (yamlDocument != null && offset !== undefined) {
+      if (yamlDocument != null) {
         const fullContextKey = `${pathContextKey}:${offset}`;
         const cachedContext = fullContextCache.get(fullContextKey);
         if (cachedContext) {

@@ -32,7 +32,8 @@ export interface VariableItem extends BaseItem {
   /** Never null: the regex `key` group always participates in a match. */
   key: string;
   type: 'regexp' | 'foreach';
-  offset?: number;
+  /** Offset of the variable start in the YAML source. */
+  offset: number;
 }
 
 export interface StepPropertyItem extends BaseItem {
