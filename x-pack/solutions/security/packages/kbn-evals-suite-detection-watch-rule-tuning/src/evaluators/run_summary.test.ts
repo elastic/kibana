@@ -7,6 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
+import { changeTypeAccuracy, validProposal } from '../evaluators';
 import { logRunSummary, withScoreCollection, type ScoreSink } from './run_summary';
 
 const collectingLog = (): { log: ToolingLog; lines: string[] } => {
@@ -98,5 +99,42 @@ describe('logRunSummary', () => {
     logRunSummary({ sink, datasetName: 'd', log });
 
     expect(lines[0]).toContain('±0.000(n=1)');
+  });
+});
+
+describe('the suite pipeline (real evaluators through the real summary)', () => {
+  it('reports ChangeTypeAccuracy as discriminating and ValidProposal as saturated', async () => {
+    // End-to-end over the evaluators the spec actually selects: a well-formed proposal
+    // every time (ValidProposal saturates at 1.0) with a model that gets 2 of 3 tuning
+    // paths right (ChangeTypeAccuracy varies). The two summary lines must differ.
+    const sink: ScoreSink = new Map();
+    const sampled = withScoreCollection([changeTypeAccuracy, validProposal], sink);
+    const proposal = {
+      change_type: 'exception',
+      summary: 'the FP cluster is one known-good host',
+      exception_entries: [{ field: 'host.name', operator: 'is', value: 'build-agent-01' }],
+    };
+
+    for (const expected of ['exception', 'query', 'exception']) {
+      await sampled[0].evaluate({
+        output: proposal,
+        expected: { change_type: expected },
+      } as never);
+      await sampled[1].evaluate({
+        output: proposal,
+        metadata: { ruleType: 'query' },
+      } as never);
+    }
+
+    const { log, lines } = collectingLog();
+    logRunSummary({ sink, datasetName: 'security: rule-tuning-workflow-decision', log });
+
+    const accuracy = lines.find((line) => line.includes('ChangeTypeAccuracy'));
+    const valid = lines.find((line) => line.includes('ValidProposal'));
+    expect(accuracy).toContain('mean 0.667 ±');
+    expect(accuracy).toContain('(n=3)');
+    expect(accuracy).not.toContain('SATURATED');
+    expect(valid).toContain('mean 1.000');
+    expect(valid).toContain('SATURATED(no signal)');
   });
 });
