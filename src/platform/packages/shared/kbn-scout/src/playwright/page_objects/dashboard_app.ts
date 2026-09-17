@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Download } from 'playwright-core';
 import type { ScoutPage } from '..';
 import { expect } from '..';
-import { RenderablePage } from './renderable_page';
+import { AppMenu } from './app_menu';
+import { RenderablePage } from './utils/renderable_page';
 import { Toasts } from './toasts';
 
 type CommonlyUsedTimeRange =
@@ -31,6 +33,7 @@ const DEFAULT_LIBRARY_TIMEOUT = 30_000;
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
+  private readonly appMenu: AppMenu;
   // Dashboard shell and mode controls
   private readonly settingsFlyout;
   private readonly settingsButton;
@@ -85,6 +88,7 @@ export class DashboardApp {
   constructor(private readonly page: ScoutPage) {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
+    this.appMenu = new AppMenu(page);
 
     // Dashboard shell and mode controls
     this.settingsFlyout = this.page.testSubj.locator('dashboardSettingsFlyout');
@@ -281,7 +285,7 @@ export class DashboardApp {
   }
 
   async saveDashboard(name: string, options?: TimeoutOptions) {
-    await this.clickAppMenuItem('dashboardInteractiveSaveMenuItem');
+    await this.appMenu.clickItem('dashboardInteractiveSaveMenuItem');
     await this.savedObjectTitleInput.fill(name);
     await this.confirmSaveModal(options);
   }
@@ -291,14 +295,6 @@ export class DashboardApp {
     await expect(this.saveModal).toBeHidden({
       timeout: options?.timeout ?? DEFAULT_SAVE_MODAL_TIMEOUT,
     });
-  }
-
-  private async clickAppMenuItem(testSubj: string) {
-    const item = this.page.testSubj.locator(testSubj);
-    if (!(await item.isVisible())) {
-      await this.page.testSubj.click('app-menu-overflow-button');
-    }
-    await item.click();
   }
 
   async saveChangesToExistingDashboard() {
@@ -321,9 +317,11 @@ export class DashboardApp {
       await expect(titleButton).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
       await titleButton.click();
 
-      await expect(
-        this.page.testSubj.locator(`embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`)
-      ).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
+      // Strip whitespace only: the panel header builds this subject with
+      // `replace(/\s/g, '')`, so titles keep their hyphens.
+      await this.page.testSubj
+        .locator(`embeddablePanelHeading-${names[i].replace(/\s/g, '')}`)
+        .waitFor({ state: 'visible', timeout: DEFAULT_LIBRARY_TIMEOUT });
     }
     await this.closeLibraryFlyout();
   }
@@ -999,6 +997,20 @@ export class DashboardApp {
     await this.editInDiscoverLink.click();
   }
 
+  /** Generates and downloads a CSV report for a Discover session panel. */
+  async exportPanelAsCsv(title?: string): Promise<Download> {
+    await this.toasts.dismissAll();
+    await this.clickPanelAction('embeddablePanelAction-generateCsvReport', title);
+
+    const downloadButton = this.page.testSubj.locator('downloadCompletedReportButton');
+    // Report generation runs asynchronously and can be slow on shared CI workers.
+    await downloadButton.waitFor({ state: 'visible', timeout: 120_000 });
+
+    const downloadPromise = this.page.waitForEvent('download');
+    await downloadButton.click();
+    return downloadPromise;
+  }
+
   /**
    * Clones a panel on the dashboard.
    * The cloned panel becomes a "by value" panel (not linked to library).
@@ -1256,7 +1268,7 @@ export class DashboardApp {
   // ============================================================
 
   async enterFullscreen() {
-    await this.clickAppMenuItem('dashboardFullScreenMode');
+    await this.appMenu.clickItem('dashboardFullScreenMode');
     await expect(this.page.testSubj.locator('exitFullScreenModeButton')).toBeVisible();
   }
 

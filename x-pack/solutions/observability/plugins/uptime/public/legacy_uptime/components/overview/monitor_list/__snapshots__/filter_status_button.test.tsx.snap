@@ -2,16 +2,17 @@
 
 exports[`FilterStatusButton renders without errors for valid props 1`] = `
 <div
-  class="euiFilterButton__wrapper css-1anz60t-wrapper-withNext-hasToggle"
+  class="euiFilterButton__wrapper css-gf1zx3-wrapper-withNext"
 >
   <button
     aria-pressed="true"
-    class="euiButtonGroupButton euiButtonGroupButton-isSelected euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-fill-text-euiFilterButton-hasActiveFilters-toggle"
+    class="euiButton euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-base-text-euiFilterButton-hasActiveFilters-toggle-isSelected"
     data-test-subj="foo"
+    id="filter-button_generated-id"
     type="button"
   >
     <span
-      class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
+      class="emotion-euiButtonDisplayContent-euiFilterButton__content"
     >
       <span
         class="euiFilterButton__text emotion-euiFilterButton__text"

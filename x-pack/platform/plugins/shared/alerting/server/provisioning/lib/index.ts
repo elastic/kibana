@@ -10,6 +10,7 @@ export {
   createSkippedRuleStatus,
   createFailedConversionStatus,
   createStatusFromBulkUpdateResult,
+  deleteLegacyProvisioningStatusDocs,
   prepareProvisioningStatusWrite,
   statusDocsAndOrphanedKeysFromBulkUpdate,
   type BulkUpdateResultItem,

@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonIcon,
   EuiCode,
   EuiConfirmModal,
@@ -34,7 +33,7 @@ import type { MissingDashboard, RuleArtifactPayload } from '@kbn/alerting-v2-rul
 import { mapArtifacts } from '@kbn/alerting-v2-rule-form';
 import { useUpdateRule } from '../../../../hooks/use_update_rule';
 import { UserCapabilities } from '../../../../services/user_capabilities';
-import { useRule } from '../../rule_context';
+import type { RuleSummarySectionProps } from '../../../rule/types';
 import { ManageDashboardsPopover } from './manage_dashboards_popover';
 import { useDashboardArtifacts } from './use_dashboard_artifacts';
 
@@ -215,7 +214,7 @@ const DashboardsSubsectionHeader = ({ manageButton }: { manageButton: React.Reac
     <EuiFlexItem grow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="dashboardApp" size="m" aria-hidden={true} />
+          <EuiIcon type="productDashboard" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -232,8 +231,7 @@ const DashboardsSubsectionHeader = ({ manageButton }: { manageButton: React.Reac
   </EuiFlexGroup>
 );
 
-export const DashboardArtifactsSubsection: React.FC = () => {
-  const rule = useRule();
+export const DashboardArtifactsSubsection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const http = useService(CoreStart('http'));
   const share = useService(PluginStart('share')) as SharePluginStart;
@@ -248,11 +246,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
   const [isManagePopoverOpen, setIsManagePopoverOpen] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId();
 
-  const canManage = Boolean(dashboard) && canWrite;
-
-  const openManagePopover = useCallback(() => {
-    setIsManagePopoverOpen(true);
-  }, []);
+  const canManage = Boolean(dashboard) && canWrite && Boolean(rule.id);
 
   const toggleManagePopover = useCallback(() => {
     setIsManagePopoverOpen((isOpen) => !isOpen);
@@ -271,7 +265,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
   }, []);
 
   const handleDeleteConfirm = useCallback(() => {
-    if (!artifactIdPendingDelete) {
+    if (!artifactIdPendingDelete || !rule.id) {
       return;
     }
 
@@ -295,6 +289,10 @@ export const DashboardArtifactsSubsection: React.FC = () => {
 
   const handleManageSave = useCallback(
     (artifacts: RuleArtifactPayload) => {
+      if (!rule.id) {
+        return;
+      }
+
       updateRule(
         {
           id: rule.id,
@@ -377,7 +375,9 @@ export const DashboardArtifactsSubsection: React.FC = () => {
         {dashboard && !isLoading && isError ? (
           <EuiEmptyPrompt
             color="danger"
-            iconType="warning"
+            icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="ruleDashboardArtifactsError"
             title={
               <h4>
@@ -398,7 +398,9 @@ export const DashboardArtifactsSubsection: React.FC = () => {
 
         {dashboard && !isLoading && !isError && !hasDashboardArtifacts ? (
           <EuiEmptyPrompt
-            iconType="dashboardApp"
+            icon={<EuiIcon type="productDashboard" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="ruleDashboardArtifactsEmpty"
             title={
               <h4>
@@ -414,20 +416,6 @@ export const DashboardArtifactsSubsection: React.FC = () => {
                 })}
               </EuiText>
             }
-            actions={
-              canManage ? (
-                <EuiButton
-                  size="s"
-                  onClick={openManagePopover}
-                  data-test-subj="ruleDashboardArtifactsEmptyAddButton"
-                >
-                  {i18n.translate(
-                    'xpack.alertingV2.ruleDetails.artifacts.dashboards.emptyAddButton',
-                    { defaultMessage: 'Add dashboards' }
-                  )}
-                </EuiButton>
-              ) : undefined
-            }
           />
         ) : null}
 
@@ -441,7 +429,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
                   href={entry.href}
                   artifactId={artifactIdByDashboardId.get(entry.id)}
                   isUpdating={isUpdating}
-                  canWrite={canWrite}
+                  canWrite={canManage}
                   onDelete={handleDeleteRequest}
                 />
                 <EuiSpacer size="s" />
@@ -453,7 +441,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
                   missingDashboard={missingDashboard}
                   artifactId={artifactIdByDashboardId.get(missingDashboard.id)}
                   isUpdating={isUpdating}
-                  canWrite={canWrite}
+                  canWrite={canManage}
                   onDelete={handleDeleteRequest}
                 />
                 <EuiSpacer size="s" />

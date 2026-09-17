@@ -11,11 +11,13 @@ export { handleCancellation } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';
 export {
   getConversation,
-  updateConversation$,
-  createConversation$,
+  persistRoundInput,
+  appendRoundTerminated$,
+  appendResumeExecution$,
   placeholderConversation,
   type ConversationOperation,
   type ConversationWithOperation,
 } from './conversations';
 export { convertErrors } from './convert_errors';
 export { resolveServices } from './resolve_services';
+export { executionStartedEvents$ } from './execution_started';

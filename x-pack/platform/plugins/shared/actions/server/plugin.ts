@@ -96,6 +96,7 @@ import {
   scheduleUserConnectorTokenCleanupTask,
 } from './lib/user_connector_token_cleanup_task';
 import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
@@ -276,6 +277,7 @@ export interface ActionsPluginsStart {
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -504,13 +506,13 @@ export class ActionsPlugin
             isActionTypeEnabled: (actionTypeId) =>
               actionsConfigUtils.isActionTypeEnabled(actionTypeId),
             maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
+            maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
             getStartServices: core.getStartServices,
             inMemoryConnectors: this.inMemoryConnectors,
             emitConnectorEvents: (params) =>
               dispatchConnectorEvents({
                 emitter: this.connectorEventEmitter,
                 params,
-                logger: this.logger,
               }),
           }),
           getSpaceId: (request: KibanaRequest) =>
@@ -684,6 +686,7 @@ export class ActionsPlugin
         evictClientPool: async (connectorId: string) => {
           await this.clientLeasePool.evict(connectorId);
         },
+        securityService: core.security,
       });
     };
 
@@ -1130,6 +1133,7 @@ export class ActionsPlugin
             getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
               getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
             evictClientPool,
+            securityService: coreStart.security,
           });
         },
         listTypes: (featureId?: string) => {

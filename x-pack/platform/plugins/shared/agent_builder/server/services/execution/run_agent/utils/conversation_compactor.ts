@@ -16,10 +16,12 @@ import type {
 import { ChatEventType, isToolCallStep } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { ProcessedConversation } from './prepare_conversation';
+import { groupTimelineRounds, sliceTimelineRounds, type TimelineRound } from './context_timeline';
 import type { ContextBudget } from './context_budget';
 import { shouldTriggerCompaction } from './context_budget';
-import { convertPreviousRounds } from './to_langchain_messages';
+import { prepareMessages } from './to_langchain_messages';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { llmCompactionSchema, COMPACTION_SYSTEM_PROMPT } from './compaction_schema';
 import type { LlmCompactionOutput } from './compaction_schema';
@@ -38,7 +40,7 @@ export interface CompactConversationOptions {
   chatModel: InferenceChatModel;
   contextBudget: ContextBudget;
   /**
-   * Per-round token counts for `processedConversation.previousRounds`, index-aligned.
+   * Per-round token counts for the rounds of `processedConversation.timeline`, in round order.
    * Computed once upstream so the trigger, before/after reporting, and hard truncation
    * all share the same summarization-aware estimate.
    */
@@ -97,7 +99,7 @@ const summarizeParams = (params: Record<string, unknown>): string => {
  * structured output so new entity types can be added without code changes.
  */
 export const extractProgrammaticSummary = (
-  rounds: ProcessedConversationRound[]
+  rounds: Array<{ steps: ConversationRoundStep[] }>
 ): {
   tool_calls_summary: CompactionToolCallSummary[];
   agent_actions: string[];
@@ -259,7 +261,7 @@ const applyExistingSummary = (
 ): ProcessedConversation => {
   return {
     ...conversation,
-    previousRounds: conversation.previousRounds.slice(summary.summarized_round_count),
+    timeline: sliceTimelineRounds(conversation.timeline, summary.summarized_round_count),
     compactionSummary: summary,
   };
 };
@@ -282,15 +284,15 @@ const summarizeOlderRounds = async (
   existingSummary?: CompactionSummary,
   abortSignal?: AbortSignal
 ): Promise<{ processedConversation: ProcessedConversation; summary?: CompactionSummary }> => {
-  const { previousRounds } = conversation;
+  const previousRounds = groupTimelineRounds(conversation.timeline);
   const preserveCount = Math.min(PRESERVED_RECENT_ROUNDS, previousRounds.length);
 
   if (previousRounds.length <= preserveCount) {
     return { processedConversation: conversation };
   }
 
-  const roundsToSummarize = previousRounds.slice(0, previousRounds.length - preserveCount);
-  const recentRounds = previousRounds.slice(previousRounds.length - preserveCount);
+  const summarizeCount = previousRounds.length - preserveCount;
+  const roundsToSummarize = previousRounds.slice(0, summarizeCount);
 
   // Phase 1: programmatic extraction from all older rounds (deterministic, not expensive)
   const programmatic = extractProgrammaticSummary(roundsToSummarize);
@@ -327,7 +329,7 @@ const summarizeOlderRounds = async (
     return {
       processedConversation: {
         ...conversation,
-        previousRounds: recentRounds,
+        timeline: sliceTimelineRounds(conversation.timeline, summarizeCount),
         compactionSummary: summary,
       },
       summary,
@@ -345,12 +347,12 @@ const summarizeOlderRounds = async (
  *
  * When an existing summary is provided, only the rounds beyond its coverage
  * are sent as raw history. The existing summary is injected as a prior context
- * block via convertPreviousRounds so the LLM can build on it without
+ * block via prepareMessages so the LLM can build on it without
  * re-processing already-summarized rounds.
  */
 const generateLlmSummary = async (
   conversation: ProcessedConversation,
-  roundsToSummarize: ProcessedConversationRound[],
+  roundsToSummarize: Array<TimelineRound<ProcessedConversation['timeline'][number]>>,
   programmatic: {
     tool_calls_summary: CompactionToolCallSummary[];
     agent_actions: string[];
@@ -363,14 +365,12 @@ const generateLlmSummary = async (
   // This avoids re-processing stale rounds and prevents the summarizer call
   // from overflowing the context window on second+ compactions.
   const alreadySummarizedCount = existingSummary?.summarized_round_count ?? 0;
-  const newRounds = roundsToSummarize.slice(alreadySummarizedCount);
-
   const tempConversation: ProcessedConversation = {
     ...conversation,
-    previousRounds: newRounds,
+    timeline: roundsToSummarize.slice(alreadySummarizedCount).flatMap((round) => round.events),
   };
 
-  const historyMessages = await convertPreviousRounds({
+  const historyMessages = await prepareMessages({
     conversation: tempConversation,
     compactionSummary: existingSummary,
   });
@@ -400,7 +400,7 @@ const generateLlmSummary = async (
 /**
  * Drop oldest rounds one by one until the conversation fits within the history
  * budget, always preserving at least the most recent rounds. `perRoundCounts`
- * is index-aligned with `conversation.previousRounds`; truncation is O(n) via a
+ * is index-aligned with the timeline's rounds; truncation is O(n) via a
  * rolling total and a start index (no per-step re-estimation or array shifting).
  */
 const applyHardTruncation = (
@@ -408,14 +408,13 @@ const applyHardTruncation = (
   perRoundCounts: number[],
   budget: ContextBudget
 ): { conversation: ProcessedConversation; tokens: number } => {
-  const { previousRounds } = conversation;
   let currentTokens = sumTokens(perRoundCounts);
 
   if (currentTokens <= budget.historyBudget) {
     return { conversation, tokens: currentTokens };
   }
 
-  const minStart = previousRounds.length - PRESERVED_RECENT_ROUNDS;
+  const minStart = groupTimelineRounds(conversation.timeline).length - PRESERVED_RECENT_ROUNDS;
   let start = 0;
 
   while (start < minStart && currentTokens > budget.historyBudget) {
@@ -424,7 +423,7 @@ const applyHardTruncation = (
   }
 
   return {
-    conversation: { ...conversation, previousRounds: previousRounds.slice(start) },
+    conversation: { ...conversation, timeline: sliceTimelineRounds(conversation.timeline, start) },
     tokens: currentTokens,
   };
 };

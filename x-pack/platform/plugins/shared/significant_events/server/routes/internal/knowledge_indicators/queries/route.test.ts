@@ -17,6 +17,7 @@ const mockFetchQueryLinks = jest.fn();
 const mockComputeOccurrences = jest.fn();
 const mockGetQueryOccurrences = jest.fn();
 const mockGenerateKIQueries = jest.fn();
+const mockCleanupStaleEvents = jest.fn();
 
 jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alerts', () => ({
   fetchQueryLinks: (...args: unknown[]) => mockFetchQueryLinks(...args),
@@ -35,6 +36,10 @@ jest.mock('../../../../lib/significant_events/ki_queries_generation_service', ()
   generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
 }));
 
+jest.mock('../../../../lib/significant_events/events/cleanup_stale_events', () => ({
+  cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+}));
+
 jest.mock('../../../../lib/significant_events/create_significant_events_traced_es_client', () => ({
   createSignificantEventsTracedEsClient: jest.fn().mockReturnValue({}),
 }));
@@ -43,6 +48,9 @@ const route = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile
 const discoveryQueriesRoute = internalKIQueriesRoutes['GET /internal/streams/_queries'];
 const discoveryOccurrencesRoute =
   internalKIQueriesRoutes['GET /internal/streams/_queries/_occurrences'];
+const bulkDeleteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_bulk_delete'];
+const upsertQueryRoute =
+  internalKIQueriesRoutes['PUT /internal/significant_events/queries/{queryId}'];
 const RECONCILE_MAX_STREAMS = 10;
 
 type HandlerParams = Parameters<typeof route.handler>[0];
@@ -55,7 +63,7 @@ const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enab
   getState: jest.fn().mockResolvedValue(state),
 });
 
-const makeQueryLink = (id: string, severityScore: number): QueryLink => ({
+const makeQueryLink = (id: string, severityScore: number, streamName = 'logs.test'): QueryLink => ({
   query: {
     id,
     type: 'match',
@@ -64,7 +72,7 @@ const makeQueryLink = (id: string, severityScore: number): QueryLink => ({
     esql: { query: `FROM logs-* | WHERE id == "${id}"` },
     severity_score: severityScore,
   },
-  stream_name: 'logs.test',
+  stream_name: streamName,
   rule_backed: true,
   rule_id: `rule-${id}`,
 });
@@ -225,6 +233,112 @@ describe('pause guard on rule-touching query routes', () => {
       body: null,
     });
   });
+
+  it('rejects upsert with 409 while paused', async () => {
+    await expectPausedBeforeRuleWork(upsertQueryRoute.handler, {
+      path: { queryId: 'q1' },
+      body: {
+        title: 'Error count',
+        description: '',
+        esql: { query: 'FROM logs.test | WHERE log.level == "error"' },
+        target_name: 'logs.test',
+      },
+    });
+  });
+});
+
+describe('bulkDeleteQueriesRoute', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('triggers stale event cleanup only for deleted backing rules', async () => {
+    const eventClient = {};
+    const rulesClient = {};
+    const deleteQueries = jest.fn().mockResolvedValue(undefined);
+    const handlerParams = {
+      params: { body: { queryIds: ['q1', 'q2'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          getQueryLinks: jest
+            .fn()
+            .mockResolvedValue([
+              makeQueryLink('q1', 40),
+              { ...makeQueryLink('q2', 40), rule_backed: false },
+            ]),
+          deleteQueries,
+        }),
+        getEventClient: () => eventClient,
+        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
+      }),
+      server: makeServer(),
+      logger: {
+        warn: jest.fn(),
+        get: jest.fn().mockReturnValue({ error: jest.fn() }),
+      },
+    } as never;
+
+    await expect(bulkDeleteRoute.handler(handlerParams)).resolves.toEqual({
+      succeeded: 2,
+      failed: 0,
+      skipped: 0,
+    });
+    expect(deleteQueries).toHaveBeenCalled();
+    expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
+      eventClient,
+      rulesClient,
+      candidateRuleIds: ['rule-q1'],
+    });
+  });
+
+  it('excludes backing rules from streams whose deletion failed', async () => {
+    const eventClient = {};
+    const rulesClient = {};
+    const deleteQueries = jest
+      .fn()
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('storage write failed'));
+    const handlerParams = {
+      params: { body: { queryIds: ['q1', 'q2'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: {
+          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
+        },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          getQueryLinks: jest
+            .fn()
+            .mockResolvedValue([
+              makeQueryLink('q1', 40, 'logs.success'),
+              makeQueryLink('q2', 40, 'logs.failed'),
+            ]),
+          deleteQueries,
+        }),
+        getEventClient: () => eventClient,
+        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
+      }),
+      server: makeServer(),
+      logger: {
+        warn: jest.fn(),
+        get: jest.fn().mockReturnValue({ error: jest.fn() }),
+      },
+    } as never;
+
+    await expect(bulkDeleteRoute.handler(handlerParams)).resolves.toEqual({
+      succeeded: 1,
+      failed: 1,
+      skipped: 0,
+    });
+    expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
+      eventClient,
+      rulesClient,
+      candidateRuleIds: ['rule-q1'],
+    });
+  });
 });
 
 describe('getDiscoveryQueriesRoute stream resolution', () => {
@@ -380,6 +494,7 @@ describe('generateQueriesRoute', () => {
       server: {
         core: {
           featureFlags: {},
+          dataStreams: {},
         },
         searchInferenceEndpoints: undefined,
         agentBuilder: undefined,
@@ -407,5 +522,109 @@ describe('generateQueriesRoute', () => {
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
       connectorId: 'test-connector',
     });
+  });
+});
+
+describe('upsertQueryRoute', () => {
+  const definition = { name: 'logs.test' };
+  const upsertBody = {
+    title: 'Error count',
+    description: '',
+    esql: { query: 'FROM logs.test, logs.test.* | WHERE log.level == "error"' },
+  };
+
+  it('upserts against the provided target_name', async () => {
+    const upsertQuery = jest.fn().mockResolvedValue(undefined);
+    const getQueryLinks = jest.fn();
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: { ...upsertBody, target_name: 'logs.test' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery, getQueryLinks }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
+    expect(getQueryLinks).not.toHaveBeenCalled();
+    expect(upsertQuery).toHaveBeenCalledWith(
+      definition,
+      expect.objectContaining({
+        id: 'q1',
+        type: 'match',
+        title: 'Error count',
+        esql: upsertBody.esql,
+      })
+    );
+  });
+
+  it('resolves the stream from an existing query when target_name is omitted', async () => {
+    const upsertQuery = jest.fn().mockResolvedValue(undefined);
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: upsertBody },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
+    expect(upsertQuery).toHaveBeenCalledWith(definition, expect.objectContaining({ id: 'q1' }));
+  });
+
+  it('throws 404 when the query is missing and no target_name is provided', async () => {
+    const upsertQuery = jest.fn();
+    const handlerParams = {
+      params: { path: { queryId: 'missing' }, body: upsertBody },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn() },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 404 },
+    });
+    expect(upsertQuery).not.toHaveBeenCalled();
+  });
+
+  it('does not persist when ES|QL is invalid', async () => {
+    const upsertQuery = jest.fn();
+    const handlerParams = {
+      params: {
+        path: { queryId: 'q1' },
+        body: { ...upsertBody, esql: { query: 'NOT VALID' }, target_name: 'logs.test' },
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(upsertQuery).not.toHaveBeenCalled();
   });
 });

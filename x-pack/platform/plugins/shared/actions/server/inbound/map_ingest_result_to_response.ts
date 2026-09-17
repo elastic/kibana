@@ -5,9 +5,23 @@
  * 2.0.
  */
 
-import type { KibanaResponseFactory } from '@kbn/core/server';
+import type { HttpResponsePayload, KibanaResponseFactory } from '@kbn/core/server';
+import { isJsonSerializableSpokeBody } from '@kbn/connector-specs';
 
 import type { IngestInboundEventResult } from './ingest';
+
+const spokeHttpBody = (body: unknown): HttpResponsePayload | undefined => {
+  if (body === undefined || body === null) {
+    return undefined;
+  }
+  if (typeof body === 'string') {
+    return body;
+  }
+  if (isJsonSerializableSpokeBody(body)) {
+    return body as HttpResponsePayload;
+  }
+  return undefined;
+};
 
 export const mapIngestResultToResponse = (
   result: IngestInboundEventResult,
@@ -23,6 +37,14 @@ export const mapIngestResultToResponse = (
         statusCode: result.statusCode,
         body: result.body,
       });
+    case 'spoke_http': {
+      const body = spokeHttpBody(result.body);
+      return response.custom({
+        statusCode: result.statusCode,
+        ...(body !== undefined ? { body } : {}),
+        ...(result.headers !== undefined ? { headers: result.headers } : {}),
+      });
+    }
     case 'accepted':
       return response.accepted({ body: result.body });
   }

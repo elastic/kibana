@@ -6,14 +6,19 @@
  */
 
 import { isSavedObjectErrorResult } from '@kbn/core/server';
-import type { SavedObjectErrorResult } from '@kbn/core/server';
+import type { Logger, SavedObjectErrorResult, SavedObjectsClientContract } from '@kbn/core/server';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
+  buildUiamApiKeyProvisioningStatusId,
   UiamApiKeyProvisioningStatus,
   UiamApiKeyProvisioningEntityType,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
+import { TAGS } from '../constants';
 import type { ProvisioningStatusDocs, UiamApiKeyByRuleId } from '../types';
 import { getErrorMessage } from './error_utils';
+
+const buildRuleStatusId = (ruleId: string): string =>
+  buildUiamApiKeyProvisioningStatusId(UiamApiKeyProvisioningEntityType.RULE, ruleId);
 
 /**
  * Builds a provisioning status doc for a rule that was skipped (no API key, already has UIAM key, or user-created key).
@@ -23,7 +28,7 @@ export const createSkippedRuleStatus = (
   message: string
 ): ProvisioningStatusDocs => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-  id: ruleId,
+  id: buildRuleStatusId(ruleId),
   attributes: {
     '@timestamp': new Date().toISOString(),
     entityId: ruleId,
@@ -42,7 +47,7 @@ export const createFailedConversionStatus = (
   errorCode?: string
 ): ProvisioningStatusDocs => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-  id: ruleId,
+  id: buildRuleStatusId(ruleId),
   attributes: {
     '@timestamp': new Date().toISOString(),
     entityId: ruleId,
@@ -95,6 +100,55 @@ export const prepareProvisioningStatusWrite = (
   return { docs, counts };
 };
 
+/** Cap on the number of failed legacy deletes named in a single warn, to bound log line length. */
+const MAX_LOGGED_LEGACY_DELETE_FAILURES = 10;
+
+/**
+ * Deletes the status docs written under the pre-namespacing bare entity id (`<ruleId>` rather than
+ * `rule:<ruleId>`) for the rules we just wrote a namespaced doc for. Best effort: a legacy doc is
+ * missing for every rule first provisioned after this change, and any other failure is retried the
+ * next time the rule is written.
+ *
+ * TODO: transitional one-shot migration for the pre-namespacing id scheme. Delete this helper and
+ * its call site once every deployment has run the provisioning task at least once; it is removed
+ * wholesale by https://github.com/elastic/kibana/pull/287038, which retires the provisioning tasks.
+ */
+export const deleteLegacyProvisioningStatusDocs = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger,
+  docs: Array<ProvisioningStatusDocs>
+): Promise<void> => {
+  const legacyIds = Array.from(new Set(docs.map(({ attributes }) => attributes.entityId)));
+  if (legacyIds.length === 0) {
+    return;
+  }
+  try {
+    const { statuses } = await savedObjectsClient.bulkDelete(
+      legacyIds.map((id) => ({ type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE, id }))
+    );
+    // 404 means there is nothing to migrate for that rule, which is the steady state.
+    const unexpectedErrors = statuses.filter(
+      ({ success, error }) => !success && error?.statusCode !== 404
+    );
+    if (unexpectedErrors.length > 0) {
+      const named = unexpectedErrors.slice(0, MAX_LOGGED_LEGACY_DELETE_FAILURES);
+      const omitted = unexpectedErrors.length - named.length;
+      logger.warn(
+        `Failed to delete ${
+          unexpectedErrors.length
+        } legacy UIAM provisioning status doc(s) for rules: ${named
+          .map(({ id, error }) => `${id} (${error?.message})`)
+          .join(', ')}${omitted > 0 ? ` and ${omitted} more` : ''}`,
+        { tags: TAGS }
+      );
+    }
+  } catch (e) {
+    logger.warn(`Error deleting legacy UIAM provisioning status docs: ${getErrorMessage(e)}`, {
+      tags: TAGS,
+    });
+  }
+};
+
 /**
  * Builds a provisioning status doc from a single saved object result of a bulk rule update.
  */
@@ -102,7 +156,7 @@ export const createStatusFromBulkUpdateResult = (
   so: BulkUpdateResultItem
 ): ProvisioningStatusDocs => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-  id: so.id,
+  id: buildRuleStatusId(so.id),
   attributes: {
     '@timestamp': new Date().toISOString(),
     entityId: so.id,

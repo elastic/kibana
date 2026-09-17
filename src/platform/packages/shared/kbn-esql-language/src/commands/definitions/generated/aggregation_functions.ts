@@ -781,6 +781,8 @@ const countDefinition: FunctionDefinition = {
     'ROW n=1\n| STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS cnt = COUNT(responseTime)',
     'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS cnt = COUNT(responseTime::tdigest)',
+    'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS count = COUNT(responseTime, bucket) BY bucket = BUCKET(responseTime, 1)\n| SORT RANGE_MIN(bucket)',
+    'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS count = COUNT(responseTime::tdigest, bucket) BY bucket = BUCKET(responseTime::tdigest, 1)\n| SORT RANGE_MIN(bucket)',
   ],
 };
 
@@ -817,11 +819,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -838,11 +840,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -859,11 +861,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -891,11 +893,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -912,11 +914,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -933,11 +935,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -965,11 +967,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -986,11 +988,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1007,11 +1009,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1039,11 +1041,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1060,11 +1062,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1081,11 +1083,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1113,11 +1115,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1134,11 +1136,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1155,11 +1157,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1187,11 +1189,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1208,11 +1210,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1229,11 +1231,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1261,11 +1263,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1282,11 +1284,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1303,11 +1305,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1335,11 +1337,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1356,11 +1358,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1377,11 +1379,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1409,11 +1411,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1430,11 +1432,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1451,11 +1453,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1483,11 +1485,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1504,11 +1506,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1525,11 +1527,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1557,11 +1559,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1578,11 +1580,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1599,11 +1601,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1631,11 +1633,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1652,11 +1654,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1673,11 +1675,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1705,11 +1707,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1726,11 +1728,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1747,11 +1749,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1779,11 +1781,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1800,11 +1802,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -1821,11 +1823,11 @@ const countDistinctDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
       ],
       returnType: 'long',
@@ -5886,10 +5888,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -5906,10 +5908,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -5926,10 +5928,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -5946,10 +5948,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -5966,10 +5968,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -5986,10 +5988,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6006,10 +6008,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6026,10 +6028,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6046,10 +6048,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6066,10 +6068,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6086,10 +6088,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6106,10 +6108,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6126,10 +6128,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6146,10 +6148,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6166,10 +6168,10 @@ const percentileDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
-          description: '',
           hint: {
             kind: 'constant',
           },
+          description: '',
         },
       ],
       returnType: 'double',
@@ -6512,10 +6514,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'boolean',
@@ -6532,10 +6534,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'cartesian_point',
@@ -6552,10 +6554,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'cartesian_shape',
@@ -6572,10 +6574,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'date',
@@ -6592,10 +6594,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'date_nanos',
@@ -6612,10 +6614,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'double',
@@ -6632,10 +6634,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'flattened',
@@ -6652,10 +6654,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'geo_point',
@@ -6672,10 +6674,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'geo_shape',
@@ -6692,10 +6694,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'geohash',
@@ -6712,10 +6714,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'geohex',
@@ -6732,10 +6734,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'geotile',
@@ -6752,10 +6754,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'integer',
@@ -6772,10 +6774,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'ip',
@@ -6792,10 +6794,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'keyword',
@@ -6812,10 +6814,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'long',
@@ -6832,10 +6834,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'keyword',
@@ -6852,10 +6854,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'unsigned_long',
@@ -6872,10 +6874,10 @@ const sampleDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'version',
@@ -6906,11 +6908,11 @@ const sparklineDefinition: FunctionDefinition = {
           name: 'aggregation',
           type: 'double',
           optional: false,
-          description:
-            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
           hint: {
             kind: 'aggregation',
           },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
         },
         {
           name: 'key',
@@ -6945,11 +6947,11 @@ const sparklineDefinition: FunctionDefinition = {
           name: 'aggregation',
           type: 'integer',
           optional: false,
-          description:
-            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
           hint: {
             kind: 'aggregation',
           },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
         },
         {
           name: 'key',
@@ -6984,11 +6986,11 @@ const sparklineDefinition: FunctionDefinition = {
           name: 'aggregation',
           type: 'long',
           optional: false,
-          description:
-            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
           hint: {
             kind: 'aggregation',
           },
+          description:
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
         },
         {
           name: 'key',
@@ -7055,8 +7057,8 @@ const stCentroidAggDefinition: FunctionDefinition = {
           description: '',
         },
       ],
-      license: 'platinum',
       returnType: 'cartesian_point',
+      license: 'platinum',
     },
     {
       params: [
@@ -7078,8 +7080,8 @@ const stCentroidAggDefinition: FunctionDefinition = {
           description: '',
         },
       ],
-      license: 'platinum',
       returnType: 'geo_point',
+      license: 'platinum',
     },
   ],
   locationsAvailable: [Location.STATS],
@@ -7117,8 +7119,8 @@ const stExtentAggDefinition: FunctionDefinition = {
           description: '',
         },
       ],
-      license: 'platinum',
       returnType: 'cartesian_shape',
+      license: 'platinum',
     },
     {
       params: [
@@ -7140,8 +7142,8 @@ const stExtentAggDefinition: FunctionDefinition = {
           description: '',
         },
       ],
-      license: 'platinum',
       returnType: 'geo_shape',
+      license: 'platinum',
     },
   ],
   locationsAvailable: [Location.STATS],
@@ -7318,10 +7320,10 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'boolean',
@@ -7338,21 +7340,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
       ],
       returnType: 'boolean',
@@ -7369,10 +7371,10 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'date',
@@ -7389,21 +7391,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
       ],
       returnType: 'date',
@@ -7420,21 +7422,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7458,21 +7460,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7496,21 +7498,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7534,21 +7536,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7572,21 +7574,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7610,21 +7612,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7648,10 +7650,10 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'double',
@@ -7668,21 +7670,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
       ],
       returnType: 'double',
@@ -7699,21 +7701,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7737,21 +7739,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7775,21 +7777,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7813,21 +7815,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7851,21 +7853,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7889,21 +7891,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -7927,10 +7929,10 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'integer',
@@ -7947,21 +7949,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
       ],
       returnType: 'integer',
@@ -7978,21 +7980,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8016,21 +8018,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8054,21 +8056,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8092,21 +8094,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8130,21 +8132,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8168,21 +8170,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8206,10 +8208,10 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'ip',
@@ -8226,21 +8228,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
       ],
       returnType: 'ip',
@@ -8257,10 +8259,10 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'keyword',
@@ -8277,21 +8279,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
       ],
       returnType: 'keyword',
@@ -8308,21 +8310,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8346,21 +8348,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8384,21 +8386,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8422,21 +8424,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8460,21 +8462,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8498,21 +8500,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8536,10 +8538,10 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'long',
@@ -8556,21 +8558,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
       ],
       returnType: 'long',
@@ -8587,21 +8589,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8625,21 +8627,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8663,21 +8665,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8701,21 +8703,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8739,21 +8741,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8777,21 +8779,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8815,10 +8817,10 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
       ],
       returnType: 'keyword',
@@ -8835,21 +8837,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
       ],
       returnType: 'keyword',
@@ -8866,21 +8868,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8904,21 +8906,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8942,21 +8944,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -8980,21 +8982,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -9018,21 +9020,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',
@@ -9056,21 +9058,21 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          description: 'The maximum number of values to collect.',
           hint: {
             kind: 'constant',
           },
+          description: 'The maximum number of values to collect.',
         },
         {
           name: 'order',
           type: 'keyword',
           optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
           hint: {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
         },
         {
           name: 'outputField',

@@ -12,17 +12,18 @@ import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type {
   SmlContext,
-  SmlDocument,
   SmlEntry,
   SmlDeleteScope,
   SmlIngestionMethod,
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
   SmlPermissionsInput,
+  SmlDocument,
+  SmlDocumentAttributes,
   SmlTypeDefinition,
 } from './types';
 
-import { createSmlStorage, smlIndexName } from './sml_storage';
+import { smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
 
@@ -97,6 +98,27 @@ export interface SmlIndexer {
   }) => Promise<void>;
 }
 
+const withNamespace = (
+  client: SavedObjectsClientContract,
+  namespace: string
+): SavedObjectsClientContract => {
+  const wrapped = Object.create(client) as SavedObjectsClientContract;
+  wrapped.get = (type, id, opts) => client.get(type, id, { ...opts, namespace });
+  wrapped.bulkGet = (objects, opts) =>
+    client.bulkGet(
+      objects.map(({ namespaces: _namespaces, ...object }) => object),
+      { ...opts, namespace }
+    );
+  wrapped.resolve = (type, id, opts) => client.resolve(type, id, { ...opts, namespace });
+  wrapped.bulkResolve = (objects, opts) => client.bulkResolve(objects, { ...opts, namespace });
+  return wrapped;
+};
+
+const namespaceForSpaces = (spaces: string[]): string | undefined => {
+  const [firstSpace] = spaces;
+  return !firstSpace || firstSpace === 'default' || firstSpace === '*' ? undefined : firstSpace;
+};
+
 export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
   return new SmlIndexerImpl({ registry, logger });
 };
@@ -119,6 +141,7 @@ class SmlIndexerImpl implements SmlIndexer {
       esClient,
       savedObjectsClient,
       logger: contextLogger,
+      clientHasSpacesExtension = false,
     } = params;
     const originUri = `${attachmentType}://${originId}`;
 
@@ -159,9 +182,15 @@ class SmlIndexerImpl implements SmlIndexer {
       }
     }
 
+    // Internal repos need an explicit namespace to access non-default spaces
+    const internalNamespace = clientHasSpacesExtension ? undefined : namespaceForSpaces(spaces);
+    const wrappedClient = internalNamespace
+      ? withNamespace(savedObjectsClient as SavedObjectsClientContract, internalNamespace)
+      : (savedObjectsClient as SavedObjectsClientContract);
+
     const context: SmlContext = {
       esClient,
-      savedObjectsClient: savedObjectsClient as SavedObjectsClientContract,
+      savedObjectsClient: wrappedClient,
       logger: contextLogger,
     };
 
@@ -318,28 +347,33 @@ class SmlIndexerImpl implements SmlIndexer {
       .map((space) => ({ space, name: actions, count: actions.length }));
 
     const now = new Date().toISOString();
-    const document: SmlDocument = {
+
+    // SML-owned keys are spread last so a producer cannot forge `origin.uri` or `ingestion_method`,
+    // which gate deletion and manual-entry protection.
+    const attributes: SmlDocumentAttributes = {
+      ...entry.attributes,
       id: entryId,
-      type: entry.type,
-      title: entry.title,
       origin: { uri: `${entry.type}://${originId}` },
-      content: entry.content,
       created_at: createdAt || now,
       updated_at: now,
-      permissions: { kibana: { privileges } },
       ingestion_method: ingestionMethod,
+    };
+    if (entry.user_id !== undefined) {
+      attributes.user_id = entry.user_id;
+    }
+
+    const document: SmlDocument = {
+      type: entry.type,
+      title: entry.title,
+      content: entry.content,
+      permissions: { kibana: { privileges } },
+      attributes,
     };
     if (entry.description !== undefined) {
       document.description = entry.description;
     }
     if (entry.tags !== undefined) {
       document.tags = entry.tags;
-    }
-    if (entry.extended_attrs !== undefined) {
-      document.extended_attrs = entry.extended_attrs;
-    }
-    if (entry.user_id !== undefined) {
-      document.user_id = entry.user_id;
     }
     if (entry.references !== undefined) {
       document.references = entry.references;
@@ -361,16 +395,14 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     originId: string;
   }): Promise<void> {
-    const storage = createSmlStorage({ logger: this.logger, esClient });
-    const smlClient = storage.getClient();
-
     this.logger.debug(
       `SML indexer: writing entry to index '${smlIndexName}' for origin '${originId}'`
     );
     try {
-      const response = await smlClient.bulk({
+      const response = await esClient.bulk({
+        index: smlIndexName,
         refresh: 'wait_for',
-        operations: [indexOp],
+        operations: [{ index: { _id: indexOp.index._id } }, indexOp.index.document],
       });
 
       if (response.errors) {
@@ -412,8 +444,8 @@ class SmlIndexerImpl implements SmlIndexer {
         query: {
           bool: {
             filter: [
-              { term: { 'origin.uri': originUri } },
-              { term: { ingestion_method: 'manual' } },
+              { term: { 'attributes.origin.uri': originUri } },
+              { term: { 'attributes.ingestion_method': 'manual' } },
             ],
           },
         },
@@ -455,9 +487,11 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
   }): Promise<void> {
-    const filter: Array<Record<string, unknown>> = [{ term: { 'origin.uri': originUri } }];
+    const filter: Array<Record<string, unknown>> = [
+      { term: { 'attributes.origin.uri': originUri } },
+    ];
     if (ingestionMethod) {
-      filter.push({ term: { ingestion_method: ingestionMethod } });
+      filter.push({ term: { 'attributes.ingestion_method': ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
       // Space scoping is a direct term match on the nested `.space` field

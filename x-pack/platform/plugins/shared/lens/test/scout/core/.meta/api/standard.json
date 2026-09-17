@@ -1,5 +1,5 @@
 {
-  "sha1": "418baa4d474407427b2ff4e4517fe22a2bf61e8c",
+  "sha1": "8e64fedc236411f59750695e9c94594151599ff2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -182,8 +182,428 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-f2731ed3a973dff",
+      "title": "Lens metric trendline query execution executes trendline query: raw query without metric fields falls back to COUNT(*)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-01477fd8fe1bd72",
+      "title": "Lens metric trendline query execution executes trendline query: query with an existing BUCKET on the time field is unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-369063de0748786",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with KEEP before STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-139cf639c1b782b",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with TBUCKET renamed via assignment form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-aff6334ea31699c",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased BUCKET through chained RENAMEs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-6d9c6fd6994b46f",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query selecting the KPI branch by metric column",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-cb1e45e34bca95f",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with backtick-quoted metric and bucket column names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-07a47462ffcb9dd",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query selecting the branch with an existing aliased BUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-8ce9d6d4b4f5d3c",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with primary and secondary metrics from different branches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-83213ebcb0bf177",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with primary and secondary metrics from the same branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-f4b97a163428dcf",
+      "title": "Lens metric trendline query execution executes trendline query: STATS query with an EVAL-derived secondary metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-901fa33b610a5d3",
+      "title": "Lens metric trendline query execution executes trendline query: STATS query with a secondary metric on a BY grouping key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-a78f0c52e9a4274",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with post-FORK RENAME/EVAL/KEEP referencing discarded-branch columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-d14fea74d6a53c4",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with post-FORK chained EVAL assignments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-239cd4df1b93da2",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query without metric fields falls back to the first STATS branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-13ecaaebe3a9539",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with top-N branch and COUNT KPI branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-a860ae668bc1fee",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with SORT _fork after FORK",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-2e7161447c385d7",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with SORT _fork DESC NULLS LAST after FORK",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-0f198ed0556fad3",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with WHERE on the _fork discriminator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-f480f8ab3752b0a",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with compound WHERE combining _fork and a metric predicate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-fbfd356942f8a3f",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with KEEP including the _fork discriminator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-423812b74f67375",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with metric column produced via RENAME inside a branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-c37335470a0fac1",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query selecting an open-scope branch by raw metric field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-26bc0ac877765e9",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query preferring a definite metric producer over an open scope",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-0bee70093a2982a",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query selecting a KEEP-projected branch by raw metric field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-b8753061fdcc4d2",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with WHERE-only branches and raw metric fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-2606501634955f5",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with WHERE prefix kept before the selected branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-95d431aa09c2837",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query dropping a KEEP that only referenced the _fork discriminator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-5ca4a91b4fb1913",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query with EVAL prefix shared by both branches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-e41124c59148cd7",
+      "title": "Lens metric trendline query execution executes trendline query: FORK query selecting a branch by unaliased aggregation expression",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -202,8 +622,48 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/create.spec.ts",
-        "line": 18,
-        "column": 25
+        "line": 20,
+        "column": 22
+      }
+    },
+    {
+      "id": "9a20063fc72c8c5-b33e846fa1f830c",
+      "title": "lens visualizations - create should create without a tags field (backward compatibility)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/create.spec.ts",
+        "line": 32,
+        "column": 16
+      }
+    },
+    {
+      "id": "9a20063fc72c8c5-ecad1ca5af8d47f",
+      "title": "lens visualizations - create should persist tags through the create response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/create.spec.ts",
+        "line": 44,
+        "column": 99
       }
     },
     {
@@ -222,8 +682,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/create.spec.ts",
-        "line": 30,
-        "column": 16
+        "line": 59,
+        "column": 71
       }
     },
     {
@@ -382,8 +842,48 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
-        "line": 27,
-        "column": 25
+        "line": 29,
+        "column": 22
+      }
+    },
+    {
+      "id": "93b93d439d2c363-8498178417991b5",
+      "title": "lens visualizations - update should update without a tags field (backward compatibility)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 41,
+        "column": 16
+      }
+    },
+    {
+      "id": "93b93d439d2c363-84c38f593024c78",
+      "title": "lens visualizations - update should persist tags through the update response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 53,
+        "column": 99
       }
     },
     {
@@ -402,8 +902,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
-        "line": 39,
-        "column": 16
+        "line": 68,
+        "column": 71
       }
     },
     {
@@ -422,8 +922,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
-        "line": 55,
-        "column": 22
+        "line": 82,
+        "column": 93
       }
     },
     {
@@ -442,8 +942,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
-        "line": 69,
-        "column": 11
+        "line": 96,
+        "column": 12
       }
     }
   ]

@@ -12,17 +12,20 @@ import type {
   ConverseInput,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
-  ConversationAction,
   ConversationAccessControl,
   ConversationRoundOrigin,
   ConversationOrigin,
   ConversationRoundAuthor,
   ExecutionStatus,
   InteractivityConfig,
+  InteractivityConfigInput,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 
 /**
  * Common execution parameters shared between conversation and standalone modes.
@@ -52,6 +55,10 @@ export interface BaseExecutionParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  /**
+   * Optional reasoning level forwarded to the inference plugin.
+   */
+  reasoningLevel?: ChatCompletionReasoningEffort;
   projectRouting?: string;
 }
 
@@ -89,8 +96,6 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   };
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];
-  /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
-  action?: ConversationAction;
   /**
    * Used to establish the parent linkage and add subagent-specific metadata
    * to the newly-created child conversation.
@@ -202,7 +207,7 @@ interface ExecuteAgentBaseParams {
   /**
    * Interactivity configuration for this execution.
    */
-  interactive?: InteractivityConfig;
+  interactive?: InteractivityConfigInput;
 }
 
 export interface ExecuteConversationAgentParams extends ExecuteAgentBaseParams {

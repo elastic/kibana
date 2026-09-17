@@ -17,6 +17,7 @@ import type {
   LensDatasourceId,
   TypedLensSerializedState,
   LensDocument,
+  Visualization,
 } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -63,7 +64,7 @@ export const useEsqlConversionCheck = (
     datasourceId: LensDatasourceId;
     layerIds: string[];
     visualization: VisualizationState;
-    activeVisualization: unknown;
+    activeVisualization: Visualization | undefined;
   },
   {
     framePublicAPI,
