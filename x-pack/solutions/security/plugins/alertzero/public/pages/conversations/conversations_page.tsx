@@ -27,14 +27,11 @@ import {
   AssignActionModal,
   ApprovalModal,
 } from '@kbn/agentic-investigations-common';
+import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import {
-  useProposalsList,
-  useApproveProposal,
-  useDismissProposal,
-} from '../../hooks/use_proposals_api';
+import { useProposalsList } from '../../hooks/use_proposals_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
