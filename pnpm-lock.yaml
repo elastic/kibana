@@ -4389,8 +4389,8 @@ importers:
         specifier: 10.2.6
         version: 10.2.6
       moment:
-        specifier: 2.30.1
-        version: 2.30.1
+        specifier: 2.31.0
+        version: 2.31.0
       moment-duration-format:
         specifier: 2.3.2
         version: 2.3.2
