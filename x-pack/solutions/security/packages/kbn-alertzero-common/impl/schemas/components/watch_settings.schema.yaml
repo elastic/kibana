@@ -253,9 +253,21 @@ components:
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
 
+    WorkerSettingsExtras:
+      type: object
+      additionalProperties: true
+      description: >-
+        Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the
+        shared read/update path stays generic; each Worker declares a closed schema for its own
+        extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates
+        against that declaration, rejecting unknown or missing fields by name.
+
     WorkerSettings:
       type: object
-      description: Durable per-Worker settings stored as managed template values.
+      additionalProperties: false
+      description: >-
+        Durable per-Worker settings stored as managed template values. Shared fields sit at the top
+        level; Worker-specific fields live under `extras`. Unknown top-level keys are rejected.
       required:
         - workerId
         - autonomy
@@ -269,6 +281,26 @@ components:
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsExtras'
+          description: Omitted for Workers that declare no Worker-specific settings.
+
+    WorkerSettingsWrite:
+      type: object
+      additionalProperties: false
+      description: >-
+        Settings patch; the editable subset of WorkerSettings with the same names and nesting.
+        Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras`
+        is whole-object: omitted keeps the stored extras, supplied must be the complete valid object
+        for this Worker and replaces the stored one. There is no deep merge and `null` has no
+        special meaning.
+      properties:
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsExtras'
 
     Worker:
       type: object

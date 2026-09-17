@@ -21,6 +21,7 @@ import type {
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
 import { isExternalApiKey, type UiamServicePublic } from '../../../uiam';
+import { getUiamClientAuthentication } from '../../../uiam/get_client_authentication';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -81,9 +82,16 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params, {
-        includeClientAuthentication: !isExternalApiKey(this.getCurrentUser(request)),
-      });
+      // External API keys must not carry client authentication (`null`). For other credentials,
+      // preserve the request's secret and only default to Kibana's for internally created requests.
+      const clientAuthentication = isExternalApiKey(this.getCurrentUser(request))
+        ? null
+        : getUiamClientAuthentication(request);
+      const { id, key, description } = await this.uiam?.grantApiKey(
+        authorization,
+        params,
+        clientAuthentication
+      );
 
       result = {
         id,
@@ -128,7 +136,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      await this.uiam?.revokeApiKey(id, authorization.credentials);
+      await this.uiam?.revokeApiKey(request, id);
 
       this.logger.debug(`API key ${id} was invalidated successfully`);
 
