@@ -44,12 +44,14 @@ export const registerInstallAllTaskDefinition = ({
         const inferenceId = taskInstance.params?.inferenceId;
         return {
           async run() {
-            const { remaining, installed } = taskInstance.state as ChunkedTaskState;
-            const { packageInstaller } = getServices();
+            const { remaining, installed, attempts } = taskInstance.state as ChunkedTaskState;
+            const { packageInstaller, logger } = getServices();
             return runInstallChunk({
               lockManager,
+              logger,
               items: (remaining ?? Object.values(DocumentationProduct)).filter(isProductName),
               installed: installed?.filter(isProductName),
+              attempts,
               install: (productName) =>
                 packageInstaller.installProduct({ productName, inferenceId }),
               isSuperseded: (productNames) =>

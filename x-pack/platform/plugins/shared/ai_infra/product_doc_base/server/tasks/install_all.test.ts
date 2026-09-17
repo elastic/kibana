@@ -6,12 +6,14 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import { registerInstallAllTaskDefinition, INSTALL_ALL_TASK_TYPE } from './install_all';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../services/install_lock';
+import { MAX_INSTALL_ITEM_RETRIES } from './utils';
 
 const allProducts = Object.values(DocumentationProduct);
 
@@ -19,18 +21,21 @@ describe('InstallAll task', () => {
   let installProduct: jest.Mock;
   let hasUninstalledProducts: jest.Mock;
   let withLock: jest.Mock;
+  let logger: ReturnType<typeof loggerMock.create>;
   let runTask: (state: Record<string, unknown>) => Promise<unknown>;
 
   beforeEach(() => {
     installProduct = jest.fn().mockResolvedValue(true);
     hasUninstalledProducts = jest.fn().mockResolvedValue(false);
     withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
+    logger = loggerMock.create();
     const taskManager = taskManagerMock.createSetup();
     registerInstallAllTaskDefinition({
       taskManager,
       lockManager: { withLock },
       getServices: () =>
         ({
+          logger,
           packageInstaller: { installProduct, hasUninstalledProducts },
         } as unknown as InternalServices),
     });
@@ -130,10 +135,47 @@ describe('InstallAll task', () => {
     expect(result).toEqual({ state: {} });
   });
 
-  it('propagates installation errors so Task Manager retries the same product', async () => {
+  it('retries a failing product with exponential backoff, keeping the same item', async () => {
+    installProduct.mockRejectedValue(new Error('boom'));
+    const now = Date.now();
+
+    const first = (await runTask({ remaining: ['kibana', 'security'], installed: [] })) as {
+      state: Record<string, unknown>;
+      runAt: Date;
+    };
+    expect(first.state).toEqual({ remaining: ['kibana', 'security'], installed: [], attempts: 1 });
+    expect(first.runAt.getTime() - now).toBeGreaterThanOrEqual(30_000);
+    expect(first.runAt.getTime() - now).toBeLessThan(60_000);
+
+    const third = (await runTask({ ...first.state, attempts: 2 })) as {
+      state: Record<string, unknown>;
+      runAt: Date;
+    };
+    expect(third.state).toEqual({ remaining: ['kibana', 'security'], installed: [], attempts: 3 });
+    expect(third.runAt.getTime() - now).toBeGreaterThanOrEqual(120_000);
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up on the item after the maximum number of retries and ends the task', async () => {
     installProduct.mockRejectedValue(new Error('boom'));
 
-    await expect(runTask({ remaining: ['kibana', 'security'] })).rejects.toThrow('boom');
+    const result = await runTask({
+      remaining: ['kibana', 'security'],
+      installed: [],
+      attempts: MAX_INSTALL_ITEM_RETRIES,
+    });
+
+    expect(result).toEqual({ state: {} });
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Giving up'));
+  });
+
+  it('resets the attempt counter once the item succeeds', async () => {
+    const result = await runTask({ remaining: ['kibana', 'security'], installed: [], attempts: 2 });
+
+    expect(result).toEqual({
+      state: { remaining: ['security'], installed: ['kibana'] },
+      runAt: expect.any(Date),
+    });
   });
 
   it('installs each product under the shared install lock', async () => {

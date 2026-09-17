@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
@@ -28,7 +29,20 @@ export const chunkedTaskStateSchema = schema.object({
   remaining: schema.maybe(itemsSchema),
   // Items already handled by this task, used to detect an uninstall that ran between two chunks
   installed: schema.maybe(itemsSchema),
+  // Failed attempts for the current item
+  attempts: schema.maybe(schema.number({ min: 0 })),
 });
+
+export const MAX_INSTALL_ITEM_RETRIES = 5;
+const INSTALL_ITEM_RETRY_BASE_DELAY_MS = 30_000;
+const INSTALL_ITEM_RETRY_MAX_DELAY_MS = 10 * 60 * 1000;
+
+// 30s, 1m, 2m, 4m, 8m
+export const installItemRetryDelayMs = (failedAttempts: number) =>
+  Math.min(
+    INSTALL_ITEM_RETRY_BASE_DELAY_MS * 2 ** (failedAttempts - 1),
+    INSTALL_ITEM_RETRY_MAX_DELAY_MS
+  );
 
 export type ChunkedTaskState = TypeOf<typeof chunkedTaskStateSchema>;
 
@@ -75,19 +89,24 @@ export const runTaskUnderInstallLock = async ({
  * item is kept and the run is deferred instead of failing an attempt. The lock is released between
  * items, so before each item `isSuperseded` is checked (still under the lock) with the items that
  * `install` reported as actually installed: when an uninstall ran in between, the task stops instead
- * of reinstalling the rest.
+ * of reinstalling the rest. A failing item is retried with exponential backoff up to
+ * `MAX_INSTALL_ITEM_RETRIES` times; the task then ends, leaving the failure in the install status.
  */
 export const runInstallChunk = async <T extends string>({
   lockManager,
+  logger,
   items,
   installed = [],
+  attempts = 0,
   install,
   isSuperseded,
   metadata,
 }: {
   lockManager: InstallLockManager;
+  logger: Logger;
   items: T[];
   installed?: T[];
+  attempts?: number;
   install: (item: T) => Promise<boolean>;
   isSuperseded: (installedItems: T[]) => Promise<boolean>;
   metadata?: Record<string, unknown>;
@@ -98,21 +117,46 @@ export const runInstallChunk = async <T extends string>({
   }
   let superseded = false;
   let didInstall = false;
+  let installError: Error | undefined;
   const acquired = await tryWithInstallLock({
     lockManager,
     run: async () => {
       superseded = installed.length > 0 && (await isSuperseded(installed));
-      if (!superseded) {
+      if (superseded) {
+        return;
+      }
+      try {
         didInstall = await install(item);
+      } catch (e) {
+        installError = e as Error;
       }
     },
     metadata: { ...metadata, item },
   });
   if (!acquired) {
-    return deferredRunResult({ remaining: items, installed });
+    return deferredRunResult({ remaining: items, installed, ...(attempts ? { attempts } : {}) });
   }
   if (superseded) {
     return { state: {} };
+  }
+  if (installError) {
+    const failedAttempts = attempts + 1;
+    if (failedAttempts > MAX_INSTALL_ITEM_RETRIES) {
+      logger.error(
+        `Giving up on documentation item [${item}] after ${failedAttempts} attempts: ${installError.message}`
+      );
+      return { state: {} };
+    }
+    const delayMs = installItemRetryDelayMs(failedAttempts);
+    logger.warn(
+      `Documentation item [${item}] failed (attempt ${failedAttempts}), retrying in ${
+        delayMs / 1000
+      }s: ${installError.message}`
+    );
+    return {
+      state: { remaining: items, installed, attempts: failedAttempts },
+      runAt: new Date(Date.now() + delayMs),
+    };
   }
   return nextChunkRunResult(rest, didInstall ? [...installed, item] : installed);
 };

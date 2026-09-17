@@ -897,17 +897,24 @@ export class PackageInstaller {
     inferenceId: string;
   }): Promise<string> {
     let lastMissingError: Error | undefined;
+    // Several candidate versions can map to the same artifact (e.g. every `latest-<timestamp>`
+    // entry on serverless), which must not be downloaded again once it is known to be missing.
+    const triedArtifacts = new Set<string>();
 
     for (const candidateVersion of candidateVersions) {
+      const artifactFileNameVersion = this.isServerless
+        ? LATEST_PRODUCT_VERSION
+        : majorMinor(candidateVersion);
+      const artifactFileName = getArtifactName({
+        productName,
+        productVersion: artifactFileNameVersion,
+        inferenceId,
+      });
+      if (triedArtifacts.has(artifactFileName)) {
+        continue;
+      }
+      triedArtifacts.add(artifactFileName);
       try {
-        const artifactFileNameVersion = this.isServerless
-          ? LATEST_PRODUCT_VERSION
-          : majorMinor(candidateVersion);
-        const artifactFileName = getArtifactName({
-          productName,
-          productVersion: artifactFileNameVersion,
-          inferenceId,
-        });
         await this.ensureArtifactArchiveAvailable(artifactFileName);
         return candidateVersion;
       } catch (error) {
@@ -948,17 +955,29 @@ export class PackageInstaller {
       fallbackVersionsLoaded = true;
     }
 
+    // Several candidate versions can map to the same artifact (every `latest-<timestamp>` entry
+    // maps to the single `latest` file), which must not be downloaded again once known missing.
+    const triedArtifacts = new Set<string>();
+    let lastMissingError: Error | undefined;
     for (let candidateIndex = 0; candidateIndex < candidateVersions.length; candidateIndex++) {
       const stackVersion = candidateVersions[candidateIndex];
       const artifactFileName = this.getOpenApiArtifactFileName({
         stackVersion,
         inferenceId,
       });
+      if (triedArtifacts.has(artifactFileName)) {
+        continue;
+      }
+      triedArtifacts.add(artifactFileName);
       try {
         await this.ensureArtifactArchiveAvailable(artifactFileName, { openApi: true });
         return stackVersion;
       } catch (error) {
-        if (isArtifactMissingError(error) && explicitVersionProvided && !fallbackVersionsLoaded) {
+        if (!isArtifactMissingError(error)) {
+          throw error;
+        }
+        lastMissingError = error as Error;
+        if (explicitVersionProvided && !fallbackVersionsLoaded) {
           try {
             const availableVersions = await this.fetchArtifactVersionsWithRetry();
             candidateVersions.push(
@@ -974,17 +993,15 @@ export class PackageInstaller {
             fallbackVersionsLoaded = true;
           }
         }
-
-        if (isArtifactMissingError(error) && candidateIndex !== candidateVersions.length - 1) {
-          this.log.warn(
-            `OpenAPI artifact for version [${stackVersion}] is unavailable. Retrying with older version.`
-          );
-          continue;
-        }
-        throw error;
+        this.log.warn(
+          `OpenAPI artifact [${artifactFileName}] for version [${stackVersion}] is unavailable.`
+        );
       }
     }
 
+    if (lastMissingError) {
+      throw lastMissingError;
+    }
     throw new Error(
       `No installable OpenAPI artifact found for selected version [${selectedVersion}]`
     );
@@ -1000,7 +1017,12 @@ export class PackageInstaller {
     const inferenceIdSuffix = isImpliedDefaultElserInferenceId(inferenceId)
       ? ''
       : `--${inferenceId}`;
-    return `kb-product-doc-openapi-${stackVersion}${inferenceIdSuffix}.zip`;
+    // `latest-<timestamp>` versions track the upload date of the single `latest` artifact
+    const fileVersion =
+      extractLatestVersionTimestamp(stackVersion) !== undefined
+        ? LATEST_PRODUCT_VERSION
+        : stackVersion;
+    return `kb-product-doc-openapi-${fileVersion}${inferenceIdSuffix}.zip`;
   }
 
   private async ensureArtifactArchiveAvailable(

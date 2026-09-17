@@ -6,6 +6,7 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import type { InternalServices } from '../types';
@@ -21,9 +22,11 @@ describe('EnsureUpToDate task', () => {
   let ensureOpenApiSpecUpToDate: jest.Mock;
   let hasUninstalledProducts: jest.Mock;
   let withLock: jest.Mock;
+  let logger: ReturnType<typeof loggerMock.create>;
   let runTask: (state: Record<string, unknown>) => Promise<unknown>;
 
   beforeEach(() => {
+    logger = loggerMock.create();
     updateProduct = jest.fn().mockResolvedValue(true);
     getProductsToUpdate = jest.fn().mockResolvedValue(['kibana', 'security']);
     ensureOpenApiSpecUpToDate = jest.fn().mockResolvedValue(undefined);
@@ -35,6 +38,7 @@ describe('EnsureUpToDate task', () => {
       lockManager: { withLock },
       getServices: () =>
         ({
+          logger,
           packageInstaller: {
             updateProduct,
             getProductsToUpdate,
@@ -96,6 +100,18 @@ describe('EnsureUpToDate task', () => {
       state: { remaining: ['openapi'], installed: ['kibana'] },
       runAt: expect.any(Date),
     });
+  });
+
+  it('retries the OpenAPI spec item with backoff instead of failing the run', async () => {
+    ensureOpenApiSpecUpToDate.mockRejectedValue(new Error('no artifact'));
+
+    const result = await runTask({ remaining: ['openapi'], installed: ['kibana'] });
+
+    expect(result).toEqual({
+      state: { remaining: ['openapi'], installed: ['kibana'], attempts: 1 },
+      runAt: expect.any(Date),
+    });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('[openapi] failed'));
   });
 
   it('stops when a product updated earlier in this run was uninstalled', async () => {

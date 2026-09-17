@@ -823,6 +823,21 @@ describe('PackageInstaller', () => {
       downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/artifact.zip`);
     });
 
+    it('checks a missing `latest` product artifact once across timestamped fallback versions', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        kibana: ['latest-2026-08-20T23:08:00.384Z', 'latest-2026-08-20T20:51:06.777Z'],
+      });
+      openZipArchiveMock.mockRejectedValue(
+        new Error('End of central directory record signature not found.')
+      );
+
+      await expect(packageInstaller.installProduct({ productName: 'kibana' })).rejects.toThrow(
+        'End of central directory record signature not found.'
+      );
+
+      expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
+    });
+
     it('installs product documentation with an EIS endpoint', async () => {
       await packageInstaller.installPackage({
         productName: 'kibana',
@@ -966,6 +981,48 @@ describe('PackageInstaller', () => {
 
     beforeEach(() => {
       esClient.bulk.mockResolvedValue({ errors: false } as never);
+    });
+
+    it('downloads the `latest` artifact for a `latest-<timestamp>` version', async () => {
+      openZipArchiveMock
+        .mockResolvedValueOnce({ close: jest.fn() }) // precheck
+        .mockResolvedValueOnce(getOpenApiArchive()); // install
+      downloadToDiskMock.mockResolvedValue('/tmp/openapi-latest.zip');
+
+      await packageInstaller.installOpenAPISpec({
+        version: 'latest-2026-08-20T23:08:00.384Z',
+        inferenceId: '.jina-embeddings-v5-text-small',
+      });
+
+      expect(downloadToDiskMock.mock.calls[0][0]).toBe(
+        `${artifactRepositoryUrl}/kb-product-doc-openapi-latest--.jina-embeddings-v5-text-small.zip`
+      );
+      expect(productDocClient.setOpenapiSpecInstallationSuccessful).toHaveBeenCalledWith(
+        expect.objectContaining({ productVersion: 'latest-2026-08-20T23:08:00.384Z' })
+      );
+    });
+
+    it('checks a missing `latest` artifact once even when several timestamped versions map to it', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        openapi: [
+          'latest-2026-08-20T23:08:00.384Z',
+          'latest-2026-08-20T20:51:06.777Z',
+          'latest-2026-07-01T00:00:00.000Z',
+        ],
+      });
+      downloadToDiskMock.mockResolvedValue('/tmp/openapi-missing.zip');
+      openZipArchiveMock.mockRejectedValue(
+        new Error('End of central directory record signature not found.')
+      );
+
+      await expect(
+        packageInstaller.installOpenAPISpec({
+          version: 'latest-2026-08-20T23:08:00.384Z',
+          inferenceId: '.jina-embeddings-v5-text-small',
+        })
+      ).rejects.toThrow('End of central directory record signature not found.');
+
+      expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
     });
 
     it('does not fetch artifact versions when explicit version is directly installable', async () => {
