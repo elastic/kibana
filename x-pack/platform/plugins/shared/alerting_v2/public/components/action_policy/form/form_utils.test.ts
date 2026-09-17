@@ -12,7 +12,6 @@ describe('action policy form utils', () => {
   const state = {
     name: 'Policy',
     description: 'Description',
-    tags: [],
     matcher: null as PolicyMatcher | null,
     groupingMode: 'per_episode' as const,
     groupBy: [],
@@ -124,7 +123,6 @@ describe('action policy form utils', () => {
         name: 'Policy',
         description: 'Description',
         grouping_mode: 'per_episode',
-        tags: null,
         matcher: null,
         group_by: null,
         throttle: { strategy: 'on_status_change', interval: null },
@@ -145,7 +143,6 @@ describe('action policy form utils', () => {
         toUpdatePayload(
           {
             ...state,
-            tags: ['production'],
             matcher: { expression: 'event.severity: critical' },
             groupingMode: 'per_field',
             groupBy: ['host.name'],
@@ -159,7 +156,6 @@ describe('action policy form utils', () => {
         name: 'Policy',
         description: 'Description',
         grouping_mode: 'per_field',
-        tags: ['production'],
         matcher: { expression: 'event.severity: critical' },
         group_by: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
@@ -179,7 +175,6 @@ describe('action policy form utils', () => {
       enabled: true,
       matcher: severityMatcher,
       group_by: ['host.name'],
-      tags: ['production'],
       grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
       snoozed_until: null,
@@ -195,7 +190,6 @@ describe('action policy form utils', () => {
       expect(toFormState(baseResponse)).toEqual({
         name: 'Test Policy',
         description: 'A test policy',
-        tags: ['production'],
         matcher: severityMatcher,
         groupingMode: 'per_field',
         groupBy: ['host.name'],
@@ -213,12 +207,10 @@ describe('action policy form utils', () => {
           grouping_mode: null,
           throttle: null,
           group_by: null,
-          tags: null,
         })
       ).toEqual({
         name: 'Test Policy',
         description: 'A test policy',
-        tags: [],
         matcher: severityMatcher,
         groupingMode: 'per_episode',
         groupBy: [],

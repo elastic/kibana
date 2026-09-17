@@ -32,27 +32,14 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
   );
 
   const activeConnectorIdSet = useMemo(
-    () =>
-      new Set(
-        agent
-          ? getEffectiveConnectorIds(
-              agent,
-              allConnectors.map((c) => c.id)
-            )
-          : []
-      ),
-    [agent, allConnectors]
+    () => new Set(agent ? getEffectiveConnectorIds(agent) : []),
+    [agent]
   );
 
   const getCurrentConnectorIds = useCallback((): string[] => {
     const currentAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
-    return currentAgent
-      ? getEffectiveConnectorIds(
-          currentAgent,
-          allConnectors.map((c) => c.id)
-        )
-      : allConnectors.map((c) => c.id);
-  }, [queryClient, agentQueryKey, allConnectors]);
+    return currentAgent ? getEffectiveConnectorIds(currentAgent) : [];
+  }, [queryClient, agentQueryKey]);
 
   const updateConnectorsMutation = useMutation({
     mutationFn: (newConnectorIds: string[]) =>
