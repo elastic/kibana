@@ -448,6 +448,60 @@ const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
 ];
 
 /**
+ * `mapper_parsing_exception` is ES's generic "this mapping is invalid" error, so only the
+ * reasons below are treated as rollover-worthy.  Both are caused by analysis settings
+ * (analyzers, normalizers) being immutable after index creation: the referenced analyzer is
+ * defined in the composed index template but not in the current write index's settings, so only
+ * a new backing index can pick it up.  This typically happens when a `@custom` component
+ * template gains a custom analyzer after the write index was created.
+ *
+ * The patterns are anchored on the analyzer/normalizer name so that unrelated invalid mappings
+ * keep surfacing as errors instead of being masked by a pointless rollover.
+ */
+const MAPPER_PARSING_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
+  // (search_)analyzer [standard_lower] has not been configured in mappings
+  /(analyzer|normalizer) \[[^\]]+\] has not been configured in mappings/,
+  // normalizer [uppercase_normalizer] not found for field [name]
+  /(analyzer|normalizer) \[[^\]]+\] not found for field/,
+];
+
+/**
+ * Collects every `reason` string from an ES error body, walking the `caused_by` chain and
+ * `root_cause` entries, as ES often nests the actionable message below the top level.
+ */
+const collectErrorReasons = (err: any): string[] => {
+  const reasons: string[] = [];
+  const visit = (error: any) => {
+    if (!error || typeof error !== 'object') {
+      return;
+    }
+    if (typeof error.reason === 'string') {
+      reasons.push(error.reason);
+    }
+    visit(error.caused_by);
+    if (Array.isArray(error.root_cause)) {
+      error.root_cause.forEach(visit);
+    }
+  };
+  visit(err?.body?.error);
+  return reasons;
+};
+
+const errorReasonRequiresRollover = (
+  err: any,
+  reasonsRequiringRollover: Array<string | RegExp>
+): boolean => {
+  const reasons = collectErrorReasons(err);
+  return reasonsRequiringRollover.some((reasonRequiringRollover) =>
+    reasons.some((reason) =>
+      typeof reasonRequiringRollover === 'string'
+        ? reason.includes(reasonRequiringRollover)
+        : reasonRequiringRollover.test(reason)
+    )
+  );
+};
+
+/**
  * Returns true when the ES error indicates that the mapping change is incompatible with the
  * current write index and a data-stream rollover is the right recovery action.
  *
@@ -455,6 +509,11 @@ const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
  * `illegal_argument_exception` but a rollover cannot fix them — the new write index is built
  * from the same index template and inherits the same field-count limit, so the oversized
  * mapping would fail again immediately.  Callers should surface those errors clearly instead.
+ *
+ * `mapper_exception` and `mapper_parsing_exception` are matched against an allowlist of reasons
+ * rather than by type alone: both types also cover genuinely invalid mappings, and a rollover
+ * here swallows the error and reports the install as successful, so matching them
+ * unconditionally would hide real packaging bugs.
  */
 function errorNeedRollover(err: any): boolean {
   if (
@@ -470,10 +529,13 @@ function errorNeedRollover(err: any): boolean {
   }
   if (
     err.body?.error?.type === 'mapper_exception' &&
-    err.body?.error?.reason &&
-    MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER.some((reason) =>
-      err.body?.error?.reason?.includes(reason)
-    )
+    errorReasonRequiresRollover(err, MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER)
+  ) {
+    return true;
+  }
+  if (
+    err.body?.error?.type === 'mapper_parsing_exception' &&
+    errorReasonRequiresRollover(err, MAPPER_PARSING_EXCEPTION_REASONS_REQUIRING_ROLLOVER)
   ) {
     return true;
   }
