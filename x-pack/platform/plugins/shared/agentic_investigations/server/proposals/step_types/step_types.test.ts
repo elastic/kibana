@@ -231,6 +231,39 @@ describe('proposals.createProposal step', () => {
     });
   });
 
+  it('should pass a blank optional input to the service as an omission', async () => {
+    // The engine renders a step's `with` block and hands it over unparsed —
+    // `CustomStepImpl.getInput()` never applies `inputSchema` — so the `''`
+    // Liquid renders for an absent input arrives verbatim. The handler parses
+    // the input itself, which is the only thing that makes `optionalStepInput`
+    // take effect; without it the service stores empty strings where a
+    // category, an impact and a confidence should be.
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        actionWorkflowId: '',
+        impact: '',
+        category: '',
+        confidence: '',
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionWorkflowId: undefined,
+        impact: undefined,
+        category: undefined,
+        // The handler's own default, which `''` would have satisfied.
+        confidence: 'medium',
+      }),
+      expect.anything()
+    );
+  });
+
   it('should emit expiresAt so the gate loop can derive each attempt from it', async () => {
     const create = jest
       .fn()

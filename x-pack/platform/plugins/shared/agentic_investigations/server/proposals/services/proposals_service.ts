@@ -138,8 +138,18 @@ export class ProposalsService {
     // which the action's own metadata cannot. A category can end up absent —
     // the vocabulary belongs to the solution that authored the action — but
     // impact cannot, because it is the queue's primary sort key.
-    const category = params.category ?? metadata?.category;
-    const impact = params.impact ?? metadata?.impact ?? 'low';
+    //
+    // Blanked first, and not defensively: `??` treats the `''` that Liquid
+    // renders for an absent workflow input as a value, so without this the
+    // caller always "wins" with an empty string, the action's own metadata is
+    // never consulted, and the queue silently drops a proposal it cannot group.
+    const category = blankToUndefined(params.category) ?? metadata?.category;
+    const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
+    // Both are required on the stored document, so a blank has to resolve to
+    // something rather than to an omission: `confidence` feeds the queue's
+    // secondary sort rank, and `origin` says who proposed it.
+    const confidence = blankToUndefined(params.confidence) ?? 'medium';
+    const origin = blankToUndefined(params.origin) ?? 'worker';
 
     const document: ProposalDocument = {
       spaceId,
@@ -149,10 +159,10 @@ export class ProposalsService {
       actionInput: params.actionInput,
       status: 'pending',
       impact,
-      confidence: params.confidence,
+      confidence,
       category,
-      origin: params.origin,
-      ...toSortRanks({ impact, confidence: params.confidence }),
+      origin,
+      ...toSortRanks({ impact, confidence }),
       expiresAt: blankToUndefined(params.expiresAt),
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
       createdAt: new Date().toISOString(),
@@ -1029,11 +1039,15 @@ const assertValidPair = (
 
 /**
  * Treats an empty or whitespace-only string as absent. Liquid renders a missing
- * workflow input as `''`, which is not the same thing as a value.
+ * workflow input as `''`, which is not the same thing as a value — and `??`
+ * cannot tell them apart, so every default behind one of these would be skipped.
+ *
+ * Generic so an enum-typed field keeps its type: trimming cannot move a value
+ * off its union, since none of the members carry surrounding whitespace.
  */
-const blankToUndefined = (value: string | undefined): string | undefined => {
+const blankToUndefined = <Value extends string>(value: Value | undefined): Value | undefined => {
   const trimmed = value?.trim();
-  return trimmed === undefined || trimmed === '' ? undefined : trimmed;
+  return trimmed === undefined || trimmed === '' ? undefined : (trimmed as Value);
 };
 
 /**

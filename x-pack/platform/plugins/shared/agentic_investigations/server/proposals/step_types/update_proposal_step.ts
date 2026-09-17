@@ -10,6 +10,7 @@ import { updateProposalStepCommonDefinition } from '../../../common/proposals/st
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import { parseStepInput } from './parse_step_input';
 import { toStepError } from './to_step_error';
 
 export const getUpdateProposalStepDefinition = ({
@@ -25,6 +26,7 @@ export const getUpdateProposalStepDefinition = ({
     ...updateProposalStepCommonDefinition,
     handler: async (context) => {
       try {
+        const input = parseStepInput(updateProposalStepCommonDefinition.inputSchema, context.input);
         const spaceId = context.contextManager.getContext().workflow.spaceId;
         const request = context.contextManager.getFakeRequest();
 
@@ -36,22 +38,22 @@ export const getUpdateProposalStepDefinition = ({
         // workflow runner — which is why the gate's own `respondedBy` is the
         // fallback rather than the other way round.
         const decidedBy =
-          context.input.decision !== undefined
+          input.decision !== undefined
             ? (await resolveUser(request)) ??
-              (context.input.decidedBy
-                ? { username: context.input.decidedBy, fullName: null, email: null }
+              (input.decidedBy
+                ? { username: input.decidedBy, fullName: null, email: null }
                 : undefined)
             : undefined;
 
         const proposal = await getProposalsService().update(
           {
-            id: context.input.proposalId,
-            status: context.input.status,
-            decision: context.input.decision,
+            id: input.proposalId,
+            status: input.status,
+            decision: input.decision,
             decidedBy,
-            dismissReason: context.input.dismissReason,
-            rationale: context.input.rationale,
-            executionError: context.input.executionError,
+            dismissReason: input.dismissReason,
+            rationale: input.rationale,
+            executionError: input.executionError,
           },
           spaceId
         );

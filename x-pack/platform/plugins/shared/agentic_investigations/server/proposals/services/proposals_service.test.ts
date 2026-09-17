@@ -339,6 +339,39 @@ describe('ProposalsService', () => {
       expect(indexArgs.document.impactRank).toBe(3);
     });
 
+    it('should treat a blank caller value as absent rather than as a value', async () => {
+      // A workflow reaches this through Liquid, which renders an absent input
+      // as `''` — and `??` cannot tell that from a real value. Unblanked, the
+      // caller always wins with an empty string: the action's own metadata is
+      // never consulted, no default fires, and the queue drops a proposal it
+      // cannot group by category.
+      const storage = createStorage();
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({
+        definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+      });
+      const { service } = createService(storage, workflowsApi);
+
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          impact: '' as never,
+          category: '' as never,
+          confidence: '' as never,
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(proposal.category).toBe('tune');
+      expect(proposal.impact).toBe('low');
+      // Required on the stored document, so a blank resolves to the default
+      // rather than to an omission.
+      expect(proposal.confidence).toBe('medium');
+    });
+
     it('should prefer the caller category over the action metadata', async () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();

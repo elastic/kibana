@@ -9,6 +9,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getProposalStepCommonDefinition } from '../../../common/proposals/step_types/get_proposal_step';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import { parseStepInput } from './parse_step_input';
 import { toStepError } from './to_step_error';
 
 export const getGetProposalStepDefinition = ({
@@ -22,11 +23,12 @@ export const getGetProposalStepDefinition = ({
     ...getProposalStepCommonDefinition,
     handler: async (context) => {
       try {
+        const input = parseStepInput(getProposalStepCommonDefinition.inputSchema, context.input);
         const spaceId = context.contextManager.getContext().workflow.spaceId;
 
         await privileges.assertCanRead(context.contextManager.getFakeRequest());
 
-        const proposal = await getProposalsService().get(context.input.proposalId, spaceId);
+        const proposal = await getProposalsService().get(input.proposalId, spaceId);
 
         return {
           output: {

@@ -11,6 +11,7 @@ import { resolveExpiresAt } from './resolve_expires_at';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import { parseStepInput } from './parse_step_input';
 import { toStepError } from './to_step_error';
 
 /**
@@ -31,6 +32,7 @@ export const getCreateProposalStepDefinition = ({
     ...createProposalStepCommonDefinition,
     handler: async (context) => {
       try {
+        const input = parseStepInput(createProposalStepCommonDefinition.inputSchema, context.input);
         const workflowContext = context.contextManager.getContext();
         const spaceId = workflowContext.workflow.spaceId;
         const workflowExecutionId = workflowContext.execution.id;
@@ -47,15 +49,15 @@ export const getCreateProposalStepDefinition = ({
 
         const proposal = await getProposalsService().create(
           {
-            conversationId: context.input.conversationId,
-            comment: context.input.comment,
-            actionWorkflowId: context.input.actionWorkflowId,
-            actionInput: context.input.actionInput,
-            impact: context.input.impact,
-            category: context.input.category,
-            confidence: context.input.confidence ?? 'medium',
-            origin: context.input.origin ?? 'worker',
-            expiresAt: resolveExpiresAt(context.input.expiresIn),
+            conversationId: input.conversationId,
+            comment: input.comment,
+            actionWorkflowId: input.actionWorkflowId,
+            actionInput: input.actionInput,
+            impact: input.impact,
+            category: input.category,
+            confidence: input.confidence ?? 'medium',
+            origin: input.origin ?? 'worker',
+            expiresAt: resolveExpiresAt(input.expiresIn),
             workflowExecutionId,
           },
           {

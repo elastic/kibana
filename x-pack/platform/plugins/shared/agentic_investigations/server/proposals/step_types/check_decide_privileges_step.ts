@@ -11,6 +11,7 @@ import {
   isExternalResumePrincipal,
 } from '../../../common/proposals/step_types/check_decide_privileges_step';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import { parseStepInput } from './parse_step_input';
 import { toStepError } from './to_step_error';
 
 /**
@@ -30,7 +31,10 @@ export const getCheckDecidePrivilegesStepDefinition = ({
     ...checkDecidePrivilegesStepCommonDefinition,
     handler: async (context) => {
       try {
-        const { proposalId, respondedBy } = context.input;
+        const { proposalId, respondedBy } = parseStepInput(
+          checkDecidePrivilegesStepCommonDefinition.inputSchema,
+          context.input
+        );
 
         // Refused without consulting the privilege service at all: on this path
         // the execution identity is the workflow runner, so a check would

@@ -49,6 +49,21 @@ describe('create-investigation-proposal workflow execution', () => {
 
       expect(fixture.onlyProposal().workflowExecutionId).toBe('fake_workflow_execution_id');
     });
+
+    it('should fill the grouping and ranking fields a caller left out', async () => {
+      // The caller passes only what it knows, and the YAML renders every other
+      // input as `''` — Liquid has no way to omit a key. Left as empty strings
+      // these reach the queue, which groups by category and silently drops
+      // whatever it cannot group, so the proposal never appears at all.
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+
+      const proposal = fixture.onlyProposal();
+      // Resolved from the action workflow's own declared metadata, which an
+      // empty-string category would have taken precedence over.
+      expect(proposal.category).toBe('tune');
+      expect(proposal.impact).toBe('low');
+      expect(proposal.confidence).toBe('medium');
+    });
   });
 
   describe('dismissal', () => {
