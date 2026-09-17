@@ -91,6 +91,7 @@
     "@kbn/workflows-extensions",
     "@kbn/alerts-ui-shared",
     "@kbn/licensing-plugin",
+    "@kbn/rule-registry-plugin",
     "@kbn/securitysolution-rules",
     "@kbn/alerts-as-data-utils",
     "@kbn/shared-ux-utility",

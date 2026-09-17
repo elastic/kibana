@@ -24,6 +24,7 @@ import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ServerlessServerSetup } from '@kbn/serverless/server/types';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -76,6 +77,7 @@ export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{
   workflows: WorkflowsApiRequestHandlerContext;
   actions: ActionsApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
+  rac: RacApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;
 }>;
 
