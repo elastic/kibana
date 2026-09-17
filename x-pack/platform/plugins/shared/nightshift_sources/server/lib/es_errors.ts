@@ -6,7 +6,15 @@
  */
 
 import type { errors } from '@elastic/elasticsearch';
-import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
+import {
+  badRequest,
+  conflict,
+  forbidden,
+  internal,
+  notFound,
+  serverUnavailable,
+  tooManyRequests,
+} from '@hapi/boom';
 import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 const getEsError = (error: errors.ResponseError): ElasticsearchErrorDetails['error'] =>
@@ -36,6 +44,10 @@ export const toBoom = (error: unknown, prefix?: string): Error => {
       return notFound(message);
     case 409:
       return conflict(message);
+    case 429:
+      return tooManyRequests(message);
+    case 503:
+      return serverUnavailable(message);
     default:
       return internal(message);
   }

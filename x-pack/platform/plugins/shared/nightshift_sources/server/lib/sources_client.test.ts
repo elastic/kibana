@@ -499,5 +499,16 @@ describe('SourcesClient', () => {
       expect(source.esql_updated_at).toBe('2026-09-01T00:00:00.000Z');
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
+
+    it('short-circuits when the flag already matches', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.setEnabled('source-1', true);
+
+      expect(source.enabled).toBe(true);
+      expect(source.updated_at).toBe('2026-09-01T00:00:00.000Z');
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
   });
 });

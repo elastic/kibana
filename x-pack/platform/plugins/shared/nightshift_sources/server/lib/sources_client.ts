@@ -117,7 +117,10 @@ export class SourcesClient {
       await viewsClient.putView(attributes.view_name, attributes.esql);
     } catch (error) {
       await this.compensate(`restore source ${id} after its view could not be updated`, () =>
-        soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, previous, FULL_UPDATE)
+        soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, previous, {
+          ...FULL_UPDATE,
+          version: so.version,
+        })
       );
       throw error;
     }
@@ -175,12 +178,17 @@ export class SourcesClient {
     // SO first: an orphaned view is invisible to Kibana and harmless, while a source
     // with view_missing health is visible and looks broken.
     await soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id);
-    await viewsClient.deleteView(attributes.view_name);
+    await this.compensate(`clean up view for deleted source ${id}`, () =>
+      viewsClient.deleteView(attributes.view_name)
+    );
   }
 
   /** Flips the flag only; engines reconcile their rules and onboarding from it. */
   async setEnabled(id: string, enabled: boolean): Promise<NightshiftSource> {
     const so = await this.getSavedObject(id);
+    if (so.attributes.enabled === enabled) {
+      return toSource(id, so.attributes);
+    }
     const attributes: NightshiftSourceAttributes = {
       ...so.attributes,
       enabled,

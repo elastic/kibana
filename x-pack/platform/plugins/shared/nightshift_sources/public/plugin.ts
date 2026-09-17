@@ -22,9 +22,14 @@ export class NightshiftSourcesPublicPlugin
     return {
       getClient: () => {
         if (!clientPromise) {
-          clientPromise = import('./api').then(({ createNightshiftSourcesRepositoryClient }) =>
-            createNightshiftSourcesRepositoryClient(core)
-          );
+          clientPromise = import('./api')
+            .then(({ createNightshiftSourcesRepositoryClient }) =>
+              createNightshiftSourcesRepositoryClient(core)
+            )
+            .catch((error) => {
+              clientPromise = undefined;
+              throw error;
+            });
         }
         return clientPromise;
       },
