@@ -8,6 +8,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
+import { aiIndexViewName } from '@kbn/context-engine-plugin/common/constants';
 import { resolveSpaceId } from '@kbn/context-engine-plugin/server/utils/resolve_space_id';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { registerAgentBuilderTools } from './agent_builder/tools';
@@ -56,7 +57,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
       .filter((aiIndex) => requestedIds.has(aiIndex.id))
       .map((aiIndex) => ({
         id: aiIndex.id,
-        esqlTarget: aiIndex.dest.value,
+        esqlTarget: aiIndexViewName(aiIndex.id),
         description: aiIndex.description,
       }));
   });
