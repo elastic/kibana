@@ -184,6 +184,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 created_by: user.username,
                 created_by_profile_uid: null,
                 updated_by_profile_uid: null,
+                api_key_owner_profile_uid: null,
                 schedule: { interval: '1m' },
                 scheduled_task_id: response.body.scheduled_task_id,
                 created_at: response.body.created_at,

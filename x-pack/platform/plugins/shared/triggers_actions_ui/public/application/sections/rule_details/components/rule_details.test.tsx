@@ -324,6 +324,39 @@ describe('rule_details', () => {
       expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('elastic');
     });
 
+    it('renders the API key owner metadata using the resolved user profile when apiKeyOwnerProfileUid is set', async () => {
+      useKibanaMock().services.userProfile.bulkGet = jest.fn().mockResolvedValue([
+        {
+          uid: 'api-key-owner-uid',
+          user: { username: '2889684073', email: 'jdoe@elastic.co' },
+          data: {},
+        },
+      ]);
+      const rule = mockRule({
+        apiKeyOwner: '2889684073',
+        apiKeyOwnerProfileUid: 'api-key-owner-uid',
+      });
+      renderPage(rule);
+
+      expect(await screen.findByTestId('apiKeyOwnerLabel')).toHaveTextContent('jdoe@elastic.co');
+    });
+
+    it('falls back to apiKeyOwner when its profile uid cannot be resolved', async () => {
+      const bulkGet = jest.fn().mockResolvedValue([]);
+      useKibanaMock().services.userProfile.bulkGet = bulkGet;
+      const rule = mockRule({
+        apiKeyOwner: '2889684073',
+        apiKeyOwnerProfileUid: 'unresolvable-api-key-owner-uid',
+      });
+      renderPage(rule);
+
+      await waitFor(() => {
+        expect(bulkGet).toHaveBeenCalled();
+      });
+
+      expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('2889684073');
+    });
+
     it(`doesn't render the API key owner metadata when user can't manage API keys`, () => {
       const { hasManageApiKeysCapability } = jest.requireMock('../../../lib/capabilities');
       hasManageApiKeysCapability.mockReturnValueOnce(false);

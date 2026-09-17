@@ -447,6 +447,7 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -715,6 +716,7 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -1202,6 +1204,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1464,6 +1467,7 @@ describe('create()', () => {
         apiKey: null,
         apiKeyCreatedByUser: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1730,6 +1734,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -1938,6 +1943,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -2139,6 +2145,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -2298,6 +2305,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -2457,6 +2465,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -2639,6 +2648,7 @@ describe('create()', () => {
           },
         ],
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKey: null,
         apiKeyCreatedByUser: null,
         artifacts: {
@@ -3121,6 +3131,7 @@ describe('create()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyCreatedByUser: false,
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: {
@@ -3242,6 +3253,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdByProfileUid: null,
@@ -4200,6 +4212,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: true,
         artifacts: {
           dashboards: [],
@@ -4285,6 +4298,7 @@ describe('create()', () => {
       expect.objectContaining({
         apiKey: Buffer.from('cloned-id:cloned-secret').toString('base64'),
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: false,
       }),
       expect.any(Object)
@@ -4515,6 +4529,7 @@ describe('create()', () => {
           alertTypeId: '123',
           apiKey: null,
           apiKeyOwner: null,
+          apiKeyOwnerProfileUid: null,
           apiKeyCreatedByUser: null,
           artifacts: {
             dashboards: [],

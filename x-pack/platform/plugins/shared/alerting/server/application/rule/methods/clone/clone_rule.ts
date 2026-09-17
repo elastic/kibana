@@ -142,6 +142,7 @@ export async function cloneRule<Params extends RuleParams = never>(
     id: ruleType.id,
     ruleName,
     username,
+    profileUid,
     shouldUpdateApiKey: ruleSavedObject.attributes.enabled,
     errorMessage: 'Error creating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: ruleSavedObject.attributes.apiKeyCreatedByUser },

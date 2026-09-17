@@ -100,11 +100,12 @@ describe('transformRuleToRuleResponseInternal', () => {
     });
   });
 
-  describe('createdByProfileUid / updatedByProfileUid', () => {
+  describe('profile uid fields', () => {
     it('omits the fields when absent from the rule', () => {
       const res = transformRuleToRuleResponseInternal(rule);
       expect(res).not.toHaveProperty('created_by_profile_uid');
       expect(res).not.toHaveProperty('updated_by_profile_uid');
+      expect(res).not.toHaveProperty('api_key_owner_profile_uid');
     });
 
     it('includes the fields when present on the rule', () => {
@@ -112,9 +113,11 @@ describe('transformRuleToRuleResponseInternal', () => {
         ...rule,
         createdByProfileUid: 'u_profile_created',
         updatedByProfileUid: 'u_profile_updated',
+        apiKeyOwnerProfileUid: 'u_profile_api_key_owner',
       });
       expect(res.created_by_profile_uid).toBe('u_profile_created');
       expect(res.updated_by_profile_uid).toBe('u_profile_updated');
+      expect(res.api_key_owner_profile_uid).toBe('u_profile_api_key_owner');
     });
 
     it('preserves an explicit null, like created_by/updated_by', () => {
@@ -122,9 +125,11 @@ describe('transformRuleToRuleResponseInternal', () => {
         ...rule,
         createdByProfileUid: null,
         updatedByProfileUid: null,
+        apiKeyOwnerProfileUid: null,
       });
       expect(res).toHaveProperty('created_by_profile_uid', null);
       expect(res).toHaveProperty('updated_by_profile_uid', null);
+      expect(res).toHaveProperty('api_key_owner_profile_uid', null);
     });
   });
 });

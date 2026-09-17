@@ -422,7 +422,7 @@ describe('findInternalRulesRoute', () => {
     `);
   });
 
-  it('includes created_by_profile_uid and updated_by_profile_uid when present', async () => {
+  it('includes the profile uid fields when present', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -448,6 +448,7 @@ describe('findInternalRulesRoute', () => {
           updatedBy: '2889684073',
           createdByProfileUid: 'u_profile_created',
           updatedByProfileUid: 'u_profile_updated',
+          apiKeyOwnerProfileUid: 'u_profile_api_key_owner',
           muteAll: false,
           mutedInstanceIds: [],
           schedule: { interval: '1m' },
@@ -478,6 +479,7 @@ describe('findInternalRulesRoute', () => {
 
     expect(data[0].created_by_profile_uid).toBe('u_profile_created');
     expect(data[0].updated_by_profile_uid).toBe('u_profile_updated');
+    expect(data[0].api_key_owner_profile_uid).toBe('u_profile_api_key_owner');
   });
 
   it('transforms snoozedInstances into snoozed_alert_instances in the response', async () => {

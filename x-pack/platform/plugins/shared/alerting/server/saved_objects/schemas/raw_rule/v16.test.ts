@@ -38,7 +38,7 @@ describe('rawRuleSchemaV16', () => {
     params: {},
   };
 
-  it('keeps older documents valid when createdByProfileUid/updatedByProfileUid are absent', () => {
+  it('keeps older documents valid when the profile uid fields are absent', () => {
     expect(() => rawRuleSchema.validate(baseRule)).not.toThrow();
   });
 
@@ -78,6 +78,33 @@ describe('rawRuleSchemaV16', () => {
       rawRuleSchema.validate({
         ...baseRule,
         updatedByProfileUid: 123,
+      })
+    ).toThrow();
+  });
+
+  it('accepts apiKeyOwnerProfileUid as a string', () => {
+    const validated = rawRuleSchema.validate({
+      ...baseRule,
+      apiKeyOwnerProfileUid: 'u_profile_api_key_owner',
+    });
+
+    expect(validated.apiKeyOwnerProfileUid).toBe('u_profile_api_key_owner');
+  });
+
+  it('accepts apiKeyOwnerProfileUid as null', () => {
+    const validated = rawRuleSchema.validate({
+      ...baseRule,
+      apiKeyOwnerProfileUid: null,
+    });
+
+    expect(validated.apiKeyOwnerProfileUid).toBeNull();
+  });
+
+  it('rejects a non-string, non-null apiKeyOwnerProfileUid', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        apiKeyOwnerProfileUid: 123,
       })
     ).toThrow();
   });

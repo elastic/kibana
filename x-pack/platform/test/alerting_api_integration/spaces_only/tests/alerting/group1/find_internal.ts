@@ -119,6 +119,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           created_by: null,
           created_by_profile_uid: null,
           updated_by_profile_uid: null,
+          api_key_owner_profile_uid: null,
           api_key_owner: null,
           artifacts: {
             dashboards: [],

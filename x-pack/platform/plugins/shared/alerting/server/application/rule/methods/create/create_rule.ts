@@ -235,7 +235,12 @@ export async function createRule<Params extends RuleParams = never>(
 
   const { systemActions, actions: actionToNotUse, ...restData } = data;
 
-  const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
+  const apiKeyProps = apiKeyAsRuleDomainProperties(
+    createdAPIKey,
+    username,
+    isAuthTypeApiKey,
+    profileUid
+  );
   const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
     data.tags,
     apiKeyProps.uiamApiKey,

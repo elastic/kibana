@@ -93,6 +93,7 @@ const getTestUtils = (
                       is_snoozed_until: response.body.is_snoozed_until,
                       created_by_profile_uid: null,
                       updated_by_profile_uid: null,
+                      api_key_owner_profile_uid: null,
                     }
                   : {}),
               });

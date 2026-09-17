@@ -335,6 +335,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     id: ruleType.id,
     ruleName: updateRuleData.name,
     username,
+    profileUid,
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },

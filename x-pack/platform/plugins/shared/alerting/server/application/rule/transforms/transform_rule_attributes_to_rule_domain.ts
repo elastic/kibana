@@ -194,6 +194,9 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(esRule.updatedByProfileUid !== undefined
       ? { updatedByProfileUid: esRule.updatedByProfileUid }
       : {}),
+    ...(esRule.apiKeyOwnerProfileUid !== undefined
+      ? { apiKeyOwnerProfileUid: esRule.apiKeyOwnerProfileUid }
+      : {}),
     createdAt: new Date(esRule.createdAt),
     updatedAt: new Date(esRule.updatedAt),
     apiKey: esRule.apiKey,

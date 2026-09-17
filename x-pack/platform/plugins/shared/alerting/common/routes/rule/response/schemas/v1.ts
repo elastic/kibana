@@ -784,6 +784,16 @@ export const ruleResponseInternalSchema = schema.object(
         },
       })
     ),
+    api_key_owner_profile_uid: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'The identifier for the profile that owns the API key associated with the rule.',
+          },
+        })
+      )
+    ),
     api_key_created_by_user: schema.maybe(
       schema.nullable(
         schema.boolean({

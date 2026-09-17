@@ -313,6 +313,8 @@ export interface Rule<Params extends RuleTypeParams = never> {
   updatedAt: Date;
   apiKey: string | null;
   apiKeyOwner: string | null;
+  /** Elasticsearch user profile uid of the API key owner, when available (e.g. not populated for API key-authenticated actions). */
+  apiKeyOwnerProfileUid?: string | null;
   apiKeyCreatedByUser?: boolean | null;
   uiamApiKey?: string | null;
   throttle?: string | null;

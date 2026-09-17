@@ -426,6 +426,7 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -689,6 +690,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -939,6 +941,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1164,6 +1167,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1381,6 +1385,7 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": false,
         "apiKeyOwner": "elastic",
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -1569,6 +1574,7 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -2718,6 +2724,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -3313,6 +3320,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -3482,6 +3490,7 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": true,
         "apiKeyOwner": "elastic",
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -3737,6 +3746,7 @@ describe('update()', () => {
           alertTypeId: 'myType',
           apiKey: null,
           apiKeyOwner: null,
+          apiKeyOwnerProfileUid: null,
           artifacts: {
             dashboards: [],
             investigation_guide: { blob: '' },

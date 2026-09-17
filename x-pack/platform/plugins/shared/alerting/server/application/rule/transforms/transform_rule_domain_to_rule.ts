@@ -30,6 +30,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     createdAt: ruleDomain.createdAt,
     updatedAt: ruleDomain.updatedAt,
     apiKeyOwner: ruleDomain.apiKeyOwner,
+    apiKeyOwnerProfileUid: ruleDomain.apiKeyOwnerProfileUid,
     apiKeyCreatedByUser: ruleDomain.apiKeyCreatedByUser,
     throttle: ruleDomain.throttle,
     muteAll: ruleDomain.muteAll,

@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -135,11 +136,15 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
 
-  // Batch both uids into a single bulkGet request instead of fetching separately.
+  // Batch all uids into a single bulkGet request instead of fetching separately.
   const auditProfileUids = useMemo(
     () =>
-      [rule.createdByProfileUid, rule.updatedByProfileUid].filter((uid): uid is string => !!uid),
-    [rule.createdByProfileUid, rule.updatedByProfileUid]
+      uniq(
+        [rule.createdByProfileUid, rule.updatedByProfileUid, rule.apiKeyOwnerProfileUid].filter(
+          (uid): uid is string => !!uid
+        )
+      ),
+    [rule.createdByProfileUid, rule.updatedByProfileUid, rule.apiKeyOwnerProfileUid]
   );
 
   const { data: profilesByUid = EMPTY_PROFILES_BY_UID } = useBulkGetUserProfiles({
@@ -151,6 +156,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const updater = rule.updatedByProfileUid
     ? profilesByUid.get(rule.updatedByProfileUid) ?? rule.updatedBy ?? ''
     : rule.updatedBy ?? '';
+  const apiKeyOwner = rule.apiKeyOwnerProfileUid
+    ? profilesByUid.get(rule.apiKeyOwnerProfileUid) ?? rule.apiKeyOwner ?? ''
+    : rule.apiKeyOwner ?? '';
 
   useEffect(() => {
     (async () => {
@@ -387,20 +395,20 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       },
     ];
 
-    if (hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner) {
+    if (hasManageApiKeysCapability(capabilities) && apiKeyOwner) {
       items.push({
         type: 'text',
         label: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle',
           { defaultMessage: 'API key owner' }
         ),
-        value: rule.apiKeyOwner,
+        value: apiKeyOwner,
         'data-test-subj': 'apiKeyOwnerLabel',
       });
     }
 
     return items as unknown as AppHeaderMetadataItems;
-  }, [creator, rule.createdAt, updater, rule.updatedAt, rule.apiKeyOwner, capabilities]);
+  }, [creator, rule.createdAt, updater, rule.updatedAt, apiKeyOwner, capabilities]);
 
   const appMenu = useRuleDetailsAppMenu({
     rule,

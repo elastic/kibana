@@ -49,6 +49,9 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.updatedByProfileUid !== undefined
       ? { updatedByProfileUid: rule.updatedByProfileUid }
       : {}),
+    ...(rule.apiKeyOwnerProfileUid !== undefined
+      ? { apiKeyOwnerProfileUid: rule.apiKeyOwnerProfileUid }
+      : {}),
     createdAt: rule.createdAt.toISOString(),
     updatedAt: rule.updatedAt.toISOString(),
     apiKey: rule.apiKey,

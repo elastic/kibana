@@ -114,12 +114,13 @@ describe('transformRuleDomainToRuleAttributes', () => {
     expect(result).not.toHaveProperty('lastEnabledAt');
   });
 
-  test('should include createdByProfileUid and updatedByProfileUid when present', () => {
+  test('should include the profile uid fields when present', () => {
     const result = transformRuleDomainToRuleAttributes({
       rule: {
         ...rule,
         createdByProfileUid: 'u_profile_created',
         updatedByProfileUid: 'u_profile_updated',
+        apiKeyOwnerProfileUid: 'u_profile_api_key_owner',
       },
       actionsWithRefs: [
         {
@@ -141,9 +142,10 @@ describe('transformRuleDomainToRuleAttributes', () => {
 
     expect(result.createdByProfileUid).toBe('u_profile_created');
     expect(result.updatedByProfileUid).toBe('u_profile_updated');
+    expect(result.apiKeyOwnerProfileUid).toBe('u_profile_api_key_owner');
   });
 
-  test('should omit createdByProfileUid and updatedByProfileUid when absent', () => {
+  test('should omit the profile uid fields when absent', () => {
     const result = transformRuleDomainToRuleAttributes({
       rule,
       actionsWithRefs: [
@@ -166,14 +168,16 @@ describe('transformRuleDomainToRuleAttributes', () => {
 
     expect(result).not.toHaveProperty('createdByProfileUid');
     expect(result).not.toHaveProperty('updatedByProfileUid');
+    expect(result).not.toHaveProperty('apiKeyOwnerProfileUid');
   });
 
-  test('should preserve explicit null createdByProfileUid and updatedByProfileUid', () => {
+  test('should preserve an explicit null for the profile uid fields', () => {
     const result = transformRuleDomainToRuleAttributes({
       rule: {
         ...rule,
         createdByProfileUid: null,
         updatedByProfileUid: null,
+        apiKeyOwnerProfileUid: null,
       },
       actionsWithRefs: [
         {
@@ -198,6 +202,7 @@ describe('transformRuleDomainToRuleAttributes', () => {
 
     expect(result.createdByProfileUid).toBe(null);
     expect(result.updatedByProfileUid).toBe(null);
+    expect(result.apiKeyOwnerProfileUid).toBe(null);
   });
 
   test('should transform rule domain to rule attribute', () => {

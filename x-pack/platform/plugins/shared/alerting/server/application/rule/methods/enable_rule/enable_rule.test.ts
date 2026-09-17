@@ -283,6 +283,7 @@ describe('enable()', () => {
         updatedByProfileUid: null,
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: false,
         scheduledTaskId: 'task-123',
         actions: [

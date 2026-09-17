@@ -193,7 +193,8 @@ export async function updateRuleInMemory<Params extends RuleParams>(
       apiKeysMap,
       ruleAttributes,
       hasUpdateApiKeyOperation,
-      username
+      username,
+      profileUid
     );
     apiKeyAttributes = preparedApiKeyAttributes;
   }
@@ -218,12 +219,14 @@ async function prepareApiKeys(
   apiKeysMap: ApiKeysMap,
   attributes: RawRule,
   hasUpdateApiKeyOperation: boolean,
-  username: string | null
+  username: string | null,
+  profileUid: string | null
 ): Promise<{ apiKeyAttributes: ApiKeyAttributes }> {
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: ruleType.id,
     ruleName: attributes.name,
     username,
+    profileUid,
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },

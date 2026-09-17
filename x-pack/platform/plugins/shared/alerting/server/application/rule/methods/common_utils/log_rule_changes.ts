@@ -241,6 +241,7 @@ function transformRuleDomainToRuleChangeHistorySnapshot(
     updatedAt: normalizeDate(ruleDomain.updatedAt, new Date()),
     apiKey: ruleDomain.apiKey,
     apiKeyOwner: ruleDomain.apiKeyOwner,
+    apiKeyOwnerProfileUid: ruleDomain.apiKeyOwnerProfileUid,
     apiKeyCreatedByUser: ruleDomain.apiKeyCreatedByUser,
     uiamApiKey: ruleDomain.uiamApiKey,
     uiamApiKeyExternal: ruleDomain.uiamApiKeyExternal,

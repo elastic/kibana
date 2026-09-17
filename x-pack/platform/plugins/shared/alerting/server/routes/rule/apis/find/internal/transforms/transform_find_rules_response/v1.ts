@@ -52,6 +52,9 @@ export const transformPartialRule = (
     ...(rule.createdAt ? { created_at: rule.createdAt.toISOString() } : {}),
     ...(rule.updatedAt ? { updated_at: rule.updatedAt.toISOString() } : {}),
     ...(rule.apiKeyOwner !== undefined ? { api_key_owner: rule.apiKeyOwner } : {}),
+    ...(rule.apiKeyOwnerProfileUid !== undefined
+      ? { api_key_owner_profile_uid: rule.apiKeyOwnerProfileUid }
+      : {}),
     ...(rule.apiKeyCreatedByUser !== undefined
       ? { api_key_created_by_user: rule.apiKeyCreatedByUser }
       : {}),

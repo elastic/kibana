@@ -11,4 +11,5 @@ import { rawRuleSchema as rawRuleSchemaV15 } from './v15';
 export const rawRuleSchema = rawRuleSchemaV15.extends({
   createdByProfileUid: schema.maybe(schema.nullable(schema.string())),
   updatedByProfileUid: schema.maybe(schema.nullable(schema.string())),
+  apiKeyOwnerProfileUid: schema.maybe(schema.nullable(schema.string())),
 });

@@ -109,6 +109,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     id: attributes.alertTypeId,
     ruleName: attributes.name,
     username,
+    profileUid,
     shouldUpdateApiKey: true,
     errorMessage: 'Error updating API key for rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },

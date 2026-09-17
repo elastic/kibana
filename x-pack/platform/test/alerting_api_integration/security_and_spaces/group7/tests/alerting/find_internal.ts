@@ -95,6 +95,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 created_by: 'elastic',
                 created_by_profile_uid: null,
                 updated_by_profile_uid: null,
+                api_key_owner_profile_uid: null,
                 api_key_created_by_user: false,
                 revision: 0,
                 scheduled_task_id: match.scheduled_task_id,
@@ -287,6 +288,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 created_by: 'elastic',
                 created_by_profile_uid: null,
                 updated_by_profile_uid: null,
+                api_key_owner_profile_uid: null,
                 api_key_created_by_user: null,
                 artifacts: {
                   dashboards: [],
@@ -801,7 +803,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('created_by_profile_uid / updated_by_profile_uid', () => {
+    describe('profile uid fields', () => {
       const { user, space } = SuperuserAtSpace1;
 
       async function loginAndGetSessionCookie() {
@@ -819,7 +821,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         return (response.headers['set-cookie'] as unknown as string[])[0];
       }
 
-      it('populates both fields with the profile uid of the user that created the rule, when created through an active session', async () => {
+      it('populates all of them with the profile uid of the user that created the rule, when created through an active session', async () => {
         // Rules created via basic auth or an API key never carry a profile uid: Kibana only
         // resolves `AuthenticatedUser.profile_uid` for requests authenticated through an active
         // browser session (see `getCurrentUser` in the security plugin). A session cookie is
@@ -850,9 +852,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const match = response.body.data.find((obj: any) => obj.id === createdRule.id);
         expect(match.created_by_profile_uid).to.eql(currentUser.profile_uid);
         expect(match.updated_by_profile_uid).to.eql(currentUser.profile_uid);
+        expect(match.api_key_owner_profile_uid).to.eql(currentUser.profile_uid);
       });
 
-      it('sets both fields to null when the rule is created without an active session (e.g. basic auth)', async () => {
+      it('sets all of them to null when the rule is created without an active session (e.g. basic auth)', async () => {
         const createdRule = await createNoOpAlert(space);
 
         const response = await supertestWithoutAuth
@@ -865,6 +868,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const match = response.body.data.find((obj: any) => obj.id === createdRule.id);
         expect(match.created_by_profile_uid).to.eql(null);
         expect(match.updated_by_profile_uid).to.eql(null);
+        expect(match.api_key_owner_profile_uid).to.eql(null);
       });
     });
 

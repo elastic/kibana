@@ -33,6 +33,7 @@ const getDefaultRules = (response: any) => ({
   created_by: 'elastic',
   created_by_profile_uid: null,
   updated_by_profile_uid: null,
+  api_key_owner_profile_uid: null,
   updated_by: response.body.rules[0].updated_by,
   mute_all: false,
   muted_alert_ids: [],

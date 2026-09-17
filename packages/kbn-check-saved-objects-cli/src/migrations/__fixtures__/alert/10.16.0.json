@@ -121,6 +121,7 @@
       "uiamApiKeyExternal": "boolean?|null",
       "createdByProfileUid": "string?|null",
       "updatedByProfileUid": "string?|null",
+      "apiKeyOwnerProfileUid": "string?|null",
       "schedule": {
         "interval": "string"
       },

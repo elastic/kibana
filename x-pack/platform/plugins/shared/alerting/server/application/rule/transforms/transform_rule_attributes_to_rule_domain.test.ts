@@ -242,7 +242,7 @@ describe('transformRuleAttributesToRuleDomain', () => {
     `);
   });
 
-  it('includes createdByProfileUid and updatedByProfileUid when present', () => {
+  it('includes the profile uid fields when present', () => {
     const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
 
     const res = transformRuleAttributesToRuleDomain(
@@ -251,6 +251,7 @@ describe('transformRuleAttributesToRuleDomain', () => {
         tags: ['foo'],
         createdBy: 'user',
         createdByProfileUid: 'u_profile_created',
+        apiKeyOwnerProfileUid: 'u_profile_api_key_owner',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         legacyId: null,
@@ -289,9 +290,10 @@ describe('transformRuleAttributesToRuleDomain', () => {
 
     expect(res.createdByProfileUid).toBe('u_profile_created');
     expect(res.updatedByProfileUid).toBe('u_profile_updated');
+    expect(res.apiKeyOwnerProfileUid).toBe('u_profile_api_key_owner');
   });
 
-  it('omits createdByProfileUid and updatedByProfileUid when absent', () => {
+  it('omits the profile uid fields when absent', () => {
     const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
 
     const res = transformRuleAttributesToRuleDomain(
@@ -336,9 +338,10 @@ describe('transformRuleAttributesToRuleDomain', () => {
 
     expect(res).not.toHaveProperty('createdByProfileUid');
     expect(res).not.toHaveProperty('updatedByProfileUid');
+    expect(res).not.toHaveProperty('apiKeyOwnerProfileUid');
   });
 
-  it('preserves an explicit null for createdByProfileUid and updatedByProfileUid', () => {
+  it('preserves an explicit null for the profile uid fields', () => {
     const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
 
     const res = transformRuleAttributesToRuleDomain(
@@ -347,6 +350,7 @@ describe('transformRuleAttributesToRuleDomain', () => {
         tags: ['foo'],
         createdBy: 'user',
         createdByProfileUid: null,
+        apiKeyOwnerProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         legacyId: null,
@@ -385,6 +389,7 @@ describe('transformRuleAttributesToRuleDomain', () => {
 
     expect(res).toHaveProperty('createdByProfileUid', null);
     expect(res).toHaveProperty('updatedByProfileUid', null);
+    expect(res).toHaveProperty('apiKeyOwnerProfileUid', null);
   });
 
   describe('lastRun outcomeMsg migration', () => {

@@ -155,6 +155,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
           id: attributes.alertTypeId,
           ruleName: attributes.name,
           username,
+          profileUid,
           shouldUpdateApiKey: true,
           apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
         })

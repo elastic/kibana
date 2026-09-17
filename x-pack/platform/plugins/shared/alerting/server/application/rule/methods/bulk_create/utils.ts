@@ -70,13 +70,15 @@ export const prepareRule = async <Params extends RuleParams>({
       | Awaited<ReturnType<typeof createNewAPIKeySet>> = apiKeyAsRuleDomainProperties(
       null,
       username,
-      false
+      false,
+      profileUid
     );
     if (data.enabled) {
       apiKeyProps = await createNewAPIKeySet(context, {
         id: ruleType.id,
         ruleName: data.name,
         username,
+        profileUid,
         shouldUpdateApiKey: true,
         errorMessage: 'Error creating rule: could not create API key',
         refresh: false,
