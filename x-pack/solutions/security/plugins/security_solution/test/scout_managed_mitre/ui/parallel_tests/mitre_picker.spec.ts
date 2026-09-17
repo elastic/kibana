@@ -119,13 +119,9 @@ spaceTest.describe(
           await expect(ruleCreateWizard.savedThreatTechniques).toContainText(
             SEEDED_TECHNIQUE_ONE.name
           );
-          // threatSubtechniqueLink exists in
-          // public/detection_engine/rule_creation_ui/components/description_step/threat_description.tsx.
-          // Asserting via page.testSubj directly (not promoted to the page object yet —
-          // add it to RuleCreateWizardPage.savedThreatSubtechniques when a second caller appears).
-          await expect(
-            page.testSubj.locator('aboutRule').getByTestId('threatSubtechniqueLink')
-          ).toContainText(SEEDED_SUBTECHNIQUE_ONE.name);
+          await expect(ruleCreateWizard.savedThreatSubtechniques).toContainText(
+            SEEDED_SUBTECHNIQUE_ONE.name
+          );
         });
       }
     );

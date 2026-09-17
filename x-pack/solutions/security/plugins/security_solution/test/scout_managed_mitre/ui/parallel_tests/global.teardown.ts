@@ -43,18 +43,20 @@ globalTeardownHook(
         },
       });
 
-      // Assert a non-zero deletion count so silent cleanup failures are visible.
-      // If setup ran correctly and seeded 5 entities, teardown must delete at least 5.
+      // deleteByQuery throws on a real failure, so zero deletions just means the
+      // entities were not there — warn rather than fail, so a setup failure is not
+      // buried under a teardown error.
       if ((result.deleted ?? 0) === 0) {
-        throw new Error(
-          '[managed-mitre teardown] deleteByQuery removed 0 documents — seeded entities may not have been present or cleanup silently failed'
+        log.warning(
+          '[managed-mitre teardown] deleteByQuery removed 0 documents. Seeded entities were not present (setup may have failed)'
         );
+      } else {
+        log.info(`[managed-mitre teardown] Deleted ${result.deleted} synthetic MITRE entities`);
       }
-
-      await deleteSystemIndicesEsUser(esClient);
-
-      log.info(`[managed-mitre teardown] Deleted ${result.deleted} synthetic MITRE entities`);
     } finally {
+      // Must run even if the delete throws: the seeder account carries `all` privileges
+      // on the saved-objects index and would otherwise outlive the suite.
+      await deleteSystemIndicesEsUser(esClient);
       await seederClient.close();
     }
   }

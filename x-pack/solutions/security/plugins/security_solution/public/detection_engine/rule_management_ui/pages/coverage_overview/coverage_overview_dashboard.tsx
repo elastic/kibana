@@ -60,7 +60,12 @@ const CoverageOverviewDashboardComponent = () => {
           <p>{i18n.COVERAGE_OVERVIEW_MITRE_ERROR_BODY}</p>
         </KbnDangerCallout>
       ) : (
-        <EuiFlexGroup gutterSize="m" className="eui-xScroll" tabIndex={0}>
+        <EuiFlexGroup
+          gutterSize="m"
+          className="eui-xScroll"
+          tabIndex={0}
+          data-test-subj="coverageOverviewMatrix"
+        >
           {data?.mitreTactics.map((tactic) => (
             <EuiFlexGroup
               data-test-subj={`coverageOverviewTacticGroup-${tactic.id}`}

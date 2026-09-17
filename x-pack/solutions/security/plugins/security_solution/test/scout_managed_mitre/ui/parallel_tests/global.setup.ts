@@ -49,17 +49,20 @@ globalSetupHook(
         `[managed-mitre setup] Successfully indexed ${result.items.length} MITRE fixture documents`
       );
 
-      // Verify the seeded data is actually served by the route. This single check
-      // confirms that:
+      // Verify the seeded data is actually served by the route. This request
+      // exercises the same resolution path the UI uses: no framework_version
+      // param, so resolveLatestVersion runs and must return 99.0 (the highest
+      // version present). Confirms:
       //   1. xpack.mitreAttack.managedSourceEnabled is on and the route is registered.
-      //   2. Version resolution picked 99.0 (the highest indexed version).
+      //   2. Version resolution picks 99.0 (the highest indexed version).
       //   3. All five seeded IDs round-trip through the saved-object transform.
-      // Without this, seeding failures surface as five cryptic UI locator timeouts
+      //   4. No extra entities are returned — 99.0 is the only version indexed,
+      //      so the response must be exactly the five seeded documents.
+      // Without this, seeding failures surface as cryptic UI locator timeouts
       // rather than a clear setup error.
       const { data } = await kbnClient.request<GetMitreEntitiesResponse>({
         method: 'GET',
-        // Filter by our synthetic version so real bundled entities don't interfere.
-        path: `${GET_MITRE_ENTITIES_URL}?framework_version=${SEEDED_MITRE_FRAMEWORK_VERSION}`,
+        path: GET_MITRE_ENTITIES_URL,
         // Internal route requiring the versioned-API header.
         headers: { 'elastic-api-version': '1' },
       });
@@ -69,7 +72,9 @@ globalSetupHook(
         ...data.techniques.map((t) => t.id),
         ...data.subtechniques.map((t) => t.id),
       ]);
-      const missing = SEEDED_ENTITIES.map((e) => e.id).filter((id) => !returnedIds.has(id));
+      const seededIds = SEEDED_ENTITIES.map((e) => e.id);
+      const missing = seededIds.filter((id) => !returnedIds.has(id));
+      const extra = [...returnedIds].filter((id) => !seededIds.includes(id));
 
       if (missing.length > 0) {
         throw new Error(
@@ -79,8 +84,16 @@ globalSetupHook(
         );
       }
 
+      if (extra.length > 0) {
+        throw new Error(
+          `[managed-mitre setup] Verification failed — route returned unexpected IDs not in the seeded set: ${extra.join(
+            ', '
+          )}. Version resolution may not have selected 99.0.`
+        );
+      }
+
       log.info(
-        '[managed-mitre setup] Verification passed — all seeded entities are served by the route'
+        '[managed-mitre setup] Verification passed — route returned exactly the five seeded entities'
       );
     } finally {
       await seederClient.close();
