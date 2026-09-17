@@ -119,6 +119,75 @@ describe('generateEsqlQuery date histogram', () => {
     });
   });
 
+  describe('serialized format with relative date range', () => {
+    it('should prepend YYYY-MM-DD to HH:mm format when relative date range spans >24h', () => {
+      const dateHistogramCol: DateHistogramIndexPatternColumn = {
+        ...baseDateHistogramColumn,
+        params: { interval: 'auto' },
+      };
+      // Use a dateFormat with hours but no day component so the >24h prepending logic triggers
+      const customUiSettings = createCoreSetupMock().uiSettings;
+      customUiSettings.get.mockImplementation((key: string) => {
+        if (key === 'dateFormat') return 'HH:mm:ss';
+        return defaultUiSettingsGet(key);
+      });
+
+      const nowInstant = new Date('2021-01-10T12:00:00.000Z');
+      const relativeDateRange = { fromDate: 'now-7d', toDate: 'now' };
+
+      const result = generateEsqlQuery(
+        buildAggEntries(dateHistogramCol),
+        buildLayer(dateHistogramCol),
+        mockIndexPattern,
+        customUiSettings,
+        relativeDateRange,
+        nowInstant
+      );
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        const bucketKey = 'BUCKET(order_date, 75, ?_tstart, ?_tend)';
+        const bucketEntry = result.esAggsIdMap[bucketKey]?.[0];
+        expect(bucketEntry?.format).toEqual({
+          id: 'date',
+          params: { pattern: 'YYYY-MM-DD HH:mm:ss' },
+        });
+      }
+    });
+
+    it('should not prepend YYYY-MM-DD when relative date range spans <=24h', () => {
+      const dateHistogramCol: DateHistogramIndexPatternColumn = {
+        ...baseDateHistogramColumn,
+        params: { interval: 'auto' },
+      };
+      const customUiSettings = createCoreSetupMock().uiSettings;
+      customUiSettings.get.mockImplementation((key: string) => {
+        if (key === 'dateFormat') return 'HH:mm:ss';
+        return defaultUiSettingsGet(key);
+      });
+
+      const nowInstant = new Date('2021-01-10T12:00:00.000Z');
+      // 6 hour range — under 24h threshold
+      const relativeDateRange = { fromDate: 'now-6h', toDate: 'now' };
+
+      const result = generateEsqlQuery(
+        buildAggEntries(dateHistogramCol),
+        buildLayer(dateHistogramCol),
+        mockIndexPattern,
+        customUiSettings,
+        relativeDateRange,
+        nowInstant
+      );
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        const bucketKey = 'BUCKET(order_date, 75, ?_tstart, ?_tend)';
+        const bucketEntry = result.esAggsIdMap[bucketKey]?.[0];
+        expect(bucketEntry?.format).toEqual({ id: 'date', params: { pattern: 'HH:mm:ss' } });
+      }
+    });
+  });
+
   describe('fixed (non-auto) interval', () => {
     it('should use BUCKET(..., 1 hour) for interval 1h', () => {
       const dateHistogramCol: DateHistogramIndexPatternColumn = {

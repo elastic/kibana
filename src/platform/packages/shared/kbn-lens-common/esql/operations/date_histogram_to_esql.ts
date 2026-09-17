@@ -13,6 +13,7 @@ import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import type { DateHistogramIndexPatternColumn } from '../../datasources/operations';
 import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '../constants';
+import { convertToAbsoluteDateRange } from '../date_range';
 import {
   AUTO_INTERVAL,
   DEFAULT_DATE_HISTOGRAM_INTERVAL,
@@ -38,14 +39,24 @@ export const getDateHistogramSerializedFormat: GetSerializedFormatFn<
       false
     )?.asMilliseconds() || 3600000;
   const rules = uiSettings?.get<Array<[string, string]>>('dateFormat:scaled');
+  let pattern: string = uiSettings?.get('dateFormat');
   for (let i = rules.length - 1; i >= 0; i--) {
     const rule = rules[i];
     if (!Array.isArray(rule) || rule.length !== 2) continue;
     if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]).asMilliseconds())) {
-      return { id: 'date', params: { pattern: rule[1] } };
+      pattern = rule[1];
+      break;
     }
   }
-  return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
+
+  const absDateRange = convertToAbsoluteDateRange(dateRange, new Date());
+  const rangeMs =
+    new Date(absDateRange.toDate).getTime() - new Date(absDateRange.fromDate).getTime();
+  if (rangeMs > 24 * 60 * 60 * 1000 && /[Hh]/.test(pattern) && !/D/.test(pattern)) {
+    pattern = `YYYY-MM-DD ${pattern}`;
+  }
+
+  return { id: 'date', params: { pattern } };
 };
 
 export const dateHistogramToESQL: ToEsqlFn<DateHistogramIndexPatternColumn> = (
