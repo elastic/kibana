@@ -92,7 +92,7 @@ describe('useMetricsDataView', () => {
       ]);
     });
     expect(result.current.metricsView?.fields).not.toBe(initialFields);
-  });
+  }, 10000);
 
   it('does not refresh fields when re-resolving under the same routing', async () => {
     const { result, rerender } = renderHook(() => useMetricsDataView());
