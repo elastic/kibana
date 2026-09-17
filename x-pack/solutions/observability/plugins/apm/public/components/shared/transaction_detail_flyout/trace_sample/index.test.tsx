@@ -154,6 +154,22 @@ describe('TransactionDetailFlyoutTraceSample', () => {
     expect(screen.getByTestId('transactionDetailFlyoutTraceSampleEmpty')).toBeInTheDocument();
   });
 
+  it('renders empty prompt when a selected sample has no resolvable entry transaction', () => {
+    mockedUseUnifiedWaterfallFetcher.mockReturnValue({
+      ...DEFAULT_WATERFALL_RESULT,
+      entryTransaction: undefined,
+      traceItems: [],
+      status: FETCH_STATUS.SUCCESS,
+    });
+
+    render(<TransactionDetailFlyoutTraceSample />);
+
+    expect(screen.getByTestId('transactionDetailFlyoutTraceSampleEmpty')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('transactionDetailFlyoutTraceSampleTimelineLoading')
+    ).not.toBeInTheDocument();
+  });
+
   it('renders an error prompt when the trace samples fetch fails', () => {
     mockedUseTransactionDetailFlyoutTraceSamplesFetcher.mockReturnValue({
       data: undefined,

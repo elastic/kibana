@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { FETCH_STATUS, isFailure, isPending, isSuccess } from '../../../../hooks/use_fetcher';
+import { isFailure, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { useUnifiedWaterfallFetcher } from '../../../app/transaction_details/use_unified_waterfall_fetcher';
 import { MaybeViewTraceLink } from '../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link';
 import { TransactionSummary } from '../../summary/transaction_summary';
@@ -61,11 +61,6 @@ export function TransactionDetailFlyoutTraceSample() {
 
   const hasFailed =
     isFailure(traceSamplesFetchResult.status) || isFailure(unifiedWaterfallFetchResult.status);
-
-  const isSucceeded =
-    (isSuccess(unifiedWaterfallFetchResult.status) ||
-      unifiedWaterfallFetchResult.status === FETCH_STATUS.NOT_INITIATED) &&
-    isSuccess(traceSamplesFetchResult.status);
 
   const entryTransaction = unifiedWaterfallFetchResult.entryTransaction;
 
@@ -114,7 +109,15 @@ export function TransactionDetailFlyoutTraceSample() {
     );
   }
 
-  if (!entryTransaction && traceSamples?.length === 0 && isSucceeded) {
+  // No samples, or a selected sample whose waterfall resolved without an entry
+  // transaction (aged-out / deleted / sampling mismatch) — avoid a perpetual skeleton.
+  const selectedSampleUnresolved =
+    isSuccess(traceSamplesFetchResult.status) &&
+    !isLoading &&
+    !entryTransaction &&
+    (traceSamples?.length === 0 || isSuccess(unifiedWaterfallFetchResult.status));
+
+  if (selectedSampleUnresolved) {
     return (
       <EuiEmptyPrompt
         title={
