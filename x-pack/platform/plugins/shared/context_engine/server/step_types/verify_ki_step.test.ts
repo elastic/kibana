@@ -456,7 +456,7 @@ describe('verify_ki workflow step', () => {
         status: ExecutionStatus.COMPLETED,
         error: null,
         context: { output },
-      } as unknown as WorkflowExecutionDto);
+      }) as unknown as WorkflowExecutionDto;
 
     it('runs built-in and workflow verifiers in declaration order', async () => {
       setContextEngineEnabled(true);

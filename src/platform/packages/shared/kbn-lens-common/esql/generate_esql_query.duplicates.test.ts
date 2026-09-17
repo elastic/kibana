@@ -25,7 +25,7 @@ const avgBytes = (label = 'Average of bytes'): GenericIndexPatternColumn =>
     label,
     dataType: 'number',
     isBucketed: false,
-  } as GenericIndexPatternColumn);
+  }) as GenericIndexPatternColumn;
 
 // Elasticsearch collapses repeated STATS expressions into a single result column, so the
 // generator must emit each expression once and map every Lens column onto that one column.

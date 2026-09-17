@@ -414,13 +414,12 @@ describe('SystemFlyoutService', () => {
     /** Minimal content component: a `FlyoutTemplate` with header and body zones. */
     const content =
       (title: string, body: React.ReactNode = 'content') =>
-      ({ onClose }: { onClose: () => void }) =>
-        (
-          <FlyoutTemplate onClose={onClose}>
-            <FlyoutTemplate.Header title={title} />
-            <FlyoutTemplate.Body>{body}</FlyoutTemplate.Body>
-          </FlyoutTemplate>
-        );
+      ({ onClose }: { onClose: () => void }) => (
+        <FlyoutTemplate onClose={onClose}>
+          <FlyoutTemplate.Header title={title} />
+          <FlyoutTemplate.Body>{body}</FlyoutTemplate.Body>
+        </FlyoutTemplate>
+      );
 
     /** The contract handed to the content subtree: resolved root props plus `close`. */
     const managedValue = (call = 0) =>

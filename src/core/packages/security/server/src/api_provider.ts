@@ -63,8 +63,10 @@ export type AuditServiceContract = CoreAuditService;
  *
  * @public
  */
-export interface ServiceAccountsServiceContract
-  extends Pick<CoreServiceAccountsService, 'isEnabled' | 'create'> {
+export interface ServiceAccountsServiceContract extends Pick<
+  CoreServiceAccountsService,
+  'isEnabled' | 'create'
+> {
   /**
    * Binds a workload to a service account, in the space of the request.
    *

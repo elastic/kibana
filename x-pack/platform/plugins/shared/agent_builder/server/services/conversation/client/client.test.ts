@@ -2755,7 +2755,7 @@ describe('ConversationClient', () => {
           render_inline: false,
           source: 'http_api',
         },
-      } as TimelineEvent);
+      }) as TimelineEvent;
 
     const userMessageEvent = (id: string): TimelineEvent => ({
       id,
