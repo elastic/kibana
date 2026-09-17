@@ -7,7 +7,10 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  throwUnrecoverableError,
+  type TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
 import {
@@ -27,8 +30,6 @@ const itemsSchema = schema.arrayOf(schema.string({ maxLength: 100 }), {
 
 export const chunkedTaskStateSchema = schema.object({
   remaining: schema.maybe(itemsSchema),
-  // Items already handled by this task, used to detect an uninstall that ran between two chunks
-  installed: schema.maybe(itemsSchema),
   // Failed attempts for the current item
   attempts: schema.maybe(schema.number({ min: 0 })),
 });
@@ -58,8 +59,8 @@ export const isProductName = (value: string): value is ProductName =>
 
 // Returning `runAt` makes Task Manager run the task again for the next item, so a run only holds
 // a capacity slot for one item and completed items are not redone when a later attempt fails.
-export const nextChunkRunResult = (remaining: string[], installed: string[]) =>
-  remaining.length > 0 ? { state: { remaining, installed }, runAt: new Date() } : { state: {} };
+export const nextChunkRunResult = (remaining: string[]) =>
+  remaining.length > 0 ? { state: { remaining }, runAt: new Date() } : { state: {} };
 
 // Re-runs the task shortly without consuming an attempt, e.g. while another install holds the lock
 export const deferredRunResult = (state: Record<string, unknown>) => ({
@@ -87,16 +88,15 @@ export const runTaskUnderInstallLock = async ({
  * Installs the first of `items` under the cluster-wide install lock, so that at most one documentation
  * install runs at a time across all tasks and Kibana nodes. When another install holds the lock the
  * item is kept and the run is deferred instead of failing an attempt. The lock is released between
- * items, so before each item `isSuperseded` is checked (still under the lock) with the items that
- * `install` reported as actually installed: when an uninstall ran in between, the task stops instead
- * of reinstalling the rest. A failing item is retried with exponential backoff up to
- * `MAX_INSTALL_ITEM_RETRIES` times; the task then ends, leaving the failure in the install status.
+ * items and does not order operations, so `isSuperseded` is checked under the lock before every item:
+ * when a newer request (an uninstall) took effect since this task was scheduled, the task stops
+ * instead of recreating the documentation. A failing item is retried with exponential backoff up to
+ * `MAX_INSTALL_ITEM_RETRIES` times, after which the task fails without further Task Manager retries.
  */
 export const runInstallChunk = async <T extends string>({
   lockManager,
   logger,
   items,
-  installed = [],
   attempts = 0,
   install,
   isSuperseded,
@@ -105,10 +105,9 @@ export const runInstallChunk = async <T extends string>({
   lockManager: InstallLockManager;
   logger: Logger;
   items: T[];
-  installed?: T[];
   attempts?: number;
-  install: (item: T) => Promise<boolean>;
-  isSuperseded: (installedItems: T[]) => Promise<boolean>;
+  install: (item: T) => Promise<unknown>;
+  isSuperseded: () => Promise<boolean>;
   metadata?: Record<string, unknown>;
 }) => {
   const [item, ...rest] = items;
@@ -116,17 +115,16 @@ export const runInstallChunk = async <T extends string>({
     return { state: {} };
   }
   let superseded = false;
-  let didInstall = false;
   let installError: Error | undefined;
   const acquired = await tryWithInstallLock({
     lockManager,
     run: async () => {
-      superseded = installed.length > 0 && (await isSuperseded(installed));
+      superseded = await isSuperseded();
       if (superseded) {
         return;
       }
       try {
-        didInstall = await install(item);
+        await install(item);
       } catch (e) {
         installError = e as Error;
       }
@@ -134,9 +132,10 @@ export const runInstallChunk = async <T extends string>({
     metadata: { ...metadata, item },
   });
   if (!acquired) {
-    return deferredRunResult({ remaining: items, installed, ...(attempts ? { attempts } : {}) });
+    return deferredRunResult({ remaining: items, ...(attempts ? { attempts } : {}) });
   }
   if (superseded) {
+    logger.info(`Documentation item [${item}] skipped: a later request superseded this task`);
     return { state: {} };
   }
   if (installError) {
@@ -145,7 +144,7 @@ export const runInstallChunk = async <T extends string>({
       logger.error(
         `Giving up on documentation item [${item}] after ${failedAttempts} attempts: ${installError.message}`
       );
-      return { state: {} };
+      throwUnrecoverableError(installError);
     }
     const delayMs = installItemRetryDelayMs(failedAttempts);
     logger.warn(
@@ -154,11 +153,11 @@ export const runInstallChunk = async <T extends string>({
       }s: ${installError.message}`
     );
     return {
-      state: { remaining: items, installed, attempts: failedAttempts },
+      state: { remaining: items, attempts: failedAttempts },
       runAt: new Date(Date.now() + delayMs),
     };
   }
-  return nextChunkRunResult(rest, didInstall ? [...installed, item] : installed);
+  return nextChunkRunResult(rest);
 };
 
 export const getTaskStatus = async ({
@@ -213,6 +212,9 @@ export const waitUntilTaskCompleted = async ({
         // not found means the task was completed and the entry removed
         return;
       }
+      // transient read failure: keep polling at the regular interval until the timeout
+      await sleep(interval);
+      now = Date.now();
     }
   }
 

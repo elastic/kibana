@@ -46,6 +46,33 @@ describe('ProductDocInstallClient', () => {
       expect(log.error).toHaveBeenCalledTimes(1);
     });
 
+    it('exposes when a product status was last written', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...createObj({
+              product_name: 'kibana',
+              product_version: '8.15',
+              installation_status: 'uninstalled',
+            }),
+            updated_at: '2026-09-17T10:00:00.000Z',
+          },
+        ],
+        total: 1,
+        per_page: 100,
+        page: 1,
+      });
+
+      const installStatus = await service.getInstallationStatus({ inferenceId });
+
+      expect(installStatus.kibana).toEqual({
+        status: 'uninstalled',
+        version: '8.15',
+        updatedAt: '2026-09-17T10:00:00.000Z',
+      });
+      expect(installStatus.security.updatedAt).toBeUndefined();
+    });
+
     it('propagates read failures from getInstallationStatusOrThrow', async () => {
       soClient.find.mockRejectedValue(new Error('es unavailable'));
 

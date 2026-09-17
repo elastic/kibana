@@ -118,6 +118,36 @@ describe('PackageInstaller', () => {
       expect(logArtifactsFolderUsageMock).toHaveBeenCalledTimes(1);
     });
 
+    it('deletes the existing index only after the archive has been downloaded and validated', async () => {
+      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      loadMappingFileMock.mockResolvedValue({ properties: {} });
+      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+
+      await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
+
+      expect(esClient.indices.delete).toHaveBeenCalledWith(
+        { index: getProductDocIndexName('kibana') },
+        { ignore: [404] }
+      );
+      expect(callOrder(validateArtifactArchiveMock)).toBeLessThan(
+        callOrder(esClient.indices.delete)
+      );
+      expect(callOrder(esClient.indices.delete)).toBeLessThan(callOrder(createIndexMock));
+    });
+
+    it('keeps the existing index when the archive fails validation', async () => {
+      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      validateArtifactArchiveMock.mockReturnValue({ valid: false, error: 'truncated' });
+
+      await expect(
+        packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' })
+      ).rejects.toThrow('Artifact archive validation failed: truncated');
+
+      expect(esClient.indices.delete).not.toHaveBeenCalled();
+      expect(createIndexMock).not.toHaveBeenCalled();
+    });
+
     it('deletes the downloaded artifact when the install fails', async () => {
       downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
       openZipArchiveMock.mockRejectedValue(new Error('corrupt archive'));
@@ -475,44 +505,38 @@ describe('PackageInstaller', () => {
     });
   });
 
-  describe('hasUninstalledProducts', () => {
+  describe('wasUninstalledSince', () => {
+    const since = new Date('2026-09-17T10:00:00.000Z');
+
     it('propagates status read failures instead of reporting an uninstall', async () => {
       productDocClient.getInstallationStatusOrThrow.mockRejectedValue(new Error('es unavailable'));
 
       await expect(
-        packageInstaller.hasUninstalledProducts({ productNames: ['kibana'], inferenceId: '.elser' })
+        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
       ).rejects.toThrow('es unavailable');
     });
 
-    it('returns true when one of the products is uninstalled', async () => {
+    it('returns true when a product was uninstalled after the given time', async () => {
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
-        kibana: { status: 'installed', version: '8.15' },
-        security: { status: 'uninstalled' },
+        kibana: { status: 'installed', version: '8.15', updatedAt: '2026-09-17T10:05:00.000Z' },
+        security: { status: 'uninstalled', updatedAt: '2026-09-17T10:01:00.000Z' },
       } as never);
 
       await expect(
-        packageInstaller.hasUninstalledProducts({
-          productNames: ['kibana', 'security'],
-          inferenceId: '.elser',
-        })
+        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
       ).resolves.toBe(true);
     });
 
-    it('returns false when all products are still installed', async () => {
+    it('returns false when the uninstall predates the given time or products have no status', async () => {
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
-        kibana: { status: 'installed', version: '8.15' },
+        kibana: { status: 'uninstalled', updatedAt: '2026-09-17T09:00:00.000Z' },
+        security: { status: 'uninstalled' },
+        elasticsearch: { status: 'installing', updatedAt: '2026-09-17T10:05:00.000Z' },
       } as never);
 
       await expect(
-        packageInstaller.hasUninstalledProducts({ productNames: ['kibana'], inferenceId: '.elser' })
+        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
       ).resolves.toBe(false);
-    });
-
-    it('returns false without querying when no products are given', async () => {
-      await expect(
-        packageInstaller.hasUninstalledProducts({ productNames: [], inferenceId: '.elser' })
-      ).resolves.toBe(false);
-      expect(productDocClient.getInstallationStatusOrThrow).not.toHaveBeenCalled();
     });
   });
 

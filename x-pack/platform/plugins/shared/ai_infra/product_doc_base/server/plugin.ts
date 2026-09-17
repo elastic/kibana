@@ -30,6 +30,7 @@ import { DocumentationManager } from './services/doc_manager';
 import { SearchService } from './services/search';
 import { registerRoutes } from './routes';
 import { registerTaskDefinitions } from './tasks';
+import { waitForInstallLock, type InstallLockManager } from './services/install_lock';
 
 // A full install can run for several minutes per product, so startup waits well past the default
 const STARTUP_TASK_WAIT_TIMEOUT_MS = 60 * 60 * 1000;
@@ -146,6 +147,7 @@ export class ProductDocBasePlugin
       core,
       documentationManager,
       packageInstaller,
+      this.lockManager,
       isServerless,
       this.cloud
     ).catch((err: Error) => {
@@ -175,11 +177,17 @@ export class ProductDocBasePlugin
     core: CoreStart,
     documentationManager: DocumentationManager,
     packageInstaller: PackageInstaller,
+    lockManager: InstallLockManager,
     isServerless: boolean,
     cloud: ProductDocBaseSetupDependencies['cloud']
   ): Promise<void> {
     try {
-      await packageInstaller.purgeArtifactsFolder();
+      // Under the install lock so an install running elsewhere does not lose its artifact
+      await waitForInstallLock({
+        lockManager,
+        run: () => packageInstaller.purgeArtifactsFolder(),
+        metadata: { source: 'purgeArtifactsFolder' },
+      });
     } catch (err) {
       this.logger.error(
         `Error purging leftover documentation artifacts: ${(err as Error).message}`

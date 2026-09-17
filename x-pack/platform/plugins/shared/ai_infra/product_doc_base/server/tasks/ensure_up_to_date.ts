@@ -48,7 +48,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
         return {
           async run() {
             const { packageInstaller, logger } = getServices();
-            const { remaining, installed, attempts } = taskInstance.state as ChunkedTaskState;
+            const { remaining, attempts } = taskInstance.state as ChunkedTaskState;
             const items = remaining ?? [
               ...(await packageInstaller.getProductsToUpdate({ inferenceId, forceUpdate })),
               OPENAPI_SPEC_ITEM,
@@ -57,22 +57,19 @@ export const registerEnsureUpToDateTaskDefinition = ({
               lockManager,
               logger,
               items,
-              installed,
               attempts,
-              isSuperseded: (handledItems) =>
-                packageInstaller.hasUninstalledProducts({
-                  productNames: handledItems.filter(isProductName),
+              // `scheduledAt` is the time of the latest update request for this task
+              isSuperseded: () =>
+                packageInstaller.wasUninstalledSince({
                   inferenceId,
+                  since: taskInstance.scheduledAt,
                 }),
               install: async (item) => {
                 if (item === OPENAPI_SPEC_ITEM) {
                   await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId, forceUpdate });
-                  return false;
+                } else if (isProductName(item)) {
+                  await packageInstaller.updateProduct({ productName: item, inferenceId });
                 }
-                if (isProductName(item)) {
-                  return packageInstaller.updateProduct({ productName: item, inferenceId });
-                }
-                return false;
               },
               metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },
             });
@@ -99,6 +96,9 @@ export const scheduleEnsureUpToDateTask = async ({
     ? ENSURE_DOC_UP_TO_DATE_TASK_ID
     : ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL;
   try {
+    // A new request replaces any persisted plan and params of an earlier update so that, for
+    // example, a forced update is not swallowed by an ordinary one that is still in progress.
+    await taskManager.removeIfExists(taskId);
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,

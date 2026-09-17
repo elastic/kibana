@@ -115,13 +115,14 @@ export class ProductDocInstallClient {
       return resourceType === ResourceTypes.productDoc;
     });
 
-    productDocsSavedObjects?.forEach(({ attributes }) => {
+    productDocsSavedObjects?.forEach(({ attributes, updated_at: updatedAt }) => {
       installStatus[attributes.product_name as ProductName] = {
         status: attributes.installation_status,
         version: attributes.product_version,
         ...(attributes.last_installation_failure_reason
           ? { failureReason: attributes.last_installation_failure_reason }
           : {}),
+        ...(updatedAt ? { updatedAt } : {}),
       };
     });
 

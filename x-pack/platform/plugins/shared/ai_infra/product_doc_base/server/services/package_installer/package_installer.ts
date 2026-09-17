@@ -125,6 +125,11 @@ export class PackageInstaller {
     return purgeArtifactsFolder(this.artifactsFolderPath, this.log);
   }
 
+  // The existing index is only replaced once the new archive has been downloaded and validated
+  private async deleteIndex(indexName: string): Promise<void> {
+    await this.esClient.indices.delete({ index: indexName }, { ignore: [404] });
+  }
+
   private async cleanupArtifact(artifactFullPath: string | undefined): Promise<void> {
     if (artifactFullPath) {
       await removeArtifactFile(artifactFullPath, this.log);
@@ -267,22 +272,20 @@ export class PackageInstaller {
   }
 
   /**
-   * Whether any of the given products is uninstalled, meaning an uninstall ran after they were installed.
-   * Status read failures are propagated so that they are not mistaken for an uninstall.
+   * Whether a product of this inference ID was uninstalled after `since`, meaning an uninstall request
+   * superseded the task that started at `since`. Status read failures are propagated so that they are
+   * not mistaken for an uninstall.
    */
-  async hasUninstalledProducts(params: {
-    productNames: ProductName[];
-    inferenceId: string;
-  }): Promise<boolean> {
-    const { productNames, inferenceId } = params;
-    if (productNames.length === 0) {
-      return false;
-    }
+  async wasUninstalledSince(params: { inferenceId: string; since: Date }): Promise<boolean> {
+    const { inferenceId, since } = params;
     const installStatuses = await this.productDocClient.getInstallationStatusOrThrow({
       inferenceId,
     });
-    return productNames.some(
-      (productName) => installStatuses[productName]?.status === 'uninstalled'
+    return Object.values(installStatuses).some(
+      ({ status, updatedAt }) =>
+        (status === 'uninstalled' || status === 'uninstalling') &&
+        updatedAt !== undefined &&
+        new Date(updatedAt).getTime() > since.getTime()
     );
   }
 
@@ -398,8 +401,6 @@ export class PackageInstaller {
       ? LATEST_PRODUCT_VERSION
       : majorMinor(productVersion);
 
-    await this.uninstallPackage({ productName, inferenceId });
-
     let zipArchive: ZipArchive | undefined;
     let artifactFullPath: string | undefined;
     try {
@@ -450,6 +451,7 @@ export class PackageInstaller {
       const modifiedMappings = cloneDeep(mappings);
       overrideInferenceSettings(modifiedMappings, inferenceId!);
 
+      await this.deleteIndex(indexName);
       await createIndex({
         indexName,
         mappings: modifiedMappings, // Mappings will be overridden by the inference ID and inference type
@@ -546,9 +548,6 @@ export class PackageInstaller {
       } with inference ID [${effectiveInferenceId}]`
     );
 
-    // Uninstall existing Security Labs content first
-    await this.uninstallSecurityLabs({ inferenceId: effectiveInferenceId });
-
     let zipArchive: ZipArchive | undefined;
     let selectedVersion: string | undefined;
     let artifactFullPath: string | undefined;
@@ -603,6 +602,7 @@ export class PackageInstaller {
       const modifiedMappings = cloneDeep(mappings);
       overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
 
+      await this.deleteIndex(indexName);
       await createIndex({
         indexName,
         mappings: modifiedMappings,
@@ -782,8 +782,6 @@ export class PackageInstaller {
     let zipArchive: ZipArchive | undefined;
     let artifactFullPath: string | undefined;
     try {
-      await this.uninstallOpenAPISpec({ inferenceId: effectiveInferenceId });
-
       await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
       const artifactFileName = this.getOpenApiArtifactFileName({
         stackVersion,
@@ -837,7 +835,7 @@ export class PackageInstaller {
         const indexName = `${unmodifiedIndexName}${
           !isImpliedDefaultElserInferenceId(effectiveInferenceId) ? `-${effectiveInferenceId}` : ''
         }`;
-        // Create index
+        await this.deleteIndex(indexName);
         await createIndex({
           indexName,
           mappings: modifiedMappings,
