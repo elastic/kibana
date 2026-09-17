@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '..';
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../../types';
+import mongodbIcon from './mongodb.svg';
 
-export class OverlaysPage {
-  constructor(private readonly page: ScoutPage) {}
-
-  public get docViewerFlyout() {
-    return this.page.testSubj.locator('docViewerFlyout');
-  }
-}
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={mongodbIcon} {...props} />;
+};
