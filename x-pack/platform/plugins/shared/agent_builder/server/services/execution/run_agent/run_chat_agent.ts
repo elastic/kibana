@@ -107,7 +107,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
     configurationOverrides,
-    action,
     executionId,
     roundId: providedRoundId,
   },
@@ -137,9 +136,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // source. Regenerate replaces the last round, so a paused one is never resumed.
   const timeline = conversation ? eventsForContext(conversation) : [];
 
-  ensureValidInput({ input: nextInput, timeline, action });
+  ensureValidInput({ input: nextInput, timeline });
 
-  const pendingRound = action === 'regenerate' ? undefined : getPendingRound(timeline);
+  const pendingRound = getPendingRound(timeline);
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
@@ -197,16 +196,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
-  // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
     timeline,
     nextInputAuthor: pendingRound?.author ?? author,
     context,
-    action,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
   });
+  // Everything in the log at this point came from the incoming message's attachments; anything
+  // recorded from here on is made by tools during the round.
+  const chatInputChanges = context.attachmentStateManager.drainChanges();
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
     request,
@@ -484,6 +484,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       initialTodos,
       relevantSkillsSelection,
       getWorkspaceId: () => context.bashService?.getWorkspaceId(),
+      chatInputChanges,
+      agentId: agentId ?? conversation?.agent_id ?? 'unknown',
+      conversation,
     }),
     evictInternalEvents(),
     shareReplay()

@@ -16,7 +16,7 @@ file.
 
 For example:
 ```bash
-$ yarn start --config /path/to/some/other/config.yml
+$ pnpm start --config /path/to/some/other/config.yml
 ```
 Here is a sample configuration file recommended for use in development:
 
@@ -69,7 +69,7 @@ This will automatically run Kibana on the ports from the sample `gateway.yml`
 above (5605-5606).
 
 Once you have your `gateway.yml` and have started docker-compose, you can run the
-server from the `/src/platform/packages/private/kbn-health-gateway-server` directory with `yarn start`. Then you should
+server from the `/src/platform/packages/private/kbn-health-gateway-server` directory with `pnpm start`. Then you should
 be able to make requests to the `/` endpoint:
 
 ```bash
