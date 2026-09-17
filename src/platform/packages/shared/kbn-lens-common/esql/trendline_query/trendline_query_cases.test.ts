@@ -32,6 +32,12 @@ describe('trendline query case matrix (rewrite assertions)', () => {
           queryCase.expectedMetricFieldMap
         );
       }
+
+      if (queryCase.expectedUnavailableMetricFields) {
+        expect(generated.unavailableMetricFields).toEqual(
+          queryCase.expectedUnavailableMetricFields
+        );
+      }
     });
   }
 });

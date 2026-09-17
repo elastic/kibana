@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export {
-  extractSourceEntitiesFromAlert,
-  getEntityFieldValues,
-  normalizeToStringArray,
-  RELATED_ALERT_ENTITY_SOURCE_INCLUDES,
-  RELATED_ALERT_SOURCE_ALLOWLIST,
-  trimEntityValues,
-  type SourceEntities,
-} from './entity_utils';
+/**
+ * localStorage key persisting the user's push vs overlay flyout preference.
+ * Read when opening a flyout so the choice sticks across sessions.
+ */
+export const FLYOUT_PUSH_VS_OVERLAY_LOCAL_STORAGE = 'securitySolution.flyoutV2.pushVsOverlay';
