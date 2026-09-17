@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../../common/constants';
+import { MAX_IAC_RENDER_INTEGRATIONS } from '../../../../common/types/rest_spec/iac_provisioner';
 import { apiTest, testData } from '../fixtures';
 
 const { VALID_RENDER_BODY } = testData;
@@ -105,7 +106,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns 400 when more than 10 integrations are sent',
+      'returns 400 when more integrations than the render limit are sent',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
 
@@ -113,7 +114,7 @@ apiTest.describe(
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
           body: {
             ...VALID_RENDER_BODY,
-            integrations: Array.from({ length: 11 }, (_, i) => ({
+            integrations: Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS + 1 }, (_, i) => ({
               name: `pkg_${i}`,
               policyTemplates: [{ name: 'tpl', enabledInputs: ['input'] }],
             })),

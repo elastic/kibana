@@ -41,8 +41,10 @@ export const LaunchCloudFormationButton: React.FC<LaunchCloudFormationButtonProp
       isDisabled={isDisabled}
       {...launchButtonProps}
     >
+      {/* Keeps the id the label had before it moved into this shared button, so the existing
+          translations still apply. */}
       <FormattedMessage
-        id="xpack.fleet.cloudConnector.aws.launchCloudFormationButton"
+        id="xpack.fleet.awsIdentityFederationSetup.launchCloudFormation"
         defaultMessage="Launch CloudFormation"
       />
     </EuiButton>
