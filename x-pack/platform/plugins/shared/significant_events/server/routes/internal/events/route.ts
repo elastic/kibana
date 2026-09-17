@@ -138,7 +138,8 @@ const eventsSearchRoute = createServerRoute({
       ...rest
     } = params.query ?? {};
 
-    return getEventClient().findLatestByCurrentStatePaginated({
+    const eventClient = await getEventClient();
+    return eventClient.findLatestByCurrentStatePaginated({
       ...rest,
       from,
       to,
@@ -179,19 +180,21 @@ const eventsLifecycleRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { hits: initialHits } = await getEventClient().findByEventUuid(params.path.id);
+    const eventClient = await getEventClient();
+    const { hits: initialHits } = await eventClient.findByEventUuid(params.path.id);
     if (initialHits.length === 0) {
       return { detections: [], events: [] };
     }
 
     const { event_id: eventId } = initialHits[0];
-    const { hits: events } = await getEventClient().findByEventId(eventId);
+    const { hits: events } = await eventClient.findByEventId(eventId);
     if (events.length === 0) {
       return { detections: [], events: [] };
     }
 
     const embedded = collectEmbeddedDetections(events);
-    const { hits: allDetectionHits } = await getDetectionClient().findByIds(
+    const detectionClient = await getDetectionClient();
+    const { hits: allDetectionHits } = await detectionClient.findByIds(
       embedded.map((e) => e.detection_id)
     );
     const hitsByDetectionId = new Map(
@@ -259,7 +262,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
 
     return attachInvestigationToEvent({
-      eventClient: getEventClient(),
+      eventClient: await getEventClient(),
       eventId: params.path.id,
       investigation,
       triggerFeedback: triggerFeedback as SignificantEventTriggerFeedback | undefined,
@@ -299,7 +302,8 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { hits } = await getEventClient().findByEventUuid(params.path.id);
+    const eventClient = await getEventClient();
+    const { hits } = await eventClient.findByEventUuid(params.path.id);
     if (hits.length === 0) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
@@ -403,7 +407,7 @@ const eventsUpdateRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     return updateSignificantEventStatus({
-      eventClient: getEventClient(),
+      eventClient: await getEventClient(),
       eventUuid: params.path.id,
       status: params.body.status,
       assessmentNote: params.body.assessment_note,
@@ -443,7 +447,7 @@ const cleanupStaleEventsRoute = createServerRoute({
 
     const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
     return cleanupStaleEvents({
-      eventClient: getEventClient(),
+      eventClient: await getEventClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
     });
