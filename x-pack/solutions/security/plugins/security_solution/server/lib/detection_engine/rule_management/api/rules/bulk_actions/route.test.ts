@@ -210,9 +210,7 @@ describe('Perform bulk action route', () => {
       clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
         rules: [],
         errors: [],
-        skipped: [
-          { id: mockRule.id, name: mockRule.name, skip_reason: 'RULE_NOT_FOUND' },
-        ],
+        skipped: [{ id: mockRule.id, name: mockRule.name, skip_reason: 'RULE_NOT_FOUND' }],
       });
 
       const response = await server.inject(
