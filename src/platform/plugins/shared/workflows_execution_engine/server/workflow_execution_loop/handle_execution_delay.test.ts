@@ -30,6 +30,7 @@ const makeParams = (
     workflowRuntime: {
       getWorkflowExecution: jest.fn().mockReturnValue({
         id: 'exec-parent',
+        spaceId: 'default',
         startedAt: '2025-06-01T12:00:00.000Z',
         scopeStack: [],
       }),
@@ -40,11 +41,15 @@ const makeParams = (
       updateWorkflowExecution: jest.fn(),
       getLatestStepExecution: jest.fn().mockReturnValue(undefined),
     },
+    workflowExecutionRepository: {
+      getWorkflowExecutionById: jest.fn().mockResolvedValue(undefined),
+    },
     workflowTaskManager: {
       scheduleResumeTask: jest.fn().mockResolvedValue({ taskId: 'resume-task-1' }),
       scheduleWorkflowGlobalTimeoutResumeTask: jest
         .fn()
         .mockResolvedValue({ taskId: 'wf-global-timeout-1' }),
+      runExistingResumeTask: jest.fn().mockResolvedValue(undefined),
     },
     fakeRequest: {},
     workflowExecutionGraph: {
@@ -302,6 +307,103 @@ describe('handleExecutionDelay', () => {
         expect(
           params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
         ).toHaveBeenCalledTimes(1);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('should immediately wake the parent when the sync child is already terminal', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T13:00:00.000Z'));
+        const params = makeParams();
+        (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue('2h');
+        (
+          params.workflowExecutionRepository.getWorkflowExecutionById as jest.Mock
+        ).mockResolvedValue({
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+        });
+
+        const stepRuntime = makeStepRuntime({
+          node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
+          stepExecution: {
+            status: ExecutionStatus.WAITING_FOR_CHILD,
+            state: { executionId: 'child-exec-1' },
+          } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        expect(params.workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+          'child-exec-1',
+          'default'
+        );
+        expect(params.workflowTaskManager.runExistingResumeTask).toHaveBeenCalledWith(
+          'exec-parent'
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('should not wake the parent when the sync child is still running', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T13:00:00.000Z'));
+        const params = makeParams();
+        (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue('2h');
+        (
+          params.workflowExecutionRepository.getWorkflowExecutionById as jest.Mock
+        ).mockResolvedValue({
+          id: 'child-exec-1',
+          status: ExecutionStatus.RUNNING,
+        });
+
+        const stepRuntime = makeStepRuntime({
+          node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
+          stepExecution: {
+            status: ExecutionStatus.WAITING_FOR_CHILD,
+            state: { executionId: 'child-exec-1' },
+          } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        expect(params.workflowTaskManager.runExistingResumeTask).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('should not fail the wait when the handshake cannot wake the parent', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T13:00:00.000Z'));
+        const params = makeParams();
+        (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue('2h');
+        (
+          params.workflowExecutionRepository.getWorkflowExecutionById as jest.Mock
+        ).mockResolvedValue({
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+        });
+        (params.workflowTaskManager.runExistingResumeTask as jest.Mock).mockRejectedValue(
+          new Error('not found')
+        );
+
+        const stepRuntime = makeStepRuntime({
+          node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
+          stepExecution: {
+            status: ExecutionStatus.WAITING_FOR_CHILD,
+            state: { executionId: 'child-exec-1' },
+          } as any,
+        });
+
+        await expect(handleExecutionDelay(params, stepRuntime)).resolves.toBeUndefined();
+        expect(params.workflowLogger.logWarn).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to wake parent after detecting terminal sync child')
+        );
       } finally {
         jest.useRealTimers();
       }
@@ -605,5 +707,34 @@ describe('ensureWorkflowIdleTimeoutResumeAfterLoop', () => {
     expect(
       params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
     ).not.toHaveBeenCalled();
+  });
+
+  it('wakes the parent when re-arming WAITING_FOR_CHILD and the child is already terminal', async () => {
+    const params = makeParams();
+    (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+      id: 'exec-parent',
+      spaceId: 'default',
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+      startedAt: '2025-06-01T12:00:00.000Z',
+      scopeStack: [],
+    });
+    (params.workflowRuntime.getCurrentNode as jest.Mock).mockReturnValue({
+      stepId: 'run_child',
+      type: WORKFLOW_EXECUTE_STEP_TYPE,
+      stepType: WORKFLOW_EXECUTE_STEP_TYPE,
+    });
+    (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue('6h');
+    (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
+      startedAt: '2025-06-01T12:00:00.000Z',
+      state: { executionId: 'child-exec-1' },
+    });
+    (params.workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+      id: 'child-exec-1',
+      status: ExecutionStatus.COMPLETED,
+    });
+
+    await ensureWorkflowIdleTimeoutResumeAfterLoop(params);
+
+    expect(params.workflowTaskManager.runExistingResumeTask).toHaveBeenCalledWith('exec-parent');
   });
 });
