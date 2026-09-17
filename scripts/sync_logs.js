@@ -438,7 +438,7 @@ function tryDestCandidate(config, candidate) {
       return { candidate: candidate, info: info };
     })
     .finally(function () {
-      return probe.close();
+      return probe.close().catch(function () {});
     });
 }
 
