@@ -3062,23 +3062,14 @@ module.exports = {
       },
     },
     {
-      // Raw EUI class selectors in Scout code, including the framework's own
-      // page objects (unlike the block above, which excludes kbn-scout* src).
-      // Selectors are added here only once a `@elastic/eui-test-helpers`
-      // Component Object method covers the same interaction.
+      // Hand-written EUI class selectors in Scout code, including the
+      // framework's own page objects (the block above excludes kbn-scout* src).
+      // The restricted classes come from the `Eui*Selectors` objects exported by
+      // `@elastic/eui-test-helpers`, so the list grows with the helpers and is
+      // not maintained here. `warn` until the existing sites are migrated.
       files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       rules: {
-        '@kbn/eslint/scout_no_raw_eui_selectors': [
-          'error',
-          {
-            restricted: [
-              {
-                selector: '.euiComboBoxPill',
-                replacement: 'page.components.comboBox(testSubj).getSelectedOptions()',
-              },
-            ],
-          },
-        ],
+        '@kbn/eslint/scout_no_raw_eui_selectors': 'warn',
       },
     },
     {
