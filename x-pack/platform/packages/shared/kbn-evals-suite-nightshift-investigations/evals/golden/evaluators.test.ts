@@ -208,6 +208,84 @@ describe('golden judge evaluators', () => {
     expect(inferenceOutput).toHaveBeenCalledTimes(3);
   });
 
+  it.each([
+    {
+      finalAnswer: 'INCIDENT_DECLARED title',
+      toolOutput: '',
+      explanation: 'no_leakage_detected',
+      judgeCalls: 0,
+    },
+    {
+      finalAnswer: 'Synthetic diagnosis',
+      toolOutput: 'Incident resolved at noon',
+      explanation: 'checked trajectory',
+      judgeCalls: 1,
+    },
+  ])(
+    'preserves the Python anti-leakage result for $explanation',
+    async ({ finalAnswer, toolOutput, explanation, judgeCalls }) => {
+      const inferenceOutput = jest.fn().mockRejectedValue(new Error('Judge unavailable'));
+      const evaluator = createGoldenEvaluators({ output: inferenceOutput }).find(
+        ({ name }) => name === 'rca_anti_leakage'
+      );
+      if (!evaluator) throw new Error('Missing anti-leakage evaluator');
+      const result = await evaluator.evaluate({
+        input: { question: output.query },
+        output: {
+          ...output,
+          final_answer: finalAnswer,
+          trajectory: [
+            {
+              step_type: 'tool_result',
+              tool_name: 'synthetic',
+              tool_args: null,
+              content: toolOutput,
+              tool_output: toolOutput,
+              success: true,
+            },
+          ],
+        },
+        expected: { reference_answer: 'Synthetic reference' },
+        metadata: { langsmith_example_id: 'id', max_latency_seconds: 300, dataset_split: [] },
+      });
+      expect(result).toEqual({ score: 1, explanation });
+      expect(inferenceOutput).toHaveBeenCalledTimes(judgeCalls);
+    }
+  );
+
+  it.each(['rca_mechanism_class', 'rca_evidence_quality'])(
+    'preserves the Python trajectory prefix supplied to %s',
+    async (name) => {
+      const inferenceOutput = jest.fn().mockRejectedValue(new Error('Judge unavailable'));
+      const evaluator = createGoldenEvaluators({ output: inferenceOutput }).find(
+        (candidate) => candidate.name === name
+      );
+      if (!evaluator) throw new Error('Missing trajectory evaluator');
+      await evaluator.evaluate({
+        input: { question: output.query },
+        output: {
+          ...output,
+          trajectory: [
+            {
+              step_type: 'tool_result',
+              tool_name: 'synthetic',
+              tool_args: null,
+              content: 'x'.repeat(400) + 'content-tail',
+              tool_output: 'structured-output',
+              success: true,
+            },
+          ],
+        },
+        expected: { reference_answer: 'Synthetic reference' },
+        metadata: { langsmith_example_id: 'id', max_latency_seconds: 300, dataset_split: [] },
+      });
+      const [{ input }] = inferenceOutput.mock.calls[0];
+      expect(input).toContain('[tool_result] synthetic: ' + 'x'.repeat(400));
+      expect(input).not.toContain('content-tail');
+      expect(input).not.toContain('structured-output');
+    }
+  );
+
   it('keeps all eighteen golden score keys and hashes every LLM evaluator version', () => {
     const evaluators = createGoldenEvaluators({ output: jest.fn() });
     expect(new Set(evaluators.map(({ name }) => name)).size).toBe(18);
