@@ -1,5 +1,5 @@
 {
-  "sha1": "9fb70b75d8f6169b25a3a3ae4ce1c79dc160a41e",
+  "sha1": "6b41d5433e5871713a83b7af8c86dd4f6d6f9b01",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -778,8 +778,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
-        "line": 88,
-        "column": 20
+        "line": 127,
+        "column": 15
+      }
+    },
+    {
+      "id": "a67f0ea6f9cf137-9a4508d4ebdd9a6",
+      "title": "Dashboard with ES|QL Lens panel cancels the search request when navigating away cancels both ES|QL and classic requests when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
+        "line": 158,
+        "column": 95
       }
     },
     {
@@ -1352,6 +1365,19 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
         "line": 55,
         "column": 15
+      }
+    },
+    {
+      "id": "79b736095ef203d-841136227d41f25",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline for a FORK query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 91,
+        "column": 49
       }
     },
     {
