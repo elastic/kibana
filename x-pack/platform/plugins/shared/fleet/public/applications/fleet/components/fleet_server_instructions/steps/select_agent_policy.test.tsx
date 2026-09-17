@@ -128,6 +128,9 @@ describe('getSelectAgentPolicyStep — enrollment token callout', () => {
     const { queryByText } = renderWithHookWrapper(<Harness initialPolicyId="policy-1" />);
 
     await waitFor(() => expect(mockSendGetEnrollmentAPIKeys).toHaveBeenCalled());
+    expect(mockSendGetEnrollmentAPIKeys).toHaveBeenCalledWith(
+      expect.objectContaining({ kuery: 'policy_id:"policy-1"' })
+    );
     expect(
       queryByText('There are no enrollment tokens for the selected Fleet Server policy')
     ).toBeNull();
@@ -144,6 +147,26 @@ describe('getSelectAgentPolicyStep — enrollment token callout', () => {
       ).toBeInTheDocument()
     );
     expect(getByText('Create enrollment token')).toBeInTheDocument();
+    // Confirms server-side policy scoping is applied
+    expect(mockSendGetEnrollmentAPIKeys).toHaveBeenCalledWith(
+      expect.objectContaining({ kuery: 'policy_id:"policy-1"' })
+    );
+  });
+
+  it('does not show the callout when the token lookup fails', async () => {
+    const fetchError = new Error('network error');
+    mockSendGetEnrollmentAPIKeys.mockResolvedValue({ error: fetchError });
+
+    const { queryByText } = renderWithHookWrapper(<Harness initialPolicyId="policy-1" />);
+
+    await waitFor(() => expect(mockSendGetEnrollmentAPIKeys).toHaveBeenCalled());
+    // Error → lookupStatus stays 'error', callout must not appear
+    await waitFor(() =>
+      expect(
+        queryByText('There are no enrollment tokens for the selected Fleet Server policy')
+      ).toBeNull()
+    );
+    expect(mockAddError).toHaveBeenCalled();
   });
 
   it('creates a token, shows a success toast, and hides the callout on button click', async () => {

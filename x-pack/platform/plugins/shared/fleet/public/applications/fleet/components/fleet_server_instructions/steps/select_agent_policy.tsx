@@ -10,9 +10,8 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { SO_SEARCH_LIMIT } from '../../../constants';
 import {
   sendCreateEnrollmentAPIKey,
   sendGetEnrollmentAPIKeys,
@@ -25,7 +24,7 @@ import { SelectCreateAgentPolicy } from '../..';
 
 const NoEnrollmentTokensCallout: React.FunctionComponent<{
   policyId: string;
-  onTokenCreated: (key: EnrollmentAPIKey) => void;
+  onTokenCreated: (key: EnrollmentAPIKey, forPolicyId: string) => void;
 }> = ({ policyId, onTokenCreated }) => {
   const { notifications } = useStartServices();
   const [isCreating, setIsCreating] = useState(false);
@@ -40,7 +39,8 @@ const NoEnrollmentTokensCallout: React.FunctionComponent<{
       if (!res.data?.item) {
         return;
       }
-      onTokenCreated(res.data.item);
+      // Pass the policy ID so the parent can discard completions for stale policies.
+      onTokenCreated(res.data.item, policyId);
       notifications.toasts.addSuccess(
         i18n.translate('xpack.fleet.fleetServerSetup.enrollmentTokenCreatedToast', {
           defaultMessage: 'Enrollment token created',
@@ -113,6 +113,8 @@ export const getSelectAgentPolicyStep = ({
   };
 };
 
+type TokenLookupStatus = 'idle' | 'loading' | 'success' | 'error';
+
 const SelectAgentPolicyStepContent: React.FunctionComponent<{
   policyId?: string;
   setPolicyId: (v?: string) => void;
@@ -134,37 +136,63 @@ const SelectAgentPolicyStepContent: React.FunctionComponent<{
   }, [eligibleFleetServerPolicies, policyId, setPolicyId]);
 
   const [enrollmentTokens, setEnrollmentTokens] = useState<EnrollmentAPIKey[]>([]);
-  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
+  const [tokenLookupStatus, setTokenLookupStatus] = useState<TokenLookupStatus>('idle');
+
+  // Track the current policyId in a ref so token-creation callbacks that complete
+  // after a policy change can detect staleness and be ignored.
+  const currentPolicyIdRef = useRef(policyId);
+  useEffect(() => {
+    currentPolicyIdRef.current = policyId;
+  }, [policyId]);
 
   useEffect(() => {
     if (!policyId) {
       setEnrollmentTokens([]);
+      setTokenLookupStatus('idle');
       return;
     }
 
+    // Cancelled flag prevents a response from an earlier policyId from overwriting
+    // state that belongs to a later one when the user changes policy mid-flight.
+    let cancelled = false;
+
     const fetchTokens = async () => {
-      setIsLoadingTokens(true);
+      setTokenLookupStatus('loading');
       try {
-        const res = await sendGetEnrollmentAPIKeys({ page: 1, perPage: SO_SEARCH_LIMIT });
+        // Use server-side kuery to scope the query to this policy so we never
+        // silently miss tokens that fall outside the default page window.
+        const res = await sendGetEnrollmentAPIKeys({
+          page: 1,
+          perPage: 100,
+          kuery: `policy_id:"${policyId}"`,
+        });
+        if (cancelled) return;
         if (res.error) {
           throw res.error;
         }
         const activeTokens = (res.data?.items ?? []).filter(
-          (k) => k.policy_id === policyId && k.active === true && !isEnrollmentTokenExpired(k)
+          (k) => k.active === true && !isEnrollmentTokenExpired(k)
         );
         setEnrollmentTokens(activeTokens);
+        setTokenLookupStatus('success');
       } catch (error) {
+        if (cancelled) return;
         notifications.toasts.addError(error, { title: 'Error' });
-      } finally {
-        setIsLoadingTokens(false);
+        setTokenLookupStatus('error');
       }
     };
 
     fetchTokens();
+    return () => {
+      cancelled = true;
+    };
   }, [policyId, notifications.toasts]);
 
-  const onTokenCreated = useCallback((key: EnrollmentAPIKey) => {
+  const onTokenCreated = useCallback((key: EnrollmentAPIKey, forPolicyId: string) => {
+    // Discard completions for a policy that is no longer selected.
+    if (forPolicyId !== currentPolicyIdRef.current) return;
     setEnrollmentTokens([key]);
+    setTokenLookupStatus('success');
   }, []);
 
   const setSelectedPolicyId = (agentPolicyId?: string) => {
@@ -182,7 +210,7 @@ const SelectAgentPolicyStepContent: React.FunctionComponent<{
         excludeFleetServer={false}
         isFleetServerPolicy={true}
       />
-      {policyId && !isLoadingTokens && enrollmentTokens.length === 0 && (
+      {policyId && tokenLookupStatus === 'success' && enrollmentTokens.length === 0 && (
         <>
           <EuiSpacer size="m" />
           <NoEnrollmentTokensCallout policyId={policyId} onTokenCreated={onTokenCreated} />
