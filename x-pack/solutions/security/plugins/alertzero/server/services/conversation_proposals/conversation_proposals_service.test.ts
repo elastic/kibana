@@ -82,7 +82,11 @@ describe('ConversationProposalsService', () => {
     await service.list(query, request, spaceId);
 
     expect(proposalsService.listByWindow).toHaveBeenCalledWith(
-      { includeStatuses: ['pending'], decidedWithinHours: query.windowHours },
+      {
+        decidedWithinHours: query.windowHours,
+        excludeSuperseded: true,
+        excludeExpired: false,
+      },
       spaceId
     );
   });
@@ -199,7 +203,51 @@ describe('ConversationProposalsService', () => {
   it('places a decided proposal under closed, not under its category', async () => {
     const proposals = [
       makeProposal({
-        status: 'dismissed',
+        decision: 'dismissed',
+        status: 'no_action',
+        category: 'contain',
+        decidedAt: '2026-09-09T10:00:00.000Z',
+      }),
+    ];
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      makeAgentBuilder(),
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(1);
+    expect(result.groups.contain).toBeUndefined();
+  });
+
+  it('closes a proposal whose decision landed while its action is still executing', async () => {
+    // Classification follows the decision rather than the status: an approved
+    // proposal sits at `executing` for as long as its action runs, and showing
+    // it back in the queue would invite a second decision.
+    const proposals = [
+      makeProposal({ decision: 'approved', status: 'executing', category: 'contain' }),
+    ];
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      makeAgentBuilder(),
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(1);
+    expect(result.groups.contain).toBeUndefined();
+  });
+
+  it('closes a recently expired proposal rather than offering it for decision', async () => {
+    // Reachable because `update` stamps `decidedAt` when it settles a proposal
+    // nobody decided, which is what `chartsSummary` reads as the close event.
+    // That makes an expired proposal match `listByWindow`'s decided-recently
+    // leg, so it arrives here with no decision — and classifying on the
+    // decision alone would file it under its category as though a human could
+    // still act on it.
+    const proposals = [
+      makeProposal({
+        status: 'expired',
         category: 'contain',
         decidedAt: '2026-09-09T10:00:00.000Z',
       }),
@@ -241,8 +289,18 @@ describe('ConversationProposalsService', () => {
 
   it('sorts the closed bucket by decidedAt descending', async () => {
     const proposals = [
-      makeProposal({ id: 'older', status: 'dismissed', decidedAt: '2026-09-08T10:00:00.000Z' }),
-      makeProposal({ id: 'newer', status: 'succeeded', decidedAt: '2026-09-09T10:00:00.000Z' }),
+      makeProposal({
+        id: 'older',
+        decision: 'dismissed',
+        status: 'no_action',
+        decidedAt: '2026-09-08T10:00:00.000Z',
+      }),
+      makeProposal({
+        id: 'newer',
+        decision: 'approved',
+        status: 'succeeded',
+        decidedAt: '2026-09-09T10:00:00.000Z',
+      }),
     ];
     const service = new ConversationProposalsService(
       makeProposalsService(proposals),
