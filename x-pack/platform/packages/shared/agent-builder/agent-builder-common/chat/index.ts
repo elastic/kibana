@@ -225,4 +225,5 @@ export {
   isBuiltInConversationEventType,
   isTimelineEvent,
   type ValidConversationEventType,
+  type ConversationAddEventInput,
 } from './timeline_events';

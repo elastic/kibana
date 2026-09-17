@@ -24,6 +24,7 @@ import {
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAddEventInput,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_SCHEMA_VERSION,
@@ -106,10 +107,7 @@ import {
   type Document,
 } from './converters';
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
-import type {
-  ConversationEventsServiceStart,
-  ConversationEventAddInput,
-} from '../../conversation_events';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
 import {
   materializeConversationEvents,
   validateConversationEvents,
@@ -147,9 +145,9 @@ export interface ConversationClient {
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  addEvents(request: {
+  addCustomEvents(request: {
     id: string;
-    events: ConversationEventAddInput[];
+    events: ConversationAddEventInput[];
   }): Promise<ConversationEvent[]>;
   replaceRoundEvents(
     request: ReplaceRoundEventsRequest,
@@ -713,12 +711,12 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
-  async addEvents({
+  async addCustomEvents({
     id,
     events: inputs,
   }: {
     id: string;
-    events: ConversationEventAddInput[];
+    events: ConversationAddEventInput[];
   }): Promise<ConversationEvent[]> {
     const actor = {
       type: EventActorType.user,

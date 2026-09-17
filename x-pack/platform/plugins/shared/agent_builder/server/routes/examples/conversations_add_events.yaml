@@ -6,10 +6,10 @@ requestBody:
           description: "Example request appending two custom events to a conversation"
           value:
             events:
-              - type: example.note
+              - type: text_note
                 data:
                   text: "First note on this conversation"
-              - type: example.note
+              - type: text_note
                 data:
                   text: "Second note on this conversation"
 responses:
@@ -23,7 +23,7 @@ responses:
             value:
               events:
                 - id: 7d3f1a2b-4c5e-6f7a-8b9c-0d1e2f3a4b5c
-                  type: example.note
+                  type: text_note
                   created_at: "2026-09-14T10:00:00.000Z"
                   actor:
                     type: user
@@ -32,7 +32,7 @@ responses:
                   data:
                     text: "First note on this conversation"
                 - id: 8e4f2b3c-5d6f-7a8b-9c0d-1e2f3a4b5c6d
-                  type: example.note
+                  type: text_note
                   created_at: "2026-09-14T10:00:00.000Z"
                   actor:
                     type: user
@@ -51,7 +51,7 @@ x-codeSamples:
       -H "Content-Type: application/json" \
       -d '{
         "events": [
-          { "type": "example.note", "data": { "text": "A note on this conversation" } }
+          { "type": "text_note", "data": { "text": "A note on this conversation" } }
         ]
       }'
 - lang: Console
@@ -59,6 +59,6 @@ x-codeSamples:
     POST kbn://api/agent_builder/conversations/${CONVERSATION_ID}/_add_events
     {
       "events": [
-        { "type": "example.note", "data": { "text": "A note on this conversation" } }
+        { "type": "text_note", "data": { "text": "A note on this conversation" } }
       ]
     }

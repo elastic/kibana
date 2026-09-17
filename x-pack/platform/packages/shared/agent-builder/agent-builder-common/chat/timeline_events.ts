@@ -319,3 +319,9 @@ export type ValidConversationEventType<T extends string> =
     : T extends BuiltInConversationEventTypeValue
     ? never
     : T;
+
+/** Input event for adding to a conversation. Server assigns id, created_at, and actor. */
+export interface ConversationAddEventInput {
+  type: string;
+  data: Record<string, unknown>;
+}

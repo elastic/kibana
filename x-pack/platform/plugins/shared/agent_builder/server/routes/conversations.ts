@@ -538,6 +538,7 @@ export function registerConversationRoutes({
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
+          stability: 'experimental',
           since: '9.6.0',
         },
       },
@@ -561,7 +562,15 @@ export function registerConversationRoutes({
                     maxLength: CONVERSATION_EVENT_TYPE_MAX_LENGTH,
                     meta: { description: 'The registered custom event type.' },
                   }),
-                  data: schema.object({}, { unknowns: 'allow' }),
+                  data: schema.object(
+                    {},
+                    {
+                      unknowns: 'allow',
+                      meta: {
+                        description: 'The event payload. Its shape is defined by the event type.',
+                      },
+                    }
+                  ),
                 }),
                 {
                   minSize: 1,
@@ -583,7 +592,7 @@ export function registerConversationRoutes({
         const { conversation_id: conversationId } = request.params;
 
         const client = await conversationsService.getScopedClient({ request });
-        const events = await client.addEvents({
+        const events = await client.addCustomEvents({
           id: conversationId,
           events: request.body.events,
         });

@@ -9,6 +9,7 @@ import type {
   ConversationAccessControl,
   ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
+  ConversationAddEventInput,
   ConversationEvent,
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -64,7 +65,7 @@ export interface UpdateConversationAccessControlRequestBody {
 export type UpdateConversationAccessControlResponse = ConversationAccessControl;
 
 export interface AddConversationEventsRequestBody {
-  events: Array<{ type: string; data: Record<string, unknown> }>;
+  events: Array<ConversationAddEventInput>;
 }
 
 export interface AddConversationEventsResponse {

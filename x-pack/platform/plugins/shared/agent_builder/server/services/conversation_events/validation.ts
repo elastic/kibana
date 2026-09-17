@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { createBadRequestError, isBuiltInConversationEventType } from '@kbn/agent-builder-common';
+import {
+  createBadRequestError,
+  isBuiltInConversationEventType,
+  type ConversationAddEventInput,
+} from '@kbn/agent-builder-common';
 
-import type {
-  ConversationEventsServiceStart,
-  ConversationEventAddInput,
-  ValidatedConversationEventAddInput,
-} from './types';
+import type { ConversationEventsServiceStart, ValidatedConversationEventAddInput } from './types';
 
 const validateEvent =
   (registry: Pick<ConversationEventsServiceStart, 'getDefinition'>) =>
-  ({ type, data }: ConversationEventAddInput) => {
+  ({ type, data }: ConversationAddEventInput) => {
     if (isBuiltInConversationEventType(type)) {
       throw createBadRequestError(
         `Conversation event type "${type}" is internal and cannot be added directly`
@@ -43,7 +43,7 @@ const validateEvent =
   };
 
 export const validateConversationEvents = (
-  events: ConversationEventAddInput[],
+  events: ConversationAddEventInput[],
   registry: Pick<ConversationEventsServiceStart, 'getDefinition'>
 ): ValidatedConversationEventAddInput[] => {
   return events.map(validateEvent(registry));

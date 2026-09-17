@@ -782,9 +782,9 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
     jest.clearAllMocks();
   });
 
-  it('calls addEvents with the parsed body and returns the materialized events', async () => {
+  it('calls addCustomEvents with the parsed body and returns the materialized events', async () => {
     const testEvent = {
-      type: 'example.note',
+      type: 'text_note',
       data: { text: 'test note' },
     };
     const materializedEvents = [
@@ -795,7 +795,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
         ...testEvent,
       },
     ];
-    const mockAddEvents = jest.fn().mockResolvedValue(materializedEvents);
+    const mockAddCustomEvents = jest.fn().mockResolvedValue(materializedEvents);
     let handler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
 
     const router = makeRouter((h) => {
@@ -806,7 +806,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({ addEvents: mockAddEvents }),
+          getScopedClient: jest.fn().mockResolvedValue({ addCustomEvents: mockAddCustomEvents }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -819,7 +819,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
       defaultResponse
     );
 
-    expect(mockAddEvents).toHaveBeenCalledWith({ id: 'conv-1', events: requestBody.events });
+    expect(mockAddCustomEvents).toHaveBeenCalledWith({ id: 'conv-1', events: requestBody.events });
     expect(result.status).toBe(200);
     expect(result.payload).toEqual({ events: materializedEvents });
   });
@@ -843,7 +843,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
 
     it('accepts a valid events array', () => {
       expect(() =>
-        getBodySchema().validate({ events: [{ type: 'example.note', data: { text: 'hello' } }] })
+        getBodySchema().validate({ events: [{ type: 'text_note', data: { text: 'hello' } }] })
       ).not.toThrow();
     });
 
@@ -859,7 +859,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
       expect(() =>
         getBodySchema().validate({
           events: [
-            { type: 'example.note', data: { text: 'test', a: 1, b: 'two', c: { nested: true } } },
+            { type: 'text_note', data: { text: 'test', a: 1, b: 'two', c: { nested: true } } },
           ],
         })
       ).not.toThrow();

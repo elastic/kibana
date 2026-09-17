@@ -14,13 +14,8 @@ import type {
   ConversationWithoutRoundsWithPermissions,
   ConversationListResult,
   MetadataFieldValue,
+  ConversationAddEventInput,
 } from '@kbn/agent-builder-common';
-
-/** Input event for adding to a conversation. Server assigns id, created_at, and actor. */
-export interface ConversationAddEventInput {
-  type: string;
-  data: Record<string, unknown>;
-}
 
 /** Request for adding events to a conversation. */
 export interface ConversationAddEventsRequest {

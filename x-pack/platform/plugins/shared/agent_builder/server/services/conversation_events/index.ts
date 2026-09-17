@@ -13,11 +13,7 @@ export {
   createConversationEventsService,
   type ConversationEventsService,
 } from './conversation_events_service';
-export type {
-  ConversationEventsServiceSetup,
-  ConversationEventsServiceStart,
-  ConversationEventAddInput,
-} from './types';
+export type { ConversationEventsServiceSetup, ConversationEventsServiceStart } from './types';
 export { materializeConversationEvents } from './materialize_events';
 export { validateConversationEvents } from './validation';
 export { exampleNoteEventType } from './example_event_type';

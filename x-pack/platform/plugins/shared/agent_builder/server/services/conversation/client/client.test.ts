@@ -3363,7 +3363,7 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('addEvents', () => {
+  describe('addCustomEvents', () => {
     beforeEach(() => {
       (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(exampleNoteEventType);
     });
@@ -3372,13 +3372,13 @@ describe('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
-      const result = await client.addEvents({
+      const result = await client.addCustomEvents({
         id: 'conversation-1',
-        events: [{ type: 'example.note', data: { text: 'hello' } }],
+        events: [{ type: 'text_note', data: { text: 'hello' } }],
       });
 
       expect(result).toHaveLength(1);
-      expect(result[0].type).toBe('example.note');
+      expect(result[0].type).toBe('text_note');
       expect(result[0].actor.type).toBe(EventActorType.user);
       expect(result[0].actor.id).toBe('user-1');
     });

@@ -12,7 +12,7 @@ import type {
   CreateConversationResponse,
   GetConversationResponse,
 } from '../../../../common/http_api/conversations';
-import { EXAMPLE_NOTE_EVENT_TYPE } from '../../../../common/constants';
+import { TEXT_NOTE_EVENT_TYPE } from '../../../../common/constants';
 import { apiTest } from '../fixtures';
 import {
   API_AGENT_BUILDER,
@@ -25,7 +25,7 @@ const CONVERSATION_PATH = (id: string) => `${CONVERSATIONS_PATH}/${encodeURIComp
 const ADD_EVENTS_PATH = (id: string) => `${CONVERSATION_PATH(id)}/_add_events`;
 const ADD_EVENTS_HEADERS = { 'elastic-api-version': ELASTIC_API_VERSION };
 
-const NOTE_EVENT = { type: EXAMPLE_NOTE_EVENT_TYPE, data: { text: 'test note' } };
+const NOTE_EVENT = { type: TEXT_NOTE_EVENT_TYPE, data: { text: 'test note' } };
 
 apiTest.describe(
   'Agent Builder — POST /conversations/{id}/_add_events',
@@ -65,7 +65,7 @@ apiTest.describe(
         const { events } = res.body as AddConversationEventsResponse;
         expect(events).toHaveLength(1);
         const [event] = events;
-        expect(event.type).toBe(EXAMPLE_NOTE_EVENT_TYPE);
+        expect(event.type).toBe(TEXT_NOTE_EVENT_TYPE);
         expect((event.data as { text: string }).text).toBe('test note');
         // Server assigns id — must be uuid-shaped and must not contain '::'
         // (the delimiter used by round-derived event ids; a collision would cause
@@ -85,7 +85,7 @@ apiTest.describe(
       'event persists on GET and does not affect the rounds projection',
       async ({ asAdmin }) => {
         const postRes = await asAdmin.post(ADD_EVENTS_PATH(conversationId), {
-          body: { events: [{ type: EXAMPLE_NOTE_EVENT_TYPE, data: { text: 'round-trip note' } }] },
+          body: { events: [{ type: TEXT_NOTE_EVENT_TYPE, data: { text: 'round-trip note' } }] },
           headers: ADD_EVENTS_HEADERS,
           responseType: 'json',
         });
@@ -111,8 +111,8 @@ apiTest.describe(
       const res = await asAdmin.post(ADD_EVENTS_PATH(conversationId), {
         body: {
           events: [
-            { type: EXAMPLE_NOTE_EVENT_TYPE, data: { text: 'note A' } },
-            { type: EXAMPLE_NOTE_EVENT_TYPE, data: { text: 'note B' } },
+            { type: TEXT_NOTE_EVENT_TYPE, data: { text: 'note A' } },
+            { type: TEXT_NOTE_EVENT_TYPE, data: { text: 'note B' } },
           ],
         },
         headers: ADD_EVENTS_HEADERS,
@@ -132,8 +132,8 @@ apiTest.describe(
         const postRes = await asAdmin.post(ADD_EVENTS_PATH(conversationId), {
           body: {
             events: [
-              { type: EXAMPLE_NOTE_EVENT_TYPE, data: { text: 'valid note' } },
-              { type: EXAMPLE_NOTE_EVENT_TYPE, data: {} }, // missing required text
+              { type: TEXT_NOTE_EVENT_TYPE, data: { text: 'valid note' } },
+              { type: TEXT_NOTE_EVENT_TYPE, data: {} }, // missing required text
             ],
           },
           headers: ADD_EVENTS_HEADERS,
@@ -148,7 +148,7 @@ apiTest.describe(
         expect(getRes).toHaveStatusCode(200);
         const conversation = getRes.body as GetConversationResponse;
         const texts = (conversation.events ?? [])
-          .filter((e) => e.type === EXAMPLE_NOTE_EVENT_TYPE)
+          .filter((e) => e.type === TEXT_NOTE_EVENT_TYPE)
           .map((e) => (e.data as { text?: string }).text);
         expect(texts).not.toContain('valid note');
       }
@@ -202,7 +202,7 @@ apiTest.describe(
         body: {
           events: [
             {
-              type: EXAMPLE_NOTE_EVENT_TYPE,
+              type: TEXT_NOTE_EVENT_TYPE,
               data: { text: 'hi' },
               actor: { type: 'user', id: 'u_other' },
             },
@@ -219,7 +219,7 @@ apiTest.describe(
       const res = await asAdmin.post(ADD_EVENTS_PATH(conversationId), {
         body: {
           events: [
-            { type: EXAMPLE_NOTE_EVENT_TYPE, data: { text: 'hi' }, id: 'caller-supplied-id' },
+            { type: TEXT_NOTE_EVENT_TYPE, data: { text: 'hi' }, id: 'caller-supplied-id' },
           ],
         },
         headers: ADD_EVENTS_HEADERS,
@@ -234,9 +234,9 @@ apiTest.describe(
         body: {
           events: [
             {
-              type: EXAMPLE_NOTE_EVENT_TYPE,
+              type: TEXT_NOTE_EVENT_TYPE,
               data: {
-                // example.note event limits text to 1000 characters
+                // text_note event limits text to 1000 characters
                 text: 'a'.repeat(2000),
               },
             },

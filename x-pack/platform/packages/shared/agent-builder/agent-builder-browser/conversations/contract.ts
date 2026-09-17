@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ConversationEvent } from '@kbn/agent-builder-common';
+import type { ConversationEvent, ConversationAddEventInput } from '@kbn/agent-builder-common';
 
 export interface AddConversationEventsParams {
   conversationId: string;
-  events: Array<{ type: string; data: Record<string, unknown> }>;
+  events: ConversationAddEventInput[];
 }
 
 export interface AddConversationEventsResult {

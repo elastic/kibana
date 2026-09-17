@@ -6,7 +6,6 @@
  */
 
 export type {
-  ConversationAddEventInput,
   ConversationAddEventsRequest,
   ConversationCreatePublicRequest,
   ConversationPublicClient,

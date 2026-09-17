@@ -34,7 +34,7 @@ describe('ConversationsService', () => {
 
   it('posts events to the _add_events endpoint', async () => {
     const event = {
-      type: 'example.note',
+      type: 'text_note',
       data: { text: 'this is a note' },
     };
     const responseBody = {

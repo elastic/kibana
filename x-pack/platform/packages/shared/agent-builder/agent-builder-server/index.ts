@@ -178,7 +178,6 @@ export type {
   ListAttachmentsArgs,
 } from './attachments';
 export type {
-  ConversationAddEventInput,
   ConversationAddEventsRequest,
   ConversationCreatePublicRequest,
   ConversationPublicClient,

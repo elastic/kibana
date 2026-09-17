@@ -16,11 +16,6 @@ export interface ConversationEventsServiceStart {
   list(): ConversationEventTypeDefinition[];
 }
 
-export interface ConversationEventAddInput {
-  type: string;
-  data: unknown;
-}
-
 export interface ValidatedConversationEventAddInput {
   type: string;
   data: Record<string, unknown>;

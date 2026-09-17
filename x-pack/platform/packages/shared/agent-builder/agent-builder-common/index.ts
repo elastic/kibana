@@ -377,6 +377,7 @@ export {
   isBuiltInConversationEventType,
   isTimelineEvent,
   type ValidConversationEventType,
+  type ConversationAddEventInput,
 } from './chat';
 export {
   type PublicSkillDefinition,
