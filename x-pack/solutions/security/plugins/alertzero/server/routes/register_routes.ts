@@ -11,6 +11,7 @@ import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
 import type { ConversationProposalsService } from '../services/conversation_proposals/conversation_proposals_service';
 import type { ActionsService } from '../services/actions/actions_service';
+import type { HuntServices } from '../services/watches/hunt';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
@@ -18,6 +19,7 @@ import { registerUpdateWorkerRoute } from './workers/update_worker';
 import { registerGetProposalsByCategoryRoute } from './proposals/get_proposals_by_category';
 import { registerGetClosedProposalsRoute } from './proposals/get_closed_proposals';
 import { registerListActionsRoute } from './actions/list_actions';
+import { registerThreatIntelRoutes } from './threat_intel/register_threat_intel_routes';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -27,6 +29,7 @@ export interface RouteDependencies {
   getWorkersService: () => WorkersService;
   getConversationProposalsService: () => ConversationProposalsService;
   getActionsService: () => ActionsService;
+  getHuntServices: () => HuntServices;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {
@@ -37,4 +40,5 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetProposalsByCategoryRoute(deps);
   registerGetClosedProposalsRoute(deps);
   registerListActionsRoute(deps);
+  registerThreatIntelRoutes(deps);
 };

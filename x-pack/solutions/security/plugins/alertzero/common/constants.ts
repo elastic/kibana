@@ -31,3 +31,30 @@ export const ALERTZERO_API_PRIVILEGE_WRITE = 'alertzero_write' as const;
 
 /** Owner id registered for all AlertZero managed workflow definitions. */
 export const ALERTZERO_MANAGED_WORKFLOW_OWNER_ID = 'alertzero' as const;
+
+// --- Hunt services (PR 3: hunt-watch-services-lift) ---
+
+/** Run status while a hunt is actively querying source indices. */
+export const HUNT_RUN_STATUS_RUNNING = 'running' as const;
+
+/** Run status once a hunt completes with zero or more environment hits. */
+export const HUNT_RUN_STATUS_COMPLETE = 'complete' as const;
+
+/** Run status when a hunt run fails before producing a result. */
+export const HUNT_RUN_STATUS_FAILED = 'failed' as const;
+
+/** All valid hunt run status values, for schema validation. */
+export const HUNT_RUN_STATUSES = [
+  HUNT_RUN_STATUS_RUNNING,
+  HUNT_RUN_STATUS_COMPLETE,
+  HUNT_RUN_STATUS_FAILED,
+] as const;
+
+/** Tier 1 hunts scope by IOC lookup against a small, fixed index set. */
+export const HUNT_TIER_1 = 'tier1' as const;
+
+/** Tier 2 hunts scope by TTP/behavior search against a broader index set. */
+export const HUNT_TIER_2 = 'tier2' as const;
+
+/** All valid hunt tier values, for schema validation. */
+export const HUNT_TIERS = [HUNT_TIER_1, HUNT_TIER_2] as const;
