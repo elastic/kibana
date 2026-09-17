@@ -60,26 +60,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const { entityFilters, setEntityFilters } = useEntityFiltersParam();
 
-  // const baseFilter = useMemo(
-  //   () => combineFilters([esFilter, ...getEntityFilterTerms(entityFilters)]),
-  //   [esFilter, entityFilters]
-  // );
-
-  // const [selectedTileId, setSelectedTileId] = useTileParam();
-
-  // tile hooks filters: esFilter + entity filters
-  // const { entityIds: alertEntityIds } = useEntitiesWithAlertsCount({ spaceId, filter: baseFilter });
-
-  // const tileEntityIds = useMemo(() => {
-  //   if (selectedTileId === 'entitiesWithAlerts') return alertEntityIds;
-  //   if (selectedTileId === 'entitiesWithAnomalies') return anomalyEntityIds;
-  //   return [];
-  // }, [selectedTileId, alertEntityIds, anomalyEntityIds]);
-
-  // const tileFilter = selectedTileId
-  //   ? { terms: { 'entity.id': tileEntityIds } }
-  //   : undefined;
-
   const menu = useMemo<AppHeaderMenu>(
     () => ({
       items: [
@@ -126,7 +106,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
               spaceId={spaceId}
               view={viewBy}
               esFilter={esFilter}
-              // tileFilter={tileFilter}
               watchlistNames={watchlistNames}
             />
           </div>

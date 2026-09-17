@@ -201,7 +201,6 @@ interface Props {
   spaceId: string | undefined;
   view: 'resolved' | 'raw';
   esFilter?: QueryDslQueryContainer;
-  // tileFilter?: QueryDslQueryContainer;
   watchlistNames: Map<string, string>;
 }
 
@@ -211,17 +210,11 @@ export const EntityFiltersBar: React.FC<Props> = ({
   spaceId,
   view,
   esFilter,
-  // tileFilter
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
   const baseFilter = useMemo(
-    () =>
-      combineFilters([
-        esFilter,
-        // tileFilter
-        ...getEntityFilterTerms(filters),
-      ]),
+    () => combineFilters([esFilter, ...getEntityFilterTerms(filters)]),
     [esFilter, filters]
   );
   const filterCounts = useEntityFilterBarCounts({ spaceId, view, filter: baseFilter });
