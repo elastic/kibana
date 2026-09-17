@@ -28,6 +28,7 @@ import {
   fromDiscoverSessionPanelOverrides,
 } from '../../../common/embeddable';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
+import { normalizeInlineDataViewForByValuePersistence } from '../../../common/session/inline_data_view';
 import type { DiscoverServices } from '../../build_services';
 import { EDITABLE_PANEL_KEYS } from '../constants';
 import type { SearchEmbeddableInputState, SearchEmbeddableRuntimeState } from '../types';
@@ -41,6 +42,24 @@ export const deserializeState = async ({
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState, EDITABLE_PANEL_KEYS);
+  const legacyState = isSearchEmbeddableLegacyPanelState(serializedState)
+    ? serializedState
+    : undefined;
+
+  // Preserve the legacy spec ID and its references until serializeState can replace both
+  // atomically. Converting to the ID-less API shape here would orphan the references first.
+  if (legacyState && 'attributes' in legacyState) {
+    const { byValueToSavedSearch } = discoverServices.savedSearch;
+    const savedSearch = await byValueToSavedSearch(legacyState, true);
+    const { tabs, ...savedSearchWithoutTabs } = savedSearch;
+
+    return {
+      ...savedSearchWithoutTabs,
+      ...panelState,
+      nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
+    };
+  }
+
   const apiState = isSearchEmbeddableLegacyPanelState(serializedState)
     ? fromStoredSearchEmbeddable(serializedState)
     : serializedState;
@@ -130,7 +149,12 @@ export const serializeState = ({
   selectedTabId?: string;
 }): SearchEmbeddablePanelApiState => {
   const searchSource = savedSearch.searchSource;
-  const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
+  const serializedSearchSource = searchSource.getSerializedFields();
+  const searchSourceJSON = JSON.stringify(
+    savedObjectId
+      ? serializedSearchSource
+      : normalizeInlineDataViewForByValuePersistence(serializedSearchSource)
+  );
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
   if (savedObjectId) {

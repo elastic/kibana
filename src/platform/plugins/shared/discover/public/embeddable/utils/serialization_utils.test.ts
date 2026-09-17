@@ -503,6 +503,37 @@ describe('Serialization utils', () => {
   });
 
   describe('legacy panel state (BWC)', () => {
+    test('deserialize by-value preserves legacy inline IDs until the next client write', async () => {
+      const runtimeDataViewId = 'legacy-runtime-inline-id';
+      const legacyByValue: SearchEmbeddableByValueState = {
+        title: 'Legacy inline panel',
+        attributes: {
+          ...mockedSavedSearchAttributes,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              index: { id: runtimeDataViewId, title: 'logs-*' },
+              filter: [
+                {
+                  meta: { index: runtimeDataViewId, key: 'bytes' },
+                  query: { match_phrase: { bytes: 100 } },
+                },
+              ],
+            }),
+          },
+        },
+      };
+
+      await deserializeState({
+        serializedState: legacyByValue,
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(discoverServiceMock.savedSearch.byValueToSavedSearch).toHaveBeenLastCalledWith(
+        legacyByValue,
+        true
+      );
+    });
+
     test('deserialize by-ref uses savedObjectId', async () => {
       const sessionTabs = [mockTab('tab-1', 'Tab 1')];
       discoverServiceMock.savedSearch.getDiscoverSession = jest

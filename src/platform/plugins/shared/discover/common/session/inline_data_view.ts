@@ -11,6 +11,7 @@ import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { Sha256 } from '@kbn/crypto-browser';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { stableStringify } from '@kbn/std';
@@ -25,39 +26,66 @@ export const getInlineDataView = (
   }
 
   const index = searchSource?.index;
-  if (!index || typeof index === 'string' || !index.title) {
+  if (!index || typeof index === 'string' || !index.title || index.type === ESQL_TYPE) {
     return undefined;
   }
 
   return index;
 };
 
-/** Compares saved and local specs in the API format, excluding local-only fields such as the ID. */
-export const getDataViewSpecKey = (dataView: DataViewSpec): string =>
-  stableStringify(
-    fromStoredDataView({
-      ...dataView,
-      // The Data View service uses the title when the name is missing or empty.
-      name: dataView.name || dataView.title,
-      // DataView.toMinimalSpec() includes this default even when the API document omits it.
-      allowHidden: dataView.allowHidden ?? false,
-    })
-  );
-
-/** Generates a stable inline ID from the definition without changing the spec. */
-export const generateInlineDataViewId = (dataView: DataViewSpec): string => {
+const getCanonicalInlineDataViewSpec = (dataView: DataViewSpec) => {
   const spec = fromStoredDataView(dataView) as AsCodeDataViewSpec;
   const fieldSettings = omitBy(spec.field_settings, (settings) => every(settings, isUndefined));
 
-  // Changing the ID for an unchanged spec can break saved dashboard filters.
-  const specKey = stableStringify({
-    type: 'data_view_spec',
-    // Renaming an inline view in Discover already creates a new ID; the hash follows the same rule.
+  return {
+    type: 'data_view_spec' as const,
+    // The Data View service uses the title when the name is missing or empty.
     name: spec.name || spec.index_pattern,
+    // DataView.toMinimalSpec() includes this default even when the API document omits it.
     allow_hidden_indices: spec.allow_hidden_indices ?? false,
     ...pick(spec, ['index_pattern', 'time_field']),
     ...omitBy({ field_settings: fieldSettings, field_filters: spec.field_filters }, isEmpty),
-  });
+  };
+};
+
+/** Compares definitions using the same canonical representation that owns deterministic IDs. */
+export const getDataViewSpecKey = (dataView: DataViewSpec): string =>
+  stableStringify(getCanonicalInlineDataViewSpec(dataView));
+
+/** Generates a stable inline ID from the definition without changing the spec. */
+export const generateInlineDataViewId = (dataView: DataViewSpec): string => {
+  // Changing the ID for an unchanged spec can break saved dashboard filters.
+  const specKey = getDataViewSpecKey(dataView);
 
   return `discover-inline-${new Sha256().update(specKey).digest('hex')}`;
+};
+
+/** Replaces a runtime inline ID and its filter references with the stable by-value ID. */
+export const normalizeInlineDataViewForByValuePersistence = (
+  searchSource: SerializedSearchSourceFields
+): SerializedSearchSourceFields => {
+  const inlineDataView = getInlineDataView(searchSource);
+
+  if (!inlineDataView || inlineDataView.id === undefined) {
+    return searchSource;
+  }
+
+  const runtimeDataViewId = inlineDataView.id;
+  const stableDataViewId = generateInlineDataViewId(inlineDataView);
+
+  if (runtimeDataViewId === stableDataViewId) {
+    return searchSource;
+  }
+
+  return {
+    ...searchSource,
+    index: { ...inlineDataView, id: stableDataViewId },
+    ...(searchSource.filter && {
+      filter: searchSource.filter.map((filter) =>
+        filter.meta?.index === runtimeDataViewId
+          ? { ...filter, meta: { ...filter.meta, index: stableDataViewId } }
+          : filter
+      ),
+    }),
+  };
 };

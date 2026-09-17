@@ -20,7 +20,6 @@ import {
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { cloneDeep } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
@@ -29,7 +28,7 @@ import type {
 } from '@kbn/as-code-discover-schema';
 import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
 import type { DiscoverSessionApiResponse } from '../../server';
-import { assignSessionDataViewIds } from '../application/main/state_management/utils/assign_session_data_view_ids';
+import { reconcileSessionInlineDataViewIds } from '../application/main/state_management/utils/reconcile_session_inline_data_view_ids';
 import {
   fromDiscoverSessionApiResponse,
   getDiscoverSessionReferences,
@@ -40,10 +39,6 @@ type ApiInlineDataView = Extract<
   DiscoverSessionApiClassicTab['data_source'],
   { type: 'data_view_spec' }
 >;
-
-jest.mock('uuid', () => ({ v4: jest.fn(() => 'runtime-inline-id') }));
-
-const mockedUuidv4 = uuidv4 as jest.MockedFunction<() => string>;
 
 const inlineApiDataView: ApiInlineDataView = {
   type: 'data_view_spec',
@@ -198,7 +193,6 @@ describe('Discover session conversion and UI preparation', () => {
       'foreign-data-view-id'
     );
     expect(fromDiscoverSessionApiResponse(response)).toStrictEqual(session);
-    expect(mockedUuidv4).not.toHaveBeenCalled();
     expect(response).toStrictEqual(originalResponse);
   });
 
@@ -207,8 +201,6 @@ describe('Discover session conversion and UI preparation', () => {
 
     // Identity is assigned after local tabs are restored, not during API conversion.
     expect(session.tabs[1].serializedSearchSource.index).not.toHaveProperty('id');
-    expect(mockedUuidv4).not.toHaveBeenCalled();
-
     expect(session).toEqual(
       expect.objectContaining({
         id: 'session-id',
@@ -362,7 +354,10 @@ describe('Discover session conversion and UI preparation', () => {
       },
     };
 
-    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(apiResponse), []);
+    const session = reconcileSessionInlineDataViewIds({
+      session: fromDiscoverSessionApiResponse(apiResponse),
+      localTabs: [],
+    }).session;
     const data = toDiscoverSessionApiData(session);
 
     const expectedInlineTab = {
@@ -406,18 +401,23 @@ describe('Discover session conversion and UI preparation', () => {
     expect(toDiscoverSessionApiData(session)).toStrictEqual(metricsResponse.data);
   });
 
-  it('keeps inline IDs runtime-only and preserves filters for other data views', () => {
-    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
+  it('assigns inline IDs only at runtime and preserves filters for other data views', () => {
+    const session = reconcileSessionInlineDataViewIds({
+      session: fromDiscoverSessionApiResponse(response),
+      localTabs: [],
+    }).session;
     const inlineTab = session.tabs[1];
+    const inlineDataView = inlineTab.serializedSearchSource.index;
+    const inlineDataViewId = typeof inlineDataView === 'object' ? inlineDataView.id : undefined;
 
     expect(inlineTab.serializedSearchSource.index).toEqual(
       expect.objectContaining({
-        id: 'runtime-inline-id',
+        id: expect.stringMatching(/^discover-inline-/),
         title: 'logs-*',
         sourceFilters: [{ value: 'secret.*' }],
       })
     );
-    expect(inlineTab.serializedSearchSource.filter?.[0].meta.index).toBe('runtime-inline-id');
+    expect(inlineTab.serializedSearchSource.filter?.[0].meta.index).toBe(inlineDataViewId);
     expect(inlineTab.serializedSearchSource.filter?.[1].meta.index).toBe('foreign-data-view-id');
 
     const apiTab = toDiscoverSessionApiData(session).tabs[1];
@@ -470,7 +470,10 @@ describe('Discover session conversion and UI preparation', () => {
   });
 
   it('builds references for preserved filter conditions without including inline IDs', () => {
-    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
+    const session = reconcileSessionInlineDataViewIds({
+      session: fromDiscoverSessionApiResponse(response),
+      localTabs: [],
+    }).session;
     const inlineTab = session.tabs[1];
     inlineTab.serializedSearchSource.filter = [
       {

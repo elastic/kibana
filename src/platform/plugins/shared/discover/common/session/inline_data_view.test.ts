@@ -9,26 +9,24 @@
 
 import { cloneDeep } from 'lodash';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { generateInlineDataViewId } from './inline_data_view';
-
-const inlineSpec: DataViewSpec = {
-  title: 'logs-*',
-  timeFieldName: '@timestamp',
-  runtimeFieldMap: {
-    bytes_runtime: { type: 'long', script: { source: 'emit(doc["bytes"].value)' } },
-  },
-};
+import {
+  generateInlineDataViewId,
+  getDataViewSpecKey,
+  normalizeInlineDataViewForByValuePersistence,
+} from './inline_data_view';
+import { inlineDataViewIdCases, inlineSpec } from './inline_data_view.fixtures';
 
 describe('generateInlineDataViewId', () => {
-  it('keeps the expected ID without mutating the spec', () => {
-    const input = cloneDeep(inlineSpec);
+  it.each(inlineDataViewIdCases)(
+    'keeps the expected ID for %s',
+    (_description, spec, expectedId) => {
+      const input = cloneDeep(spec);
 
-    expect(generateInlineDataViewId(input)).toBe(
-      'discover-inline-6304de431ceaf4f5d9a8c49b99c634ec13a2a8a028c596c2c1d7940d8ef40731'
-    );
-    expect(generateInlineDataViewId(cloneDeep(inlineSpec))).toBe(generateInlineDataViewId(input));
-    expect(input).toEqual(inlineSpec);
-  });
+      expect(generateInlineDataViewId(input)).toBe(expectedId);
+      expect(generateInlineDataViewId(cloneDeep(spec))).toBe(expectedId);
+      expect(input).toEqual(spec);
+    }
+  );
 
   it('ignores key order, local metadata and explicit defaults', () => {
     const equivalentSpec: DataViewSpec = {
@@ -47,6 +45,14 @@ describe('generateInlineDataViewId', () => {
     };
 
     expect(generateInlineDataViewId(equivalentSpec)).toBe(generateInlineDataViewId(inlineSpec));
+    expect(getDataViewSpecKey(equivalentSpec)).toBe(getDataViewSpecKey(inlineSpec));
+  });
+
+  it.each<[string, DataViewSpec]>([
+    ['popularity', { ...inlineSpec, fieldAttrs: { bytes: { count: 3 } } }],
+    ['empty field settings', { ...inlineSpec, fieldAttrs: { bytes: {} } }],
+  ])('uses the same canonical key when only %s differs', (_description, spec) => {
+    expect(getDataViewSpecKey(spec)).toBe(getDataViewSpecKey(inlineSpec));
   });
 
   it.each(['', 'logs-*'])('treats the name "%s" like an omitted name', (name) => {
@@ -75,5 +81,53 @@ describe('generateInlineDataViewId', () => {
     expect(generateInlineDataViewId({ ...inlineSpec, ...changes })).not.toBe(
       generateInlineDataViewId(inlineSpec)
     );
+  });
+});
+
+describe('normalizeInlineDataViewForByValuePersistence', () => {
+  it('normalizes the inline spec and only its matching filter references', () => {
+    const runtimeDataViewId = 'runtime-inline-id';
+    const searchSource = {
+      index: { ...inlineSpec, id: runtimeDataViewId },
+      filter: [
+        {
+          meta: { index: runtimeDataViewId, key: 'bytes' },
+          query: { match_phrase: { bytes: 100 } },
+        },
+        {
+          meta: { index: 'another-data-view', key: 'service.name' },
+          query: { match_phrase: { 'service.name': 'checkout' } },
+        },
+        {
+          meta: { key: 'bytes' },
+          query: { match_phrase: { bytes: 200 } },
+        },
+      ],
+    };
+    const original = cloneDeep(searchSource);
+    const stableDataViewId = generateInlineDataViewId(inlineSpec);
+
+    const normalized = normalizeInlineDataViewForByValuePersistence(searchSource);
+
+    expect(normalized).toHaveProperty('index.id', stableDataViewId);
+    expect(normalized).toHaveProperty('filter.0.meta.index', stableDataViewId);
+    expect(normalized).toHaveProperty('filter.1.meta.index', 'another-data-view');
+    expect(normalized).not.toHaveProperty('filter.2.meta.index');
+    expect(searchSource).toEqual(original);
+    expect(normalizeInlineDataViewForByValuePersistence(normalized)).toBe(normalized);
+  });
+
+  it('does not infer a filter relationship when the inline spec has no ID', () => {
+    const searchSource = {
+      index: inlineSpec,
+      filter: [
+        {
+          meta: { index: 'unknown-data-view', key: 'bytes' },
+          query: { match_phrase: { bytes: 100 } },
+        },
+      ],
+    };
+
+    expect(normalizeInlineDataViewForByValuePersistence(searchSource)).toBe(searchSource);
   });
 });

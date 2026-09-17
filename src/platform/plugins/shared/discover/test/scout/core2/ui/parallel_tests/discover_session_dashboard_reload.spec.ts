@@ -433,5 +433,225 @@ spaceTest.describe(
         });
       });
     }
+
+    spaceTest(
+      'keeps a UI-created inline session filter editable after Unlink and reload',
+      async ({ page, pageObjects, scoutSpace }) => {
+        const { dashboard, dataGrid, discover, filterBar, unifiedFieldList } = pageObjects;
+        const savedSearchName = `UI inline session Unlink ${scoutSpace.id}`;
+        const bytesCell = dataGrid.getCellValue(0, 'bytes');
+        const discoverGrid = page.testSubj.locator('discoverDocTable').getByRole('grid');
+        const panelGrid = dashboard.getPanelHoverActionsLocator(savedSearchName).getByRole('grid');
+
+        const { bytesText, bytesValue, unfilteredRowCount, originalDataViewId } =
+          await spaceTest.step('create an inline view in Discover', async () => {
+            await discover.goto({ queryMode: 'classic' });
+            await discover.waitUntilTabIsLoaded();
+            await discover.createDataViewFromSearchBar({ name: 'logst*', adHoc: true });
+            expect(await discover.isCurrentDataViewAdHoc()).toBe(true);
+            const dataViewId = await discover.getCurrentDataViewId();
+            expect(dataViewId).not.toBe('');
+            expect(dataViewId).not.toMatch(/^discover-inline-/);
+
+            await unifiedFieldList.clickFieldListItemAdd('bytes');
+            await discover.writeAndSubmitKqlQuery('bytes > 0');
+            await expect(bytesCell).toHaveText(/^\s*\d[\d,]*\s*$/);
+            const cellText = (await bytesCell.innerText()).trim();
+            const cellValue = Number(cellText.replace(/,/g, ''));
+            expect(cellValue).toBeGreaterThan(0);
+            await expect(discoverGrid).toHaveAttribute('aria-rowcount', /^[1-9]\d*$/);
+            return {
+              bytesText: cellText,
+              bytesValue: cellValue,
+              unfilteredRowCount: await getGridRowCount(discoverGrid),
+              originalDataViewId: dataViewId,
+            };
+          });
+
+        const filteredRowCount = await spaceTest.step(
+          'save a session with a panel filter',
+          async () => {
+            await filterBar.addFilter({
+              field: 'bytes',
+              operator: 'is',
+              value: String(bytesValue),
+            });
+            await expect.poll(() => getGridRowCount(discoverGrid)).toBeLessThan(unfilteredRowCount);
+            const rowCount = await getGridRowCount(discoverGrid);
+            expect(rowCount).toBeGreaterThan(0);
+            await expect.poll(() => filterBar.getFilterCount()).toBe(1);
+            await filterBar.clickEditFilterById('0');
+            await expectBytesFilterEditor(page, bytesValue);
+            await filterBar.closeFieldEditorModal();
+
+            await discover.saveSearch(savedSearchName);
+            await discover.waitUntilTabIsLoaded();
+            expect(await discover.getCurrentDataViewId()).toBe(originalDataViewId);
+            return rowCount;
+          }
+        );
+
+        await spaceTest.step('add the session to a dashboard and unlink it', async () => {
+          await dashboard.openNewDashboard();
+          await dashboard.addSavedSearch(savedSearchName);
+          await dashboard.waitForPanelsToLoad(1);
+          await expect(panelGrid).toHaveAttribute('aria-rowcount', String(filteredRowCount));
+          await expect(bytesCell).toHaveText(bytesText);
+          await expect.poll(() => filterBar.getFilterCount()).toBe(0);
+          await dashboard.expectLinkedToLibrary(savedSearchName);
+          await dashboard.unlinkFromLibrary(savedSearchName);
+          await dashboard.expectNotLinkedToLibrary(savedSearchName);
+        });
+
+        await spaceTest.step('save and reload the by-value panel', async () => {
+          await dashboard.saveDashboard(savedSearchName);
+          await page.reload();
+          await dashboard.waitForPanelsToLoad(1);
+
+          await expect(panelGrid).toHaveAttribute('aria-rowcount', String(filteredRowCount));
+          await expect(bytesCell).toHaveText(bytesText);
+          await expect.poll(() => filterBar.getFilterCount()).toBe(0);
+          await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+          await expect(page.testSubj.locator('dashboardQuickSaveMenuItem')).toBeVisible();
+          await expect(dashboard.unsavedChangesIndicator).toBeHidden();
+          await dashboard.expectNotLinkedToLibrary(savedSearchName);
+        });
+
+        await spaceTest.step('reopen the panel filter with a cold cache', async () => {
+          await dashboard.clickPanelAction('embeddablePanelAction-editPanel', savedSearchName);
+          await discover.waitUntilTabIsLoaded();
+          await expect(discoverGrid).toHaveAttribute('aria-rowcount', String(filteredRowCount));
+          await expect.poll(() => filterBar.getFilterCount()).toBe(1);
+          await filterBar.clickEditFilterById('0');
+          await expectBytesFilterEditor(page, bytesValue);
+          await filterBar.closeFieldEditorModal();
+          await discover.cancelEditorChanges();
+        });
+      }
+    );
+
+    spaceTest(
+      'keeps a filter created while editing a by-value inline panel editable after reload',
+      async ({ apiServices, page, pageObjects, scoutSpace }) => {
+        const { dashboard, dataGrid, discover, filterBar, unifiedFieldList } = pageObjects;
+        const savedSearchName = `Edited by-value inline session ${scoutSpace.id}`;
+
+        await apiServices.discover.create(
+          {
+            title: savedSearchName,
+            tabs: [
+              {
+                id: 'inline-tab',
+                label: 'Inline logs',
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: 'logst*',
+                  name: 'Editable inline logs',
+                  time_field: '@timestamp',
+                },
+                column_order: ['bytes'],
+                query: { language: 'kql', expression: 'bytes > 0' },
+                sort: [{ name: '@timestamp', direction: 'desc' }],
+              },
+            ],
+          },
+          scoutSpace.id
+        );
+
+        await dashboard.openNewDashboard();
+        await dashboard.addSavedSearch(savedSearchName);
+        await dashboard.waitForPanelsToLoad(1);
+
+        const originalPanel = dashboard.getPanelHoverActionsLocator(savedSearchName);
+        const originalGrid = originalPanel.getByRole('grid');
+        const bytesCell = dataGrid.getCellValue(0, 'bytes');
+        const originalCell = originalPanel.locator(bytesCell);
+        await expect(originalCell).toHaveText(/^\s*\d[\d,]*\s*$/);
+        const bytesText = (await originalCell.innerText()).trim();
+        const bytesValue = Number(bytesText.replace(/,/g, ''));
+        expect(bytesValue).toBeGreaterThan(0);
+        await expect(originalGrid).toHaveAttribute('aria-rowcount', /^[1-9]\d*$/);
+        const unfilteredRowCount = await getGridRowCount(originalGrid);
+
+        await dashboard.clonePanel(savedSearchName);
+        await dashboard.waitForPanelsToLoad(2);
+        const clonedTitles = (await dashboard.getPanelTitles()).filter(
+          (title) => title !== savedSearchName
+        );
+        expect(clonedTitles).toHaveLength(1);
+        const [clonedTitle] = clonedTitles;
+        await dashboard.expectNotLinkedToLibrary(clonedTitle);
+        const clonedPanel = dashboard.getPanelHoverActionsLocator(clonedTitle);
+        const clonedGrid = clonedPanel.getByRole('grid');
+
+        const filteredRowCount = await spaceTest.step(
+          'add a runtime field and a panel filter in Discover',
+          async () => {
+            await dashboard.clickPanelAction('embeddablePanelAction-editPanel', clonedTitle);
+            await discover.waitUntilTabIsLoaded();
+            await discover.createRuntimeField({
+              fieldName: 'bytes_doubled',
+              script: 'emit((doc["bytes"].value * 2).toString())',
+            });
+            await unifiedFieldList.clickFieldListItemAdd('bytes_doubled');
+            await filterBar.addFilter({
+              field: 'bytes',
+              operator: 'is',
+              value: String(bytesValue),
+            });
+            const editorGrid = page.testSubj.locator('discoverDocTable').getByRole('grid');
+            await expect.poll(() => getGridRowCount(editorGrid)).toBeLessThan(unfilteredRowCount);
+            const rowCount = await getGridRowCount(editorGrid);
+            expect(rowCount).toBeGreaterThan(0);
+            await expect(dataGrid.getCellValue(0, 'bytes_doubled')).toHaveText(
+              String(bytesValue * 2)
+            );
+
+            await discover.saveAndReturnToEditor();
+            await page.waitForURL(/\/app\/dashboards/);
+            await dashboard.waitForPanelsToLoad(2);
+            return rowCount;
+          }
+        );
+
+        const expectIndependentPanels = async () => {
+          await expect.poll(() => filterBar.getFilterCount()).toBe(0);
+          await expect(originalGrid).toHaveAttribute('aria-rowcount', String(unfilteredRowCount));
+          await expect(originalCell).toHaveText(bytesText);
+          await expect(
+            originalPanel.locator(dataGrid.getCellValue(0, 'bytes_doubled'))
+          ).toHaveCount(0);
+          await expect(clonedGrid).toHaveAttribute('aria-rowcount', String(filteredRowCount));
+          await expect(clonedPanel.locator(bytesCell)).toHaveText(bytesText);
+          await expect(clonedPanel.locator(dataGrid.getCellValue(0, 'bytes_doubled'))).toHaveText(
+            String(bytesValue * 2)
+          );
+          await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+        };
+
+        await expectIndependentPanels();
+        await dashboard.saveDashboard(savedSearchName);
+        await page.reload();
+        await dashboard.waitForPanelsToLoad(2);
+        await expectIndependentPanels();
+        await expect(page.testSubj.locator('dashboardQuickSaveMenuItem')).toBeVisible();
+        await expect(dashboard.unsavedChangesIndicator).toBeHidden();
+
+        await spaceTest.step(
+          'reopen the clone and edit its saved filter with a cold cache',
+          async () => {
+            await dashboard.clickPanelAction('embeddablePanelAction-editPanel', clonedTitle);
+            await discover.waitUntilTabIsLoaded();
+            await expect.poll(() => filterBar.getFilterCount()).toBe(1);
+            await filterBar.clickEditFilterById('0');
+            await expectBytesFilterEditor(page, bytesValue);
+            await filterBar.closeFieldEditorModal();
+            await discover.cancelEditorChanges();
+            await page.waitForURL(/\/app\/dashboards/);
+            await dashboard.waitForPanelsToLoad(2);
+          }
+        );
+      }
+    );
   }
 );

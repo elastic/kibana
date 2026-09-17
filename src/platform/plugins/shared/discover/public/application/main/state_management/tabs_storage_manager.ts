@@ -92,12 +92,12 @@ export interface TabsStorageManager {
     persistedDiscoverSession?: DiscoverSession;
     shouldClearAllTabs?: boolean;
     defaultTabState: Omit<TabState, keyof TabItem>;
-    /** Prepares the returned session before mapping its tabs, using local tabs from the same session. */
+    /** Prepares the session and same-session local tabs before either is consumed. */
     prepareSession?: (
       session: DiscoverSession,
       localTabs: TabState[],
       selectedTabId: string | undefined
-    ) => DiscoverSession;
+    ) => { session: DiscoverSession; localTabs: TabState[] };
   }) => TabsInternalStatePayload & {
     updatedDiscoverSession: DiscoverSession | undefined;
   };
@@ -453,14 +453,23 @@ export const createTabsStorageManager = ({
       toTabState(tab, defaultTabState)
     );
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
+    let closedTabs = storedTabsState.closedTabs.map((tab) =>
+      toRecentlyClosedTabState(tab, defaultTabState)
+    );
     let updatedDiscoverSession = persistedDiscoverSession;
 
-    // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
-    // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
+    // Prepare before mapping tabs so document, open and recently closed state share one identity.
     if (persistedDiscoverSession && prepareSession) {
-      const localTabs =
-        persistedDiscoverSession.id === storedTabsState.discoverSessionId ? openTabs : [];
-      updatedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
+      const hasSameSession = persistedDiscoverSession.id === storedTabsState.discoverSessionId;
+      const localTabs = hasSameSession ? [...openTabs, ...closedTabs] : [];
+      const openTabsCount = openTabs.length;
+      const prepared = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
+      updatedDiscoverSession = prepared.session;
+
+      if (hasSameSession) {
+        openTabs = prepared.localTabs.slice(0, openTabsCount);
+        closedTabs = prepared.localTabs.slice(openTabsCount) as RecentlyClosedTabState[];
+      }
     }
 
     const persistedTabs = updatedDiscoverSession?.tabs.map((tab) =>
@@ -471,10 +480,6 @@ export const createTabsStorageManager = ({
       // if the discover session has changed, use the tabs from the session
       openTabs = persistedTabs ?? [];
     }
-    const closedTabs = storedTabsState.closedTabs.map((tab) =>
-      toRecentlyClosedTabState(tab, defaultTabState)
-    );
-
     // restore previously opened tabs
     if (enabled) {
       // try to preselect one of the previously opened tabs

@@ -38,7 +38,6 @@ import {
   type Query,
 } from '@kbn/es-query';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getEsqlDataView } from '@kbn/discover-utils';
@@ -53,7 +52,7 @@ import type {
 
 const assignInlineDataViewId = (searchSource?: SerializedSearchSourceFields) => {
   const index = getInlineDataView(searchSource);
-  if (!index || index.id !== undefined || index.type === ESQL_TYPE) {
+  if (!index || index.id !== undefined) {
     return searchSource;
   }
 
