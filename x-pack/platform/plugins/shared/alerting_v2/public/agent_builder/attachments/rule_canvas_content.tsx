@@ -143,8 +143,8 @@ export const RuleCanvasContent = ({
         <EuiPanel paddingSize="l" hasShadow={false}>
           <RuleSummaryBody rule={summaryRule}>
             <RuleSummaryAboutSection />
-            <RuleSummaryInvestigationSection />
             <RuleQueryPreviewSection />
+            <RuleSummaryInvestigationSection />
             <RuleSummaryActionPoliciesSection />
             <RuleSummaryArtifactsSection />
           </RuleSummaryBody>

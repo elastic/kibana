@@ -155,6 +155,17 @@ describe('RuleCanvasContent', () => {
         'true'
       );
       expect(getByTestId('mockArtifactsSection')).toHaveAttribute('data-has-query-client', 'true');
+
+      const sectionOrder = Array.from(getByTestId('mockRuleSummaryBody').children).map((section) =>
+        section.getAttribute('data-test-subj')
+      );
+      expect(sectionOrder).toEqual([
+        'mockAboutSection',
+        'mockQueryPreviewSection',
+        'mockInvestigationSection',
+        'mockActionPoliciesSection',
+        'mockArtifactsSection',
+      ]);
     });
 
     it('does not expose a proposed data id as a persisted summary id', () => {
