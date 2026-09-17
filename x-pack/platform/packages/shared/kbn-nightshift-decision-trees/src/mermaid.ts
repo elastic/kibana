@@ -77,7 +77,7 @@ export const extractMermaid = (markdown: string): string => {
   let blockLines: string[] = [];
 
   for (const line of splitLinesKeepEnds(markdown)) {
-    const lineWithoutNewline = line.replace(/[\r\n]+$/, '');
+    const lineWithoutNewline = line.trimEnd();
 
     if (inMermaidBlock) {
       const stripped = lineWithoutNewline.trim();

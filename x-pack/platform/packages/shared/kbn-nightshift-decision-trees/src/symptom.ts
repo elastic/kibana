@@ -14,25 +14,49 @@ export const DECISION_TREE_DIRECTORY = 'decision-trees';
 const DECISION_TREE_FILE_PREFIX = 'decision_tree_';
 
 const MAX_SLUG_LENGTH = 80;
+/** Bound free-text input before scanning so slug normalization cannot walk unbounded strings. */
+const MAX_SLUG_INPUT_LENGTH = 512;
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const MIN_SLUG_WORDS = 2;
 const MAX_SLUG_WORDS = 5;
 
+const isSlugChar = (char: string): boolean =>
+  (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9');
+
 /**
  * Normalizes free text into the kebab-case slug shape Cortex ids use.
  * Mirrors `canonicalizeSlug` in the Cortex page store so a slug survives the round trip.
+ *
+ * Implemented with a single pass over a length-capped string so hyphen collapsing cannot
+ * become ReDoS via quantified dash regexes.
  */
-export const normalizeSymptomSlug = (value: string): string =>
-  value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-')
-    .slice(0, MAX_SLUG_LENGTH)
-    .replace(/-+$/g, '');
+export const normalizeSymptomSlug = (value: string): string => {
+  const capped = value.trim().toLowerCase().slice(0, MAX_SLUG_INPUT_LENGTH);
+  let slug = '';
+  let pendingHyphen = false;
+
+  for (const char of capped) {
+    if (isSlugChar(char)) {
+      if (pendingHyphen && slug.length > 0) {
+        slug += '-';
+      }
+      slug += char;
+      pendingHyphen = false;
+      continue;
+    }
+    pendingHyphen = true;
+  }
+
+  if (slug.length > MAX_SLUG_LENGTH) {
+    slug = slug.slice(0, MAX_SLUG_LENGTH);
+  }
+  if (slug.endsWith('-')) {
+    slug = slug.slice(0, -1);
+  }
+  return slug;
+};
 
 /** Builds the `symptom:<slug>` identifier a tree is stored under. */
 export const symptomTreeId = (slug: string): string =>

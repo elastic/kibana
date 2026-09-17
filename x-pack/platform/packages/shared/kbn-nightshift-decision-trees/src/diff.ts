@@ -73,19 +73,19 @@ export const diffDecisionTrees = (
   const beforeNodes = new Map(before.nodes.map((node) => [node.node_id, node]));
   const afterNodes = new Map(after.nodes.map((node) => [node.node_id, node]));
 
-  const nodes_added: DecisionNodeView[] = [];
-  const nodes_removed: DecisionNodeView[] = [];
-  const nodes_modified: DecisionNodeChange[] = [];
+  const nodesAdded: DecisionNodeView[] = [];
+  const nodesRemoved: DecisionNodeView[] = [];
+  const nodesModified: DecisionNodeChange[] = [];
 
   for (const [nodeId, afterNode] of afterNodes) {
     const beforeNode = beforeNodes.get(nodeId);
     if (!beforeNode) {
-      nodes_added.push(afterNode);
+      nodesAdded.push(afterNode);
       continue;
     }
     const changedFields = nodeChangedFields(beforeNode, afterNode);
     if (changedFields.length > 0) {
-      nodes_modified.push({
+      nodesModified.push({
         node_id: nodeId,
         before: beforeNode,
         after: afterNode,
@@ -96,40 +96,40 @@ export const diffDecisionTrees = (
 
   for (const [nodeId, beforeNode] of beforeNodes) {
     if (!afterNodes.has(nodeId)) {
-      nodes_removed.push(beforeNode);
+      nodesRemoved.push(beforeNode);
     }
   }
 
   const beforeEdges = new Map(before.edges.map((edge) => [edgeKey(edge), edge]));
   const afterEdges = new Map(after.edges.map((edge) => [edgeKey(edge), edge]));
 
-  const edges_added: DecisionEdgeView[] = [];
-  const edges_removed: DecisionEdgeView[] = [];
-  const edges_modified: DecisionEdgeChange[] = [];
+  const edgesAdded: DecisionEdgeView[] = [];
+  const edgesRemoved: DecisionEdgeView[] = [];
+  const edgesModified: DecisionEdgeChange[] = [];
 
   for (const [key, afterEdge] of afterEdges) {
     const beforeEdge = beforeEdges.get(key);
     if (!beforeEdge) {
-      edges_added.push(afterEdge);
+      edgesAdded.push(afterEdge);
       continue;
     }
     if (beforeEdge.is_taken !== afterEdge.is_taken) {
-      edges_modified.push({ before: beforeEdge, after: afterEdge });
+      edgesModified.push({ before: beforeEdge, after: afterEdge });
     }
   }
 
   for (const [key, beforeEdge] of beforeEdges) {
     if (!afterEdges.has(key)) {
-      edges_removed.push(beforeEdge);
+      edgesRemoved.push(beforeEdge);
     }
   }
 
   return {
-    nodes_added,
-    nodes_removed,
-    nodes_modified,
-    edges_added,
-    edges_removed,
-    edges_modified,
+    nodes_added: nodesAdded,
+    nodes_removed: nodesRemoved,
+    nodes_modified: nodesModified,
+    edges_added: edgesAdded,
+    edges_removed: edgesRemoved,
+    edges_modified: edgesModified,
   };
 };
