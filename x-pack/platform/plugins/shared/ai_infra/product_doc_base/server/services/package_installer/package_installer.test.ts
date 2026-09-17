@@ -19,6 +19,10 @@ import {
   fetchSecurityLabsVersionsMock,
   ensureDefaultElserDeployedMock,
   ensureInferenceDeployedMock,
+  checkArtifactAvailableMock,
+  removeArtifactFileMock,
+  logArtifactsFolderUsageMock,
+  purgeArtifactsFolderMock,
 } from './package_installer.test.mocks';
 import { cloneDeep } from 'lodash';
 import type { ProductName } from '@kbn/product-doc-common';
@@ -34,6 +38,7 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { installClientMock } from '../doc_install_status/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
+import { ArtifactNotFoundError } from './utils/download';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
@@ -76,6 +81,7 @@ describe('PackageInstaller', () => {
 
     validateArtifactArchiveMock.mockReturnValue({ valid: true });
     validateOpenApiArtifactArchiveMock.mockReturnValue({ valid: true });
+    checkArtifactAvailableMock.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -91,9 +97,41 @@ describe('PackageInstaller', () => {
     fetchSecurityLabsVersionsMock.mockReset();
     ensureDefaultElserDeployedMock.mockReset();
     ensureInferenceDeployedMock.mockReset();
+    checkArtifactAvailableMock.mockReset();
+    removeArtifactFileMock.mockReset();
+    logArtifactsFolderUsageMock.mockReset();
+    purgeArtifactsFolderMock.mockReset();
   });
 
   describe('installPackage', () => {
+    it('deletes the downloaded artifact after a successful install', async () => {
+      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      loadMappingFileMock.mockResolvedValue({ properties: {} });
+      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+
+      await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
+
+      expect(removeArtifactFileMock).toHaveBeenCalledWith(
+        expect.stringContaining('kb-product-doc-kibana-8.16.zip'),
+        logger
+      );
+      expect(logArtifactsFolderUsageMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('deletes the downloaded artifact when the install fails', async () => {
+      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      openZipArchiveMock.mockRejectedValue(new Error('corrupt archive'));
+
+      await expect(
+        packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' })
+      ).rejects.toThrow('corrupt archive');
+
+      expect(removeArtifactFileMock).toHaveBeenCalledWith(
+        expect.stringContaining('kb-product-doc-kibana-8.16.zip'),
+        logger
+      );
+    });
+
     it('calls the steps with the right parameters', async () => {
       const zipArchive = {
         close: jest.fn(),
@@ -313,12 +351,9 @@ describe('PackageInstaller', () => {
         kibana: ['8.15', '8.16'],
       });
 
-      openZipArchiveMock.mockImplementationOnce(async () => {
-        throw new Error('End of central directory record signature not found.');
-      });
-      openZipArchiveMock.mockResolvedValue({
-        close: jest.fn(),
-      });
+      checkArtifactAvailableMock
+        .mockRejectedValueOnce(new ArtifactNotFoundError('missing')) // 8.16
+        .mockResolvedValueOnce(undefined); // 8.15
 
       await packageInstaller.installAll();
 
@@ -424,6 +459,19 @@ describe('PackageInstaller', () => {
 
       expect(packageInstaller.installPackage).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith('No version found for product [kibana]');
+    });
+  });
+
+  describe('purgeArtifactsFolder', () => {
+    it('purges the resolved artifacts folder', async () => {
+      purgeArtifactsFolderMock.mockResolvedValue({ files: 2, bytes: 10 });
+
+      await expect(packageInstaller.purgeArtifactsFolder()).resolves.toEqual({
+        files: 2,
+        bytes: 10,
+      });
+
+      expect(purgeArtifactsFolderMock).toHaveBeenCalledWith(expect.stringMatching(/lost$/), logger);
     });
   });
 
@@ -581,6 +629,34 @@ describe('PackageInstaller', () => {
         version: '8.16',
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
+    });
+  });
+
+  describe('ensureOpenApiSpecUpToDate on serverless', () => {
+    it('does not reinstall when the most recent `latest` upload is already installed', async () => {
+      const serverlessInstaller = new PackageInstaller({
+        artifactsFolder,
+        logger,
+        esClient,
+        productDocClient,
+        artifactRepositoryUrl,
+        kibanaVersion,
+        isServerless: true,
+      });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        openapi: ['latest-2026-08-20T20:51:06.777Z', 'latest-2026-08-20T23:08:00.384Z'],
+      });
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: 'latest-2026-08-20T23:08:00.384Z',
+      });
+      jest.spyOn(serverlessInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+
+      await serverlessInstaller.ensureOpenApiSpecUpToDate({
+        inferenceId: '.jina-embeddings-v5-text-small',
+      });
+
+      expect(serverlessInstaller.installOpenAPISpec).not.toHaveBeenCalled();
     });
   });
 
@@ -827,15 +903,27 @@ describe('PackageInstaller', () => {
       fetchArtifactVersionsMock.mockResolvedValue({
         kibana: ['latest-2026-08-20T23:08:00.384Z', 'latest-2026-08-20T20:51:06.777Z'],
       });
-      openZipArchiveMock.mockRejectedValue(
-        new Error('End of central directory record signature not found.')
-      );
+      checkArtifactAvailableMock.mockRejectedValue(new ArtifactNotFoundError('missing'));
 
       await expect(packageInstaller.installProduct({ productName: 'kibana' })).rejects.toThrow(
-        'End of central directory record signature not found.'
+        'Artifact not found'
       );
 
-      expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
+      expect(checkArtifactAvailableMock).toHaveBeenCalledTimes(1);
+      expect(downloadToDiskMock).not.toHaveBeenCalled();
+    });
+
+    it('selects the most recent `latest` upload rather than the first listed one', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        kibana: ['latest-2026-08-20T20:51:06.777Z', 'latest-2026-08-20T23:08:00.384Z'],
+      });
+      productDocClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed', version: 'latest-2026-08-20T23:08:00.384Z' },
+      } as never);
+
+      await expect(
+        packageInstaller.getProductsToUpdate({ inferenceId: EIS_ELSER })
+      ).resolves.toEqual([]);
     });
 
     it('installs product documentation with an EIS endpoint', async () => {
@@ -984,9 +1072,7 @@ describe('PackageInstaller', () => {
     });
 
     it('downloads the `latest` artifact for a `latest-<timestamp>` version', async () => {
-      openZipArchiveMock
-        .mockResolvedValueOnce({ close: jest.fn() }) // precheck
-        .mockResolvedValueOnce(getOpenApiArchive()); // install
+      openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
       downloadToDiskMock.mockResolvedValue('/tmp/openapi-latest.zip');
 
       await packageInstaller.installOpenAPISpec({
@@ -994,9 +1080,10 @@ describe('PackageInstaller', () => {
         inferenceId: '.jina-embeddings-v5-text-small',
       });
 
-      expect(downloadToDiskMock.mock.calls[0][0]).toBe(
-        `${artifactRepositoryUrl}/kb-product-doc-openapi-latest--.jina-embeddings-v5-text-small.zip`
-      );
+      const latestArtifactUrl = `${artifactRepositoryUrl}/kb-product-doc-openapi-latest--.jina-embeddings-v5-text-small.zip`;
+      expect(checkArtifactAvailableMock).toHaveBeenCalledWith(latestArtifactUrl, undefined);
+      expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
+      expect(downloadToDiskMock.mock.calls[0][0]).toBe(latestArtifactUrl);
       expect(productDocClient.setOpenapiSpecInstallationSuccessful).toHaveBeenCalledWith(
         expect.objectContaining({ productVersion: 'latest-2026-08-20T23:08:00.384Z' })
       );
@@ -1010,25 +1097,37 @@ describe('PackageInstaller', () => {
           'latest-2026-07-01T00:00:00.000Z',
         ],
       });
-      downloadToDiskMock.mockResolvedValue('/tmp/openapi-missing.zip');
-      openZipArchiveMock.mockRejectedValue(
-        new Error('End of central directory record signature not found.')
-      );
+      checkArtifactAvailableMock.mockRejectedValue(new ArtifactNotFoundError('missing'));
 
       await expect(
         packageInstaller.installOpenAPISpec({
           version: 'latest-2026-08-20T23:08:00.384Z',
           inferenceId: '.jina-embeddings-v5-text-small',
         })
-      ).rejects.toThrow('End of central directory record signature not found.');
+      ).rejects.toThrow('Artifact not found');
 
-      expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
+      expect(checkArtifactAvailableMock).toHaveBeenCalledTimes(1);
+      expect(downloadToDiskMock).not.toHaveBeenCalled();
+    });
+
+    it('deletes the downloaded artifact and logs the folder usage after installing', async () => {
+      openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
+      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-openapi-8.16.zip');
+
+      await packageInstaller.installOpenAPISpec({
+        version: '8.16',
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(removeArtifactFileMock).toHaveBeenCalledWith(
+        expect.stringContaining('kb-product-doc-openapi-8.16.zip'),
+        logger
+      );
+      expect(logArtifactsFolderUsageMock).toHaveBeenCalledTimes(1);
     });
 
     it('does not fetch artifact versions when explicit version is directly installable', async () => {
-      openZipArchiveMock
-        .mockResolvedValueOnce({ close: jest.fn() }) // precheck
-        .mockResolvedValueOnce(getOpenApiArchive()); // install
+      openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
       downloadToDiskMock.mockResolvedValue('/tmp/openapi-explicit.zip');
 
       await packageInstaller.installOpenAPISpec({
@@ -1046,12 +1145,10 @@ describe('PackageInstaller', () => {
     });
 
     it('retries listing and falls back to previous explicit version when selected is missing', async () => {
-      openZipArchiveMock
-        .mockImplementationOnce(async () => {
-          throw new Error('End of central directory record signature not found.');
-        }) // explicit precheck miss
-        .mockResolvedValueOnce({ close: jest.fn() }) // fallback precheck success
-        .mockResolvedValueOnce(getOpenApiArchive()); // install fallback
+      checkArtifactAvailableMock
+        .mockRejectedValueOnce(new ArtifactNotFoundError('missing')) // explicit version
+        .mockResolvedValueOnce(undefined); // fallback version
+      openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
       downloadToDiskMock.mockResolvedValue('/tmp/openapi-fallback.zip');
 
       fetchArtifactVersionsMock

@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ResourceType } from '@kbn/product-doc-common';
 import Semver from 'semver';
-import Fs from 'fs/promises';
+import { getSafePath } from '@kbn/fs';
 import {
   getArtifactName,
   getProductDocIndexName,
@@ -37,6 +37,13 @@ import {
   isLegacySemanticTextVersion,
   indexNdjsonEntry,
   rewriteInferenceId,
+  checkArtifactAvailable,
+  ArtifactNotFoundError,
+  resolveArtifactsFolderPath,
+  removeArtifactFile,
+  logArtifactsFolderUsage,
+  purgeArtifactsFolder,
+  type ArtifactsFolderUsage,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -79,6 +86,7 @@ const OPEN_API_SPEC_PRODUCTS: Array<{
 export class PackageInstaller {
   private readonly log: Logger;
   private readonly artifactsFolder: string;
+  private readonly artifactsFolderPath: string;
   private readonly esClient: ElasticsearchClient;
   private readonly productDocClient: ProductDocInstallClient;
   private readonly artifactRepositoryUrl: string;
@@ -101,12 +109,27 @@ export class PackageInstaller {
     this.esClient = esClient;
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
+    this.artifactsFolderPath = resolveArtifactsFolderPath(artifactsFolder);
     this.artifactRepositoryUrl = artifactRepositoryUrl;
     this.artifactRepositoryProxyUrl = artifactRepositoryProxyUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
     this.isServerless = isServerless ?? false;
+  }
+
+  /**
+   * Deletes artifact files left behind by a previous process lifetime or a failed install.
+   */
+  async purgeArtifactsFolder(): Promise<ArtifactsFolderUsage> {
+    return purgeArtifactsFolder(this.artifactsFolderPath, this.log);
+  }
+
+  private async cleanupArtifact(artifactFullPath: string | undefined): Promise<void> {
+    if (artifactFullPath) {
+      await removeArtifactFile(artifactFullPath, this.log);
+    }
+    await logArtifactsFolderUsage(this.artifactsFolderPath, this.log);
   }
 
   private getArtifactRepositoryOptions(): {
@@ -298,11 +321,7 @@ export class PackageInstaller {
       repositoryVersions.openapi,
       this.isServerless
     );
-    if (
-      forceUpdate ||
-      openapiSpecInstallStatus.version !== openAPISpecVersionToUpgradeTo ||
-      openAPISpecVersionToUpgradeTo === LATEST_PRODUCT_VERSION
-    ) {
+    if (forceUpdate || openapiSpecInstallStatus.version !== openAPISpecVersionToUpgradeTo) {
       await this.installOpenAPISpec({
         version: openAPISpecVersionToUpgradeTo,
         inferenceId,
@@ -382,6 +401,7 @@ export class PackageInstaller {
     await this.uninstallPackage({ productName, inferenceId });
 
     let zipArchive: ZipArchive | undefined;
+    let artifactFullPath: string | undefined;
     try {
       await this.productDocClient.setInstallationStarted({
         productName,
@@ -407,8 +427,10 @@ export class PackageInstaller {
       });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
       const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
+      // Resolved up front so a failed download still gets cleaned up
+      artifactFullPath = getSafePath(artifactPathAtVolume).fullPath;
       this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPathAtVolume}]`);
-      const artifactFullPath = await downloadToDisk(
+      artifactFullPath = await downloadToDisk(
         artifactUrl,
         artifactPathAtVolume,
         this.artifactRepositoryProxyUrl
@@ -451,7 +473,7 @@ export class PackageInstaller {
       );
     } catch (e) {
       let message = e.message;
-      if (message.includes('End of central directory record signature not found.')) {
+      if (isArtifactMissingError(e)) {
         message = i18n.translate('aiInfra.productDocBase.packageInstaller.noArtifactAvailable', {
           values: {
             productName,
@@ -470,6 +492,7 @@ export class PackageInstaller {
       throw e;
     } finally {
       zipArchive?.close();
+      await this.cleanupArtifact(artifactFullPath);
     }
   }
 
@@ -528,6 +551,7 @@ export class PackageInstaller {
 
     let zipArchive: ZipArchive | undefined;
     let selectedVersion: string | undefined;
+    let artifactFullPath: string | undefined;
     try {
       await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
 
@@ -556,16 +580,17 @@ export class PackageInstaller {
       });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
       const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+      artifactFullPath = getSafePath(artifactPath).fullPath;
 
       this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
-      const downloadedFullPath = await downloadToDisk(
+      artifactFullPath = await downloadToDisk(
         artifactUrl,
         artifactPath,
         this.artifactRepositoryProxyUrl
       );
 
-      zipArchive = await openZipArchive(downloadedFullPath);
-      this.assertValidArtifactArchive(zipArchive, downloadedFullPath);
+      zipArchive = await openZipArchive(artifactFullPath);
+      this.assertValidArtifactArchive(zipArchive, artifactFullPath);
 
       const [manifest, mappings] = await Promise.all([
         loadManifestFile(zipArchive),
@@ -604,7 +629,7 @@ export class PackageInstaller {
       this.log.info(`Security Labs installation successful for version [${selectedVersion}]`);
     } catch (e) {
       let message = e.message;
-      if (message.includes('End of central directory record signature not found.')) {
+      if (isArtifactMissingError(e)) {
         message = i18n.translate(
           'aiInfra.productDocBase.packageInstaller.noSecurityLabsArtifactAvailable',
           {
@@ -623,6 +648,7 @@ export class PackageInstaller {
       throw e;
     } finally {
       zipArchive?.close();
+      await this.cleanupArtifact(artifactFullPath);
     }
   }
 
@@ -754,6 +780,7 @@ export class PackageInstaller {
     );
 
     let zipArchive: ZipArchive | undefined;
+    let artifactFullPath: string | undefined;
     try {
       await this.uninstallOpenAPISpec({ inferenceId: effectiveInferenceId });
 
@@ -764,16 +791,17 @@ export class PackageInstaller {
       });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
       const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+      artifactFullPath = getSafePath(artifactPath).fullPath;
 
       this.log.debug(`Downloading OpenAPI artifact from [${artifactUrl}] to [${artifactPath}]`);
-      const downloadedFullPath = await downloadToDisk(
+      artifactFullPath = await downloadToDisk(
         artifactUrl,
         artifactPath,
         this.artifactRepositoryProxyUrl
       );
 
-      zipArchive = await openZipArchive(downloadedFullPath);
-      this.assertValidArtifactArchive(zipArchive, downloadedFullPath, { openApi: true });
+      zipArchive = await openZipArchive(artifactFullPath);
+      this.assertValidArtifactArchive(zipArchive, artifactFullPath, { openApi: true });
 
       for (const { productName, indexName: unmodifiedIndexName } of OPEN_API_SPEC_PRODUCTS) {
         this.log.info(`Installing OpenAPI spec for ${productName}`);
@@ -884,6 +912,7 @@ export class PackageInstaller {
       throw e;
     } finally {
       zipArchive?.close();
+      await this.cleanupArtifact(artifactFullPath);
     }
   }
 
@@ -915,7 +944,7 @@ export class PackageInstaller {
       }
       triedArtifacts.add(artifactFileName);
       try {
-        await this.ensureArtifactArchiveAvailable(artifactFileName);
+        await this.ensureArtifactAvailable(artifactFileName);
         return candidateVersion;
       } catch (error) {
         if (!isArtifactMissingError(error)) {
@@ -970,7 +999,7 @@ export class PackageInstaller {
       }
       triedArtifacts.add(artifactFileName);
       try {
-        await this.ensureArtifactArchiveAvailable(artifactFileName, { openApi: true });
+        await this.ensureArtifactAvailable(artifactFileName);
         return stackVersion;
       } catch (error) {
         if (!isArtifactMissingError(error)) {
@@ -1025,27 +1054,12 @@ export class PackageInstaller {
     return `kb-product-doc-openapi-${fileVersion}${inferenceIdSuffix}.zip`;
   }
 
-  private async ensureArtifactArchiveAvailable(
-    artifactFileName: string,
-    { openApi = false }: { openApi?: boolean } = {}
-  ): Promise<void> {
-    const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-    const precheckArtifactPath = `${
-      this.artifactsFolder
-    }/.precheck-${Date.now()}-${artifactFileName}`;
-    let zipArchive: ZipArchive | undefined;
-    try {
-      const downloadedFullPath = await downloadToDisk(
-        artifactUrl,
-        precheckArtifactPath,
-        this.artifactRepositoryProxyUrl
-      );
-      zipArchive = await openZipArchive(downloadedFullPath);
-      this.assertValidArtifactArchive(zipArchive, downloadedFullPath, { openApi });
-    } finally {
-      zipArchive?.close();
-      await Fs.unlink(precheckArtifactPath).catch(() => {});
-    }
+  // Existence is checked without downloading; the archive itself is validated once installed
+  private async ensureArtifactAvailable(artifactFileName: string): Promise<void> {
+    await checkArtifactAvailable(
+      `${this.artifactRepositoryUrl}/${artifactFileName}`,
+      this.artifactRepositoryProxyUrl
+    );
   }
 
   private async fetchArtifactVersionsWithRetry(retries = 3) {
@@ -1106,12 +1120,17 @@ const selectVersion = (
     : latestVersion(availableVersions, currentVersion);
 
   if (isServerless) {
-    const latestServerlessVersions = availableVersions.filter((version) =>
-      version.includes(LATEST_PRODUCT_VERSION)
-    );
-    return latestServerlessVersions.length > 0
-      ? latestServerlessVersions[0]
-      : latestAvailableVersion;
+    // Every `latest-<timestamp>` entry is a `latest` artifact upload; the most recent one wins
+    const newestLatestVersion = availableVersions
+      .filter((version) => version.includes(LATEST_PRODUCT_VERSION))
+      .reduce<string | undefined>((newest, version) => {
+        if (!newest) {
+          return version;
+        }
+        const timestamp = extractLatestVersionTimestamp(version) ?? -1;
+        return timestamp > (extractLatestVersionTimestamp(newest) ?? -1) ? version : newest;
+      }, undefined);
+    return newestLatestVersion ?? latestAvailableVersion;
   }
   return latestAvailableVersion;
 };
@@ -1121,6 +1140,8 @@ const isArtifactMissingError = (error: unknown): boolean => {
     return false;
   }
   return (
+    error instanceof ArtifactNotFoundError ||
+    error.name === 'ArtifactNotFoundError' ||
     error.message.includes('End of central directory record signature not found.') ||
     error.message.includes('No such file or directory') ||
     error.message.includes('ENOENT')

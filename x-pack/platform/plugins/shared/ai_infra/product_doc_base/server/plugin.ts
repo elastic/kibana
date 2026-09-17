@@ -142,13 +142,15 @@ export class ProductDocBasePlugin
       taskManager,
     };
 
-    this.runStartupTasks(core, documentationManager, isServerless, this.cloud).catch(
-      (err: Error) => {
-        this.logger.error(
-          `Unexpected error in product documentation startup tasks: ${err.message}`
-        );
-      }
-    );
+    this.runStartupTasks(
+      core,
+      documentationManager,
+      packageInstaller,
+      isServerless,
+      this.cloud
+    ).catch((err: Error) => {
+      this.logger.error(`Unexpected error in product documentation startup tasks: ${err.message}`);
+    });
     return {
       management: {
         install: documentationManager.install.bind(documentationManager),
@@ -172,9 +174,18 @@ export class ProductDocBasePlugin
   private async runStartupTasks(
     core: CoreStart,
     documentationManager: DocumentationManager,
+    packageInstaller: PackageInstaller,
     isServerless: boolean,
     cloud: ProductDocBaseSetupDependencies['cloud']
   ): Promise<void> {
+    try {
+      await packageInstaller.purgeArtifactsFolder();
+    } catch (err) {
+      this.logger.error(
+        `Error purging leftover documentation artifacts: ${(err as Error).message}`
+      );
+    }
+
     const uiSettingsSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const uiSettingsClient = core.uiSettings.asScopedToClient(uiSettingsSoClient);
 
