@@ -263,12 +263,21 @@ describe('createRuleSmlType', () => {
         title: 'High CPU',
         content: '',
         permissions: { kibana: { privileges: [] } },
-        attributes: {
-          id: 'sml-1',
-          origin: { uri: `${RULE_KI_TYPE}://${originId}` },
-          created_at: '2026-04-10T00:00:00.000Z',
-          updated_at: '2026-04-10T00:00:00.000Z',
-          ingestion_method: 'crawled' as const,
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        references: [{ uri: `${RULE_KI_TYPE}://${originId}`, relation: 'derived_from' as const }],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
         },
       };
     };
