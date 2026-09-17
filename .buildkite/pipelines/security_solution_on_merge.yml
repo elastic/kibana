@@ -1,7 +1,9 @@
+# Owning-team Slack routing. Buildkite sends one step-level notification per
+# step (not per parallel job), so a sharded suite pages its channel once.
+# `errored` covers timeouts and agent loss, which are not hard_failed.
 steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
     label: 'Serverless Entity Analytics - Security Cypress Tests'
-    key: serverless-entity-analytics
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -18,10 +20,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-entity-analytics-alerts'
+          message: ':alert: *Serverless Entity Analytics - Security Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
     label: 'Serverless Explore - Security Solution Cypress Tests'
-    key: serverless-explore
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -39,10 +47,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-threat-hunting'
+          message: ':alert: *Serverless Explore - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Investigations - Security Solution Cypress Tests'
-    key: serverless-investigations
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -60,10 +74,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-threat-hunting'
+          message: ':alert: *Serverless Investigations - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
-    key: serverless-rule-management
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -81,10 +101,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Serverless Rule Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
     label: 'Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
-    key: serverless-rule-management-prebuilt-rules-customization
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -101,10 +127,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
     label: 'Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
-    key: serverless-rule-management-prebuilt-rules-installation
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -121,10 +153,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
     label: 'Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
-    key: serverless-rule-management-prebuilt-rules-management
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -141,10 +179,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
     label: 'Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
-    key: serverless-rule-management-prebuilt-rules-upgrade
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -161,10 +205,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
-    key: rule-management
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -180,10 +230,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Rule Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
     label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
-    key: rule-management-prebuilt-rules-customization
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -199,10 +255,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
     label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
-    key: rule-management-prebuilt-rules-installation
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -218,10 +280,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
     label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
-    key: rule-management-prebuilt-rules-management
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -237,10 +305,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
     label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
-    key: rule-management-prebuilt-rules-upgrade
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -256,10 +330,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
-    key: serverless-detection-engine
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -276,10 +356,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Serverless Detection Engine - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
-    key: serverless-detection-engine-exceptions
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -296,10 +382,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Serverless Detection Engine - Exceptions - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
-    key: detection-engine
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -315,10 +407,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Detection Engine - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
-    key: detection-engine-exceptions
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -334,10 +432,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-detection-engineering-team'
+          message: ':alert: *Detection Engine - Exceptions - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
-    key: serverless-ai-assistant
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -354,10 +458,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-threat-hunting'
+          message: ':alert: *Serverless AI Assistant - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
     label: 'AI Assistant - Security Solution Cypress Tests'
-    key: ai-assistant
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -374,10 +484,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-threat-hunting'
+          message: ':alert: *AI Assistant - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     label: 'Entity Analytics - Security Solution Cypress Tests'
-    key: entity-analytics
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -393,10 +509,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-entity-analytics-alerts'
+          message: ':alert: *Entity Analytics - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
     label: 'Explore - Security Solution Cypress Tests'
-    key: explore
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -413,10 +535,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-threat-hunting'
+          message: ':alert: *Explore - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
-    key: investigations
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -433,10 +561,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-threat-hunting'
+          message: ':alert: *Investigations - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
-    key: osquery
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -453,10 +587,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-defend-workflows'
+          message: ':alert: *Osquery Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
-    key: osquery-serverless
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -474,10 +614,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-defend-workflows'
+          message: ':alert: *Osquery Cypress Tests on Serverless* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
-    key: defend-workflows
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -495,10 +641,16 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    notify:
+      - slack:
+          channels:
+            - '#security-defend-workflows'
+          message: ':alert: *Defend Workflows Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"
+
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
-    key: defend-workflows-serverless
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
@@ -517,930 +669,9 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
-
-  # Per-suite Slack followers: check the suite step's aggregate outcome (hard_failed
-  # or errored — timeouts / agent loss), then soft_fail this step so Slack fires once
-  # per suite rather than once per red shard. soft_fail also keeps a notify miss
-  # from masking suite results; notify.if must be soft_failed (not hard_failed).
-  - label: ':slack: Notify Serverless Entity Analytics - Security Cypress Tests failure'
-    key: notify-serverless-entity-analytics
-    depends_on:
-      - step: serverless-entity-analytics
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-entity-analytics)"; then
-        echo "Could not read outcome for serverless-entity-analytics; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-entity-analytics-alerts'
-          message: ':alert: *Serverless Entity Analytics - Security Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless Explore - Security Solution Cypress Tests failure'
-    key: notify-serverless-explore
-    depends_on:
-      - step: serverless-explore
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-explore)"; then
-        echo "Could not read outcome for serverless-explore; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-threat-hunting'
-          message: ':alert: *Serverless Explore - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless Investigations - Security Solution Cypress Tests failure'
-    key: notify-serverless-investigations
-    depends_on:
-      - step: serverless-investigations
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-investigations)"; then
-        echo "Could not read outcome for serverless-investigations; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-threat-hunting'
-          message: ':alert: *Serverless Investigations - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless Rule Management - Security Solution Cypress Tests failure'
-    key: notify-serverless-rule-management
-    depends_on:
-      - step: serverless-rule-management
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management)"; then
-        echo "Could not read outcome for serverless-rule-management; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Serverless Rule Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests failure'
-    key: notify-serverless-rule-management-prebuilt-rules-customization
-    depends_on:
-      - step: serverless-rule-management-prebuilt-rules-customization
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-customization)"; then
-        echo "Could not read outcome for serverless-rule-management-prebuilt-rules-customization; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests failure'
-    key: notify-serverless-rule-management-prebuilt-rules-installation
-    depends_on:
-      - step: serverless-rule-management-prebuilt-rules-installation
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-installation)"; then
-        echo "Could not read outcome for serverless-rule-management-prebuilt-rules-installation; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests failure'
-    key: notify-serverless-rule-management-prebuilt-rules-management
-    depends_on:
-      - step: serverless-rule-management-prebuilt-rules-management
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-management)"; then
-        echo "Could not read outcome for serverless-rule-management-prebuilt-rules-management; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests failure'
-    key: notify-serverless-rule-management-prebuilt-rules-upgrade
-    depends_on:
-      - step: serverless-rule-management-prebuilt-rules-upgrade
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-upgrade)"; then
-        echo "Could not read outcome for serverless-rule-management-prebuilt-rules-upgrade; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Rule Management - Security Solution Cypress Tests failure'
-    key: notify-rule-management
-    depends_on:
-      - step: rule-management
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step rule-management)"; then
-        echo "Could not read outcome for rule-management; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Rule Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests failure'
-    key: notify-rule-management-prebuilt-rules-customization
-    depends_on:
-      - step: rule-management-prebuilt-rules-customization
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-customization)"; then
-        echo "Could not read outcome for rule-management-prebuilt-rules-customization; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests failure'
-    key: notify-rule-management-prebuilt-rules-installation
-    depends_on:
-      - step: rule-management-prebuilt-rules-installation
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-installation)"; then
-        echo "Could not read outcome for rule-management-prebuilt-rules-installation; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests failure'
-    key: notify-rule-management-prebuilt-rules-management
-    depends_on:
-      - step: rule-management-prebuilt-rules-management
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-management)"; then
-        echo "Could not read outcome for rule-management-prebuilt-rules-management; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests failure'
-    key: notify-rule-management-prebuilt-rules-upgrade
-    depends_on:
-      - step: rule-management-prebuilt-rules-upgrade
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-upgrade)"; then
-        echo "Could not read outcome for rule-management-prebuilt-rules-upgrade; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless Detection Engine - Security Solution Cypress Tests failure'
-    key: notify-serverless-detection-engine
-    depends_on:
-      - step: serverless-detection-engine
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-detection-engine)"; then
-        echo "Could not read outcome for serverless-detection-engine; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Serverless Detection Engine - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless Detection Engine - Exceptions - Security Solution Cypress Tests failure'
-    key: notify-serverless-detection-engine-exceptions
-    depends_on:
-      - step: serverless-detection-engine-exceptions
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-detection-engine-exceptions)"; then
-        echo "Could not read outcome for serverless-detection-engine-exceptions; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Serverless Detection Engine - Exceptions - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Detection Engine - Security Solution Cypress Tests failure'
-    key: notify-detection-engine
-    depends_on:
-      - step: detection-engine
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step detection-engine)"; then
-        echo "Could not read outcome for detection-engine; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Detection Engine - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Detection Engine - Exceptions - Security Solution Cypress Tests failure'
-    key: notify-detection-engine-exceptions
-    depends_on:
-      - step: detection-engine-exceptions
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step detection-engine-exceptions)"; then
-        echo "Could not read outcome for detection-engine-exceptions; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-detection-engineering-team'
-          message: ':alert: *Detection Engine - Exceptions - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Serverless AI Assistant - Security Solution Cypress Tests failure'
-    key: notify-serverless-ai-assistant
-    depends_on:
-      - step: serverless-ai-assistant
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step serverless-ai-assistant)"; then
-        echo "Could not read outcome for serverless-ai-assistant; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-threat-hunting'
-          message: ':alert: *Serverless AI Assistant - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify AI Assistant - Security Solution Cypress Tests failure'
-    key: notify-ai-assistant
-    depends_on:
-      - step: ai-assistant
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step ai-assistant)"; then
-        echo "Could not read outcome for ai-assistant; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-threat-hunting'
-          message: ':alert: *AI Assistant - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Entity Analytics - Security Solution Cypress Tests failure'
-    key: notify-entity-analytics
-    depends_on:
-      - step: entity-analytics
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step entity-analytics)"; then
-        echo "Could not read outcome for entity-analytics; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-entity-analytics-alerts'
-          message: ':alert: *Entity Analytics - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Explore - Security Solution Cypress Tests failure'
-    key: notify-explore
-    depends_on:
-      - step: explore
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step explore)"; then
-        echo "Could not read outcome for explore; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-threat-hunting'
-          message: ':alert: *Explore - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Investigations - Security Solution Cypress Tests failure'
-    key: notify-investigations
-    depends_on:
-      - step: investigations
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step investigations)"; then
-        echo "Could not read outcome for investigations; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-threat-hunting'
-          message: ':alert: *Investigations - Security Solution Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Osquery Cypress Tests failure'
-    key: notify-osquery
-    depends_on:
-      - step: osquery
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step osquery)"; then
-        echo "Could not read outcome for osquery; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
     notify:
       - slack:
           channels:
             - '#security-defend-workflows'
-          message: ':alert: *Osquery Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Osquery Cypress Tests on Serverless failure'
-    key: notify-osquery-serverless
-    depends_on:
-      - step: osquery-serverless
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step osquery-serverless)"; then
-        echo "Could not read outcome for osquery-serverless; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-defend-workflows'
-          message: ':alert: *Osquery Cypress Tests on Serverless* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Defend Workflows Cypress Tests failure'
-    key: notify-defend-workflows
-    depends_on:
-      - step: defend-workflows
-        allow_failure: true
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step defend-workflows)"; then
-        echo "Could not read outcome for defend-workflows; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-defend-workflows'
-          message: ':alert: *Defend Workflows Cypress Tests* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
-
-  - label: ':slack: Notify Defend Workflows Cypress Tests on Serverless failure'
-    key: notify-defend-workflows-serverless
-    depends_on:
-      - step: defend-workflows-serverless
-        allow_failure: true
-    branches: main
-    command: |
-      set -euo pipefail
-      if ! outcome="$(buildkite-agent step get outcome --step defend-workflows-serverless)"; then
-        echo "Could not read outcome for defend-workflows-serverless; alerting rather than staying silent"
-        exit 1
-      fi
-      if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
-        exit 1
-      fi
-    timeout_in_minutes: 10
-    soft_fail: true
-    env:
-      SKIP_NODE_SETUP: 'true'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: false
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 2
-    notify:
-      - slack:
-          channels:
-            - '#security-defend-workflows'
-          message: ':alert: *Defend Workflows Cypress Tests on Serverless* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail — treat as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
-        if: step.outcome == "soft_failed"
+          message: ':alert: *Defend Workflows Cypress Tests on Serverless* failed on kibana-security-solution-on-merge. Parent kibana-on-merge is soft_fail, so treat this as release-blocking for Security. <${BUILDKITE_BUILD_URL}|View build #${BUILDKITE_BUILD_NUMBER}>'
+        if: step.outcome == "hard_failed" || step.outcome == "errored"

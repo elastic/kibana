@@ -21,8 +21,8 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#sdh-security-team'
         # Keep the build-bot notifier off. Owning-team routing is native
-        # Buildkite step notify on per-suite follower steps in
-        # security_solution_on_merge.yml (not the build-bot).
+        # Buildkite step notify in security_solution_on_merge.yml, which the
+        # build-bot does not read.
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
