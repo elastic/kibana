@@ -74,10 +74,9 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
             privileges: [
               {
                 id: 'incidents_all',
-                name: i18n.translate(
-                  'xpack.agenticInvestigations.incidentsAllPrivilegeName',
-                  { defaultMessage: 'Create, update, and view incidents' }
-                ),
+                name: i18n.translate('xpack.agenticInvestigations.incidentsAllPrivilegeName', {
+                  defaultMessage: 'Create, update, and view incidents',
+                }),
                 includeIn: 'all',
                 api: [INCIDENTS_API_PRIVILEGE_READ, INCIDENTS_API_PRIVILEGE_MANAGE],
                 savedObject: { all: [], read: [] },
@@ -85,10 +84,9 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
               },
               {
                 id: 'incidents_read',
-                name: i18n.translate(
-                  'xpack.agenticInvestigations.incidentsReadPrivilegeName',
-                  { defaultMessage: 'View incidents' }
-                ),
+                name: i18n.translate('xpack.agenticInvestigations.incidentsReadPrivilegeName', {
+                  defaultMessage: 'View incidents',
+                }),
                 includeIn: 'read',
                 api: [INCIDENTS_API_PRIVILEGE_READ],
                 savedObject: { all: [], read: [] },

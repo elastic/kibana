@@ -113,8 +113,6 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toHaveProperty('pagination');
-      expect(response.body).toHaveProperty('results');
       expect(typeof response.body.pagination.total).toBe('number');
       expect(typeof response.body.pagination.page).toBe('number');
       expect(typeof response.body.pagination.per_page).toBe('number');
@@ -154,19 +152,16 @@ apiTest.describe(
       expect(ids).not.toContain(investigationId);
     });
 
-    apiTest(
-      'excludes private incidents the caller has no access to',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(LIST_INCIDENTS_PATH, {
-          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-          responseType: 'json',
-        });
+    apiTest('excludes private incidents the caller has no access to', async ({ apiClient }) => {
+      const response = await apiClient.get(LIST_INCIDENTS_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
 
-        expect(response).toHaveStatusCode(200);
-        const ids = response.body.results.map((r: { id: string }) => r.id);
-        expect(ids).not.toContain(privateIncidentId);
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      const ids = response.body.results.map((r: { id: string }) => r.id);
+      expect(ids).not.toContain(privateIncidentId);
+    });
 
     apiTest(
       'results carry template_id: "incident" (never "investigation")',

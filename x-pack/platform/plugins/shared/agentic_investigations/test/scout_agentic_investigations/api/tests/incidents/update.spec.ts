@@ -7,7 +7,12 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, INTERNAL_HEADERS, CREATE_INCIDENT_PATH, INCIDENT_BY_ID_PATH } from '../../fixtures';
+import {
+  apiTest,
+  INTERNAL_HEADERS,
+  CREATE_INCIDENT_PATH,
+  INCIDENT_BY_ID_PATH,
+} from '../../fixtures';
 
 const INVESTIGATION_INDEX = '.chat-conversations';
 const INVESTIGATION_TEMPLATE_ID = 'investigation';
@@ -99,19 +104,24 @@ apiTest.describe(
       expect(linked_investigations).toContain(secondInvestigationId);
     });
 
-    apiTest('deduplicates — patching the same id twice produces no duplicate', async ({ apiClient }) => {
-      // Patch secondInvestigationId again (it was appended in the previous test)
-      const response = await apiClient.patch(INCIDENT_BY_ID_PATH(incidentId), {
-        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        body: { linked_investigations: [secondInvestigationId] },
-        responseType: 'json',
-      });
+    apiTest(
+      'deduplicates — patching the same id twice produces no duplicate',
+      async ({ apiClient }) => {
+        // Patch secondInvestigationId again (it was appended in the previous test)
+        const response = await apiClient.patch(INCIDENT_BY_ID_PATH(incidentId), {
+          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+          body: { linked_investigations: [secondInvestigationId] },
+          responseType: 'json',
+        });
 
-      expect(response).toHaveStatusCode(200);
-      const { linked_investigations } = response.body.metadata;
-      const count = linked_investigations.filter((id: string) => id === secondInvestigationId).length;
-      expect(count).toBe(1);
-    });
+        expect(response).toHaveStatusCode(200);
+        const { linked_investigations } = response.body.metadata;
+        const count = linked_investigations.filter(
+          (id: string) => id === secondInvestigationId
+        ).length;
+        expect(count).toBe(1);
+      }
+    );
 
     apiTest('returns 400 for an empty body', async ({ apiClient }) => {
       const response = await apiClient.patch(INCIDENT_BY_ID_PATH(incidentId), {

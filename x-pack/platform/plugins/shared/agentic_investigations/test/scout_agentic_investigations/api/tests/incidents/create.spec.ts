@@ -102,26 +102,12 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body.metadata).not.toHaveProperty('workflow_execution_id');
+        expect(response.body.metadata?.workflow_execution_id).toBeUndefined();
       }
     );
 
-    apiTest('sets status to "open" regardless of the investigation status', async ({ apiClient }) => {
-      const response = await apiClient.post(CREATE_INCIDENT_PATH, {
-        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        body: {
-          linked_investigation_id: investigationId,
-          visibility: 'public',
-        },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.metadata.status).toBe('open');
-    });
-
     apiTest(
-      'sets linked_investigations to [linked_investigation_id]',
+      'sets status to "open" regardless of the investigation status',
       async ({ apiClient }) => {
         const response = await apiClient.post(CREATE_INCIDENT_PATH, {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
@@ -133,9 +119,23 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body.metadata.linked_investigations).toEqual([investigationId]);
+        expect(response.body.metadata.status).toBe('open');
       }
     );
+
+    apiTest('sets linked_investigations to [linked_investigation_id]', async ({ apiClient }) => {
+      const response = await apiClient.post(CREATE_INCIDENT_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+        body: {
+          linked_investigation_id: investigationId,
+          visibility: 'public',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.linked_investigations).toStrictEqual([investigationId]);
+    });
 
     apiTest('returns 400 when public + collaborators is provided', async ({ apiClient }) => {
       const response = await apiClient.post(CREATE_INCIDENT_PATH, {

@@ -7,8 +7,7 @@
 
 import { AGENTIC_INVESTIGATIONS_INTERNAL_URL } from '../constants';
 
-export const INCIDENTS_INTERNAL_URL =
-  `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/incidents` as const;
+export const INCIDENTS_INTERNAL_URL = `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/incidents` as const;
 export const INCIDENT_BY_ID_URL = `${INCIDENTS_INTERNAL_URL}/{id}` as const;
 
 /** Template ids. Owned by agent_builder_platform; referenced here for guard checks. */

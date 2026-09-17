@@ -98,8 +98,9 @@ describe('createIncidentRequestSchema', () => {
     expect(() =>
       createIncidentRequestSchema.parse({
         ...validPrivate,
-        collaborators: Array.from({ length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES + 1 }, (_, i) =>
-          `user-${i}`
+        collaborators: Array.from(
+          { length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES + 1 },
+          (_, i) => `user-${i}`
         ),
       })
     ).toThrow();
@@ -133,9 +134,7 @@ describe('createIncidentRequestSchema', () => {
 
 describe('updateIncidentRequestSchema', () => {
   it('accepts a title-only update', () => {
-    expect(() =>
-      updateIncidentRequestSchema.parse({ title: 'Renamed incident' })
-    ).not.toThrow();
+    expect(() => updateIncidentRequestSchema.parse({ title: 'Renamed incident' })).not.toThrow();
   });
 
   it('accepts a links-only update', () => {
@@ -167,15 +166,11 @@ describe('updateIncidentRequestSchema', () => {
   });
 
   it('rejects an empty linked_investigations array (min: 1)', () => {
-    expect(() =>
-      updateIncidentRequestSchema.parse({ linked_investigations: [] })
-    ).toThrow();
+    expect(() => updateIncidentRequestSchema.parse({ linked_investigations: [] })).toThrow();
   });
 
   it('rejects when a linked investigation id is empty', () => {
-    expect(() =>
-      updateIncidentRequestSchema.parse({ linked_investigations: [''] })
-    ).toThrow();
+    expect(() => updateIncidentRequestSchema.parse({ linked_investigations: [''] })).toThrow();
   });
 
   it('rejects when a linked investigation id exceeds max length', () => {
@@ -247,8 +242,6 @@ describe('listIncidentsQuerySchema', () => {
   });
 
   it('accepts page=200 per_page=50 (= exactly 10 000, the limit)', () => {
-    expect(() =>
-      listIncidentsQuerySchema.parse({ page: 200, per_page: 50 })
-    ).not.toThrow();
+    expect(() => listIncidentsQuerySchema.parse({ page: 200, per_page: 50 })).not.toThrow();
   });
 });

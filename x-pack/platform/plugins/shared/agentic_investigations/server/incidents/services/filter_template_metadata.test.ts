@@ -115,7 +115,15 @@ describe('filterMetadataToTemplateFields', () => {
     });
 
     expect(Object.keys(result).sort()).toEqual(
-      ['status', 'severity', 'assignees', 'verdict', 'summary', 'description', 'close_reason'].sort()
+      [
+        'status',
+        'severity',
+        'assignees',
+        'verdict',
+        'summary',
+        'description',
+        'close_reason',
+      ].sort()
     );
     expect(result).not.toHaveProperty('workflow_execution_id');
   });

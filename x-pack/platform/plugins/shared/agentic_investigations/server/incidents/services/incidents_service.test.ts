@@ -7,10 +7,17 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { ConversationAccessControlMode, ConversationAccessControlRole } from '@kbn/agent-builder-common';
+import {
+  ConversationAccessControlMode,
+  ConversationAccessControlRole,
+} from '@kbn/agent-builder-common';
 import { IncidentsService } from './incidents_service';
 import { InvalidLinkedInvestigationError } from './errors';
-import { INCIDENT_TEMPLATE_ID, INVESTIGATION_TEMPLATE_ID, INCIDENT_LINKED_INVESTIGATIONS_FIELD } from '../../../common/incidents/constants';
+import {
+  INCIDENT_TEMPLATE_ID,
+  INVESTIGATION_TEMPLATE_ID,
+  INCIDENT_LINKED_INVESTIGATIONS_FIELD,
+} from '../../../common/incidents/constants';
 
 const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
@@ -42,13 +49,26 @@ const INCIDENT_TEMPLATE = {
   name: 'Incident',
   description: 'Use for incidents',
   fields: {
-    status: { input_type: 'SELECT', default_value: 'open', required: true, options: ['open', 'closed'] },
-    severity: { input_type: 'SELECT', required: false, options: ['low', 'medium', 'high', 'critical'] },
+    status: {
+      input_type: 'SELECT',
+      default_value: 'open',
+      required: true,
+      options: ['open', 'closed'],
+    },
+    severity: {
+      input_type: 'SELECT',
+      required: false,
+      options: ['low', 'medium', 'high', 'critical'],
+    },
     assignees: { input_type: 'TEXT_ARRAY', required: false },
     verdict: { input_type: 'TEXT', required: false, max_length: 10000 },
     summary: { input_type: 'TEXT', required: false, max_length: 10000 },
     description: { input_type: 'TEXT', required: false },
-    close_reason: { input_type: 'SELECT', required: false, options: ['false_positive', 'benign', 'resolved', 'duplicate', 'other'] },
+    close_reason: {
+      input_type: 'SELECT',
+      required: false,
+      options: ['false_positive', 'benign', 'resolved', 'duplicate', 'other'],
+    },
     linked_investigations: { input_type: 'TEXT_ARRAY' },
   },
 };
@@ -58,7 +78,10 @@ const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   list: jest.fn(),
   search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
   create: jest.fn().mockResolvedValue(MOCK_INCIDENT),
-  patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_INCIDENT, changedFields: [INCIDENT_LINKED_INVESTIGATIONS_FIELD] }),
+  patchMetadata: jest.fn().mockResolvedValue({
+    conversation: MOCK_INCIDENT,
+    changedFields: [INCIDENT_LINKED_INVESTIGATIONS_FIELD],
+  }),
   update: jest.fn().mockResolvedValue(MOCK_INCIDENT),
   ...overrides,
 });
@@ -363,7 +386,11 @@ describe('IncidentsService.update', () => {
 });
 
 describe('IncidentsService.list', () => {
-  const MOCK_SUMMARY = { id: 'incident-1', template_id: INCIDENT_TEMPLATE_ID, title: 'My Incident' };
+  const MOCK_SUMMARY = {
+    id: 'incident-1',
+    template_id: INCIDENT_TEMPLATE_ID,
+    title: 'My Incident',
+  };
 
   it('calls client.search with the fixed non-closed incidents filter', async () => {
     const { service, client } = makeService({
@@ -414,9 +441,7 @@ describe('IncidentsService.list', () => {
 
     await service.list(request, { page: 3, per_page: 25 });
 
-    expect(client.search).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 3, perPage: 25 })
-    );
+    expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ page: 3, perPage: 25 }));
   });
 
   it('wraps the client result in the pagination envelope', async () => {

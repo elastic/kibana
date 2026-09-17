@@ -10,8 +10,11 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
-import type { ConversationPublicClient } from '@kbn/agent-builder-server';
-import type { ConversationTemplatesStart } from '@kbn/agent-builder-server';
+import type {
+  ConversationPublicClient,
+  ConversationTemplatesStart,
+} from '@kbn/agent-builder-server';
+import type { ConversationSearchSort } from '@kbn/agent-builder-common';
 import type {
   CreateIncidentRequest,
   IncidentConversation,
@@ -19,12 +22,13 @@ import type {
   ListIncidentsResponse,
   UpdateIncidentRequest,
 } from '../../../common/incidents/incident';
-import type { ConversationSearchSort } from '@kbn/agent-builder-common';
 import {
   INCIDENT_LINKED_INVESTIGATIONS_FIELD,
   INCIDENT_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
 } from '../../../common/incidents/constants';
+import { InvalidLinkedInvestigationError } from './errors';
+import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
 /**
  * Fixed KQL filter applied to every list query.
@@ -47,8 +51,6 @@ const NON_CLOSED_INCIDENTS_FILTER =
  * The conversation client appends `created_at` as a deterministic paging tiebreaker.
  */
 const INCIDENTS_LIST_SORT: ConversationSearchSort = { field: 'updated_at', order: 'desc' };
-import { InvalidLinkedInvestigationError } from './errors';
-import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
 export interface IncidentsServiceDeps {
   logger: Logger;
@@ -76,7 +78,9 @@ export interface IncidentsServiceDeps {
  */
 export class IncidentsService {
   private readonly logger: Logger;
-  private readonly getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
+  private readonly getConversationClient: (
+    request: KibanaRequest
+  ) => Promise<ConversationPublicClient>;
   private readonly conversationTemplates: ConversationTemplatesStart;
 
   constructor({ logger, getConversationClient, conversationTemplates }: IncidentsServiceDeps) {
@@ -112,7 +116,9 @@ export class IncidentsService {
     // Must NOT copy status — let the template default ('open') apply so an incident
     // escalated from a closed investigation starts open.
     const filteredMetadata = filterMetadataToTemplateFields({
-      metadata: investigation.metadata as Record<string, string | number | boolean | string[]> | undefined,
+      metadata: investigation.metadata as
+        | Record<string, string | number | boolean | string[]>
+        | undefined,
       declaredFields: Object.keys(incidentTemplate.fields),
       exclude: [INCIDENT_LINKED_INVESTIGATIONS_FIELD, 'status'],
     });
@@ -154,7 +160,11 @@ export class IncidentsService {
     });
   }
 
-  async update(request: KibanaRequest, incidentId: string, body: UpdateIncidentRequest): Promise<IncidentConversation> {
+  async update(
+    request: KibanaRequest,
+    incidentId: string,
+    body: UpdateIncidentRequest
+  ): Promise<IncidentConversation> {
     const client = await this.getConversationClient(request);
 
     // Fetch the current state for two reasons:
