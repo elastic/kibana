@@ -68,26 +68,27 @@ describe('SeveritySection', () => {
     });
   });
 
-  it('seeds levels when switching to multi mode', () => {
+  it('promotes to multi when adding a level from single', () => {
     const { onChange } = renderSection({
       alertConditions: [condition()],
       severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
     });
-    fireEvent.click(screen.getByTestId('ruleBuilderSeverityMode-multi'));
+    fireEvent.click(screen.getByTestId('ruleBuilderAddSeverityLevel'));
     expect(onChange).toHaveBeenCalledTimes(1);
     const next = onChange.mock.calls[0][0] as SeverityConfig;
     expect(next.mode).toBe('multi');
     expect(next.levels).toHaveLength(2);
-    expect(next.levels.map((l) => l.severity)).toEqual(['low', 'medium']);
+    // Keeps the single severity as the fallback and seeds a more-severe level.
+    expect(next.levels.map((l) => l.severity)).toEqual(['high', 'critical']);
     expect(next.levels.every((l) => l.threshold === 0.8)).toBe(true);
   });
 
-  it('disables multi mode and explains why for range comparators', () => {
+  it('hides the add-level button and explains why for range comparators', () => {
     renderSection({
       alertConditions: [condition({ comparator: Comparator.BETWEEN, threshold: [0.8, 0.9] })],
       severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
     });
-    expect(screen.getByTestId('ruleBuilderSeverityMode-multi')).toBeDisabled();
+    expect(screen.queryByTestId('ruleBuilderAddSeverityLevel')).not.toBeInTheDocument();
     expect(screen.getByText(/Multiple severity levels are not available/i)).toBeInTheDocument();
   });
 
@@ -143,7 +144,7 @@ describe('SeveritySection', () => {
     expect(screen.getByTestId('ruleBuilderAddSeverityLevel')).toBeDisabled();
   });
 
-  it('removes a severity level in multi mode', () => {
+  it('demotes to single when removing down to one level', () => {
     const { onChange } = renderSection({
       alertConditions: [condition()],
       severity: {
@@ -157,8 +158,28 @@ describe('SeveritySection', () => {
     });
     fireEvent.click(screen.getByTestId('ruleBuilderRemoveSeverityLevel-1'));
     const next = onChange.mock.calls[0][0] as SeverityConfig;
-    expect(next.levels).toHaveLength(1);
-    expect(next.levels[0].severity).toBe('low');
+    expect(next.mode).toBe('single');
+    expect(next.levels).toHaveLength(0);
+    expect(next.singleLevelSeverity).toBe('low');
+  });
+
+  it('removes one level while staying in multi mode when three or more remain', () => {
+    const { onChange } = renderSection({
+      alertConditions: [condition()],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 0.8 },
+          { id: 'l2', severity: 'medium', threshold: 0.9 },
+          { id: 'l3', severity: 'high', threshold: 0.95 },
+        ],
+      },
+    });
+    fireEvent.click(screen.getByTestId('ruleBuilderRemoveSeverityLevel-2'));
+    const next = onChange.mock.calls[0][0] as SeverityConfig;
+    expect(next.mode).toBe('multi');
+    expect(next.levels.map((l) => l.severity)).toEqual(['low', 'medium']);
   });
 
   it('shows a validation error when multi thresholds are out of order', () => {

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiButtonIcon,
   EuiCallOut,
   EuiFieldNumber,
@@ -31,22 +30,16 @@ import type {
   Comparator,
   SeverityConfig,
   SeverityLevel,
-  SeverityMode,
 } from './form_types';
 import {
   createDefaultSeverityConfig,
-  createDefaultSeverityLevels,
   generateId,
   getSeverityValidationError,
   isMultiSeveritySupported,
   nextSeverityLevel,
   MAX_SEVERITY_LEVELS,
 } from './form_types';
-import {
-  SEVERITY_LEVEL_OPTIONS,
-  SEVERITY_MODE_OPTIONS,
-  SEVERITY_VALIDATION_ERRORS,
-} from './translations';
+import { SEVERITY_LEVEL_OPTIONS, SEVERITY_VALIDATION_ERRORS } from './translations';
 
 interface SeverityValidationCalloutProps {
   severity: SeverityConfig;
@@ -89,14 +82,22 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
   const toggleEnabled = (enabled: boolean) =>
     onChange(enabled ? createDefaultSeverityConfig() : undefined);
 
-  const setMode = (mode: SeverityMode) => {
-    if (!severity) return;
-    // Seed a couple of levels the first time the user switches to multi mode.
-    if (mode === 'multi' && severity.levels.length === 0 && condition) {
-      onChange({ ...severity, mode, levels: createDefaultSeverityLevels(condition) });
-      return;
-    }
-    onChange({ ...severity, mode });
+  // Adding a second level promotes single → multi: the current single severity becomes the
+  // least-severe (fallback) level and a more-severe level is seeded alongside it.
+  const promoteToMulti = () => {
+    if (!severity || !condition) return;
+    const [baseThreshold = 0] = condition.threshold;
+    const base: SeverityLevel = {
+      id: generateId(),
+      severity: severity.singleLevelSeverity,
+      threshold: baseThreshold,
+    };
+    const next: SeverityLevel = {
+      id: generateId(),
+      severity: nextSeverityLevel([base]),
+      threshold: baseThreshold,
+    };
+    onChange({ ...severity, mode: 'multi', levels: [base, next] });
   };
 
   const setSingleLevel = (level: AlertEventSeverity) => {
@@ -128,9 +129,20 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
     });
   };
 
+  // Removing down to a single level demotes multi → single, keeping the remaining level.
   const removeLevel = (index: number) => {
     if (!severity) return;
-    onChange({ ...severity, levels: severity.levels.filter((_, i) => i !== index) });
+    const remaining = severity.levels.filter((_, i) => i !== index);
+    if (remaining.length <= 1) {
+      onChange({
+        ...severity,
+        mode: 'single',
+        singleLevelSeverity: remaining[0]?.severity ?? severity.singleLevelSeverity,
+        levels: [],
+      });
+      return;
+    }
+    onChange({ ...severity, levels: remaining });
   };
 
   return (
@@ -163,51 +175,51 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
       {severity && (
         <>
           <EuiSpacer size="m" />
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.alertingV2.ruleBuilder.severity.modeLegend', {
-              defaultMessage: 'Severity mode',
-            })}
-            options={SEVERITY_MODE_OPTIONS.map((option) => ({
-              ...option,
-              'data-test-subj': `ruleBuilderSeverityMode-${option.id}`,
-              ...(option.id === 'multi' && !multiSupported ? { isDisabled: true } : {}),
-            }))}
-            idSelected={severity.mode}
-            onChange={(id) => setMode(id as SeverityMode)}
-            buttonSize="compressed"
-            data-test-subj="ruleBuilderSeverityMode"
-          />
-
-          {!multiSupported && (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.alertingV2.ruleBuilder.severity.multiUnsupported"
-                  defaultMessage="Multiple severity levels are not available for between comparators."
-                />
-              </EuiText>
-            </>
-          )}
-
-          <EuiSpacer size="s" />
 
           {severity.mode === 'single' ? (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.ruleBuilder.severity.levelLabel', {
-                defaultMessage: 'Severity level',
-              })}
-              fullWidth
-            >
-              <EuiSelect
+            <>
+              <EuiFormRow
+                label={i18n.translate('xpack.alertingV2.ruleBuilder.severity.levelLabel', {
+                  defaultMessage: 'Severity level',
+                })}
                 fullWidth
-                compressed
-                options={SEVERITY_LEVEL_OPTIONS}
-                value={severity.singleLevelSeverity}
-                onChange={(e) => setSingleLevel(e.target.value as AlertEventSeverity)}
-                data-test-subj="ruleBuilderSeveritySingleLevel"
-              />
-            </EuiFormRow>
+              >
+                <EuiSelect
+                  fullWidth
+                  compressed
+                  options={SEVERITY_LEVEL_OPTIONS}
+                  value={severity.singleLevelSeverity}
+                  onChange={(e) => setSingleLevel(e.target.value as AlertEventSeverity)}
+                  data-test-subj="ruleBuilderSeveritySingleLevel"
+                />
+              </EuiFormRow>
+              {multiSupported ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="plusCircle"
+                    onClick={promoteToMulti}
+                    data-test-subj="ruleBuilderAddSeverityLevel"
+                  >
+                    <FormattedMessage
+                      id="xpack.alertingV2.ruleBuilder.severity.addLevelButton"
+                      defaultMessage="Add severity level"
+                    />
+                  </EuiButtonEmpty>
+                </>
+              ) : (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.alertingV2.ruleBuilder.severity.multiUnsupported"
+                      defaultMessage="Multiple severity levels are not available for between comparators."
+                    />
+                  </EuiText>
+                </>
+              )}
+            </>
           ) : (
             <>
               {severity.levels.map((level, idx) => (

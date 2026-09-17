@@ -251,18 +251,6 @@ export const createDefaultSeverityConfig = (): SeverityConfig => ({
   levels: [],
 });
 
-/**
- * Seed multi-severity levels from an alert condition: the least-severe level
- * inherits the condition's threshold, plus one more severe level to start from.
- */
-export const createDefaultSeverityLevels = (condition: AlertCondition): SeverityLevel[] => {
-  const [baseThreshold = 0] = condition.threshold;
-  return [
-    { id: generateId(), severity: 'low', threshold: baseThreshold },
-    { id: generateId(), severity: 'medium', threshold: baseThreshold },
-  ];
-};
-
 /** Since duplicate severity levels are invalid, at most one level per severity can exist. */
 export const MAX_SEVERITY_LEVELS = SEVERITY_LEVELS.length;
 

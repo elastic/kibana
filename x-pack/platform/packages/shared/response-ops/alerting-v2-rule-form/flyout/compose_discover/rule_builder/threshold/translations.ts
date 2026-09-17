@@ -132,21 +132,6 @@ export const SEVERITY_LEVEL_OPTIONS = [
   },
 ];
 
-export const SEVERITY_MODE_OPTIONS = [
-  {
-    id: 'single',
-    label: i18n.translate('xpack.alertingV2.ruleBuilder.severity.mode.single', {
-      defaultMessage: 'Single',
-    }),
-  },
-  {
-    id: 'multi',
-    label: i18n.translate('xpack.alertingV2.ruleBuilder.severity.mode.multi', {
-      defaultMessage: 'Multiple',
-    }),
-  },
-];
-
 export const SEVERITY_VALIDATION_ERRORS: Record<SeverityValidationError, string> = {
   invalid_threshold: i18n.translate(
     'xpack.alertingV2.ruleBuilder.severity.error.invalidThreshold',
