@@ -57,8 +57,10 @@ export function normalizeCommonRuleFields(
     revision: rule.revision,
     updated_at: rule.updatedAt.toISOString(),
     updated_by: rule.updatedBy ?? 'elastic',
+    updated_by_profile_uid: rule.updatedByProfileUid ?? undefined,
     created_at: rule.createdAt.toISOString(),
     created_by: rule.createdBy ?? 'elastic',
+    created_by_profile_uid: rule.createdByProfileUid ?? undefined,
 
     // Rule schedule and execution-related data
     enabled: rule.enabled,

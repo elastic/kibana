@@ -8264,6 +8264,11 @@ components:
           type: string
         created_by:
           type: string
+        created_by_profile_uid:
+          description: The user profile uid of the user who created the rule. Only present
+            when the rule was created through an authenticated Kibana session.
+            Resolve it to a display name with the user profiles API.
+          type: string
         execution_summary:
           $ref: '#/components/schemas/RuleExecutionSummary'
         id:
@@ -8282,6 +8287,11 @@ components:
           format: date-time
           type: string
         updated_by:
+          type: string
+        updated_by_profile_uid:
+          description: The user profile uid of the user who last updated the rule. Only
+            present when the rule was updated through an authenticated Kibana
+            session. Resolve it to a display name with the user profiles API.
           type: string
       required:
         - id
