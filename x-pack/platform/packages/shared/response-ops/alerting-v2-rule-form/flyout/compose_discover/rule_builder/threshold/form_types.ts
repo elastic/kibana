@@ -245,6 +245,10 @@ export const isSeveritySupported = (alertConditions: AlertCondition[]): boolean 
 export const isMultiSeveritySupported = (comparator: Comparator): boolean =>
   comparator !== Comparator.BETWEEN && comparator !== Comparator.NOT_BETWEEN;
 
+/** Whether the breach escalates upward (`>`/`>=`) rather than downward (`<`/`<=`). */
+export const isAscendingComparator = (comparator: Comparator): boolean =>
+  comparator === Comparator.GT || comparator === Comparator.GTE;
+
 export const createDefaultSeverityConfig = (): SeverityConfig => ({
   mode: 'single',
   singleLevelSeverity: DEFAULT_SINGLE_SEVERITY_LEVEL,
@@ -315,9 +319,7 @@ export const nextSeverityThreshold = (
   severity: AlertEventSeverity,
   condition: AlertCondition
 ): number => {
-  const ascending =
-    condition.comparator === Comparator.GT || condition.comparator === Comparator.GTE;
-  const dir = ascending ? 1 : -1;
+  const dir = isAscendingComparator(condition.comparator) ? 1 : -1;
   const [conditionThreshold = 0] = condition.threshold;
 
   // Work in "extremeness" space (larger = more severe breach) so both directions share logic.
@@ -369,8 +371,7 @@ export const getSeverityValidationError = (
   if (bands.some((band) => !Number.isFinite(band.threshold))) return 'invalid_threshold';
 
   const [conditionThreshold] = condition.threshold;
-  const ascending =
-    condition.comparator === Comparator.GT || condition.comparator === Comparator.GTE;
+  const ascending = isAscendingComparator(condition.comparator);
 
   // A band cannot be less extreme than the breach threshold itself — that row never breaches.
   if (

@@ -30,6 +30,7 @@ import {
   createDefaultSeverityConfig,
   generateId,
   getSeverityValidationError,
+  isAscendingComparator,
   isMultiSeveritySupported,
   nextSeverityLevel,
   nextSeverityThreshold,
@@ -74,6 +75,13 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
 }) => {
   const condition = alertConditions[0];
   const multiSupported = condition ? isMultiSeveritySupported(condition.comparator) : false;
+
+  // Guide the threshold inputs so a band cannot be set less extreme than the breach itself:
+  // a lower bound for ascending comparators (`>`/`>=`), an upper bound for descending ones.
+  const ascending = condition ? isAscendingComparator(condition.comparator) : true;
+  const conditionThreshold = condition?.threshold[0];
+  const thresholdMin = ascending ? conditionThreshold : undefined;
+  const thresholdMax = ascending ? undefined : conditionThreshold;
 
   const toggleEnabled = (enabled: boolean) =>
     onChange(enabled ? createDefaultSeverityConfig() : undefined);
@@ -264,6 +272,8 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                           fullWidth
                           compressed
                           prepend={condition?.comparator ?? ''}
+                          min={thresholdMin}
+                          max={thresholdMax}
                           value={level.threshold}
                           onChange={(e) =>
                             updateLevel(idx, { threshold: parseFloat(e.target.value) || 0 })

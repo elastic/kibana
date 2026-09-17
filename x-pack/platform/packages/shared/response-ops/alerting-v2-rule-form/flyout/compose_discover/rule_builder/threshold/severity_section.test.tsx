@@ -111,6 +111,38 @@ describe('SeveritySection', () => {
     expect(screen.getByTestId('ruleBuilderSeverityThreshold-1')).toHaveValue(0.95);
   });
 
+  it('caps the threshold input with a lower bound for an ascending comparator', () => {
+    renderSection({
+      alertConditions: [condition({ comparator: Comparator.GT, threshold: [0.8] })],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 0.8 },
+          { id: 'l2', severity: 'high', threshold: 0.95 },
+        ],
+      },
+    });
+    expect(screen.getByTestId('ruleBuilderSeverityThreshold-0')).toHaveAttribute('min', '0.8');
+    expect(screen.getByTestId('ruleBuilderSeverityThreshold-0')).not.toHaveAttribute('max');
+  });
+
+  it('caps the threshold input with an upper bound for a descending comparator', () => {
+    renderSection({
+      alertConditions: [condition({ comparator: Comparator.LT, threshold: [500] })],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 450 },
+          { id: 'l2', severity: 'high', threshold: 100 },
+        ],
+      },
+    });
+    expect(screen.getByTestId('ruleBuilderSeverityThreshold-0')).toHaveAttribute('max', '500');
+    expect(screen.getByTestId('ruleBuilderSeverityThreshold-0')).not.toHaveAttribute('min');
+  });
+
   it('adds a severity level in multi mode', () => {
     const { onChange } = renderSection({
       alertConditions: [condition()],
