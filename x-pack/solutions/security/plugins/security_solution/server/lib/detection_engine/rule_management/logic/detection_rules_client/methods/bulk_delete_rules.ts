@@ -58,6 +58,22 @@ export const bulkDeleteRules = async ({
       }
       allErrors.push(error);
     }
+
+    // Rules that silently drop out of alerting's PIT search (deleted between
+    // our fetch and the PIT query) appear in neither rules nor errors.
+    const returnedIds = new Set([
+      ...result.rules.map((r) => r.id),
+      ...result.errors.map((e) => e.rule.id),
+    ]);
+    for (const id of idsChunk) {
+      if (!returnedIds.has(id)) {
+        allSkipped.push({
+          id,
+          name: rulesById.get(id)?.name,
+          skip_reason: 'RULE_NOT_FOUND',
+        });
+      }
+    }
   }
 
   return { rules: allRules, errors: allErrors, skipped: allSkipped };

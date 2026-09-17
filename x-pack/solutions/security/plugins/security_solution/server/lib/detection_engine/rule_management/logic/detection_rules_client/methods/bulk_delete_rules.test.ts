@@ -89,6 +89,25 @@ describe('bulkDeleteRules', () => {
 
     expect(result.rules).toEqual([ruleA]);
     expect(result.errors).toEqual([unknownRuleError]);
-    expect(result.skipped).toEqual([]);
+    expect(result.skipped).toEqual([
+      { id: 'rule-b', name: 'Rule B', skip_reason: 'RULE_NOT_FOUND' },
+    ]);
+  });
+
+  it('skips rules that silently drop from the PIT search (not in rules or errors)', async () => {
+    rulesClient.bulkDeleteRules.mockResolvedValue({
+      rules: [ruleA],
+      errors: [],
+      total: 2,
+      taskIdsFailedToBeDeleted: [],
+    });
+
+    const result = await bulkDeleteRules({ rulesClient, rules: [ruleA, ruleB] });
+
+    expect(result.rules).toEqual([ruleA]);
+    expect(result.errors).toEqual([]);
+    expect(result.skipped).toEqual([
+      { id: 'rule-b', name: 'Rule B', skip_reason: 'RULE_NOT_FOUND' },
+    ]);
   });
 });
