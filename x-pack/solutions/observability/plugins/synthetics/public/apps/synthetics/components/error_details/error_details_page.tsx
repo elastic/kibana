@@ -22,6 +22,15 @@ import { useErrorDetailsBreadcrumbs } from './hooks/use_error_details_breadcrumb
 import { StepImage } from '../step_details_page/step_screenshot/step_image';
 import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
 import { useDateFormat } from '../../../../hooks/use_date_format';
+import {
+  ERROR_DETAILS_TITLE,
+  MonitorBackPage,
+  SyntheticsHeaderToolbar,
+} from '../common/app_header';
+import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
+import { ErrorDuration } from './components/error_duration';
+import { ResolvedAt } from './components/resolved_at';
+import { ErrorStartedAt } from './components/error_started_at';
 
 export function ErrorDetailsPage() {
   const { failedTests, loading } = useErrorFailedTests();
@@ -54,63 +63,74 @@ export function ErrorDetailsPage() {
   const isStepBased = isBrowser || isApiMonitor;
 
   return (
-    <div>
-      <PanelWithTitle title={TIMELINE_LABEL}>
-        <ErrorTimeline lastTestRun={lastTestRun} />
-      </PanelWithTitle>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={2} style={{ minWidth: 0 }}>
-          <PanelWithTitle title={FAILED_TESTS_LABEL}>
-            <FailedTestsList failedTests={failedTests} loading={loading} />
-          </PanelWithTitle>
-          {isStepBased && (
-            <>
-              <EuiSpacer size="m" />
-              <StepDetails {...stepDetails} isApiMonitor={isApiMonitor} />
-            </>
-          )}
-          <EuiSpacer size="m" />
-          <LastTestRunComponent
-            latestPing={lastTestRun}
-            loading={loading}
-            stepsData={data}
-            stepsLoading={stepsLoading}
-            isErrorDetails={true}
-          />
-          {isStepBased && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiPanel hasShadow={false} hasBorder>
-                <TestRunErrorInfo
-                  journeyDetails={data?.details}
-                  showErrorTitle={false}
-                  showErrorLogs={true}
-                />
-              </EuiPanel>
-            </>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={1} style={{ height: 'fit-content' }}>
-          {isBrowser && data?.details?.journey && failedStep && (
-            <>
-              <PanelWithTitle>
-                <StepImage
-                  ping={data?.details?.journey}
-                  step={failedStep}
-                  isFailed={isFailedStep}
-                />
-              </PanelWithTitle>
-              <EuiSpacer size="m" />
-            </>
-          )}
-
-          <StepDurationPanel doBreakdown={false} />
-          <EuiSpacer size="m" />
-          <MonitorDetailsPanelContainer hideLocations />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <MonitorBackPage
+      title={ERROR_DETAILS_TITLE}
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <ErrorDuration />
+          <MonitorDetailsLocation isDisabled={true} />
+          <ResolvedAt />
+          <ErrorStartedAt />
+        </SyntheticsHeaderToolbar>
+      }
+    >
+      <div>
+        <PanelWithTitle title={TIMELINE_LABEL}>
+          <ErrorTimeline lastTestRun={lastTestRun} />
+        </PanelWithTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={2} style={{ minWidth: 0 }}>
+            <PanelWithTitle title={FAILED_TESTS_LABEL}>
+              <FailedTestsList failedTests={failedTests} loading={loading} />
+            </PanelWithTitle>
+            {isStepBased && (
+              <>
+                <EuiSpacer size="m" />
+                <StepDetails {...stepDetails} isApiMonitor={isApiMonitor} />
+              </>
+            )}
+            <EuiSpacer size="m" />
+            <LastTestRunComponent
+              latestPing={lastTestRun}
+              loading={loading}
+              stepsData={data}
+              stepsLoading={stepsLoading}
+              isErrorDetails={true}
+            />
+            {isStepBased && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiPanel hasShadow={false} hasBorder>
+                  <TestRunErrorInfo
+                    journeyDetails={data?.details}
+                    showErrorTitle={false}
+                    showErrorLogs={true}
+                  />
+                </EuiPanel>
+              </>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={1} style={{ height: 'fit-content' }}>
+            {isBrowser && data?.details?.journey && failedStep && (
+              <>
+                <PanelWithTitle>
+                  <StepImage
+                    ping={data?.details?.journey}
+                    step={failedStep}
+                    isFailed={isFailedStep}
+                  />
+                </PanelWithTitle>
+                <EuiSpacer size="m" />
+              </>
+            )}
+            <StepDurationPanel doBreakdown={false} />
+            <EuiSpacer size="m" />
+            <MonitorDetailsPanelContainer hideLocations />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    </MonitorBackPage>
   );
 }
 
