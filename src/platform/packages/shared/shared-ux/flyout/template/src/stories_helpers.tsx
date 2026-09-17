@@ -40,13 +40,13 @@ export interface SharedStoryArgs {
 }
 
 export const LEADING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']>['leadingActions'] = [
-  { iconType: 'documents', onClick: () => { }, 'aria-label': 'View surrounding documents', toolTipContent: 'View surrounding documents' },
-  { iconType: 'document', onClick: () => { }, 'aria-label': 'View document', toolTipContent: 'View document' },
+  { iconType: 'documents', onClick: () => {}, 'aria-label': 'View surrounding documents', toolTipContent: 'View surrounding documents' },
+  { iconType: 'document', onClick: () => {}, 'aria-label': 'View document', toolTipContent: 'View document' },
 ]; // prettier-ignore
 
 export const TRAILING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']>['trailingActions'] = [
-  { iconType: 'share', onClick: () => { }, 'aria-label': 'Share', toolTipContent: 'Share' },
-  { iconType: 'gear', onClick: () => { }, 'aria-label': 'Settings', toolTipContent: 'Settings' },
+  { iconType: 'share', onClick: () => {}, 'aria-label': 'Share', toolTipContent: 'Share' },
+  { iconType: 'gear', onClick: () => {}, 'aria-label': 'Settings', toolTipContent: 'Settings' },
 ]; // prettier-ignore
 
 /** Maps shared story args to `FlyoutTemplate` props. Pagination is handled per-story via useState. */
