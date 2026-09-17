@@ -38,13 +38,30 @@ if: >-
   || contains(github.event.issue.body, '"test.failCount":2}'))) }}
 
 concurrency:
-  # Keep one investigation lane per issue. Unrelated label events get their own group suffix so they can skip without canceling an in-flight investigation.
+  # Keep one investigation lane per issue. Events that can't activate this workflow still
+  # create a run that claims the concurrency group before the `if` above is evaluated, so
+  # with `cancel-in-progress` they would kill an in-flight investigation and then skip
+  # themselves. Give those events their own group suffix:
+  # - unrelated `labeled` events (e.g. `Team:*`, `needs-team`) → the label name
+  # - `issue_comment` events other than kibanamachine's failCount-2 "New failure" comment
+  #   (team pings, `/skip`, later "New failure" comments) → `comment-<id>`
   group: >-
     failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
       (
         github.event.action == 'labeled' &&
         github.event.label.name != 'failed-test' &&
         github.event.label.name
+      ) ||
+      (
+        github.event_name == 'issue_comment' &&
+        !(
+          github.event.comment.user.login == 'kibanamachine' &&
+          (
+            contains(github.event.issue.body, '"test.failCount":2,') ||
+            contains(github.event.issue.body, '"test.failCount":2}')
+          )
+        ) &&
+        format('comment-{0}', github.event.comment.id)
       ) ||
       'investigate'
     }}
@@ -123,6 +140,10 @@ safe-outputs:
     # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
     # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+    # Use the REST endpoint: with issue intents on, GitHub only applies HIGH-confidence
+    # labels and parks the rest as pending suggestions, so a `medium` verdict added no
+    # labels and `ai:fix-flaky` never fired (https://github.com/github/gh-aw/issues/53654).
+    issue-intent: false
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
@@ -144,6 +165,8 @@ safe-outputs:
     target: *issue_number
     required-labels: [failed-test]
     state-reason: not_planned
+    # Same gating as `add-labels`: a `medium` close is parked as a suggestion, not applied.
+    issue-intent: false
 
 strict: false
 timeout-minutes: 35
@@ -234,6 +257,8 @@ Every fix you propose is held to the same guardrails as the fixer and verifier w
 
 ## Labels
 
+Label only when `confidence` is `medium` or `high`. A `low`-confidence verdict adds or removes no labels — except `failure:inconclusive` and `failure:insufficient-data`, which exist to record exactly that uncertainty. The comment already surfaces low confidence (see "Comment format").
+
 ### Classification label
 
 Add exactly one classification label to the issue that matches the chosen `classification`:
@@ -259,7 +284,13 @@ Request an automatic fix immediately for a fixable **`application`** failure. Fo
 
 **Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate. Also skip `ai:fix-flaky` (and `failure:ai-fixable`) for Security Cypress when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none`.
 
-An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate.
+An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate or the team opt-out below.
+
+#### Teams opted out of automatic fix requests
+
+Some teams prefer to request fixes themselves. When the issue carries one of these `Team:` labels, never add `ai:fix-flaky` — regardless of classification or `failCount`. Still add `failure:ai-fixable` when a fix is available, and use the "Fix available, team opted out" tip in "Comment format" so the team sees how to request one.
+
+- `Team:Kibana Management`
 
 ### "Previous fix didn't hold" label
 
@@ -345,6 +376,15 @@ If a fix PR is already up (in draft or in review) in the Kibana repository — t
 > [!TIP]
 > Marked "AI-fixable". Add `ai:fix-flaky` to request a fix now; otherwise it will be requested automatically if the test fails again.
 ```
+
+**Fix available, team opted out** — you added `failure:ai-fixable` without `ai:fix-flaky` because the issue's team has opted out of automatic fix requests (see "Teams opted out of automatic fix requests"). Fixes are never requested automatically for it, so don't promise one:
+
+```markdown
+> [!TIP]
+> Marked "AI-fixable". Add `ai:fix-flaky` to request a fix PR — `<Team: label>` has opted out of automatic fix requests.
+```
+
+Fill `<Team: label>` with the issue's opted-out team label, e.g. `Team:Kibana Management`.
 
 ### 1. Visible header (required)
 

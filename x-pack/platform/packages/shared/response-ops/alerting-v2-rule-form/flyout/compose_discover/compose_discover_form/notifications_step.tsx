@@ -22,7 +22,7 @@ const notificationsSubtext = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.subtext',
   {
     defaultMessage:
-      "Send a notification when this rule's alerts change status. A linked action policy will be created with this rule.",
+      "Send a notification when this rule's alerts change status. An action policy will be created with this rule.",
   }
 );
 

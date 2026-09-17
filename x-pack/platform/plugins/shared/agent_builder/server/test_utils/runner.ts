@@ -148,9 +148,11 @@ export const createSkillsStoreMock = (): SkillsStoreMock => {
 
 export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock => {
   return {
-    validate: jest.fn(),
+    validateAttachmentInputs: jest.fn(),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn(),
+    createStateManager: jest.fn(),
+    mergeAttachmentInputs: jest.fn(),
   };
 };
 
@@ -254,6 +256,8 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     rename: jest.fn(),
     getAccessedRefs: jest.fn(),
     clearAccessTracking: jest.fn(),
+    drainChanges: jest.fn().mockReturnValue([]),
+    clearChanges: jest.fn(),
     resolveRefs: jest.fn(),
     evaluateStalenessForActiveAttachments: jest.fn(),
     getTotalTokenEstimate: jest.fn(),
@@ -365,6 +369,14 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
+    agentRegistry: {
+      has: jest.fn().mockResolvedValue(false),
+      get: jest.fn(),
+      list: jest.fn().mockResolvedValue([]),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn().mockResolvedValue(false),
+    },
     conversationClient: {
       exists: jest.fn().mockResolvedValue(false),
       patchMetadata: jest.fn().mockResolvedValue({ changedFields: [] }),
@@ -454,6 +466,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    deductiveRegister: false,
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProvider: createModelProviderMock(),
@@ -505,6 +518,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    deductiveRegister: false,
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),

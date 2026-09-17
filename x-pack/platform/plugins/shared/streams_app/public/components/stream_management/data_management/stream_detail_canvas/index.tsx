@@ -36,6 +36,7 @@ import { CanvasEmptyState } from './canvas_empty_state';
 import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
 import { CanvasToolbar } from './canvas_toolbar';
 import { applyLayout } from './layout';
+import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
 import { StreamFlyout, type StreamFlyoutTabId } from '../../../stream_flyout';
@@ -79,9 +80,6 @@ const SOURCE_TYPE_ICONS: Record<SourceType, IconType> = {
   prometheus_remote_write: 'logoPrometheus',
   es_prometheus_remote_write: 'logoPrometheus',
 };
-
-const getGraphNodeIds = (graphNodes: Array<{ id: string }>): string =>
-  graphNodes.map((node) => node.id).join('\0');
 
 interface CanvasContextMenuState {
   position: ContextMenuPosition;
@@ -148,7 +146,7 @@ function StreamsCanvasInner() {
     closeSourceFlyout,
   } = sourcesController;
 
-  const { value, loading } = useStreamsAppFetch(
+  const { value, loading, refresh } = useStreamsAppFetch(
     ({ signal }) => streamsRepositoryClient.fetch('GET /internal/streams/classic', { signal }),
     [streamsRepositoryClient]
   );
@@ -190,8 +188,9 @@ function StreamsCanvasInner() {
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
   // Positions and undo history reset only when the set of node ids changes
-  // (streams or configured sources added/removed). Metadata-only updates must
-  // not wipe a user's in-progress tidy or keyboard move.
+  // (streams or configured sources added/removed). Metadata-only updates
+  // (e.g. hasProcessing after a save) are merged onto the live nodes so a
+  // user's in-progress tidy or keyboard move is not wiped.
   const [nodes, setNodes, applyNodesChange] = useNodesState(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
   const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
@@ -206,6 +205,7 @@ function StreamsCanvasInner() {
   useEffect(() => {
     const nextNodeIds = getGraphNodeIds(graph.nodes);
     if (graphNodeIdsRef.current === nextNodeIds) {
+      setNodes((current) => syncCanvasNodeMetadata(current, graph.nodes));
       return;
     }
     graphNodeIdsRef.current = nextNodeIds;
@@ -467,7 +467,9 @@ function StreamsCanvasInner() {
           />
         )}
         {nodes.length === 0 && <CanvasEmptyState />}
-        {flyoutName && <StreamFlyout name={flyoutName} onClose={closeFlyout} />}
+        {flyoutName && (
+          <StreamFlyout name={flyoutName} onClose={closeFlyout} refreshStreams={refresh} />
+        )}
         {selectedSource && (
           <SourceDetailsFlyout
             sources={sourcesController}

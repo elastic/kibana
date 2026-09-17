@@ -11,6 +11,14 @@ export type { OverlayStart } from './src/overlays';
 export type { OverlayBannersStart } from './src/banners';
 export type { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './src/flyout';
 export type { OverlaySystemFlyoutStart, OverlaySystemFlyoutOpenOptions } from './src/system_flyout';
+export type { SystemFlyoutType, SystemFlyoutTypeContextValue } from './src/system_flyout_type';
+export { SystemFlyoutTypeContext, useSystemFlyoutType } from './src/system_flyout_type';
+export type {
+  OverlayFlyoutTemplateStart,
+  OverlayFlyoutTemplateOpenOptions,
+  OverlayFlyoutTemplateContent,
+  OverlayFlyoutTemplateContentProps,
+} from './src/system_flyout';
 export type {
   OverlayModalStart,
   OverlayModalOpenOptions,

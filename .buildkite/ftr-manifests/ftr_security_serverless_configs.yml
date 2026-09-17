@@ -45,12 +45,10 @@ enabled:
   - x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.saved_objects_management.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts
-  - x-pack/platform/test/serverless/functional/configs/security/config.examples.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.config_compat_mode.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group1.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group5.ts
-  - x-pack/platform/test/serverless/functional/configs/security/config.group6.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group8.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group9.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group11.ts
@@ -80,6 +78,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/indicator_match/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/machine_learning/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/new_terms/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/new_terms_max_response_size/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/query/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/threshold/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_gaps/trial_license_complete_tier/configs/serverless.config.ts
@@ -142,6 +141,8 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation/timeline/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/mitre_attack/entities/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/mitre_attack/feature_flag_disabled/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/serverless.config.ts

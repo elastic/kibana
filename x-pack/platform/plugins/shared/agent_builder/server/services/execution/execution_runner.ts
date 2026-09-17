@@ -9,6 +9,7 @@ import {
   merge,
   of,
   filter,
+  map,
   tap,
   catchError,
   throwError,
@@ -26,7 +27,7 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -59,17 +60,17 @@ import {
   handleCancellation,
   executeAgent$,
   getConversation,
-  updateConversation$,
-  createConversation$,
   persistRoundInput,
   appendRoundTerminated$,
+  appendResumeExecution$,
+  executionStartedEvents$,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { withConverseSpan } from '../../tracing';
+import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -177,9 +178,9 @@ const handleConversationExecution = async ({
     nextInput,
     browserApiTools,
     configurationOverrides,
-    action,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     accessControl,
     subagentCreation,
     readOnly,
@@ -218,7 +219,7 @@ const handleConversationExecution = async ({
   const roundId = uuidv4();
   const receivedAt = new Date();
 
-  const useTwoPhase = action !== 'regenerate' && !isPendingResumeConversation(conversation);
+  const useTwoPhase = !isPendingResumeConversation(conversation);
   if (storeConversation && useTwoPhase) {
     await persistRoundInput({
       conversation,
@@ -252,10 +253,10 @@ const handleConversationExecution = async ({
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     runAgent,
     browserApiTools,
     configurationOverrides,
-    action,
     interactivity,
     parentExecutionId: execution.parentExecutionId,
     projectRouting,
@@ -284,8 +285,13 @@ const handleConversationExecution = async ({
         conversationClient,
         title$,
         agentEvents$,
-        action,
+        nextInput,
+        author,
       })
+    : EMPTY;
+
+  const startedEvents$ = storeConversation
+    ? executionStartedEvents$({ conversation, agentEvents$ })
     : EMPTY;
 
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
@@ -303,6 +309,11 @@ const handleConversationExecution = async ({
       : undefined;
 
   const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+  const privacySettings = await loadTracingPrivacySettings({
+    uiSettingsClient: deps.uiSettings.asScopedToClient(deps.savedObjects.getScopedClient(request)),
+    logger,
+    spaceId,
+  });
 
   return withConverseSpan(
     {
@@ -311,6 +322,7 @@ const handleConversationExecution = async ({
       providerName: connectorProvider,
       conversationId: conversation.id,
       spaceId,
+      privacySettings,
       opikHeaders,
     },
     (span) => {
@@ -330,8 +342,17 @@ const handleConversationExecution = async ({
           )
         : EMPTY;
 
-      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
+      return merge(
+        conversationIdEvent$,
+        agentEvents$,
+        startedEvents$,
+        persistenceEvents$,
+        titleAttr$
+      ).pipe(
         filter((event) => !isRoundStartedEvent(event)),
+        // `resume_execution` is persistence-layer plumbing consumed by buildPersistenceEvents; strip
+        // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
+        map(stripResumeExecution),
         handleCancellation(abortSignal),
         tap((event) => {
           if (isConversationCreatedEvent(event) && !author) {
@@ -343,7 +364,7 @@ const handleConversationExecution = async ({
 
           try {
             if (isRoundCompleteEvent(event)) {
-              const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+              const isReplacingRound = event.data?.resumed === true;
               const currentRoundCount = isReplacingRound
                 ? conversation.rounds.length
                 : (conversation.rounds?.length ?? 0) + 1;
@@ -373,6 +394,7 @@ const handleConversationExecution = async ({
                 agentId,
                 round: event.data.round,
                 modelProvider: connectorProvider,
+                conversationAttachments: event.data.attachments ?? conversation.attachments ?? [],
               });
             }
           } catch (error) {
@@ -505,6 +527,14 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
 const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
   !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
 
+const stripResumeExecution = (event: ChatEvent): ChatEvent => {
+  if (!isRoundCompleteEvent(event) || !event.data.resume_execution) {
+    return event;
+  }
+  const { resume_execution: _resumeExecution, ...data } = event.data;
+  return { ...event, data };
+};
+
 const isPendingResumeConversation = (conversation: ConversationWithOperation): boolean => {
   const lastRound = conversation.rounds[conversation.rounds.length - 1];
   return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
@@ -515,19 +545,20 @@ const buildPersistenceEvents = ({
   conversationClient,
   title$,
   agentEvents$,
-  action,
+  nextInput,
+  author,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
-  action?: ConversationAction;
+  nextInput: ConverseInput;
+  author?: ConversationRoundAuthor;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
-  const isRegenerate = action === 'regenerate';
   const isResume = isPendingResumeConversation(conversation);
-  const useTwoPhase = !isRegenerate && !isResume;
+  const useTwoPhase = !isResume;
 
   if (useTwoPhase) {
     const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
@@ -551,20 +582,17 @@ const buildPersistenceEvents = ({
     );
   }
 
-  return conversation.operation === 'CREATE'
-    ? createConversation$({
-        conversation,
-        conversationClient,
-        title$,
-        roundCompletedEvents$,
-      })
-    : updateConversation$({
-        conversationClient,
-        conversation,
-        roundCompletedEvents$,
-        action,
-        title$: conversationNeedsTitle(conversation) ? title$ : undefined,
-      });
+  // A resume appends a new execution (append-only); the pause is never rewritten. This also covers
+  // legacy (non events-native) documents: `fromEs` derives their timeline from rounds on read, so
+  // the append writes the full projection and promotes the document to events-native.
+  return appendResumeExecution$({
+    conversation,
+    conversationClient,
+    roundCompletedEvents$,
+    input: nextInput,
+    author,
+    title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+  });
 };
 
 /**
@@ -586,7 +614,8 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength, projectRouting } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
+    execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -606,6 +635,7 @@ const handleStandaloneExecution = async ({
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     runAgent,
     projectRouting,
     executionMode: AgentExecutionMode.standalone,
