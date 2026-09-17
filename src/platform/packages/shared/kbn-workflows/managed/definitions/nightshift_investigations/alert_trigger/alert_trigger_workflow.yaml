@@ -1,5 +1,5 @@
 version: '1'
-name: Nightshift Investigation from an Alert rule
+name: '[Experimental] Nightshift Investigation from an Alert rule'
 description: >
   Starts a Nightshift investigation when a v1 alerting rule fires.
   Attach this workflow as a rule action. One in-flight run per rule per space

@@ -43,6 +43,7 @@ describe('nightshift investigation alert trigger workflow', () => {
     expect(NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW.management.enablement).toBe(
       'restorable'
     );
+    expect(workflow.name).toBe('[Experimental] Nightshift Investigation from an Alert rule');
     expect(workflow.enabled).toBe(true);
     expect(workflow.triggers).toEqual([{ type: 'alert' }]);
     expect(workflow.settings?.concurrency).toEqual({
