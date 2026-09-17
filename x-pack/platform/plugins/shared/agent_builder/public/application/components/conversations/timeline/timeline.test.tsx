@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { TimelineItem } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { Timeline } from './timeline';
@@ -23,7 +23,7 @@ describe('Timeline', () => {
         kind: 'agentTurn',
         key: 'round-1::execution',
         status: 'completed',
-        startedAt: '',
+        startedAt: '2025-01-01T00:00:10.000Z',
         steps: [],
       },
     ];
@@ -35,5 +35,61 @@ describe('Timeline', () => {
         el.getAttribute('data-timeline-item-key')
       )
     ).toEqual(['round-1::user_message', 'round-1::execution']);
+  });
+
+  describe('date dividers', () => {
+    const message = (id: string, createdAt: string): TimelineItem => ({
+      kind: 'userMessage',
+      key: id,
+      event: createUserMessageEvent({ id, created_at: createdAt }),
+    });
+    const turn = (key: string, startedAt: string): TimelineItem => ({
+      kind: 'agentTurn',
+      key,
+      status: 'completed',
+      startedAt,
+      steps: [],
+    });
+
+    it('draws one divider for items on the same day', () => {
+      render(
+        <Timeline
+          items={[
+            message('u1', '2025-01-01T09:00:00.000Z'),
+            turn('t1', '2025-01-01T09:00:10.000Z'),
+            message('u2', '2025-01-01T17:00:00.000Z'),
+          ]}
+        />
+      );
+
+      expect(screen.getAllByRole('separator')).toHaveLength(1);
+    });
+
+    it('draws a divider above the first item of each new day', () => {
+      const { container } = render(
+        <Timeline
+          items={[
+            message('u1', '2025-01-01T09:00:00.000Z'),
+            turn('t1', '2025-01-01T09:00:10.000Z'),
+            message('u2', '2025-01-03T09:00:00.000Z'),
+            turn('t2', '2025-01-03T09:00:10.000Z'),
+          ]}
+        />
+      );
+
+      const children = Array.from(container.querySelector('.euiFlexGroup')!.children);
+      const kinds = children.map((el) =>
+        el.getAttribute('role') === 'separator'
+          ? 'divider'
+          : el.getAttribute('data-timeline-item-key')
+      );
+      expect(kinds).toEqual(['divider', 'u1', 't1', 'divider', 'u2', 't2']);
+    });
+
+    it('labels a message sent now as today', () => {
+      render(<Timeline items={[message('u1', new Date().toISOString())]} />);
+
+      expect(screen.getByRole('separator')).toHaveAttribute('aria-label', 'Today');
+    });
   });
 });
