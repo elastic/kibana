@@ -74,7 +74,7 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
     'xpack.alertzero.watches.workers.forensicsEndpointAnalysis.description',
     {
       defaultMessage:
-        'Reconstructs the host attack timeline and recommends containment from installed actions.',
+        'Picks up pending endpoint-analysis requests and reconstructs the host attack timeline.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
