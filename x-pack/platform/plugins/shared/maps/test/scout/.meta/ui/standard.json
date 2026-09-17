@@ -1,5 +1,5 @@
 {
-  "sha1": "a61b094fa6eeb4c1a0a03f9e53bf49152b0001ac",
+  "sha1": "f19e02a2ed8a8fe577b579a9fc081db4a2aafb63",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embedded_map_search_cancellation.spec.ts",
-        "line": 46,
+        "line": 50,
         "column": 7
+      }
+    },
+    {
+      "id": "f6a280d8279d22c-4035f9937306db3",
+      "title": "Maps embedded in dashboard - request cancellation cancels search when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embedded_map_search_cancellation.spec.ts",
+        "line": 62,
+        "column": 13
       }
     },
     {

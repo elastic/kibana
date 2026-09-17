@@ -45,6 +45,15 @@ describe('addComment', () => {
     ).rejects.toThrow('invalid keys "foo"');
   });
 
+  it('rejects a legacy v1 body', async () => {
+    const v1Comment = { type: 'user', comment: 'a legacy comment', owner: SECURITY_SOLUTION_OWNER };
+
+    await expect(
+      // @ts-expect-error: legacy v1 shape is no longer accepted, client is unified-only
+      addComment({ comment: v1Comment, caseId }, clientArgs)
+    ).rejects.toThrow();
+  });
+
   it(`throws error when the case user actions become > ${MAX_USER_ACTIONS_PER_CASE}`, async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
       [caseId]: MAX_USER_ACTIONS_PER_CASE,

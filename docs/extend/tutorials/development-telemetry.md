@@ -9,10 +9,10 @@ To help us provide a good developer experience, we track some straightforward me
 
 The operations we current report timing data for:
 
-* Total execution time of `yarn kbn bootstrap`.
+* Total execution time of `pnpm kbn bootstrap`.
 * Total execution time of `@kbn/rspack-optimizer` runs as well as the following metadata about the runs: whether the build succeeded, the number of bundle entries created, usage of `--watch`, `--dist` and `--no-cache` flags, and the count of themes being built.
-* The time from when you run `yarn start` until both the Kibana server and `@kbn/rspack-optimizer` are ready for use.
-* The time it takes for the Kibana server to start listening after it is spawned by `yarn start`.
+* The time from when you run `pnpm start` until both the Kibana server and `@kbn/rspack-optimizer` are ready for use.
+* The time it takes for the Kibana server to start listening after it is spawned by `pnpm start`.
 
 Along with the execution time of each execution, we ship the following information about your machine to the service:
 

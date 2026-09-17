@@ -65,7 +65,7 @@ node scripts/build_kibana_platform_plugins.js --dist
 node scripts/build_kibana_platform_plugins.js --watch
 
 # Dev mode starts the optimizer in watch mode automatically
-yarn start
+pnpm start
 ```
 
 ### CLI Options

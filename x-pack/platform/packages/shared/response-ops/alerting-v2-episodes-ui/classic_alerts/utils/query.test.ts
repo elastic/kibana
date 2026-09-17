@@ -78,7 +78,7 @@ describe('buildClassicAlertsQuery', () => {
     const query = buildClassicAlertsQuery({ tags: ['error', 'prod'] });
 
     expect(getFilters(query)).toEqual(
-      expect.arrayContaining([{ terms: { 'kibana.alert.rule.tags': ['error', 'prod'] } }])
+      expect.arrayContaining([{ terms: { 'kibana.alert.workflow_tags': ['error', 'prod'] } }])
     );
   });
 
