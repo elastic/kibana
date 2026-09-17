@@ -65,6 +65,7 @@ const mockUsePageReady = usePageReady as jest.Mock;
 
 const investigation: ListInvestigationItem = {
   investigation_id: 'investigation-1',
+  title: 'Checkout errors',
   status: 'running',
   created_at: '2026-09-11T09:00:00.000Z',
   subject: { type: 'significant_event', id: 'event-1', summary: 'Investigate checkout errors' },

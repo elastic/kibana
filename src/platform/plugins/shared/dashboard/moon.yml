@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dashboard-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/dashboard-plugin'
   description: Moon project for @kbn/dashboard-plugin
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/dashboard
 dependsOn:
   - '@kbn/core'
@@ -98,7 +98,6 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/css-utils'
   - '@kbn/es-query-server'
-  - '@kbn/data-service-server'
   - '@kbn/controls-schemas'
   - '@kbn/controls-constants'
   - '@kbn/controls-renderer'
@@ -135,6 +134,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
+  - '@kbn/as-code-dashboard-schema'
 tags:
   - plugin
   - prod

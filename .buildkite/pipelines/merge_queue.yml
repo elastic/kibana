@@ -54,6 +54,28 @@ steps:
   - wait: ~
     depends_on: pre_build
 
+  - command: .buildkite/scripts/steps/spoof_status_checks.sh
+    label: 'Spoof Status Checks'
+    env:
+      STATUS_CHECKS: |
+        prbot:backport labels
+        prbot:outdated
+        prbot:release note labels
+        prbot:update required
+        security/snyk (Application Experience)
+        buildkite/docs-build-pr
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    timeout_in_minutes: 10
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
     agents:
