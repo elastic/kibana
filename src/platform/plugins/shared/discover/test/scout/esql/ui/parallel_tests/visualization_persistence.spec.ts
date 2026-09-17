@@ -54,6 +54,7 @@ spaceTest.describe(
           page.testSubj.locator('unifiedHistogramTimeIntervalSelectorButton')
         ).toBeHidden();
 
+        const initialTimeRange = await discover.getChartTimespan();
         await datePicker.setAbsoluteRange({
           from: 'Sep 20, 2015 @ 00:00:00.000',
           to: 'Sep 20, 2015 @ 00:00:00.000',
@@ -62,6 +63,10 @@ spaceTest.describe(
 
         await expect(discover.getHitCountLocator()).toHaveText('1');
         await expect(discover.getHistogramChart()).toBeVisible();
+        await expect(discover.getHistogramChart()).not.toHaveAttribute(
+          'data-time-range',
+          initialTimeRange
+        );
       }
     );
 
@@ -103,6 +108,7 @@ spaceTest.describe(
         expect(await discover.getHistogramSuggestionType()).toBe('histogramForESQL');
 
         await discover.writeAndSubmitEsqlQuery(ESQL_STATS_QUERY);
+        await expect(page.testSubj.locator('unifiedHistogramBreakdownSelectorButton')).toBeHidden();
         await discover.chooseVisualizationSuggestion('treemap');
         await expect(page.testSubj.locator('partitionVisChart')).toBeVisible();
         expect(await discover.getHistogramSuggestionType()).toBe('lensSuggestion');
@@ -199,10 +205,11 @@ spaceTest.describe(
 
         await discover.changeVisualizationShape('Waffle');
         await discover.openLensEditFlyout();
-        await expect(discover.getLensEditFlyout()).toBeVisible();
+        const lensEditFlyout = page.testSubj.locator('lnsEditOnFlyFlyout');
+        await expect(lensEditFlyout).toBeVisible();
         await discover.revertUnsavedChanges();
 
-        await expect(discover.getLensEditFlyout()).toBeHidden();
+        await expect(lensEditFlyout).toBeHidden();
         expect(await discover.getVisualizationTitle()).toBe('Pie');
       }
     );
