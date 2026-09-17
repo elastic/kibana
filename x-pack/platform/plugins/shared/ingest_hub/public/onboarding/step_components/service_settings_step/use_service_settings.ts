@@ -78,8 +78,11 @@ function baseInstances(
  * - Keep instances whose serviceId is still selected.
  * - Add a base instance for any newly-selected service with no existing instance.
  * - Drop instances for deselected services.
+ * Also used by the Authenticate & Deploy step: the step indicator lets users
+ * change the selection and skip Service Settings, so a stored instance list
+ * must never be trusted as-is.
  */
-function reconcileInstances(
+export function reconcileInstances(
   selectedServiceIds: string[],
   persisted: ServiceInstance[] | undefined,
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined

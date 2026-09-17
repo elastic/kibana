@@ -35,6 +35,7 @@ import {
   ECF_CROWDSTRIKE_STACK_NAME,
 } from '../ecf_cloudformation';
 import {
+  reconcileInstances,
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,
 } from './service_settings_step/use_service_settings';
@@ -74,20 +75,17 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
-  // Reconciled instances (ECF and managed integrations): prefer session-storage instances
-  // because they carry duplicate-instance configs (multi-bucket / multi-log-group from Step 2).
-  // Fall back to one base instance per selected service when session storage hasn't been
-  // written yet — e.g. the user jumped to Step 3 directly via the horizontal step indicator
-  // without clicking Next in Step 2.
-  const reconciledInstances = useMemo(() => {
-    const stored = serviceSettings?.instances;
-    if (stored && stored.length > 0) return stored;
-    return selectedServiceIds.flatMap((id) => {
-      const service = awsServicesMap?.get(id);
-      if (!service?.showInUI) return [];
-      return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
-    });
-  }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
+  // Reconciled instances (ECF and managed integrations). Session-storage
+  // instances carry duplicate-instance configs (multi-bucket /
+  // multi-log-group from Step 2) but can be stale: the step indicator lets
+  // users change the selection and jump here without clicking Next in
+  // Step 2. Reconcile against the current selection — dropping deselected
+  // instances and adding a base instance per newly selected service — using
+  // the same helper Service Settings uses (it also covers empty storage).
+  const reconciledInstances = useMemo(
+    () => reconcileInstances(selectedServiceIds, serviceSettings?.instances, awsServicesMap),
+    [serviceSettings?.instances, selectedServiceIds, awsServicesMap]
+  );
 
   // ── Managed Integrations ──────────────────────────────────────────────────────
   const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed } = useDeploy({

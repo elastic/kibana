@@ -440,6 +440,43 @@ describe('AuthenticateAndDeployStep', () => {
     });
   });
 
+  describe('instance reconciliation', () => {
+    it('drops stale stored instances and adds base instances for the current selection', () => {
+      // The step indicator lets users change the selection and jump here
+      // without revisiting Service Settings, so stored instances can name
+      // deselected services and miss newly selected ones.
+      mockUseSessionStorage.mockReturnValue([
+        {
+          globalRegion: 'us-east-1',
+          serviceVars: {},
+          instances: [
+            {
+              instanceId: 'vpcflow',
+              serviceId: 'vpcflow',
+              name: 'AWS VPC Flow Logs',
+              isDuplicate: false,
+            },
+          ],
+        },
+        jest.fn(),
+      ]);
+      renderStep();
+
+      const miProps =
+        MockManagedIntegrationsSection.mock.calls[
+          MockManagedIntegrationsSection.mock.calls.length - 1
+        ][0];
+      expect(miProps.instances).toEqual([
+        {
+          instanceId: 'guardduty',
+          serviceId: 'guardduty',
+          name: 'AWS GuardDuty',
+          isDuplicate: false,
+        },
+      ]);
+    });
+  });
+
   describe('Next calls onContinue', () => {
     it('invokes onContinue when Next clicked after successful deploy', () => {
       const onContinue = jest.fn();
