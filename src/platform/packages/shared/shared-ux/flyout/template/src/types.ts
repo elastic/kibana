@@ -189,9 +189,9 @@ interface DataAttributeProps {
 /**
  * Trigger button props the template sets itself, so a consumer value would be discarded.
  *
- * `isSelected` is excluded for a different reason: it applies `aria-pressed`, which
- * describes a toggle button. A popover trigger is described by `aria-expanded`, which
- * EUI already sets.
+ * `onClick` is always `togglePopover`; `isSelected` is excluded because it applies
+ * `aria-pressed`, which describes a toggle button — a popover trigger uses `aria-expanded`
+ * instead, which EUI sets automatically.
  */
 type MenuTriggerOwnedProps =
   | 'children'
@@ -199,6 +199,7 @@ type MenuTriggerOwnedProps =
   | 'iconType'
   | 'iconSide'
   | 'element'
+  | 'onClick'
   | 'isSelected';
 
 /**
