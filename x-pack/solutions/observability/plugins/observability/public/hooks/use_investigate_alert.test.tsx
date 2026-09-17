@@ -221,6 +221,12 @@ describe('useInvestigateAlert', () => {
     });
   });
 
+  it('does not fetch investigations or availability when enabled is false', async () => {
+    renderHook(() => useInvestigateAlert({ alertId: 'alert-1', enabled: false }), { wrapper });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('hides the action when the nightshift plugin is unavailable', async () => {
     setInvestigationsClient(undefined);
     const { result } = renderInvestigateAlert();

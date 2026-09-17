@@ -181,6 +181,7 @@ export function HeaderActions({
     viewInvestigationActionLabel,
   } = useInvestigateAlert({
     alertId,
+    enabled: isPopoverOpen,
     onInvestigate: () => setIsPopoverOpen(false),
   });
 

@@ -33,9 +33,11 @@ import { observabilityFeatureId } from '../..';
 
 function InvestigateAlertActionItem({
   alertId,
+  enabled,
   onActionExecuted,
 }: {
   alertId?: string;
+  enabled?: boolean;
   onActionExecuted: () => void;
 }) {
   const {
@@ -47,6 +49,7 @@ function InvestigateAlertActionItem({
     viewInvestigationActionLabel,
   } = useInvestigateAlert({
     alertId,
+    enabled,
     onInvestigate: onActionExecuted,
   });
 
@@ -166,6 +169,7 @@ export function AlertActions(
     <InvestigateAlertActionItem
       key="investigateAlert"
       alertId={observabilityAlert.fields[ALERT_UUID]}
+      enabled={isPopoverOpen}
       onActionExecuted={closeActionsPopover}
     />,
 

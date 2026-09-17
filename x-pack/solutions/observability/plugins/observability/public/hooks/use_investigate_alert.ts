@@ -27,16 +27,18 @@ const getStatusQuery = (alertId: string) => ({
 
 export const useInvestigateAlert = ({
   alertId,
+  enabled = true,
   onInvestigate,
 }: {
   alertId?: string;
+  enabled?: boolean;
   onInvestigate?: () => void;
 }) => {
   const { application, http, notifications } = useKibana().services;
   const investigationsClient = getInvestigationsClient();
   const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
   const queryClient = useQueryClient();
-  const canInvestigate = Boolean(alertId && investigationsClient);
+  const canInvestigate = Boolean(enabled && alertId && investigationsClient);
   const { data: availability } = useQuery({
     queryKey: ['investigationAvailability', http.basePath.get?.() ?? ''],
     queryFn: ({ signal }) =>
