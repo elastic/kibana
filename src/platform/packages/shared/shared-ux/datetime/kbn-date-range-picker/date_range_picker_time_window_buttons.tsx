@@ -262,10 +262,12 @@ function useTimeWindow(
     [apply]
   );
 
-  // Range bounds are inclusive, so the adjacent window starts one ms after
-  // the current end (and ends one ms before the current start). Otherwise the
-  // boundary ms would belong to both windows and a full day (00:00:00.000 to
-  // 23:59:59.999) would drift by one ms on every step.
+  // Shifts by the elapsed duration of the current window. Range bounds are
+  // inclusive, so the adjacent window starts one ms after the current end
+  // (and ends one ms before the current start); otherwise the boundary ms
+  // would belong to both windows. Since the shift is a fixed number of ms,
+  // a window spanning whole local days drifts by an hour when it crosses a
+  // DST transition.
   const stepForward = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
     const nextStart = moment(max).add(1, 'ms');
