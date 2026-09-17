@@ -12,7 +12,7 @@ import {
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
 import { EscalationsService } from './escalations_service';
-import { InvalidLinkedInvestigationError } from './errors';
+import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
 import {
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
@@ -284,7 +284,7 @@ describe('EscalationsService.create', () => {
 });
 
 describe('EscalationsService.update', () => {
-  it('throws InvalidLinkedInvestigationError when target is not an escalation', async () => {
+  it('throws NotAnEscalationError when target is not an escalation', async () => {
     const { service } = makeService({
       get: jest.fn().mockResolvedValue({
         ...MOCK_INVESTIGATION,
@@ -294,7 +294,7 @@ describe('EscalationsService.update', () => {
 
     await expect(
       service.update(request, 'not-an-escalation', { title: 'New title' })
-    ).rejects.toBeInstanceOf(InvalidLinkedInvestigationError);
+    ).rejects.toBeInstanceOf(NotAnEscalationError);
   });
 
   it('calls patchMetadata when linked_investigations are provided (appends, not replaces)', async () => {

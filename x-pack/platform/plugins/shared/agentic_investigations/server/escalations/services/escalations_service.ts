@@ -27,7 +27,7 @@ import {
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
 } from '../../../common/escalations/constants';
-import { InvalidLinkedInvestigationError } from './errors';
+import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
 // Scopes list results to escalations and hides closed ones. Uses `metadata.status` (the
@@ -122,7 +122,7 @@ export class EscalationsService {
 
     const current = await client.get(escalationId);
     if (current.template_id !== ESCALATION_TEMPLATE_ID) {
-      throw new InvalidLinkedInvestigationError(escalationId);
+      throw new NotAnEscalationError(escalationId);
     }
 
     let result: EscalationConversation = current;

@@ -29,8 +29,6 @@ import {
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
     id: AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-    // Named for proposals alone because action proposals move to their own
-    // plugin in a follow-up; until then this feature grants only proposals.
     name: i18n.translate('xpack.agenticInvestigations.featureName', {
       defaultMessage: 'Proposed Actions',
     }),

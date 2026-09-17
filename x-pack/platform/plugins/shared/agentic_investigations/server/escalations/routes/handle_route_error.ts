@@ -7,7 +7,7 @@
 
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
-import { InvalidLinkedInvestigationError } from '../services/errors';
+import { InvalidLinkedInvestigationError, NotAnEscalationError } from '../services/errors';
 
 /**
  * Maps service errors to HTTP responses for escalation routes.
@@ -33,6 +33,10 @@ export const handleEscalationRouteError = (
     return response.badRequest({ body: { message: error.message } });
   }
 
+  if (error instanceof NotAnEscalationError) {
+    return response.notFound({ body: { message: error.message } });
+  }
+
   if (isAgentBuilderError(error)) {
     const statusCode = error.meta?.statusCode;
     if (typeof statusCode === 'number' && statusCode >= 400 && statusCode < 500) {
@@ -42,5 +46,5 @@ export const handleEscalationRouteError = (
 
   const message = error instanceof Error ? error.message : String(error);
   logger.error(`Escalation route failed: ${message}`);
-  return response.customError({ statusCode: 500, body: { message } });
+  return response.customError({ statusCode: 500, body: { message: 'Internal server error' } });
 };

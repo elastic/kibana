@@ -14,7 +14,7 @@ import {
 import { ESCALATIONS_INTERNAL_URL, ESCALATION_BY_ID_URL } from '../../../common/escalations/constants';
 import { ESCALATIONS_API_PRIVILEGE_MANAGE, ESCALATIONS_API_PRIVILEGE_READ } from '../constants';
 import type { EscalationsService } from '../services/escalations_service';
-import { InvalidLinkedInvestigationError } from '../services/errors';
+import { InvalidLinkedInvestigationError, NotAnEscalationError } from '../services/errors';
 import type { EscalationRouteDependencies } from '../types';
 import { registerEscalationRoutes } from './register_routes';
 
@@ -268,6 +268,27 @@ describe('escalation routes', () => {
         expect.objectContaining({ title: 'New title' })
       );
       expect(response.ok).toHaveBeenCalledWith({ body: MOCK_ESCALATION });
+    });
+
+    it('maps NotAnEscalationError to 404', async () => {
+      const update = jest
+        .fn()
+        .mockRejectedValue(new NotAnEscalationError('conv-1'));
+      const { byPath, patches } = registerAndCollect({ update });
+      const response = httpServerMock.createResponseFactory();
+
+      await byPath(patches, ESCALATION_BY_ID_URL).handler(
+        {},
+        httpServerMock.createKibanaRequest({
+          params: { id: 'conv-1' },
+          body: { title: 'New title' },
+        }),
+        response
+      );
+
+      expect(response.notFound).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.objectContaining({ message: expect.any(String) }) })
+      );
     });
 
     it('maps a conversationWriteConflict to 409', async () => {
