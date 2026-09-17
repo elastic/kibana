@@ -28,6 +28,7 @@ import type {
   LensByRefSerializedState,
   LensByValueSerializedState,
   LensDatasourceId,
+  DatasourceStates,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -66,6 +67,11 @@ function LoadingSpinnerWithOverlay() {
   );
 }
 
+const getDatasourceStateValues = (datasourceStates: DatasourceStates) =>
+  Object.fromEntries(
+    Object.entries(datasourceStates).map(([datasourceId, { state }]) => [datasourceId, state])
+  );
+
 // exported for testing
 export const updatingMiddleware =
   (updater: LensPanelStateUpdater) =>
@@ -83,12 +89,8 @@ export const updatingMiddleware =
     // example, an ES|QL chart keeps static reference-line values in formBased state while
     // textBased remains active. Compare every datasource state so those edits update the panel,
     // but ignore loading metadata because it does not affect the rendered visualization.
-    const previousDatasourceStateValues = Object.fromEntries(
-      Object.entries(prevDatasourceStates).map(([datasourceId, { state }]) => [datasourceId, state])
-    );
-    const datasourceStateValues = Object.fromEntries(
-      Object.entries(datasourceStates).map(([datasourceId, { state }]) => [datasourceId, state])
-    );
+    const previousDatasourceStateValues = getDatasourceStateValues(prevDatasourceStates);
+    const datasourceStateValues = getDatasourceStateValues(datasourceStates);
     if (
       prevActiveDatasourceId !== activeDatasourceId ||
       !isEqual(previousDatasourceStateValues, datasourceStateValues) ||
