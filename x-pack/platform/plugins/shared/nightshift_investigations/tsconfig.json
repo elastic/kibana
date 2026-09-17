@@ -38,6 +38,7 @@
     "@kbn/context-engine-plugin",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/es-errors"
   ]
 }
