@@ -12,12 +12,14 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './proposals/services/proposals_service';
 
 export interface AgenticInvestigationsSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {

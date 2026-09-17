@@ -32,6 +32,7 @@ interface EpisodesKpisServices {
   spaces: SpacesPluginStart;
   userProfile: CoreStart['userProfile'];
   http: HttpStart;
+  notifications?: CoreStart['notifications'];
 }
 
 export interface EpisodesKpisProps {

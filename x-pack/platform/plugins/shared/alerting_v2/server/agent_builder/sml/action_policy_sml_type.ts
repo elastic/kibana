@@ -76,14 +76,11 @@ export const createActionPolicySmlType = ({
       const attrs = so.attributes;
       const name = attrs?.name ?? originId;
       const description = attrs?.description ?? '';
-      const tags = attrs?.tags?.join(', ') ?? '';
       const matcher = PolicyMatcher.of(attrs?.matcher).toKql() ?? '';
       const groupingMode = attrs?.groupingMode ?? '';
       const destinations = attrs?.destinations?.map((d) => `${d.type}:${d.id}`).join(', ') ?? '';
 
-      const contentParts = [name, description, matcher, groupingMode, destinations, tags].filter(
-        Boolean
-      );
+      const contentParts = [name, description, matcher, groupingMode, destinations].filter(Boolean);
 
       return {
         type: ACTION_POLICY_KI_TYPE,
