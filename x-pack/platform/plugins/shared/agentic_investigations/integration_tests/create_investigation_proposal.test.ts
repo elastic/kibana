@@ -248,6 +248,47 @@ describe('create-investigation-proposal workflow execution', () => {
     });
   });
 
+  describe('a gate nobody answers', () => {
+    it('should settle as expired once the gate times out', async () => {
+      await fixture.start();
+      await fixture.timeOutGate();
+
+      const proposal = fixture.onlyProposal();
+      expect(proposal.status).toBe('expired');
+      // Nobody answered, so there is no decision to record — `expired` is the
+      // only terminal status an undecided proposal has.
+      expect(proposal.decision).toBeUndefined();
+      expect(proposal.decidedBy).toBeUndefined();
+    });
+
+    it('should complete rather than fail, since a timeout is an expected end', async () => {
+      await fixture.start();
+      await fixture.timeOutGate();
+
+      // The step-level handler on the gate is what makes this `completed`:
+      // without it the workflow-level handler settles the record but ends the
+      // run as `failed` and skips the output step.
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('should not read a timed-out gate as a dismissal', async () => {
+      await fixture.start();
+      await fixture.timeOutGate();
+
+      // A timed-out gate answers blank, which the dismissal branch would
+      // otherwise record as a decision nobody made.
+      expect(fixture.onlyProposal().dismissReason).toBeUndefined();
+      expect(fixture.stepExecutions('record_dismissal')).toHaveLength(0);
+    });
+
+    it('should carry the timeout onto the record, so the queue can say why', async () => {
+      await fixture.start();
+      await fixture.timeOutGate();
+
+      expect(fixture.onlyProposal().executionError).toContain('timeout');
+    });
+  });
+
   describe('autonomy', () => {
     it('should skip the gate for an action the caller already authorised', async () => {
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });

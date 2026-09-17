@@ -83,7 +83,7 @@ describe('investigation proposals routes', () => {
     }
   });
 
-  it('should not register an update route', () => {
+  it('should write over HTTP only through the two decision routes', () => {
     const router = httpServiceMock.createRouter();
     (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
     (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
@@ -98,6 +98,13 @@ describe('investigation proposals routes', () => {
 
     expect(router.versioned.put).not.toHaveBeenCalled();
     expect(router.versioned.patch).not.toHaveBeenCalled();
+    // And no create route: a decision is written behind the proposal's gate,
+    // so one created without a gate execution could never be decided. The
+    // `proposals.createProposal` step is the only caller that knows the
+    // execution id to stamp.
+    expect((router.versioned.post as jest.Mock).mock.calls.map(([{ path }]) => path)).not.toContain(
+      PROPOSALS_INTERNAL_URL
+    );
   });
 
   it('should release the gate with the submitted action input and the rationale', async () => {

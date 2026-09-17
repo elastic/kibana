@@ -26,15 +26,19 @@ consts:
   max_attempts: 20
 
 settings:
-  # Every timeout in this workflow is deliberately the same literal until a
-  # templated HITL timeout lands (elastic/kibana#290258), at which point the
-  # gate's `timeout` becomes `{{ variables.remaining_seconds }}s` and this
-  # ceiling can be sized independently. Until then the ceiling is reached
-  # before the gate's own deadline, and a ceiling timeout runs no handler:
+  # A backstop, never the mechanism. A ceiling timeout runs no handler at all —
   # `EnterWorkflowTimeoutZoneNodeImpl.monitor()` marks the execution TIMED_OUT
-  # and `catchError` returns early, so an unanswered proposal is left awaiting.
-  # Known and accepted for now; see the plugin README's limitations.
-  timeout: '72h'
+  # and `catchError` returns early — so anything it catches strands as
+  # `pending`. The gate's own timeout is what settles an unanswered proposal,
+  # and it can only do that if it fires first.
+  #
+  # Hence the size. Each park waits a fixed 72h rather than the time left on
+  # the deadline (elastic/kibana#290258), so a proposal re-parked just before
+  # its deadline waits out a second full 72h: ~144h in the worst case before
+  # the gate times out and the loop settles it. A re-park cannot extend that
+  # further, because every iteration settles on the deadline before parking
+  # again.
+  timeout: '168h'
   on-failure:
     # Attached per step, not once for the whole workflow: the engine wraps each
     # non-flow-control step in its own try/fallback pair. The fallback runs and
@@ -258,17 +262,51 @@ steps:
             # step's `timeout`. Today it hands the raw string to the duration
             # parser, so a template here fails at execution time.
             timeout: '72h'
-            # No step-level `on-failure` here, and not for want of trying: the
-            # HITL schemas are the only ones that do not merge
-            # `StepWithOnFailureSchema`, so zod silently strips it and the
-            # engine never sees it (elastic/security-team#19315). A gate
-            # failure therefore lands on the workflow-level handler, which
-            # settles the record — the right outcome for a timeout, just not a
-            # re-park. Revisit once #19315 lands.
+            on-failure:
+              # A timeout is the expected end of an unanswered proposal, not a
+              # malfunction, so it is settled here rather than left to the
+              # workflow-level handler — which would settle the record too, but
+              # end the run as `failed` and skip the output step.
+              #
+              # `WaitForApprovalStepSchema` does not model this key, so it
+              # reaches the engine only because managed workflows install under
+              # lightweight validation. The engine honours it: the wait fails
+              # with a `TimeoutError` through the ordinary `failStep` path, and
+              # `handleStepLevelOnFailure` wraps any step that declares the key
+              # with no exclusion for HITL types. Pinned by the schema-parity
+              # test beside this file; the schema gap is
+              # elastic/security-team#19315.
+              continue: true
             with:
               message: "{{ inputs.comment | default: 'A proposal is awaiting your decision.' }}"
               approveLabel: Approve
               rejectLabel: Dismiss
+
+          # Before anything reads the gate's answer, because a timed-out gate
+          # has no answer to read: `response.approved` comes back blank, which
+          # `resolve_gate` below would record as a dismissal — a decision
+          # nobody made, attributed to nobody.
+          - name: handle_gate_timeout
+            type: if
+            condition: '${{ steps.await_decision.error != blank }}'
+            steps:
+              # `expired` rather than `failed`: the gate's timeout and the
+              # deadline on the record are the same literal, and the gate
+              # starts marginally after the proposal is created, so a gate that
+              # times out is always past the deadline. No decision was reached.
+              - name: record_gate_expiry
+                type: proposals.updateProposal
+                with:
+                  proposalId: '{{ variables.current_proposal_id }}'
+                  status: expired
+                  executionError: '{{ steps.await_decision.error.message }}'
+              - name: complete_gate_expiry
+                type: data.set
+                with:
+                  completed: true
+                  final_status: expired
+              - name: break_gate_expiry
+                type: loop.break
 
           # Copied into variables immediately. `waitForApproval` is not exempt
           # from output eviction, and a step output resolves to its latest
@@ -437,6 +475,13 @@ steps:
               # Without this the workflow-level handler would settle the
               # proposal and stop, and the clone branch below would be
               # unreachable.
+              #
+              # The engine honours this, but `WorkflowExecuteStepSchema` does
+              # not model the key — it reaches the engine only because managed
+              # workflows install under lightweight validation, which does not
+              # validate steps. Pinned by the schema-parity test next to this
+              # file so it cannot start being stripped unnoticed; the schema
+              # gap belongs with elastic/security-team#19315.
               continue: true
             with:
               workflow-id: '{{ variables.action_workflow_id }}'

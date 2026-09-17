@@ -564,6 +564,24 @@ describe('ProposalsService', () => {
       expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalled();
     });
 
+    it('should reject a proposal the workflow already settled without a decision', async () => {
+      // Attempt exhaustion and a failure before anyone decided both settle the
+      // record as `expired` with no decision on it, and can do so long before
+      // the deadline — so the date check alone would still read it as live.
+      const storage = createStorage(
+        baseDocument({
+          status: 'expired',
+          decision: undefined,
+          expiresAt: '2099-01-01T00:00:00.000Z',
+        })
+      );
+      const { service } = createService(storage);
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+    });
+
     it('should reject a proposal past its decision deadline', async () => {
       const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
       const { service } = createService(storage);
@@ -587,12 +605,17 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('should skip the resume for a proposal with no waiting execution', async () => {
+    it('should refuse a proposal with no gate execution rather than report success', async () => {
+      // Only the gate workflow's create step makes a proposal, and it stamps
+      // its own execution id — but a record without one could never be
+      // decided, since the decision is written behind the gate. Answering the
+      // caller with a 200 would be the worst of the options.
       const storage = createStorage(baseDocument({ workflowExecutionId: undefined }));
       const { service, workflowsApi } = createService(storage);
 
-      await service.releaseGate('proposal-1', releaseParams());
-
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
       expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
@@ -1068,6 +1091,28 @@ describe('ProposalsService', () => {
       await expect(service.clone({ id: 'missing' }, SPACE_ID)).rejects.toBeInstanceOf(
         ProposalNotFoundError
       );
+    });
+
+    // Reachable as a registered step, so any workflow could otherwise re-open
+    // a settled proposal as `pending` and hide the real one behind
+    // `supersededBy`. A failed action is the only thing there is to re-offer.
+    it.each([
+      ['a proposal nobody has decided', { decision: undefined, status: 'pending' as const }],
+      [
+        'an approval that has not run yet',
+        { decision: 'approved' as const, status: 'executing' as const },
+      ],
+      ['an action that succeeded', { decision: 'approved' as const, status: 'succeeded' as const }],
+      ['a dismissal', { decision: 'dismissed' as const, status: 'no_action' as const }],
+      ['an expired proposal', { decision: undefined, status: 'expired' as const }],
+    ])('should refuse to clone %s', async (_label, overrides) => {
+      const storage = createStorage(baseDocument(overrides));
+      const { service } = createService(storage);
+
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
     });
   });
 

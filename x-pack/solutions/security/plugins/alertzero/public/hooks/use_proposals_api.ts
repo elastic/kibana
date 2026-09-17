@@ -99,27 +99,22 @@ export const useProposal = (id: string | undefined) => {
 };
 
 /**
- * Both decision mutations refetch rather than reading the response body.
+ * Both decision mutations refetch rather than reading the response body: the
+ * route only releases the gating workflow, and the decision is written by that
+ * workflow's post-gate steps, which run after the resume call has returned.
  *
- * The route only releases the gating workflow; the decision itself is written
- * by that workflow's post-gate steps, which run after the resume call has
- * already returned. The response therefore still describes an undecided
- * proposal, and using it would show the analyst the state they just changed.
- * `invalidateQueries` is awaited via `refetchType: 'all'` so the queue reflects
- * the write once it lands rather than on the next mount.
+ * The id therefore comes from the mutation's variables, not from a response
+ * body that still describes an undecided proposal. A refetch that beats the
+ * post-gate write reads `pending` once more, which is what the `executing`
+ * state being added separately is for — nothing here can wait for a write that
+ * lands out of band.
  */
 const invalidateProposal = (
   queryClient: ReturnType<typeof useQueryClient>,
   { id }: { id: string }
 ) => {
-  void queryClient.invalidateQueries({
-    queryKey: queryKeys.proposals.all,
-    refetchType: 'all',
-  });
-  void queryClient.invalidateQueries({
-    queryKey: queryKeys.proposals.detail(id),
-    refetchType: 'all',
-  });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.detail(id) });
 };
 
 /**

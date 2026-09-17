@@ -24,6 +24,13 @@ import { registerStepDefinitionsForTest } from './register_step_definitions_for_
 /**
  * The real definition as shipped, so the test cannot drift from the YAML that
  * actually installs.
+ *
+ * Handed to the engine as-is, which matches how managed workflows install:
+ * `lightweightValidation` does not validate steps, so the stored definition
+ * keeps every key the YAML declares. What that does *not* catch is a key no
+ * schema models — the engine may quietly ignore it while this fixture, and
+ * every assertion over the raw YAML, still shows it present. The schema-parity
+ * test next to the definition in `@kbn/workflows` is what closes that gap.
  */
 export const gateWorkflowYaml = (): string => {
   const definition = getManagedWorkflowDefinition(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID);
@@ -75,6 +82,9 @@ const createInMemoryStorage = () => {
   };
 };
 
+/** The gate's literal `timeout`, which is also the deadline on the record. */
+const GATE_TIMEOUT_MS = 72 * 60 * 60 * 1000;
+
 export interface ProposalGateFixture {
   engine: WorkflowRunFixture;
   /** Every proposal written so far, in insertion order. */
@@ -96,6 +106,13 @@ export interface ProposalGateFixture {
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
   resume: (approved: boolean, respondedBy?: string) => Promise<void>;
+  /**
+   * Wakes the parked gate past its deadline with no answer, which is what the
+   * scheduled wake task does in production. The fixture's task manager mock has
+   * no `ensureScheduled`, so the task is never really scheduled here and the
+   * wake has to be driven by hand.
+   */
+  timeOutGate: () => Promise<void>;
   /** Flips what `proposals.checkDecidePrivileges` reports. */
   setCanDecide: (canDecide: boolean) => void;
 }
@@ -176,6 +193,16 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       };
       engine.workflowExecutionRepositoryMock.workflowExecutions.set(execution.id, execution);
       await engine.resumeWorkflow();
+    },
+    timeOutGate: async () => {
+      // No `resumeInput`, which is the whole signal: the step reads the wait as
+      // expired and fails itself with a `TimeoutError`.
+      jest.useFakeTimers({ now: new Date(Date.now() + GATE_TIMEOUT_MS + 60_000) });
+      try {
+        await engine.resumeWorkflow();
+      } finally {
+        jest.useRealTimers();
+      }
     },
     setCanDecide: (value) => {
       canDecide = value;

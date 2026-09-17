@@ -8,7 +8,18 @@
  */
 
 import { parse } from 'yaml';
+import type { z } from '@kbn/zod/v4';
 import CREATE_INVESTIGATION_PROPOSAL_YAML from './create_investigation_proposal.yaml';
+import {
+  DataSetStepSchema,
+  IfStepSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
+  WaitForApprovalStepSchema,
+  WhileStepSchema,
+  WorkflowExecuteStepSchema,
+  WorkflowOutputStepSchema,
+} from '../../../../spec/schema';
 
 /** Local shape: the parsed YAML is untyped, and only these fields are asserted on. */
 interface WorkflowStep {
@@ -87,6 +98,33 @@ const VALID_STATUSES: Record<string, readonly string[]> = {
   approved: ['no_action', 'executing', 'succeeded', 'failed'],
 };
 
+/**
+ * The schemas the engine models built-in steps with. The custom `proposals.*`
+ * steps are absent on purpose: this repo owns their schemas, so a key written
+ * here is a key it declared.
+ */
+const BUILT_IN_STEP_SCHEMAS: Record<string, z.ZodType> = {
+  'data.set': DataSetStepSchema,
+  if: IfStepSchema,
+  'loop.break': LoopBreakStepSchema,
+  'loop.continue': LoopContinueStepSchema,
+  waitForApproval: WaitForApprovalStepSchema,
+  while: WhileStepSchema,
+  'workflow.execute': WorkflowExecuteStepSchema,
+  'workflow.output': WorkflowOutputStepSchema,
+};
+
+/** Every step in the definition, including the failure handler's fallback. */
+const allSteps = (): WorkflowStep[] => {
+  const flatten = (steps: WorkflowStep[]): WorkflowStep[] =>
+    steps.flatMap((step) => [step, ...flatten(step.steps ?? [])]);
+
+  return [
+    ...flatten(workflow.steps),
+    ...flatten(workflow.settings?.['on-failure']?.fallback ?? []),
+  ];
+};
+
 /** Every `proposals.updateProposal` step anywhere in the definition. */
 const updateProposalSteps = (): WorkflowStep[] => {
   const collect = (steps: WorkflowStep[]): WorkflowStep[] =>
@@ -162,18 +200,71 @@ describe('create-investigation-proposal workflow', () => {
       expect(() => durationToMs(gate().timeout ?? '')).not.toThrow();
     });
 
-    it('uses one literal for the gate, the workflow ceiling and the recorded deadline', () => {
-      // Deliberately equal until the templated HITL timeout lands: three
-      // different numbers would each need their own justification, and the
-      // relationship between them is what #290258 changes.
+    it('records the same deadline it applies to the gate', () => {
       const create = findStep(workflow.steps, 'create_proposal');
 
-      expect(gate().timeout).toBe(workflow.settings?.timeout);
       expect(create?.with?.expiresIn).toBe(gate().timeout);
+    });
+
+    it('keeps the workflow ceiling above the gate, so the gate times out first', () => {
+      // The ceiling must never fire first. Its timeout runs no handler at all
+      // — `EnterWorkflowTimeoutZoneNodeImpl.monitor()` marks the execution
+      // TIMED_OUT and `catchError` returns early — whereas the gate's timeout
+      // reaches the workflow-level handler, which settles the record as
+      // `expired`. The workflow clock also starts before the gate is entered,
+      // so equal values put the ceiling first and no proposal would ever
+      // settle.
+      const ceiling = durationToMs(workflow.settings?.timeout ?? '');
+
+      expect(ceiling).toBeGreaterThan(durationToMs(gate().timeout ?? ''));
     });
 
     it('does not set iteration-timeout, which would truncate the parked gate', () => {
       expect(loop()['iteration-timeout']).toBeUndefined();
+    });
+  });
+
+  describe('schema parity', () => {
+    /**
+     * A zod object drops a key it does not model rather than complaining, and
+     * every other assertion in this file reads the raw YAML — so a step can
+     * declare something no schema has heard of and still look wired.
+     *
+     * Managed workflows install under `lightweightValidation`, which does not
+     * validate steps at all, so production neither rejects nor strips such a
+     * key: whether it does anything is entirely up to the engine. Both keys
+     * below are honoured by it — `handleStepLevelOnFailure` wraps any step
+     * that declares `on-failure`, with no exclusion by type — but neither
+     * `WaitForApprovalStepSchema` nor `WorkflowExecuteStepSchema` merges
+     * `StepWithOnFailureSchema`, unlike the connector-derived schema every
+     * custom step gets. This is the only place that names what is load-bearing
+     * by accident, so the list shrinks when
+     * elastic/security-team#19315 lands rather than silently staying stale.
+     */
+    it('declares no unmodelled key beyond the two the platform still owes us', () => {
+      const unmodelled = allSteps().flatMap((step) => {
+        const schema = step.type ? BUILT_IN_STEP_SCHEMAS[step.type] : undefined;
+        if (!schema) {
+          return [];
+        }
+        const parsed = schema.safeParse(step);
+        if (!parsed.success) {
+          return [`${step.name} (${step.type}): does not satisfy its own schema`];
+        }
+        const modelled = new Set(Object.keys(parsed.data as object));
+        return Object.keys(step)
+          .filter((key) => !modelled.has(key))
+          .map((key) => `${step.name} (${step.type}): ${key}`);
+      });
+
+      // Both are load-bearing and both are covered end to end by the plugin's
+      // integration tests: the gate's handler settles an unanswered proposal
+      // as `expired`, and the action's keeps a failed action inside the loop
+      // so it can be cloned and re-offered. Pinned, not removed.
+      expect(unmodelled.sort()).toEqual([
+        'await_decision (waitForApproval): on-failure',
+        'execute_action (workflow.execute): on-failure',
+      ]);
     });
   });
 
@@ -359,13 +450,27 @@ describe('create-investigation-proposal workflow', () => {
   });
 
   describe('gate failures', () => {
-    it('declares no step-level on-failure, which the schema would silently strip', () => {
-      // HITL steps are the only ones whose schema does not merge
-      // `StepWithOnFailureSchema`, so zod drops the key and the engine never
-      // sees it (elastic/security-team#19315). Declaring one here would read as
-      // a re-park that does not happen; the workflow-level handler settles a
-      // gate timeout instead. Revisit when #19315 lands.
-      expect(gate()['on-failure']).toBeUndefined();
+    it('keeps a gate failure inside the loop, so the loop settles it', () => {
+      // Without this the workflow-level handler settles the record too, but
+      // ends the run as `failed` and skips the output step — and a timeout is
+      // the expected end of an unanswered proposal, not a malfunction.
+      expect(gate()['on-failure']?.continue).toBe(true);
+    });
+
+    it('settles a timed-out gate as expired before reading its answer', () => {
+      const handle = findStep(workflow.steps, 'handle_gate_timeout');
+      const record = findStep(workflow.steps, 'record_gate_expiry');
+
+      // A timed-out gate answers blank, which `resolve_gate` would record as a
+      // dismissal, so the branch has to come first.
+      const gateBranchOrder = (findStep(workflow.steps, 'gate_branch')?.steps ?? []).map(
+        ({ name }) => name
+      );
+      expect(gateBranchOrder).toEqual(['await_decision', 'handle_gate_timeout', 'resolve_gate']);
+
+      expect(handle?.condition).toContain('steps.await_decision.error != blank');
+      expect(record?.with?.status).toBe('expired');
+      expect(findStep(workflow.steps, 'break_gate_expiry')?.type).toBe('loop.break');
     });
   });
 

@@ -594,6 +594,17 @@ export class ProposalsService {
   async clone({ id, executionError }: CloneProposalParams, spaceId: string): Promise<string> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
+    // Asserted here rather than left to the caller, because this is reachable
+    // as a registered step: any workflow could otherwise re-open a succeeded
+    // or dismissed proposal as `pending` and hide the real one behind
+    // `supersededBy`. A failed action is the only thing there is to re-offer.
+    if (proposal.decision !== 'approved' || proposal.status !== 'failed') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] cannot be cloned: only an approved proposal whose action failed can be ` +
+          `re-offered, and this one is ${proposal.decision ?? 'undecided'}/${proposal.status}`
+      );
+    }
+
     if (proposal.supersededBy !== undefined) {
       // Overwriting the pointer would orphan the first clone: it would stay
       // live and undecided with nothing referring to it.
@@ -764,10 +775,20 @@ export class ProposalsService {
   }
 
   /**
-   * Whether a decision can still be made. Reads the decision rather than the
-   * status: an approved proposal stays at `pending` for as long as it takes the
-   * gate workflow's post-gate steps to run, so `status` would let a second
-   * approver through that window.
+   * Whether a decision can still be made. Both axes have to be checked, for
+   * different reasons.
+   *
+   * The decision catches the window the status cannot: an approved proposal
+   * stays at `pending` for as long as the gate workflow's post-gate steps take
+   * to run, so a status check alone would let a second approver through.
+   *
+   * The status catches what the decision cannot: the workflow settles an
+   * unanswered proposal as `expired` on attempt exhaustion or a failure before
+   * anyone decided, which leaves no decision behind and can happen well before
+   * the wall-clock deadline. The date check below would still read it as live.
+   *
+   * `pending` is the only status that is valid while undecided, so anything
+   * else is already settled.
    */
   private assertDecidable(proposal: StoredProposalRecord): void {
     if (proposal.decision !== undefined) {
@@ -775,6 +796,14 @@ export class ProposalsService {
         `Proposal [${proposal.id}] was already decided as ${proposal.decision}`
       );
     }
+    if (proposal.status !== 'pending') {
+      throw new ProposalConflictError(
+        `Proposal [${proposal.id}] has settled as ${proposal.status}`
+      );
+    }
+    // Kept alongside the status check for the lag between a deadline passing
+    // and the workflow settling the record, during which it still reads
+    // `pending`.
     if (isExpired(proposal)) {
       throw new ProposalExpiredError(proposal.id);
     }
@@ -813,8 +842,14 @@ export class ProposalsService {
     { spaceId, request, approved }: { spaceId: string; request: KibanaRequest; approved: boolean }
   ): Promise<void> {
     if (!proposal.workflowExecutionId) {
-      // Standalone proposal: nothing is waiting on the decision.
-      return;
+      // Unreachable by construction — the gate workflow's create step is the
+      // only way to make a proposal, and it stamps its own execution id. Kept
+      // as a refusal rather than an early return because the decision is
+      // written behind the gate: returning would answer the caller with a 200
+      // for a record that nothing will ever decide.
+      throw new ProposalConflictError(
+        `Proposal [${proposal.id}] has no gate execution, so its decision cannot be recorded`
+      );
     }
 
     const api = this.deps.getWorkflowsApi();
