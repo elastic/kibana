@@ -17,6 +17,7 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../types';
 
 import { StepDefinePackagePolicy } from './step_define_package_policy';
+import { useOutputs } from './components/hooks';
 
 jest.mock('./components/hooks', () => ({
   ...jest.requireActual('./components/hooks'),
