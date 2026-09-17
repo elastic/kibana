@@ -42,7 +42,7 @@ Kibana-native scenario definitions for multi-stage attack chains. All seeding is
 
 ### FP/TP twin pair (`src/fp_tp_twins/`)
 
-One authored Attack Discovery plus the `encoded-powershell` alerts, cloned into a true-positive world and a false-positive world. The alerts and discovery are identical; entity store documents and raw-event overlays differ. This is a fixture for a future FP/TP *analyzer* eval, not a generation eval. See `src/fp_tp_twins/README.md`.
+One authored Attack Discovery plus the `encoded-powershell` alerts, cloned into a true-positive world and a false-positive world. The alerts and discovery are identical; entity store documents and raw-event overlays differ. This is a fixture for a future FP/TP *analyzer* eval, not a generation eval. See `src/fp_tp_twins/README.md` for the twin layout, the local seed CLI, and the importable Workflows UI YAML.
 
 ### Full profile (out of scope for this package)
 

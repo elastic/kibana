@@ -14,6 +14,8 @@ export const FP_TP_TWIN_SEED_LABEL = 'ad-fp-tp-twins-2026-09';
 
 export const FP_TP_ENTITY_INDEX = '.entities.v2.latest.default';
 
+export const FP_TP_ATTACK_ADHOC_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
+
 export const ENCODED_POWERSHELL_SCENARIO_KEY = 'encoded-powershell';
 
 export const ENCODED_POWERSHELL_HOST = 'wks-alice-01';
