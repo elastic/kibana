@@ -30,7 +30,12 @@ const createMocks = () => {
     delete: jest.fn((_, handler) => handlers.delete.mockImplementation(handler)),
     post: jest.fn((_, handler) => handlers.post.mockImplementation(handler)),
   };
-  const asCurrentUser = {};
+  const esql = {
+    getView: jest.fn(),
+    putView: jest.fn(),
+    deleteView: jest.fn(),
+  };
+  const asCurrentUser = { esql };
   const requestHandlerContext = {
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser } },
@@ -57,15 +62,13 @@ const createMocks = () => {
     logger,
     initializerContext,
     asCurrentUser,
+    esql,
   };
 };
 
 describe('ES|QL views routes', () => {
   const service = {
     getViews: jest.fn(),
-    getView: jest.fn(),
-    upsertView: jest.fn(),
-    deleteViews: jest.fn(),
   };
 
   beforeEach(() => {
@@ -113,10 +116,10 @@ describe('ES|QL views routes', () => {
       );
     });
 
-    it('gets one view through the shared service', async () => {
+    it('gets one view through the scoped Elasticsearch client', async () => {
       const mocks = createMocks();
       const view = { name: 'my-view', query: 'FROM logs-*' };
-      service.getView.mockResolvedValue(view);
+      mocks.esql.getView.mockResolvedValue({ views: [view] });
       registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await expect(
@@ -126,15 +129,12 @@ describe('ES|QL views routes', () => {
           mocks.response
         )
       ).resolves.toEqual({ status: 200, body: view });
-      expect(service.getView).toHaveBeenCalledWith('my-view');
-      expect(MockedEsqlService).toHaveBeenCalledWith({
-        client: mocks.asCurrentUser,
-      });
+      expect(mocks.esql.getView).toHaveBeenCalledWith({ name: 'my-view' });
     });
 
     it('returns not found when an exact-name response is empty', async () => {
       const mocks = createMocks();
-      service.getView.mockResolvedValue(undefined);
+      mocks.esql.getView.mockResolvedValue({ views: [] });
       registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await expect(
@@ -148,7 +148,7 @@ describe('ES|QL views routes', () => {
 
     it('upserts name, query, and description', async () => {
       const mocks = createMocks();
-      service.upsertView.mockResolvedValue({ acknowledged: true });
+      mocks.esql.putView.mockResolvedValue({ acknowledged: true });
       registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await expect(
@@ -161,16 +161,16 @@ describe('ES|QL views routes', () => {
           mocks.response
         )
       ).resolves.toEqual({ status: 200, body: { acknowledged: true } });
-      expect(service.upsertView).toHaveBeenCalledWith({
+      expect(mocks.esql.putView).toHaveBeenCalledWith({
         name: 'my-view',
         query: 'FROM logs-*',
-        description: 'Logs',
+        body: { description: 'Logs' },
       });
     });
 
     it('deletes one view', async () => {
       const mocks = createMocks();
-      service.deleteViews.mockResolvedValue({ acknowledged: true });
+      mocks.esql.deleteView.mockResolvedValue({ acknowledged: true });
       registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await mocks.handlers.delete(
@@ -179,12 +179,12 @@ describe('ES|QL views routes', () => {
         mocks.response
       );
 
-      expect(service.deleteViews).toHaveBeenCalledWith(['my-view']);
+      expect(mocks.esql.deleteView).toHaveBeenCalledWith({ name: 'my-view' });
     });
 
     it('bulk deletes views', async () => {
       const mocks = createMocks();
-      service.deleteViews.mockResolvedValue({ acknowledged: true });
+      mocks.esql.deleteView.mockResolvedValue({ acknowledged: true });
       registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await mocks.handlers.post(
@@ -193,13 +193,15 @@ describe('ES|QL views routes', () => {
         mocks.response
       );
 
-      expect(service.deleteViews).toHaveBeenCalledWith(['first-view', 'second-view']);
+      expect(mocks.esql.deleteView).toHaveBeenCalledWith({
+        name: ['first-view', 'second-view'],
+      });
     });
 
-    it('preserves service errors with their status', async () => {
+    it('preserves Elasticsearch errors with their status', async () => {
       const mocks = createMocks();
       const error = Object.assign(new Error('Conflict'), { statusCode: 409 });
-      service.upsertView.mockRejectedValue(error);
+      mocks.esql.putView.mockRejectedValue(error);
       registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
       await expect(

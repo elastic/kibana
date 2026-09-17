@@ -9,7 +9,6 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, PluginInitializerContext } from '@kbn/core/server';
-import { EsqlService } from '@kbn/esql-server-utils';
 import { VIEWS_BULK_DELETE_ROUTE, VIEWS_ROUTE } from '@kbn/esql-types';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
@@ -74,10 +73,8 @@ export const registerViewsManagementRoutes = (
       const { name } = request.params;
       try {
         const core = await requestHandlerContext.core;
-        const service = new EsqlService({
-          client: core.elasticsearch.client.asCurrentUser,
-        });
-        const view = await service.getView(name);
+        const { views } = await core.elasticsearch.client.asCurrentUser.esql.getView({ name });
+        const view = views[0];
 
         if (!view) {
           return response.notFound({
@@ -113,10 +110,11 @@ export const registerViewsManagementRoutes = (
       const { query, description } = request.body;
       try {
         const core = await requestHandlerContext.core;
-        const service = new EsqlService({
-          client: core.elasticsearch.client.asCurrentUser,
+        const result = await core.elasticsearch.client.asCurrentUser.esql.putView({
+          name,
+          query,
+          ...(description === undefined ? {} : { body: { description } }),
         });
-        const result = await service.upsertView({ name, query, description });
 
         reportRouteSuccess('views.upsert');
         return response.ok({ body: result });
@@ -143,10 +141,7 @@ export const registerViewsManagementRoutes = (
       const { name } = request.params;
       try {
         const core = await requestHandlerContext.core;
-        const service = new EsqlService({
-          client: core.elasticsearch.client.asCurrentUser,
-        });
-        const result = await service.deleteViews([name]);
+        const result = await core.elasticsearch.client.asCurrentUser.esql.deleteView({ name });
 
         reportRouteSuccess('views.delete');
         return response.ok({ body: result });
@@ -178,10 +173,9 @@ export const registerViewsManagementRoutes = (
       const { names } = request.body;
       try {
         const core = await requestHandlerContext.core;
-        const service = new EsqlService({
-          client: core.elasticsearch.client.asCurrentUser,
+        const result = await core.elasticsearch.client.asCurrentUser.esql.deleteView({
+          name: names,
         });
-        const result = await service.deleteViews(names);
 
         reportRouteSuccess('views.bulk_delete');
         return response.ok({ body: result });
