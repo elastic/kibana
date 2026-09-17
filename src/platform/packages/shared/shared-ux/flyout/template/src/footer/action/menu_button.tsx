@@ -71,7 +71,12 @@ const resolvePanels = (
           const { onClick, href } = asEntry;
           // Only wrap items that are actionable (have onClick or href).
           // Adding an onClick to static items causes EUI to incorrectly render them as interactive buttons.
-          if (!closeOnItemClick || asEntry.isSeparator || asEntry.panel != null || (!onClick && !href)) {
+          if (
+            !closeOnItemClick ||
+            asEntry.isSeparator ||
+            asEntry.panel != null ||
+            (!onClick && !href)
+          ) {
             return item;
           }
           return {

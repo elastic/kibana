@@ -168,7 +168,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
     const { container } = renderMenu({ panels });
 
     await user.click(screen.getByRole('button', { name: /take action/i }));
-    await user.click(await screen.findByRole('menuitem', { name: 'Go there' }));
+    await user.click(await screen.findByRole('menuitem', { name: /go there/i }));
 
     expect(container.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
   });
