@@ -14,7 +14,12 @@ import {
   rawRuleTemplateSchema,
   alertingV1RawRuleTemplateSchemaV4,
   alertingV2RawRuleTemplateSchemaV4,
+  alertingV2RawRuleTemplateReadSchemaV4,
 } from './v4';
+import {
+  rawRuleTemplateSchema as rawRuleTemplateSchemaV5,
+  alertingV2RawRuleTemplateSchemaV5,
+} from './v5';
 
 export {
   rawRuleTemplateSchemaV1,
@@ -22,6 +27,9 @@ export {
   rawRuleTemplateSchemaV3,
   alertingV1RawRuleTemplateSchemaV4,
   alertingV2RawRuleTemplateSchemaV4,
+  alertingV2RawRuleTemplateReadSchemaV4,
+  rawRuleTemplateSchemaV5,
+  alertingV2RawRuleTemplateSchemaV5,
 };
 export { rawRuleTemplateSchema as rawRuleTemplateSchemaV4 };
 
