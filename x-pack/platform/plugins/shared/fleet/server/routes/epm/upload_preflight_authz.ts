@@ -26,8 +26,10 @@ const GATED_ASSET_TYPES = new Set<KibanaAssetType>([
   KibanaAssetType.mlModule,
   KibanaAssetType.cloudSecurityPostureRuleTemplate,
   KibanaAssetType.sloTemplate,
-  // alertingRuleTemplate: alerting uses per-ruleType / per-consumer authz via rulesClient
-  // with no single static API privilege. Add here once per-type authz is implemented.
+  // alertingRuleTemplate is intentionally excluded. It is a hidden SO type whose write access
+  // is reserved exclusively for Fleet's internal SO client — no user-facing Kibana API privilege
+  // grants write access (alerting_v2 rules.all grants only read on templates). Downstream rule
+  // creation from installed templates enforces per-rule-type authz via rulesClient.
 ]);
 
 // Maps each gated asset type to the Kibana API privilege actions required to install it.

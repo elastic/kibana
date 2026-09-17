@@ -351,8 +351,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('rejects upload of package with security_rule asset for Fleet-only user — 403 before any install writes', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-
       const securityRuleAsset = {
         id: 'test-rule-id',
         type: 'security-rule',
