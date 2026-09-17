@@ -102,9 +102,11 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
 }
 
 /**
- * Lost-wakeup handshake: after the parent's authenticated resume task is armed,
- * re-read the sync child. If it already finished during arming, pull the task's
- * runAt to now so the parent does not sit until the workflow-level timeout.
+ * Lost-wakeup handshake: after attempting to arm the parent's authenticated resume
+ * task, re-read the sync child. If it already finished during arming, pull the
+ * task's runAt to now so the parent does not sit until the workflow-level timeout.
+ * Run even when scheduling reports failure: ensureWakeTask may have already armed
+ * the wake task before a later timer operation threw.
  */
 async function wakeIfSyncChildAlreadyTerminal(
   params: WorkflowExecutionLoopParams,
@@ -201,7 +203,6 @@ export async function ensureWorkflowIdleTimeoutResumeAfterLoop(
         error instanceof Error ? error.message : String(error)
       }`
     );
-    return;
   }
 
   if (workflowExecution.status === ExecutionStatus.WAITING_FOR_CHILD && node?.stepId) {
@@ -225,12 +226,8 @@ export async function handleExecutionDelay(
       status: stepStatus,
     });
 
-    const scheduled = await scheduleWorkflowGlobalTimeoutResumeTask(
-      params,
-      workflowExecution,
-      stepExecutionRuntime
-    );
-    if (stepStatus === ExecutionStatus.WAITING_FOR_CHILD && scheduled) {
+    await scheduleWorkflowGlobalTimeoutResumeTask(params, workflowExecution, stepExecutionRuntime);
+    if (stepStatus === ExecutionStatus.WAITING_FOR_CHILD) {
       await wakeIfSyncChildAlreadyTerminal(
         params,
         stepExecutionRuntime.stepExecution?.state?.executionId
