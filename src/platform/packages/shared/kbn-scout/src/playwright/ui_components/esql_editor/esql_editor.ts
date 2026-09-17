@@ -67,7 +67,7 @@ export class EsqlEditor {
 
     this.editor = this.scope.getByTestId('ESQLEditor');
     this.content = this.editor.locator('.view-lines');
-    this.input = this.editor.locator('textarea');
+    this.input = this.editor.locator(this.codeEditor.editorInputLocator);
     this.runButton = this.scope.getByTestId('ESQLEditor-run-query-button');
     this.queryStatsTotalDocumentsProcessed = this.scope.getByTestId(
       'ESQLEditor-queryStats-totalDocumentsProcessed'
