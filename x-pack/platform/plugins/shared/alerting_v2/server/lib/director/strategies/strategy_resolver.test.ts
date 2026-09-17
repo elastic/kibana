@@ -30,7 +30,7 @@ describe('TransitionStrategyFactory', () => {
     });
 
     it('returns the count_timeframe strategy when rule has stateTransition', () => {
-      const rule = createRuleResponse({ state_transition: { pending_count: 3 } });
+      const rule = createRuleResponse({ state_transition: { pending: { count: 3 } } });
       const resolved = factory.getStrategy(rule);
       expect(resolved.name).toBe('count_timeframe');
     });
