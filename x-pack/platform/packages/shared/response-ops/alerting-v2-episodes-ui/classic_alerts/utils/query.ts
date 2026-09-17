@@ -9,7 +9,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import dateMath from '@kbn/datemath';
 import {
   ALERT_DURATION,
-  ALERT_RULE_TAGS,
   ALERT_RULE_UUID,
   ALERT_SEVERITY,
   ALERT_STATUS,
@@ -18,6 +17,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
   ALERT_UUID,
+  ALERT_WORKFLOW_TAGS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -144,7 +144,7 @@ export const buildClassicAlertsQuery = (
 
   const tags = filterState?.tags?.map((tag) => tag.trim()).filter(Boolean);
   if (tags?.length) {
-    filters.push({ terms: { [ALERT_RULE_TAGS]: tags } });
+    filters.push({ terms: { [ALERT_WORKFLOW_TAGS]: tags } });
   }
 
   if (filterState?.severity?.length) {

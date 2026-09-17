@@ -178,7 +178,7 @@ describe('AuthenticationService', () => {
         })
       ) as UnauthorizedError;
       await handler({ error, request: httpServerMock.createFakeKibanaRequest({}) }, toolkit);
-      expect(serviceAccounts.reauthenticateFakeRequest).not.toHaveBeenCalled();
+      expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
       expect(toolkit.retry).not.toHaveBeenCalled();
       expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
     });
@@ -504,7 +504,7 @@ describe('AuthenticationService', () => {
         });
 
         it('retries with the replaced credential when the request is service-account-bound', async () => {
-          serviceAccounts.reauthenticateFakeRequest.mockResolvedValue({
+          serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
             authorization: 'Bearer essu_fresh_token',
           });
           const request = httpServerMock.createFakeKibanaRequest({
@@ -516,8 +516,8 @@ describe('AuthenticationService', () => {
             mockUnauthorizedErrorToolkit
           );
 
-          expect(serviceAccounts.reauthenticateFakeRequest).toHaveBeenCalledTimes(1);
-          expect(serviceAccounts.reauthenticateFakeRequest).toHaveBeenCalledWith(request);
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).toHaveBeenCalledTimes(1);
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).toHaveBeenCalledWith(request);
           // The lowercase `authorization` key is load-bearing for the transport header merge.
           expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
             authHeaders: { authorization: 'Bearer essu_fresh_token' },
@@ -527,7 +527,7 @@ describe('AuthenticationService', () => {
         });
 
         it('does not handle the error when the request is not service-account-bound', async () => {
-          serviceAccounts.reauthenticateFakeRequest.mockResolvedValue(null);
+          serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue(null);
           const request = httpServerMock.createFakeKibanaRequest({
             headers: { authorization: 'ApiKey essu_task_manager_key' },
           });
@@ -543,7 +543,9 @@ describe('AuthenticationService', () => {
         });
 
         it('does not handle the error when the credential replacement rejects', async () => {
-          serviceAccounts.reauthenticateFakeRequest.mockRejectedValue(new Error('mint failed'));
+          serviceAccounts.backend.reauthenticateFakeRequest.mockRejectedValue(
+            new Error('mint failed')
+          );
           const request = httpServerMock.createFakeKibanaRequest({});
 
           await unauthorizedErrorHandler(
@@ -570,7 +572,7 @@ describe('AuthenticationService', () => {
         });
 
         it('does not attempt replacement for non-expiry 401 errors', async () => {
-          serviceAccounts.reauthenticateFakeRequest.mockResolvedValue({
+          serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
             authorization: 'Bearer essu_fresh_token',
           });
           // A 401 that would NOT pass the session path's expired-token classification.
@@ -587,7 +589,7 @@ describe('AuthenticationService', () => {
           );
 
           expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
-          expect(serviceAccounts.reauthenticateFakeRequest).not.toHaveBeenCalled();
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
           expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
         });
 
@@ -599,7 +601,7 @@ describe('AuthenticationService', () => {
               { error: fakeRequestError, request: httpServerMock.createFakeKibanaRequest({}) },
               mockUnauthorizedErrorToolkit
             );
-            expect(serviceAccounts.reauthenticateFakeRequest).not.toHaveBeenCalled();
+            expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
             expect(reauthenticate).not.toHaveBeenCalled();
             expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
             expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
@@ -607,7 +609,7 @@ describe('AuthenticationService', () => {
         );
 
         it('recognizes the native Elasticsearch token expiry reason', async () => {
-          serviceAccounts.reauthenticateFakeRequest.mockResolvedValue({
+          serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
             authorization: 'Bearer replacement',
           });
           const error = new errors.ResponseError(
@@ -638,7 +640,7 @@ describe('AuthenticationService', () => {
             { error, request: httpServerMock.createFakeKibanaRequest({}) },
             mockUnauthorizedErrorToolkit
           );
-          expect(serviceAccounts.reauthenticateFakeRequest).not.toHaveBeenCalled();
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
           expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
           expect(reauthenticate).not.toHaveBeenCalled();
         });
