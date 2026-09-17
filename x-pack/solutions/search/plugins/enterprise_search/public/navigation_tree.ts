@@ -269,6 +269,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:watcher' },
                     { link: 'management:maintenanceWindows' },
                   ],
+                  id: 'alerts_and_insights',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.alerts', {
                     defaultMessage: 'Alerts and Insights',
                   }),
