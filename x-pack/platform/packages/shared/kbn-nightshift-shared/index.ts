@@ -47,6 +47,7 @@ export {
 export {
   createSourceRequestSchema,
   listSourcesQuerySchema,
+  updateSourceRequestSchema,
   type CreateSourceRequest,
   type DeleteSourceResponse,
   type ListSourcesResponse,

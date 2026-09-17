@@ -358,7 +358,9 @@ describe('SourcesClient', () => {
 
     it('replaces the stored attributes instead of merging, so a dropped description is removed', async () => {
       const { client, soClient } = setup();
-      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ description: 'old' })));
+      const so = makeSavedObject(makeAttributes({ description: 'old' }));
+      so.version = 'v1';
+      soClient.get.mockResolvedValue(so);
 
       const updated = await client.update('source-1', {
         title: 'nginx errors',
@@ -371,7 +373,7 @@ describe('SourcesClient', () => {
         NIGHTSHIFT_SOURCE_SO_TYPE,
         'source-1',
         expect.objectContaining({ description: undefined }),
-        FULL_UPDATE
+        { ...FULL_UPDATE, version: 'v1' }
       );
     });
 
@@ -465,14 +467,24 @@ describe('SourcesClient', () => {
   });
 
   describe('delete', () => {
-    it('deletes the view and then the saved object', async () => {
+    it('deletes the saved object first, then the view', async () => {
       const { client, soClient, viewsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
 
+      const callOrder: string[] = [];
+      soClient.delete.mockImplementation(async () => {
+        callOrder.push('so');
+        return {};
+      });
+      viewsClient.deleteView.mockImplementation(async () => {
+        callOrder.push('view');
+      });
+
       await client.delete('source-1');
 
-      expect(viewsClient.deleteView).toHaveBeenCalledWith('$.nightshift.sources.source-1');
       expect(soClient.delete).toHaveBeenCalledWith(NIGHTSHIFT_SOURCE_SO_TYPE, 'source-1');
+      expect(viewsClient.deleteView).toHaveBeenCalledWith('$.nightshift.sources.source-1');
+      expect(callOrder).toEqual(['so', 'view']);
     });
   });
 

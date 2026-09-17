@@ -52,11 +52,19 @@ export const createSourceRequestSchema = z.object({
   esql: sourceEsqlSchema,
 });
 
-/** Wire shape callers send; `tags` may be omitted. */
+/** Wire shape callers send; `tags` may be omitted on create (defaults to `[]`). */
 export type CreateSourceRequest = z.input<typeof createSourceRequestSchema>;
 
 /** Parsed shape the server works with; defaults applied. */
 export type SourceInput = z.output<typeof createSourceRequestSchema>;
+
+/** On update, `tags` is required so omitting it is a validation error instead of silently clearing. */
+export const updateSourceRequestSchema = z.object({
+  title: sourceTitleSchema,
+  description: sourceDescriptionSchema.optional(),
+  tags: sourceTagsSchema,
+  esql: sourceEsqlSchema,
+});
 
 export const listSourcesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

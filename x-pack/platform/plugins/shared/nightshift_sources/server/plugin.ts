@@ -15,6 +15,8 @@ import type {
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { EsqlViewsClient } from './lib/esql_views_client';
 import { SourcesClient } from './lib/sources_client';
@@ -55,7 +57,7 @@ const createSourcesClient = (
     viewsClient: new EsqlViewsClient(viewsEsClient),
     dataEsClient,
     logger,
-    username: core.security.authc.getCurrentUser(request)?.username ?? 'unknown',
+    username: core.security.authc.getCurrentUser(request)?.username ?? '<system>',
   });
 };
 
@@ -87,7 +89,23 @@ export class NightshiftSourcesPlugin
     });
   }
 
-  public start(core: CoreStart): NightshiftSourcesServerStart {
+  public start(
+    core: CoreStart,
+    plugins: { features?: FeaturesPluginStart }
+  ): NightshiftSourcesServerStart {
+    if (plugins.features) {
+      const hasFeature = plugins.features
+        .getKibanaFeatures()
+        .some((f) => f.id === NIGHTSHIFT_FEATURE_ID);
+      if (!hasFeature) {
+        this.logger.warn(
+          `The "${NIGHTSHIFT_FEATURE_ID}" feature is not registered. ` +
+            'All nightshiftSources routes will return 403 because their privileges do not exist. ' +
+            'Ensure the nightshift plugin is enabled alongside nightshiftSources.'
+        );
+      }
+    }
+
     return {
       getSourcesClient: async ({ request }) =>
         createSourcesClient(core, request, this.logger.get('sources')),

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchClient,
-  Logger,
-  SavedObject,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
@@ -92,7 +87,8 @@ export class SourcesClient {
 
   async update(id: string, input: SourceInput): Promise<NightshiftSource> {
     const { soClient, viewsClient } = this.deps;
-    const { attributes: previous } = await this.getSavedObject(id);
+    const so = await this.getSavedObject(id);
+    const { attributes: previous } = so;
     const esqlChanged = !hasSameEsql(input.esql, previous.esql);
     validateSourceQuery(input.esql);
     if (esqlChanged) {
@@ -112,7 +108,10 @@ export class SourcesClient {
       esql_updated_at: esqlChanged ? now : previous.esql_updated_at,
     };
 
-    await soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, FULL_UPDATE);
+    await soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, {
+      ...FULL_UPDATE,
+      version: so.version,
+    });
 
     try {
       await viewsClient.putView(attributes.view_name, attributes.esql);
@@ -169,19 +168,24 @@ export class SourcesClient {
   async delete(id: string): Promise<void> {
     const { soClient, viewsClient } = this.deps;
     const { attributes } = await this.getSavedObject(id);
-    await viewsClient.deleteView(attributes.view_name);
+    // SO first: an orphaned view is invisible to Kibana and harmless, while a source
+    // with view_missing health is visible and looks broken.
     await soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id);
+    await viewsClient.deleteView(attributes.view_name);
   }
 
   /** Flips the flag only; engines reconcile their rules and onboarding from it. */
   async setEnabled(id: string, enabled: boolean): Promise<NightshiftSource> {
-    const { attributes: previous } = await this.getSavedObject(id);
+    const so = await this.getSavedObject(id);
     const attributes: NightshiftSourceAttributes = {
-      ...previous,
+      ...so.attributes,
       enabled,
       updated_at: new Date().toISOString(),
     };
-    await this.deps.soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, FULL_UPDATE);
+    await this.deps.soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, {
+      ...FULL_UPDATE,
+      version: so.version,
+    });
     return toSource(id, attributes);
   }
 
@@ -199,14 +203,16 @@ export class SourcesClient {
     try {
       view = await viewsClient.getView(source.view_name);
     } catch (error) {
-      logger.debug(`Could not read view ${source.view_name} for source ${source.id}: ${error}`);
+      logger.info(`Could not read view ${source.view_name} for source ${source.id}: ${error}`);
       return 'unknown';
     }
     if (!view) {
       return 'view_missing';
     }
-    // Kibana writes the view with the stored string verbatim, so a byte-equal query skips the
-    // parse-and-normalize on every list row; normalization only runs for genuinely drifted views.
+    if (typeof view.query !== 'string') {
+      return 'view_drift';
+    }
+    // Byte-equal skips the parse-and-normalize on every list row.
     if (view.query !== source.esql && !hasSameEsql(view.query, source.esql)) {
       return 'view_drift';
     }
@@ -221,11 +227,13 @@ export class SourcesClient {
       });
       return 'ok';
     } catch (error) {
+      // The view exists and its query matches, but the underlying index doesn't exist yet.
+      // That's the normal "no data yet" state, not a broken source.
       if (isEsqlUnknownIndexError(error)) {
         return 'ok';
       }
       if (!isEsqlVerificationError(error)) {
-        logger.debug(`Could not probe view ${source.view_name} for source ${source.id}: ${error}`);
+        logger.info(`Could not probe view ${source.view_name} for source ${source.id}: ${error}`);
         return 'unknown';
       }
     }
@@ -236,12 +244,12 @@ export class SourcesClient {
       const noIndices = await hasNoIndicesBehind({ esClient: dataEsClient, esql: source.esql });
       return noIndices ? 'ok' : 'unresolvable';
     } catch (error) {
-      logger.debug(`Could not probe sources of ${source.id}: ${error}`);
+      logger.info(`Could not probe sources of ${source.id}: ${error}`);
       return 'unknown';
     }
   }
 
-  private async getSavedObject(id: string): Promise<SavedObject<NightshiftSourceAttributes>> {
+  private async getSavedObject(id: string) {
     try {
       return await this.deps.soClient.get<NightshiftSourceAttributes>(
         NIGHTSHIFT_SOURCE_SO_TYPE,

@@ -10,6 +10,7 @@ import {
   NIGHTSHIFT_API_PRIVILEGES,
   createSourceRequestSchema,
   listSourcesQuerySchema,
+  updateSourceRequestSchema,
   type DeleteSourceResponse,
   type ListSourcesResponse,
   type SourceMutationResponse,
@@ -104,7 +105,7 @@ const updateSourceRoute = createNightshiftSourcesServerRoute({
   },
   params: z.object({
     path: sourceIdPathSchema,
-    body: createSourceRequestSchema,
+    body: updateSourceRequestSchema,
   }),
   handler: async ({ params, request, getSourcesClient }): Promise<SourceMutationResponse> => {
     const client = await getSourcesClient({ request });

@@ -14,7 +14,7 @@
     // obs plugin's feature. It can't be a requiredPlugin (cycle via significantEvents), but it
     // must be loaded for the routes to be accessible — the serverless configs keep both in sync.
     "requiredPlugins": [],
-    "optionalPlugins": [],
+    "optionalPlugins": ["features"],
     "requiredBundles": []
   }
 }
