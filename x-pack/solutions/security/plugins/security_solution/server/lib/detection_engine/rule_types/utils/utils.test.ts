@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
@@ -32,6 +32,7 @@ import {
   getExceptions,
   hasTimestampFields,
   createErrorsFromShard,
+  createWarningsFromClusters,
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
@@ -735,6 +736,97 @@ describe('utils', () => {
       expect(warningMessage).toBe(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]'
       );
+    });
+  });
+
+  describe('createWarningsFromClusters', () => {
+    const skippedFailure: estypes.ShardFailure = {
+      shard: -1,
+      index: 'kayak:logs-a-000001',
+      node: 'node-1',
+      reason: {
+        type: 'security_exception',
+        reason: 'action [indices:data/read/search] is unauthorized',
+      },
+    };
+
+    test('returns an empty array without a _clusters section', () => {
+      expect(createWarningsFromClusters({ clusters: undefined, shardErrors: [] })).toEqual([]);
+    });
+
+    test('reports per-cluster failures as warnings naming the cluster and its status', () => {
+      const warnings = createWarningsFromClusters({
+        clusters: {
+          total: 2,
+          successful: 1,
+          skipped: 1,
+          running: 0,
+          partial: 0,
+          failed: 0,
+          details: {
+            kayak: {
+              status: 'skipped',
+              indices: 'logs-a-*',
+              timed_out: false,
+              failures: [skippedFailure],
+            },
+          },
+        },
+        shardErrors: [],
+      });
+
+      expect(warnings).toEqual([
+        'Cluster "kayak" is "skipped" and its data may be missing from this rule run: index: "kayak:logs-a-000001" reason: "action [indices:data/read/search] is unauthorized" type: "security_exception"',
+      ]);
+    });
+
+    test('omits failures already reported in _shards.failures', () => {
+      const shardErrors = createErrorsFromShard({ errors: [skippedFailure] });
+      const warnings = createWarningsFromClusters({
+        clusters: {
+          total: 1,
+          successful: 1,
+          skipped: 0,
+          running: 0,
+          partial: 0,
+          failed: 0,
+          details: {
+            '(local)': {
+              status: 'successful',
+              indices: 'logs-a-*',
+              timed_out: false,
+              failures: [skippedFailure],
+            },
+          },
+        },
+        shardErrors,
+      });
+
+      expect(warnings).toEqual([]);
+    });
+
+    test('reports skipped and failed clusters that carry no failures', () => {
+      const warnings = createWarningsFromClusters({
+        clusters: {
+          total: 2,
+          successful: 0,
+          skipped: 1,
+          running: 0,
+          partial: 0,
+          failed: 1,
+          details: {
+            kayak: { status: 'skipped', indices: 'logs-a-*', timed_out: false },
+            booking: { status: 'failed', indices: 'logs-a-*', timed_out: false },
+            opentable: { status: 'successful', indices: 'logs-a-*', timed_out: false },
+          },
+        },
+        shardErrors: [],
+      });
+
+      expect(warnings).toEqual([
+        'Cluster "kayak" is "skipped" and its data is missing from this rule run (indices: "logs-a-*").',
+        'Cluster "booking" is "failed" and its data is missing from this rule run (indices: "logs-a-*").',
+      ]);
     });
   });
 

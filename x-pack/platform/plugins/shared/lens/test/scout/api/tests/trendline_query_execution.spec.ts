@@ -83,11 +83,11 @@ apiTest.describe(
         // The source query is what the metric panel's main layer runs; it must
         // be executable itself so the case reflects a real user query.
         const sourceResponse = await executeEsqlQuery(queryCase.sourceQuery);
-        expect(sourceResponse).toHaveStatusCode(200);
+        expect(sourceResponse, JSON.stringify(sourceResponse.body, null, 2)).toHaveStatusCode(200);
 
         const response = await executeEsqlQuery(generated.query);
 
-        expect(response).toHaveStatusCode(200);
+        expect(response, JSON.stringify(response.body, null, 2)).toHaveStatusCode(200);
         const columnNames = response.body.rawResponse.columns.map(
           ({ name }: { name: string }) => name
         );

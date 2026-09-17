@@ -97,13 +97,15 @@ export const onboardingExecuteRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing, uiSettingsClient, streamsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { streamName },
       body,
     } = params;
+
+    await streamsClient.ensureStream(streamName);
 
     if (body.action === 'schedule') {
       const { skipFeatures, skipQueries } = mapStepsToSkipFlags(body.steps);
@@ -163,12 +165,14 @@ export const onboardingStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing, uiSettingsClient, streamsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { streamName },
     } = params;
+
+    await streamsClient.assertReadAccess(streamName);
 
     return streamsKIsOnboardingClient.getStatus({ streamName });
   },
@@ -180,7 +184,7 @@ export const onboardingBulkStatusRoute = createServerRoute({
     access: 'internal',
     summary: 'Check the onboarding status of multiple streams',
     description:
-      'Check the status of onboarding progress for a list of streams in a single request.',
+      'Check the status of onboarding progress for a list of streams in a single request. Streams the caller cannot read are omitted from the response.',
   },
   security: {
     authz: {
@@ -207,14 +211,19 @@ export const onboardingBulkStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing, uiSettingsClient, streamsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       body: { streamNames },
     } = params;
 
-    return streamsKIsOnboardingClient.getStatuses({ streamNames });
+    const readableStreamNames = await streamsClient.getReadableStreamNames(streamNames);
+    if (readableStreamNames.length === 0) {
+      return {};
+    }
+
+    return streamsKIsOnboardingClient.getStatuses({ streamNames: readableStreamNames });
   },
 });
 
