@@ -120,6 +120,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
     view,
     filter: esFilter,
   });
+
   // static options
   const entityTypeOptions = ENTITY_TYPE_OPTIONS.map((value) => ({
     value,
