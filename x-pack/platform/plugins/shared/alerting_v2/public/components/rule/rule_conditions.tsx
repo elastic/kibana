@@ -8,37 +8,64 @@
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
-import { getBreachEsqlQuery, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useRule } from '../rule_context';
 import {
   EMPTY_VALUE,
   formatAlertDelay,
   formatNoDataStrategy,
   formatRecoveryDelay,
   formatRecoveryStrategy,
-  getRecoverEsqlSegment,
-} from '../utils';
+  getDisplayQueryParts,
+  getQueryOverflowHeight,
+  getDisplayRecoveryCondition,
+} from '../../utils/rule_display';
 import { RuleDetailsTable } from './rule_details_table';
+import type { RuleSummaryData } from './types';
 
 export interface RuleConditionsProps {
+  rule: RuleSummaryData;
   /**
-   * `'full'` (default) shows all condition fields, matching the details page.
-   * `'summary'` hides Alert delay and Recovery delay — used by the rule summary flyout.
+   * `'full'` (default) shows the rule description above the query blocks.
+   * `'summary'` omits it because the About card already shows the description.
    */
   variant?: 'full' | 'summary';
 }
 
-export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
-  variant = 'full',
-}) => {
-  const rule = useRule();
+const ConditionQueryBlock = ({
+  title,
+  query,
+  'data-test-subj': dataTestSubj,
+}: {
+  title: string;
+  query: string;
+  'data-test-subj': string;
+}) => (
+  <>
+    <EuiTitle size="xxs">
+      <h3>{title}</h3>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiCodeBlock
+      language="esql"
+      isCopyable
+      paddingSize="s"
+      overflowHeight={getQueryOverflowHeight(query)}
+      data-test-subj={dataTestSubj}
+    >
+      {query || EMPTY_VALUE}
+    </EuiCodeBlock>
+  </>
+);
+
+export const RuleConditions: React.FC<RuleConditionsProps> = ({ rule, variant = 'full' }) => {
   const isAlertKind = rule.kind === 'alert';
   const isSummary = variant === 'summary';
   const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
-  const recoveryCondition = getRecoverEsqlSegment(rule.query, rule.recovery_strategy);
+  const recoveryCondition = getDisplayRecoveryCondition(rule.query, rule.recovery_strategy);
+  const { baseQuery, alertCondition } = getDisplayQueryParts(rule.query);
 
   const conditionItems = [
     {
@@ -86,7 +113,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       description: RULE_KIND_LABELS[rule.kind] ?? rule.kind,
       'data-test-subj': 'alertingV2RuleDetailsKind',
     },
-    ...(isAlertKind && !isSummary
+    ...(isAlertKind
       ? [
           {
             title: i18n.translate('xpack.alertingV2.ruleDetails.alertDelay', {
@@ -113,6 +140,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
                 language="esql"
                 isCopyable
                 paddingSize="s"
+                overflowHeight={getQueryOverflowHeight(recoveryCondition)}
                 data-test-subj="alertingV2RuleDetailsRecoveryConditionQuery"
               >
                 {recoveryCondition}
@@ -137,23 +165,10 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       : []),
   ];
 
-  // The summary flyout renders the description in its header.
   const description = isSummary ? undefined : rule.metadata.description;
 
   return (
     <>
-      {isSummary && (
-        <>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.alertingV2.ruleDetails.conditions', {
-                defaultMessage: 'Rule conditions',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-        </>
-      )}
       {description && (
         <>
           <EuiText size="s" data-test-subj="ruleConditionsDescription">
@@ -162,23 +177,25 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
           <EuiSpacer size="m" />
         </>
       )}
-      <EuiTitle size="xxs">
-        <h3>
-          {i18n.translate('xpack.alertingV2.ruleDetails.esqlQuery', {
-            defaultMessage: 'ES|QL query',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiCodeBlock
-        language="esql"
-        isCopyable
-        overflowHeight={360}
-        paddingSize="m"
+      <ConditionQueryBlock
+        title={i18n.translate('xpack.alertingV2.ruleDetails.baseQueryTitle', {
+          defaultMessage: 'Base query',
+        })}
+        query={baseQuery}
         data-test-subj="alertingV2RuleDetailsBaseQuery"
-      >
-        {getBreachEsqlQuery(rule.query) || EMPTY_VALUE}
-      </EuiCodeBlock>
+      />
+      {alertCondition ? (
+        <>
+          <EuiSpacer size="m" />
+          <ConditionQueryBlock
+            title={i18n.translate('xpack.alertingV2.ruleDetails.alertConditionTitle', {
+              defaultMessage: 'Alert condition',
+            })}
+            query={alertCondition}
+            data-test-subj="alertingV2RuleDetailsAlertCondition"
+          />
+        </>
+      ) : null}
 
       <EuiSpacer size="s" />
 
