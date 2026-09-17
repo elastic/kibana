@@ -179,8 +179,8 @@ export const OverviewPage: React.FC = () => {
       {hasMonitors ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
-            <EuiFlexItem grow={false} css={{ minWidth: 380 }}>
-              <OverviewStatus extraStats={activityStats} />
+            <EuiFlexItem grow={false} css={{ minWidth: 300 }}>
+              <OverviewStatus extraStats={activityStats} areStatsClickable />
             </EuiFlexItem>
             <EuiFlexItem grow={1} css={{ minWidth: 500 }}>
               <OverviewActivityChart />

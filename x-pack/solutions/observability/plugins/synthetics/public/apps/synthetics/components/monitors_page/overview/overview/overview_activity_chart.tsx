@@ -12,10 +12,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useOverviewRefreshedRange } from '../../common/use_overview_date_range';
-import { AlertsLink } from '../../../common/links/view_alerts';
+import { useAlertsUrl } from '../../../monitor_details/monitor_summary/alert_actions';
 import { ERRORS_LABEL } from '../../../monitor_details/monitor_summary/monitor_errors_count';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
+import { useOverviewAlertsAnnotations } from '../../hooks/use_overview_alerts_annotations';
 import { useOverviewAlertsCount } from '../../hooks/use_overview_alerts_count';
 import { useOverviewDataViewIndexPatterns } from '../../hooks/use_overview_data_view_index_patterns';
 import type { MonitorStatProps } from './overview_status';
@@ -28,6 +29,7 @@ import type { MonitorStatProps } from './overview_status';
 // restate the chart.
 export const useOverviewActivityStats = (): MonitorStatProps[] => {
   const { count: alertsCount } = useOverviewAlertsCount(useOverviewRefreshedRange());
+  const alertsUrl = useAlertsUrl({ rangeFrom: 'now-12h/h', rangeTo: 'now' });
 
   return [
     {
@@ -35,9 +37,10 @@ export const useOverviewActivityStats = (): MonitorStatProps[] => {
       statName: alertsLabel,
       statNo: alertsCount,
       numberColor: 'danger',
-      isClickable: false,
-      onClickStat: () => {},
-      append: <AlertsLink />,
+      isClickable: true,
+      onClickStat: () => {
+        window.location.href = alertsUrl;
+      },
     },
   ];
 };
@@ -65,6 +68,8 @@ export const OverviewActivityChart = () => {
     []
   );
 
+  const annotationLayers = useOverviewAlertsAnnotations();
+
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiTitle size="xs">
@@ -81,6 +86,7 @@ export const OverviewActivityChart = () => {
           legendPosition={Position.Right}
           dslFilters={queryFilters}
           dataTypesIndexPatterns={dataTypesIndexPatterns}
+          annotationLayers={annotationLayers}
           attributes={[
             {
               time,
