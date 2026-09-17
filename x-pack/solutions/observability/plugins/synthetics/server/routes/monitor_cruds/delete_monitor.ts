@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod';
-import { optionalRouteId, routeId } from '../zod_query';
+import { MAX_MONITOR_BULK_SIZE, optionalRouteId, routeId } from '../zod_query';
 import { DeleteMonitorAPI } from './services/delete_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DeleteParamsResponse } from '../../../common/runtime_types';
@@ -25,7 +25,7 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
     request: {
       body: z
         .object({
-          ids: z.array(routeId).min(1).max(500),
+          ids: z.array(routeId).min(1).max(MAX_MONITOR_BULK_SIZE),
         })
         .nullable(),
       params: z.object({

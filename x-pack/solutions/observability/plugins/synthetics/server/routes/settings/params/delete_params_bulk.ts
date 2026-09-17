@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { MAX_PARAM_BULK_SIZE } from '../../zod_query';
 import { getExistingParamsInfo } from './delete_param';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
@@ -25,7 +26,7 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: z.object({
-        ids: z.array(z.string().max(1024)).max(1000),
+        ids: z.array(z.string().max(1024)).max(MAX_PARAM_BULK_SIZE),
       }),
     },
   },

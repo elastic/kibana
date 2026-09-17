@@ -14,7 +14,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
-import { MAX_PARAM_VALUE_LENGTH } from '../../zod_query';
+import { MAX_PARAM_BULK_SIZE, MAX_PARAM_VALUE_LENGTH } from '../../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
   SyntheticsParamRequest,
@@ -41,7 +41,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: z.union([ParamsObjectSchema, z.array(ParamsObjectSchema).max(1000)]),
+      body: z.union([ParamsObjectSchema, z.array(ParamsObjectSchema).max(MAX_PARAM_BULK_SIZE)]),
     },
   },
   handler: async ({ request, response, server, savedObjectsClient }) => {

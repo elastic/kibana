@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { asRouteSchema, maxArraySizeMessage, routeId } from '../../zod_query';
+import {
+  asRouteSchema,
+  maxArraySizeMessage,
+  MAX_MONITOR_BULK_SIZE,
+  routeId,
+} from '../../zod_query';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -15,7 +20,6 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getSavedObjectKqlFilter } from '../../common';
 import { validateSpaceId } from '../services/validate_space_id';
 
-const MAX_MONITORS_TO_DELETE = 500;
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
@@ -24,7 +28,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       z.object({
         monitors: z
           .array(routeId)
-          .max(MAX_MONITORS_TO_DELETE, { error: maxArraySizeMessage(MAX_MONITORS_TO_DELETE) }),
+          .max(MAX_MONITOR_BULK_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_BULK_SIZE) }),
       })
     ),
     params: z.object({
@@ -48,7 +52,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     const { saved_objects: monitors } =
       await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
-        perPage: MAX_MONITORS_TO_DELETE,
+        perPage: MAX_MONITOR_BULK_SIZE,
         filter: deleteFilter,
         fields: [],
       });

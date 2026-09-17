@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-common';
-import { routeId } from '../../zod_query';
+import { MAX_MONITOR_BULK_SIZE, routeId } from '../../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { ConfigKey, type MonitorFields } from '../../../../common/runtime_types';
@@ -62,7 +62,7 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
             })
           )
           .min(1)
-          .max(500),
+          .max(MAX_MONITOR_BULK_SIZE),
       }),
     },
   },

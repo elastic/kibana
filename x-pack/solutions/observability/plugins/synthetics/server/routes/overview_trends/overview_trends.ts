@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { routeId } from '../zod_query';
+import {
+  MAX_MONITOR_BULK_SIZE,
+  MAX_ROUTE_ID_LENGTH,
+  MAX_SCHEDULE_LENGTH,
+  routeId,
+} from '../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { TrendRequest, TrendTable } from '../../../common/types';
 import type { TrendsQuery } from './fetch_trends';
@@ -62,11 +67,11 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
       .array(
         z.object({
           configId: routeId,
-          locationIds: z.array(z.string().max(1024)).max(100),
-          schedule: z.string().max(64),
+          locationIds: z.array(z.string().max(MAX_ROUTE_ID_LENGTH)).max(100),
+          schedule: z.string().max(MAX_SCHEDULE_LENGTH),
         })
       )
-      .max(500),
+      .max(MAX_MONITOR_BULK_SIZE),
   },
   handler: async (routeContext): Promise<TrendTable> => {
     const esClient = routeContext.syntheticsEsClient;
