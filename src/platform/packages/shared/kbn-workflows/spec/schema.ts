@@ -23,6 +23,9 @@ import {
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
   MAX_HITL_ACTION_LABEL_LENGTH,
+  MAX_HITL_EMAIL_ADDRESS_LENGTH,
+  MAX_HITL_EMAIL_RECIPIENTS,
+  MAX_HITL_EMAIL_SUBJECT_LENGTH,
   MAX_HITL_EXTERNAL_LINK_LENGTH,
   MAX_HITL_MESSAGE_LENGTH,
   MAX_HITL_SLACK_CHANNEL_LENGTH,
@@ -315,6 +318,64 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
     ),
 });
 
+export const HitlEmailRecipientListSchema = z
+  .array(z.string().min(1).max(MAX_HITL_EMAIL_ADDRESS_LENGTH))
+  .min(1)
+  .max(MAX_HITL_EMAIL_RECIPIENTS);
+
+export const WaitForApprovalEmailChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Email connector saved object id or name'),
+  to: HitlEmailRecipientListSchema.describe('Primary email recipients'),
+  cc: HitlEmailRecipientListSchema.optional().describe('CC recipients'),
+  bcc: HitlEmailRecipientListSchema.optional().describe('BCC recipients'),
+  subject: z
+    .string()
+    .min(1)
+    .max(MAX_HITL_EMAIL_SUBJECT_LENGTH)
+    .optional()
+    .describe('Email subject. Defaults to a built-in subject when omitted.'),
+  message: z
+    .string()
+    .max(MAX_HITL_MESSAGE_LENGTH)
+    .optional()
+    .describe(
+      'Optional notification template for waitForInput. Use {{context.hitl.externalFormLink}}. Ignored for waitForApproval (built-in approve/reject body is always used).'
+    ),
+});
+
+export const WaitForApprovalSlack2ChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Slack (v2) connector saved object id or name'),
+  channels: z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+        .describe(
+          'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
+        )
+    )
+    .min(1)
+    .describe(
+      'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
+    ),
+  message: z
+    .string()
+    .max(MAX_HITL_MESSAGE_LENGTH)
+    .optional()
+    .describe(
+      'Optional notification template for waitForInput. Use {{context.hitl.externalFormLink}}. Ignored for waitForApproval (built-in approve/reject body is always used).'
+    ),
+});
+
 export const WaitForApprovalChannelsSchema = z
   .object({
     slack: WaitForApprovalSlackChannelSchema.optional().describe(
@@ -322,6 +383,12 @@ export const WaitForApprovalChannelsSchema = z
     ),
     slack_api: WaitForApprovalSlackApiChannelSchema.optional().describe(
       'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.'
+    ),
+    slack2: WaitForApprovalSlack2ChannelSchema.optional().describe(
+      'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.'
+    ),
+    email: WaitForApprovalEmailChannelSchema.optional().describe(
+      'Notify via an Email connector. Requires connector-id and at least one `to` recipient.'
     ),
   })
   .optional()
