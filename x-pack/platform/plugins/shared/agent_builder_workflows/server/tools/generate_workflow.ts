@@ -68,6 +68,8 @@ Use this tool when:
 – The user asks to edit an existing workflow.
 — You want to generate a workflow to fulfill a specific multi-step task.
 
+Do **not** use this tool for a one-off call to a single connector (e.g. "post this to Slack", "create this Jira issue") — that is not a workflow. Load the \`connector-discovery\` skill instead. This tool's knowledge of available connectors (below) is only for authoring workflow steps, not a substitute for connector-discovery.
+
 ## Which context to provide
 
 Under the hood, the tool delegates to a workflow-generation specialized agent.
