@@ -8,7 +8,6 @@
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import { getStreamsPromptsSavedObject } from '../prompts/prompts_config';
 import {
   streamsConfigurationEncryptedType,
   streamsConfigurationSavedObjectType,
@@ -25,8 +24,6 @@ export const registerStreamsSavedObjects = (
     encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   }
 ) => {
-  savedObjects.registerType(getStreamsPromptsSavedObject());
-
   if (isStreamsCanvasEnabled) {
     // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove once streams-configuration graduates from WIP
     savedObjects.registerType(streamsConfigurationSavedObjectType);

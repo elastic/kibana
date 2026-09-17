@@ -36,12 +36,25 @@ const validUnit: StreamsUnit.Configuration = {
       supported_telemetry: ['logs'],
     },
   ],
+  pipelines: [
+    {
+      id: 'main',
+      supported_telemetry: ['logs'],
+      config: [
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'processors', value: ['add-env'] },
+        { name: 'destinations', value: ['es-prod'] },
+      ],
+    },
+  ],
 };
 
 describe('streams unit schema', () => {
-  it('accepts units without destinations or processors', () => {
+  it('defaults omitted sources, destinations, and pipelines to empty arrays', () => {
     expect(streamsUnitSchema.parse({ sources: validUnit.sources })).toEqual({
       sources: validUnit.sources,
+      destinations: [],
+      pipelines: [],
     });
   });
 
@@ -62,7 +75,7 @@ describe('streams unit schema', () => {
 
   it('collects ids across component kinds', () => {
     expect(collectUnitComponentIds(validUnit).sort()).toEqual(
-      ['add-env', 'es-prod', 'otlp-input'].sort()
+      ['add-env', 'es-prod', 'main', 'otlp-input'].sort()
     );
   });
 
