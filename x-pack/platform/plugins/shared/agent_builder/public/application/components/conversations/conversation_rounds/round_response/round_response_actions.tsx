@@ -19,6 +19,7 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useAgentId, useConversationReadOnly } from '../../../../hooks/use_conversation';
+import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
@@ -79,6 +80,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const isExperimentalEnabled = useExperimentalFeatures();
   const isTracingEnabled = useTracingEnabled();
   const agentId = useAgentId();
+  const conversationId = useConversationId();
   const { isReadOnly, isLoading: isConversationReadOnlyLoading } = useConversationReadOnly();
 
   const { action: copyLabel, success: copySuccessLabel } = copyLabels[copyTarget];
@@ -201,7 +203,11 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           )}
           {rawRound && (
             <EuiFlexItem grow={false}>
-              <RoundMetadataPopover rawRound={rawRound} />
+              <RoundMetadataPopover
+                rawRound={rawRound}
+                conversationId={conversationId ?? undefined}
+                agentId={agentId ?? undefined}
+              />
             </EuiFlexItem>
           )}
           {showFeedback && (

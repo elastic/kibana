@@ -38,6 +38,10 @@ jest.mock('../../../../hooks/use_conversation', () => ({
   useConversationReadOnly: jest.fn(),
 }));
 
+jest.mock('../../../../context/conversation/use_conversation_id', () => ({
+  useConversationId: () => undefined,
+}));
+
 jest.mock('./feedback_controls/use_feedback', () => ({
   useFeedback: () => ({
     vote: null,

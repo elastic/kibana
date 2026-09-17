@@ -13,9 +13,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
+import type { TraceSpan } from '@kbn/llm-trace-waterfall';
 import { useNavigation } from '../../../hooks/use_navigation';
 import {
   useAgentId,
@@ -29,6 +30,48 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useToasts } from '../../../hooks/use_toasts';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { RoundTraceFlyout } from '../conversation_rounds/round_response/round_trace_flyout';
+
+const triggerDownload = (filename: string, content: string) => {
+  const blob = new Blob([content], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const readFileAsText = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') resolve(reader.result);
+      else reject(new Error('FileReader did not return a string'));
+    };
+    reader.onerror = () => reject(reader.error ?? new Error('FileReader failed'));
+    reader.readAsText(file);
+  });
+
+const exportLabels = {
+  downloadConversation: i18n.translate(
+    'xpack.agentBuilder.conversationActions.downloadConversation',
+    { defaultMessage: 'Download conversation JSON' }
+  ),
+  loadTrace: i18n.translate('xpack.agentBuilder.conversationActions.loadTrace', {
+    defaultMessage: 'Load trace from file',
+  }),
+  loadTraceErrorTitle: i18n.translate(
+    'xpack.agentBuilder.conversationActions.loadTraceErrorTitle',
+    { defaultMessage: 'Could not load trace file' }
+  ),
+  loadTraceErrorBody: i18n.translate(
+    'xpack.agentBuilder.conversationActions.loadTraceErrorBody',
+    { defaultMessage: 'The file does not contain a valid trace. Expected a JSON array of spans or an object with a "spans" array.' }
+  ),
+};
 
 const fullscreenLabels = {
   actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {
@@ -75,6 +118,9 @@ interface MoreActionsButtonProps {
 
 export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSidebar }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isTraceFlyoutOpen, setIsTraceFlyoutOpen] = useState(false);
+  const [menuLoadedSpans, setMenuLoadedSpans] = useState<TraceSpan[] | null>(null);
+  const traceFileInputRef = useRef<HTMLInputElement>(null);
 
   const agentId = useAgentId();
   const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
@@ -84,6 +130,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const isExperimentalEnabled = useExperimentalFeatures();
   const { conversation } = useConversation();
   const conversationRounds = useConversationRounds();
+  const { agent } = useAgentBuilderAgentById(agentId ?? undefined);
+  const { addErrorToast } = useToasts();
 
   const {
     services: { application, plugins },
@@ -165,6 +213,47 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     navigateToAgentBuilderUrl(path, undefined, { entryPointSource: 'inapp_escalation' });
   }, [application, conversationId, onCloseSidebar, agentId, navigateToAgentBuilderUrl]);
 
+  const handleDownloadConversation = useCallback(() => {
+    if (!conversation) return;
+    setIsPopoverOpen(false);
+    const payload = {
+      conversation_id: conversationId ?? null,
+      agent,
+      conversation,
+      rounds: conversationRounds,
+    };
+    const filename = conversationId ? `conversation-${conversationId}.json` : 'conversation.json';
+    triggerDownload(filename, JSON.stringify(payload, null, 2));
+  }, [conversation, conversationId, agent, conversationRounds]);
+
+  const handleLoadTrace = useCallback(() => {
+    setIsPopoverOpen(false);
+    traceFileInputRef.current?.click();
+  }, []);
+
+  const handleTraceFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const text = await readFileAsText(file);
+      const parsed: unknown = JSON.parse(text);
+      const spans: unknown = Array.isArray(parsed)
+        ? parsed
+        : parsed !== null && typeof parsed === 'object' && 'spans' in parsed
+        ? (parsed as { spans: unknown }).spans
+        : null;
+      if (Array.isArray(spans)) {
+        setMenuLoadedSpans(spans as TraceSpan[]);
+        setIsTraceFlyoutOpen(true);
+      } else {
+        addErrorToast({ title: exportLabels.loadTraceErrorTitle, text: exportLabels.loadTraceErrorBody });
+      }
+    } catch {
+      addErrorToast({ title: exportLabels.loadTraceErrorTitle, text: exportLabels.loadTraceErrorBody });
+    }
+  }, []);
+
   const fullScreenMenuItemLabel = useMemo(() => {
     if (conversationId) {
       return fullscreenLabels.fullScreen;
@@ -175,6 +264,29 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       </EuiToolTip>
     );
   }, [conversationId]);
+
+  const exportMenuItems = [
+    ...(conversation
+      ? [
+          <EuiContextMenuItem
+            key="downloadConversation"
+            icon="download"
+            data-test-subj="agentBuilderDownloadConversationButton"
+            onClick={handleDownloadConversation}
+          >
+            {exportLabels.downloadConversation}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    <EuiContextMenuItem
+      key="loadTrace"
+      icon="upload"
+      data-test-subj="agentBuilderLoadTraceButton"
+      onClick={handleLoadTrace}
+    >
+      {exportLabels.loadTrace}
+    </EuiContextMenuItem>,
+  ];
 
   const addToDatasetMenuItem = showAddToDatasetItem
     ? [
@@ -245,43 +357,10 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         ]
       : []),
     ...addToDatasetMenuItem,
+    ...exportMenuItems,
   ];
 
-  const fullscreenMenuItems = [
-    <EuiContextMenuItem
-      key="view-current-agent"
-      icon="info"
-      disabled={!manageAgents}
-      onClick={closePopover}
-      href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.AGENT_DETAILS,
-        detail: 'conversation',
-      })}
-    >
-      {fullscreenLabels.agentDetails}
-    </EuiContextMenuItem>,
-    ...(hasAccessToGenAiSettings
-      ? [
-          <EuiContextMenuItem
-            key="agentBuilderSettings"
-            icon="gear"
-            onClick={closePopover}
-            href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
-            data-test-subj="agentBuilderGenAiSettingsButton"
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.GENAI_SETTINGS,
-              detail: 'conversation',
-            })}
-          >
-            {fullscreenLabels.genAiSettings}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-    ...addToDatasetMenuItem,
-  ];
+  const fullscreenMenuItems = [...addToDatasetMenuItem, ...exportMenuItems];
 
   const menuItems = isEmbeddedContext ? embeddedContextMenuItems : fullscreenMenuItems;
 
@@ -301,6 +380,14 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   return (
     <>
+      <input
+        ref={traceFileInputRef}
+        type="file"
+        accept=".json"
+        style={{ display: 'none' }}
+        onChange={handleTraceFileChange}
+        data-test-subj="moreActionsTraceFileInput"
+      />
       <EuiPopover
         button={<EuiButtonIcon {...buttonProps} />}
         isOpen={isPopoverOpen}
@@ -311,6 +398,15 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       >
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
+      {isTraceFlyoutOpen && (
+        <RoundTraceFlyout
+          initialSpans={menuLoadedSpans ?? undefined}
+          onClose={() => {
+            setIsTraceFlyoutOpen(false);
+            setMenuLoadedSpans(null);
+          }}
+        />
+      )}
     </>
   );
 };
