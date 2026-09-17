@@ -64,7 +64,6 @@ import { ListRuleChangeHistoryRoute } from '../routes/rule_change_history/list_r
 import { GetRuleChangeHistoryEventRoute } from '../routes/rule_change_history/get_rule_change_history_event_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherRuleEventFieldsRoute } from '../routes/suggestions/matcher_rule_event_fields_route';
-import { ActionPolicyTagsRoute } from '../routes/action_policies/action_policy_tags_route';
 import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_profiles_route';
 import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
@@ -137,7 +136,6 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherRuleEventFieldsRoute);
 
-  bind(Route).toConstantValue(ActionPolicyTagsRoute);
   bind(Route).toConstantValue(SuggestUserProfilesRoute);
   // TODO(rna-program#426): remove this binding before GA.
   bind(Route).toConstantValue(ResetResourcesRoute);
