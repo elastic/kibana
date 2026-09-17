@@ -213,10 +213,14 @@ const PerOsDeviceControlRow = <OS extends DeviceControlOSes>({
           usb_storage: nextAccessLevel,
         };
         currentOsPolicy.device_control.usb_storage = nextAccessLevel;
-        if (currentOsPolicy.popup.device_control) {
-          currentOsPolicy.popup.device_control.enabled =
-            nextAccessLevel === DeviceControlAccessLevelEnum.deny_all;
-        }
+        // Create the branch rather than skip the sync, matching the master toggle: an OS whose
+        // popup branch is missing would otherwise keep a disabled notification after Block all.
+        currentOsPolicy.popup.device_control ??= {
+          enabled: false,
+          message: DefaultPolicyDeviceNotificationMessage,
+        };
+        currentOsPolicy.popup.device_control.enabled =
+          nextAccessLevel === DeviceControlAccessLevelEnum.deny_all;
       });
       onChange({ isValid: true, updatedPolicy });
     },

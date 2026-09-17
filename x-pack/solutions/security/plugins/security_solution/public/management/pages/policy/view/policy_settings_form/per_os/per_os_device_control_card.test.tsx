@@ -170,6 +170,22 @@ describe('PerOsDeviceControlCard', () => {
     expect(afterLeaveDenyAll.linux).toEqual(linuxBefore);
   });
 
+  it('creates the notification branch when Block all is chosen and the popup branch is absent', async () => {
+    policy[PolicyOperatingSystem.mac].device_control!.usb_storage =
+      DeviceControlAccessLevel.read_only;
+    const macPopup = policy[PolicyOperatingSystem.mac].popup as Partial<
+      PolicyConfig['mac']['popup']
+    >;
+    delete macPopup.device_control;
+    render();
+
+    await selectOsControlOption(renderResult, testSubj.mac.accessLevelSelect, 'Block all');
+
+    const updatedPolicy = getUpdatedPolicy();
+    expect(updatedPolicy.mac.device_control?.usb_storage).toBe(DeviceControlAccessLevel.deny_all);
+    expect(updatedPolicy.mac.popup.device_control?.enabled).toBe(true);
+  });
+
   it('renders without throwing when one OS has no device_control field', () => {
     delete policy[PolicyOperatingSystem.mac].device_control;
 
