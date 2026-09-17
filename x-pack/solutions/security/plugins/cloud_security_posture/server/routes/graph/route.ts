@@ -71,7 +71,10 @@ export const defineGraphRoute = (router: CspRouter) =>
         const integrationRuntimeEvalsEnabled = await coreContext.uiSettings.client.get<boolean>(
           GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING
         );
-        const { nodesLimit, showUnknownTarget = await coreContext.uiSettings.client.get<boolean>(GRAPH_SHOW_UNKNOWN_TARGET_ENABLED_SETTING) } = request.body;
+        const showUnknownTargetSetting = await coreContext.uiSettings.client.get<boolean>(
+          GRAPH_SHOW_UNKNOWN_TARGET_ENABLED_SETTING
+        );
+        const { nodesLimit, showUnknownTarget = showUnknownTargetSetting } = request.body;
 
         try {
           const resp = await getGraphV1({
