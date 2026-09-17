@@ -1119,6 +1119,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       querying: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-querying`,
       security: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-security`,
     },
+    contextEngine: {
+      overview: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine`,
+    },
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,
       getStarted: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/get-started`,
