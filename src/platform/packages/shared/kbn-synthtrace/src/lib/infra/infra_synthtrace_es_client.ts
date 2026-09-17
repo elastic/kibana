@@ -198,6 +198,7 @@ export class InfraSynthtraceEsClientImpl
       this.logger.info(`Created index template "${name}"`);
     } catch (error) {
       this.logger.warning(`Failed to create index template "${name}": ${error}`);
+      throw error;
     }
   }
 
