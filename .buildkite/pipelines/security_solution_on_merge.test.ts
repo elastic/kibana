@@ -82,9 +82,7 @@ describe('security_solution_on_merge Slack routing', () => {
   });
 
   it('alerts on test failures and on timeouts or agent loss', () => {
-    const conditions = suiteSteps().flatMap((step) =>
-      (step.notify ?? []).map((entry) => entry.if)
-    );
+    const conditions = suiteSteps().flatMap((step) => (step.notify ?? []).map((entry) => entry.if));
 
     expect(new Set(conditions)).toEqual(new Set([FAILURE_CONDITION]));
   });
