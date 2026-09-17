@@ -37,7 +37,7 @@ describe('registerSkills', () => {
 
   it('delegates prettify presentation defaults to the chart author', () => {
     expect(skill.content).toContain('Improving an Existing Dashboard (Prettify)');
-    expect(skill.content).toContain('presentationMode: "enhance"');
+    expect(skill.content).toContain('applyChartRules: true');
     expect(skill.content).toContain('for every existing ES|QL Lens panel');
     expect(skill.content).toContain('preserveESQL: true');
     expect(skill.content).toContain(

@@ -132,7 +132,7 @@ describe('createVisPanelResolver', () => {
       identifier: 'panel-1',
       nlQuery: 'change the title',
       preserveESQL: true,
-      presentationMode: 'enhance',
+      applyChartRules: true,
       existingPanel: {
         id: 'panel-1',
         type: LENS_EMBEDDABLE_TYPE,
@@ -146,7 +146,7 @@ describe('createVisPanelResolver', () => {
         existingConfig: JSON.stringify({ type: 'xy' }),
         parsedExistingConfig: { type: 'xy' },
         preserveESQL: true,
-        presentationMode: 'enhance',
+        applyChartRules: true,
       })
     );
   });
@@ -252,7 +252,7 @@ describe('createVisPanelResolver', () => {
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'Enhance this panel',
-      presentationMode: 'enhance',
+      applyChartRules: true,
       preserveESQL: true,
       existingPanel: {
         id: 'panel-1',

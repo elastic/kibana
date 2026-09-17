@@ -7,10 +7,9 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createGenerateConfigPrompt } from './prompts';
-import type { PresentationMode } from './types';
 
 describe('Lens config prompt', () => {
-  const createPrompt = (presentationMode?: PresentationMode) =>
+  const createPrompt = (applyChartRules?: boolean) =>
     JSON.stringify(
       createGenerateConfigPrompt({
         nlQuery: 'Improve this chart',
@@ -18,7 +17,7 @@ describe('Lens config prompt', () => {
         chartType: SupportedChartType.XY,
         schema: {},
         existingConfig: JSON.stringify({ type: 'xy', layers: [] }),
-        presentationMode,
+        applyChartRules,
         preserveESQL: true,
       })
     );
@@ -35,7 +34,7 @@ describe('Lens config prompt', () => {
   });
 
   it('switches enhancement to reauthoring without the preservation rule', () => {
-    const prompt = createPrompt('enhance');
+    const prompt = createPrompt(true);
 
     expect(prompt).toContain('Reauthor the presentation. Apply every applicable chart rule');
     expect(prompt).toContain('Existing display text is not a naming instruction');
@@ -76,7 +75,7 @@ describe('Lens config prompt', () => {
       schema: {},
       existingConfig,
       preserveESQL: true,
-      presentationMode: 'enhance',
+      applyChartRules: true,
     });
 
     expect(system).toEqual(['system', expect.not.stringContaining(existingConfig)]);

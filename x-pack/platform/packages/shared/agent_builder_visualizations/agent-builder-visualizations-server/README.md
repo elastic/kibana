@@ -20,9 +20,10 @@ Builder. It builds a visualization config for the renderer chosen by the caller
 Consumed by the `agent_builder_visualizations` and `agent_builder_dashboards`
 plugins.
 
-Lens edits accept `presentationMode: 'enhance'` to apply all chart presentation
-defaults and replace custom styling. The default mode, `'focused'`, preserves
-unrelated presentation settings. The mode is independent of `preserveESQL`.
+Lens edits accept `applyChartRules: true` to apply all chart presentation
+defaults and replace custom styling. By default only the requested changes are
+applied and unrelated presentation settings are preserved. The flag is
+independent of `preserveESQL`.
 Set `preserveESQL` to keep the existing queries, or omit it to combine a query
 change with enhancement. The dashboard agent owns layout. The Lens author applies
 and checks chart defaults on its own.

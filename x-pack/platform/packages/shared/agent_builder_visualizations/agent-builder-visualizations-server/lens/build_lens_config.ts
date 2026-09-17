@@ -13,7 +13,7 @@ import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVisualizationGraph, getExistingEsqlQueries } from './graph_lens';
 import { getSchemaForChartType } from './schemas';
-import type { PresentationMode, VisualizationConfig } from './types';
+import type { VisualizationConfig } from './types';
 
 const SUPPORTED_CHART_TYPES = new Set<string>(Object.values(SupportedChartType));
 
@@ -42,7 +42,11 @@ export interface BuildLensConfigParams {
    * `parsedExistingConfig` instead of regenerating the query.
    */
   preserveESQL?: boolean;
-  presentationMode?: PresentationMode;
+  /**
+   * Reauthor the presentation of `parsedExistingConfig` from the chart rules,
+   * replacing custom styling. Otherwise only the requested changes are applied.
+   */
+  applyChartRules?: boolean;
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -64,7 +68,7 @@ export const buildLensConfig = async ({
   existingConfig,
   parsedExistingConfig = null,
   preserveESQL = false,
-  presentationMode = 'focused',
+  applyChartRules = false,
   modelProvider,
   logger,
   events,
@@ -119,7 +123,7 @@ export const buildLensConfig = async ({
     existingConfig,
     parsedExistingConfig,
     preserveESQL,
-    presentationMode,
+    applyChartRules,
     esqlQuery: providedEsql || existingEsql || '',
     currentAttempt: 0,
     actions: [],

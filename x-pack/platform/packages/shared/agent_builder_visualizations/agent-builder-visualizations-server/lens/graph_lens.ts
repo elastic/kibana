@@ -13,7 +13,6 @@ import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
-import type { PresentationMode } from './types';
 import {
   GENERATE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
@@ -112,7 +111,7 @@ const VisualizationStateAnnotation = Annotation.Root({
    * `data_source` instead of receiving the single resolved query.
    */
   preserveESQL: Annotation<boolean>(),
-  presentationMode: Annotation<PresentationMode>(),
+  applyChartRules: Annotation<boolean>(),
   // internal
   esqlQuery: Annotation<string>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
@@ -229,7 +228,7 @@ export const createVisualizationGraph = async (
       existingConfig: state.existingConfig,
       parsedExistingConfig: state.parsedExistingConfig,
       preserveESQL: state.preserveESQL,
-      presentationMode: state.presentationMode,
+      applyChartRules: state.applyChartRules,
       additionalContext,
     });
 

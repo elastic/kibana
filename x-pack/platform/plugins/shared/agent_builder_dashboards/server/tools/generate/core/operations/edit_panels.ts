@@ -124,7 +124,7 @@ export const editPanelsOperation = defineOperation({
             chartType: panelInput.chartType,
             esql: panelInput.esql,
             preserveESQL: panelInput.preserveESQL,
-            presentationMode: panelInput.presentationMode,
+            applyChartRules: panelInput.applyChartRules,
             existingPanel,
           })
         )

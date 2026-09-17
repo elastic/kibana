@@ -201,10 +201,10 @@ describe('buildLensConfig', () => {
   });
 
   it.each([
-    { preserveESQL: true, presentationMode: undefined },
-    { preserveESQL: true, presentationMode: 'enhance' as const },
-    { preserveESQL: false, presentationMode: 'enhance' as const },
-  ])('keeps query resolution independent of presentation mode: %j', async (options) => {
+    { preserveESQL: true, applyChartRules: undefined },
+    { preserveESQL: true, applyChartRules: true },
+    { preserveESQL: false, applyChartRules: true },
+  ])('keeps query resolution independent of chart rule application: %j', async (options) => {
     const existingQuery = 'FROM logs-* | STATS count = COUNT(*)';
 
     await buildLensConfig({
@@ -225,7 +225,7 @@ describe('buildLensConfig', () => {
 
     expect(invoke.mock.calls[0][0]).toMatchObject({
       preserveESQL: options.preserveESQL,
-      presentationMode: options.presentationMode ?? 'focused',
+      applyChartRules: options.applyChartRules ?? false,
       esqlQuery: options.preserveESQL ? existingQuery : '',
     });
   });

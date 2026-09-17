@@ -9,16 +9,16 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getChartTypeConfigPromptContent } from './chart_type_guidance';
 import { getColorConfigPromptContent } from './color_palettes';
-import type { PresentationMode, VisualizationConfig } from './types';
+import type { VisualizationConfig } from './types';
 
-const getEditRulesPromptContent = (presentationMode: PresentationMode): string =>
+const getEditRulesPromptContent = (applyChartRules: boolean): string =>
   [
     'EDIT RULES:',
     '- Return the complete updated configuration.',
-    presentationMode === 'enhance'
+    applyChartRules
       ? '- Reauthor the presentation. Apply every applicable chart rule below, replacing custom styling and colors the rules do not call for. Use the existing configuration for data, bindings, and thresholds only, not as a presentation template.'
       : '- Apply the requested changes and any adjustment they require, and preserve unrelated presentation settings. Keep ambiguous settings and report the ambiguity in the authoring note.',
-    ...(presentationMode === 'enhance'
+    ...(applyChartRules
       ? [
           '- Derive every title, label, and description from the query alone, naming the measure and breakdown it computes. Existing display text is not a naming instruction. Do not keep, restyle, or recapitalize it unless the query or <user_query> proves it.',
         ]
@@ -33,7 +33,7 @@ export const createGenerateConfigPrompt = ({
   existingConfig,
   parsedExistingConfig,
   preserveESQL = false,
-  presentationMode = 'focused',
+  applyChartRules = false,
   additionalContext,
 }: {
   nlQuery: string;
@@ -43,7 +43,7 @@ export const createGenerateConfigPrompt = ({
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
   preserveESQL?: boolean;
-  presentationMode?: PresentationMode;
+  applyChartRules?: boolean;
   additionalContext?: string;
 }): BaseMessageLike[] => {
   const keepsExistingQueries = preserveESQL && Boolean(existingConfig);
@@ -55,7 +55,7 @@ Schema for ${chartType}:
 <schema type="${chartType}">
 ${JSON.stringify(schema)}
 </schema>`,
-    existingConfig ? getEditRulesPromptContent(presentationMode) : '',
+    existingConfig ? getEditRulesPromptContent(applyChartRules) : '',
     `DATA SOURCE RULES:
 1. The ES|QL query is owned and injected by the system automatically. DO NOT output a 'data_source' field, and do not restate, copy, or modify the query anywhere in the config.
 2. ${

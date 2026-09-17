@@ -54,7 +54,7 @@ describe('visualization panel request schemas', () => {
       panelId: 'panel-1',
       query: 'Enhance this panel',
       preserveESQL,
-      presentationMode: 'enhance',
+      applyChartRules: true,
     };
 
     expect(editPanelRequestInputSchema.parse(request)).toEqual(request);

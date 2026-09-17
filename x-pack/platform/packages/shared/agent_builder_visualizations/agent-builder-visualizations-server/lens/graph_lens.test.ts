@@ -171,7 +171,7 @@ describe('createVisualizationGraph', () => {
     expect(finalState.authoringNote).toBeNull();
   });
 
-  it.each(['focused', 'enhance'] as const)('%s edits regenerate ES|QL', async (mode) => {
+  it.each([false, true])('applyChartRules=%s edits regenerate ES|QL', async (applyChartRules) => {
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)',
     } as Awaited<ReturnType<typeof generateEsql>>);
@@ -193,7 +193,7 @@ describe('createVisualizationGraph', () => {
       schema: {},
       existingConfig: JSON.stringify(parsedExistingConfig),
       parsedExistingConfig,
-      presentationMode: mode,
+      applyChartRules,
       esqlQuery: '',
       currentAttempt: 0,
       actions: [],
@@ -220,7 +220,7 @@ describe('createVisualizationGraph', () => {
         [
           'system',
           expect.stringContaining(
-            mode === 'enhance'
+            applyChartRules
               ? 'Reauthor the presentation.'
               : 'preserve unrelated presentation settings'
           ),
@@ -364,7 +364,7 @@ describe('createVisualizationGraph', () => {
     }
   });
 
-  it.each(['focused', 'enhance'] as const)('%s preserves layer queries', async (mode) => {
+  it.each([false, true])('applyChartRules=%s preserves layer queries', async (applyChartRules) => {
     const firstQuery = 'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 1h)';
     const secondQuery = 'FROM metrics-* | STATS cpu = AVG(cpu) BY bucket = BUCKET(@timestamp, 1h)';
     const parsedExistingConfig = {
@@ -391,7 +391,7 @@ describe('createVisualizationGraph', () => {
       existingConfig: JSON.stringify(parsedExistingConfig),
       parsedExistingConfig,
       preserveESQL: true,
-      presentationMode: mode,
+      applyChartRules,
       esqlQuery: firstQuery,
       currentAttempt: 0,
       actions: [],

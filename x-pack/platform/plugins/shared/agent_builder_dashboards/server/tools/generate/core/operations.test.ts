@@ -1715,7 +1715,7 @@ describe('executeDashboardOperations', () => {
                 type: 'vis',
                 panelId: 'panel-1',
                 query: 'make this a bar chart',
-                presentationMode: 'enhance',
+                applyChartRules: true,
                 preserveESQL: true,
               },
               {
@@ -1723,7 +1723,7 @@ describe('executeDashboardOperations', () => {
                 type: 'vis',
                 panelId: 'panel-2',
                 query: 'make this a line chart',
-                presentationMode: 'enhance',
+                applyChartRules: true,
                 preserveESQL: false,
               },
             ],
@@ -1741,14 +1741,14 @@ describe('executeDashboardOperations', () => {
       expect(resolvePanelContent).toHaveBeenCalledWith(
         expect.objectContaining({
           identifier: 'panel-1',
-          presentationMode: 'enhance',
+          applyChartRules: true,
           preserveESQL: true,
         })
       );
       expect(resolvePanelContent).toHaveBeenCalledWith(
         expect.objectContaining({
           identifier: 'panel-2',
-          presentationMode: 'enhance',
+          applyChartRules: true,
           preserveESQL: false,
         })
       );

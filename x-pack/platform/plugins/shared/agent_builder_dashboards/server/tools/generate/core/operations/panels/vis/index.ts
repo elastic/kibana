@@ -8,10 +8,6 @@
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import {
-  presentationModeSchema,
-  type PresentationMode,
-} from '@kbn/agent-builder-visualizations-server';
-import {
   MAX_VEGA_SPEC_LENGTH,
   VEGA_VIS_TYPE,
   type VisualizationRenderer,
@@ -55,7 +51,8 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   renderer?: VisualizationRenderer;
   /** Keep the panel's existing ES|QL query and column bindings instead of regenerating them. */
   preserveESQL?: boolean;
-  presentationMode?: PresentationMode;
+  /** Reauthor the presentation from the chart rules instead of applying only the requested changes. */
+  applyChartRules?: boolean;
 }
 
 const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
@@ -200,10 +197,11 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
       .describe(
         '(optional) Set true to keep the existing ES|QL query of the panel instead of regenerating it, e.g. when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds) or chart type. Omit it when the edit changes what the panel measures.'
       ),
-    presentationMode: presentationModeSchema
+    applyChartRules: z
+      .boolean()
       .optional()
       .describe(
-        'Lens only. "enhance" applies all presentation defaults, replacing custom styling. "focused" (default) changes only requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
+        '(optional) Lens only. Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
       ),
   });
 
