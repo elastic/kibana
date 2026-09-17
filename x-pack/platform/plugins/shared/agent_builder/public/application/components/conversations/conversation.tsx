@@ -76,8 +76,11 @@ export const Conversation: React.FC<{}> = () => {
   });
 
   const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
+  const [timelineContent, setTimelineContent] = useState<HTMLDivElement | null>(null);
+
   const { height: scrollContainerHeight } = useResizeObserver(scrollContainer, 'height');
   const anchoredItemKey = useAnchoredItemKey();
+
   const {
     showScrollButton,
     onMessageSent,
@@ -87,6 +90,7 @@ export const Conversation: React.FC<{}> = () => {
   } = useConversationScrollActions({
     scrollContainer,
     scrollContainerHeight,
+    timelineContent,
     anchoredItemKey,
   });
 
@@ -186,7 +190,9 @@ export const Conversation: React.FC<{}> = () => {
             css={scrollableStyles}
           >
             <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
-              <TimelineConnector />
+              <div ref={setTimelineContent}>
+                <TimelineConnector />
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
           {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
