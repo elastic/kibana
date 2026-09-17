@@ -64,7 +64,7 @@ You can configure the create alert action through the form view or using a JSON 
 The create alert action form has the following configuration properties.
 
 Message
-:   The message for the alert (required).
+:   The message for the alert (required). {{jsm}} limits this field to 130 characters. {{kib}} truncates longer values, including values expanded from Mustache templates, instead of failing the action.
 
 Jira Service Management tags
 :   The tags for the alert (optional).

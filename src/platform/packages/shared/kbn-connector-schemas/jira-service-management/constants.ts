@@ -20,6 +20,12 @@ export const MESSAGE_NON_EMPTY = i18n.translate(
   }
 );
 
+/** Jira Service Management's create-alert `message` API limit. */
+export const MESSAGE_MAX_LENGTH = 130;
+
+/** HTTP-facing schema bound for `message`; the connector truncates to `MESSAGE_MAX_LENGTH`. */
+export const MESSAGE_SCHEMA_MAX_LENGTH = 15000;
+
 export enum SUB_ACTION {
   CreateAlert = 'createAlert',
   CloseAlert = 'closeAlert',

@@ -15,6 +15,7 @@ import {
   SUB_ACTION,
   CloseAlertParamsSchema,
   CreateAlertParamsSchema,
+  MESSAGE_MAX_LENGTH,
   Response,
 } from '@kbn/connector-schemas/jira-service-management';
 import type {
@@ -90,7 +91,11 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
       {
         method: 'post',
         url,
-        data: { ...params, ...JiraServiceManagementConnector.createAliasObj(params.alias) },
+        data: {
+          ...params,
+          message: this.truncateMessage(params.message),
+          ...JiraServiceManagementConnector.createAliasObj(params.alias),
+        },
         headers: this.createHeaders(),
         responseSchema: Response,
       },
@@ -108,6 +113,17 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
     const newAlias = JiraServiceManagementConnector.createAlias(alias);
 
     return { alias: newAlias };
+  }
+
+  private truncateMessage(message: string): string {
+    if (message.length <= MESSAGE_MAX_LENGTH) {
+      return message;
+    }
+
+    this.logger.warn(
+      `connector "${this.connector.id}" message length ${message.length} exceeds ${MESSAGE_MAX_LENGTH} and has been truncated`
+    );
+    return message.slice(0, MESSAGE_MAX_LENGTH);
   }
 
   private static createAlias(alias: string) {
