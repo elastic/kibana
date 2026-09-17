@@ -2822,6 +2822,10 @@ paths:
                   description: Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
                   maxLength: 256
@@ -3107,6 +3111,10 @@ paths:
                   description: Optional new description for the attachment.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
               required:
                 - data
       responses:
@@ -3408,7 +3416,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview; added in 9.5.0
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
@@ -3889,7 +3898,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview; added in 9.5.0
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
@@ -8662,18 +8672,6 @@ paths:
             maxLength: 256
             minLength: 1
             type: string
-        - description: Filter by tags. Accepts a single string or an array.
-          in: query
-          name: tags
-          required: false
-          schema:
-            items:
-              maxLength: 128
-              minLength: 1
-              type: string
-            maxItems: 10
-            minItems: 1
-            type: array
         - description: Filter by enabled status. Accepts the strings true or false.
           in: query
           name: enabled
@@ -8728,8 +8726,6 @@ paths:
                           expression: 'rule.tags: "production"'
                         name: Notify on production alerts
                         snoozed_until: null
-                        tags:
-                          - production
                         throttle:
                           interval: null
                           strategy: on_status_change
@@ -8854,8 +8850,6 @@ paths:
                   matcher:
                     expression: 'rule.tags: "production"'
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -8885,8 +8879,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9883,8 +9875,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10051,8 +10041,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts (updated)
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10213,8 +10201,6 @@ paths:
                   matcher:
                     expression: 'rule.tags: "production"'
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -10244,8 +10230,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10279,8 +10263,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10452,8 +10434,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10624,8 +10604,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10806,8 +10784,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10978,8 +10954,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -98396,12 +98370,6 @@ components:
           description: The ISO datetime until which the policy is snoozed, or null if not snoozed.
           nullable: true
           type: string
-        tags:
-          description: Tags associated with the action policy.
-          items:
-            type: string
-          nullable: true
-          type: array
         throttle:
           additionalProperties: false
           description: The throttle configuration for notifications.
@@ -98452,7 +98420,6 @@ components:
         - destinations
         - matcher
         - group_by
-        - tags
         - grouping_mode
         - throttle
         - snoozed_until
@@ -99147,14 +99114,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          type: array
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
           description: The throttle configuration for notifications.
@@ -99979,15 +99938,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          nullable: true
-          type: array
         throttle:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
