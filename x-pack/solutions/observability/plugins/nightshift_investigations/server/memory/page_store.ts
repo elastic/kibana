@@ -13,19 +13,20 @@ import {
   type MemoryPage,
   type MemoryStats,
 } from '../../common/memory';
+import { applyUpdates, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
 
 const MAX_LIST_SIZE = 500;
 const MEMORY_TAG = 'memory';
 const SPACE_ID_FIELD = 'attributes.space_id';
 
-const HALF_LIFE_SEC = 7 * 24 * 3600;
-const DECAY_LAMBDA = Math.log(2) / HALF_LIFE_SEC;
+export type { CounterUpdate };
 
 export interface MemoryPageStore {
   list: (options?: { status?: StoredMemoryStatus }) => Promise<{
     pages: MemoryPage[];
     stats: MemoryStats;
   }>;
+  retrieve: (options?: { query?: string; size?: number }) => Promise<MemoryPage[]>;
   get: (id: string) => Promise<MemoryPage | undefined>;
   getByName: (name: string) => Promise<MemoryPage | undefined>;
   upsert: (page: {
@@ -44,7 +45,7 @@ export interface MemoryPageStore {
     };
     user: string;
   }) => Promise<MemoryPage>;
-  corroborate: (id: string) => Promise<MemoryPage | undefined>;
+  applyCounterUpdates: (updates: readonly CounterUpdate[]) => Promise<void>;
   archive: (id: string) => Promise<MemoryPage | undefined>;
   delete: (id: string) => Promise<void>;
   pruneDuplicates: () => Promise<number>;
@@ -78,32 +79,45 @@ export const slugFromMemoryId = (id: string): string => {
   return id;
 };
 
-const calculateConfidence = (imp: number, conv: number): number => {
-  if (imp <= 0) return 0;
-  return Math.min(1, imp / 50.0);
+export const isoToEpochSeconds = (iso: string): number => {
+  const ms = Date.parse(iso);
+  return Number.isFinite(ms) ? ms / 1000 : 0;
 };
 
-const applyTelemetryDecayAndLabelling = (page: MemoryPage, nowMs: number = Date.now()): MemoryPage => {
-  const tel = page.telemetry;
-  const lastTime = new Date(tel.last_impression_time).getTime();
-  const timeDiffSec = Math.max(0, (nowMs - lastTime) / 1000.0);
-  const decayFactor = Math.exp(-DECAY_LAMBDA * timeDiffSec);
+export const epochSecondsToIso = (epochSeconds: number): string =>
+  new Date(epochSeconds * 1000).toISOString();
 
-  const decayedImp = tel.impressions * decayFactor;
-  const decayedConv = tel.conversions * decayFactor;
+const toCounterState = (telemetry: MemoryPage['telemetry']): CounterState => ({
+  impressions: telemetry.impressions,
+  conversions: telemetry.conversions,
+  lastTime: isoToEpochSeconds(telemetry.last_impression_time),
+});
 
-  const useful = decayedImp > 0 ? (decayedConv / decayedImp) : 0;
-  const confidence = calculateConfidence(decayedImp, decayedConv);
-
+/** Read-time decay for headers / stats. Does not change stored `last_impression_time`. */
+export const toMemoryDisplayTelemetry = (
+  page: MemoryPage,
+  nowSec: number
+): {
+  impressions: number;
+  conversions: number;
+  conversionRate: number;
+  confidence: number;
+  last_impression_time: string;
+} => {
+  const shown = displayTelemetry(toCounterState(page.telemetry), nowSec);
   return {
-    ...page,
-    telemetry: {
-      impressions: decayedImp,
-      conversions: decayedConv,
-      last_impression_time: new Date(nowMs).toISOString(),
-    },
+    impressions: shown.impressions,
+    conversions: shown.conversions,
+    conversionRate: shown.conversionRate,
+    confidence: shown.confidence,
+    last_impression_time: page.telemetry.last_impression_time,
   };
 };
+
+const memoryTags = (tags: string[]): string[] => [
+  MEMORY_TAG,
+  ...tags.filter((tag) => tag !== MEMORY_TAG),
+];
 
 const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined => {
   if (source.title === undefined || source.title.length === 0) {
@@ -131,7 +145,8 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
     telemetry: {
       impressions: Number(source.attributes?.impressions ?? 0.0),
       conversions: Number(source.attributes?.conversions ?? 0.0),
-      last_impression_time: source.attributes?.last_impression_time ?? new Date().toISOString(),
+      last_impression_time:
+        source.attributes?.last_impression_time ?? source['@timestamp'] ?? new Date().toISOString(),
     },
   };
 };
@@ -141,11 +156,13 @@ export const createMemoryPageStore = ({
   logger,
   spaceId,
   signal,
+  now = () => Date.now() / 1000,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
   signal?: AbortSignal;
+  now?: () => number;
 }): MemoryPageStore => {
   const isIndexNotFoundError = (err: unknown): boolean => {
     const statusCode = (err as { statusCode?: number }).statusCode;
@@ -160,25 +177,24 @@ export const createMemoryPageStore = ({
 
   const listAll = async (): Promise<MemoryPage[]> => {
     try {
-      const response = await esClient.search<StoredMemoryPage>({
-        index: MEMORY_AI_INDEX_DEST,
-        query: {
-          bool: {
-            filter: [
-              { term: { tags: MEMORY_TAG } },
-              { term: { [SPACE_ID_FIELD]: spaceId } }
-            ],
+      const response = await esClient.search<StoredMemoryPage>(
+        {
+          index: MEMORY_AI_INDEX_DEST,
+          query: {
+            bool: {
+              filter: [{ term: { tags: MEMORY_TAG } }, { term: { [SPACE_ID_FIELD]: spaceId } }],
+            },
           },
+          size: MAX_LIST_SIZE,
+          sort: [{ '@timestamp': { order: 'desc' } }],
         },
-        size: MAX_LIST_SIZE,
-        sort: [{ '@timestamp': { order: 'desc' } }],
-        signal,
-      });
+        { signal }
+      );
 
       return response.hits.hits.flatMap((hit) => {
         if (!hit._id || !hit._source) return [];
         const page = toPage(toPageId(hit._id), hit._source);
-        return page ? [applyTelemetryDecayAndLabelling(page)] : [];
+        return page ? [page] : [];
       });
     } catch (err) {
       if (isIndexNotFoundError(err)) return [];
@@ -196,12 +212,13 @@ export const createMemoryPageStore = ({
         return true;
       });
 
-      // Compute statistics over filtered set
+      const nowSec = now();
       let decayed_impressions = 0;
       let decayed_conversions = 0;
-      for (const p of filtered) {
-        decayed_impressions += p.telemetry.impressions;
-        decayed_conversions += p.telemetry.conversions;
+      for (const page of filtered) {
+        const display = toMemoryDisplayTelemetry(page, nowSec);
+        decayed_impressions += display.impressions;
+        decayed_conversions += display.conversions;
       }
 
       return {
@@ -214,17 +231,65 @@ export const createMemoryPageStore = ({
       };
     },
 
+    async retrieve({ query, size } = {}) {
+      const trimmed = query?.trim();
+      const isSearch = trimmed !== undefined && trimmed.length > 0;
+      const pageSize = size ?? (isSearch ? 50 : 150);
+
+      try {
+        const response = await esClient.search<StoredMemoryPage>(
+          {
+            index: MEMORY_AI_INDEX_DEST,
+            query: {
+              bool: {
+                filter: [{ term: { tags: MEMORY_TAG } }, { term: { [SPACE_ID_FIELD]: spaceId } }],
+                must_not: [{ term: { 'attributes.status': 'archived' } }],
+                ...(isSearch
+                  ? {
+                      must: [
+                        {
+                          bool: {
+                            should: [
+                              { match: { title: trimmed } },
+                              { match: { content: trimmed } },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    }
+                  : {}),
+              },
+            },
+            size: pageSize,
+            ...(isSearch ? {} : { sort: [{ '@timestamp': { order: 'desc' as const } }] }),
+          },
+          { signal }
+        );
+
+        return response.hits.hits.flatMap((hit) => {
+          if (!hit._id || !hit._source) return [];
+          const page = toPage(toPageId(hit._id), hit._source);
+          return page ? [page] : [];
+        });
+      } catch (err) {
+        if (isIndexNotFoundError(err)) return [];
+        throw err;
+      }
+    },
+
     async get(id) {
       const storedId = toStoredId(id);
       try {
-        const response = await esClient.get<StoredMemoryPage>({
-          index: MEMORY_AI_INDEX_DEST,
-          id: storedId,
-          signal,
-        });
+        const response = await esClient.get<StoredMemoryPage>(
+          {
+            index: MEMORY_AI_INDEX_DEST,
+            id: storedId,
+          },
+          { signal }
+        );
         if (response.found && response._source) {
-          const page = toPage(id, response._source);
-          return page ? applyTelemetryDecayAndLabelling(page) : undefined;
+          return toPage(id, response._source);
         }
         return undefined;
       } catch (err) {
@@ -245,15 +310,15 @@ export const createMemoryPageStore = ({
       const storedId = toStoredId(id);
 
       const existing = await this.get(id);
-      const now = new Date().toISOString();
+      const nowIso = epochSecondsToIso(now());
 
       const document: StoredMemoryPage = {
-        '@timestamp': now,
+        '@timestamp': nowIso,
         type: 'memory',
         title: page.title,
         description: page.description,
         content: page.content,
-        tags: [MEMORY_TAG, ...page.tags],
+        tags: memoryTags(page.tags),
         search_embedding: `${page.title}\n\n${page.content}`,
         attributes: {
           status: page.status,
@@ -261,54 +326,125 @@ export const createMemoryPageStore = ({
           space_id: spaceId,
           categories: page.categories,
           references: page.references,
-          created_at: existing?.created_at ?? now,
-          updated_at: now,
+          created_at: existing?.created_at ?? nowIso,
+          updated_at: nowIso,
           created_by: existing?.created_by ?? page.user,
           updated_by: page.user,
           impressions: page.telemetry?.impressions ?? existing?.telemetry.impressions ?? 0.0,
           conversions: page.telemetry?.conversions ?? existing?.telemetry.conversions ?? 0.0,
-          last_impression_time: page.telemetry?.last_impression_time ?? existing?.telemetry.last_impression_time ?? now,
+          last_impression_time:
+            page.telemetry?.last_impression_time ??
+            existing?.telemetry.last_impression_time ??
+            nowIso,
         },
       };
 
-      await esClient.index({
-        index: MEMORY_AI_INDEX_DEST,
-        id: storedId,
-        document,
-        refresh: 'wait_for',
-        signal,
-      });
+      await esClient.index(
+        {
+          index: MEMORY_AI_INDEX_DEST,
+          id: storedId,
+          document,
+          refresh: 'wait_for',
+        },
+        { signal }
+      );
 
       const updated = toPage(id, document);
       if (!updated) {
         throw new Error(`Failed to map standard index response to MemoryPage for ${id}`);
       }
-      return applyTelemetryDecayAndLabelling(updated);
+      return updated;
     },
 
-    async corroborate(id) {
-      const existing = await this.get(id);
-      if (!existing || existing.status === 'archived') {
-        return undefined;
+    async applyCounterUpdates(updates) {
+      if (updates.length === 0) {
+        return;
       }
 
-      const updated = await this.upsert({
-        slug: existing.slug,
-        title: existing.title,
-        description: existing.description,
-        content: existing.content,
-        tags: existing.tags,
-        categories: existing.categories,
-        references: existing.references,
-        status: existing.status,
-        telemetry: {
-          impressions: existing.telemetry.impressions,
-          conversions: existing.telemetry.conversions + 1.0, // Conversions boost on corroboration
-          last_impression_time: new Date().toISOString(),
+      const uniqueIds = [...new Set(updates.map((update) => update.id))];
+      const storedIds = uniqueIds.map(toStoredId);
+
+      let docs: Array<{
+        _id?: string;
+        found?: boolean;
+        _source?: StoredMemoryPage;
+      }>;
+      try {
+        const response = await esClient.mget<StoredMemoryPage>(
+          {
+            index: MEMORY_AI_INDEX_DEST,
+            ids: storedIds,
+          },
+          { signal }
+        );
+        docs = response.docs;
+      } catch (err) {
+        if (isIndexNotFoundError(err)) {
+          return;
+        }
+        throw err;
+      }
+
+      const sourceByPageId = new Map<string, StoredMemoryPage>();
+      for (const doc of docs) {
+        if (!doc._id || doc.found === false || !doc._source) {
+          continue;
+        }
+        sourceByPageId.set(toPageId(doc._id), doc._source);
+      }
+
+      const nowSec = now();
+      const current: Record<string, CounterState> = {};
+      const sourcesToWrite: Array<{ id: string; source: StoredMemoryPage }> = [];
+
+      for (const id of uniqueIds) {
+        const source = sourceByPageId.get(id);
+        const page = source ? toPage(id, source) : undefined;
+        if (!page || page.status === 'archived') {
+          continue;
+        }
+        current[id] = toCounterState(page.telemetry);
+        sourcesToWrite.push({ id, source });
+      }
+
+      const next = applyUpdates(
+        current,
+        updates.filter((update) => current[update.id] !== undefined),
+        nowSec
+      );
+
+      const operations: object[] = [];
+      for (const { id, source } of sourcesToWrite) {
+        const counter = next[id];
+        if (!counter) {
+          continue;
+        }
+        const document: StoredMemoryPage = {
+          ...source,
+          attributes: {
+            ...source.attributes,
+            impressions: counter.impressions,
+            conversions: counter.conversions,
+            last_impression_time: epochSecondsToIso(counter.lastTime),
+          },
+        };
+        operations.push({ index: { _index: MEMORY_AI_INDEX_DEST, _id: toStoredId(id) } }, document);
+      }
+
+      if (operations.length === 0) {
+        return;
+      }
+
+      const bulk = await esClient.bulk(
+        {
+          refresh: 'wait_for',
+          operations,
         },
-        user: existing.updated_by,
-      });
-      return updated;
+        { signal }
+      );
+      if (bulk.errors) {
+        logger.warn('Memory counter bulk update reported item errors');
+      }
     },
 
     async archive(id) {
@@ -317,7 +453,7 @@ export const createMemoryPageStore = ({
         return undefined;
       }
 
-      const updated = await this.upsert({
+      return this.upsert({
         slug: existing.slug,
         title: existing.title,
         description: existing.description,
@@ -326,20 +462,22 @@ export const createMemoryPageStore = ({
         categories: existing.categories,
         references: existing.references,
         status: 'archived',
+        telemetry: existing.telemetry,
         user: existing.updated_by,
       });
-      return updated;
     },
 
     async delete(id) {
       const storedId = toStoredId(id);
       try {
-        await esClient.delete({
-          index: MEMORY_AI_INDEX_DEST,
-          id: storedId,
-          refresh: 'wait_for',
-          signal,
-        });
+        await esClient.delete(
+          {
+            index: MEMORY_AI_INDEX_DEST,
+            id: storedId,
+            refresh: 'wait_for',
+          },
+          { signal }
+        );
       } catch (err) {
         if (!isIndexNotFoundError(err) && (err as { statusCode?: number }).statusCode !== 404) {
           throw err;
@@ -348,8 +486,6 @@ export const createMemoryPageStore = ({
     },
 
     async pruneDuplicates() {
-      // Direct standard index stores carry exactly one document per space-scoped ID,
-      // meaning duplicates are mathematically impossible! Returns 0 pruned.
       return 0;
     },
   };

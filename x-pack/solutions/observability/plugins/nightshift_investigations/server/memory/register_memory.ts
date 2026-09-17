@@ -14,8 +14,12 @@ import { i18n } from '@kbn/i18n';
 import { MEMORY_AI_INDEX_DEST, MEMORY_AI_INDEX_ID } from '../../common/memory';
 import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
 import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
-import { materializeMemory } from './materialize';
-import { createLlmProposeMemoryEdits, optimizeMemory } from './optimize';
+import { materializeMemory, readRecalledIds } from './materialize';
+import {
+  createLlmProposeMemoryExtractions,
+  createLlmProposeMemoryLabels,
+  optimizeMemory,
+} from './optimize';
 import { createMemoryPageStore, type MemoryPageStore } from './page_store';
 
 export const createMemoryStore = ({
@@ -35,7 +39,9 @@ export const registerMemoryAiIndex = (
   logger: Logger
 ): void => {
   if (!contextEngine) {
-    logger.debug('contextEngine is not available — Semantic Memory AI index will not be registered');
+    logger.debug(
+      'contextEngine is not available — Semantic Memory AI index will not be registered'
+    );
     return;
   }
 
@@ -55,6 +61,7 @@ export const hydrateMemoryWorkspace = async ({
   conversationId,
   esClient,
   spaceId,
+  query,
   signal,
   logger,
 }: {
@@ -62,11 +69,34 @@ export const hydrateMemoryWorkspace = async ({
   conversationId: string;
   esClient: ElasticsearchClient;
   spaceId: string;
+  query?: string;
   signal?: AbortSignal;
   logger: Logger;
 }): Promise<void> => {
   const store = createMemoryStore({ esClient, logger, spaceId, signal });
-  await materializeMemory({ apiClient, conversationId, store, logger });
+  await materializeMemory({ apiClient, conversationId, store, logger, query });
+};
+
+const loadRecalledIds = async ({
+  apiClient,
+  conversationId,
+  logger,
+}: {
+  apiClient?: SandboxApiClient;
+  conversationId?: string;
+  logger: Logger;
+}): Promise<string[]> => {
+  if (!apiClient || !conversationId) {
+    logger.debug('Memory optimizer has no sandbox conversation — recalled set is empty');
+    return [];
+  }
+
+  try {
+    return await readRecalledIds({ apiClient, conversationId });
+  } catch (err) {
+    logger.debug(`Memory optimizer could not read .recalled.json: ${(err as Error).message}`);
+    return [];
+  }
 };
 
 export const runMemoryOptimize = async ({
@@ -74,6 +104,8 @@ export const runMemoryOptimize = async ({
   agentId,
   userMessage,
   assistantMessage,
+  conversationId,
+  apiClient,
   esClient,
   spaceId,
   signal,
@@ -85,6 +117,8 @@ export const runMemoryOptimize = async ({
   agentId?: string;
   userMessage: string;
   assistantMessage: string;
+  conversationId?: string;
+  apiClient?: SandboxApiClient;
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
@@ -116,9 +150,12 @@ export const runMemoryOptimize = async ({
 
   const store = createMemoryStore({ esClient, logger, spaceId, signal });
   const inferenceClient = inference.getClient({ request });
+  const recalledIds = await loadRecalledIds({ apiClient, conversationId, logger });
   await optimizeMemory({
     store,
-    proposeEdits: createLlmProposeMemoryEdits({ inferenceClient, connectorId }),
+    recalledIds,
+    proposeLabels: createLlmProposeMemoryLabels({ inferenceClient, connectorId }),
+    proposeExtractions: createLlmProposeMemoryExtractions({ inferenceClient, connectorId }),
     userMessage,
     assistantMessage,
     logger,

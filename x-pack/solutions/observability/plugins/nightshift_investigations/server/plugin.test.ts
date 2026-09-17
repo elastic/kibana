@@ -16,6 +16,7 @@ const createPlugin = () =>
       sandbox: undefined,
       cortex: { enabled: false },
       decision_trees: { enabled: true },
+      memory: { enabled: false },
     })
   );
 
