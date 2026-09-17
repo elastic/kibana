@@ -219,15 +219,18 @@ export function OverviewStatus({
         isClickable: areStatsClickable,
         onClickStat: getOnClickStat('down'),
       },
-      {
+    ];
+
+    if (statusConfig?.disabledCount) {
+      stats.push({
         dataTestSubj: 'xpack.uptime.synthetics.overview.status.disabled',
         statName: disabledDescription,
-        statNo: title(statusConfig?.disabledCount),
+        statNo: title(statusConfig.disabledCount),
         numberColor: 'subdued',
         isClickable: areStatsClickable,
         onClickStat: getOnClickStat('disabled'),
-      },
-    ];
+      });
+    }
 
     if (statusConfig?.pending) {
       stats.push({
