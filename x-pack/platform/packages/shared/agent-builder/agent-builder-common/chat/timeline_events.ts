@@ -64,6 +64,15 @@ export interface EventActor {
 }
 
 /**
+ * Whether a chat request executes the agent. `never` appends the user message to the conversation
+ * and returns, leaving the execution options unused.
+ */
+export enum ChatTriggerMode {
+  Always = 'always',
+  Never = 'never',
+}
+
+/**
  * What caused an agent run to start.
  */
 export enum TimelineTriggerType {

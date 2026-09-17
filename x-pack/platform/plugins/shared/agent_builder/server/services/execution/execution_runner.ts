@@ -36,7 +36,6 @@ import {
   isAgentBuilderError,
   AgentBuilderErrorCode,
   AgentExecutionMode,
-  ConversationRoundStatus,
   createInternalError,
   normalizeInteractive,
   DEFAULT_CONVERSATION_TITLE,
@@ -60,7 +59,7 @@ import {
   handleCancellation,
   executeAgent$,
   getConversation,
-  persistRoundInput,
+  isPendingResumeConversation,
   appendRoundTerminated$,
   appendResumeExecution$,
   executionStartedEvents$,
@@ -185,6 +184,8 @@ const handleConversationExecution = async ({
     subagentCreation,
     readOnly,
     projectRouting,
+    roundId: providedRoundId,
+    conversationCreated,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -200,7 +201,7 @@ const handleConversationExecution = async ({
   });
 
   // Get conversation — only the conversation-level part of the origin is persisted on it
-  const conversation = await getConversation({
+  const resolvedConversation = await getConversation({
     agentId,
     conversationId,
     autoCreateConversationWithId,
@@ -216,21 +217,14 @@ const handleConversationExecution = async ({
     origin,
   });
 
-  const roundId = uuidv4();
-  const receivedAt = new Date();
-
-  const useTwoPhase = !isPendingResumeConversation(conversation);
-  if (storeConversation && useTwoPhase) {
-    await persistRoundInput({
-      conversation,
-      conversationClient,
-      roundId,
-      receivedAt,
-      input: nextInput,
-      author,
-      origin: origin ? { type: origin.type } : undefined,
-    });
-  }
+  // The execution service resolved the conversation and wrote the opening user message before
+  // this run was dispatched, so the round reuses the id it opened and reports the creation the
+  // service performed — by now the conversation is stored either way.
+  const roundId = providedRoundId ?? uuidv4();
+  const conversation: ConversationWithOperation =
+    conversationCreated === undefined
+      ? resolvedConversation
+      : { ...resolvedConversation, operation: conversationCreated ? 'CREATE' : 'UPDATE' };
 
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
@@ -265,9 +259,7 @@ const handleConversationExecution = async ({
 
   // Generate title when creating a new conversation
   // OR when the conversation still carries the default placeholder title
-  const needsTitle =
-    (conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)) &&
-    !subagentCreation;
+  const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
   const title$ = (
     needsTitle
       ? generateTitle({
@@ -535,11 +527,6 @@ const stripResumeExecution = (event: ChatEvent): ChatEvent => {
   return { ...event, data };
 };
 
-const isPendingResumeConversation = (conversation: ConversationWithOperation): boolean => {
-  const lastRound = conversation.rounds[conversation.rounds.length - 1];
-  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
-};
-
 const buildPersistenceEvents = ({
   conversation,
   conversationClient,
@@ -562,10 +549,7 @@ const buildPersistenceEvents = ({
 
   if (useTwoPhase) {
     const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
-    const endTitle$ =
-      conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)
-        ? title$
-        : undefined;
+    const endTitle$ = conversationNeedsTitle(conversation) ? title$ : undefined;
 
     return roundStartedEvents$.pipe(
       concatMap((startEvent) =>

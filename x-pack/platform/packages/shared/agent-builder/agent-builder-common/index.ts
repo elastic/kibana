@@ -350,6 +350,7 @@ export {
   isEventsNativeVersion,
   EventActorType,
   TimelineTriggerType,
+  ChatTriggerMode,
   TimelineEventType,
   type ServerAssignedEventFields,
   type ConversationEventInput,

@@ -17,6 +17,7 @@ import {
   agentBuilderDefaultAgentId,
   CONVERSATION_ID_MAX_LENGTH,
   createBadRequestError,
+  createInternalError,
   ConversationAccessControlMode,
   ConversationOriginType,
 } from '@kbn/agent-builder-common';
@@ -579,6 +580,10 @@ export function registerChatRoutes({
           executionService,
           executionOptions: resolveExecutionOptions(payload, spaceId),
         });
+
+        if (!executionId) {
+          throw createInternalError('Callback converse requires an execution to report');
+        }
 
         return response.accepted<ChatCallbackAcceptedResponse>({
           body: {

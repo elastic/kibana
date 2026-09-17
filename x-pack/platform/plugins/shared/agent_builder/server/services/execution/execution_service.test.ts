@@ -5,15 +5,28 @@
  * 2.0.
  */
 
-import { of, Subject } from 'rxjs';
+import { lastValueFrom, of, Subject, toArray } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  CONVERSATION_SCHEMA_VERSION,
+  ChatEventType,
+  ChatTriggerMode,
+  ConversationRoundStatus,
+  ExecutionStatus,
+  isBadRequestError,
+} from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
 import type { AttachmentServiceStart } from '../attachments';
+import {
+  createConversationClientMock,
+  createEmptyConversation,
+  createRound,
+} from '../../test_utils';
+import { findConversationEvent } from './utils/chat_response';
 
 // Mock persistence module
 const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
@@ -101,12 +114,19 @@ describe('AgentExecutionService', () => {
     mergeAttachmentInputs: jest.fn(),
   };
 
+  const conversationClient = createConversationClientMock();
+  const conversationService = {
+    getScopedClient: jest.fn().mockImplementation(async () => conversationClient),
+    getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+    getCurrentUser: jest.fn().mockResolvedValue({ id: 'user-1', username: 'alice' }),
+  };
+
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
     taskManager,
     inference: {} as any,
-    conversationService: {} as any,
+    conversationService: conversationService as any,
     agentService: {} as any,
     runAgent: jest.fn(),
     attachmentsService,
@@ -638,6 +658,204 @@ describe('AgentExecutionService', () => {
 
       const results = await service.findExecutions(request);
       expect(results).toEqual([fakeExecution]);
+    });
+  });
+  describe('user message persistence', () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      agent_id: 'agent-1',
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+    });
+
+    const converse = ({
+      useTaskManager,
+      ...params
+    }: Record<string, unknown> & { useTaskManager?: boolean } = {}) =>
+      service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        useTaskManager,
+        params: {
+          agentId: 'agent-1',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+          ...params,
+        },
+      });
+
+    beforeEach(() => {
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.exists.mockResolvedValue(true);
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      conversationClient.create.mockResolvedValue(conversation);
+    });
+
+    it('writes the opening user message on the round it reserved', async () => {
+      await converse();
+
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [{ events }] = conversationClient.appendEvents.mock.calls[0];
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({ data: { message: 'Hello' } });
+
+      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      const { roundId } = agentParams as { roundId?: string };
+      expect(events[0].id).toBe(`${roundId}::user_message`);
+    });
+
+    it('records the execution before writing, so a replayed request cannot duplicate the message', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(
+        Object.assign(new Error('conflict'), { statusCode: 409 })
+      );
+      mockExecutionClient.peek.mockResolvedValue({
+        status: ExecutionStatus.running,
+      } as Awaited<ReturnType<AgentExecutionClient['peek']>>);
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        executionId: 'exec-1',
+        metadata: { execution_idempotency_key: 'slack-event-1' },
+        params: {
+          agentId: 'agent-1',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      });
+
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('creates the conversation the request asked for, carrying readOnly', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+
+      await converse({
+        conversationId: undefined,
+        readOnly: true,
+        autoCreateConversationWithId: true,
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ read_only: true })
+      );
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('leaves a conversation paused on a prompt to the resume path', async () => {
+      conversationClient.get.mockResolvedValue({
+        ...conversation,
+        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt })],
+      });
+
+      await converse();
+
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for the write before handing off to the runner', async () => {
+      let releaseWrite!: () => void;
+      conversationClient.appendEvents.mockReturnValue(
+        new Promise((resolve) => {
+          releaseWrite = () => resolve(conversation);
+        })
+      );
+
+      const pending = converse({ useTaskManager: false });
+      await new Promise(process.nextTick);
+
+      expect(mockHandleAgentExecution).not.toHaveBeenCalled();
+
+      releaseWrite();
+      await pending;
+
+      expect(mockHandleAgentExecution).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('executeAgent with trigger_mode never', () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      agent_id: 'agent-1',
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+    });
+
+    const append = (params: Record<string, unknown> = {}) =>
+      service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          conversationId: 'conversation-1',
+          autoCreateConversationWithId: true,
+          triggerMode: ChatTriggerMode.Never,
+          nextInput: { message: 'Pool limit is now 200' },
+          ...params,
+        },
+      });
+
+    beforeEach(() => {
+      conversationClient.exists.mockResolvedValue(true);
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      conversationClient.create.mockResolvedValue(conversation);
+      (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
+        getAccessedRefs: () => [],
+        getAll: () => [],
+        drainChanges: () => [],
+      });
+    });
+
+    it('persists the message without recording an execution', async () => {
+      const result = await append();
+
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [{ events }] = conversationClient.appendEvents.mock.calls[0];
+      expect(events[0]).toMatchObject({ data: { message: 'Pool limit is now 200' } });
+      // A standalone message must not look round-derived, or a round write would drop it.
+      expect(events[0].id).not.toContain('::user_message');
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      expect(mockHandleAgentExecution).not.toHaveBeenCalled();
+      expect(result.executionId).toBeUndefined();
+    });
+
+    it('reports the conversation through the same events an execution would', async () => {
+      const events = await lastValueFrom((await append()).events$.pipe(toArray()));
+
+      expect(events.map(({ type }) => type)).toEqual([ChatEventType.conversationUpdated]);
+      expect(findConversationEvent(events).data.conversation_id).toBe('conversation-1');
+    });
+
+    it('creates the conversation when the request names none', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+
+      const events = await lastValueFrom(
+        (await append({ conversationId: undefined })).events$.pipe(toArray())
+      );
+
+      expect(conversationClient.create).toHaveBeenCalledTimes(1);
+      expect(events.map(({ type }) => type)).toEqual([
+        ChatEventType.conversationIdSet,
+        ChatEventType.conversationCreated,
+      ]);
+    });
+
+    it('rejects a conversation that predates canonical event storage', async () => {
+      conversationClient.get.mockResolvedValue({ ...conversation, schema_version: undefined });
+
+      const error = await append().catch((thrown) => thrown);
+
+      expect(isBadRequestError(error)).toBe(true);
+      expect(error.message).toContain('canonical event storage');
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('requires something to say', async () => {
+      const error = await append({ nextInput: { message: '  ' } }).catch((thrown) => thrown);
+
+      expect(isBadRequestError(error)).toBe(true);
+      expect(error.message).toContain('input or attachments');
     });
   });
 });

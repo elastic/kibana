@@ -146,13 +146,20 @@ apiTest.describe(
         const requestsBefore = llmProxy.interceptedRequests.length;
         const headers = { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
 
-        await apiTest.step('a user message without a conversation is rejected', async () => {
-          const orphan = await apiClient.post(CHAT_CONVERSE, {
+        await apiTest.step('a user message without a conversation creates one', async () => {
+          const created = await apiClient.post(CHAT_CONVERSE, {
             headers,
             body: { trigger_mode: 'never', input: 'Pool limit is now 200' },
             responseType: 'json',
           });
-          expect(orphan).toHaveStatusCode(400);
+          expect(created).toHaveStatusCode(200);
+
+          const conversation = created.body as GetConversationResponse;
+          conversationIds.push(conversation.id);
+          expect(conversation.rounds).toStrictEqual([]);
+          expect(conversation.events?.map(({ type }) => type)).toStrictEqual([
+            TimelineEventType.userMessage,
+          ]);
         });
 
         const conversationId = await apiTest.step('create an empty conversation', async () => {
@@ -332,6 +339,43 @@ apiTest.describe(
       // Two completed rounds project to two event trios.
       expect(body.events).toHaveLength(ROUND_DERIVED_EVENT_TYPES.length * 2);
     });
+
+    apiTest(
+      'a user message on the streaming route reports the conversation and stops',
+      async ({ apiClient }) => {
+        const requestsBefore = llmProxy.interceptedRequests.length;
+
+        const res = await apiClient.post(CHAT_CONVERSE_ASYNC, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: { trigger_mode: 'never', input: 'Disk is filling up' },
+          responseType: 'buffer',
+        });
+
+        expect(res).toHaveStatusCode(200);
+        expect(String(res.headers['content-type'])).toContain('text/event-stream');
+
+        const streamText = (res.body as Buffer).toString('utf8');
+        const conversationId = conversationIdFromSseStream(streamText);
+        expect(conversationId, 'expected a conversation_id in the SSE stream').toBeDefined();
+        conversationIds.push(conversationId!);
+
+        // Nothing ran, so the stream carries the conversation and none of the agent's own events.
+        const streamed = parseSseBlocks(streamText).map(({ type }) => type);
+        expect(streamed).not.toContain(TimelineEventType.executionStarted);
+        expect(streamed).not.toContain(ChatEventType.messageChunk);
+        expect(llmProxy.interceptedRequests).toHaveLength(requestsBefore);
+
+        const stored = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          conversationId!
+        );
+        expect(stored.rounds).toStrictEqual([]);
+        expect(stored.events?.map(({ type }) => type)).toStrictEqual([
+          TimelineEventType.userMessage,
+        ]);
+      }
+    );
 
     apiTest('streaming converse responds with an event stream', async ({ apiClient }) => {
       const MOCKED_LLM_RESPONSE = 'streamed ack';

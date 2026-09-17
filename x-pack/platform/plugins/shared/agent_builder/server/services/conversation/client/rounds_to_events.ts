@@ -9,6 +9,7 @@ import type {
   Conversation,
   ConversationRound,
   ConversationRoundAuthor,
+  ConversationRoundOrigin,
   EventActor,
   ExecutionOutcome,
   ExecutionRunSummary,
@@ -61,6 +62,10 @@ const roundDerivedEventIds = (roundId: string) => ({
   execution: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`,
 });
 
+/** ID of the `user_message` event derived from a round. */
+export const roundUserMessageEventId = (roundId: string): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`;
+
 /** ID for a step event. */
 export const roundStepEventId = (roundId: string, sequence: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
@@ -70,15 +75,31 @@ type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'autho
 
 type ConversationForRoundEvents = Pick<Conversation, 'agent_id' | 'user'>;
 
+/**
+ * Builds a `user_message` event. The caller owns the id: round-derived when a round will run,
+ * a plain uuid for a message appended on its own, which `isRoundDerivedEventId` must not match.
+ */
 export const userMessageEvent = (
-  round: RoundStart,
+  {
+    id,
+    createdAt,
+    input,
+    author,
+    origin,
+  }: {
+    id: string;
+    createdAt: string;
+    input: RoundInput;
+    author?: ConversationRoundAuthor;
+    origin?: ConversationRoundOrigin;
+  },
   conversation: ConversationForRoundEvents
 ): TimelineEvent => ({
-  id: `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
+  id,
   type: TimelineEventType.userMessage,
-  created_at: round.started_at,
-  actor: userMessageActor(conversation, round),
-  data: round.input,
+  created_at: createdAt,
+  actor: userMessageActor(conversation, { author, origin }),
+  data: input,
 });
 
 export const executionStartedEvent = (
@@ -101,7 +122,16 @@ export const roundStartEvents = (
   round: RoundStart,
   conversation: ConversationForRoundEvents
 ): TimelineEvent[] => [
-  userMessageEvent(round, conversation),
+  userMessageEvent(
+    {
+      id: `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
+      createdAt: round.started_at,
+      input: round.input,
+      author: round.author,
+      origin: round.origin,
+    },
+    conversation
+  ),
   executionStartedEvent(round, conversation),
 ];
 

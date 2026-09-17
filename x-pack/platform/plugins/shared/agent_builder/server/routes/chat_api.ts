@@ -10,13 +10,7 @@ import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { createBadRequestError } from '@kbn/agent-builder-common';
-import type {
-  ChatRequestBodyPayload,
-  ChatConverseResponse,
-  UserMessagePayload,
-} from '../../common/http_api/chat';
-import { ChatTriggerMode } from '../../common/http_api/chat';
+import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
@@ -24,33 +18,7 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers, filterEventsNativeApiEvents } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { chatPayloadSchema, conversePayloadSchema } from './chat';
-
-/**
- * Validates a `trigger_mode: 'never'` request and returns the fields it appends to the
- * conversation. The execution options the payload may also carry are ignored, as nothing
- * executes.
- */
-const validateUserMessagePayload = ({
-  conversation_id: conversationId,
-  input,
-  attachments,
-}: ChatRequestBodyPayload): UserMessagePayload => {
-  if (!conversationId) {
-    throw createBadRequestError('User message requests require conversation_id');
-  }
-
-  if (!input?.trim() && !attachments?.length) {
-    throw createBadRequestError('User message requests require input or attachments');
-  }
-
-  return {
-    trigger_mode: ChatTriggerMode.Never,
-    conversation_id: conversationId,
-    input,
-    attachments,
-  };
-};
+import { chatPayloadSchema } from './chat';
 
 /** Events-native chat API */
 export function registerChatApiRoutes({
@@ -96,31 +64,6 @@ export function registerChatApiRoutes({
       wrapHandler(
         async (ctx, request, response) => {
           const payload = request.body as ChatRequestBodyPayload;
-
-          if (payload.trigger_mode === ChatTriggerMode.Never) {
-            const {
-              conversation_id: conversationId,
-              input,
-              attachments: attachmentInputs,
-            } = validateUserMessagePayload(payload);
-
-            const { attachments: attachmentsService, conversations: conversationsService } =
-              getInternalServices();
-
-            const attachments = await attachmentsService.validateAttachmentInputs(
-              attachmentInputs,
-              request
-            );
-
-            const body = await conversationsService.appendUserMessage({
-              request,
-              conversationId,
-              message: input,
-              attachments,
-            });
-
-            return response.ok({ body });
-          }
 
           const { conversations: conversationsService, execution: executionService } =
             getInternalServices();
@@ -170,7 +113,7 @@ export function registerChatApiRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { body: conversePayloadSchema },
+          request: { body: chatPayloadSchema },
         },
       },
       wrapHandler(

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs';
+import { of, shareReplay } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -15,13 +15,20 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent, InteractivityConfig } from '@kbn/agent-builder-common';
 import {
+  AgentExecutionMode,
+  ChatTriggerMode,
   agentBuilderDefaultAgentId,
   createBadRequestError,
+  createInternalError,
+  isEventsNativeVersion,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import type {
   AgentExecutionService,
   AgentExecution,
+  ConversationExecutionParams,
   ExecuteAgentParams,
   ExecuteAgentResult,
   FollowExecutionOptions,
@@ -42,6 +49,19 @@ import {
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
+import {
+  getConversation,
+  isPendingResumeConversation,
+  persistUserMessage,
+  type ConversationWithOperation,
+} from './utils/conversations';
+import {
+  createConversationCreatedEvent,
+  createConversationIdSetEvent,
+  createConversationUpdatedEvent,
+} from './utils/events';
+import { roundUserMessageEventId, userMessageActor } from '../conversation/client/rounds_to_events';
+import type { ConversationClient } from '../conversation';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -58,6 +78,12 @@ export const createAgentExecutionService = (
 
 const noop = () => {};
 
+/** A resolved conversation and the client scoped to the request that resolved it. */
+interface ConversationTarget {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+}
+
 class AgentExecutionServiceImpl implements AgentExecutionService {
   private readonly deps: AgentExecutionServiceDeps;
   private readonly logger: Logger;
@@ -67,16 +93,22 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     this.logger = deps.logger;
   }
 
-  async executeAgent({
-    request,
-    mode,
-    params,
-    executionId: providedExecutionId,
-    useTaskManager,
-    abortSignal,
-    metadata,
-    interactive,
-  }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
+  /**
+   * Runs an agent, and owns the one place a user message is persisted. A conversation request
+   * persists its message before anything executes, so it survives a failed run; with
+   * `trigger_mode: 'never'` the write is all that happens and no execution is created.
+   */
+  async executeAgent(args: ExecuteAgentParams): Promise<ExecuteAgentResult> {
+    const {
+      request,
+      mode,
+      params,
+      executionId: providedExecutionId,
+      useTaskManager,
+      abortSignal,
+      metadata,
+      interactive,
+    } = args;
     const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
@@ -84,19 +116,31 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    const validatedAttachments = await this.deps.attachmentsService.validateAttachmentInputs(
-      params.nextInput.attachments,
-      request
-    );
-    const validatedParams = validatedAttachments
-      ? {
-          ...params,
-          nextInput: {
-            ...params.nextInput,
-            attachments: validatedAttachments,
-          },
-        }
-      : params;
+    const conversationParams =
+      args.mode === AgentExecutionMode.conversation
+        ? await this.validateAttachments(args.params, request)
+        : undefined;
+    const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
+
+    const roundId = uuidv4();
+    const receivedAt = new Date();
+
+    // Resolving up front keeps conversation creation and the message write on the request node,
+    // before a Task Manager run is scheduled.
+    const target = conversationParams
+      ? await this.resolveConversation({ request, agentId, params: conversationParams })
+      : undefined;
+
+    if (conversationParams && target) {
+      if (conversationParams.triggerMode === ChatTriggerMode.Never) {
+        return this.appendUserMessage({
+          request,
+          params: conversationParams,
+          target,
+          receivedAt,
+        });
+      }
+    }
 
     let execution: AgentExecution;
     try {
@@ -105,7 +149,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionId,
         agentId,
         spaceId,
-        agentParams: validatedParams,
+        agentParams:
+          conversationParams && target
+            ? {
+                ...conversationParams,
+                // The conversation is resolved, and created when it was new, before the run is
+                // dispatched — so the run reads it rather than resolving it again.
+                conversationId: target.conversation.id,
+                autoCreateConversationWithId: true,
+                conversationCreated: target.conversation.operation === 'CREATE',
+                roundId,
+              }
+            : validatedParams,
         parentExecutionId: params.parentExecutionId,
         metadata,
         interactivity,
@@ -138,6 +193,22 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
 
       throw err;
+    }
+
+    // After the record, so an idempotency-key replay is detected before a second message lands.
+    if (conversationParams && target && this.shouldPersistRoundInput(conversationParams, target)) {
+      await persistUserMessage({
+        conversation: target.conversation,
+        conversationClient: target.conversationClient,
+        eventId: roundUserMessageEventId(roundId),
+        receivedAt,
+        input: conversationParams.nextInput,
+        author: await this.deps.conversationService.getConversationRoundAuthor({
+          request,
+          origin: conversationParams.origin,
+        }),
+        ...(conversationParams.origin ? { origin: { type: conversationParams.origin.type } } : {}),
+      });
     }
 
     // Wire up external abort signal to execution abort
@@ -390,6 +461,134 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ...options,
       spaceId: options?.spaceId || defaultSpaceId,
     });
+  }
+
+  private async validateAttachments<T extends { nextInput: { attachments?: unknown[] } }>(
+    params: T,
+    request: KibanaRequest
+  ): Promise<T> {
+    const validated = await this.deps.attachmentsService.validateAttachmentInputs(
+      params.nextInput.attachments as Parameters<
+        AttachmentServiceStart['validateAttachmentInputs']
+      >[0],
+      request
+    );
+
+    return validated
+      ? { ...params, nextInput: { ...params.nextInput, attachments: validated } }
+      : params;
+  }
+
+  /** Resolves, and when asked creates, the conversation a request targets. */
+  private async resolveConversation({
+    request,
+    agentId,
+    params,
+  }: {
+    request: KibanaRequest;
+    agentId: string;
+    params: ConversationExecutionParams;
+  }): Promise<ConversationTarget> {
+    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
+    const conversation = await getConversation({
+      agentId,
+      conversationId: params.conversationId,
+      autoCreateConversationWithId: params.autoCreateConversationWithId,
+      conversationClient,
+      accessControl: params.accessControl,
+      readOnly: params.readOnly,
+      origin: params.origin
+        ? { external_conversation_id: params.origin.external_conversation_id }
+        : undefined,
+      subagentCreation: params.subagentCreation,
+    });
+
+    return { conversation, conversationClient };
+  }
+
+  /** A resume continues a round that is already open, so it does not write a new message. */
+  private shouldPersistRoundInput(
+    params: ConversationExecutionParams,
+    { conversation }: ConversationTarget
+  ): boolean {
+    const { storeConversation = true } = params;
+
+    return storeConversation && !isPendingResumeConversation(conversation);
+  }
+
+  /**
+   * The `trigger_mode: 'never'` tail: persist the message and report the conversation, leaving
+   * the execution options unused. Emits the same conversation events an execution would, so
+   * callers read the conversation id the one way.
+   */
+  private async appendUserMessage({
+    request,
+    params,
+    target: { conversation, conversationClient },
+    receivedAt,
+  }: {
+    request: KibanaRequest;
+    params: ConversationExecutionParams;
+    target: ConversationTarget;
+    receivedAt: Date;
+  }): Promise<ExecuteAgentResult> {
+    if (params.storeConversation === false) {
+      throw createInternalError('A user message without execution has to be stored');
+    }
+
+    const created = conversation.operation === 'CREATE';
+
+    // A conversation this request creates is events-native from its first write; only a stored
+    // one can predate that.
+    if (!created && !isEventsNativeVersion(conversation.schema_version)) {
+      throw createBadRequestError('User messages require canonical event storage');
+    }
+
+    const message = params.nextInput.message?.trim() ?? '';
+    const attachments = params.nextInput.attachments ?? [];
+
+    if (!message && attachments.length === 0) {
+      throw createBadRequestError('User message requests require input or attachments');
+    }
+
+    const snapshot = conversation.attachments ?? [];
+    const stateManager = this.deps.attachmentsService.createStateManager(snapshot);
+
+    await this.deps.attachmentsService.mergeAttachmentInputs({
+      stateManager,
+      inputs: attachments,
+      request,
+      actor: ATTACHMENT_REF_ACTOR.user,
+    });
+
+    const user = await this.deps.conversationService.getCurrentUser({ request });
+    const author = await this.deps.conversationService.getConversationRoundAuthor({ request });
+    const createdAt = receivedAt.toISOString();
+
+    await persistUserMessage({
+      conversation,
+      conversationClient,
+      eventId: uuidv4(),
+      receivedAt,
+      input: { message, attachment_refs: stateManager.getAccessedRefs() },
+      author,
+      user,
+      additionalEvents: attachmentChangesToEvents(stateManager.drainChanges(), {
+        source: 'chat_input',
+        actor: userMessageActor({ ...conversation, user }, { author }),
+        created_at: createdAt,
+      }),
+      attachments: { snapshot, produced: stateManager.getAll() },
+    });
+
+    const stored = await conversationClient.get(conversation.id);
+
+    return {
+      events$: of(
+        ...(created ? [createConversationIdSetEvent(stored.id)] : []),
+        created ? createConversationCreatedEvent(stored) : createConversationUpdatedEvent(stored)
+      ),
+    };
   }
 
   private createExecutionClient(): AgentExecutionClient {
