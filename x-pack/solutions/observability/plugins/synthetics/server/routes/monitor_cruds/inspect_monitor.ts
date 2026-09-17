@@ -73,8 +73,9 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     const capabilities = await server.coreStart?.capabilities.resolveCapabilities(request, {
       capabilityPath: 'uptime.*',
     });
+    const canSave = Boolean(capabilities?.uptime?.save);
     const canRevealParams = canRevealParameterValues({
-      canSave: Boolean(capabilities?.uptime?.save),
+      canSave,
       canReadParamValues: Boolean(capabilities?.uptime?.canReadParamValues),
     });
 
@@ -93,7 +94,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
         privateLocations,
         spaceId,
         hideParams || !canRevealParams,
-        canRevealParams
+        canSave
       );
 
       const publicConfigs = result.publicConfigs;
