@@ -68,16 +68,18 @@ const SCOUT_FAILURES_FILE_RE = /^scout-failures-(.*)\.ndjson$/;
 
 /**
  * Runner-level errors (global setup/teardown, config, run timeout) are written by the reporter
- * to `scout-runner-errors-<runId>.json` next to `scout-failures-<runId>.ndjson`.
+ * to `scout-runner-errors-<runId>.json` next to `scout-failures-<runId>.ndjson`, as the last
+ * step of its `onEnd`. A missing sidecar therefore means the reporter did not finish, and the
+ * NDJSON cannot be trusted to explain the run's exit code.
  */
 const readScoutRunnerErrors = (ndjsonPath: string): string[] => {
   const runId = Path.basename(ndjsonPath).match(SCOUT_FAILURES_FILE_RE)?.[1];
   if (runId === undefined) {
-    return [];
+    return [`unrecognised failure report name: ${Path.basename(ndjsonPath)}`];
   }
   const runnerErrorsPath = Path.join(Path.dirname(ndjsonPath), `scout-runner-errors-${runId}.json`);
   if (!Fs.existsSync(runnerErrorsPath)) {
-    return [];
+    return [`runner errors sidecar missing (reporter did not complete): ${runnerErrorsPath}`];
   }
   const { errors } = JSON.parse(Fs.readFileSync(runnerErrorsPath, 'utf8')) as { errors: string[] };
   return errors;

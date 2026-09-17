@@ -123,11 +123,13 @@ describe('ScoutFailureTracker', () => {
     expect(fs.existsSync(tracker.getTrackingFilePath())).toBe(false);
   });
 
-  it('does not write a sidecar when there are no runner errors', () => {
+  it('writes an empty sidecar when there are no runner errors, marking the report complete', () => {
     const tracker = new ScoutFailureTracker(createMockLog(), tempDir, 'run-6');
 
     tracker.saveRunnerErrors({ status: 'passed', errors: [] });
 
-    expect(fs.existsSync(path.join(tempDir, 'scout-runner-errors-run-6.json'))).toBe(false);
+    expect(
+      JSON.parse(fs.readFileSync(path.join(tempDir, 'scout-runner-errors-run-6.json'), 'utf-8'))
+    ).toEqual({ status: 'passed', errors: [] });
   });
 });

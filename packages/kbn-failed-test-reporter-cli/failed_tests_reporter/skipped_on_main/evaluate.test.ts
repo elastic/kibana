@@ -260,10 +260,36 @@ describe('failure adapters', () => {
         JSON.stringify({ suite: 'suite b', title: 'test b', location: 'other.spec.ts' }),
       ].join('\n')
     );
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'scout-runner-errors-1.json'),
+      JSON.stringify({ status: 'failed', errors: [] })
+    );
 
     expect(collectScoutFailures([ndjsonPath])).toEqual([
       { kind: 'scout', file: SCOUT_FILE, suite: 'suite a', title: 'test a' },
       { kind: 'scout', file: 'other.spec.ts', suite: 'suite b', title: 'test b' },
+    ]);
+  });
+
+  it('treats a missing runner errors sidecar as a real failure, since the reporter did not complete', () => {
+    const ndjsonPath = Path.join(tmpDir, 'scout-failures-partial.ndjson');
+    Fs.writeFileSync(
+      ndjsonPath,
+      JSON.stringify({ suite: 'suite a', title: 'test a', location: SCOUT_FILE }) + '\n'
+    );
+
+    const failures = collectScoutFailures([ndjsonPath]);
+    const evaluation = evaluate(failures, (ref) =>
+      ref === 'main'
+        ? 'test.describe.skip("suite a", () => { test("test a", () => {}) })'
+        : 'test.describe("suite a", () => { test("test a", () => {}) })'
+    );
+
+    expect(evaluation.real).toEqual([
+      expect.objectContaining({
+        suite: 'Scout runner',
+        title: expect.stringContaining('sidecar missing'),
+      }),
     ]);
   });
 

@@ -132,18 +132,19 @@ export class ScoutFailureTracker {
    * Save runner-level errors to a sidecar file next to the tracking file. Kept out of the NDJSON
    * so the GitHub issue reporter does not open issues for them; `check_skipped_on_main` reads it
    * to refuse forgiving a run whose exit code is not explained by the tracked test failures.
+   *
+   * Always written, even with no errors: it is the last file the reporter produces, so its
+   * presence is what tells the consumer the failure report is complete.
    */
   saveRunnerErrors(runnerErrors: ScoutRunnerErrors) {
-    if (runnerErrors.errors.length === 0) {
-      return;
-    }
-
     fs.mkdirSync(path.dirname(this.runnerErrorsFilePath), { recursive: true });
     fs.writeFileSync(this.runnerErrorsFilePath, JSON.stringify(runnerErrors, null, 2), 'utf-8');
 
-    this.log.info(
-      `Saved ${runnerErrors.errors.length} Scout runner error(s) to: ${this.runnerErrorsFilePath}`
-    );
+    if (runnerErrors.errors.length > 0) {
+      this.log.info(
+        `Saved ${runnerErrors.errors.length} Scout runner error(s) to: ${this.runnerErrorsFilePath}`
+      );
+    }
   }
 
   /**
