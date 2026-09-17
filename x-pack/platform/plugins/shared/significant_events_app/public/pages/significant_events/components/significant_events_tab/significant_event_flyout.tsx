@@ -226,7 +226,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     onUpdateSuccess: onClose,
   });
 
-  const isClosed = latestEvent.status === 'closed';
+  const isOpen = latestEvent.status === 'open';
   const isDismissed = latestEvent.status === 'dismissed';
 
   useInterval(
@@ -252,7 +252,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       hideCloseButton
     >
       <FlyoutToolbarHeader>
-        {!isClosed && canManage && (
+        {isOpen && canManage && (
           <EuiFlexItem grow={false}>
             <EuiPopover
               aria-label={ACTIONS_BUTTON_ARIA_LABEL}

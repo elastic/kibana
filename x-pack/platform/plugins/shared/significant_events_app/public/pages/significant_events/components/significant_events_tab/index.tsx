@@ -141,7 +141,7 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
   const { canManage } = getNightshiftCapabilities(nightshift);
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent();
 
-  if (!canManage || event.status === 'closed') {
+  if (!canManage || event.status !== 'open') {
     return null;
   }
 
