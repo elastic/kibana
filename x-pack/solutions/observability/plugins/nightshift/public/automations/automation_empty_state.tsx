@@ -28,7 +28,7 @@ export function AutomationEmptyState({
         <p>
           {i18n.translate('xpack.nightshift.automations.emptyState.body', {
             defaultMessage:
-              'Automations watch for significant events and trigger investigations automatically. Create your first automation to get started.',
+              'Automations watch for events and trigger investigations automatically. Create your first automation to get started.',
           })}
         </p>
       }

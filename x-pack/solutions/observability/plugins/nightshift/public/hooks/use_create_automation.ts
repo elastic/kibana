@@ -21,6 +21,7 @@ type TriggerRow =
       ruleNamePattern?: string;
       ruleNameMatchMode?: 'substring' | 'regex';
       alertStatus?: 'firing' | 'recovered' | 'any';
+      tags?: string[];
     }
   | {
       kind: 'schedule';
