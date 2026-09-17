@@ -20,21 +20,27 @@ const USER_ERRORS_EXCEPTIONS = [
 
 // illegal_argument_exception and query_shard_exception are too broad to classify as user
 // errors globally (ES itself can produce them from framework-generated queries). These reason
-// substrings identify cases that are unambiguously caused by the rule's own query or data, and
-// they arrive wrapped in different exception types depending on the search path (an
-// illegal_argument_exception caused_by on a shard failure, or a query_shard_exception root
-// cause of a search_phase_execution_exception), so they are matched regardless of the wrapper.
-// Each substring must be one ES only produces when evaluating user-supplied query text against
-// the target field mapping — framework-generated queries do not emit them. When adding a new
-// substring, verify that property before landing.
+// substrings identify cases that ES only produces when evaluating user-supplied query text
+// against the target field mapping, and they arrive wrapped in different exception types
+// depending on the search path (an illegal_argument_exception caused_by on a shard failure, or
+// a query_shard_exception root cause of a search_phase_execution_exception), so they are
+// matched regardless of the wrapper. When adding a new substring, verify that
+// framework-generated queries cannot emit it before landing.
 const USER_ERROR_REASON_SUBSTRINGS = [
   'is not an IP string literal',
-  'Fielddata is disabled on',
   'Can only use prefix queries on keyword, text and wildcard fields',
 ];
 
+// Fielddata errors can also be emitted for framework-generated aggregations and sorts, so they
+// are only classified as user errors when accompanied by illegal_argument_exception, which is
+// how the known user-driven variants have been observed to arrive in shard failures.
+const isFielddataUserError = (errorString: string): boolean =>
+  errorString.includes('illegal_argument_exception') &&
+  errorString.includes('Fielddata is disabled on');
+
 const isUserErrorReason = (errorString: string): boolean =>
-  USER_ERROR_REASON_SUBSTRINGS.some((reason) => errorString.includes(reason));
+  USER_ERROR_REASON_SUBSTRINGS.some((reason) => errorString.includes(reason)) ||
+  isFielddataUserError(errorString);
 
 /**
  *
