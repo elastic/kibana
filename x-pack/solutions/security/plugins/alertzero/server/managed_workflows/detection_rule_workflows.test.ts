@@ -865,7 +865,7 @@ describe('detection rule workflows', () => {
 
         expect(launches.map(({ name }) => name)).toEqual(['run_review']);
         expect(launches[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID);
-        // A dropped or rejected start must not stop the remaining rules' reviews.
+        // A start the engine rejects must not stop the remaining rules' reviews.
         expect(launches[0]['on-failure']).toEqual({ continue: true });
         expect(tuningSteps.map(({ type }) => type)).not.toContain('waitForApproval');
         expect(tuningSteps.map(({ type }) => type)).not.toContain('workflow.execute');

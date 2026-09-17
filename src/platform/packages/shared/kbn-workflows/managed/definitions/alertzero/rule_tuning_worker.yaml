@@ -246,8 +246,9 @@ steps:
   # One review execution per rule, started without waiting. Each child parks on
   # its own approval gate for up to 72h; joining on them here would park this sweep
   # with them and block the space's scheduled sweeps behind a pending gate.
-  # A start that fails (child dropped by its per-rule concurrency, or the engine
-  # rejected it) must not stop the remaining rules from getting a review.
+  # A start the engine rejects (review disabled, input rejected) must not stop the
+  # remaining rules from getting a review. The child's per-rule drop concurrency
+  # is applied when the child task runs, so a duplicate never fails this step.
   - name: run_reviews
     type: foreach
     foreach: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows }}"
