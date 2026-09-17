@@ -323,20 +323,4 @@ describe('useConversationReadOnly', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(true));
     queryClient.clear();
   });
-
-  it('does not report loading while this client streams into an unfetched conversation', async () => {
-    setStreaming(true);
-    mockGet.mockReturnValue(new Promise(() => {}));
-    const { queryClient, Wrapper } = createWrapper();
-    const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
-
-    // The execution_started fetch runs through fetchQuery while the observer is disabled.
-    queryClient
-      .fetchQuery({ queryKey: queryKeys.conversations.byId(conversationId), queryFn: mockGet })
-      .catch(() => {});
-
-    await waitFor(() => expect(queryClient.isFetching()).toBe(1));
-    expect(result.current.isLoading).toBe(false);
-    queryClient.clear();
-  });
 });

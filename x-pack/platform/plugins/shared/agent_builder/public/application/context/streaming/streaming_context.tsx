@@ -122,11 +122,9 @@ export const StreamingProvider = ({
   }, [sendCancelAll, resumeCancelAll]);
 
   // Wrappers around `mutate` that set the per-id `activeStreams` entry SYNCHRONOUSLY before
-  // queueing the mutation. Without this, callers like `useSubmitMessage` (which call
-  // `mutate` and then immediately navigate to `/conversations/<uuid>`) would render the new
-  // URL with no `activeStreams` entry — the `useConversation` gate would open, fire a GET
-  // for the not-yet-persisted conversation, and 404. The mutation's `mutationFn` runs
-  // asynchronously, so setting the entry from inside `mutationFn` is too late.
+  // queueing the mutation, so the conversation reads as streaming (Stop, the scroll anchor) in
+  // the same render as the send. The mutation's `mutationFn` runs asynchronously, so setting the
+  // entry from inside it is too late.
   const mutateSendMessage = useCallback(
     (vars: SendMessageVars) => {
       setActiveStream(vars.conversationId, {

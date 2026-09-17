@@ -141,13 +141,11 @@ export const useConversationTitle = () => {
 export const useConversationReadOnly = () => {
   const conversationId = useConversationId();
   const { conversation, isFetching } = useConversation();
-  const isStreaming = useIsCurrentConversationStreaming();
 
   return {
     isReadOnly: conversation?.read_only ?? false,
-    // Not `isLoading`: v4 reports it for disabled queries too. A conversation this client is
-    // streaming into is not read-only, so its first fetch must not hide the input.
-    isLoading: Boolean(conversationId) && !conversation && isFetching && !isStreaming,
+    // Not `isLoading`: v4 reports it for disabled queries too.
+    isLoading: Boolean(conversationId) && !conversation && isFetching,
   };
 };
 
