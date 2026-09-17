@@ -41,6 +41,7 @@ export const WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION = {
   hidden: true,
   settings: {
     auto_expand_replicas: '0-1',
+    'index.lifecycle.prefer_ilm': false,
   },
   mappings: DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
 };
