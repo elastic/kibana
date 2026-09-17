@@ -3077,9 +3077,6 @@ importers:
       '@kbn/search-notebooks':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/search_notebooks
-      '@kbn/search-playground':
-        specifier: workspace:*
-        version: link:x-pack/solutions/search/plugins/search_playground
       '@kbn/search-queries':
         specifier: workspace:*
         version: link:x-pack/solutions/search/packages/kbn-search-queries
@@ -9381,8 +9378,6 @@ importers:
   x-pack/solutions/search/plugins/search_navigation: {}
 
   x-pack/solutions/search/plugins/search_notebooks: {}
-
-  x-pack/solutions/search/plugins/search_playground: {}
 
   x-pack/solutions/search/plugins/search_query_rules: {}
 

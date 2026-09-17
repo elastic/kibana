@@ -51,7 +51,9 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecati
   }
 };
 
-export const coreDeprecationProvider: ConfigDeprecationProvider = () => [
+export const coreDeprecationProvider: ConfigDeprecationProvider = ({ unusedFromRoot }) => [
   rewriteCorsSettings,
   rewriteBasePathDeprecation,
+  unusedFromRoot('xpack.searchPlayground.enabled', { level: 'warning' }),
+  unusedFromRoot('xpack.searchPlayground.ui.enabled', { level: 'warning' }),
 ];
