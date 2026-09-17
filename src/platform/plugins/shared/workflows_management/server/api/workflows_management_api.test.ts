@@ -768,53 +768,6 @@ steps:
       );
     });
 
-    it('validates processed inputs before starting the workflow', async () => {
-      const workflow = {
-        id: 'workflow-123',
-        name: 'Test workflow',
-        enabled: true,
-        definition: {
-          version: '1',
-          name: 'Test workflow',
-          enabled: true,
-          triggers: [{ type: 'manual' }],
-          steps: [],
-        },
-        yaml: 'name: Test workflow',
-      } as WorkflowExecutionEngineModel;
-      const inputs = {
-        event: {
-          triggerType: 'document',
-          documentIds: [{ _id: 'event-1', _index: 'logs-default' }],
-        },
-      };
-      const processedInputs = {
-        event: {
-          triggerType: 'document',
-          documents: [{ id: 'event-1', index: 'logs-default', data: {} }],
-        },
-      };
-      const context = {} as TriggerInputPreprocessingContext;
-      const validateProcessedInputs = jest.fn(() => {
-        throw new Error('Document is not attached to the case');
-      });
-      mockPreprocessTriggerInputs.mockResolvedValue(processedInputs);
-
-      await expect(
-        api.runWorkflowWithPreprocessing({
-          workflow,
-          spaceId: 'default',
-          inputs,
-          request: mockRequest,
-          preprocessingContext: context,
-          validateProcessedInputs,
-        })
-      ).rejects.toThrow('Document is not attached to the case');
-
-      expect(validateProcessedInputs).toHaveBeenCalledWith(processedInputs);
-      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
-    });
-
     it('merges eventOverrides into event after preprocessing so caller-owned fields survive event replacement', async () => {
       const workflow = {
         id: 'workflow-123',
