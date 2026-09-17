@@ -39,6 +39,7 @@ import { WorkersService } from './services/workers/workers_service';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ActionsService } from './services/actions/actions_service';
+import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
@@ -65,6 +66,7 @@ export class AlertZeroPlugin
   private conversationProposalsService?: ConversationProposalsService;
   private proposals?: AlertZeroStartDependencies['proposals'];
   private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
+  private huntServices?: HuntServices;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -141,6 +143,7 @@ export class AlertZeroPlugin
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
+      getHuntServices: () => this.requireHuntServices(),
     });
 
     return { isEnabled: true };
@@ -203,6 +206,13 @@ export class AlertZeroPlugin
       agentTypes: [agentType],
     });
 
+    this.huntServices = {
+      getScopedConversationClient: plugins.agentBuilder.conversations.getScopedClient,
+      getProposalsService: plugins.proposals.getProposalsService,
+      getAiIndexService: plugins.contextEngine.getAiIndexService,
+      getInference: () => plugins.inference,
+    };
+
     return {};
   }
 
@@ -250,6 +260,13 @@ export class AlertZeroPlugin
       );
     }
     return this.agentBuilderConversations;
+  }
+
+  private requireHuntServices(): HuntServices {
+    if (!this.huntServices) {
+      throw new Error('Hunt services are not available until the AlertZero plugin has started');
+    }
+    return this.huntServices;
   }
 
   private getSpaceId(request: KibanaRequest): string {

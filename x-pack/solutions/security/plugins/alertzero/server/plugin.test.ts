@@ -258,10 +258,13 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions,
+        agentBuilder: { conversations: { getScopedClient: jest.fn() } },
         proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
         agenticInvestigations: {
           getImpactClient: jest.fn(),
         },
+        contextEngine: { getAiIndexService: jest.fn() },
+        inference: {},
       } as never);
 
       expect(initializeManagedWorkflows).toHaveBeenCalledWith(
@@ -274,7 +277,10 @@ describe('AlertZeroPlugin feature-flag gating', () => {
     it('ensures the thin agent in the default space', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
-      const agentBuilder = { agents: { ensure: jest.fn() } };
+      const agentBuilder = {
+        agents: { ensure: jest.fn() },
+        conversations: { getScopedClient: jest.fn() },
+      };
 
       plugin.start(coreStart, {
         spaces: undefined,
@@ -284,6 +290,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         agenticInvestigations: {
           getImpactClient: jest.fn(),
         },
+        contextEngine: { getAiIndexService: jest.fn() },
+        inference: {},
       } as never);
 
       expect(ensureAgentSafe).toHaveBeenCalledWith(
