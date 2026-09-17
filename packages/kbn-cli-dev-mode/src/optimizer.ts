@@ -102,13 +102,15 @@ export class Optimizer {
     const log = this.createLog(options, '@kbn/optimizer');
 
     return Rx.defer(async () => {
-      const { buildSharedPackages } = await import('@kbn/rspack-optimizer');
-      await buildSharedPackages({
+      const { runSharedBuild } = await import('@kbn/rspack-optimizer');
+      const result = await runSharedBuild({
         repoRoot: options.repoRoot,
         dist: options.dist,
-        cache: options.cache,
         log,
       });
+      if (!result.success) {
+        throw new Error(`Shared frontend build failed: ${result.errors?.join(', ')}`);
+      }
     }).pipe(
       Rx.switchMap(
         () =>

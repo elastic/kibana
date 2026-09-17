@@ -77,7 +77,7 @@ describe('scripts/generate_plugin', () => {
 
     expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
-     info building required artifacts for the optimizer
+     info building shared frontend artifacts required by the optimizer
      info running @kbn/optimizer
      │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
      │ info stopping @kbn/optimizer

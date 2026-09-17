@@ -14,7 +14,6 @@ import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import type { ThemeTag } from './types';
 import { getInspectExecArgv } from './utils/inspect';
-import { watchSharedPackages, type SharedPackagesWatcher } from './build_shared_packages';
 
 export type OptimizerPhase = 'initializing' | 'running' | 'success' | 'issue' | 'error' | 'idle';
 
@@ -67,7 +66,6 @@ export class RspackOptimizer {
   private readonly phase$ = new Rx.ReplaySubject<OptimizerPhase>(1);
   private readonly options: RspackOptimizerOptions;
   private worker?: ChildProcess;
-  private sharedPackagesWatcher?: SharedPackagesWatcher;
   private isShuttingDown = false;
 
   constructor(options: RspackOptimizerOptions) {
@@ -83,17 +81,6 @@ export class RspackOptimizer {
 
     this.phase$.next('initializing');
     log.info('Starting RSPack build (using existing @kbn/ui-shared-deps)...');
-
-    if (this.options.watch) {
-      this.sharedPackagesWatcher = await watchSharedPackages({
-        repoRoot: this.options.repoRoot,
-        dist: this.options.dist,
-        log,
-      });
-      this.sharedPackagesWatcher.onRebuild(() => {
-        this.worker?.send({ type: 'invalidate' });
-      });
-    }
 
     return new Promise<void>((resolve, reject) => {
       // Spawn worker process
@@ -153,7 +140,6 @@ export class RspackOptimizer {
                 pluginScanDirs: this.options.pluginScanDirs,
                 allowlistPluginGroups: this.options.allowlistPluginGroups,
                 basePath: this.options.basePath,
-                buildSharedDeps: !this.options.watch,
               },
             });
             break;
@@ -236,7 +222,7 @@ export class RspackOptimizer {
         log.error(`RSPack worker error: ${err.message}`);
         reject(err);
       });
-    }).finally(() => this.closeSharedPackagesWatcher());
+    });
   }
 
   /**
@@ -255,12 +241,6 @@ export class RspackOptimizer {
       this.worker.kill('SIGKILL');
       this.worker = undefined;
     }
-    await this.closeSharedPackagesWatcher();
-  }
-
-  private async closeSharedPackagesWatcher(): Promise<void> {
-    await this.sharedPackagesWatcher?.close();
-    this.sharedPackagesWatcher = undefined;
   }
 
   /**

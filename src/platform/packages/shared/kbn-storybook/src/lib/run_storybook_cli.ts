@@ -9,16 +9,15 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { join } from 'path';
-import execa from 'execa';
 import { build } from '@storybook/core-server';
 import type { CLIOptions, BuilderOptions, LoadOptions } from '@storybook/types';
 import type { Flags } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { runSharedBuild } from '@kbn/rspack-optimizer';
 import * as constants from './constants';
 
 type StorybookCliOptions = CLIOptions & BuilderOptions & LoadOptions & { mode: 'dev' | 'static' };
-const sharedPackageBuilds = new Map<boolean, Promise<void>>();
 
 // Convert the flags to a Storybook loglevel
 export function getLogLevelFromFlags(flags: Flags) {
@@ -63,7 +62,15 @@ export async function buildStorybook({
     process.env.NODE_ENV = 'development';
   }
 
-  await buildSharedPackages(site);
+  const sharedBuild = await runSharedBuild({
+    repoRoot: REPO_ROOT,
+    dist: site,
+    watch: !site,
+  });
+  if (!sharedBuild.success) {
+    await sharedBuild.close?.();
+    throw new Error(`Shared frontend build failed: ${sharedBuild.errors?.join(', ')}`);
+  }
 
   try {
     // Some transitive deps of addon-docs are ESM and not loading properly
@@ -72,6 +79,7 @@ export async function buildStorybook({
     await build(config);
   } finally {
     require('fix-esm').unregister();
+    await sharedBuild.close?.();
   }
 }
 
@@ -99,22 +107,4 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       `,
     }
   );
-}
-
-async function buildSharedPackages(dist: boolean) {
-  const existingBuild = sharedPackageBuilds.get(dist);
-  if (existingBuild) {
-    return existingBuild;
-  }
-
-  const args = ['kbn', 'build-shared'];
-  if (dist) {
-    args.push('--dist', '--no-cache');
-  }
-
-  const buildPromise = execa('pnpm', args, { cwd: REPO_ROOT, stdio: 'inherit' }).then(
-    () => undefined
-  );
-  sharedPackageBuilds.set(dist, buildPromise);
-  return buildPromise;
 }

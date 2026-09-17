@@ -95,7 +95,7 @@ export function runCli() {
         };
 
         await Tasks.initTargets(context);
-        await Tasks.buildWebpackPackages(context);
+        await Tasks.buildSharedPackages(context);
 
         // Use RSPack or webpack based on environment
         if (isRspackMode()) {
@@ -181,7 +181,7 @@ export function runCli() {
         };
 
         await Tasks.initDev(context);
-        await Tasks.buildWebpackPackages(context);
+        await Tasks.buildSharedPackages(context);
 
         // Use RSPack or webpack based on environment
         if (isRspackMode()) {

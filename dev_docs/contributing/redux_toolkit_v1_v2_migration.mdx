@@ -46,7 +46,7 @@ import { produce } from 'immer-v9';
 
 - **npm aliases** in `package.json` (e.g. `"redux-toolkit-v1": "npm:@reduxjs/toolkit@1.9.7"`) install both versions side by side.
 - **`kbn-ui-shared-deps-npm`** bundles both the new packages and the v1 aliases as shared externals so both are available at runtime.
-- **`@elastic/charts`** still depends on RTK v1 internally. Yarn resolutions pin its nested copies to v1-era versions, and a `NormalModuleReplacementPlugin` in the shared deps webpack config redirects resolution for imports originating from `@elastic/charts` to its nested `node_modules`.
+- **`@elastic/charts`** still depends on RTK v1 internally. Yarn resolutions pin its nested copies to v1-era versions, and the shared dependency bundler keeps those versions isolated.
 - **`kea`** depends on `react-redux` v7. The webpack and rspack optimizer configs use function-based externals combined with `NormalModuleReplacementPlugin` to rewrite kea's `react-redux` import to `react-redux-v7`.
 
 ## ESLint enforcement

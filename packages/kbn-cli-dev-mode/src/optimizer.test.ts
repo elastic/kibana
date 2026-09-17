@@ -27,16 +27,16 @@ jest.mock('@kbn/rspack-optimizer', () => {
 
   return {
     RspackOptimizer: jest.fn(),
-    buildSharedPackages: jest.fn().mockResolvedValue(undefined),
+    runSharedBuild: jest.fn().mockResolvedValue({ success: true }),
   };
 });
 
 jest.mock('@kbn/optimizer');
 const realOptimizer = jest.requireActual('@kbn/optimizer');
-const { RspackOptimizer: RspackOptimizerMock, buildSharedPackages: buildSharedPackagesMock } =
+const { RspackOptimizer: RspackOptimizerMock, runSharedBuild: runSharedBuildMock } =
   jest.requireMock('@kbn/rspack-optimizer') as {
     RspackOptimizer: jest.Mock;
-    buildSharedPackages: jest.Mock;
+    runSharedBuild: jest.Mock;
   };
 
 const { runOptimizer, OptimizerConfig, logOptimizerState, logOptimizerProgress } =
@@ -215,10 +215,9 @@ describe('webpack optimizer path', () => {
       })
     );
     await flushPromises();
-    expect(buildSharedPackagesMock).toHaveBeenCalledWith({
+    expect(runSharedBuildMock).toHaveBeenCalledWith({
       repoRoot: '/app',
       dist: true,
-      cache: true,
       log: expect.anything(),
     });
 

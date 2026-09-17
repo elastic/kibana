@@ -15,17 +15,12 @@ import { fork } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { RspackOptimizer } from './optimizer';
-import { watchSharedPackages } from './build_shared_packages';
 
 jest.mock('child_process', () => ({
   fork: jest.fn(),
 }));
-jest.mock('./build_shared_packages', () => ({
-  watchSharedPackages: jest.fn(),
-}));
 
 const mockFork = fork as jest.MockedFunction<typeof fork>;
-const watchSharedPackagesMock = jest.mocked(watchSharedPackages);
 
 function createMockChildProcess(): ChildProcess {
   const child = new EventEmitter() as EventEmitter & {
@@ -55,13 +50,6 @@ function createMockLog(): jest.Mocked<ToolingLog> {
 
 describe('RspackOptimizer', () => {
   const repoRoot = '/repo/kibana';
-
-  beforeEach(() => {
-    watchSharedPackagesMock.mockResolvedValue({
-      close: jest.fn().mockResolvedValue(undefined),
-      onRebuild: jest.fn(),
-    });
-  });
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -105,7 +93,6 @@ describe('RspackOptimizer', () => {
         pluginPaths: ['/repo/analytics_ftr_helpers'],
         pluginScanDirs: ['/repo/plugins'],
         basePath: '/bp',
-        buildSharedDeps: true,
       },
     });
 
@@ -190,39 +177,6 @@ describe('RspackOptimizer', () => {
 
     child.emit('exit', 0);
     await expect(runPromise).resolves.toBeUndefined();
-  });
-
-  it('waits for shared watchers and invalidates the worker after shared rebuilds', async () => {
-    const child = createMockChildProcess();
-    mockFork.mockReturnValue(child);
-    const close = jest.fn().mockResolvedValue(undefined);
-    const onRebuild = jest.fn();
-    watchSharedPackagesMock.mockResolvedValue({ close, onRebuild });
-
-    const optimizer = createOptimizer({ watch: true });
-    const runPromise = optimizer.run();
-    await Promise.resolve();
-
-    expect(watchSharedPackagesMock).toHaveBeenCalledWith({
-      repoRoot,
-      dist: undefined,
-      log: expect.anything(),
-    });
-    child.emit('message', { type: 'ready' });
-    expect(child.send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'start',
-        options: expect.objectContaining({ buildSharedDeps: false }),
-      })
-    );
-
-    onRebuild.mock.calls[0][0]();
-    expect(child.send).toHaveBeenLastCalledWith({ type: 'invalidate' });
-
-    await optimizer.stop();
-    child.emit('exit', 0);
-    await expect(runPromise).resolves.toBeUndefined();
-    expect(close).toHaveBeenCalled();
   });
 
   it('forwards IPC log messages to ToolingLog by level', async () => {

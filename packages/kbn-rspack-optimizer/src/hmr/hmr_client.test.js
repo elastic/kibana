@@ -155,6 +155,22 @@ describe('hmr_client', () => {
     expect(hot.check).not.toHaveBeenCalled();
   });
 
+  it('reloads the page when shared bundles change', async () => {
+    const { hot } = loadHmrClient();
+    const source = eventSourceInstances[0];
+
+    source.onmessage({
+      data: JSON.stringify({ reload: true, files: ['src/shared.ts'] }),
+    });
+
+    await Promise.resolve();
+
+    expect(console.log).toHaveBeenCalledWith(
+      expect.stringContaining('Shared bundles updated, reloading page')
+    );
+    expect(hot.check).not.toHaveBeenCalled();
+  });
+
   it('handles errors SSE: logs, shows overlay when not replay, sets error state', async () => {
     loadHmrClient();
     const source = eventSourceInstances[0];

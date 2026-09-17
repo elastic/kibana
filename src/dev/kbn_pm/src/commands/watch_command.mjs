@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { moonRun } from '../lib/moon.mjs';
+import { run } from '../lib/spawn.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
   name: 'watch',
-  description: 'Runs a build in the webpack-built packages and keeps watching them for changes',
+  description: 'Builds shared frontend packages with Rspack and watches them for changes',
   flagsHelp: `
     --allow-root         Required supplementary flag if you're running this command as root.
   `,
@@ -24,9 +24,8 @@ export const command = {
   async run({ args }) {
     const quiet = args.getBooleanValue('quiet') ?? false;
 
-    await moonRun(':watch-webpack', {
+    await run('node', ['scripts/build_rspack_bundles.js', '--shared-only', '--watch'], {
       pipe: !quiet,
-      quiet,
     });
   },
 };

@@ -38,7 +38,6 @@ export const BuildRspackBundles: Task = {
       hmr: false,
       examples: buildConfig.pluginSelector.examples,
       testPlugins: buildConfig.pluginSelector.testPlugins,
-      buildSharedDeps: false,
       log,
     });
 
