@@ -18,6 +18,7 @@ import {
   useDismissProposal,
 } from './use_proposals_api';
 import { PROPOSALS_INTERNAL_URL, AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common';
+import { queryKeys } from '../query_keys';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -261,11 +262,7 @@ describe('useApproveProposal', () => {
 
     await waitFor(() => {
       expect(invalidateSpy).toHaveBeenCalledTimes(1);
-      expect(invalidateSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queryKey: expect.arrayContaining(['agenticInvestigations', 'proposals']),
-        })
-      );
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
     });
   });
 
@@ -322,11 +319,7 @@ describe('useDismissProposal', () => {
 
     await waitFor(() => {
       expect(invalidateSpy).toHaveBeenCalledTimes(1);
-      expect(invalidateSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queryKey: expect.arrayContaining(['agenticInvestigations', 'proposals']),
-        })
-      );
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
     });
   });
 

@@ -97,18 +97,14 @@ export const useProposal = (id: string | undefined) => {
  * route only releases the gating workflow, and the decision is written by that
  * workflow's post-gate steps, which run after the resume call has returned.
  *
- * The id therefore comes from the mutation's variables, not from a response
- * body that still describes an undecided proposal. A refetch that beats the
- * post-gate write reads `pending` once more, which is what the `executing`
- * state being added separately is for — nothing here can wait for a write that
- * lands out of band.
+ * Invalidating the root key (`proposals.all`) in one call sweeps every derived
+ * view — platform `list`/`detail` and AlertZero `grouped`/`charts-summary` —
+ * because those keys all share this prefix. A refetch that beats the post-gate
+ * write reads `pending` once more; that is expected while the gate workflow
+ * settles and is not a sign of a failed invalidation.
  */
-const invalidateProposal = (
-  queryClient: ReturnType<typeof useQueryClient>,
-  { id }: { id: string }
-) => {
+const invalidateProposals = (queryClient: ReturnType<typeof useQueryClient>) => {
   void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-  void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.detail(id) });
 };
 
 /**
@@ -125,7 +121,7 @@ export const useApproveProposal = () => {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (_proposal, { id }) => invalidateProposal(queryClient, { id }),
+    onSuccess: () => invalidateProposals(queryClient),
   });
 };
 
@@ -139,6 +135,6 @@ export const useDismissProposal = () => {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (_proposal, { id }) => invalidateProposal(queryClient, { id }),
+    onSuccess: () => invalidateProposals(queryClient),
   });
 };

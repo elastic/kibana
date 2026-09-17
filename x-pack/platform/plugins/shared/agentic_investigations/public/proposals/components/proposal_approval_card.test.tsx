@@ -245,7 +245,7 @@ describe('ProposalApprovalCard', () => {
     });
 
     it('renders an info callout for a dismissed proposal', () => {
-      setupMocks(baseProposal({ status: 'dismissed' }));
+      setupMocks(baseProposal({ status: 'no_action' }));
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('info-callout')).toBeInTheDocument();
     });
