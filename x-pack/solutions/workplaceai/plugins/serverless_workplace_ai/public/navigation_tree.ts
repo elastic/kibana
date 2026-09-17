@@ -15,8 +15,10 @@ export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition 
     body: [
       {
         link: 'workplace_ai',
-        title: 'Workplace AI',
-        renderAs: 'home',
+        title: i18n.translate('xpack.serverlessWorkplaceAI.nav.home', {
+          defaultMessage: 'Home',
+        }),
+        icon: 'home',
         breadcrumbStatus: 'hidden',
       },
       {
@@ -24,7 +26,7 @@ export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition 
         link: 'agent_builder',
       },
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine',
       },
       ...getWorkflowsNavPanel(core),

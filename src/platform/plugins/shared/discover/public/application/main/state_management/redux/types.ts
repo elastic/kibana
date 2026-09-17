@@ -11,6 +11,7 @@ import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -214,10 +215,14 @@ export interface TabState extends TabItem {
     | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
     | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
 
+  // Indicates the tab was created via "+" and should not auto-fetch on init.
+  skipInitialFetch?: boolean;
+
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
     searchSessionId?: string;
+    tabType?: DiscoverTabType;
   };
 
   // Persistable attributes of the tab (stored in Discover Session and in local storage).
@@ -235,6 +240,7 @@ export interface TabState extends TabItem {
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
+  isWarningCalloutDismissed: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
   profileAppStateDefaults: ProfileAppStateDefaults;
@@ -267,7 +273,7 @@ export enum TabsBarVisibility {
 }
 
 export interface DiscoverInternalState {
-  initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  initializationState: { hasESData: boolean; hasDataView: boolean };
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;

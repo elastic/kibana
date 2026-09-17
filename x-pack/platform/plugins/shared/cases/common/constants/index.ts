@@ -12,6 +12,7 @@ export * from './files';
 export * from './application';
 export * from './observables';
 export * from './attachments';
+export * from './workflow';
 
 /**
  * Cases connector limits.
@@ -119,6 +120,8 @@ export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
+export const INTERNAL_CASE_WORKFLOW_RUN_URL =
+  `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
@@ -470,6 +473,9 @@ export const OWNER_FIELD = 'owner';
 
 export const MAX_OBSERVABLE_TYPE_KEY_LENGTH = 36;
 
+/** v4 UUID — 8-4-4-4-12 hex + 4 hyphens */
+export const OBSERVABLE_ID_MAX_LENGTH = 36;
+
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
 export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
@@ -537,6 +543,16 @@ export const CASES_TEMPLATE_APPLIED_ON_CREATE_EVENT_TYPE =
 export const CASES_TEMPLATE_APPLIED_EVENT_TYPE = 'cases_template_applied' as const;
 
 export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as const;
+
+/**
+ * Field Library management events. One confirmed UI write each, never a total — see
+ * `register_management_events`.
+ */
+export const CASES_FIELD_DEFINITION_CREATED_EVENT_TYPE = 'cases_field_definition_created' as const;
+
+export const CASES_FIELD_DEFINITION_UPDATED_EVENT_TYPE = 'cases_field_definition_updated' as const;
+
+export const CASES_FIELD_DEFINITION_DELETED_EVENT_TYPE = 'cases_field_definition_deleted' as const;
 
 /**
  * Exporting this to make it easier to track the usage across the codebase

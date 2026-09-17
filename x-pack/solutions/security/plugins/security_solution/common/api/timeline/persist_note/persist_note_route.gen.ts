@@ -30,15 +30,23 @@ export const PersistNoteRouteRequestBody = lazySchema(() =>
     /**
      * Note payload (timeline, text, optional event linkage, metadata).
      */
-    note: BareNote,
+    note: BareNote.describe('Note payload (timeline, text, optional event linkage, metadata).'),
     /**
      * The `savedObjectId` of the note to update. Omit when creating a new note.
      */
-    noteId: z.string().nullable().optional(),
+    noteId: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The `savedObjectId` of the note to update. Omit when creating a new note.'),
     /**
      * Saved object version string from a previous read; optional on update.
      */
-    version: z.string().nullable().optional(),
+    version: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('Saved object version string from a previous read; optional on update.'),
   })
 );
 export type PersistNoteRouteRequestBody = z.infer<typeof PersistNoteRouteRequestBody>;

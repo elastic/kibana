@@ -13,13 +13,12 @@ import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
-  RecoveryType,
   StepDefinition,
   StepRenderProps,
 } from '../types';
 import { isAlertConditionStepId } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
-import type { FormValues } from '../../../form/types';
+import type { FormValues, RecoveryStrategy } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { ScheduleField } from '../../../form/fields/schedule_field';
@@ -36,10 +35,9 @@ interface Props {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  onRecoveryTypeChange: (type: RecoveryType) => void;
+  onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
-  ruleId?: string;
   builderType?: string;
 }
 
@@ -98,7 +96,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     }),
     render: (props) => (
       <>
-        <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
+        <LinkedActionPoliciesStep http={props.services.http} />
         <EuiHorizontalRule margin="m" />
         <NotificationsStep />
       </>
@@ -163,7 +161,6 @@ export const ComposeDiscoverForm = ({
   onRecoveryTypeChange,
   onKindChange,
   isEditing,
-  ruleId,
   builderType,
 }: Props) => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
@@ -181,7 +178,6 @@ export const ComposeDiscoverForm = ({
     onRecoveryTypeChange,
     onKindChange,
     isEditing,
-    ruleId,
     renderCustomRecovery,
   });
 

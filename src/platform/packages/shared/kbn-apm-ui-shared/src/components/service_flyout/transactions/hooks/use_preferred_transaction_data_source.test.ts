@@ -156,6 +156,38 @@ describe('usePreferredTransactionDataSource', () => {
     );
   });
 
+  it('sends x-project-routing when projectRouting is provided', async () => {
+    const { http, start, end } = withSources([
+      { documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: true },
+    ]);
+
+    renderHook(() =>
+      usePreferredTransactionDataSource({ http, start, end, projectRouting: '_alias:*' })
+    );
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+    expect(http.get).toHaveBeenCalledWith(
+      '/internal/apm/time_range_metadata',
+      expect.objectContaining({
+        headers: { 'x-project-routing': '_alias:*' },
+      })
+    );
+  });
+
+  it('omits x-project-routing when projectRouting is not provided', async () => {
+    const { http, start, end } = withSources([
+      { documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: true },
+    ]);
+
+    renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+    const options = (http.get as jest.Mock).mock.calls[0][1];
+    expect(options.headers).toBeUndefined();
+  });
+
   it('returns undefined dataSource and exposes the error when the metadata call fails', async () => {
     const fetchError = new Error('network error');
     const http = {

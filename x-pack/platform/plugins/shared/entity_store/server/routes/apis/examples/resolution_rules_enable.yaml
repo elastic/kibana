@@ -10,6 +10,7 @@ responses:
             value:
               id: related_user_alias_resolution
               kind: related_user_alias_resolution
+              description: Related user alias resolution across identity providers
               managed: true
               enabled: true
   '404':

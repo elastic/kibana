@@ -31,6 +31,7 @@ import {
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -80,7 +81,7 @@ export class WorkflowsPlugin
     const workflowsService = new WorkflowsService(core, plugins, this.logger, this.kibanaVersion);
     this.workflowsService = workflowsService;
 
-    const api = new WorkflowsManagementApi(workflowsService, this.config.available);
+    const api = new WorkflowsManagementApi(workflowsService, this.config.available, this.logger);
     this.api = api;
 
     if (plugins.actions) {
@@ -89,6 +90,14 @@ export class WorkflowsPlugin
       if (plugins.alerting) {
         plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
       }
+
+      registerConnectorEventTriggers({
+        inboundEventsEnabled: plugins.actions
+          .getActionsConfigurationUtilities()
+          .isInboundEventsEnabled(),
+        registerTriggerDefinition: (definition) =>
+          plugins.workflowsExtensions.registerTriggerDefinition(definition),
+      });
     }
 
     plugins.workflowsExtensions.registerWorkflowsClientProvider(

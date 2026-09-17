@@ -109,8 +109,12 @@ describe('timeRangeToDisplayText', () => {
     );
   });
 
-  it('supports a custom date format', () => {
-    expect(toDisplay('feb 3, 2016 to feb 3, 2026', { dateFormat: 'YYYY' })).toBe('2016 → 2026');
+  it('shows the label as configured when the text matches a preset label', () => {
+    const presets = [{ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' }];
+
+    expect(
+      timeRangeToDisplayText(textToTimeRange('financial year to date', { presets }), { presets })
+    ).toBe('Financial Year to Date');
   });
 
   it('returns raw text for invalid ranges', () => {
@@ -178,6 +182,26 @@ describe('timeRangeToDisplayText', () => {
     it('generates French relative-to-relative instant phrasing', () => {
       expect(toDisplay('-15m to -5m', { locale: 'fr-FR' })).toBe(
         'il y a 15 minutes → il y a 5 minutes'
+      );
+    });
+
+    it('generates gender-agreeing Portuguese duration labels', () => {
+      // a hora / a semana (feminine) vs o minuto / o dia (masculine)
+      expect(toDisplay('-1w', { locale: 'pt-BR' })).toBe('Última 1 semana');
+      expect(toDisplay('-1h', { locale: 'pt-BR' })).toBe('Última 1 hora');
+      expect(toDisplay('-15m', { locale: 'pt-BR' })).toBe('Últimos 15 minutos');
+      expect(toDisplay('-7d', { locale: 'pt-BR' })).toBe('Últimos 7 dias');
+      expect(toDisplay('-1M', { locale: 'pt-BR' })).toBe('Último 1 mês');
+      expect(toDisplay('now to +24h', { locale: 'pt-BR' })).toBe('Próximas 24 horas');
+    });
+
+    it('generates Portuguese relative-to-relative instant phrasing', () => {
+      expect(toDisplay('-15m to -5m', { locale: 'pt-BR' })).toBe('há 15 minutos → há 5 minutos');
+    });
+
+    it('generates "agora" for bare now in Portuguese', () => {
+      expect(toDisplay('Feb 3 2016 to now', { locale: 'pt-BR' })).toBe(
+        'Feb 3, 2016, 00:00:00 → agora'
       );
     });
 
@@ -277,12 +301,6 @@ describe('timeRangeToFullFormattedText', () => {
   it('supports a custom delimiter', () => {
     expect(toFullFormatted('Feb 3 2016 to Feb 3 2026', { delimiter: '—' })).toBe(
       'Feb 3, 2016, 00:00:00.000 — Feb 3, 2026, 00:00:00.000'
-    );
-  });
-
-  it('supports a custom date format', () => {
-    expect(toFullFormatted('Feb 3 2016 to Feb 3 2026', { dateFormat: 'YYYY-MM-DD' })).toBe(
-      '2016-02-03 → 2026-02-03'
     );
   });
 });

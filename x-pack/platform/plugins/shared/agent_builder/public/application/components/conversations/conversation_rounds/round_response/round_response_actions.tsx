@@ -18,7 +18,6 @@ import {
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
-import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 import { useAgentId, useConversationReadOnly } from '../../../../hooks/use_conversation';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
@@ -50,18 +49,20 @@ const copyLabels = {
   },
 } as const;
 
-const labels = {
-  regenerate: i18n.translate('xpack.agentBuilder.roundResponseActions.regenerate', {
-    defaultMessage: 'Regenerate response',
-  }),
-};
-
 const ADD_TO_DATASET_METADATA_SOURCE = 'agent_builder';
+
+// Round feedback is not modelled in the events timeline yet — it lives only on the
+// round (`ConversationRoundFeedback`) and is dropped when rounds are projected from
+// events, so a vote can't round-trip and a submitted vote would silently vanish on
+// the next projection. Hide the control until feedback becomes a first-class
+// timeline event. Typed `boolean` (not the `false` literal) so the gated render
+// paths don't read as statically unreachable.
+// TODO(agent-builder): re-enable once round feedback is captured as a timeline event.
+const ROUND_FEEDBACK_ENABLED: boolean = false;
 
 interface RoundResponseActionsProps {
   content: string;
   isVisible: boolean;
-  isLastRound?: boolean;
   rawRound?: ConversationRound;
   /** Which side of the round `content` comes from, so the copy wording matches it. */
   copyTarget?: keyof typeof copyLabels;
@@ -70,12 +71,10 @@ interface RoundResponseActionsProps {
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   content,
   isVisible,
-  isLastRound,
   rawRound,
   copyTarget = 'response',
 }) => {
   const { addSuccessToast } = useToasts();
-  const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
   const { services } = useKibana();
   const isExperimentalEnabled = useExperimentalFeatures();
   const isTracingEnabled = useTracingEnabled();
@@ -90,13 +89,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
       addSuccessToast(copySuccessLabel);
     }
   }, [content, addSuccessToast, copySuccessLabel]);
-
-  const handleResend = useCallback(() => {
-    regenerate();
-  }, [regenerate]);
-
-  // Disable regenerate button while any response is loading
-  const isRegenerateDisabled = isRegenerating || isResponseLoading;
 
   // Normalise trace_id — backend models it as `string | string[]` to keep the
   // door open for multi-trace rounds; only the first id is meaningful today.
@@ -151,8 +143,10 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
   const isEditable = !isReadOnly && !isConversationReadOnlyLoading;
   const showFeedback =
-    Boolean(rawRound) && rawRound?.status === ConversationRoundStatus.completed && isEditable;
-  const showRegenerateButton = isLastRound && isEditable;
+    ROUND_FEEDBACK_ENABLED &&
+    Boolean(rawRound) &&
+    rawRound?.status === ConversationRoundStatus.completed &&
+    isEditable;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
@@ -184,26 +178,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
               />
             </EuiToolTip>
           </EuiFlexItem>
-          {showRegenerateButton && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={labels.regenerate} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="refresh"
-                  aria-label={labels.regenerate}
-                  onClick={handleResend}
-                  color="text"
-                  isDisabled={isRegenerateDisabled}
-                  isLoading={isRegenerating}
-                  data-test-subj="roundResponseRegenerateButton"
-                  {...getEbtProps({
-                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                    action: AGENT_BUILDER_UI_EBT.action.conversation.REGENERATE,
-                    detail: 'conversation',
-                  })}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
           {showTraceButton && traceId && (
             <EuiFlexItem grow={false}>
               <RoundTraceButton traceId={traceId} />

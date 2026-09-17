@@ -182,6 +182,15 @@ describe('Calculate risk scores with ESQL', () => {
         expect(script.source).toContain("__id.startsWith('user:')");
         expect(script.source).not.toContain("__id.startsWith('host:')");
       });
+
+      it('does not gate the fallback derivation on postAggFilter', () => {
+        const { script } = buildEuidRuntimeMappingWithStoredFieldFastPath(EntityType.user);
+
+        // `entity.id exists` is the postAggFilter-only arm, so its absence proves the gate was dropped.
+        expect(script.source).not.toContain(`doc.containsKey('entity.id')`);
+        // documentsFilter still applies.
+        expect(script.source).toContain(`doc.containsKey('user.name')`);
+      });
     });
 
     describe('storedEuidCoalesceClause', () => {
