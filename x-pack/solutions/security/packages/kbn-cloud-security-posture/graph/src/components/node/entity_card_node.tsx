@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { Handle, Position, useViewport } from '@xyflow/react';
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -30,7 +31,6 @@ import {
   HandleStyleOverride,
   useNodeFillColor,
 } from './styles';
-import { NodeExpandButton } from './node_expand_button';
 import { NODE_HEIGHT, NODE_WIDTH, LAYERS_ZOOM_THRESHOLD } from '../constants';
 import {
   GRAPH_ENTITY_NODE_ID,
@@ -106,6 +106,19 @@ const EntityCardHeader = styled.div`
 
 /** Size of the inset icon box inside the header. */
 const ICON_BOX_SIZE = 40;
+
+/**
+ * Returns the icon box background color for an entity node.
+ * Currently a passthrough — icon always uses the node's default fill color.
+ * TODO: Map riskScore ranges to semantic EUI severity tokens (separate ticket).
+ *       e.g. score >= 70 → danger tint, score >= 40 → warning tint, else → defaultColor.
+ */
+const getIconColorByRiskScore = (
+  _riskScore: { min: number; max: number } | undefined,
+  defaultColor: string
+): string => {
+  return defaultColor;
+};
 
 /**
  * Contained colored icon box — inset with padding so it doesn't span
@@ -576,21 +589,25 @@ const GroupedMetadataPanel = memo<{
       )}
     </FullWidthMetadataItem>
 
-    {/* Row 4: Asset criticality distribution (full-width, optional) */}
-    {assetCriticality?.length ? (
-      <FullWidthMetadataItem euiTheme={euiTheme}>
-        <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+    {/* Row 4: Asset criticality distribution (full-width, always shown) */}
+    <FullWidthMetadataItem euiTheme={euiTheme}>
+      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+      {assetCriticality?.length ? (
         <CriticalityDistribution levels={assetCriticality} euiTheme={euiTheme} />
-      </FullWidthMetadataItem>
-    ) : null}
+      ) : (
+        <DashValue euiTheme={euiTheme} />
+      )}
+    </FullWidthMetadataItem>
 
-    {/* Row 5: Risk score range (full-width, optional) */}
-    {riskScore != null ? (
-      <FullWidthMetadataItem euiTheme={euiTheme}>
-        <MetadataLabel>{RISK_SCORE_LABEL}</MetadataLabel>
+    {/* Row 5: Risk score range (full-width, always shown) */}
+    <FullWidthMetadataItem euiTheme={euiTheme}>
+      <MetadataLabel>{RISK_SCORE_LABEL}</MetadataLabel>
+      {riskScore != null ? (
         <RiskScoreRange riskScore={riskScore} euiTheme={euiTheme} />
-      </FullWidthMetadataItem>
-    ) : null}
+      ) : (
+        <DashValue euiTheme={euiTheme} />
+      )}
+    </FullWidthMetadataItem>
   </>
 ));
 GroupedMetadataPanel.displayName = 'GroupedMetadataPanel';
@@ -644,20 +661,22 @@ const SingleEntityMetadataPanel = memo<{
       )}
     </FullWidthMetadataItem>
 
-    {/* Row 4: Asset criticality — EuiHealth dot + label (full-width, optional) */}
-    {assetCriticality?.length ? (
-      <FullWidthMetadataItem euiTheme={euiTheme}>
-        <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+    {/* Row 4: Asset criticality — EuiHealth dot + label (full-width, always shown) */}
+    <FullWidthMetadataItem euiTheme={euiTheme}>
+      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+      {assetCriticality?.length ? (
         <EuiHealth color={getCriticalityColor(assetCriticality[0].level, euiTheme)} textSize="xs">
           {formatCriticalityLevel(assetCriticality[0].level)}
         </EuiHealth>
-      </FullWidthMetadataItem>
-    ) : null}
+      ) : (
+        <DashValue euiTheme={euiTheme} />
+      )}
+    </FullWidthMetadataItem>
 
-    {/* Row 5: Risk score — single colored badge (full-width, optional) */}
-    {riskScore != null ? (
-      <FullWidthMetadataItem euiTheme={euiTheme}>
-        <MetadataLabel>{RISK_SCORE_LABEL}</MetadataLabel>
+    {/* Row 5: Risk score — single colored badge (full-width, always shown) */}
+    <FullWidthMetadataItem euiTheme={euiTheme}>
+      <MetadataLabel>{RISK_SCORE_LABEL}</MetadataLabel>
+      {riskScore != null ? (
         <span
           css={css`
             display: inline-flex;
@@ -673,8 +692,10 @@ const SingleEntityMetadataPanel = memo<{
         >
           {riskScore.min.toFixed(2)}
         </span>
-      </FullWidthMetadataItem>
-    ) : null}
+      ) : (
+        <DashValue euiTheme={euiTheme} />
+      )}
+    </FullWidthMetadataItem>
   </>
 ));
 SingleEntityMetadataPanel.displayName = 'SingleEntityMetadataPanel';
@@ -705,7 +726,20 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m');
   const fillColor = useNodeFillColor(color ?? 'primary');
+  const iconBgColor = getIconColorByRiskScore(riskScore, fillColor);
   const { zoom } = useViewport();
+
+  // Hamburger menu toggle state — mirrors what NodeExpandButton managed internally.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const unToggleMenu = useCallback(() => setMenuOpen(false), []);
+  const onMenuClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      setMenuOpen((prev) => !prev);
+      expandButtonClick?.(e as unknown as React.MouseEvent<HTMLElement>, props, unToggleMenu);
+    },
+    [expandButtonClick, props, unToggleMenu]
+  );
+
   const showLayers = zoom >= LAYERS_ZOOM_THRESHOLD;
 
   const isGrouped = showStackedShape(count);
@@ -757,7 +791,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
           <EntityCardWrapper euiTheme={euiTheme} shadow={shadow}>
             {/* Header row: icon | name+tag | risk badge */}
             <EntityCardHeader>
-              <IconBox bgColor={fillColor} euiTheme={euiTheme}>
+              <IconBox bgColor={iconBgColor} euiTheme={euiTheme}>
                 {isGrouped && <CountBadge euiTheme={euiTheme}>{countDisplay}</CountBadge>}
                 {icon && (
                   <EuiIcon
@@ -800,10 +834,35 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 )}
               </EntityInfo>
 
-              {/* Right: risk score badge */}
+              {/* Right: risk score badge + hamburger menu */}
               <RiskBadgeArea data-test-subj={GRAPH_ENTITY_NODE_RISK_BADGE_ID} euiTheme={euiTheme}>
                 {riskScoreDisplay}
               </RiskBadgeArea>
+
+              {interactive && (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'securitySolutionPackages.cspGraph.entityNode.menuButtonAriaLabel',
+                    { defaultMessage: 'Open node actions' }
+                  )}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="ellipsis"
+                    color="text"
+                    size="xs"
+                    aria-label={i18n.translate(
+                      'securitySolutionPackages.cspGraph.entityNode.menuButtonAriaLabel',
+                      { defaultMessage: 'Open node actions' }
+                    )}
+                    aria-pressed={menuOpen}
+                    onClick={onMenuClick}
+                    css={css`
+                      flex-shrink: 0;
+                    `}
+                  />
+                </EuiToolTip>
+              )}
             </EntityCardHeader>
 
             {/* Expanded metadata — shown when zoomed in past LAYERS_ZOOM_THRESHOLD */}
@@ -842,7 +901,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
             <StackedCard
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               euiTheme={euiTheme}
-              bgColor={fillColor}
+              bgColor={iconBgColor}
               bottomOffset={4}
               scale={0.95}
             />
@@ -850,19 +909,11 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
         </div>
 
         {interactive && (
-          <>
-            <NodeButton
-              width={NODE_WIDTH}
-              height={NODE_HEIGHT}
-              onClick={(e) => nodeClick?.(e, props)}
-            />
-            <NodeExpandButton
-              color={color}
-              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
-              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
-            />
-          </>
+          <NodeButton
+            width={NODE_WIDTH}
+            height={NODE_HEIGHT}
+            onClick={(e) => nodeClick?.(e, props)}
+          />
         )}
 
         <Handle

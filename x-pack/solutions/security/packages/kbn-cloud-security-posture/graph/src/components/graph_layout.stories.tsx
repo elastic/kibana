@@ -442,10 +442,47 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'hexagon',
     icon: 'storage',
-    ips: ['213.180.204.3'],
-    countryCodes: ['RU'],
+    ips: ['213.180.204.3', '10.0.0.1', '192.168.1.5'],
+    countryCodes: ['RU', 'US'],
     tag: 'Host',
     count: 3,
+    riskScore: { min: 55.0, max: 95.0 },
+    assetCriticality: [
+      { level: 'high_impact', count: 2 },
+      { level: 'low_impact', count: 1 },
+    ],
+    documentsData: [
+      {
+        id: 'host:host-instance-1',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'host',
+          name: 'host-instance-1',
+          sources: ['cloud_asset_inventory'],
+        },
+      },
+      {
+        id: 'host:host-instance-2',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'host',
+          name: 'host-instance-2',
+          sources: ['endpoint'],
+        },
+      },
+      {
+        id: 'host:host-instance-3',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'host',
+          name: 'host-instance-3',
+          sources: ['cloud_asset_inventory'],
+        },
+      },
+    ],
   },
   {
     id: '213.180.204.3',
@@ -453,6 +490,21 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'diamond',
     icon: 'globe',
+    tag: 'IP',
+    riskScore: { min: 81.0, max: 81.0 },
+    assetCriticality: [{ level: 'medium_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'ip:213.180.204.3',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'generic',
+          sources: ['cloud_asset_inventory'],
+          sourceFields: { 'host.ip': '213.180.204.3' },
+        },
+      },
+    ],
   },
   {
     id: 'user',
@@ -460,10 +512,47 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'ellipse',
     icon: 'user',
-    ips: ['213.180.204.3'],
-    countryCodes: ['RU'],
-    tag: 'Host',
+    ips: ['213.180.204.3', '10.0.0.2'],
+    countryCodes: ['RU', 'DE'],
+    tag: 'User',
     count: 3,
+    riskScore: { min: 70.0, max: 88.5 },
+    assetCriticality: [
+      { level: 'extreme_impact', count: 1 },
+      { level: 'medium_impact', count: 2 },
+    ],
+    documentsData: [
+      {
+        id: 'user:alice@example.com',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'user',
+          name: 'alice@example.com',
+          sources: ['active_directory', 'okta'],
+        },
+      },
+      {
+        id: 'user:bob@example.com',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'user',
+          name: 'bob@example.com',
+          sources: ['okta'],
+        },
+      },
+      {
+        id: 'user:charlie@example.com',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'user',
+          name: 'charlie@example.com',
+          sources: ['active_directory'],
+        },
+      },
+    ],
   },
   {
     id: 'oktauser',
@@ -471,6 +560,21 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'ellipse',
     icon: 'user',
+    tag: 'User',
+    riskScore: { min: 42.0, max: 42.0 },
+    assetCriticality: [{ level: 'low_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'user:pluni@elastic.co',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'user',
+          name: 'pluni@elastic.co',
+          sources: ['okta'],
+        },
+      },
+    ],
   },
   {
     id: 'hackeruser',
@@ -478,6 +582,21 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'ellipse',
     icon: 'user',
+    tag: 'User',
+    riskScore: { min: 90.01, max: 90.01 },
+    assetCriticality: [{ level: 'high_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'user:hacker@threat.io',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: false,
+          engine_type: 'user',
+          name: 'hacker@threat.io',
+          sources: ['endpoint'],
+        },
+      },
+    ],
   },
   {
     id: 's3',
@@ -485,6 +604,21 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'rectangle',
     icon: 'aws_s3',
+    tag: 'Storage',
+    riskScore: { min: 35.0, max: 35.0 },
+    assetCriticality: [{ level: 'extreme_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'generic:s3-customer-pii',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'generic',
+          sources: ['cloud_asset_inventory'],
+          sourceFields: { 'cloud.resource_id': 's3-customer-pii' },
+        },
+      },
+    ],
   },
   {
     id: 'ec2',
@@ -492,6 +626,21 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'rectangle',
     icon: 'aws_ec2',
+    tag: 'Host',
+    riskScore: { min: 60.5, max: 60.5 },
+    assetCriticality: [{ level: 'high_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'host:aws-ec2-instance',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'host',
+          sources: ['cloud_asset_inventory'],
+          sourceFields: { 'host.id': 'aws-ec2-instance' },
+        },
+      },
+    ],
   },
   {
     id: 'aws',
@@ -499,6 +648,19 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'rectangle',
     icon: 'aws',
+    tag: 'Service',
+    documentsData: [
+      {
+        id: 'generic:aws-cloudtrail',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: false,
+          engine_type: 'generic',
+          sources: ['cloud_asset_inventory'],
+          sourceFields: { 'cloud.service.name': 'cloudtrail' },
+        },
+      },
+    ],
   },
   {
     id: 'a(siem-windows)-b(user)',
