@@ -11,7 +11,7 @@ import type { Download } from 'playwright-core';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
-import { RenderablePage } from './renderable_page';
+import { RenderablePage } from './utils/renderable_page';
 import { Toasts } from './toasts';
 
 type CommonlyUsedTimeRange =
