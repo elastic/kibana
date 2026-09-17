@@ -148,6 +148,8 @@ export const createActionHandler = async (
   };
 
   const actionQueries = osqueryAction.queries as OsqueryActionQuery[];
+  // Single source for both placements below, so the two can never disagree.
+  const actionSpaceId = options.space?.id ?? DEFAULT_SPACE_ID;
   const fleetActions = !error
     ? map(
         filter(actionQueries, (query) => !query.error),
@@ -159,9 +161,18 @@ export const createActionHandler = async (
           input_type: 'osquery',
           agents: query.agents as string[],
           user_id: metadata?.currentUser,
-          space_id: options.space?.id ?? DEFAULT_SPACE_ID,
+          space_id: actionSpaceId,
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
-          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']) as {
+          data: {
+            ...pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+            // The top-level space_id above never reaches the agent: Fleet Server's
+            // action model has no such field, and its checkin conversion copies a
+            // fixed whitelist. `data` is an opaque passthrough, and osquerybeat
+            // copies it verbatim onto result and action-response documents as
+            // `action_data` — so this is what makes the originating space visible
+            // in named spaces. Read back via `matchActionDataSpaceId`.
+            space_id: actionSpaceId,
+          } as {
             [k: string]: unknown;
           },
         })

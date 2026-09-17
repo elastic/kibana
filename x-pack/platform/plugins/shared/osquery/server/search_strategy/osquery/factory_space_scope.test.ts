@@ -14,6 +14,7 @@ import type {
 } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import { enforceSpaceScope } from './enforce_space_scope';
+import { ID_BOUND_FACTORY_QUERY_TYPES } from '.';
 
 // Minimal-but-valid request options per factory type. Only the fields each
 // `buildDsl` reads are required.
@@ -159,4 +160,73 @@ describe('osquery search strategy space scoping invariant', () => {
       }
     }
   );
+
+  // Third-level invariant, and the regression guard for the cross-space leak.
+  //
+  // `action_data.space_id` is the query payload round-tripped through the agent,
+  // so it is less trustworthy than the Kibana-written top-level `space_id`. It is
+  // only safe on reads already constrained by an `action_id`/`schedule_id`, which
+  // the caller can only have learned from a space-stamped action document. A
+  // factory type that enumerates across actions must never gain the fallback.
+  describe('action_data.space_id fallback is confined to id-bound reads', () => {
+    const containsActionDataSpaceId = (dsl: ISearchRequestParams): boolean =>
+      JSON.stringify(dsl.query ?? {}).includes('action_data.space_id');
+
+    it('only allowlists factory types whose builder always filters on an action or schedule id', () => {
+      expect([...ID_BOUND_FACTORY_QUERY_TYPES].sort()).toEqual(
+        [
+          OsqueryQueries.actionResults,
+          OsqueryQueries.results,
+          OsqueryQueries.scheduledActionResults,
+        ].sort()
+      );
+    });
+
+    it.each(factoryTypes)(
+      'applies the fallback to "%s" only when it is id-bound',
+      (factoryQueryType) => {
+        const dsl = osqueryFactory[factoryQueryType].buildDsl(baseRequest(factoryQueryType));
+        const scoped = enforceSpaceScope(dsl, 'my-space', {
+          matchActionDataSpaceId: ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType),
+        });
+
+        expect(containsActionDataSpaceId(scoped)).toBe(
+          ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType)
+        );
+      }
+    );
+
+    it('never emits the fallback for enumerating factory types', () => {
+      const enumeratingTypes = factoryTypes.filter(
+        (type) => !ID_BOUND_FACTORY_QUERY_TYPES.includes(type)
+      );
+
+      // Guards against the allowlist silently swallowing every type.
+      expect(enumeratingTypes.length).toBeGreaterThan(0);
+
+      for (const factoryQueryType of enumeratingTypes) {
+        const dsl = osqueryFactory[factoryQueryType].buildDsl(baseRequest(factoryQueryType));
+        const scoped = enforceSpaceScope(dsl, 'my-space');
+
+        expect(containsActionDataSpaceId(scoped)).toBe(false);
+        // The aggregation scope must stay clean too.
+        expect(JSON.stringify(dsl.aggs ?? {})).not.toContain('action_data.space_id');
+      }
+    });
+
+    it('keeps the fallback independent of matchMissingSpaceId (CPS path)', () => {
+      const dsl = osqueryFactory[OsqueryQueries.results].buildDsl(
+        baseRequest(OsqueryQueries.results)
+      );
+      const scoped = enforceSpaceScope(dsl, 'default', {
+        matchMissingSpaceId: false,
+        matchActionDataSpaceId: true,
+      });
+      const filter = JSON.stringify((scoped.query as { bool: { filter: unknown } }).bool.filter);
+
+      expect(filter).toContain('action_data.space_id');
+      // Dropping the missing-field allowance must still drop it.
+      expect(filter).not.toContain('must_not');
+    });
+  });
 });

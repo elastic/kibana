@@ -28,6 +28,23 @@ import type { OsqueryFactory } from './factory/types';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
 
+/**
+ * Factory query types whose DSL is always constrained by an `action_id` or a
+ * `schedule_id`, and which may therefore also match the agent-carried
+ * `action_data.space_id` (see {@link buildSpaceIdFilter}).
+ *
+ * SECURITY: that id binding is the authorization gate — a caller can only supply
+ * such an id if they obtained it from a space-stamped, Kibana-written action
+ * document. Do not add a query type here unless its builder unconditionally
+ * filters on one of those ids. Types that enumerate across actions
+ * (`actions`, `actionDetails`, `exportResults`) must stay out.
+ */
+export const ID_BOUND_FACTORY_QUERY_TYPES: readonly FactoryQueryTypes[] = [
+  OsqueryQueries.results,
+  OsqueryQueries.actionResults,
+  OsqueryQueries.scheduledActionResults,
+];
+
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
   esClient: CoreStart['elasticsearch']['client'],
@@ -110,10 +127,18 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
             const spaceId = activeSpace?.id ?? DEFAULT_SPACE_ID;
 
-            const spaceScopeOptions =
-              'matchMissingSpaceId' in request && request.matchMissingSpaceId !== undefined
+            // Only id-bound reads may honour the agent-carried
+            // `action_data.space_id`; see ID_BOUND_FACTORY_QUERY_TYPES.
+            const matchActionDataSpaceId = ID_BOUND_FACTORY_QUERY_TYPES.includes(
+              request.factoryQueryType
+            );
+
+            const spaceScopeOptions = {
+              ...('matchMissingSpaceId' in request && request.matchMissingSpaceId !== undefined
                 ? { matchMissingSpaceId: request.matchMissingSpaceId }
-                : undefined;
+                : {}),
+              matchActionDataSpaceId,
+            };
 
             const dsl = enforceSpaceScope(
               queryFactory.buildDsl({

@@ -63,6 +63,7 @@ describe('buildActionResultsQuery', () => {
                           should: [
                             { term: { space_id: 'default' } },
                             { bool: { must_not: { exists: { field: 'space_id' } } } },
+                            { term: { 'action_data.space_id': 'default' } },
                           ],
                         },
                       },
@@ -340,6 +341,7 @@ describe('buildActionResultsQuery', () => {
                           should: [
                             { term: { space_id: 'default' } },
                             { bool: { must_not: { exists: { field: 'space_id' } } } },
+                            { term: { 'action_data.space_id': 'default' } },
                           ],
                         },
                       },
@@ -657,6 +659,7 @@ describe('buildActionResultsQuery', () => {
           should: [
             { term: { space_id: 'default' } },
             { bool: { must_not: { exists: { field: 'space_id' } } } },
+            { term: { 'action_data.space_id': 'default' } },
           ],
         },
       };
@@ -666,7 +669,15 @@ describe('buildActionResultsQuery', () => {
 
     it('scopes the aggregation to the space exactly in a named space', () => {
       const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
-      expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
+      // Id-bound read: also matches the agent-carried action_data.space_id.
+      expect(getAggFilterMust(result)).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'my-space' } },
+            { term: { 'action_data.space_id': 'my-space' } },
+          ],
+        },
+      });
     });
   });
 });

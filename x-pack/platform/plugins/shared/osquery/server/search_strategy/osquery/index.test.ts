@@ -218,7 +218,16 @@ describe('osquerySearchStrategyProvider space scoping', () => {
   it('injects a named-space term filter into the ES params', async () => {
     const filter = await runResultsSearch('my-space');
 
-    expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+    // `results` is id-bound, so it also matches the agent-carried
+    // action_data.space_id (see ID_BOUND_FACTORY_QUERY_TYPES).
+    expect(filter).toContainEqual({
+      bool: {
+        should: [
+          { term: { space_id: 'my-space' } },
+          { term: { 'action_data.space_id': 'my-space' } },
+        ],
+      },
+    });
     // Named space must NOT include the default-space missing-field fallback.
     expect(JSON.stringify(filter)).not.toContain('exists');
   });
@@ -231,6 +240,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         should: [
           { term: { space_id: 'default' } },
           { bool: { must_not: { exists: { field: 'space_id' } } } },
+          { term: { 'action_data.space_id': 'default' } },
         ],
       },
     });
@@ -239,7 +249,14 @@ describe('osquerySearchStrategyProvider space scoping', () => {
   it('uses the active space when the request includes a spaceId', async () => {
     const filter = await runResultsSearch('active-space', 'request-space');
 
-    expect(filter).toContainEqual({ term: { space_id: 'active-space' } });
+    expect(filter).toContainEqual({
+      bool: {
+        should: [
+          { term: { space_id: 'active-space' } },
+          { term: { 'action_data.space_id': 'active-space' } },
+        ],
+      },
+    });
     expect(JSON.stringify(filter)).not.toContain('request-space');
   });
 
@@ -253,6 +270,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         should: [
           { term: { space_id: 'default' } },
           { bool: { must_not: { exists: { field: 'space_id' } } } },
+          { term: { 'action_data.space_id': 'default' } },
         ],
       },
     });

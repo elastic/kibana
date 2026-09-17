@@ -152,7 +152,15 @@ describe('buildScheduledActionResultsQuery', () => {
     const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
     const filter = responsesBySchedule.filter as Record<string, Record<string, TermFilter[]>>;
     const mustFilters = filter.bool.must;
-    expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
+    // Id-bound read: also matches the agent-carried action_data.space_id.
+    expect(mustFilters).toContainEqual({
+      bool: {
+        should: [
+          { term: { space_id: 'my-space' } },
+          { term: { 'action_data.space_id': 'my-space' } },
+        ],
+      },
+    });
   });
 
   it('matches default space OR missing space_id when spaceId is "default"', () => {
@@ -171,6 +179,7 @@ describe('buildScheduledActionResultsQuery', () => {
         should: [
           { term: { space_id: 'default' } },
           { bool: { must_not: { exists: { field: 'space_id' } } } },
+          { term: { 'action_data.space_id': 'default' } },
         ],
       },
     };
@@ -205,7 +214,17 @@ describe('buildScheduledActionResultsQuery', () => {
     const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
     const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
 
-    expect(mustFilters).toContainEqual({ term: { space_id: 'default' } });
+    // The action_data fallback is orthogonal to matchMissingSpaceId: it is a
+    // present, exact-valued term, so it survives while the missing-field
+    // allowance is dropped.
+    expect(mustFilters).toContainEqual({
+      bool: {
+        should: [
+          { term: { space_id: 'default' } },
+          { term: { 'action_data.space_id': 'default' } },
+        ],
+      },
+    });
     expect(JSON.stringify(mustFilters)).not.toContain('exists');
   });
 
@@ -228,7 +247,14 @@ describe('buildScheduledActionResultsQuery', () => {
     const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
     const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
 
-    expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
+    expect(mustFilters).toContainEqual({
+      bool: {
+        should: [
+          { term: { space_id: 'my-space' } },
+          { term: { 'action_data.space_id': 'my-space' } },
+        ],
+      },
+    });
   });
 
   it('prefixes index with *: when ccsEnabled is true', () => {

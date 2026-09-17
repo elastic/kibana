@@ -64,7 +64,13 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const spaceIdFilter = buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer;
+  // This read is bound to a single `action_id`, which the caller can only have
+  // learned from a space-stamped, Kibana-written action document. That binding is
+  // the authorization gate that makes honouring the agent-carried
+  // `action_data.space_id` safe here — see buildSpaceIdFilter.
+  const spaceIdFilter = buildSpaceIdFilter(spaceId, {
+    matchActionDataSpaceId: true,
+  }) as estypes.QueryDslQueryContainer;
 
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
