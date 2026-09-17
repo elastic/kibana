@@ -21,6 +21,7 @@ import { getDeferred } from '../../../mocks/utils';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { DISABLED_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../services/policies/hooks', () => ({
   useGetEndpointSpecificPolicies: jest.fn(),
@@ -35,6 +36,7 @@ describe('When using the ArtifactListPage component', () => {
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
+  let coreStart: AppContextTestRender['coreStart'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let getFirstCard: ArtifactListPageRenderingSetup['getFirstCard'];
   let importExportUi: ReturnType<typeof getArtifactImportExportUiMocks>;
@@ -44,7 +46,7 @@ describe('When using the ArtifactListPage component', () => {
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, mockedApi, getFirstCard, setExperimentalFlag } = renderSetup);
+    ({ history, coreStart, mockedApi, getFirstCard, setExperimentalFlag } = renderSetup);
 
     mockUseGetEndpointSpecificPolicies.mockReturnValue({
       data: mockedApi.responseProvider.endpointPackagePolicyList(),
@@ -134,6 +136,54 @@ describe('When using the ArtifactListPage component', () => {
         expect(queryByTestId('testPage-list')).not.toBeInTheDocument();
         expect(getByTestId('testPage-simpleTable')).toBeInTheDocument();
         expect(getAllByRole('row')).toHaveLength(11); // header + 10 items
+      });
+
+      it('should not show the Enabled column by default', async () => {
+        const { queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(queryByTestId('testPage-simpleTable-columnEnabled')).not.toBeInTheDocument();
+      });
+
+      it('should show the Enabled column when showEnabledColumn is true', async () => {
+        const { getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        expect(getAllByTestId('testPage-simpleTable-columnEnabled').length).toBeGreaterThan(0);
+      });
+
+      it('should update the full artifact with the disabled tag when the switch is turned off', async () => {
+        const { getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnEnabled')[0]);
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppUpdate).toHaveBeenCalled();
+        });
+
+        const updateRequest = mockedApi.responseProvider.trustedAppUpdate.mock.calls[0][0];
+        const updateBody = JSON.parse(updateRequest.body as string);
+
+        expect(updateBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+        expect(updateBody).toEqual(
+          expect.objectContaining({
+            id: expect.any(String),
+            item_id: expect.any(String),
+            name: expect.any(String),
+            entries: expect.any(Array),
+            os_types: expect.any(Array),
+            type: expect.any(String),
+          })
+        );
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          expect.stringContaining('disabled')
+        );
       });
 
       it('should show table row actions that open edit and delete', async () => {
