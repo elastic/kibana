@@ -31,7 +31,6 @@ import {
   EuiLoadingSpinner,
   EuiFormPrepend,
   EuiToolTip,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import type {
@@ -162,7 +161,6 @@ export const ActionTypeForm = ({
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
-  const connectorFormRowId = useGeneratedHtmlId({ prefix: 'connectorSelection' });
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
   const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
@@ -436,7 +434,6 @@ export const ActionTypeForm = ({
       >
         <EuiFormRow
           fullWidth
-          id={connectorFormRowId}
           label={
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
@@ -467,7 +464,6 @@ export const ActionTypeForm = ({
         >
           <ConnectorsSelection
             allowGroupConnector={allowGroupConnector}
-            aria-labelledby={`${connectorFormRowId}-label`}
             actionItem={actionItem}
             accordionIndex={index}
             actionTypesIndex={actionTypesIndex}
