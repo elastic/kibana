@@ -43,8 +43,18 @@ const CHARTS_LOAD_ERROR = i18n.translate('xpack.apm.transactionDetailFlyout.char
   defaultMessage: 'Unable to load charts',
 });
 
-function RedMetricsChartsSkeleton() {
+function useSecondaryChartsGridCss() {
   const { euiTheme } = useEuiTheme();
+
+  return css`
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: ${euiTheme.size.m};
+  `;
+}
+
+function RedMetricsChartsSkeleton() {
+  const secondaryChartsGridCss = useSecondaryChartsGridCss();
 
   return (
     <div data-test-subj="transactionDetailFlyoutRedMetricsSkeleton">
@@ -52,13 +62,7 @@ function RedMetricsChartsSkeleton() {
       <EuiSpacer size="s" />
       <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
       <EuiSpacer size="m" />
-      <div
-        css={css`
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: ${euiTheme.size.m};
-        `}
-      >
+      <div css={secondaryChartsGridCss}>
         <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
         <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
       </div>
@@ -134,12 +138,12 @@ function TransactionDetailFlyoutApiRedMetrics({
   latencyAggregationType: LatencyAggregationType;
   setLatencyAggregationType: (value: LatencyAggregationType) => void;
 }) {
-  const { euiTheme } = useEuiTheme();
   const {
     deps: { core },
     filters,
   } = useTransactionDetailFlyoutContext();
   const timeZone = getTimeZone(core.uiSettings);
+  const secondaryChartsGridCss = useSecondaryChartsGridCss();
 
   const {
     latencyTimeseries,
@@ -157,12 +161,6 @@ function TransactionDetailFlyoutApiRedMetrics({
 
   const latencyMaxY = getMaxY(latencyTimeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
-
-  const secondaryChartsGridCss = css`
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: ${euiTheme.size.m};
-  `;
 
   if (isLoading) {
     return <RedMetricsChartsSkeleton />;
@@ -264,7 +262,6 @@ function TransactionDetailFlyoutEsqlRedMetrics({
   latencyAggregationType: LatencyAggregationType;
   setLatencyAggregationType: (value: LatencyAggregationType) => void;
 }) {
-  const { euiTheme } = useEuiTheme();
   const {
     deps: { lens, dataViews },
     filters,
@@ -272,6 +269,7 @@ function TransactionDetailFlyoutEsqlRedMetrics({
     indices,
   } = useTransactionDetailFlyoutContext();
   const projectRouting = useProjectRouting();
+  const secondaryChartsGridCss = useSecondaryChartsGridCss();
 
   const charts = useMemo(
     () =>
@@ -328,31 +326,38 @@ function TransactionDetailFlyoutEsqlRedMetrics({
     );
   }
 
+  const latencyChart = charts.find((chart) => chart.id === 'latency');
+  // Same layout as the API path: latency full-width, then throughput + failed rate.
+  const secondaryCharts = ['throughput', 'failedTransactionRate']
+    .map((id) => charts.find((chart) => chart.id === id))
+    .filter((chart): chart is (typeof charts)[number] => chart != null);
+
+  const renderLensChart = (chart: (typeof charts)[number]) => (
+    <FlyoutLensChart
+      key={chart.id}
+      deps={{ lens, dataViews }}
+      id={chart.id}
+      title={chart.title}
+      titleAction={chart.titleAction}
+      config={chart.config}
+      rangeFrom={filters.rangeFrom}
+      rangeTo={filters.rangeTo}
+      dataTestSubjPrefix="transactionDetailFlyoutLensChart"
+      embeddableIdPrefix="transaction-detail-flyout"
+      executionContextDescription="apm transaction detail flyout chart data"
+      executionContextProfileId="transaction-detail-flyout"
+    />
+  );
+
   return (
-    <div
-      data-test-subj="transactionDetailFlyoutEsqlRedMetrics"
-      css={css`
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: ${euiTheme.size.m};
-      `}
-    >
-      {charts.map((chart) => (
-        <FlyoutLensChart
-          key={chart.id}
-          deps={{ lens, dataViews }}
-          id={chart.id}
-          title={chart.title}
-          titleAction={chart.titleAction}
-          config={chart.config}
-          rangeFrom={filters.rangeFrom}
-          rangeTo={filters.rangeTo}
-          dataTestSubjPrefix="transactionDetailFlyoutLensChart"
-          embeddableIdPrefix="transaction-detail-flyout"
-          executionContextDescription="apm transaction detail flyout chart data"
-          executionContextProfileId="transaction-detail-flyout"
-        />
-      ))}
+    <div data-test-subj="transactionDetailFlyoutEsqlRedMetrics">
+      {latencyChart ? renderLensChart(latencyChart) : null}
+      {secondaryCharts.length > 0 ? (
+        <>
+          <EuiSpacer size="m" />
+          <div css={secondaryChartsGridCss}>{secondaryCharts.map(renderLensChart)}</div>
+        </>
+      ) : null}
     </div>
   );
 }
