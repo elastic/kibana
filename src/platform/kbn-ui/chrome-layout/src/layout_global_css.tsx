@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
-import { layoutVarName } from './constants';
+import { AGENT_FIRST_NAV_MARGIN_TOP, layoutVarName } from './constants';
 import { useLayoutState } from './layout_state_context';
 
 /**
@@ -42,6 +42,8 @@ export const LayoutGlobalCSS = () => {
   const applicationRight = applicationMarginRight + sidebarWidth;
   const agentAppGutter = hasAgent && agentWorkspaceOpen ? applicationMarginRight : 0;
   const applicationLeft = navigationWidth + agentWidth + agentMarginLeft + agentAppGutter;
+  const navigationMarginTop = hasAgent ? AGENT_FIRST_NAV_MARGIN_TOP : 0;
+  const navigationMarginBottom = hasAgent ? applicationMarginBottom : 0;
   const applicationHorizontalOffset = applicationLeft + applicationRight;
   const contentTop = applicationTop + applicationTopBarHeight;
   const contentBottom = applicationBottom + applicationBottomBarHeight;
@@ -74,11 +76,16 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const navigation = css`
-    ${layoutVarName('navigation.top')}: ${headerAndBannerHeight}px;
-    ${layoutVarName('navigation.bottom')}: ${footerHeight}px;
+    ${layoutVarName('navigation.marginTop')}: ${navigationMarginTop}px;
+    ${layoutVarName('navigation.marginBottom')}: ${navigationMarginBottom}px;
+    ${layoutVarName('navigation.top')}: ${headerAndBannerHeight + navigationMarginTop}px;
+    ${layoutVarName('navigation.bottom')}: ${footerHeight + navigationMarginBottom}px;
     ${layoutVarName('navigation.left')}: 0;
     ${layoutVarName('navigation.right')}: calc(100vw - ${navigationWidth}px);
-    ${layoutVarName('navigation.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
+    ${layoutVarName('navigation.height')}: calc(
+      100vh -
+        ${headerAndBannerHeight + footerHeight + navigationMarginTop + navigationMarginBottom}px
+    );
     ${layoutVarName('navigation.width')}: ${navigationWidth}px;
   `;
 

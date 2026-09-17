@@ -44,6 +44,7 @@ export {
   clampAgentWorkspaceWidth,
   getSoloAgentWorkspaceWidth,
   AGENT_FIRST_GAP,
+  AGENT_FIRST_NAV_MARGIN_TOP,
   AGENT_FIRST_FEATURE_FLAG_KEY,
   euiIncludeSelectorInFocusTrap,
 } from './src/constants';

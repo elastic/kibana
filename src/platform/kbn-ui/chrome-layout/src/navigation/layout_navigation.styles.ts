@@ -14,8 +14,14 @@ import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
   grid-area: navigation;
-  height: ${layoutVar('navigation.height')};
+  height: calc(
+    100% - ${layoutVar('navigation.marginTop', '0px')} -
+      ${layoutVar('navigation.marginBottom', '0px')}
+  );
+  margin-top: ${layoutVar('navigation.marginTop', '0px')};
+  margin-bottom: ${layoutVar('navigation.marginBottom', '0px')};
   width: ${layoutVar('navigation.width')};
+  min-height: 0;
   z-index: ${layoutLevels.navigation};
   display: flex;
 `;

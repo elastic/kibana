@@ -107,6 +107,9 @@ export const getSoloAgentWorkspaceWidth = ({
 /** Gutter between nav, agent, and application panels. */
 export const AGENT_FIRST_GAP = 8;
 
+/** Extra space above the agent-first left nav. */
+export const AGENT_FIRST_NAV_MARGIN_TOP = 12;
+
 export const AGENT_FIRST_FEATURE_FLAG_KEY = 'core.chrome.agentFirst';
 
 export const euiIncludeSelectorInFocusTrap = {
