@@ -112,6 +112,18 @@ describe('useFetchEpisodeTagOptions', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.data).toEqual(['prod']);
+    expect(result.current.isError).toBe(false);
+  });
+
+  it('returns source-only tags when the v2 fetch fails', async () => {
+    mockFetchEpisodeTagOptions.mockRejectedValue(new Error('v2 failure'));
+
+    const { result } = renderTagOptions(sourceWithTags(jest.fn().mockResolvedValue(['staging'])));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data).toEqual(['staging']);
+    expect(result.current.isError).toBe(false);
   });
 
   it('skips additional data source that does not implement tag options', async () => {

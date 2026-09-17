@@ -6,7 +6,7 @@
  */
 
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   TEMPLATE_ID_PROPOSAL,
@@ -137,11 +137,11 @@ export const MOCK_PROPOSALS: Proposal[] = [
   {
     id: 'prop-beacon-contain-007',
     template_id: TEMPLATE_ID_PROPOSAL,
-    parentConversationId: 'inv-dark-beacon-corroborated-001',
+    parentConversationId: 'inv-hunt-beacon-corroborated-001',
     type: 'contain',
     confidence: 0.91,
     reasoning:
-      'Dark Watch corroboration raised confidence to 0.94. Containment draft ready once analyst takes over.',
+      'Hunt Watch corroboration raised confidence to 0.94. Containment draft ready once analyst takes over.',
     evidenceRefs: [
       { id: 'evidence-c2', type: 'enrichment', label: 'Shared C2 endpoint' },
       { id: 'evidence-persist', type: 'edr', label: 'Shared persistence mechanism' },
@@ -150,7 +150,7 @@ export const MOCK_PROPOSALS: Proposal[] = [
     assignee: 'oncall.sec-team',
     sla: new Date(Date.now() + 2.5 * 60 * 60 * 1000).toISOString(),
     events: [],
-    sourceWatchId: SYSTEM_SECURITY_WATCH_DARK_ID,
+    sourceWatchId: SYSTEM_SECURITY_WATCH_HUNT_ID,
     approvalRequired: true,
     summary: 'Isolate beaconing hosts after take-over review',
     recommendation: 'Network isolate · preserve memory',
