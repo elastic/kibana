@@ -17,16 +17,36 @@ import {
   pullImage,
   removeContainer,
   startDetachedContainer,
+  stopContainer,
 } from './docker';
 import { startTargetServer, stopTargetServer, type TargetServer } from './target_server';
 
 const FLEET_SERVER_CONTAINER_PORT = 8220;
 const DOCKER_HOST_GATEWAY = ['--add-host', 'host.docker.internal:host-gateway'];
 
+export interface EnrolledAgent {
+  id: string;
+  container: string;
+}
+
 export interface AgentStack {
   privateLocation: ScoutPrivateLocation;
   target: Omit<TargetServer, 'server'>;
   runId: string;
+  agents: EnrolledAgent[];
+  /** Stops the agent's Docker container without unregistering it from Fleet. */
+  stopAgentContainer: (agentId: string) => void;
+}
+
+export interface StartAgentStackOptions {
+  /** Agents to enroll on the shared synthetics policy. Defaults to 1. */
+  agentCount?: number;
+  /**
+   * `complete` includes Chromium (browser journeys). `agent` is the lightweight
+   * image and is enough for HTTP/TCP/ICMP.
+   */
+  agentImage?: 'complete' | 'agent';
+  isAgentSharding?: boolean;
 }
 
 interface EnrollmentApiKeyItem {
@@ -69,10 +89,11 @@ async function waitForFleetServer(url: string, log: ScoutLogger): Promise<void> 
   log.info('Fleet Server is healthy');
 }
 
-async function waitForAgentOnline(
+async function waitForNewOnlineAgent(
   kbnClient: KbnClient,
   log: ScoutLogger,
-  policyId: string
+  policyId: string,
+  alreadyKnown: ReadonlySet<string>
 ): Promise<string> {
   let agentId = '';
   await tryForTime(
@@ -83,10 +104,12 @@ async function waitForAgentOnline(
         path: '/api/fleet/agents',
         query: { kuery: `policy_id:"${policyId}"` },
       });
-      const agent = data.items.find((item) => item.status === 'online');
+      const agent = data.items.find(
+        (item) => item.status === 'online' && !alreadyKnown.has(item.id)
+      );
       if (!agent) {
         throw new Error(
-          `No online agent for policy ${policyId}. Seen: ${JSON.stringify(data.items)}`
+          `No new online agent for policy ${policyId}. Seen: ${JSON.stringify(data.items)}`
         );
       }
       agentId = agent.id;
@@ -103,21 +126,25 @@ export async function startAgentStack({
   config,
   log,
   runId,
+  agentCount = 1,
+  agentImage = 'complete',
+  isAgentSharding = false,
 }: {
   apiServices: SyntheticsApiServicesFixture;
   kbnClient: KbnClient;
   config: ScoutTestConfig;
   log: ScoutLogger;
   runId: string;
-}): Promise<{ stack: AgentStack; stop: () => Promise<void> }> {
+} & StartAgentStackOptions): Promise<{ stack: AgentStack; stop: () => Promise<void> }> {
   if (!isDockerAvailable()) {
     throw new Error(
-      'Docker is required for scout_synthetics_agent_e2e (Fleet Server + elastic-agent-complete)'
+      `Docker is required for scout_synthetics_agent_e2e (Fleet Server + elastic-agent${
+        agentImage === 'complete' ? '-complete' : ''
+      })`
     );
   }
 
   const fleetServerContainer = dockerContainerName('fleet-server', runId);
-  const agentContainer = dockerContainerName('agent', runId);
   const target = await startTargetServer();
   log.info(`Target HTTP server listening on ${target.url}`);
 
@@ -127,18 +154,21 @@ export async function startAgentStack({
   // ES is a SNAPSHOT — always pull the SNAPSHOT agent images for this suite.
   const imageTag = version.includes('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
   const fleetServerImage = `docker.elastic.co/elastic-agent/elastic-agent:${imageTag}`;
-  const agentImage = `docker.elastic.co/elastic-agent/elastic-agent-complete:${imageTag}`;
+  const agentImageName =
+    agentImage === 'complete'
+      ? `docker.elastic.co/elastic-agent/elastic-agent-complete:${imageTag}`
+      : fleetServerImage;
   const esPort = esPortFromUrl(config.hosts.elasticsearch);
   const dockerEsHost = `http://host.docker.internal:${esPort}`;
 
   let fleetServerStarted = false;
-  let agentStarted = false;
+  const agentContainers: string[] = [];
   let dockerOutputId: string | undefined;
   let dockerFleetHostId: string | undefined;
   let fleetServerPolicyId: string | undefined;
   let syntheticsPolicyId: string | undefined;
   let privateLocationId: string | undefined;
-  let enrolledAgentId: string | undefined;
+  const enrolledAgents: EnrolledAgent[] = [];
 
   const runCleanup = async (label: string, fn: () => Promise<void> | void) => {
     try {
@@ -154,20 +184,19 @@ export async function startAgentStack({
 
   const stop = async () => {
     // Best-effort: one failed delete must not skip the rest (shared Scout server).
-    await runCleanup('agent container', () => {
-      if (agentStarted) {
-        removeContainer(agentContainer);
-      }
-    });
+    for (const agentContainer of agentContainers) {
+      await runCleanup(`agent container ${agentContainer}`, () => removeContainer(agentContainer));
+    }
     await runCleanup('fleet-server container', () => {
       if (fleetServerStarted) {
         removeContainer(fleetServerContainer);
       }
     });
     await runCleanup('target server', () => stopTargetServer(target.server));
-    if (enrolledAgentId) {
-      const agentId = enrolledAgentId;
-      await runCleanup('enrolled agent', () => apiServices.fleet.agent.delete(agentId));
+    for (const enrolled of enrolledAgents) {
+      await runCleanup(`enrolled agent ${enrolled.id}`, () =>
+        apiServices.fleet.agent.delete(enrolled.id)
+      );
     }
     if (privateLocationId) {
       const locationId = privateLocationId;
@@ -200,8 +229,10 @@ export async function startAgentStack({
   try {
     log.info(`Pulling ${fleetServerImage}`);
     pullImage(fleetServerImage);
-    log.info(`Pulling ${agentImage}`);
-    pullImage(agentImage);
+    if (agentImageName !== fleetServerImage) {
+      log.info(`Pulling ${agentImageName}`);
+      pullImage(agentImageName);
+    }
 
     await apiServices.fleet.internal.setup();
     await apiServices.fleet.agent.setup();
@@ -302,9 +333,11 @@ export async function startAgentStack({
         fleet_server_host_id: dockerFleetHostId,
       },
     });
-    const [privateLocation] = await apiServices.syntheticsPrivateLocations.setTestLocations([
-      createdSyntheticsPolicyId,
-    ]);
+    const [privateLocation] = await apiServices.syntheticsPrivateLocations.setTestLocations(
+      [createdSyntheticsPolicyId],
+      undefined,
+      { isAgentSharding }
+    );
     privateLocationId = privateLocation.id;
 
     const { data: enrollmentKeys } = await kbnClient.request<{ items: EnrollmentApiKeyItem[] }>({
@@ -317,38 +350,62 @@ export async function startAgentStack({
       throw new Error(`No enrollment API key for synthetics policy ${createdSyntheticsPolicyId}`);
     }
 
-    log.info(`Starting synthetics agent ${agentImage}`);
-    // CI runc rejects `--sysctl net.ipv4.ping_group_range=...` (invalid argument).
-    // NET_RAW is enough for ICMP; Docker Desktop already allows unprivileged ping.
-    startDetachedContainer(agentContainer, [
-      ...DOCKER_HOST_GATEWAY,
-      '--cap-add=NET_RAW',
-      '--cap-add=SYS_ADMIN',
-      '--security-opt=seccomp=unconfined',
-      '-e',
-      'FLEET_ENROLL=1',
-      '-e',
-      `FLEET_URL=${agentFleetUrl}`,
-      '-e',
-      `FLEET_ENROLLMENT_TOKEN=${enrollmentToken}`,
-      '-e',
-      'FLEET_INSECURE=true',
-      agentImage,
-    ]);
-    agentStarted = true;
+    log.info(`Starting ${agentCount} synthetics agent(s) ${agentImageName}`);
+    const knownAgentIds = new Set<string>();
+    for (let i = 0; i < agentCount; i++) {
+      const agentContainer =
+        agentCount === 1
+          ? dockerContainerName('agent', runId)
+          : dockerContainerName('agent', runId, i);
+      // CI runc rejects `--sysctl net.ipv4.ping_group_range=...` (invalid argument).
+      // NET_RAW is enough for ICMP; Docker Desktop already allows unprivileged ping.
+      startDetachedContainer(agentContainer, [
+        ...DOCKER_HOST_GATEWAY,
+        '--cap-add=NET_RAW',
+        '--cap-add=SYS_ADMIN',
+        '--security-opt=seccomp=unconfined',
+        '-e',
+        'FLEET_ENROLL=1',
+        '-e',
+        `FLEET_URL=${agentFleetUrl}`,
+        '-e',
+        `FLEET_ENROLLMENT_TOKEN=${enrollmentToken}`,
+        '-e',
+        'FLEET_INSECURE=true',
+        agentImageName,
+      ]);
+      agentContainers.push(agentContainer);
 
-    try {
-      enrolledAgentId = await waitForAgentOnline(kbnClient, log, createdSyntheticsPolicyId);
-    } catch (error) {
-      log.error(`Agent failed to come online:\n${containerLogs(agentContainer)}`);
-      throw error;
+      try {
+        const agentId = await waitForNewOnlineAgent(
+          kbnClient,
+          log,
+          createdSyntheticsPolicyId,
+          knownAgentIds
+        );
+        knownAgentIds.add(agentId);
+        enrolledAgents.push({ id: agentId, container: agentContainer });
+      } catch (error) {
+        log.error(`Agent failed to come online:\n${containerLogs(agentContainer)}`);
+        throw error;
+      }
     }
+
+    const stopAgentContainer = (agentId: string) => {
+      const enrolled = enrolledAgents.find((agent) => agent.id === agentId);
+      if (!enrolled) {
+        throw new Error(`Unknown agent id ${agentId}`);
+      }
+      stopContainer(enrolled.container);
+    };
 
     return {
       stack: {
         privateLocation,
         target: { port: target.port, url: target.url, host: target.host },
         runId,
+        agents: enrolledAgents,
+        stopAgentContainer,
       },
       stop,
     };

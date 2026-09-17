@@ -1,0 +1,21 @@
+{
+  "sha1": "0000000000000000000000000000000000000000",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "000000000000000-000000000000000",
+      "title": "Synthetics real-agent sharding failover assigns HTTP monitors then failovers a stopped agent onto the survivor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/sharding_failover.spec.ts",
+        "line": 82,
+        "column": 13
+      }
+    }
+  ]
+}

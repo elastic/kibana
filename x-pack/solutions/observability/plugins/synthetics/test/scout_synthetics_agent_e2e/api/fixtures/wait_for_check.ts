@@ -20,6 +20,7 @@ export type SyntheticsMonitorType = keyof typeof SYNTHETICS_INDEX_BY_TYPE;
 export interface SyntheticsCheckDoc {
   config_id?: string;
   test_run_id?: string;
+  agent?: { id?: string };
   monitor?: { status?: string; type?: string; ip?: string };
   state?: { status?: string };
   summary?: { up?: number; down?: number; final_attempt?: boolean };
@@ -71,12 +72,14 @@ export async function waitForSyntheticsCheck(
     type,
     configId,
     testRunId,
+    agentId,
     expectStatus = 'up',
     timeoutMs = 180_000,
   }: {
     type: SyntheticsMonitorType;
     configId: string;
     testRunId?: string;
+    agentId?: string;
     expectStatus?: 'up' | 'down';
     timeoutMs?: number;
   }
@@ -92,13 +95,17 @@ export async function waitForSyntheticsCheck(
       if (type === 'browser') {
         filters.push({ term: { 'synthetics.type': 'heartbeat/summary' } });
       }
+      if (agentId) {
+        filters.push({ term: { 'agent.id': agentId } });
+      }
 
       const source = await searchLatest(esClient, index, filters, testRunId);
 
       if (!source) {
         throw new Error(
           `No ${type} check document yet in ${index} for config_id=${configId}` +
-            (testRunId ? ` test_run_id=${testRunId}` : '')
+            (testRunId ? ` test_run_id=${testRunId}` : '') +
+            (agentId ? ` agent.id=${agentId}` : '')
         );
       }
       if (!statusMatches(source, expectStatus)) {
@@ -112,6 +119,20 @@ export async function waitForSyntheticsCheck(
     },
     { intervalMs: 3_000 }
   );
+}
+
+/** Drops Heartbeat docs for a stopped agent so STALE_DATA_MS cannot veto failover. */
+export async function deleteSyntheticsDocsForAgent(
+  esClient: EsClient,
+  agentId: string
+): Promise<void> {
+  await esClient.deleteByQuery({
+    index: 'synthetics-*',
+    query: { term: { 'agent.id': agentId } },
+    refresh: true,
+    ignore_unavailable: true,
+    conflicts: 'proceed',
+  });
 }
 
 export async function waitForBrowserStep(
