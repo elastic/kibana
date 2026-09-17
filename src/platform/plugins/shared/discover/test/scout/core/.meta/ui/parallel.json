@@ -1,5 +1,5 @@
 {
-  "sha1": "57364ec5e6d1d0c5c894fefeab8fe5f8a0fe637f",
+  "sha1": "984fb6fd5e1ef817addbbdd187e968cb6608c3cb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1298,6 +1298,106 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/value_suggestions.spec.ts",
         "line": 38,
         "column": 31
+      }
+    },
+    {
+      "id": "fc345810e00ce81-99241b2825e1659",
+      "title": "Discover field visualization opens a field in Lens with its suggested dimensions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 21,
+        "column": 62
+      }
+    },
+    {
+      "id": "fc345810e00ce81-1a967194d22c5a4",
+      "title": "Discover field visualization preserves filters when visualizing a field in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 27,
+        "column": 56
+      }
+    },
+    {
+      "id": "fc345810e00ce81-9cace5d69607ce2",
+      "title": "Discover field visualization preserves the query when visualizing a field in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 43,
+        "column": 80
+      }
+    },
+    {
+      "id": "fc345810e00ce81-b1451f0b0148f03",
+      "title": "Discover field visualization opens the histogram breakdown in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 46,
+        "column": 21
+      }
+    },
+    {
+      "id": "fc345810e00ce81-4a9a42db690384e",
+      "title": "Discover field visualization preserves an ad hoc data view when opening the histogram in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/visualize_field.spec.ts",
+        "line": 61,
+        "column": 38
       }
     },
     {
