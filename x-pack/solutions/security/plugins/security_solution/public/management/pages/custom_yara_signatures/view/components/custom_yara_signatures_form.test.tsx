@@ -578,7 +578,9 @@ describe('Custom YARA signatures form', () => {
       const view = renderWithSignature();
 
       await waitFor(() => {
-        expect(screen.getByTestId('customYaraSignatures-form-validation-error')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('customYaraSignatures-form-validation-error')
+        ).toBeInTheDocument();
       });
 
       view.rerender(
