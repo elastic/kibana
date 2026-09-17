@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
-const PACKAGE_NAME = 'nginx';
-const PACKAGE_VERSION = '1.20.0';
+const PACKAGE_NAME = 'input_package_upgrade';
+const PACKAGE_VERSION = '1.0.0';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -68,16 +68,32 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const createPackagePolicy = async (agentPolicyId: string): Promise<string> => {
+    const dataset = `test_dataset_${Date.now()}`;
     const res = await supertest
       .post(`/api/fleet/package_policies`)
       .set('kbn-xsrf', 'xxxx')
       .send({
         policy_id: agentPolicyId,
         package: { name: PACKAGE_NAME, version: PACKAGE_VERSION },
-        name: `test-policy-${Date.now()}`,
+        name: `test-policy-${dataset}`,
         description: '',
         namespace: 'default',
-        inputs: {},
+        inputs: {
+          'logs-logfile': {
+            enabled: true,
+            streams: {
+              [`${PACKAGE_NAME}.logs`]: {
+                enabled: true,
+                vars: {
+                  paths: ['/tmp/test/log'],
+                  tags: ['tag1'],
+                  ignore_older: '72h',
+                  'data_stream.dataset': dataset,
+                },
+              },
+            },
+          },
+        },
       })
       .expect(200);
     return res.body.item.id;
