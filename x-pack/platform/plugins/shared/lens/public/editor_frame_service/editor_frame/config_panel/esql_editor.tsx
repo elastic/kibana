@@ -36,6 +36,7 @@ import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
 import { useInitializeChart } from './use_initialize_chart';
+import { useHasMultipleVisibleLayers } from './use_has_multiple_visible_layers';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export type ESQLEditorProps = Simplify<
@@ -103,6 +104,17 @@ export function ESQLEditor({
 
   const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
+  const activeVisualization = visualization.activeId
+    ? visualizationMap[visualization.activeId]
+    : undefined;
+  const hasMultipleVisibleLayers = useHasMultipleVisibleLayers({
+    activeVisualization,
+    visualizationState: visualization.state,
+    framePublicAPI,
+  });
+  // The layer tabs provide the divider above a portaled editor. Keep the editor's own
+  // divider when there are no tabs, including single-layer ES|QL charts.
+  const showTopBorder = !editorContainer || !hasMultipleVisibleLayers;
   // Updated when the workspace kicks off a new search (manual refresh, auto-refresh,
   // or when chart requests run under a new session). Used as an effect dependency to
   // re-fetch the ES|QL results grid for the last submitted query.
@@ -392,6 +404,7 @@ export function ESQLEditor({
         setIsVisualizationLoading={setIsVisualizationLoading}
         esqlVariables={esqlVariables}
         queryStats={esqlQueryStats}
+        showTopBorder={showTopBorder}
         closeFlyout={closeFlyout}
         panelId={panelId}
         layerId={layerId}
@@ -443,6 +456,7 @@ type InnerEditorProps = Simplify<
     adHocDataViews: DataViewSpec[];
     esqlVariables: ESQLControlVariable[] | undefined;
     queryStats?: ESQLQueryStats;
+    showTopBorder: boolean;
   } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'layerId' | 'closeFlyout'>
 >;
 
@@ -464,6 +478,7 @@ function InnerESQLEditor({
   runQuery,
   esqlVariables,
   queryStats,
+  showTopBorder,
 }: InnerEditorProps) {
   const { euiTheme } = useEuiTheme();
   const esqlEditorContext = useESQLEditorContext();
@@ -479,7 +494,7 @@ function InnerESQLEditor({
     <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
       <div
         css={css`
-          border-top: ${euiTheme.border.thin};
+          ${showTopBorder ? `border-top: ${euiTheme.border.thin};` : ''}
         `}
       >
         <ESQLLangEditor

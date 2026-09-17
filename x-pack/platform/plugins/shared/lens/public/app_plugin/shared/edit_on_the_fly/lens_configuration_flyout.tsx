@@ -46,7 +46,7 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
-import { getVisibleLayerIds } from '../../../editor_frame_service/editor_frame/config_panel/get_visible_layer_ids';
+import { useHasMultipleVisibleLayers } from '../../../editor_frame_service/editor_frame/config_panel/use_has_multiple_visible_layers';
 import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
@@ -398,20 +398,11 @@ export function LensEditConfigurationFlyout({
   // layers (e.g. annotations, reference lines), so show the panel only for
   // single-layer ES|QL charts edited via layer tabs. Hidden layers (e.g. the
   // metric trendline) do not render as tabs and must not count here.
-  const hasMultipleVisibleLayers = useMemo(() => {
-    if (!activeVisualization || !visualization.state) {
-      return false;
-    }
-
-    return (
-      getVisibleLayerIds({
-        activeVisualization,
-        visualizationState: visualization.state,
-        framePublicAPI,
-        layerIds,
-      }).length > 1
-    );
-  }, [activeVisualization, framePublicAPI, layerIds, visualization.state]);
+  const hasMultipleVisibleLayers = useHasMultipleVisibleLayers({
+    activeVisualization,
+    visualizationState: visualization.state,
+    framePublicAPI,
+  });
   const showSuggestions = !textBasedMode || !hasMultipleVisibleLayers;
 
   const showConvertToEsqlButton = useMemo(() => {
