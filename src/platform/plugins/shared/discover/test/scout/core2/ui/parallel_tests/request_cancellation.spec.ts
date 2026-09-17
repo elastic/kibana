@@ -9,6 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
+import { waitForRequestCount } from '../helpers/request_counts_shared';
 
 const STALLED_LOGSTASH_QUERY = JSON.stringify({
   error_query: {
@@ -66,18 +67,43 @@ spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-clas
 
   spaceTest(
     'recovers when a newer time range aborts an active request',
-    async ({ page, pageObjects }) => {
+    async ({ page, pageObjects, network }) => {
       const { datePicker, discover, filterBar } = pageObjects;
       const reducedRange = {
         from: 'Sep 20, 2015 @ 00:00:00.000',
         to: 'Sep 20, 2015 @ 23:50:13.253',
       };
 
+      await discover.waitUntilSearchingHasFinished();
+
+      const stalledSearchResponse = page.waitForResponse((response) => {
+        try {
+          return (
+            new URL(response.url()).pathname.endsWith('/internal/search/ese') &&
+            response.request().method() === 'POST' &&
+            response.ok()
+          );
+        } catch {
+          return false;
+        }
+      });
       await filterBar.addDslFilter(STALLED_LOGSTASH_WARNING_QUERY);
+      const stalledBody = await (await stalledSearchResponse).json();
+      expect(stalledBody.id).toBeTruthy();
       await expect(discover.getQueryCancelButton()).toBeVisible();
       await expect(page.testSubj.locator('discoverDataGridUpdating')).toBeVisible();
 
-      await datePicker.setAbsoluteRange(reducedRange);
+      expect(
+        await network.trackMatchingRequests(
+          { endpoint: '/internal/search/ese', method: 'DELETE' },
+          async (getCount) => {
+            await datePicker.setAbsoluteRange(reducedRange);
+            // Discover aborts the previous search from fetch$, which runs after
+            // the date picker closes — keep listening until the DELETE arrives.
+            await waitForRequestCount(getCount, 1);
+          }
+        )
+      ).toBeGreaterThan(0);
       await discover.waitUntilSearchingHasFinished();
 
       await expect(discover.getHistogramChart()).toBeVisible();

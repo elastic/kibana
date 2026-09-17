@@ -35,13 +35,24 @@ spaceTest.describe(
 
     spaceTest(
       'renders an ES|QL histogram and updates it for a new time range',
-      async ({ pageObjects }) => {
+      async ({ page, pageObjects }) => {
         const { datePicker, discover } = pageObjects;
 
         await discover.writeAndSubmitEsqlQuery(ESQL_LIMIT_QUERY);
         await expect(discover.getHistogramChart()).toBeVisible();
         await expect(discover.getHitCountLocator()).toHaveText('10');
         expect(await discover.getHistogramSuggestionType()).toBe('histogramForESQL');
+        await expect(page.testSubj.locator('unifiedHistogramSaveVisualization')).toBeVisible();
+        await expect(
+          page.testSubj.locator('unifiedHistogramEditFlyoutVisualization')
+        ).toBeVisible();
+        await expect(page.testSubj.locator('unifiedHistogramEditVisualization')).toBeHidden();
+        await expect(
+          page.testSubj.locator('unifiedHistogramBreakdownSelectorButton')
+        ).toBeVisible();
+        await expect(
+          page.testSubj.locator('unifiedHistogramTimeIntervalSelectorButton')
+        ).toBeHidden();
 
         await datePicker.setAbsoluteRange({
           from: 'Sep 20, 2015 @ 00:00:00.000',
@@ -126,6 +137,8 @@ spaceTest.describe(
         await discover.revertUnsavedChanges();
         expect(await discover.getVisualizationTitle()).toBe('Line');
         expect(await discover.getHistogramSuggestionType()).toBe('histogramForESQL');
+        expect(await discover.getEsqlQueryValue()).toBe(ESQL_LIMIT_QUERY);
+        await expect(discover.getHitCountLocator()).toHaveText('10');
         await expect(discover.unsavedChangesIndicator()).toBeHidden();
       }
     );

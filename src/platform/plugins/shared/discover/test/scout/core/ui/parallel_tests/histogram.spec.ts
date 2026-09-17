@@ -190,7 +190,7 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
   );
 
   spaceTest(
-    'persists a narrowed histogram time range on a saved session',
+    'keeps a narrowed histogram time range after save and reload',
     async ({ page, pageObjects, scoutSpace, discoverScoutSpace }) => {
       const { discover, datePicker } = pageObjects;
 
@@ -198,15 +198,17 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
         await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
         await page.reload();
         await discover.waitUntilTabIsLoaded();
+        await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
         await datePicker.setAbsoluteRange({
           from: '2015-09-20T00:00:00.000Z',
           to: '2015-09-20T23:50:13.253Z',
         });
-        await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
         await discover.waitUntilSearchingHasFinished();
         await expect(discover.getHitCountLocator()).toHaveText('4,756');
 
-        await discover.saveSearch(`test-search-${scoutSpace.id}`, { storeTimeRange: true });
+        await discover.saveSearch(`test-search-${scoutSpace.id}`);
+        await expect(discover.getHitCountLocator()).toHaveText('4,756');
+
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await expect(discover.getHistogramChart()).toBeVisible();
