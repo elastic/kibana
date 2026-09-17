@@ -8,16 +8,18 @@
  */
 
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
 import {
   AGENT_FIRST_LAYOUT_OVERRIDES,
   ChromeLayout,
   ChromeLayoutConfigProvider,
   DEFAULT_AGENT_WIDTH,
+  clampAgentWorkspaceWidth,
   isAgentFirst,
 } from '@kbn/ui-chrome-layout';
 import {
+  AgentWorkspacePanel,
   AgentWorkspaceSlot,
   ChromeComponentsProvider,
   ClassicHeader,
@@ -106,10 +108,35 @@ export class GridLayout implements LayoutService {
       const showAgentWorkspace =
         agentFirstEnabled && chromeVisible && chromeStyle === 'project';
 
+      const [agentWorkspaceWidth, setAgentWorkspaceWidth] = useState(DEFAULT_AGENT_WIDTH);
+
+      const setAgentWorkspaceWidthClamped = useCallback(
+        (width: number) => {
+          setAgentWorkspaceWidth(clampAgentWorkspaceWidth(width, navigationWidth, sidebarWidth));
+        },
+        [navigationWidth, sidebarWidth]
+      );
+
+      useLayoutEffect(() => {
+        if (!showAgentWorkspace) {
+          return;
+        }
+
+        const reclamp = () => {
+          setAgentWorkspaceWidth((current) =>
+            clampAgentWorkspaceWidth(current, navigationWidth, sidebarWidth)
+          );
+        };
+
+        reclamp();
+        window.addEventListener('resize', reclamp);
+        return () => window.removeEventListener('resize', reclamp);
+      }, [navigationWidth, showAgentWorkspace, sidebarWidth]);
+
       const layoutConfig = {
         ...layoutConfigs[layoutConfigKey],
         ...(showAgentWorkspace ? AGENT_FIRST_LAYOUT_OVERRIDES : {}),
-        ...(showAgentWorkspace ? { agentWidth: DEFAULT_AGENT_WIDTH } : {}),
+        ...(showAgentWorkspace ? { agentWidth: agentWorkspaceWidth } : {}),
         sidebarWidth,
         navigationWidth,
       };
@@ -126,7 +153,16 @@ export class GridLayout implements LayoutService {
           header = <ClassicHeader />;
         } else if (showAgentWorkspace) {
           navigation = <GridLayoutProjectSideNav />;
-          agent = <AgentWorkspaceSlot />;
+          agent = (
+            <AgentWorkspacePanel
+              width={agentWorkspaceWidth}
+              navigationWidth={navigationWidth}
+              sidebarWidth={sidebarWidth}
+              onWidthChange={setAgentWorkspaceWidthClamped}
+            >
+              <AgentWorkspaceSlot />
+            </AgentWorkspacePanel>
+          );
         } else {
           header = <ChromeNextGlobalHeader />;
           if (!hasInlineAppHeader && hasChromeAppHeaderContent) {

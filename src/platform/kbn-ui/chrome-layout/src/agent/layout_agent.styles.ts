@@ -87,6 +87,7 @@ const content: EmotionFn = () => css`
   flex-grow: 1;
   min-width: 0;
   min-height: 0;
+  height: 100%;
 `;
 
 export const styles = {

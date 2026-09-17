@@ -19,6 +19,7 @@ export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './sr
 export { useHasInlineAppHeader } from './src/shared/chrome_hooks';
 export { HeaderActionButton, type HeaderActionButtonProps } from './src/chrome_next/global_header';
 export { AgentWorkspaceSlot } from './src/agent/agent_workspace_slot';
+export { AgentWorkspacePanel } from './src/agent/agent_workspace_panel';
 export {
   registerAgentWorkspaceContent,
   unregisterAgentWorkspaceContent,

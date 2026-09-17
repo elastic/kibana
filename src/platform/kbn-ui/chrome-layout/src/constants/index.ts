@@ -29,6 +29,40 @@ export const SIDE_PANEL_CONTENT_GAP = 8;
 /** Default width of the agent workspace column in agent-first chrome (POC). */
 export const DEFAULT_AGENT_WIDTH = 800;
 
+/** Minimum width of the agent workspace column when agent-first. */
+export const MIN_AGENT_WIDTH = 480;
+
+/** Minimum width reserved for the application workspace when agent-first. */
+export const MIN_APPLICATION_WORKSPACE_WIDTH = 320;
+
+/** Maximum agent workspace width as a fraction of the viewport width (50vw). */
+export const MAX_AGENT_VIEWPORT_WIDTH_RATIO = 0.5;
+
+export const getMaxAgentWorkspaceWidth = (
+  navigationWidth: number,
+  sidebarWidth: number
+): number => {
+  if (typeof window === 'undefined') {
+    return MIN_AGENT_WIDTH;
+  }
+
+  const maxByViewport = Math.floor(window.innerWidth * MAX_AGENT_VIEWPORT_WIDTH_RATIO);
+  const maxByRemainingSpace =
+    window.innerWidth - navigationWidth - MIN_APPLICATION_WORKSPACE_WIDTH - sidebarWidth;
+
+  return Math.max(MIN_AGENT_WIDTH, Math.min(maxByViewport, maxByRemainingSpace));
+};
+
+export const clampAgentWorkspaceWidth = (
+  width: number,
+  navigationWidth: number,
+  sidebarWidth: number
+): number =>
+  Math.max(
+    MIN_AGENT_WIDTH,
+    Math.min(getMaxAgentWorkspaceWidth(navigationWidth, sidebarWidth), Math.floor(width))
+  );
+
 /** Gutter between nav, agent, and application panels. */
 export const AGENT_FIRST_GAP = 8;
 
