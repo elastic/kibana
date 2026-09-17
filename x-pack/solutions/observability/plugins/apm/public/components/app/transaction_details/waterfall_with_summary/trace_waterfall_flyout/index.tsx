@@ -31,8 +31,16 @@ interface Props {
   onClose: () => void;
   contextSpanIds?: string[];
   /**
-   * Shared with the parent flyout so the full trace timeline participates in the
-   * same EUI managed back-button stack (Discover FullScreenWaterfall pattern).
+   * Shared with the parent flyout stack so Back/history stay linked across sessions
+   * (Discover FullScreenWaterfall / historyKey group pattern).
+   *
+   * Nested hosts pass the service-flyout key. Omit for the standalone APM
+   * transaction-page path (uses TRACE_WATERFALL_FLYOUT_HISTORY_KEY).
+   *
+   * Intentionally keeps session="start" even when nested: EUI allows only one
+   * main + one child per session, and service (m) + full-trace (m) cannot both
+   * be parent/child. A deeper stack (service → tx → full trace → doc) needs a
+   * new session that shares historyKey with the parent group.
    */
   historyKey?: symbol;
   /**
