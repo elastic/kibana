@@ -29,9 +29,13 @@ triggers:
         max_open_checks:
           type: integer
           minimum: 1
-          # The maximum equals the default. The search below reads at most 50 indicators.
+          maximum: 100
+          description: "Maximum number of active reviews in this space. Default: 100. Cannot exceed 100 because the active-review lookup is capped at 100 by the executions API."
+        batch_size:
+          type: integer
+          minimum: 1
           maximum: 50
-          description: "Maximum number of active reviews in this space. Default: 50. A manual run can only lower it."
+          description: "How many new reviews to start per sweep. Default: 5. Raise to process the backlog faster; lower to reduce Task Manager load."
         lookback_days:
           type: integer
           minimum: 1
@@ -52,17 +56,21 @@ outputs:
 consts:
   # Defaults. A manual run can override each value through the input with the same name.
   ai_index_id: security-investigations
-  # Maximum number of active reviews per space. A sweep starts new reviews up to this
-  # number.
-  max_open_checks: 50
+  # Maximum number of active reviews per space (across all sweeps). A sweep starts new
+  # reviews only when the in-flight count is below this ceiling. Capped at 100 because
+  # the executions API returns at most 100 results, so counting above 100 is impossible.
+  max_open_checks: 100
+  # New reviews started per sweep. Kept small so each sweep adds a bounded number of
+  # Task Manager tasks. The ES search size below must be at least this value.
+  batch_size: 5
   # How many days back the sweep looks. An indicator older than this is never reviewed,
   # so the sweep reads the oldest indicators in the window first.
-  lookback_days: 30
+  lookback_days: 7
   # The template language has no empty-list literal. `| default: []` returns nothing.
   # This constant is the empty-list fallback.
   no_rows: []
 steps:
-  # Step 1 of 7: list the reviews that are active in this space. A review is active from
+  # Step 1 of 8: list the reviews that are active in this space. A review is active from
   # its start until it ends. Each review has the concurrency key
   # `coverage-<indicator id>`. The key gives the indicator id.
   #
@@ -70,6 +78,10 @@ steps:
   # indicator is a candidate. The review's concurrency rule drops a duplicate review.
   #
   # The workflow id in the path must equal the id in `start_review`.
+  #
+  # `size=100` is the maximum the executions API accepts. If more than 100 reviews are
+  # active, the in-flight count is underestimated and the exclusion list is incomplete.
+  # The concurrency key drop remains the enforcer that prevents duplicate reviews.
   - name: list_active_reviews
     type: kibana.request
     on-failure:
@@ -80,7 +92,7 @@ steps:
       headers:
         elastic-api-version: "2023-10-31"
 
-  # Step 2 of 7: get the indicator ids of the active reviews, and count them. The
+  # Step 2 of 8: get the indicator ids of the active reviews, and count them. The
   # template language cannot change list items one by one. The keys are joined into one
   # string, the prefix is removed, and the string is split into ids.
   - name: collect_active_indicators
@@ -90,7 +102,7 @@ steps:
       parsed_count: "${{ steps.list_active_reviews.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'coverage-' | split: ',' | size }}"
       count: "${{ steps.list_active_reviews.output.results | default: consts.no_rows | size }}"
 
-  # Step 3 of 7: publish the ids only when the parse is sound. `join` and `split` use a
+  # Step 3 of 8: publish the ids only when the parse is sound. `join` and `split` use a
   # comma, so a comma inside a key would produce more ids than there are reviews, and a
   # fragment could name an unrelated indicator. The parse counts only when it yields
   # exactly one id per active review. Otherwise this step is skipped and the search below
@@ -101,15 +113,20 @@ steps:
     with:
       indicator_ids: "${{ steps.collect_active_indicators.output.parsed }}"
 
-  # Step 4 of 7: count the reviews this sweep can start: the maximum minus the active
-  # reviews. The result is never below zero. A negative slice length does not give an
-  # empty list.
+  # Step 4 of 8: count how many reviews the space can still accept: the ceiling minus
+  # the active reviews. The result is never below zero.
   - name: resolve_free_slots
     type: data.set
     with:
       free: "${{ inputs.max_open_checks | default: consts.max_open_checks | minus: steps.collect_active_indicators.output.count | at_least: 0 }}"
 
-  # Step 5 of 7: find pending indicators without an active review. The query matches
+  # Step 5 of 8: resolve the per-sweep batch limit from the input or the default.
+  - name: resolve_batch_size
+    type: data.set
+    with:
+      size: "${{ inputs.batch_size | default: consts.batch_size }}"
+
+  # Step 6 of 8: find pending indicators without an active review. The query matches
   # type, status, and creation time. `attributes` is a flattened field in Elasticsearch.
   # Values match exactly and are case-sensitive. `@timestamp` is written once, when the
   # indicator is created, so the range is a creation-time window and marking an indicator
@@ -130,8 +147,9 @@ steps:
       continue: true
     with:
       index: "ai-index-idx-{{ inputs.ai_index_id | default: consts.ai_index_id }}"
-      # A plain number. The step rejects a template in a number field. The value equals
-      # max_open_checks, so one sweep can fill an empty space. Change both together.
+      # A plain number. The step rejects a template in a number field. Set to the
+      # maximum allowed batch_size input so the search always returns enough candidates.
+      # consts.batch_size and the batch_size input maximum (50) must not exceed this.
       size: 50
       _source: false
       sort:
@@ -152,13 +170,15 @@ steps:
             - ids:
                 values: "${{ steps.resolve_active_indicators.output.indicator_ids | default: consts.no_rows }}"
 
-  # Step 6 of 7: keep only as many indicators as the sweep can start.
+  # Step 7 of 8: cap results to the smaller of free slots and batch size. Two slices in
+  # sequence take the minimum: the first limits by the space ceiling, the second by the
+  # per-sweep batch. The ES search already returns at most batch_size.maximum (50) hits.
   - name: resolve_dispatch_batch
     type: data.set
     with:
-      indicators: "${{ steps.search_pending_indicators.output.hits.hits | default: consts.no_rows | slice: 0, steps.resolve_free_slots.output.free }}"
+      indicators: "${{ steps.search_pending_indicators.output.hits.hits | default: consts.no_rows | slice: 0, steps.resolve_free_slots.output.free | slice: 0, steps.resolve_batch_size.output.size }}"
 
-  # Step 7 of 7: start one review per indicator. The sweep does not wait for the review.
+  # Step 8 of 8: start one review per indicator. The sweep does not wait for the review.
   # A review can wait up to 72 hours for a human. The sweep passes the indicator id and
   # the index name. The review reads the indicator.
   - name: start_reviews

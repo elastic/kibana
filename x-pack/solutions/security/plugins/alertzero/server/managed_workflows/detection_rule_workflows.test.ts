@@ -988,6 +988,8 @@ describe('detection rule workflows', () => {
         ]) {
           expect(path).toContain(`statuses=${status}`);
         }
+        // The executions API rejects size > 100. size=100 is the maximum allowed.
+        expect(path).toContain('size=100');
         expect(lookup['on-failure']).toEqual({ continue: true });
       });
 
@@ -1002,20 +1004,35 @@ describe('detection rule workflows', () => {
           }>
         ).find(({ type }) => type === 'manual')!.inputs!.properties;
 
-        expect(consts.max_open_checks).toBe(50);
+        expect(consts.max_open_checks).toBe(100);
         expect(free).toContain('inputs.max_open_checks | default: consts.max_open_checks');
         expect(free).toContain('minus: steps.collect_active_indicators.output.count');
         expect(free).toContain('at_least: 0');
-        expect(String(withOf('resolve_dispatch_batch').indicators)).toContain(
-          'slice: 0, steps.resolve_free_slots.output.free'
-        );
+        // dispatch is capped by both the ceiling and the per-sweep batch size
+        const dispatch = String(withOf('resolve_dispatch_batch').indicators);
+        expect(dispatch).toContain('slice: 0, steps.resolve_free_slots.output.free');
+        expect(dispatch).toContain('slice: 0, steps.resolve_batch_size.output.size');
         expect(inputs.max_open_checks.maximum).toBe(consts.max_open_checks);
       });
 
+      it('resolves batch_size from input or default and caps dispatch to it', () => {
+        const batchSize = String(withOf('resolve_batch_size').size);
+        const inputs = (
+          sweep.triggers as unknown as Array<{
+            type: string;
+            inputs?: { properties: Record<string, { maximum?: number }> };
+          }>
+        ).find(({ type }) => type === 'manual')!.inputs!.properties;
+
+        expect(consts.batch_size).toBe(5);
+        expect(batchSize).toContain('inputs.batch_size | default: consts.batch_size');
+        expect(inputs.batch_size.maximum).toBe(50);
+      });
+
       // Indicators with an active review are excluded in the query itself, so they never
-      // take a result slot from a free one. The search size equals the maximum, so one
-      // sweep can fill an empty space.
-      it('searches pending indicators minus the active ones, sized for the maximum', () => {
+      // take a result slot from a free one. The search size is the maximum allowed batch_size
+      // input (50) so all valid batch sizes have enough candidates to slice from.
+      it('searches pending indicators minus the active ones, sized for the max batch', () => {
         const search = step('search_pending_indicators');
         const query = JSON.stringify(search.with?.query);
 
@@ -1027,7 +1044,7 @@ describe('detection rule workflows', () => {
         expect(query).toContain(
           '"ids":{"values":"${{ steps.resolve_active_indicators.output.indicator_ids | default: consts.no_rows }}"}'
         );
-        expect(search.with?.size).toBe(consts.max_open_checks);
+        expect(search.with?.size).toBe(50);
         expect(search['on-failure']).toEqual({ continue: true });
       });
 
@@ -1053,7 +1070,7 @@ describe('detection rule workflows', () => {
           }>
         ).find(({ type }) => type === 'manual')!.inputs!.properties;
 
-        expect(consts.lookback_days).toBe(30);
+        expect(consts.lookback_days).toBe(7);
         expect(query).toContain(
           '"gte":"now-{{ inputs.lookback_days | default: consts.lookback_days }}d"'
         );
