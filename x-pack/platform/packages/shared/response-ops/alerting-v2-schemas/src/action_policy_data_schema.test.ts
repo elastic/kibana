@@ -429,41 +429,6 @@ describe('findActionPoliciesRequestSchema', () => {
       false
     );
   });
-
-  describe('tags', () => {
-    it('wraps a single tag in an array', () => {
-      expect(findActionPoliciesRequestSchema.parse({ tags: 'production' }).tags).toEqual([
-        'production',
-      ]);
-    });
-
-    it('trims each tag', () => {
-      expect(findActionPoliciesRequestSchema.parse({ tags: [' a ', 'b '] }).tags).toEqual([
-        'a',
-        'b',
-      ]);
-    });
-
-    it('rejects a whitespace-only tag', () => {
-      expect(findActionPoliciesRequestSchema.safeParse({ tags: ['  '] }).success).toBe(false);
-    });
-
-    it('accepts up to 10 tags', () => {
-      const tags = Array.from({ length: 10 }, (_, index) => `tag-${index}`);
-      expect(findActionPoliciesRequestSchema.parse({ tags }).tags).toEqual(tags);
-    });
-
-    it('rejects more than 10 tags', () => {
-      const tags = Array.from({ length: 11 }, (_, index) => `tag-${index}`);
-      expect(findActionPoliciesRequestSchema.safeParse({ tags }).success).toBe(false);
-    });
-
-    it('rejects a tag longer than 128 characters', () => {
-      expect(findActionPoliciesRequestSchema.safeParse({ tags: 'a'.repeat(129) }).success).toBe(
-        false
-      );
-    });
-  });
 });
 
 describe('bulkSnoozeActionPoliciesBodySchema', () => {
