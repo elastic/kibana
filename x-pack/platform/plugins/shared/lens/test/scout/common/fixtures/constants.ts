@@ -16,6 +16,7 @@ export const ES_ARCHIVE_PATHS = {
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights',
   KIBANA_SAMPLE_DATA_LOGS_TSDB:
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb',
+  ML_ECOMMERCE: 'x-pack/platform/test/fixtures/es_archives/ml/ecommerce',
 } as const;
 
 export const DATA_VIEW_ID = {
