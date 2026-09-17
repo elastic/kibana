@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DURATION_REGEX, isValidDuration, parseDuration } from './duration/duration';
+export {
+  assertValidDuration,
+  DURATION_REGEX,
+  isValidDuration,
+  parseDuration,
+} from './duration/duration';
 export { extractTemplateVariables } from './extract_template_variables/extract_template_variables';
 export {
   findInputsInGraph,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
   CollisionStrategySchema,
@@ -14,6 +15,7 @@ import {
   DataSetStepSchema,
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   DurationSchema,
+  DynamicTimeoutSchema,
   ElasticsearchStepSchema,
   EventTimestampSchema,
   IfStepSchema,
@@ -1307,5 +1309,16 @@ describe('dynamic timeout schema', () => {
     expect(TimeoutPropSchema.safeParse({ timeout: templated }).success).toBe(false);
     expect(TimeoutPropSchema.safeParse({ timeout: '5m' }).success).toBe(true);
     expect(TimeoutPropSchema.safeParse({ timeout: '1h30m' }).success).toBe(true);
+  });
+
+  it('emits duration and Liquid patterns in JSON Schema for Monaco', () => {
+    const jsonSchema = z.toJSONSchema(DynamicTimeoutSchema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    });
+    const encoded = JSON.stringify(jsonSchema);
+    expect(encoded).toMatch(/"anyOf"|"oneOf"/);
+    expect(encoded).toContain('\\d+w');
+    expect(encoded).toContain('{{');
   });
 });

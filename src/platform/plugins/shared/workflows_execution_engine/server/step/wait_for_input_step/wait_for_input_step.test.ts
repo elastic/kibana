@@ -230,6 +230,27 @@ describe('WaitForInputStepImpl', () => {
       );
     });
 
+    it('fails wait-entry before notifications when the rendered timeout is invalid', async () => {
+      mockHasExternalHitlChannels.mockReturnValue(true);
+      node.configuration = {
+        ...node.configuration,
+        timeout: '{{ inputs.expiresIn }}',
+        with: {
+          ...node.configuration.with,
+          channels: { slack: { 'connector-id': 'slack-1' } },
+        },
+      } as WaitForInputStep;
+      (
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockImplementation((value: unknown) =>
+        value === node.configuration.timeout ? 'soon' : value
+      );
+
+      await expect(underTest.run()).rejects.toThrow('Invalid duration format: soon');
+      expect(mockSendWaitForInputNotifications).not.toHaveBeenCalled();
+      expect(mockMintHitlExternalResumeToken).not.toHaveBeenCalled();
+    });
+
     it('should not call setInput when the with block is absent', async () => {
       node.configuration = {
         name: 'wait-for-input-step',

@@ -566,24 +566,32 @@ describe('getWorkflowIdleTimeoutResumeAtAfterLoop', () => {
   });
 
   it('does not parse a templated YAML timeout when the rendered duration is persisted', () => {
-    const params = makeParams();
-    (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
-      id: 'exec-parent',
-      status: ExecutionStatus.WAITING_FOR_INPUT,
-      startedAt: '2025-06-01T12:00:00.000Z',
-      scopeStack: [],
-    });
-    (params.workflowRuntime.getCurrentNode as jest.Mock).mockReturnValue({
-      stepId: 'app',
-      type: 'waitForApproval',
-      configuration: { timeout: "{{ inputs.expiresIn | default: '72h' }}" },
-    });
-    (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
-      startedAt: '2025-06-01T12:00:00.000Z',
-      state: { dynamicTimeout: '30s' },
-    });
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(new Date('2025-06-01T12:00:15.000Z'));
+      const params = makeParams();
+      (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+        id: 'exec-parent',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        startedAt: '2025-06-01T12:00:00.000Z',
+        scopeStack: [],
+      });
+      (params.workflowRuntime.getCurrentNode as jest.Mock).mockReturnValue({
+        stepId: 'app',
+        type: 'waitForApproval',
+        configuration: { timeout: "{{ inputs.expiresIn | default: '72h' }}" },
+      });
+      (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
+        startedAt: '2025-06-01T12:00:00.000Z',
+        state: { dynamicTimeout: '30s' },
+      });
 
-    expect(getWorkflowIdleTimeoutResumeAtAfterLoop(params)).toBeInstanceOf(Date);
+      expect(getWorkflowIdleTimeoutResumeAtAfterLoop(params)?.getTime()).toBe(
+        Date.parse('2025-06-01T12:00:30.000Z')
+      );
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 

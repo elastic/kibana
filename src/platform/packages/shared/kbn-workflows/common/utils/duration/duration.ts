@@ -28,13 +28,18 @@ export function isValidDuration(duration: unknown): duration is string {
   return typeof duration === 'string' && DURATION_REGEX.test(duration);
 }
 
-/** Converts a compound duration string to milliseconds. */
-export function parseDuration(duration: string): number {
+/** Throws if `duration` is not a compound duration string. */
+export function assertValidDuration(duration: unknown): asserts duration is string {
   if (!isValidDuration(duration)) {
     throw new Error(
       `Invalid duration format: ${duration}. Use format like "1w2d3h4m5s6ms" with units in descending order.`
     );
   }
+}
+
+/** Converts a compound duration string to milliseconds. */
+export function parseDuration(duration: string): number {
+  assertValidDuration(duration);
 
   let total = 0;
   const durationComponentsRegex = /(\d+)(ms|s|m|h|d|w)(?![a-zA-Z])/g;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DURATION_REGEX, isValidDuration, parseDuration } from './duration';
+import { assertValidDuration, DURATION_REGEX, isValidDuration, parseDuration } from './duration';
 
 describe('isValidDuration', () => {
   it.each(['1ms', '30s', '5m', '2h', '1d', '1w', '1h30m', '1w2d3h4m5s6ms', '1h500ms', '0s'])(
@@ -24,6 +24,18 @@ describe('isValidDuration', () => {
       expect(isValidDuration(duration)).toBe(false);
     }
   );
+});
+
+describe('assertValidDuration', () => {
+  it('returns for a valid duration', () => {
+    expect(() => assertValidDuration('1h30m')).not.toThrow();
+  });
+
+  it('throws for an invalid duration', () => {
+    expect(() => assertValidDuration('soon')).toThrow(
+      'Invalid duration format: soon. Use format like "1w2d3h4m5s6ms" with units in descending order.'
+    );
+  });
 });
 
 describe('parseDuration', () => {

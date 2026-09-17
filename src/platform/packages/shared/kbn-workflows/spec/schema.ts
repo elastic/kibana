@@ -195,12 +195,16 @@ export const TimeoutPropSchema = z.object({
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
+const LiquidTimeoutTemplateSchema = z
+  .string()
+  .regex(
+    /\{\{[\s\S]*\}\}/,
+    'Invalid timeout. Use a duration (e.g. "72h") or a template that renders to one.'
+  );
+
 /** A duration, or Liquid that renders to one at step entry. */
 export const DynamicTimeoutSchema = z
-  .string()
-  .refine((value) => DurationSchema.safeParse(value).success || /\{\{[\s\S]*\}\}/.test(value), {
-    error: 'Invalid timeout. Use a duration (e.g. "72h") or a template that renders to one.',
-  })
+  .union([DurationSchema, LiquidTimeoutTemplateSchema])
   .describe(
     "Duration (`72h`) or Liquid that renders to one (`{{ inputs.expiresIn | default: '72h' }}`)."
   );
