@@ -17,7 +17,7 @@ import type { SourceApiKeyGenerationDeps } from '../source_api_keys';
 import type { SourceEnvironmentLoader } from '../source_environment';
 import { getConfiguredSources } from '../source_models';
 import {
-  createEmptyUnit,
+  createDefaultUnit,
   type Unit,
   type UnitRepository,
 } from '../../../../services/unit_repository';
@@ -235,7 +235,7 @@ export const sourcesTableStateMachine = setup({
 }).createMachine({
   id: 'streamsSourcesTable',
   context: ({ input, self, spawn }) => {
-    const unitDefinition = input.unitDefinition ?? createEmptyUnit();
+    const unitDefinition = input.unitDefinition ?? createDefaultUnit();
     return {
       unitDefinition,
       pendingUnitDefinition: undefined,

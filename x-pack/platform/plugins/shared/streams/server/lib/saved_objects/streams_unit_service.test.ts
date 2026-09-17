@@ -28,6 +28,16 @@ const unit: StreamsUnit.Configuration = {
       supported_telemetry: ['logs'],
     },
   ],
+  pipelines: [
+    {
+      id: 'main',
+      supported_telemetry: ['logs'],
+      config: [
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'destinations', value: ['es-prod'] },
+      ],
+    },
+  ],
 };
 
 const secrets: StreamsUnit.Secrets = { es_api_key: 's3cret' };
@@ -160,6 +170,7 @@ describe('StreamsUnitService', () => {
       {
         id: 'default',
         overwrite: true,
+        initialNamespaces: ['*'],
         references: [
           {
             name: 'streamsMetadata',
@@ -183,6 +194,7 @@ describe('StreamsUnitService', () => {
       {
         id: 'default-streams-ui-metadata',
         overwrite: true,
+        initialNamespaces: ['*'],
       }
     );
   });
@@ -278,7 +290,9 @@ describe('StreamsUnitService', () => {
       })
     ).rejects.toThrow('distributor down');
 
-    expect(soClient.delete).toHaveBeenCalledWith('streams-configuration', 'default');
+    expect(soClient.delete).toHaveBeenCalledWith('streams-configuration', 'default', {
+      force: true,
+    });
     expect(soClient.create).toHaveBeenCalledTimes(1);
   });
 
@@ -326,6 +340,7 @@ describe('StreamsUnitService', () => {
       {
         id: 'default',
         overwrite: true,
+        initialNamespaces: ['*'],
         references: storedConfiguration.references,
       }
     );
@@ -343,9 +358,12 @@ describe('StreamsUnitService', () => {
     expect(soClient.delete).toHaveBeenNthCalledWith(
       1,
       'streams-ui-metadata',
-      'default-streams-ui-metadata'
+      'default-streams-ui-metadata',
+      { force: true }
     );
-    expect(soClient.delete).toHaveBeenNthCalledWith(2, 'streams-configuration', 'default');
+    expect(soClient.delete).toHaveBeenNthCalledWith(2, 'streams-configuration', 'default', {
+      force: true,
+    });
   });
 
   it('does nothing when the unit is not stored', async () => {

@@ -17,8 +17,47 @@ export interface UnitRepository {
   persist: (unit: Unit) => Promise<Unit>;
 }
 
-export const createEmptyUnit = (): Unit => ({
-  unit: {},
+const DEFAULT_SOURCE_ID = 'otlp-input';
+const DEFAULT_DESTINATION_ID = 'debug-out';
+const DEFAULT_PIPELINE_ID = 'main';
+const DEFAULT_SUPPORTED_TELEMETRY = ['logs', 'metrics', 'traces'] as const;
+
+/**
+ * Temporary client-side default until the backend ships a canonical unit.
+ * Used when GET `/internal/streams/unit/{id}` 404s, and as canvas / sources
+ * table initial context before a stored unit exists.
+ * TODO: Remove this once some sort of default exists: https://github.com/elastic/ingest-dev/issues/9178
+ * OR the canvas can actually facilitate configuration of a full unit.
+ */
+export const createDefaultUnit = (): Unit => ({
+  unit: {
+    sources: [
+      {
+        id: DEFAULT_SOURCE_ID,
+        name: 'OTLP',
+        type: 'otlp',
+        supported_telemetry: [...DEFAULT_SUPPORTED_TELEMETRY],
+      },
+    ],
+    destinations: [
+      {
+        id: DEFAULT_DESTINATION_ID,
+        name: 'Debug',
+        type: 'debug',
+        supported_telemetry: [...DEFAULT_SUPPORTED_TELEMETRY],
+      },
+    ],
+    pipelines: [
+      {
+        id: DEFAULT_PIPELINE_ID,
+        supported_telemetry: [...DEFAULT_SUPPORTED_TELEMETRY],
+        config: [
+          { name: 'sources', value: [DEFAULT_SOURCE_ID] },
+          { name: 'destinations', value: [DEFAULT_DESTINATION_ID] },
+        ],
+      },
+    ],
+  },
   ui_metadata: {},
 });
 
@@ -37,7 +76,7 @@ export const createUnitRepository = ({
       });
     } catch (error) {
       if (isNotFoundError(error)) {
-        return createEmptyUnit();
+        return createDefaultUnit();
       }
       throw error;
     }

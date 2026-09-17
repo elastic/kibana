@@ -20,6 +20,23 @@ const unit: StreamsUnit.Configuration = {
       supported_telemetry: ['logs'],
     },
   ],
+  destinations: [
+    {
+      id: 'es-prod',
+      type: 'debug',
+      supported_telemetry: ['logs'],
+    },
+  ],
+  pipelines: [
+    {
+      id: 'main',
+      supported_telemetry: ['logs'],
+      config: [
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'destinations', value: ['es-prod'] },
+      ],
+    },
+  ],
 };
 
 const expectedYaml = YAML.stringify(unit);

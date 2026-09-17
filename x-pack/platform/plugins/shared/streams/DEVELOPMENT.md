@@ -58,6 +58,7 @@ With the feature flags enabled you can then access the "new experience" via `/ap
 Important consequences:
 
 - Types are `hidden: true`. They do **not** appear in Stack Management → Saved Objects.
+- Both types are `namespaceType: 'multiple'` and are written with `initialNamespaces: ['*']`, so every space sees the same unit. That matches config-distributor `PUT /v1/units/default` (one unit per cluster). `multiple-isolated` would hide the object from other spaces while still using a globally unique id, so a second space would 404 then collide.
 - Only `unit_id` is mapped (`keyword`). The configuration saved object id is the unit id (`default` in v1). Do not add mappings unless you actually need to filter/sort on that field; mappings cannot be removed later.
 - `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest; `unit_id` is in AAD. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document — do not `soClient.update` encrypted or AAD attributes.
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
@@ -98,12 +99,49 @@ PUT kbn:/internal/streams/unit/default
 {
   "unit": {
     "sources": [
-      { "id": "otlp-input", "type": "nop", "supported_telemetry": ["logs"] }
+      { "id": "otlp-input", "type": "otlp", "supported_telemetry": ["logs", "traces"] }
+    ],
+    "processors": [
+      {
+        "id": "add-environment-tag",
+        "type": "add_fields",
+        "supported_telemetry": ["logs", "traces"],
+        "config": [
+          {
+            "name": "fields",
+            "value": [
+              {
+                "action": "upsert",
+                "location": "resource",
+                "path": "attributes[\"env\"]",
+                "value": "prod"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "destinations": [
+      { "id": "debug-out", "type": "debug", "supported_telemetry": ["logs", "traces"] }
+    ],
+    "pipelines": [
+      {
+        "id": "main",
+        "supported_telemetry": ["logs", "traces"],
+        "config": [
+          { "name": "sources", "value": ["otlp-input"] },
+          { "name": "processors", "value": ["add-environment-tag"] },
+          { "name": "destinations", "value": ["debug-out"] }
+        ]
+      }
     ]
   },
   "ui_metadata": {
     "nodes": {
-      "otlp-input": { "x": 0, "y": 0 }
+      "otlp-input": { "x": 0, "y": 0 },
+      "add-environment-tag": { "x": 240, "y": 0 },
+      "debug-out": { "x": 480, "y": 0 },
+      "stale-node": { "x": 999, "y": 999 }
     }
   },
   "secrets": {
@@ -116,7 +154,7 @@ GET kbn:/internal/streams/unit/default
 POST kbn:/internal/streams/unit/default/_reset
 ```
 
-Component `id`s must be unique across sources, processors, and destinations. Semantic / compile validation calls config-distributor `POST /v1/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)) when `xpack.streams.distributor.url` is set. Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. Without a distributor URL, only Kibana structural checks run.
+Component `id`s must be unique across sources, processors, destinations, and pipelines. Semantic / compile validation calls config-distributor `POST /v1/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)) when `xpack.streams.distributor.url` is set. Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. Without a distributor URL, only Kibana structural checks run.
 
 The distributor (via `transpiler.Compile()`) is the authority on whether a unit is valid. Kibana schema and Zod types are structural DX only. 
 

@@ -11,6 +11,11 @@ export * as StreamsV2Examples from './src/v2/__examples__';
 export {
   collectUnitComponentIds,
   findDuplicateUnitComponentIds,
+  streamsConfigEntrySchema,
+  streamsOttlRoutingContextSchema,
+  streamsPipelineConfigEntrySchema,
+  streamsPipelineRouteSchema,
+  streamsPipelineSchema,
   streamsSignalSchema,
   streamsSupportedTelemetrySchema,
   streamsUnitIdentifierSchema,

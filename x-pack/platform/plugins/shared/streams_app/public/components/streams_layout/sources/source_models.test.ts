@@ -24,7 +24,18 @@ const storedUnit: StreamsUnit.GetResponse = {
       },
     ],
     processors: [{ id: 'add-env', type: 'add_fields', supported_telemetry: ['logs'] }],
-    destinations: [{ id: 'es-prod', type: 'elasticsearch', supported_telemetry: ['logs'] }],
+    destinations: [{ id: 'es-prod', type: 'debug', supported_telemetry: ['logs'] }],
+    pipelines: [
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'traces'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'processors', value: ['add-env'] },
+          { name: 'destinations', value: ['es-prod'] },
+        ],
+      },
+    ],
   },
   ui_metadata: { nodes: { 'add-env': { x: 1, y: 2 } } },
 };
@@ -63,6 +74,7 @@ describe('source models', () => {
         ],
         processors: storedUnit.unit.processors,
         destinations: storedUnit.unit.destinations,
+        pipelines: storedUnit.unit.pipelines,
       },
       ui_metadata: storedUnit.ui_metadata,
     });

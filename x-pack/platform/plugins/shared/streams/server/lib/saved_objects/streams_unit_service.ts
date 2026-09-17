@@ -7,6 +7,7 @@
 
 import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ALL_SPACES_ID } from '@kbn/core-spaces-common';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { collectUnitComponentIds, type StreamsUnit } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
@@ -239,6 +240,9 @@ export class StreamsUnitService {
       {
         id: savedObjectId,
         overwrite: true,
+        // One unit per cluster (distributor `/v1/units/default`). Share to all
+        // spaces so they see the same document instead of colliding on the id.
+        initialNamespaces: [ALL_SPACES_ID],
         references: [
           {
             name: STREAMS_METADATA_REFERENCE_NAME,
@@ -263,13 +267,15 @@ export class StreamsUnitService {
       {
         id: getStreamsUiMetadataSavedObjectId(configurationSavedObjectId),
         overwrite: true,
+        initialNamespaces: [ALL_SPACES_ID],
       }
     );
   }
 
   private async deleteSavedObject(type: string, id: string): Promise<void> {
     try {
-      await this.soClient.delete(type, id);
+      // Shared to all spaces (`*`); force is required to delete multi-namespace objects.
+      await this.soClient.delete(type, id, { force: true });
     } catch (error) {
       if (!isNotFoundError(error)) {
         throw error;
@@ -282,7 +288,7 @@ export class StreamsUnitService {
     configurationSavedObjectId: string
   ): Promise<void> {
     if (!previousConfiguration) {
-      await this.soClient.delete(
+      await this.deleteSavedObject(
         STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
         configurationSavedObjectId
       );
@@ -295,6 +301,7 @@ export class StreamsUnitService {
       {
         id: previousConfiguration.id,
         overwrite: true,
+        initialNamespaces: [ALL_SPACES_ID],
         references: previousConfiguration.references,
       }
     );

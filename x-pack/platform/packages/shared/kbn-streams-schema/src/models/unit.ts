@@ -20,39 +20,133 @@ export const streamsUnitIdentifierSchema = z
 
 export const streamsSignalSchema = z.enum(['logs', 'metrics', 'traces', 'docs', 'profiles']);
 
-export const streamsSupportedTelemetrySchema = z.array(streamsSignalSchema).min(1).max(5);
+export const streamsSupportedTelemetrySchema = z
+  .array(streamsSignalSchema)
+  .min(1)
+  .max(5)
+  .refine((signals) => new Set(signals).size === signals.length, {
+    message: 'supported_telemetry must not contain duplicate signals',
+  });
 
-const displayFieldsSchema = z.object({
+/** Route `context` from streams-spec `defs.schema.yaml#/$defs/ottl_routing_context`. */
+export const streamsOttlRoutingContextSchema = z.enum([
+  'record',
+  'resource',
+  'log',
+  'span',
+  'metric',
+  'datapoint',
+  'profile',
+]);
+
+const displayFieldsSchema = {
   name: z.string().max(1024).optional(),
   description: z.string().max(10000).optional(),
-});
+};
 
-const configEntrySchema = z.object({
+export const streamsConfigEntrySchema = z.strictObject({
   name: z.string().min(1).max(256),
   value: z.unknown(),
   telemetry: streamsSupportedTelemetrySchema.optional(),
 });
 
-const componentBaseSchema = displayFieldsSchema.extend({
+const componentFields = {
+  ...displayFieldsSchema,
   id: streamsUnitIdentifierSchema,
   type: z.string().min(1).max(256),
   supported_telemetry: streamsSupportedTelemetrySchema,
-  config: z.array(configEntrySchema).max(500).optional(),
-});
+  config: z.array(streamsConfigEntrySchema).max(500).optional(),
+};
 
-const sourceSchema = componentBaseSchema.extend({
+const componentBaseSchema = z.strictObject(componentFields);
+
+const sourceSchema = z.strictObject({
+  ...componentFields,
   path_template: z.string().max(2048).optional(),
 });
 
+const identifierListSchema = z.array(streamsUnitIdentifierSchema).max(2000);
+
+const pipelineRouteBase = {
+  when: z.string().max(10000).optional(),
+  processors: identifierListSchema.optional(),
+  action: z.enum(['copy', 'move']).optional(),
+  context: streamsOttlRoutingContextSchema.optional(),
+  telemetry: streamsSupportedTelemetrySchema.optional(),
+};
+
 /**
- * Authored Streams unit document (sources, processors, destinations).
- * Per-type config and semantic graph rules are enforced by the
- * config-distributor validation endpoint (`transpiler.Compile()`).
+ * Pipeline route from streams-spec `pipeline.schema.yaml#/$defs/route`.
+ * `destinations` and `pipelines` are mutually exclusive (`oneOf`).
  */
-export const streamsUnitSchema = z.object({
-  sources: z.array(sourceSchema).max(2000).optional(),
+export const streamsPipelineRouteSchema = z.union([
+  z.strictObject({
+    ...pipelineRouteBase,
+    destinations: identifierListSchema.min(1),
+  }),
+  z.strictObject({
+    ...pipelineRouteBase,
+    pipelines: identifierListSchema.min(1),
+  }),
+]);
+
+const pipelineConfigTelemetry = {
+  telemetry: streamsSupportedTelemetrySchema.optional(),
+};
+
+/**
+ * Closed pipeline config names from streams-spec `pipeline.schema.yaml`.
+ */
+export const streamsPipelineConfigEntrySchema = z.discriminatedUnion('name', [
+  z.strictObject({
+    name: z.literal('sources'),
+    value: identifierListSchema.min(1),
+    ...pipelineConfigTelemetry,
+  }),
+  z.strictObject({
+    name: z.literal('processors'),
+    value: identifierListSchema,
+    ...pipelineConfigTelemetry,
+  }),
+  z.strictObject({
+    name: z.literal('routes'),
+    value: z.array(streamsPipelineRouteSchema).min(1).max(2000),
+    ...pipelineConfigTelemetry,
+  }),
+  z.strictObject({
+    name: z.literal('destinations'),
+    value: identifierListSchema.min(1),
+    ...pipelineConfigTelemetry,
+  }),
+]);
+
+export const streamsPipelineSchema = z
+  .strictObject({
+    ...displayFieldsSchema,
+    id: streamsUnitIdentifierSchema,
+    supported_telemetry: streamsSupportedTelemetrySchema,
+    config: z.array(streamsPipelineConfigEntrySchema).min(1).max(500),
+  })
+  .refine(
+    (pipeline) => {
+      const hasDestinations = pipeline.config.some((entry) => entry.name === 'destinations');
+      const hasRoutes = pipeline.config.some((entry) => entry.name === 'routes');
+      return !(hasDestinations && hasRoutes);
+    },
+    { message: 'destinations and routes are mutually exclusive', path: ['config'] }
+  );
+
+/**
+ * Authored Streams unit document from streams-spec `unit.schema.yaml`.
+ * Canvas saves sources, destinations, and pipelines incrementally, so Kibana
+ * does not require `minItems: 1` here. Completeness and remaining semantic
+ * graph rules are enforced by the config-distributor (`transpiler.Compile()`).
+ */
+export const streamsUnitSchema = z.strictObject({
+  sources: z.array(sourceSchema).max(2000).default([]),
   processors: z.array(componentBaseSchema).max(2000).optional(),
-  destinations: z.array(componentBaseSchema).max(2000).optional(),
+  destinations: z.array(componentBaseSchema).max(2000).default([]),
+  pipelines: z.array(streamsPipelineSchema).max(2000).default([]),
 });
 
 export const streamsUnitUiMetadataSchema = recursiveRecord.default({});
@@ -83,7 +177,7 @@ export const streamsUnitUpsertRequestSchema = z.object({
 });
 
 export const collectUnitComponentIds = (unit: StreamsUnit.Configuration): string[] => {
-  return [...(unit.sources ?? []), ...(unit.processors ?? []), ...(unit.destinations ?? [])].map(
+  return [...unit.sources, ...(unit.processors ?? []), ...unit.destinations, ...unit.pipelines].map(
     ({ id }) => id
   );
 };
@@ -106,6 +200,9 @@ export const findDuplicateUnitComponentIds = (unit: StreamsUnit.Configuration): 
 export namespace StreamsUnit {
   export type Identifier = z.infer<typeof streamsUnitIdentifierSchema>;
   export type Configuration = z.infer<typeof streamsUnitSchema>;
+  export type Pipeline = z.infer<typeof streamsPipelineSchema>;
+  export type PipelineConfigEntry = z.infer<typeof streamsPipelineConfigEntrySchema>;
+  export type PipelineRoute = z.infer<typeof streamsPipelineRouteSchema>;
   export type UiMetadata = z.infer<typeof streamsUnitUiMetadataSchema>;
   export type Secrets = z.infer<typeof streamsUnitSecretsSchema>;
   export type GetResponse = z.infer<typeof streamsUnitResponseSchema>;

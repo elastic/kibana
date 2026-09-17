@@ -24,7 +24,7 @@ import {
 } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
 import { getUnitSources } from '../../../../streams_layout/sources/source_models';
 import {
-  createEmptyUnit,
+  createDefaultUnit,
   type Unit,
   type UnitRepository,
 } from '../../../../../services/unit_repository';
@@ -418,7 +418,7 @@ export const canvasStateMachine = setup({
     },
   },
   context: ({ spawn, self }) => {
-    const unitDefinition = createEmptyUnit();
+    const unitDefinition = createDefaultUnit();
     return {
       urlState: defaultUrlState,
       unit: unitDefinition,

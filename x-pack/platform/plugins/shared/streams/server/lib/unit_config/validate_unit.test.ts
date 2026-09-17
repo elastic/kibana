@@ -17,6 +17,23 @@ const unit: StreamsUnit.Configuration = {
       supported_telemetry: ['logs'],
     },
   ],
+  destinations: [
+    {
+      id: 'es-prod',
+      type: 'debug',
+      supported_telemetry: ['logs'],
+    },
+  ],
+  pipelines: [
+    {
+      id: 'main',
+      supported_telemetry: ['logs'],
+      config: [
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'destinations', value: ['es-prod'] },
+      ],
+    },
+  ],
 };
 
 describe('validateUnitForWrite', () => {
@@ -46,5 +63,18 @@ describe('validateUnitForWrite', () => {
       statusCode: 400,
     });
     expect(validate).toHaveBeenCalledWith(unit);
+  });
+
+  it('still calls the distributor hook for incomplete units', async () => {
+    const validate = jest.fn().mockResolvedValue(undefined);
+    const incomplete: StreamsUnit.Configuration = {
+      sources: unit.sources,
+      destinations: [],
+      pipelines: [],
+    };
+
+    await validateUnitForWrite(incomplete, { validate });
+
+    expect(validate).toHaveBeenCalledWith(incomplete);
   });
 });

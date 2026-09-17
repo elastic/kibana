@@ -28,6 +28,7 @@ export const streamsConfigurationSavedObjectAttributesV1 = schema.object({
     sources: schema.maybe(unitComponentsSchema),
     processors: schema.maybe(unitComponentsSchema),
     destinations: schema.maybe(unitComponentsSchema),
+    pipelines: schema.maybe(unitComponentsSchema),
   }),
   // Encrypted at rest as a string. Decrypted `secrets` is a name → value map.
   // Do not map it; do not include `unit` in AAD (canvas edits would re-encrypt).
@@ -56,7 +57,7 @@ export const streamsConfigurationSavedObjectType: SavedObjectsType<StreamsConfig
     name: STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
     hidden: true,
     hiddenFromHttpApis: true,
-    namespaceType: 'multiple-isolated',
+    namespaceType: 'multiple',
     mappings: {
       dynamic: false,
       properties: {
@@ -85,7 +86,7 @@ export const streamsUiMetadataSavedObjectType: SavedObjectsType<StreamsUiMetadat
     name: STREAMS_UI_METADATA_SAVED_OBJECT_TYPE,
     hidden: true,
     hiddenFromHttpApis: true,
-    namespaceType: 'multiple-isolated',
+    namespaceType: 'multiple',
     mappings: {
       dynamic: false,
       properties: {},
