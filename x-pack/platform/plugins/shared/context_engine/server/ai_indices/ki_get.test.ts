@@ -94,16 +94,19 @@ describe('ki_get', () => {
             _id: 'rev-a',
             _index: '.ds-ai-index-ds-sample-000001',
             _source: { id: 'ki-1', '@timestamp': '2026-01-01T00:00:00.000Z', title: 'A' },
+            sort: [1767225600000],
           },
           {
             _id: 'rev-b',
             _index: '.ds-ai-index-ds-sample-000001',
-            _source: { id: 'ki-1', '@timestamp': '2026-01-01T00:00:00.000Z', title: 'B' },
+            _source: { id: 'ki-1', '@timestamp': '2026-01-01T00:00:00Z', title: 'B' },
+            sort: [1767225600000],
           },
           {
             _id: 'rev-z',
             _index: '.ds-ai-index-ds-sample-000001',
             _source: { id: 'ki-1', '@timestamp': '2025-12-31T00:00:00.000Z', title: 'older' },
+            sort: [1767139200000],
           },
         ],
       },
@@ -118,7 +121,7 @@ describe('ki_get', () => {
       })
     ).resolves.toEqual({
       id: 'ki-1',
-      document: { id: 'ki-1', '@timestamp': '2026-01-01T00:00:00.000Z', title: 'B' },
+      document: { id: 'ki-1', '@timestamp': '2026-01-01T00:00:00Z', title: 'B' },
     });
     expect(search).toHaveBeenCalledWith(expect.objectContaining({ size: 10 }));
   });

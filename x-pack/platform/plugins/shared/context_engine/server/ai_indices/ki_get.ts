@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { GetKiResponse, KiDocument } from '../../common/http_api/knowledge_indicators';
@@ -46,21 +47,22 @@ export const REVISION_TIE_WINDOW = 10;
 interface RevisionHit {
   _id?: string;
   _source?: Record<string, unknown> | undefined;
+  sort?: estypes.SortResults;
 }
 
 /**
  * Picks the current revision from hits sorted by `@timestamp` descending: among
- * the hits sharing the newest timestamp, the greatest `_id`. Matches the list's
- * `MAX(_id)` tie-break so every read path agrees.
+ * the hits sharing the newest indexed timestamp, the greatest `_id`. Matches the
+ * list's `MAX(_id)` tie-break so every read path agrees.
  */
 export const pickCurrentRevision = <T extends RevisionHit>(hits: T[]): T | undefined => {
   const [newest] = hits;
   if (!newest) {
     return undefined;
   }
-  const newestTimestamp = newest._source?.['@timestamp'];
+  const newestTimestamp = newest.sort?.[0];
   return hits
-    .filter((hit) => hit._source?.['@timestamp'] === newestTimestamp)
+    .filter((hit) => hit.sort?.[0] === newestTimestamp)
     .reduce((current, hit) => ((hit._id ?? '') > (current._id ?? '') ? hit : current));
 };
 
