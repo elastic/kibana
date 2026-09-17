@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationContext } from '../../context/conversation/conversation_context';
@@ -33,6 +34,10 @@ const mockedUseKibana = jest.mocked(useKibana);
 
 const mockGetActiveSpace = jest.fn();
 
+const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <EuiProvider>{children}</EuiProvider>
+);
+
 describe('NewConversationPrompt', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -51,7 +56,7 @@ describe('NewConversationPrompt', () => {
   });
 
   it('renders the static greeting and typed capability slot', async () => {
-    render(<NewConversationPrompt />);
+    render(<NewConversationPrompt />, { wrapper });
 
     expect(screen.getByRole('heading', { name: 'How can I help you?' })).toBeInTheDocument();
     await waitFor(() => {
@@ -65,7 +70,7 @@ describe('NewConversationPrompt', () => {
   it('renders Observability capability messages for oblt spaces', async () => {
     mockGetActiveSpace.mockResolvedValue({ id: 'oblt-space', solution: 'oblt' });
 
-    render(<NewConversationPrompt />);
+    render(<NewConversationPrompt />, { wrapper });
 
     await waitFor(() => {
       expect(screen.getByTestId('agentBuilderWelcomeTypedText')).toHaveTextContent(
@@ -77,7 +82,7 @@ describe('NewConversationPrompt', () => {
   it('renders Security capability messages for security spaces', async () => {
     mockGetActiveSpace.mockResolvedValue({ id: 'security-space', solution: 'security' });
 
-    render(<NewConversationPrompt />);
+    render(<NewConversationPrompt />, { wrapper });
 
     await waitFor(() => {
       expect(screen.getByTestId('agentBuilderWelcomeTypedText')).toHaveTextContent(
@@ -89,7 +94,7 @@ describe('NewConversationPrompt', () => {
   it('renders Elasticsearch capability messages for es spaces', async () => {
     mockGetActiveSpace.mockResolvedValue({ id: 'es-space', solution: 'es' });
 
-    render(<NewConversationPrompt />);
+    render(<NewConversationPrompt />, { wrapper });
 
     await waitFor(() => {
       expect(screen.getByTestId('agentBuilderWelcomeTypedText')).toHaveTextContent(
@@ -105,7 +110,7 @@ describe('NewConversationPrompt', () => {
       conversationActions: {} as never,
     });
 
-    render(<NewConversationPrompt />);
+    render(<NewConversationPrompt />, { wrapper });
 
     expect(
       screen.getByRole('heading', { name: 'What do you want to automate?' })
