@@ -13,6 +13,12 @@ import type { RuleApiResponse } from '../../services/rules_api';
 
 export const EMPTY_VALUE = '-';
 
+/**
+ * The evaluation that first matches already counts towards the threshold, so counts at or
+ * below this resolve on that evaluation and are shown as immediate rather than as a delay.
+ */
+const IMMEDIATE_COUNT = 1;
+
 const IMMEDIATE_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.immediateValue', {
   defaultMessage: 'Immediate',
 });
@@ -91,37 +97,39 @@ const recoveryLabel = (n: number) =>
   });
 
 export function formatAlertDelay(stateTransition: RuleApiResponse['state_transition']): string {
-  if (stateTransition?.pending_count == null && stateTransition?.pending_timeframe == null) {
+  const {
+    pending_count: count,
+    pending_timeframe: timeframe,
+    pending_operator: operator,
+  } = stateTransition ?? {};
+
+  if (count == null && timeframe == null) {
     return EMPTY_VALUE;
   }
 
-  if (stateTransition.pending_count === 0 && stateTransition.pending_timeframe == null) {
+  if (count != null && count <= IMMEDIATE_COUNT && timeframe == null) {
     return IMMEDIATE_LABEL;
   }
 
-  return formatDelay({
-    count: stateTransition.pending_count,
-    countLabel: matchLabel,
-    timeframe: stateTransition.pending_timeframe,
-    operator: stateTransition.pending_operator,
-  });
+  return formatDelay({ count, countLabel: matchLabel, timeframe, operator });
 }
 
 export function formatRecoveryDelay(stateTransition: RuleApiResponse['state_transition']): string {
-  if (stateTransition?.recovering_count == null && stateTransition?.recovering_timeframe == null) {
+  const {
+    recovering_count: count,
+    recovering_timeframe: timeframe,
+    recovering_operator: operator,
+  } = stateTransition ?? {};
+
+  if (count == null && timeframe == null) {
     return EMPTY_VALUE;
   }
 
-  if (stateTransition.recovering_count === 0 && stateTransition.recovering_timeframe == null) {
+  if (count != null && count <= IMMEDIATE_COUNT && timeframe == null) {
     return IMMEDIATE_LABEL;
   }
 
-  return formatDelay({
-    count: stateTransition.recovering_count,
-    countLabel: recoveryLabel,
-    timeframe: stateTransition.recovering_timeframe,
-    operator: stateTransition.recovering_operator,
-  });
+  return formatDelay({ count, countLabel: recoveryLabel, timeframe, operator });
 }
 
 const NO_DATA_STRATEGY_LABELS: Record<NoDataStrategy, string> = {

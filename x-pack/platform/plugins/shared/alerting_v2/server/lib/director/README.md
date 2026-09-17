@@ -147,6 +147,25 @@ It supports:
 
 For timeframe evaluation, it compares the current alert event timestamp with the last stored episode timestamp.
 
+#### Count semantics
+
+A count is the number of consecutive matching evaluations required to leave the phase, and the
+evaluation that enters the phase is already the first of those matches. So `pending_count: N`
+activates on evaluation N, mirroring `alertDelay.active` in the v1 alerting framework.
+
+| `pending_count` | eval 1 | eval 2 | eval 3 | Becomes `active` on |
+| --- | --- | --- | --- | --- |
+| 0 | `active` | — | — | 1 |
+| 1 | `active` | — | — | 1 |
+| 2 | `pending` (1) | `active` | — | 2 |
+| 3 | `pending` (1) | `pending` (2) | `active` | 3 |
+
+`recovering_count` follows the same shape for `recovering -> inactive`.
+
+Counts of `0` and `1` both resolve on the first evaluation: a count of `1` is satisfied by the
+entering match itself, and `0` skips the intermediate status outright. When a phase has neither a
+count nor a timeframe configured, that phase keeps the basic two-step lifecycle.
+
 ## When to add a new strategy
 
 Add a strategy when the lifecycle rules depend on rule configuration and the variation can be isolated behind `canHandle(rule)` + `getNextState(...)`.
