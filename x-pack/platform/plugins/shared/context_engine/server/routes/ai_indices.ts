@@ -133,7 +133,7 @@ const aiIndexIdSchema = schema.string({
   minLength: 1,
   maxLength: MAX_AI_INDEX_ID_LENGTH,
   validate: validateAiIndexId,
-  meta: { description: 'The unique identifier of the AI index.' },
+  meta: { description: 'The unique identifier of the AI Index.' },
 });
 
 const aiIndexIdParamsSchema = schema.object({
@@ -239,7 +239,7 @@ const aiIndexPropertiesSchema = {
   description: schema.maybe(
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
-      meta: { description: 'Human-readable description of the AI index.' },
+      meta: { description: 'Human-readable description of the AI Index.' },
     })
   ),
   feedback_analysis: schema.maybe(feedbackAnalysisSchema),
@@ -255,7 +255,7 @@ const aiIndexPropertiesSchema = {
       maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
       meta: {
         description:
-          'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.',
+          'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI Index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.',
       },
     }),
   }),
@@ -266,7 +266,7 @@ const aiIndexPropertiesSchema = {
     }),
     {
       maxSize: MAX_AI_INDEX_AUTOMATIONS,
-      meta: { description: 'Automations associated with the AI index.' },
+      meta: { description: 'Automations associated with the AI Index.' },
     }
   ),
   sources: schema.arrayOf(
@@ -290,7 +290,7 @@ const aiIndexPropertiesSchema = {
     ]),
     {
       maxSize: MAX_AI_INDEX_SOURCES,
-      meta: { description: 'Additional sources that provide context for the AI index.' },
+      meta: { description: 'Additional sources that provide context for the AI Index.' },
     }
   ),
 };
@@ -451,15 +451,15 @@ export const registerAiIndexRoutes = ({
       );
     }
   };
-  // Create an AI index
+  // Create an AI Index
   router.versioned
     .post({
       path: aiIndexPath,
       security: WRITE_SECURITY,
       access: 'public',
-      summary: 'Create an AI index',
+      summary: 'Create an AI Index',
       description:
-        'Creates an AI index record attached to a data stream or index pattern. Fails with a 409 if an AI index with the same id already exists.',
+        'Creates an AI Index record attached to a data stream or index pattern. Fails with a 409 if an AI Index with the same id already exists.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -496,15 +496,15 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Create or update an AI index
+  // Create or update an AI Index
   router.versioned
     .put({
       path: aiIndexByIdPath,
       security: WRITE_SECURITY,
       access: 'public',
-      summary: 'Create or update an AI index',
+      summary: 'Create or update an AI Index',
       description:
-        'Creates or updates an AI index record attached to a data stream or index pattern.',
+        'Creates or updates an AI Index record attached to a data stream or index pattern.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -546,14 +546,14 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Get an AI index by id
+  // Get an AI Index by id
   router.versioned
     .get({
       path: aiIndexByIdPath,
       security: READ_SECURITY,
       access: 'public',
-      summary: 'Get an AI index',
-      description: 'Fetches an AI index by id.',
+      summary: 'Get an AI Index',
+      description: 'Fetches an AI Index by id.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -585,14 +585,14 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // List AI indices
+  // List AI Indices
   router.versioned
     .get({
       path: aiIndexPath,
       security: READ_SECURITY,
       access: 'public',
-      summary: 'List AI indices',
-      description: `Lists registered AI indices, up to a limit of ${MAX_AI_INDICES}.`,
+      summary: 'List AI Indices',
+      description: `Lists the AI Indices registered in the current space that the caller can read. An AI Index is left out when the caller cannot read its backing index. An empty AI Index is still listed. Up to ${MAX_AI_INDICES} entries.`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -604,28 +604,25 @@ export const registerAiIndexRoutes = ({
         validate: false,
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         try {
-          const spaceId = resolveSpaceId(await getSpaces(), request);
           const body: ListAiIndexResponse = {
-            ai_indices: await getAiIndexService().list(spaceId),
+            ai_indices: await getAiIndexDataReadService({ esClient, request }).list(),
           };
-          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST }));
           return response.ok({ body });
         } catch (error) {
-          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
-          return handleAiIndexError(error, response);
+          return handleReadError(error, response);
         }
       })
     );
 
-  // Query AI indices with ES|QL
+  // Query AI Indices with ES|QL
   router.versioned
     .post({
       path: aiIndexQueryPath,
       security: READ_SECURITY,
       access: 'public',
-      summary: 'Query AI indices',
+      summary: 'Query AI Indices',
       description: `Runs an ES|QL query as the current user, with a space filter and a row limit (at most ${MAX_AI_INDEX_QUERY_LIMIT}) applied server-side. The query decides which indices it reads; Elasticsearch index privileges bound what it can reach.`,
       options: {
         tags: ['oas-tag:context engine'],
@@ -655,14 +652,14 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Describe an AI index
+  // Describe an AI Index
   router.versioned
     .get({
       path: aiIndexDescribePath,
       security: READ_SECURITY,
       access: 'public',
-      summary: 'Describe an AI index',
-      description: `Returns a free-form text context block for an agent: the AI index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach.`,
+      summary: 'Describe an AI Index',
+      description: `Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach.`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -689,7 +686,7 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // List Knowledge Indicators for an AI index
+  // List Knowledge Indicators for an AI Index
   router.versioned
     .get({
       path: aiIndexKiListPath,
@@ -697,7 +694,7 @@ export const registerAiIndexRoutes = ({
       access: 'internal',
       summary: 'List Knowledge Indicators',
       description:
-        'Returns a paginated list of Knowledge Indicators stored in the AI index destination backing store.',
+        'Returns a paginated list of Knowledge Indicators stored in the AI Index destination backing store.',
     })
     .addVersion(
       {
@@ -777,15 +774,15 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Update the feedback analysis configuration of an AI index
+  // Update the feedback analysis configuration of an AI Index
   router.versioned
     .put({
       path: aiIndexFeedbackAnalysisPath,
       security: WRITE_SECURITY,
       access: 'internal',
-      summary: 'Update AI index feedback analysis configuration',
+      summary: 'Update AI Index feedback analysis configuration',
       description:
-        'Replaces the feedback analysis configuration of an AI index without touching the rest of the entry. Permitted on managed AI indices, whose definition is otherwise immutable.',
+        'Replaces the feedback analysis configuration of an AI Index without touching the rest of the entry. Permitted on managed AI Indices, whose definition is otherwise immutable.',
     })
     .addVersion(
       {
@@ -820,18 +817,18 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Delete an AI index
+  // Delete an AI Index
   router.versioned
     .delete({
       path: aiIndexByIdPath,
       security: DELETE_SECURITY,
       access: 'public',
-      summary: 'Delete an AI index',
+      summary: 'Delete an AI Index',
       description:
-        'Deletes an AI index by id. The backing data stream/index (and therefore its Knowledge ' +
+        'Deletes an AI Index by id. The backing data stream/index (and therefore its Knowledge ' +
         'Indicators) and the attached workflow automations are left untouched unless the ' +
         '`delete_knowledge_indicators`/`delete_automations` query parameters are set to true. ' +
-        'The dest is not deleted when another AI index still uses it.',
+        'The dest is not deleted when another AI Index still uses it.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -925,8 +922,8 @@ export const registerAiIndexRoutes = ({
             );
           }
 
-          // The improvements store is keyed by AI index id, so revisions left behind would
-          // resurface if an AI index were later recreated under the same id. Best-effort: the store
+          // The improvements store is keyed by AI Index id, so revisions left behind would
+          // resurface if an AI Index were later recreated under the same id. Best-effort: the store
           // is a user-owned index and the caller may well have no privileges on it, and reporting a
           // failure for an index that is already gone would only send them to retry a delete that
           // now 404s. What is left behind is inert until an id is reused.

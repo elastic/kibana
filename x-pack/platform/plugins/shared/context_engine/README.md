@@ -4,18 +4,18 @@ Server-side plugin for the Context Engine.
 
 ## AI Indices API
 
-AI indices attach a logical name to an existing user index pattern or data
-stream. AI index records are stored in a hidden Kibana system index
+AI Indices attach a logical name to an existing user index pattern or data
+stream. AI Index records are stored in a hidden Kibana system index
 (`.contextengine-ai-indices`), separate from the backing data.
 
 | Method   | Path                                                            | Description                          |
 | -------- | --------------------------------------------------------------- | ------------------------------------ |
-| `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI index         |
-| `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI index by id                |
-| `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
-| `POST`   | `/api/context_engine/ai_index/_query`                             | Run ES\|QL against AI indices        |
-| `GET`    | `/api/context_engine/ai_index/{id}/_describe`                     | Describe an AI index for querying    |
-| `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
+| `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI Index         |
+| `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI Index by id                |
+| `GET`    | `/api/context_engine/ai_index`                                    | List AI Indices available to the caller (max 100) |
+| `POST`   | `/api/context_engine/ai_index/_query`                             | Run ES\|QL against AI Indices        |
+| `GET`    | `/api/context_engine/ai_index/{id}/_describe`                     | Describe an AI Index for querying    |
+| `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI Index                   |
 | `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
 
 Notes:
@@ -40,12 +40,28 @@ Notes:
     instance id (from Stack Management → Connectors). See
     [Connector sources](#connector-sources) below.
   Required, may be empty.
-- Deleting an AI index deletes **only** the AI index entry. Backing indices
+- Deleting an AI Index deletes **only** the AI Index entry. Backing indices
   are left untouched and must be removed with the Delete index API if desired.
 - `feedback_analysis` configures this index's feedback loop. See
   [Feedback analysis configuration](#feedback-analysis-configuration) below.
 
-## Querying AI indices
+## Listing AI Indices
+
+`GET /api/context_engine/ai_index` returns the AI Indices the caller can use
+in the current space. AI Index records are stored per space, so the list
+starts from the entries registered in the request's space (from the URL:
+`/s/{spaceId}/api/...`, default space otherwise). An entry is then listed
+when the caller can read its backing index, including when that index is
+empty or does not exist yet. It is not listed when the caller lacks `read` on
+the backing index.
+
+To decide, Kibana runs one small search per AI Index as the current user, in
+a single `msearch`. Any error, timeout or failed shard on that search hides
+the entry. The search deliberately does not set `ignore_unavailable`: with it,
+an index the caller cannot read would look empty and be listed anyway. The
+agent prompt's AI-index catalog uses the same rule.
+
+## Querying AI Indices
 
 `POST /api/context_engine/ai_index/_query` runs caller-supplied ES|QL as the
 current user. Body: `{ query, params?, limit? }`. Two things are server-owned
@@ -65,7 +81,7 @@ The query is otherwise a pass-through: it decides which indices it reads
 Elasticsearch index privileges bound what it can reach. Elasticsearch 4xx
 errors (bad ES|QL, missing index privilege) are returned with their status.
 
-## Describing AI indices
+## Describing AI Indices
 
 `GET /api/context_engine/ai_index/{id}/_describe` is the step before writing a
 query. It returns `{ response: string }`: a free-form text context block meant
@@ -136,7 +152,7 @@ Count by type
 
 Describe runs no ES|QL. It issues `_mapping` and `_field_caps` (both needed:
 `_field_caps` reports `semantic_text` as `text`) plus the one aggregation, all
-as the current user. 404 when the AI index is not registered; Elasticsearch 4xx
+as the current user. 404 when the AI Index is not registered; Elasticsearch 4xx
 from `_mapping` / `_field_caps` (missing `view_index_metadata`) is returned
 with its status. The aggregation is the exception: its 403 (missing `read`)
 drops the counts sections instead. Each `_mapping` /
@@ -148,6 +164,11 @@ target broad enough to exceed it returns 400.
 `contextEngine:read` grants the routes; it grants **no** Elasticsearch index
 privileges. Callers also need, on every backing index (`ai-index-*`):
 
+- `read` to be listed. Without it the AI Index is left out of the list; there
+  is no error. (The one case that looks different is a wildcard `dest.value`
+  matching nothing the caller can read: Elasticsearch reports it as
+  "no such index", so it shows up as an empty AI Index. See
+  [Listing AI Indices](#listing-ai-indices));
 - `read` to query, or Elasticsearch returns 403;
 - `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
   Elasticsearch returns 403. The counts aggregation also needs `read`; without
@@ -157,13 +178,13 @@ Kibana adds only the space filter. For the built-in SML index
 (`ai-index-idx-sml-data`), Elasticsearch additionally applies implicit
 document-level security mirroring Kibana object privileges, so callers only see
 knowledge indicators for dashboards, rules or connectors they could open. Custom
-AI indices get the space filter alone; they are queried like any other index.
+AI Indices get the space filter alone; they are queried like any other index.
 
 ## Feedback analysis configuration
 
 Signal *generation* is global — one background task, one advanced setting.
-Signal *analysis* is per AI index, because the improvement it proposes targets
-that index's KI pipeline. The configuration therefore lives on the AI index
+Signal *analysis* is per AI Index, because the improvement it proposes targets
+that index's KI pipeline. The configuration therefore lives on the AI Index
 record:
 
 ```json
@@ -208,8 +229,8 @@ record:
   change.
 
 The dedicated `PUT .../feedback_analysis` route replaces only this block,
-leaving the rest of the record untouched. Unlike a full AI index replace it is
-permitted on **managed** AI indices: their definition is owned by the plugin
+leaving the rest of the record untouched. Unlike a full AI Index replace it is
+permitted on **managed** AI Indices: their definition is owned by the plugin
 that registers them, but which agent analyzes them and how often is operator
 preference. Without that carve-out, the indices that ship by default would be
 the only ones that could never be analyzed.
@@ -221,7 +242,7 @@ in to the Context Engine — i.e. its spec declares `contextEngine` in
 `supportedFeatureIds`. The value stored on the source is the connector
 **instance id** (not the connector type). Human-readable names are resolved
 at render time via the Actions API, so renaming a connector in Stack
-Management does not leave a stale label on the AI index.
+Management does not leave a stale label on the AI Index.
 
 Which connector types are eligible is derived at runtime from the Actions
 plugin's connector-types registry:
@@ -237,7 +258,7 @@ No changes to the Context Engine plugin are required.
 ## Signals
 
 Signals are observations classified from Agent Builder traces and stored in the
-per-space `context-engine-signals-<space>` index. The AI index detail page
+per-space `context-engine-signals-<space>` index. The AI Index detail page
 renders a read-only **Signals** panel: a preaggregated grouped-by-tag list, a
 drill-down into a group's individual signals (each with a trace waterfall in a
 flyout), and an "Analyze & improve" button that opens Agent Builder when a chat
@@ -252,7 +273,7 @@ user against the current space's signals index):
 | `GET`  | `/internal/context_engine/signals`        | The individual signals for a `tag` (paginated)         |
 
 Both routes are gated by the same `contextEngine:enabled` advanced setting as
-the AI index API (they return 404 while it is off).
+the AI Index API (they return 404 while it is off).
 
 ### Self-referential exclusion
 
@@ -279,17 +300,17 @@ the same guidance in its instructions goes unmarked.
 
 ## Improvements
 
-An **improvement** is a proposed change to one AI index's KI pipeline, derived
+An **improvement** is a proposed change to one AI Index's KI pipeline, derived
 from that index's signals. They live in the `context-engine-improvements` index,
 exposed to the server as
 `ContextEnginePluginStart.getImprovementsService(esClient, spaceId)` and written
 by an analysis run (see [Feedback analysis runs](#feedback-analysis-runs)). The
 review UI that applies them comes later.
 
-Improvements are **scoped to the space of the AI index they target**, which is
+Improvements are **scoped to the space of the AI Index they target**, which is
 the space the service is constructed for. Every read filters on it and every
 write stamps it, so `list`, `get`, `transition` and `deleteByAiIndex` cannot
-reach another space's rows, and the same AI index id in two spaces keeps two
+reach another space's rows, and the same AI Index id in two spaces keeps two
 independent sets of improvements. Documents written before the store was
 space-scoped carry no `space` and are treated as belonging to the default
 space.
@@ -319,7 +340,7 @@ record of what the loop did to a user's index survives every transition:
 - OCC only guards a lineage that already has a head. The first revision of a
   brand-new `improvement_id` has nothing to guard it, so two runs writing the
   same new improvement concurrently can both append a head. Analysis runs for
-  one AI index are therefore expected to be serialized. Should it happen anyway,
+  one AI Index are therefore expected to be serialized. Should it happen anyway,
   it is self-healing rather than permanent: a head lookup returns every head of
   a lineage and the next `write` or `transition` retires all of them, so the
   lineage converges back to a single head.
