@@ -76,11 +76,15 @@ export const CreateKnowledgeBaseRequestParams = CreateKnowledgeBaseRequestParams
   resource: CreateKnowledgeBaseRequestParamsBase.shape.resource.optional(),
 });
 export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
+export type CreateKnowledgeBaseRequestParamsInput = z.input<
+  typeof CreateKnowledgeBaseRequestParams
+>;
 
 export const ReadKnowledgeBaseRequestParams = ReadKnowledgeBaseRequestParamsBase.extend({
   resource: ReadKnowledgeBaseRequestParamsBase.shape.resource.optional(),
 });
 export type ReadKnowledgeBaseRequestParams = z.infer<typeof ReadKnowledgeBaseRequestParams>;
+export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBaseRequestParams>;
 export * from './knowledge_base/entries/bulk_crud_knowledge_base_entries_route.gen';
 export * from './knowledge_base/entries/common_attributes.gen';
 export * from './knowledge_base/entries/crud_knowledge_base_entries_route.gen';
