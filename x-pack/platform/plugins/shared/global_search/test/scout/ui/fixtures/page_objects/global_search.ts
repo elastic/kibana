@@ -69,9 +69,7 @@ export class GlobalSearch {
 
   async scrollToResult(label: string): Promise<Locator> {
     const item = this.resultLabels.filter({ hasText: label });
-    const list = this.page.testSubj
-      .locator(SEARCH_MODAL)
-      .locator('.euiSelectableList__list');
+    const list = this.page.testSubj.locator(SEARCH_MODAL).locator('.euiSelectableList__list');
 
     // EuiSelectable virtualizes rows, so off-screen labels are not in the DOM.
     // scrollIntoViewIfNeeded is a no-op until this windowing container scrolls.
