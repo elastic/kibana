@@ -24,8 +24,6 @@ import {
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
   getAnyCloudConnectorIacTemplateUrl,
   getTemplateUrlTokens,
-  getWorkloadIdentityIssuer,
-  getWorkloadIdentitySubject,
   getElasticCloudTemplateContext,
   getElasticResource,
   parseElasticCloudHost,
@@ -1040,7 +1038,7 @@ describe('getAnyCloudConnectorIacTemplateUrl', () => {
 
 describe('Workload Identity template URLs', () => {
   const WII_TEMPLATE_URL =
-    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&stackName=Elastic-Workload-Identity-RESOURCE_ID&param_ElasticIssuer=ISSUER&param_ElasticSubject=SUBJECT';
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticCloudProvider=CLOUD_PROVIDER&param_ElasticCloudRegion=CLOUD_REGION&param_ElasticCloudEnvironment=CLOUD_ENVIRONMENT&param_ElasticResourceType=RESOURCE_TYPE&param_ElasticResourceId=RESOURCE_ID';
   const LEGACY_TEMPLATE_URL =
     'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-aws-9.6.0.yml';
 
@@ -1085,11 +1083,12 @@ describe('Workload Identity template URLs', () => {
       expect(params.get('templateURL')).toBe(
         'https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml'
       );
-      expect(params.get('stackName')).toBe(`Elastic-Workload-Identity-${KIBANA_COMPONENT_ID}`);
-      expect(params.get('param_ElasticIssuer')).toBe(
-        'workload-identity-issuer.eu-west-1.aws.svc.qa.elastic.cloud/orgs/2070044029'
-      );
-      expect(params.get('param_ElasticSubject')).toBe(`deployment:${KIBANA_COMPONENT_ID}`);
+      expect(params.get('param_ElasticOrganizationId')).toBe('2070044029');
+      expect(params.get('param_ElasticCloudProvider')).toBe('aws');
+      expect(params.get('param_ElasticCloudRegion')).toBe('eu-west-1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('qa');
+      expect(params.get('param_ElasticResourceType')).toBe('deployment');
+      expect(params.get('param_ElasticResourceId')).toBe(KIBANA_COMPONENT_ID);
       TEMPLATE_URL_TOKENS.forEach((token) => expect(result).not.toContain(token));
     });
 
@@ -1102,11 +1101,12 @@ describe('Workload Identity template URLs', () => {
 
       expect(result).toBeDefined();
       const params = getQuickCreateParams(result!);
-      expect(params.get('stackName')).toBe(`Elastic-Workload-Identity-${PROJECT_ID}`);
-      expect(params.get('param_ElasticIssuer')).toBe(
-        'workload-identity-issuer.us-east-1.aws.svc.elastic.cloud/orgs/10'
-      );
-      expect(params.get('param_ElasticSubject')).toBe(`project:${PROJECT_ID}`);
+      expect(params.get('param_ElasticOrganizationId')).toBe('10');
+      expect(params.get('param_ElasticCloudProvider')).toBe('aws');
+      expect(params.get('param_ElasticCloudRegion')).toBe('us-east-1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('production');
+      expect(params.get('param_ElasticResourceType')).toBe('project');
+      expect(params.get('param_ElasticResourceId')).toBe(PROJECT_ID);
     });
 
     it('prefers the explicit cloud plugin CSP and region over the Cloud ID host', () => {
@@ -1117,9 +1117,9 @@ describe('Workload Identity template URLs', () => {
       });
 
       const params = getQuickCreateParams(result!);
-      expect(params.get('param_ElasticIssuer')).toBe(
-        'workload-identity-issuer.us-central1.gcp.svc.qa.elastic.cloud/orgs/2070044029'
-      );
+      expect(params.get('param_ElasticCloudProvider')).toBe('gcp');
+      expect(params.get('param_ElasticCloudRegion')).toBe('us-central1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('qa');
     });
 
     it('prefers the cloudHost exposed by the cloud plugin over decoding the Cloud ID', () => {
@@ -1130,9 +1130,9 @@ describe('Workload Identity template URLs', () => {
       });
 
       const params = getQuickCreateParams(result!);
-      expect(params.get('param_ElasticIssuer')).toBe(
-        'workload-identity-issuer.eastus2.azure.svc.staging.elastic.cloud/orgs/2070044029'
-      );
+      expect(params.get('param_ElasticCloudProvider')).toBe('azure');
+      expect(params.get('param_ElasticCloudRegion')).toBe('eastus2');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('staging');
     });
 
     it('falls back to the console base URL for the environment when no Cloud ID host is available', () => {
@@ -1148,10 +1148,8 @@ describe('Workload Identity template URLs', () => {
       });
 
       const params = getQuickCreateParams(result!);
-      expect(params.get('param_ElasticIssuer')).toBe(
-        'workload-identity-issuer.us-east-1.aws.svc.staging.elastic.cloud/orgs/10'
-      );
-      expect(params.get('param_ElasticSubject')).toBe(`project:${PROJECT_ID}`);
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('staging');
+      expect(params.get('param_ElasticResourceId')).toBe(PROJECT_ID);
     });
 
     it('returns undefined when the organization ID is unknown', () => {
@@ -1194,68 +1192,29 @@ describe('Workload Identity template URLs', () => {
       expect(result).toBe(LEGACY_TEMPLATE_URL);
     });
 
-    it('percent-encodes reserved characters but keeps / and : readable', () => {
+    it('URL-encodes substituted values', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
         cloud: { ...echQaCloud, organizationId: 'org id&x' } as CloudSetup,
         accountType: SINGLE_ACCOUNT,
         iacTemplateUrl: WII_TEMPLATE_URL,
       });
 
-      expect(result).toContain(
-        'param_ElasticIssuer=workload-identity-issuer.eu-west-1.aws.svc.qa.elastic.cloud/orgs/org%20id%26x'
-      );
-      expect(result).toContain(`param_ElasticSubject=deployment:${KIBANA_COMPONENT_ID}`);
+      expect(result).toContain('param_ElasticOrganizationId=org%20id%26x');
     });
   });
 
   describe('getTemplateUrlTokens', () => {
     it('returns the tokens present in declaration order', () => {
-      expect(getTemplateUrlTokens(WII_TEMPLATE_URL)).toEqual(['RESOURCE_ID', 'ISSUER', 'SUBJECT']);
+      expect(getTemplateUrlTokens(WII_TEMPLATE_URL)).toEqual([
+        'RESOURCE_ID',
+        'RESOURCE_TYPE',
+        'ORGANIZATION_ID',
+        'CLOUD_PROVIDER',
+        'CLOUD_REGION',
+        'CLOUD_ENVIRONMENT',
+      ]);
       expect(getTemplateUrlTokens(LEGACY_TEMPLATE_URL)).toEqual([]);
       expect(getTemplateUrlTokens(undefined)).toEqual([]);
-    });
-  });
-
-  describe('getWorkloadIdentityIssuer', () => {
-    const context = {
-      resourceType: 'deployment',
-      organizationId: '10',
-      cloudProvider: 'gcp',
-      cloudRegion: 'us-central1',
-    } as const;
-
-    it('uses the issuer domain of the Elastic Cloud environment', () => {
-      expect(getWorkloadIdentityIssuer({ ...context, cloudEnvironment: 'production' })).toBe(
-        'workload-identity-issuer.us-central1.gcp.svc.elastic.cloud/orgs/10'
-      );
-      expect(getWorkloadIdentityIssuer({ ...context, cloudEnvironment: 'staging' })).toBe(
-        'workload-identity-issuer.us-central1.gcp.svc.staging.elastic.cloud/orgs/10'
-      );
-      expect(getWorkloadIdentityIssuer({ ...context, cloudEnvironment: 'qa' })).toBe(
-        'workload-identity-issuer.us-central1.gcp.svc.qa.elastic.cloud/orgs/10'
-      );
-    });
-
-    it('is undefined when the organization, provider or region is unknown', () => {
-      const full = { ...context, cloudEnvironment: 'production' } as const;
-      expect(getWorkloadIdentityIssuer({ ...full, organizationId: undefined })).toBeUndefined();
-      expect(getWorkloadIdentityIssuer({ ...full, cloudProvider: undefined })).toBeUndefined();
-      expect(getWorkloadIdentityIssuer({ ...full, cloudRegion: undefined })).toBeUndefined();
-    });
-  });
-
-  describe('getWorkloadIdentitySubject', () => {
-    it('joins the resource type and ID as the JWT sub claim', () => {
-      expect(getWorkloadIdentitySubject(getElasticCloudTemplateContext(echQaCloud))).toBe(
-        `deployment:${KIBANA_COMPONENT_ID}`
-      );
-      expect(
-        getWorkloadIdentitySubject(getElasticCloudTemplateContext(serverlessProductionCloud))
-      ).toBe(`project:${PROJECT_ID}`);
-    });
-
-    it('is undefined without a resource ID', () => {
-      expect(getWorkloadIdentitySubject(getElasticCloudTemplateContext(undefined))).toBeUndefined();
     });
   });
 

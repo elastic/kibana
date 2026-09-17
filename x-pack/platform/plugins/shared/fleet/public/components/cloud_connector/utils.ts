@@ -41,15 +41,17 @@ import {
   GCP_PROVIDER,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
-  TEMPLATE_URL_ELASTIC_ISSUER_ENV_VAR,
-  TEMPLATE_URL_ELASTIC_SUBJECT_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_RESOURCE_TYPE_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_ORGANIZATION_ID_ENV_VAR,
+  TEMPLATE_URL_CLOUD_PROVIDER_ENV_VAR,
+  TEMPLATE_URL_CLOUD_REGION_ENV_VAR,
+  TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR,
   TEMPLATE_URL_TOKENS,
   ELASTIC_RESOURCE_TYPE_DEPLOYMENT,
   ELASTIC_RESOURCE_TYPE_PROJECT,
   ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION,
   ELASTIC_CLOUD_ENVIRONMENT_STAGING,
   ELASTIC_CLOUD_ENVIRONMENT_QA,
-  WORKLOAD_IDENTITY_ISSUER_DOMAINS,
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
   CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
@@ -214,10 +216,6 @@ const normalizeRegion = (region: string | undefined): string | undefined => {
   return value && REGION_LABEL_REGEX.test(value) ? value : undefined;
 };
 
-// keep / and : readable in the console
-const encodeTemplateValue = (value: string): string =>
-  encodeURIComponent(value).replace(/%2F/gi, '/').replace(/%3A/gi, ':');
-
 const getHostname = (url: string | undefined): string | undefined => {
   if (!url) return undefined;
   try {
@@ -308,23 +306,6 @@ export const getElasticCloudTemplateContext = (
   };
 };
 
-export const getWorkloadIdentityIssuer = ({
-  organizationId,
-  cloudProvider,
-  cloudRegion,
-  cloudEnvironment,
-}: ElasticCloudTemplateContext): string | undefined => {
-  if (!organizationId || !cloudProvider || !cloudRegion) return undefined;
-  const domain = WORKLOAD_IDENTITY_ISSUER_DOMAINS[cloudEnvironment];
-  return `workload-identity-issuer.${cloudRegion}.${cloudProvider}.${domain}/orgs/${organizationId}`;
-};
-
-export const getWorkloadIdentitySubject = ({
-  resourceType,
-  resourceId,
-}: ElasticCloudTemplateContext): string | undefined =>
-  resourceId ? `${resourceType}:${resourceId}` : undefined;
-
 export const getTemplateUrlTokens = (iacTemplateUrl: string | undefined): TemplateUrlToken[] =>
   iacTemplateUrl ? TEMPLATE_URL_TOKENS.filter((token) => iacTemplateUrl.includes(token)) : [];
 
@@ -336,8 +317,11 @@ const getTemplateTokenValues = (
   return {
     [TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR]: accountType,
     [TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR]: context.resourceId,
-    [TEMPLATE_URL_ELASTIC_ISSUER_ENV_VAR]: getWorkloadIdentityIssuer(context),
-    [TEMPLATE_URL_ELASTIC_SUBJECT_ENV_VAR]: getWorkloadIdentitySubject(context),
+    [TEMPLATE_URL_ELASTIC_RESOURCE_TYPE_ENV_VAR]: context.resourceType,
+    [TEMPLATE_URL_ELASTIC_ORGANIZATION_ID_ENV_VAR]: context.organizationId,
+    [TEMPLATE_URL_CLOUD_PROVIDER_ENV_VAR]: context.cloudProvider,
+    [TEMPLATE_URL_CLOUD_REGION_ENV_VAR]: context.cloudRegion,
+    [TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR]: context.cloudEnvironment,
   };
 };
 
@@ -398,7 +382,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   return tokens.reduce<string | undefined>((url, token) => {
     const value = values[token];
     if (url === undefined || !value) return undefined;
-    return url.split(token).join(encodeTemplateValue(value));
+    return url.split(token).join(encodeURIComponent(value));
   }, iacTemplateUrl);
 };
 
