@@ -16,12 +16,12 @@ export const importDashboardJsonStrings = {
     }),
   getExportApplication: () =>
     i18n.translate('dashboard.importJson.flyout.exportApplication', {
-      defaultMessage: 'Dashboard application',
+      defaultMessage: 'the Dashboards application',
     }),
   getServerValidationError: () =>
     i18n.translate('dashboard.importJson.flyout.serverValidationError', {
       defaultMessage:
-        'The file could not be imported. Make sure it was exported from the Dashboard export feature.',
+        'The file could not be imported. Make sure it contains the full dashboard definition and was exported from the "Export JSON" dashboard option.',
     }),
   getWarningsBody: (count: number) =>
     i18n.translate('dashboard.importJson.flyout.warningsSummary', {

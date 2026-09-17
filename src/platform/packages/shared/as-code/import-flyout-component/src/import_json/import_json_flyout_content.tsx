@@ -114,7 +114,7 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
           text={
             <FormattedMessage
               id="asCodeImport.importJson.ndjsonNote"
-              defaultMessage="Trying to import an NDJSON? Do it from {link}."
+              defaultMessage="If you have an NDJSON file, import it from {link} instead."
               values={{
                 link: (
                   <EuiLink href={savedObjectsHref}>

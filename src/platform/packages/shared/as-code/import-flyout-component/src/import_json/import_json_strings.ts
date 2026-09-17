@@ -50,7 +50,7 @@ export const importJsonFlyoutStrings = {
     }),
   getNdjsonNoteLinkLabel: () =>
     i18n.translate('asCodeImport.importJson.ndjsonNoteLink', {
-      defaultMessage: 'here',
+      defaultMessage: 'the Saved Objects page',
     }),
   getReviewWarningsTitle: () =>
     i18n.translate('asCodeImport.importJson.reviewWarningsTitle', {
@@ -63,7 +63,7 @@ export const importJsonFlyoutStrings = {
   getWarningsSummary: (count: number) =>
     i18n.translate('asCodeImport.importJson.warningsSummary', {
       defaultMessage:
-        '{count} item{count, plural, one {} other {s}} removed from the imported JSON.',
+        '{count} item{count, plural, one {} other {s}} removed from the imported file.',
       values: { count },
     }),
   getWarningsAccordionShow: () =>
@@ -77,7 +77,7 @@ export const importJsonFlyoutStrings = {
   getRelatedItemsSummary: (count: number) =>
     i18n.translate('asCodeImport.importJson.relatedItemsSummary', {
       defaultMessage:
-        'This import references {count} related item{count, plural, one {} other {s}}. Please ensure these items exist in this cluster or space.',
+        'This import references {count} related item{count, plural, one {} other {s}}. Make sure that these items exist in this cluster or space.',
       values: { count },
     }),
   getRelatedItemsTruncatedSummary: (displayedCount: number) =>
@@ -87,7 +87,7 @@ export const importJsonFlyoutStrings = {
     }),
   getRelatedItemsTypeColumn: () =>
     i18n.translate('asCodeImport.importJson.relatedItemsTypeColumn', {
-      defaultMessage: 'Item Type',
+      defaultMessage: 'Item type',
     }),
   getRelatedItemsIdColumn: () =>
     i18n.translate('asCodeImport.importJson.relatedItemsIdColumn', {
