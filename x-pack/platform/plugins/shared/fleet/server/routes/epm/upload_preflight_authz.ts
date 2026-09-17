@@ -24,12 +24,9 @@ const GATED_ASSET_TYPES = new Set<KibanaAssetType>([
   KibanaAssetType.osquerySavedQuery,
   KibanaAssetType.osqueryPackAsset,
   KibanaAssetType.mlModule,
+  KibanaAssetType.alertingRuleTemplate,
   KibanaAssetType.cloudSecurityPostureRuleTemplate,
   KibanaAssetType.sloTemplate,
-  // alertingRuleTemplate is intentionally excluded. It is a hidden SO type whose write access
-  // is reserved exclusively for Fleet's internal SO client — no user-facing Kibana API privilege
-  // grants write access (alerting_v2 rules.all grants only read on templates). Downstream rule
-  // creation from installed templates enforces per-rule-type authz via rulesClient.
 ]);
 
 // Maps each gated asset type to the Kibana API privilege actions required to install it.
@@ -40,6 +37,9 @@ const ASSET_REQUIRED_PRIVILEGES: Partial<Record<KibanaAssetType, readonly string
   [KibanaAssetType.osquerySavedQuery]: ['osquery-writeSavedQueries'],
   [KibanaAssetType.osqueryPackAsset]: ['osquery-writePacks'],
   [KibanaAssetType.mlModule]: ['ml:canCreateJob'],
+  // 'rac' (Rules and Alerts Connector) is the API privilege granted by stackAlerts: all,
+  // the closest static Kibana privilege for alerting rule management.
+  [KibanaAssetType.alertingRuleTemplate]: ['rac'],
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]: ['cloud-security-posture-all'],
   [KibanaAssetType.sloTemplate]: ['slo_write'],
 };
