@@ -16,10 +16,10 @@ components, configuration, and utilities fit together.
 
 ## Key packages
 
-- `@kbn/core-chrome-layout` — internal layout service implementations (currently `GridLayout`).
-- `@kbn/ui-chrome-layout` — public React layout primitives and slots.
-- `@kbn/core-chrome-layout-utils` — scroll and high-contrast helpers for layout-aware UI.
-- `@kbn/core-chrome-layout-constants` — type-safe CSS variable helpers and IDs.
+- `@kbn/core-chrome-layout` — Kibana layout service, constants, and utilities. Plugins should import from this package.
+- `@kbn/ui-chrome-layout` — portable React layout primitives. Not a Kibana plugin dependency.
+- `@kbn/core-chrome-layout-utils` — **deprecated.** Re-exports scroll and high-contrast helpers from `@kbn/core-chrome-layout`.
+- `@kbn/core-chrome-layout-constants` — **deprecated.** Re-exports CSS variable helpers and IDs from `@kbn/core-chrome-layout`.
 
 ## Render flow
 
@@ -70,10 +70,10 @@ Slots accept `ReactNode` or a render function that receives the computed `Layout
 
 `LayoutGlobalCSS` calculates layout variables based on `LayoutState`. Variables are exposed on
 `:root` and used for consistent sizing and positioning. Prefer the helpers from
-`@kbn/core-chrome-layout-constants` to avoid magic strings:
+`@kbn/core-chrome-layout` to avoid magic strings:
 
 ```ts
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { layoutVar } from '@kbn/core-chrome-layout';
 
 const styles = css`
   height: ${layoutVar('header.height')};
@@ -95,7 +95,7 @@ const styles = css`
 ## Application scroll container
 
 The main scroll container is the application slot. It is identified by
-`APP_MAIN_SCROLL_CONTAINER_ID` in `LayoutApplication`. Use `@kbn/core-chrome-layout-utils` to
+`APP_MAIN_SCROLL_CONTAINER_ID` in `LayoutApplication`. Use `@kbn/core-chrome-layout` to
 interact with it in a layout-aware way:
 
 - `getScrollContainer()` to resolve the active scroll root
@@ -123,5 +123,7 @@ application area rather than the full viewport:
 - **Push flyouts** apply padding to the application scroll container instead of `body`, keeping
   app content aligned with the layout grid.
 
-These overrides live in `GridLayoutGlobalStyles` and are temporary workarounds until EUI offers
-first-class layout-aware flyout positioning.
+These overrides live in `GridLayoutGlobalStyles` from `@kbn/ui-chrome-layout` and are temporary
+workarounds until EUI offers first-class layout-aware flyout positioning. Kibana-specific DOM
+selectors, legacy `--kbn*` variables, and the fixed chart viewport are applied separately by
+`KibanaGridLayoutGlobalStyles` in `@kbn/core-chrome-layout`.

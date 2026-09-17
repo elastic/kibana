@@ -69,15 +69,12 @@
     "@kbn/data-views-plugin",
     "@kbn/apm-data-view",
     "@kbn/rison",
-    "@kbn/dataset-quality-plugin",
-    "@kbn/metrics-data-access-plugin",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
     "@kbn/cases-plugin",
     "@kbn/test-suites-src",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/config-schema",
-    "@kbn/ml-string-hash",
     "@kbn/test-subj-selector",
     "@kbn/datemath",
     "@kbn/typed-react-router-config",
@@ -85,7 +82,6 @@
     "@kbn/dev-utils",
     "@kbn/serverless-observability-settings",
     "@kbn/streams-schema",
-    "@kbn/data-quality",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-plugin",
     "@kbn/aiops-log-rate-analysis",
@@ -94,6 +90,7 @@
     "@kbn/kbn-client",
     "@kbn/apm-types",
     "@kbn/apm-api-shared",
-    "@kbn/apm-types-shared"
+    "@kbn/apm-types-shared",
+    "@kbn/app-header"
   ]
 }

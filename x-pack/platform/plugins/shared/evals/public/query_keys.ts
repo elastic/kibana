@@ -8,14 +8,18 @@
 export const queryKeys = {
   datasets: {
     all: ['evals', 'datasets'] as const,
+    lists: ['evals', 'datasets', 'list'] as const,
     list: (filters?: {
       page?: number;
       perPage?: number;
       search?: string;
+      tags?: string[];
+      maturity?: string[];
       sortField?: string;
       sortOrder?: string;
     }) => ['evals', 'datasets', 'list', filters] as const,
     detail: (datasetId: string) => ['evals', 'datasets', 'detail', datasetId] as const,
+    tagSuggestions: () => ['evals', 'datasets', 'tagSuggestions'] as const,
   },
   remotes: {
     all: ['evals', 'remotes'] as const,
@@ -50,11 +54,19 @@ export const queryKeys = {
   },
   examples: {
     all: ['evals', 'examples'] as const,
-    scores: (exampleId: string) => ['evals', 'examples', 'scores', exampleId] as const,
+    scores: (exampleId: string, datasetId?: string) =>
+      ['evals', 'examples', 'scores', exampleId, datasetId ?? null] as const,
   },
   traces: {
     all: ['evals', 'traces'] as const,
     detail: (traceId: string) => ['evals', 'traces', 'detail', traceId] as const,
+  },
+  onlineEvals: {
+    all: ['evals', 'online_evals'] as const,
+    list: () => ['evals', 'online_evals', 'list'] as const,
+    detail: (workflowId: string) => ['evals', 'online_evals', 'detail', workflowId] as const,
+    scores: (workflowId: string, page: number, perPage: number) =>
+      ['evals', 'online_evals', 'scores', workflowId, page, perPage] as const,
   },
   tracing: {
     all: ['evals', 'tracing'] as const,

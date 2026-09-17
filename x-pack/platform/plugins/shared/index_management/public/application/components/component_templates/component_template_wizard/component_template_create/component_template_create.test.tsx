@@ -92,6 +92,17 @@ describe('<ComponentTemplateCreate />', () => {
           expect(screen.getByTestId('nextButton')).toBeDisabled();
         });
 
+        test('should prevent proceeding when the name has invalid characters', async () => {
+          const nameRow = screen.getByTestId('nameField');
+          const nameInput = within(nameRow).getByRole('textbox');
+
+          fireEvent.change(nameInput, { target: { value: 'Invalid#Name' } });
+          fireEvent.click(screen.getByTestId('nextButton'));
+
+          await screen.findByText("Name must not contain a '#'.");
+          expect(screen.getByTestId('nextButton')).toBeDisabled();
+        });
+
         test('should prevent proceeding when data lifecycle configuration is invalid', async () => {
           const nameRow = screen.getByTestId('nameField');
           const nameInput = within(nameRow).getByRole('textbox');

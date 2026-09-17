@@ -111,7 +111,7 @@ export const JsxTag = ({
       <div css={[baseFontCss, rowCss, indentCss]}>
         <EuiToolTip content={`Expand ${name}`} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             size="xs"
             color="text"
             aria-label={`Expand ${name}`}
@@ -142,7 +142,7 @@ export const JsxTag = ({
         {collapsible && (
           <EuiToolTip content={`Collapse ${name}`} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               size="xs"
               color="text"
               aria-label={`Collapse ${name}`}

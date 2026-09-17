@@ -148,9 +148,7 @@ describe('RulesSettingsQueryDelayClient', () => {
       client.update({
         delay: 19,
       })
-    ).rejects.toThrowError(
-      'savedObjectsClient errored trying to update query delay settings: failed!!'
-    );
+    ).rejects.toThrow('savedObjectsClient errored trying to update query delay settings: failed!!');
   });
 
   test('throws if new query delay setting fails verification', async () => {
@@ -159,7 +157,7 @@ describe('RulesSettingsQueryDelayClient', () => {
       client.update({
         delay: 200,
       })
-    ).rejects.toThrowError('Invalid query delay value, must be between 0 and 60, but got: 200.');
+    ).rejects.toThrow('Invalid query delay value, must be between 0 and 60, but got: 200.');
   });
 
   test('can create a new query delay settings saved object', async () => {
@@ -266,7 +264,7 @@ describe('RulesSettingsQueryDelayClient', () => {
         RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID
       )
     );
-    await expect(client.get()).rejects.toThrowError();
+    await expect(client.get()).rejects.toThrow();
   });
 
   test('can persist query delay settings when saved object already exists', async () => {

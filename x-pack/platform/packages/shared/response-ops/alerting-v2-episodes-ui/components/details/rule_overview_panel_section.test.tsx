@@ -72,8 +72,10 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
     );
 
     expect(
-      screen.getByTestId('alertingV2EpisodeRuleOverviewPanelSectionLoading')
-    ).toBeInTheDocument();
+      screen
+        .getByTestId('alertingV2EpisodeRuleOverviewPanelSectionLoading')
+        .querySelector('.euiSkeletonText')
+    ).not.toBeNull();
   });
 
   it('renders an error state when the rule fails to load', async () => {

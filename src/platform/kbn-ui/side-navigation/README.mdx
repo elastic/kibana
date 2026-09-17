@@ -68,7 +68,7 @@ function App() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeItemId, setActiveItemId] = useState('dashboard');
 
-  const handleItemClick = (item: MenuItem | SecondaryMenuItem | SideNavLogo) => {
+  const handleItemClick = (item: MenuItem | SecondaryMenuItem) => {
     setActiveItemId(item.id);
     trackAnalytics(item.id);
   };
@@ -80,12 +80,6 @@ function App() {
         activeItemId={activeItemId}
         isCollapsed={isCollapsed}
         items={navigationItems}
-        logo={{
-          label: 'Observability',
-          id: 'observability',
-          iconType: 'observabilityApp',
-          href: '/observability',
-        }}
         onItemClick={handleItemClick}
         setWidth={setNavigationWidth}
       />

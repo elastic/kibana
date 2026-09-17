@@ -115,7 +115,13 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup data-test-subj={props['data-test-subj']} gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiPopover ownFocus button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+            <EuiPopover
+              aria-label={iconLabel}
+              ownFocus
+              button={button}
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+            >
               <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
                 <EuiDescriptionList
                   type="column"

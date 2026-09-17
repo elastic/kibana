@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -53,7 +53,6 @@ describe('ChromeNextGlobalHeader', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
     chrome.next.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
         open: jest.fn(),
@@ -76,7 +75,6 @@ describe('ChromeNextGlobalHeader', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
     chrome.next.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
         open: jest.fn(),
@@ -92,6 +90,39 @@ describe('ChromeNextGlobalHeader', () => {
 
     await userEvent.click(screen.getByTestId('chromeNextGlobalHeaderHelpButton'));
 
+    expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
+  });
+
+  it('shows unread indicators when the newsfeed has new items', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const hasNew$ = new BehaviorSubject(true);
+    chrome.getChromeStyle.mockReturnValue('project');
+    chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
+    chrome.next.getNewsfeedHandler$.mockReturnValue(
+      new BehaviorSubject({
+        open: jest.fn(),
+        hasNew$,
+      })
+    );
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeNextGlobalHeader />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByTestId('headerActionButtonNotification')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('chromeNextGlobalHeaderHelpButton'));
+
+    expect(screen.getByTestId('helpMenuWhatsNewUnreadIndicator')).toBeInTheDocument();
+
+    act(() => {
+      hasNew$.next(false);
+    });
+
+    expect(screen.queryByTestId('headerActionButtonNotification')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('helpMenuWhatsNewUnreadIndicator')).not.toBeInTheDocument();
     expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
   });
 });

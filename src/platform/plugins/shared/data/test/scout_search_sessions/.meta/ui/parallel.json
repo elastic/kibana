@@ -1,8 +1,7 @@
 {
-  "sha1": "eca40d9e3beab916950c1d36db4e3c8972900a1d",
+  "sha1": "381aeff229a6996d00156e438b3faec8067e24a7",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -14,8 +13,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/global.setup.ts",
-        "line": 22,
-        "column": 16
+        "line": 18,
+        "column": 1
       }
     },
     {
@@ -27,8 +26,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_management.spec.ts",
-        "line": 107,
-        "column": 12
+        "line": 47,
+        "column": 7
       }
     },
     {
@@ -40,8 +39,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_permissions.spec.ts",
-        "line": 54,
-        "column": 14
+        "line": 58,
+        "column": 28
       }
     },
     {
@@ -53,8 +52,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_permissions.spec.ts",
-        "line": 63,
-        "column": 14
+        "line": 65,
+        "column": 22
       }
     }
   ]

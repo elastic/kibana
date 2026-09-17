@@ -144,6 +144,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
       children,
       css: userCss,
       iconType,
+      textProps,
       ...rest
     } = props;
 
@@ -153,7 +154,12 @@ export const AiButtonBase = (props: AiButtonProps) => {
       iconSize: rest.iconSize ?? getSyncedIconSize(rest.size),
       iconType: iconType ? resolvedIconType(iconType) : undefined,
       css: [buttonCss, iconGradientCss, userCss],
-      children: <span css={labelCss}>{resolveButtonLabel(iconType, children)}</span>,
+      // Apply label styles on EUI's text span so padding is not doubled and truncation still works.
+      textProps: {
+        ...textProps,
+        css: [labelCss, textProps !== false ? textProps?.css : undefined],
+      },
+      children: resolveButtonLabel(iconType, children),
     };
     return (
       <>

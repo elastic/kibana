@@ -7,24 +7,39 @@
 
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import {
   ToolType,
   isRoundCompleteEvent,
   internalTools,
   SubagentExecutionMode,
+  SubagentMode,
 } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
-import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
+import type { ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
+import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
+import type { SubagentTracker } from '../subagent_tracker';
 
 export const SubAgentToolName = internalTools.runSubagent;
 
 const schema = z.object({
   description: z.string().describe('A short (3-5 word) description of the task'),
   prompt: z.string().describe('The task for the agent to perform'),
+  mode: z
+    .enum([SubagentMode.transient, SubagentMode.persistent])
+    .optional()
+    .describe(
+      '"transient" (default) to create a one-off sub-agent or "persistent" to create a named session you can address later via send_message.'
+    ),
+  name: z
+    .string()
+    .optional()
+    .describe(
+      'For persistent agents - unique Identifier for the sub-agent. Defaults to "subagent".'
+    ),
   run_in_background: z
     .boolean()
     .optional()
@@ -64,6 +79,13 @@ Brief the agent like a smart colleague who just walked into the room — it hasn
   - Use foreground (default) when you need the agent's results before you can proceed — e.g., research agents whose findings inform your next steps.
   - Use background when you have genuinely independent work to do in parallel.
 
+## Persistent sub-agents
+
+- \`mode: "persistent"\` creates a named, long-running sub-agent you can address later with the \`send_message\` tool. Only use "persistent" when you expect to follow up with the same sub-agent across multiple invocations (either later in this round or in a future round).
+- Pick a short, meaningful \`name\` that reflects the sub-agent's role (e.g. \`researcher\`, \`code-reviewer\`, \`planner\`). Names are scoped to the current conversation.
+- \`run_subagent\` only ever creates. If a persistent sub-agent with the same name already exists, this call will fail — use \`send_message\` to talk to it.
+- The current active roster is surfaced to you in "Active persistent sub-agents" system notices; check there before choosing a name.
+
 ## Running agents in the background
 
 - When an agent runs in the background, **you** will be **automatically** notified when it completes via a system notification
@@ -77,19 +99,26 @@ export const createSubagentTool = ({
   agentId,
   executionId: parentExecutionId,
   connectorId,
-  capabilities,
   subAgentExecutor,
   abortSignal,
   backgroundExecutionService,
+  parentConversationId,
+  subagentTracker,
+  conversationExists,
 }: {
   agentId: string;
   executionId: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
-}): BuiltinToolDefinition<typeof schema> => {
+  /** Parent conversation id — required for persistent-mode creation. */
+  parentConversationId?: string;
+  /** Round-local persistent sub-agent tracker. */
+  subagentTracker?: SubagentTracker;
+  /** Existence probe for stale-entry recovery. */
+  conversationExists?: (id: string) => Promise<boolean>;
+}): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: SubAgentToolName,
     description: toolDescription,
@@ -97,28 +126,110 @@ export const createSubagentTool = ({
     schema,
     tags: ['subagent'],
     handler: async (
-      { description, prompt, run_in_background = false, effort = 'medium' },
+      { description, prompt, run_in_background = false, effort = 'medium', mode, name },
       { events, modelProvider }
     ) => {
-      try {
-        const fullPrompt = `${description}\n\n${prompt}`;
+      const fullPrompt = `${description}\n\n${prompt}`;
+      const isPersistent = mode === SubagentMode.persistent;
 
+      try {
         const subAgentModel = await modelProvider.selectModel({
           effortLevel: effort as EffortLevel,
         });
         const selectedConnectorId = subAgentModel.connector.connectorId;
+        if (isPersistent) {
+          const finalName = name ?? 'subagent';
 
+          if (!subagentTracker || !parentConversationId) {
+            return {
+              results: [
+                createErrorResult(
+                  'Persistent sub-agent creation is not available in this execution context.'
+                ),
+              ],
+            };
+          }
+
+          // Uniqueness check: name must not point to a live child.
+          const existing = subagentTracker.get(finalName);
+          if (existing) {
+            const stillExists = conversationExists ? await conversationExists(existing) : true;
+            if (stillExists) {
+              return {
+                results: [
+                  createErrorResult(
+                    `A sub-agent named "${finalName}" already exists in this conversation. ` +
+                      `Use send_message({ to: "${finalName}", ... }) to talk to it, or pick a ` +
+                      `different name to create a new one.`
+                  ),
+                ],
+              };
+            }
+            // Stale entry — drop and fall through to creation.
+            subagentTracker.clear(finalName);
+          }
+
+          // Creation path.
+          const newChildId = uuidv4();
+
+          const { executionId, events$ } = await subAgentExecutor.createSubAgent({
+            agentId,
+            parentConversationId,
+            parentExecutionId,
+            subagentName: finalName,
+            subagentPurpose: description,
+            conversationId: newChildId,
+            prompt: fullPrompt,
+            connectorId: selectedConnectorId,
+            ...(run_in_background ? {} : { abortSignal }),
+          });
+
+          subagentTracker.register({
+            name: finalName,
+            purpose: description,
+            conversation_id: newChildId,
+          });
+
+          events.reportProgress(`Sub-agent execution ${executionId} started`, {
+            metadata: { agent_execution_id: executionId, internal: 'true' },
+          });
+
+          if (run_in_background) {
+            backgroundExecutionService?.registerExecution(executionId);
+            return {
+              results: [
+                createOtherResult({
+                  agent_execution_id: executionId,
+                  mode: SubagentExecutionMode.background,
+                  status: 'queued',
+                }),
+              ],
+            };
+          }
+
+          const response = await extractFinalResponse(events$);
+          return {
+            results: [
+              createOtherResult({
+                agent_execution_id: executionId,
+                mode: SubagentExecutionMode.foreground,
+                status: 'completed',
+                response,
+              }),
+            ],
+          };
+        }
+
+        // Transient path — unchanged behavior.
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
           agentId,
           connectorId: selectedConnectorId,
-          capabilities,
           parentExecutionId,
           prompt: fullPrompt,
           // background agents should continue running even if main execution completes
           ...(run_in_background ? {} : { abortSignal }),
         });
 
-        // Emit progress with execution ID so the UI can show "Watch" before results arrive
         events.reportProgress(`Sub-agent execution ${executionId} started`, {
           metadata: {
             agent_execution_id: executionId,
@@ -138,20 +249,20 @@ export const createSubagentTool = ({
               }),
             ],
           };
-        } else {
-          const response = await extractFinalResponse(events$);
-
-          return {
-            results: [
-              createOtherResult({
-                agent_execution_id: executionId,
-                mode: SubagentExecutionMode.foreground,
-                status: 'completed',
-                response,
-              }),
-            ],
-          };
         }
+
+        const response = await extractFinalResponse(events$);
+
+        return {
+          results: [
+            createOtherResult({
+              agent_execution_id: executionId,
+              mode: SubagentExecutionMode.foreground,
+              status: 'completed',
+              response,
+            }),
+          ],
+        };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         return {

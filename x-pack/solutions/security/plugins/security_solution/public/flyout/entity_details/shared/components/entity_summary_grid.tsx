@@ -217,7 +217,7 @@ const AssetCriticalityCell = memo(
       </EuiFlexItem>
       {canEdit && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="arrowDown" size="s" aria-hidden={true} />
+          <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

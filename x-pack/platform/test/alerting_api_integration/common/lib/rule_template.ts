@@ -11,13 +11,16 @@ import type { Agent as SupertestAgent } from 'supertest';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { Superuser } from '../../security_and_spaces/scenarios';
 
+const SAMPLE_V1_TEMPLATE_ID = 'sample-alerting-rule';
+const SAMPLE_V2_TEMPLATE_ID = 'sample-alerting-rule-engine-v2';
+
 export async function createRuleTemplateSO(
   ftrProvider: FtrProviderContext,
   { space = 'default' }: { space?: string } = {}
 ) {
   return await ftrProvider.getService('es').index({
     index: '.kibana_alerting_cases',
-    id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:sample-alerting-rule`,
+    id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:${SAMPLE_V1_TEMPLATE_ID}`,
     document: {
       alerting_rule_template: {
         name: 'Sample alerting rule template v2',
@@ -59,6 +62,56 @@ export async function createRuleTemplateSO(
   });
 }
 
+/**
+ * Indexes an alerting-v2 shaped rule template SO directly (bypassing Fleet/SO APIs).
+ * Used to assert v1 find APIs exclude `engine: "v2"` documents.
+ */
+export async function createAlertingV2RuleTemplateSO(
+  ftrProvider: FtrProviderContext,
+  { space = 'default' }: { space?: string } = {}
+) {
+  return await ftrProvider.getService('es').index({
+    index: '.kibana_alerting_cases',
+    id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:${SAMPLE_V2_TEMPLATE_ID}`,
+    document: {
+      alerting_rule_template: {
+        engine: 'v2',
+        rule: {
+          kind: 'alert',
+          metadata: {
+            name: 'Sample alerting v2 rule template',
+            description: 'Should be excluded from v1 find results',
+            tags: ['Testing', 'v2'],
+          },
+          schedule: {
+            every: '1m',
+            lookback: '15m',
+          },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: {
+              segment: '| WHERE true',
+            },
+          },
+          time_field: '@timestamp',
+        },
+      },
+      type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+      references: [],
+      managed: false,
+      namespaces: [space],
+      coreMigrationVersion: '8.8.0',
+      typeMigrationVersion: '10.4.0',
+      updated_at: '2025-09-09T09:57:45.733Z',
+      created_at: '2025-09-09T09:57:45.733Z',
+    },
+    refresh: 'wait_for',
+  });
+}
+
+export { SAMPLE_V1_TEMPLATE_ID, SAMPLE_V2_TEMPLATE_ID };
+
 export async function deleteRuleTemplateByESQuery(ftrProvider: FtrProviderContext) {
   const es = ftrProvider.getService('es');
   await es.deleteByQuery({
@@ -82,6 +135,23 @@ export function getRuleTemplate({
 }) {
   return supertest
     .get(`${auth.space ? `/s/${auth.space}` : ''}/internal/alerting/rule_template/${templateId}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .send();
+}
+
+export function findRuleTemplates({
+  supertest,
+  query = {},
+  auth = { user: Superuser, space: null },
+}: {
+  supertest: SupertestAgent;
+  query?: Record<string, string | number | string[]>;
+  auth?: { user: { username: string; password: string }; space: string | null };
+}) {
+  return supertest
+    .get(`${auth.space ? `/s/${auth.space}` : ''}/internal/alerting/rule_template/_find`)
+    .query(query)
     .set('kbn-xsrf', 'true')
     .auth(auth.user.username, auth.user.password)
     .send();

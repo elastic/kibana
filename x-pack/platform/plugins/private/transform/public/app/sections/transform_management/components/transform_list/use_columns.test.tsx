@@ -91,6 +91,10 @@ describe('Transform: Job List Columns', () => {
         isReady = true;
       }),
       hasLinkedProjects: jest.fn(() => isReady),
+      fetchProjects: jest.fn().mockResolvedValue({
+        origin: { _id: 'origin-project' },
+        linkedProjects: [],
+      }),
       getTotalProjectCount: jest.fn(() => 2),
     } as unknown as ICPSManager;
 
@@ -140,6 +144,10 @@ describe('Transform: Job List Columns', () => {
     const cpsManager = {
       whenReady: jest.fn().mockResolvedValue(undefined),
       hasLinkedProjects: jest.fn(() => true),
+      fetchProjects: jest.fn().mockResolvedValue({
+        origin: { _id: 'origin-project' },
+        linkedProjects: [],
+      }),
       getTotalProjectCount: jest.fn(() => 2),
     } as unknown as ICPSManager;
 
@@ -180,5 +188,31 @@ describe('Transform: Job List Columns', () => {
         },
       })
     ).toBe('all');
+    await waitFor(() => {
+      const updatedProjectScopeColumn = result.current
+        .columns[3] as EuiTableComputedColumnType<TransformListRow>;
+      const getUpdatedSortValue = updatedProjectScopeColumn.sortable as (
+        item: TransformListRow
+      ) => string;
+
+      expect(
+        getUpdatedSortValue({
+          ...item,
+          config: {
+            ...item.config,
+            source: { ...item.config.source, project_routing: '_id:origin-project' },
+          },
+        })
+      ).toBe('origin');
+    });
+    expect(
+      getSortValue({
+        ...item,
+        config: {
+          ...item.config,
+          source: { ...item.config.source, project_routing: '_id:linked-project' },
+        },
+      })
+    ).toBe('custom:_id:linked-project');
   });
 });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import React, { useCallback, useState, useMemo } from 'react';
+import { EuiLink, EuiPopover, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import {
   type ICPSManager,
@@ -59,14 +59,21 @@ export const getStaticProjectScopeLabel = (projectRouting?: ProjectRouting): str
   }
 };
 
-export const getProjectScopeSortValue = (projectRouting?: ProjectRouting): string => {
+export const getProjectScopeSortValue = (
+  projectRouting?: ProjectRouting,
+  originProjectId?: string
+): string => {
   if (projectRouting === PROJECT_ROUTING.ALL) {
     return 'all';
   }
 
   // A missing project routing value means the transform is origin-only, which is
-  // the same display bucket as the explicit `_alias:_origin` routing value.
-  if (projectRouting === undefined || projectRouting === PROJECT_ROUTING.ORIGIN) {
+  // the same display bucket as explicit origin-only routing values.
+  if (
+    projectRouting === undefined ||
+    projectRouting === PROJECT_ROUTING.ORIGIN ||
+    (originProjectId && projectRouting === `_id:${originProjectId}`)
+  ) {
     return 'origin';
   }
 
@@ -78,19 +85,36 @@ interface ProjectScopeColumnProps {
   projectRouting?: ProjectRouting;
 }
 
-const ProjectScopePopoverContent = ({ cpsManager, projectRouting }: ProjectScopeColumnProps) => {
+const ProjectScopePopoverContent = ({
+  cpsManager,
+  popoverTitleId,
+  projectRouting,
+  projectScopeContentTitle,
+}: ProjectScopeColumnProps & {
+  projectScopeContentTitle: React.ReactNode;
+  popoverTitleId: string;
+}) => {
   const effectiveProjectRouting = getEffectiveProjectRouting(projectRouting);
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
     [cpsManager]
   );
-  const projects = useFetchProjects(fetchProjects, effectiveProjectRouting);
+
+  const popoverTitle = useMemo(() => {
+    return (
+      <EuiText size="s">
+        <p id={popoverTitleId}>{projectScopeContentTitle}</p>
+      </EuiText>
+    );
+  }, [popoverTitleId, projectScopeContentTitle]);
 
   return (
     <ProjectPickerContent
       projectRouting={effectiveProjectRouting}
-      projects={projects}
+      fetchProjectsByRouting={fetchProjects}
       controlsState="hidden"
+      customHeaderText={popoverTitle}
+      showProjectTags={false}
     />
   );
 };
@@ -119,6 +143,10 @@ const CustomProjectScopeLabel = ({ cpsManager, projectRouting }: ProjectScopeCol
     return unknownProjectScopeLabel;
   }
 
+  if (originProject && linkedProjects.length === 0) {
+    return originProjectLabel;
+  }
+
   return `${projectCount}/${cpsManager.getTotalProjectCount()}`;
 };
 
@@ -134,6 +162,7 @@ const ProjectScopeLabel = ({ cpsManager, projectRouting }: ProjectScopeColumnPro
 
 export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeColumnProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   if (cpsManager.getTotalProjectCount() <= 1) {
     return (
@@ -145,6 +174,7 @@ export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeC
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={
         <EuiLink
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -156,11 +186,16 @@ export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeC
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
+      panelProps={{ css: { width: 320 } }}
       anchorPosition="downLeft"
       repositionOnScroll
     >
-      <EuiPopoverTitle paddingSize="s">{projectScopeLabel}</EuiPopoverTitle>
-      <ProjectScopePopoverContent cpsManager={cpsManager} projectRouting={projectRouting} />
+      <ProjectScopePopoverContent
+        popoverTitleId={popoverTitleId}
+        cpsManager={cpsManager}
+        projectRouting={projectRouting}
+        projectScopeContentTitle={projectScopeLabel}
+      />
     </EuiPopover>
   );
 };

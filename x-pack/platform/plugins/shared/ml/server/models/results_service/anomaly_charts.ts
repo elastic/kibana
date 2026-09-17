@@ -1020,7 +1020,6 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         }
       }
     }
-
     const { chartRange, tooManyBuckets } = calculateChartRange(
       seriesConfigs as SeriesConfigWithMetadata[],
       selectedEarliestMs,
@@ -1242,13 +1241,16 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         };
       });
 
-    if (mapData.length) {
-      // push map data in if it's available
-      // @ts-ignore
-      seriesToPlot.push(...mapData);
-    }
-
-    data.seriesToPlot = seriesToPlot;
+    data.seriesToPlot = mapData.length
+      ? [
+          ...seriesToPlot,
+          ...mapData.map((series) => ({
+            ...series,
+            plotEarliest: chartRange.min,
+            plotLatest: chartRange.max,
+          })),
+        ]
+      : seriesToPlot;
 
     data.errorMessages = errorMessages
       ? Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {
@@ -1512,7 +1514,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    intervalMs: number
+    intervalMs: number,
+    projectRouting?: string
   ): Promise<any> {
     if (splitField === undefined) {
       return [];
@@ -1595,6 +1598,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           },
         },
       },
+      ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
     };
 
     if (
@@ -1697,7 +1701,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         config.timeField,
         range.min,
         range.max,
-        config.bucketSpanSeconds * 1000
+        config.bucketSpanSeconds * 1000,
+        config.datafeedConfig.project_routing
       );
     } catch (e) {
       handleError(

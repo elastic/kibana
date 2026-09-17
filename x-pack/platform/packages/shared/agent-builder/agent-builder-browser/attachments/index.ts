@@ -9,6 +9,7 @@ export type {
   AttachmentUIDefinition,
   AttachmentServiceStartContract,
   AttachmentRenderProps,
+  ConversationDetailsRenderProps,
   CanvasRenderCallbacks,
   InlineRenderCallbacks,
   GetActionButtonsParams,

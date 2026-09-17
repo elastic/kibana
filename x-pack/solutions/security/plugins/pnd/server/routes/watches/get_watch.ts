@@ -7,11 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCH_URL_TEMPLATE } from '@kbn/pnd-common';
-import type { GetWatchResponse } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { getMockWatchById } from '@kbn/pnd-common';
+import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
-import { getWatchRoutePrivileges } from './watch_route_security';
 
 const GetWatchRequestParams = z.object({
   watchId: z.string().min(1).max(128),
@@ -20,9 +18,8 @@ const GetWatchRequestParams = z.object({
 export const registerGetWatchRoute = ({
   router,
   logger,
-  config,
   getSpaceId,
-  getWatchProjection,
+  getWatchesService,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -30,7 +27,7 @@ export const registerGetWatchRoute = ({
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
-          requiredPrivileges: getWatchRoutePrivileges(config.ui.useMockData),
+          requiredPrivileges: [PND_API_PRIVILEGE_READ],
         },
       },
       summary: 'Get a PND watch by id',
@@ -47,33 +44,13 @@ export const registerGetWatchRoute = ({
       async (_context, request, response) => {
         try {
           const { watchId } = request.params;
-
-          if (config.ui.useMockData) {
-            const watch = getMockWatchById(watchId);
-            if (!watch) {
-              return response.notFound({
-                body: { message: `Watch "${watchId}" not found` },
-              });
-            }
-            const body: GetWatchResponse = { watch };
-            return response.ok({ body });
-          }
-
-          const projection = getWatchProjection?.();
-          if (!projection) {
+          const body = await getWatchesService().get(watchId, getSpaceId(request));
+          if (!body) {
             return response.notFound({
               body: { message: `Watch "${watchId}" not found` },
             });
           }
 
-          const result = await projection.get(watchId, getSpaceId(request));
-          if (!result) {
-            return response.notFound({
-              body: { message: `Watch "${watchId}" not found` },
-            });
-          }
-
-          const body: GetWatchResponse = result;
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to get watch: ${error}`);

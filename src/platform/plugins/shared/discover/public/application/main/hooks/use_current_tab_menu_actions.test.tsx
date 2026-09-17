@@ -14,7 +14,6 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { DataSourceType } from '../../../../common/data_sources';
-import { ESQL_TRANSITION_MODAL_KEY } from '../../../../common/constants';
 import type { DiscoverServices } from '../../../build_services';
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
@@ -125,7 +124,7 @@ describe('useCurrentTabMenuActions', () => {
     });
   });
 
-  it('shows the transition modal when switching from ES|QL back to classic with unsaved changes', async () => {
+  it('transitions from ES|QL back to classic immediately, even with unsaved changes', async () => {
     const { services, toolkit, tabId } = await setup();
 
     toolkit.internalState.dispatch(
@@ -160,49 +159,6 @@ describe('useCurrentTabMenuActions', () => {
       METRIC_TYPE.CLICK,
       'esql:back_to_classic_clicked'
     );
-    expect(toolkit.internalState.getState().isESQLToDataViewTransitionModalVisible).toBe(true);
-    expect(toolkit.getCurrentTab().appState.dataSource).toEqual({
-      type: DataSourceType.Esql,
-    });
-  });
-
-  it('transitions from ES|QL back to classic when the transition modal was already dismissed', async () => {
-    const { services, toolkit, tabId } = await setup();
-
-    toolkit.internalState.dispatch(
-      internalStateActions.transitionFromDataViewToESQL({
-        tabId,
-        dataView: dataViewWithTimefieldMock,
-      })
-    );
-    toolkit.internalState.dispatch(
-      internalStateActions.setUnsavedChanges({
-        hasUnsavedChanges: true,
-        unsavedTabIds: [tabId],
-      })
-    );
-    services.storage.set(ESQL_TRANSITION_MODAL_KEY, 'true');
-
-    const { result } = renderHook(
-      () => useCurrentTabMenuActions({ currentDataView: dataViewWithTimefieldMock }),
-      {
-        wrapper: ({ children }) => (
-          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
-        ),
-      }
-    );
-
-    expect(result.current.isDataViewMode).toBe(false);
-
-    await act(async () => {
-      result.current.switchLanguageMode();
-    });
-
-    expect(services.trackUiMetric).toHaveBeenCalledWith(
-      METRIC_TYPE.CLICK,
-      'esql:back_to_classic_clicked'
-    );
-    expect(toolkit.internalState.getState().isESQLToDataViewTransitionModalVisible).toBe(false);
     expect(result.current.isDataViewMode).toBe(true);
     expect(toolkit.getCurrentTab().appState.dataSource).toEqual({
       type: DataSourceType.DataView,

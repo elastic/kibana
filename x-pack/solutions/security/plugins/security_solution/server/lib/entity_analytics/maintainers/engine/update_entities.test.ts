@@ -36,7 +36,7 @@ describe('writeEntityIds', () => {
       updated: 0,
       notFound: 0,
       errors: 0,
-      droppedTargets: 0,
+      targetIdsNotInStore: 0,
       relationshipTypeApplied: {},
       succeededEntityIds: new Set(),
     });
@@ -63,7 +63,7 @@ describe('writeEntityIds', () => {
       updated: 0,
       notFound: 0,
       errors: 0,
-      droppedTargets: 0,
+      targetIdsNotInStore: 0,
       relationshipTypeApplied: {},
       succeededEntityIds: new Set(),
     });
@@ -93,7 +93,7 @@ describe('writeEntityIds', () => {
       updated: 0,
       notFound: 0,
       errors: 0,
-      droppedTargets: 0,
+      targetIdsNotInStore: 0,
       relationshipTypeApplied: {},
       succeededEntityIds: new Set(),
     });
@@ -432,7 +432,7 @@ describe('writeEntityIds — validateTargetIds', () => {
     } as unknown as ElasticsearchClient;
   };
 
-  it('prunes targets not returned by the entity index and reports droppedTargets', async () => {
+  it('prunes targets not returned by the entity index and reports targetIdsNotInStore', async () => {
     const crudClient = makeCrudClient();
     // Only host:exists is in the entity index; host:ghost is not.
     const esClient = makeSearchEsClient(['host:exists.corp.com']);
@@ -455,7 +455,7 @@ describe('writeEntityIds — validateTargetIds', () => {
       true
     );
 
-    expect(result.droppedTargets).toBe(1);
+    expect(result.targetIdsNotInStore).toBe(1);
     const call = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
     expect(call.objects[0].doc.entity.relationships.administers.ids).toEqual([
       'host:exists.corp.com',
@@ -482,7 +482,7 @@ describe('writeEntityIds — validateTargetIds', () => {
       true
     );
 
-    expect(result.droppedTargets).toBe(1);
+    expect(result.targetIdsNotInStore).toBe(1);
     expect(result.updated).toBe(0);
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });

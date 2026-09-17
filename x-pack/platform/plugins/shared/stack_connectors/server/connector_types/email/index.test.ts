@@ -599,7 +599,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has invalid format (leading hyphen in domain)', () => {
@@ -616,7 +616,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has invalid format (trailing hyphen in domain)', () => {
@@ -633,7 +633,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email starts with @ sign', () => {
@@ -650,7 +650,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has double @ sign', () => {
@@ -667,7 +667,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has double dots in domain', () => {
@@ -684,7 +684,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has space in domain', () => {
@@ -701,7 +701,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation accepts email with single-label domain (on-prem MTA)', () => {
@@ -718,7 +718,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('params validation fails when email has path traversal characters', () => {
@@ -735,7 +735,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation succeeds for valid email with hyphens and subdomains', () => {
@@ -810,7 +810,7 @@ describe('params validation', () => {
         }),
         { configurationUtilities }
       );
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('error when using a service that is not enabled', async () => {
@@ -853,7 +853,7 @@ describe('params validation', () => {
         }),
         { configurationUtilities: configUtils }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('does not throw when fetching service enabled in config', () => {
@@ -873,7 +873,7 @@ describe('params validation', () => {
         }),
         { configurationUtilities: configUtils }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('throws for too long "to" address ', async () => {
@@ -2161,7 +2161,7 @@ describe('execute()', () => {
     );
 
     const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('message parameter is trimmed to 0 length if configured', async () => {
@@ -2188,7 +2188,7 @@ describe('execute()', () => {
     expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(additionalTextWeAdded);
 
     const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('messageHTML parameter is trimmed to the maximum allowed length', async () => {
@@ -2216,7 +2216,7 @@ describe('execute()', () => {
     );
 
     const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('messageHTML parameter is trimmed to 0 length if configured', async () => {
@@ -2242,7 +2242,7 @@ describe('execute()', () => {
     expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(additionalTextWeAdded);
 
     const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('includes replyTo in routing when provided', async () => {

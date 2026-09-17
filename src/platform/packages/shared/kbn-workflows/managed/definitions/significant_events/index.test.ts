@@ -8,13 +8,23 @@
  */
 
 import { parse } from 'yaml';
-import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW, SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW } from '.';
+import {
+  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
+  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
+} from '.';
 
 interface WorkflowStep {
   name: string;
+  type?: string;
   condition?: string;
+  'on-failure'?: { continue?: boolean };
   steps?: WorkflowStep[];
-  with?: Record<string, string>;
+  with?: {
+    path?: string;
+    body?: { trigger_feedback?: string };
+    inputs?: { context?: { trigger_type?: string } };
+    written_rule_uuids?: string;
+  };
   foreach?: string;
 }
 
@@ -37,12 +47,32 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 };
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
-const triage = parse(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.yaml) as ParsedWorkflow;
+const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
+  | ParsedWorkflow & {
+      triggers: Array<{ type: string; on?: { condition?: string } }>;
+    };
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(13);
-    expect(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.version).toBe(15);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(20);
+  });
+
+  it('bootstraps per-space cleanup before discovery work', () => {
+    expect(discovery.steps[0]).toMatchObject({
+      name: 'bootstrap_cleanup_workflow',
+      type: 'kibana.request',
+      with: {
+        path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap',
+      },
+      'on-failure': { continue: true },
+    });
+  });
+
+  it('marks discovery-triggered investigations as automatic', () => {
+    const triggerStep = requireStep(discovery, 'trigger_investigation') as {
+      with?: { inputs?: { context?: { trigger_type?: string } } };
+    };
+    expect(triggerStep.with?.inputs?.context?.trigger_type).toBe('automatic');
   });
 
   it('stamps discovery detections only from confirmed write outcomes', () => {
@@ -54,15 +84,23 @@ describe('significant events persistence workflow contracts', () => {
     );
   });
 
-  it('gates triage investigations on confirmed event writes', () => {
-    expect(requireStep(triage, 'count_open_events').with?.openCount).toContain(
-      "reject: 'written', false"
+  it('does not launch investigations without resolved event details', () => {
+    expect(requireStep(discovery, 'guard_resolved_event').condition).toContain(
+      'steps.resolve_open_event.output.hits.hits[0] != null'
     );
-    expect(requireStep(triage, 'foreach_significant_event').foreach).toContain(
-      "reject: 'written', false"
-    );
-    expect(requireStep(triage, 'gate_investigatable_severity').condition).toContain(
-      'foreach.item.event_uuid != null'
-    );
+  });
+
+  it('applies completed investigation feedback only to Significant Events', () => {
+    expect(investigationCompleted.triggers).toEqual([
+      {
+        type: 'nightshift-investigations.completed',
+        on: { condition: 'event.subject.type: "significant_event"' },
+      },
+    ]);
+    const getInvestigation = requireStep(investigationCompleted, 'get_investigation');
+    const attach = requireStep(investigationCompleted, 'attach_completed_investigation');
+    expect(getInvestigation.with?.path).toContain('/internal/nightshift/investigations/');
+    expect(attach.with?.path).toContain('/internal/significant_events/events/');
+    expect(attach.with?.body?.trigger_feedback).toContain('output.trigger_feedback');
   });
 });

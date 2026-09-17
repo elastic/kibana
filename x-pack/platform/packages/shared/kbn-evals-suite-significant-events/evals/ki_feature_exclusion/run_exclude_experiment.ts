@@ -8,11 +8,12 @@
 import { isDuplicateFeature } from '@kbn/significant-events-schema';
 import {
   EMPTY_TOKENS,
+  featuresPrompt,
   identifyFeatures,
   sumTokens,
+  type AnalysisTarget,
   type ExcludedFeatureSummary,
-} from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+} from '@kbn/nightshift-ai';
 import { sortBy } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
@@ -47,8 +48,15 @@ export async function runExcludeExperiment({
     log,
   });
 
+  const target: AnalysisTarget = {
+    id: MANAGED_STREAM_NAME,
+    name: MANAGED_STREAM_NAME,
+    sources: [MANAGED_STREAM_NAME, `${MANAGED_STREAM_NAME}.*`],
+    samplingSource: MANAGED_STREAM_NAME,
+  };
+
   const { features: initialFeatures, tokensUsed: initialTokens } = await identifyFeatures({
-    streamName: MANAGED_STREAM_NAME,
+    target,
     sampleDocuments,
     systemPrompt: featuresPrompt,
     inferenceClient,
@@ -95,7 +103,7 @@ export async function runExcludeExperiment({
       ignoredFeatures,
       tokensUsed: followUpTokens,
     } = await identifyFeatures({
-      streamName: MANAGED_STREAM_NAME,
+      target,
       sampleDocuments,
       excludedFeatures,
       systemPrompt: featuresPrompt,

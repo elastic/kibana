@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { identifyFeatures } from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import {
+  featuresPrompt,
+  formatRawDocument,
+  identifyFeatures,
+  type AnalysisTarget,
+  type InferenceDocument,
+} from '@kbn/nightshift-ai';
 import {
   createMemoryDiscoveryTools,
   MemoryServiceImpl,
@@ -18,7 +23,6 @@ import {
   createChatCallsEvaluator,
   createSpanLatencyEvaluator,
 } from '@kbn/evals';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   createEvalSignificantEventSearchTool,
   type AgentBuilderToolResult,
@@ -45,7 +49,7 @@ const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 interface CollectedExample {
   scenario: KIFeatureExtractionScenario;
-  sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
+  sampleDocuments: InferenceDocument[];
 }
 
 evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.complete }, () => {
@@ -103,10 +107,14 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
           await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-          const sampleDocuments = await collectSampleDocuments({
+          const sampledHits = await collectSampleDocuments({
             esClient,
             scenario,
             log,
+          });
+          const sampleDocuments = sampledHits.flatMap((hit) => {
+            const document = formatRawDocument({ hit });
+            return document ? [document] : [];
           });
           if (sampleDocuments.length === 0) {
             throw new Error(
@@ -189,8 +197,14 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                 }
 
+                const target: AnalysisTarget = {
+                  id: MANAGED_STREAM_NAME,
+                  name: MANAGED_STREAM_NAME,
+                  sources: [MANAGED_STREAM_NAME, `${MANAGED_STREAM_NAME}.*`],
+                  samplingSource: MANAGED_STREAM_NAME,
+                };
                 const { features, tokensUsed } = await identifyFeatures({
-                  streamName: MANAGED_STREAM_NAME,
+                  target,
                   sampleDocuments: heavy.sampleDocuments,
                   systemPrompt: `${featuresPrompt}\n${memoryTools.promptSnippet}\n${eventSearchTool.promptSnippet}`,
                   inferenceClient,

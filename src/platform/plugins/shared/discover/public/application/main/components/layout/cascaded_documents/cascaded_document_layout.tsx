@@ -62,7 +62,7 @@ const ESQLDataCascade = React.memo(
       availableCascadeGroups,
       selectedCascadeGroups,
       esqlVariables,
-      viewModeToggle,
+      renderViewModeToggle,
       getDataCascadeUiState,
       setDataCascadeUiState,
       cascadeGroupingChangeHandler,
@@ -95,7 +95,7 @@ const ESQLDataCascade = React.memo(
     );
 
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
-      viewModeToggle,
+      renderViewModeToggle,
       cascadeGroupingChangeHandler: cascadeGroupingChangeHandlerWithTracking,
     });
 

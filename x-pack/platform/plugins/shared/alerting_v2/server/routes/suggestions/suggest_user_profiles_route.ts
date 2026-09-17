@@ -6,11 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
+import { errorResponseSchema, suggestUserProfilesResponseSchema } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 import type { AlertingServerStartDependencies } from '../../types';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -19,16 +20,18 @@ import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '../cons
 
 const ROUTE_AUTH_PRIVILEGES = [ALERTING_V2_API_PRIVILEGES.alerts.read] as const;
 
-const suggestUserProfilesBodySchema = z.object({
-  name: z.string().min(1).max(256).describe('Name fragment to search by.'),
-  size: z
-    .number()
-    .int()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe('Maximum number of profiles to return. Defaults to 10'),
-});
+const suggestUserProfilesBodySchema = z
+  .object({
+    name: z.string().min(1).max(256).describe('Name fragment to search by.'),
+    size: z
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .optional()
+      .describe('Maximum number of profiles to return. Defaults to 10'),
+  })
+  .strict();
 
 type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
 
@@ -70,6 +73,10 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
       body: suggestUserProfilesBodySchema,
     },
     response: {
+      200: {
+        body: () => suggestUserProfilesResponseSchema,
+        description: 'Returns a list of suggested user profiles.',
+      },
       400: {
         body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
@@ -91,12 +98,30 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const { name, size } = this.request.body;
-    const profiles = await this.securityStart.userProfiles.suggest({
+    const profiles: UserProfile[] = await this.securityStart.userProfiles.suggest({
       name,
       size,
       dataPath: 'avatar',
     });
 
-    return this.ctx.response.ok({ body: profiles });
+    const body = profiles.map(({ uid, user, data }) => {
+      return {
+        uid,
+        user: {
+          username: user.username,
+          full_name: user.full_name,
+          email: user.email,
+        },
+        ...(data?.avatar && {
+          avatar: {
+            initials: data.avatar.initials,
+            color: data.avatar.color,
+            image_url: data.avatar.imageUrl,
+          },
+        }),
+      };
+    });
+
+    return this.ctx.response.ok({ body });
   }
 }

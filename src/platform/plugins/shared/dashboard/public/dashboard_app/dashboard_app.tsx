@@ -34,6 +34,7 @@ import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
+import { PrettifyDashboardButton } from './prettify/prettify_dashboard_button';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
 import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
@@ -194,6 +195,7 @@ export function DashboardApp({
             dashboardApi={dashboardApi}
             dashboardInternalApi={dashboardInternalApi}
           />
+          <PrettifyDashboardButton dashboardApi={dashboardApi} />
         </>
       )}
 

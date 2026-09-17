@@ -9,9 +9,8 @@
   "kbn_references": [
     "@kbn/agent-builder-common",
     "@kbn/evals",
-    "@kbn/evals-phoenix-executor",
     "@kbn/tooling-log",
-    "@kbn/streams-ai",
+    "@kbn/nightshift-ai",
     "@kbn/scout",
     "@kbn/streams-schema",
     "@kbn/significant-events-schema",
@@ -28,5 +27,7 @@
     "@kbn/std",
     "@kbn/streamlang",
     "@kbn/significant-events-plugin",
+    "@kbn/repo-info",
+    "@kbn/test",
   ]
 }

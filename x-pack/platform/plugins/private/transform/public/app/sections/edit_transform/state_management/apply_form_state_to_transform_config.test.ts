@@ -61,6 +61,34 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
     expect(updateConfig.frequency).toBe('10m');
   });
 
+  it('should include project routing only when changed', () => {
+    const transformConfigMock = getTransformConfigMock();
+
+    const defaultState = getDefaultState(transformConfigMock);
+    const unchangedUpdateConfig = applyFormStateToTransformConfig(
+      transformConfigMock,
+      defaultState.formFields,
+      defaultState.formSections
+    );
+
+    expect(unchangedUpdateConfig.source).toBeUndefined();
+
+    const { formFields, formSections } = getDefaultState({
+      ...transformConfigMock,
+      source: {
+        ...transformConfigMock.source,
+        project_routing: '_id:linked-id',
+      },
+    });
+    const updateConfig = applyFormStateToTransformConfig(
+      transformConfigMock,
+      formFields,
+      formSections
+    );
+
+    expect(updateConfig.source?.project_routing).toBe('_id:linked-id');
+  });
+
   it('should only include changed form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 

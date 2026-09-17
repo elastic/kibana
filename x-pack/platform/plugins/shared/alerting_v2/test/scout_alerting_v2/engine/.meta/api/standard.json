@@ -1,0 +1,526 @@
+{
+  "sha1": "edb363027c5b0e957c233382ac2c4ea4d1cf7f71",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "80022d138baddea-0f1c065c42b9c1b",
+      "title": "End-to-end (executor -> director -> dispatcher) a breaching rule produces a fire action via the full end-to-end",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/end_to_end.spec.ts",
+        "line": 71,
+        "column": 94
+      }
+    },
+    {
+      "id": "80022d138baddea-a4879e8eb660252",
+      "title": "End-to-end (executor -> director -> dispatcher) a recovering rule produces a fire action for the inactive transition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/end_to_end.spec.ts",
+        "line": 113,
+        "column": 27
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-f2ee7078b7d95b9",
+      "title": "Alerting v2 alerts implicit index privileges viewer: get-role surfaces read on both patterns with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 354,
+        "column": 16
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-31b66ccc2aa5315",
+      "title": "Alerting v2 alerts implicit index privileges viewer: reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 359,
+        "column": 6
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-6ed7a760dd19297",
+      "title": "Alerting v2 alerts implicit index privileges editor: get-role surfaces read on both patterns with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 365,
+        "column": 11
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-edc4bbda9d981f1",
+      "title": "Alerting v2 alerts implicit index privileges editor: reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 369,
+        "column": 27
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-a7ef8a1e224f557",
+      "title": "Alerting v2 alerts implicit index privileges kibana_admin: get-role surfaces read on both patterns with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 376,
+        "column": 31
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-920b47b674e476a",
+      "title": "Alerting v2 alerts implicit index privileges kibana_admin: reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 384,
+        "column": 7
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-ef34e7ebe714f4a",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in \"*\": get-role surfaces read with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 393,
+        "column": 6
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-eb120af99a4fbd7",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in \"*\": reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 397,
+        "column": 31
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-1b130d4be867897",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:all in \"*\": get-role surfaces read with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 406,
+        "column": 16
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-759b5d579df8512",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:all in \"*\": reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 411,
+        "column": 11
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-cc2b6e36c32bce1",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing: get-role DLS is scoped to marketing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 419,
+        "column": 16
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-6ecab2c2e0d1b1d",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing: reads .rule-events and .alert-actions only in marketing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 428,
+        "column": 16
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-edfde7baa7f49bf",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:all in marketing: get-role DLS is scoped to marketing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 442,
+        "column": 11
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-0d0dfc34adf0d40",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:all in marketing: reads .rule-events and .alert-actions only in marketing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 451,
+        "column": 11
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-6906f8a64321b1c",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing+finance: get-role DLS covers both spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 469,
+        "column": 6
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-6daacaaeea5dac5",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing+finance: reads .rule-events and .alert-actions in both spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 489,
+        "column": 6
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-1d051c53044a278",
+      "title": "Alerting v2 alerts implicit index privileges custom alerting_v2 rules only: get-role surfaces no implicit grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 505,
+        "column": 11
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-52721214c15902f",
+      "title": "Alerting v2 alerts implicit index privileges custom alerting_v2 rules only: cannot read .rule-events or .alert-actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 514,
+        "column": 7
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-57c07c9ec575998",
+      "title": "Alerting v2 alerts implicit index privileges custom role with no alerting_v2 privilege: get-role surfaces no implicit grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 520,
+        "column": 6
+      }
+    },
+    {
+      "id": "067e9c797dbeec5-e1d82179da16ae7",
+      "title": "Alerting v2 alerts implicit index privileges custom role with no alerting_v2 privilege: cannot read .rule-events or .alert-actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "line": 524,
+        "column": 31
+      }
+    },
+    {
+      "id": "134d64c4c7ff58c-7f791e41745c742",
+      "title": "Rule change history create: logs a rule_create entry with sequence 1 and a RuleResponse-shaped snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "line": 64,
+        "column": 30
+      }
+    },
+    {
+      "id": "134d64c4c7ff58c-721824a2cb489b8",
+      "title": "Rule change history update: logs a rule_update entry with sequence 2 and the post-change snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "line": 99,
+        "column": 14
+      }
+    },
+    {
+      "id": "134d64c4c7ff58c-076cbd168c53cad",
+      "title": "Rule change history upsert (create): logs a rule_create entry when the rule does not yet exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "line": 169,
+        "column": 14
+      }
+    },
+    {
+      "id": "134d64c4c7ff58c-cebbf774add38e2",
+      "title": "Rule change history upsert (update): logs a rule_update entry when the rule already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "line": 201,
+        "column": 9
+      }
+    },
+    {
+      "id": "134d64c4c7ff58c-d881130ec7f4802",
+      "title": "Rule change history disable: logs a rule_disable entry with sequence 2 and enabled: false in the snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "line": 267,
+        "column": 14
+      }
+    },
+    {
+      "id": "134d64c4c7ff58c-ffa9ead21e78fee",
+      "title": "Rule change history enable: logs a rule_enable entry with sequence 3 and enabled: true in the snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "line": 324,
+        "column": 17
+      }
+    },
+    {
+      "id": "134d64c4c7ff58c-2bdb5c3af519adc",
+      "title": "Rule change history delete: logs a rule_delete entry with a bumped sequence and a pre-delete snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "line": 397,
+        "column": 14
+      }
+    },
+    {
+      "id": "134d64c4c7ff58c-7466317b0fa1c8e",
+      "title": "Rule change history HTTP list + detail: returns lean rows with server-side diffs and full snapshots on detail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "line": 455,
+        "column": 24
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-14af16ecf5b4c6e",
+      "title": "Agent Builder — alerting V2 SML type access limited privilege user can search alerting v2 rule and action policy SML types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 265,
+        "column": 6
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-1f9e47bf5893431",
+      "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the rule type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 284,
+        "column": 16
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-8d801d629dbe51a",
+      "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the action policy type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 299,
+        "column": 16
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-c9f7c69fdc70c1b",
+      "title": "Agent Builder — alerting V2 SML type access user with agent builder read but without alerting v2 read cannot see rule or action policy SML hits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 310,
+        "column": 1
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-d86c1bdd1fc4b98",
+      "title": "Agent Builder — alerting V2 SML type access user without alerting v2 read cannot see rule or action policy SML hits on a wildcard search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 325,
+        "column": 16
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-ee202b11d867308",
+      "title": "Agent Builder — alerting V2 SML type access limited privilege user still sees both types on a wildcard search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 335,
+        "column": 10
+      }
+    },
+    {
+      "id": "6290ee9814ba752-878763af7a4b207",
+      "title": "Alerting V2 Telemetry should retrieve telemetry data in the expected format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/telemetry.spec.ts",
+        "line": 171,
+        "column": 20
+      }
+    }
+  ]
+}

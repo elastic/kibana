@@ -18,7 +18,7 @@ import { WorkflowExecutionService } from './workflow_execution_service';
 export interface SignificantEventsDiscoveryRunParams {
   request: KibanaRequest;
   spaceId: string;
-  /** Ensures discovery/judge agent profiles exist in `spaceId` before a new run. */
+  /** Ensures the discovery agent profile exists in `spaceId` before a new run. */
   agentBuilder?: AgentBuilderPluginStart;
 }
 

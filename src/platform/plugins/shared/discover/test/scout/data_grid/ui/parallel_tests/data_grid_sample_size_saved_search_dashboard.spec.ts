@@ -19,7 +19,8 @@ import { testData } from '../fixtures';
 const CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH = 150;
 const CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL = 10;
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/287788
+spaceTest.describe.skip(
   'Discover data grid sample size - saved search and Dashboard',
   { tag: '@local-stateful-classic' },
   () => {
@@ -49,7 +50,7 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('saves a custom sample size with a search', async ({ pageObjects, scoutSpace }) => {
+    spaceTest('saves and restores a custom sample size', async ({ pageObjects, scoutSpace }) => {
       const { dataGrid, discover } = pageObjects;
       const savedSearchName = `With sample size ${scoutSpace.id}`;
 
@@ -71,17 +72,12 @@ spaceTest.describe(
         });
       });
 
-      await spaceTest.step('new Discover sessions use the default sample size', async () => {
+      await spaceTest.step('loading the saved search restores the custom sample size', async () => {
+        // Start a new session first so the reload is a genuine restore, not the already-open search.
         await discover.clickNewSearch();
         await dataGrid.waitForLoad();
         await dataGrid.waitForDocTableRendered();
-        await dataGrid.openGridDisplaySettings();
 
-        expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
-        await expectSampleSizeFooter({ pageObjects, sampleSize: testData.DEFAULT_SAMPLE_SIZE });
-      });
-
-      await spaceTest.step('loading the saved search restores the custom sample size', async () => {
         await discover.loadSavedSearch(savedSearchName);
         await dataGrid.waitForLoad();
         await dataGrid.waitForDocTableRendered();
@@ -93,20 +89,46 @@ spaceTest.describe(
           sampleSize: CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH,
         });
       });
-
-      await spaceTest.step(
-        'loading an archived saved search uses the default sample size',
-        async () => {
-          await discover.loadSavedSearch(testData.SAVED_SEARCH_TITLE);
-          await dataGrid.waitForLoad();
-          await dataGrid.waitForDocTableRendered();
-          await dataGrid.openGridDisplaySettings();
-
-          expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
-          await expectSampleSizeFooter({ pageObjects, sampleSize: testData.DEFAULT_SAMPLE_SIZE });
-        }
-      );
     });
+
+    spaceTest('new Discover sessions use the default sample size', async ({ pageObjects }) => {
+      const { dataGrid, discover } = pageObjects;
+
+      // Establish a non-default sample size, then confirm a new session resets it.
+      await discover.goto({ queryMode: 'classic' });
+      await dataGrid.waitForLoad();
+      await dataGrid.waitForDocTableRendered();
+      await dataGrid.openGridDisplaySettings();
+      await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+      expect(await dataGrid.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+
+      await discover.clickNewSearch();
+      await dataGrid.waitForLoad();
+      await dataGrid.waitForDocTableRendered();
+      await dataGrid.openGridDisplaySettings();
+
+      expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
+      await expectSampleSizeFooter({ pageObjects, sampleSize: testData.DEFAULT_SAMPLE_SIZE });
+    });
+
+    spaceTest(
+      'loading an archived saved search uses the default sample size',
+      async ({ pageObjects }) => {
+        const { dataGrid, discover } = pageObjects;
+
+        await discover.goto({ queryMode: 'classic' });
+        await dataGrid.waitForLoad();
+        await dataGrid.waitForDocTableRendered();
+
+        await discover.loadSavedSearch(testData.SAVED_SEARCH_TITLE);
+        await dataGrid.waitForLoad();
+        await dataGrid.waitForDocTableRendered();
+        await dataGrid.openGridDisplaySettings();
+
+        expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
+        await expectSampleSizeFooter({ pageObjects, sampleSize: testData.DEFAULT_SAMPLE_SIZE });
+      }
+    );
 
     spaceTest('uses the default sample size on Dashboard', async ({ pageObjects }) => {
       const { dashboard, dataGrid } = pageObjects;

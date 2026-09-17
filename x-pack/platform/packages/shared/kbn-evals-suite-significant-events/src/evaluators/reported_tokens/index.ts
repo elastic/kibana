@@ -32,6 +32,7 @@ const createReportedTokensEvaluator = <TExample extends Example, TTaskOutput ext
 }): Evaluator<TExample, TTaskOutput> => ({
   name,
   kind: 'CODE',
+  direction: 'minimize',
   evaluate: async ({ output }) => {
     const tokens = readReportedTokens(output);
 
@@ -47,7 +48,7 @@ const createReportedTokensEvaluator = <TExample extends Example, TTaskOutput ext
     return {
       score: select(tokens),
       explanation: `Provider-reported tokens: ${tokens.prompt} input, ${tokens.completion} output`,
-      details: { ...tokens },
+      metadata: { ...tokens },
     };
   },
 });

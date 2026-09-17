@@ -53,16 +53,19 @@ export const MetricDetailPage = () => {
     timeRange: parsedTimeRange,
   });
 
-  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
-  useMetricsBreadcrumbs([
-    {
-      ...breadcrumbOptions.link,
-      text: breadcrumbOptions.text,
-    },
-    {
-      text: name,
-    },
-  ]);
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions();
+  useMetricsBreadcrumbs(
+    [
+      {
+        ...breadcrumbOptions.link,
+        text: breadcrumbOptions.text,
+      },
+      {
+        text: name,
+      },
+    ],
+    { parent: 'app' }
+  );
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 

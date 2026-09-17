@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 export const DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE = 'settingsEmptyState';
 export const DATA_TEST_SUBJ_SETTINGS_CLEAR_SEARCH_LINK = 'settingsClearSearchLink';
@@ -26,8 +27,7 @@ interface EmptyStateProps {
  * Component for displaying a prompt to inform that no settings are found for a given query.
  */
 export const EmptyState = ({ queryText, onClearQuery }: EmptyStateProps) => (
-  <EuiCallOut
-    color="danger"
+  <KbnDangerCallout
     title={
       <>
         <FormattedMessage

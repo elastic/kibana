@@ -7,7 +7,10 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import {
+  getChartTypeSelectionPromptContent,
+  seriesStatisticsAgentGuidance,
+} from '@kbn/agent-builder-visualizations-server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 const chartTypeSelectionContent = getChartTypeSelectionPromptContent();
@@ -77,6 +80,7 @@ Do **not** use this skill when:
      - \`chartType\` (required for a new Lens visualization; optional hint for a new Vega visualization; optional on updates)
      - \`esql\` (optional, when you have a validated ES|QL)
      - \`attachment_id\` (optional, only when updating an existing visualization)
+     - \`time_range\` (optional; **only** when the user explicitly named a time window, e.g. "last 7 days", "May 20–24". Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
      platformCoreTools.createVisualization
    } once per panel WITH that \`index\`. Do **not** fan out several index-less calls in parallel — a single failed auto-discovery fails all of them identically.
@@ -108,8 +112,11 @@ Reference only fields that exist in your grounded index mapping. The field names
 
 Good prompt patterns (specific and field-accurate):
 - "Show average <numeric field> over time grouped by <keyword field>"
+- "Log volume over time, show avg/min/max in the legend"
 - "Display top 10 <keyword field> values by document count as a bar chart"
 - "Show a single metric for count where <field> is <value>"
+
+${seriesStatisticsAgentGuidance}
 
 Poor prompt patterns:
 - "Show CPU" / "Make a chart" / "Display everything" (too vague)
@@ -125,8 +132,8 @@ ${
 
 - Pass \`renderer: "vega"\` when:
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
-  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
-- Otherwise pass \`renderer: "lens"\` (or omit it to use the Lens default) with the required best-fitting \`chartType\`.
+  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts of **different measures** (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
+- Otherwise pass \`renderer: "lens"\` (or omit it to use the Lens default) with the required best-fitting \`chartType\`. Legend statistics of one series stay on Lens xy — see the average/min/max distinction above.
 - When updating an existing attachment, omit \`renderer\` — edits keep the existing renderer.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
@@ -159,6 +166,17 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
   "query": "Show average system.cpu.total.pct over time grouped by host.name",
   "index": "metrics-system.cpu-default",
   "chartType": "xy"
+}
+\`\`\`
+
+## Create with an explicit user-named time window
+
+\`\`\`json
+{
+  "query": "Show error count over the last 7 days",
+  "index": "logs-*",
+  "chartType": "xy",
+  "time_range": { "from": "now-7d", "to": "now" }
 }
 \`\`\`
 

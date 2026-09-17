@@ -1,0 +1,21 @@
+{
+  "sha1": "426d7e7c31465a87e07791adbc57cc67852fa918",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "3d7888607ed889f-8a69cef482a004a",
+      "title": "License Management — accessibility license management pages meet a11y requirements",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/license_management/test/scout/ui/tests/license_management_a11y.spec.ts",
+        "line": 15,
+        "column": 8
+      }
+    }
+  ]
+}

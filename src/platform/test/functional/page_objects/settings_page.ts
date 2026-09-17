@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { FtrService } from '../ftr_provider_context';
 export class SettingsPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -242,12 +243,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
-    await this.testSubjects.click('moreActionsButton');
+    if (!(await this.testSubjects.exists('deleteIndexPatternButton'))) {
+      await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+    }
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
   async getIndexPageHeading() {
-    return await this.testSubjects.getVisibleText('indexPatternTitle');
+    return await this.testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title);
   }
 
   async getManagedTag() {
@@ -356,8 +359,14 @@ export class SettingsPageObject extends FtrService {
     });
 
     expect(await this.isOptionChecked(option)).to.be(true);
-    await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(false);
+    // Center the option in the popover's scroll list so the click clears an edge-pinned option.
+    const optionToClear = await this.testSubjects.find(`selectable-option-${option}`);
+    await optionToClear.scrollIntoView({ block: 'center' });
+    await optionToClear.click();
+    await this.retry.waitFor(
+      'option to be unchecked',
+      async () => !(await this.isOptionChecked(option))
+    );
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
@@ -368,8 +377,11 @@ export class SettingsPageObject extends FtrService {
     });
 
     expect(await this.isOptionChecked(option)).to.be(false);
-    await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(true);
+    // Center the option in the popover's scroll list so the click toggles an edge-pinned option.
+    const optionToSelect = await this.testSubjects.find(`selectable-option-${option}`);
+    await optionToSelect.scrollIntoView({ block: 'center' });
+    await optionToSelect.click();
+    await this.retry.waitFor('option to be checked', async () => this.isOptionChecked(option));
 
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
@@ -772,6 +784,9 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
       alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
+      // getVisibleText returns '' while the flyout is still animating in, and the retry accepts
+      // that empty read; wait for the static title to actually paint before returning it.
+      if (!alertText) throw new Error('delete data view flyout title has not rendered yet');
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
@@ -1113,8 +1128,27 @@ export class SettingsPageObject extends FtrService {
     }
 
     if (activeTab) {
+      // The flyout slides in with an entrance animation; a tab click issued before it settles can
+      // miss the moving target and leave the default Syntax tab selected, so wait for it to stop.
+      await this.waitForScriptedFieldHelpFlyoutToSettle();
       await this.testSubjects.click(activeTab);
+      await this.testSubjects.existOrFail('runScriptButton');
     }
+  }
+
+  private async waitForScriptedFieldHelpFlyoutToSettle() {
+    let previousPosition = await (
+      await this.testSubjects.find('scriptedFieldsHelpFlyout')
+    ).getPosition();
+    await this.retry.waitFor('scripted fields help flyout to stop animating', async () => {
+      const currentPosition = await (
+        await this.testSubjects.find('scriptedFieldsHelpFlyout')
+      ).getPosition();
+      const settled =
+        currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y;
+      previousPosition = currentPosition;
+      return settled;
+    });
   }
 
   async closeScriptedFieldHelp() {

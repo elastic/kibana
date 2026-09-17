@@ -171,6 +171,27 @@ describe('EVAL > columnsAfter', () => {
     ]);
   });
 
+  it('propagates the concrete type of a CASE expression with a null result', () => {
+    const command = synth.cmd`EVAL result = CASE(true, 1, NULL)`;
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.DEFAULT
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'result',
+        type: 'integer',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+      ...baseColumns,
+    ]);
+  });
+
   it('handles unmapped field with LOAD strategy', () => {
     const command = synth.cmd`EVAL newField = unmappedField`;
     const result = columnsAfter(
@@ -179,6 +200,27 @@ describe('EVAL > columnsAfter', () => {
       '',
       additionalFieldsMock,
       UnmappedFieldsStrategy.LOAD
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'newField',
+        type: 'keyword',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+      ...baseColumns,
+    ]);
+  });
+
+  it('handles unmapped field with LOAD_ALL strategy', () => {
+    const command = synth.cmd`EVAL newField = unmappedField`;
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.LOAD_ALL
     );
 
     expect(result).toEqual([

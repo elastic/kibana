@@ -7,10 +7,8 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { encode } from '@kbn/rison';
-import {
-  translateLegacyStateToDescriptors,
-  useLegacyFlyoutUrlInterop,
-} from './use_expandable_flyout_url_interop';
+import { translateLegacyStateToDescriptors } from '../../../../common/flyout_v2';
+import { useLegacyFlyoutUrlInterop } from './use_expandable_flyout_url_interop';
 import { useFlyoutApi } from '../../use_flyout_api';
 import { createFlyoutApiMock } from '../../use_flyout_api.mock';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
@@ -249,7 +247,6 @@ describe('translateLegacyStateToDescriptors', () => {
           documentId: 'doc-7',
           indexName: 'idx',
           scopeId: 'sc',
-          isRulePreview: false,
         },
         { kind: 'document', documentId: 'doc-7', indexName: 'idx' },
       ]);

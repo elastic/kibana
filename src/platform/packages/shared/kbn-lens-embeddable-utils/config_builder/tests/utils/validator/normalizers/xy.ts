@@ -310,8 +310,13 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     } else {
       delete viz.curveType; // curveType only preserved for line/area charts
     }
-    if (hasAreas) viz.fillOpacity ??= 0.3;
-    if (!hasAreas) delete viz.fillOpacity; // fillOpacity only preserved for area charts
+    if (hasAreas) {
+      viz.areaFill ??= 'solid';
+      viz.fillOpacity ??= 0.3;
+    } else {
+      delete viz.fillOpacity; // fillOpacity only preserved for area charts
+      delete viz.areaFill;
+    }
 
     // xExtent: X axis only supports fit/custom (full is coerced to fit=dataBounds by the transform)
     if (!viz.xExtent || viz.xExtent.mode === 'full') {
@@ -508,9 +513,6 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       );
     }
 
-    // Tag references (type: "tag") are not preserved by the transform — drop them.
-    attributes.references = attributes.references.filter((ref) => ref.type !== 'tag');
-
     // External index-pattern refs with raw index-pattern IDs (e.g. "logs-*") that match
     // an adHocDataViews entry are treated as adhoc by the transform and dropped from external refs.
     const adHocDataViews = (attributes.state as any).adHocDataViews as
@@ -543,6 +545,10 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       }
       return ref;
     });
+
+    // Tag references are only for Lens library items handled at the route level — not preserved by the
+    // builder round-trip (toAPIFormat → schema.parse → fromAPIFormat), so strip them here.
+    attributes.references = attributes.references.filter((ref) => ref.type !== 'tag');
 
     // Re-sort so the order matches what normalizeReferences produces on the transformed side.
     attributes.references = orderBy(attributes.references, ['name', 'id', 'type']);

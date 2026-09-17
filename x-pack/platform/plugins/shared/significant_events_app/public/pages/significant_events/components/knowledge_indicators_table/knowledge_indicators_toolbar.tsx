@@ -15,7 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React from 'react';
 import { TableTitle } from '../../../../components/features/table_title';
 import { KnowledgeIndicatorsTypeFilter } from '../../../../components/knowledge_indicators/knowledge_indicators_type_filter';
@@ -222,7 +222,7 @@ export function KnowledgeIndicatorsToolbar({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={activityBlockTooltip}>
               <EuiButtonEmpty
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 size="xs"
                 isDisabled={
                   blocksActivity ||
@@ -270,7 +270,7 @@ function BulkExcludeButton({
 }) {
   const button = (
     <EuiButtonEmpty
-      iconType="eyeClosed"
+      iconType="eyeSlash"
       color="warning"
       size="xs"
       aria-label={EXCLUDE_SELECTED_LABEL}

@@ -104,8 +104,14 @@ apiTest.describe(
       username: `${ACCESS_CONTROL_TEST_PREFIX}-reader-${testRunId}`,
       password: 'reader-password',
     };
+    // No Agent Builder privileges at all. Used to assert route-level privilege gates.
+    const noAccess = {
+      roleName: `${ACCESS_CONTROL_TEST_PREFIX}-no-access-role-${testRunId}`,
+      username: `${ACCESS_CONTROL_TEST_PREFIX}-no-access-${testRunId}`,
+      password: 'no-access-password',
+    };
 
-    const allPrincipals = [alice, bob, eve, reader];
+    const allPrincipals = [alice, bob, eve, reader, noAccess];
 
     let adminCookie: Record<string, string>;
     let sysEsClient: Client;
@@ -183,6 +189,12 @@ apiTest.describe(
         headers: adminPublicHeaders(),
         body: agentBuilderRole(accessControlSpaceId, ['minimal_read']),
       });
+      await kbnClient.request({
+        method: 'PUT',
+        path: `/api/security/role/${encodeURIComponent(noAccess.roleName)}`,
+        headers: adminPublicHeaders(),
+        body: { elasticsearch: { cluster: [], indices: [], run_as: [] } },
+      });
 
       for (const user of allPrincipals) {
         await kbnClient.request({
@@ -256,7 +268,8 @@ apiTest.describe(
     const createAgentAs = async (
       apiClient: any,
       user: { username: string; password: string },
-      agent: ReturnType<typeof mockAgent>
+      agent: Omit<ReturnType<typeof mockAgent>, 'access_control'> &
+        Partial<Pick<ReturnType<typeof mockAgent>, 'access_control'>>
     ) => {
       const res = await apiClient.post(`${accessControlApiBase}/agents`, {
         headers: headersFor(user),
@@ -290,7 +303,8 @@ apiTest.describe(
       entries = [],
     }: {
       agentId: string;
-      visibility: AgentAccessControlMode;
+      /** Omitted to simulate documents predating the access-control fields entirely. */
+      visibility?: AgentAccessControlMode;
       entries?: Array<{ type: 'user'; name: string; role: AgentAccessControlRole }>;
     }) => {
       await addLegacyAccessControlMappings();
@@ -306,7 +320,7 @@ apiTest.describe(
           space: accessControlSpaceId,
           description: 'Legacy fixture for access control tests',
           created_by_name: alice.username,
-          visibility,
+          ...(visibility ? { visibility } : {}),
           acl: { entries },
           config: {
             instructions: 'Legacy test agent',
@@ -335,6 +349,40 @@ apiTest.describe(
         permissions: { update_agent: true, update_access_control: true },
       });
     });
+
+    apiTest(
+      'POST defaults to private when no access-control mode is given',
+      async ({ apiClient }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-default-${randomUUID()}`;
+        const { access_control: _omitted, ...agentWithoutAccessControl } = mockAgent(agentId);
+
+        const response = await createAgentAs(apiClient, alice, agentWithoutAccessControl);
+
+        expect(response.body).toMatchObject({
+          id: agentId,
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        });
+
+        await apiTest.step('Bob can neither read nor list the agent', async () => {
+          const denied = await apiClient.get(
+            `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
+            {
+              headers: headersFor(bob),
+              responseType: 'json',
+            }
+          );
+          expect(denied).toHaveStatusCode(404);
+
+          const list = await apiClient.get(`${accessControlApiBase}/agents`, {
+            headers: headersFor(bob),
+            responseType: 'json',
+          });
+          expect(list).toHaveStatusCode(200);
+          const ids = list.body.results.map((a: { id: string }) => a.id);
+          expect(ids).not.toContain(agentId);
+        });
+      }
+    );
 
     apiTest('PUT updates access-control mode explicitly', async ({ apiClient }) => {
       const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-mode-${randomUUID()}`;
@@ -436,6 +484,30 @@ apiTest.describe(
           update_access_control: false,
         });
       });
+    });
+
+    apiTest('legacy agents without any access-control field stay public', async ({ apiClient }) => {
+      const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-nofield-${randomUUID()}`;
+      await seedLegacyAgent({ agentId });
+
+      const read = await apiClient.get(
+        `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
+        {
+          headers: headersFor(bob),
+          responseType: 'json',
+        }
+      );
+      expect(read).toHaveStatusCode(200);
+      expect(read.body.access_control).toMatchObject({
+        access_mode: AgentAccessControlMode.Public,
+      });
+
+      const list = await apiClient.get(`${accessControlApiBase}/agents`, {
+        headers: headersFor(bob),
+        responseType: 'json',
+      });
+      const ids = list.body.results.map((a: { id: string }) => a.id);
+      expect(ids).toContain(agentId);
     });
 
     apiTest(
@@ -730,25 +802,37 @@ apiTest.describe(
 
     // ── user-picker proxy ──────────────────────────────────────────────────
 
+    // The conversation share popover feeds this picker into `PUT
+    // /conversations/{id}/access_control`, which only requires Agent Builder read. Gating the
+    // picker on `manageAgents` would leave conversation owners unable to invite anyone.
+    apiTest('/_suggest_user_profiles only requires agentBuilder read', async ({ apiClient }) => {
+      const asReader = await apiClient.post(`${accessControlInternalBase}/_suggest_user_profiles`, {
+        headers: headersFor(reader),
+        body: { name: '' },
+        responseType: 'json',
+      });
+      expect(asReader).toHaveStatusCode(200);
+
+      const asAgentManager = await apiClient.post(
+        `${accessControlInternalBase}/_suggest_user_profiles`,
+        {
+          headers: headersFor(eve),
+          body: { name: '' },
+          responseType: 'json',
+        }
+      );
+      expect(asAgentManager).toHaveStatusCode(200);
+    });
+
     apiTest(
-      '/_suggest_user_profiles requires manageAgents (reader gets 403)',
+      '/_suggest_user_profiles rejects callers without Agent Builder privileges',
       async ({ apiClient }) => {
         const denied = await apiClient.post(`${accessControlInternalBase}/_suggest_user_profiles`, {
-          headers: headersFor(reader),
+          headers: headersFor(noAccess),
           body: { name: '' },
           responseType: 'json',
         });
         expect(denied).toHaveStatusCode(403);
-
-        const allowed = await apiClient.post(
-          `${accessControlInternalBase}/_suggest_user_profiles`,
-          {
-            headers: headersFor(eve),
-            body: { name: '' },
-            responseType: 'json',
-          }
-        );
-        expect(allowed).toHaveStatusCode(200);
       }
     );
   }

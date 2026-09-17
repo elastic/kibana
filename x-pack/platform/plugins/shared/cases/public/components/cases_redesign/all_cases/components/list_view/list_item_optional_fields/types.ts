@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { CasesColumnSelection } from '../../../types';
 import type { CaseUI } from '../../../../../../../common/ui/types';
 
@@ -17,4 +18,5 @@ export interface ListItemFieldContent {
 export interface ListItemOptionalFieldsProps {
   theCase: CaseUI;
   selectedFields: CasesColumnSelection[];
+  userProfiles: Map<string, UserProfileWithAvatar>;
 }

@@ -46,6 +46,7 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'Get matcher value suggestions',
     description:
       'Get suggestions for action policy matcher values based on an optional search query.',

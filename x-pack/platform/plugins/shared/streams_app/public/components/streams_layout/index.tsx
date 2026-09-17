@@ -64,6 +64,11 @@ export function StreamsLayout() {
   }
 
   const { Component, noPadding } = streamsLayoutTabs[tab];
+  const body = (
+    <StreamsAppPageTemplate.Body noPadding={noPadding} paddingSize="m">
+      <Component />
+    </StreamsAppPageTemplate.Body>
+  );
 
   return (
     <>
@@ -71,11 +76,13 @@ export function StreamsLayout() {
         title={i18n.translate('xpack.streams.streamsLayout.pageHeaderTitle', {
           defaultMessage: 'Streams',
         })}
+        description={i18n.translate('xpack.streams.streamsLayout.pageHeaderDescription', {
+          defaultMessage:
+            'Route, process, and manage your data streams from source to destination.',
+        })}
         tabs={appHeaderTabs}
       />
-      <StreamsAppPageTemplate.Body noPadding={noPadding} paddingSize="m">
-        <Component />
-      </StreamsAppPageTemplate.Body>
+      {body}
     </>
   );
 }

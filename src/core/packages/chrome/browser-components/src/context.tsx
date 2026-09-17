@@ -27,9 +27,9 @@ export interface ChromeComponentsDeps {
 const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null);
 
 /**
- * Provides `ChromeComponentsDeps` to all context-aware Chrome components (`Header`,
- * `ProjectHeader`, `GridLayoutProjectSideNav`, `HeaderTopBanner`, `ChromelessHeader`,
- * `AppMenuBar`, `Sidebar`).
+ * Provides `ChromeComponentsDeps` to all context-aware Chrome components
+ * (`ClassicHeader`, `ChromeNextGlobalHeader`, `GridLayoutProjectSideNav`,
+ * `HeaderTopBanner`, `ChromelessHeader`, `Sidebar`).
  *
  * The layout layer passes whole service contracts (narrowed via `Pick`) and wraps the
  * layout tree once. Chrome-owned state is accessed separately via `useChromeService()` hooks.

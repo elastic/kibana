@@ -7,7 +7,7 @@
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { waitForApmAppMenuReady } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class CustomLinksPage {
@@ -18,7 +18,7 @@ export class CustomLinksPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/custom-links`);
-    return await waitForApmSettingsHeaderLink(this.page);
+    return await waitForApmAppMenuReady(this.page);
   }
 
   async getCreateCustomLinkButton() {

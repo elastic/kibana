@@ -7,34 +7,24 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { useConnectorSelection } from './use_connector_selection';
+import { useConnectorSelection, _resetConnectorSelectionStore } from './use_connector_selection';
 
 jest.mock('../use_kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('react-use/lib/useLocalStorage', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
 import { useKibana } from '../use_kibana';
 import { storageKeys } from '../../storage_keys';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseLocalStorage = useLocalStorage as jest.MockedFunction<typeof useLocalStorage>;
-
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+
 describe('useConnectorSelection', () => {
   let defaultConnector$: BehaviorSubject<string | undefined>;
   let defaultConnectorOnly$: BehaviorSubject<boolean>;
-  let localStorageState: { [key: string]: string | undefined };
-  let mockSetLocalStorage: jest.Mock;
 
   const buildGet$ = () =>
     jest.fn((key: string) => {
@@ -46,18 +36,7 @@ describe('useConnectorSelection', () => {
   beforeEach(() => {
     defaultConnector$ = new BehaviorSubject<string | undefined>(undefined);
     defaultConnectorOnly$ = new BehaviorSubject<boolean>(false);
-    localStorageState = {};
-    mockSetLocalStorage = jest.fn((newValue: string) => {
-      localStorageState[storageKeys.lastUsedConnector] = newValue;
-    });
 
-    // Mock localStorage
-    mockUseLocalStorage.mockImplementation((key: string) => {
-      const value = localStorageState[key];
-      return [value, mockSetLocalStorage, jest.fn()];
-    });
-
-    // Mock Kibana services
     mockUseKibana.mockReturnValue({
       services: {
         settings: {
@@ -71,6 +50,11 @@ describe('useConnectorSelection', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
+    localStorage.clear();
+    act(() => {
+      _resetConnectorSelectionStore();
+    });
   });
 
   describe('selectedConnector', () => {
@@ -82,7 +66,8 @@ describe('useConnectorSelection', () => {
     });
 
     it('should return the connector from localStorage when set', () => {
-      localStorageState[storageKeys.lastUsedConnector] = 'connector-1';
+      localStorage.setItem(storageKeys.lastUsedConnector, JSON.stringify('connector-1'));
+      _resetConnectorSelectionStore();
 
       const { result } = renderHook(() => useConnectorSelection());
 
@@ -164,43 +149,48 @@ describe('useConnectorSelection', () => {
         result.current.selectConnector('connector-2');
       });
 
-      expect(mockSetLocalStorage).toHaveBeenCalledWith('connector-2');
-      expect(localStorageState[storageKeys.lastUsedConnector]).toBe('connector-2');
+      expect(JSON.parse(localStorage.getItem(storageKeys.lastUsedConnector)!)).toBe('connector-2');
     });
 
     it('should update selected connector when selectConnector is called', () => {
-      const { result, rerender } = renderHook(() => useConnectorSelection());
+      const { result } = renderHook(() => useConnectorSelection());
 
       act(() => {
         result.current.selectConnector('connector-3');
       });
-
-      // Rerender to get updated value from localStorage
-      rerender();
 
       expect(result.current.selectedConnector).toBe('connector-3');
     });
 
     it('should allow selecting different connectors sequentially', () => {
-      const { result, rerender } = renderHook(() => useConnectorSelection());
+      const { result } = renderHook(() => useConnectorSelection());
 
       act(() => {
         result.current.selectConnector('connector-1');
       });
-      rerender();
       expect(result.current.selectedConnector).toBe('connector-1');
 
       act(() => {
         result.current.selectConnector('connector-2');
       });
-      rerender();
       expect(result.current.selectedConnector).toBe('connector-2');
 
       act(() => {
         result.current.selectConnector('connector-3');
       });
-      rerender();
       expect(result.current.selectedConnector).toBe('connector-3');
+    });
+
+    it('should sync connector changes to all other mounted instances', () => {
+      const { result: instance1 } = renderHook(() => useConnectorSelection());
+      const { result: instance2 } = renderHook(() => useConnectorSelection());
+
+      act(() => {
+        instance1.current.selectConnector('connector-sync');
+      });
+
+      expect(instance1.current.selectedConnector).toBe('connector-sync');
+      expect(instance2.current.selectedConnector).toBe('connector-sync');
     });
   });
 
@@ -215,7 +205,11 @@ describe('useConnectorSelection', () => {
       const { result } = renderHook(() => useConnectorSelection());
 
       expect(result.current.defaultConnectorId).toBeUndefined();
-      expect(() => result.current.selectConnector('connector-1')).not.toThrow();
+      expect(() =>
+        act(() => {
+          result.current.selectConnector('connector-1');
+        })
+      ).not.toThrow();
     });
 
     it('should maintain selection stability across re-renders', () => {
@@ -229,7 +223,8 @@ describe('useConnectorSelection', () => {
           },
         },
       } as any);
-      localStorageState[storageKeys.lastUsedConnector] = 'connector-2';
+      localStorage.setItem(storageKeys.lastUsedConnector, JSON.stringify('connector-2'));
+      _resetConnectorSelectionStore();
 
       const { result, rerender } = renderHook(() => useConnectorSelection());
 

@@ -11,7 +11,6 @@ import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
-import { flushState } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 import {
   getHitlIdleDeadlineMsForNode,
@@ -205,10 +204,9 @@ export async function handleExecutionDelay(
   const resumeAt = new Date(resumeAtFromState);
   const now = new Date();
   const diff = resumeAt.getTime() - now.getTime();
-  await flushState(params);
-  params.workflowExecutionState.updateWorkflowExecution({
-    status: ExecutionStatus.WAITING,
-  });
+
+  // In-process wait: keep workflow RUNNING. Persistence already flushes while
+  // the cursor is executing; setting WAITING here races cancel/drop occupancy.
   if (!forceTaskScheduleFromState && diff < SHORT_DURATION_THRESHOLD) {
     const timeout = diff > 0 ? diff : 0;
 
@@ -217,21 +215,23 @@ export async function handleExecutionDelay(
     } catch (error) {
       if (error instanceof TimeoutAbortedError) {
         // Delay was interrupted (e.g. by a timeout or cancellation).
+        // Leave workflow status as-is: cancel/timeout monitors own CANCELLED / TIMED_OUT.
         return;
       }
 
       throw error;
     }
-    params.workflowExecutionState.updateWorkflowExecution({
-      status: ExecutionStatus.RUNNING,
-    });
-  } else {
-    await params.workflowTaskManager.scheduleResumeTask({
-      workflowExecution: workflowExecution as EsWorkflowExecution,
-      resumeAt,
-      fakeRequest: params.fakeRequest,
-    });
-    // Execution loop should stop here so the workflow can be resumed later
-    params.workflowExecutionCursor.stop();
+    return;
   }
+
+  params.workflowExecutionState.updateWorkflowExecution({
+    status: ExecutionStatus.WAITING,
+  });
+  await params.workflowTaskManager.scheduleResumeTask({
+    workflowExecution: workflowExecution as EsWorkflowExecution,
+    resumeAt,
+    fakeRequest: params.fakeRequest,
+  });
+  // Execution loop should stop here so the workflow can be resumed later
+  params.workflowExecutionCursor.stop();
 }

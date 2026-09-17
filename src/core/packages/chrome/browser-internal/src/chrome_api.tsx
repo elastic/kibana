@@ -8,22 +8,22 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
-import type { AppHeaderConfig, GlobalHeaderAiButton } from '@kbn/core-chrome-browser';
+import type {
+  ChromeAppHeaderConfig,
+  ChromeAiButton,
+  ChromeNewsfeedHandler,
+} from '@kbn/core-chrome-browser';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
-import type { NavControlsService } from './services/nav_controls';
 import type { NavLinksService } from './services/nav_links';
 import type { ProjectNavigationService } from './services/project_navigation';
 import type { DocTitleService } from './services/doc_title';
 
-type NavControlsStart = ReturnType<NavControlsService['start']>;
 type NavLinksStart = ReturnType<NavLinksService['start']>;
 type ProjectNavigationStart = ReturnType<ProjectNavigationService['start']>;
 type DocTitleStart = ReturnType<DocTitleService['start']>;
@@ -32,14 +32,12 @@ type RecentlyAccessedStart = ReturnType<RecentlyAccessedService['start']>;
 export interface ChromeApiDeps {
   state: ChromeState;
   services: {
-    navControls: NavControlsStart;
     navLinks: NavLinksStart;
     recentlyAccessed: RecentlyAccessedStart;
     docTitle: DocTitleStart;
     projectNavigation: ProjectNavigationStart;
   };
   sidebar: SidebarStart;
-  featureFlags: FeatureFlagsStart;
   componentDeps: InternalChromeStart['componentDeps'];
 }
 
@@ -47,7 +45,6 @@ export function createChromeApi({
   state,
   services,
   sidebar,
-  featureFlags,
   componentDeps,
 }: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
@@ -88,6 +85,72 @@ export function createChromeApi({
 
   let appHeaderRegistrationId = 0;
 
+  const appHeader: InternalChromeStart['appHeader'] = {
+    get$: () => state.appHeader.$,
+    set: (config: ChromeAppHeaderConfig) => {
+      const registrationId = ++appHeaderRegistrationId;
+      state.appHeader.set(config);
+      return () => {
+        if (registrationId === appHeaderRegistrationId) {
+          state.appHeader.set(undefined);
+        }
+      };
+    },
+  };
+  const inlineAppHeader: InternalChromeStart['inlineAppHeader'] = {
+    get$: () => state.inlineAppHeader.$,
+    set: state.inlineAppHeader.set,
+  };
+
+  const controls: InternalChromeStart['controls'] = {
+    aiButton: {
+      get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
+      register: (button: ChromeAiButton) => {
+        state.aiButton.update((prev) => new Set([...prev, button]));
+        return () => {
+          state.aiButton.update((prev) => {
+            const nextButtons = new Set(prev);
+            nextButtons.delete(button);
+            return nextButtons;
+          });
+        };
+      },
+    },
+    globalSearch: {
+      get$: () => state.globalSearch.$,
+      set: (config) => state.globalSearch.set(config),
+    },
+    contextSwitcher: {
+      get$: () => state.contextSwitcher.$,
+      set: state.contextSwitcher.set,
+    },
+    projectPicker: {
+      get$: () => state.projectPicker.$,
+      set: state.projectPicker.set,
+    },
+    userMenu: {
+      get$: () => state.userMenu.$,
+      set: (content) => state.userMenu.set(content),
+    },
+  };
+
+  const help: InternalChromeStart['help'] = {
+    registerFeedbackHandler: (handler: () => void) => {
+      state.feedbackHandler.set(handler);
+      return () => {
+        state.feedbackHandler.update((current) => (current === handler ? undefined : current));
+      };
+    },
+    getFeedbackHandler$: () => state.feedbackHandler.$,
+    registerNewsfeedHandler: (handler: ChromeNewsfeedHandler) => {
+      state.newsfeedHandler.set(handler);
+      return () => {
+        state.newsfeedHandler.update((current) => (current === handler ? undefined : current));
+      };
+    },
+    getNewsfeedHandler$: () => state.newsfeedHandler.$,
+  };
+
   const chromeStart: InternalChromeStart = {
     componentDeps,
 
@@ -100,7 +163,6 @@ export function createChromeApi({
     },
 
     // Sub-services
-    navControls: services.navControls,
     navLinks: services.navLinks,
     recentlyAccessed: services.recentlyAccessed,
     docTitle: services.docTitle,
@@ -152,8 +214,8 @@ export function createChromeApi({
     setHelpSupportUrl: state.help.supportUrl.set,
     getGlobalHelpExtensionMenuLinks$: () => state.help.globalMenuLinks.$,
     registerGlobalHelpExtensionMenuLink: (link) => state.help.globalMenuLinks.add(link),
-    getHelpMenuLinks$: () => services.navControls.getHelpMenuLinks$(),
-    setHelpMenuLinks: services.navControls.setHelpMenuLinks,
+    getHelpMenuLinks$: () => state.help.menuLinks.$,
+    setHelpMenuLinks: state.help.menuLinks.set,
 
     // Custom Nav Link
     getCustomNavLink$: () => state.customNavLink.$,
@@ -187,69 +249,22 @@ export function createChromeApi({
       >,
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
+    controls,
+    help,
+    appHeader,
+    inlineAppHeader,
     next: {
-      get isEnabled() {
-        return isNextChrome(featureFlags);
-      },
-      aiButton: {
-        get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
-        register: (button: GlobalHeaderAiButton) => {
-          state.aiButton.update((prev) => new Set([...prev, button]));
-          return () => {
-            state.aiButton.update((prev) => {
-              const next = new Set(prev);
-              next.delete(button);
-              return next;
-            });
-          };
-        },
-      },
-      globalSearch: {
-        get$: () => state.globalSearch.$,
-        set: (config) => state.globalSearch.set(config),
-      },
-      contextSwitcher: {
-        get$: () => state.contextSwitcher.$,
-        set: state.contextSwitcher.set,
-      },
-      projectPicker: {
-        get$: () => state.projectPicker.$,
-        set: state.projectPicker.set,
-      },
-      inlineAppHeader: {
-        get$: () => state.inlineAppHeader.$,
-        set: state.inlineAppHeader.set,
-      },
-      appHeader: {
-        get$: () => state.appHeader.$,
-        set: (config: AppHeaderConfig) => {
-          const registrationId = ++appHeaderRegistrationId;
-          state.appHeader.set(config);
-          return () => {
-            if (registrationId === appHeaderRegistrationId) {
-              state.appHeader.set(undefined);
-            }
-          };
-        },
-      },
-      userMenu: {
-        get$: () => state.userMenu.$,
-        set: (content) => state.userMenu.set(content),
-      },
-      registerFeedbackHandler: (handler: () => void) => {
-        state.feedbackHandler.set(handler);
-        return () => {
-          state.feedbackHandler.update((current) => (current === handler ? undefined : current));
-        };
-      },
-      getFeedbackHandler$: () => state.feedbackHandler.$,
-      registerNewsfeedHandler: (handler: { open: () => void; hasNew$: Observable<boolean> }) => {
-        state.newsfeedHandler.set(handler);
-        return () => {
-          state.newsfeedHandler.update((current) => (current === handler ? undefined : current));
-        };
-      },
-      getNewsfeedHandler$: () => state.newsfeedHandler.$,
+      aiButton: controls.aiButton,
+      globalSearch: controls.globalSearch,
+      contextSwitcher: controls.contextSwitcher,
+      projectPicker: controls.projectPicker,
+      userMenu: controls.userMenu,
+      inlineAppHeader,
+      appHeader,
+      registerFeedbackHandler: help.registerFeedbackHandler,
+      getFeedbackHandler$: help.getFeedbackHandler$,
+      registerNewsfeedHandler: help.registerNewsfeedHandler,
+      getNewsfeedHandler$: help.getNewsfeedHandler$,
     },
     sidebar,
   };

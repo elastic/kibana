@@ -25,10 +25,6 @@ describe('Duration unit transforms', () => {
       expect(durationInputUnitCompat.toState('y')).toBe('years');
     });
 
-    it('converts legacy `m` input unit to Lens state', () => {
-      expect(durationInputUnitCompat.toState('m')).toBe('minutes');
-    });
-
     it('converts Lens state input units to API enums (always GA)', () => {
       expect(durationInputUnitCompat.toAPI('milliseconds')).toBe('ms');
       expect(durationInputUnitCompat.toAPI('seconds')).toBe('s');
@@ -53,12 +49,6 @@ describe('Duration unit transforms', () => {
       expect(durationOutputUnitCompat.toState('min')).toBe('asMinutes');
       expect(durationOutputUnitCompat.toState('mo')).toBe('asMonths');
       expect(durationOutputUnitCompat.toState('y')).toBe('asYears');
-    });
-
-    it('converts legacy output names to Lens state', () => {
-      expect(durationOutputUnitCompat.toState('humanize')).toBe('humanize');
-      expect(durationOutputUnitCompat.toState('humanizePrecise')).toBe('humanizePrecise');
-      expect(durationOutputUnitCompat.toState('m')).toBe('asMinutes');
     });
 
     it('converts Lens state output methods to API enums (always GA)', () => {

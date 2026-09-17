@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isList } from '@elastic/esql';
+import { isList, isSubQuery } from '@elastic/esql';
 import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ISuggestionItem } from '../../../../../registry/types';
@@ -40,6 +40,7 @@ export function isOperandMissing(operand: ESQLSingleAstItem | undefined): boolea
 export function shouldSuggestRightOperandStart(operand: ESQLSingleAstItem | undefined): boolean {
   return (
     isOperandMissing(operand) ||
+    (isSubQuery(operand) && operand.incomplete && operand.child.commands.length === 0) ||
     (isList(operand) && operand.location.min === 0 && operand.location.max === 0)
   );
 }

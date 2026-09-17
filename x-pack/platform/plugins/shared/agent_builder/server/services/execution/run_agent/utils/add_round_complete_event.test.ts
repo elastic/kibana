@@ -30,6 +30,7 @@ describe('addRoundCompleteEvent', () => {
     modelProvider: {
       getUsageStats: jest.fn(() => ({ calls: [] })),
     } as unknown as ModelProvider,
+    mainConnectorId: 'default-connector',
     stateManager: {} as unknown as ConversationStateManager,
     attachmentStateManager: {
       getAccessedRefs: jest.fn(() => []),
@@ -77,6 +78,58 @@ describe('addRoundCompleteEvent', () => {
       id: 'U123',
       full_name: 'Jane Doe',
       username: 'jane',
+    });
+  });
+
+  it('attributes model_usage to the main connector, not a faster helper call that completed first', async () => {
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: {
+        message_id: 'message-1',
+        message_content: 'Done',
+      },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          modelProvider: {
+            getUsageStats: jest.fn(() => ({
+              calls: [
+                {
+                  connectorId: 'fast-connector',
+                  model: 'anthropic-claude-4.5-haiku',
+                  tokens: { prompt: 10, completion: 5, total: 15 },
+                },
+                {
+                  connectorId: 'default-connector',
+                  model: 'anthropic-claude-4.5-sonnet',
+                  tokens: { prompt: 100, completion: 50, total: 150 },
+                },
+              ],
+            })),
+          } as unknown as ModelProvider,
+          mainConnectorId: 'default-connector',
+          pendingRound: undefined,
+          userInput: { message: 'use Sonnet' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.model_usage).toEqual({
+      connector_id: 'default-connector',
+      model: 'anthropic-claude-4.5-sonnet',
+      llm_calls: 2,
+      input_tokens: 110,
+      output_tokens: 55,
     });
   });
 

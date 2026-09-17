@@ -23,6 +23,7 @@ spec:
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        SCOUT_REPORTER_ENABLED: 'true'
       repository: elastic/kibana
       branch_configuration: main 8.19
       default_branch: main

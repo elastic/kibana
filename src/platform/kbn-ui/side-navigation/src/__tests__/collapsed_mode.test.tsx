@@ -25,7 +25,6 @@ const mockMenuItemHeight = 32;
 const mlAnomalyExplorerItemId = securityMock.navItems.primaryItems[11].sections?.[1].items[0].id;
 
 // Test ID helpers
-const logoId = `kbnChromeNav-logo`;
 const primaryItemId = (id: string) => `kbnChromeNav-primaryItem-${id}`;
 const secondaryItemId = (id: string) => `kbnChromeNav-secondaryItem-${id}`;
 const moreMenuId = 'kbnChromeNav-moreMenuTrigger';
@@ -55,28 +54,9 @@ describe('Collapsed mode', () => {
   });
 
   it('should render the side navigation', () => {
-    const { container } = render(
-      <TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />
-    );
+    const { container } = render(<TestComponent isCollapsed items={basicMock.navItems} />);
 
     expect(container).toMatchSnapshot();
-  });
-
-  describe('Solution logo', () => {
-    /**
-     * GIVEN the side navigation is in collapsed mode
-     * WHEN the navigation renders the solution logo
-     * THEN I should not see the solution label
-     */
-    it('should NOT display the solution label next to the logo', () => {
-      render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
-
-      const solutionLogo = screen.getByTestId(logoId);
-
-      // The label is wrapped with `<EuiScreenReaderOnly />` in collapsed mode
-      // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
-      expect(solutionLogo.children[1].className).toContain('euiScreenReaderOnly');
-    });
   });
 
   describe('Primary menu', () => {
@@ -88,7 +68,7 @@ describe('Collapsed mode', () => {
        * THEN I should see a popover with the submenu
        */
       it('(with submenu) should show a popover with the submenu on hover', async () => {
-        render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent isCollapsed items={basicMock.navItems} />);
 
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
@@ -106,7 +86,7 @@ describe('Collapsed mode', () => {
        * THEN I should see a popover with the submenu
        */
       it('(with submenu) should show a popover when item with submenu receives keyboard focus', async () => {
-        render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent isCollapsed items={basicMock.navItems} />);
 
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
@@ -127,7 +107,7 @@ describe('Collapsed mode', () => {
        * AND I should not see a side panel
        */
       it('(with submenu) should redirect and NOT open side panel when clicking item', async () => {
-        render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent isCollapsed items={basicMock.navItems} />);
 
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
         const expectedHref = basicMock.navItems.primaryItems[2].href; // Apps
@@ -148,7 +128,7 @@ describe('Collapsed mode', () => {
        * THEN focus moves to the first item inside the displayed popover
        */
       it('(with submenu) should move focus to first popover item on Enter', async () => {
-        render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent isCollapsed items={basicMock.navItems} />);
 
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
@@ -174,7 +154,7 @@ describe('Collapsed mode', () => {
        * THEN I should not see a popover
        */
       it('(without submenu) should NOT show a popover on hover', async () => {
-        render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent isCollapsed items={basicMock.navItems} />);
 
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
@@ -194,7 +174,7 @@ describe('Collapsed mode', () => {
        * AND I should not see a side panel
        */
       it('(without submenu) should redirect without side panel when clicking item without submenu', async () => {
-        render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent isCollapsed items={basicMock.navItems} />);
 
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
@@ -216,7 +196,7 @@ describe('Collapsed mode', () => {
        * - THEN I should be redirected to its href
        */
       it('(without submenu) should redirect on Enter when focused item has no submenu', async () => {
-        render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent isCollapsed items={basicMock.navItems} />);
 
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
         const expectedHref = basicMock.navItems.primaryItems[0].href;
@@ -238,13 +218,7 @@ describe('Collapsed mode', () => {
        * AND a beta badge with beta icon
        */
       it('should show tooltip with label and beta badge on hover', async () => {
-        render(
-          <TestComponent
-            isCollapsed
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed items={observabilityMock.navItems} />);
 
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
@@ -267,13 +241,7 @@ describe('Collapsed mode', () => {
        * AND a beta badge with flask icon
        */
       it('should show tooltip with label and flask badge on hover', async () => {
-        render(
-          <TestComponent
-            isCollapsed
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed items={observabilityMock.navItems} />);
 
         const casesLink = screen.getByTestId(primaryItemId('cases'));
 
@@ -296,13 +264,7 @@ describe('Collapsed mode', () => {
        * AND a badge reading "New"
        */
       it('should show tooltip with label and new badge on hover', async () => {
-        render(
-          <TestComponent
-            isCollapsed
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed items={observabilityMock.navItems} />);
 
         const alertsLink = screen.getByTestId(primaryItemId('alerts'));
 
@@ -329,9 +291,7 @@ describe('Collapsed mode', () => {
        */
       it('should render the "More" primary menu item when items overflow', async () => {
         // Renders 10 primary menu items + "More" item
-        render(
-          <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
-        );
+        render(<TestComponent isCollapsed items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -345,9 +305,7 @@ describe('Collapsed mode', () => {
        * THEN I should see a popover with secondary menu
        */
       it('should show secondary menu popover on hover over "More"', async () => {
-        render(
-          <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
-        );
+        render(<TestComponent isCollapsed items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -371,9 +329,7 @@ describe('Collapsed mode', () => {
        * AND I shouldn’t see a side panel
        */
       it('should navigate through nested panel and redirect on clicking a submenu item', async () => {
-        render(
-          <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
-        );
+        render(<TestComponent isCollapsed items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -414,9 +370,7 @@ describe('Collapsed mode', () => {
        * AND I shouldn’t see a side panel
        */
       it('should close popover, redirect, and NOT open side panel after clicking on an item without submenu from "More"', async () => {
-        render(
-          <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
-        );
+        render(<TestComponent isCollapsed items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -451,7 +405,6 @@ describe('Collapsed mode', () => {
       it('should have active state and NOT open side panel when initial active submenu item is under "More"', async () => {
         render(
           <TestComponent
-            logo={securityMock.logo}
             items={securityMock.navItems}
             isCollapsed
             initialActiveItemId={mlAnomalyExplorerItemId}

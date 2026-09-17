@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIcon, EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getRunbookContent } from '@kbn/alerting-v2-rule-form';
 import { useRule } from '../rule_context';
 
 export const RuleSidebarRunbookTab: React.FC = () => {
@@ -17,7 +18,9 @@ export const RuleSidebarRunbookTab: React.FC = () => {
   if (!runbook) {
     return (
       <EuiEmptyPrompt
-        iconType="documentation"
+        icon={<EuiIcon type="documentation" size="l" aria-hidden={true} />}
+        titleSize="xs"
+        paddingSize="m"
         title={
           <h3>
             {i18n.translate('xpack.alertingV2.sidebar.runbook.emptyTitle', {
@@ -26,11 +29,13 @@ export const RuleSidebarRunbookTab: React.FC = () => {
           </h3>
         }
         body={
-          <p>
-            {i18n.translate('xpack.alertingV2.sidebar.runbook.emptyBody', {
-              defaultMessage: 'No runbook has been added to this rule yet.',
-            })}
-          </p>
+          <EuiText size="s">
+            <p>
+              {i18n.translate('xpack.alertingV2.sidebar.runbook.emptyBody', {
+                defaultMessage: 'No runbook has been added to this rule yet.',
+              })}
+            </p>
+          </EuiText>
         }
         data-test-subj="sidebarRunbookEmpty"
       />
@@ -38,6 +43,8 @@ export const RuleSidebarRunbookTab: React.FC = () => {
   }
 
   return (
-    <EuiMarkdownFormat data-test-subj="sidebarRunbookContent">{runbook.value}</EuiMarkdownFormat>
+    <EuiMarkdownFormat data-test-subj="sidebarRunbookContent">
+      {getRunbookContent(runbook)}
+    </EuiMarkdownFormat>
   );
 };
