@@ -1020,6 +1020,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     const {
       inTableSearchTermCss,
       inTableSearchControl,
+      inTableSearchButton,
+      inTableSearchInput,
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     } = useDataGridInTableSearch({
@@ -1391,7 +1393,8 @@ const InternalUnifiedDataTable = React.forwardRef<
                     additionalControls && 'left' in additionalControls
                       ? additionalControls.left
                       : additionalControls,
-                  inTableSearchControl,
+                  inTableSearchButton,
+                  inTableSearchInput,
                 },
               });
             }
@@ -1400,7 +1403,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         renderCustomToolbar,
         showSummaryColumnToggle,
         additionalControls,
-        inTableSearchControl,
+        inTableSearchButton,
+        inTableSearchInput,
         showSummaryColumn,
         isSummaryOnlyColumn,
         onChangeShowSummaryColumn,

@@ -17,9 +17,9 @@ xpack.observability.unsafe.alertDetails.uptime.enabled: true
 
 By default, Kibana will run with X-Pack installed as mentioned in the [contributing guide](../CONTRIBUTING.md).
 
-Elasticsearch will run with a basic license. To run with a trial license, including security, you can specifying that with the `yarn es` command.
+Elasticsearch will run with a basic license. To run with a trial license, including security, you can specifying that with the `pnpm es` command.
 
-Example: `yarn es snapshot --license trial --password changeme`
+Example: `pnpm es snapshot --license trial --password changeme`
 
 By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana_system` user which `elasticsearch.username` defaults to in development. If you wish to specify a password for a given native realm account, you can do that like so: `--password.kibana_system=notsecure`
 
@@ -91,7 +91,7 @@ node scripts/functional_tests --config test/security_api_integration/saml.config
 Jest integration tests can be used to test behavior with Elasticsearch and the Kibana server.
 
 ```sh
-yarn test:jest_integration
+pnpm test:jest_integration
 ```
 
 #### Running Reporting functional tests
