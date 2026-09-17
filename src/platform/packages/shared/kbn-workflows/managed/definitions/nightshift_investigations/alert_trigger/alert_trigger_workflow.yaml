@@ -1,14 +1,14 @@
 version: '1'
-name: Deductive Investigation from Alert
+name: Nightshift Investigation from an Alert rule
 description: >
-  Starts a Nightshift deductive investigation when a v1 alerting rule fires.
+  Starts a Nightshift investigation when a v1 alerting rule fires.
   Attach this workflow as a rule action. One in-flight run per rule per space
   (extras dropped), and at most five alerts per firing.
 enabled: true
 settings:
   timeout: '10m'
   concurrency:
-    key: 'deductive-alert-trigger-{{ workflow.spaceId }}-{{ event.rule.id }}'
+    key: 'nightshift-investigation-alert-trigger-{{ workflow.spaceId }}-{{ event.rule.id }}'
     strategy: drop
     max: 1
 tags:

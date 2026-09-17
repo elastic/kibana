@@ -8,7 +8,7 @@
  */
 
 import { parse } from 'yaml';
-import { DEDUCTIVE_ALERT_TRIGGER_WORKFLOW } from '.';
+import { NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW } from '.';
 
 interface WorkflowStep {
   name: string;
@@ -20,7 +20,7 @@ interface WorkflowStep {
   steps?: WorkflowStep[];
 }
 
-const workflow = parse(DEDUCTIVE_ALERT_TRIGGER_WORKFLOW.yaml) as {
+const workflow = parse(NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW.yaml) as {
   name: string;
   enabled: boolean;
   triggers: Array<{ type: string }>;
@@ -32,15 +32,21 @@ const workflow = parse(DEDUCTIVE_ALERT_TRIGGER_WORKFLOW.yaml) as {
   steps: WorkflowStep[];
 };
 
-describe('deductive alert trigger workflow', () => {
+describe('nightshift investigation alert trigger workflow', () => {
   it('is an opt-in v1 rule action that rate-limits and starts investigations', () => {
-    expect(DEDUCTIVE_ALERT_TRIGGER_WORKFLOW.id).toBe('system-deductive-alert-trigger');
-    expect(DEDUCTIVE_ALERT_TRIGGER_WORKFLOW.visibility).toEqual({ selectors: ['rule_action'] });
-    expect(DEDUCTIVE_ALERT_TRIGGER_WORKFLOW.management.enablement).toBe('restorable');
+    expect(NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW.id).toBe(
+      'system-nightshift-investigation-alert-trigger'
+    );
+    expect(NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW.visibility).toEqual({
+      selectors: ['rule_action'],
+    });
+    expect(NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW.management.enablement).toBe(
+      'restorable'
+    );
     expect(workflow.enabled).toBe(true);
     expect(workflow.triggers).toEqual([{ type: 'alert' }]);
     expect(workflow.settings?.concurrency).toEqual({
-      key: 'deductive-alert-trigger-{{ workflow.spaceId }}-{{ event.rule.id }}',
+      key: 'nightshift-investigation-alert-trigger-{{ workflow.spaceId }}-{{ event.rule.id }}',
       strategy: 'drop',
       max: 1,
     });

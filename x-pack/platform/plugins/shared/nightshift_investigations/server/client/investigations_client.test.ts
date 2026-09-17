@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -411,13 +411,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
   });
 
   it('calls runWorkflow with the correct inputs and returns investigation_id', async () => {
-    const deductiveWorkflow = {
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+    const nightshiftWorkflow = {
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
     };
-    mockManagement.getWorkflow.mockResolvedValue(deductiveWorkflow);
+    mockManagement.getWorkflow.mockResolvedValue(nightshiftWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
     const result = await makeClient().start({
@@ -427,7 +427,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID }),
+      expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }),
       SPACE_ID,
       expect.objectContaining({
         context: expect.objectContaining({
@@ -443,14 +443,14 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(investigationQuotaCallback).not.toHaveBeenCalled();
   });
 
-  it('starts alert runs on the deductive investigation workflow', async () => {
-    const deductiveWorkflow = {
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  it('starts alert runs on the nightshift investigation workflow', async () => {
+    const nightshiftWorkflow = {
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
     };
-    mockManagement.getWorkflow.mockResolvedValue(deductiveWorkflow);
+    mockManagement.getWorkflow.mockResolvedValue(nightshiftWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-alert');
 
     await makeClient().start({
@@ -460,7 +460,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     expect(mockManagement.getWorkflow).toHaveBeenCalledWith(
-      DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       SPACE_ID
     );
     expect(installDeductiveInvestigationAgentMock).toHaveBeenCalledWith({
@@ -469,7 +469,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
     expect(installInvestigationAgentMock).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID }),
+      expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }),
       SPACE_ID,
       expect.objectContaining({
         context: expect.objectContaining({ source: 'alert', alert_id: 'alert-1' }),
@@ -479,14 +479,14 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('starts manual runs on the deductive investigation workflow', async () => {
-    const deductiveWorkflow = {
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  it('starts manual runs on the nightshift investigation workflow', async () => {
+    const nightshiftWorkflow = {
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
     };
-    mockManagement.getWorkflow.mockResolvedValue(deductiveWorkflow);
+    mockManagement.getWorkflow.mockResolvedValue(nightshiftWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     const result = await makeClient().start({
@@ -496,17 +496,17 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     expect(mockManagement.getWorkflow).toHaveBeenCalledWith(
-      DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       SPACE_ID
     );
-    // The deductive workflow calls its own agent, so the pre-install must follow the split.
+    // The nightshift workflow calls its own agent, so the pre-install must follow the split.
     expect(installDeductiveInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
     });
     expect(installInvestigationAgentMock).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID }),
+      expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }),
       SPACE_ID,
       expect.objectContaining({
         message: 'Why did payment timeouts increase?',
@@ -520,7 +520,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
@@ -555,7 +555,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('truncates a long prompt rather than storing it whole as the headline', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
@@ -577,7 +577,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('keeps an explicit subject summary over the prompt', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
@@ -1358,11 +1358,11 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it('accepts a manual execution of the deductive investigation workflow', async () => {
+  it('accepts a manual execution of the nightshift investigation workflow', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(
       makeEnsureExecution({
-        workflowId: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
-        originManagedWorkflowId: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+        workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+        originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
         context: {
           inputs: {
             message: 'Investigate last error',

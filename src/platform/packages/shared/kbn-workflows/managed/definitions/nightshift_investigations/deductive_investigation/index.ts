@@ -11,6 +11,7 @@ import DEDUCTIVE_INVESTIGATION_WORKFLOW_YAML from './deductive_investigation_wor
 import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const DEDUCTIVE_INVESTIGATION_WORKFLOW_ID = 'system-deductive-investigation';
+export const NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID = DEDUCTIVE_INVESTIGATION_WORKFLOW_ID;
 
 export const DEDUCTIVE_INVESTIGATION_WORKFLOW = {
   id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,

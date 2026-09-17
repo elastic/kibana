@@ -95,19 +95,20 @@ const INVESTIGATION_WORKFLOW_IDS = new Set([
 
 /**
  * Manual questions and v1 alerts have no significant-event write-back, so they run the lean
- * deductive workflow. Significant events keep the workflow that attaches findings to the event.
+ * Nightshift investigation workflow. Significant events keep the workflow that attaches findings
+ * to the event.
  */
-const usesDeductiveWorkflow = (subject: InvestigationSubject): boolean =>
+const usesNightshiftWorkflow = (subject: InvestigationSubject): boolean =>
   subject.type === 'manual' || subject.type === 'alert';
 
 const workflowIdForSubject = (subject: InvestigationSubject): string =>
-  usesDeductiveWorkflow(subject)
+  usesNightshiftWorkflow(subject)
     ? DEDUCTIVE_INVESTIGATION_WORKFLOW_ID
     : SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
 
 /** Each workflow calls its own agent, so the pre-install has to follow the same split. */
 const installAgentForSubject = (subject: InvestigationSubject) =>
-  usesDeductiveWorkflow(subject) ? installDeductiveInvestigationAgent : installInvestigationAgent;
+  usesNightshiftWorkflow(subject) ? installDeductiveInvestigationAgent : installInvestigationAgent;
 
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;

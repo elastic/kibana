@@ -10,17 +10,18 @@
 import ALERT_TRIGGER_WORKFLOW_YAML from './alert_trigger_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const DEDUCTIVE_ALERT_TRIGGER_WORKFLOW_ID = 'system-deductive-alert-trigger';
+export const NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW_ID =
+  'system-nightshift-investigation-alert-trigger';
 
 /**
- * Opt-in v1 rule action that starts a deductive investigation for each firing
+ * Opt-in v1 rule action that starts a Nightshift investigation for each firing
  * alert. `selectors: ['rule_action']` is what makes it appear in the rule-action
  * picker; it does not auto-run on every alert in the space.
  *
  * `enablement: 'restorable'` so a noisy space can disable it without an uninstall.
  */
-export const DEDUCTIVE_ALERT_TRIGGER_WORKFLOW = {
-  id: DEDUCTIVE_ALERT_TRIGGER_WORKFLOW_ID,
+export const NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW = {
+  id: NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
   version: 1,
   billable: false,
