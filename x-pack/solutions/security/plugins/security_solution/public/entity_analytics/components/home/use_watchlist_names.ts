@@ -6,18 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@kbn/react-query';
-import { useKibana } from '../../../common/lib/kibana';
-import { WATCHLISTS_URL } from '../../../../common/entity_analytics/watchlists/constants';
-import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
+import { useGetWatchlists } from '../../api/hooks/use_get_watchlists';
 
 export const useWatchlistNames = (): Map<string, string> => {
-  const { http } = useKibana().services;
-  const { data } = useQuery(['watchlist-names'], () =>
-    http.get<Array<{ id?: string; name: string }>>(`${WATCHLISTS_URL}/list`, {
-      version: API_VERSIONS.public.v1,
-    })
-  );
+  const { data } = useGetWatchlists();
   return useMemo(() => {
     const map = new Map<string, string>();
     for (const w of data ?? []) {
