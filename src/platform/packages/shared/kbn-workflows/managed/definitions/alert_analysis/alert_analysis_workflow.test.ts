@@ -644,10 +644,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     };
     expect(overrideStep).toBeDefined();
     expect(overrideStep.type).toBe('if');
-    // Gate on the presence of the feature-registry connector id — absent on standalone path.
+    // Gate on the explicit calledByWorker flag — absent (or false) on the standalone path.
     // NOTE: workflow_enabled is intentionally not overridden here — a space admin's decision
     // to disable the workflow is respected on both standalone and Worker paths.
-    expect(overrideStep.condition).toBe('${{ inputs.connectorIdByFeature != null }}');
+    expect(overrideStep.condition).toBe('${{ inputs.calledByWorker == true }}');
 
     const setStep = findStepByName(overrideStep.steps, 'set_caller_overrides') as {
       with: Record<string, string | number>;
@@ -695,13 +695,12 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     };
     expect(defaultStep.with.alert_set).toBe('${{ event.alerts }}');
 
-    // The override is gated on presence, not truthiness: a caller-supplied set must win
-    // even when it is empty, rather than silently falling back to the trigger event.
+    // The override is gated on calledByWorker — only a Worker call supplies an alert set.
     const overrideStep = findStepByName(workflow.steps, 'use_caller_alerts_if_provided') as {
       condition: string;
       steps: Array<{ name: string; with: { alert_set: string } }>;
     };
-    expect(overrideStep.condition).toBe('${{ inputs.alerts != null }}');
+    expect(overrideStep.condition).toBe('${{ inputs.calledByWorker == true }}');
     expect(overrideStep.steps[0].with.alert_set).toBe('${{ inputs.alerts }}');
 
     // Every site that iterates or counts alerts must read the resolved set, or a caller's

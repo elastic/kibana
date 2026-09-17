@@ -55,11 +55,10 @@ triggers:
     # via workflow.execute), they override the space's uiSettings runtime_config values.
     # Absent inputs leave the standalone path byte-identical (success criterion 7 / R8).
     #
-    # CONTRACT — inputs are all-or-nothing for the current caller set. The override step
-    # is gated on connectorIdByFeature; a caller that supplies any of the other four fields
-    # without connectorIdByFeature will have all overrides silently dropped and the workflow
-    # will run in standalone mode. Future callers that do not need connectorIdByFeature must
-    # use a different gate or extend the override step.
+    # CONTRACT — Worker-path steps are gated on `calledByWorker: true`. A caller that omits
+    # this flag runs the standalone path byte-identical to a trigger-fired run (R8). Any
+    # caller that sets `calledByWorker: true` MUST also supply the other Worker-specific
+    # inputs (alerts, connectorIdByFeature, etc.) or those steps will produce empty output.
     inputs:
       additionalProperties: false
       properties:
@@ -95,6 +94,13 @@ triggers:
             tells the sub-workflow to use the feature registry instead of uiSettings.
             Must be non-empty — an empty string passes the != null gate but leaves both
             connectors unset, causing analysis to silently skip with empty verdicts.
+        calledByWorker:
+          type: boolean
+          description: >
+            Explicit flag that this run was triggered by an AlertZero Worker via
+            workflow.execute (not by the alert trigger directly). When true, Worker-specific
+            steps activate: input overrides, caller-supplied alerts, and output accumulation.
+            Absent (or false) keeps the standalone path byte-identical (R8).
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
@@ -257,9 +263,8 @@ steps:
   # Apply caller-supplied input overrides (Worker path)
   # ---------------------------------------------------------------------------
   # When a caller (e.g. the Alert Triage Worker) supplies inputs, those values take
-  # precedence over the space's uiSettings read above. Gated on connectorIdByFeature
-  # because that field is always present when the Worker calls; its absence means
-  # standalone mode, which must remain byte-identical to the pre-Worker path (R8).
+  # precedence over the space's uiSettings read above. Gated on calledByWorker so the
+  # standalone path (trigger-fired, no Worker) remains byte-identical (R8).
   #
   # NOTE — workflow_enabled is intentionally NOT overridden here. If a space admin
   # has disabled the workflow in uiSettings, Worker invocations will also no-op (the
@@ -268,7 +273,7 @@ steps:
   # workflowEnabled before invoking this sub-workflow (PR 4's responsibility).
   - name: apply_caller_input_overrides
     type: if
-    condition: "${{ inputs.connectorIdByFeature != null }}"
+    condition: "${{ inputs.calledByWorker == true }}"
     steps:
       - name: set_caller_overrides
         type: data.set
@@ -337,7 +342,7 @@ steps:
 
   - name: use_caller_alerts_if_provided
     type: if
-    condition: "${{ inputs.alerts != null }}"
+    condition: "${{ inputs.calledByWorker == true }}"
     steps:
       - name: apply_caller_alerts
         type: data.set
@@ -1323,32 +1328,37 @@ steps:
 
               # -------------------------------------------------------------------
               # Accumulate the verdict a caller receives via workflow.output
+              # (Worker path only — gated on calledByWorker so standalone runs skip this)
               # -------------------------------------------------------------------
               # Keyed on foreach.item._id — the real alert id — never on the model's echoed
               # `id`. A caller acts on these: the Alert Triage Worker tags, notes and closes
               # by this field, so passing the raw model output through would let a fabricated
               # id close an unrelated alert. Reached only from this else branch, so a verdict
               # matching no real alert is dropped rather than exported.
-              - name: build_output_verdict
-                type: data.set
-                with:
-                  output_verdict:
-                    alert_id: "{{ foreach.item._id }}"
-                    classification: "{{ variables.alert_verdict.classification }}"
-                    confidence_score: "${{ variables.alert_verdict.confidence_score }}"
-                    rationale: "{{ variables.alert_verdict.rationale }}"
-                    contributing_factors: "${{ variables.alert_verdict.contributing_factors }}"
-                    # Entity the alert belongs to, carried so a caller can group verdicts by
-                    # host/user without re-reading the alerts. Read from the alert document,
-                    # never from the model's reply. `unknown` keeps grouping total: an alert
-                    # with no host still belongs in exactly one group.
-                    host_name: "{{ foreach.item.host.name | default: 'unknown' }}"
-                    user_name: "{{ foreach.item.user.name | default: 'unknown' }}"
+              - name: accumulate_worker_output_verdict
+                type: if
+                condition: "${{ inputs.calledByWorker == true }}"
+                steps:
+                  - name: build_output_verdict
+                    type: data.set
+                    with:
+                      output_verdict:
+                        alert_id: "{{ foreach.item._id }}"
+                        classification: "{{ variables.alert_verdict.classification }}"
+                        confidence_score: "${{ variables.alert_verdict.confidence_score }}"
+                        rationale: "{{ variables.alert_verdict.rationale }}"
+                        contributing_factors: "${{ variables.alert_verdict.contributing_factors }}"
+                        # Entity the alert belongs to, carried so a caller can group verdicts by
+                        # host/user without re-reading the alerts. Read from the alert document,
+                        # never from the model's reply. `unknown` keeps grouping total: an alert
+                        # with no host still belongs in exactly one group.
+                        host_name: "{{ foreach.item.host.name | default: 'unknown' }}"
+                        user_name: "{{ foreach.item.user.name | default: 'unknown' }}"
 
-              - name: accumulate_output_verdict
-                type: data.set
-                with:
-                  output_verdicts: "${{ variables.output_verdicts | push: variables.output_verdict }}"
+                  - name: accumulate_output_verdict
+                    type: data.set
+                    with:
+                      output_verdicts: "${{ variables.output_verdicts | push: variables.output_verdict }}"
 
               # -------------------------------------------------------------------
               # Write the verdict note to the alert timeline
@@ -1468,25 +1478,30 @@ steps:
 
       # -----------------------------------------------------------------------
       # Grouped verdict counts, per entity, as a ready-to-render sentence
+      # (Worker path only — gated on calledByWorker; standalone runs have no caller to receive it)
       # -----------------------------------------------------------------------
       # The epic asks an Investigation conclusion to read "X alerts for host A classified as
       # true positive. Y alerts from host B were classified as false positives." Rendered
       # here rather than in the caller so grouping stays with the data that produced it, and
       # deterministic (plain Liquid over the counts, no second model call — D41).
-      - name: build_grouped_counts_summary
-        type: data.set
-        with:
-          grouped_counts_summary: >-
-            {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq -%}
-            {%- for h in hosts -%}
-            {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
-            {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
-            {%- assign fp = for_host | where: 'classification', 'false_positive' | size -%}
-            {%- assign inc = for_host | where: 'classification', 'inconclusive' | size -%}
-            {%- if tp > 0 %} {{ tp }} alert(s) for host {{ h }} classified as true positive.{% endif -%}
-            {%- if fp > 0 %} {{ fp }} alert(s) for host {{ h }} classified as false positive.{% endif -%}
-            {%- if inc > 0 %} {{ inc }} alert(s) for host {{ h }} were inconclusive.{% endif -%}
-            {%- endfor -%}
+      - name: build_grouped_counts_summary_gate
+        type: if
+        condition: "${{ inputs.calledByWorker == true }}"
+        steps:
+          - name: build_grouped_counts_summary
+            type: data.set
+            with:
+              grouped_counts_summary: >-
+                {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq -%}
+                {%- for h in hosts -%}
+                {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
+                {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
+                {%- assign fp = for_host | where: 'classification', 'false_positive' | size -%}
+                {%- assign inc = for_host | where: 'classification', 'inconclusive' | size -%}
+                {%- if tp > 0 %} {{ tp }} alert(s) for host {{ h }} classified as true positive.{% endif -%}
+                {%- if fp > 0 %} {{ fp }} alert(s) for host {{ h }} classified as false positive.{% endif -%}
+                {%- if inc > 0 %} {{ inc }} alert(s) for host {{ h }} were inconclusive.{% endif -%}
+                {%- endfor -%}
 
       # -----------------------------------------------------------------------
       # Auto-close: close every alert that meets the FP thresholds, in bulk
