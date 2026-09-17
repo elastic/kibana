@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/scout'
   - '@kbn/core-chrome-browser-components'
-  - '@kbn/global-search-bar-plugin'
 tags:
   - plugin
   - prod

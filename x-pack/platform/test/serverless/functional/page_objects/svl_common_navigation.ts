@@ -7,7 +7,6 @@
 
 import { SolutionNavigationProvider } from '@kbn/test-suites-src/functional/page_objects';
 import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
-import { SEARCH_MODAL_SELECTOR_PREFIX } from '@kbn/global-search-bar-plugin/common';
 
 import { NavigationalSearchPageObject } from '../../../functional/page_objects/navigational_search';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -22,7 +21,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
 }
 
 const SEARCH_BUTTON = CHROME_HEADER_TEST_SUBJECTS.searchButton;
-const SEARCH_MODAL = SEARCH_MODAL_SELECTOR_PREFIX;
+const SEARCH_MODAL = 'globalSearchModal';
 
 class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
   constructor(ctx: FtrProviderContext) {

@@ -10,7 +10,7 @@ import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventReporter } from '../telemetry';
 
-export { SEARCH_MODAL_SELECTOR_PREFIX } from '../../common';
+export const SEARCH_MODAL_SELECTOR_PREFIX = 'globalSearchModal';
 export const SEARCH_MODAL_HEIGHT_VH = 70;
 export const SEARCH_MODAL_WIDTH_PX = 800;
 export const SEARCH_MODAL_ROW_HEIGHT_PX = 68;

@@ -6,15 +6,16 @@
  */
 
 import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
-import { SEARCH_MODAL_SELECTOR_PREFIX } from '@kbn/global-search-bar-plugin/common';
 import type { ScoutPage, Locator } from '@kbn/scout';
+
+const SEARCH_MODAL = 'globalSearchModal';
 
 export class GlobalSearch {
   constructor(private readonly page: ScoutPage) {}
 
   public get resultLabels(): Locator {
     return this.page.testSubj
-      .locator(SEARCH_MODAL_SELECTOR_PREFIX)
+      .locator(SEARCH_MODAL)
       .locator('.euiSelectableTemplateSitewide__listItemTitle');
   }
 
@@ -23,7 +24,7 @@ export class GlobalSearch {
   }
 
   async openSearch() {
-    const modal = this.page.testSubj.locator(SEARCH_MODAL_SELECTOR_PREFIX);
+    const modal = this.page.testSubj.locator(SEARCH_MODAL);
     if (await modal.isVisible()) {
       return;
     }
@@ -38,7 +39,7 @@ export class GlobalSearch {
 
   async blur() {
     await this.page.keyboard.press('Escape');
-    await this.page.testSubj.locator(SEARCH_MODAL_SELECTOR_PREFIX).waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator(SEARCH_MODAL).waitFor({ state: 'hidden' });
   }
 
   async searchFor(term: string, { clear = true }: { clear?: boolean } = {}) {
@@ -58,7 +59,7 @@ export class GlobalSearch {
   }
 
   async isPopoverDisplayed() {
-    return await this.page.testSubj.locator(SEARCH_MODAL_SELECTOR_PREFIX).isVisible();
+    return await this.page.testSubj.locator(SEARCH_MODAL).isVisible();
   }
 
   async clickOnOption(index: number) {
@@ -69,7 +70,7 @@ export class GlobalSearch {
   async scrollToResult(label: string): Promise<Locator> {
     const item = this.resultLabels.filter({ hasText: label });
     const list = this.page.testSubj
-      .locator(SEARCH_MODAL_SELECTOR_PREFIX)
+      .locator(SEARCH_MODAL)
       .locator('.euiSelectableList__list');
 
     // EuiSelectable virtualizes rows, so off-screen labels are not in the DOM.

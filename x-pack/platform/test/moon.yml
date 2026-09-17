@@ -160,7 +160,6 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/core-chrome-browser-components'
-  - '@kbn/global-search-bar-plugin'
 tags:
   - test-helper
   - package
