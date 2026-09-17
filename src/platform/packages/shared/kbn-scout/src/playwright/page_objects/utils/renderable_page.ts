@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '..';
-import { expect } from '..';
+import type { ScoutPage } from '../..';
+import { expect } from '../..';
 
 export class RenderablePage {
   constructor(private readonly page: ScoutPage) {}
