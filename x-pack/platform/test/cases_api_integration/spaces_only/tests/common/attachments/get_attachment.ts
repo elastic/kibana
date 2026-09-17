@@ -13,7 +13,7 @@ import {
   deleteAllCaseItems,
   createCase,
   createComment,
-  getUnifiedAttachment,
+  getAttachmentV2,
   getAuthWithSuperUser,
 } from '../../../../common/lib/api';
 
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
         auth: authSpace1,
       });
-      const attachment = await getUnifiedAttachment({
+      const attachment = await getAttachmentV2({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         attachmentId: patchedCase.comments![0].id,
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
         auth: authSpace1,
       });
-      await getUnifiedAttachment({
+      await getAttachmentV2({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         attachmentId: patchedCase.comments![0].id,

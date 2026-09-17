@@ -19,7 +19,7 @@ import {
   deleteAllCaseItems,
   createCase,
   createComment,
-  findUnifiedAttachments,
+  findAttachmentsV2,
   ensureSavedObjectIsAuthorized,
   superUserSpace1Auth,
 } from '../../../../common/lib/api';
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
       });
 
-      const attachments = await findUnifiedAttachments({ supertest, caseId: postedCase.id });
+      const attachments = await findAttachmentsV2({ supertest, caseId: postedCase.id });
 
       expect(attachments.data.map((a) => a.id).sort()).to.eql(
         patchedCase.comments!.map((c) => c.id).sort()
@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
       await createComment({ supertest, caseId: postedCase.id, params: postCommentAlertReq });
 
-      const attachments = await findUnifiedAttachments({
+      const attachments = await findAttachmentsV2({
         supertest,
         caseId: postedCase.id,
         query: { type: 'comment' },
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
           { user: obsSec, owners: ['securitySolutionFixture', 'observabilityFixture'] },
           { user: obsSecRead, owners: ['securitySolutionFixture', 'observabilityFixture'] },
         ]) {
-          const attachments = await findUnifiedAttachments({
+          const attachments = await findAttachmentsV2({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             auth: { user: scenario.user, space: 'space1' },
@@ -132,7 +132,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         for (const user of [obsOnly, obsOnlyRead]) {
-          const attachments = await findUnifiedAttachments({
+          const attachments = await findAttachmentsV2({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             auth: { user, space: 'space1' },
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: superUserSpace1Auth,
         });
 
-        await findUnifiedAttachments({
+        await findAttachmentsV2({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
           auth: { user: noKibanaPrivileges, space: 'space1' },

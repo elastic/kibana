@@ -23,7 +23,11 @@ import type {
   UnifiedAttachmentsFindResponse,
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import type { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  Attachments,
+  Attachment,
+  UnifiedAttachment,
+} from '@kbn/cases-plugin/common/types/domain';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -339,8 +343,9 @@ export const findAttachments = async ({
   return body;
 };
 
-// v2 (unified-shape) version of `findAttachments`. Hits `GET /attachments`.
-export const findUnifiedAttachments = async ({
+// -----------------------------V2 Unified Attachments API----------------------------
+
+export const findAttachmentsV2 = async ({
   supertest,
   caseId,
   query = {},
@@ -363,8 +368,7 @@ export const findUnifiedAttachments = async ({
   return body;
 };
 
-// v2 (unified-shape) version of `getComment`. Hits `GET /attachments/{id}`.
-export const getUnifiedAttachment = async ({
+export const getAttachmentV2 = async ({
   supertest,
   caseId,
   attachmentId,
@@ -376,7 +380,7 @@ export const getUnifiedAttachment = async ({
   attachmentId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<Attachment> => {
+}): Promise<UnifiedAttachment> => {
   const { body: attachment } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/attachments/${attachmentId}`)
     .set('kbn-xsrf', 'true')

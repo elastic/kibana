@@ -30,8 +30,8 @@ import {
   bulkCreateAttachments,
   bulkGetAttachments,
   getCase,
-  findUnifiedAttachments,
-  getUnifiedAttachment,
+  findAttachmentsV2,
+  getAttachmentV2,
 } from '../../../../common/lib/api';
 
 const EVENTS_INDEX = 'test-events-index';
@@ -331,7 +331,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         const unifiedId = unifiedCase.comments!.find((c) => c.id !== legacyId)!.id;
 
-        const attachments = await findUnifiedAttachments({ supertest, caseId: postedCase.id });
+        const attachments = await findAttachmentsV2({ supertest, caseId: postedCase.id });
 
         expect(attachments.data.length).to.be(2);
         const ids = attachments.data.map((a) => a.id);
@@ -361,14 +361,14 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         const unifiedId = unifiedCase.comments!.find((c) => c.id !== legacyId)!.id;
 
-        const legacyAttachment = await getUnifiedAttachment({
+        const legacyAttachment = await getAttachmentV2({
           supertest,
           caseId: postedCase.id,
           attachmentId: legacyId,
         });
         expect(legacyAttachment.type).to.be(COMMENT_ATTACHMENT_TYPE);
 
-        const unifiedAttachment = await getUnifiedAttachment({
+        const unifiedAttachment = await getAttachmentV2({
           supertest,
           caseId: postedCase.id,
           attachmentId: unifiedId,
@@ -409,7 +409,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         const unifiedAlertId = unifiedCase.comments!.find((c) => c.id !== legacyAlertId)!.id;
 
-        const attachments = await findUnifiedAttachments({
+        const attachments = await findAttachmentsV2({
           supertest,
           caseId: postedCase.id,
           query: { type: 'security.alert' },

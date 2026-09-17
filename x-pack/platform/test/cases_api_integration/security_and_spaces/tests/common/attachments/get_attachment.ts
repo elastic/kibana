@@ -13,7 +13,7 @@ import {
   deleteAllCaseItems,
   createCase,
   createComment,
-  getUnifiedAttachment,
+  getAttachmentV2,
   superUserSpace1Auth,
 } from '../../../../common/lib/api';
 import {
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: postCommentUserReq,
       });
-      const attachment = await getUnifiedAttachment({
+      const attachment = await getAttachmentV2({
         supertest,
         caseId: postedCase.id,
         attachmentId: patchedCase.comments![0].id,
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('unhappy path - 404s when attachment is not there', async () => {
-      await getUnifiedAttachment({
+      await getAttachmentV2({
         supertest,
         caseId: 'fake-id',
         attachmentId: 'fake-id',
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
-          await getUnifiedAttachment({
+          await getAttachmentV2({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             attachmentId: caseWithComment.comments![0].id,
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
-          await getUnifiedAttachment({
+          await getAttachmentV2({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             attachmentId: caseWithComment.comments![0].id,

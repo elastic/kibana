@@ -6,7 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CASE_ATTACHMENT_DETAILS_URL } from '../../../../common/constants';
+import {
+  CASE_ATTACHMENT_DETAILS_URL,
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_CASE_ID_LENGTH,
+} from '../../../../common/constants';
 import type { attachmentDomainV2 } from '../../../../common/types/domain';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -18,8 +22,8 @@ export const getAttachmentRoute = createCasesRoute({
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
-      case_id: schema.string(),
-      attachment_id: schema.string(),
+      case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
+      attachment_id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
     }),
   },
   routerOptions: {

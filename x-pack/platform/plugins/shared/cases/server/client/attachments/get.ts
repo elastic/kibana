@@ -209,7 +209,7 @@ export async function get(
     return decodeOrThrow(UnifiedAttachmentRt)(res);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to get comment case id: ${caseID} attachment id: ${savedObjectId}: ${error}`,
+      message: `Failed to get attachment case id: ${caseID} attachment id: ${savedObjectId}: ${error}`,
       error,
       logger,
     });

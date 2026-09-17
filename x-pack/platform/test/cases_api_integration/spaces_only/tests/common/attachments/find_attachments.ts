@@ -14,7 +14,7 @@ import {
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
-  findUnifiedAttachments,
+  findAttachmentsV2,
   createCase,
   getAuthWithSuperUser,
 } from '../../../../common/lib/api';
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      const attachments = await findUnifiedAttachments({
+      const attachments = await findAttachmentsV2({
         supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         auth: authSpace1,
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      const attachments = await findUnifiedAttachments({
+      const attachments = await findAttachmentsV2({
         supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         auth: getAuthWithSuperUser('space2'),
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      const attachments = await findUnifiedAttachments({
+      const attachments = await findAttachmentsV2({
         supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         query: { type: 'security.alert' },
