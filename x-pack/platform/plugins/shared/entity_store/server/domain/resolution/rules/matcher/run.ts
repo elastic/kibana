@@ -138,6 +138,7 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
         resolutionClient,
         logger,
         stats,
+        spec,
         ruleId,
         mutatedIds,
       });
@@ -233,11 +234,13 @@ async function resolveMatchGroup(
     resolutionClient: ResolutionClient;
     logger: Logger;
     stats: BucketStats;
+    spec: EsqlMatchSpec;
     ruleId: string;
     mutatedIds: Set<string>;
   }
 ): Promise<void> {
   const { logger, stats, ruleId, resolutionClient, mutatedIds } = deps;
+  const declineSameNamespaceDuplicates = deps.spec.declineSameNamespaceDuplicates !== false;
   stats.examinedBuckets++;
 
   if (row.groupSize > GROUP_SIZE_CEILING) {
@@ -248,11 +251,11 @@ async function resolveMatchGroup(
     return;
   }
 
-  if (row.unresolvedNamespaces.length < row.unresolvedCount) {
-    // Two unresolved entities in one namespace (including two `local` hosts
-    // sharing an email) decline the whole group, including a clear IDP pair
-    // sitting next to them. Decline-all is intentional: dropping the doubled
-    // namespace can promote a worse target (two ADs + one Okta → Okta wins).
+  // Same-namespace duplicates are declined by default (two AD emails + one Okta
+  // must not make Okta the target). SID rules set this false: a SID names one
+  // account, so duplicates are identifier drift, not a collision. Well-known
+  // SIDs are excluded at query time so LocalSystem never reaches this path.
+  if (declineSameNamespaceDuplicates && row.unresolvedNamespaces.length < row.unresolvedCount) {
     stats.skippedAmbiguousBuckets++;
     logger.warn(
       `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${row.unresolvedCount} unresolved entities across ${row.unresolvedNamespaces.length} namespaces`

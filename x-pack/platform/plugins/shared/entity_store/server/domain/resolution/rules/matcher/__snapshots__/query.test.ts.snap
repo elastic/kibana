@@ -26,32 +26,6 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for crowdstrike SID 1`] = `
-"SET unmapped_fields=\\"nullify\\";
-FROM \\".entities.v2.latest.default\\"
-| WHERE entity.EngineMetadata.Type == \\"user\\"
-    AND MV_COUNT(user.id) == 1
-    AND entity.namespace IN (\\"crowdstrike\\", \\"active_directory\\")
-| EVAL match_value = user.id
-| WHERE match_value IS NOT NULL
-    AND match_value != \\"\\"
-    AND match_value RLIKE \\"S-1-5-.*\\"
-| EVAL is_unresolved = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
-| EVAL is_new = CASE(1 == 1, 1, 0)
-| EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
-| EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
-| STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
-        unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
-        unresolved_n = SUM(is_unresolved),
-        total_n = COUNT(*),
-        new_n = SUM(is_new)
-    BY match_value
-| WHERE total_n >= 2 AND new_n >= 1
-| SORT match_value ASC
-| LIMIT 5000"
-`;
-
 exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for email 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
@@ -102,15 +76,43 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
+exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for crowdstrike SID 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM \\".entities.v2.latest.default\\"
+| WHERE entity.EngineMetadata.Type == \\"user\\"
+    AND MV_COUNT(user.id) == 1
+    AND entity.namespace IN (\\"crowdstrike\\", \\"active_directory\\")
+| EVAL match_value = user.id
+| WHERE match_value IS NOT NULL
+    AND match_value != \\"\\"
+    AND match_value RLIKE \\"S-1-5-.*\\"
+    AND NOT match_value RLIKE \\"(S-1-5-18|S-1-5-19|S-1-5-20|S-1-5-32-54[4-9]|S-1-5-32-55[0-4])\\"
+| EVAL is_unresolved = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
+| EVAL is_new = CASE(1 == 1, 1, 0)
+| EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
+| EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
+| STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
+        unresolved_ns = VALUES(unresolved_namespace),
+        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
+        unresolved_n = SUM(is_unresolved),
+        total_n = COUNT(*),
+        new_n = SUM(is_new)
+    BY match_value
+| WHERE total_n >= 2 AND new_n >= 1
+| SORT match_value ASC
+| LIMIT 5000"
+`;
+
 exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for windows SID 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
     AND MV_COUNT(user.id) == 1
-    AND entity.namespace IN (\\"system\\", \\"windows\\", \\"active_directory\\")
+    AND entity.namespace IN (\\"local\\", \\"system\\", \\"windows\\", \\"active_directory\\")
 | EVAL match_value = user.id
 | WHERE match_value IS NOT NULL
     AND match_value != \\"\\"
+    AND match_value RLIKE \\"S-1-5-.*\\"
     AND NOT match_value RLIKE \\"(S-1-5-18|S-1-5-19|S-1-5-20|S-1-5-32-54[4-9]|S-1-5-32-55[0-4])\\"
 | EVAL is_unresolved = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
 | EVAL is_new = CASE(1 == 1, 1, 0)

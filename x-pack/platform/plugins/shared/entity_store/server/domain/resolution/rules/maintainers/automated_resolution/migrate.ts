@@ -74,6 +74,11 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   };
 };
 
+// 2 — email watermark (case-insensitive match)
+const EMAIL_WATERMARK_RESET_VERSION = 2;
+// 3 — SID watermark (`local` entities created while the rule scanned empty feeders)
+const SID_LOCAL_NAMESPACE_WATERMARK_RESET_VERSION = 3;
+
 const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleState> => {
   if (!isRecord(value)) {
     return {};
@@ -118,6 +123,7 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
 
   const rules = sanitizeRules(source.rules, logger);
   const emailRuleId = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
+  const sidRuleId = RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE;
 
   // Move the legacy flat state into the email rule slot — unless it was already
   // migrated, in which case keep the newer progress (idempotent / crash-retry safe).
@@ -130,11 +136,25 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
     };
   }
 
-  if (storedVersion < AUTOMATED_RESOLUTION_STATE_VERSION && Object.hasOwn(rules, emailRuleId)) {
+  if (storedVersion < EMAIL_WATERMARK_RESET_VERSION && Object.hasOwn(rules, emailRuleId)) {
     const emailState = rules[emailRuleId];
     rules[emailRuleId] = {
       lastProcessedTimestamp: null,
       lastRun: sanitizeLastRun(emailState.lastRun),
+    };
+  }
+
+  // The SID rule kept advancing its watermark over empty `windows`/`system`
+  // scans after the IdP gate change. `local` entities created in that window
+  // sit behind it and would never be considered without a one-time reset.
+  if (
+    storedVersion < SID_LOCAL_NAMESPACE_WATERMARK_RESET_VERSION &&
+    Object.hasOwn(rules, sidRuleId)
+  ) {
+    const sidState = rules[sidRuleId];
+    rules[sidRuleId] = {
+      lastProcessedTimestamp: null,
+      lastRun: sanitizeLastRun(sidState.lastRun),
     };
   }
 

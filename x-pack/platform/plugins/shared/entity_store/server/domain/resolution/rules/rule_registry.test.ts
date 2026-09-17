@@ -9,7 +9,9 @@ import {
   ENTRA_GUID_INCLUSION,
   NT_AUTHORITY_SID_INCLUSION,
   WINDOWS_NON_PERSON_SID_EXCLUSION,
+  getResolutionRuleConfig,
 } from './rule_registry';
+import { RESOLUTION_RULE_IDS } from '../../../../common/domain/resolution_rules/constants';
 
 /**
  * ES|QL `RLIKE` compiles through Lucene's automaton (`RegExp.ALL`). `^` / `$`
@@ -43,5 +45,16 @@ describe('RLIKE value gates use Lucene automaton syntax', () => {
 
   it('matches a GUID as a whole string', () => {
     expect(ENTRA_GUID_INCLUSION).toBe('[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}');
+  });
+});
+
+describe('OOTB rule enablement', () => {
+  it('disables the CrowdStrike and UPN rules whose feeders no longer create entities', () => {
+    expect(getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE)?.defaultEnabled).toBe(
+      false
+    );
+    expect(getResolutionRuleConfig(RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE)?.defaultEnabled).toBe(
+      false
+    );
   });
 });
