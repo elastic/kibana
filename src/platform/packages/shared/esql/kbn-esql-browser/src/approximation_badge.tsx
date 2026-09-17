@@ -16,7 +16,7 @@ const approximationTooltip = i18n.translate('esqlBrowser.approximationAppliedToo
     'Shows approximate results because fast mode is enabled or the query enables approximation.',
 });
 
-export const ApproximationIcon: React.FC<{
+export const ApproximationBadge: React.FC<{
   isApproximationApplied: boolean;
   'data-test-subj'?: string;
 }> = ({ isApproximationApplied, 'data-test-subj': dataTestSubj = 'approximationApplied' }) => {

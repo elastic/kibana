@@ -13,7 +13,7 @@ import type { EmbeddableApiContext, PublishesEsql } from '@kbn/presentation-publ
 import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { map } from 'rxjs';
-import { ApproximationIcon } from '@kbn/esql-browser';
+import { ApproximationBadge } from '@kbn/esql-browser';
 import { APPROXIMATION_APPLIED_BADGE } from './constants';
 
 export type ApproximationAppliedBadgeApi = Pick<PublishesEsql, 'approximationApplied$'>;
@@ -40,7 +40,7 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
       : undefined;
   },
   MenuItem: ({ dataTestSubj }: { context: EmbeddableApiContext; dataTestSubj?: string }) => (
-    <ApproximationIcon
+    <ApproximationBadge
       isApproximationApplied
       data-test-subj={dataTestSubj}
     />

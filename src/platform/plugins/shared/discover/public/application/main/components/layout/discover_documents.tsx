@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { ApproximationIcon } from '@kbn/esql-browser';
+import { ApproximationBadge } from '@kbn/esql-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -593,7 +593,7 @@ function DiscoverDocumentsComponent({
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
-            externalAdditionalControls={<span style={{ marginRight: 4 }}><ApproximationIcon isApproximationApplied={Boolean(approximationApplied)} data-test-subj="discoverApproximationApplied" /></span>}
+            externalAdditionalControls={<span style={{ marginRight: 4 }}><ApproximationBadge isApproximationApplied={Boolean(approximationApplied)} data-test-subj="discoverApproximationApplied" /></span>}
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}

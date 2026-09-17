@@ -12,7 +12,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ApproximationIcon } from '@kbn/esql-browser';
+import { ApproximationBadge } from '@kbn/esql-browser';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
@@ -349,7 +349,7 @@ export function UnifiedHistogramChart({
           toggleActions: toolbarToggleActions,
           leftSide: toolbarSelectors,
           rightSide: chartVisible ? actions : [],
-          additionalControls: { prependRight: <span style={{ marginRight: 4 }}><ApproximationIcon isApproximationApplied={isApproximationApplied} data-test-subj="unifiedHistogramApproximationApplied" /></span> },
+          additionalControls: { prependRight: <span style={{ marginRight: 4 }}><ApproximationBadge isApproximationApplied={isApproximationApplied} data-test-subj="unifiedHistogramApproximationApplied" /></span> },
         }}
       >
         {chartVisible && (
