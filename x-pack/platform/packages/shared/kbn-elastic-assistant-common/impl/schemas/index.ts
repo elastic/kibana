@@ -66,7 +66,12 @@ import {
 } from './knowledge_base/crud_kb_route.gen';
 export * from './knowledge_base/crud_kb_route.gen';
 export * from './knowledge_base/get_knowledge_base_indices_route.gen';
-// OAS does not support optional path parameters, so we override the generated schema
+// The knowledge base route is registered as `/knowledge_base/{resource?}`, so `resource`
+// is optional at runtime. OpenAPI 3.0 cannot express an optional path parameter and
+// requires `required: true` on every path parameter, so crud_kb_route.schema.yaml marks
+// it required to keep the published spec valid. That makes codegen emit
+// `resource: z.string()`. Override the exported schemas here so callers and route
+// validation keep accepting requests without a resource. Same approach as main (#240921).
 export const CreateKnowledgeBaseRequestParams = CreateKnowledgeBaseRequestParamsBase.extend({
   resource: CreateKnowledgeBaseRequestParamsBase.shape.resource.optional(),
 });

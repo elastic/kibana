@@ -15,6 +15,10 @@ paths:
       parameters:
         - name: resource
           in: path
+          # The route is registered as `{resource?}`, but OpenAPI 3.0 requires path
+          # parameters to be `required: true`. The exported request params schema in
+          # impl/schemas/index.ts makes `resource` optional again for runtime validation.
+          # Same approach as main (#240921).
           required: true
           description: The KnowledgeBase `resource` value.
           schema:
@@ -72,6 +76,8 @@ paths:
       parameters:
         - name: resource
           in: path
+          # See the note on the POST parameter above: required for a valid OpenAPI
+          # document, made optional again in impl/schemas/index.ts.
           required: true
           description: The KnowledgeBase `resource` value.
           schema:
