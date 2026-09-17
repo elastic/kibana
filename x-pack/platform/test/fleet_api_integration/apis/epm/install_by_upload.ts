@@ -70,6 +70,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
+  describe('EPM - install by upload', () => {
   describe('Installs packages from direct upload', () => {
     skipIfNoDockerRegistry(providerContext);
 
@@ -406,5 +407,6 @@ export default function (providerContext: FtrProviderContext) {
       });
       expect(installRecord.hits.total).to.equal(0);
     });
-  });
+  }); // Upload preflight asset privilege checks
+  }); // EPM - install by upload
 }
