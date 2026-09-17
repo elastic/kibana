@@ -7,25 +7,10 @@
 
 import { Subject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { subscribeToDualProcessFlag } from './dual_process';
-import { stopExtractEntityTask } from '../../tasks/extract_entity_task';
 import { ENGINE_STATUS } from '../../domain/constants';
 import { EngineDescriptorTypeName } from '../../domain/saved_objects';
-import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
-
-jest.mock('../../tasks/extract_entity_task', () => ({
-  stopExtractEntityTask: jest.fn(),
-  getExtractEntityTaskConfig: jest.requireActual('../../tasks/extract_entity_task')
-    .getExtractEntityTaskConfig,
-  getExtractEntityTaskId: jest.requireActual('../../tasks/extract_entity_task')
-    .getExtractEntityTaskId,
-}));
-
-const mockStopExtractEntityTask = stopExtractEntityTask as jest.MockedFunction<
-  typeof stopExtractEntityTask
->;
 
 function makeEngineDescriptorSo(
   type: string,
@@ -45,30 +30,28 @@ function makeEngineDescriptorSo(
 
 function buildCoreStart(
   flagSubject: Subject<boolean>,
-  savedObjects: { saved_objects: ReturnType<typeof makeEngineDescriptorSo>[] }
+  savedObjects: { saved_objects: ReturnType<typeof makeEngineDescriptorSo>[] },
+  flagOnStartup?: boolean
 ): CoreStart {
   const mockInternalRepo = {
     find: jest.fn().mockResolvedValue(savedObjects),
     update: jest.fn().mockResolvedValue({}),
   };
 
+  const getBooleanValue =
+    flagOnStartup !== undefined
+      ? jest.fn().mockResolvedValue(flagOnStartup)
+      : jest.fn().mockRejectedValue(new Error('getBooleanValue not mocked for this test'));
+
   return {
     featureFlags: {
       getBooleanValue$: jest.fn().mockReturnValue(flagSubject.asObservable()),
+      getBooleanValue,
     },
     savedObjects: {
       createInternalRepository: jest.fn().mockReturnValue(mockInternalRepo),
     },
   } as unknown as CoreStart;
-}
-
-function buildTaskManager(): jest.Mocked<
-  Pick<TaskManagerStartContract, 'ensureScheduled' | 'removeIfExists'>
-> {
-  return {
-    ensureScheduled: jest.fn().mockResolvedValue({}),
-    removeIfExists: jest.fn().mockResolvedValue({}),
-  };
 }
 
 /** Waits for all pending microtasks (Promise resolutions and concatMap callbacks). */
@@ -89,39 +72,74 @@ describe('subscribeToDualProcessFlag', () => {
     stop$.complete();
   });
 
-  describe('true -> false: teardown', () => {
-    it('removes the non-priority task and clears SO fields for a started user engine', async () => {
+  describe('startup reconciliation', () => {
+    it('runs teardownNonPriorityTasks when flag is off on startup', async () => {
       const flagSubject = new Subject<boolean>();
-      const soRow = makeEngineDescriptorSo('user', 'default');
-      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
-      const taskManager = buildTaskManager();
+      const soRow = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.STARTED,
+      });
+      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] }, false);
       const mockUpdate = (
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        stop$,
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      await flushPromises();
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        EngineDescriptorTypeName,
+        expect.stringContaining('user'),
+        expect.objectContaining({
+          nonPriorityStatus: ENGINE_STATUS.STOPPED,
+          nonPriorityLogExtractionState: null,
+          nonPriorityError: null,
+        }),
+        expect.objectContaining({ namespace: 'default' })
+      );
+    });
+
+    it('runs enableNonPriorityTasks when flag is on on startup', async () => {
+      const flagSubject = new Subject<boolean>();
+      const soRow = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.STOPPED,
       });
+      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] }, true);
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
+
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      await flushPromises();
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        EngineDescriptorTypeName,
+        expect.stringContaining('user'),
+        expect.objectContaining({ nonPriorityStatus: ENGINE_STATUS.STARTED }),
+        expect.objectContaining({ namespace: 'default' })
+      );
+    });
+  });
+
+  describe('true -> false: teardown', () => {
+    it('clears SO fields for a started user engine', async () => {
+      const flagSubject = new Subject<boolean>();
+      const soRow = makeEngineDescriptorSo('user', 'default');
+      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
+
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
 
       flagSubject.next(true);
       flagSubject.next(false);
       await flushPromises();
 
-      expect(mockStopExtractEntityTask).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'user',
-          namespace: 'default',
-          extractionMode: EXTRACTION_MODE.nonPriority,
-        })
-      );
       expect(mockUpdate).toHaveBeenCalledWith(
         EngineDescriptorTypeName,
         expect.stringContaining('user'),
         expect.objectContaining({
-          nonPriorityStatus: null,
+          nonPriorityStatus: ENGINE_STATUS.STOPPED,
           nonPriorityLogExtractionState: null,
           nonPriorityError: null,
         }),
@@ -133,20 +151,17 @@ describe('subscribeToDualProcessFlag', () => {
       const flagSubject = new Subject<boolean>();
       const soRow = makeEngineDescriptorSo('user', 'default', { nonPriorityStatus: null });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
-      const taskManager = buildTaskManager();
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
 
-      subscribeToDualProcessFlag({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        stop$,
-      });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
 
       flagSubject.next(true);
       flagSubject.next(false);
       await flushPromises();
 
-      expect(mockStopExtractEntityTask).not.toHaveBeenCalled();
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
 
     it('skips types without a priority extraction gate (host, service, generic)', async () => {
@@ -158,51 +173,37 @@ describe('subscribeToDualProcessFlag', () => {
           makeEngineDescriptorSo('generic', 'default'),
         ],
       });
-      const taskManager = buildTaskManager();
-
-      subscribeToDualProcessFlag({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        stop$,
-      });
-
-      flagSubject.next(true);
-      flagSubject.next(false);
-      await flushPromises();
-
-      expect(mockStopExtractEntityTask).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('false -> true: re-enable', () => {
-    it('schedules the non-priority task and sets nonPriorityStatus for an eligible engine', async () => {
-      const flagSubject = new Subject<boolean>();
-      const soRow = makeEngineDescriptorSo('user', 'default', { nonPriorityStatus: null });
-      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
-      const taskManager = buildTaskManager();
       const mockUpdate = (
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        stop$,
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+
+      flagSubject.next(true);
+      flagSubject.next(false);
+      await flushPromises();
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('false -> true: re-enable', () => {
+    it('sets nonPriorityStatus to started for an eligible engine (was stopped)', async () => {
+      const flagSubject = new Subject<boolean>();
+      const soRow = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.STOPPED,
       });
+      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
+
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
 
       flagSubject.next(false);
       flagSubject.next(true);
       await flushPromises();
 
-      expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: expect.stringContaining('user'),
-          taskType: expect.stringContaining('non_priority'),
-          state: { namespace: 'default' },
-        })
-      );
       expect(mockUpdate).toHaveBeenCalledWith(
         EngineDescriptorTypeName,
         expect.stringContaining('user'),
@@ -217,43 +218,37 @@ describe('subscribeToDualProcessFlag', () => {
         nonPriorityStatus: ENGINE_STATUS.STARTED,
       });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
-      const taskManager = buildTaskManager();
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
 
-      subscribeToDualProcessFlag({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        stop$,
-      });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
 
       flagSubject.next(false);
       flagSubject.next(true);
       await flushPromises();
 
-      expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
 
     it('skips engines where status is not started', async () => {
       const flagSubject = new Subject<boolean>();
       const soRow = makeEngineDescriptorSo('user', 'default', {
         status: ENGINE_STATUS.STOPPED,
-        nonPriorityStatus: null,
+        nonPriorityStatus: ENGINE_STATUS.STOPPED,
       });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
-      const taskManager = buildTaskManager();
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
 
-      subscribeToDualProcessFlag({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        stop$,
-      });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
 
       flagSubject.next(false);
       flagSubject.next(true);
       await flushPromises();
 
-      expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
   });
 
@@ -262,35 +257,28 @@ describe('subscribeToDualProcessFlag', () => {
       const flagSubject = new Subject<boolean>();
       const soRow = makeEngineDescriptorSo('user', 'default');
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
-      const taskManager = buildTaskManager();
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
 
-      subscribeToDualProcessFlag({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        stop$,
-      });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
 
       flagSubject.next(true);
       flagSubject.next(true);
       await flushPromises();
 
-      expect(mockStopExtractEntityTask).not.toHaveBeenCalled();
-      expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
 
     it('does nothing after stop$ emits', async () => {
       const flagSubject = new Subject<boolean>();
       const soRow = makeEngineDescriptorSo('user', 'default');
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
-      const taskManager = buildTaskManager();
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
 
-      subscribeToDualProcessFlag({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        stop$,
-      });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
 
       stop$.next();
       stop$.complete();
@@ -299,7 +287,7 @@ describe('subscribeToDualProcessFlag', () => {
       flagSubject.next(false);
       await flushPromises();
 
-      expect(mockStopExtractEntityTask).not.toHaveBeenCalled();
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
   });
 
@@ -309,43 +297,54 @@ describe('subscribeToDualProcessFlag', () => {
       const soRowStarted = makeEngineDescriptorSo('user', 'default', {
         nonPriorityStatus: ENGINE_STATUS.STARTED,
       });
-      const soRowCleared = makeEngineDescriptorSo('user', 'default', { nonPriorityStatus: null });
+      const soRowStopped = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.STOPPED,
+      });
 
       const mockFind = jest
         .fn()
         .mockResolvedValueOnce({ saved_objects: [soRowStarted] })
-        .mockResolvedValueOnce({ saved_objects: [soRowCleared] });
+        .mockResolvedValueOnce({ saved_objects: [soRowStopped] });
 
-      const mockInternalRepo = {
-        find: mockFind,
-        update: jest.fn().mockResolvedValue({}),
-      };
+      const mockUpdate = jest.fn().mockResolvedValue({});
+      const mockInternalRepo = { find: mockFind, update: mockUpdate };
       const coreStart = {
         featureFlags: {
           getBooleanValue$: jest.fn().mockReturnValue(flagSubject.asObservable()),
+          getBooleanValue: jest
+            .fn()
+            .mockRejectedValue(new Error('getBooleanValue not mocked for this test')),
         },
         savedObjects: {
           createInternalRepository: jest.fn().mockReturnValue(mockInternalRepo),
         },
       } as unknown as CoreStart;
-      const taskManager = buildTaskManager();
 
-      subscribeToDualProcessFlag({
-        coreStart,
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        logger,
-        stop$,
-      });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
 
-      // Emit all three values synchronously — concatMap must serialise them.
+      // Emit all three values synchronously - concatMap must serialise them.
       flagSubject.next(true);
       flagSubject.next(false);
       flagSubject.next(true);
       await flushPromises();
 
-      // Teardown ran first (true -> false), then re-enable (false -> true).
-      expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(1);
-      expect(taskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+      // Teardown ran first (true -> false): sets nonPriorityStatus to STOPPED.
+      expect(mockUpdate).toHaveBeenCalledWith(
+        EngineDescriptorTypeName,
+        expect.stringContaining('user'),
+        expect.objectContaining({ nonPriorityStatus: ENGINE_STATUS.STOPPED }),
+        expect.objectContaining({ namespace: 'default' })
+      );
+
+      // Re-enable ran second (false -> true): sets nonPriorityStatus back to STARTED.
+      expect(mockUpdate).toHaveBeenCalledWith(
+        EngineDescriptorTypeName,
+        expect.stringContaining('user'),
+        expect.objectContaining({ nonPriorityStatus: ENGINE_STATUS.STARTED }),
+        expect.objectContaining({ namespace: 'default' })
+      );
+
+      expect(mockUpdate).toHaveBeenCalledTimes(2);
     });
   });
 });
