@@ -444,7 +444,7 @@ Stream type definitions live in `@kbn/streams-schema`. When changing the shape o
 
 ```bash
 # Bootstrap (run after switching branches or on dependency errors)
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 # Generate sample log data (useful for testing streams)
 node scripts/synthtrace.js sample_logs --live
@@ -456,26 +456,26 @@ Streams are shipped in Observability serverless. Enable wired streams via the St
 
 ```bash
 # Streams plugin
-yarn test:type_check --project x-pack/platform/plugins/shared/streams/tsconfig.json
+pnpm test:type_check --project x-pack/platform/plugins/shared/streams/tsconfig.json
 
 # Streams app plugin
-yarn test:type_check --project x-pack/platform/plugins/shared/streams_app/tsconfig.json
+pnpm test:type_check --project x-pack/platform/plugins/shared/streams_app/tsconfig.json
 
 # Streams schema package
-yarn test:type_check --project x-pack/platform/packages/shared/kbn-streams-schema/tsconfig.json
+pnpm test:type_check --project x-pack/platform/packages/shared/kbn-streams-schema/tsconfig.json
 
 # Streamlang package
-yarn test:type_check --project x-pack/platform/packages/shared/kbn-streamlang/tsconfig.json
+pnpm test:type_check --project x-pack/platform/packages/shared/kbn-streamlang/tsconfig.json
 ```
 
 ### Unit Tests (Jest)
 
 ```bash
 # Run tests for a specific file
-yarn test:jest path/to/file.test.ts
+pnpm test:jest path/to/file.test.ts
 
 # Run all tests in a directory (config is auto-discovered)
-yarn test:jest x-pack/platform/plugins/shared/streams/server/lib/streams/
+pnpm test:jest x-pack/platform/plugins/shared/streams/server/lib/streams/
 ```
 
 ### Integration Tests (Scout)
