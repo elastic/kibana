@@ -262,7 +262,7 @@ describe('preprocessTriggerInputs', () => {
 
       await expect(
         preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
-      ).rejects.toThrow('No alerts found with the provided IDs');
+      ).rejects.toThrow('No alerts found with the provided selection');
 
       expect(mockLogger.warn).toHaveBeenCalledTimes(2);
     });
@@ -727,7 +727,7 @@ describe('preprocessTriggerInputs', () => {
 
         await expect(
           preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
-        ).rejects.toThrow('No alerts found with the provided IDs');
+        ).rejects.toThrow('No alerts found with the provided selection');
         expect(mockEsClient.closePointInTime).toHaveBeenCalled();
       });
     });
