@@ -19,8 +19,6 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useAgentId, useConversationReadOnly } from '../../../../hooks/use_conversation';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
 import { RoundMetadataPopover } from './round_metadata_popover';
 import { RoundTraceButton } from './round_trace_button';
@@ -49,8 +47,6 @@ const copyLabels = {
   },
 } as const;
 
-const ADD_TO_DATASET_METADATA_SOURCE = 'agent_builder';
-
 // Round feedback is not modelled in the events timeline yet — it lives only on the
 // round (`ConversationRoundFeedback`) and is dropped when rounds are projected from
 // events, so a vote can't round-trip and a submitted vote would silently vanish on
@@ -75,8 +71,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   copyTarget = 'response',
 }) => {
   const { addSuccessToast } = useToasts();
-  const { services } = useKibana();
-  const isExperimentalEnabled = useExperimentalFeatures();
   const isTracingEnabled = useTracingEnabled();
   const agentId = useAgentId();
   const { isReadOnly, isLoading: isConversationReadOnlyLoading } = useConversationReadOnly();
@@ -123,24 +117,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
 
   const feedback = useFeedback(rawRound?.id ?? '', rawRound?.feedback, ebtContext);
 
-  // `services.plugins.evals` is optional — the evals plugin isn't installed
-  // in every Kibana deployment. When absent, the 'Add to Dataset' button hides.
-  const addToDatasetAction = useMemo(() => {
-    if (!rawRound || !services.plugins.evals?.getAddToDatasetAction) return null;
-    return services.plugins.evals.getAddToDatasetAction({
-      initialExample: {
-        input: { round: rawRound },
-        output: { steps: rawRound.steps },
-        metadata: {
-          source: ADD_TO_DATASET_METADATA_SOURCE,
-          trace_id: traceId ?? null,
-        },
-      },
-    });
-  }, [rawRound, services.plugins.evals, traceId]);
-
   const showTraceButton = isTracingEnabled && Boolean(traceId);
-  const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
   const isEditable = !isReadOnly && !isConversationReadOnlyLoading;
   const showFeedback =
     ROUND_FEEDBACK_ENABLED &&
@@ -181,22 +158,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           {showTraceButton && traceId && (
             <EuiFlexItem grow={false}>
               <RoundTraceButton traceId={traceId} />
-            </EuiFlexItem>
-          )}
-          {showAddToDatasetButton && addToDatasetAction && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType={addToDatasetAction.iconType}
-                color="text"
-                aria-label={addToDatasetAction.label}
-                onClick={addToDatasetAction.onClick}
-                data-test-subj="roundAddToDatasetButton"
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: AGENT_BUILDER_UI_EBT.action.conversation.ROUND_ADD_TO_DATASET,
-                  detail: 'conversation',
-                })}
-              />
             </EuiFlexItem>
           )}
           {rawRound && (

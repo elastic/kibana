@@ -21,14 +21,6 @@ jest.mock('../../../../hooks/use_toasts', () => ({
   useToasts: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: { plugins: {} } }),
-}));
-
-jest.mock('../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => false,
-}));
-
 jest.mock('../../../../hooks/use_tracing_enabled', () => ({
   useTracingEnabled: () => false,
 }));
