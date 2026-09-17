@@ -80,7 +80,10 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
             const hostName = action.hosts[agentId]?.name ?? agentId;
             let hostOutput: React.ReactNode = null;
 
-            if (isCompleted && wasSuccessful) {
+            // With `kill-process` we still want to show the returned content even
+            // during a failure. This accommodates for when the parent PID was not able
+            // to be killed, but descendants (at least some) were killed.
+            if ((isCompleted && wasSuccessful) || isKillProcessAction(action)) {
               if (isGetFileAction(action)) {
                 hostOutput = (
                   <ResponseActionFileDownloadLink
@@ -195,15 +198,16 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                         {OUTPUT_MESSAGES.expandSection.completedAt} {completedAt}
                       </div>
                     )}
-                    {wasSuccessful ? (
-                      hostOutput
-                    ) : (
+
+                    {!wasSuccessful && !hostOutput && (
                       <EndpointActionFailureMessage
                         action={action}
                         agentId={agentId}
                         data-test-subj={getTestId(`${agentId}-outputFailureMessage`)}
                       />
                     )}
+
+                    {hostOutput}
                   </div>
                 )}
                 {hasMultipleAgents && <EuiSpacer size="l" />}
