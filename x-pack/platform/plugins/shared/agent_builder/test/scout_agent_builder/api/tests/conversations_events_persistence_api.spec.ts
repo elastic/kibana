@@ -101,7 +101,7 @@ apiTest.describe(
       'a completed round is persisted as a stored events projection that GET serves verbatim',
       async ({ apiClient, esClient }) => {
         // A single real round through `converse` drives the production write path
-        // (upsertRound -> reconcile -> toEs -> storage.index).
+        // (replaceRoundEvents -> reconcile -> toEs -> storage.index).
         await setupAgentDirectAnswer({
           proxy: llmProxy,
           title: 'Events-native round',

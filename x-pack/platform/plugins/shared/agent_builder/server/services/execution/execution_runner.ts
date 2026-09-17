@@ -27,12 +27,7 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type {
-  ChatEvent,
-  ConversationAction,
-  ConverseInput,
-  ConversationRoundAuthor,
-} from '@kbn/agent-builder-common';
+import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -45,7 +40,6 @@ import {
   createInternalError,
   normalizeInteractive,
   DEFAULT_CONVERSATION_TITLE,
-  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
@@ -66,8 +60,6 @@ import {
   handleCancellation,
   executeAgent$,
   getConversation,
-  updateConversation$,
-  createConversation$,
   persistRoundInput,
   appendRoundTerminated$,
   appendResumeExecution$,
@@ -78,7 +70,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { withConverseSpan } from '../../tracing';
+import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -186,7 +178,6 @@ const handleConversationExecution = async ({
     nextInput,
     browserApiTools,
     configurationOverrides,
-    action,
     telemetryMetadata,
     maxContentLength,
     reasoningLevel,
@@ -228,7 +219,7 @@ const handleConversationExecution = async ({
   const roundId = uuidv4();
   const receivedAt = new Date();
 
-  const useTwoPhase = action !== 'regenerate' && !isPendingResumeConversation(conversation);
+  const useTwoPhase = !isPendingResumeConversation(conversation);
   if (storeConversation && useTwoPhase) {
     await persistRoundInput({
       conversation,
@@ -266,7 +257,6 @@ const handleConversationExecution = async ({
     runAgent,
     browserApiTools,
     configurationOverrides,
-    action,
     interactivity,
     parentExecutionId: execution.parentExecutionId,
     projectRouting,
@@ -295,7 +285,6 @@ const handleConversationExecution = async ({
         conversationClient,
         title$,
         agentEvents$,
-        action,
         nextInput,
         author,
       })
@@ -320,6 +309,11 @@ const handleConversationExecution = async ({
       : undefined;
 
   const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+  const privacySettings = await loadTracingPrivacySettings({
+    uiSettingsClient: deps.uiSettings.asScopedToClient(deps.savedObjects.getScopedClient(request)),
+    logger,
+    spaceId,
+  });
 
   return withConverseSpan(
     {
@@ -328,6 +322,7 @@ const handleConversationExecution = async ({
       providerName: connectorProvider,
       conversationId: conversation.id,
       spaceId,
+      privacySettings,
       opikHeaders,
     },
     (span) => {
@@ -369,7 +364,7 @@ const handleConversationExecution = async ({
 
           try {
             if (isRoundCompleteEvent(event)) {
-              const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+              const isReplacingRound = event.data?.resumed === true;
               const currentRoundCount = isReplacingRound
                 ? conversation.rounds.length
                 : (conversation.rounds?.length ?? 0) + 1;
@@ -550,7 +545,6 @@ const buildPersistenceEvents = ({
   conversationClient,
   title$,
   agentEvents$,
-  action,
   nextInput,
   author,
 }: {
@@ -558,15 +552,13 @@ const buildPersistenceEvents = ({
   conversationClient: ConversationClient;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
-  action?: ConversationAction;
   nextInput: ConverseInput;
   author?: ConversationRoundAuthor;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
-  const isRegenerate = action === 'regenerate';
   const isResume = isPendingResumeConversation(conversation);
-  const useTwoPhase = !isRegenerate && !isResume;
+  const useTwoPhase = !isResume;
 
   if (useTwoPhase) {
     const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
@@ -590,33 +582,17 @@ const buildPersistenceEvents = ({
     );
   }
 
-  // A resume of an events-native conversation appends a new execution (append-only); the pause is
-  // never rewritten. Legacy (non-events-native) resumes and regenerate keep the rounds-path write.
-  if (isResume && !isRegenerate && isEventsNativeVersion(conversation.schema_version)) {
-    return appendResumeExecution$({
-      conversation,
-      conversationClient,
-      roundCompletedEvents$,
-      input: nextInput,
-      author,
-      title$: conversationNeedsTitle(conversation) ? title$ : undefined,
-    });
-  }
-
-  return conversation.operation === 'CREATE'
-    ? createConversation$({
-        conversation,
-        conversationClient,
-        title$,
-        roundCompletedEvents$,
-      })
-    : updateConversation$({
-        conversationClient,
-        conversation,
-        roundCompletedEvents$,
-        action,
-        title$: conversationNeedsTitle(conversation) ? title$ : undefined,
-      });
+  // A resume appends a new execution (append-only); the pause is never rewritten. This also covers
+  // legacy (non events-native) documents: `fromEs` derives their timeline from rounds on read, so
+  // the append writes the full projection and promotes the document to events-native.
+  return appendResumeExecution$({
+    conversation,
+    conversationClient,
+    roundCompletedEvents$,
+    input: nextInput,
+    author,
+    title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+  });
 };
 
 /**
