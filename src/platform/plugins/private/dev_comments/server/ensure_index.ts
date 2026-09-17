@@ -11,7 +11,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-export const COMMENTS_INDEX = '.kibana-developer-toolbar-comments';
+export const COMMENTS_INDEX = '.kibana-dev-comments';
 
 const keyword = { type: 'keyword' } as const;
 
@@ -67,5 +67,5 @@ export const ensureCommentsIndex = async (
     }
     throw error;
   }
-  logger.info(`Created developer toolbar comments index [${COMMENTS_INDEX}]`);
+  logger.info(`Created dev comments index [${COMMENTS_INDEX}]`);
 };

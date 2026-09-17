@@ -17,7 +17,7 @@ import type {
   UpdateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { NewComment } from '../../common/comments';
+import type { NewComment } from '../common';
 import { CommentsClient } from './comments_client';
 import { COMMENTS_INDEX } from './ensure_index';
 import { CommentsLimitError } from './limit_error';

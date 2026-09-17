@@ -42,13 +42,6 @@ const LazyDesignToolsButton = lazy(() =>
   }))
 );
 
-// The launcher loads the comments layer itself on first use.
-const LazyCommentsLauncher = lazy(() =>
-  import('./comments/comments_launcher').then(({ CommentsLauncher }) => ({
-    default: CommentsLauncher,
-  }))
-);
-
 export class DeveloperToolbarPlugin
   implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
 {
@@ -93,15 +86,6 @@ export class DeveloperToolbarPlugin
       children: (
         <Suspense fallback={null}>
           <LazyDesignToolsButton />
-        </Suspense>
-      ),
-    });
-
-    this.registerItem({
-      id: 'Comments',
-      children: (
-        <Suspense fallback={null}>
-          <LazyCommentsLauncher core={core} />
         </Suspense>
       ),
     });

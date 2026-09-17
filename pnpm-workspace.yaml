@@ -1031,6 +1031,7 @@ packages:
   - 'src/platform/packages/shared/shared-ux/table_persist'
   - 'src/platform/packages/shared/shared-ux/toolbar_selector'
   - 'src/platform/plugins/private/advanced_settings'
+  - 'src/platform/plugins/private/dev_comments'
   - 'src/platform/plugins/private/event_annotation'
   - 'src/platform/plugins/private/event_annotation_listing'
   - 'src/platform/plugins/private/files_management'

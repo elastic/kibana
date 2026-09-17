@@ -18,7 +18,7 @@ import type {
   CommentsImportResult,
   NewComment,
   TrailStep,
-} from '../../common/comments';
+} from '../common';
 import { COMMENTS_INDEX, ensureCommentsIndex } from './ensure_index';
 import { CommentsLimitError } from './limit_error';
 import { MAX_COMMENTS, QUOTA_ID, REPLIES_MAX, normalizeRoute, type LegacyRoute } from './schemas';
@@ -193,7 +193,7 @@ export class CommentsClient {
     if (failures.length > 0) {
       await this.release(failures.filter(({ id }) => id && newIds.has(id)).length);
       this.logger.warn(
-        `Failed to import ${failures.length} developer toolbar comments: ${failures
+        `Failed to import ${failures.length} comments: ${failures
           .map(({ id, reason }) => `[${id}] ${reason}`)
           .join('; ')}`
       );
@@ -239,9 +239,7 @@ export class CommentsClient {
         return;
       }
     }
-    throw new Error(
-      `Could not claim room for ${count} developer toolbar comments: the quota kept changing.`
-    );
+    throw new Error(`Could not claim room for ${count} comments: the quota kept changing.`);
   }
 
   /** Gives back room claimed for comments that were not written after all; a failure here only makes the quota conservative. */
@@ -253,7 +251,7 @@ export class CommentsClient {
       // Nothing to give back when the document is missing: it will be recreated from the index.
       await this.adjustQuota(-count);
     } catch (error) {
-      this.logger.warn(`Failed to release ${count} developer toolbar comment slots: ${error}`);
+      this.logger.warn(`Failed to release ${count} comment slots: ${error}`);
     }
   }
 

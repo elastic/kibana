@@ -16,7 +16,7 @@ import {
   type CommentsApi,
   type CommentsExport,
   type CommentsImportResult,
-} from '../../common/comments';
+} from '../common';
 
 /** Fetch errors carry the server's explanation (limits, rejected records) in their body; the layer shows it to the user. */
 const explained = async <T>(request: Promise<T>): Promise<T> => {

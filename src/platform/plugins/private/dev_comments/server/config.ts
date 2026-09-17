@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  /** Controls whether the developer toolbar (and its server routes) is enabled. */
+  /** Controls whether the dev comments plugin is enabled. */
   enabled: schema.conditional(
     schema.contextRef('dev'),
     true,
@@ -19,7 +19,7 @@ export const configSchema = schema.object({
     schema.boolean(),
     /** When not in dev, only false is allowed. */
     schema.literal(false),
-    /** Default to true in dev */
+    /** Default to true in dev, false otherwise. */
     { defaultValue: schema.contextRef('dev') }
   ),
 });

@@ -7,10 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, type ConfigSchema } from './config';
+import type { Plugin, PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-export type { ConfigSchema } from './config';
+const configSchema = schema.object({
+  /** Controls whether inspect component plugin is enabled. */
+  enabled: schema.conditional(
+    schema.contextRef('dev'),
+    true,
+    /** Allowed to be configured when in dev. */
+    schema.boolean(),
+    /** When not in dev, only false is allowed. */
+    schema.literal(false),
+    /** Default to true in dev */
+    { defaultValue: schema.contextRef('dev') }
+  ),
+});
+
+export type ConfigSchema = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
@@ -19,7 +34,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { DeveloperToolbarServerPlugin } = await import('./plugin');
-  return new DeveloperToolbarServerPlugin(initializerContext);
+export const plugin = (): Plugin => {
+  return { setup() {}, start() {} };
 };

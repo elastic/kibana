@@ -9,7 +9,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { COMMENTS_API_PATH } from '../../common/comments';
+import { COMMENTS_API_PATH } from '../common';
 import type { CommentsClient } from './comments_client';
 import { CommentsLimitError } from './limit_error';
 import { registerCommentsRoutes } from './routes';

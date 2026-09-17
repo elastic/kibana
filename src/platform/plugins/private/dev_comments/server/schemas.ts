@@ -14,7 +14,7 @@ import {
   type Comment,
   type CommentRoute,
   type CommentsExport,
-} from '../../common/comments';
+} from '../common';
 
 /** Most comments stored, and so listed, exported or imported at once. */
 export const MAX_COMMENTS = 1000;

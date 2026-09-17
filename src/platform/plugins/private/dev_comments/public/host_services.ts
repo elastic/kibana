@@ -10,7 +10,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { IBasePath } from '@kbn/core-http-browser';
 import { isSafeRelativePath, type CommentsHostServices } from '@kbn/dev-comments';
-import { routeFromLocation, type CommentRoute } from '../../common/comments';
+import { routeFromLocation, type CommentRoute } from '../common';
 import { createCommentsApi } from './comments_api';
 import { captureViewport } from './capture_viewport';
 

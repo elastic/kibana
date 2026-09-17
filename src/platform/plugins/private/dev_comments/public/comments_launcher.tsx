@@ -43,7 +43,7 @@ const LauncherButton = ({ onClick, loading }: { onClick?: () => void; loading?: 
 /**
  * Stands in for the comments button until comment mode is first switched on
  * (button or shortcut): `@kbn/dev-comments` and the screenshot library are
- * only loaded then, and stay out of the toolbar's page load.
+ * only loaded then, and stay out of the page load.
  */
 export const CommentsLauncher = ({ core }: { core: CoreStart }) => {
   const [loaded, setLoaded] = useState(false);

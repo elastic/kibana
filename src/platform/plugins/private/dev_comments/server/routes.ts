@@ -8,7 +8,7 @@
  */
 
 import type { IRouter, KibanaResponseFactory } from '@kbn/core/server';
-import { COMMENTS_API_PATH } from '../../common/comments';
+import { COMMENTS_API_PATH } from '../common';
 import type { CommentsClient } from './comments_client';
 import { CommentsLimitError } from './limit_error';
 import {
@@ -24,7 +24,7 @@ const security = {
   authz: {
     enabled: false,
     reason:
-      'Development-only review tool: the routes exist only while the developer toolbar is enabled and store UI comments intentionally shared by every authenticated user.',
+      'Development-only review tool: the routes exist only while the plugin is enabled in dev mode and store UI comments intentionally shared by every authenticated user.',
   },
 } as const;
 

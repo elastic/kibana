@@ -10,11 +10,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/plugins/shared/developer_toolbar'],
+  roots: ['<rootDir>/src/platform/plugins/private/dev_comments'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/developer_toolbar',
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/dev_comments',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/platform/plugins/shared/developer_toolbar/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/plugins/private/dev_comments/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

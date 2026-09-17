@@ -9,7 +9,7 @@
 
 import type { CommentRoute } from '@kbn/dev-comments';
 
-export const COMMENTS_API_PATH = '/internal/developer_toolbar/comments';
+export const COMMENTS_API_PATH = '/internal/dev_comments';
 
 export type {
   Comment,
