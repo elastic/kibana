@@ -60,7 +60,7 @@ user to the "Create policy" or "Update Policy" button in the rendered attachment
 Use operations[] to:
 1. set_metadata — set name and description
 2. set_destinations — set workflow destinations (type: 'workflow', id: '<workflow-id>')
-3. set_matcher — set matcher \`tags\` (string[]) to match by rule tags, or a KQL \`expression\` over episode context fields, or null for catch-all.
+3. set_matcher — set matcher \`tags\` (string[]) to match by rule tags, or a KQL \`expression\` over episode context fields, or null for catch-all. To target one specific rule, put a shared link tag on both the rule (via manage_rule \`set_metadata\`) and \`matcher.tags\`.
 4. set_grouping — set groupingMode (per_episode | all | per_field) and groupBy fields
 5. set_throttle — set throttle strategy and optional interval
 6. validate — validate the accumulated policy against the API request schema; throws if not ready to save`,
