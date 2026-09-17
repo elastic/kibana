@@ -352,9 +352,8 @@ export const registerGetPipelineDataRoute = (
 
           // Always fetch step inputs so we can extract the actual alerts the
           // generate step received from the 'generate_discoveries' step's
-          // input.alerts field. These are the REAL events passed to generation —
-          // used both to surface them on the gate (skill) inspect (Step 5b) and to
-          // reconstruct provided-mode alert retrieval (Step 2.5).
+          // input.alerts field — the REAL events passed to generation, used to
+          // surface them on the gate (skill) inspect (Step 5b).
           // Note: includeInput controls _step execution_ inputs, not workflow-level input.
           let generationStepAlerts: string[] | null = null;
           const generationData: PipelineGenerationData | null =
@@ -409,25 +408,29 @@ export const registerGetPipelineDataRoute = (
               : null;
 
           // Step 2.5: For a supplied-alerts run, reconstruct alert retrieval data
-          // from either:
-          // (a) the generation step's input (available after the step completes), or
-          // (b) the event log tracking data written at generate-step-started time
-          //     (available immediately during the running state, before step.input is populated).
-          // This surfaces the provided alerts in the Alert Retrieval section of the flyout
-          // both while the generation is running AND after it completes.
-          const effectiveProvidedAlerts: string[] | null =
-            generationStepAlerts ?? tracking.providedAlerts ?? null;
+          // from the tracked supplied-alert list. `tracking.providedAlerts` is
+          // written to the event log at generate-step-started time (before the
+          // step input is populated), so the entry is available while the
+          // generation is running AND after it completes — with the same value in
+          // both states.
+          //
+          // Deliberately NOT sourced from the generate step's `input.alerts`
+          // (available once the step completes): that input is the full generation
+          // input — the kept candidates plus any net-new alerts the gate (skill)
+          // added — while the gate run's results are intentionally excluded from
+          // `combined_alerts`. Labelling the step input `provided` would fold
+          // gate-added alerts into this entry (mislabelling them as supplied) and
+          // indirectly into Combined alert retrieval, and would make the displayed
+          // provided count change between the running and completed states.
+          // The step input is reserved for the gate inspect data (Step 5b).
+          const providedAlerts = tracking.providedAlerts ?? null;
 
           if (
             alertRetrievalData == null &&
             hasProvidedAlerts &&
-            Array.isArray(effectiveProvidedAlerts) &&
-            effectiveProvidedAlerts.length > 0
+            Array.isArray(providedAlerts) &&
+            providedAlerts.length > 0
           ) {
-            // Assign to a const to satisfy TS narrowing — `let` variables
-            // mutated in closures are widened back to `T | null`.
-            const providedAlerts: string[] = effectiveProvidedAlerts;
-
             alertRetrievalData = [
               {
                 alerts: providedAlerts,

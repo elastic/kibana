@@ -531,25 +531,107 @@ describe('registerGetPipelineDataRoute', () => {
       ]);
     });
 
-    it('prefers the resolved generate_discoveries step input once it is available', async () => {
-      mockGetWorkflowExecutionsTracking.mockResolvedValue(providedRunTracking);
+    it('uses the tracked supplied alerts for the provided entry even when the gate added net-new alerts', async () => {
+      // A provided run can execute the gate (`skill_enabled: true` in the run
+      // tool). Once the generate step completes, its `input.alerts` holds the
+      // FULL generation input: the supplied alerts PLUS the net-new alerts the
+      // gate added. The `provided` entry must stay scoped to what the user
+      // supplied (the tracked list) — labelling the step input `provided` would
+      // mislabel the gate-added alerts as supplied and fold them, via Combined
+      // alert retrieval, into a phase that intentionally excludes gate results.
+      // The step input is reserved for the gate inspect data (Step 5b) instead.
+      mockGetWorkflowExecutionsTracking.mockResolvedValue({
+        ...providedRunTracking,
+        gate: [
+          {
+            workflowId: 'system-attack-discovery-skill-alert-retrieval',
+            workflowRunId: 'gate-run-id',
+          },
+        ],
+      });
       mockGenerationExecutionWithAlerts(resolvedGenerationAlerts);
+      mockExtractPipelineGateData.mockReturnValue({
+        alerts: [],
+        alerts_context_count: resolvedGenerationAlerts.length,
+        extraction_strategy: 'skill' as const,
+      });
       mockExtractPipelineGenerationData.mockReturnValue(null);
       mockExtractPipelineValidationData.mockReturnValue(null);
       mockComputeCombinedAlerts.mockReturnValue({
-        alerts: resolvedGenerationAlerts,
-        alerts_context_count: resolvedGenerationAlerts.length,
+        alerts: suppliedAlerts,
+        alerts_context_count: suppliedAlerts.length,
       });
 
       const body = await invokeHandler();
 
-      expect(body.alert_retrieval).toEqual([
+      // The provided entry carries the SUPPLIED alerts, not the step input —
+      // the count matches the tracked supplied list (2), not the generation
+      // input (3).
+      expect(body.alert_retrieval).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            alerts: suppliedAlerts,
+            alerts_context_count: suppliedAlerts.length,
+            extraction_strategy: 'provided',
+            workflow_id: 'provided',
+            workflow_run_id: 'provided',
+          }),
+        ])
+      );
+      // The full generation input (kept + gate-added) is surfaced on the gate
+      // (skill) inspect entry instead.
+      expect(body.alert_retrieval).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            alerts: resolvedGenerationAlerts,
+            alerts_context_count: resolvedGenerationAlerts.length,
+            extraction_strategy: 'skill',
+            workflow_run_id: 'gate-run-id',
+          }),
+        ])
+      );
+      // Combined alert retrieval is computed from the provided entry only — the
+      // gate entry belongs to the Generation phase and is excluded.
+      expect(mockComputeCombinedAlerts).toHaveBeenCalledTimes(1);
+      expect(mockComputeCombinedAlerts).toHaveBeenCalledWith([
         expect.objectContaining({
-          alerts: resolvedGenerationAlerts,
-          alerts_context_count: resolvedGenerationAlerts.length,
-          extraction_strategy: 'provided',
+          alerts: suppliedAlerts,
+          alerts_context_count: suppliedAlerts.length,
         }),
       ]);
+    });
+
+    it('reports the same provided list and count in the running and completed states', async () => {
+      mockGetWorkflowExecutionsTracking.mockResolvedValue(providedRunTracking);
+      mockExtractPipelineGenerationData.mockReturnValue(null);
+      mockExtractPipelineValidationData.mockReturnValue(null);
+
+      // Running state: the generate step has started, its input is not
+      // populated yet.
+      mockGetWorkflowExecution.mockResolvedValue({ stepExecutions: [] });
+
+      const runningBody = await invokeHandler();
+
+      // Completed state: the generate step input is now resolved.
+      mockGenerationExecutionWithAlerts(resolvedGenerationAlerts);
+
+      const completedBody = await invokeHandler();
+
+      const runningEntry = runningBody.alert_retrieval?.find(
+        (entry) => entry.extraction_strategy === 'provided'
+      );
+      const completedEntry = completedBody.alert_retrieval?.find(
+        (entry) => entry.extraction_strategy === 'provided'
+      );
+
+      expect(runningEntry).toEqual(
+        expect.objectContaining({
+          alerts: suppliedAlerts,
+          alerts_context_count: suppliedAlerts.length,
+        })
+      );
+      // The displayed provided entry must not change between states.
+      expect(completedEntry).toEqual(runningEntry);
     });
 
     it('does not label retrieved alerts as provided when an alert-retrieval workflow ran', async () => {
