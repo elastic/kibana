@@ -3893,7 +3893,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.nativeConnectors.outlook.sync_all_mail_folders.tooltip',
           {
             defaultMessage:
-              'When enabled, indexes every mail folder in each mailbox, not only Inbox, Sent, Junk, and Archive. Expect longer syncs, more Exchange load, and a larger index.',
+              'When enabled, indexes the user mail folders in each mailbox, not only Inbox, Sent, Junk, and Archive. System folders such as Deleted Items, Drafts, Outbox, and search folders are never indexed. Expect longer syncs, more Exchange load, and a larger index.',
           }
         ),
         type: BOOLEAN,
