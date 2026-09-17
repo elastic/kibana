@@ -124,6 +124,7 @@ const nodeHttpFetch = (agent: HttpsAgent | undefined): DistributorFetch => {
           res.on('data', (chunk: Buffer) => {
             chunks.push(chunk);
           });
+          res.on('error', reject);
           res.on('end', () => {
             const status = res.statusCode ?? 0;
             const text = Buffer.concat(chunks).toString('utf8');

@@ -28,6 +28,7 @@ import {
   type Unit,
   type UnitRepository,
 } from '../../../../../services/unit_repository';
+import { getFormattedError } from '../../../../../util/errors';
 import {
   CANVAS_URL_STATE_KEY,
   canvasUrlSchema,
@@ -43,9 +44,6 @@ const defaultUrlState = {
   flyoutName: null,
   flyoutTab: null,
 };
-
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error('The unit definition request failed.');
 
 export const canvasStateMachine = setup({
   types: {
@@ -134,7 +132,7 @@ export const canvasStateMachine = setup({
         event.type === 'xstate.error.actor.loadUnitDefinition' ||
         event.type === 'xstate.error.actor.validateUnitDefinition' ||
         event.type === 'xstate.error.actor.persistUnitDefinition'
-          ? toError(event.error)
+          ? getFormattedError(event.error)
           : undefined,
     }),
     rollbackFailedSourceSave: assign(({ context }) =>
@@ -183,7 +181,7 @@ export const canvasStateMachine = setup({
           message:
             event.type === 'xstate.error.actor.validateUnitDefinition' ||
             event.type === 'xstate.error.actor.persistUnitDefinition'
-              ? toError(event.error).message
+              ? getFormattedError(event.error).message
               : 'Unable to save the source.',
           intent: context.savingSourceIntent,
         };
@@ -531,7 +529,7 @@ function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'c
       event.type === 'xstate.error.actor.validateUnitDefinition' ||
       event.type === 'xstate.error.actor.persistUnitDefinition'
     ) {
-      core.notifications.toasts.addError(toError(event.error), {
+      core.notifications.toasts.addError(getFormattedError(event.error), {
         title: i18n.translate('xpack.streams.streamDetailCanvas.sourcesConfigurationErrorMessage', {
           defaultMessage: 'Unable to update the sources configuration',
         }),

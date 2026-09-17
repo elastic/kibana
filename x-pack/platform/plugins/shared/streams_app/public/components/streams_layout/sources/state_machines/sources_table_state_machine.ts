@@ -21,6 +21,7 @@ import {
   type Unit,
   type UnitRepository,
 } from '../../../../services/unit_repository';
+import { getFormattedError } from '../../../../util/errors';
 
 export interface SourcesTableSortingColumn {
   id: string;
@@ -82,9 +83,6 @@ export type SourcesTableStateEvent =
   | { type: 'sorting.change'; columns: SourcesTableSortingColumn[] }
   | { type: 'pagination.change'; pagination: SourcesTablePagination }
   | { type: 'visibleColumns.change'; columnIds: string[] };
-
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error('The unit definition request failed.');
 
 export const sourcesTableStateMachine = setup({
   types: {
@@ -148,7 +146,7 @@ export const sourcesTableStateMachine = setup({
       error: ({ event }) =>
         event.type === 'xstate.error.actor.loadUnitDefinition' ||
         event.type === 'xstate.error.actor.persistUnitDefinition'
-          ? toError(event.error)
+          ? getFormattedError(event.error)
           : undefined,
     }),
     syncLoadedUnitDefinition: sendTo(
@@ -189,7 +187,7 @@ export const sourcesTableStateMachine = setup({
           type: 'unit.persistenceFailed',
           sourceId: context.pendingSourceId,
           unitDefinition: context.unitDefinition,
-          message: toError(event.error).message,
+          message: getFormattedError(event.error).message,
           intent: context.pendingIntent,
         };
       }
