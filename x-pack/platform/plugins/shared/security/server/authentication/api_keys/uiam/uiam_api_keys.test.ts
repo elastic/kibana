@@ -224,9 +224,9 @@ describe('UiamAPIKeys', () => {
       it('is omitted for an external API key', async () => {
         authenticatedWithApiKey(false);
 
-        expect(await grantWith(createMockRequest('ApiKey essu_external_credential_123'))).toEqual({
-          sharedSecret: undefined,
-        });
+        expect(
+          await grantWith(createMockRequest('ApiKey essu_external_credential_123'))
+        ).toBeNull();
       });
 
       it('defers to Kibana client authentication for an internal API key', async () => {

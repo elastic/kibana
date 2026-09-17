@@ -138,7 +138,7 @@ describe('UiamServiceAccounts', () => {
         expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
           new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
           expect.objectContaining({ organization_id: 'organization-id' }),
-          internal ? undefined : { sharedSecret: undefined }
+          internal ? undefined : null
         );
       }
     );

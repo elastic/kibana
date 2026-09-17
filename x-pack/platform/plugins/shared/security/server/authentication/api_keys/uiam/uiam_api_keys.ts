@@ -82,10 +82,10 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      // External API keys must not carry client authentication. For other credentials, preserve
-      // the request's secret and only default to Kibana's for internally created requests.
+      // External API keys must not carry client authentication (`null`). For other credentials,
+      // preserve the request's secret and only default to Kibana's for internally created requests.
       const clientAuthentication = isExternalApiKey(this.getCurrentUser(request))
-        ? { sharedSecret: undefined }
+        ? null
         : getUiamClientAuthentication(request);
       const { id, key, description } = await this.uiam?.grantApiKey(
         authorization,

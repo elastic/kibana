@@ -226,13 +226,14 @@ export interface UiamServicePublic {
    * @param authorization The HTTP authorization header containing scheme and credentials.
    * @param params The parameters for creating the API key (name and optional expiration).
    * @param clientAuthentication The client authentication to present alongside the caller
-   * credential (see {@link UiamClientAuthentication} for the supported shapes).
+   * credential: a {@link UiamClientAuthentication} secret to present verbatim, `null` to present
+   * none at all, or `undefined` to default to Kibana's own shared secret.
    * @returns A promise that resolves to an object containing the API key details.
    */
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    clientAuthentication?: UiamClientAuthentication
+    clientAuthentication?: UiamClientAuthentication | null
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -268,12 +269,13 @@ export interface UiamServicePublic {
    * @param authorization The caller's UIAM authorization header.
    * @param body The request body for creating the service account.
    * @param clientAuthentication The client authentication to present alongside the caller
-   * credential (see {@link UiamClientAuthentication} for the supported shapes).
+   * credential: a {@link UiamClientAuthentication} secret to present verbatim, `null` to present
+   * none at all, or `undefined` to default to Kibana's own shared secret.
    */
   createServiceAccount(
     authorization: HTTPAuthorizationHeader,
     body: CreateServiceAccountRequestBody,
-    clientAuthentication?: UiamClientAuthentication
+    clientAuthentication?: UiamClientAuthentication | null
   ): Promise<ServiceAccount>;
 
   /**
@@ -447,14 +449,20 @@ export class UiamService implements UiamServicePublic {
   /**
    * Builds the client authentication header for a UIAM call. `undefined` means the caller did not
    * supply anything, so Kibana presents its own shared secret; a {@link UiamClientAuthentication}
-   * carries the caller's secret verbatim, or - when it has no `sharedSecret` - deliberately
-   * presents none at all, which UIAM requires for external (organization) API keys.
+   * carries the caller's secret verbatim; `null` deliberately presents none at all, which UIAM
+   * requires for external (organization) API keys.
    */
   #getClientAuthenticationHeaders(
-    clientAuthentication: UiamClientAuthentication = { sharedSecret: this.#config.sharedSecret }
+    clientAuthentication?: UiamClientAuthentication | null
   ): Record<string, string> {
-    const { sharedSecret } = clientAuthentication;
-    return sharedSecret === undefined ? {} : { [ES_CLIENT_AUTHENTICATION_HEADER]: sharedSecret };
+    if (clientAuthentication === null) {
+      return {};
+    }
+
+    return {
+      [ES_CLIENT_AUTHENTICATION_HEADER]:
+        clientAuthentication?.sharedSecret ?? this.#config.sharedSecret,
+    };
   }
 
   /**
@@ -623,7 +631,7 @@ export class UiamService implements UiamServicePublic {
   async grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    clientAuthentication?: UiamClientAuthentication
+    clientAuthentication?: UiamClientAuthentication | null
   ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
@@ -748,7 +756,7 @@ export class UiamService implements UiamServicePublic {
   async createServiceAccount(
     authorization: HTTPAuthorizationHeader,
     body: CreateServiceAccountRequestBody,
-    clientAuthentication?: UiamClientAuthentication
+    clientAuthentication?: UiamClientAuthentication | null
   ): Promise<ServiceAccount> {
     try {
       this.#logger.debug('Attempting to create service account.');

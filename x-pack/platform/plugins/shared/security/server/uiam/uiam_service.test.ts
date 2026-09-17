@@ -476,13 +476,13 @@ describe('UiamService', () => {
     });
 
     // Methods that act on a caller-supplied credential accept the client authentication the caller
-    // composed: a secret to forward verbatim, one without a secret to present none at all, or
-    // `undefined` to present Kibana's own shared secret.
+    // composed: a secret to forward verbatim, `null` to present none at all, or `undefined` to
+    // present Kibana's own shared secret.
     const credentialOperations: Array<{
       name: string;
       run: (
         service: UiamService,
-        clientAuthentication?: UiamClientAuthentication
+        clientAuthentication?: UiamClientAuthentication | null
       ) => Promise<object | void>;
     }> = [
       {
@@ -528,7 +528,7 @@ describe('UiamService', () => {
       it('presents no client authentication when the caller composed none', async () => {
         fetchSpy.mockResolvedValue({ ok: true, json: async () => ({}) });
 
-        await run(uiamService, { sharedSecret: undefined });
+        await run(uiamService, null);
 
         expect(fetchSpy).toHaveBeenCalledTimes(1);
         expect(fetchSpy.mock.calls[0][1].headers).not.toHaveProperty(
@@ -888,7 +888,7 @@ describe('UiamService', () => {
           {
             name: 'api-key-from-grant',
           },
-          { sharedSecret: undefined }
+          null
         )
       ).resolves.toEqual(mockResponse);
 
@@ -1323,7 +1323,7 @@ describe('UiamService', () => {
         await uiamService.createServiceAccount(
           new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
           body,
-          withheld ? { sharedSecret: undefined } : undefined
+          withheld ? null : undefined
         );
         expect(fetchSpy).toHaveBeenCalledWith(
           expect.any(String),
@@ -1376,7 +1376,7 @@ describe('UiamService', () => {
       await mtlsUiamService.createServiceAccount(
         new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
         body,
-        { sharedSecret: undefined }
+        null
       );
 
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {

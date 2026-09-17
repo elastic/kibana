@@ -11,13 +11,13 @@ import { HTTPAuthorizationHeader, isUiamBearerCredential } from '@kbn/core-secur
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 
 /**
- * Client authentication composed by the caller: a shared secret to present verbatim, or - when
- * `sharedSecret` is absent - deliberately none at all, which UIAM requires for external
- * (organization) API keys. Passing `undefined` where this type is accepted means the caller
- * supplied nothing and Kibana's own shared secret is presented instead.
+ * Client authentication composed by the caller: a shared secret to present verbatim. Where this
+ * type is accepted, `null` means deliberately no client authentication at all, which UIAM requires
+ * for external (organization) API keys, and `undefined` means the caller supplied nothing and
+ * Kibana's own shared secret is presented instead.
  */
 export interface UiamClientAuthentication {
-  readonly sharedSecret?: string;
+  readonly sharedSecret: string;
 }
 
 /**
