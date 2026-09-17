@@ -11,6 +11,7 @@ import type { RuleCustomizationCounts } from './types';
 export interface ExternalRuleSourceInfo {
   is_customized: boolean;
   customized_fields: Array<{ fieldName: string }>;
+  has_base_version: boolean;
 }
 
 // we only publish a subset of most important fields that we know can be customized

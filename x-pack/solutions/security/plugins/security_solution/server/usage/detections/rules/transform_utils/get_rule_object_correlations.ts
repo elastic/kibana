@@ -63,6 +63,9 @@ export const getRuleObjectCorrelations = ({
       is_customized:
         attributes.params.ruleSource?.type === 'external' &&
         attributes.params.ruleSource?.isCustomized === true,
+      has_base_version:
+        attributes.params.ruleSource?.type !== 'external' ||
+        attributes.params.ruleSource?.hasBaseVersion !== false,
       // if rule immutable, it's Elastic/prebuilt
       elastic_rule: attributes.params.immutable,
       created_on: attributes.createdAt,

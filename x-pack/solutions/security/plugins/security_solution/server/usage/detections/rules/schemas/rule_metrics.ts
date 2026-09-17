@@ -32,6 +32,12 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
       description: 'Whether this is a customized prebuilt rule',
     },
   },
+  has_base_version: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether this prebuilt rule still has its base (original) prebuilt version',
+    },
+  },
   elastic_rule: {
     type: 'boolean',
     _meta: { description: 'If the detection rule has been authored by Elastic' },

@@ -18,6 +18,7 @@ import {
   getInitialAiCreatedRulesUsage,
   getInitialChangesHistoryUsage,
   getInitialEventLogUsage,
+  getInitialRuleBaseVersionStatus,
   getInitialRuleCustomizationStatus,
   getInitialRuleDeprecatedStatus,
   getInitialRuleUpgradeStatus,
@@ -37,6 +38,7 @@ import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
 import { calculateRuleUpgradeStatus } from './calculate_rules_upgrade_status';
 import type { ExternalRuleSourceInfo } from './get_rule_customization_status';
 import { getRuleCustomizationStatus } from './get_rule_customization_status';
+import { getRuleBaseVersionStatus } from './get_rule_base_version_status';
 
 export interface GetRuleMetricsOptions {
   signalsIndex: string;
@@ -73,6 +75,7 @@ export const getRuleMetrics = async ({
         detection_rule_status: getInitialEventLogUsage(),
         elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
         elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+        elastic_detection_rule_base_version_status: getInitialRuleBaseVersionStatus(),
         elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
         ai_created_rules: getInitialAiCreatedRulesUsage(),
         spaces_usage: getInitialSpacesUsage(),
@@ -178,12 +181,21 @@ export const getRuleMetrics = async ({
       return acc;
     }, getInitialAiCreatedRulesUsage());
 
+    const externalRuleSources = getExternalRuleSourceInfoList(ruleResults);
+
     return {
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
       elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
-      elastic_detection_rule_customization_status: prepareRuleCustomizationStatus(ruleResults),
+      elastic_detection_rule_customization_status:
+        externalRuleSources.length === 0
+          ? getInitialRuleCustomizationStatus()
+          : getRuleCustomizationStatus(externalRuleSources),
+      elastic_detection_rule_base_version_status:
+        externalRuleSources.length === 0
+          ? getInitialRuleBaseVersionStatus()
+          : getRuleBaseVersionStatus(externalRuleSources),
       elastic_detection_rule_deprecated_status: { total: numDeprecated },
       ai_created_rules: aiCreatedRulesUsage,
       spaces_usage: getSpacesUsage(ruleResults),
@@ -200,6 +212,7 @@ export const getRuleMetrics = async ({
       detection_rule_status: getInitialEventLogUsage(),
       elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
       elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+      elastic_detection_rule_base_version_status: getInitialRuleBaseVersionStatus(),
       elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
       ai_created_rules: getInitialAiCreatedRulesUsage(),
       spaces_usage: getInitialSpacesUsage(),
@@ -208,10 +221,10 @@ export const getRuleMetrics = async ({
   }
 };
 
-function prepareRuleCustomizationStatus(
+function getExternalRuleSourceInfoList(
   ruleResults: Awaited<ReturnType<typeof getDetectionRules>>
-) {
-  const ruleSources = ruleResults.flatMap((ruleResult): ExternalRuleSourceInfo[] => {
+): ExternalRuleSourceInfo[] {
+  return ruleResults.flatMap((ruleResult): ExternalRuleSourceInfo[] => {
     const ruleSource = ruleResult.attributes?.params?.ruleSource;
     if (
       !ruleSource ||
@@ -225,11 +238,8 @@ function prepareRuleCustomizationStatus(
       {
         is_customized: ruleSource.isCustomized,
         customized_fields: ruleSource.customizedFields ?? [],
+        has_base_version: ruleSource.hasBaseVersion ?? true,
       },
     ];
   });
-
-  return ruleSources.length === 0
-    ? getInitialRuleCustomizationStatus()
-    : getRuleCustomizationStatus(ruleSources);
 }

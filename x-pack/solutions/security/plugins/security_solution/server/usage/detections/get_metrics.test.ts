@@ -129,6 +129,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: false,
+              has_base_version: true,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -221,6 +222,12 @@ describe('Detections Usage and Metrics', () => {
             threat_query: 0,
             threshold: 0,
             timeline_id: 0,
+          },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 0,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
           },
           ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
@@ -279,6 +286,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: false,
+              has_base_version: true,
               enabled: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -372,6 +380,12 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 0,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
+          },
         },
       });
     });
@@ -428,6 +442,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: true,
+              has_base_version: true,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -521,6 +536,12 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 1,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
+          },
         },
       });
     });
@@ -577,6 +598,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: true,
+              has_base_version: true,
               enabled: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -670,6 +692,12 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 1,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
+          },
         },
       });
     });
@@ -726,6 +754,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: false,
+              has_base_version: true,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -833,6 +862,12 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 0,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
+          },
         },
       });
     });
@@ -889,6 +924,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: false,
+              has_base_version: true,
               enabled: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -982,6 +1018,12 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 0,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
+          },
         },
       });
     });
@@ -1038,6 +1080,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: true,
+              has_base_version: true,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -1131,6 +1174,12 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 1,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
+          },
         },
       });
     });
@@ -1187,6 +1236,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               is_customized: true,
+              has_base_version: true,
               enabled: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -1279,6 +1329,12 @@ describe('Detections Usage and Metrics', () => {
             threat_query: 0,
             threshold: 0,
             timeline_id: 0,
+          },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 1,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
           },
         },
       });
@@ -1387,6 +1443,12 @@ describe('Detections Usage and Metrics', () => {
             anomaly_threshold: 0,
             new_terms_fields: 0,
           },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 0,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
+          },
           ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
       });
@@ -1435,6 +1497,7 @@ describe('Detections Usage and Metrics', () => {
               elastic_rule: true,
               enabled: false,
               is_customized: false,
+              has_base_version: true,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
               rule_type: 'query',
@@ -1534,6 +1597,12 @@ describe('Detections Usage and Metrics', () => {
             threat_query: 0,
             anomaly_threshold: 0,
             new_terms_fields: 0,
+          },
+          elastic_detection_rule_base_version_status: {
+            customized_with_base_version: 0,
+            customized_without_base_version: 0,
+            noncustomized_with_base_version: 0,
+            noncustomized_without_base_version: 0,
           },
           ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
