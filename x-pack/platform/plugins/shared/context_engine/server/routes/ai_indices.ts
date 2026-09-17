@@ -715,7 +715,7 @@ export const registerAiIndexRoutes = ({
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: ListKisResponse = await getKis(esClient, {
-            destValue: aiIndex.dest.value,
+            dest: aiIndex.dest,
             size,
             ...(type !== undefined ? { type } : {}),
           });
@@ -759,7 +759,7 @@ export const registerAiIndexRoutes = ({
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: GetKiResponse = await getKi(esClient, {
             aiIndexId,
-            destValue: aiIndex.dest.value,
+            dest: aiIndex.dest,
             index,
             kiId,
           });

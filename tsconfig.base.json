@@ -1289,6 +1289,8 @@
       "@kbn/eso-plugin/*": ["./x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/*"],
       "@kbn/esql": ["./src/platform/plugins/shared/esql"],
       "@kbn/esql/*": ["./src/platform/plugins/shared/esql/*"],
+      "@kbn/esql-browser": ["./src/platform/packages/shared/esql/kbn-esql-browser"],
+      "@kbn/esql-browser/*": ["./src/platform/packages/shared/esql/kbn-esql-browser/*"],
       "@kbn/esql-composer": ["./src/platform/packages/shared/kbn-esql-composer"],
       "@kbn/esql-composer/*": ["./src/platform/packages/shared/kbn-esql-composer/*"],
       "@kbn/esql-datagrid": ["./src/platform/plugins/shared/esql_datagrid"],
@@ -2979,6 +2981,9 @@
       // resolution can't find the types; redirect to the real .d.ts. Drop
       // these once each package ships proper exports.types.
       "piscina": ["./node_modules/piscina/dist/src/index.d.ts"],
+      "mongodb-connection-string-url": [
+        "./node_modules/mongodb-connection-string-url/lib/index.d.ts"
+      ],
       "canvg": ["./typings/canvg"],
       "@typescript-eslint/parser": ["./typings/@typescript-eslint/parser"],
       "@a2a-js/sdk/server": ["./typings/@a2a-js-sdk/server"],

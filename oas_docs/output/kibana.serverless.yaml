@@ -2092,6 +2092,11 @@ paths:
                       total: 128
                     results:
                       - agent_id: elastic-ai-agent
+                        attachments:
+                          - id: 6f1c0f1e-6c2a-4a0a-9a1e-2f2b1c7d4e11
+                            type: text
+                          - id: 2b9d7c53-0b8e-4a77-9f0c-91a5d6c3b208
+                            type: esql
                         created_at: '2025-09-19T17:45:39.554Z'
                         id: bcc176c5-38f6-40be-be0c-898e34fa1480
                         permissions:
@@ -2753,6 +2758,10 @@ paths:
                   description: Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
                   maxLength: 256
@@ -3038,6 +3047,10 @@ paths:
                   description: Optional new description for the attachment.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
               required:
                 - data
       responses:
@@ -3339,7 +3352,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
@@ -3820,7 +3834,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
@@ -8208,8 +8223,9 @@ paths:
           name: page
           required: false
           schema:
+            maximum: 10000
             minimum: 1
-            type: number
+            type: integer
         - description: The number of action policies to return per page. Defaults to 20.
           in: query
           name: per_page
@@ -8217,7 +8233,7 @@ paths:
           schema:
             maximum: 100
             minimum: 1
-            type: number
+            type: integer
         - description: A text string to search across action policy fields.
           in: query
           name: search
@@ -8226,17 +8242,6 @@ paths:
             maxLength: 256
             minLength: 1
             type: string
-        - description: Filter by tags. Accepts a single string or an array.
-          in: query
-          name: tags
-          required: false
-          schema:
-            items:
-              maxLength: 128
-              minLength: 1
-              type: string
-            maxItems: 10
-            type: array
         - description: Filter by enabled status. Accepts the strings true or false.
           in: query
           name: enabled
@@ -8291,8 +8296,6 @@ paths:
                           expression: 'rule.tags: "production"'
                         name: Notify on production alerts
                         snoozed_until: null
-                        tags:
-                          - production
                         throttle:
                           interval: null
                           strategy: on_status_change
@@ -8369,7 +8372,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -8417,8 +8420,6 @@ paths:
                   matcher:
                     expression: 'rule.tags: "production"'
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -8448,8 +8449,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -8524,7 +8523,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -8647,7 +8646,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -8770,7 +8769,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -8893,7 +8892,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9017,7 +9016,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9140,7 +9139,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9263,7 +9262,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9387,7 +9386,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9446,8 +9445,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9536,7 +9533,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9614,8 +9611,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts (updated)
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9720,7 +9715,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9776,8 +9771,6 @@ paths:
                   matcher:
                     expression: 'rule.tags: "production"'
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -9807,8 +9800,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9842,8 +9833,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9948,7 +9937,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10015,8 +10004,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10120,7 +10107,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10187,8 +10174,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10292,7 +10277,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10369,8 +10354,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10474,7 +10457,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10541,8 +10524,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10646,7 +10627,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10785,7 +10766,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10909,7 +10890,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11029,7 +11010,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11151,7 +11132,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11271,7 +11252,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11395,7 +11376,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11515,7 +11496,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11645,7 +11626,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11776,7 +11757,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11907,7 +11888,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12038,7 +12019,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12171,7 +12152,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12301,7 +12282,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12491,7 +12472,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12686,7 +12667,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12713,13 +12694,14 @@ paths:
         [Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: get-alerting-v2-rules
       parameters:
-        - description: The page number to return. Defaults to 1.
+        - description: The page number to return. Defaults to 1. `page * per_page` cannot exceed 10000.
           in: query
           name: page
           required: false
           schema:
+            maximum: 10000
             minimum: 1
-            type: number
+            type: integer
         - description: The number of rules to return per page. Defaults to 20.
           in: query
           name: per_page
@@ -12727,7 +12709,7 @@ paths:
           schema:
             maximum: 1000
             minimum: 1
-            type: number
+            type: integer
         - description: The filter to apply to the rules.
           in: query
           name: filter
@@ -12871,7 +12853,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13037,7 +13019,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13261,7 +13243,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13381,7 +13363,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13501,7 +13483,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13621,7 +13603,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13783,7 +13765,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13903,7 +13885,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14025,7 +14007,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14147,7 +14129,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14269,7 +14251,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14391,7 +14373,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14515,7 +14497,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14669,7 +14651,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14855,7 +14837,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15099,7 +15081,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15276,7 +15258,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15449,7 +15431,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15583,7 +15565,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15704,7 +15686,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15824,7 +15806,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15955,7 +15937,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16085,7 +16067,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -78715,6 +78697,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Include execution input data.
           in: query
@@ -78726,6 +78709,13 @@ paths:
         - description: Include execution output data.
           in: query
           name: includeOutput
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: When `true`, omit the embedded `stepExecutions` array. Defaults to `false`. When this is `false`, the embed is capped at 5000 steps.
+          in: query
+          name: omitStepExecutions
           required: false
           schema:
             default: false
@@ -78838,6 +78828,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -78876,6 +78867,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -78939,6 +78931,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter logs by a specific step execution ID.
           in: query
@@ -79053,6 +79046,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -79142,12 +79136,14 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Step execution ID.
           in: path
           name: stepExecutionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -79221,6 +79217,86 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/executions/{executionId}/steps:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}. If a page exceeds Kibana's response buffer, the handler still returns 200 with `results: []` and the page `total`.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
+      operationId: get-workflows-executions-executionid-steps
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: Number of step executions per page.
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 1000
+            maximum: 5000
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getExecutionStepsResponseExample:
+                  description: Example response returning a page of step executions for a workflow run
+                  value:
+                    page: 1
+                    results:
+                      - executionTimeMs: 1000
+                        finishedAt: '2025-11-20T12:00:02.000Z'
+                        globalExecutionIndex: 0
+                        id: step-exec-001
+                        isTestRun: false
+                        scopeStack: []
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:01.000Z'
+                        status: completed
+                        stepExecutionIndex: 0
+                        stepId: hello_world_step
+                        stepType: console
+                        topologicalIndex: 0
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        workflowRunId: exec-a1b2c3d4-e5f6-7890
+                    size: 1000
+                    total: 1
+          description: "Indicates a successful response. If the page exceeds Kibana's response buffer, the handler still returns 200 with results: [] and the page total."
+      summary: Get execution step executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps?page=1&size=1000" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/steps?page=1&size=1000
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -79549,6 +79625,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -80233,6 +80310,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.
           in: query
@@ -80285,6 +80363,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -80373,6 +80452,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -80489,6 +80569,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -80579,6 +80660,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -80660,6 +80742,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter by execution status.
           in: query
@@ -80875,6 +80958,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -80913,6 +80997,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter by step ID.
           in: query
@@ -90657,12 +90742,6 @@ components:
           description: The ISO datetime until which the policy is snoozed, or null if not snoozed.
           nullable: true
           type: string
-        tags:
-          description: Tags associated with the action policy.
-          items:
-            type: string
-          nullable: true
-          type: array
         throttle:
           additionalProperties: false
           description: The throttle configuration for notifications.
@@ -90671,6 +90750,7 @@ components:
           properties:
             interval:
               description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+              maxLength: 32
               nullable: true
               type: string
             strategy:
@@ -90712,7 +90792,6 @@ components:
         - destinations
         - matcher
         - group_by
-        - tags
         - grouping_mode
         - throttle
         - snoozed_until
@@ -90727,6 +90806,7 @@ components:
       properties:
         interval:
           description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+          maxLength: 32
           nullable: true
           type: string
         strategy:
@@ -90875,7 +90955,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -90893,92 +90973,94 @@ components:
           type: string
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
               enum:
                 - alert
               type: string
-            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
               enum:
                 - signal
               type: string
-          description: The kind of the rule.
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data_strategy:
           anyOf:
-            - description: Holds the last known episode status when no data is present.
+            - description: Keeps the alert's last status when the rule finds no data.
               enum:
                 - last_known_status
               type: string
-            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+            - description: Not accepted when creating or updating rules. Do not send this value.
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
               enum:
                 - recover
               type: string
-            - description: No-data situations are ignored (default).
+            - description: Ignores runs where the rule finds no data.
               enum:
                 - none
               type: string
-          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+          description: 'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
           anyOf:
-            - description: recovers groups that stop breaching (default).
+            - description: Recovers an alert when the breach query no longer returns matches.
               enum:
                 - no_breach
               type: string
-            - description: uses a custom recovery query to detect recovery.
+            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
               enum:
                 - query
               type: string
-            - description: disables recovery entirely.
+            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
               enum:
                 - none
               type: string
-          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+          description: 'The condition that marks an alert recovered. If omitted or set to `none`, recovery is disabled: the alert stays `active` even after the breach query stops returning matches, and `state_transition.recovering_count` / `recovering_timeframe` are not allowed. Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.'
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
           additionalProperties: false
-          description: Episode state transition thresholds (alert-only).
+          description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
           nullable: true
           type: object
           properties:
             pending_count:
-              description: Consecutive breaches before transitioning to active.
+              description: Number of consecutive matches required before the alert becomes `active`.
               maximum: 1000
               minimum: 0
               type: integer
             pending_operator:
-              description: How to combine count and timeframe for pending.
+              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             pending_timeframe:
-              description: Time window for pending evaluation, e.g. 5m, 15m.
+              description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
-              description: Consecutive recoveries before transitioning to inactive.
+              description: Number of consecutive recoveries required before the alert becomes `inactive`.
               maximum: 1000
               minimum: 0
               type: integer
             recovering_operator:
-              description: How to combine count and timeframe for recovering.
+              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             recovering_timeframe:
-              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
-          description: Time field used for the lookback window range filter.
+          description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
           maxLength: 128
           minLength: 1
           type: string
@@ -91013,14 +91095,14 @@ components:
                 type: object
                 properties:
                   code:
-                    description: A stable, machine-readable error code (e.g., "RULE_NOT_FOUND", "INVALID_SCHEDULE"). Safe for clients to branch on.
+                    description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
                     type: string
                   details:
                     additionalProperties: {}
-                    description: Optional structured context (e.g., validation field errors, conflict resource IDs).
+                    description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
                     type: object
                   message:
-                    description: A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.
+                    description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
                     type: string
                 required:
                   - code
@@ -91135,14 +91217,14 @@ components:
                 type: object
                 properties:
                   code:
-                    description: A stable, machine-readable error code (e.g., "RULE_NOT_FOUND", "INVALID_SCHEDULE"). Safe for clients to branch on.
+                    description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
                     type: string
                   details:
                     additionalProperties: {}
-                    description: Optional structured context (e.g., validation field errors, conflict resource IDs).
+                    description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
                     type: object
                   message:
-                    description: A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.
+                    description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
                     type: string
                 required:
                   - code
@@ -91334,17 +91416,17 @@ components:
       type: object
       properties:
         code:
-          description: A stable, machine-readable error code (e.g., "RULE_NOT_FOUND", "INVALID_SCHEDULE"). Safe for clients to branch on.
+          description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
           type: string
         details:
           additionalProperties: {}
-          description: Optional structured context (e.g., validation field errors, conflict resource IDs).
+          description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
           type: object
         error:
           description: A short human-readable summary of the error category (e.g., "Not Found", "Bad Request"). Subject to change without notice. Do not parse or rely on its content.
           type: string
         message:
-          description: A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.
+          description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
           type: string
       required:
         - code
@@ -91404,14 +91486,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          type: array
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
           description: The throttle configuration for notifications.
@@ -91457,7 +91531,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -91466,92 +91540,94 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
               enum:
                 - alert
               type: string
-            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
               enum:
                 - signal
               type: string
-          description: The kind of the rule.
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data_strategy:
           anyOf:
-            - description: Holds the last known episode status when no data is present.
+            - description: Keeps the alert's last status when the rule finds no data.
               enum:
                 - last_known_status
               type: string
-            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+            - description: Not accepted when creating or updating rules. Do not send this value.
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
               enum:
                 - recover
               type: string
-            - description: No-data situations are ignored (default).
+            - description: Ignores runs where the rule finds no data.
               enum:
                 - none
               type: string
-          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+          description: 'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
           anyOf:
-            - description: recovers groups that stop breaching (default).
+            - description: Recovers an alert when the breach query no longer returns matches.
               enum:
                 - no_breach
               type: string
-            - description: uses a custom recovery query to detect recovery.
+            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
               enum:
                 - query
               type: string
-            - description: disables recovery entirely.
+            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
               enum:
                 - none
               type: string
-          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+          description: 'The condition that marks an alert recovered. If omitted or set to `none`, recovery is disabled: the alert stays `active` even after the breach query stops returning matches, and `state_transition.recovering_count` / `recovering_timeframe` are not allowed. Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.'
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
           additionalProperties: false
-          description: Episode state transition thresholds (alert-only).
+          description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
           nullable: true
           type: object
           properties:
             pending_count:
-              description: Consecutive breaches before transitioning to active.
+              description: Number of consecutive matches required before the alert becomes `active`.
               maximum: 1000
               minimum: 0
               type: integer
             pending_operator:
-              description: How to combine count and timeframe for pending.
+              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             pending_timeframe:
-              description: Time window for pending evaluation, e.g. 5m, 15m.
+              description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
-              description: Consecutive recoveries before transitioning to inactive.
+              description: Number of consecutive recoveries required before the alert becomes `inactive`.
               maximum: 1000
               minimum: 0
               type: integer
             recovering_operator:
-              description: How to combine count and timeframe for recovering.
+              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             recovering_timeframe:
-              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
-          description: Time field used for the lookback window range filter.
+          description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
           maxLength: 128
           minLength: 1
           type: string
@@ -91934,7 +92010,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -91956,92 +92032,94 @@ components:
           type: string
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
               enum:
                 - alert
               type: string
-            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
               enum:
                 - signal
               type: string
-          description: The kind of the rule.
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
         no_data_strategy:
           anyOf:
-            - description: Holds the last known episode status when no data is present.
+            - description: Keeps the alert's last status when the rule finds no data.
               enum:
                 - last_known_status
               type: string
-            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+            - description: Not accepted when creating or updating rules. Do not send this value.
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
               enum:
                 - recover
               type: string
-            - description: No-data situations are ignored (default).
+            - description: Ignores runs where the rule finds no data.
               enum:
                 - none
               type: string
-          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+          description: 'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
           anyOf:
-            - description: recovers groups that stop breaching (default).
+            - description: Recovers an alert when the breach query no longer returns matches.
               enum:
                 - no_breach
               type: string
-            - description: uses a custom recovery query to detect recovery.
+            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
               enum:
                 - query
               type: string
-            - description: disables recovery entirely.
+            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
               enum:
                 - none
               type: string
-          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+          description: 'The condition that marks an alert recovered. If omitted or set to `none`, recovery is disabled: the alert stays `active` even after the breach query stops returning matches, and `state_transition.recovering_count` / `recovering_timeframe` are not allowed. Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.'
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
           additionalProperties: false
-          description: Episode state transition thresholds (alert-only).
+          description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
           nullable: true
           type: object
           properties:
             pending_count:
-              description: Consecutive breaches before transitioning to active.
+              description: Number of consecutive matches required before the alert becomes `active`.
               maximum: 1000
               minimum: 0
               type: integer
             pending_operator:
-              description: How to combine count and timeframe for pending.
+              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             pending_timeframe:
-              description: Time window for pending evaluation, e.g. 5m, 15m.
+              description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
-              description: Consecutive recoveries before transitioning to inactive.
+              description: Number of consecutive recoveries required before the alert becomes `inactive`.
               maximum: 1000
               minimum: 0
               type: integer
             recovering_operator:
-              description: How to combine count and timeframe for recovering.
+              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             recovering_timeframe:
-              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
-          description: Time field used for the lookback window range filter.
+          description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
           maxLength: 128
           minLength: 1
           type: string
@@ -92111,9 +92189,11 @@ components:
       properties:
         every:
           description: Execution interval, e.g. 1m, 5m, 1h.
+          maxLength: 32
           type: string
         lookback:
           description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+          maxLength: 32
           type: string
       required:
         - every
@@ -92230,15 +92310,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          nullable: true
-          type: array
         throttle:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
@@ -92256,7 +92327,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -92298,39 +92369,41 @@ components:
               type: array
         no_data_strategy:
           anyOf:
-            - description: Holds the last known episode status when no data is present.
+            - description: Keeps the alert's last status when the rule finds no data.
               enum:
                 - last_known_status
               type: string
-            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+            - description: Not accepted when creating or updating rules. Do not send this value.
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
               enum:
                 - recover
               type: string
-            - description: No-data situations are ignored (default).
+            - description: Ignores runs where the rule finds no data.
               enum:
                 - none
               type: string
+          description: 'How the rule behaves when it finds no data for a group. If omitted, the existing value is kept. Set to `null` to clear it (those runs are then ignored). If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
           nullable: true
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
           anyOf:
-            - description: recovers groups that stop breaching (default).
+            - description: Recovers an alert when the breach query no longer returns matches.
               enum:
                 - no_breach
               type: string
-            - description: uses a custom recovery query to detect recovery.
+            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
               enum:
                 - query
               type: string
-            - description: disables recovery entirely.
+            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
               enum:
                 - none
               type: string
+          description: The condition that marks an alert recovered. If omitted, the existing value is kept. Set to `null` to clear it (recovery is then disabled). Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`. With `none`, the alert stays `active`, even after the breach query stops returning matches. `state_transition.recovering_count` and `recovering_timeframe` require an explicit `recovery_strategy` other than `none`.
           nullable: true
         schedule:
           additionalProperties: false
@@ -92339,47 +92412,52 @@ components:
           properties:
             every:
               description: Execution interval, e.g. 1m, 5m, 1h.
+              maxLength: 32
               type: string
             lookback:
               description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+              maxLength: 32
               type: string
         state_transition:
           anyOf:
             - additionalProperties: false
-              description: Episode state transition thresholds (alert-only).
+              description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
               type: object
               properties:
                 pending_count:
-                  description: Consecutive breaches before transitioning to active.
+                  description: Number of consecutive matches required before the alert becomes `active`.
                   maximum: 1000
                   minimum: 0
                   type: integer
                 pending_operator:
-                  description: How to combine count and timeframe for pending.
+                  description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
                   enum:
                     - AND
                     - OR
                   type: string
                 pending_timeframe:
-                  description: Time window for pending evaluation, e.g. 5m, 15m.
+                  description: Time window used with `pending_count`, for example `5m` or `15m`.
+                  maxLength: 32
                   type: string
                 recovering_count:
-                  description: Consecutive recoveries before transitioning to inactive.
+                  description: Number of consecutive recoveries required before the alert becomes `inactive`.
                   maximum: 1000
                   minimum: 0
                   type: integer
                 recovering_operator:
-                  description: How to combine count and timeframe for recovering.
+                  description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
                   enum:
                     - AND
                     - OR
                   type: string
                 recovering_timeframe:
-                  description: Time window for recovering evaluation, e.g. 5m, 15m.
+                  description: Time window used with `recovering_count`, for example `5m` or `15m`.
+                  maxLength: 32
                   type: string
             - nullable: true
           nullable: true
         time_field:
+          description: Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.
           maxLength: 128
           minLength: 1
           type: string

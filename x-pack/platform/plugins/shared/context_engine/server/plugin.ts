@@ -16,6 +16,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
 import type {
@@ -26,6 +27,7 @@ import type {
   DeleteWorkflowsApi,
   GetAiIndexDataReadServiceParams,
 } from './types';
+import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
@@ -77,8 +79,9 @@ export class ContextEnginePlugin
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
-  private workflowsManagementApiPromise: Promise<DeleteWorkflowsApi | undefined> =
-    Promise.resolve(undefined);
+  private workflowsManagementApiPromise: Promise<
+    (DeleteWorkflowsApi & KiVerifierWorkflowRunner) | undefined
+  > = Promise.resolve(undefined);
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -100,8 +103,30 @@ export class ContextEnginePlugin
     this.analyticsService.registerContextEngineEventTypes();
     const analyticsService = this.analyticsService;
 
+    const checkApiPrivileges = async (
+      request: KibanaRequest,
+      spaceId: string,
+      actions: readonly string[]
+    ): Promise<boolean> => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      const { security } = startDeps;
+      if (!security) {
+        return true;
+      }
+      const { hasAllRequested } = await security.authz
+        .checkPrivilegesWithRequest(request)
+        .atSpace(spaceId, {
+          kibana: actions.map((action) => security.authz.actions.api.get(action)),
+        });
+      return hasAllRequested;
+    };
+
     setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService)
+      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService, {
+        getWorkflowsManagement: () => this.workflowsManagementApiPromise,
+        checkExecutePrivilege: (request, spaceId) =>
+          checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
+      })
     );
 
     coreSetup.uiSettings.registerGlobal({
@@ -251,7 +276,9 @@ export class ContextEnginePlugin
   ): void {
     try {
       this.workflowsManagementApiPromise = coreSetup.plugins
-        .onSetup<{ workflowsManagement: { management: DeleteWorkflowsApi } }>('workflowsManagement')
+        .onSetup<{
+          workflowsManagement: { management: DeleteWorkflowsApi & KiVerifierWorkflowRunner };
+        }>('workflowsManagement')
         .then(({ workflowsManagement }) =>
           workflowsManagement.found ? workflowsManagement.contract.management : undefined
         )
