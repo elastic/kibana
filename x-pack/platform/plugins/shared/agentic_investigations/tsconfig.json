@@ -25,7 +25,6 @@
     "@kbn/zod",
     "@kbn/core-http-server-mocks",
     "@kbn/zod-helpers",
-    "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",

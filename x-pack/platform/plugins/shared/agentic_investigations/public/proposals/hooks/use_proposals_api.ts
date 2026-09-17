@@ -72,9 +72,12 @@ export const useProposal = (id: string | undefined) => {
       if (!id) {
         throw new Error('proposal id is required');
       }
-      return services.http!.get<ProposalWithMetadata>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-      });
+      return services.http!.get<ProposalWithMetadata>(
+        `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`,
+        {
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        }
+      );
     },
     enabled: Boolean(id),
     retry: retryOnTransientError,

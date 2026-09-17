@@ -30,10 +30,9 @@ export const STATUS_BADGE_LABELS: Record<ProposalStatus, string> = {
     'xpack.agenticInvestigations.proposals.attachments.statusBadge.succeeded',
     { defaultMessage: 'Succeeded' }
   ),
-  failed: i18n.translate(
-    'xpack.agenticInvestigations.proposals.attachments.statusBadge.failed',
-    { defaultMessage: 'Failed' }
-  ),
+  failed: i18n.translate('xpack.agenticInvestigations.proposals.attachments.statusBadge.failed', {
+    defaultMessage: 'Failed',
+  }),
   dismissed: i18n.translate(
     'xpack.agenticInvestigations.proposals.attachments.statusBadge.dismissed',
     { defaultMessage: 'Dismissed' }

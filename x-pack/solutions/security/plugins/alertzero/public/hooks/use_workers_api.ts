@@ -17,8 +17,8 @@ import type {
   UpdateWorkerResponse,
   Worker,
 } from '@kbn/alertzero-common';
-import { queryKeys } from '../query_keys';
 import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
+import { queryKeys } from '../query_keys';
 
 export const useWorkers = () => {
   const { services } = useKibana();
