@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSkeletonText,
   EuiSuperSelect,
   EuiText,
   EuiToolTip,
@@ -96,8 +97,7 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
     }
   `;
 
-  // Fall back to the raw identifier while the profile loads or for legacy name-only entries.
-  const displayName = profile ? getUserDisplayName(profile.user) : entry.name ?? entry.id ?? '';
+  const displayName = profile ? getUserDisplayName(profile.user) : entry.name;
   const secondary = profile?.user.email ?? profile?.user.username;
   const showSecondary = Boolean(secondary && secondary !== displayName);
 
@@ -115,14 +115,22 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
               size="s"
             />
           ) : (
-            <UserAvatar css={avatarStyles} user={{ username: displayName }} size="s" />
+            <UserAvatar
+              css={avatarStyles}
+              user={entry.name !== undefined ? { username: entry.name } : undefined}
+              size="s"
+            />
           )}
         </EuiFlexItem>
 
         <EuiFlexItem grow>
-          <EuiText size="s">
-            <strong>{displayName}</strong>
-          </EuiText>
+          {displayName === undefined ? (
+            <EuiSkeletonText lines={1} size="s" />
+          ) : (
+            <EuiText size="s">
+              <strong>{displayName}</strong>
+            </EuiText>
+          )}
           {showSecondary ? (
             <EuiText size="xs" color="subdued">
               {secondary}

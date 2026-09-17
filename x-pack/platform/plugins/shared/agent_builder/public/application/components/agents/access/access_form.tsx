@@ -107,14 +107,10 @@ export const AccessForm: React.FC<AccessFormProps> = ({
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
   }, [accessControlMode]);
 
-  const excludedUsernames = useMemo(
-    () =>
-      entries.flatMap((entry) => {
-        const username =
-          entry.id !== undefined ? profileByUid.get(entry.id)?.user.username : entry.name;
-        return username !== undefined ? [username] : [];
-      }),
-    [entries, profileByUid]
+  const excludedUids = entries.flatMap((entry) => (entry.id !== undefined ? [entry.id] : []));
+
+  const excludedUsernames = entries.flatMap((entry) =>
+    entry.id === undefined && entry.name !== undefined ? [entry.name] : []
   );
 
   const handleAdd = (profile: UserProfileWithAvatar) => {
@@ -136,7 +132,12 @@ export const AccessForm: React.FC<AccessFormProps> = ({
 
   return (
     <Section title={accessFlyoutPeopleSection} helpText={accessFlyoutPeopleHelp}>
-      <UserPicker excludedUsernames={excludedUsernames} isDisabled={isDisabled} onAdd={handleAdd} />
+      <UserPicker
+        excludedUids={excludedUids}
+        excludedUsernames={excludedUsernames}
+        isDisabled={isDisabled}
+        onAdd={handleAdd}
+      />
       {entries.length === 0 ? (
         <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
           {accessFlyoutNoPeople}

@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -111,18 +110,22 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
             <div css={tokenStackStyles(euiTheme)} aria-hidden>
               {previewEntries.map((entry) => {
                 const profile = entry.id !== undefined ? profileByUid.get(entry.id) : undefined;
-                const displayName = profile
-                  ? getUserDisplayName(profile.user)
-                  : entry.name ?? entry.id ?? '';
+                const displayName = profile ? getUserDisplayName(profile.user) : entry.name;
+                const roleLabel = ROLE_LABEL[entry.role];
                 return (
                   <EuiToolTip
                     key={getAccessControlEntryKey(entry)}
-                    content={`${displayName} — ${ROLE_LABEL[entry.role]}`}
+                    content={
+                      displayName !== undefined ? `${displayName} — ${roleLabel}` : roleLabel
+                    }
                   >
                     {profile ? (
                       <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
                     ) : (
-                      <EuiAvatar name={displayName} size="s" />
+                      <UserAvatar
+                        user={entry.name !== undefined ? { username: entry.name } : undefined}
+                        size="s"
+                      />
                     )}
                   </EuiToolTip>
                 );
