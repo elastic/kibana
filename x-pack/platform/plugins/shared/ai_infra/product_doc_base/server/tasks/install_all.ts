@@ -11,8 +11,15 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import { DocumentationProduct } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
-import { isTaskCurrentlyRunningError } from './utils';
+import {
+  isTaskCurrentlyRunningError,
+  chunkedTaskStateSchemaByVersion,
+  isProductName,
+  nextChunkRunResult,
+  type ChunkedTaskState,
+} from './utils';
 
 export const INSTALL_ALL_TASK_TYPE = 'ProductDocBase:InstallAll';
 export const INSTALL_ALL_TASK_ID = 'ProductDocBase:InstallAll';
@@ -30,16 +37,24 @@ export const registerInstallAllTaskDefinition = ({
       title: `Install all product documentation artifacts ${INSTALL_ALL_TASK_TYPE}`,
       timeout: '10m',
       maxAttempts: 3,
-      createTaskRunner: (context) => {
-        const inferenceId = context.taskInstance?.params?.inferenceId;
+      createTaskRunner: ({ taskInstance }) => {
+        const inferenceId = taskInstance.params?.inferenceId;
         return {
           async run() {
+            const { remaining } = taskInstance.state as ChunkedTaskState;
+            const [productName, ...rest] = (
+              remaining ?? Object.values(DocumentationProduct)
+            ).filter(isProductName);
+            if (!productName) {
+              return { state: {} };
+            }
             const { packageInstaller } = getServices();
-            return packageInstaller.installAll({ inferenceId });
+            await packageInstaller.installProduct({ productName, inferenceId });
+            return nextChunkRunResult(rest);
           },
         };
       },
-      stateSchemaByVersion: {},
+      stateSchemaByVersion: chunkedTaskStateSchemaByVersion,
     },
   });
 };

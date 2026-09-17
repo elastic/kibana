@@ -145,6 +145,46 @@ describe('ProductDocBasePlugin', () => {
       // Flush async startup tasks (uiSettings.get() → manager calls)
       await new Promise((resolve) => setImmediate(resolve));
       expect(DocumentationManagerMock().ensureDefaultProductDocumentation).toHaveBeenCalledTimes(1);
+      expect(DocumentationManagerMock().ensureDefaultProductDocumentation).toHaveBeenCalledWith({
+        wait: true,
+        waitTimeoutMs: expect.any(Number),
+      });
+      expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
+      expect(DocumentationManagerMock().updateAll).toHaveBeenCalledWith({
+        wait: true,
+        waitTimeoutMs: expect.any(Number),
+      });
+    });
+
+    it('does not schedule the update until the default documentation install has completed', async () => {
+      const coreStart = coreMock.createStart();
+      mockEisAvailable(coreStart);
+      let resolveInstall: () => void = () => {};
+      DocumentationManagerMock().ensureDefaultProductDocumentation.mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveInstall = resolve;
+        })
+      );
+      plugin.setup(coreMock.createSetup(), pluginSetupDeps);
+      plugin.start(coreStart, pluginStartDeps);
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(DocumentationManagerMock().ensureDefaultProductDocumentation).toHaveBeenCalledTimes(1);
+      expect(DocumentationManagerMock().updateAll).not.toHaveBeenCalled();
+
+      resolveInstall();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
+    });
+
+    it('continues with the update when the default documentation install fails', async () => {
+      const coreStart = coreMock.createStart();
+      mockEisAvailable(coreStart);
+      DocumentationManagerMock().ensureDefaultProductDocumentation.mockRejectedValue(
+        new Error('install failed')
+      );
+      plugin.setup(coreMock.createSetup(), pluginSetupDeps);
+      plugin.start(coreStart, pluginStartDeps);
+      await new Promise((resolve) => setImmediate(resolve));
       expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
     });
 
@@ -218,6 +258,32 @@ describe('ProductDocBasePlugin', () => {
           } as unknown as ProductDocBaseSetupDependencies['cloud'],
         });
         serverlessPlugin.start(coreStart, pluginStartDeps);
+        await new Promise((resolve) => setImmediate(resolve));
+        expect(DocumentationManagerMock().ensureDefaultSecurityLabs).toHaveBeenCalledTimes(1);
+        expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
+      });
+
+      it('starts Security Labs only after the product documentation tasks have completed', async () => {
+        const coreStart = coreMock.createStart();
+        mockEisAvailable(coreStart);
+        let resolveUpdateAll: () => void = () => {};
+        DocumentationManagerMock().updateAll.mockReturnValue(
+          new Promise<void>((resolve) => {
+            resolveUpdateAll = resolve;
+          })
+        );
+        serverlessPlugin.setup(coreMock.createSetup(), {
+          ...pluginSetupDeps,
+          cloud: {
+            serverless: { projectType: 'security' },
+          } as unknown as ProductDocBaseSetupDependencies['cloud'],
+        });
+        serverlessPlugin.start(coreStart, pluginStartDeps);
+        await new Promise((resolve) => setImmediate(resolve));
+        expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
+        expect(DocumentationManagerMock().ensureDefaultSecurityLabs).not.toHaveBeenCalled();
+
+        resolveUpdateAll();
         await new Promise((resolve) => setImmediate(resolve));
         expect(DocumentationManagerMock().ensureDefaultSecurityLabs).toHaveBeenCalledTimes(1);
         expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);

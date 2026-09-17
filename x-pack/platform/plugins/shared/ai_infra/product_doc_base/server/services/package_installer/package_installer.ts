@@ -173,20 +173,18 @@ export class PackageInstaller {
   }
 
   /**
-   * Will not upgrade products that are not already installed
+   * Returns the installed products whose version differs from the version selected for this deployment.
    */
-  async ensureUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
+  async getProductsToUpdate(params: {
+    inferenceId: string;
+    forceUpdate?: boolean;
+  }): Promise<ProductName[]> {
     const { inferenceId, forceUpdate } = params;
-    const inferenceInfo = await this.getInferenceInfo(inferenceId);
-    const [repositoryVersions, installStatuses, openapiSpecInstallStatus] = await Promise.all([
+    const [repositoryVersions, installStatuses] = await Promise.all([
       fetchArtifactVersions(this.getArtifactRepositoryOptions()),
       this.productDocClient.getInstallationStatus({ inferenceId }),
-      this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
-    const toUpdate: Array<{
-      productName: ProductName;
-      productVersion: string;
-    }> = [];
+    const toUpdate: ProductName[] = [];
     Object.entries(installStatuses).forEach(([productName, productState]) => {
       if (productState.status === 'uninstalled') {
         return;
@@ -197,39 +195,66 @@ export class PackageInstaller {
       }
       // Serverless/"latest" zip file has a special versioning strategy
       // where we track by last date modified in the bucket
-      const shouldInstallLatest = this.isServerless;
       const selectedVersion = selectVersion(
         this.currentVersion,
         availableVersions,
-        shouldInstallLatest
+        this.isServerless
       );
       if (productState.version !== selectedVersion || Boolean(forceUpdate)) {
         this.log.info(
           `Updating product [${productName}] from version [${productState.version}] to version [${selectedVersion}]`
         );
-        toUpdate.push({
-          productName: productName as ProductName,
-          productVersion: selectedVersion,
-        });
+        toUpdate.push(productName as ProductName);
       }
     });
+    return toUpdate;
+  }
 
-    for (const { productName, productVersion } of toUpdate) {
-      await this.installPackageWithVersionFallback({
-        productName,
-        selectedVersion: productVersion,
-        availableVersions: repositoryVersions[productName] ?? [],
-        customInference: inferenceInfo,
-      });
+  /**
+   * Installs the version of a single product selected for this deployment, falling back to
+   * previous versions when the selected artifact is not available.
+   */
+  async installProduct(params: { productName: ProductName; inferenceId?: string }): Promise<void> {
+    const { productName, inferenceId } = params;
+    const [repositoryVersions, inferenceInfo] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.getInferenceInfo(inferenceId),
+    ]);
+    const availableVersions = repositoryVersions[productName];
+    if (!availableVersions || !availableVersions.length) {
+      this.log.warn(`No version found for product [${productName}]`);
+      return;
     }
+    const selectedVersion = selectVersion(
+      this.currentVersion,
+      availableVersions,
+      this.isServerless
+    );
+    await this.installPackageWithVersionFallback({
+      productName,
+      selectedVersion,
+      availableVersions,
+      customInference: inferenceInfo,
+    });
+  }
 
+  /**
+   * Installs the OpenAPI spec when the installed version differs from the version selected for this deployment.
+   */
+  async ensureOpenApiSpecUpToDate(params: {
+    inferenceId: string;
+    forceUpdate?: boolean;
+  }): Promise<void> {
+    const { inferenceId, forceUpdate } = params;
+    const [repositoryVersions, openapiSpecInstallStatus] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
+    ]);
     const openAPISpecVersionToUpgradeTo = selectVersion(
       this.currentVersion,
       repositoryVersions.openapi,
       this.isServerless
     );
-
-    // Upgrade to newest version of OpenAPI Spec if possile
     if (
       forceUpdate ||
       openapiSpecInstallStatus.version !== openAPISpecVersionToUpgradeTo ||
@@ -242,33 +267,22 @@ export class PackageInstaller {
     }
   }
 
+  /**
+   * Will not upgrade products that are not already installed
+   */
+  async ensureUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
+    const productsToUpdate = await this.getProductsToUpdate(params);
+    for (const productName of productsToUpdate) {
+      await this.installProduct({ productName, inferenceId: params.inferenceId });
+    }
+    await this.ensureOpenApiSpecUpToDate(params);
+  }
+
   async installAll(params: { inferenceId?: string } = {}) {
     const { inferenceId } = params;
-    const repositoryVersions = await fetchArtifactVersions(this.getArtifactRepositoryOptions());
     const allProducts = Object.values(DocumentationProduct) as ProductName[];
-    const inferenceInfo = await this.getInferenceInfo(inferenceId);
-
     for (const productName of allProducts) {
-      const availableVersions = repositoryVersions[productName];
-
-      if (!availableVersions || !availableVersions.length) {
-        this.log.warn(`No version found for product [${productName}]`);
-        continue;
-      }
-
-      const shouldInstallLatest = this.isServerless;
-      const selectedVersion = selectVersion(
-        this.currentVersion,
-        availableVersions,
-        shouldInstallLatest
-      );
-
-      await this.installPackageWithVersionFallback({
-        productName,
-        selectedVersion,
-        availableVersions,
-        customInference: inferenceInfo,
-      });
+      await this.installProduct({ productName, inferenceId });
     }
   }
 

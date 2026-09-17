@@ -30,6 +30,9 @@ import { SearchService } from './services/search';
 import { registerRoutes } from './routes';
 import { registerTaskDefinitions } from './tasks';
 
+// A full install can run for several minutes per product, so startup waits well past the default
+const STARTUP_TASK_WAIT_TIMEOUT_MS = 60 * 60 * 1000;
+
 // Sentinels that mean no default AI connector/model is configured. Either can
 // appear depending on which settings UI last wrote genAiSettings:defaultAIConnector
 // (gen_ai_settings vs search_inference_endpoints "Use AI features" toggle).
@@ -192,27 +195,31 @@ export class ProductDocBasePlugin
       return;
     }
 
-    // Product docs for all projects
-    documentationManager.ensureDefaultProductDocumentation().catch((err: Error) => {
-      this.logger.error(
-        `Error ensuring product documentation for default inference ID: ${err.message}`
-      );
-    });
-    documentationManager.updateAll().catch((err: Error) => {
-      this.logger.error(`Error scheduling product documentation updateAll task: ${err.message}`);
+    // Steps run one at a time so that at most one documentation install is in flight per pod
+    const waitOptions = { wait: true, waitTimeoutMs: STARTUP_TASK_WAIT_TIMEOUT_MS };
+    await documentationManager
+      .ensureDefaultProductDocumentation(waitOptions)
+      .catch((err: Error) => {
+        this.logger.error(
+          `Error ensuring product documentation for default inference ID: ${err.message}`
+        );
+      });
+    await documentationManager.updateAll(waitOptions).catch((err: Error) => {
+      this.logger.error(`Error updating product documentation on startup: ${err.message}`);
     });
 
     // Security Labs only for serverless security projects
     const isSecurityProject = isServerless ? cloud?.serverless?.projectType === 'security' : false;
-    if (isSecurityProject) {
-      documentationManager.ensureDefaultSecurityLabs().catch((err: Error) => {
-        this.logger.error(
-          `Error ensuring Security Labs content for default inference ID: ${err.message}`
-        );
-      });
-      documentationManager.updateSecurityLabsAll().catch((err: Error) => {
-        this.logger.error(`Error scheduling Security Labs update task: ${err.message}`);
-      });
+    if (!isSecurityProject) {
+      return;
     }
+    await documentationManager.ensureDefaultSecurityLabs().catch((err: Error) => {
+      this.logger.error(
+        `Error ensuring Security Labs content for default inference ID: ${err.message}`
+      );
+    });
+    await documentationManager.updateSecurityLabsAll().catch((err: Error) => {
+      this.logger.error(`Error scheduling Security Labs update task: ${err.message}`);
+    });
   }
 }

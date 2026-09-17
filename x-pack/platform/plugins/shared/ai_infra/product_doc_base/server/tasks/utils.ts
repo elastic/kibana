@@ -7,6 +7,31 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import { DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
+
+export const chunkedTaskStateSchema = schema.object({
+  remaining: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export type ChunkedTaskState = TypeOf<typeof chunkedTaskStateSchema>;
+
+export const chunkedTaskStateSchemaByVersion = {
+  1: {
+    schema: chunkedTaskStateSchema,
+    up: (state: Record<string, unknown>) => state,
+  },
+};
+
+const allProductNames = Object.values(DocumentationProduct) as ProductName[];
+
+export const isProductName = (value: string): value is ProductName =>
+  allProductNames.includes(value as ProductName);
+
+// Returning `runAt` makes Task Manager run the task again for the next item, so a run only holds
+// a capacity slot for one item and completed items are not redone when a later attempt fails.
+export const nextChunkRunResult = (remaining: string[]) =>
+  remaining.length > 0 ? { state: { remaining }, runAt: new Date() } : { state: {} };
 
 export const getTaskStatus = async ({
   taskManager,

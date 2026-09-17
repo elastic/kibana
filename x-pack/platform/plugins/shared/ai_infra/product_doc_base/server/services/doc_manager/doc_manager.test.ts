@@ -16,6 +16,11 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import { DocumentationManager } from './doc_manager';
+import { INSTALL_ALL_TASK_ID } from '../../tasks/install_all';
+import {
+  ENSURE_DOC_UP_TO_DATE_TASK_ID,
+  ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL,
+} from '../../tasks/ensure_up_to_date';
 
 jest.mock('../../tasks');
 import {
@@ -334,6 +339,22 @@ describe('DocumentationManager', () => {
       expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
     });
+
+    it('waits for the install task when wait=true', async () => {
+      docInstallClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'uninstalled' },
+      } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+      scheduleInstallAllTaskMock.mockResolvedValue(INSTALL_ALL_TASK_ID);
+
+      await docManager.ensureDefaultProductDocumentation({ wait: true, waitTimeoutMs: 1234 });
+
+      expect(scheduleInstallAllTaskMock).toHaveBeenCalledTimes(1);
+      expect(waitUntilTaskCompletedMock).toHaveBeenCalledWith({
+        taskManager,
+        taskId: INSTALL_ALL_TASK_ID,
+        timeout: 1234,
+      });
+    });
   });
 
   describe('#ensureDefaultSecurityLabs', () => {
@@ -428,6 +449,31 @@ describe('DocumentationManager', () => {
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
+    });
+
+    it('updates one inference ID at a time and waits for each task when wait=true', async () => {
+      const callOrder: string[] = [];
+      scheduleEnsureUpToDateTaskMock.mockImplementation(async ({ inferenceId }) => {
+        callOrder.push(`schedule:${inferenceId}`);
+        return inferenceId === defaultInferenceEndpoints.ELSER
+          ? ENSURE_DOC_UP_TO_DATE_TASK_ID
+          : ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL;
+      });
+      waitUntilTaskCompletedMock.mockImplementation(async ({ taskId }) => {
+        callOrder.push(`wait:${taskId}`);
+      });
+
+      await docManager.updateAll({ wait: true, waitTimeoutMs: 4321 });
+
+      expect(callOrder).toEqual([
+        `schedule:${defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL}`,
+        `wait:${ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL}`,
+        `schedule:${defaultInferenceEndpoints.ELSER}`,
+        `wait:${ENSURE_DOC_UP_TO_DATE_TASK_ID}`,
+      ]);
+      expect(waitUntilTaskCompletedMock).toHaveBeenCalledWith(
+        expect.objectContaining({ timeout: 4321 })
+      );
     });
   });
 

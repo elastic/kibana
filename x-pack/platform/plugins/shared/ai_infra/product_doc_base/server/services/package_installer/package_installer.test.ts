@@ -400,6 +400,110 @@ describe('PackageInstaller', () => {
     });
   });
 
+  describe('installProduct', () => {
+    it('installs the version selected for the current stack version', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        kibana: ['8.15', '8.16'],
+      });
+      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+
+      await packageInstaller.installProduct({ productName: 'kibana' });
+
+      expect(packageInstaller.installPackage).toHaveBeenCalledTimes(1);
+      expect(packageInstaller.installPackage).toHaveBeenCalledWith({
+        productName: 'kibana',
+        productVersion: '8.16',
+      });
+    });
+
+    it('warns and skips when the repository has no version for the product', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ kibana: [] });
+      jest.spyOn(packageInstaller, 'installPackage');
+
+      await packageInstaller.installProduct({ productName: 'kibana' });
+
+      expect(packageInstaller.installPackage).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith('No version found for product [kibana]');
+    });
+  });
+
+  describe('getProductsToUpdate', () => {
+    it('returns installed products whose version differs from the selected version', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        kibana: ['8.15', '8.16'],
+        security: ['8.15', '8.16'],
+        elasticsearch: ['8.16'],
+        openapi: [],
+      });
+      productDocClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.15' },
+        security: { status: 'installed', version: '8.16' },
+        elasticsearch: { status: 'uninstalled' },
+      } as Record<ProductName, ProductInstallState>);
+
+      const products = await packageInstaller.getProductsToUpdate({
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(products).toEqual(['kibana']);
+    });
+
+    it('returns every installed product when forceUpdate is set', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        kibana: ['8.16'],
+        security: ['8.16'],
+        openapi: [],
+      });
+      productDocClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.16' },
+        security: { status: 'installed', version: '8.16' },
+        elasticsearch: { status: 'uninstalled' },
+      } as Record<ProductName, ProductInstallState>);
+
+      const products = await packageInstaller.getProductsToUpdate({
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        forceUpdate: true,
+      });
+
+      expect(products).toEqual(['kibana', 'security']);
+    });
+  });
+
+  describe('ensureOpenApiSpecUpToDate', () => {
+    it('does not reinstall when the installed version matches the selected version', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ openapi: ['8.16'] });
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: '8.16',
+      });
+      jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(packageInstaller.installOpenAPISpec).not.toHaveBeenCalled();
+    });
+
+    it('installs when the installed version differs from the selected version', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ openapi: ['8.15', '8.16'] });
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: '8.15',
+      });
+      jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(packageInstaller.installOpenAPISpec).toHaveBeenCalledWith({
+        version: '8.16',
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+    });
+  });
+
   describe('artifact repository proxy', () => {
     let proxyPackageInstaller: PackageInstaller;
 

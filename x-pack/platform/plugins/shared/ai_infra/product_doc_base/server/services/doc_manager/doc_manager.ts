@@ -82,7 +82,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async install(options: DocInstallOptions): Promise<void> {
-    const { request, force = false, wait = false } = options;
+    const { request, force = false, wait = false, waitTimeoutMs = TEN_MIN_IN_MS } = options;
     const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
     const { status: previousStatus } = await this.getStatus({ inferenceId });
@@ -119,13 +119,19 @@ export class DocumentationManager implements DocumentationManagerAPI {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
         taskId,
-        timeout: TEN_MIN_IN_MS,
+        timeout: waitTimeoutMs,
       });
     }
   }
 
   async update(options: DocUpdateOptions): Promise<void> {
-    const { request, wait = false, inferenceId, forceUpdate } = options;
+    const {
+      request,
+      wait = false,
+      waitTimeoutMs = TEN_MIN_IN_MS,
+      inferenceId,
+      forceUpdate,
+    } = options;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
@@ -152,12 +158,14 @@ export class DocumentationManager implements DocumentationManagerAPI {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
         taskId,
-        timeout: TEN_MIN_IN_MS,
+        timeout: waitTimeoutMs,
       });
     }
   }
 
-  async ensureDefaultProductDocumentation(): Promise<void> {
+  async ensureDefaultProductDocumentation(
+    options: { wait?: boolean; waitTimeoutMs?: number } = {}
+  ): Promise<void> {
     const inferenceId = await resolveDefaultInferenceIdFromInferenceGet(
       () => this.esClient.inference.get({}),
       { resourceType: ResourceTypes.productDoc }
@@ -176,7 +184,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
         );
         return;
       }
-      await this.install({ inferenceId });
+      await this.install({ inferenceId, ...options });
       return;
     }
 
@@ -194,7 +202,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
-    const { forceUpdate, inferenceIds } = options ?? {};
+    const { forceUpdate, inferenceIds, wait = false, waitTimeoutMs } = options ?? {};
     const idsToUpdate: string[] =
       Array.isArray(inferenceIds) && inferenceIds?.length > 0
         ? inferenceIds
@@ -202,7 +210,15 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
-    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate })));
+    if (wait) {
+      for (const inferenceId of idsToUpdate) {
+        await this.update({ inferenceId, forceUpdate, wait, waitTimeoutMs });
+      }
+    } else {
+      await Promise.all(
+        idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate }))
+      );
+    }
     return {
       inferenceIds: idsToUpdate,
     };

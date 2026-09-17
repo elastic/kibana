@@ -12,12 +12,20 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
-import { isTaskCurrentlyRunningError } from './utils';
+import {
+  isTaskCurrentlyRunningError,
+  chunkedTaskStateSchemaByVersion,
+  isProductName,
+  nextChunkRunResult,
+  type ChunkedTaskState,
+} from './utils';
 
 export const ENSURE_DOC_UP_TO_DATE_TASK_TYPE = 'ProductDocBase:EnsureUpToDate';
 export const ENSURE_DOC_UP_TO_DATE_TASK_ID = 'ProductDocBase:EnsureUpToDate';
 export const ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL =
   'ProductDocBase:EnsureUpToDateMultilingual';
+
+const OPENAPI_SPEC_ITEM = 'openapi';
 
 export const registerEnsureUpToDateTaskDefinition = ({
   getServices,
@@ -31,17 +39,30 @@ export const registerEnsureUpToDateTaskDefinition = ({
       title: 'Ensure product documentation up to date task',
       timeout: '10m',
       maxAttempts: 3,
-      createTaskRunner: (context) => {
+      createTaskRunner: ({ taskInstance }) => {
+        const inferenceId = taskInstance.params?.inferenceId;
+        const forceUpdate = taskInstance.params?.forceUpdate;
         return {
           async run() {
-            const inferenceId = context.taskInstance?.params?.inferenceId;
-            const forceUpdate = context.taskInstance?.params?.forceUpdate;
             const { packageInstaller } = getServices();
-            return packageInstaller.ensureUpToDate({ inferenceId, forceUpdate });
+            const { remaining } = taskInstance.state as ChunkedTaskState;
+            const [item, ...rest] = remaining ?? [
+              ...(await packageInstaller.getProductsToUpdate({ inferenceId, forceUpdate })),
+              OPENAPI_SPEC_ITEM,
+            ];
+            if (!item) {
+              return { state: {} };
+            }
+            if (item === OPENAPI_SPEC_ITEM) {
+              await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId, forceUpdate });
+            } else if (isProductName(item)) {
+              await packageInstaller.installProduct({ productName: item, inferenceId });
+            }
+            return nextChunkRunResult(rest);
           },
         };
       },
-      stateSchemaByVersion: {},
+      stateSchemaByVersion: chunkedTaskStateSchemaByVersion,
     },
   });
 };
