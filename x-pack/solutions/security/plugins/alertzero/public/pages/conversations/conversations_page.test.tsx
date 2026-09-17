@@ -13,35 +13,32 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, type MemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Investigation } from '@kbn/alertzero-common';
-import { useInvestigations } from '../../hooks/use_investigations_api';
-import { usePendingProposals } from '../../hooks/use_proposals_api';
+import { useProposalsList } from '../../hooks/use_proposals_api';
+import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
-jest.mock('../../hooks/use_investigations_api');
 jest.mock('../../hooks/use_proposals_api');
-jest.mock('../../components/pending_proposals', () => ({
-  PendingProposalsPanel: () => null,
-}));
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
 
-const mockUseInvestigations = useInvestigations as jest.Mock;
-const mockUsePendingProposals = usePendingProposals as jest.Mock;
+const mockUseProposalsList = useProposalsList as jest.Mock;
 
-const investigation: Investigation = {
+// The queue renders proposals adapted into the Investigation shape, and the adapter keeps
+// the proposal id as the investigation id, so the URL still addresses this row by `id`.
+const proposal: ProposalItem = {
   id: 'inv-1',
-  template_id: 'investigation',
-  title: 'Impossible travel — exec account',
+  spaceId: 'default',
+  conversationId: 'conv-1',
+  conversationTitle: 'Impossible travel — exec account',
+  comment: 'MFA satisfied from two countries in 40 minutes.',
+  status: 'pending',
+  impact: 'high',
+  confidence: 'high',
+  category: 'investigate',
+  origin: 'worker',
   createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
-  status: 'open',
-  recommendedAction: 'investigate',
-  pendingProposalCount: 0,
-  events: [],
+  expired: false,
 };
 
 const renderPage = (initialEntry: string) => {
@@ -65,13 +62,8 @@ const renderPage = (initialEntry: string) => {
 
 describe('ConversationsPage details flyout URL state', () => {
   beforeEach(() => {
-    mockUseInvestigations.mockReturnValue({
-      data: { investigations: [investigation], total: 1 },
-      isLoading: false,
-      error: undefined,
-    });
-    mockUsePendingProposals.mockReturnValue({
-      data: { proposals: [], total: 0 },
+    mockUseProposalsList.mockReturnValue({
+      data: { groups: { investigate: [proposal] }, total: 1, truncated: false },
       isLoading: false,
       error: undefined,
     });
@@ -109,8 +101,8 @@ describe('ConversationsPage details flyout URL state', () => {
     expect(history.location.search).toBe('?selectedConversationId=inv-1&show=overview');
   });
 
-  it('shows skeleton content until the investigations resolve', () => {
-    mockUseInvestigations.mockReturnValue({ data: undefined, isLoading: true, error: undefined });
+  it('shows skeleton content until the proposals resolve', () => {
+    mockUseProposalsList.mockReturnValue({ data: undefined, isLoading: true, error: undefined });
 
     renderPage('/?selectedConversationId=inv-1&show=overview');
 
@@ -143,8 +135,8 @@ describe('ConversationsPage details flyout URL state', () => {
     );
   });
 
-  it('does not warn while the investigations are still loading', () => {
-    mockUseInvestigations.mockReturnValue({ data: undefined, isLoading: true, error: undefined });
+  it('does not warn while the proposals are still loading', () => {
+    mockUseProposalsList.mockReturnValue({ data: undefined, isLoading: true, error: undefined });
 
     const { core } = renderPage('/?selectedConversationId=missing&show=overview');
 
