@@ -119,6 +119,17 @@ describe('ConversationsPage details flyout URL state', () => {
     expect(within(flyout).getByText('Impossible travel — full investigation')).toBeInTheDocument();
   });
 
+  it('opens the same chat session from the card as from its flyout', () => {
+    const { history } = renderPage('/');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open in chat' }));
+
+    // The chats page tags the session by whatever id it is given, so the card has to
+    // resolve its proposal to a conversation or the two entry points fork two threads.
+    expect(history.location.search).toContain('inv-1');
+    expect(history.location.search).not.toContain('prop-1');
+  });
+
   it('opens the linked investigation when a proposal card is clicked', async () => {
     const { history } = renderPage('/');
 
@@ -130,6 +141,30 @@ describe('ConversationsPage details flyout URL state', () => {
 
     const flyout = await screen.findByTestId('investigationDetailsFlyout');
     expect(within(flyout).getByText('Impossible travel — full investigation')).toBeInTheDocument();
+  });
+
+  it('stops marking the card as current once the flyout closes', async () => {
+    renderPage('/');
+    const card = screen.getByRole('button', { name: 'Impossible travel — exec account' });
+
+    fireEvent.click(card);
+    await screen.findByTestId('investigationDetailsFlyout');
+    expect(card).toHaveAttribute('aria-current', 'true');
+
+    fireEvent.click(screen.getByTestId('investigationDetailsFlyoutClose'));
+
+    // A card left marked current with nothing open announces a selection that is not there.
+    expect(screen.queryByTestId('investigationDetailsFlyout')).not.toBeInTheDocument();
+    expect(card).not.toHaveAttribute('aria-current');
+  });
+
+  it('does not mark a card as current for a flyout opened by deep link', async () => {
+    renderPage('/?selectedConversationId=inv-1&show=overview');
+    await screen.findByTestId('investigationDetailsFlyout');
+
+    expect(
+      screen.getByRole('button', { name: 'Impossible travel — exec account' })
+    ).not.toHaveAttribute('aria-current');
   });
 
   it('shows the investigation in the flyout rather than repeating the proposal', async () => {

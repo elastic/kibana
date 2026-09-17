@@ -113,13 +113,13 @@ export const ConversationsPage: React.FC = () => {
   // Cards are keyed by proposal id, but the flyout addresses an investigation, so the
   // click has to be translated through the proposal's conversation. The clicked id is
   // kept locally because the URL carries the conversation, which no card matches.
-  const [selectedCardId, setSelectedCardId] = useState<string | undefined>(undefined);
+  const [clickedCardId, setClickedCardId] = useState<string | undefined>(undefined);
 
   const onClickCard = useCallback(
     (proposalId: Investigation['id']) => {
       const conversationId = proposalsById.get(proposalId)?.conversationId;
       if (conversationId) {
-        setSelectedCardId(proposalId);
+        setClickedCardId(proposalId);
         selectConversation(conversationId);
       }
     },
@@ -130,6 +130,14 @@ export const ConversationsPage: React.FC = () => {
   const closeApproval = useCallback(() => setSelectedIdForRecommendedAction(undefined), []);
 
   const openInChat = useOpenInChat();
+
+  // A card's chat session has to be the one its flyout opens, so the proposal id the card
+  // is keyed by is resolved to its conversation first — the chats page tags the session by
+  // whatever id it is given, so passing the proposal id would fork a second thread.
+  const openChatForProposal = useCallback(
+    (proposalId: Investigation['id']) => openInChat(proposalsById.get(proposalId)?.conversationId),
+    [openInChat, proposalsById]
+  );
   const {
     services: { notifications },
   } = useKibana<CoreStart>();
@@ -178,6 +186,17 @@ export const ConversationsPage: React.FC = () => {
 
   // Both params are required: an id on its own leaves the flyout closed rather than guessing a tab.
   const flyoutConversationId = selectedConversationId && show ? selectedConversationId : undefined;
+
+  // The highlight belongs to the open flyout, not to the last click. Deriving it means
+  // Close, Back and the not-found dismiss all clear it for free; a stored id would keep a
+  // card marked `aria-current` with nothing open.
+  const selectedCardId = useMemo(
+    () =>
+      clickedCardId && proposalsById.get(clickedCardId)?.conversationId === flyoutConversationId
+        ? clickedCardId
+        : undefined,
+    [clickedCardId, flyoutConversationId, proposalsById]
+  );
 
   // The flyout shows the investigation the proposal belongs to, not the proposal again: a
   // proposal has no timeline, watch or assignee, so rendering the adapted card here would
@@ -347,7 +366,7 @@ export const ConversationsPage: React.FC = () => {
                   onClickRecommendedAction={onClickRecommendedAction}
                   onClickAction={onClickAction}
                   onClickCard={onClickCard}
-                  onOpenChat={openInChat}
+                  onOpenChat={openChatForProposal}
                   selectedId={selectedCardId}
                 />
               </EuiFlexItem>
