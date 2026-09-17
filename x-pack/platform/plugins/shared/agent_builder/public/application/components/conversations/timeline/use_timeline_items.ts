@@ -50,10 +50,17 @@ export const useTimelineItems = (): TimelineItem[] => {
   );
 
   const persistedEvents = conversation?.events;
-  const savedItems = useMemo(() => buildSavedItems(persistedEvents ?? []), [persistedEvents]);
+  const localPromptResponse = activeExecution?.promptResponse;
+  const savedItems = useMemo(
+    () => buildSavedItems(persistedEvents ?? [], localPromptResponse ? [localPromptResponse] : []),
+    [persistedEvents, localPromptResponse]
+  );
   const liveItems = useMemo(
     () => buildLiveItems({ pendingUserMessage, activeExecution }),
     [pendingUserMessage, activeExecution]
   );
-  return useMemo(() => assembleTimelineItems(savedItems, liveItems), [savedItems, liveItems]);
+  return useMemo(
+    () => assembleTimelineItems(savedItems, liveItems, localPromptResponse),
+    [savedItems, liveItems, localPromptResponse]
+  );
 };

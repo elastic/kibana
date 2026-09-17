@@ -10,6 +10,8 @@ import {
   EventActorType,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents';
+import { createConfirmationPrompt } from './prompt_request_event.factory';
 
 export const createExecutionTerminatedEvent = (
   overrides?: Partial<ExecutionTerminatedEvent>
@@ -37,3 +39,13 @@ export const createExecutionTerminatedEvent = (
   },
   ...overrides,
 });
+
+export const createPromptRequestedTerminatedEvent = ({
+  prompts = [createConfirmationPrompt()],
+  ...overrides
+}: Partial<ExecutionTerminatedEvent> & {
+  prompts?: PromptRequest[];
+} = {}): ExecutionTerminatedEvent => {
+  const base = createExecutionTerminatedEvent(overrides);
+  return { ...base, data: { ...base.data, outcome: { type: 'prompt_requested', prompts } } };
+};

@@ -162,12 +162,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         const updated = { ...prev, [promptId]: promptResponse };
         const allAnswered = (pendingPrompts ?? []).every((p) => updated[p.id] !== undefined);
         if (allAnswered) {
-          resumeRound({ prompts: updated });
+          resumeRound({ prompts: updated, promptRequestedEventId: rawRound.id });
         }
         return updated;
       });
     },
-    [pendingPrompts, resumeRound]
+    [pendingPrompts, resumeRound, rawRound.id]
   );
 
   const avatarColumnStyles = css`

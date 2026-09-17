@@ -10,8 +10,17 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
-import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationRoundStep,
+  PromptResponseEvent,
+} from '@kbn/agent-builder-common';
+import {
+  EventActorType,
+  TimelineEventType,
+  isExecutionStartedEvent,
+  isExecutionTerminatedEvent,
+} from '@kbn/agent-builder-common';
 import { tap } from 'rxjs';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useKibana } from '../../hooks/use_kibana';
@@ -23,8 +32,39 @@ import { createConversationActions } from '../conversation/use_conversation_acti
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 
+export const LOCAL_PROMPT_RESPONSE_ID = 'pending::prompt_response';
+
+const localPromptResponseEvent = ({
+  prompts,
+  promptRequestedEventId,
+}: ResumeRoundVars): PromptResponseEvent => ({
+  id: LOCAL_PROMPT_RESPONSE_ID,
+  type: TimelineEventType.promptResponse,
+  created_at: new Date().toISOString(),
+  actor: { type: EventActorType.user, id: '' },
+  data: {
+    prompt_requested_event_id: promptRequestedEventId,
+    responses: prompts,
+  },
+});
+
+const hasPersistedPromptResponse = async (
+  refetch: () => Promise<Conversation>,
+  promptRequestedEventId: string
+): Promise<boolean> => {
+  const conversation = await refetch();
+  return (
+    conversation.events?.some(
+      (event) =>
+        event.type === TimelineEventType.promptResponse &&
+        event.data.prompt_requested_event_id === promptRequestedEventId
+    ) ?? false
+  );
+};
+
 export interface ResumeRoundVars {
   prompts: Record<string, PromptResponse>;
+  promptRequestedEventId: string;
   conversationId: string;
   agentId: string;
   connectorId?: string;
@@ -80,11 +120,10 @@ export const useResumeRoundMutation = ({
       const executionId = uuidv4();
       controllersRef.current.set(vars.conversationId, { controller, executionId });
 
-      // Optimistically populate ask_user_question step answers before clearing the prompt —
-      // pending_prompts is needed to reconstruct the step, so this must come first.
-      streamActions.setAskUserQuestionAnswers(vars.prompts);
-      // Drop pending prompts from the round — the user has answered, the round is back in progress.
-      streamActions.clearPendingPrompts();
+      conversationStreamService.recordPromptResponse(
+        vars.conversationId,
+        localPromptResponseEvent(vars)
+      );
 
       let timelineExecutionId: string | undefined;
       let stepsAtFailure: ConversationRoundStep[] = [];
@@ -139,6 +178,18 @@ export const useResumeRoundMutation = ({
           });
         }
       } catch (err) {
+        if (!controller.signal.aborted) {
+          const persisted = await hasPersistedPromptResponse(
+            streamActions.refetchConversation,
+            vars.promptRequestedEventId
+          ).catch(() => false);
+          if (!persisted) {
+            conversationStreamService.clearPromptResponse(
+              vars.conversationId,
+              vars.promptRequestedEventId
+            );
+          }
+        }
         setError(vars.conversationId, err, stepsAtFailure);
         throw err;
       } finally {

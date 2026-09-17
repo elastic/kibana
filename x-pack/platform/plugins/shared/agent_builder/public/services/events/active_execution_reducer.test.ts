@@ -18,11 +18,12 @@ import {
   type ChatEvent,
   type TodoItem,
   type ExecutionTerminatedEvent,
+  type PromptResponseEvent,
 } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common/tools';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { ActiveExecutionDraft } from './active_execution_reducer';
-import { activeExecutionReducer } from './active_execution_reducer';
+import { activeExecutionReducer, withPromptResponse } from './active_execution_reducer';
 
 // --------------- minimal event factories ---------------
 
@@ -159,6 +160,17 @@ const executionTerminatedEvent = (
   },
 });
 
+const promptRequestedTerminatedEvent = (
+  prompts: Array<{ type: AgentPromptType; id: string }>,
+  execution_id = 'exec-1'
+): ExecutionTerminatedEvent => {
+  const base = executionTerminatedEvent(execution_id);
+  return {
+    ...base,
+    data: { ...base.data, outcome: { type: 'prompt_requested', prompts } as any },
+  };
+};
+
 // -------------------------------------------------------
 
 describe('activeExecutionReducer', () => {
@@ -248,6 +260,29 @@ describe('activeExecutionReducer', () => {
     expect(state?.status).toBe('awaiting_prompt');
     expect(state?.pendingPrompts).toHaveLength(1);
     expect(state?.pendingPrompts?.[0].id).toBe('p1');
+  });
+
+  it('execution_terminated overwrites the streamed preview from its outcome.prompts', () => {
+    const s1 = activeExecutionReducer(null, promptRequestEvent());
+    expect(s1?.pendingPrompts?.[0].id).toBe('p1');
+
+    const terminal = promptRequestedTerminatedEvent([
+      { type: AgentPromptType.confirmation, id: 'authoritative' },
+    ]);
+    const sealed = activeExecutionReducer(s1, terminal);
+
+    expect(sealed?.pendingPrompts).toHaveLength(1);
+    expect(sealed?.pendingPrompts?.[0].id).toBe('authoritative');
+    expect(sealed?.terminalEvent).toBe(terminal);
+  });
+
+  it('a non-prompt terminal clears the streamed pending prompts', () => {
+    const s1 = activeExecutionReducer(null, promptRequestEvent());
+    expect(s1?.pendingPrompts).toHaveLength(1);
+
+    const sealed = activeExecutionReducer(s1, executionTerminatedEvent('exec-1'));
+
+    expect(sealed?.pendingPrompts).toBeUndefined();
   });
 
   it('compaction_started then compaction_completed creates one compaction step patched with token_count_after and summarized_round_count', () => {
@@ -403,5 +438,86 @@ describe('activeExecutionReducer', () => {
     const toolCall = steps[1];
     if (!isToolCallStep(toolCall)) throw new Error('expected a tool call step');
     expect(toolCall.results).toEqual(results);
+  });
+});
+
+describe('activeExecutionReducer - ask_user_question', () => {
+  const questions = [
+    {
+      question: 'Which environment?',
+      options: [{ label: 'Prod' }, { label: 'Dev' }],
+      multi_select: false,
+    },
+  ];
+  const askPromptRequestEvent = (): ChatEvent =>
+    ({
+      type: ChatEventType.promptRequest,
+      data: {
+        prompt: { type: AgentPromptType.ask_user_question, id: 'prompt-1', questions },
+        source: { type: 'tool_call', tool_call_id: 'tc1' },
+      },
+    } as ChatEvent);
+
+  it('an ask_user_question prompt_request appends the step and the pending prompt', () => {
+    const state = activeExecutionReducer(null, askPromptRequestEvent());
+
+    expect(state?.status).toBe('awaiting_prompt');
+    expect(state?.pendingPrompts).toHaveLength(1);
+    expect(state?.steps).toEqual([
+      { type: ConversationRoundStepType.askUserQuestion, prompt_id: 'prompt-1', questions },
+    ]);
+  });
+
+  it('a confirmation prompt_request creates a pending prompt but no step', () => {
+    const state = activeExecutionReducer(null, promptRequestEvent());
+
+    expect(state?.pendingPrompts).toHaveLength(1);
+    expect(state?.steps).toHaveLength(0);
+  });
+});
+
+describe('withPromptResponse', () => {
+  const promptResponse: PromptResponseEvent = {
+    id: 'pending::prompt_response',
+    type: TimelineEventType.promptResponse,
+    created_at: '2026-06-01T10:00:00.000Z',
+    actor: { type: EventActorType.user, id: '' },
+    data: {
+      prompt_requested_event_id: 'exec-paused::execution_terminated',
+      responses: { 'prompt-1': { allow: true } },
+    },
+  };
+
+  it('records the answer on a sealed pause draft without disturbing it', () => {
+    const sealed = activeExecutionReducer(null, executionTerminatedEvent('exec-paused'));
+
+    const answered = withPromptResponse(sealed, promptResponse);
+
+    expect(answered.status).toBe('completed');
+    expect(answered.terminalEvent).toBe(sealed?.terminalEvent);
+    expect(answered.promptResponse).toBe(promptResponse);
+  });
+
+  it('records the answer even when no draft is live', () => {
+    const answered = withPromptResponse(null, promptResponse);
+
+    expect(answered.status).toBe('running');
+    expect(answered.steps).toEqual([]);
+    expect(answered.promptResponse).toBe(promptResponse);
+  });
+
+  it('keeps the recorded answer when the resume execution resets the draft', () => {
+    const sealed = activeExecutionReducer(null, executionTerminatedEvent('exec-paused'));
+    const answered = withPromptResponse(sealed, promptResponse);
+
+    const resumed = activeExecutionReducer(
+      answered,
+      executionStartedEvent('exec-resume', '2026-06-01T10:00:01.000Z')
+    );
+
+    expect(resumed?.status).toBe('running');
+    expect(resumed?.executionId).toBe('exec-resume');
+    expect(resumed?.terminalEvent).toBeUndefined();
+    expect(resumed?.promptResponse).toBe(promptResponse);
   });
 });

@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
-import { useConversation, useAgentId } from '../../../hooks/use_conversation';
+import {
+  useConversation,
+  useAgentId,
+  useConversationReadOnly,
+} from '../../../hooks/use_conversation';
+import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { RoundsScreenReaderStatus } from '../conversation_rounds/rounds_screen_reader_status';
 import { useTimelineItems } from './use_timeline_items';
@@ -22,11 +27,22 @@ export const TimelineConnector: React.FC = () => {
   const { agent } = useAgentBuilderAgentById(agentId);
   const items = useTimelineItems();
   const lastTurn = items.filter((item): item is AgentTurnItem => item.kind === 'agentTurn').at(-1);
+  const { isReadOnly, isLoading: isConversationReadOnlyLoading } = useConversationReadOnly();
+  const { resumeRound, isResuming, isStreaming } = useConversationStream();
+  const isPromptDisabled =
+    isReadOnly || isConversationReadOnlyLoading || (isStreaming && !isResuming);
 
   return (
     <>
       <RoundsScreenReaderStatus responseMessage={lastTurn?.response?.message} />
-      <Timeline items={items} agent={agent} conversationAttachments={conversation?.attachments} />
+      <Timeline
+        items={items}
+        agent={agent}
+        conversationAttachments={conversation?.attachments}
+        onResumePrompt={resumeRound}
+        isResuming={isResuming}
+        isPromptDisabled={isPromptDisabled}
+      />
     </>
   );
 };

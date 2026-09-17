@@ -43,6 +43,15 @@ ES|QL ("FROM <dataset_name>"); they do not support _search.`,
       openWorldHint: false,
     },
     schema: listIndicesSchema,
+    // POC: temporary - force a HITL confirmation prompt on every call to this tool.
+    // Revert before merging.
+    confirmation: {
+      askUser: 'always',
+      getConfirmation: () => ({
+        title: `Allow \`${platformCoreTools.listIndices}\` to run?`,
+        message: 'Lists all indices, aliases and datastreams from your Elasticsearch cluster.',
+      }),
+    },
     handler: async ({ pattern }, { esClient, experimentalFeatures, logger }) => {
       logger.debug(`list indices tool called with pattern: ${pattern}`);
       const includeDatasets = experimentalFeatures.datasets;

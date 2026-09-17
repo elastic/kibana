@@ -15,17 +15,29 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ChatEvent, TimelineEvent } from '@kbn/agent-builder-common';
-import { ConversationRoundStepType } from '@kbn/agent-builder-common';
+import type { ChatEvent, PromptResponseEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  EventActorType,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
 import { Timeline } from './timeline';
 import { DevSseEmitter } from './dev_sse_emitter';
-import { activeExecutionReducer } from '../../../../services/events/active_execution_reducer';
-import { toTimelineItems } from './to_timeline_items';
+import type { ActiveExecutionDraft } from '../../../../services/events/active_execution_reducer';
+import {
+  activeExecutionReducer,
+  withPromptResponse,
+} from '../../../../services/events/active_execution_reducer';
+import { buildSavedItems, toTimelineItems } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
-import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
+import {
+  createExecutionTerminatedEvent,
+  createPromptRequestedTerminatedEvent,
+} from './items/execution_terminated_event.factory';
+import { createAskUserQuestionPrompt } from './items/prompt_request_event.factory';
 import {
   createUserMessageItem,
   createCompletedTurnItem,
@@ -33,45 +45,6 @@ import {
   createAbortedTurnItem,
   createStreamingTurnItem,
 } from './items/timeline_item.factory';
-
-const seedEvents: TimelineEvent[] = [
-  createUserMessageEvent({ id: 'seed-1' }),
-  createExecutionStartedEvent({
-    id: 'seed-exec-started',
-    execution_id: 'seed-exec-1',
-    trigger_event_id: 'seed-1',
-  }),
-  createExecutionStepEvent({
-    id: 'seed-step-0',
-    execution_id: 'seed-exec-1',
-    trigger_event_id: 'seed-1',
-    data: {
-      step: {
-        type: ConversationRoundStepType.reasoning,
-        reasoning: 'Looking at the available tools...',
-      },
-      sequence: 0,
-    },
-  }),
-  createExecutionStepEvent({
-    id: 'seed-step-1',
-    execution_id: 'seed-exec-1',
-    trigger_event_id: 'seed-1',
-    data: {
-      step: { type: ConversationRoundStepType.reasoning, reasoning: 'Querying host metrics.' },
-      sequence: 1,
-    },
-  }),
-  createExecutionTerminatedEvent({
-    id: 'seed-2',
-    execution_id: 'seed-exec-1',
-    trigger_event_id: 'seed-1',
-  }),
-  createUserMessageEvent({
-    id: 'seed-3',
-    data: { message: 'Are there any anomalies in the last hour?' },
-  }),
-];
 
 const meta: Meta<typeof Timeline> = {
   title: 'Conversations/Timeline/Timeline',
@@ -177,22 +150,135 @@ export const AbortedExecution: Story = {
   },
 };
 
-const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
-  const [activeExecution, dispatch] = useReducer(activeExecutionReducer, null);
-  const emit = useCallback((event: ChatEvent) => dispatch(event), []);
+const pausePrompt = createAskUserQuestionPrompt();
+const PAUSE_EXECUTION_ID = 'pause-exec-1';
+const PAUSE_TERMINATED_ID = 'pause-exec-1::execution_terminated';
 
-  const toTimelineItemsInput = { events: seedEvents, activeExecution };
+const pauseEvents: TimelineEvent[] = [
+  createUserMessageEvent({
+    id: 'pause-user-1',
+    data: { message: 'Find the noisy services for me.' },
+  }),
+  createExecutionStartedEvent({
+    id: 'pause-exec-1::execution_started',
+    execution_id: PAUSE_EXECUTION_ID,
+    trigger_event_id: 'pause-user-1',
+  }),
+  createExecutionStepEvent({
+    id: 'pause-step-0',
+    execution_id: PAUSE_EXECUTION_ID,
+    trigger_event_id: 'pause-user-1',
+    data: {
+      step: {
+        type: ConversationRoundStepType.askUserQuestion,
+        prompt_id: pausePrompt.id,
+        questions: pausePrompt.questions,
+      },
+      sequence: 0,
+    },
+  }),
+  createPromptRequestedTerminatedEvent({
+    prompts: [pausePrompt],
+    id: PAUSE_TERMINATED_ID,
+    execution_id: PAUSE_EXECUTION_ID,
+    trigger_event_id: 'pause-user-1',
+  }),
+];
+
+const pauseAnswer: PromptResponseEvent = {
+  id: 'pause-response-1',
+  type: TimelineEventType.promptResponse,
+  created_at: '2026-09-03T11:20:00.000Z',
+  actor: { type: EventActorType.user, id: 'user-1' },
+  data: {
+    prompt_requested_event_id: PAUSE_TERMINATED_ID,
+    responses: { [pausePrompt.id]: { answers: [{ choice: [0] }] } },
+  },
+};
+
+export const AwaitingPrompt: Story = {
+  args: { items: buildSavedItems(pauseEvents) },
+};
+
+export const AnsweredPause: Story = {
+  args: {
+    items: buildSavedItems([
+      ...pauseEvents,
+      pauseAnswer,
+      createExecutionStartedEvent({
+        id: 'resume-exec-1::execution_started',
+        execution_id: 'resume-exec-1',
+        trigger_event_id: 'pause-response-1',
+      }),
+      createExecutionTerminatedEvent({
+        id: 'resume-exec-1::execution_terminated',
+        execution_id: 'resume-exec-1',
+        trigger_event_id: 'pause-response-1',
+        data: {
+          model_usage: {
+            connector_id: '',
+            llm_calls: 1,
+            input_tokens: 120,
+            output_tokens: 20,
+            model: 'dev',
+          },
+          time_to_first_token: 120,
+          time_to_last_token: 300,
+          outcome: {
+            type: 'responded',
+            response: { message: 'checkout-api is the noisiest service in production.' },
+          },
+        },
+      }),
+    ]),
+  },
+};
+
+type DevAction =
+  | { kind: 'chat'; event: ChatEvent }
+  | { kind: 'answer'; event: PromptResponseEvent };
+
+const devReducer = (
+  state: ActiveExecutionDraft | null,
+  action: DevAction
+): ActiveExecutionDraft | null =>
+  action.kind === 'chat'
+    ? activeExecutionReducer(state, action.event)
+    : withPromptResponse(state, action.event);
+
+const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
+  const [activeExecution, dispatch] = useReducer(devReducer, null);
+  const [log, setLog] = useState<Array<ChatEvent | PromptResponseEvent>>([]);
+  const apply = useCallback((action: DevAction) => {
+    dispatch(action);
+    setLog((previous) => [...previous, action.event]);
+  }, []);
+  const emit = useCallback((event: ChatEvent) => apply({ kind: 'chat', event }), [apply]);
+  const recordPromptResponse = useCallback(
+    (event: PromptResponseEvent) => apply({ kind: 'answer', event }),
+    [apply]
+  );
+
+  const toTimelineItemsInput = { events: [] as TimelineEvent[], activeExecution };
   const items = toTimelineItems(toTimelineItemsInput);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem grow={false}>
-        <DevSseEmitter emit={emit} reset={onReset} />
+        <DevSseEmitter emit={emit} recordPromptResponse={recordPromptResponse} reset={onReset} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder paddingSize="l">
           <Timeline items={items} />
         </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiAccordion id="debug-sse" buttonContent={`Raw SSE events (${log.length})`}>
+          <EuiSpacer size="s" />
+          <EuiCodeBlock language="json" isCopyable overflowHeight={300}>
+            {JSON.stringify(log, null, 2)}
+          </EuiCodeBlock>
+        </EuiAccordion>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiAccordion id="debug-source" buttonContent="Source">

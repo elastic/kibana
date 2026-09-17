@@ -6,14 +6,17 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PromptResponseEvent as PromptResponseEventData } from '@kbn/agent-builder-common';
+import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import {
   isConfirmationPromptResponse,
   isAuthorizationPromptResponse,
-  isAskUserQuestionPromptResponse,
+  isConfirmationPrompt,
+  isAuthorizationPrompt,
 } from '@kbn/agent-builder-common/agents';
+import { AuthorizationPrompt, ConfirmationPrompt } from '../../conversation_rounds/round_prompt';
 
 const labels = {
   approved: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.approved', {
@@ -28,71 +31,98 @@ const labels = {
   declined: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.declined', {
     defaultMessage: 'Declined',
   }),
-  responded: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.responded', {
-    defaultMessage: 'Responded',
-  }),
-  skipped: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.skipped', {
-    defaultMessage: 'Skipped',
-  }),
 };
 
-/** Renders the human's read-only answer(s) to a HITL prompt. */
-export const PromptResponseEvent: React.FC<{ event: PromptResponseEventData }> = ({ event }) => {
-  const responseEntries = Object.entries(event.data.responses);
+const noop = () => {};
 
-  if (responseEntries.length === 0) {
+const StatusBadge: React.FC<{ isPositive: boolean; positive: string; negative: string }> = ({
+  isPositive,
+  positive,
+  negative,
+}) => (
+  <div>
+    <EuiBadge color={isPositive ? 'success' : 'danger'}>
+      {isPositive ? positive : negative}
+    </EuiBadge>
+  </div>
+);
+
+export const PromptResponseEvent: React.FC<{
+  event: PromptResponseEventData;
+  prompts?: PromptRequest[];
+}> = ({ event, prompts }) => {
+  const promptsById = new Map<string, PromptRequest>(
+    (prompts ?? []).map((prompt) => [prompt.id, prompt])
+  );
+
+  const approvalEntries = Object.entries(event.data.responses).filter(
+    ([, response]) =>
+      isConfirmationPromptResponse(response) || isAuthorizationPromptResponse(response)
+  );
+
+  if (approvalEntries.length === 0) {
     return null;
   }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="agentBuilderPromptResponse">
-      {responseEntries.map(([promptId, response]) => {
-        if (isConfirmationPromptResponse(response)) {
-          return (
-            <EuiFlexItem key={promptId} grow={false}>
-              <div>
-                <EuiBadge color={response.allow ? 'success' : 'danger'}>
-                  {response.allow ? labels.approved : labels.denied}
-                </EuiBadge>
-              </div>
-            </EuiFlexItem>
-          );
-        }
-
-        if (isAuthorizationPromptResponse(response)) {
-          return (
-            <EuiFlexItem key={promptId} grow={false}>
-              <div>
-                <EuiBadge color={response.authorized ? 'success' : 'danger'}>
-                  {response.authorized ? labels.authorized : labels.declined}
-                </EuiBadge>
-              </div>
-            </EuiFlexItem>
-          );
-        }
-
-        if (isAskUserQuestionPromptResponse(response)) {
-          const answerTexts = response.answers.map((answer) => {
-            if (answer.skipped) {
-              return labels.skipped;
-            }
-            // custom free-text answer; choice indices have no label context available here
-            return answer.custom ?? labels.responded;
-          });
-
-          return (
-            <EuiFlexItem key={promptId} grow={false}>
-              <EuiText size="s">
-                {answerTexts.map((text, answerIndex) => (
-                  <p key={answerIndex}>{text}</p>
-                ))}
-              </EuiText>
-            </EuiFlexItem>
-          );
-        }
-
-        return null;
-      })}
+      {approvalEntries.map(([promptId, response]) => (
+        <EuiFlexItem key={promptId} grow={false}>
+          {renderAnswer(promptId, response, promptsById.get(promptId))}
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
+};
+
+const renderAnswer = (
+  promptId: string,
+  response: PromptResponse,
+  definition: PromptRequest | undefined
+): React.ReactNode => {
+  if (isConfirmationPromptResponse(response)) {
+    if (definition && isConfirmationPrompt(definition)) {
+      return (
+        <ConfirmationPrompt
+          prompt={definition}
+          onConfirm={noop}
+          onCancel={noop}
+          isDisabled
+          isAnswered
+          answeredValue={response.allow}
+        />
+      );
+    }
+    return (
+      <StatusBadge
+        isPositive={response.allow}
+        positive={labels.approved}
+        negative={labels.denied}
+      />
+    );
+  }
+
+  if (isAuthorizationPromptResponse(response)) {
+    if (definition && isAuthorizationPrompt(definition)) {
+      return (
+        <AuthorizationPrompt
+          prompt={definition}
+          onAuthorize={noop}
+          onCancel={noop}
+          isDisabled
+          isAnswered
+          answeredValue={response.authorized}
+        />
+      );
+    }
+    return (
+      <StatusBadge
+        isPositive={response.authorized}
+        positive={labels.authorized}
+        negative={labels.declined}
+      />
+    );
+  }
+
+  return null;
 };
