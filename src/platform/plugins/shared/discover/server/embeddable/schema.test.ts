@@ -16,6 +16,7 @@ import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import {
   classicTabSchema,
+  discoverSessionApiTabSchema,
   esqlTabSchema,
   panelOverridesSchema,
 } from '@kbn/as-code-discover-schema';
@@ -44,6 +45,13 @@ const metricsTabInput = {
   gauge_aggregation: 'avg',
   histogram_percentile: 'p99',
 } as const;
+
+// A sample tab for every tab type. The exhaustive record makes a new tab type a type error until
+// it is covered here, and the parity tests below then require it in both schemas.
+const tabInputByTabType: Record<DiscoverTabType, object> = {
+  [DiscoverTabType.Default]: esqlTabInput,
+  [DiscoverTabType.Metrics]: metricsTabInput,
+};
 
 const embeddableSchema = getDiscoverSessionEmbeddableSchema(mockGetDrilldownsSchema);
 
@@ -201,6 +209,25 @@ describe('by-value tab schema', () => {
   it('rejects a tab without a data_source', () => {
     expect(() => parseByValueTab({ sort: [] })).toThrow();
   });
+});
+
+describe('tab type parity', () => {
+  it.each(Object.values(DiscoverTabType))('accepts a %s tab by value', (tabType) => {
+    expect(parseByValueTab(tabInputByTabType[tabType])).toMatchObject({ type: tabType });
+  });
+
+  it.each(Object.values(DiscoverTabType))(
+    'accepts the same %s tab in the session API schema',
+    (tabType) => {
+      const apiTab = discoverSessionApiTabSchema.parse({
+        id: 'tab-1',
+        label: 'Tab 1',
+        ...tabInputByTabType[tabType],
+      });
+
+      expect(apiTab).toMatchObject({ type: tabType });
+    }
+  );
 });
 
 describe('panelOverridesSchema', () => {

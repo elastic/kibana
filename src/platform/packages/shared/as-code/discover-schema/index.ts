@@ -15,6 +15,7 @@ export {
   classicTabSchema,
   esqlTabSchema,
   tabSchema,
+  panelTabSchema,
   visContextSchema,
   discoverSessionControlPanelSchema,
   discoverSessionControlPanelsSchema,

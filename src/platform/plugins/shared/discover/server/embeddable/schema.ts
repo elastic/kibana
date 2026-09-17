@@ -16,32 +16,8 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { tabSchema } from '@kbn/as-code-discover-schema';
-import {
-  classicTabSchema,
-  esqlTabSchema,
-  panelOverridesSchema,
-  discoverSessionDefaultTabTypeStateSchema,
-  discoverSessionMetricsTabTypeStateSchema,
-} from '@kbn/as-code-discover-schema';
-
-const metricsTabSchema = esqlTabSchema.extend(discoverSessionMetricsTabTypeStateSchema.shape).meta({
-  title: 'Metrics tab',
-  description:
-    'An ES|QL tab with saved metrics grid settings. ' +
-    'The dashboard panel stores these settings and restores them in Discover. ' +
-    'The panel does not render the metrics grid.',
-});
-
-// Panel tabs reuse the shared base schemas, not the full session API schemas,
-// which also include session-only fields such as id, label, and presentation state.
-const byValueTabSchema = z.union([
-  classicTabSchema.extend(discoverSessionDefaultTabTypeStateSchema.shape),
-  esqlTabSchema
-    .extend(discoverSessionDefaultTabTypeStateSchema.shape)
-    .meta({ ...esqlTabSchema.meta() }), // extend() does not preserve object-level metadata.
-  metricsTabSchema,
-]);
+import type { classicTabSchema, esqlTabSchema, tabSchema } from '@kbn/as-code-discover-schema';
+import { panelOverridesSchema, panelTabSchema } from '@kbn/as-code-discover-schema';
 
 const DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
@@ -68,7 +44,7 @@ function withPanelSchemas<T extends z.ZodRawShape>(
 
 const discoverSessionByValuePropsSchema = z
   .object({
-    tabs: z.array(byValueTabSchema).min(1).max(1).meta({
+    tabs: z.array(panelTabSchema).min(1).max(1).meta({
       description:
         'Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.',
     }),
