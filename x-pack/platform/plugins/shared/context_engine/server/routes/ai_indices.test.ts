@@ -10,6 +10,7 @@ import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -25,6 +26,7 @@ import {
   aiIndexPath,
 } from '../../common/constants';
 import { aiIndicesIndexName } from '../ai_indices/storage';
+import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 import { apiPrivileges } from '../../common/features';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
@@ -115,7 +117,10 @@ describe('ai indices routes', () => {
   let esInternalSearch: jest.Mock;
   let spacesStart: ReturnType<typeof spacesMock.createStart>;
   let improvementsClients: unknown[];
+  let improvementsSpaceIds: string[];
+  let getSpaces: jest.Mock;
   const logger = loggerMock.create();
+  const defaultSpaceId = 'default';
 
   const createContext = () =>
     ({
@@ -177,6 +182,8 @@ describe('ai indices routes', () => {
       deleteWorkflows: jest.fn().mockResolvedValue({ failures: [] }),
     };
     improvementsClients = [];
+    improvementsSpaceIds = [];
+    getSpaces = jest.fn().mockResolvedValue(spacesStart);
     scheduleService = {
       reconcile: jest.fn().mockResolvedValue(undefined),
       remove: jest.fn().mockResolvedValue(undefined),
@@ -208,14 +215,15 @@ describe('ai indices routes', () => {
       router,
       logger,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
-      getImprovementsService: (esClient) => {
+      getImprovementsService: (esClient, spaceId) => {
         improvementsClients.push(esClient);
+        improvementsSpaceIds.push(spaceId);
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
       getActions: async () => actions,
       getWorkflowsManagementApi: async () => workflowsManagementApi,
-      getSpaces: async () => spacesStart,
+      getSpaces,
     });
   });
 
@@ -326,7 +334,11 @@ describe('ai indices routes', () => {
       await callRoute('POST', aiIndexPath, { body: postBody });
 
       const { id, ...properties } = postBody;
-      expect(aiIndexService.create).toHaveBeenCalledWith('customer_support', properties);
+      expect(aiIndexService.create).toHaveBeenCalledWith(
+        'customer_support',
+        defaultSpaceId,
+        properties
+      );
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
     });
 
@@ -363,7 +375,11 @@ describe('ai indices routes', () => {
       await callRoute('POST', aiIndexPath, { body });
 
       const { id, ...properties } = body;
-      expect(aiIndexService.create).toHaveBeenCalledWith('customer_support', properties);
+      expect(aiIndexService.create).toHaveBeenCalledWith(
+        'customer_support',
+        defaultSpaceId,
+        properties
+      );
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
     });
 
@@ -419,7 +435,11 @@ describe('ai indices routes', () => {
 
       await callRoute('PUT', aiIndexByIdPath, putRequest);
 
-      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', putRequest.body);
+      expect(aiIndexService.put).toHaveBeenCalledWith(
+        'customer_support',
+        defaultSpaceId,
+        putRequest.body
+      );
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
     });
 
@@ -465,7 +485,7 @@ describe('ai indices routes', () => {
 
       await callRoute('PUT', aiIndexByIdPath, { ...putRequest, body });
 
-      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', body);
+      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', defaultSpaceId, body);
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
     });
 
@@ -492,6 +512,7 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
 
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: aiIndexItem });
     });
 
@@ -767,6 +788,7 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', aiIndexPath, {});
 
+      expect(aiIndexService.list).toHaveBeenCalledWith(defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: [] } });
     });
   });
@@ -779,7 +801,7 @@ describe('ai indices routes', () => {
         params: { aiIndexId: 'customer_support' },
       });
 
-      expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support');
+      expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
     });
 
@@ -808,6 +830,7 @@ describe('ai indices routes', () => {
       });
 
       expect(improvementsService.deleteByAiIndex).toHaveBeenCalledWith('customer_support');
+      expect(improvementsSpaceIds).toEqual([defaultSpaceId]);
     });
 
     it('audits the deletion even when the improvements cleanup fails afterwards', async () => {
@@ -868,10 +891,38 @@ describe('ai indices routes', () => {
           index: aiIndicesIndexName,
           size: MAX_AI_INDICES,
           track_total_hits: false,
-          query: { term: { 'dest.value': aiIndexItem.dest.value } },
+          query: {
+            bool: {
+              filter: [{ term: { 'dest.value': aiIndexItem.dest.value } }],
+              must_not: [createAiIndexIdentityDslFilter('customer_support', defaultSpaceId)],
+            },
+          },
         });
         expect(esDeleteDataStream).toHaveBeenCalledWith({ name: aiIndexItem.dest.value });
         expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+      });
+
+      it('excludes the deleted entry from the request space, not always default', async () => {
+        const spaces = spacesMock.createStart();
+        spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
+        getSpaces.mockResolvedValue(spaces);
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_knowledge_indicators: true },
+        });
+
+        expect(esInternalSearch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                filter: [{ term: { 'dest.value': aiIndexItem.dest.value } }],
+                must_not: [createAiIndexIdentityDslFilter('customer_support', 'marketing')],
+              },
+            },
+          })
+        );
       });
 
       it('deletes the backing index when dest type is index', async () => {
@@ -1092,7 +1143,7 @@ describe('ai indices routes', () => {
           { [WorkflowsManagementApiActions.delete]: false }
         );
 
-        expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support');
+        expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', defaultSpaceId);
         expect(workflowsManagementApi.deleteWorkflows).not.toHaveBeenCalled();
         expect(response.ok).toHaveBeenCalledWith({
           body: {
@@ -1138,6 +1189,25 @@ describe('ai indices routes', () => {
     });
   });
 
+  describe('space scoping', () => {
+    it('resolves the space id from the spaces plugin and threads it through to the service', async () => {
+      const spaces = spacesMock.createStart();
+      spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
+      getSpaces.mockResolvedValue(spaces);
+      aiIndexService.list.mockResolvedValue([]);
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('GET', aiIndexPath, {});
+      await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
+      await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
+
+      expect(aiIndexService.list).toHaveBeenCalledWith('marketing');
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'marketing');
+      expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', 'marketing');
+    });
+  });
+
   describe('PUT /internal/context_engine/ai_index/{aiIndexId}/feedback_analysis', () => {
     const feedbackAnalysis = {
       enabled: true,
@@ -1156,6 +1226,7 @@ describe('ai indices routes', () => {
 
       expect(aiIndexService.setFeedbackAnalysis).toHaveBeenCalledWith(
         'customer_support',
+        defaultSpaceId,
         feedbackAnalysis
       );
       expect(response.ok).toHaveBeenCalledWith({
@@ -1202,6 +1273,7 @@ describe('ai indices routes', () => {
 
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
+        spaceId: defaultSpaceId,
         feedbackAnalysis,
         request: expect.anything(),
       });
@@ -1232,7 +1304,7 @@ describe('ai indices routes', () => {
       });
 
       expect(scheduleService.reconcile).toHaveBeenCalledWith(
-        expect.objectContaining({ feedbackAnalysis: stored })
+        expect.objectContaining({ feedbackAnalysis: stored, spaceId: defaultSpaceId })
       );
     });
 
@@ -1246,6 +1318,7 @@ describe('ai indices routes', () => {
 
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
+        spaceId: defaultSpaceId,
         feedbackAnalysis,
         request: expect.anything(),
       });
@@ -1262,6 +1335,7 @@ describe('ai indices routes', () => {
 
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
+        spaceId: defaultSpaceId,
         request: expect.anything(),
       });
     });
@@ -1285,6 +1359,7 @@ describe('ai indices routes', () => {
 
       expect(scheduleService.remove).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
+        spaceId: defaultSpaceId,
       });
     });
 
@@ -1293,9 +1368,54 @@ describe('ai indices routes', () => {
 
       await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
 
-      expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support');
+      expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', defaultSpaceId);
       expect(response.ok).toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('reconciles the schedule into the request space, not always default', async () => {
+      const spaces = spacesMock.createStart();
+      spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
+      getSpaces.mockResolvedValue(spaces);
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue(feedbackAnalysis);
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, feedback_analysis: feedbackAnalysis });
+      aiIndexService.create.mockResolvedValue(undefined);
+      aiIndexService.put.mockResolvedValue('updated');
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+      });
+      await callRoute('POST', aiIndexPath, {
+        body: { id: 'customer_support', sources: [], feedback_analysis: feedbackAnalysis },
+      });
+      await callRoute('PUT', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: { sources: [], feedback_analysis: feedbackAnalysis },
+      });
+
+      expect(scheduleService.reconcile).toHaveBeenCalledTimes(3);
+      expect(scheduleService.reconcile).toHaveBeenCalledWith({
+        aiIndexId: 'customer_support',
+        spaceId: 'marketing',
+        feedbackAnalysis,
+        request: expect.anything(),
+      });
+    });
+
+    it('removes the schedule and improvements from the request space', async () => {
+      const spaces = spacesMock.createStart();
+      spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
+      getSpaces.mockResolvedValue(spaces);
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
+
+      expect(scheduleService.remove).toHaveBeenCalledWith({
+        aiIndexId: 'customer_support',
+        spaceId: 'marketing',
+      });
+      expect(improvementsSpaceIds).toEqual(['marketing']);
     });
   });
 

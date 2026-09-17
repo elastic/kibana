@@ -473,6 +473,9 @@ export const OWNER_FIELD = 'owner';
 
 export const MAX_OBSERVABLE_TYPE_KEY_LENGTH = 36;
 
+/** v4 UUID — 8-4-4-4-12 hex + 4 hyphens */
+export const OBSERVABLE_ID_MAX_LENGTH = 36;
+
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
 export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
