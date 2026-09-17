@@ -35,19 +35,24 @@ describe('useBulkGetUserProfiles', () => {
     useKibanaMock().services.userProfile.bulkGet = bulkGet;
   });
 
-  it('resolves uids to display names, preferring full_name over username', async () => {
+  it('resolves uids to display names, preferring full_name, then email, then username', async () => {
     bulkGet.mockResolvedValue([
-      { uid: 'u_1', user: { username: 'user.one', full_name: 'User One' } },
-      { uid: 'u_2', user: { username: 'user.two' } },
+      {
+        uid: 'u_1',
+        user: { username: 'user.one', full_name: 'User One', email: 'user.one@elastic.co' },
+      },
+      { uid: 'u_2', user: { username: 'user.two', email: 'user.two@elastic.co' } },
+      { uid: 'u_3', user: { username: 'user.three' } },
     ]);
 
-    const { result } = renderHook(() => useBulkGetUserProfiles({ uids: ['u_1', 'u_2'] }), {
+    const { result } = renderHook(() => useBulkGetUserProfiles({ uids: ['u_1', 'u_2', 'u_3'] }), {
       wrapper,
     });
 
     await waitFor(() => {
       expect(result.current.data?.get('u_1')).toBe('User One');
-      expect(result.current.data?.get('u_2')).toBe('user.two');
+      expect(result.current.data?.get('u_2')).toBe('user.two@elastic.co');
+      expect(result.current.data?.get('u_3')).toBe('user.three');
     });
     expect(result.current.isLoading).toBe(false);
   });

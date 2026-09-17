@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { UseQueryResult } from '@kbn/react-query';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '../../common/lib/kibana';
 
 export interface UseBulkGetUserProfilesParams {
@@ -35,7 +36,7 @@ export const useBulkGetUserProfiles = ({
     select: (data) => {
       const profileByUid = new Map<string, string>();
       data.forEach((profile) => {
-        profileByUid.set(profile.uid, profile.user.full_name || profile.user.username);
+        profileByUid.set(profile.uid, getUserDisplayName(profile.user));
       });
       return profileByUid;
     },
