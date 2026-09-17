@@ -35,8 +35,7 @@ import {
 } from '../../../flyout/entity_details/shared/components/entity_source_value';
 import type { EntityFilters } from './use_entity_filters_param';
 import { useEntityFilterBarCounts } from './use_entity_filter_bar_counts';
-export { combineFilters, toBucketMap } from './use_entity_filter_bar_counts';
-export type { EntityFilterBarCounts } from './use_entity_filter_bar_counts';
+export { toBucketMap } from './use_entity_filter_bar_counts';
 
 const ENTITY_TYPE_OPTIONS = getEntityAnalyticsEntityTypes();
 const RISK_LEVEL_OPTIONS = SEVERITY_UI_SORT_ORDER.slice().reverse();

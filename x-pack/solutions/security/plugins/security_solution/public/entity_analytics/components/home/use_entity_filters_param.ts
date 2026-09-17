@@ -22,12 +22,12 @@ export interface EntityFilters {
 }
 
 const FILTER_FIELDS = [
-  ['entityTypes', 'entity.EngineMetadata.Type'],
-  ['riskLevels', 'entity.risk.calculated_level'],
-  ['assetCriticality', 'asset.criticality'],
-  ['watchlists', 'entity.attributes.watchlists'],
-  ['dataSources', 'entity.source'],
-] as const satisfies ReadonlyArray<[key: keyof EntityFilters, esField: string]>;
+  'entityTypes',
+  'riskLevels',
+  'assetCriticality',
+  'watchlists',
+  'dataSources',
+] as const satisfies ReadonlyArray<keyof EntityFilters>;
 
 const VALID_ENTITY_TYPES = new Set<string>(getEntityAnalyticsEntityTypes());
 const VALID_RISK_LEVELS = new Set<string>(SEVERITY_UI_SORT_ORDER);
@@ -37,15 +37,6 @@ const parseArray = (params: URLSearchParams, key: keyof EntityFilters): string[]
   const val = params.get(key);
   return val ? val.split(',').filter(Boolean) : [];
 };
-
-export interface EntityFilterTerm {
-  terms: Record<string, string[]>;
-}
-
-export const getEntityFilterTerms = (filters: EntityFilters): EntityFilterTerm[] =>
-  FILTER_FIELDS.filter(([key]) => filters[key].length).map(([key, field]) => ({
-    terms: { [field]: filters[key] as string[] },
-  }));
 
 interface EntityFiltersResult {
   entityFilters: EntityFilters;
@@ -76,7 +67,7 @@ export const useEntityFiltersParam = (): EntityFiltersResult => {
   const setEntityFilters = useCallback(
     (next: EntityFilters) => {
       const params = new URLSearchParams(history.location.search);
-      for (const [key] of FILTER_FIELDS) {
+      for (const key of FILTER_FIELDS) {
         const arr = next[key];
         if (arr.length) params.set(key, arr.join(','));
         else params.delete(key);
