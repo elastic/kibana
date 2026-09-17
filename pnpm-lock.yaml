@@ -3629,6 +3629,9 @@ importers:
       '@kbn/ui-ai-components':
         specifier: workspace:*
         version: link:src/platform/kbn-ui/ai-components
+      '@kbn/ui-annotations':
+        specifier: workspace:*
+        version: link:src/platform/kbn-ui/annotations
       '@kbn/ui-app-header':
         specifier: workspace:*
         version: link:src/platform/kbn-ui/app-header
@@ -7350,6 +7353,8 @@ importers:
   src/dev: {}
 
   src/platform/kbn-ui/ai-components: {}
+
+  src/platform/kbn-ui/annotations: {}
 
   src/platform/kbn-ui/app-header: {}
 

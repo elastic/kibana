@@ -93,5 +93,16 @@ module.exports = {
     '@kbn/ui-storybook-config': {
       alternative: 'Storybook-only config; do not import from Kibana runtime code.',
     },
+
+    '@kbn/ui-annotations': {
+      alternative:
+        'Enable the developer toolbar; the annotation layer is dev tooling, not an app-facing component.',
+      overrides: [
+        {
+          path: 'src/platform/plugins/shared/developer_toolbar/',
+          reason: 'Owning plugin that mounts the annotations UI and implements its host services.',
+        },
+      ],
+    },
   },
 };

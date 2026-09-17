@@ -2783,6 +2783,8 @@
       "@kbn/ui-actions-plugin/*": ["./src/platform/plugins/shared/ui_actions/*"],
       "@kbn/ui-ai-components": ["./src/platform/kbn-ui/ai-components"],
       "@kbn/ui-ai-components/*": ["./src/platform/kbn-ui/ai-components/*"],
+      "@kbn/ui-annotations": ["./src/platform/kbn-ui/annotations"],
+      "@kbn/ui-annotations/*": ["./src/platform/kbn-ui/annotations/*"],
       "@kbn/ui-app-header": ["./src/platform/kbn-ui/app-header"],
       "@kbn/ui-app-header/*": ["./src/platform/kbn-ui/app-header/*"],
       "@kbn/ui-app-menu": ["./src/platform/kbn-ui/app-menu"],
