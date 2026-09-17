@@ -16,7 +16,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
-import type { ApiClientFixture, KbnClient } from '@kbn/scout-oblt';
+import type { ApiClientFixture, KbnClient, KibanaRole } from '@kbn/scout-oblt';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
@@ -46,6 +46,17 @@ const MONITOR_SO_TYPES = [
   legacySyntheticsMonitorTypeSingle,
   'ingest-package-policies',
 ];
+
+const SYNTHETICS_EDITOR_WITH_PARAMETER_VALUES_ROLE = {
+  elasticsearch: { cluster: [], indices: [{ names: ['*'], privileges: ['all'] }] },
+  kibana: [
+    {
+      base: [],
+      spaces: ['*'],
+      feature: { uptime: ['all', 'can_read_param_values'] },
+    },
+  ],
+} satisfies KibanaRole;
 
 apiTest.describe(
   'CreateProjectMonitors',
@@ -105,7 +116,9 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ requestAuth, kbnClient, apiServices }) => {
       await kbnClient.savedObjects.clean({ types: MONITOR_SO_TYPES });
-      const { apiKeyHeader } = await requestAuth.getApiKey('editor');
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        SYNTHETICS_EDITOR_WITH_PARAMETER_VALUES_ROLE
+      );
       editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader, { Accept: 'application/json' });
 
       // One private location is enough — only the location-formatting test
