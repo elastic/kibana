@@ -11,11 +11,16 @@ import {
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
 } from '@kbn/agent-builder-common';
-import type { ConversationWithPermissions } from '@kbn/agent-builder-common';
+import type {
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
 import {
   INCIDENT_LINKED_INVESTIGATIONS_FIELD,
   MAX_INCIDENT_LINKED_INVESTIGATIONS,
+  MAX_INCIDENTS_PAGE_SIZE,
+  MAX_INCIDENTS_RESULT_WINDOW,
 } from './constants';
 
 /**
@@ -99,3 +104,42 @@ export const updateIncidentRequestSchema = z
   );
 
 export type UpdateIncidentRequest = z.infer<typeof updateIncidentRequestSchema>;
+
+/**
+ * Query parameters for the list incidents endpoint.
+ *
+ * Uses `z.coerce.number()` because query-string values arrive as strings.
+ * The `page * per_page` refinement mirrors agent_builder's `_search` route guard:
+ * results beyond MAX_INCIDENTS_RESULT_WINDOW are unreachable through offset
+ * pagination, so requesting them is always an error rather than an empty page.
+ */
+export const listIncidentsQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_INCIDENTS_PAGE_SIZE)
+      .default(MAX_INCIDENTS_PAGE_SIZE),
+  })
+  .refine(({ page, per_page: perPage }) => page * perPage <= MAX_INCIDENTS_RESULT_WINDOW, {
+    message: `page * per_page must not exceed ${MAX_INCIDENTS_RESULT_WINDOW}; incidents beyond that are not reachable through this API`,
+  });
+
+export type ListIncidentsQuery = z.infer<typeof listIncidentsQuerySchema>;
+
+/**
+ * An incident as returned by the **list** endpoint.
+ *
+ * Distinct from `IncidentConversation` (which includes rounds): the conversation
+ * client's `search()` method sources results from `CONVERSATION_LIST_SOURCE_FIELDS`,
+ * which excludes round data and attachment content. Using a separate type keeps
+ * the contract honest.
+ */
+export type IncidentConversationSummary = ConversationWithoutRoundsWithPermissions;
+
+export interface ListIncidentsResponse {
+  pagination: { total: number; page: number; per_page: number };
+  results: IncidentConversationSummary[];
+}

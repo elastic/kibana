@@ -11,19 +11,26 @@ export {
   INCIDENT_TEMPLATE_ID,
   INCIDENTS_INTERNAL_URL,
   INCIDENTS_UI_CAPABILITY_MANAGE,
+  INCIDENTS_UI_CAPABILITY_SHOW,
   INVESTIGATION_TEMPLATE_ID,
   MAX_INCIDENT_LINKED_INVESTIGATIONS,
+  MAX_INCIDENTS_PAGE_SIZE,
+  MAX_INCIDENTS_RESULT_WINDOW,
 } from './constants';
 
 export {
   createIncidentRequestSchema,
   incidentVisibilitySchema,
+  listIncidentsQuerySchema,
   updateIncidentRequestSchema,
 } from './incident';
 
 export type {
   CreateIncidentRequest,
   IncidentConversation,
+  IncidentConversationSummary,
   IncidentVisibility,
+  ListIncidentsQuery,
+  ListIncidentsResponse,
   UpdateIncidentRequest,
 } from './incident';

@@ -56,6 +56,7 @@ const INCIDENT_TEMPLATE = {
 const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   get: jest.fn().mockResolvedValue(MOCK_INVESTIGATION),
   list: jest.fn(),
+  search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
   create: jest.fn().mockResolvedValue(MOCK_INCIDENT),
   patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_INCIDENT, changedFields: [INCIDENT_LINKED_INVESTIGATIONS_FIELD] }),
   update: jest.fn().mockResolvedValue(MOCK_INCIDENT),
@@ -358,5 +359,89 @@ describe('IncidentsService.update', () => {
     });
 
     expect(client.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('IncidentsService.list', () => {
+  const MOCK_SUMMARY = { id: 'incident-1', template_id: INCIDENT_TEMPLATE_ID, title: 'My Incident' };
+
+  it('calls client.search with the fixed non-closed incidents filter', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 1 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50 });
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // The filter must reference `metadata.status`, not the bare `status` field,
+        // which maps to ConversationRoundStatus — not the incident template field.
+        // Regression guard: filtering `status: "closed"` would compile silently but
+        // return closed incidents.
+        filter: expect.stringContaining('metadata.status'),
+      })
+    );
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.stringContaining(`template_id: "${INCIDENT_TEMPLATE_ID}"`),
+      })
+    );
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.stringContaining('not (metadata.status: "closed")'),
+      })
+    );
+  });
+
+  it('passes sort updated_at desc explicitly to client.search', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50 });
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: { field: 'updated_at', order: 'desc' },
+      })
+    );
+  });
+
+  it('passes page and per_page through to client.search', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 3, per_page: 25 });
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 3, perPage: 25 })
+    );
+  });
+
+  it('wraps the client result in the pagination envelope', async () => {
+    const { service } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 42 }),
+    });
+
+    const result = await service.list(request, { page: 2, per_page: 10 });
+
+    expect(result).toEqual({
+      pagination: { total: 42, page: 2, per_page: 10 },
+      results: [MOCK_SUMMARY],
+    });
+  });
+
+  it('returns empty results and total 0 when client.search returns nothing', async () => {
+    const { service } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    const result = await service.list(request, { page: 1, per_page: 50 });
+
+    expect(result).toEqual({
+      pagination: { total: 0, page: 1, per_page: 50 },
+      results: [],
+    });
   });
 });

@@ -13,12 +13,18 @@ import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
 } from '../common/proposals/constants';
-import { INCIDENTS_UI_CAPABILITY_MANAGE } from '../common/incidents/constants';
+import {
+  INCIDENTS_UI_CAPABILITY_MANAGE,
+  INCIDENTS_UI_CAPABILITY_SHOW,
+} from '../common/incidents/constants';
 import {
   PROPOSALS_API_PRIVILEGE_MANAGE,
   PROPOSALS_API_PRIVILEGE_READ,
 } from './proposals/constants';
-import { INCIDENTS_API_PRIVILEGE_MANAGE } from './incidents/constants';
+import {
+  INCIDENTS_API_PRIVILEGE_MANAGE,
+  INCIDENTS_API_PRIVILEGE_READ,
+} from './incidents/constants';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -60,21 +66,33 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         }),
         privilegeGroups: [
           {
-            // `independent` with a single privilege today. It becomes `mutually_exclusive`
-            // when the List endpoint lands (follow-up gated on elastic/kibana#290659) and
-            // adds an `incidents_read` privilege alongside this `incidents_all`.
-            groupType: 'independent',
+            // `mutually_exclusive`: a user gets exactly one of these. The more permissive
+            // privilege (`incidents_all`) must come first. `incidents_all` includes both
+            // read and manage API privileges so that an `all` user can list incidents
+            // without needing a separate explicit read grant.
+            groupType: 'mutually_exclusive',
             privileges: [
               {
                 id: 'incidents_all',
                 name: i18n.translate(
                   'xpack.agenticInvestigations.incidentsAllPrivilegeName',
-                  { defaultMessage: 'Create and update incidents' }
+                  { defaultMessage: 'Create, update, and view incidents' }
                 ),
                 includeIn: 'all',
-                api: [INCIDENTS_API_PRIVILEGE_MANAGE],
+                api: [INCIDENTS_API_PRIVILEGE_READ, INCIDENTS_API_PRIVILEGE_MANAGE],
                 savedObject: { all: [], read: [] },
-                ui: [INCIDENTS_UI_CAPABILITY_MANAGE],
+                ui: [INCIDENTS_UI_CAPABILITY_SHOW, INCIDENTS_UI_CAPABILITY_MANAGE],
+              },
+              {
+                id: 'incidents_read',
+                name: i18n.translate(
+                  'xpack.agenticInvestigations.incidentsReadPrivilegeName',
+                  { defaultMessage: 'View incidents' }
+                ),
+                includeIn: 'read',
+                api: [INCIDENTS_API_PRIVILEGE_READ],
+                savedObject: { all: [], read: [] },
+                ui: [INCIDENTS_UI_CAPABILITY_SHOW],
               },
             ],
           },

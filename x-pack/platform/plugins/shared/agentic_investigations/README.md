@@ -257,20 +257,20 @@ An **incident** is a durable, shareable record that an analyst creates when a co
 
 Incidents use an `incidents` sub-feature on the `agenticInvestigations` Kibana feature:
 
+The `incidents` sub-feature uses a `mutually_exclusive` privilege group, so a user receives exactly one of:
+
 | Sub-feature privilege | API | UI |
 | --- | --- | --- |
 | `incidents_all` (included in `all`) | `read_incidents`, `manage_incidents` | `showIncidents`, `manageIncidents` |
-
-There is no `incidents_read` sub-privilege yet because there is no list or get route; it will be added when the list endpoint lands.
+| `incidents_read` (included in `read`) | `read_incidents` | `showIncidents` |
 
 ### API
 
 All routes are internal and versioned (`/internal/investigations/incidents`, version `1`):
 
+- `GET /internal/investigations/incidents` — list non-closed incidents the caller can access; needs `read_incidents`
 - `POST /internal/investigations/incidents` — create an incident from a linked investigation; needs `manage_incidents`
 - `PATCH /internal/investigations/incidents/{id}` — update title or append linked investigations; needs `manage_incidents`
-
-The **list** endpoint is deferred (blocked on [elastic/kibana#290659](https://github.com/elastic/kibana/pull/290659) which adds KQL filtering and sorting to the conversation client).
 
 ### Create behaviour
 
@@ -282,7 +282,36 @@ The **list** endpoint is deferred (blocked on [elastic/kibana#290659](https://gi
 4. Copies the intersection of the investigation's metadata and those declared fields, **excluding `status`** (so the incident opens with `status: 'open'` from the template default) and **excluding `linked_investigations`** (set separately to `[linked_investigation_id]`). This filter is what prevents a `400` from `workflow_execution_id`, which is declared on the investigation template but not on the incident template.
 5. Creates the conversation with `templateId: 'incident'` and no explicit `agentId` — the default agent is used, so collaborators can always see the incident regardless of their access to the investigation's agent.
 
+### List behaviour
+
+`GET` accepts optional `page` and `per_page` query parameters (defaults: `page=1`, `per_page=50`; maximum `per_page=50`; `page * per_page` must not exceed `10,000`). It returns:
+
+```json
+{
+  "pagination": { "total": 42, "page": 1, "per_page": 50 },
+  "results": [ /* ConversationWithoutRoundsWithPermissions */ ]
+}
+```
+
+The filter is **fixed and server-side**: `template_id: "incident" and not metadata.status: "closed"`. A few things to note:
+
+- The filter uses `metadata.status`, not the bare `status` field. The bare `status` maps to the
+  conversation-level `ConversationRoundStatus` (`in_progress`/`completed`/…); the incident
+  open/closed state lives in the template metadata.
+- `not metadata.status: "closed"` keeps documents where the field is absent, so a freshly created
+  incident (whose metadata carries `status: "open"` from the template default) always appears.
+- Access filtering is inherited from Agent Builder's `buildReadAccessFilter`: a caller sees public
+  incidents, their own incidents, and private incidents they are listed in. No access control needs
+  to be written in this plugin.
+- Results are sorted `updated_at desc` (newest-first) with a `created_at` tiebreaker, which is the
+  `client.search()` default when no explicit sort is requested.
+- Results include no round data (`_source` is `CONVERSATION_LIST_SOURCE_FIELDS`). The response type
+  is `IncidentConversationSummary` (`ConversationWithoutRoundsWithPermissions`), which is distinct
+  from `IncidentConversation` (the create/update response that includes rounds).
+
 ### MVP limitations
 
 - **Owner-only writes.** `patchMetadata` and `update` in Agent Builder are `access: 'owner'`. This conflicts with the epic requirement that participants can link further investigations. A follow-up is needed to widen the access check in Agent Builder's authorization layer.
 - **Last-write-wins on concurrent appends.** The array union for `linked_investigations` is computed in the service (outside the OCC write callback), so two concurrent `PATCH` requests can each read stale state and one link can be silently lost. The fix is to move the union computation into `writeConversation`'s `fields` callback. Accepted for MVP; follow-up filed.
+- **List caps at 10,000 results.** Offset pagination cannot go beyond Elasticsearch's default result window. Incidents beyond that threshold are unreachable through this API. `search_after` would be needed for deeper paging.
+- **Closed incidents are never returned.** The `status: "closed"` filter is not toggleable. A separate endpoint or a future filter parameter would be needed to retrieve closed incidents.

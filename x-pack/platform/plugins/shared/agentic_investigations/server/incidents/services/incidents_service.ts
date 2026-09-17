@@ -12,12 +12,41 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { ConversationTemplatesStart } from '@kbn/agent-builder-server';
-import type { CreateIncidentRequest, IncidentConversation, UpdateIncidentRequest } from '../../../common/incidents/incident';
+import type {
+  CreateIncidentRequest,
+  IncidentConversation,
+  ListIncidentsQuery,
+  ListIncidentsResponse,
+  UpdateIncidentRequest,
+} from '../../../common/incidents/incident';
+import type { ConversationSearchSort } from '@kbn/agent-builder-common';
 import {
   INCIDENT_LINKED_INVESTIGATIONS_FIELD,
   INCIDENT_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
 } from '../../../common/incidents/constants';
+
+/**
+ * Fixed KQL filter applied to every list query.
+ *
+ * `template_id` scopes to incidents only. `not (metadata.status: "closed")` uses
+ * the incident template's `status` metadata field — **not** the bare `status` filter
+ * field, which maps to the conversation-level `ConversationRoundStatus`
+ * (`in_progress`/`completed`/…) and would silently return closed incidents.
+ *
+ * `not` compiles to `bool.must_not`, which keeps documents where the field is absent
+ * rather than hiding them. That is correct: a document without `metadata.status`
+ * is not a closed incident.
+ */
+const NON_CLOSED_INCIDENTS_FILTER =
+  `template_id: "${INCIDENT_TEMPLATE_ID}" and not (metadata.status: "closed")` as const;
+
+/**
+ * Newest activity first. Passed explicitly so the sort is part of this endpoint's
+ * own contract and is not silently changed by an upstream default change.
+ * The conversation client appends `created_at` as a deterministic paging tiebreaker.
+ */
+const INCIDENTS_LIST_SORT: ConversationSearchSort = { field: 'updated_at', order: 'desc' };
 import { InvalidLinkedInvestigationError } from './errors';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
@@ -164,5 +193,18 @@ export class IncidentsService {
     }
 
     return result;
+  }
+
+  async list(request: KibanaRequest, query: ListIncidentsQuery): Promise<ListIncidentsResponse> {
+    const client = await this.getConversationClient(request);
+
+    const { results, total } = await client.search({
+      filter: NON_CLOSED_INCIDENTS_FILTER,
+      sort: INCIDENTS_LIST_SORT,
+      page: query.page,
+      perPage: query.per_page,
+    });
+
+    return { pagination: { total, page: query.page, per_page: query.per_page }, results };
   }
 }

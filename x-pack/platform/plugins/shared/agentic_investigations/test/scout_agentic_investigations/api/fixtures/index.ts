@@ -9,4 +9,9 @@
 // and `samlAuth.asInteractiveUser('viewer')`, which are built-in roles that cover the
 // agenticInvestigations `all` and `read` privileges respectively.
 export { apiTest } from '@kbn/scout';
-export { INTERNAL_HEADERS, CREATE_INCIDENT_PATH, INCIDENT_BY_ID_PATH } from './constants';
+export {
+  INTERNAL_HEADERS,
+  LIST_INCIDENTS_PATH,
+  CREATE_INCIDENT_PATH,
+  INCIDENT_BY_ID_PATH,
+} from './constants';

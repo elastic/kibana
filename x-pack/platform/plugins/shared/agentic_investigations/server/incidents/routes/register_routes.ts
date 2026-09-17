@@ -7,9 +7,11 @@
 
 import type { IncidentRouteDependencies } from '../types';
 import { registerCreateIncidentRoute } from './create_incident';
+import { registerListIncidentsRoute } from './list_incidents';
 import { registerUpdateIncidentRoute } from './update_incident';
 
 export const registerIncidentRoutes = (deps: IncidentRouteDependencies) => {
   registerCreateIncidentRoute(deps);
+  registerListIncidentsRoute(deps);
   registerUpdateIncidentRoute(deps);
 };

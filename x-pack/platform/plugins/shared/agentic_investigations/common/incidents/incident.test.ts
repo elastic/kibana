@@ -11,8 +11,12 @@ import {
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
 } from '@kbn/agent-builder-common';
-import { createIncidentRequestSchema, updateIncidentRequestSchema } from './incident';
-import { MAX_INCIDENT_LINKED_INVESTIGATIONS } from './constants';
+import {
+  createIncidentRequestSchema,
+  listIncidentsQuerySchema,
+  updateIncidentRequestSchema,
+} from './incident';
+import { MAX_INCIDENT_LINKED_INVESTIGATIONS, MAX_INCIDENTS_PAGE_SIZE } from './constants';
 
 // ---------------------------------------------------------------------------
 // createIncidentRequestSchema
@@ -191,5 +195,60 @@ describe('updateIncidentRequestSchema', () => {
         ),
       })
     ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// listIncidentsQuerySchema
+// ---------------------------------------------------------------------------
+
+describe('listIncidentsQuerySchema', () => {
+  it('defaults page to 1 and per_page to MAX_INCIDENTS_PAGE_SIZE when omitted', () => {
+    const result = listIncidentsQuerySchema.parse({});
+    expect(result.page).toBe(1);
+    expect(result.per_page).toBe(MAX_INCIDENTS_PAGE_SIZE);
+  });
+
+  it('coerces string query-param values to numbers', () => {
+    const result = listIncidentsQuerySchema.parse({ page: '2', per_page: '10' });
+    expect(result.page).toBe(2);
+    expect(result.per_page).toBe(10);
+  });
+
+  it('accepts page=1 and per_page=1 (minimum valid values)', () => {
+    expect(() => listIncidentsQuerySchema.parse({ page: 1, per_page: 1 })).not.toThrow();
+  });
+
+  it('accepts page=1 and per_page=MAX_INCIDENTS_PAGE_SIZE (maximum per_page)', () => {
+    expect(() =>
+      listIncidentsQuerySchema.parse({ page: 1, per_page: MAX_INCIDENTS_PAGE_SIZE })
+    ).not.toThrow();
+  });
+
+  it('rejects page=0', () => {
+    expect(() => listIncidentsQuerySchema.parse({ page: 0 })).toThrow();
+  });
+
+  it('rejects per_page=0', () => {
+    expect(() => listIncidentsQuerySchema.parse({ per_page: 0 })).toThrow();
+  });
+
+  it('rejects per_page exceeding MAX_INCIDENTS_PAGE_SIZE', () => {
+    expect(() =>
+      listIncidentsQuerySchema.parse({ page: 1, per_page: MAX_INCIDENTS_PAGE_SIZE + 1 })
+    ).toThrow();
+  });
+
+  it('rejects when page * per_page exceeds MAX_INCIDENTS_RESULT_WINDOW', () => {
+    // 201 * 50 = 10 050 > 10 000
+    expect(() =>
+      listIncidentsQuerySchema.parse({ page: 201, per_page: MAX_INCIDENTS_PAGE_SIZE })
+    ).toThrow();
+  });
+
+  it('accepts page=200 per_page=50 (= exactly 10 000, the limit)', () => {
+    expect(() =>
+      listIncidentsQuerySchema.parse({ page: 200, per_page: 50 })
+    ).not.toThrow();
   });
 });

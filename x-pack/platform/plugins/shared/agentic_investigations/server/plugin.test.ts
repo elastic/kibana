@@ -67,7 +67,9 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
     conversations: {
       getScopedClient: jest.fn().mockReturnValue({
         get: jest.fn(),
+        bulkGet: jest.fn(),
         list: jest.fn(),
+        search: jest.fn(),
         create: jest.fn(),
         patchMetadata: jest.fn(),
         update: jest.fn(),

@@ -28,7 +28,17 @@ export const MAX_INCIDENT_LINKED_INVESTIGATIONS = 100;
 /**
  * UI capabilities. Capabilities are namespaced by feature id rather than by
  * sub-feature, so each entity scopes its own names.
- * There is no `showIncidents` yet — the read / list route is deferred to a
- * follow-up ticket gated on elastic/kibana#290659.
  */
+export const INCIDENTS_UI_CAPABILITY_SHOW = 'showIncidents' as const;
 export const INCIDENTS_UI_CAPABILITY_MANAGE = 'manageIncidents' as const;
+
+/**
+ * Pagination bounds for the list endpoint.
+ *
+ * These mirror agent_builder's MAX_CONVERSATION_SEARCH_PER_PAGE (50) and
+ * MAX_RESULT_WINDOW (10_000), which live in that plugin's own common/ and are
+ * not importable cross-plugin. They are intentionally kept in sync with those
+ * upstream values — update here if agent_builder changes them.
+ */
+export const MAX_INCIDENTS_PAGE_SIZE = 50;
+export const MAX_INCIDENTS_RESULT_WINDOW = 10_000;

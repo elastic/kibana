@@ -12,7 +12,7 @@ import {
   createConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import { INCIDENTS_INTERNAL_URL, INCIDENT_BY_ID_URL } from '../../../common/incidents/constants';
-import { INCIDENTS_API_PRIVILEGE_MANAGE } from '../constants';
+import { INCIDENTS_API_PRIVILEGE_MANAGE, INCIDENTS_API_PRIVILEGE_READ } from '../constants';
 import type { IncidentsService } from '../services/incidents_service';
 import { InvalidLinkedInvestigationError } from '../services/errors';
 import type { IncidentRouteDependencies } from '../types';
@@ -37,9 +37,13 @@ const MOCK_INCIDENT = { id: 'incident-1', template_id: 'incident', title: 'Test 
 
 const registerAndCollect = (service: Partial<IncidentsService>) => {
   const router = httpServiceMock.createRouter();
+  const gets: RegisteredRoute[] = [];
   const posts: RegisteredRoute[] = [];
   const patches: RegisteredRoute[] = [];
 
+  (router.versioned.get as jest.Mock).mockImplementation((config) => ({
+    addVersion: (_version: unknown, handler: Handler) => gets.push({ config, handler }),
+  }));
   (router.versioned.post as jest.Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => posts.push({ config, handler }),
   }));
@@ -56,7 +60,7 @@ const registerAndCollect = (service: Partial<IncidentsService>) => {
   const byPath = (routes: RegisteredRoute[], path: string) =>
     routes.find(({ config }) => config.path === path)!;
 
-  return { router, posts, patches, byPath };
+  return { router, gets, posts, patches, byPath };
 };
 
 describe('incident routes', () => {
@@ -65,6 +69,13 @@ describe('incident routes', () => {
   });
 
   describe('privilege wiring', () => {
+    it('gates list on INCIDENTS_API_PRIVILEGE_READ', () => {
+      const { byPath, gets } = registerAndCollect({});
+      expect(
+        byPath(gets, INCIDENTS_INTERNAL_URL).config.security?.authz?.requiredPrivileges
+      ).toEqual([INCIDENTS_API_PRIVILEGE_READ]);
+    });
+
     it('gates create on INCIDENTS_API_PRIVILEGE_MANAGE', () => {
       const { byPath, posts } = registerAndCollect({});
       expect(
@@ -79,17 +90,18 @@ describe('incident routes', () => {
       ).toEqual([INCIDENTS_API_PRIVILEGE_MANAGE]);
     });
 
-    it('marks both routes as internal', () => {
-      const { byPath, posts, patches } = registerAndCollect({});
+    it('marks all routes as internal', () => {
+      const { byPath, gets, posts, patches } = registerAndCollect({});
+      expect(byPath(gets, INCIDENTS_INTERNAL_URL).config.access).toBe('internal');
       expect(byPath(posts, INCIDENTS_INTERNAL_URL).config.access).toBe('internal');
       expect(byPath(patches, INCIDENT_BY_ID_URL).config.access).toBe('internal');
     });
   });
 
   describe('route shape', () => {
-    it('does not register a GET (list) route — list is deferred to a follow-up ticket', () => {
-      const { router } = registerAndCollect({});
-      expect(router.versioned.get).not.toHaveBeenCalled();
+    it('registers a GET route at INCIDENTS_INTERNAL_URL for the list endpoint', () => {
+      const { byPath, gets } = registerAndCollect({});
+      expect(byPath(gets, INCIDENTS_INTERNAL_URL)).toBeDefined();
     });
 
     it('does not register a PUT or DELETE route', () => {
@@ -174,6 +186,62 @@ describe('incident routes', () => {
 
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 500 })
+      );
+    });
+  });
+
+  describe('list incidents handler', () => {
+    const MOCK_LIST_RESPONSE = {
+      pagination: { total: 2, page: 1, per_page: 50 },
+      results: [MOCK_INCIDENT, { ...MOCK_INCIDENT, id: 'incident-2' }],
+    };
+
+    it('calls service.list with request.query and returns 200', async () => {
+      const list = jest.fn().mockResolvedValue(MOCK_LIST_RESPONSE);
+      const { byPath, gets } = registerAndCollect({ list });
+      const response = httpServerMock.createResponseFactory();
+
+      await byPath(gets, INCIDENTS_INTERNAL_URL).handler(
+        {},
+        httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 50 } }),
+        response
+      );
+
+      expect(list).toHaveBeenCalledTimes(1);
+      expect(response.ok).toHaveBeenCalledWith({ body: MOCK_LIST_RESPONSE });
+    });
+
+    it('maps an unknown error to 500', async () => {
+      const list = jest.fn().mockRejectedValue(new Error('unexpected'));
+      const { byPath, gets } = registerAndCollect({ list });
+      const response = httpServerMock.createResponseFactory();
+
+      await byPath(gets, INCIDENTS_INTERNAL_URL).handler(
+        {},
+        httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 50 } }),
+        response
+      );
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
+    });
+
+    it('maps a conversationNotFound AgentBuilderError to 404', async () => {
+      const list = jest
+        .fn()
+        .mockRejectedValue(createConversationNotFoundError({ conversationId: 'inv-1' }));
+      const { byPath, gets } = registerAndCollect({ list });
+      const response = httpServerMock.createResponseFactory();
+
+      await byPath(gets, INCIDENTS_INTERNAL_URL).handler(
+        {},
+        httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 50 } }),
+        response
+      );
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404 })
       );
     });
   });
