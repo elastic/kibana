@@ -15,6 +15,7 @@ import {
 } from '@kbn/alertzero-common';
 import { SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import { createWorkerSettingsRegistration } from './worker_settings';
+import type { RegisteredWorkerId } from '../worker_registry';
 
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
@@ -316,7 +317,7 @@ describe('createWorkerSettingsRegistration', () => {
 
   describe('Workers that allow only manual autonomy', () => {
     it.each(MANUAL_ONLY_WORKER_IDS)('%s rejects a higher level, naming the field', (workerId) => {
-      const registration = createWorkerSettingsRegistration(workerId);
+      const registration = createWorkerSettingsRegistration(workerId as RegisteredWorkerId);
 
       expect(
         expectInvalid(
@@ -326,7 +327,9 @@ describe('createWorkerSettingsRegistration', () => {
     });
 
     it.each(MANUAL_ONLY_WORKER_IDS)('%s still defaults to manual', (workerId) => {
-      expect(createWorkerSettingsRegistration(workerId).createDefaultValues()).toEqual({
+      expect(
+        createWorkerSettingsRegistration(workerId as RegisteredWorkerId).createDefaultValues()
+      ).toEqual({
         settingsVersion: 1,
         autonomyLevel: 'manual',
       });
