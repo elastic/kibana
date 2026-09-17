@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/disk_usage.sh
 
 # Dual-cache agent images (elastic/ci-agent-images) bake one tree per package manager:
 #   pnpm -> ~/.cache/kibana/pnpm/{.pnpm-store,node_modules}
@@ -64,6 +65,8 @@ if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   BOOTSTRAP_PARAMS+=(--force-install)
   pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"
 fi
+
+print_disk_usage "post-bootstrap"
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'pnpm kbn bootstrap'
