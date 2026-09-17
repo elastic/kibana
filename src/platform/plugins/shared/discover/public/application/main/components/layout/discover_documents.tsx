@@ -385,7 +385,7 @@ function DiscoverDocumentsComponent({
   // New result identity after refresh - keeps sparkline cache from reusing a stale series.
   const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);
   const searchContext = useMemo(() => {
-    if (!isEsqlMode || !esqlTable || !query || !requestParams.timeRangeAbsolute) {
+    if (!isEsqlMode || !esqlTable || !query) {
       return undefined;
     }
     return {
