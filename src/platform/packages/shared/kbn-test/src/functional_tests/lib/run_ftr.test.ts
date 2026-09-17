@@ -68,6 +68,16 @@ describe('runFtr', () => {
     expect(error.exitCode).toBe(1);
   });
 
+  it('exits with 1 when an aborted attempt was followed by a passing retry, since the tests the abort cut off never ran', async () => {
+    mockRun.mockImplementation(async () => {
+      mockRunner.aborted = true;
+      return 0;
+    });
+    const error = await runAndCatch();
+    expect(error.exitCode).toBe(1);
+    expect(error.message).toBe('run aborted before every test ran');
+  });
+
   it('exits with 1 when bail is on (CLI flag, FTR_EXTRA_ARGS or mochaOpts), since the run stopped at the first failure', async () => {
     mockRun.mockResolvedValue(1);
     const error = await runAndCatch(configWith(true));

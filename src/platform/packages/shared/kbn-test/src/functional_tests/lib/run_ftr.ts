@@ -34,16 +34,30 @@ export async function runFtr(options: {
   const ftr = new FunctionalTestRunner(options.log, options.config, options.esVersion);
 
   const failureCount = await ftr.run(options.signal, options.retry);
-  if (failureCount > 0) {
-    // Bail stops at the first failure and an abort (ES/Kibana exited early, or the first Mocha
-    // timeout under `mochaOpts.abortOnTimeout`) stops wherever it was, so in both cases the JUnit
-    // report is incomplete and does not explain the exit alone.
-    // `mochaOpts.bail` is the effective value: the CLI flag is applied onto the config.
-    const stoppedEarly = ftr.aborted || options.config.get('mochaOpts.bail') === true;
+  const failuresMessage = `${failureCount} functional test ${
+    failureCount === 1 ? 'failure' : 'failures'
+  }`;
+
+  // An abort (ES/Kibana exited early, or the first Mocha timeout under `mochaOpts.abortOnTimeout`)
+  // stops wherever it was, so tests after that point never ran. `aborted` is sticky across
+  // retries: a retry re-runs only the failed files, so a passing retry can bring the count back to
+  // zero while the tests the aborted attempt never reached remain unrun.
+  if (ftr.aborted) {
     throw createFailError(
-      `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`,
-      { exitCode: stoppedEarly ? 1 : FTR_TEST_FAILURES_EXIT_CODE }
+      failureCount > 0
+        ? `${failuresMessage}; run aborted before every test ran`
+        : 'run aborted before every test ran',
+      { exitCode: 1 }
     );
+  }
+
+  if (failureCount > 0) {
+    // Bail stops at the first failure, so the JUnit report is incomplete and does not explain
+    // the exit alone. `mochaOpts.bail` is the effective value: the CLI flag is applied onto the config.
+    const bail = options.config.get('mochaOpts.bail') === true;
+    throw createFailError(failuresMessage, {
+      exitCode: bail ? 1 : FTR_TEST_FAILURES_EXIT_CODE,
+    });
   }
 }
 
