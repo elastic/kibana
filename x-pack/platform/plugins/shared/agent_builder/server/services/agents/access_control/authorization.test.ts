@@ -9,6 +9,7 @@ import {
   agentBuilderDefaultAgentId,
   AgentAccessControlMode,
   AgentAccessControlRole,
+  type AgentAccessControlEntry,
   type CurrentUser,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
@@ -121,13 +122,14 @@ describe('agent access-control authorization', () => {
       ).toBe(false);
     });
 
-    it('returns false when the caller is missing or the entry is not a user grant', () => {
-      expect(
-        matchesAccessControlEntry(
-          { type: 'user', id: 'bob-id', role: AgentAccessControlRole.User },
-          null
-        )
-      ).toBe(false);
+    it('returns false when the entry is not a user grant', () => {
+      const roleEntry = {
+        type: 'role',
+        id: 'bob-id',
+        role: AgentAccessControlRole.User,
+      } as unknown as AgentAccessControlEntry;
+
+      expect(matchesAccessControlEntry(roleEntry, bob)).toBe(false);
     });
   });
 

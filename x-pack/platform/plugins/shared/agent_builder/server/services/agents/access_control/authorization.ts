@@ -86,9 +86,9 @@ const accessControlModeRole = (
  */
 export const matchesAccessControlEntry = (
   entry: AgentAccessControlEntry,
-  user: UserIdAndName | null | undefined
+  user: UserIdAndName
 ): boolean => {
-  if (!user || entry.type !== 'user') {
+  if (entry.type !== 'user') {
     return false;
   }
   if (entry.id !== undefined) {
