@@ -25,3 +25,7 @@ export { convertErrors, toClientError } from './convert_errors';
 export { serializeExecutionError } from './serialize_execution_error';
 export { resolveServices } from './resolve_services';
 export { executionStartedEvents$ } from './execution_started';
+export {
+  trackExecutionInterruption,
+  type PersistInterruptionFn,
+} from './track_execution_interruption';
