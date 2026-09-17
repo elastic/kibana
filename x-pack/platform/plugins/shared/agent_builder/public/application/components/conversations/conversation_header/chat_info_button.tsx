@@ -20,6 +20,8 @@ const labels = {
 export const ChatInfoButton = () => {
   const conversationId = useConversationId();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   if (!conversationId) {
     return null;
@@ -30,8 +32,12 @@ export const ChatInfoButton = () => {
       <EuiButtonEmpty
         size="s"
         color="text"
-        iconType={isFlyoutOpen ? 'transitionLeftIn' : 'transitionLeftOut'}
+        iconType={isFlyoutOpen && (isHovered || isFocused) ? 'cross' : 'briefcase'}
         onClick={() => setIsFlyoutOpen((open) => !open)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocus={(event) => setIsFocused(event.currentTarget.matches(':focus-visible'))}
+        onBlur={() => setIsFocused(false)}
         aria-label={labels.chatInfo}
         aria-expanded={isFlyoutOpen}
         data-test-subj="agentBuilderChatInfoButton"

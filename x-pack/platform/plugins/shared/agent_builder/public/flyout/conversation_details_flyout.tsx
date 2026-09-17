@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -236,6 +236,36 @@ const agentPanelFlyoutStyles = css`
   max-height: none !important;
 `;
 
+/** Push Chat info when the agent column is at least this wide. */
+const CHAT_INFO_PUSH_MIN_AGENT_WIDTH = 1000;
+
+const useAgentPanelWidth = (enabled: boolean): number => {
+  const [width, setWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    if (!enabled) {
+      setWidth(0);
+      return;
+    }
+
+    const element = document.getElementById(AGENT_MAIN_CONTAINER_ID);
+    if (!element) {
+      return;
+    }
+
+    const updateWidth = () => {
+      setWidth(element.getBoundingClientRect().width);
+    };
+
+    updateWidth();
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(element);
+    return () => resizeObserver.disconnect();
+  }, [enabled]);
+
+  return width;
+};
+
 /** Live variant backed by the active conversation cache. */
 export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyoutProps) => {
   const titleId = useGeneratedHtmlId({
@@ -244,6 +274,9 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const agentPanelWidth = useAgentPanelWidth(isAgentWorkspaceMount);
+  const isPushFlyout =
+    !isAgentWorkspaceMount || agentPanelWidth >= CHAT_INFO_PUSH_MIN_AGENT_WIDTH;
 
   return (
     <EuiFlyout
@@ -252,7 +285,8 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       flyoutMenuDisplayMode="always"
       flyoutMenuProps={{}}
       size="s"
-      type={isAgentWorkspaceMount ? 'overlay' : 'push'}
+      type={isPushFlyout ? 'push' : 'overlay'}
+      resizable={isPushFlyout}
       hasAnimation={false}
       container={isAgentWorkspaceMount ? `#${AGENT_MAIN_CONTAINER_ID}` : undefined}
       ownFocus={!isAgentWorkspaceMount}
