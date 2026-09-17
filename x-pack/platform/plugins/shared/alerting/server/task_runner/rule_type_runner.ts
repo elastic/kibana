@@ -40,6 +40,10 @@ import type {
 } from './types';
 import { withAlertingSpan } from './lib';
 import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
+import {
+  AlertStateChangedTriggerId,
+  type AlertStateChangedPayload,
+} from '../../common/workflows/triggers/alert_state_changed';
 
 interface ConstructorOpts<
   Params extends RuleTypeParams,
@@ -427,6 +431,74 @@ export class RuleTypeRunner<
         ruleType.cancelAlertsOnRuleTimeout
       ),
     });
+
+    // Emit one workflow trigger event per alert per genuine state transition.
+    // Gate on autoRecoverAlerts: non-lifecycle rule types don't persist alert state
+    // between runs, so every alert is vacuously "new" every execution — emitting
+    // for them would reproduce the fan-out problem we're trying to fix.
+    if (
+      (ruleType.autoRecoverAlerts ?? true) &&
+      this.options.context.workflowsExtensions
+    ) {
+      const newAlerts = alertsClient.getProcessedAlerts('new');
+      const recoveredAlerts = alertsClient.getProcessedAlerts('recovered');
+      const newEntries = Object.entries(newAlerts);
+      const recoveredEntries = Object.entries(recoveredAlerts);
+
+      if (newEntries.length > 0 || recoveredEntries.length > 0) {
+        const { workflowsExtensions } = this.options.context;
+        const rulePayload: AlertStateChangedPayload['rule'] = {
+          id: context.ruleId,
+          name: rule.name,
+          spaceId: context.spaceId,
+          consumer: rule.consumer,
+          ruleTypeId: ruleType.id,
+          tags: rule.tags,
+          ruleCategory: ruleType.name,
+        };
+
+        const events: AlertStateChangedPayload[] = [
+          ...newEntries.map(([, alert]) => ({
+            rule: rulePayload,
+            alert: {
+              id: alert.getId(),
+              uuid: alert.getUuid(),
+              category: 'new' as const,
+              actionGroup: alert.getScheduledActionOptions()?.actionGroup ?? null,
+              start: alert.getStart(),
+              status: 'active',
+            },
+          })),
+          ...recoveredEntries.map(([, alert]) => ({
+            rule: rulePayload,
+            alert: {
+              id: alert.getId(),
+              uuid: alert.getUuid(),
+              category: 'recovered' as const,
+              actionGroup: alert.getLastScheduledActions()?.group ?? null,
+              start: alert.getStart(),
+              status: 'recovered',
+            },
+          })),
+        ];
+
+        setImmediate(() => {
+          workflowsExtensions
+            .getClient(context.request)
+            .then(async (client) => {
+              if (!client.isWorkflowsAvailable) return;
+              await Promise.all(
+                events.map((payload) => client.emitEvent(AlertStateChangedTriggerId, payload))
+              );
+            })
+            .catch((err: Error) => {
+              context.logger.error(
+                `[alerting.alertStateChanged] Failed to emit workflow trigger for rule ${context.ruleId}: ${err.message}`
+              );
+            });
+        });
+      }
+    }
 
     return { state: updatedRuleTypeState };
   }

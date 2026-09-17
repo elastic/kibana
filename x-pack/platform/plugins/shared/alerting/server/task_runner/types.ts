@@ -61,6 +61,7 @@ import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_a
 import type { RulesSettingsService } from '../rules_settings';
 import type { MaintenanceWindowsService } from './maintenance_windows';
 import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -198,6 +199,7 @@ export interface RuleTypeRunnerContext {
   spaceId: SpaceId;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export interface RuleRunnerErrorStackTraceLog {
@@ -244,6 +246,13 @@ export interface TaskRunnerContext {
    * run fails because UIAM no longer knows the stored key. Absent when UIAM is not configured.
    */
   uiamConvert?: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
+  /**
+   * Optional — absent when the `workflowsExtensions` plugin is not loaded
+   * (e.g. some Serverless tiers). When present, rule executions emit
+   * `alerting.alertStateChanged` workflow trigger events on genuine alert
+   * state transitions.
+   */
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {
