@@ -33,12 +33,6 @@ const getSectionStyles = ({ euiTheme }: UseEuiTheme) => ({
       border-block-start: ${euiTheme.border.thin};
     }
   `,
-  noSeparator: css`
-    [data-flyout-section]:not([data-bordered]):not([data-open]) + & {
-      padding-block-start: 0;
-      border-block-start: none;
-    }
-  `,
 });
 
 export const FlyoutSection = ({
@@ -49,7 +43,6 @@ export const FlyoutSection = ({
   action,
   hasBorder = false,
   borderOnChildren = false,
-  showSeparator = true,
   children,
   'data-test-subj': dataTestSubj,
 }: FlyoutSectionProps) => {
@@ -84,7 +77,7 @@ export const FlyoutSection = ({
       // An unnamed `section` is not exposed to assistive tech at all; naming it by its own
       // heading makes it a navigable region.
       aria-labelledby={titleId}
-      css={[styles.section, !showSeparator && styles.noSeparator]}
+      css={styles.section}
       data-flyout-section="section"
       // Read by the divider rule above on the *following* sibling, so it must stay set even when
       // the panel itself lives on the children.

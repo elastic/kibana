@@ -233,20 +233,56 @@ describe('ActionPolicyDetailsFlyout', () => {
     });
   });
 
-  describe('body accordions', () => {
-    it('renders the Definition accordion', () => {
+  describe('body section containers', () => {
+    it('renders the Definition section', () => {
       renderFlyout();
       expect(screen.getByTestId('actionPolicyDetailsFlyoutDefinition')).toBeInTheDocument();
     });
 
-    it('renders the Notification accordion', () => {
+    it('renders the Notification section', () => {
       renderFlyout();
       expect(screen.getByTestId('actionPolicyDetailsFlyoutNotification')).toBeInTheDocument();
     });
 
-    it('renders the Destinations accordion', () => {
+    it('renders the Destinations section', () => {
       renderFlyout();
       expect(screen.getByTestId('actionPolicyDetailsFlyoutDestinations')).toBeInTheDocument();
+    });
+
+    it('renders the Description subsection', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutDescriptionBlock')).toBeInTheDocument();
+    });
+
+    it('renders the Policy scope subsection', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutPolicyScopeBlock')).toBeInTheDocument();
+    });
+
+    it('renders the Dispatch mode subsection', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutDispatchModeBlock')).toBeInTheDocument();
+    });
+
+    it('renders the Frequency subsection', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutFrequencyBlock')).toBeInTheDocument();
+    });
+
+    it('renders the Group by subsection when grouping mode is per_field', () => {
+      renderFlyout();
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutGroupByBlock')).toBeInTheDocument();
+    });
+
+    it('does not render the Group by subsection when grouping mode is per_episode', () => {
+      renderFlyout({
+        policy: createPolicy({
+          grouping_mode: 'per_episode',
+          group_by: null,
+          throttle: { strategy: 'on_status_change', interval: null },
+        }),
+      });
+      expect(screen.queryByTestId('actionPolicyDetailsFlyoutGroupByBlock')).not.toBeInTheDocument();
     });
   });
 

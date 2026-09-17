@@ -94,7 +94,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/flyout-template",
-    "@kbn/flyout-info-blocks",
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
     "@kbn/unified-histogram",
