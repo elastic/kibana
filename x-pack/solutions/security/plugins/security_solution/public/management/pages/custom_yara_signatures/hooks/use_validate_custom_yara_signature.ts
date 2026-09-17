@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { useQuery } from '@kbn/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
+import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '../../../../../common/endpoint/constants';
 import { useHttp } from '../../../../common/lib/kibana';
 import type {
   ValidateCustomYaraSignatureDiagnostic,
-  ValidateCustomYaraSignatureRequestBody,
+  ValidateCustomYaraSignatureResponse,
 } from '../../../../../common/api/endpoint/custom_yara_signatures';
-import { validateCustomYaraSignature } from '../service/validate_custom_yara_signature';
 
 export const VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS = 500;
+
+export const CUSTOM_YARA_SIGNATURE_VALIDATE_QUERY_KEY = [
+  'customYaraSignatures',
+  'validate',
+] as const;
 
 const EMPTY_OS_TYPES: OsTypeArray = [];
 const EMPTY_DIAGNOSTICS: ValidateCustomYaraSignatureDiagnostic[] = [];
 
-const isAbortError = (error: unknown): boolean =>
-  error instanceof DOMException && error.name === 'AbortError';
-
-export interface UseValidateCustomYaraSignatureResultPayload {
-  errors: ValidateCustomYaraSignatureDiagnostic[];
-  warnings: ValidateCustomYaraSignatureDiagnostic[];
-  requestError: unknown;
-}
+const toOsTypesKey = (osTypes: OsTypeArray | undefined): string =>
+  (osTypes ?? EMPTY_OS_TYPES).join(',');
 
 export interface UseValidateCustomYaraSignatureProps {
   yaraRule: string;
   osTypes: OsTypeArray | undefined;
   enabled?: boolean;
-  onValidationResult?: (result: UseValidateCustomYaraSignatureResultPayload) => void;
 }
 
 export interface UseValidateCustomYaraSignatureResult {
@@ -42,24 +42,20 @@ export interface UseValidateCustomYaraSignatureResult {
   warnings: ValidateCustomYaraSignatureDiagnostic[];
   isValidating: boolean;
   requestError: unknown;
+  isDirty: boolean;
+  isYaraSyntaxValid: boolean;
 }
 
 export const useValidateCustomYaraSignature = ({
   yaraRule,
   osTypes,
   enabled = true,
-  onValidationResult,
 }: UseValidateCustomYaraSignatureProps): UseValidateCustomYaraSignatureResult => {
   const http = useHttp();
-  const onValidationResultRef = useRef(onValidationResult);
-  onValidationResultRef.current = onValidationResult;
+  const osTypesKey = toOsTypesKey(osTypes);
 
-  const [debouncedYaraRule, setDebouncedYaraRule] = useState('');
-  const [debouncedOsTypes, setDebouncedOsTypes] = useState<OsTypeArray>(EMPTY_OS_TYPES);
-  const [errors, setErrors] = useState(EMPTY_DIAGNOSTICS);
-  const [warnings, setWarnings] = useState(EMPTY_DIAGNOSTICS);
-  const [isValidating, setIsValidating] = useState(false);
-  const [requestError, setRequestError] = useState<unknown>(undefined);
+  const [debouncedYaraRule, setDebouncedYaraRule] = useState(yaraRule);
+  const [debouncedOsTypes, setDebouncedOsTypes] = useState<OsTypeArray>(osTypes ?? EMPTY_OS_TYPES);
 
   useDebounce(
     () => {
@@ -67,73 +63,42 @@ export const useValidateCustomYaraSignature = ({
       setDebouncedOsTypes(osTypes ?? EMPTY_OS_TYPES);
     },
     VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS,
-    [yaraRule, osTypes]
+    [osTypesKey, yaraRule]
   );
 
+  const isDirty = yaraRule !== debouncedYaraRule || osTypesKey !== toOsTypesKey(debouncedOsTypes);
   const canValidate =
     enabled && debouncedYaraRule.trim().length > 0 && (debouncedOsTypes?.length ?? 0) > 0;
 
-  useEffect(() => {
-    if (!canValidate) {
-      setErrors(EMPTY_DIAGNOSTICS);
-      setWarnings(EMPTY_DIAGNOSTICS);
-      setRequestError(undefined);
-      setIsValidating(false);
-      return;
-    }
+  const query = useQuery<ValidateCustomYaraSignatureResponse, IHttpFetchError>({
+    queryKey: [
+      ...CUSTOM_YARA_SIGNATURE_VALIDATE_QUERY_KEY,
+      debouncedYaraRule,
+      [...debouncedOsTypes],
+    ],
+    queryFn: async ({ signal }) =>
+      http.post<ValidateCustomYaraSignatureResponse>(CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE, {
+        version: '1',
+        body: JSON.stringify({
+          yara_rule: debouncedYaraRule,
+          os_types: [...debouncedOsTypes] as OperatingSystem[],
+        }),
+        signal,
+      }),
+    enabled: canValidate,
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
-    const abortController = new AbortController();
-    const body: ValidateCustomYaraSignatureRequestBody = {
-      yara_rule: debouncedYaraRule,
-      os_types: [...debouncedOsTypes] as OperatingSystem[],
-    };
-
-    setIsValidating(true);
-    setRequestError(undefined);
-
-    validateCustomYaraSignature(http, body, { signal: abortController.signal })
-      .then((response) => {
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        setErrors(response.errors);
-        setWarnings(response.warnings);
-        onValidationResultRef.current?.({
-          errors: response.errors,
-          warnings: response.warnings,
-          requestError: undefined,
-        });
-      })
-      .catch((error: unknown) => {
-        if (abortController.signal.aborted || isAbortError(error)) {
-          return;
-        }
-
-        setErrors(EMPTY_DIAGNOSTICS);
-        setWarnings(EMPTY_DIAGNOSTICS);
-        setRequestError(error);
-        onValidationResultRef.current?.({
-          errors: EMPTY_DIAGNOSTICS,
-          warnings: EMPTY_DIAGNOSTICS,
-          requestError: error,
-        });
-      })
-      .finally(() => {
-        if (!abortController.signal.aborted) {
-          setIsValidating(false);
-        }
-      });
-
-    return () => {
-      abortController.abort();
-    };
-  }, [canValidate, debouncedOsTypes, debouncedYaraRule, http]);
+  const settledData = canValidate && !isDirty && query.isSuccess ? query.data : undefined;
 
   return {
-    errors,
-    warnings,
-    isValidating,
-    requestError,
+    errors: settledData?.errors ?? EMPTY_DIAGNOSTICS,
+    warnings: settledData?.warnings ?? EMPTY_DIAGNOSTICS,
+    isValidating: query.isFetching,
+    requestError: isDirty ? undefined : query.error,
+    isDirty,
+    isYaraSyntaxValid: settledData !== undefined && settledData.errors.length === 0,
   };
 };

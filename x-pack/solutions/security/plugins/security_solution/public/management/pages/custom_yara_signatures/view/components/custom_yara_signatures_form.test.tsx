@@ -402,20 +402,30 @@ describe('Custom YARA signatures form', () => {
     });
 
     it('should debounce validate API calls until the user finishes typing', async () => {
-      renderWithSignature();
+      const view = renderWithSignature();
+      flushValidationDebounce();
 
-      expect(mockedContext.coreStart.http.post).not.toHaveBeenCalledWith(
-        CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
-        expect.anything()
+      await waitFor(() => {
+        expect(mockedContext.coreStart.http.post).toHaveBeenCalledTimes(1);
+      });
+      mockedContext.coreStart.http.post.mockClear();
+
+      view.rerender(
+        <CustomYaraSignaturesForm
+          {...createProps({
+            item: createItem({
+              entries: [createYaraEntry(`${signature} extra`)],
+            }),
+          })}
+        />
       );
+
+      expect(mockedContext.coreStart.http.post).not.toHaveBeenCalled();
 
       act(() => {
         jest.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS - 1);
       });
-      expect(mockedContext.coreStart.http.post).not.toHaveBeenCalledWith(
-        CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
-        expect.anything()
-      );
+      expect(mockedContext.coreStart.http.post).not.toHaveBeenCalled();
 
       flushValidationDebounce();
 
@@ -425,7 +435,7 @@ describe('Custom YARA signatures form', () => {
           expect.objectContaining({
             version: '1',
             body: JSON.stringify({
-              yara_rule: signature,
+              yara_rule: `${signature} extra`,
               os_types: [OperatingSystem.WINDOWS],
             }),
           })
@@ -555,6 +565,84 @@ describe('Custom YARA signatures form', () => {
           })
         );
       });
+    });
+
+    it('should hide validation diagnostics while the signature is being edited', async () => {
+      mockedContext.coreStart.http.post.mockResolvedValue({
+        errors: [{ message: 'syntax error', line: 2, severity: 'error' }],
+        warnings: [{ message: 'unused identifier', line: 4, severity: 'warning' }],
+        error_count: 1,
+        warning_count: 1,
+      });
+
+      const view = renderWithSignature();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('customYaraSignatures-form-validation-error')).toBeInTheDocument();
+      });
+
+      view.rerender(
+        <CustomYaraSignaturesForm
+          {...createProps({
+            item: createItem({
+              entries: [createYaraEntry(`${signature} extra`)],
+            }),
+          })}
+        />
+      );
+
+      expect(
+        screen.queryByTestId('customYaraSignatures-form-validation-error')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('customYaraSignatures-form-validation-warning')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should restore cached diagnostics without refetching when the signature is reverted', async () => {
+      mockedContext.coreStart.http.post.mockResolvedValue({
+        errors: [{ message: 'syntax error', line: 2, severity: 'error' }],
+        warnings: [],
+        error_count: 1,
+        warning_count: 0,
+      });
+
+      const view = renderWithSignature();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('customYaraSignatures-form-validation-error')).toHaveTextContent(
+          'Line 2: syntax error'
+        );
+      });
+      expect(mockedContext.coreStart.http.post).toHaveBeenCalledTimes(1);
+
+      view.rerender(
+        <CustomYaraSignaturesForm
+          {...createProps({
+            item: createItem({
+              entries: [createYaraEntry(`${signature} extra`)],
+            }),
+          })}
+        />
+      );
+      expect(
+        screen.queryByTestId('customYaraSignatures-form-validation-error')
+      ).not.toBeInTheDocument();
+
+      view.rerender(
+        <CustomYaraSignaturesForm
+          {...createProps({
+            item: createItem({
+              entries: [createYaraEntry(signature)],
+            }),
+          })}
+        />
+      );
+
+      expect(screen.getByTestId('customYaraSignatures-form-validation-error')).toHaveTextContent(
+        'Line 2: syntax error'
+      );
+      expect(mockedContext.coreStart.http.post).toHaveBeenCalledTimes(1);
     });
   });
 });

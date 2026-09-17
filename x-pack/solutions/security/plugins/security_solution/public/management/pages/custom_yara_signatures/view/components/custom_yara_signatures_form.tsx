@@ -18,16 +18,13 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { CodeEditor, type monaco } from '@kbn/code-editor';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useCustomYaraSignatureEditorMarkers } from '../../hooks/use_custom_yara_signature_editor_markers';
-import {
-  useValidateCustomYaraSignature,
-  type UseValidateCustomYaraSignatureResultPayload,
-} from '../../hooks/use_validate_custom_yara_signature';
+import { useValidateCustomYaraSignature } from '../../hooks/use_validate_custom_yara_signature';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
@@ -112,7 +109,6 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
     const [hasNameError, setHasNameError] = useState(!item.name?.trim());
     const [hasOsError, setHasOsError] = useState(!(item.os_types?.length ?? 0));
-    const [isYaraSyntaxValid, setIsYaraSyntaxValid] = useState(false);
     const [signatureEditorInstance, setSignatureEditorInstance] =
       useState<monaco.editor.IStandaloneCodeEditor | null>(null);
     const [signatureEditorHeight, setSignatureEditorHeight] = useState(
@@ -131,6 +127,17 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
     const yaraEntry = useMemo((): CustomYaraSignatureEntry => {
       return (item.entries[0] || EMPTY_YARA_ENTRY) as CustomYaraSignatureEntry;
     }, [item.entries]);
+
+    const {
+      errors: validationErrors,
+      warnings: validationWarnings,
+      requestError,
+      isYaraSyntaxValid,
+    } = useValidateCustomYaraSignature({
+      yaraRule: yaraEntry.value,
+      osTypes: item.os_types,
+      enabled: !disabled,
+    });
 
     const notifyOfChange = useCallback(
       (
@@ -152,28 +159,12 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
       [isYaraSyntaxValid, item, onChange]
     );
 
-    const handleValidationResult = useCallback(
-      ({
-        errors,
-        requestError: validationRequestError,
-      }: UseValidateCustomYaraSignatureResultPayload) => {
-        const yaraSyntaxValid = errors.length === 0 && validationRequestError == null;
-        setIsYaraSyntaxValid(yaraSyntaxValid);
-        notifyOfChange(undefined, yaraSyntaxValid);
-      },
-      [notifyOfChange]
-    );
+    const notifyOfChangeRef = useRef(notifyOfChange);
+    notifyOfChangeRef.current = notifyOfChange;
 
-    const {
-      errors: validationErrors,
-      warnings: validationWarnings,
-      requestError,
-    } = useValidateCustomYaraSignature({
-      yaraRule: yaraEntry.value,
-      osTypes: item.os_types,
-      enabled: !disabled,
-      onValidationResult: handleValidationResult,
-    });
+    useEffect(() => {
+      notifyOfChangeRef.current(undefined, isYaraSyntaxValid);
+    }, [isYaraSyntaxValid]);
 
     useCustomYaraSignatureEditorMarkers({
       editor: signatureEditorInstance,
@@ -216,7 +207,6 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
     const handleOnSignatureChange = useCallback(
       (value: string) => {
-        setIsYaraSyntaxValid(false);
         notifyOfChange(
           {
             entries: [
@@ -239,7 +229,6 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
           .map(({ value }) => value as OperatingSystem);
 
         setHasOsError(osTypes.length === 0);
-        setIsYaraSyntaxValid(false);
         notifyOfChange({ os_types: osTypes }, false);
       },
       [notifyOfChange]
