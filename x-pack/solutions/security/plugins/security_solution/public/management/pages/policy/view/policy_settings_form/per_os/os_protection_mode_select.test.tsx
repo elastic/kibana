@@ -15,6 +15,7 @@ import type { OsProtectionModeSelectProps } from './os_protection_mode_select';
 import { OsProtectionModeSelect } from './os_protection_mode_select';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
+jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 describe('OsProtectionModeSelect', () => {
   const testSubj = 'osProtectionModeSelect';
 

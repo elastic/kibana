@@ -93,6 +93,13 @@ export const PerOsEventCollectionCard = memo<PerOsEventCollectionCardProps>(
         const updatedPolicy = cloneDeep(policy);
         updatedPolicy.linux.events[field] = checked;
 
+        // Session data needs process collection, and terminal output needs session data. Clearing
+        // a dependency clears what sits above it, otherwise the row keeps a checked-but-disabled
+        // switch and the policy saves terminal capture without the events it is built from.
+        if (updatedPolicy.linux.events.process === false) {
+          updatedPolicy.linux.events.session_data = false;
+        }
+
         if (updatedPolicy.linux.events.session_data === false) {
           updatedPolicy.linux.events.tty_io = false;
         }

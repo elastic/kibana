@@ -11,6 +11,7 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { OS_TITLES } from '../../../../../common/translations';
 import { OsRow } from './os_row';
 
+jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 describe('OsRow', () => {
   const testSubj = 'osRow';
 

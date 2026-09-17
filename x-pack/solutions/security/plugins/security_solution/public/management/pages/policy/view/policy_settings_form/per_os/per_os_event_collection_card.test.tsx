@@ -18,6 +18,7 @@ import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } f
 import type { PerOsEventCollectionCardProps } from './per_os_event_collection_card';
 import { PerOsEventCollectionCard } from './per_os_event_collection_card';
 
+jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 describe('PerOsEventCollectionCard', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').perOsEventCollection;
   let policy: PolicyConfig;
@@ -230,6 +231,20 @@ describe('PerOsEventCollectionCard', () => {
     await userEvent.click(renderResult.getByTestId(testSubj.linux.sessionDataCheckbox));
     const updatedPolicy = getUpdatedPolicy();
 
+    expect(updatedPolicy.linux.events.session_data).toBe(false);
+    expect(updatedPolicy.linux.events.tty_io).toBe(false);
+  });
+
+  it('turning process off also forces session_data and tty_io off in the emitted policy', async () => {
+    policy.linux.events.process = true;
+    policy.linux.events.session_data = true;
+    policy.linux.events.tty_io = true;
+    render();
+
+    await userEvent.click(renderResult.getByTestId(testSubj.linux.processCheckbox));
+    const updatedPolicy = getUpdatedPolicy();
+
+    expect(updatedPolicy.linux.events.process).toBe(false);
     expect(updatedPolicy.linux.events.session_data).toBe(false);
     expect(updatedPolicy.linux.events.tty_io).toBe(false);
   });

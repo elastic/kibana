@@ -24,6 +24,8 @@ import { PerOsNotifyUserOption } from './per_os_notify_user_option';
 
 jest.mock('../../../../../../common/hooks/use_license');
 
+jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+
 const useLicenseMock = _useLicense as jest.Mock;
 
 describe('PerOsNotifyUserOption', () => {

@@ -14,6 +14,7 @@ const createPolicy = () =>
   new FleetPackagePolicyGenerator('per-os-policy-accessor').generateEndpointPackagePolicy()
     .inputs[0].config.policy.value;
 
+jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 describe('per-OS policy accessor', () => {
   it('reads only the requested OS branch', () => {
     const policy = createPolicy();

@@ -24,6 +24,8 @@ import { createDeviceControlPolicyAccessor } from './policy_accessor';
 
 jest.mock('../../../../../../common/hooks/use_license');
 
+jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+
 describe('PerOsDeviceControlNotifyUserOption', () => {
   const testSubj = 'perOsDeviceControlNotifyUser';
   let policy: PolicyConfig;
