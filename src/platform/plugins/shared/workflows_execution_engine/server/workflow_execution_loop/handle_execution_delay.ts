@@ -115,10 +115,7 @@ async function wakeIfSyncChildAlreadyTerminal(
   }
 
   const parentExecution = params.workflowRuntime.getWorkflowExecution();
-  const spaceId = parentExecution.spaceId;
-  if (!spaceId) {
-    return;
-  }
+  const spaceId = parentExecution.spaceId || 'default';
 
   try {
     const child = await params.workflowExecutionRepository.getWorkflowExecutionById(

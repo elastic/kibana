@@ -347,6 +347,47 @@ describe('handleExecutionDelay', () => {
       }
     });
 
+    it('should wake the parent in the default space when the execution has no spaceId', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T13:00:00.000Z'));
+        const params = makeParams();
+        (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+          id: 'exec-parent',
+          spaceId: undefined,
+          startedAt: '2025-06-01T12:00:00.000Z',
+          scopeStack: [],
+        });
+        (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue('2h');
+        (
+          params.workflowExecutionRepository.getWorkflowExecutionById as jest.Mock
+        ).mockResolvedValue({
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+        });
+
+        const stepRuntime = makeStepRuntime({
+          node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
+          stepExecution: {
+            status: ExecutionStatus.WAITING_FOR_CHILD,
+            state: { executionId: 'child-exec-1' },
+          } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        expect(params.workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+          'child-exec-1',
+          'default'
+        );
+        expect(params.workflowTaskManager.runExistingResumeTask).toHaveBeenCalledWith(
+          'exec-parent'
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it('should not wake the parent when the sync child is still running', async () => {
       jest.useFakeTimers();
       try {
