@@ -11,11 +11,10 @@ import type { RenderPageErrorBody, RenderPageRequest, RenderPageResult } from '.
 
 export interface PageRenderServiceConfig {
   url: string;
-  /** Mints a fresh, short-lived token for this Kibana's own UIAM identity. Called once
-   * per render request — the tokens are not refreshable and must not be persisted. */
+  /** Mints a short-lived token for this Kibana's own UIAM identity. Not refreshable,
+   * never persisted. */
   createToken: (signal: AbortSignal) => Promise<string>;
-  /** Presents this Kibana's client certificate. The service reads our identity off it
-   * and forwards it to UIAM with the token; the token does not validate without it. */
+  /** The token does not validate without the certificate this presents. */
   dispatcher?: unknown;
 }
 
@@ -59,8 +58,7 @@ async function postWithRetry(
   logger: Logger
 ): Promise<RenderPageResult> {
   for (;;) {
-    // Minted inside the loop: a retry may happen minutes later, by which time the
-    // previous token could have expired.
+    // Inside the loop: a retry may land minutes later, past the token's lifetime.
     const token = await config.createToken(signal);
     const response = await fetch(`${config.url}${RENDER_PATH}`, {
       method: 'POST',

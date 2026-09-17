@@ -24,12 +24,8 @@ const pluginConfigSchema = schema.object({
   url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
 
   /**
-   * Client certificate presented to page-render-service, and the CAs used to trust it.
-   *
-   * This must be the same certificate configured under `xpack.security.uiam.ssl`: the
-   * service reads the caller's identity off this certificate and forwards it to UIAM
-   * alongside the token minted for it, and UIAM only honours the token together with
-   * the identity it was minted for.
+   * Must be the same certificate as `xpack.security.uiam.ssl`: the service forwards this
+   * identity to UIAM, which only honours the token minted for it.
    */
   ssl: schema.object({
     verificationMode: schema.oneOf(

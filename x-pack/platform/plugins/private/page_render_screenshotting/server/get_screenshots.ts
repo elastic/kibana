@@ -64,11 +64,9 @@ export function createGetScreenshots({
   config: PluginConfig;
   logger: Logger;
   security: SecurityServiceStart;
-  /** Kibana's own UIAM identity, resolved per call because the security plugin's start
-   * contract does not exist when this plugin is set up. Undefined when UIAM is not
-   * configured, which is a misconfiguration once this plugin is enabled. */
+  /** Resolved per call: the security plugin's start contract does not exist at setup. */
   getSystemIdentity: () => SystemIdentity | undefined;
-  /** Presents Kibana's client certificate to the service. */
+  /** Presents Kibana's client certificate. */
   dispatcher?: unknown;
   /** `server.publicBaseUrl`, substituted into capture URLs so the remote render service can
    * reach Kibana. See the note in `server/plugin.ts`. */

@@ -10,15 +10,12 @@ import { Agent } from 'undici';
 import type { PluginConfig } from '../config';
 
 /**
- * Presents this Kibana's client certificate to page-render-service.
+ * Presents this Kibana's client certificate to page-render-service, which reads our
+ * identity off it. UIAM only honours the token alongside the identity it was minted for,
+ * so without this the render is rejected.
  *
- * The service reads our identity off that certificate and forwards it to UIAM together
- * with the token we send, and UIAM only honours the token alongside the identity it was
- * minted for — so without this the render request is rejected.
- *
- * Returns undefined when no custom TLS material is configured and full verification is
- * wanted, which is plain `fetch` behaviour and needs no dispatcher. Mirrors the security
- * plugin's own UIAM dispatcher so the two stay recognisably the same shape.
+ * Mirrors the security plugin's own UIAM dispatcher. Undefined when no custom TLS is
+ * configured, which is plain `fetch` behaviour.
  */
 export function createDispatcher(ssl: PluginConfig['ssl']): Agent | undefined {
   const { certificate, key, certificateAuthorities, verificationMode } = ssl;
@@ -42,8 +39,7 @@ export function createDispatcher(ssl: PluginConfig['ssl']): Agent | undefined {
       ca,
       cert,
       key: clientKey,
-      // The trust bundle deployed in Kibana pods carries only the intermediate CA scoped
-      // to the application cluster, not a root, so the chain is legitimately partial.
+      // Kibana pods carry only the cluster-scoped intermediate CA, not a root.
       allowPartialTrustChain: true,
       rejectUnauthorized: verificationMode !== 'none',
       ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
