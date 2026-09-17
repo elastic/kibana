@@ -167,6 +167,19 @@ describe('WorkflowCrudService', () => {
   });
 
   describe('getWorkflow', () => {
+    it('rejects incomplete lookups instead of treating the workflow as missing', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ timed_out: true, hits: { hits: [] } });
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.getWorkflow('wf-1', 'default', { includeDeleted: true })
+      ).rejects.toThrow('Could not determine workflow access from an incomplete search.');
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
+    });
+
     it('returns WorkflowDetailDto for existing workflow', async () => {
       const source = makeSource();
       const { deps, client } = makeDeps();

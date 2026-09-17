@@ -169,7 +169,11 @@ export class WorkflowCrudService {
       query: { bool: { must, must_not } },
       size: 1,
       track_total_hits: false,
+      allow_partial_search_results: false,
     });
+    if (searchResponse.timed_out) {
+      throw new Error('Could not determine workflow access from an incomplete search.');
+    }
 
     const hit = searchResponse.hits.hits[0];
     return (hit?._source as WorkflowProperties | undefined) ?? null;

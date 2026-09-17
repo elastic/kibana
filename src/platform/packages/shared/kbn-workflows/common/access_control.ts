@@ -7,13 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAccessControlSchema, hasEntityAccess } from '@kbn/entity-access-control';
+import {
+  ACCESS_CONTROL_MAX_ENTRIES,
+  createAccessControlSchema,
+  hasEntityAccess,
+} from '@kbn/entity-access-control';
 import type { AccessControl } from '@kbn/entity-access-control';
+import { z } from '@kbn/zod/v4';
 
 export const WORKFLOW_ACCESS_CONTROL_ROLES = ['viewer', 'executor', 'editor'] as const;
 export type WorkflowAccessControlRole = (typeof WORKFLOW_ACCESS_CONTROL_ROLES)[number];
 export type WorkflowAccessControl = AccessControl<WorkflowAccessControlRole>;
 export const workflowAccessControlSchema = createAccessControlSchema(WORKFLOW_ACCESS_CONTROL_ROLES);
+export const storedWorkflowAccessControlSchema = workflowAccessControlSchema
+  .extend({
+    entries: workflowAccessControlSchema.shape.entries
+      .unwrap()
+      .element.extend({ added_at: z.string() })
+      .array()
+      .max(ACCESS_CONTROL_MAX_ENTRIES),
+  })
+  .optional();
 export type WorkflowAccessOperation = 'read' | 'execute' | 'edit' | 'manage';
 export type WorkflowPermissions = Record<WorkflowAccessOperation, boolean>;
 

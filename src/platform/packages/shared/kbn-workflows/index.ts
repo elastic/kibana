@@ -140,6 +140,7 @@ export type {
 export {
   WORKFLOW_ACCESS_CONTROL_ROLES,
   workflowAccessControlSchema,
+  storedWorkflowAccessControlSchema,
   getWorkflowPermissions,
 } from './common/access_control';
 export type {

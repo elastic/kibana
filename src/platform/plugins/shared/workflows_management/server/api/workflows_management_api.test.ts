@@ -115,6 +115,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflowExecution: jest
         .fn()
         .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
+      getWorkflowExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
@@ -126,6 +127,94 @@ describe('WorkflowsManagementApi', () => {
     mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
 
     mockRequest = httpServerMock.createKibanaRequest();
+  });
+
+  describe('workflow execution list access', () => {
+    const workflow = {
+      id: 'workflow-123',
+      name: 'Test workflow',
+      enabled: true,
+      yaml: '',
+      valid: true,
+      createdAt: '2026-09-17T00:00:00.000Z',
+      createdBy: 'owner',
+      lastUpdatedAt: '2026-09-17T00:00:00.000Z',
+      lastUpdatedBy: 'owner',
+      definition: null,
+      owner_id: 'owner',
+    };
+
+    it.each([
+      { name: 'owner', profileId: 'owner', mode: 'private', allowed: true },
+      { name: 'executor', profileId: 'executor', mode: 'private', allowed: true },
+      { name: 'outsider', profileId: 'outsider', mode: 'private', allowed: false },
+      { name: 'missing profile', profileId: null, mode: 'private', allowed: false },
+      { name: 'public', profileId: 'outsider', mode: 'public', allowed: true },
+      { name: 'legacy', profileId: 'outsider', mode: undefined, allowed: true },
+    ] as const)(
+      'checks $name access without scanning the space',
+      async ({ profileId, mode, allowed }) => {
+        const core = coreMock.createStart();
+        core.userProfile.getCurrentProfileId.mockResolvedValue(profileId);
+        const access = new WorkflowAccessControlService(core, {
+          getWorkflowDocumentWithVersion: jest.fn(),
+          writeWorkflowDocumentWithOcc: jest.fn(),
+        });
+        mockWorkflowsService.getAccessControl.mockResolvedValue(access);
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          ...workflow,
+          access_control: mode
+            ? {
+                access_mode: mode,
+                entries: [
+                  { type: 'user', id: 'executor', role: 'executor', added_at: '2026-09-17' },
+                ],
+              }
+            : undefined,
+        });
+        const params = { workflowId: workflow.id, request: mockRequest, page: 2, size: 10 };
+
+        await api.getWorkflowExecutions(params, 'default');
+
+        expect(mockWorkflowsService.getWorkflow).toHaveBeenCalledWith(workflow.id, 'default', {
+          includeDeleted: true,
+        });
+        expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+          { ...params, accessControlFilter: allowed ? undefined : { match_none: {} } },
+          'default'
+        );
+        expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
+      }
+    );
+
+    it('retains history access when the workflow was hard deleted', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(null);
+      const access = await mockWorkflowsService.getAccessControl();
+      const params = { workflowId: workflow.id, request: mockRequest };
+
+      await api.getWorkflowExecutions(params, 'default');
+
+      expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: undefined },
+        'default'
+      );
+      expect(access.executionFilter).not.toHaveBeenCalled();
+    });
+
+    it('keeps the space filter for cross-workflow history', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
+      jest.mocked(access.executionFilter).mockResolvedValue(filter);
+
+      await api.getWorkflowExecutions({ request: mockRequest }, 'default');
+
+      expect(access.executionFilter).toHaveBeenCalledWith('default', mockRequest);
+      expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+      expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+        { request: mockRequest, accessControlFilter: filter },
+        'default'
+      );
+    });
   });
 
   it.each([false, true])(

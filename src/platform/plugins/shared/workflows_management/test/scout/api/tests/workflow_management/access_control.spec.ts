@@ -754,6 +754,19 @@ steps:
         expect(await apiClient.get(executionPath, { headers: readerHeaders })).toHaveStatusCode(
           404
         );
+        const ownerHistory = await apiClient.get(`${workflowPath}/executions`, {
+          headers: ownerHeaders,
+        });
+        expect(ownerHistory).toHaveStatusCode(200);
+        expect(ownerHistory.body.results).toStrictEqual([
+          expect.objectContaining({ id: run.body.workflowExecutionId }),
+        ]);
+        const readerHistory = await apiClient.get(`${workflowPath}/executions`, {
+          headers: readerHeaders,
+        });
+        expect(readerHistory).toHaveStatusCode(200);
+        expect(readerHistory.body.results).toStrictEqual([]);
+        expect(readerHistory.body.total).toBe(0);
         const warning = await apiClient.delete(`${workflowPath}?force=true`, {
           headers: ownerHeaders,
         });

@@ -1050,10 +1050,18 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     const access = await this.workflowsService.getAccessControl();
-    return this.workflowsService.getWorkflowExecutions(
-      { ...params, accessControlFilter: await access.executionFilter(spaceId, params.request) },
-      spaceId
-    );
+    let accessControlFilter: estypes.QueryDslQueryContainer | undefined;
+    if (params.workflowId) {
+      const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
+        includeDeleted: true,
+      });
+      if (workflow && !(await access.permissions(workflow, params.request)).read) {
+        accessControlFilter = { match_none: {} };
+      }
+    } else {
+      accessControlFilter = await access.executionFilter(spaceId, params.request);
+    }
+    return this.workflowsService.getWorkflowExecutions({ ...params, accessControlFilter }, spaceId);
   }
 
   public async searchExecutionsView(

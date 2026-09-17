@@ -9,7 +9,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EsWorkflow, WorkflowAccessControl, WorkflowDetailDto } from '../..';
+import type { EsWorkflow, WorkflowDetailDto } from '../..';
+import { storedWorkflowAccessControlSchema } from '../../common/access_control';
 import { pickWorkflowDocumentVersion } from '../../common/utils';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
 import { buildWorkflowFilters } from '../lib/workflow_filters';
@@ -80,6 +81,7 @@ export class WorkflowRepository {
 
       // Map index _source → EsWorkflow (read created_at / updated_at; EsWorkflow uses createdAt / lastUpdatedAt).
       const source = document._source as Record<string, unknown>;
+      const accessControl = storedWorkflowAccessControlSchema.parse(source.access_control);
       const managed = typeof source.managed === 'boolean' ? (source.managed as boolean) : undefined;
       const managedBy = typeof source.managedBy === 'string' ? source.managedBy : undefined;
       const billable = typeof source.billable === 'boolean' ? source.billable : undefined;
@@ -92,9 +94,7 @@ export class WorkflowRepository {
       return {
         id: workflowId,
         ...(source.owner_id ? { owner_id: source.owner_id as string } : {}),
-        ...(source.access_control
-          ? { access_control: source.access_control as WorkflowAccessControl }
-          : {}),
+        ...(accessControl ? { access_control: accessControl } : {}),
         name: source.name as string,
         description: source.description as string | undefined,
         enabled: source.enabled as boolean,
@@ -214,7 +214,7 @@ export class WorkflowRepository {
           const state = {
             enabled: source.enabled ?? false,
             owner_id: source.owner_id,
-            access_control: source.access_control,
+            access_control: storedWorkflowAccessControlSchema.parse(source.access_control),
           };
           if (source.spaceId === GLOBAL_WORKFLOW_SPACE_ID && options?.includeGlobal) {
             const requestedSpaces = requestedSpacesByWorkflowId.get(hit._id ?? '');
