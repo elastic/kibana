@@ -17,6 +17,7 @@ const investigation = (
   overrides: Partial<GetInvestigationResponse> = {}
 ): GetInvestigationResponse => ({
   investigation_id: 'exec-1',
+  title: 'Checkout latency spike',
   subject: { type: 'manual', id: 'manual' },
   status: 'running',
   created_at: '2026-09-15T12:00:00.000Z',

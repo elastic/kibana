@@ -63,7 +63,7 @@ export function createEventStatusUpdateTool({
         await assertSignificantEventsAccess({ server, licensing });
 
         const data = await updateEventStatusToolHandler({
-          eventClient: getEventClient(),
+          eventClient: await getEventClient(),
           eventUuid: toolParams.event_uuid,
           status: toolParams.status,
         });
