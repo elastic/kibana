@@ -75,7 +75,7 @@ export function CreateDatasetWizardPage({
     services: { datasetsClient },
   } = useKibana<DataFederationKibanaServices>();
   const isEditMode = initialDataSet !== undefined;
-  const initialIdNormalized = initialDataSet?.name.trim().toLowerCase() ?? '';
+  const datasetNameToEdit = initialDataSet?.name;
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const formDefaultValues = useMemo(
@@ -186,7 +186,7 @@ export function CreateDatasetWizardPage({
                 existingDataSetNames={existingDataSetNames}
                 loadDataSources={loadDataSources}
                 isEditMode={isEditMode}
-                initialIdNormalized={initialIdNormalized}
+                datasetNameToEdit={datasetNameToEdit}
               />
             </div>
           </FormWizardStep>

@@ -24,13 +24,13 @@ export function StepDataset({
   existingDataSetNames,
   loadDataSources,
   isEditMode = false,
-  initialIdNormalized = '',
+  datasetNameToEdit = '',
 }: {
   dataSources: DataSource[];
   existingDataSetNames: readonly string[];
   loadDataSources: () => Promise<void>;
   isEditMode?: boolean;
-  initialIdNormalized?: string;
+  datasetNameToEdit?: string;
 }) {
   const { control, getValues, trigger } = useFormContext<CreateDatasetFormValues>();
   const { updateContent } = Forms.useContent<DatasetWizardContent, 'dataset'>('dataset');
@@ -70,7 +70,7 @@ export function StepDataset({
         dataSources={dataSources}
         existingDataSetNames={existingDataSetNames}
         isEditMode={isEditMode}
-        initialIdNormalized={initialIdNormalized}
+        datasetNameToEdit={datasetNameToEdit}
         loadDataSources={loadDataSources}
       />
       <EuiSpacer size="m" />

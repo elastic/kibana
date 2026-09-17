@@ -56,7 +56,7 @@ export interface CreateDatasetDetailsFieldsProps {
   dataSources: DataSource[];
   existingDataSetNames?: readonly string[];
   isEditMode?: boolean;
-  initialIdNormalized?: string;
+  datasetNameToEdit?: string;
   loadDataSources: () => Promise<void>;
 }
 
@@ -65,7 +65,7 @@ export function CreateDatasetDetailsFields({
   dataSources,
   existingDataSetNames = [],
   isEditMode = false,
-  initialIdNormalized = '',
+  datasetNameToEdit = '',
   loadDataSources,
 }: CreateDatasetDetailsFieldsProps) {
   const { euiTheme } = useEuiTheme();
@@ -91,7 +91,7 @@ export function CreateDatasetDetailsFields({
         const normalized = trimmed.toLowerCase();
         const isDuplicate = existingDataSetNames.some((n) => {
           const nNormalized = n.trim().toLowerCase();
-          if (isEditMode && nNormalized === initialIdNormalized) {
+          if (isEditMode && nNormalized === datasetNameToEdit) {
             return false;
           }
           return nNormalized === normalized;
