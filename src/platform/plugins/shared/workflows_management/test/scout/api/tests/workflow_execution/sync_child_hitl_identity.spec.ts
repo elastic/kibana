@@ -80,6 +80,14 @@ const childExecutionIdOf = (execution: WorkflowExecutionDto): string | undefined
   return typeof executionId === 'string' && executionId.length > 0 ? executionId : undefined;
 };
 
+const requireChildExecutionId = (execution: WorkflowExecutionDto): string => {
+  const executionId = childExecutionIdOf(execution);
+  if (executionId === undefined) {
+    throw new Error(`Execution ${execution.id} did not expose a child execution id`);
+  }
+  return executionId;
+};
+
 const hasStepOutputs = (execution: WorkflowExecutionDto, stepIds: readonly string[]): boolean =>
   stepIds.every((stepId) => asRecord(stepById(execution.stepExecutions, stepId)?.output) != null);
 
@@ -153,12 +161,7 @@ apiTest.describe(
           timeout: WAITING_TIMEOUT,
           until: (execution) => childExecutionIdOf(execution) !== undefined,
         });
-        const childExecutionId = childExecutionIdOf(pausedParent);
-        if (childExecutionId === undefined) {
-          throw new Error(
-            `Parent execution ${parentExecutionId} did not expose a child execution id`
-          );
-        }
+        const childExecutionId = requireChildExecutionId(pausedParent);
 
         const pausedChild = await workflowsApi.waitForStatus({
           workflowExecutionId: childExecutionId,
