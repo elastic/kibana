@@ -79,12 +79,19 @@ export const updatingMiddleware =
     } = store.getState().lens;
     next(action);
     const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
+    // Mixed panels can update a datasource that is not the chart's active datasource. For
+    // example, an ES|QL chart keeps static reference-line values in formBased state while
+    // textBased remains active. Compare every datasource state so those edits update the panel,
+    // but ignore loading metadata because it does not affect the rendered visualization.
+    const previousDatasourceStateValues = Object.fromEntries(
+      Object.entries(prevDatasourceStates).map(([datasourceId, { state }]) => [datasourceId, state])
+    );
+    const datasourceStateValues = Object.fromEntries(
+      Object.entries(datasourceStates).map(([datasourceId, { state }]) => [datasourceId, state])
+    );
     if (
       prevActiveDatasourceId !== activeDatasourceId ||
-      !isEqual(
-        prevDatasourceStates[prevActiveDatasourceId].state,
-        datasourceStates[activeDatasourceId].state
-      ) ||
+      !isEqual(previousDatasourceStateValues, datasourceStateValues) ||
       !isEqual(prevVisualization, visualization)
     ) {
       // ignore the actions that initialize the store with the state from the attributes

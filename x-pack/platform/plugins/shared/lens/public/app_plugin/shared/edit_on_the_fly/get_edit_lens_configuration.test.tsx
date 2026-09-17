@@ -68,6 +68,42 @@ describe('Lens flyout', () => {
       );
     });
 
+    test('updater is run when a non-active datasource state changes', () => {
+      store.dispatch(
+        setState({
+          datasourceStates: {
+            formBased: { state: 'referenceLineState', isLoading: false },
+            textBased: { state: 'esqlState', isLoading: false },
+          },
+          visualization: {
+            state: 'visualizationState',
+            activeId: 'testVis',
+            selectedLayerId: null,
+          },
+        })
+      );
+      updaterFn.mockClear();
+
+      store.dispatch(
+        updateDatasourceState({
+          datasourceId: 'formBased',
+          newDatasourceState: 'updatedReferenceLineState',
+        })
+      );
+
+      expect(updaterFn).toHaveBeenCalledWith(
+        'esqlState',
+        'visualizationState',
+        'testVis',
+        'textBased',
+        {
+          formBased: { isLoading: false, state: 'updatedReferenceLineState' },
+          textBased: { isLoading: false, state: 'esqlState' },
+        },
+        {}
+      );
+    });
+
     test('updater is not run if it does not modify visualization or datasource state', () => {
       // assigning the states to {} to test equality by value check
       store.dispatch(
