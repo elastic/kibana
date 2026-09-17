@@ -27,6 +27,7 @@ describe('transformConnectorTypesResponse', () => {
         description: 'Card subtitle from list API',
         is_experimental: true,
         is_testable: true,
+        sub_actions: ['checkIp', 'reportIp'],
       },
       {
         id: 'actionType2Id',
@@ -58,6 +59,7 @@ describe('transformConnectorTypesResponse', () => {
         description: 'Card subtitle from list API',
         isExperimental: true,
         isTestable: true,
+        subActions: ['checkIp', 'reportIp'],
       },
       {
         id: 'actionType2Id',

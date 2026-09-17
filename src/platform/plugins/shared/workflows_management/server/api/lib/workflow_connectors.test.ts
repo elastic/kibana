@@ -8,6 +8,7 @@
  */
 
 import { getAvailableConnectors } from './workflow_connectors';
+import { CONNECTOR_SUB_ACTIONS_MAP } from '../../../common/connector_sub_actions_map';
 import { convertDynamicConnectorsToContracts } from '../../../common/schema';
 
 const mockActionType = (overrides: Record<string, unknown> = {}) => ({
@@ -230,7 +231,7 @@ describe('getAvailableConnectors', () => {
     expect(order.indexOf('listTypes:start')).toBeLessThan(order.indexOf('getAll:end'));
   });
 
-  it('exposes AbuseIPDB checkIp and reportIp and can generate a checkIp contract', async () => {
+  it('exposes AbuseIPDB checkIp and reportIp from listed subActions and can generate a checkIp contract', async () => {
     const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
     const actionsClientWithRequest = {
       listTypes: jest.fn().mockResolvedValue([
@@ -238,6 +239,7 @@ describe('getAvailableConnectors', () => {
           id: '.abuseipdb',
           name: 'AbuseIPDB',
           minimumLicenseRequired: 'gold',
+          subActions: ['checkIp', 'reportIp'],
         }),
       ]),
     };
@@ -249,6 +251,7 @@ describe('getAvailableConnectors', () => {
       request,
     });
 
+    expect(CONNECTOR_SUB_ACTIONS_MAP['.abuseipdb']).toBeUndefined();
     expect(result.connectorTypes['.abuseipdb'].subActions).toEqual([
       { name: 'checkIp', displayName: 'Check Ip' },
       { name: 'reportIp', displayName: 'Report Ip' },
@@ -257,6 +260,29 @@ describe('getAvailableConnectors', () => {
     const contracts = convertDynamicConnectorsToContracts(result.connectorTypes);
     expect(contracts.map((contract) => contract.type)).toEqual(
       expect.arrayContaining(['abuseipdb.checkIp', 'abuseipdb.reportIp'])
+    );
+  });
+
+  it('resolves classic connector sub-actions from CONNECTOR_SUB_ACTIONS_MAP', async () => {
+    const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
+    const actionsClientWithRequest = {
+      listTypes: jest.fn().mockResolvedValue([
+        mockActionType({
+          id: '.slack_api',
+          name: 'Slack API',
+        }),
+      ]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      spaceId: 'default',
+      request,
+    });
+
+    expect(result.connectorTypes['.slack_api'].subActions).toEqual(
+      CONNECTOR_SUB_ACTIONS_MAP['.slack_api']
     );
   });
 });

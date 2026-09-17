@@ -56,10 +56,8 @@ import {
   SUB_ACTION as XSOAR_SUB_ACTION,
 } from '@kbn/connector-schemas/xsoar/constants';
 
-import { connectorsSpecs } from '@kbn/connector-specs';
-
-// Helper function to format sub-action names for display
-function formatSubActionName(action: string): string {
+/** Formats a sub-action identifier for display (camelCase or snake_case). */
+export function formatSubActionName(action: string): string {
   // Handle both snake_case and camelCase
   return (
     action
@@ -145,20 +143,6 @@ function createSubActionsMapping() {
       displayName: formatSubActionName(action),
     }));
   });
-
-  Object.values(connectorsSpecs).forEach((connectorSpec) => {
-    mapping[connectorSpec.metadata.id] = Object.keys(connectorSpec.actions).map((action) => ({
-      name: action,
-      displayName: formatSubActionName(action),
-    }));
-  });
-
-  // Disk-loaded spec connectors are not in the bundled barrel; keep workflow
-  // discovery for the shipped AbuseIPDB actions only.
-  mapping['.abuseipdb'] = ['checkIp', 'reportIp'].map((action) => ({
-    name: action,
-    displayName: formatSubActionName(action),
-  }));
 
   return mapping;
 }

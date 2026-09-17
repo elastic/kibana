@@ -299,6 +299,9 @@ export class ActionTypeRegistry {
         description: actionType.description,
         isExperimental: actionType.isExperimental,
         isTestable: Boolean(actionType.isTestable),
+        ...(actionType.connectorSpec
+          ? { subActions: Object.keys(actionType.connectorSpec.actions) }
+          : {}),
       }));
   }
 
