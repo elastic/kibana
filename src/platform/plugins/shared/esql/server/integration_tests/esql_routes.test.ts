@@ -12,9 +12,11 @@ import {
   JOIN_INDICES_AUTOCOMPLETE_ROUTE,
   TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE,
   VIEWS_BULK_DELETE_ROUTE,
-  getViewRoute,
+  VIEWS_ROUTE,
 } from '@kbn/esql-types';
 import { EsqlServiceTestbed } from './testbed';
+
+const getViewRoute = (name: string) => `${VIEWS_ROUTE}/${encodeURIComponent(name)}`;
 
 describe('ESQL routes', () => {
   const testbed = new EsqlServiceTestbed();

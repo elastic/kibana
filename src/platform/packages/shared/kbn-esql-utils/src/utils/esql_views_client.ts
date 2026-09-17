@@ -14,7 +14,6 @@ import {
   type EsqlViewMutationResponse,
   type EsqlViewsResult,
   type UpsertEsqlViewRequest,
-  getViewRoute,
   VIEWS_BULK_DELETE_ROUTE,
   VIEWS_ROUTE,
 } from '@kbn/esql-types';
@@ -76,6 +75,8 @@ const runRequest = async <Response>(request: () => Promise<Response>): Promise<R
     throw normalizeError(error);
   }
 };
+
+const getViewRoute = (name: string) => `${VIEWS_ROUTE}/${encodeURIComponent(name)}`;
 
 export const createEsqlViewsClient = (http: HttpStart): EsqlViewsClient => {
   const getViews = (signal?: AbortSignal) =>
