@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import type { SourceWithHealth } from '@kbn/nightshift-shared';
 import type { ApiClientFixture, ApiClientResponse, EsClient } from '@kbn/scout';
 import { COMMON_HEADERS, SOURCES_PATH, TEST_INDEX_PREFIX } from './constants';
 
@@ -74,6 +75,16 @@ export const setSourceEnabled = (
     body: {},
   });
 
+interface ListBody {
+  sources: SourceWithHealth[];
+}
+
+/** The list entry for a source id, `undefined` when the page does not contain it. */
+export const findListed = (body: ListBody, id: string): SourceWithHealth | undefined =>
+  body.sources.find((entry) => entry.source.id === id);
+
+export const listedIds = (body: ListBody): string[] => body.sources.map((entry) => entry.source.id);
+
 /** Creates a small index with a known mapping so ES can validate field references. */
 export const createTestIndex = async (esClient: EsClient, index: string): Promise<void> => {
   await esClient.indices.delete({ index }, { ignore: [404] });
@@ -118,9 +129,7 @@ export const cleanupSources = async (
   if (response.statusCode !== 200) {
     throw new Error(`Failed to list sources for cleanup: ${JSON.stringify(response.body)}`);
   }
-  const sources = (response.body as { sources: Array<{ source: { id: string; title: string } }> })
-    .sources;
-  for (const { source } of sources) {
+  for (const { source } of (response.body as ListBody).sources) {
     if (source.title.startsWith(titlePrefix)) {
       await deleteSource(apiClient, cookieHeader, source.id);
     }

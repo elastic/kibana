@@ -7,13 +7,10 @@
 
 export { apiTest } from '@kbn/scout';
 export {
-  COMMON_HEADERS,
   NIGHTSHIFT_MANAGER_ROLE,
   NIGHTSHIFT_READ_ONLY_NO_ES_ROLE,
   NIGHTSHIFT_READ_ONLY_ROLE,
   NO_NIGHTSHIFT_ROLE,
-  SOURCES_PATH,
-  TEST_INDEX_PREFIX,
 } from './constants';
 export {
   cleanupSources,
@@ -21,12 +18,13 @@ export {
   createTestIndex,
   deleteSource,
   deleteTestIndex,
+  findListed,
   getSource,
   listSources,
+  listedIds,
   readView,
   setSourceEnabled,
   testIndexName,
   uniqueSuffix,
   updateSource,
-  type SourceBody,
 } from './helpers';

@@ -9,23 +9,18 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { isEsqlUnknownIndexError, isEsqlVerificationError, toBoom } from './es_errors';
 import { getSourceCommandQuery } from './validate_source_query';
 
-const withLimitZero = (esql: string): string => `${esql}\n| LIMIT 0`;
-
 // ES|QL answers a wildcard that matches nothing with a single placeholder column of this name.
 const ESQL_EMPTY_RELATION_COLUMN = '<no-fields>';
 
-interface EsqlColumnsResponse {
-  columns?: Array<{ name: string }>;
-}
-
-const isEmptyRelation = ({ columns = [] }: EsqlColumnsResponse): boolean =>
+const isEmptyRelation = ({ columns = [] }: { columns?: Array<{ name: string }> }): boolean =>
   columns.every((column) => column.name === ESQL_EMPTY_RELATION_COLUMN);
 
 /**
  * True when nothing exists yet behind the query's source command. A concrete name that does not
  * exist fails with "Unknown index"; a wildcard that matches nothing succeeds with an empty
  * relation. Either way there is no schema to validate `WHERE` against, and that is not the
- * source's fault.
+ * source's fault. Other verification failures mean indices exist; anything else (403, 5xx) is
+ * rethrown so callers can tell "could not look" from "looked and found nothing".
  */
 export const hasNoIndicesBehind = async ({
   esClient,
@@ -36,12 +31,15 @@ export const hasNoIndicesBehind = async ({
 }): Promise<boolean> => {
   try {
     const response = await esClient.esql.query({
-      query: withLimitZero(getSourceCommandQuery(esql)),
+      query: `${getSourceCommandQuery(esql)}\n| LIMIT 0`,
       format: 'json',
     });
-    return isEmptyRelation(response as EsqlColumnsResponse);
+    return isEmptyRelation(response);
   } catch (error) {
-    return isEsqlUnknownIndexError(error);
+    if (isEsqlVerificationError(error)) {
+      return isEsqlUnknownIndexError(error);
+    }
+    throw error;
   }
 };
 
@@ -57,13 +55,19 @@ export const assertSourceQueryExecutes = async ({
   esql: string;
 }): Promise<void> => {
   try {
-    await esClient.esql.query({ query: withLimitZero(esql), format: 'json' });
+    await esClient.esql.query({ query: `${esql}\n| LIMIT 0`, format: 'json' });
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {
       return;
     }
-    if (isEsqlVerificationError(error) && (await hasNoIndicesBehind({ esClient, esql }))) {
-      return;
+    if (isEsqlVerificationError(error)) {
+      try {
+        if (await hasNoIndicesBehind({ esClient, esql })) {
+          return;
+        }
+      } catch (probeError) {
+        throw toBoom(probeError, 'ES|QL query cannot be executed');
+      }
     }
     throw toBoom(error, 'ES|QL query cannot be executed');
   }

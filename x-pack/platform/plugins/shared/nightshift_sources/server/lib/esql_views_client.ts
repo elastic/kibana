@@ -5,18 +5,17 @@
  * 2.0.
  */
 
+import { errors, type estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isEsResponseError, toBoom } from './es_errors';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
+import { toBoom } from './es_errors';
 
-export interface EsqlView {
-  name: string;
-  query: string;
-}
+export type EsqlView = estypes.EsqlESQLView;
 
 // Parallel `PUT /_query/view` calls can hit a `ConcurrentModificationException` in ES; Streams
 // serialises its own upserts for the same reason. Two users creating sources at once is the
 // realistic trigger here, so a short retry is enough.
-const RETRYABLE_STATUS_CODES = new Set([409, 429, 503]);
+const RETRYABLE_STATUS_CODES = [409, 429, 503];
 const RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 250;
 
@@ -26,13 +25,14 @@ export interface EsRetryOptions {
 }
 
 const isRetryable = (error: unknown): boolean =>
-  isEsResponseError(error) && RETRYABLE_STATUS_CODES.has(error.statusCode ?? 0);
+  error instanceof errors.ElasticsearchClientError &&
+  isRetryableEsClientError(error, RETRYABLE_STATUS_CODES);
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const withEsRetry = async <T>(
+const withEsRetry = async <T>(
   operation: () => Promise<T>,
-  { attempts = RETRY_ATTEMPTS, baseDelayMs = RETRY_BASE_DELAY_MS }: EsRetryOptions = {}
+  { attempts = RETRY_ATTEMPTS, baseDelayMs = RETRY_BASE_DELAY_MS }: EsRetryOptions
 ): Promise<T> => {
   for (let attempt = 1; ; attempt++) {
     try {
@@ -66,22 +66,16 @@ export class EsqlViewsClient {
   }
 
   /**
-   * A missing view surfaces either as a 404 or as a 200 with an empty `views` list depending
-   * on the ES version; both resolve to `undefined`.
+   * A missing view surfaces either as a 404 (whose ignored body has no `views`) or as a 200 with
+   * an empty `views` list depending on the ES version; both resolve to `undefined`.
    */
   async getView(name: string): Promise<EsqlView | undefined> {
-    let body: unknown;
     try {
-      body = await this.esClient.esql.getView({ name }, { ignore: [404] });
+      const { views } = await this.esClient.esql.getView({ name }, { ignore: [404] });
+      return Array.isArray(views) ? views.find((view) => view.name === name) : undefined;
     } catch (error) {
       throw toBoom(error, `Failed to read ES|QL view "${name}"`);
     }
-    const views = (body as { views?: unknown } | undefined)?.views;
-    if (!Array.isArray(views) || views.length === 0) {
-      return undefined;
-    }
-    const view = views.find((candidate: EsqlView) => candidate.name === name) ?? views[0];
-    return { name: view.name, query: view.query };
   }
 
   async deleteView(name: string): Promise<void> {

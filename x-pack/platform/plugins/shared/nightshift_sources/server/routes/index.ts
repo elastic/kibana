@@ -7,8 +7,6 @@
 
 import { sourcesRoutes } from './sources/route';
 
-export const nightshiftSourcesRouteRepository = {
-  ...sourcesRoutes,
-};
+export const nightshiftSourcesRouteRepository = sourcesRoutes;
 
 export type NightshiftSourcesRouteRepository = typeof nightshiftSourcesRouteRepository;

@@ -54,7 +54,7 @@ source's health becomes `unresolvable`.
 | `ok` | View exists and its query matches the stored ES|QL |
 | `view_missing` | View was deleted out of band; `PUT` the current values to recreate it |
 | `view_drift` | View exists but its query differs from the stored ES|QL; `PUT` fixes it |
-| `unresolvable` | `FROM <view> \| LIMIT 0` fails with a 400 other than "Unknown index" (only checked on `GET /{sourceId}`) |
+| `unresolvable` | `FROM <view> \| LIMIT 0` fails with a 400 while indices exist behind the source, e.g. a `WHERE` field that no longer resolves (only checked on `GET /{sourceId}`) |
 | `unknown` | The view could not be read or probed (403, ES error); the source itself may be fine |
 
 ## Enablement model

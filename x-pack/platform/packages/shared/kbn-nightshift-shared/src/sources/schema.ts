@@ -65,7 +65,11 @@ export const createSourceRequestSchema = z.object({
   esql: sourceEsqlSchema,
 });
 
+/** Wire shape callers send; `tags` may be omitted. */
 export type CreateSourceRequest = z.input<typeof createSourceRequestSchema>;
+
+/** Parsed shape the server works with; defaults applied. */
+export type SourceInput = z.output<typeof createSourceRequestSchema>;
 
 export const updateSourceRequestSchema = createSourceRequestSchema;
 

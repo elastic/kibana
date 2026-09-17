@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/elasticsearch';
 import { forbidden } from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -20,31 +18,28 @@ import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
   type NightshiftSourceAttributes,
 } from '../saved_objects/nightshift_source_saved_object';
-import type { EsqlViewsClient } from './esql_views_client';
-import { SourcesClient } from './sources_client';
+import { createEsResponseError } from './es_errors.mock';
+import { SourcesClient, type SourceViewsClient } from './sources_client';
 
-const makeEsError = (statusCode: number, type: string, reason: string) =>
-  new errors.ResponseError({
-    statusCode,
-    headers: {},
-    warnings: [],
-    meta: {} as unknown as TransportResult['meta'],
-    body: { error: { type, reason } },
-  } as TransportResult);
+const FULL_UPDATE = { mergeAttributes: false };
 
 const unknownIndexError = () =>
-  makeEsError(
+  createEsResponseError(
     400,
     'verification_exception',
     'Found 1 problem\nline 1:6: Unknown index [logs-none]'
   );
 
 const unknownColumnError = () =>
-  makeEsError(400, 'verification_exception', 'Found 1 problem\nline 1:46: Unknown column [status]');
+  createEsResponseError(
+    400,
+    'verification_exception',
+    'Found 1 problem\nline 1:46: Unknown column [status]'
+  );
 
-const withColumns = { columns: [{ name: 'status', type: 'integer' }], values: [] } as never;
+const withColumns = { columns: [{ name: 'status', type: 'integer' }], values: [] };
 // What ES returns for a wildcard that matches no index: one placeholder column.
-const withoutColumns = { columns: [{ name: '<no-fields>', type: 'null' }], values: [] } as never;
+const withoutColumns = { columns: [{ name: '<no-fields>', type: 'null' }], values: [] };
 
 const makeAttributes = (
   overrides: Partial<NightshiftSourceAttributes> = {}
@@ -81,11 +76,11 @@ const makeSource = (overrides: Partial<NightshiftSource> = {}): NightshiftSource
 const setup = () => {
   const soClient = savedObjectsClientMock.create();
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
-  const viewsClient = {
+  const viewsClient: jest.Mocked<SourceViewsClient> = {
     putView: jest.fn().mockResolvedValue(undefined),
     getView: jest.fn(),
     deleteView: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<EsqlViewsClient>;
+  };
   const logger = loggingSystemMock.createLogger();
 
   const client = new SourcesClient({
@@ -208,8 +203,23 @@ describe('SourcesClient', () => {
         query: makeAttributes().esql,
       });
       dataEsClient.esql.query.mockRejectedValue(
-        makeEsError(403, 'security_exception', 'unauthorized')
+        createEsResponseError(403, 'security_exception', 'unauthorized')
       );
+
+      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe(
+        'unknown'
+      );
+    });
+
+    it('is unknown when the follow-up source probe fails for a non-verification reason', async () => {
+      const { client, viewsClient, dataEsClient } = setup();
+      viewsClient.getView.mockResolvedValue({
+        name: '$.nightshift.sources.source-1',
+        query: makeAttributes().esql,
+      });
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockRejectedValueOnce(createEsResponseError(503, 'unavailable', 'shards down'));
 
       await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe(
         'unknown'
@@ -220,9 +230,6 @@ describe('SourcesClient', () => {
   describe('create', () => {
     it('validates, writes the saved object with a generated view name, then puts the view', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();
-      soClient.create.mockImplementation(async (_type, attributes, options) =>
-        makeSavedObject(attributes as NightshiftSourceAttributes, options?.id)
-      );
 
       const source = await client.create({
         title: 'nginx errors',
@@ -261,11 +268,8 @@ describe('SourcesClient', () => {
     });
 
     it('accepts a concrete index that does not exist yet', async () => {
-      const { client, soClient, dataEsClient } = setup();
+      const { client, dataEsClient } = setup();
       dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
-      soClient.create.mockImplementation(async (_type, attributes, options) =>
-        makeSavedObject(attributes as NightshiftSourceAttributes, options?.id)
-      );
 
       await expect(
         client.create({ title: 't', tags: [], esql: 'FROM logs-none' })
@@ -275,13 +279,10 @@ describe('SourcesClient', () => {
     // A wildcard matching nothing resolves to an empty relation, so ES reports the WHERE field
     // as an unknown column instead of an unknown index.
     it('accepts a wildcard that matches no index yet even when WHERE references fields', async () => {
-      const { client, soClient, dataEsClient } = setup();
+      const { client, dataEsClient } = setup();
       dataEsClient.esql.query
         .mockRejectedValueOnce(unknownColumnError())
         .mockResponseOnce(withoutColumns);
-      soClient.create.mockImplementation(async (_type, attributes, options) =>
-        makeSavedObject(attributes as NightshiftSourceAttributes, options?.id)
-      );
 
       await expect(
         client.create({ title: 't', tags: [], esql: 'FROM logs-none-* | WHERE status >= 500' })
@@ -295,7 +296,9 @@ describe('SourcesClient', () => {
     it('surfaces an unknown field on an existing index as a 400', async () => {
       const { client, soClient, dataEsClient } = setup();
       dataEsClient.esql.query
-        .mockRejectedValueOnce(makeEsError(400, 'verification_exception', 'Unknown column [nope]'))
+        .mockRejectedValueOnce(
+          createEsResponseError(400, 'verification_exception', 'Unknown column [nope]')
+        )
         .mockResponseOnce(withColumns);
 
       await expect(
@@ -310,7 +313,7 @@ describe('SourcesClient', () => {
     it('surfaces a non-verification ES failure with its own status', async () => {
       const { client, soClient, dataEsClient } = setup();
       dataEsClient.esql.query.mockRejectedValue(
-        makeEsError(403, 'security_exception', 'unauthorized for user [x]')
+        createEsResponseError(403, 'security_exception', 'unauthorized for user [x]')
       );
 
       await expect(
@@ -322,9 +325,6 @@ describe('SourcesClient', () => {
 
     it('rolls the saved object back when the view cannot be created', async () => {
       const { client, soClient, viewsClient } = setup();
-      soClient.create.mockImplementation(async (_type, attributes, options) =>
-        makeSavedObject(attributes as NightshiftSourceAttributes, options?.id)
-      );
       viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
 
       await expect(
@@ -338,7 +338,6 @@ describe('SourcesClient', () => {
     it('bumps esql_updated_at only when the normalized query changes', async () => {
       const { client, soClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
-      soClient.update.mockResolvedValue({} as never);
 
       const titleOnly = await client.update('source-1', {
         title: 'renamed',
@@ -357,10 +356,28 @@ describe('SourcesClient', () => {
       expect(queryChange.esql_updated_at).not.toBe('2026-09-01T00:00:00.000Z');
     });
 
+    it('replaces the stored attributes instead of merging, so a dropped description is removed', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ description: 'old' })));
+
+      const updated = await client.update('source-1', {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+      });
+
+      expect(updated.description).toBeUndefined();
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ description: undefined }),
+        FULL_UPDATE
+      );
+    });
+
     it('always re-puts the view so PUT doubles as repair', async () => {
       const { client, soClient, viewsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
-      soClient.update.mockResolvedValue({} as never);
 
       await client.update('source-1', {
         title: 'nginx errors',
@@ -378,7 +395,6 @@ describe('SourcesClient', () => {
       const { client, soClient, viewsClient } = setup();
       const previous = makeAttributes();
       soClient.get.mockResolvedValue(makeSavedObject(previous));
-      soClient.update.mockResolvedValue({} as never);
       viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
 
       await expect(
@@ -389,7 +405,8 @@ describe('SourcesClient', () => {
       expect(soClient.update).toHaveBeenLastCalledWith(
         NIGHTSHIFT_SOURCE_SO_TYPE,
         'source-1',
-        previous
+        previous,
+        FULL_UPDATE
       );
     });
 
@@ -463,7 +480,6 @@ describe('SourcesClient', () => {
     it('flips the flag and touches updated_at only', async () => {
       const { client, soClient, viewsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
-      soClient.update.mockResolvedValue({} as never);
 
       const source = await client.setEnabled('source-1', false);
 

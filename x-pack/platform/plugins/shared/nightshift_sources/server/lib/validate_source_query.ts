@@ -6,12 +6,15 @@
  */
 
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
-import type { ESQLAstQueryExpression, ESQLSource } from '@elastic/esql/types';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { badRequest } from '@hapi/boom';
 
 const SOURCE_COMMANDS = new Set(['from', 'ts']);
 const ALLOWED_PROCESSING_COMMANDS = new Set(['where']);
 
+// `Parser.parse` reports syntax errors in `errors` rather than throwing; the catch only keeps a
+// parser crash on pathological input from surfacing as a 500. Fail closed either way: a view
+// built from an unparseable query would break every consumer at query time.
 const parseOrThrow = (esql: string): ESQLAstQueryExpression => {
   let parsed: ReturnType<typeof Parser.parse>;
   try {
@@ -20,8 +23,6 @@ const parseOrThrow = (esql: string): ESQLAstQueryExpression => {
     const message = error instanceof Error ? error.message : String(error);
     throw badRequest(`Invalid ES|QL query: ${message}`);
   }
-  // `Parser.parse` reports syntax errors in `errors` instead of throwing. Fail closed: a view
-  // built from an unparseable query would break every consumer at query time.
   if (parsed.errors.length > 0) {
     throw badRequest(
       `Invalid ES|QL query: ${parsed.errors.map((error) => error.message).join('; ')}`
@@ -59,8 +60,9 @@ export const validateSourceQuery = (esql: string): void => {
     throw badRequest('METADATA is not allowed in a source query');
   }
 
-  const remoteSource = Walker.matchAll(root, { type: 'source', sourceType: 'index' }).find(
-    (source) => Boolean((source as ESQLSource).prefix)
+  const remoteSource = Walker.find(
+    root,
+    (node) => node.type === 'source' && node.sourceType === 'index' && Boolean(node.prefix)
   );
   if (remoteSource) {
     throw badRequest(

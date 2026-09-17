@@ -8,7 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
-export type { NightshiftSourcesConfig } from './config';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { NightshiftSourcesPlugin } = await import('./plugin');

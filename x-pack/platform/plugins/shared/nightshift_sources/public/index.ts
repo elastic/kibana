@@ -23,4 +23,4 @@ export type { NightshiftSourcesPublicPluginSetup, NightshiftSourcesPublicPluginS
 export const plugin: PluginInitializer<
   NightshiftSourcesPublicPluginSetup,
   NightshiftSourcesPublicPluginStart
-> = (context) => new NightshiftSourcesPublicPlugin(context);
+> = () => new NightshiftSourcesPublicPlugin();

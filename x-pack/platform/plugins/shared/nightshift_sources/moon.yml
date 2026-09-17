@@ -19,9 +19,11 @@ project:
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-plugins-server'
   - '@kbn/core-saved-objects-server'
   - '@kbn/cps-server-utils'
+  - '@kbn/es-errors'
   - '@kbn/nightshift-shared'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-client'
@@ -36,7 +38,6 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - common/**/*
     - server/**/*
     - public/**/*
     - test/scout*/**/*

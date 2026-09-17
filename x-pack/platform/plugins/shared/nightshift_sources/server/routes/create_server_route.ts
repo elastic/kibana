@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import type { NightshiftSourcesRouteHandlerResources } from './types';
+import type { GetSourcesClient } from '../types';
+
+export type NightshiftSourcesRouteHandlerResources = {
+  getSourcesClient: GetSourcesClient;
+} & DefaultRouteHandlerResources;
 
 export const createNightshiftSourcesServerRoute =
   createServerRouteFactory<NightshiftSourcesRouteHandlerResources>();

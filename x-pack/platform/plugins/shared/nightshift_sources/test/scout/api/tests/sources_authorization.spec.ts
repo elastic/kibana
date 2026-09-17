@@ -19,6 +19,7 @@ import {
   createTestIndex,
   deleteSource,
   deleteTestIndex,
+  findListed,
   getSource,
   listSources,
   setSourceEnabled,
@@ -28,14 +29,6 @@ import {
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-authz';
-
-interface ListedSource {
-  source: { id: string };
-  health: string;
-}
-
-const findListed = (body: { sources: ListedSource[] }, id: string): ListedSource | undefined =>
-  body.sources.find((entry) => entry.source.id === id);
 
 apiTest.describe(
   'Nightshift sources authorization',

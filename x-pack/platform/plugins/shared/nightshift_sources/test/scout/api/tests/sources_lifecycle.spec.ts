@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { RoleSessionCredentials } from '@kbn/scout';
-import { getNightshiftSourceViewName } from '@kbn/nightshift-shared';
+import { getNightshiftSourceViewName, type SourceWithHealth } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_MANAGER_ROLE,
   apiTest,
@@ -17,8 +17,10 @@ import {
   createTestIndex,
   deleteSource,
   deleteTestIndex,
+  findListed,
   getSource,
   listSources,
+  listedIds,
   readView,
   setSourceEnabled,
   testIndexName,
@@ -27,17 +29,6 @@ import {
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-lifecycle';
-
-interface ListedSource {
-  source: { id: string; title: string };
-  health: string;
-}
-
-const findListed = (body: { sources: ListedSource[] }, id: string): ListedSource | undefined =>
-  body.sources.find((entry) => entry.source.id === id);
-
-const listedIds = (body: { sources: ListedSource[] }): string[] =>
-  body.sources.map((entry) => entry.source.id);
 
 apiTest.describe(
   'Nightshift sources lifecycle',
@@ -207,7 +198,7 @@ apiTest.describe(
       expect(secondPage.body).toMatchObject({ page: 2, per_page: 2 });
 
       const seen = [...firstPage.body.sources, ...secondPage.body.sources].map(
-        (entry: ListedSource) => entry.source.title
+        (entry: SourceWithHealth) => entry.source.title
       );
       const ours = seen.filter((title) => titles.includes(title));
       expect(ours).toStrictEqual([...ours].sort());

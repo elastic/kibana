@@ -15,8 +15,6 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
-export type NightshiftSourcesConfig = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<NightshiftSourcesConfig> = {
+export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
 };

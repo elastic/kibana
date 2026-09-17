@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { NightshiftSourcesRepositoryClient } from './api';
 import { createNightshiftSourcesRepositoryClient } from './api';
 
@@ -18,9 +18,7 @@ export interface NightshiftSourcesPublicPluginStart {
 export class NightshiftSourcesPublicPlugin
   implements Plugin<NightshiftSourcesPublicPluginSetup, NightshiftSourcesPublicPluginStart>
 {
-  constructor(_context: PluginInitializerContext) {}
-
-  setup(_core: CoreSetup): NightshiftSourcesPublicPluginSetup {
+  setup(): NightshiftSourcesPublicPluginSetup {
     return {};
   }
 

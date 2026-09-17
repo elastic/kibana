@@ -12,15 +12,14 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { normalizeEsqlSafe } from '@kbn/streams-schema';
+import { hasSameEsql } from '@kbn/streams-schema';
 import {
   getNightshiftSourceViewName,
-  type CreateSourceRequest,
   type ListSourcesResponse,
   type NightshiftSource,
   type SourceHealth,
+  type SourceInput,
   type SourceWithHealth,
-  type UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
 import { notFound } from '@hapi/boom';
 import pLimit from 'p-limit';
@@ -36,14 +35,20 @@ import { validateSourceQuery } from './validate_source_query';
 
 const HEALTH_CHECK_CONCURRENCY = 10;
 
+// Every write sends the full attribute set, so a field the caller dropped (an optional
+// `description`) must be removed rather than merged over the stored value.
+const FULL_UPDATE = { mergeAttributes: false } as const;
+
 export type SourceSavedObjectsClient = Pick<
   SavedObjectsClientContract,
   'create' | 'get' | 'update' | 'delete' | 'find'
 >;
 
+export type SourceViewsClient = Pick<EsqlViewsClient, 'putView' | 'getView' | 'deleteView'>;
+
 export interface SourcesClientDependencies {
   soClient: SourceSavedObjectsClient;
-  viewsClient: EsqlViewsClient;
+  viewsClient: SourceViewsClient;
   /** Client used to run ES|QL against the data behind a source (validation and health probes). */
   dataEsClient: ElasticsearchClient;
   logger: Logger;
@@ -56,19 +61,12 @@ export interface ListSourcesParams {
   enabled?: boolean;
 }
 
-type SourceInput = CreateSourceRequest | UpdateSourceRequest;
-
-const toSource = (savedObject: SavedObject<NightshiftSourceAttributes>): NightshiftSource => ({
-  id: savedObject.id,
-  ...savedObject.attributes,
+const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
+  id,
+  ...attributes,
 });
 
-const sourceNotFound = (id: string): Error => notFound(`Source ${id} not found`);
-
-/**
- * Space-scoped CRUD for Nightshift sources plus the ES|QL view that materialises each one.
- * Depends only on clients handed in at construction so it can move to a package later.
- */
+/** Space-scoped CRUD for Nightshift sources plus the ES|QL view that materialises each one. */
 export class SourcesClient {
   constructor(private readonly deps: SourcesClientDependencies) {}
 
@@ -79,10 +77,7 @@ export class SourcesClient {
     const id = uuidv4();
     const now = new Date().toISOString();
     const attributes: NightshiftSourceAttributes = {
-      title: input.title,
-      description: input.description,
-      tags: input.tags ?? [],
-      esql: input.esql,
+      ...input,
       view_name: getNightshiftSourceViewName(id),
       enabled: true,
       created_by: username,
@@ -91,62 +86,63 @@ export class SourcesClient {
       esql_updated_at: now,
     };
 
-    const savedObject = await soClient.create<NightshiftSourceAttributes>(
-      NIGHTSHIFT_SOURCE_SO_TYPE,
-      attributes,
-      { id }
-    );
+    await soClient.create<NightshiftSourceAttributes>(NIGHTSHIFT_SOURCE_SO_TYPE, attributes, {
+      id,
+    });
 
     try {
       await viewsClient.putView(attributes.view_name, attributes.esql);
     } catch (error) {
-      await this.rollbackCreate(id);
+      await this.compensate(`roll back source ${id} after its view could not be created`, () =>
+        soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id)
+      );
       throw error;
     }
 
-    return toSource(savedObject);
+    return toSource(id, attributes);
   }
 
   /** Full replacement of the editable fields; the view is always re-put so a `PUT` doubles as repair. */
   async update(id: string, input: SourceInput): Promise<NightshiftSource> {
     const { soClient, viewsClient } = this.deps;
-    const existing = await this.getSavedObject(id);
+    const { attributes: previous } = await this.getSavedObject(id);
     await this.validate(input.esql);
 
     const now = new Date().toISOString();
-    const esqlChanged =
-      normalizeEsqlSafe(input.esql) !== normalizeEsqlSafe(existing.attributes.esql);
+    // Assign the editable fields one by one: an omitted `description` must clear the stored one,
+    // which a spread of `input` would leave in place.
     const attributes: NightshiftSourceAttributes = {
-      ...existing.attributes,
+      ...previous,
       title: input.title,
       description: input.description,
-      tags: input.tags ?? [],
+      tags: input.tags,
       esql: input.esql,
       updated_at: now,
-      esql_updated_at: esqlChanged ? now : existing.attributes.esql_updated_at,
+      esql_updated_at: hasSameEsql(input.esql, previous.esql) ? previous.esql_updated_at : now,
     };
 
-    await soClient.update<NightshiftSourceAttributes>(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes);
+    await soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, FULL_UPDATE);
 
     try {
       await viewsClient.putView(attributes.view_name, attributes.esql);
     } catch (error) {
-      await this.restoreAttributes(id, existing.attributes);
+      await this.compensate(`restore source ${id} after its view could not be updated`, () =>
+        soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, previous, FULL_UPDATE)
+      );
       throw error;
     }
 
-    return { id, ...attributes };
+    return toSource(id, attributes);
   }
 
   async get(id: string): Promise<SourceWithHealth> {
-    const source = toSource(await this.getSavedObject(id));
-    const health = await this.getHealth(source, { checkResolvable: true });
-    return { source, health };
+    const { attributes } = await this.getSavedObject(id);
+    const source = toSource(id, attributes);
+    return { source, health: await this.getHealth(source, { checkResolvable: true }) };
   }
 
   async list({ page, perPage, enabled }: ListSourcesParams): Promise<ListSourcesResponse> {
-    const { soClient } = this.deps;
-    const response = await soClient.find<NightshiftSourceAttributes>({
+    const response = await this.deps.soClient.find<NightshiftSourceAttributes>({
       type: NIGHTSHIFT_SOURCE_SO_TYPE,
       page,
       perPage,
@@ -162,7 +158,7 @@ export class SourcesClient {
     const sources = await Promise.all(
       response.saved_objects.map((savedObject) =>
         limit(async (): Promise<SourceWithHealth> => {
-          const source = toSource(savedObject);
+          const source = toSource(savedObject.id, savedObject.attributes);
           return { source, health: await this.getHealth(source, { checkResolvable: false }) };
         })
       )
@@ -173,22 +169,21 @@ export class SourcesClient {
 
   async delete(id: string): Promise<void> {
     const { soClient, viewsClient } = this.deps;
-    const existing = await this.getSavedObject(id);
-    await viewsClient.deleteView(existing.attributes.view_name);
+    const { attributes } = await this.getSavedObject(id);
+    await viewsClient.deleteView(attributes.view_name);
     await soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id);
   }
 
   /** Flips the flag only; engines reconcile their rules and onboarding from it. */
   async setEnabled(id: string, enabled: boolean): Promise<NightshiftSource> {
-    const { soClient } = this.deps;
-    const existing = await this.getSavedObject(id);
+    const { attributes: previous } = await this.getSavedObject(id);
     const attributes: NightshiftSourceAttributes = {
-      ...existing.attributes,
+      ...previous,
       enabled,
       updated_at: new Date().toISOString(),
     };
-    await soClient.update<NightshiftSourceAttributes>(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes);
-    return { id, ...attributes };
+    await this.deps.soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, FULL_UPDATE);
+    return toSource(id, attributes);
   }
 
   /**
@@ -211,7 +206,9 @@ export class SourcesClient {
     if (!view) {
       return 'view_missing';
     }
-    if (normalizeEsqlSafe(view.query) !== normalizeEsqlSafe(source.esql)) {
+    // Kibana writes the view with the stored string verbatim, so a byte-equal query skips the
+    // parse-and-normalize on every list row; normalization only runs for genuinely drifted views.
+    if (view.query !== source.esql && !hasSameEsql(view.query, source.esql)) {
       return 'view_drift';
     }
     if (!checkResolvable) {
@@ -228,13 +225,19 @@ export class SourcesClient {
       if (isEsqlUnknownIndexError(error)) {
         return 'ok';
       }
-      if (isEsqlVerificationError(error)) {
-        // A view over indices that do not exist yet cannot resolve its WHERE fields either; that
-        // is the accepted "no data yet" state, not a broken query.
-        const noIndices = await hasNoIndicesBehind({ esClient: dataEsClient, esql: source.esql });
-        return noIndices ? 'ok' : 'unresolvable';
+      if (!isEsqlVerificationError(error)) {
+        logger.debug(`Could not probe view ${source.view_name} for source ${source.id}: ${error}`);
+        return 'unknown';
       }
-      logger.debug(`Could not probe view ${source.view_name} for source ${source.id}: ${error}`);
+    }
+
+    // A view over indices that do not exist yet cannot resolve its WHERE fields either; that is
+    // the accepted "no data yet" state, not a broken query.
+    try {
+      const noIndices = await hasNoIndicesBehind({ esClient: dataEsClient, esql: source.esql });
+      return noIndices ? 'ok' : 'unresolvable';
+    } catch (error) {
+      logger.debug(`Could not probe sources of ${source.id}: ${error}`);
       return 'unknown';
     }
   }
@@ -252,36 +255,18 @@ export class SourcesClient {
       );
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        throw sourceNotFound(id);
+        throw notFound(`Source ${id} not found`);
       }
       throw error;
     }
   }
 
-  private async rollbackCreate(id: string): Promise<void> {
+  /** Best-effort undo after a view write failed; the original error is what the caller sees. */
+  private async compensate(description: string, operation: () => Promise<unknown>): Promise<void> {
     try {
-      await this.deps.soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id);
+      await operation();
     } catch (error) {
-      this.deps.logger.warn(
-        `Failed to roll back source ${id} after its view could not be created: ${error}`
-      );
-    }
-  }
-
-  private async restoreAttributes(
-    id: string,
-    attributes: NightshiftSourceAttributes
-  ): Promise<void> {
-    try {
-      await this.deps.soClient.update<NightshiftSourceAttributes>(
-        NIGHTSHIFT_SOURCE_SO_TYPE,
-        id,
-        attributes
-      );
-    } catch (error) {
-      this.deps.logger.warn(
-        `Failed to restore source ${id} after its view could not be updated: ${error}`
-      );
+      this.deps.logger.warn(`Failed to ${description}: ${error}`);
     }
   }
 }
