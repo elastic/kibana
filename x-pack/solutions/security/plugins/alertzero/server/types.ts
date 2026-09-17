@@ -12,8 +12,10 @@ import type {
   AgenticInvestigationsPluginStart,
 } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -45,6 +47,8 @@ export interface AlertZeroStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   agenticInvestigations: AgenticInvestigationsPluginStart;
   proposals: ProposalsPluginStart;
+  contextEngine: ContextEnginePluginStart;
+  inference: InferenceServerStart;
 }
 
 export type AlertZeroRouter = IRouter;
