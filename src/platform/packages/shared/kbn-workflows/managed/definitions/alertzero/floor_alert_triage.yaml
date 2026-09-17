@@ -15,6 +15,8 @@ steps:
   - name: triage_alerts
     type: ai.agent
     agent-id: alertzero-thin-agent
+    # Keep in sync with ALERTZERO_TRIAGE_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_triage
     timeout: "10m"
     create-conversation: true
     with:

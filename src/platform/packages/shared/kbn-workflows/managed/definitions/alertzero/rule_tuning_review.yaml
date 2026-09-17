@@ -247,6 +247,8 @@ steps:
 
   - name: diagnose_rule
     type: ai.agent
+    # Keep in sync with ALERTZERO_INVESTIGATION_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_investigation
     if: >-
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
