@@ -480,34 +480,14 @@ export class WorkflowEditorPage {
   }
 
   /**
-   * Type text into the YAML editor through the Monaco `type` command so input
-   * lands in the editor regardless of which DOM element holds keyboard focus.
-   * In serverless-security the Agent Builder chat panel autofocuses its input,
-   * so raw `page.keyboard.type` leaks there; driving the editor directly keeps
-   * the keystrokes deterministic while still filtering/opening the suggest widget.
+   * Focus the YAML editor and type through the real keyboard so the suggest
+   * widget filters exactly as it does for a user. The editor is focused first
+   * because in serverless-security the Agent Builder chat panel autofocuses its
+   * input on mount, and without reclaiming focus the keystrokes leak there.
    */
   async typeInYamlEditor(text: string): Promise<void> {
-    const uri = await this.getEditorUri(this.yamlEditor);
-    await this.page.evaluate(
-      ({ modelUri, insertion }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
-        const monacoEnv = (window as any).MonacoEnvironment;
-        if (!monacoEnv?.monaco?.editor) {
-          throw new Error('MonacoEnvironment.monaco.editor is not available');
-        }
-        const editors = monacoEnv.monaco.editor.getEditors();
-        const editor = editors.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
-          (candidate: any) => candidate.getModel()?.uri?.toString() === modelUri
-        );
-        if (!editor) {
-          throw new Error('No editor instance found for the YAML model');
-        }
-        editor.focus();
-        editor.trigger('keyboard', 'type', { text: insertion });
-      },
-      { modelUri: uri, insertion: text }
-    );
+    await this.focusYamlEditor();
+    await this.page.keyboard.type(text);
   }
 
   /**
