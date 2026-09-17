@@ -8,11 +8,16 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { getNamedParams } from '@kbn/esql-utils';
+import { getNamedParams, fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
+import { getTime } from '@kbn/data-plugin/common';
+import type { ESQLColumn, ESQLSearchResponse } from '@kbn/es-types';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 import { getMaxNestingDepth, MAX_NESTING_DEPTH } from './get_timefield';
+
+const DATE_FORMAT_TZ_SETTING = 'dateFormat:tz';
 
 export const registerGetSourceInfoRoute = (
   router: IRouter,
@@ -37,6 +42,7 @@ export const registerGetSourceInfoRoute = (
               to: schema.string({ maxLength: 100 }),
             })
           ),
+          timeFieldName: schema.maybe(schema.string({ maxLength: 1000 })),
           esqlVariables: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -51,7 +57,7 @@ export const registerGetSourceInfoRoute = (
       },
     },
     async (requestHandlerContext, request, response) => {
-      const { query, projectRouting, timeRange, esqlVariables } = request.body;
+      const { query, projectRouting, timeRange, timeFieldName, esqlVariables } = request.body;
 
       if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
         return response.badRequest({
@@ -62,23 +68,56 @@ export const registerGetSourceInfoRoute = (
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
       try {
-        const namedParams = getNamedParams(
+        const fixedQuery = fixESQLQueryWithVariables(
           query,
+          (esqlVariables as ESQLControlVariable[] | undefined) ?? []
+        );
+
+        const namedParams = getNamedParams(
+          fixedQuery,
           timeRange,
           esqlVariables as ESQLControlVariable[] | undefined
         );
 
+        const dateFormatTZ = await core.uiSettings.client.get<string>(DATE_FORMAT_TZ_SETTING);
+        const timeZone = getTimeZoneFromSettings(dateFormatTZ ?? 'UTC');
+
+        const timeFilter =
+          timeRange && timeFieldName
+            ? getTime(undefined, timeRange, { fieldName: timeFieldName })
+            : undefined;
+        const filter = timeFilter
+          ? buildEsQuery(undefined, [], [timeFilter], {
+              allowLeadingWildcards: true,
+              queryStringOptions: {},
+              ignoreFilterIfFieldNotInIndex: false,
+            })
+          : undefined;
+
         const columnsResult = await client.esql
           .query({
-            query: `${query} | LIMIT 0`,
+            query: `${fixedQuery} | LIMIT 0`,
             ...(namedParams.length ? { params: namedParams } : {}),
             ...(projectRouting ? { project_routing: projectRouting } : {}),
+            ...(filter ? { filter } : {}),
+            time_zone: timeZone,
+            drop_null_columns: true,
+            settings: { column_metadata: true },
           })
-          .catch(() => ({ columns: [] as Array<{ name: string; type: string }> }));
+          .catch(() => ({
+            columns: [] as Array<{ name: string; type: string }>,
+            all_columns: undefined,
+          }));
 
-        const columns = (columnsResult.columns ?? []).map(
-          ({ name, type }: { name: string; type: string }) => ({ name, esType: type })
-        );
+        const result = columnsResult as unknown as ESQLSearchResponse;
+        const allColumnsRaw: ESQLColumn[] = result.all_columns ?? result.columns ?? [];
+
+        const columns = allColumnsRaw.map(({ name, type, original_types, _meta }) => ({
+          name,
+          esType: type,
+          ...(original_types?.length ? { originalTypes: original_types } : {}),
+          ...(_meta !== undefined ? { columnMeta: _meta } : {}),
+        }));
 
         esqlRouteRequestCounter.add(1, {
           route: 'source_info',

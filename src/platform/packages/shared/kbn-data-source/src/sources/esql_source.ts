@@ -148,21 +148,23 @@ export class EsqlSource implements DataSourceBase {
           http: args.http,
           projectRouting: args.projectRouting,
           timeRange: args.timeRange,
+          timeFieldName: args.timeFieldName,
           esqlVariables: cleanVariables,
         }).catch(() => null),
       ]);
 
       timeFieldName = resolvedTimeField;
       if (info) {
-        resultColumns = info.columns.map(
-          ({ name, esType }) =>
-            ({
-              id: name,
-              name,
-              meta: { type: esFieldTypeToKibanaFieldType(esType), esType },
-              isComputedColumn: isComputedColumn(name, querySummary),
-            } as DatatableColumn)
-        );
+        resultColumns = info.columns.map(({ name, esType }) => {
+          const kibanaFieldType = esFieldTypeToKibanaFieldType(esType);
+          return {
+            id: name,
+            name,
+            meta: { type: kibanaFieldType, esType },
+            isNull: false,
+            isComputedColumn: isComputedColumn(name, querySummary),
+          } as DatatableColumn;
+        });
       }
     }
 

@@ -11,8 +11,15 @@ import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
 
+export interface ESQLSourceInfoColumn {
+  name: string;
+  esType: string;
+  originalTypes?: string[];
+  columnMeta?: Record<string, unknown>;
+}
+
 export interface ESQLSourceInfo {
-  columns: Array<{ name: string; esType: string }>;
+  columns: ESQLSourceInfoColumn[];
 }
 
 const sourceInfoCache = new LRUCache<string, Promise<ESQLSourceInfo>>({ max: 100 });
@@ -45,12 +52,14 @@ export async function getESQLSourceInfo({
   http,
   projectRouting,
   timeRange,
+  timeFieldName,
   esqlVariables,
 }: {
   query: string;
   http: HttpStart;
   projectRouting?: string;
   timeRange?: { from: string; to: string };
+  timeFieldName?: string;
   esqlVariables?: ESQLControlVariable[];
 }): Promise<ESQLSourceInfo> {
   const { cacheKey, cleanVariables } = buildEsqlSourceCacheKey(
@@ -66,7 +75,13 @@ export async function getESQLSourceInfo({
 
   const pending = http
     .post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, {
-      body: JSON.stringify({ query, projectRouting, timeRange, esqlVariables: cleanVariables }),
+      body: JSON.stringify({
+        query,
+        projectRouting,
+        timeRange,
+        timeFieldName,
+        esqlVariables: cleanVariables,
+      }),
     })
     .catch((error) => {
       sourceInfoCache.delete(cacheKey);

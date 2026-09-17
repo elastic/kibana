@@ -155,7 +155,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(async ({ records, interceptedWarnings = [], esqlHeaderWarning }) => {
+      .then(async ({ records, interceptedWarnings = [], esqlHeaderWarning, esqlColumns }) => {
         fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
         if (isEsqlQuery) {
@@ -194,13 +194,17 @@ export function fetchAll(
          */
         const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
-        // For ES|QL, ensure the PARTIAL emit carries the full EsqlSource (with
-        // columns) so that build_esql_fetch_subscribe derives the correct default
-        // columns. getESQLSourceInfo (LIMIT 0) always resolves before the full
-        // table fetch completes, so this await is effectively instant.
-        const latestEsqlSource = isEsqlQuery
+        // For ES|QL, ensure the PARTIAL emit carries the full EsqlSource updated
+        // with the actual query columns (correct isNull values for the sidebar).
+        // getESQLSourceInfo (LIMIT 0) always resolves before the full table fetch
+        // completes, so this await is effectively instant.
+        const baseEsqlSource = isEsqlQuery
           ? await fullEsqlSourcePromise?.catch(() => undefined)
           : undefined;
+        const latestEsqlSource =
+          baseEsqlSource && esqlColumns?.length
+            ? baseEsqlSource.withColumns(esqlColumns)
+            : baseEsqlSource;
 
         dataSubjects.documents$.next({
           fetchStatus,

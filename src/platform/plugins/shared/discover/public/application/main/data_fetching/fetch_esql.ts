@@ -22,7 +22,7 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -106,6 +106,7 @@ export function fetchEsql({
         });
         const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
+        let finalColumns: DatatableColumn[] = [];
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
         let approximationApplied: boolean | undefined;
@@ -115,6 +116,7 @@ export function fetchEsql({
             error = response.error.message;
           } else {
             const table = response as Datatable;
+            finalColumns = table.columns ?? [];
             const rows = table?.rows ?? [];
             approximationApplied = table.meta?.approximationApplied;
             const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
@@ -155,6 +157,7 @@ export function fetchEsql({
             }
             return {
               records: finalData || [],
+              esqlColumns: finalColumns,
               interceptedWarnings,
               esqlHeaderWarning,
               approximationApplied,
@@ -164,6 +167,7 @@ export function fetchEsql({
       }
       return {
         records: [],
+        esqlColumns: [],
         interceptedWarnings: [],
         esqlHeaderWarning: undefined,
         approximationApplied: undefined,
