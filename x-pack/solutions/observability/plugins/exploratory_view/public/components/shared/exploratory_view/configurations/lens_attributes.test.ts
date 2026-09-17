@@ -23,6 +23,7 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 import type { XYVisualizationState } from '@kbn/lens-plugin/public';
 import type { Query } from '@kbn/es-query';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -594,6 +595,41 @@ describe('Lens Attribute', () => {
       const attributes = lnsAttr.getJSON();
 
       expect(attributes).toEqual(sampleAttributeWithReferenceLines);
+    });
+  });
+
+  describe('Annotation layers', function () {
+    it('adds a query-driven annotation layer, referencing its own data view', function () {
+      const annotation: EventAnnotationConfig = {
+        id: 'alerts-annotation',
+        type: 'query',
+        key: { type: 'point_in_time' },
+        filter: {
+          type: 'kibana_query',
+          query: 'kibana.alert.status: active',
+          language: 'kuery',
+        },
+        timeField: '@timestamp',
+        label: 'Alert',
+        color: '#BD271E',
+      };
+
+      lnsAttr = new LensAttributes([layerConfig], reportViewConfig.reportType, undefined, [
+        { dataView: mockDataView, annotations: [annotation] },
+      ]);
+
+      const attributes = lnsAttr.getJSON();
+      const layers = (attributes.state.visualization as XYVisualizationState).layers;
+      const annotationLayer = layers.find((layer) => layer.layerType === 'annotations') as {
+        layerType: string;
+        annotations: EventAnnotationConfig[];
+        indexPatternId: string;
+      };
+
+      expect(annotationLayer).toBeDefined();
+      expect(annotationLayer.annotations).toEqual([annotation]);
+      expect(annotationLayer.indexPatternId).toEqual(mockDataView.id);
+      expect(attributes.state.adHocDataViews).toHaveProperty(mockDataView.id!);
     });
   });
 });

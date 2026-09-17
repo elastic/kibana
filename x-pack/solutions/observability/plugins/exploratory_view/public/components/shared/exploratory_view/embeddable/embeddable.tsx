@@ -19,6 +19,7 @@ import type { AllSeries } from '../../../..';
 import type { AppDataType, ReportViewType } from '../types';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import type { DataViewState } from '../hooks/use_app_data_view';
+import type { AnnotationLayerConfig } from '../configurations/lens_attributes';
 import type { ReportConfigMap } from '../contexts/exploratory_view_config';
 import type { ActionTypes } from './use_actions';
 import { useActions } from './use_actions';
@@ -63,6 +64,9 @@ export interface ExploratoryEmbeddableProps {
   dataTestSubj?: string;
   searchSessionId?: string;
   dslFilters?: QueryDslQueryContainer[];
+  // Query-driven annotation layers (e.g. alert markers), resolved against their
+  // own data view independent of `attributes`' main chart data.
+  annotationLayers?: AnnotationLayerConfig[];
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
