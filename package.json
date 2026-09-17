@@ -717,6 +717,7 @@
     "@kbn/eso-model-version-example": "workspace:*",
     "@kbn/eso-plugin": "workspace:*",
     "@kbn/esql": "workspace:*",
+    "@kbn/esql-browser": "workspace:*",
     "@kbn/esql-composer": "workspace:*",
     "@kbn/esql-datagrid": "workspace:*",
     "@kbn/esql-editor": "workspace:*",
