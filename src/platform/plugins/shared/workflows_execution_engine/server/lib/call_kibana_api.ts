@@ -302,7 +302,8 @@ export async function callKibanaApi<T = unknown>(
     access: 'internal',
     asResponse: true,
     rawResponse: true,
-    // The workflow fake request has no base path, and any space is already encoded in `path`.
+    // Fake requests carry no base path. `createUrl` leaves `path` untouched when this is
+    // false, so the string above must already include `server.basePath` when configured.
     prependBasePath: false,
     signal: params.signal,
   });

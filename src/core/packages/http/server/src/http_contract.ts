@@ -76,11 +76,19 @@ export interface HttpSelfFetchOptions<TRequestBody = unknown> {
   forwardRequestHeaders?: boolean;
   /** API version string used to populate the `elastic-api-version` header. */
   version?: ApiVersion;
-  /** Abort signal for cancelling the outbound request. */
+  /** Abort signal for cancelling the outbound request, including in-flight redirect hops. */
   signal?: AbortSignal | null;
-  /** Request timeout in milliseconds. Defaults to a bounded Core value. */
+  /**
+   * Timeout in milliseconds for the entire outbound call, including any same-origin
+   * redirects Core follows. Defaults to 60 seconds.
+   */
   timeout?: number;
-  /** Whether to include the incoming request base path and space prefix. Defaults to `true`. */
+  /**
+   * When `true` (default), prefix `path` with the scoped request's base path (server
+   * base path plus space). Fake requests use `server.basePath` and the request's space.
+   * When `false`, `path` is used as-is and must already include `server.basePath` when
+   * one is configured. Core does not add that prefix a second time.
+   */
   prependBasePath?: boolean;
   /** When `true`, return response details instead of only the parsed response body. */
   asResponse?: boolean;
