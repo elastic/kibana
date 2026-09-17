@@ -213,6 +213,22 @@ export const WORKER_SCHEDULE_UNITS = ['m', 'h', 'd'] as const;
 
 export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
 
+/**
+ * Inference feature registry ids. Operators pick the model for each tier in Stack Management >
+ * Model Settings, and Worker `ai.agent` steps resolve through them with
+ * `connector-id-by-feature` instead of naming an endpoint themselves.
+ *
+ * The axis is the kind of call, not the Worker. One Worker can span several tiers — Attack
+ * Discovery generates and then investigates, three `workflow.execute` hops apart — and a step
+ * names its own tier wherever it sits in the call tree, so nothing has to be threaded through
+ * `workflow.execute` inputs. A new Worker usually costs no new tier.
+ */
+export const ALERTZERO_INFERENCE_PARENT_FEATURE_ID = 'alertzero_parent' as const;
+export const ALERTZERO_TRIAGE_INFERENCE_FEATURE_ID = 'alertzero_triage' as const;
+export const ALERTZERO_GENERATION_INFERENCE_FEATURE_ID = 'alertzero_generation' as const;
+export const ALERTZERO_INVESTIGATION_INFERENCE_FEATURE_ID = 'alertzero_investigation' as const;
+export const ALERTZERO_SUMMARIZATION_INFERENCE_FEATURE_ID = 'alertzero_summarization' as const;
+
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
 export const TEMPLATE_ID_INCIDENT = 'incident' as const;
