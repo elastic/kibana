@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConversationEventTypeDefinition } from '@kbn/agent-builder-server';
-import { TEXT_NOTE_EVENT_TYPE } from '../../../common/constants';
 
-/** Reference custom event type, registered via the public contract exactly as an external plugin would. */
-export const exampleNoteEventType: ConversationEventTypeDefinition = {
+import { TEXT_NOTE_EVENT_TYPE } from '../../common/conversation_events/constants';
+
+export const textNoteEventType: ConversationEventTypeDefinition = {
   type: TEXT_NOTE_EVENT_TYPE,
   payloadSchema: z.object({
     title: z.string().min(1).max(256).optional(),

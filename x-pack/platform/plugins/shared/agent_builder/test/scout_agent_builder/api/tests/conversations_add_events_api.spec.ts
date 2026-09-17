@@ -12,19 +12,16 @@ import type {
   CreateConversationResponse,
   GetConversationResponse,
 } from '../../../../common/http_api/conversations';
-import { TEXT_NOTE_EVENT_TYPE } from '../../../../common/constants';
+import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_shared/lib/conversations_es';
 import { apiTest } from '../fixtures';
-import {
-  API_AGENT_BUILDER,
-  CHAT_CONVERSATIONS_INDEX,
-  ELASTIC_API_VERSION,
-} from '../fixtures/constants';
+import { API_AGENT_BUILDER, ELASTIC_API_VERSION } from '../fixtures/constants';
 
 const CONVERSATIONS_PATH = `${API_AGENT_BUILDER}/conversations`;
 const CONVERSATION_PATH = (id: string) => `${CONVERSATIONS_PATH}/${encodeURIComponent(id)}`;
 const ADD_EVENTS_PATH = (id: string) => `${CONVERSATION_PATH(id)}/_add_events`;
 const ADD_EVENTS_HEADERS = { 'elastic-api-version': ELASTIC_API_VERSION };
 
+const TEXT_NOTE_EVENT_TYPE = 'text_note';
 const NOTE_EVENT = { type: TEXT_NOTE_EVENT_TYPE, data: { text: 'test note' } };
 
 apiTest.describe(
@@ -40,14 +37,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-      await esClient.deleteByQuery({
-        index: CHAT_CONVERSATIONS_INDEX,
-        query: { match_all: {} },
-        wait_for_completion: true,
-        refresh: true,
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-      });
+      await deleteAllConversationsFromEs(esClient);
     });
 
     // ── Happy path ──────────────────────────────────────────────────────────────

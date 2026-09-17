@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { nodeBuilder } from '@kbn/es-query';
+import { z } from '@kbn/zod/v4';
 import {
   CONVERSATION_SCHEMA_VERSION,
   ConversationParentRelation,
@@ -40,7 +41,6 @@ import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
-import { exampleNoteEventType } from '../../conversation_events/example_event_type';
 
 jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -3364,8 +3364,15 @@ describe('ConversationClient', () => {
   });
 
   describe('addCustomEvents', () => {
+    const mockEventType = {
+      type: 'text_note',
+      payloadSchema: z.object({
+        title: z.string().min(1).max(256).optional(),
+        text: z.string().min(1).max(1000),
+      }),
+    };
     beforeEach(() => {
-      (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(exampleNoteEventType);
+      (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(mockEventType);
     });
 
     it('calls appendEvents with access converse and returns materialized events', async () => {

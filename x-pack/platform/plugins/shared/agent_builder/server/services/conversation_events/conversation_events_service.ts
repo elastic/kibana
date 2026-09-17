@@ -10,7 +10,6 @@ import {
   type ConversationEventTypeRegistry,
 } from './conversation_event_type_registry';
 import type { ConversationEventsServiceSetup, ConversationEventsServiceStart } from './types';
-import { exampleNoteEventType } from './example_event_type';
 
 export interface ConversationEventsService {
   setup: () => ConversationEventsServiceSetup;
@@ -29,8 +28,6 @@ class ConversationEventsServiceImpl implements ConversationEventsService {
   }
 
   setup(): ConversationEventsServiceSetup {
-    this.registry.register(exampleNoteEventType);
-
     return {
       register: (definition) => this.registry.register(definition),
     };
