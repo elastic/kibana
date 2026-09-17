@@ -102,7 +102,7 @@ export SANDBOX_CA_CERT_PATH=/absolute/path/to/sandbox-service/ssl/server.crt
 
 Scout reads the PEM files into the current `sandbox.ssl` configuration and connects with mTLS.
 The sandbox configuration is passed through a mode-0600 temporary file in a private directory,
-so the API key and mTLS private key do not appear in process arguments. Scout removes the
+so sandbox credentials and the telemetry password do not appear in process arguments. Scout removes the
 temporary directory when its process exits normally.
 The gRPC API listens on `9090`; `8090` is only for probes. Leave the `WORKSPACE_SNAPSHOT_*`
 variables unset so each new conversation starts independently. Persistence is owned by
@@ -115,7 +115,11 @@ Scout Elasticsearch at `http://host.docker.internal:9220`; override
 The `evals_nightshift_investigations` Scout config extends `evals_tracing`. It adds the plugin,
 sandbox, a preconfigured basic-auth telemetry webhook, Agent Builder experimental features,
 and all eight tracing/privacy settings. Both trace exporters use the selected profile.
-The telemetry connector exposes only the ephemeral Scout cluster. Existing preconfigured-only,
+The telemetry connector uses a generated file-realm identity on the ephemeral Scout cluster.
+It can only read and inspect index metadata for `logs-*`, `metrics-*`, and `traces-*`; it has
+no cluster, write, impersonation, or restricted-index privileges. Its random password is
+kept in the same private Kibana configuration, and Elasticsearch receives only its salted hash.
+Existing preconfigured-only,
 agent allow-list and execute-authorization checks still apply.
 
 ## Dataset procurement contract

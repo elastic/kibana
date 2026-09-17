@@ -18,7 +18,13 @@ jest.mock('../../evals_tracing/stateful/classic.stateful.config', () => ({
       elasticsearch: { port: 9220 },
       kibana: { username: 'elastic', password: 'changeme' },
     },
-    kbnTestServer: { serverArgs: ['--telemetry.enabled=true'] },
+    esTestCluster: { files: [] },
+    kbnTestServer: {
+      serverArgs: [
+        '--telemetry.enabled=true',
+        '--xpack.actions.preconfigured={"existing":{"secrets":{"apiKey":"synthetic-model-key"}}}',
+      ],
+    },
   },
 }));
 
@@ -66,7 +72,8 @@ describe('Nightshift sandbox configuration', () => {
     const configPath = configArgs[0].slice('--config='.length);
     expect(statSync(dirname(configPath)).mode.toString(8).slice(-3)).toBe('700');
     expect(statSync(configPath).mode.toString(8).slice(-3)).toBe('600');
-    expect(parse(readFileSync(configPath, 'utf8'))).toEqual({
+    const config = parse(readFileSync(configPath, 'utf8'));
+    expect(config).toMatchObject({
       'xpack.nightshift_investigations.sandbox': {
         host: customCa ? 'sandbox.example' : 'localhost',
         port: customCa ? 9091 : 9090,
@@ -79,7 +86,16 @@ describe('Nightshift sandbox configuration', () => {
         telemetry_connector_id: 'nightshift-evals-telemetry',
       },
     });
+    const connector = config['xpack.actions.preconfigured']['nightshift-evals-telemetry'];
+    expect(connector.secrets.user).toBe('nightshift_evals_telemetry');
+    expect(connector.secrets.password).toMatch(/^[a-f0-9]{64}$/);
+    expect(config['xpack.actions.preconfigured'].existing.secrets.apiKey).toBe(
+      'synthetic-model-key'
+    );
     const args = serverArgs.join(' ');
+    expect(args).not.toContain(connector.secrets.password);
+    expect(args).not.toContain('synthetic-model-key');
+    expect(args).not.toContain('--xpack.actions.preconfigured=');
     expect(args).not.toContain('synthetic-api-key');
     expect(args).not.toContain('synthetic private key');
     expect(args).not.toContain('--xpack.nightshift_investigations.sandbox=');

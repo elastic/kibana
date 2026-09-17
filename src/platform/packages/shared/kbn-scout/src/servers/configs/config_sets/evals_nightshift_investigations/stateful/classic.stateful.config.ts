@@ -12,6 +12,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as tracing } from '../../evals_tracing/stateful/classic.stateful.config';
+import { createTelemetryIdentity } from './create_telemetry_identity';
 
 const sandboxKey = process.env.SANDBOX_API_KEY;
 if (!sandboxKey)
@@ -40,7 +41,29 @@ const exporters: Array<{ http?: { url: string; headers?: Record<string, string> 
   ? JSON.parse(exporterArg.slice(exporterPrefix.length))
   : [];
 
+// Keep sandbox and telemetry credentials out of process arguments and launcher logs.
+const configDirectory = mkdtempSync(join(tmpdir(), 'nightshift-evals-'));
+process.once('exit', () => rmSync(configDirectory, { recursive: true, force: true }));
+const telemetry = createTelemetryIdentity(configDirectory, tracing.esTestCluster.files);
 const sandboxConfig = {
+  'xpack.actions.preconfigured': {
+    ...connectors,
+    'nightshift-evals-telemetry': {
+      name: 'Scout Elasticsearch telemetry',
+      actionTypeId: '.webhook',
+      config: {
+        url:
+          process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL ??
+          `http://host.docker.internal:${tracing.servers.elasticsearch.port}`,
+        method: 'post',
+        hasAuth: true,
+      },
+      secrets: {
+        user: telemetry.username,
+        password: telemetry.password,
+      },
+    },
+  },
   'xpack.nightshift_investigations.sandbox': {
     host: process.env.SANDBOX_API_HOST ?? 'localhost',
     port: Number(process.env.SANDBOX_API_PORT ?? 9090),
@@ -53,14 +76,12 @@ const sandboxConfig = {
     telemetry_connector_id: 'nightshift-evals-telemetry',
   },
 };
-// Keep the API key and mTLS private key out of process arguments and launcher logs.
-const configDirectory = mkdtempSync(join(tmpdir(), 'nightshift-evals-'));
 const sandboxConfigPath = join(configDirectory, 'sandbox.yml');
-process.once('exit', () => rmSync(configDirectory, { recursive: true, force: true }));
 writeFileSync(sandboxConfigPath, JSON.stringify(sandboxConfig), { mode: 0o600 });
 
 export const servers: ScoutServerConfig = {
   ...tracing,
+  esTestCluster: { ...tracing.esTestCluster, files: telemetry.files },
   kbnTestServer: {
     ...tracing.kbnTestServer,
     serverArgs: [
@@ -68,24 +89,6 @@ export const servers: ScoutServerConfig = {
       '--xpack.nightshift_investigations.enabled=true',
       '--xpack.nightshift_investigations.cortex.enabled=false',
       `--config=${sandboxConfigPath}`,
-      `${connectorPrefix}${JSON.stringify({
-        ...connectors,
-        'nightshift-evals-telemetry': {
-          name: 'Scout Elasticsearch telemetry',
-          actionTypeId: '.webhook',
-          config: {
-            url:
-              process.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL ??
-              `http://host.docker.internal:${tracing.servers.elasticsearch.port}`,
-            method: 'post',
-            hasAuth: true,
-          },
-          secrets: {
-            user: tracing.servers.kibana.username,
-            password: tracing.servers.kibana.password,
-          },
-        },
-      })}`,
       `--xpack.agentBuilder.tracing.exporters=${JSON.stringify(
         exporters.flatMap(({ http }) => (http ? [http] : []))
       )}`,
