@@ -496,6 +496,54 @@ describe('IacProvisionerService', () => {
     });
   });
 
+  it('rejects a 200 resolve body with malformed notCovered entries', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, {
+        blueprints: [
+          {
+            workflow: 'federated_identity',
+            resolvedVersion: null,
+            deployable: false,
+            notCovered: [null],
+          },
+        ],
+      })
+    );
+
+    await expect(
+      iacProvisionerService.resolveBlueprints({
+        provider: 'aws',
+        integrations: RENDER_REQUEST.integrations,
+      })
+    ).rejects.toThrow(/invalid resolve body/);
+  });
+
+  it('rejects a 200 resolve body with an unknown notCovered reason code', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, {
+        blueprints: [
+          {
+            workflow: 'federated_identity',
+            resolvedVersion: null,
+            deployable: false,
+            notCovered: [{ integration: 'aws', reason: 'not_a_reason' }],
+          },
+        ],
+      })
+    );
+
+    await expect(
+      iacProvisionerService.resolveBlueprints({
+        provider: 'aws',
+        integrations: RENDER_REQUEST.integrations,
+      })
+    ).rejects.toThrow(/invalid resolve body/);
+  });
+
   it('rejects a 200 resolve body whose blueprints are malformed', async () => {
     mockConfig();
     mockLogger();

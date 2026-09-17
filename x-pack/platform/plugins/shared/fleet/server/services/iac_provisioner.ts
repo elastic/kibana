@@ -14,9 +14,11 @@ import apm from 'elastic-apm-node';
 import type { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
 import type {
   IacBlueprintCoverage,
+  IacNotCoveredReason,
   IacPolicyTemplateSelection,
   IAC_FEDERATED_IDENTITY_WORKFLOW,
 } from '../../common/types/rest_spec/iac_provisioner';
+import { IAC_NOT_COVERED_REASONS } from '../../common/types/rest_spec/iac_provisioner';
 
 import {
   IacProvisionerConfigError,
@@ -108,6 +110,26 @@ const isIacProvisionerRenderResponse = (value: unknown): value is IacProvisioner
   );
 };
 
+const isOptionalString = (value: unknown): value is string | undefined =>
+  value === undefined || typeof value === 'string';
+
+const isIacNotCoveredReason = (value: unknown): value is IacNotCoveredReason => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const { integration, reason, policyTemplate, input, supportFloor, installedVersion } =
+    value as Record<string, unknown>;
+  return (
+    typeof integration === 'string' &&
+    typeof reason === 'string' &&
+    (IAC_NOT_COVERED_REASONS as readonly string[]).includes(reason) &&
+    isOptionalString(policyTemplate) &&
+    isOptionalString(input) &&
+    isOptionalString(supportFloor) &&
+    isOptionalString(installedVersion)
+  );
+};
+
 const isIacBlueprintCoverage = (value: unknown): value is IacBlueprintCoverage => {
   if (!value || typeof value !== 'object') {
     return false;
@@ -117,7 +139,8 @@ const isIacBlueprintCoverage = (value: unknown): value is IacBlueprintCoverage =
     typeof workflow === 'string' &&
     (resolvedVersion === null || typeof resolvedVersion === 'string') &&
     typeof deployable === 'boolean' &&
-    Array.isArray(notCovered)
+    Array.isArray(notCovered) &&
+    notCovered.every(isIacNotCoveredReason)
   );
 };
 
