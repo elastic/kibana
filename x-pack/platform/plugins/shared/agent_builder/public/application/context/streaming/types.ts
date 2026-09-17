@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { OptimisticAttachments } from '../../utils/build_optimistic_attachments';
+
 export type StreamType = 'send' | 'resume';
 
 export interface ActiveStream {
@@ -13,4 +15,5 @@ export interface ActiveStream {
 
 export interface StreamRecord {
   pendingMessage?: string;
+  pendingAttachments?: OptimisticAttachments;
 }

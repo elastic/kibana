@@ -28,6 +28,7 @@ import type { SendMessageVars } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 import type { ResumeRoundVars } from './use_resume_round_mutation';
 import type { ActiveStream, StreamRecord } from './types';
+import type { OptimisticAttachments } from '../../utils/build_optimistic_attachments';
 
 export interface StreamingContextValue {
   conversationStreamService: ConversationStreamService;
@@ -66,19 +67,27 @@ export const StreamingProvider = ({
     });
   }, []);
 
-  const setPendingMessage = useCallback((conversationId: string, message: string) => {
-    setByConversationId(
-      produce((draft) => {
-        draft[conversationId] = { ...draft[conversationId], pendingMessage: message };
-      })
-    );
-  }, []);
+  const setPendingMessage = useCallback(
+    (conversationId: string, message: string, attachments?: OptimisticAttachments) => {
+      setByConversationId(
+        produce((draft) => {
+          draft[conversationId] = {
+            ...draft[conversationId],
+            pendingMessage: message,
+            pendingAttachments: attachments,
+          };
+        })
+      );
+    },
+    []
+  );
 
   const clearPendingMessage = useCallback((conversationId: string) => {
     setByConversationId(
       produce((draft) => {
         if (draft[conversationId]) {
           delete draft[conversationId].pendingMessage;
+          delete draft[conversationId].pendingAttachments;
         }
       })
     );

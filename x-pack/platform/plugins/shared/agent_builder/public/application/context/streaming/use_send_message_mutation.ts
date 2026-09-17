@@ -21,6 +21,10 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { flattenAttachments } from '../conversation/flatten_attachments';
+import {
+  buildOptimisticAttachments,
+  type OptimisticAttachments,
+} from '../../utils/build_optimistic_attachments';
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
@@ -46,7 +50,11 @@ export interface SendMessageVars {
 
 export interface SendMessageMutationBindings {
   conversationStreamService: ConversationStreamService;
-  setPendingMessage: (conversationId: string, message: string) => void;
+  setPendingMessage: (
+    conversationId: string,
+    message: string,
+    attachments?: OptimisticAttachments
+  ) => void;
   clearPendingMessage: (conversationId: string) => void;
   clearActiveStream: (conversationId: string) => void;
 }
@@ -159,7 +167,14 @@ export const useSendMessageMutation = ({
       if (!vars.message) {
         throw new Error('Message is required');
       }
-      setPendingMessage(vars.conversationId, vars.message);
+      setPendingMessage(
+        vars.conversationId,
+        vars.message,
+        buildOptimisticAttachments({
+          attachments: flattenAttachments(vars.attachments ?? []),
+          conversationAttachments: vars.conversationAttachments,
+        })
+      );
 
       let timelineExecutionId: string | undefined;
       let triggerEventId: string | undefined;
