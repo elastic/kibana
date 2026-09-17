@@ -326,9 +326,7 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                   defaultMessage="Add severity level"
                 />
               </EuiButtonEmpty>
-              {condition && (
-                <SeverityValidationCallout severity={severity} condition={condition} />
-              )}
+              {condition && <SeverityValidationCallout severity={severity} condition={condition} />}
             </>
           )}
         </>

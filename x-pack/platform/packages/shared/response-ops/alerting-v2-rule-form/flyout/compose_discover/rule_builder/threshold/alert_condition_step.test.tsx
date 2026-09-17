@@ -1122,7 +1122,7 @@ describe('RuleBuilderAlertConditionStep', () => {
 
       fireEvent.click(screen.getByTestId('ruleBuilderSeverityEnable'));
       const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
-      expect(next.severity).toEqual({ mode: 'single', singleLevelSeverity: 'high', levels: [] });
+      expect(next.severity).toEqual({ mode: 'single', singleLevelSeverity: 'info', levels: [] });
     });
 
     it('leaves the condition threshold unchanged when a severity band is edited', () => {

@@ -910,14 +910,14 @@ describe('severity round-trip', () => {
     const original = makeValues({
       stats: [cpuStat],
       alertConditions: [cpuCondition],
-      severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+      severity: { mode: 'single', singleLevelSeverity: 'info', levels: [] },
     });
 
     const query = buildThresholdEsql(original);
     const parsed = parseThresholdEsql(query);
 
     expect(parsed).not.toBeNull();
-    expect(parsed!.severity).toEqual({ mode: 'single', singleLevelSeverity: 'high', levels: [] });
+    expect(parsed!.severity).toEqual({ mode: 'single', singleLevelSeverity: 'info', levels: [] });
   });
 
   it('round-trips multi severity through build and parse (ascending >)', () => {
@@ -926,7 +926,7 @@ describe('severity round-trip', () => {
       alertConditions: [cpuCondition],
       severity: {
         mode: 'multi',
-        singleLevelSeverity: 'high',
+        singleLevelSeverity: 'info',
         // Every level is a band with its own threshold, all beyond the condition (0.8).
         levels: [
           { id: 'l1', severity: 'low', threshold: 0.85 },
@@ -942,7 +942,7 @@ describe('severity round-trip', () => {
     expect(parsed).not.toBeNull();
     expect(stripLevelIds(parsed!.severity!)).toEqual({
       mode: 'multi',
-      singleLevelSeverity: 'high',
+      singleLevelSeverity: 'info',
       levels: [
         { severity: 'low', threshold: 0.85 },
         { severity: 'medium', threshold: 0.9 },
@@ -960,7 +960,7 @@ describe('severity round-trip', () => {
       ],
       severity: {
         mode: 'multi',
-        singleLevelSeverity: 'high',
+        singleLevelSeverity: 'info',
         // Every level is a band with its own threshold, all beyond the condition (500, `<`).
         levels: [
           { id: 'l1', severity: 'low', threshold: 450 },

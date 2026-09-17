@@ -39,7 +39,7 @@ describe('SeveritySection', () => {
     fireEvent.click(screen.getByTestId('ruleBuilderSeverityEnable'));
     expect(onChange).toHaveBeenCalledWith({
       mode: 'single',
-      singleLevelSeverity: 'high',
+      singleLevelSeverity: 'info',
       levels: [],
     });
   });
