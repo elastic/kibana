@@ -146,7 +146,7 @@ describe('classifyChartSectionError', () => {
 
     it('classifies a 429 rate-limit status with no resource-limit cause as an application error', () => {
       const error = new EsqlResponseError(
-        { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+        { type: 'too_many_requests', reason: 'rate limit exceeded' },
         { status: 429 }
       );
 
@@ -200,6 +200,48 @@ describe('classifyChartSectionError', () => {
         reason: 'all shards failed',
         root_cause: [
           { type: 'circuit_breaking_exception', reason: 'data too large' },
+        ] as estypes.ErrorCause[],
+      });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a 429 rejected-execution status as a resource limit', () => {
+      const error = new EsqlResponseError(
+        { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+        { status: 429 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a status-less rejected-execution type as a resource limit', () => {
+      const error = new EsqlResponseError({ type: 'es_rejected_execution_exception' });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a search-interceptor error carrying a 429 rejected-execution status as a resource limit', () => {
+      const error = createEsErrorLike(
+        { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+        { status: 429 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a status-less search-interceptor rejected-execution error as a resource limit', () => {
+      const error = createEsErrorLike({ type: 'es_rejected_execution_exception' });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a rejected execution nested under a generic wrapper as a resource limit', () => {
+      const error = createEsErrorLike({
+        type: 'search_phase_execution_exception',
+        reason: 'all shards failed',
+        root_cause: [
+          { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
         ] as estypes.ErrorCause[],
       });
 

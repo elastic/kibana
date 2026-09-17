@@ -29,6 +29,21 @@ describe('buildEsqlQueryFailureEvent', () => {
     });
   });
 
+  it('classifies a rejected execution as a resource limit', () => {
+    const error = new EsqlResponseError(
+      { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+      { status: 429 }
+    );
+
+    expect(buildEsqlQueryFailureEvent({ error, esqlQuery: TS_QUERY })).toEqual({
+      error_type: 'es_rejected_execution_exception',
+      error_category: 'resource_limit',
+      status_code: 429,
+      query_type: 'TS',
+      profile: METRICS_PROFILE_TELEMETRY_NAME,
+    });
+  });
+
   it('classifies a rejected query as user input', () => {
     const error = new EsqlResponseError(
       { type: 'parsing_exception', reason: "extraneous input '|' expecting <EOF>" },

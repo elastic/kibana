@@ -16,8 +16,8 @@ import { isEsqlResponseError } from './esql_response_error';
  * invalid ES|QL or KQL expression) so incident detection can exclude them from
  * the failure rate without dropping the events themselves. `resource_limit`
  * marks failures where Elasticsearch refused the work for capacity reasons
- * (e.g. a tripped circuit breaker), which needs sizing or query changes rather
- * than a Kibana fix.
+ * (e.g. a tripped circuit breaker or a saturated thread pool), which needs
+ * sizing or query changes rather than a Kibana fix.
  */
 export const ERROR_CATEGORY = {
   USER_INPUT: 'user_input',
@@ -46,11 +46,16 @@ const USER_INPUT_ERROR_TYPES: readonly string[] = ['parsing_exception', 'verific
 
 /**
  * Elasticsearch error types that mean the cluster ran out of a budget rather
- * than that anything is broken. Matched anywhere in the cause chain, after
- * user-input statuses (400/404) and before the generic status fallback, since
- * these arrive with a 429 that would otherwise read as an application failure.
+ * than that anything is broken: heap for the circuit breaker, thread-pool
+ * queue slots for a rejected execution. Matched anywhere in the cause chain,
+ * after user-input statuses (400/404) and before the generic status fallback,
+ * since these arrive with a 429 that would otherwise read as an application
+ * failure.
  */
-const RESOURCE_LIMIT_ERROR_TYPES: readonly string[] = ['circuit_breaking_exception'];
+const RESOURCE_LIMIT_ERROR_TYPES: readonly string[] = [
+  'circuit_breaking_exception',
+  'es_rejected_execution_exception',
+];
 
 const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
