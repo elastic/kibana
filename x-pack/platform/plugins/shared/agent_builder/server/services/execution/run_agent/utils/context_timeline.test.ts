@@ -14,8 +14,13 @@ import {
 } from '../../../../test_utils/timeline';
 import {
   eventsForContext,
+  groupTimelineEntries,
+  groupTimelineFailedExecutions,
   groupTimelineRounds,
   isAwaitingPrompt,
+  isTimelineFailedExecution,
+  isTimelineRound,
+  isTimelineStandaloneUserMessage,
   lastExecutionTerminated,
   roundResponse,
   sliceTimelineRounds,
@@ -134,5 +139,158 @@ describe('lastExecutionTerminated', () => {
 
   it('is undefined for an empty timeline', () => {
     expect(lastExecutionTerminated([])).toBeUndefined();
+  });
+});
+
+/** A failed initial execution: user_message, execution_started, one step, execution_failed. */
+const failedExecutionEvents = (
+  roundId: string,
+  createdAt: string,
+  message = 'failed input'
+): TimelineEvent[] =>
+  [
+    {
+      id: `${roundId}::user_message`,
+      type: TimelineEventType.userMessage,
+      created_at: createdAt,
+      actor: userActor,
+      data: { message },
+    },
+    {
+      id: `${roundId}::execution_started`,
+      type: TimelineEventType.executionStarted,
+      created_at: createdAt,
+      actor: agentActor,
+      execution_id: `${roundId}::execution`,
+      trigger_event_id: `${roundId}::user_message`,
+      data: { trigger_type: 'user_message' },
+    },
+    {
+      id: `${roundId}::step::0`,
+      type: TimelineEventType.executionStep,
+      created_at: createdAt,
+      actor: agentActor,
+      execution_id: `${roundId}::execution`,
+      trigger_event_id: `${roundId}::user_message`,
+      data: { step: { type: 'reasoning', reasoning: 'thinking' }, sequence: 0 },
+    },
+    {
+      id: `${roundId}::execution_failed`,
+      type: TimelineEventType.executionFailed,
+      created_at: createdAt,
+      actor: agentActor,
+      execution_id: `${roundId}::execution`,
+      trigger_event_id: `${roundId}::user_message`,
+      data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
+    },
+  ] as unknown as TimelineEvent[];
+
+const completedRoundEvents = (roundId: string, createdAt: string): TimelineEvent[] =>
+  timelineFromRounds([
+    { id: roundId, input: { message: `${roundId} input` }, started_at: createdAt },
+  ]);
+
+describe('groupTimelineFailedExecutions', () => {
+  it('groups a failed initial execution with its user message, steps and terminal', () => {
+    const timeline = failedExecutionEvents('f1', '2026-01-01T00:00:00.000Z');
+    const [entry] = groupTimelineFailedExecutions(timeline);
+
+    expect(entry.id).toBe('f1');
+    expect(entry.userMessage.id).toBe('f1::user_message');
+    expect(entry.failed.id).toBe('f1::execution_failed');
+    expect(entry.steps).toEqual([{ type: 'reasoning', reasoning: 'thinking' }]);
+    expect(entry.events.map((event) => event.id)).toEqual([
+      'f1::user_message',
+      'f1::execution_started',
+      'f1::step::0',
+      'f1::execution_failed',
+    ]);
+  });
+
+  it('ignores aborted executions, failed resumes and terminated executions', () => {
+    const aborted = failedExecutionEvents('a1', '2026-01-01T00:00:00.000Z').map((event) =>
+      event.type === TimelineEventType.executionFailed
+        ? { ...event, id: 'a1::execution_aborted', type: TimelineEventType.executionAborted }
+        : event
+    ) as TimelineEvent[];
+    const failedResume = [
+      ...pausedAndResumedRoundTimeline().filter((event) => !event.execution_id?.endsWith('::1')),
+      {
+        id: 'r1::execution::1::execution_failed',
+        type: TimelineEventType.executionFailed,
+        created_at: '2026-01-01T00:00:03.000Z',
+        actor: agentActor,
+        execution_id: 'r1::execution::1',
+        trigger_event_id: 'r1::prompt_response::1',
+        data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
+      },
+    ] as TimelineEvent[];
+
+    expect(groupTimelineFailedExecutions(aborted)).toEqual([]);
+    expect(groupTimelineFailedExecutions(failedResume)).toEqual([]);
+    expect(
+      groupTimelineFailedExecutions(completedRoundEvents('c1', '2026-01-01T00:00:00.000Z'))
+    ).toEqual([]);
+  });
+});
+
+describe('groupTimelineEntries with failed executions', () => {
+  const timeline = [
+    ...completedRoundEvents('a', '2026-01-01T00:00:00.000Z'),
+    ...failedExecutionEvents('f', '2026-01-01T00:01:00.000Z'),
+    ...completedRoundEvents('b', '2026-01-01T00:02:00.000Z'),
+  ];
+
+  it('yields a failed entry between the rounds, in timeline order', () => {
+    const entries = groupTimelineEntries(timeline);
+
+    expect(entries.map((entry) => entry.userMessage.id)).toEqual([
+      'a::user_message',
+      'f::user_message',
+      'b::user_message',
+    ]);
+    expect(isTimelineFailedExecution(entries[1])).toBe(true);
+    expect(isTimelineRound(entries[1])).toBe(false);
+    expect(isTimelineStandaloneUserMessage(entries[1])).toBe(false);
+  });
+
+  it('is ignored by groupTimelineRounds', () => {
+    expect(groupTimelineRounds(timeline).map((round) => round.id)).toEqual(['a', 'b']);
+  });
+});
+
+describe('sliceTimelineRounds with failed executions', () => {
+  const timeline = [
+    ...failedExecutionEvents('f0', '2025-12-31T00:00:00.000Z'),
+    ...completedRoundEvents('a', '2026-01-01T00:00:00.000Z'),
+    ...failedExecutionEvents('f1', '2026-01-01T00:01:00.000Z'),
+    ...completedRoundEvents('b', '2026-01-01T00:02:00.000Z'),
+    ...failedExecutionEvents('f2', '2026-01-01T00:03:00.000Z'),
+    ...completedRoundEvents('c', '2026-01-01T00:04:00.000Z'),
+  ];
+  const roundIds = (events: TimelineEvent[]) =>
+    Array.from(new Set(events.map((event) => event.id.split('::')[0])));
+
+  it('keeps every failed execution when slicing from the start', () => {
+    expect(roundIds(sliceTimelineRounds(timeline, 0))).toEqual(['f0', 'a', 'f1', 'b', 'f2', 'c']);
+  });
+
+  it('drops failed executions older than the first kept round (the cut) and keeps the newer ones', () => {
+    // f0 and f1 precede round b, the first kept round: they are compacted away, never summarised
+    expect(roundIds(sliceTimelineRounds(timeline, 1))).toEqual(['b', 'f2', 'c']);
+  });
+
+  it('keeps failed executions older than the first excluded round when an end bound is given', () => {
+    // f2 precedes round c, the first excluded round, so it belongs to the kept range
+    expect(roundIds(sliceTimelineRounds(timeline, 0, 2))).toEqual(['f0', 'a', 'f1', 'b', 'f2']);
+  });
+
+  it('preserves stored order (Round B → Failed F2 → Round C)', () => {
+    const sliced = sliceTimelineRounds(timeline, 1, 3);
+    expect(sliced.map((event) => event.id)).toEqual(
+      timeline
+        .filter((event) => ['b', 'f2', 'c'].includes(event.id.split('::')[0]))
+        .map((event) => event.id)
+    );
   });
 });

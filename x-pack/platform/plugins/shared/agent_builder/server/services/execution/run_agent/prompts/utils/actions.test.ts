@@ -19,7 +19,12 @@ import type {
   ExecuteToolAction,
   BackgroundExecutionCompleteAction,
 } from '../../actions';
-import { formatResearcherActionHistory, formatSystemNotice } from './actions';
+import {
+  EXECUTION_FAILED_NOTICE_MAX_LENGTH,
+  formatExecutionFailedNotice,
+  formatResearcherActionHistory,
+  formatSystemNotice,
+} from './actions';
 import { ExecutionStatus, ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
@@ -459,5 +464,33 @@ describe('formatSystemNotice', () => {
     const notice = formatSystemNotice(makeCompletedExecution({ response: undefined }));
 
     expect(notice).toContain('<result>No response</result>');
+  });
+});
+
+describe('formatExecutionFailedNotice', () => {
+  it('renders a system_notice with the error code as an attribute and the message escaped', () => {
+    const notice = formatExecutionFailedNotice({
+      code: 'internalError',
+      message: 'bad <tag> & "quote" ] newline\nnext',
+    } as never);
+
+    expect(notice).toContain('<system_notice>');
+    // the apostrophe is escaped like everything else
+    expect(notice).toContain(
+      'The agent&apos;s attempt to answer the previous message failed. No response was produced.'
+    );
+    expect(notice).toContain('<error code="internalError">');
+    expect(notice).toContain('bad &lt;tag&gt; &amp;');
+    expect(notice).not.toContain('<tag>');
+  });
+
+  it('truncates long messages to the bound', () => {
+    const notice = formatExecutionFailedNotice({
+      code: 'internalError',
+      message: 'x'.repeat(10_000),
+    } as never);
+
+    const rendered = /<error code="internalError">([\s\S]*?)<\/error>/.exec(notice)![1].trim();
+    expect(rendered).toBe(`${'x'.repeat(EXECUTION_FAILED_NOTICE_MAX_LENGTH)}…`);
   });
 });
