@@ -113,10 +113,14 @@ export {
   WatchTriggersSettings,
   WatchWorker,
   WatchWorkerAttachment,
+  AnalysisWindowDays,
+  RuleTuningWorkerExtras,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
+  WorkerSettingsExtras,
+  WorkerSettingsWrite,
   WorkflowTriggerType,
   type TimelineEvent,
 } from './impl/schemas';
@@ -147,6 +151,22 @@ export {
   getMockProposalById,
   getMockProposalsByInvestigationId,
 } from './impl/samples';
+export {
+  ANALYSIS_WINDOW_DAYS_DEFAULT,
+  ANALYSIS_WINDOW_DAYS_MAX,
+  ANALYSIS_WINDOW_DAYS_MIN,
+  RULE_TUNING_DEFAULT_EXTRAS,
+  WORKER_SETTINGS_DECLARATIONS,
+  applyWorkerSettingsWrite,
+  createDefaultWorkerSettings,
+  diffWorkerSettings,
+  formatWorkerSettingsIssues,
+  getAllowedAutonomyLevels,
+  getCompleteWorkerSettingsSchema,
+  getWorkerSettingsDeclaration,
+  touchesWorkerSettings,
+} from './impl/worker_settings';
+export type { WorkerSettingsDeclaration } from './impl/worker_settings';
 export type {
   SystemSecurityWatchCatalogEntry,
   SystemSecurityWorkerCatalogEntry,
