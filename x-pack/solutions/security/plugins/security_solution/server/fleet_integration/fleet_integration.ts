@@ -293,11 +293,8 @@ export const getPackagePolicyUpdateCallback = (
     // Validate that Endpoint Security policy uses only enabled App Features
     validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
 
-    // Strip Custom YARA Signatures before license validation. The license validator sets
-    // `passThroughApi`, but Fleet checks `apiPassThrough`, so that 403 is swallowed and Fleet
-    // persists the raw client payload. `endpointIntegrationData` is an alias (this callback does
-    // not clone `newPackagePolicy`); stripping first mutates the shared
-    // `inputs[0].config.policy.value` Fleet falls back to, keeping the flag-off invariant.
+    // Stripped before license validation so deployments with the feature gated off never get a
+    // license error about a field they cannot set.
     if (
       (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
         !experimentalFeatures.customYaraSignaturesEnabled) &&
