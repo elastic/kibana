@@ -62,7 +62,8 @@ const getSeverityTileStyles = (
         text-align: left;
         outline: ${euiTheme.border.width.thick} solid transparent;
         transition: outline ${euiTheme.animation.fast} ease;
-        &:hover {
+        &:hover,
+        &:focus-visible {
           outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
         }
       `,
