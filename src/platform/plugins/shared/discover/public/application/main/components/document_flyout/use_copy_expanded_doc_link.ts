@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useRef } from 'react';
-import { copyToClipboard } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { constructCascadeQuery } from '@kbn/esql-utils';
@@ -24,6 +22,7 @@ import {
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useCopyLocatorLink } from '../../../../components/discover_grid_flyout';
 
 /**
  * Copies a flyout link using the absolute time range that produced the current results.
@@ -42,7 +41,6 @@ export const useCopyExpandedDocLink = ({
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const isCopyingLinkRef = useRef(false);
 
   const cascadeShareQuery = useMemo(() => {
     if (!currentTab.expandedDocCascadePath || !isOfAggregateQueryType(currentTab.appState.query)) {
@@ -69,16 +67,8 @@ export const useCopyExpandedDocLink = ({
 
   const shareQuery = cascadeShareQuery ?? currentTab.appState.query;
 
-  const copyLink = useCallback(async () => {
-    const {
-      locator,
-      share,
-      capabilities,
-      filterManager,
-      data,
-      profileStateRegistry,
-      toastNotifications,
-    } = services;
+  const buildParams = useCallback(() => {
+    const { filterManager, data, profileStateRegistry } = services;
     const { timefilter } = data.query.timefilter;
 
     const locatorParams = getDiscoverLocatorParams({
@@ -96,40 +86,13 @@ export const useCopyExpandedDocLink = ({
       }),
     });
 
-    const params = cascadeShareQuery
+    return cascadeShareQuery
       ? toCascadeDocShareLocatorParams({
           locatorParams,
           query: cascadeShareQuery,
           expandedDoc: currentTab.expandedDoc,
         })
       : locatorParams;
-
-    try {
-      let url: string;
-
-      if (capabilities.discover_v2.createShortUrl && share) {
-        const shortUrl = await share.url.shortUrls.get(null).createWithLocator({ locator, params });
-        url = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
-      } else {
-        const link = document.createElement('a');
-        link.setAttribute('href', locator.getRedirectUrl(params));
-        url = link.href;
-      }
-
-      copyToClipboard(url);
-      toastNotifications.addSuccess({
-        title: i18n.translate('discover.docViews.flyout.copyLinkSuccessTitle', {
-          defaultMessage: 'Link copied to clipboard',
-        }),
-      });
-    } catch (error) {
-      toastNotifications.addDanger({
-        title: i18n.translate('discover.docViews.flyout.copyLinkErrorTitle', {
-          defaultMessage: 'Unable to copy link',
-        }),
-        text: error instanceof Error ? error.message : String(error),
-      });
-    }
   }, [
     cascadeShareQuery,
     currentTab,
@@ -139,19 +102,7 @@ export const useCopyExpandedDocLink = ({
     services,
   ]);
 
-  const copyLinkOnce = useCallback(async () => {
-    if (isCopyingLinkRef.current) {
-      return;
-    }
+  const copyLink = useCopyLocatorLink(buildParams);
 
-    isCopyingLinkRef.current = true;
-
-    try {
-      await copyLink();
-    } finally {
-      isCopyingLinkRef.current = false;
-    }
-  }, [copyLink]);
-
-  return { copyLink: copyLinkOnce, shareQuery };
+  return { copyLink, shareQuery };
 };

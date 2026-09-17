@@ -16,14 +16,20 @@ export {
 // them so consumers have a single entry point per the plugin's public surface.
 export {
   ACTION_WORKFLOW_TAG,
+  PROPOSAL_ATTACHMENT_TYPE,
+  PROPOSAL_WITHOUT_ACTION,
+  MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
+  PROPOSAL_UNCATEGORIZED,
   PROPOSALS_RESUME_CHANNEL,
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
   PROPOSAL_APPROVE_URL,
   PROPOSAL_BY_ID_URL,
   PROPOSAL_DISMISS_URL,
+  PROPOSAL_CHARTS_SUMMARY_URL,
+  actionMetadataSchema,
   approveProposalRequestSchema,
   createProposalRequestSchema,
   dismissProposalRequestSchema,
@@ -38,8 +44,9 @@ export {
   proposalImpactSchema,
   proposalOriginSchema,
   proposalSchema,
+  proposalChartsSummaryQuerySchema,
   proposalStatusSchema,
-  actionMetadataSchema,
+  proposalUserSchema,
 } from './proposals';
 
 export type {
@@ -58,6 +65,10 @@ export type {
   ProposalConfidence,
   ProposalImpact,
   ProposalOrigin,
+  ProposalChartsSummaryBucket,
+  ProposalChartsSummaryQuery,
+  ProposalChartsSummaryResponse,
   ProposalStatus,
+  ProposalUser,
   ProposalWithMetadata,
 } from './proposals';

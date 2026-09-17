@@ -11,10 +11,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@ela
 import { BlastRadiusItem, type BlastRadiusItemProps } from './blast_radius_item';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
-interface BlastRadiusSectionProps {
-  content:
-    | { variant: 'list'; items: BlastRadiusItemProps['item'][] }
-    | { variant: 'description'; description: React.ReactNode };
+/** The content union passed to {@link BlastRadiusSection}. */
+export type BlastRadiusContent =
+  | { variant: 'list'; items: BlastRadiusItemProps['item'][] }
+  | { variant: 'description'; description: React.ReactNode };
+
+export interface BlastRadiusSectionProps {
+  content: BlastRadiusContent;
   defaultItemIconColor?: string;
 }
 

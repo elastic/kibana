@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -17,7 +18,11 @@ import {
   signalGroupsPath,
   signalsPath,
 } from '../../common/constants';
-import type { ListSignalGroupsResponse, ListSignalsResponse } from '../../common/http_api/signals';
+import type {
+  ListSignalGroupsResponse,
+  ListSignalsResponse,
+  SignalTag,
+} from '../../common/http_api/signals';
 import { apiPrivileges } from '../../common/features';
 import { getSignalGroups, getSignalsByTag } from '../signals/read';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
@@ -29,12 +34,18 @@ const READ_SECURITY: RouteSecurity = {
 /** Upper bound on `from + size`, so deep pagination cannot exceed ES `index.max_result_window`. */
 const MAX_RESULT_WINDOW = 10000;
 
+/** The tags are a closed set, so the route accepts exactly those keywords. */
+const tagSchema: Type<SignalTag> = schema.oneOf(
+  [
+    schema.literal('query_error'),
+    schema.literal('empty_retrieval'),
+    schema.literal('coverage_gap'),
+  ],
+  { meta: { description: 'The tag whose signals should be fetched.' } }
+);
+
 const listSignalsQuerySchema = schema.object({
-  tag: schema.string({
-    minLength: 1,
-    maxLength: 1024,
-    meta: { description: 'The tag whose signals should be fetched.' },
-  }),
+  tag: tagSchema,
   from: schema.number({
     min: 0,
     max: MAX_RESULT_WINDOW - MAX_SIGNALS_PAGE_SIZE,
