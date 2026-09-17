@@ -61,6 +61,11 @@ const getResolvedViewFilter = (view: 'resolved' | 'raw') =>
       ]
     : [];
 
+interface UseEntityFilterBarCountsResult {
+  counts: EntityFilterBarCounts;
+  isLoading: boolean;
+}
+
 export const useEntityFilterBarCounts = ({
   spaceId,
   view,
@@ -69,10 +74,10 @@ export const useEntityFilterBarCounts = ({
   spaceId: string | undefined;
   view: 'resolved' | 'raw';
   filter?: QueryDslQueryContainer;
-}): EntityFilterBarCounts => {
+}): UseEntityFilterBarCountsResult => {
   const { data: dataServices } = useKibana().services;
 
-  const { data, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['entity-filter-aggregations', spaceId, view, filter],
     enabled: !!spaceId,
     keepPreviousData: true,
@@ -139,5 +144,5 @@ export const useEntityFilterBarCounts = ({
     error
   );
 
-  return data ?? EMPTY_FILTER_COUNTS;
+  return { counts: data ?? EMPTY_FILTER_COUNTS, isLoading };
 };
