@@ -25,6 +25,7 @@ import {
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import { DataViewErrorComponent } from '../../common/components/data_view_error';
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
+import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { useTimeRangeParam } from '../components/home/use_time_range_param';
 import { useEntityFiltersParam } from '../components/home/use_entity_filters_param';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
@@ -59,7 +60,13 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     }
   }, [dataView, globalQuery, globalFilters]);
 
-  const { data: watchlistsData } = useGetWatchlists();
+  const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
+  useErrorToast(
+    i18n.translate('xpack.securitySolution.entityAnalytics.home.watchlists.queryError', {
+      defaultMessage: 'There was an error loading watchlists',
+    }),
+    watchlistsError
+  );
   const watchlistNames = useMemo(() => {
     const map = new Map<string, string>();
     for (const w of watchlistsData ?? []) {
