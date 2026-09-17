@@ -189,7 +189,7 @@ describe('generateEsqlQuery duplicate columns', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.esql).toBe(
-        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS AVG(bytes) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS AVG(bytes) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)'
       );
       expect(result.esAggsIdMap['AVG(bytes)'].map(({ id }) => id)).toEqual(['2', '3']);
     }
@@ -221,11 +221,9 @@ describe('generateEsqlQuery duplicate columns', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.esql).toBe(
-        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS AVG(bytes) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS AVG(bytes) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)'
       );
-      expect(
-        result.esAggsIdMap['BUCKET(order_date, 75, ?_tstart, ?_tend)'].map(({ id }) => id)
-      ).toEqual(['1', '2']);
+      expect(result.esAggsIdMap.order_date.map(({ id }) => id)).toEqual(['1', '2']);
     }
   });
 });

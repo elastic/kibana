@@ -361,6 +361,7 @@ export function generateEsqlQuery(
   // Process buckets
   const resolvedBucketExprs = new Map<number, string>();
   const usedBucketAliases = new Set<string>();
+  const bucketAliasesByExpression = new Map<string, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
       if (bucketEsAggsEntries.length !== 1) {
@@ -448,14 +449,18 @@ export function generateEsqlQuery(
     // to ensure stable column names in ES|QL results (params get resolved to literal values)
     const needsAlias =
       rawResult.template.includes('?_tstart') || rawResult.template.includes('?_tend');
-    let bucketAlias = needsAlias && 'sourceField' in col ? col.sourceField : undefined;
-    // Guard against alias collisions (two buckets on the same source field would
-    // otherwise silently shadow each other in the STATS output and esAggsIdMap)
-    if (bucketAlias && usedBucketAliases.has(bucketAlias)) {
-      bucketAlias = `${bucketAlias}_${colId}`;
-    }
-    if (bucketAlias) {
-      usedBucketAliases.add(bucketAlias);
+    let bucketAlias = bucketAliasesByExpression.get(rawResult.template);
+    if (!bucketAlias) {
+      bucketAlias = needsAlias && 'sourceField' in col ? col.sourceField : undefined;
+      // Guard against alias collisions between different expressions. Identical
+      // expressions reuse their existing alias so duplicate columns still collapse.
+      if (bucketAlias && usedBucketAliases.has(bucketAlias)) {
+        bucketAlias = `${bucketAlias}_${colId}`;
+      }
+      if (bucketAlias) {
+        usedBucketAliases.add(bucketAlias);
+        bucketAliasesByExpression.set(rawResult.template, bucketAlias);
+      }
     }
     const esAggsId = bucketAlias ?? rawResult.template;
     resolvedBucketExprs.set(index, esAggsId);
@@ -514,12 +519,15 @@ export function generateEsqlQuery(
       // Alias bucket expressions that use named params so column names are stable.
       // `esql.col()` escapes alias names that are not valid bare identifiers
       // (e.g. `my-field` -> `` `my-field` ``), matching the raw column name in results.
-      const aliasedBuckets = bucketEsAggsEntries.map(([, col], index) => {
-        const expr = validBuckets[index];
-        const resolvedId = resolvedBucketExprs.get(index);
-        // If the esAggsId differs from the expression, it means we assigned an alias
-        return resolvedId && resolvedId !== expr ? `${esql.col(resolvedId)} = ${expr}` : expr;
+      const uniqueBucketsByOutputName = new Map<string, string>();
+      bucketsResult.forEach(({ outputName, esql: expression }) => {
+        if (!uniqueBucketsByOutputName.has(outputName)) {
+          uniqueBucketsByOutputName.set(outputName, expression);
+        }
       });
+      const aliasedBuckets = Array.from(uniqueBucketsByOutputName, ([outputName, expression]) =>
+        outputName !== expression ? `${esql.col(outputName)} = ${expression}` : expression
+      );
       const statsBody = `${validMetrics.join(', ')} BY ${aliasedBuckets.join(', ')}`;
       queryParts.push(`STATS ${statsBody}`);
     }
