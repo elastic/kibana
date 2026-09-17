@@ -43,6 +43,10 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyoutModelDetails).toContainText('Model author');
       await expect(eisModels.flyoutModelDetails).toContainText('Anthropic');
     });
+
+    await test.step('flyout shows model availability', async () => {
+      await expect(eisModels.flyoutModelAvailabilitySection).toBeVisible();
+    });
   });
 
   test('flyout shows correct endpoint count and closes via button', async ({ pageObjects }) => {

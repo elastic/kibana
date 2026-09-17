@@ -29,11 +29,16 @@ import {
   regionKey,
 } from '../../utils/eis_utils';
 import { toGeoSelectableOptions, toRegionSelectableOptions } from './location_selection_list';
-import { RestrictedRegionsPolicyList } from './restricted_regions_policy_list';
+import { LocationStatusList } from './location_status_list';
 
 const popoverPanelCss = ({ euiTheme }: UseEuiTheme) => css`
   min-width: ${euiTheme.base * 20}px;
 `;
+
+const listCss = ({ euiTheme }: UseEuiTheme) => ({
+  maxHeight: euiTheme.base * 20,
+  overflowY: 'auto' as const,
+});
 
 export interface RestrictedRegionsBadgeProps {
   policy: RegionPolicyResponse;
@@ -49,7 +54,7 @@ export const RestrictedRegionsBadge: React.FC<RestrictedRegionsBadgeProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();
 
-  const { options, listTestSubj, ariaLabel } = useMemo(() => {
+  const { items, listTestSubj, ariaLabel } = useMemo(() => {
     const regions = getAvailableRegions(endpoints);
     const geos = getAvailableGeos(endpoints);
     const listedRegionKeys = new Set(regions.map(regionKey));
@@ -67,10 +72,18 @@ export const RestrictedRegionsBadge: React.FC<RestrictedRegionsBadgeProps> = ({
     } = computeSeedState(policy, availableRegions, availableGeos);
     const isGeoPolicy = activeTab === 'geo';
 
+    const selectableOptions = isGeoPolicy
+      ? toGeoSelectableOptions(availableGeos, selectedGeos)
+      : toRegionSelectableOptions(getZoneGroups(availableRegions), regionKeys);
+
     return {
-      options: isGeoPolicy
-        ? toGeoSelectableOptions(availableGeos, selectedGeos)
-        : toRegionSelectableOptions(getZoneGroups(availableRegions), regionKeys),
+      items: selectableOptions.map((option) => ({
+        key: option.key ?? option.label,
+        label: option.label,
+        isOn: option.checked === 'on',
+        isGroupLabel: option.isGroupLabel,
+        'data-test-subj': option['data-test-subj'] ?? option.key ?? option.label,
+      })),
       listTestSubj: isGeoPolicy ? 'restrictedRegionsGeoList' : 'restrictedRegionsRegionList',
       ariaLabel: isGeoPolicy
         ? i18n.translate(
@@ -125,11 +138,23 @@ export const RestrictedRegionsBadge: React.FC<RestrictedRegionsBadgeProps> = ({
           defaultMessage="Region policy"
         />
       </EuiPopoverTitle>
-      <RestrictedRegionsPolicyList
-        options={options}
-        ariaLabel={ariaLabel}
-        data-test-subj={listTestSubj}
-      />
+      <div css={listCss}>
+        <LocationStatusList
+          items={items}
+          ariaLabel={ariaLabel}
+          data-test-subj={listTestSubj}
+          onIconTestSubj="restrictedRegionsIncludedIcon"
+          offIconTestSubj="restrictedRegionsExcludedIcon"
+          onAriaLabel={i18n.translate(
+            'xpack.searchInferenceEndpoints.eisModelsPage.regionPolicyIncludedAriaLabel',
+            { defaultMessage: 'Included in region policy' }
+          )}
+          offAriaLabel={i18n.translate(
+            'xpack.searchInferenceEndpoints.eisModelsPage.regionPolicyExcludedAriaLabel',
+            { defaultMessage: 'Not included in region policy' }
+          )}
+        />
+      </div>
       {onManageRegions && (
         <EuiPopoverFooter>
           <EuiFlexGroup justifyContent="center">

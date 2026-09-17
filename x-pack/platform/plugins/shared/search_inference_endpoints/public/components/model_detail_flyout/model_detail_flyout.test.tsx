@@ -274,6 +274,113 @@ describe('ModelDetailFlyout', () => {
     });
   });
 
+  describe('model availability', () => {
+    const usRegion = { csp: 'aws', region: 'us-east-1', geo: 'us' };
+    const euRegion = { csp: 'gcp', region: 'europe-west1', geo: 'eu' };
+
+    const modelEndpoint = createEndpoint({
+      metadata: { regions: [usRegion] },
+    });
+    const otherModelEndpoint = createEndpoint({
+      inference_id: 'other-ep',
+      service_settings: { model_id: 'other-model' },
+      metadata: { regions: [euRegion] },
+    });
+
+    it('hides the Regions list when the catalog is geo-only', () => {
+      const geoOnlyEndpoint = {
+        ...createEndpoint(),
+        metadata: { regions: [{ geo: 'eu' }] },
+      } as unknown as EisInferenceEndpoint;
+
+      renderFlyout(MODEL_ID, [geoOnlyEndpoint]);
+
+      expect(screen.getByTestId('modelAvailabilitySection')).toBeInTheDocument();
+      expect(screen.queryByTestId('modelAvailabilityRegionList')).not.toBeInTheDocument();
+      expect(screen.getByTestId('modelAvailabilityGeoList')).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('modelAvailabilityGeo-eu')).getByTestId(
+          'modelAvailabilityAvailableIcon'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('lists regions and geos with available and not available from this model metadata', () => {
+      renderFlyout(MODEL_ID, [modelEndpoint, otherModelEndpoint]);
+
+      const section = screen.getByTestId('modelAvailabilitySection');
+      expect(section).toHaveTextContent('Model availability');
+      expect(screen.getByTestId('modelAvailabilityHelpText')).toHaveTextContent(
+        'Actual model availability may differ based on your region preferences.'
+      );
+      expect(screen.getByTestId('modelAvailabilityPanel')).toBeInTheDocument();
+      expect(section).toHaveTextContent('Regions');
+      expect(section).toHaveTextContent('Geos');
+      expect(screen.getByTestId('modelAvailabilityRegionList')).toBeInTheDocument();
+      expect(screen.getByTestId('modelAvailabilityGeoList')).toBeInTheDocument();
+
+      expect(screen.getByTestId('modelAvailabilityRegion-aws::us-east-1')).toHaveTextContent(
+        'us-east-1 - AWS'
+      );
+      expect(
+        within(screen.getByTestId('modelAvailabilityRegion-aws::us-east-1')).getByTestId(
+          'modelAvailabilityAvailableIcon'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('modelAvailabilityRegion-gcp::europe-west1')).toHaveTextContent(
+        'europe-west1 - GCP'
+      );
+      expect(
+        within(screen.getByTestId('modelAvailabilityRegion-gcp::europe-west1')).getByTestId(
+          'modelAvailabilityUnavailableIcon'
+        )
+      ).toBeInTheDocument();
+
+      expect(screen.getByTestId('modelAvailabilityGeo-us')).toHaveTextContent('North America');
+      expect(
+        within(screen.getByTestId('modelAvailabilityGeo-us')).getByTestId(
+          'modelAvailabilityAvailableIcon'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('modelAvailabilityGeo-eu')).toHaveTextContent('Europe');
+      expect(
+        within(screen.getByTestId('modelAvailabilityGeo-eu')).getByTestId(
+          'modelAvailabilityUnavailableIcon'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('does not change availability when an endpoint is denied by region policy', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint({
+          metadata: { regions: [usRegion], denied_by_region_policy: true },
+        }),
+        otherModelEndpoint,
+      ]);
+
+      expect(
+        within(screen.getByTestId('modelAvailabilityRegion-aws::us-east-1')).getByTestId(
+          'modelAvailabilityAvailableIcon'
+        )
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('modelAvailabilityRegion-gcp::europe-west1')).getByTestId(
+          'modelAvailabilityUnavailableIcon'
+        )
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('modelAvailabilityGeo-us')).getByTestId(
+          'modelAvailabilityAvailableIcon'
+        )
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('modelAvailabilityGeo-eu')).getByTestId(
+          'modelAvailabilityUnavailableIcon'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
   describe('release and end-of-life dates', () => {
     const releaseLabel = 'Release date';
     const eolLabel = 'End-of-life date';
