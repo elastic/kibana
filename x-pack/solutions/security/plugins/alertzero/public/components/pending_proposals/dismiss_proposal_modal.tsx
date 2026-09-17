@@ -8,18 +8,9 @@
 import React, { useState } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { DismissReason } from '@kbn/agentic-investigations-plugin/common';
+import { DISMISS_REASON_OPTIONS } from '@kbn/agentic-investigations-plugin/public';
 import { BaseActionModal } from '@kbn/agentic-investigations-common';
 import * as i18n from './translations';
-
-const DISMISS_REASONS: DismissReason[] = [
-  'wrong',
-  'duplicate',
-  'insufficient_evidence',
-  'low_value',
-  'out_of_scope',
-  'already_handled',
-  'other',
-];
 
 export interface DismissProposalModalProps {
   proposalId: string;
@@ -57,10 +48,7 @@ export const DismissProposalModal: React.FC<DismissProposalModalProps> = ({
           fullWidth
           data-test-subj="alertZeroDismissReasonSelect"
           value={dismissReason}
-          options={DISMISS_REASONS.map((reason) => ({
-            value: reason,
-            text: i18n.DISMISS_REASON_LABELS[reason],
-          }))}
+          options={DISMISS_REASON_OPTIONS}
           onChange={(event) => setDismissReason(event.target.value as DismissReason)}
         />
       </EuiFormRow>

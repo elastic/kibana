@@ -157,6 +157,14 @@ export class LensApp {
     await this.page.testSubj.locator('dshDashboardViewport').waitFor({ state: 'visible' });
   }
 
+  /** Opens the Save and return split menu when Save as lives under it. */
+  async openSaveOptionsIfNeeded() {
+    const saveOptions = this.page.testSubj.locator('lnsApp_saveAndReturnButton-secondary-button');
+    if (await saveOptions.isVisible()) {
+      await saveOptions.click();
+    }
+  }
+
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
    * a dashboard target, and confirms. Waits for the modal to close.
@@ -177,6 +185,7 @@ export class LensApp {
           addToDashboard: 'none';
         }
   ) {
+    await this.openSaveOptionsIfNeeded();
     await this.saveButton.click();
     await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
@@ -283,9 +292,31 @@ export class LensApp {
     }
   }
 
+  async configureTextBasedDimension({
+    dimension,
+    field,
+  }: {
+    dimension: string;
+    field: string;
+  }): Promise<void> {
+    await this.page.testSubj.locator(dimension).click();
+
+    const fieldPicker = this.page.components.comboBox('text-based-dimension-field');
+    await fieldPicker.setSelectedOptions([field]);
+
+    await this.closeDimensionEditor();
+    await this.applyFlyoutButton.click();
+  }
+
   private async openDimensionSelector(dimension: string) {
     await this.page.testSubj.locator(dimension).click();
     await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
+  }
+
+  async removeDimension(dimensionTestSubj: string) {
+    await this.page.testSubj
+      .locator(`${dimensionTestSubj} > indexPattern-dimension-remove`)
+      .click();
   }
 
   async switchToFormula() {

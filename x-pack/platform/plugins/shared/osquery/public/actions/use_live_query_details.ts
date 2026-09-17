@@ -33,6 +33,8 @@ export interface PackQueriesQuery {
   saved_query_id?: string;
   expiration?: string;
   timeout?: number;
+  failed?: number;
+  error?: string;
 }
 
 export interface LiveQueryDetailsItem {
@@ -45,6 +47,7 @@ export interface LiveQueryDetailsItem {
   agent_policy_ids: string[];
   agents?: string[];
   user_id?: string;
+  user_profile_uid?: string;
   pack_id?: string;
   pack_name?: string;
   pack_prebuilt?: boolean;

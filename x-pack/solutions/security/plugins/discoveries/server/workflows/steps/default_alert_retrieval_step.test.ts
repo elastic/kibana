@@ -320,6 +320,53 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
     });
   });
 
+  // Retrieval is an Elasticsearch query and needs no LLM connector; the
+  // connector only labels the output with `connector_name`. A caller that has
+  // no connector id yet (the server resolves the configured default one later,
+  // at generation time) must still be able to retrieve alerts.
+  describe('when no connector id is supplied', () => {
+    const contextWithoutConnector = {
+      ...mockContext,
+      input: {
+        ...defaultProps,
+        api_config: { ...defaultProps.api_config, connector_id: '' },
+      },
+    };
+
+    it('still returns the retrieved alerts', async () => {
+      mockGetAnonymizedAlerts.mockResolvedValue(mockAnonymizedAlertStrings);
+
+      const result = await createStepDefinition().handler(contextWithoutConnector as any);
+
+      expect(getOutputOrThrow(result).alerts).toEqual(mockAnonymizedAlertStrings);
+    });
+
+    it('does not attempt to resolve a connector', async () => {
+      mockGetAnonymizedAlerts.mockResolvedValue(mockAnonymizedAlertStrings);
+
+      await createStepDefinition().handler(contextWithoutConnector as any);
+
+      expect(mockActionsClient.get).not.toHaveBeenCalled();
+    });
+
+    it('omits connector_name rather than failing', async () => {
+      mockGetAnonymizedAlerts.mockResolvedValue(mockAnonymizedAlertStrings);
+
+      const result = await createStepDefinition().handler(contextWithoutConnector as any);
+
+      expect(getOutputOrThrow(result).connector_name).toBeUndefined();
+    });
+
+    it('does not fail even when the connector lookup would have thrown', async () => {
+      mockGetAnonymizedAlerts.mockResolvedValue(mockAnonymizedAlertStrings);
+      mockActionsClient.get.mockRejectedValue(new Error('Connector not found'));
+
+      const result = await createStepDefinition().handler(contextWithoutConnector as any);
+
+      expect(result.error).toBeUndefined();
+    });
+  });
+
   describe('connector name retrieval', () => {
     it('returns an error when connector lookup fails', async () => {
       mockGetAnonymizedAlerts.mockResolvedValue(mockAnonymizedAlertStrings);

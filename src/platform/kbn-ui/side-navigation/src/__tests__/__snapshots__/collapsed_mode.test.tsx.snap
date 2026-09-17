@@ -380,5 +380,10 @@ exports[`Collapsed mode should render the side navigation 1`] = `
       </footer>
     </div>
   </div>
+  <main
+    tabindex="-1"
+  >
+    Main content
+  </main>
 </div>
 `;
