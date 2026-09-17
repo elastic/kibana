@@ -120,9 +120,15 @@ const useEntityFilterBarCounts = ({
               },
             },
             aggs: {
-              entity_types: { terms: { field: 'entity.EngineMetadata.Type', size: 10 } },
-              risk_levels: { terms: { field: 'entity.risk.calculated_level', size: 10 } },
-              asset_criticality: { terms: { field: 'asset.criticality', size: 10 } },
+              entity_types: {
+                terms: { field: 'entity.EngineMetadata.Type', size: ENTITY_TYPE_OPTIONS.length },
+              },
+              risk_levels: {
+                terms: { field: 'entity.risk.calculated_level', size: SEVERITY_UI_SORT_ORDER.length },
+              },
+              asset_criticality: {
+                terms: { field: 'asset.criticality', size: ValidCriticalityLevels.length },
+              },
               watchlists: { terms: { field: 'entity.attributes.watchlists', size: 200 } },
               data_sources: { terms: { field: 'entity.source', size: 200 } },
             },
