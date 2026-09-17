@@ -11,23 +11,21 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import FORENSICS_ENDPOINT_ANALYSIS_RUN_YAML from './forensics_endpoint_analysis_run.yaml';
+import FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_YAML from './forensics_sweep_for_analyze_endpoint_kis.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID =
-  'system-security-forensics-endpoint-analysis-run';
+export const ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID =
+  'system-security-forensics-sweep-for-analyze-endpoint-kis';
 
 /**
- * Global KI sweep. Starts the per-space Endpoint analysis Watch worker via the
- * space-scoped run API. Owns no Watch toggle, so enablement is enforced rather
- * than restorable. The historical `-run` id is kept so already-installed
- * global documents upgrade in place.
+ * Global KI sweep. Starts the per-space Endpoint analysis worker via the
+ * space-scoped run API.
  */
-export const ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW = {
+export const ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW = {
   billable: false,
-  id: ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID,
+  id: ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
-  yaml: FORENSICS_ENDPOINT_ANALYSIS_RUN_YAML,
+  version: 1,
+  yaml: FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_YAML,
 } as const satisfies ManagedWorkflowDefinition;

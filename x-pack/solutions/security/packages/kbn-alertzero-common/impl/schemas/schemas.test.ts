@@ -31,7 +31,7 @@ import {
 describe('AlertZero schema smoke tests', () => {
   it('parses seed watches through ListWatchesResponse', () => {
     const result = ListWatchesResponse.parse({ watches: WATCHES_SEED });
-    expect(result.watches).toHaveLength(6);
+    expect(result.watches).toHaveLength(5);
     result.watches.forEach((watch: Watch) => {
       expect(watch.tags).toContain('watch');
       expect(watch.managed).toBe(true);

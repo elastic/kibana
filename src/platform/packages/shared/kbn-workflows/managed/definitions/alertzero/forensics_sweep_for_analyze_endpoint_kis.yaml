@@ -2,13 +2,13 @@ version: "1"
 name: Endpoint analysis sweep
 description: >
   Finds pending `security.analyze_endpoint` knowledge indicators and starts up
-  to two Endpoint analysis Watch workers. Does not write to indicators. The
+  to two Endpoint analysis workers. Does not write to indicators. The
   opt-in gate is the tagged worker: a disabled or missing worker in the
   indicator's space drops that start.
 enabled: true
 tags:
   - security
-  - endpoint-analysis
+  - endpoint-analysis-coverage
 settings:
   # One global sweep at a time. Overlapping ticks would start the same pending
   # indicators twice; the child's drop concurrency is the backstop for a space
@@ -18,7 +18,6 @@ settings:
     strategy: drop
     max: 1
 triggers:
-  # Engine minimum is 1m (`30s` is rejected by the scheduled-trigger schema).
   - type: scheduled
     with:
       every: "1m"
@@ -52,7 +51,6 @@ consts:
   ai_index_id: security-investigations
   batch_size: 2
   lookback_days: 7
-  # Liquid has no empty-list literal. `| default: []` returns nothing.
   no_rows: []
 
 steps:
@@ -62,7 +60,7 @@ steps:
       size: "${{ inputs.batch_size | default: consts.batch_size }}"
 
   # Oldest first so an indicator about to leave the lookback window is reviewed
-  # first. `space_id` is passed to the space-suffixed Watch worker.
+  # first. `space_id` is passed to the space-suffixed worker.
   - name: search_pending_indicators
     type: elasticsearch.search
     on-failure:
@@ -92,7 +90,7 @@ steps:
     with:
       indicators: "${{ steps.search_pending_indicators.output.hits.hits | default: consts.no_rows | slice: 0, steps.resolve_batch_size.output.size }}"
 
-  # The Watch worker is installed per space as
+  # The worker is installed per space as
   # `system-security-forensics-endpoint-analysis-{space}`. `workflow.executeAsync`
   # looks up children in this global workflow's space, so the start goes through
   # the space-scoped run API. Continue on failure: a disabled worker is the

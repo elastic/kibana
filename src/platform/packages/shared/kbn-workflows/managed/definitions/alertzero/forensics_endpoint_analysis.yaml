@@ -1,15 +1,16 @@
 version: "1"
 name: Endpoint analysis
 description: >
-  Reads one pending `security.analyze_endpoint` knowledge indicator, runs the
-  forensic pass on its investigation, and marks the indicator processed. The
-  global Endpoint analysis sweep starts this worker when it is enabled in the
-  space. Two analyses may run at once; further starts are dropped and stay
-  pending for the next sweep.
+  Given an `analyze_endpoint` knowledge indicator, resolves the associated
+  Attack Discovery alert and host, runs a forensic agent to reconstruct the
+  attack timeline and extract IoCs, attaches the findings and a containment
+  assessment to the investigation, and proposes any justified containment
+  actions for human approval.
 enabled: false
 tags:
   - watch
   - watch-forensics
+
 settings:
   # Installed per space, so the key needs no space component. Two analyses may
   # run at once; the global sweep starts at most two per tick and this cap is
@@ -18,6 +19,7 @@ settings:
     key: endpoint-analysis
     strategy: drop
     max: 2
+
 triggers:
   - type: manual
     inputs:
@@ -39,20 +41,11 @@ triggers:
 
 outputs:
   properties:
-    propose:
-      type: boolean
-    rationale:
-      type: string
-    proposal:
-      type: string
-    timeline:
-      type: object
-    iocs:
-      type: object
     ki_id:
       type: string
     ki_processed:
       type: boolean
+
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
@@ -192,11 +185,6 @@ steps:
                   `recommendedActions` from that catalog. Each action requires endpoint_ids taken from Elastic
                   Defend agent.id on involved hosts. Recommend only what you can tie to the timeline and
                   indicators you returned.
-                - State plainly
-                  (a) what you will propose for human approval
-                  (b) the exact change or action that approval authorizes
-                  (c) what happens if it is declined.
-                  Return this statement in `proposal`.
 
                 Rules
                 - Pick the most specific catalog action the evidence supports. Prefer kill/suspend when a process
@@ -219,7 +207,6 @@ steps:
                 required:
                   - propose
                   - rationale
-                  - proposal
                   - timeline
                   - iocs
                 properties:
@@ -379,14 +366,6 @@ steps:
                               description: >
                                 This host's role — patient zero, encrypted domain controller,
                                 spread with no alert coverage.
-                  proposal:
-                    type: string
-                    maxLength: 2000
-                    description: >
-                      One short paragraph stating plainly (a) what you propose
-                      for human approval, (b) the exact change or action
-                      approval authorizes, and (c) what happens if it is
-                      declined.
                   recommendedActions:
                     type: array
                     maxItems: 8
@@ -481,21 +460,6 @@ steps:
               data:
                 content: "{{ steps.forensic_analysis.output.structured_output.rationale }}"
 
-          - name: attach_proposal
-            type: ai.attachment.add
-            if: >-
-              ${{ steps.forensic_analysis.error == null
-                and steps.forensic_analysis.output.structured_output.propose == true
-                and steps.forensic_analysis.output.structured_output.proposal != blank }}
-            on-failure:
-              continue: true
-            with:
-              conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-              type: text
-              description: Proposed containment
-              data:
-                content: "{{ steps.forensic_analysis.output.structured_output.proposal }}"
-
           # Containment is proposed on the investigation, not returned as worker output.
           # `executeAsync` so this worker does not sit in the 72h approval gate; each
           # proposal workflow parks on its own. Continue on failure so a single bad
@@ -551,8 +515,5 @@ steps:
     type: workflow.output
     status: completed
     with:
-      propose: "${{ steps.forensic_analysis.output.structured_output.propose }}"
-      rationale: "{{ steps.forensic_analysis.output.structured_output.rationale }}"
-      proposal: "{{ steps.forensic_analysis.output.structured_output.proposal }}"
       ki_id: "{{ inputs.ki_id }}"
       ki_processed: "${{ steps.mark_processed.output.result != null }}"

@@ -9,8 +9,8 @@
 
 import { parse } from 'yaml';
 import {
-  ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW,
-  ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW,
+  ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '.';
 
@@ -21,7 +21,7 @@ interface YamlStep {
   steps?: YamlStep[];
 }
 
-const definition = parse(ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW.yaml) as {
+const definition = parse(ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW.yaml) as {
   name?: string;
   tags?: string[];
   settings?: { concurrency?: { key?: string; strategy?: string; max?: number } };
@@ -36,11 +36,11 @@ const startRun = flatten(definition.steps).find((step) => step.name === 'start_r
 
 describe('Endpoint analysis sweep', () => {
   it('is the untagged global dispatcher on a one-minute schedule', () => {
-    expect(ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW.id).toBe(
-      ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID
+    expect(ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW.id).toBe(
+      ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW_ID
     );
     expect(definition.name).toBe('Endpoint analysis sweep');
-    expect(definition.tags).toEqual(['security', 'endpoint-analysis']);
+    expect(definition.tags).toEqual(['security', 'endpoint-analysis-coverage']);
     expect(definition.tags).not.toContain('watch');
     expect(definition.triggers?.map(({ type }) => type)).toEqual(['scheduled', 'manual']);
     expect(definition.triggers?.[0]?.with?.every).toBe('1m');
@@ -64,7 +64,9 @@ describe('Endpoint analysis sweep', () => {
       (step) => step.name === 'search_pending_indicators'
     );
     expect(search?.with?.size).toBe(2);
-    expect(ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW.yaml).toContain('batch_size: 2');
+    expect(ALERTZERO_FORENSICS_SWEEP_FOR_ANALYZE_ENDPOINT_KIS_WORKFLOW.yaml).toContain(
+      'batch_size: 2'
+    );
     const query = JSON.stringify(search?.with);
     expect(query).toContain('security.analyze_endpoint');
     expect(query).toContain('attributes.status');

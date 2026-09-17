@@ -41,7 +41,7 @@ const flatten = (steps: YamlStep[]): YamlStep[] =>
 const allSteps = flatten(definition.steps);
 const stepByName = (name: string) => allSteps.find((step) => step.name === name);
 
-describe('Endpoint analysis worker (run)', () => {
+describe('Endpoint analysis worker', () => {
   it('is the Watch-tagged forensic pass with a manual trigger', () => {
     expect(ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW.id).toBe(
       'system-security-forensics-endpoint-analysis'
