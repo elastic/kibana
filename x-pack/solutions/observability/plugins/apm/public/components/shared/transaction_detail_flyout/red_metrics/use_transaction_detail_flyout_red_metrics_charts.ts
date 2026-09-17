@@ -208,11 +208,12 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
     [errorRateColor, errorRateData.currentPeriod?.timeseries]
   );
 
-  const isLoading =
+  // Full-section skeleton only on the first load. Latency aggregation changes
+  // re-fetch latency alone — keep throughput / failed rate mounted and let
+  // TimeseriesChart handle per-chart pending via fetchStatus.
+  const isInitialLoading =
     !preferred ||
-    isPending(latencyStatus) ||
-    isPending(throughputStatus) ||
-    isPending(errorRateStatus);
+    (isPending(latencyStatus) && isPending(throughputStatus) && isPending(errorRateStatus));
 
   const hasError =
     latencyStatus === FETCH_STATUS.FAILURE ||
@@ -229,7 +230,7 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
     errorRateTimeseries,
     errorRateStatus,
     errorRateError,
-    isLoading,
+    isLoading: isInitialLoading,
     hasError,
   };
 }

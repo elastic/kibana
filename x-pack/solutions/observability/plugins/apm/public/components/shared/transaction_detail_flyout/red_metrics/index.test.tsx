@@ -121,6 +121,26 @@ describe('TransactionDetailFlyoutRedMetrics', () => {
       expect(screen.getByTestId('transactionDetailFlyoutRedMetricsSkeleton')).toBeInTheDocument();
     });
 
+    it('keeps charts mounted when only latency is refetching', () => {
+      mockedUseTransactionDetailFlyoutRedMetricsCharts.mockReturnValue({
+        ...CHARTS_RESULT,
+        latencyStatus: FETCH_STATUS.LOADING,
+        isLoading: false,
+      });
+
+      render(<TransactionDetailFlyoutRedMetrics />);
+
+      expect(
+        screen.queryByTestId('transactionDetailFlyoutRedMetricsSkeleton')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('transactionDetailFlyoutRedMetricsChart-throughput')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('transactionDetailFlyoutRedMetricsChart-failedTransactionRate')
+      ).toBeInTheDocument();
+    });
+
     it('shows an error callout when chart requests fail', () => {
       mockedUseTransactionDetailFlyoutRedMetricsCharts.mockReturnValue({
         ...CHARTS_RESULT,
