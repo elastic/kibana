@@ -43,7 +43,6 @@ export const toFindActionPoliciesArgs = ({
   page,
   per_page: perPage,
   search,
-  tags,
   enabled,
   sort_field: sortField,
   sort_order: sortOrder,
@@ -54,7 +53,6 @@ export const toFindActionPoliciesArgs = ({
     page,
     perPage,
     search,
-    tags,
     enabled,
     sortField: sortField && SORT_FIELD_BY_API_VALUE[sortField],
     sortOrder,
@@ -87,6 +85,7 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'List action policies',
     description: 'Get a paginated list of action policies with optional filtering and sorting.',
     oasOperationObject: listActionPoliciesOasExamples,

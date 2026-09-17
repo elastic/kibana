@@ -10,7 +10,11 @@ import {
   MAX_DOCS_PER_PAGE,
   ABSOLUTE_MAX_CASES_PER_RUN,
 } from '../../../common/constants';
-import { CasesConnectorRunParamsSchema } from './schema';
+import {
+  CasesConnectorRunParamsSchema,
+  resolveCasesConnectorActionSource,
+  ZCasesConnectorRunParamsSchema,
+} from './schema';
 
 describe('CasesConnectorRunParamsSchema', () => {
   const getParams = (overrides = {}) => ({
@@ -18,6 +22,7 @@ describe('CasesConnectorRunParamsSchema', () => {
     groupingBy: ['host.name'],
     rule: { id: 'rule-id', name: 'Test rule', tags: [], ruleUrl: 'https://example.com' },
     owner: 'cases',
+    source: 'rule',
     ...overrides,
   });
 
@@ -35,7 +40,6 @@ describe('CasesConnectorRunParamsSchema', () => {
         "groupingBy": Array [
           "host.name",
         ],
-        "internallyManagedAlerts": null,
         "maximumCasesToOpen": 5,
         "owner": "cases",
         "reopenClosedCases": false,
@@ -45,6 +49,7 @@ describe('CasesConnectorRunParamsSchema', () => {
           "ruleUrl": "https://example.com",
           "tags": Array [],
         },
+        "source": "rule",
         "templateId": null,
         "templateVersion": null,
         "timeWindow": "7d",
@@ -363,11 +368,61 @@ describe('CasesConnectorRunParamsSchema', () => {
     });
   });
 
-  describe('internallyManagedAlerts', () => {
-    it('defaults the internallyManagedAlerts to null', () => {
-      expect(CasesConnectorRunParamsSchema.validate(getParams()).internallyManagedAlerts).toBe(
-        null
+  describe('source', () => {
+    it('accepts `rule`', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams({ source: 'rule' })).source).toBe(
+        'rule'
       );
+    });
+
+    it('accepts `attack`', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams({ source: 'attack' })).source).toBe(
+        'attack'
+      );
+    });
+
+    it('accepts a missing source', () => {
+      const { source, ...rest } = getParams();
+      expect(CasesConnectorRunParamsSchema.validate(rest).source).toBeUndefined();
+    });
+
+    it('accepts legacy internallyManagedAlerts without source', () => {
+      const { source, ...rest } = getParams();
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate({ ...rest, internallyManagedAlerts: true })
+      ).not.toThrow();
+    });
+
+    it('throws for an unsupported value', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ source: 'admin' }))
+      ).toThrow();
+    });
+  });
+
+  describe('ZCasesConnectorRunParamsSchema', () => {
+    it('accepts a pre-upgrade payload with internallyManagedAlerts and no source', () => {
+      const { source, ...rest } = getParams();
+
+      expect(() =>
+        ZCasesConnectorRunParamsSchema.parse({ ...rest, internallyManagedAlerts: true })
+      ).not.toThrow();
+    });
+  });
+
+  describe('resolveCasesConnectorActionSource', () => {
+    it('prefers an explicit source', () => {
+      expect(
+        resolveCasesConnectorActionSource({ source: 'rule', internallyManagedAlerts: true })
+      ).toBe('rule');
+    });
+
+    it('maps internallyManagedAlerts true to attack when source is omitted', () => {
+      expect(resolveCasesConnectorActionSource({ internallyManagedAlerts: true })).toBe('attack');
+    });
+
+    it('defaults to rule', () => {
+      expect(resolveCasesConnectorActionSource({})).toBe('rule');
     });
   });
 });

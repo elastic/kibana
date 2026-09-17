@@ -47,10 +47,10 @@ allowBuilds:
 # deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in
 # package.json; the renovate `esql-js` group bumps them together.
 catalog:
-  '@elastic/esql-grammar': '4.21.1'
-  '@elastic/esql-promql-grammar': '4.21.1'
-  '@elastic/esql-types': '4.21.1'
-  '@elastic/pretty-printer': '4.21.1'
+  '@elastic/esql-grammar': '4.22.0'
+  '@elastic/esql-promql-grammar': '4.22.0'
+  '@elastic/esql-types': '4.22.0'
+  '@elastic/pretty-printer': '4.22.0'
 overrides:
   # Generated from package.json#resolutions by `kbn bootstrap` — edit
   # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
@@ -82,7 +82,7 @@ overrides:
   '@types/react': '18.2.79'
   '@types/react-dom': '18.2.25'
   '@typescript-eslint/utils': '8.60.0'
-  'adm-zip': '0.6.0'
+  'adm-zip': '0.6.1'
   'apache-arrow': '20.x - 21.x'
   'baseline-browser-mapping': '2.9.14'
   'cheerio': '1.0.0-rc.12'
@@ -583,6 +583,7 @@ packages:
   - 'src/platform/packages/private/kbn-controls-renderer'
   - 'src/platform/packages/private/kbn-cps-common'
   - 'src/platform/packages/private/kbn-data-streams'
+  - 'src/platform/packages/private/kbn-discover-session-constants'
   - 'src/platform/packages/private/kbn-dot-text'
   - 'src/platform/packages/private/kbn-dot-text-loader'
   - 'src/platform/packages/private/kbn-esql-editor'
@@ -647,8 +648,10 @@ packages:
   - 'src/platform/packages/private/opentelemetry/kbn-metrics'
   - 'src/platform/packages/private/opentelemetry/kbn-metrics-config'
   - 'src/platform/packages/private/shared-ux/storybook/config'
+  - 'src/platform/packages/shared/as-code/dashboard-schema'
   - 'src/platform/packages/shared/as-code/data-views-schema'
   - 'src/platform/packages/shared/as-code/data-views-transforms'
+  - 'src/platform/packages/shared/as-code/discover-schema'
   - 'src/platform/packages/shared/as-code/export-flyout-component'
   - 'src/platform/packages/shared/as-code/filters-constants'
   - 'src/platform/packages/shared/as-code/filters-schema'
@@ -707,6 +710,7 @@ packages:
   - 'src/platform/packages/shared/deeplinks/vectordb'
   - 'src/platform/packages/shared/deeplinks/workflows'
   - 'src/platform/packages/shared/deeplinks/workplace_ai'
+  - 'src/platform/packages/shared/esql/kbn-esql-browser'
   - 'src/platform/packages/shared/home/sample_data_card'
   - 'src/platform/packages/shared/home/sample_data_tab'
   - 'src/platform/packages/shared/home/sample_data_types'
@@ -1299,6 +1303,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver'
   - 'x-pack/platform/packages/shared/kbn-mcp-client'
   - 'x-pack/platform/packages/shared/kbn-nightshift-ai'
+  - 'x-pack/platform/packages/shared/kbn-nightshift-shared'
   - 'x-pack/platform/packages/shared/kbn-profiler-cli'
   - 'x-pack/platform/packages/shared/kbn-sample-parser'
   - 'x-pack/platform/packages/shared/kbn-search-index-documents'
@@ -1667,3 +1672,6 @@ packages:
   - 'x-pack/solutions/workplaceai/plugins/workplace_ai_app'
   - 'x-pack/solutions/workplaceai/test'
 # END GENERATED PACKAGES
+
+# Keep a last field entry, because a trailing comment might be removed by some parsers. 
+lockfile: true

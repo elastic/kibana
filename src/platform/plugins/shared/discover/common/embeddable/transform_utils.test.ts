@@ -47,7 +47,7 @@ import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableByValueState,
 } from '../../server';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity } from '@kbn/discover-session-constants';
 import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 
 describe('search embeddable transform utils', () => {
@@ -379,11 +379,9 @@ describe('search embeddable transform utils', () => {
           header_row_height: 3,
           density: DataGridDensity.COMPACT,
           documents_display_mode: 'json',
-          json_mode_settings: {
-            hide_nulls: true,
-            wrap_lines: false,
-            default_rendered_nodes: 2,
-          },
+          hide_nulls: true,
+          wrap_lines: false,
+          default_rendered_nodes: 2,
         },
       });
       expect(result).not.toHaveProperty('sort');
@@ -767,8 +765,10 @@ describe('search embeddable transform utils', () => {
         rows_per_page: 100,
         header_row_height: 3,
         density: DataGridDensity.COMPACT,
-        json_mode_settings: { hide_nulls: true, wrap_lines: false, default_rendered_nodes: 2 },
         documents_display_mode: 'json',
+        hide_nulls: true,
+        wrap_lines: false,
+        default_rendered_nodes: 2,
       });
     });
 
@@ -789,7 +789,9 @@ describe('search embeddable transform utils', () => {
       expect(result.header_row_height).toBeUndefined();
       expect(result.density).toBeUndefined();
       expect(result.documents_display_mode).toBeUndefined();
-      expect(result.json_mode_settings).toBeUndefined();
+      expect(result.hide_nulls).toBeUndefined();
+      expect(result.wrap_lines).toBeUndefined();
+      expect(result.default_rendered_nodes).toBeUndefined();
     });
 
     it('converts numeric row heights to API form', () => {
@@ -824,7 +826,9 @@ describe('search embeddable transform utils', () => {
         rows_per_page: 100 as const,
         header_row_height: 3,
         density: DataGridDensity.COMPACT,
-        json_mode_settings: { hide_nulls: true, wrap_lines: false, default_rendered_nodes: 2 },
+        hide_nulls: true,
+        wrap_lines: false,
+        default_rendered_nodes: 2,
       };
       const result = fromDiscoverSessionPanelOverrides(apiState);
       expect(result).toEqual({

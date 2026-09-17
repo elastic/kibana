@@ -24,11 +24,11 @@ import {
   ConversationAccessControlMode,
   ConversationOriginType,
   createBadRequestError,
+  TimelineEventType,
   type ChatAgentEvent,
   type ChatEvent,
   type RoundCompleteEvent,
   type RoundStartedEvent,
-  CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -44,8 +44,7 @@ import {
   createEmptyConversation,
   createRound,
 } from '../../test_utils';
-import { pausedAndResumedRoundTimeline } from '../../test_utils/timeline';
-import { withConverseSpan } from '../../tracing';
+import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { executeAgent$, generateTitle, resolveServices } from './utils';
 import type { Span } from '@opentelemetry/api';
 
@@ -79,12 +78,25 @@ jest.mock('../../tracing', () => {
       (_opts: unknown, cb: (span: { setAttribute: jest.Mock }) => unknown) =>
         cb({ setAttribute: mockSpanSetAttribute })
     ),
+    loadTracingPrivacySettings: jest.fn().mockResolvedValue({
+      enabled: true,
+      includeUserPrompts: true,
+      includeLlmResponses: true,
+      includeToolDetails: true,
+      includeSystemPrompt: true,
+      includeRealNames: true,
+      includeRealIds: true,
+      includeUserData: true,
+    }),
   };
 });
 
 const executeAgentMock = executeAgent$ as jest.MockedFunction<typeof executeAgent$>;
 const resolveServicesMock = resolveServices as jest.MockedFunction<typeof resolveServices>;
 const withConverseSpanMock = withConverseSpan as jest.MockedFunction<typeof withConverseSpan>;
+const loadTracingPrivacySettingsMock = loadTracingPrivacySettings as jest.MockedFunction<
+  typeof loadTracingPrivacySettings
+>;
 const generateTitleMock = generateTitle as jest.MockedFunction<typeof generateTitle>;
 
 const createModelProviderMock = () => ({
@@ -116,6 +128,12 @@ const createDeps = ({
     },
     conversationService: {
       getConversationRoundAuthor,
+    },
+    uiSettings: {
+      asScopedToClient: jest.fn().mockReturnValue({}),
+    },
+    savedObjects: {
+      getScopedClient: jest.fn().mockReturnValue({}),
     },
   } as never);
 
@@ -203,6 +221,83 @@ describe('handleAgentExecution', () => {
     generateTitleMock.mockReturnValue(of('Generated title'));
   });
 
+  it('loads tracing privacy settings from the request-scoped saved objects client', async () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      agent_id: 'test-agent',
+      user: { id: 'owner-id', username: 'owner' },
+    });
+    const conversationClient = createConversationClientMock();
+    conversationClient.get.mockResolvedValue(conversation);
+    conversationClient.update.mockResolvedValue(conversation);
+    stubResolveServices(conversationClient);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.roundComplete,
+        data: { round: createRound({}) },
+      } as RoundCompleteEvent)
+    );
+
+    const request = { headers: {} } as never;
+    const soClient = { id: 'so-marketing' };
+    const uiSettingsClient = { id: 'ui-marketing' };
+    const privacySettings = {
+      enabled: true,
+      includeUserPrompts: false,
+      includeLlmResponses: false,
+      includeToolDetails: false,
+      includeSystemPrompt: false,
+      includeRealNames: false,
+      includeRealIds: false,
+      includeUserData: false,
+    };
+    loadTracingPrivacySettingsMock.mockResolvedValue(privacySettings);
+
+    const logger = loggingSystemMock.createLogger();
+    const deps = createDeps({ conversationClient });
+    (deps as { logger: ReturnType<typeof loggingSystemMock.createLogger> }).logger = logger;
+    const getScopedClient = jest.fn().mockReturnValue(soClient);
+    const asScopedToClient = jest.fn().mockReturnValue(uiSettingsClient);
+    (deps as { savedObjects: { getScopedClient: jest.Mock } }).savedObjects.getScopedClient =
+      getScopedClient;
+    (deps as { uiSettings: { asScopedToClient: jest.Mock } }).uiSettings.asScopedToClient =
+      asScopedToClient;
+    (deps as { spaces: { spacesService: { getSpaceId: jest.Mock } } }).spaces = {
+      spacesService: { getSpaceId: jest.fn().mockReturnValue('marketing') },
+    };
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps,
+      request,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(getScopedClient).toHaveBeenCalledWith(request);
+    expect(asScopedToClient).toHaveBeenCalledWith(soClient);
+    expect(loadTracingPrivacySettingsMock).toHaveBeenCalledWith({
+      uiSettingsClient,
+      logger,
+      spaceId: 'marketing',
+    });
+    expect(withConverseSpanMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'marketing',
+        privacySettings,
+      }),
+      expect.any(Function)
+    );
+  });
+
   it('reports metering with the resolved conversation id when continuing by origin', async () => {
     const origin = {
       external_conversation_id: 'team:T123/channel:C123/thread:callback-continuation',
@@ -216,7 +311,6 @@ describe('handleAgentExecution', () => {
     const conversationClient = createConversationClientMock();
     conversationClient.getByOrigin.mockResolvedValue(conversation);
     conversationClient.update.mockResolvedValue(conversation);
-    conversationClient.upsertRound.mockResolvedValue(conversation);
 
     const roundCompleteEvent: ChatEvent = {
       type: ChatEventType.roundComplete,
@@ -262,6 +356,12 @@ describe('handleAgentExecution', () => {
         conversationService: {
           getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
         },
+        uiSettings: {
+          asScopedToClient: jest.fn().mockReturnValue({}),
+        },
+        savedObjects: {
+          getScopedClient: jest.fn().mockReturnValue({}),
+        },
       } as never,
       request: { headers: {} } as never,
       abortSignal: new AbortController().signal,
@@ -294,7 +394,6 @@ describe('handleAgentExecution', () => {
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.getByOrigin.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
-      conversationClient.upsertRound.mockResolvedValue(conversation);
 
       executeAgentMock.mockReturnValue(of(roundCompleteEvent));
       resolveServicesMock.mockResolvedValue({
@@ -361,7 +460,6 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
-      conversationClient.upsertRound.mockResolvedValue(conversation);
 
       executeAgentMock.mockReturnValue(
         of({
@@ -411,7 +509,6 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
-      conversationClient.upsertRound.mockResolvedValue(conversation);
 
       executeAgentMock.mockReturnValue(
         of({
@@ -540,37 +637,82 @@ describe('handleAgentExecution', () => {
     });
   });
 
-  describe('regenerate on a paused conversation', () => {
-    it('takes the rounds-path write, never the append-only resume', async () => {
+  describe('SSE execution_started projection', () => {
+    it('emits execution_started at round start (before execution_terminated) on the normal path', async () => {
       const conversation = createEmptyConversation({
         id: 'conversation-1',
         agent_id: 'test-agent',
-        schema_version: CONVERSATION_SCHEMA_VERSION,
-        events: pausedAndResumedRoundTimeline().slice(0, 4),
-        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt })],
       });
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
-      conversationClient.upsertRound.mockResolvedValue(conversation);
-      conversationClient.update.mockResolvedValue(conversation);
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
 
-      mockAgentStream([makeRoundCompleteEvent('round-1')]);
+      mockAgentStream(
+        [
+          makeRoundStartedEvent('round-1', { started_at: '2024-01-01T00:00:00.000Z' }),
+          {
+            type: ChatEventType.roundComplete,
+            data: {
+              round: createRound({
+                id: 'round-1',
+                status: ConversationRoundStatus.completed,
+              }),
+            },
+          } as RoundCompleteEvent,
+        ],
+        'asyncShared'
+      );
       stubResolveServices(conversationClient);
 
       const events$ = await runHandle({
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
-          nextInput: {},
-          action: 'regenerate',
+          nextInput: { message: 'Hello' },
         },
         conversationClient,
       });
 
-      await lastValueFrom(events$.pipe(toArray()));
+      const emitted = (await lastValueFrom(events$.pipe(toArray()))) as ChatEvent[];
+      const startedIndex = emitted.findIndex(
+        (event) => event.type === TimelineEventType.executionStarted
+      );
+      const terminatedIndex = emitted.findIndex(
+        (event) => event.type === TimelineEventType.executionTerminated
+      );
 
-      expect(conversationClient.upsertRound).toHaveBeenCalledTimes(1);
-      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(startedIndex).toBeGreaterThanOrEqual(0);
+      expect(terminatedIndex).toBeGreaterThan(startedIndex);
+      expect(emitted[startedIndex]).toMatchObject({
+        id: 'round-1::execution_started',
+        created_at: '2024-01-01T00:00:00.000Z',
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+      });
+    });
+
+    it('skips the SSE projection when storeConversation is false (async path only)', async () => {
+      const conversationClient = createConversationClientMock();
+      mockAgentStream(
+        [makeRoundStartedEvent('round-1'), makeRoundCompleteEvent('round-1')],
+        'asyncShared'
+      );
+      stubResolveServices(conversationClient);
+
+      const events$ = await runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          nextInput: { message: 'Hello' },
+          storeConversation: false,
+        },
+        conversationClient,
+      });
+
+      const emitted = (await lastValueFrom(events$.pipe(toArray()))) as ChatEvent[];
+      expect(emitted.some((event) => event.type === TimelineEventType.executionStarted)).toBe(
+        false
+      );
     });
   });
 
