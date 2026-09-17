@@ -61,6 +61,7 @@ import type {
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAccessControlEntriesOptions,
   SavedObjectsChangeOwnershipOptions,
 } from '@kbn/core-saved-objects-api-server';
 import type {
@@ -103,6 +104,7 @@ import {
 import { createRepositoryHelpers } from './utils';
 import { performChangeOwnership } from './apis/change_ownership';
 import { performChangeAccessMode } from './apis/change_access_mode';
+import { performChangeAccessControl } from './apis/change_access_control';
 
 /**
  * Constructor options for {@link SavedObjectsRepository}
@@ -740,6 +742,21 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const timer = this.serverTiming?.start('so-change-access');
     try {
       return await performChangeAccessMode({ objects, options }, this.apiExecutionContext);
+    } finally {
+      timer?.end();
+    }
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.changeAccessControl}
+   */
+  async changeAccessControl(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlEntriesOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse> {
+    const timer = this.serverTiming?.start('so-change-access-control');
+    try {
+      return await performChangeAccessControl({ objects, options }, this.apiExecutionContext);
     } finally {
       timer?.end();
     }

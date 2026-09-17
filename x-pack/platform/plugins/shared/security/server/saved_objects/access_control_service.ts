@@ -13,12 +13,24 @@ import type {
   GetObjectsRequiringPrivilegeCheckResult,
   ObjectRequiringPrivilegeCheckResult,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
+import { hasSavedObjectAccess, isAccessRestricted } from '@kbn/core-saved-objects-utils-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
-import { SecurityAction } from '.';
+import { SecurityAction } from './types';
 
 export const MANAGE_ACCESS_CONTROL_ACTION = 'manage_access_control';
 const UPDATE_ACTION = 'update';
+
+const WRITE_ACTIONS = new Set([
+  SecurityAction.CREATE,
+  SecurityAction.BULK_CREATE,
+  SecurityAction.UPDATE,
+  SecurityAction.BULK_UPDATE,
+  SecurityAction.DELETE,
+  SecurityAction.BULK_DELETE,
+  SecurityAction.CHANGE_ACCESS_MODE,
+  SecurityAction.CHANGE_OWNERSHIP,
+]);
 
 const buildAccessDeniedMessage = (
   rbacTypes: string[],
@@ -75,6 +87,20 @@ export class AccessControlService {
     const { accessControl } = object;
     if (!accessControl) {
       return false;
+    }
+
+    /**
+     * Restricted objects are only accessible to their owner and the principals they were shared
+     * with, for every operation. Anyone else needs the manage access control privilege.
+     */
+    if (isAccessRestricted(accessControl)) {
+      const isWriteAction = Array.from(actions).some((action) => WRITE_ACTIONS.has(action));
+      return !hasSavedObjectAccess({
+        accessControl,
+        profileUid: currentUser?.profile_uid,
+        // Only the owner may write to a restricted object; any granted principal may read it.
+        ...(isWriteAction && { roles: [] }),
+      });
     }
 
     const actionsIgnoringDefaultMode = new Set([

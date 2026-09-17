@@ -202,6 +202,8 @@ export const performBulkGet = async <T>(
       objectNamespaces: namespaces,
       // @ts-expect-error MultiGetHit._source is optional
       existingNamespaces: doc?._source?.namespaces ?? [],
+      // @ts-expect-error MultiGetHit._source is optional
+      ...(doc?._source?.accessControl && { accessControl: doc._source.accessControl }),
       error: docNotFound,
       name: isSavedObjectErrorResult(savedObject)
         ? undefined
@@ -216,8 +218,25 @@ export const performBulkGet = async <T>(
     objects: authObjects,
   });
 
+  // Objects the caller cannot access because of their access control metadata are reported as
+  // not found, so that a partially authorized bulk get does not disclose their existence.
+  const inaccessibleObjects = new Set(
+    Array.from(authorizationResult?.inaccessibleObjects ?? []).map(
+      ({ type, id }) => `${type}:${id}`
+    )
+  );
+
   const results: Array<SavedObjectBulkResult<T>> = [];
   for (const doc of documents) {
+    if (!isSavedObjectErrorResult(doc) && inaccessibleObjects.has(`${doc.type}:${doc.id}`)) {
+      results.push({
+        id: doc.id,
+        type: doc.type,
+        error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(doc.type, doc.id)),
+      });
+      continue;
+    }
+
     results.push(
       isSavedObjectErrorResult(doc)
         ? doc

@@ -14,6 +14,7 @@ import { isPreconfigured } from '../../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../../lib/is_system_action';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import type { ActionsClientContext } from '../../../../actions_client';
+import { ensureConnectorAccess } from '../../../../lib/connector_access_control';
 import { validateSecrets } from '../../../../lib';
 
 type ValidatedSecrets = Record<string, unknown>;
@@ -50,10 +51,12 @@ export async function getAxiosInstance(
 
       actionTypeId = connector?.actionTypeId;
     } else {
-      const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>(
+      const { attributes, accessControl } = await unsecuredSavedObjectsClient.get<RawAction>(
         ACTION_SAVED_OBJECT_TYPE,
         connectorId
       );
+
+      await ensureConnectorAccess(context, { id: connectorId, accessControl }, 'execute');
 
       actionTypeId = attributes.actionTypeId;
       authMode = attributes.authMode;

@@ -20,14 +20,17 @@ import {
   type SavedObjectsChangeAccessControlResponse,
   type SavedObjectsChangeAccessControlObject,
   type SavedObjectsChangeAccessControlOptions,
+  type SavedObjectsChangeAccessControlEntriesOptions,
   type SavedObjectsChangeAccessModeOptions,
   type SavedObjectsChangeOwnershipOptions,
+  type SavedObjectAccessControl,
   type Either,
   left,
   right,
   isRight,
   isLeft,
 } from '@kbn/core-saved-objects-api-server';
+import { prepareSavedObjectAccessControl } from '@kbn/core-saved-objects-utils-server';
 
 import {
   getBulkOperationError,
@@ -37,7 +40,10 @@ import {
 import type { ApiExecutionContext } from '../types';
 import { type GetBulkOperationErrorRawResponse, isMgetError } from '../utils/internal_utils';
 
-export type ChangeAccessControlActionType = 'changeOwnership' | 'changeAccessMode';
+export type ChangeAccessControlActionType =
+  | 'changeOwnership'
+  | 'changeAccessMode'
+  | 'changeAccessControl';
 
 export interface ChangeAccessControlParams {
   registry: ISavedObjectTypeRegistry;
@@ -49,7 +55,7 @@ export interface ChangeAccessControlParams {
   options: SavedObjectsChangeAccessControlOptions;
   securityExtension?: ISavedObjectsSecurityExtension;
   actionType: ChangeAccessControlActionType;
-  currentUserProfileUid: string;
+  currentUserProfileUid?: string;
 }
 
 /**
@@ -80,7 +86,13 @@ export const isSavedObjectsChangeOwnershipOptions = (
   return 'newOwnerProfileUid' in options;
 };
 
-const VALID_ACCESS_MODES = ['default', 'write_restricted'] as const;
+export const isSavedObjectsChangeAccessControlEntriesOptions = (
+  options: SavedObjectsChangeAccessControlOptions
+): options is SavedObjectsChangeAccessControlEntriesOptions => {
+  return 'roles' in options;
+};
+
+const VALID_ACCESS_MODES = ['default', 'write_restricted', 'private'] as const;
 type AccessMode = (typeof VALID_ACCESS_MODES)[number];
 
 const validateChangeAccessControlParams = ({
@@ -91,7 +103,7 @@ const validateChangeAccessControlParams = ({
 }: {
   actionType: ChangeAccessControlActionType;
   newOwnerProfileUid?: string;
-  accessMode?: 'default' | 'write_restricted';
+  accessMode?: SavedObjectAccessControl['accessMode'];
   objects: SavedObjectsChangeAccessControlObject[];
 }) => {
   if (actionType === 'changeOwnership') {
@@ -107,18 +119,22 @@ const validateChangeAccessControlParams = ({
       );
     }
   }
-  if (actionType === 'changeAccessMode' && accessMode === undefined) {
+  const changesAccessMode =
+    actionType === 'changeAccessMode' || actionType === 'changeAccessControl';
+  if (changesAccessMode && accessMode === undefined) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'The "accessMode" field is required to change access mode of a saved object.'
     );
   }
   if (
-    actionType === 'changeAccessMode' &&
+    changesAccessMode &&
     accessMode !== undefined &&
     !VALID_ACCESS_MODES.includes(accessMode as AccessMode)
   ) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      'When specified, the "accessMode" field can only be "default" or "write_restricted".'
+      `When specified, the "accessMode" field can only be one of "${VALID_ACCESS_MODES.join(
+        '", "'
+      )}".`
     );
   }
 
@@ -137,13 +153,18 @@ export const changeObjectAccessControl = async (
   const { namespace } = params.options;
   const { actionType, currentUserProfileUid } = params;
 
-  // Extract owner for changeOwnership or accessMode for changeAccessMode
+  // Extract owner for changeOwnership or accessMode for changeAccessMode / changeAccessControl
   const newOwnerProfileUid =
     actionType === 'changeOwnership' && isSavedObjectsChangeOwnershipOptions(params.options)
       ? params.options.newOwnerProfileUid
       : undefined;
+  const entriesOptions = isSavedObjectsChangeAccessControlEntriesOptions(params.options)
+    ? params.options
+    : undefined;
   const accessMode =
-    actionType === 'changeAccessMode' && isSavedObjectsChangeAccessModeOptions(params.options)
+    actionType === 'changeAccessControl'
+      ? entriesOptions?.accessMode
+      : actionType === 'changeAccessMode' && isSavedObjectsChangeAccessModeOptions(params.options)
       ? params.options.accessMode
       : undefined;
   const {
@@ -156,9 +177,19 @@ export const changeObjectAccessControl = async (
     securityExtension,
   } = params;
 
-  if (!securityExtension) {
+  /**
+   * Clients that exclude the security extension authorize the operation themselves and must pass
+   * the owner, because the repository cannot resolve the current user without the extension.
+   */
+  const isSelfAuthorized = actionType === 'changeAccessControl' && !securityExtension;
+  if (!securityExtension && !isSelfAuthorized) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'Unable to proceed with changing access control without security extension.'
+    );
+  }
+  if (isSelfAuthorized && !entriesOptions?.owner) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      'The "owner" field is required when changing access control without security extension.'
     );
   }
 
@@ -247,12 +278,12 @@ export const changeObjectAccessControl = async (
     };
   });
 
-  const authorizationResult = await securityExtension.authorizeChangeAccessControl(
+  const authorizationResult = await securityExtension?.authorizeChangeAccessControl(
     {
       namespace,
       objects: authObjects,
     },
-    actionType
+    actionType === 'changeAccessControl' ? 'changeAccessMode' : actionType
   );
 
   const time = new Date().toISOString();
@@ -287,6 +318,7 @@ export const changeObjectAccessControl = async (
     }
 
     if (
+      authorizationResult &&
       authorizationResult.status !== 'fully_authorized' &&
       !authorizationResult.typeMap.has(type)
     ) {
@@ -322,6 +354,41 @@ export const changeObjectAccessControl = async (
           ...(currentSource?.accessControl || { accessMode: 'default' }),
           owner: newOwnerProfileUid,
         },
+      };
+    } else if (actionType === 'changeAccessControl') {
+      // The first caller to restrict an object becomes its owner, which allows objects created
+      // before the type opted in to access control to be restricted.
+      const owner =
+        currentSource?.accessControl?.owner ?? entriesOptions!.owner ?? currentUserProfileUid;
+      if (!owner) {
+        const error = SavedObjectsErrorHelpers.createBadRequestError(
+          `Cannot change access control of "${type}:${id}" because Kibana could not determine the owner. Access control requires an identifiable user profile.`
+        );
+        return left({ id, type, error });
+      }
+
+      let accessControl: SavedObjectAccessControl;
+      try {
+        accessControl = prepareSavedObjectAccessControl({
+          accessMode: accessMode ?? 'default',
+          entries: entriesOptions!.entries,
+          roles: entriesOptions!.roles,
+          owner,
+          previous: currentSource?.accessControl,
+          now: time,
+        });
+      } catch (validationError) {
+        return left({
+          id,
+          type,
+          error: SavedObjectsErrorHelpers.createBadRequestError(validationError.message),
+        });
+      }
+
+      documentToSave = {
+        updated_at: time,
+        ...(currentUserProfileUid && { updated_by: currentUserProfileUid }),
+        accessControl,
       };
     } else {
       documentToSave = {

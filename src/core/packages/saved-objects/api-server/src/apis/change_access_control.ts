@@ -8,7 +8,7 @@
  */
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import type { SavedObjectAccessControl } from '../..';
+import type { SavedObjectAccessControl, SavedObjectAccessControlEntry } from '../..';
 import type { SavedObjectsBaseOptions } from './base';
 
 export interface SavedObjectsChangeAccessControlObject {
@@ -25,13 +25,33 @@ export interface SavedObjectsChangeAccessModeOptions extends SavedObjectsBaseOpt
 }
 
 /**
+ * Options for restricting a saved object to a set of principals.
+ *
+ * @public
+ */
+export interface SavedObjectsChangeAccessControlEntriesOptions extends SavedObjectsBaseOptions {
+  /** The access mode to apply. `private` restricts the object to its owner and `entries`. */
+  accessMode: SavedObjectAccessControl['accessMode'];
+  /** The principals to grant access to. Entries for the owner are ignored. */
+  entries?: Array<Omit<SavedObjectAccessControlEntry, 'added_at'>>;
+  /** The roles the saved object type supports. Entries with any other role are rejected. */
+  roles: readonly [string, ...string[]];
+  /**
+   * The profile UID to record as the owner when the object does not have one yet. Required for
+   * clients that exclude the security extension, because they cannot resolve the current user.
+   */
+  owner?: SavedObjectAccessControl['owner'];
+}
+
+/**
  * Options for the changing ownership of a saved object
  *
  * @public
  */
 export type SavedObjectsChangeAccessControlOptions =
   | SavedObjectsChangeOwnershipOptions
-  | SavedObjectsChangeAccessModeOptions;
+  | SavedObjectsChangeAccessModeOptions
+  | SavedObjectsChangeAccessControlEntriesOptions;
 
 /**
  * Return type of the Saved Objects `changeOwnership()` method.

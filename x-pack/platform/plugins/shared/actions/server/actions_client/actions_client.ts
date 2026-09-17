@@ -26,6 +26,13 @@ import type { AxiosInstance } from 'axios';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AuthMode } from '@kbn/connector-specs';
+import type { AccessControlInput } from '@kbn/entity-access-control';
+import type { ConnectorAccessResponse, ConnectorAccessRole } from '../../common/access_control';
+import {
+  ensureConnectorAccess,
+  getConnectorAccessControl,
+  updateConnectorAccessControl,
+} from '../lib/connector_access_control';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { RotateInboundIngressResult } from '../application/connector/methods/rotate_inbound_ingress/types';
 import type { ConnectorType } from '../application/connector/types';
@@ -250,6 +257,25 @@ export class ActionsClient {
   }
 
   /**
+   * Get the access control of a connector and what the current user may do with it.
+   */
+  public async getAccessControl(id: string): Promise<ConnectorAccessResponse> {
+    return getConnectorAccessControl(this.context, id);
+  }
+
+  /**
+   * Make a connector public or restrict it to the given users. Only the owner of a connector,
+   * or the first user to restrict a connector that has no owner yet, may change it.
+   */
+  public async updateAccessControl(
+    id: string,
+    input: AccessControlInput<ConnectorAccessRole>,
+    validateRecipients: (profileIds: Set<string>) => Promise<void>
+  ): Promise<void> {
+    return updateConnectorAccessControl(this.context, id, input, validateRecipients);
+  }
+
+  /**
    * Get a connector
    */
   public async get({
@@ -383,6 +409,11 @@ export class ActionsClient {
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
       }
+      await ensureConnectorAccess(
+        this.context,
+        { id: action.id, accessControl: action.accessControl },
+        'read'
+      );
       actionResults.push(
         connectorFromSavedObject(
           action,
@@ -591,6 +622,13 @@ export class ActionsClient {
       }
       throw e;
     }
+
+    await ensureConnectorAccess(
+      this.context,
+      { id, accessControl: rawAction.accessControl },
+      'edit'
+    );
+
     const {
       attributes: { actionTypeId, config, authMode },
     } = rawAction;

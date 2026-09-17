@@ -18,6 +18,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers, type SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
+  buildSavedObjectAccessControlFilter,
   DEFAULT_NAMESPACE_STRING,
   FIND_DEFAULT_PAGE,
   FIND_DEFAULT_PER_PAGE,
@@ -216,6 +217,24 @@ export const performFind = async <T = unknown, A = unknown>(
       kueryNode,
     }),
   };
+
+  // Hide objects with a restricted access mode from users that are neither their owner nor a
+  // principal they were shared with. Objects of types that do not support access control, and
+  // objects without access control metadata, are unaffected.
+  const enforceAccessControl =
+    !disableExtensions &&
+    securityExtension &&
+    allowedTypes.some((allowedType) => registry.supportsAccessControl(allowedType));
+  if (enforceAccessControl) {
+    const accessControlFilter = buildSavedObjectAccessControlFilter(
+      securityExtension.getCurrentUser()?.profile_uid
+    );
+    esOptions.query = {
+      bool: {
+        filter: [esOptions.query, accessControlFilter],
+      },
+    };
+  }
 
   const { body, statusCode, headers } = await client.search<SavedObjectsRawDocSource>(esOptions, {
     ignore: [404],

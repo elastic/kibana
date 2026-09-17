@@ -81,3 +81,5 @@ export type SavedObjectReference = serverTypes.SavedObjectReference;
 export type SavedObject<T = unknown> = serverTypes.SavedObject<T>;
 
 export type SavedObjectAccessControl = serverTypes.SavedObjectAccessControl;
+
+export type SavedObjectAccessControlEntry = serverTypes.SavedObjectAccessControlEntry;

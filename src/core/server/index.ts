@@ -387,6 +387,7 @@ export type {
   SavedObjectErrorResult,
   SavedObjectBulkResult,
   SavedObjectAccessControl,
+  SavedObjectAccessControlEntry,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,

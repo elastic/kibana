@@ -48,6 +48,7 @@ import type {
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAccessControlEntriesOptions,
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsRawDocSource,
   SavedObjectsSearchOptions,
@@ -257,5 +258,13 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return this._repository.changeAccessMode(objects, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.changeAccessControl} */
+  changeAccessControl(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlEntriesOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse> {
+    return this._repository.changeAccessControl(objects, options);
   }
 }

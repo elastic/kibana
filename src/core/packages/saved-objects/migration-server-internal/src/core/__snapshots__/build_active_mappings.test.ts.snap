@@ -10,6 +10,19 @@ Object {
     "accessControl": Object {
       "dynamic": "false",
       "properties": Object {
+        "accessMode": Object {
+          "type": "keyword",
+        },
+        "entries": Object {
+          "properties": Object {
+            "id": Object {
+              "type": "keyword",
+            },
+            "role": Object {
+              "type": "keyword",
+            },
+          },
+        },
         "owner": Object {
           "type": "keyword",
         },
@@ -76,6 +89,19 @@ Object {
     "accessControl": Object {
       "dynamic": "false",
       "properties": Object {
+        "accessMode": Object {
+          "type": "keyword",
+        },
+        "entries": Object {
+          "properties": Object {
+            "id": Object {
+              "type": "keyword",
+            },
+            "role": Object {
+              "type": "keyword",
+            },
+          },
+        },
         "owner": Object {
           "type": "keyword",
         },

@@ -52,12 +52,14 @@ export const performGet = async <T>(
     indexNotFound ||
     !rawDocExistsInNamespace(registry, body, namespace);
 
+  const accessControl = body?._source?.accessControl;
   const authorizationResult = await securityExtension?.authorizeGet({
     namespace,
     object: {
       type,
       id,
       existingNamespaces: body?._source?.namespaces ?? [],
+      ...(accessControl && { accessControl }),
       name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
         attributes: body?._source?.[type],
       }),

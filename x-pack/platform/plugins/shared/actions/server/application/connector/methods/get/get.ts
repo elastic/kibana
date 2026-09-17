@@ -14,6 +14,7 @@ import { isConnectorDeprecated } from '../../lib';
 import type { GetParams } from './types';
 import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
 import { getAuthMode } from '../../lib/get_auth_mode';
+import { ensureConnectorAccess } from '../../../../lib/connector_access_control';
 
 export async function get({
   context,
@@ -71,6 +72,8 @@ export async function get({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
       id,
     });
+    await ensureConnectorAccess(context, { id, accessControl: result.accessControl }, 'read');
+
     const authMode = getAuthMode(result.attributes.authMode as Connector['authMode'] | undefined);
 
     context.auditLogger?.log(

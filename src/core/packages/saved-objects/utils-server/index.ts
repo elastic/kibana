@@ -17,3 +17,11 @@ export {
 } from './src/saved_objects_utils';
 
 export { setsAreEqual, arrayMapsAreEqual, setMapsAreEqual } from './src/saved_objects_test_utils';
+
+export {
+  PRIVATE_ACCESS_MODE,
+  isAccessRestricted,
+  hasSavedObjectAccess,
+  prepareSavedObjectAccessControl,
+  buildSavedObjectAccessControlFilter,
+} from './src/access_control';

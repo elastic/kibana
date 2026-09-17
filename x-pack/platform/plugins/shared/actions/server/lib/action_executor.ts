@@ -6,12 +6,18 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceStart,
+  KibanaRequest,
+  Logger,
+  SavedObjectAccessControl,
+} from '@kbn/core/server';
 import {
   type AuthenticatedUser,
   type SecurityServiceStart,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { hasSavedObjectAccess } from '@kbn/core-saved-objects-utils-server';
 import { cloneDeep, startsWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
@@ -23,6 +29,7 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { isConnectorAuthorizationError } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { CONNECTOR_ACCESS_ROLES } from '../../common/access_control';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
@@ -378,6 +385,7 @@ export class ActionExecutor {
         actionId,
         connectorVersion: rawAction.version,
         rawAction: rawAction.attributes,
+        accessControl: rawAction.accessControl,
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
@@ -427,10 +435,34 @@ export class ActionExecutor {
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
-        const { actionTypeId, name, config, secrets, rawAction, connectorVersion, isInMemory } =
-          actionInfo;
+        const {
+          actionTypeId,
+          name,
+          config,
+          secrets,
+          rawAction,
+          connectorVersion,
+          isInMemory,
+          accessControl,
+        } = actionInfo;
         const authMode = rawAction.authMode;
         const profileUid = providedProfileUid || currentUser?.profile_uid;
+
+        // Restricted connectors can only be run by their owner and the users they were shared
+        // with, whoever scheduled the execution. Background executions resolve the profile from
+        // the API key they run under.
+        if (
+          !hasSavedObjectAccess({
+            accessControl,
+            profileUid,
+            roles: CONNECTOR_ACCESS_ROLES,
+          })
+        ) {
+          throw createTaskRunError(
+            new Error(`Unauthorized to execute connector ${actionId}`),
+            TaskErrorSource.USER
+          );
+        }
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         const logger = this.actionExecutorContext!.logger.get(loggerId);
 
@@ -822,6 +854,7 @@ export interface ActionInfo {
   isInMemory?: boolean;
   connectorVersion?: string;
   rawAction: RawAction;
+  accessControl?: SavedObjectAccessControl;
 }
 
 function getErrorSource(error: Error): TaskErrorSource | undefined {
