@@ -639,7 +639,7 @@ export function XYChart({
           rect: {
             widthPixel: 400,
             ...(categoricalXValues?.length && categoricalXValues.length <= 2
-              ? { widthRatio: Math.min(1, 0.5 + 0.2 * categoricalXValues.length) }
+              ? { widthRatio: Math.min(1, 0.1 + 0.4 * categoricalXValues.length) }
               : {}),
           },
         }

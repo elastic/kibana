@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import type { IconType } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
   EuiToken,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -65,50 +64,24 @@ const iconMap: Record<string, string> = {
 };
 const defaultToken = 'question';
 
-const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: string }> = ({
+const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel: string }> = ({
   iconType,
   label,
   fieldTypeLabel,
-}) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const iconButton = (
-    <EuiButtonEmpty
-      size="s"
-      aria-label={
-        fieldTypeLabel ??
-        i18n.translate('xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel', {
-          defaultMessage: "Show this field's type",
-        })
-      }
-      onClick={fieldTypeLabel ? () => setIsPopoverOpen(!isPopoverOpen) : undefined}
-    >
-      <EuiToken iconType={iconType} size="s" />
-    </EuiButtonEmpty>
-  );
-  return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
-      <EuiFlexItem grow={false}>
-        {fieldTypeLabel ? (
-          <EuiPopover
-            aria-label={fieldTypeLabel}
-            closePopover={() => setIsPopoverOpen(false)}
-            button={iconButton}
-            isOpen={isPopoverOpen}
-          >
-            {fieldTypeLabel}
-          </EuiPopover>
-        ) : (
-          iconButton
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s" color="default">
-          {label}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+}) => (
+  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m" wrap={false}>
+    <EuiFlexItem grow={false}>
+      <EuiToolTip content={fieldTypeLabel} display="flex" disableScreenReaderOutput>
+        <EuiToken iconType={iconType} size="s" aria-label={fieldTypeLabel} tabIndex={0} />
+      </EuiToolTip>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiText size="s" color="default">
+        {label}
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export const ResultField: React.FC<ResultFieldProps> = ({
   iconType,

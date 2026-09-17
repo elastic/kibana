@@ -32,6 +32,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { mockState } from './__mocks__/synthetics_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import type { AppState } from '../../state';
@@ -199,13 +200,15 @@ export function MockKibanaProvider<ExtraCore>({
 
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
-      <QueryClientProvider client={queryClient}>
-        <SyntheticsRefreshContextProvider>
-          <EuiThemeProvider darkMode={false}>
-            <I18nProvider>{children}</I18nProvider>
-          </EuiThemeProvider>
-        </SyntheticsRefreshContextProvider>
-      </QueryClientProvider>
+      <MockAppHeaderProvider>
+        <QueryClientProvider client={queryClient}>
+          <SyntheticsRefreshContextProvider>
+            <EuiThemeProvider darkMode={false}>
+              <I18nProvider>{children}</I18nProvider>
+            </EuiThemeProvider>
+          </SyntheticsRefreshContextProvider>
+        </QueryClientProvider>
+      </MockAppHeaderProvider>
     </KibanaContextProvider>
   );
 }
@@ -357,6 +360,7 @@ export const makeSyntheticsPermissionsCore = (
     configureSettings: boolean;
     save: boolean;
     show: boolean;
+    canManageRules: boolean;
   }>
 ) => {
   return {

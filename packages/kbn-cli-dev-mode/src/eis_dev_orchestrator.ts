@@ -8,7 +8,7 @@
  */
 
 /**
- * EIS connector discovery for `yarn start --eis`.
+ * EIS connector discovery for `pnpm start --eis` and `pnpm serverless-* --eis`.
  *
  * Two-phase flow:
  *
@@ -16,10 +16,10 @@
  *     generous timeout (5 min), since a cold ES snapshot install/start can
  *     legitimately take minutes.
  *  2. Poll `GET /_inference/_all` for EIS-provided endpoints
- *     (`service === 'elastic'`) — bounded retry budget (~30s). If ES is
- *     healthy but no EIS endpoints exist, that is a configuration error
- *     (typically `yarn es snapshot` was run without `--eis`, or the CCM
- *     API key was not set).
+ *     (`service === 'elastic'`) — bounded retry budget (~30s stateful, ~60s
+ *     serverless). If ES is healthy but no EIS endpoints exist, that is a
+ *     configuration error (typically Elasticsearch was started without `--eis`,
+ *     or the CCM API key was not set).
  *
  * Converts each endpoint into a Kibana preconfigured connector definition
  * keyed by a sanitised model ID, and returns the result so bootstrap.ts can
@@ -29,19 +29,27 @@
  * are picked up — the gateway-defined task type is preserved on each connector.
  *
  * This module does NOT start or stop Elasticsearch — that is handled separately
- * by `yarn es snapshot --eis`.
+ * by `pnpm es snapshot --eis` or `pnpm es serverless --eis`.
  *
  * Environment variables:
  *  - KBN_EIS_ES_HOST     — full ES base URL including protocol (default:
- *                           `http://localhost:9200`). Set to
- *                           `https://localhost:9200` when ES was started with
- *                           `--ssl` (e.g. `yarn es snapshot --eis --ssl`).
- *  - KBN_EIS_ES_USERNAME — ES username (default: `elastic`)
+ *                           `http://localhost:9200`, or `https://localhost:9200`
+ *                           in serverless mode). Set to
+ *                           `https://localhost:9200` when stateful ES was started
+ *                           with `--ssl` (e.g. `pnpm es snapshot --eis --ssl`).
+ *  - KBN_EIS_ES_USERNAME — ES username (default: `elastic`, or
+ *                           `elastic_serverless` in serverless mode)
  *  - KBN_EIS_ES_PASSWORD — ES password (default: `changeme`)
  */
 
 import chalk from 'chalk';
-import { createBasicAuth, eisHttpRequest, waitForEisEsReady } from '@kbn/es';
+import {
+  createBasicAuth,
+  eisHttpRequest,
+  waitForEisEsReady,
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+} from '@kbn/es';
 import type { EisElasticsearchConnection } from '@kbn/es';
 
 import type { Log } from './log';
@@ -61,6 +69,42 @@ interface PreconfiguredConnector {
 export interface EisConnectorResult {
   preconfiguredConnectors: Record<string, PreconfiguredConnector>;
 }
+
+export interface EisDiscoveryOptions {
+  /** When true, use serverless ES defaults (https + elastic_serverless). */
+  serverless?: boolean;
+}
+
+/**
+ * Resolves the Elasticsearch connection used for EIS connector discovery.
+ * Env vars always win over stateful/serverless defaults.
+ */
+export const getEisDevEsConnection = (
+  options: EisDiscoveryOptions = {}
+): EisElasticsearchConnection => {
+  const defaults = options.serverless
+    ? {
+        baseUrl: 'https://localhost:9200',
+        username: ELASTIC_SERVERLESS_SUPERUSER,
+        password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+      }
+    : {
+        baseUrl: 'http://localhost:9200',
+        username: 'elastic',
+        password: 'changeme',
+      };
+
+  const baseUrl = process.env.KBN_EIS_ES_HOST ?? defaults.baseUrl;
+
+  return {
+    baseUrl,
+    credentials: {
+      username: process.env.KBN_EIS_ES_USERNAME || defaults.username,
+      password: process.env.KBN_EIS_ES_PASSWORD || defaults.password,
+    },
+    ssl: baseUrl.startsWith('https://'),
+  };
+};
 
 const toConnectorId = (modelId: string): string =>
   modelId
@@ -100,9 +144,9 @@ const waitForEsReachable = async (es: EisElasticsearchConnection, log: Log): Pro
  */
 const discoverEisEndpoints = async (
   es: EisElasticsearchConnection,
-  log: Log
+  log: Log,
+  { maxAttempts = 10 }: { maxAttempts?: number } = {}
 ): Promise<EisInferenceEndpoint[]> => {
-  const maxAttempts = 10;
   const delayMs = 3000;
   const auth = createBasicAuth(es.credentials.username, es.credentials.password);
 
@@ -160,7 +204,7 @@ const discoverEisEndpoints = async (
     [
       `No EIS inference endpoints found after ${maxAttempts} attempts (${detail}).`,
       'Elasticsearch is responding but EIS endpoints are not registered.',
-      'Make sure Elasticsearch was started with `yarn es snapshot --eis` and that the CCM API key was set successfully.',
+      'Make sure Elasticsearch was started with `pnpm es snapshot --eis` or `pnpm es serverless --eis` and that the CCM API key was set successfully.',
     ].join('\n')
   );
 };
@@ -211,26 +255,25 @@ const buildConnectors = (
   return connectors;
 };
 
-/** Entry point called from bootstrap.ts when `--eis` is passed to `yarn start`. */
-export const discoverEisConnectors = async (log: Log): Promise<EisConnectorResult> => {
+/** Entry point called from bootstrap.ts when `--eis` is passed to `pnpm start`. */
+export const discoverEisConnectors = async (
+  log: Log,
+  options: EisDiscoveryOptions = {}
+): Promise<EisConnectorResult> => {
   log.good('eis', 'Setting up EIS connectors from Elasticsearch...');
 
-  const baseUrl = process.env.KBN_EIS_ES_HOST ?? 'http://localhost:9200';
-  const es: EisElasticsearchConnection = {
-    baseUrl,
-    credentials: {
-      username: process.env.KBN_EIS_ES_USERNAME || 'elastic',
-      password: process.env.KBN_EIS_ES_PASSWORD || 'changeme',
-    },
-    ssl: baseUrl.startsWith('https://'),
-  };
+  const es = getEisDevEsConnection(options);
 
   // Phase 1: wait for ES itself (generous timeout).
   await waitForEsReachable(es, log);
 
   // Phase 2: wait for EIS endpoints to register (bounded — fail fast on misconfig).
+  // Serverless CCM setup happens after ES is green, so allow a longer poll window
+  // when Kibana and ES are started in parallel.
   log.write('Discovering EIS connectors...');
-  const endpoints = await discoverEisEndpoints(es, log);
+  const endpoints = await discoverEisEndpoints(es, log, {
+    maxAttempts: options.serverless ? 20 : 10,
+  });
   const connectors = buildConnectors(endpoints);
   const count = Object.keys(connectors).length;
 

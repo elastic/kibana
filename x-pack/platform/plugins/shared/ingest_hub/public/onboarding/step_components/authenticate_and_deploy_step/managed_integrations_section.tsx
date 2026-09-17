@@ -39,14 +39,19 @@ import {
 import type {
   AwsStaticKeyCredentials,
   CloudSetupForCloudConnector,
+  RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
+import { getIacRenderIntegrations } from './iac_render_integrations';
+import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
+  serviceIds: string[];
+  serviceVars: Record<string, ServiceVars>;
   showIdentityFederation: boolean;
   onDeploy: () => void;
   isDeploying: boolean;
@@ -56,6 +61,8 @@ interface ManagedIntegrationsSectionProps {
 
 export function ManagedIntegrationsSection({
   serviceCount,
+  serviceIds,
+  serviceVars,
   showIdentityFederation,
   onDeploy,
   isDeploying,
@@ -63,7 +70,8 @@ export function ManagedIntegrationsSection({
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { setConnectorId, setStaticKeys, authenticateAndDeployStep } = useOnboardingFlow();
+  const { setConnectorId, setStaticKeys, authenticateAndDeployStep, awsServicesMap } =
+    useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
@@ -107,6 +115,10 @@ export function ManagedIntegrationsSection({
   const iacTemplateUrl = useMemo(
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
+  );
+  const iacIntegrations: RenderIacTemplateIntegration[] = useMemo(
+    () => getIacRenderIntegrations(serviceIds, awsServicesMap, serviceVars),
+    [serviceIds, awsServicesMap, serviceVars]
   );
   const cloud = services.cloud as CloudSetupForCloudConnector | undefined;
 
@@ -246,6 +258,7 @@ export function ManagedIntegrationsSection({
                 <LazyAwsIdentityFederationSetup
                   cloud={cloud}
                   iacTemplateUrl={iacTemplateUrl}
+                  integrations={iacIntegrations}
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
                   initialConnectorId={initialConnectorId}
