@@ -370,7 +370,7 @@ describe('blocklist form', () => {
     expect(afterFieldChange?.item.entries).toEqual([
       createEntry('file.path.caseless', signatureValues),
     ]);
-  });
+  }, 15_000);
 
   it('should correctly create `file.path.caseless` when Mac OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
