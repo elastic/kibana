@@ -389,6 +389,35 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(secondRequest.headers.get('content-type')).toBeNull();
   });
 
+  it('returns the last-hop request when asResponse follows a redirect', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: '/api/next' } })
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+    const { self } = createClient({
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: false, requestCert: false },
+        selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+    });
+
+    const result = await self.asScoped(createFakeRequest()).fetch('/api/status', {
+      method: 'POST',
+      body: { hello: 'world' },
+      asResponse: true,
+    });
+
+    expect(result.request.method).toBe('GET');
+    expect(new URL(result.request.url).pathname).toBe('/api/next');
+    expect(result.body).toEqual({ ok: true });
+  });
+
   it('preserves PUT on a 302 follow-up', async () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce(

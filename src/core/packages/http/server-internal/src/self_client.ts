@@ -99,7 +99,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     this.validateRequestContext();
 
     const fetchOptions = { ...options, path };
-    const request = this.createRequest(path, options);
+    let request = this.createRequest(path, options);
     this.logAttempt(request.method, options.target);
     const cleanup: Array<() => void> = [];
 
@@ -114,7 +114,9 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
         ),
       };
       const maxRedirects = this.params.getHttpConfig().selfHttp.maxRedirects ?? 0;
-      const response = await followSameOriginRedirects(request, fetchInit, maxRedirects);
+      const followed = await followSameOriginRedirects(request, fetchInit, maxRedirects);
+      request = followed.request;
+      const response = followed.response;
 
       if (options.rawResponse) {
         return { fetchOptions, request, response };
@@ -356,7 +358,7 @@ const followSameOriginRedirects = async (
   initialRequest: Request,
   fetchInit: SelfFetchInit,
   maxRedirects: number
-): Promise<Response> => {
+): Promise<{ request: Request; response: Response }> => {
   const origin = new URL(initialRequest.url).origin;
   const visited = new Set<string>();
   let currentRequest = initialRequest;
@@ -410,7 +412,7 @@ const followSameOriginRedirects = async (
     response = await fetchRedirectHop(currentRequest, fetchInit, visited);
   }
 
-  return response;
+  return { request: currentRequest, response };
 };
 
 const fetchRedirectHop = async (

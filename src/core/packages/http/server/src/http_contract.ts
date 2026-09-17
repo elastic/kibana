@@ -101,6 +101,7 @@ export interface HttpSelfFetchOptions<TRequestBody = unknown> {
 /** @public */
 export interface HttpSelfResponse<TResponseBody = unknown, TRequestBody = unknown> {
   readonly fetchOptions: Readonly<HttpSelfFetchOptions<TRequestBody> & { path: string }>;
+  /** The outbound Request that produced `response` (the last hop when Core followed redirects). */
   readonly request: Readonly<Request>;
   readonly response: Readonly<Response>;
   readonly body?: TResponseBody;
