@@ -23,7 +23,7 @@ export interface RawDocumentHit {
   _source: Record<string, unknown>;
 }
 
-export interface FetchByQueryParams {
+interface FetchByQueryParams {
   query: QueryDslQueryContainer;
   index: string | string[];
   /** Upper bound on how many documents to expand. Defaults to `MAX_TRIGGER_EVENT_DOCS`. */
@@ -34,7 +34,7 @@ export interface FetchByQueryParams {
   pageSize?: number;
 }
 
-export interface FetchByQueryResult {
+interface FetchByQueryResult {
   hits: RawDocumentHit[];
   /** Total number of documents matching the query (may exceed `hits.length`). */
   total: number;
@@ -43,7 +43,7 @@ export interface FetchByQueryResult {
 }
 
 /**
- * Default cap on how many documents/alerts a single query-based trigger will expand.
+ * Default cap on how many documents/alerts a single trigger selection will expand.
  * Bounds server memory and the persisted execution event size. Re-exported from the shared
  * `@kbn/workflows` constant so the enforced limit and the UI's "first N" message stay in sync.
  */
