@@ -57,7 +57,7 @@ describe('createConversationEventsService', () => {
       expect(start.getDefinition('nonexistent')).toBeUndefined();
     });
 
-    it('list includes built-in text_note and any explicitly registered types', () => {
+    it('list returns all explicitly registered types', () => {
       const service = createConversationEventsService();
       const setup = service.setup();
 
@@ -69,7 +69,7 @@ describe('createConversationEventsService', () => {
       const start = service.start();
       const types = start.list().map((d) => d.type);
 
-      expect(types).toEqual(['text_note', 'test.extra']);
+      expect(types).toEqual(['test.extra']);
     });
   });
 });
