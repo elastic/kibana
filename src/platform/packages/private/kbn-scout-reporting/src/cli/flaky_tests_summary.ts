@@ -281,6 +281,7 @@ export const displaySummary = (
           Min builds        : ${thresholds.minBuilds} (tests seen in fewer builds are ignored)
           Min failed builds : ${thresholds.minFailedBuilds} (tests that failed in fewer builds are ignored)
           Max tests         : ${thresholds.maxTests} per list
+          Max inactive      : ${thresholds.maxInactiveHours}h (tests that did not execute since are ignored)
           Flaky                = qualifying test with at least one pass or in-run retry recovery
           Consistently failing = qualifying test that never passed in the window
         `),

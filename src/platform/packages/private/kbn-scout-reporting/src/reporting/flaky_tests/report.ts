@@ -14,11 +14,14 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { ESQL_ROW_LIMIT } from './esql';
 import {
   fetchBranchStats,
+  fetchDailyTrend,
   fetchFailingFiles,
+  fetchFilePipelineStats,
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
   type FlakyTestQueryScope,
+  type TestFailureSamples,
   type TestMetadataRow,
   type TestStatsRow,
 } from './queries';
@@ -29,10 +32,13 @@ import {
   type FlakyTestBranchStats,
   type FlakyTestClassification,
   type FlakyTestEntry,
+  type FlakyTestFileStats,
   type FlakyTestLatestRun,
+  type FlakyTestPipelineStats,
   type FlakyTestReport,
   type FlakyTestReportOptions,
   type FlakyTestReportThresholds,
+  type FlakyTestTrend,
   type TestFramework,
 } from './schema';
 
@@ -47,6 +53,33 @@ export const latestRunAcrossBranches = (
     }
   }
   return latest;
+};
+
+/** The newest execution (run that was not skipped) on any branch. */
+export const latestExecutionAcrossBranches = (
+  byBranch: readonly FlakyTestBranchStats[] | undefined
+): Date | undefined => {
+  let latest: Date | undefined;
+  for (const { latestExecutionAt } of byBranch ?? []) {
+    if (latestExecutionAt && (!latest || latestExecutionAt > latest)) {
+      latest = latestExecutionAt;
+    }
+  }
+  return latest;
+};
+
+/**
+ * Whether the test still executes: its latest execution on any branch is within
+ * `maxInactiveHours` of the window end. A test skipped, moved or deleted since fails this and is
+ * left out of the report; it would otherwise linger for the rest of the window.
+ */
+export const isActive = (
+  byBranch: readonly FlakyTestBranchStats[] | undefined,
+  to: Date,
+  maxInactiveHours: number
+): boolean => {
+  const latest = latestExecutionAcrossBranches(byBranch);
+  return latest !== undefined && to.getTime() - latest.getTime() <= maxInactiveHours * 3600_000;
 };
 
 /**
@@ -125,6 +158,9 @@ const buildReport = async (
   if (!Number.isInteger(options.lookbackDays) || options.lookbackDays < 1) {
     throw new Error(`lookbackDays must be a positive integer, got ${options.lookbackDays}`);
   }
+  if (!Number.isInteger(options.trendDays) || options.trendDays < 0) {
+    throw new Error(`trendDays must be a non-negative integer, got ${options.trendDays}`);
+  }
   if (options.classifications.length === 0) {
     throw new Error(
       `classifications must include at least one of: ${FLAKY_TEST_CLASSIFICATIONS.join(', ')}`
@@ -192,33 +228,74 @@ const buildReport = async (
   }
 
   const cap = (entries: readonly AggregatedEntry[]) => entries.slice(0, thresholds.maxTests);
-  const rankedFlaky = cap(rankTests(flaky));
-  const rankedConsistentlyFailing = cap(rankTests(consistentlyFailing));
-  const admitted = [...rankedFlaky, ...rankedConsistentlyFailing];
+  let rankedFlaky = cap(rankTests(flaky));
+  let rankedConsistentlyFailing = cap(rankTests(consistentlyFailing));
+  let admitted = [...rankedFlaky, ...rankedConsistentlyFailing];
 
   let branchStats = new Map<string, FlakyTestBranchStats[]>();
-  let samples = new Map<string, FlakyTestEntry['sampleFailures']>();
   if (admitted.length > 0) {
     startedAt = performance.now();
     branchStats = await fetchBranchStats(es, scope, admitted);
     log.info(`Fetched per-branch stats for ${admitted.length} tests in ${elapsed(startedAt)}`);
 
+    // Only now is it known which tests still run; the ones that do not are dropped from the lists
+    const active = (entry: AggregatedEntry) =>
+      isActive(branchStats.get(entry.testId), to, thresholds.maxInactiveHours);
+    const inactive = admitted.filter((entry) => !active(entry));
+    if (inactive.length > 0) {
+      log.info(
+        `Dropped ${inactive.length} tests without an execution in the last ` +
+          `${thresholds.maxInactiveHours}h (skipped, moved or deleted)`
+      );
+      rankedFlaky = rankedFlaky.filter(active);
+      rankedConsistentlyFailing = rankedConsistentlyFailing.filter(active);
+      admitted = admitted.filter(active);
+    }
+  }
+
+  let samples = new Map<string, TestFailureSamples>();
+  let trends = new Map<string, FlakyTestTrend>();
+  let pipelineStats = new Map<string, FlakyTestPipelineStats[]>();
+  if (admitted.length > 0) {
     startedAt = performance.now();
-    samples = await fetchSampleFailures(
-      es,
-      scope,
-      admitted.map((entry) => entry.testId),
-      options.samplesPerTest
+    [samples, trends, pipelineStats] = await Promise.all([
+      fetchSampleFailures(
+        es,
+        scope,
+        admitted.map((entry) => entry.testId),
+        options.samplesPerTest
+      ),
+      fetchDailyTrend(es, scope, admitted, options.trendDays),
+      fetchFilePipelineStats(es, scope, admitted),
+    ]);
+    log.info(
+      `Fetched failure samples, ${options.trendDays}-day trends and per-pipeline stats for ` +
+        `${admitted.length} tests in ${elapsed(startedAt)}`
     );
-    log.info(`Fetched failure samples for ${admitted.length} tests in ${elapsed(startedAt)}`);
   }
 
   const decorate = (entry: AggregatedEntry): FlakyTestEntry => ({
     ...entry,
+    suiteTitle: samples.get(entry.testId)?.suiteTitle,
     latestRun: latestRunAcrossBranches(branchStats.get(entry.testId)),
     byBranch: branchStats.get(entry.testId) ?? [],
-    sampleFailures: samples.get(entry.testId) ?? [],
+    sampleFailures: samples.get(entry.testId)?.failures ?? [],
+    trend: trends.get(entry.testId),
   });
+
+  // One file entry per (path, framework) over the tests of both lists, in ranking order
+  const files = new Map<string, FlakyTestFileStats>();
+  for (const { filePath, framework, testId } of admitted) {
+    const key = `${framework}\n${filePath}`;
+    const file = files.get(key) ?? {
+      filePath,
+      framework,
+      testIds: [],
+      byPipeline: pipelineStats.get(filePath) ?? [],
+    };
+    file.testIds.push(testId);
+    files.set(key, file);
+  }
 
   const flakyByFramework: Partial<Record<TestFramework, number>> = {};
   for (const entry of rankedFlaky) {
@@ -243,6 +320,7 @@ const buildReport = async (
     },
     flaky: rankedFlaky.map(decorate),
     consistentlyFailing: rankedConsistentlyFailing.map(decorate),
+    files: [...files.values()],
   });
 };
 

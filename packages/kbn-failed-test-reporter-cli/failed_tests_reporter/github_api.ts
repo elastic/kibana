@@ -29,15 +29,25 @@ export function nextPageUrl(linkHeader: string | null): string | undefined {
 
 export type GithubIssueState = 'open' | 'closed';
 
+export interface GithubIssueLabel {
+  name: string;
+}
+
 export interface GithubIssue {
   html_url: string;
   number: number;
   node_id: string;
   title: string;
-  labels: unknown[];
+  labels: GithubIssueLabel[];
   body: string;
   state: GithubIssueState;
+  /** ISO timestamp of the last closing, `null` while open. Absent in older callers' fixtures. */
+  closed_at?: string | null;
 }
+
+/** Names of the labels on an issue; GitHub returns objects, some fixtures plain strings. */
+export const issueLabelNames = (issue: Pick<GithubIssue, 'labels'>): string[] =>
+  issue.labels.map((label) => (typeof label === 'string' ? label : label.name));
 
 export interface ListIssuesOptions {
   state: GithubIssueState | 'all';
@@ -72,6 +82,10 @@ export interface GithubIssueMini {
 
 export interface GithubIssueComment {
   body: string;
+  /** ISO timestamp; absent in dry-run mode and in older fixtures. */
+  created_at?: string;
+  /** Login of the author; absent in dry-run mode and in older fixtures. */
+  user?: { login: string };
 }
 
 interface RequestOptions {
@@ -81,6 +95,13 @@ interface RequestOptions {
   safeForDryRun?: boolean;
   maxAttempts?: number;
 }
+
+/**
+ * Pause before every request that creates or changes content, following GitHub's guidance to
+ * keep content-generating requests around one per second so the secondary rate limit, shared by
+ * every job using the same token, is never approached.
+ */
+const WRITE_INTERVAL_MS = 1000;
 
 /** Longest single wait for a rate limit; the fifth secondary-limit retry would otherwise be 16 min. */
 const MAX_RATE_LIMIT_WAIT_SECONDS = 5 * 60;
@@ -126,6 +147,8 @@ export class GithubApi {
   private readonly baseUrl: string;
   private readonly defaultHeaders: Record<string, string>;
   private requestCount: number = 0;
+  private lastWriteAt: number = 0;
+  private writeQueue: Promise<void> = Promise.resolve();
 
   /**
    * Create a GithubApi helper object, if token is undefined requests won't be
@@ -157,6 +180,18 @@ export class GithubApi {
     return this.requestCount;
   }
 
+  /** Reopens an issue without touching its body. */
+  async reopenIssue(issueNumber: number) {
+    await this.request(
+      {
+        method: 'PATCH',
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),
+        data: { state: 'open' },
+      },
+      undefined
+    );
+  }
+
   async editIssueBodyAndEnsureOpen(issueNumber: number, newBody: string) {
     await this.request(
       {
@@ -174,27 +209,37 @@ export class GithubApi {
   /**
    * Fetch all comments on an issue, following pagination. Returns an empty
    * list in dry-run mode so update flows behave sensibly without hitting the
-   * (rate limited) GitHub API.
+   * (rate limited) GitHub API, unless `readInDryRun` asks for the real comments.
    */
-  async getIssueComments(issueNumber: number): Promise<GithubIssueComment[]> {
+  async getIssueComments(
+    issueNumber: number,
+    { readInDryRun = false }: { readInDryRun?: boolean } = {}
+  ): Promise<GithubIssueComment[]> {
     const perPage = 100;
     const comments: GithubIssueComment[] = [];
 
     let page = 1;
     while (true) {
-      const resp = await this.request<Array<{ body?: string }>>(
+      const resp = await this.request<
+        Array<{ body?: string; created_at?: string; user?: { login?: string } | null }>
+      >(
         {
           method: 'GET',
           url: Url.resolve(
             this.baseUrl,
             `issues/${encodeURIComponent(issueNumber)}/comments?per_page=${perPage}&page=${page}`
           ),
+          safeForDryRun: readInDryRun,
         },
         []
       );
 
       for (const comment of resp.data) {
-        comments.push({ body: comment.body ?? '' });
+        comments.push({
+          body: comment.body ?? '',
+          created_at: comment.created_at,
+          user: comment.user?.login ? { login: comment.user.login } : undefined,
+        });
       }
 
       if (resp.data.length < perPage) {
@@ -273,6 +318,21 @@ export class GithubApi {
     );
   }
 
+  /** Adds labels to an issue, keeping the ones it already has; unknown labels are created. */
+  async addLabels(issueNumber: number, labels: string[]) {
+    if (labels.length === 0) {
+      return;
+    }
+    await this.request(
+      {
+        method: 'POST',
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}/labels`),
+        data: { labels },
+      },
+      undefined
+    );
+  }
+
   async createIssue(title: string, body: string, labels?: string[]) {
     const resp = await this.request<GithubIssueMini>(
       {
@@ -322,6 +382,10 @@ export class GithubApi {
       }
 
       this.requestCount += 1;
+
+      if (options.method !== 'GET') {
+        await this.paceWrite();
+      }
 
       let response: Response;
       try {
@@ -377,5 +441,18 @@ export class GithubApi {
         data: (await response.json()) as T,
       };
     }
+  }
+
+  /** Writes take turns, so concurrent callers are spaced out too. */
+  private paceWrite(): Promise<void> {
+    const turn = this.writeQueue.then(async () => {
+      const waitMs = this.lastWriteAt + WRITE_INTERVAL_MS - Date.now();
+      if (waitMs > 0) {
+        await sleep(waitMs);
+      }
+      this.lastWriteAt = Date.now();
+    });
+    this.writeQueue = turn.catch(() => {});
+    return turn;
   }
 }
