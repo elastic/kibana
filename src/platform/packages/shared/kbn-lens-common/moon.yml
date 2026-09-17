@@ -68,7 +68,6 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/calculate-auto'
   - '@kbn/core-lifecycle-browser-mocks'
-  - '@kbn/lens-common-2'
 tags:
   - shared-common
   - package

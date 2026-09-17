@@ -20,12 +20,12 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { useStableCallback } from '@kbn/react-hooks';
-import type { LensApi } from '@kbn/lens-common-2';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBucketInterval,
@@ -116,11 +116,13 @@ export function UnifiedHistogramChart({
   }, []);
 
   const onApiAvailable = useCallback(
-    (api: LensApi) => {
+    (api: unknown) => {
       approximationSubscription.current?.unsubscribe();
-      approximationSubscription.current = api.approximationApplied$.subscribe((value) => {
-        setIsApproximationApplied(Boolean(value));
-      });
+      if (apiPublishesEsql(api)) {
+        approximationSubscription.current = api.approximationApplied$.subscribe((value) => {
+          setIsApproximationApplied(Boolean(value));
+        });
+      }
       consumerOnApiAvailable?.(api);
     },
     [consumerOnApiAvailable]

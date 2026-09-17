@@ -57,7 +57,6 @@
     "@kbn/palettes",
     "@kbn/esql-language",
     "@kbn/calculate-auto",
-    "@kbn/core-lifecycle-browser-mocks",
-    "@kbn/lens-common-2"
+    "@kbn/core-lifecycle-browser-mocks"
   ]
 }

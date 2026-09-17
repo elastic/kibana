@@ -44,7 +44,6 @@
     "@kbn/ebt-click",
     "@kbn/i18n-react",
     "@kbn/discover-session-constants",
-    "@kbn/lens-common-2",
     "@kbn/esql-browser"
   ]
 }
