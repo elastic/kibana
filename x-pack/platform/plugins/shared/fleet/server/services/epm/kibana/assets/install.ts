@@ -776,7 +776,9 @@ async function installKibanaSavedObjectsChunk({
     );
 
     const ambiguousRetries = toBeSavedObjects.map(({ id, type }) => {
-      const conflictError = ambiguousConflictErrors.find(({ id: errId }) => errId === id);
+      const conflictError = ambiguousConflictErrors.find(
+        ({ id: errId, type: errType }) => errId === id && errType === type
+      );
       if (conflictError && conflictError.error.type === 'ambiguous_conflict') {
         // Pick the destination with the most recent updatedAt; fall back to first if dates missing.
         // A destinationId is required: without it checkOriginConflicts will not skip the origin
@@ -811,18 +813,28 @@ async function installKibanaSavedObjectsChunk({
       });
 
     if (ambiguousResolveErrors?.length) {
-      logger.error(
-        `[Fleet] Failed to resolve ${
-          ambiguousResolveErrors.length
-        } ambiguous_conflict error(s) in space '${
-          options?.spaceId ?? DEFAULT_SPACE_ID
-        }': ${formatImportErrorsForLog(ambiguousResolveErrors)}`
+      // missing_references errors from the ambiguous recovery pass are tolerable — fold
+      // them into referenceErrors so the existing handler below resolves them normally.
+      const [ambiguousRefErrors, ambiguousFatalErrors] = partition(
+        ambiguousResolveErrors,
+        (e) => e?.error?.type === 'missing_references'
       );
-      throw new KibanaSOReferenceError(
-        `Encountered ${
-          ambiguousResolveErrors.length
-        } errors resolving ambiguous conflicts: ${formatImportErrorsForLog(ambiguousResolveErrors)}`
-      );
+      referenceErrors.push(...ambiguousRefErrors);
+
+      if (ambiguousFatalErrors.length) {
+        logger.error(
+          `[Fleet] Failed to resolve ${
+            ambiguousFatalErrors.length
+          } ambiguous_conflict error(s) in space '${
+            options?.spaceId ?? DEFAULT_SPACE_ID
+          }': ${formatImportErrorsForLog(ambiguousFatalErrors)}`
+        );
+        throw new KibanaSOReferenceError(
+          `Encountered ${
+            ambiguousFatalErrors.length
+          } errors resolving ambiguous conflicts: ${formatImportErrorsForLog(ambiguousFatalErrors)}`
+        );
+      }
     }
 
     allSuccessResults = allSuccessResults.concat(ambiguousSuccessResults);

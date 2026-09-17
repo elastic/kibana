@@ -187,6 +187,44 @@ describe('installKibanaSavedObjects', () => {
     ).rejects.toThrow(/resolving ambiguous conflicts/);
   });
 
+  it('folds missing_references from ambiguous resolve pass into the reference-error handler instead of throwing', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-1', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+    // First import: ambiguous_conflict
+    const ambiguousResponse = createImportResponse([ambiguousError]);
+    // Ambiguous resolve pass re-surfaces a missing_references error (tolerable)
+    const ambiguousResolveResponse = createImportResponse([
+      createImportError(asset, 'missing_references'),
+    ]);
+    // Reference-error resolve pass succeeds
+    const refResolveResponse = createImportResponse([], [createImportSuccess(asset)]);
+
+    mockImporter.import.mockResolvedValueOnce(ambiguousResponse);
+    mockImporter.resolveImportErrors
+      .mockResolvedValueOnce(ambiguousResolveResponse)
+      .mockResolvedValueOnce(refResolveResponse);
+
+    // Should NOT throw — missing_references from the ambiguous pass is recoverable
+    await expect(
+      installKibanaSavedObjects({
+        savedObjectsImporter: mockImporter,
+        logger: mockLogger,
+        kibanaAssets: [asset],
+      })
+    ).resolves.toBeDefined();
+
+    // resolveImportErrors called twice: once for ambiguous, once for missing_references
+    expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(2);
+  });
+
   it('does not throw on empty destinations array in ambiguous_conflict error', async () => {
     const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
     const ambiguousError: SavedObjectsImportFailure = {
