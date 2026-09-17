@@ -61,11 +61,6 @@ the entry. The search deliberately does not set `ignore_unavailable`: with it,
 an index the caller cannot read would look empty and be listed anyway. The
 agent prompt's AI-index catalog uses the same rule.
 
-Two things follow. An AI Index that is not listed can still be fetched,
-updated or deleted by id. And a wildcard `dest.value` that matches no index
-the caller can read looks the same as an index that does not exist yet
-(Elasticsearch returns 404, not 403), so it is listed.
-
 ## Querying AI Indices
 
 `POST /api/context_engine/ai_index/_query` runs caller-supplied ES|QL as the
