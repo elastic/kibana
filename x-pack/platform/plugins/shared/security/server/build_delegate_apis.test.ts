@@ -16,6 +16,7 @@ import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import { securityMock } from './mocks';
+import { serviceAccountsServiceMock } from './service_accounts/service_accounts_service.mock';
 import { getPrintableSessionId } from './session_management';
 import { sessionMock } from './session_management/session.mock';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
@@ -24,6 +25,7 @@ describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationServiceMock.createStart>;
   let auditService: ReturnType<typeof auditServiceMock.create>;
   let session: ReturnType<typeof sessionMock.create>;
+  let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart> | null;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let api: CoreSecurityDelegateContract;
 
@@ -31,10 +33,12 @@ describe('buildSecurityApi', () => {
     authc = authenticationServiceMock.createStart();
     auditService = auditServiceMock.create();
     session = sessionMock.create();
+    serviceAccounts = serviceAccountsServiceMock.createStart();
     logger = loggingSystemMock.createLogger();
     api = buildSecurityApi({
       getAuthc: () => authc,
       getSession: () => session,
+      getServiceAccounts: () => serviceAccounts,
       audit: auditService,
       config: { uiam: { enabled: false } },
       logger,
@@ -162,6 +166,86 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('serviceAccounts.isEnabled', () => {
+    const buildApiWithConfig = (config: Parameters<typeof buildSecurityApi>[0]['config']) =>
+      buildSecurityApi({
+        getAuthc: () => authc,
+        getSession: () => session,
+        getServiceAccounts: () => serviceAccounts,
+        audit: auditService,
+        config,
+        logger,
+      });
+
+    it('returns true when service accounts are enabled', () => {
+      expect(
+        buildApiWithConfig({ serviceAccounts: { enabled: true } }).serviceAccounts.isEnabled()
+      ).toBe(true);
+    });
+
+    it('returns false when service accounts are disabled', () => {
+      expect(
+        buildApiWithConfig({ serviceAccounts: { enabled: false } }).serviceAccounts.isEnabled()
+      ).toBe(false);
+    });
+
+    it('returns false when the setting is not available, as is the case outside of serverless', () => {
+      expect(buildApiWithConfig({}).serviceAccounts.isEnabled()).toBe(false);
+    });
+  });
+
+  describe('serviceAccounts.create', () => {
+    const params = { name: 'nightshift-relay' };
+
+    it('resolves the service lazily rather than at build time', () => {
+      const getServiceAccounts = jest.fn().mockReturnValue(serviceAccounts);
+
+      buildSecurityApi({
+        getAuthc: () => authc,
+        getSession: () => session,
+        getServiceAccounts,
+        audit: auditService,
+        config: {},
+        logger,
+      });
+
+      expect(getServiceAccounts).not.toHaveBeenCalled();
+    });
+
+    it('properly delegates to the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await api.serviceAccounts.create(request, params);
+
+      expect(serviceAccounts!.create).toHaveBeenCalledTimes(1);
+      expect(serviceAccounts!.create).toHaveBeenCalledWith(request, params);
+    });
+
+    it('returns the result from the service', async () => {
+      const created = {
+        id: 'service-account-id',
+        type: 'project' as const,
+        name: 'nightshift-relay',
+        organization_id: 'organization-id',
+        role_assignments: {},
+        assumable_by: [],
+      };
+      serviceAccounts!.create.mockResolvedValue(created);
+
+      await expect(
+        api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
+      ).resolves.toBe(created);
+    });
+
+    it('throws when service accounts are not enabled', async () => {
+      serviceAccounts = null;
+
+      await expect(
+        api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
+    });
+  });
+
   describe('config.uiam', () => {
     describe('when uiam is enabled', () => {
       beforeEach(() => {
@@ -171,6 +255,7 @@ describe('buildSecurityApi', () => {
         api = buildSecurityApi({
           getAuthc: () => authc,
           getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
           audit: auditService,
           config: { uiam: { enabled: true } },
           logger,
@@ -232,6 +317,7 @@ describe('buildSecurityApi', () => {
         api = buildSecurityApi({
           getAuthc: () => authc,
           getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
           audit: auditService,
           config: { uiam: { enabled: false } },
           logger,
@@ -251,6 +337,7 @@ describe('buildSecurityApi', () => {
         api = buildSecurityApi({
           getAuthc: () => authc,
           getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
           audit: auditService,
           config: {},
           logger,

@@ -4,6 +4,7 @@ Backing stream docs, Knowledge Indicators, and rule occurrences for seed_nightsh
 
 Invoked by seed_nightshift.sh; not meant to be run standalone unless for debugging.
 """
+
 from __future__ import annotations
 
 import base64
@@ -153,18 +154,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-001": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "catalog-service",
             "name": "catalog-service",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "dependency",
+            "subtype": "database",
             "feature_id": "web-frontend-auth-db",
             "source": "web-frontend",
             "target": "auth-database",
@@ -173,18 +177,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "notification-service",
             "name": "notification-service",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "search-api",
             "name": "search-api",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
@@ -193,6 +200,7 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-002": [
         {
             "type": "dependency",
+            "subtype": "grpc",
             "feature_id": "payment-to-ledger",
             "source": "payment-service",
             "target": "ledger-service",
@@ -201,6 +209,7 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "infrastructure",
+            "subtype": "infrastructure",
             "feature_id": "payment-service-pods",
             "title": "payment-service pods",
             "workloads": ["payment-gateway", "payment-settlement-worker"],
@@ -208,24 +217,28 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "billing-api",
             "name": "billing-api",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "dependency",
+            "subtype": "database",
             "feature_id": "payment-auth-db",
             "source": "payment-service",
             "target": "auth-database",
@@ -236,18 +249,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-003": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "infrastructure",
+            "subtype": "infrastructure",
             "feature_id": "es-data-tier",
             "title": "Elasticsearch data tier",
             "workloads": ["es-data-1", "es-data-2", "es-data-4"],
@@ -255,18 +271,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "catalog-service",
             "name": "catalog-service",
             "stream_name": "logs.web-frontend",
@@ -275,18 +294,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-004": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "dependency",
+            "subtype": "udp",
             "feature_id": "api-gateway-coredns",
             "source": "api-gateway",
             "target": "coredns",
@@ -295,12 +317,14 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
@@ -309,24 +333,28 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-005": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "dependency",
+            "subtype": "tls",
             "feature_id": "ingress-api-gateway",
             "source": "ingress-controller",
             "target": "api-gateway",
@@ -337,12 +365,14 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-006": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "dependency",
+            "subtype": "http",
             "feature_id": "order-processors-schema",
             "source": "order-processors",
             "target": "schema-registry",
@@ -351,24 +381,28 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "fulfillment-api",
             "name": "fulfillment-api",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "inventory-service",
             "name": "inventory-service",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
@@ -377,18 +411,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-007": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "catalog-service",
             "name": "catalog-service",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "search-api",
             "name": "search-api",
             "stream_name": "logs.web-frontend",
@@ -397,30 +434,35 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-008": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "catalog-service",
             "name": "catalog-service",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "api-gateway",
             "name": "api-gateway",
             "stream_name": "logs.api-gateway",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "dependency",
+            "subtype": "http",
             "feature_id": "search-catalog",
             "source": "search-api",
             "target": "catalog-service",
@@ -429,6 +471,7 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "notification-service",
             "name": "notification-service",
             "stream_name": "logs.api-gateway",
@@ -437,18 +480,21 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
     "evt-009": [
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "web-frontend",
             "name": "web-frontend",
             "stream_name": "logs.web-frontend",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-service",
             "name": "payment-service",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "dependency",
+            "subtype": "database",
             "feature_id": "gateway-auth-db",
             "source": "api-gateway",
             "target": "auth-database",
@@ -457,24 +503,28 @@ BLAST_RADIUS_BY_EVENT_ID: dict[str, list[dict]] = {
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "order-processing",
             "name": "order-processing",
             "stream_name": "logs.order-processing",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "billing-api",
             "name": "billing-api",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "payment-gateway",
             "name": "payment-gateway",
             "stream_name": "logs.payment-service",
         },
         {
             "type": "entity",
+            "subtype": "service",
             "feature_id": "ledger-service",
             "name": "ledger-service",
             "stream_name": "logs.payment-service",
@@ -507,7 +557,9 @@ def lengthen_significant_events_ndjson(ndjson: str) -> str:
             obj["summary"] = lengthen_for_truncation_demo(rich)
         for signal in obj.get("signals", []):
             if isinstance(signal, dict) and isinstance(signal.get("description"), str):
-                signal["description"] = lengthen_for_truncation_demo(signal["description"])
+                signal["description"] = lengthen_for_truncation_demo(
+                    signal["description"]
+                )
         output.append(json.dumps(obj, separators=(",", ":")))
     return "\n".join(output) + "\n"
 
@@ -524,6 +576,7 @@ def prepare_ki_feature_for_seed(feature: dict) -> dict:
         )
         prepared["description"] = lengthen_for_truncation_demo(rich)
     return prepared
+
 
 # Backing streams are logs.* only (Nightshift demo does not use metrics streams yet).
 STREAMS = [
@@ -566,7 +619,10 @@ KI_FEATURES_BY_STREAM: dict[str, list[dict]] = {
                 "User-facing web application serving checkout, browse, and search flows. "
                 "P95 request latency spiked after the api-gateway v2.8.1 rollout."
             ),
-            "properties": {"service.name": "web-frontend", "deployment.version": "v2.8.1"},
+            "properties": {
+                "service.name": "web-frontend",
+                "deployment.version": "v2.8.1",
+            },
             "confidence": 88,
             "evidence": [
                 "service.name = web-frontend",
@@ -588,7 +644,10 @@ KI_FEATURES_BY_STREAM: dict[str, list[dict]] = {
                 "Edge API gateway routing authenticated traffic to backend services. "
                 "Auth middleware on v2.8.1 performs synchronous DB lookups under load."
             ),
-            "properties": {"service.name": "api-gateway", "deployment.version": "v2.8.1"},
+            "properties": {
+                "service.name": "api-gateway",
+                "deployment.version": "v2.8.1",
+            },
             "confidence": 91,
             "evidence": [
                 "service.name = api-gateway",
@@ -655,7 +714,10 @@ KI_FEATURES_BY_STREAM: dict[str, list[dict]] = {
                 "Internal DNS resolver scaled below peak demand during maintenance, "
                 "causing SERVFAIL spikes in us-east-1 AZ-b."
             ),
-            "properties": {"service.name": "coredns", "cloud.availability_zone": "us-east-1b"},
+            "properties": {
+                "service.name": "coredns",
+                "cloud.availability_zone": "us-east-1b",
+            },
             "confidence": 79,
             "evidence": [
                 "dns.response_code = SERVFAIL",
@@ -748,6 +810,97 @@ KI_FEATURES_BY_STREAM: dict[str, list[dict]] = {
 }
 
 
+# Nightshift only surfaces a blast_radius entity when its feature_id resolves to a knowledge
+# indicator with subtype "service" — anything unresolved is dropped rather than shown as a stream
+# name. The entries above cover the origin services; these are the downstream ones they impact.
+IMPACTED_SERVICE_DESCRIPTIONS: dict[str, str] = {
+    "billing-api": (
+        "Invoicing API that settles completed orders. Charge submissions back up behind "
+        "payment-service retries."
+    ),
+    "catalog-service": (
+        "Product catalog reads backing browse and category pages. Slow responses surface as "
+        "empty shelves on the storefront."
+    ),
+    "fulfillment-api": (
+        "Warehouse fulfilment hand-off. Orders stall in 'awaiting dispatch' while upstream "
+        "processing retries."
+    ),
+    "inventory-service": (
+        "Stock level lookups and reservations. Oversell risk rises when reservations are not "
+        "confirmed promptly."
+    ),
+    "ledger-service": (
+        "Double-entry ledger recording settled payments. Unreconciled entries accumulate while "
+        "payment-service is degraded."
+    ),
+    "notification-service": (
+        "Transactional email and push delivery. Order and payment notifications queue when the "
+        "gateway sheds load."
+    ),
+    "payment-gateway": (
+        "Card authorisation front end for payment-service. Authorisation attempts time out under "
+        "heap pressure."
+    ),
+    "search-api": (
+        "Product search and typeahead. Query latency tracks web-frontend degradation."
+    ),
+}
+
+
+def build_impacted_service_feature(feature_id: str, stream_name: str) -> dict:
+    return {
+        "id": feature_id,
+        "stream_name": stream_name,
+        "type": "entity",
+        "subtype": "service",
+        "title": feature_id,
+        "description": IMPACTED_SERVICE_DESCRIPTIONS.get(
+            feature_id, f"Downstream service impacted through {stream_name}."
+        ),
+        "properties": {"service.name": feature_id},
+        "confidence": 78,
+        "evidence": [f"service.name = {feature_id}"],
+        "tags": ["downstream"],
+    }
+
+
+# Deriving a feature for *every* blast_radius entity would make impacted services resolve 100% of
+# the time locally, so the path Nightshift takes on real clusters — an entity whose feature_id
+# matches no knowledge indicator, which is dropped from the UI — would never be exercised in dev.
+# These are left unseeded on purpose.
+UNRESOLVED_IMPACTED_SERVICE_IDS: frozenset[str] = frozenset({"search-api"})
+
+
+def add_impacted_service_features() -> None:
+    """Derived, not hand-written, so a new blast_radius entity cannot silently become invisible."""
+    seeded = {
+        feature["id"]
+        for features in KI_FEATURES_BY_STREAM.values()
+        for feature in features
+    }
+    for entries in BLAST_RADIUS_BY_EVENT_ID.values():
+        for entry in entries:
+            # Only entity rows are derived: Nightshift no longer filters on the row type, but the
+            # infrastructure rows seeded here (pods, an Elasticsearch data tier) really are
+            # infrastructure, so giving them a "service" indicator would be fabricated data.
+            if (
+                entry["type"] != "entity"
+                or entry["feature_id"] in seeded
+                or entry["feature_id"] in UNRESOLVED_IMPACTED_SERVICE_IDS
+            ):
+                continue
+            seeded.add(entry["feature_id"])
+            KI_FEATURES_BY_STREAM.setdefault(entry["stream_name"], []).append(
+                build_impacted_service_feature(
+                    entry["feature_id"], entry["stream_name"]
+                )
+            )
+
+
+add_impacted_service_features()
+
+
 def es_request(
     method: str,
     path: str,
@@ -809,7 +962,9 @@ def ensure_backing_data_stream(name: str) -> None:
     )
 
 
-def kibana_request(method: str, path: str, body: dict | None = None) -> tuple[int, object]:
+def kibana_request(
+    method: str, path: str, body: dict | None = None
+) -> tuple[int, object]:
     payload = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(
         f"{KIBANA_URL}{path}",
@@ -914,7 +1069,9 @@ def enrich_doc(index: str, ts: dt.datetime, minutes_to_anchor: float, seq: int) 
                 "service.name": "payment-service",
                 "kubernetes.pod.name": pod,
                 "jvm.memory.heap.used": min(heap, 2_147_483_648),
-                "message": "pod killed: OOMKilled (exit code 137)" if seq % 4 == 0 else "processing batch",
+                "message": "pod killed: OOMKilled (exit code 137)"
+                if seq % 4 == 0
+                else "processing batch",
             }
         )
     elif index == "logs.elasticsearch":
@@ -934,7 +1091,9 @@ def enrich_doc(index: str, ts: dt.datetime, minutes_to_anchor: float, seq: int) 
     elif index == "logs.dns-resolver":
         base.update(
             {
-                "dns.response_code": "SERVFAIL" if minutes_to_anchor <= 20 else "NOERROR",
+                "dns.response_code": "SERVFAIL"
+                if minutes_to_anchor <= 20
+                else "NOERROR",
                 "message": "SERVFAIL resolving payments.internal.svc",
             }
         )
@@ -996,7 +1155,9 @@ def seed_backing_streams() -> None:
             minutes_to_anchor = (anchor - bucket).total_seconds() / 60
             count = docs_per_bucket(shape, minutes_to_anchor, rng)
             for i in range(count):
-                ts = bucket + dt.timedelta(seconds=i * (BUCKET_MINUTES * 60 // max(count, 1)))
+                ts = bucket + dt.timedelta(
+                    seconds=i * (BUCKET_MINUTES * 60 // max(count, 1))
+                )
                 doc = enrich_doc(index, ts, minutes_to_anchor, seq)
                 lines.append(json.dumps({"create": {}}))
                 lines.append(json.dumps(doc))
@@ -1054,8 +1215,9 @@ def seed_ki_features() -> None:
             f"  - Set KIBANA_URL to include your base path (detected: {KIBANA_URL})\n"
             "  - Ensure Kibana is running from this repo with Streams + Significant Events\n"
             "  - Re-run with --clean so backing streams are recreated as data streams\n"
-            "\nEntity pills still render via detection signals, but Summary/Evidence "
-            "in the entity flyout will be thinner without KI features.",
+            "\nWithout KI features Nightshift shows no impacted services at all: a "
+            "blast_radius entity is only surfaced when it resolves to a knowledge "
+            'indicator with subtype "service".',
             file=sys.stderr,
         )
         return
@@ -1069,9 +1231,7 @@ def bulk_create(index: str, documents: list[dict]) -> int:
         lines.append(json.dumps({"create": {}}))
         lines.append(json.dumps(document))
 
-    result = es_request(
-        "POST", f"/{index}/_bulk?refresh=true", "\n".join(lines) + "\n"
-    )
+    result = es_request("POST", f"/{index}/_bulk?refresh=true", "\n".join(lines) + "\n")
     if result is None or result.get("errors"):
         raise SystemExit(
             f"ERROR: bulk index into {index} failed: {json.dumps(result)[:500]}"
@@ -1082,7 +1242,9 @@ def bulk_create(index: str, documents: list[dict]) -> int:
 def seed_detection_occurrences() -> None:
     detections = parse_seed_detections()
     if not detections:
-        raise SystemExit("ERROR: no Nightshift detections were provided for occurrence seeding")
+        raise SystemExit(
+            "ERROR: no Nightshift detections were provided for occurrence seeding"
+        )
     rule_uuids = [detection["rule_uuid"] for detection in detections]
 
     es_request(
@@ -1179,5 +1341,8 @@ if __name__ == "__main__":
     try:
         main()
     except urllib.error.URLError as err:
-        print(f"ERROR: request failed — is Elasticsearch/Kibana running? {err}", file=sys.stderr)
+        print(
+            f"ERROR: request failed — is Elasticsearch/Kibana running? {err}",
+            file=sys.stderr,
+        )
         sys.exit(1)

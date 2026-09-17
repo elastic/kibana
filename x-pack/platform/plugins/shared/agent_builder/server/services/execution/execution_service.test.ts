@@ -88,9 +88,17 @@ describe('AgentExecutionService', () => {
   } as any;
 
   const attachmentsService: AttachmentServiceStart = {
-    validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
+    validateAttachmentInputs: jest.fn().mockImplementation(async (attachments) =>
+      attachments?.map((attachment: { type: string; data: unknown }) => ({
+        id: 'attachment-1',
+        type: attachment.type,
+        data: attachment.data,
+      }))
+    ),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn().mockReturnValue([]),
+    createStateManager: jest.fn(),
+    mergeAttachmentInputs: jest.fn(),
   };
 
   const service = createAgentExecutionService({
@@ -110,6 +118,14 @@ describe('AgentExecutionService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (attachmentsService.validateAttachmentInputs as jest.Mock).mockImplementation(
+      async (attachments) =>
+        attachments?.map((attachment: { type: string; data: unknown }) => ({
+          id: 'attachment-1',
+          type: attachment.type,
+          data: attachment.data,
+        }))
+    );
     mockExecutionClient.create.mockResolvedValue({
       executionId: 'test-id',
       '@timestamp': new Date().toISOString(),
@@ -157,7 +173,7 @@ describe('AgentExecutionService', () => {
           params: { executionId: result.executionId },
           scope: ['agent-builder'],
         }),
-        { request }
+        { request, cloneApiKey: true }
       );
     });
   });
@@ -236,10 +252,9 @@ describe('AgentExecutionService', () => {
     });
 
     it('validates attachments and throws on invalid attachment', async () => {
-      (attachmentsService.validate as jest.Mock).mockResolvedValue({
-        valid: false,
-        error: 'boom',
-      });
+      (attachmentsService.validateAttachmentInputs as jest.Mock).mockRejectedValue(
+        new Error('Attachment validation failed: boom')
+      );
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -257,6 +272,10 @@ describe('AgentExecutionService', () => {
         })
       ).rejects.toThrow('Attachment validation failed: boom');
 
+      expect(attachmentsService.validateAttachmentInputs).toHaveBeenCalledWith(
+        [{ type: 'some_type', data: { foo: 'bar' } }],
+        request
+      );
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
     });
 

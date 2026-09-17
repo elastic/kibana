@@ -47,6 +47,10 @@ export function createServiceFlyoutRenderer({
       telemetry={{ client: telemetryClient, source: deps.source }}
       historyKey={deps.flyoutHistoryKey}
       onClose={deps.onClose}
+      // Discover computes its RED metric charts from the raw documents matching
+      // the query, so the flyout charts stay document-based there to agree with
+      // them (the rollup-based APM chart APIs diverge under sampling).
+      preferDocumentBasedCharts
     />
   );
 }

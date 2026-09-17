@@ -67,6 +67,7 @@ export const getCasesByAlertIdStepCommonDefinition: CommonStepDefinition<
   if: \${{ steps.check_existing_cases.output.cases.length === 0 }}
   with:
     title: "New incident"
+    description: "Created automatically because the alert had no existing case"
     owner: "securitySolution"
 \`\`\``,
     ],

@@ -1,0 +1,106 @@
+{
+  "sha1": "60d95629aa0fc2bfb4de1bc3b5630c5899ae5076",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a389cee79d09b10-b3588691f578cbc",
+      "title": "Fleet IaC Provisioner render route when the feature flag is off returns 404 with IaC Provisioner is not enabled for an authorized render request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template_flag_off.spec.ts",
+        "line": 30,
+        "column": 31
+      }
+    },
+    {
+      "id": "c44a76f06065e66-7c7f2207db1899e",
+      "title": "Fleet IaC Provisioner render route rejects a caller without Fleet privileges with 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "c44a76f06065e66-496f58bcfa7e908",
+      "title": "Fleet IaC Provisioner render route returns 400 when flow is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 47,
+        "column": 25
+      }
+    },
+    {
+      "id": "c44a76f06065e66-7bd4dffb0c9ec1b",
+      "title": "Fleet IaC Provisioner render route returns 400 when workflow is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 60,
+        "column": 13
+      }
+    },
+    {
+      "id": "c44a76f06065e66-852233dca74842f",
+      "title": "Fleet IaC Provisioner render route returns 400 for an empty integrations array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "c44a76f06065e66-bdb2056374d0063",
+      "title": "Fleet IaC Provisioner render route returns 400 when more than 10 integrations are sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 80,
+        "column": 51
+      }
+    },
+    {
+      "id": "c44a76f06065e66-54b1445385f881b",
+      "title": "Fleet IaC Provisioner render route returns 404 for an authorized request naming an unknown package",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 101,
+        "column": 23
+      }
+    }
+  ]
+}

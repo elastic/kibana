@@ -32,6 +32,7 @@ import {
   scheduleDeleteInactiveNodesTaskDefinition,
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
+import { TaskExecutionControlService } from './execution_control';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskManagerConfig } from './config';
 import type { Middleware } from './lib/middleware';
@@ -42,17 +43,27 @@ import {
   BACKGROUND_TASK_NODE_SO_NAME,
   TASK_SO_NAME,
   INVALIDATE_API_KEY_SO_NAME,
+  TASK_EXECUTION_CONTROL_SO_NAME,
 } from './saved_objects';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import type { AggregationOpts, FetchResult, SearchOpts } from './task_store';
 import { TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
-import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
+import {
+  backgroundTaskUtilizationRoute,
+  healthRoute,
+  metricsRoute,
+  executionControlRoutes,
+} from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
-import { registerTaskManagerUsageCollector } from './usage';
+import {
+  registerEventLogTelemetryTask,
+  registerTaskManagerUsageCollector,
+  scheduleEventLogTelemetryTask,
+} from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
@@ -156,6 +167,7 @@ export class TaskManagerPlugin
   private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private kibanaDiscoveryService?: KibanaDiscoveryService;
+  private executionControlService?: TaskExecutionControlService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
@@ -266,6 +278,16 @@ export class TaskManagerPlugin
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
+    executionControlRoutes({
+      router,
+      logger: this.logger,
+      // getStartServices resolves after start(), by which point the service and
+      // the full task-type dictionary are available on every node.
+      getSecurity: () => core.getStartServices().then(([coreStart]) => coreStart.security),
+      getExecutionControlService: () =>
+        core.getStartServices().then(() => this.executionControlService!),
+      getDefinitions: () => this.definitions,
+    });
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
@@ -289,10 +311,13 @@ export class TaskManagerPlugin
         usageCollection,
         monitoredHealth$,
         monitoredUtilization$,
-        this.config.unsafe.exclude_task_types
+        this.config.unsafe.exclude_task_types,
+        () => core.getStartServices().then(([, , startContract]) => startContract),
+        this.logger
       );
     }
 
+    registerEventLogTelemetryTask(this.logger, core.getStartServices, this.definitions);
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
@@ -370,6 +395,7 @@ export class TaskManagerPlugin
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
       INVALIDATE_API_KEY_SO_NAME,
+      TASK_EXECUTION_CONTROL_SO_NAME,
     ]);
 
     this.kibanaDiscoveryService = new KibanaDiscoveryService({
@@ -383,6 +409,16 @@ export class TaskManagerPlugin
     if (this.shouldRunBackgroundTasks) {
       this.kibanaDiscoveryService.start().catch(() => {});
     }
+
+    // Runs on every node (including UI-only nodes) so the pause/resume API and
+    // health output are consistent everywhere; enforcement only happens where a
+    // TaskPollingLifecycle exists (background-task nodes).
+    this.executionControlService = new TaskExecutionControlService({
+      savedObjectsRepository,
+      logger: this.logger,
+      config: this.config.execution_control,
+    });
+    this.executionControlService.start().catch(() => {});
 
     const serializer = savedObjects.createSerializer();
     const apiKeyStrategy = createApiKeyStrategy(
@@ -460,6 +496,7 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+        executionControlService: this.executionControlService,
         taskPartitioner,
         startingCapacity,
         apiKeyStrategy,
@@ -476,6 +513,7 @@ export class TaskManagerPlugin
       adHocTaskCounter: this.adHocTaskCounter,
       taskDefinitions: this.definitions,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      executionControlService: this.executionControlService,
       startingCapacity,
     }).subscribe((stat) => this.monitoringStats$.next(stat));
 
@@ -485,6 +523,7 @@ export class TaskManagerPlugin
       reset$: this.resetMetrics$,
       taskPollingLifecycle: this.taskPollingLifecycle,
       taskManagerMetricsCollector: this.taskManagerMetricsCollector,
+      definitions: this.definitions,
     }).subscribe((metric) => this.metrics$.next(metric));
 
     const taskScheduling = new TaskScheduling({
@@ -495,6 +534,7 @@ export class TaskManagerPlugin
       taskPollingLifecycle: this.taskPollingLifecycle,
     });
 
+    scheduleEventLogTelemetryTask(this.logger, taskScheduling).catch(() => {});
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
     scheduleInvalidateApiKeyTask(
       this.logger,
@@ -551,6 +591,8 @@ export class TaskManagerPlugin
     if (this.taskPollingLifecycle) {
       this.taskPollingLifecycle.stop();
     }
+
+    this.executionControlService?.stop();
 
     if (this.kibanaDiscoveryService?.isStarted()) {
       this.kibanaDiscoveryService.stop();

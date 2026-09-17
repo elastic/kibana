@@ -170,52 +170,20 @@ describe('DataIngestStatus polling gate', () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
-  it.each([
-    { respectPreExistingData: undefined, expected: true },
-    { respectPreExistingData: true, expected: true },
-    { respectPreExistingData: false, expected: false },
-  ])(
-    'sends respectPreExistingData=$expected to the has-data endpoint when the prop is $respectPreExistingData',
-    ({ respectPreExistingData, expected }) => {
-      mockUseFetcher.mockReturnValue({
-        data: undefined,
-        status: FETCH_STATUS.LOADING,
-        refetch: jest.fn(),
-      });
-
-      renderStatus(respectPreExistingData === undefined ? {} : { respectPreExistingData });
-
-      const fetcherCallback = mockUseFetcher.mock.calls[0][0];
-      const callApi = jest.fn();
-      fetcherCallback(callApi);
-
-      expect(callApi).toHaveBeenCalledWith(
-        'GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data',
-        expect.objectContaining({
-          params: expect.objectContaining({
-            query: expect.objectContaining({ respectPreExistingData: expected }),
-          }),
-        })
-      );
-    }
-  );
-
-  it('stops polling and notifies when hasPreExistingData is true even without required data', () => {
-    const refetch = jest.fn();
-    const onDataReceived = jest.fn();
+  it('does not send query parameters to the has-data endpoint', () => {
     mockUseFetcher.mockReturnValue({
-      data: { hasData: false, hasLogs: false, hasMetrics: false, hasPreExistingData: true },
-      status: FETCH_STATUS.SUCCESS,
-      refetch,
+      data: undefined,
+      status: FETCH_STATUS.LOADING,
+      refetch: jest.fn(),
     });
 
-    renderStatus({ onDataReceived });
+    renderStatus({});
 
-    act(() => {
-      jest.advanceTimersByTime(FETCH_INTERVAL_MS * 3);
-    });
+    const fetcherCallback = mockUseFetcher.mock.calls[0][0];
+    const callApi = jest.fn();
+    fetcherCallback(callApi);
 
-    expect(refetch).not.toHaveBeenCalled();
-    expect(onDataReceived).toHaveBeenCalledTimes(1);
+    const [, options] = callApi.mock.calls[0];
+    expect(options.params).not.toHaveProperty('query');
   });
 });

@@ -43,9 +43,10 @@ const buildItem = (
   dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
-  totalRuleCount: 1,
+  total_rule_count: 1,
   outcome: 'dispatched',
   episode_count: 3,
+  episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
   ...overrides,
@@ -86,7 +87,7 @@ describe('PoliciesExecutionHistoryTable', () => {
 
     expect(screen.getByText('My Policy')).toBeInTheDocument();
     expect(screen.getByText('My Rule')).toBeInTheDocument();
-    expect(screen.getByText('dispatched')).toBeInTheDocument();
+    expect(screen.getByText('Dispatched')).toBeInTheDocument();
     expect(screen.getByText('My Workflow')).toBeInTheDocument();
     expect(screen.getByText(/2026-05-05/)).toBeInTheDocument();
   });
@@ -104,7 +105,7 @@ describe('PoliciesExecutionHistoryTable', () => {
     expect(screen.queryByRole('columnheader', { name: /Episodes/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('columnheader', { name: /Action groups/i })).not.toBeInTheDocument();
     // Other columns remain
-    expect(screen.getByRole('columnheader', { name: /Policy/i })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: /Action policy/i })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /Workflows/i })).toBeInTheDocument();
   });
 
@@ -113,7 +114,7 @@ describe('PoliciesExecutionHistoryTable', () => {
 
     expect(screen.queryByRole('columnheader', { name: /Rules/i })).not.toBeInTheDocument();
     expect(screen.queryByText('My Rule')).not.toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /Policy/i })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: /Action policy/i })).toBeInTheDocument();
   });
 
   it('calls onPolicyClick when the policy link is clicked', async () => {

@@ -18,11 +18,15 @@ export {
   replaySignificantEventsSnapshot,
   cleanSignificantEventsDataStreams,
 } from './replay_logs_snapshot';
+export type { CleanSignificantEventsDataStreamsOptions } from './replay_logs_snapshot';
 
 export type { ReplayStats } from './replay_into_managed_stream';
 export {
   deleteTemporaryReplayIndices,
   replayIntoManagedStream,
+  resetMemoryPages,
+  replayIntoMemoryPages,
+  shiftSnapshotTimestamp,
 } from './replay_into_managed_stream';
 
 export { replayKnowledgeIndicatorsSnapshot } from './replay_knowledge_indicators_snapshot';
@@ -35,6 +39,7 @@ export {
 } from './load_from_snapshot';
 
 export { canonicalKIFeaturesFromExpectedGroundTruth } from './canonical_ki_features';
+export type { ReplayShift } from './canonical_detections';
 export { canonicalDetectionsFromGroundTruth } from './canonical_detections';
 export { canonicalDiscoveryFromGroundTruth } from './canonical_discoveries';
 export { canonicalSignificantEventFromGroundTruth } from './canonical_significant_event';

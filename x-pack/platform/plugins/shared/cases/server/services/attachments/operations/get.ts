@@ -16,11 +16,7 @@ import {
 import { getAttachmentSavedObjectType } from '../../../common/attachments';
 import { isSOError } from '../../../common/error';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import type {
-  AttachmentPersistedAttributes,
-  AttachmentTransformedAttributes,
-  AttachmentSavedObjectTransformed,
-} from '../../../common/types/attachments_v1';
+import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
 import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments_v1';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -35,17 +31,21 @@ import {
 } from '../../../../common/constants/attachments';
 import { NodeBuilderOperators, buildFilter, combineFilters } from '../../../client/utils';
 import type {
-  AttachmentMode,
   AttachmentTotals,
   DocumentAttachmentAttributesV2,
 } from '../../../../common/types/domain';
-import { AttachmentType, DocumentAttachmentAttributesRtV2 } from '../../../../common/types/domain';
+import {
+  AttachmentType,
+  DocumentAttachmentAttributesRtV2,
+  UnifiedAttachmentAttributesRt,
+} from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
   EventIdsAggsResult,
   GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
   GetAttachmentArgs,
+  GetUnifiedAttachmentsByTypesArgs,
   MixSavedObjectResponse,
   ServiceContext,
 } from '../types';
@@ -60,14 +60,13 @@ import {
 } from '../../so_references';
 import { partitionByCaseAssociation } from '../../../common/partitioning';
 import { getCaseReferenceId } from '../../../common/references';
-import { transformAttributesForMode } from './utils';
+import { toUnifiedAttributes } from './utils';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
 
   public async bulkGet(
-    savedObjectIds: string[],
-    mode: AttachmentMode
+    savedObjectIds: string[]
   ): Promise<BulkOptionalAttributes<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(
@@ -84,10 +83,7 @@ export class AttachmentGetter {
 
       const merged = this.mergeBulkGetResults(response.saved_objects);
 
-      if (mode === 'legacy') {
-        return this.transformAndDecodeBulkGetResponseLegacy(merged);
-      }
-      return this.transformAndDecodeBulkGetResponseUnified(merged);
+      return this.transformAndDecodeBulkGetResponse(merged);
     } catch (error) {
       this.context.log.error(
         `Error retrieving attachments with ids ${savedObjectIds.join()}: ${error}`
@@ -132,43 +128,8 @@ export class AttachmentGetter {
     return result;
   }
 
-  private transformAndDecodeBulkGetResponseLegacy(
-    merged: Array<MixSavedObjectResponse>
-  ): BulkOptionalAttributes<AttachmentTransformedAttributes> {
-    const validatedAttachments: AttachmentSavedObjectTransformed[] = [];
-
-    for (const so of merged) {
-      if (isSOError(so)) {
-        validatedAttachments.push(so as unknown as AttachmentSavedObjectTransformed);
-      } else {
-        const injectedSo = injectAttachmentAttributesAndHandleErrors(
-          so as SavedObject<AttachmentPersistedAttributes>
-        ) as SavedObject<AttachmentAttributesV2>;
-        const transformed = transformAttributesForMode({
-          attributes: injectedSo.attributes,
-          mode: 'legacy',
-        });
-        if (transformed.isUnified) {
-          throw new Error('Error transforming attachment to legacy mode');
-        }
-        const legacySo = {
-          ...injectedSo,
-          attributes: transformed.attributes,
-        } as SavedObject<AttachmentPersistedAttributes>;
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-          legacySo.attributes
-        );
-        validatedAttachments.push(Object.assign(legacySo, { attributes: validatedAttributes }));
-      }
-    }
-
-    return {
-      saved_objects: validatedAttachments,
-    };
-  }
-  // the return type is a mix of legacy and unified until
-  // all the attachments are migrated
-  private transformAndDecodeBulkGetResponseUnified(
+  // Mixed until every attachment type is migrated; unmigrated types stay legacy-shaped.
+  private transformAndDecodeBulkGetResponse(
     merged: Array<MixSavedObjectResponse>
   ): BulkOptionalAttributes<AttachmentAttributesV2> {
     const validatedAttachments: Array<AttachmentSavedObjectTransformedV2> = [];
@@ -180,9 +141,8 @@ export class AttachmentGetter {
         const injectedSo = injectAttachmentAttributesAndHandleErrors(
           so as SavedObject<AttachmentPersistedAttributes>
         ) as SavedObject<AttachmentAttributesV2>;
-        const transformed = transformAttributesForMode({
+        const transformed = toUnifiedAttributes({
           attributes: injectedSo.attributes,
-          mode: 'unified',
         });
         if (transformed.isUnified) {
           validatedAttachments.push(
@@ -191,18 +151,9 @@ export class AttachmentGetter {
             }) as AttachmentSavedObjectTransformedV2
           );
         } else {
-          // Legacy-shape result (unmigrated unified type): mirror the legacy
-          // bulkGet path — re-transform with mode 'legacy' and decode.
-          const legacyTransformed = transformAttributesForMode({
-            attributes: injectedSo.attributes,
-            mode: 'legacy',
-          });
-          if (legacyTransformed.isUnified) {
-            throw new Error('Error transforming attachment to legacy mode');
-          }
           const legacySo = {
             ...injectedSo,
-            attributes: legacyTransformed.attributes,
+            attributes: transformed.attributes,
           } as SavedObject<AttachmentPersistedAttributes>;
           const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
             legacySo.attributes
@@ -325,6 +276,83 @@ export class AttachmentGetter {
 
       return Object.assign(so, { attributes: validatedAttributes });
     });
+  }
+
+  /**
+   * Retrieves unified attachments of the given `types`, preserving full metadata
+   * (unlike {@link getAllDocumentsAttachedToCase}, which only keeps alert/event fields).
+   */
+  public async getUnifiedAttachmentsByTypes({
+    caseId,
+    types,
+    filter,
+  }: GetUnifiedAttachmentsByTypesArgs): Promise<Array<SavedObject<UnifiedAttachmentAttributes>>> {
+    if (types.length === 0) {
+      return [];
+    }
+
+    try {
+      this.context.log.debug(
+        `Attempting to GET unified attachments [${types.join(', ')}] for case id ${caseId}`
+      );
+
+      const typeFilter = buildFilter({
+        filters: types,
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      });
+      const combinedFilter = combineFilters([typeFilter, filter]);
+
+      const finder =
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UnifiedAttachmentAttributes>(
+          {
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            filter: combinedFilter,
+            perPage: MAX_DOCS_PER_PAGE,
+          }
+        );
+
+      let result: Array<SavedObject<UnifiedAttachmentAttributes>> = [];
+      for await (const page of finder.find()) {
+        result = result.concat(this.decodeUnifiedAttachments(page));
+      }
+
+      return result;
+    } catch (error) {
+      this.context.log.error(
+        `Error on GET unified attachments [${types.join(', ')}] for case id ${caseId}: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Decodes each attachment individually and skips (with a warning) any that fail: unlike
+   * {@link decodeDocuments}, callers of this method (e.g. case metrics) can still return
+   * useful data derived from the other attachments, so one non-conforming `security.entity`
+   * document shouldn't fail the whole call.
+   */
+  private decodeUnifiedAttachments(
+    response: SavedObjectsFindResponse<UnifiedAttachmentAttributes>
+  ): Array<SavedObject<UnifiedAttachmentAttributes>> {
+    const decoded: Array<SavedObject<UnifiedAttachmentAttributes>> = [];
+
+    for (const so of response.saved_objects) {
+      try {
+        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
+        decoded.push(Object.assign(so, { attributes: validatedAttributes }));
+      } catch (error) {
+        this.context.log.warn(
+          `Failed to decode unified attachment id ${so.id} of type ${so.type}, skipping it: ${error}`
+        );
+      }
+    }
+
+    return decoded;
   }
 
   /**
@@ -461,7 +489,6 @@ export class AttachmentGetter {
 
   public async get({
     savedObjectId,
-    mode,
   }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformedV2> {
     try {
       this.context.log.debug(`Attempting to GET attachment ${savedObjectId}`);
@@ -492,9 +519,8 @@ export class AttachmentGetter {
       const injectedRes = injectAttachmentSOAttributesFromRefs(
         res as SavedObject<AttachmentPersistedAttributes>
       ) as SavedObject<AttachmentAttributesV2>;
-      const transformed = transformAttributesForMode({
+      const transformed = toUnifiedAttributes({
         attributes: injectedRes.attributes,
-        mode,
       });
       if (transformed.isUnified) {
         return Object.assign(injectedRes, { attributes: transformed.attributes });
@@ -741,11 +767,9 @@ export class AttachmentGetter {
   public async getFileAttachments({
     caseId,
     fileIds,
-    mode = 'legacy',
   }: {
     caseId: string;
     fileIds: string[];
-    mode?: AttachmentMode;
   }): Promise<AttachmentSavedObjectTransformedV2[]> {
     try {
       this.context.log.debug('Attempting to find file attachments');
@@ -777,9 +801,7 @@ export class AttachmentGetter {
       const foundAttachments: AttachmentSavedObjectTransformedV2[] = [];
 
       for await (const attachmentSavedObjects of finder.find()) {
-        foundAttachments.push(
-          ...this.transformAndDecodeFileAttachments(attachmentSavedObjects, mode)
-        );
+        foundAttachments.push(...this.transformAndDecodeFileAttachments(attachmentSavedObjects));
       }
 
       const [validFileAttachments, invalidFileAttachments] = partitionByCaseAssociation(
@@ -797,17 +819,15 @@ export class AttachmentGetter {
   }
 
   private transformAndDecodeFileAttachments(
-    response: SavedObjectsFindResponse<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>,
-    mode: AttachmentMode
+    response: SavedObjectsFindResponse<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
   ): AttachmentSavedObjectTransformedV2[] {
     return response.saved_objects.map((so) => {
       const injectedSo = injectAttachmentSOAttributesFromRefs(
         so as SavedObject<AttachmentPersistedAttributes>
       ) as SavedObject<AttachmentAttributesV2>;
 
-      const transformed = transformAttributesForMode({
+      const transformed = toUnifiedAttributes({
         attributes: injectedSo.attributes,
-        mode,
       });
       if (transformed.isUnified) {
         return Object.assign(injectedSo, {

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
-
-import type { DashboardState, Warnings } from '../types';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { stripUnmappedKeys } from '../scope_tooling';
@@ -17,8 +16,7 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function sanitize(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
-  dashboardState: DashboardState,
-  useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+  dashboardState: DashboardState
 ): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
   /**
@@ -28,19 +26,13 @@ export async function sanitize(
    * state in the editor format. Once we the Lens embeddable supports the API format we can remove the
    * transformDashboardIn and transformDashboardOut calls.
    */
-  const { attributes: storedDashboardState, references } = transformDashboardIn(
-    dashboardState,
-    undefined,
-    undefined,
-    useGASchemas
-  );
+  const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
   const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
     transformDashboardOut(
       storedDashboardState ?? {},
       references ?? [],
       undefined,
-      dashboardStateSchema,
-      useGASchemas
+      dashboardStateSchema
     );
 
   const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(

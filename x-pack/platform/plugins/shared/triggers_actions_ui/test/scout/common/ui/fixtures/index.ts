@@ -1,0 +1,92 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+// The globalSearch page object is owned by the global_search plugin; reuse its fixture wiring.
+import type { GlobalSearchPageObjects } from '@kbn/global-search-plugin/test/scout/ui/fixtures/page_objects';
+import { extendPageObjects as extendPageObjectsWithGlobalSearch } from '@kbn/global-search-plugin/test/scout/ui/fixtures/page_objects';
+import { ClassicRulesPage, RuleDetailsPage, StackAlertsPage } from './page_objects';
+
+export interface ExtScoutTestFixtures extends ScoutTestFixtures {
+  pageObjects: GlobalSearchPageObjects & {
+    classicRulesPage: ClassicRulesPage;
+    ruleDetailsPage: RuleDetailsPage;
+    stackAlertsPage: StackAlertsPage;
+  };
+}
+
+export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: ExtScoutTestFixtures['pageObjects'];
+      page: ExtScoutTestFixtures['page'];
+    },
+    use: (pageObjects: ExtScoutTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    const extendedPageObjects = {
+      ...extendPageObjectsWithGlobalSearch(pageObjects, page),
+      classicRulesPage: createLazyPageObject(ClassicRulesPage, page),
+      ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
+      stackAlertsPage: createLazyPageObject(StackAlertsPage, page),
+    };
+
+    await use(extendedPageObjects);
+  },
+});
+
+export * as testData from './constants';
+export {
+  ACTIONS_ONLY_ROLE,
+  CONNECTORS_APP_PATH,
+  CONNECTORS_LIST_SELECTORS,
+  CONNECTORS_ROLE,
+  MAINTENANCE_WINDOWS_APP_PATH,
+  RULES_V1_READ_ROLE,
+  RULES_V1_AND_V2_READ_ROLE,
+  STACK_ALERTS_INDEX,
+  STACK_ALERTS_INDEX_PATTERN,
+  STACK_ALERTS_PAGE_PATH,
+  STACK_ALERTS_PAGE_TEST_SUBJECTS,
+} from './constants';
+export {
+  makeEsQueryRule,
+  makeV1EsQueryRuleTemplateAttributes,
+  RULE_TEMPLATE_SO_TYPE,
+  makeIndexThresholdRule,
+  fillIndexThresholdForm,
+  defineIndexThresholdRule,
+  THRESHOLD_TEST_INDEX,
+  findRuleIdByName,
+  deleteRuleById,
+  deleteRulesByPrefix,
+  searchRulesList,
+  openRulesListAndSearch,
+} from './helpers';
+export {
+  setMonacoValue,
+  getMonacoValue,
+  navigateToConnectors,
+  searchConnectors,
+  openConnectorFlyout,
+  searchAndOpenConnector,
+  closeFlyoutIfOpen,
+  cancelRuleCreation,
+} from './connector_helpers';
+export {
+  CLASSIC_RULES_CREATE_URL_RE,
+  CLASSIC_RULES_DETAILS_URL_RE,
+  CLASSIC_RULES_EDIT_URL_RE,
+  CLASSIC_RULES_LIST_URL_RE,
+  CLASSIC_RULES_NESTED_RULES_URL_RE,
+  CLASSIC_RULES_LOGS_URL_RE,
+  MANAGEMENT_ALERTING_V2_URL_RE,
+  STANDALONE_RULES_APP_URL_RE,
+} from './page_objects';

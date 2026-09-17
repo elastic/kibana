@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
-export { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 export { KnowledgeIndicatorDetailsFlyout } from './knowledge_indicator_details_flyout';

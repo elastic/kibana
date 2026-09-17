@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   getManagedWorkflowDefinition,
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
@@ -161,6 +162,9 @@ describe('scheduled Significant Events managed workflows', () => {
       reviewIntervalMinutes: 20,
       discoveryBatchSize: 7,
       maxReviewPasses: 6,
+      flakyRuleDetectionThreshold: 12,
+      flakyRuleProbeAfterMinutes: 180,
+      flakyRuleExemptSeverityScore: 85,
     });
 
     expect(parsed.enabled).toBe(false);
@@ -177,7 +181,13 @@ describe('scheduled Significant Events managed workflows', () => {
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
     expect(discover?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-      inputs: { detectionBatchMax: 7 },
+      inputs: {
+        detectionBatchMax: 7,
+        flakyRuleDetectionThreshold: 12,
+        flakyRuleProbeAfterMinutes: 180,
+        flakyRuleExemptSeverityScore: 85,
+        rootTriggeredBy: '${{ execution.triggeredBy }}',
+      },
     });
   });
 
@@ -225,6 +235,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
 
@@ -250,6 +263,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
           reviewIntervalMinutes: 10,
           discoveryBatchSize: 3,
           maxReviewPasses: 3,
+          flakyRuleDetectionThreshold: 10,
+          flakyRuleProbeAfterMinutes: 360,
+          flakyRuleExemptSeverityScore: 80,
         },
       }
     );
@@ -264,6 +280,10 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       { enabled: true },
       'space-a',
       request
+    );
+    expect(managementApi.getWorkflow).not.toHaveBeenCalledWith(
+      `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      'space-a'
     );
   });
 
@@ -290,6 +310,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 10,
         maxReviewPasses: 4,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
 
@@ -326,6 +349,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
 
@@ -347,6 +373,16 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
       { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
+    );
+    expect(managementApi.getWorkflow).not.toHaveBeenCalledWith(
+      `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      'space-a'
+    );
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      }),
+      'space-a'
     );
   });
 });

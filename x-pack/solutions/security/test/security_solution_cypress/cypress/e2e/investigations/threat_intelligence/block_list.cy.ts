@@ -9,7 +9,6 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeFlyout,
   navigateToBlocklist,
-  navigateToThreatIntelligence,
   openFlyout,
   openFlyoutTakeAction,
   openIndicatorsTableMoreActions,
@@ -57,8 +56,7 @@ describe('Block list with invalid indicators', { tags: ['@ess'] }, () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/239150
-describe.skip('Block list interactions', { tags: ['@ess'] }, () => {
+describe('Block list interactions', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_multiple' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_multiple' }));
@@ -88,7 +86,12 @@ describe.skip('Block list interactions', { tags: ['@ess'] }, () => {
       .eq(0)
       .should('have.text', FIRST_BLOCK_LIST_NEW_DESCRIPTION);
 
-    navigateToThreatIntelligence();
+    // navigateToBlocklist above is a full page load, which drops the global time range set by
+    // visitWithTimeRange. Going back through the navbar would land on Threat Intelligence with the
+    // default time range, where the archived indicators fall outside of it and the table never
+    // renders. Re-visit with the time range instead.
+    visitWithTimeRange(URL);
+    waitForViewToBeLoaded();
 
     // second indicator is a valid indicator for add to blocklist feature
     const secondIndicatorId = 'd4ba36cfa7e4191199836b228f6d79bd74e86793bc183563b78591f508b066ed';

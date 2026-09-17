@@ -45,6 +45,10 @@ const createStartMock = (): SecurityStartMock => {
       apiKeys: apiKeysMock.create(),
     }),
     audit: auditServiceMock.create(),
+    serviceAccounts: lazyObject({
+      isEnabled: jest.fn().mockReturnValue(false),
+      create: jest.fn(),
+    }),
   });
 
   return mock;
@@ -80,6 +84,10 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
       apiKeys: apiKeysMock.create(),
     }),
     audit: auditServiceMock.create(),
+    serviceAccounts: lazyObject({
+      isEnabled: jest.fn().mockReturnValue(false),
+      create: jest.fn(),
+    }),
   });
 
   return mock;

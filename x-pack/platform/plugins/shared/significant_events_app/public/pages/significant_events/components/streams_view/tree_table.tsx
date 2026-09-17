@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CriteriaWithPagination, Direction, EuiTableSelectionType, Query } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  Direction,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+  Query,
+} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -29,7 +35,8 @@ import {
 } from '@kbn/significant-events-schema';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../components/badges';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
@@ -55,8 +62,10 @@ import {
   enrichStream,
   filterCollapsedStreamRows,
   filterStreamsByQuery,
-  shouldComposeTree,
+  getOnboardStreamTooltip,
 } from './utils';
+
+const EMPTY_CHILDREN: NonNullable<TableRow['children']> = [];
 
 export function StreamsTreeTable({
   loading,
@@ -66,6 +75,7 @@ export function StreamsTreeTable({
   selection,
   blocksActivity = false,
   activityBlockTooltip,
+  canManage,
   onOnboardStreamActionClick,
   onStopOnboardingActionClick,
 }: {
@@ -73,17 +83,19 @@ export function StreamsTreeTable({
   streamOnboardingResultMap: Record<string, SignificantEventsWorkflowStatusResult>;
   loading?: boolean;
   searchQuery: Query;
-  selection: EuiTableSelectionType<TableRow>;
+  selection?: EuiTableSelectionType<TableRow>;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
   /** Explains why onboard actions are disabled (loading / error / paused). */
   activityBlockTooltip?: string;
+  canManage: boolean;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
   const {
     dependencies: {
       start: {
+        cps,
         share: {
           url: { locators },
         },
@@ -92,6 +104,7 @@ export function StreamsTreeTable({
   } = useKibana();
   const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
   const { euiTheme } = useEuiTheme();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
 
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
@@ -102,8 +115,7 @@ export function StreamsTreeTable({
     pageSize: 25,
   });
 
-  // Filter streams by query, including ancestors of matches
-  const filteredStreams = React.useMemo(() => {
+  const filteredStreams = useMemo(() => {
     return filterStreamsByQuery(
       streams.filter(
         (stream) =>
@@ -114,38 +126,17 @@ export function StreamsTreeTable({
     );
   }, [streams, searchQuery]);
 
-  const enrichedStreams = React.useMemo(() => {
-    const streamList = shouldComposeTree(sortField) ? asTrees(filteredStreams) : filteredStreams;
-    return streamList.map(enrichStream);
-  }, [sortField, filteredStreams]);
-
-  const flattenTreeWithCollapse = React.useCallback(
-    (rows: TableRow[]) => filterCollapsedStreamRows(rows, collapsed, sortField),
-    [collapsed, sortField]
+  const enrichedStreams = useMemo(
+    () => asTrees(filteredStreams).map(enrichStream),
+    [filteredStreams]
   );
 
-  const allRows = React.useMemo(() => {
-    const rows = buildStreamRows(enrichedStreams, sortField, sortDirection, {});
-    const qualityFiters = searchQuery.ast.clauses.filter(
-      (clause) => clause.type === 'field' && clause.field === 'dataQuality'
-    );
-    return qualityFiters.length > 0
-      ? rows.filter((row) =>
-          qualityFiters.some(
-            (filter) =>
-              'value' in filter &&
-              typeof filter.value === 'string' &&
-              filter.value.includes(row.dataQuality)
-          )
-        )
-      : rows;
-  }, [enrichedStreams, sortField, sortDirection, searchQuery.ast.clauses]);
-
-  // Only pass filtered rows if tree mode is active
-  const items = React.useMemo(
-    () => (shouldComposeTree(sortField) ? flattenTreeWithCollapse(allRows) : allRows),
-    [allRows, flattenTreeWithCollapse, sortField]
+  const allRows = useMemo(
+    () => buildStreamRows(enrichedStreams, sortField, sortDirection),
+    [enrichedStreams, sortField, sortDirection]
   );
+
+  const items = useMemo(() => filterCollapsedStreamRows(allRows, collapsed), [allRows, collapsed]);
 
   const handleTableChange = ({ sort, page }: CriteriaWithPagination<TableRow>) => {
     if (sort) {
@@ -172,34 +163,21 @@ export function StreamsTreeTable({
     });
   };
 
-  // Compute all expandable node names for expand/collapse all
-  const allExpandableNodeNames = React.useMemo(() => {
+  const allExpandableNodeNames = useMemo(() => {
     const names: string[] = [];
-    const collect = (rows: TableRow[]) => {
-      for (const row of rows) {
-        if (row.children && row.children.length > 0) {
-          names.push(row.stream.name);
-        }
+    for (const row of allRows) {
+      if (row.children && row.children.length > 0) {
+        names.push(row.stream.name);
       }
-    };
-    collect(allRows);
+    }
     return names;
   }, [allRows]);
 
-  // Determine if all are expanded or not
   const allExpanded = allExpandableNodeNames.every((name) => !collapsed.has(name));
   const hasExpandable = allExpandableNodeNames.length > 0;
 
   const handleExpandCollapseAll = () => {
-    setCollapsed((prev) => {
-      if (allExpanded) {
-        // Collapse all
-        return new Set(allExpandableNodeNames);
-      } else {
-        // Expand all
-        return new Set();
-      }
-    });
+    setCollapsed(() => (allExpanded ? new Set(allExpandableNodeNames) : new Set()));
   };
 
   const sorting = {
@@ -209,53 +187,36 @@ export function StreamsTreeTable({
     },
   };
 
-  // Reset pagination if streams change (e.g., after search/filter)
   React.useEffect(() => {
     setPagination((prev) => (prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }));
   }, [streams, searchQuery, sortField, sortDirection]);
 
-  // Expand/Collapse all button for the name column header
-  const expandCollapseAllButton = (
-    <EuiToolTip
-      content={
-        allExpanded
-          ? i18n.translate('xpack.significantEventsApp.streamsTreeTable.collapseAll', {
-              defaultMessage: 'Collapse all',
-            })
-          : i18n.translate('xpack.significantEventsApp.streamsTreeTable.expandAll', {
-              defaultMessage: 'Expand all',
-            })
-      }
-      disableScreenReaderOutput
-    >
-      <EuiButtonIcon
-        size="xs"
-        iconType={allExpanded ? 'fold' : 'unfold'}
-        color="text"
-        onClick={(e: React.MouseEvent) => {
-          e.stopPropagation();
-          handleExpandCollapseAll();
-        }}
-        data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
-        aria-label={
-          allExpanded
-            ? i18n.translate('xpack.significantEventsApp.streamsTreeTable.collapseAll', {
-                defaultMessage: 'Collapse all',
-              })
-            : i18n.translate('xpack.significantEventsApp.streamsTreeTable.expandAll', {
-                defaultMessage: 'Expand all',
-              })
-        }
-      />
-    </EuiToolTip>
-  );
+  const expandCollapseLabel = allExpanded
+    ? i18n.translate('xpack.significantEventsApp.streamsTreeTable.collapseAll', {
+        defaultMessage: 'Collapse all',
+      })
+    : i18n.translate('xpack.significantEventsApp.streamsTreeTable.expandAll', {
+        defaultMessage: 'Expand all',
+      });
 
-  // Streams onboarding tour stays in streams_app; this table is rendered outside
-  // that provider, so the name header is plain text.
   const nameColumnHeader = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {shouldComposeTree(sortField) && hasExpandable && (
-        <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
+      {hasExpandable && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={expandCollapseLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              size="xs"
+              iconType={allExpanded ? 'fold' : 'unfold'}
+              color="text"
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                handleExpandCollapseAll();
+              }}
+              data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
+              aria-label={expandCollapseLabel}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
       )}
       <EuiFlexItem>
         <span>{NAME_COLUMN_HEADER}</span>
@@ -270,6 +231,7 @@ export function StreamsTreeTable({
           selection={selection}
           loading={loading}
           data-test-subj="streamsTable"
+          // prettier-ignore
           columns={[
             {
               field: 'nameSortKey',
@@ -277,9 +239,8 @@ export function StreamsTreeTable({
               sortable: (row: TableRow) => row.rootNameSortKey,
               dataType: 'string',
               render: (_: unknown, item: TableRow) => {
-                // Only show expand/collapse if tree mode is active and has children
-                const treeMode = shouldComposeTree(sortField);
-                const hasChildren = !!item.children && item.children.length > 0;
+                const children = item.children ?? EMPTY_CHILDREN;
+                const hasChildren = children.length > 0;
                 const isCollapsed = collapsed.has(item.stream.name);
                 const isQueryStream = Streams.QueryStream.Definition.is(item.stream);
 
@@ -292,7 +253,7 @@ export function StreamsTreeTable({
                       margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
                     `}
                   >
-                    {treeMode && item.children && hasChildren && (
+                    {hasChildren ? (
                       <EuiFlexItem grow={false}>
                         <EuiIcon
                           type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
@@ -309,10 +270,10 @@ export function StreamsTreeTable({
                               defaultMessage: isCollapsed
                                 ? 'Collapsed node with {childCount} children'
                                 : 'Expanded node with {childCount} children',
-                              values: { childCount: item.children.length },
+                              values: { childCount: children.length },
                             }
                           )}
-                          onClick={(e: React.MouseEvent) => {
+                          onClick={() => {
                             handleToggleCollapse(item.stream.name);
                           }}
                           tabIndex={0}
@@ -326,8 +287,7 @@ export function StreamsTreeTable({
                           style={{ cursor: 'pointer' }}
                         />
                       </EuiFlexItem>
-                    )}
-                    {treeMode && !hasChildren && (
+                    ) : (
                       <EuiFlexItem grow={false}>
                         <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
                       </EuiFlexItem>
@@ -464,7 +424,7 @@ export function StreamsTreeTable({
                 return (
                   <EuiToolTip
                     position="top"
-                    content={activityBlockTooltip ?? RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                    content={getOnboardStreamTooltip({ activityBlockTooltip, isCpsMultiProject })}
                     display="block"
                     disableScreenReaderOutput
                   >
@@ -478,7 +438,9 @@ export function StreamsTreeTable({
                 );
               },
             },
-          ]}
+          ].filter((column) => canManage || column.field !== 'definition') as Array<
+            EuiBasicTableColumn<TableRow>
+          >}
           itemId="nameSortKey"
           items={items}
           sorting={sorting}

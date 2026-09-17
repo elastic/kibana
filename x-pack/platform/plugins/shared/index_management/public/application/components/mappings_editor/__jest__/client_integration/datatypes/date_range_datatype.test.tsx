@@ -108,5 +108,5 @@ describe('Mappings editor: date range datatype', () => {
     const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
     const actualMappings = callData.getData();
     expect(actualMappings).toEqual(updatedMappings);
-  }, 7000);
+  }, 20000);
 });

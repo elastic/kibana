@@ -5,11 +5,34 @@
  * 2.0.
  */
 
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type {
+  ConversationAccessControl,
+  ConversationAccessControlEntryInput,
+  ConversationAccessControlMode,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
+
+export type {
+  ConversationPermissions,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
+
+export type GetConversationResponse = ConversationWithPermissions;
+
+export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
 
 export interface ListConversationsResponse {
-  results: ConversationWithoutRounds[];
+  pagination: {
+    total: number;
+    page: number;
+    per_page: number;
+  };
+  results: ListConversationsResponseItem[];
 }
+
+export type SearchConversationsResponse = ListConversationsResponse;
 
 export interface DeleteConversationResponse {
   success: boolean;
@@ -29,3 +52,12 @@ export interface MarkPinnedConversationResponse {
   id: string;
   pinned: boolean;
 }
+
+export type CreateConversationResponse = ConversationWithPermissions;
+
+export interface UpdateConversationAccessControlRequestBody {
+  access_mode: ConversationAccessControlMode;
+  entries: ConversationAccessControlEntryInput[];
+}
+
+export type UpdateConversationAccessControlResponse = ConversationAccessControl;

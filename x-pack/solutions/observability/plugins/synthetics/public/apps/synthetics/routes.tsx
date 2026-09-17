@@ -33,6 +33,11 @@ import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import {
+  GettingStartedBackLink,
+  hasGettingStartedAddDataReturn,
+} from './components/getting_started/getting_started_back_link';
+import { MonitorsPageHeader } from './components/monitors_page/management/page_header/monitors_page_header';
+import {
   InspectMonitorPortalNode,
   MonitorDetailsLinkPortalNode,
   MonitorTypePortalNode,
@@ -84,6 +89,12 @@ const getRoutes = (
         alignment: 'center',
         paddingSize: 'none',
       },
+      // Always set a pageHeader (rather than `undefined`) so the page template sizes
+      // itself using `--kbn-application--content-height` instead of falling back to a
+      // raw 100vh, which overflows the visible viewport and breaks vertical centering.
+      pageHeader: hasGettingStartedAddDataReturn(location.search)
+        ? { pageTitle: <GettingStartedBackLink />, bottomBorder: false }
+        : { pageTitle: <MonitorsPageHeader />, bottomBorder: false },
     },
     {
       title: i18n.translate('xpack.synthetics.createMonitorRoute.title', {

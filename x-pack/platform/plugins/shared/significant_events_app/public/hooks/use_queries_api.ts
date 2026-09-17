@@ -6,6 +6,7 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
+import type { StreamQuery } from '@kbn/significant-events-schema';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 
@@ -20,25 +21,18 @@ export interface PromoteResult {
 interface QueriesApi {
   promote: ({ queryIds }: { queryIds: string[] }) => Promise<PromoteResult>;
   demote: ({ queryIds }: { queryIds: string[] }) => Promise<{ demoted: number }>;
-  removeQuery: ({ queryId, streamName }: { queryId: string; streamName: string }) => Promise<void>;
-  deleteQueriesInBulk: ({
-    queryIds,
-    streamName,
-  }: {
-    queryIds: string[];
+  removeQuery: ({ queryId }: { queryId: string }) => Promise<void>;
+  deleteQueriesInBulk: ({ queryIds }: { queryIds: string[] }) => Promise<void>;
+  setQueryDurability: (args: {
+    query: StreamQuery;
     streamName: string;
+    expiresAt: string | undefined;
   }) => Promise<void>;
   abort: () => void;
 }
 
 export function useQueriesApi(): QueriesApi {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const { signal, abort, refresh } = useAbortController();
 
   return useMemo(
@@ -57,7 +51,7 @@ export function useQueriesApi(): QueriesApi {
           signal: null,
         });
       },
-      removeQuery: async ({ queryId }: { queryId: string; streamName: string }) => {
+      removeQuery: async ({ queryId }: { queryId: string }) => {
         await significantEventsRepositoryClient.fetch(
           'POST /internal/streams/queries/_bulk_delete',
           {
@@ -70,7 +64,7 @@ export function useQueriesApi(): QueriesApi {
           }
         );
       },
-      deleteQueriesInBulk: async ({ queryIds }: { queryIds: string[]; streamName: string }) => {
+      deleteQueriesInBulk: async ({ queryIds }: { queryIds: string[] }) => {
         await significantEventsRepositoryClient.fetch(
           'POST /internal/streams/queries/_bulk_delete',
           {
@@ -78,6 +72,34 @@ export function useQueriesApi(): QueriesApi {
             params: {
               body: {
                 queryIds,
+              },
+            },
+          }
+        );
+      },
+      setQueryDurability: async ({
+        query,
+        streamName,
+        expiresAt,
+      }: {
+        query: StreamQuery;
+        streamName: string;
+        expiresAt: string | undefined;
+      }) => {
+        await significantEventsRepositoryClient.fetch(
+          'PUT /internal/significant_events/queries/{queryId}',
+          {
+            signal: null,
+            params: {
+              path: { queryId: query.id },
+              body: {
+                title: query.title,
+                esql: query.esql,
+                severity_score: query.severity_score,
+                evidence: query.evidence,
+                description: query.description,
+                expires_at: expiresAt,
+                target_name: streamName,
               },
             },
           }

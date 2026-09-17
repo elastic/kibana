@@ -9,8 +9,7 @@
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
-import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -41,6 +40,10 @@ import {
   PROFILE_STATE_URL_KEY,
 } from '../../../../../../common/constants';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
+import {
+  forgetDiscoverSession,
+  rememberDiscoverSession,
+} from '../../../../../services/discover_recently_accessed_service';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
@@ -49,6 +52,7 @@ import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
+import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -371,43 +375,57 @@ export const initializeTabs = createInternalStateAsyncThunk(
       }
     };
 
+    const loadPersistedDiscoverSession = async () => {
+      if (!discoverSessionId) {
+        return undefined;
+      }
+      try {
+        return await services.savedSearch.getDiscoverSession(discoverSessionId);
+      } catch (error) {
+        if (error instanceof SavedObjectNotFound) {
+          forgetDiscoverSession(services.core.http, services.chrome, discoverSessionId);
+        }
+        throw error;
+      }
+    };
+
     const [userId, spaceId, persistedDiscoverSession] = await Promise.all([
       existingUserId === undefined ? getUserId() : existingUserId,
       existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
-      discoverSessionId ? services.savedSearch.getDiscoverSession(discoverSessionId) : undefined,
+      loadPersistedDiscoverSession(),
     ]);
 
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
-      services.chrome.recentlyAccessed.add(
-        getSavedSearchFullPathUrl(persistedDiscoverSession.id),
-        persistedDiscoverSession.title ??
-          i18n.translate('discover.defaultDiscoverSessionTitle', {
-            defaultMessage: 'Untitled Discover session',
-          }),
-        persistedDiscoverSession.id
-      );
-
+      rememberDiscoverSession(services.core.http, services.chrome, persistedDiscoverSession);
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
     const byValueEmbeddableTab = services.embeddableEditor.getByValueTab();
     const byValueEmbeddableTabState = byValueEmbeddableTab
-      ? fromSavedObjectTabToTabState({ tab: byValueEmbeddableTab })
+      ? fromSavedObjectTabToTabState({
+          tab: byValueEmbeddableTab,
+          profileStateRegistry: services.profileStateRegistry,
+        })
       : undefined;
 
+    const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
       persistedDiscoverSession,
       shouldClearAllTabs,
       defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
+      // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
+      prepareSession: (session, localTabs, selectedTabId) =>
+        assignSessionDataViewIds(session, localTabs, {
+          tabId: selectedTabId ?? session.tabs[0]?.id,
+          dataViewSpec: initialTabState?.dataViewSpec,
+        }),
     });
 
     // Hand the location state over to the tab initialization before updating the URL below, which
     // discards it, so initial state such as ad hoc data view specs is passed on
-    services.initialTabStateService.capture(
-      services.getScopedHistory<InitialTabState>()?.location.state
-    );
+    services.initialTabStateService.capture(initialTabState);
 
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state
@@ -415,14 +433,14 @@ export const initializeTabs = createInternalStateAsyncThunk(
       replace: true,
     });
 
-    dispatch(
-      setTabs({
-        ...initialTabsState,
-        updatedDiscoverSession: persistedDiscoverSession,
-      })
-    );
+    dispatch(setTabs(initialTabsState));
 
-    return { userId, spaceId, persistedDiscoverSession };
+    return {
+      userId,
+      spaceId,
+      // The prepared session, so the fulfilled reducer keeps the same baseline setTabs stored.
+      persistedDiscoverSession: initialTabsState.updatedDiscoverSession,
+    };
   }
 );
 
@@ -518,9 +536,9 @@ export const openInNewTab: InternalStateThunkActionCreator<
 export const openInNewTabExtPointAction: InternalStateThunkActionCreator<
   [OpenInNewTabParams],
   Promise<void>
-> = ({ query, tabLabel, timeRange }) =>
+> = ({ query, tabLabel, timeRange, esqlApproximation }) =>
   function openInNewTabExtPointActionThunkFn(dispatch) {
-    const appState: TabState['appState'] = { query };
+    const appState: TabState['appState'] = { query, esqlApproximation };
     const globalState: TabState['globalState'] = { timeRange };
 
     return dispatch(

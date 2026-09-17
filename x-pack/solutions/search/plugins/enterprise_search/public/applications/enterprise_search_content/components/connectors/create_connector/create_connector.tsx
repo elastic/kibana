@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
@@ -36,6 +37,8 @@ import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
+import { CONNECTORS_PATH } from '../../../routes';
+import { getEnterpriseSearchContentUrl } from '../../../utils/get_enterprise_search_content_url';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 import { connectorsBreadcrumbs } from '../connectors';
@@ -177,14 +180,23 @@ export const CreateConnector: React.FC = () => {
       ]}
       pageViewTelemetry="create_connector"
       isLoading={false}
-      pageHeader={{
-        description: i18n.translate('xpack.enterpriseSearch.createConnector.description', {
-          defaultMessage: 'Extract, transform, index and sync data from a third-party data source.',
-        }),
-        pageTitle: i18n.translate('xpack.enterpriseSearch.createConnector..title', {
-          defaultMessage: 'Create a connector',
-        }),
-      }}
+      appHeader={
+        <AppHeader
+          title={i18n.translate('xpack.enterpriseSearch.createConnector..title', {
+            defaultMessage: 'Create a connector',
+          })}
+          description={i18n.translate('xpack.enterpriseSearch.createConnector.description', {
+            defaultMessage:
+              'Extract, transform, index and sync data from a third-party data source.',
+          })}
+          back={{
+            href: getEnterpriseSearchContentUrl(CONNECTORS_PATH),
+            label: i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
+              defaultMessage: 'Connectors',
+            }),
+          }}
+        />
+      }
       data-test-subj="searchCreateConnectorPage"
     >
       <EuiFlexGroup gutterSize="m">

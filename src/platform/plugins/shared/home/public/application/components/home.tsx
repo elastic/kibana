@@ -8,8 +8,8 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
@@ -33,7 +33,7 @@ export interface HomeProps {
   solutions: FeatureCatalogueSolution[];
   localStorage: Storage;
   urlBasePath: string;
-  hasUserDataView: () => Promise<boolean>;
+  hasDataView: () => Promise<boolean>;
   isCloudEnabled: boolean;
 }
 
@@ -93,9 +93,9 @@ export class Home extends Component<HomeProps, State> {
         }
       }, 10000);
 
-      const hasUserIndexPattern = await this.props.hasUserDataView();
+      const hasDataView = await this.props.hasDataView();
 
-      this.endLoading({ isNewKibanaInstance: !hasUserIndexPattern });
+      this.endLoading({ isNewKibanaInstance: !hasDataView });
     } catch (err) {
       // An error here is relatively unimportant, as it only means we don't provide
       // some UI niceties.
@@ -140,14 +140,10 @@ export class Home extends Component<HomeProps, State> {
     }
 
     return (
-      <KibanaPageTemplate
-        data-test-subj="homeApp"
-        pageHeader={{
-          bottomBorder: false,
-          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
-        }}
-        panelled={false}
-      >
+      <KibanaPageTemplate data-test-subj="homeApp" panelled={false}>
+        <AppHeader
+          title={i18n.translate('home.header.title', { defaultMessage: 'Welcome home' })}
+        />
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
         <AddData

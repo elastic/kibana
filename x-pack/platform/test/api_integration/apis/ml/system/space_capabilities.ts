@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: false,
           canGetTrainedModels: true,
-          canTestTrainedModels: true,
+          canTestTrainedModels: false,
           canCreateTrainedModels: false,
           canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,

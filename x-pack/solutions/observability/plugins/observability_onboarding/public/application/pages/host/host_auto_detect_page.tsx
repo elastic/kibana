@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useGeneratedHtmlId, type EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLocation } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   ASSET_DETAILS_LOCATOR_ID,
@@ -34,11 +33,6 @@ import { EmptyPrompt } from '../../quickstart_flows/shared/empty_prompt';
 import { FeedbackButtons } from '../../quickstart_flows/shared/feedback_buttons';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../../quickstart_flows/shared/use_pricing_feature';
-import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
-import {
-  parseIngestionMode,
-  type IngestionMode,
-} from '../../quickstart_flows/shared/wired_streams_ingestion_selector';
 import {
   buildHostCollectionMethodOptions,
   HOST_SELECTOR_LEGEND,
@@ -69,25 +63,7 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
 
-  const wiredStreamsStatus = useWiredStreamsStatus();
-
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const ingestionMode = parseIngestionMode(searchParams.get('ingestion'));
-  const setIngestionMode = useCallback(
-    (mode: IngestionMode) => {
-      const next = new URLSearchParams(searchParams);
-      if (mode === 'classic') {
-        next.delete('ingestion');
-      } else {
-        next.set('ingestion', mode);
-      }
-      setSearchParams(next, { replace: true });
-    },
-    [searchParams, setSearchParams]
-  );
-
-  const useWiredStreams = ingestionMode === 'wired';
 
   const command = data
     ? getAutoDetectCommand({
@@ -98,14 +74,13 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
         ingestApiKey: data.ingestApiKey,
         elasticAgentVersion: data.elasticAgentVersionInfo.agentVersion,
         metricsEnabled: metricsOnboardingEnabled,
-        useWiredStreams,
       })
     : undefined;
 
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: { share, docLinks },
+    services: { share },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   useEffect(() => {
@@ -168,11 +143,7 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
                   command={command}
                   onboardingFlowId={data?.onboardingFlow.id}
                   status={status}
-                  ingestionMode={ingestionMode}
-                  onIngestionModeChange={setIngestionMode}
                   isMetricsOnboardingEnabled={metricsOnboardingEnabled}
-                  wiredStreamsStatus={wiredStreamsStatus}
-                  streamsDocLink={docLinks?.links.observability.logsStreams}
                   useInlineCopyOnly
                   useColoredSyntax
                 />
@@ -194,7 +165,6 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
                   status={status}
                   installedIntegrations={installedIntegrations}
                   onboardingFlowId={data?.onboardingFlow?.id}
-                  useWiredStreams={useWiredStreams}
                   isMetricsOnboardingEnabled={metricsOnboardingEnabled}
                   accordionId={accordionId}
                   logsLocator={logsLocator}
@@ -213,13 +183,8 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
       refetch,
       command,
       data?.onboardingFlow?.id,
-      ingestionMode,
-      setIngestionMode,
       metricsOnboardingEnabled,
-      wiredStreamsStatus,
-      docLinks?.links.observability.logsStreams,
       installedIntegrations,
-      useWiredStreams,
       accordionId,
       logsLocator,
       dashboardLocator,

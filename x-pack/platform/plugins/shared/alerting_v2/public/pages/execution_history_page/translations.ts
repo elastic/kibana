@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-/** --- Policies table columns --- */
+/** --- Action policies table columns --- */
 export const COLUMN_TIMESTAMP = i18n.translate(
   'xpack.alertingV2.executionHistory.columns.timestamp',
   {
@@ -16,7 +16,7 @@ export const COLUMN_TIMESTAMP = i18n.translate(
 );
 
 export const COLUMN_POLICY = i18n.translate('xpack.alertingV2.executionHistory.columns.policy', {
-  defaultMessage: 'Policy',
+  defaultMessage: 'Action policy',
 });
 
 export const COLUMN_OUTCOME = i18n.translate('xpack.alertingV2.executionHistory.columns.outcome', {
@@ -46,4 +46,20 @@ export const COLUMN_WORKFLOWS = i18n.translate(
   {
     defaultMessage: 'Workflows',
   }
+);
+
+/** --- Outcome badge labels --- */
+export const OUTCOME_DISPATCHED = i18n.translate(
+  'xpack.alertingV2.executionHistory.table.outcome.dispatched',
+  { defaultMessage: 'Dispatched' }
+);
+
+export const OUTCOME_THROTTLED = i18n.translate(
+  'xpack.alertingV2.executionHistory.table.outcome.throttled',
+  { defaultMessage: 'Throttled' }
+);
+
+export const OUTCOME_FAILED = i18n.translate(
+  'xpack.alertingV2.executionHistory.table.outcome.failed',
+  { defaultMessage: 'Failed' }
 );

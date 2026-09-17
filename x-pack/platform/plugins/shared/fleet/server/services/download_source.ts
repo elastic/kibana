@@ -46,7 +46,7 @@ import {
 } from './secrets';
 import { isSSLSecretStorageEnabled } from './secrets';
 
-function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
+export function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
   const { ssl, auth, source_id: sourceId, secrets, ...attributes } = so.attributes;
 
   // Clean up null values from secrets (they may be set during updates to force removal)
@@ -67,12 +67,13 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>
     }
   }
 
+  // canonical id placed last so attributes.id cannot shadow it
   return {
-    id: sourceId ?? so.id,
     ...attributes,
     ...(cleanedSecrets ? { secrets: cleanedSecrets } : {}),
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
     ...(auth ? { auth: JSON.parse(auth as string) } : {}),
+    id: sourceId ?? so.id,
   };
 }
 
@@ -256,7 +257,7 @@ class DownloadSourceService {
 
     const originalItem = await this.get(id);
     const updateData: Partial<DownloadSourceSOAttributes> = {
-      ...omit(newData, ['ssl', 'auth', 'secrets']),
+      ...omit(newData, ['ssl', 'auth', 'secrets', 'id']),
     };
 
     if (updateData.proxy_id) {
@@ -429,15 +430,22 @@ class DownloadSourceService {
     logger.debug(`Updated download source ${id}`);
   }
 
-  public async delete(id: string) {
+  public async delete(id: string, options?: { fromPreconfiguration?: boolean }) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting download source ${id}`);
 
     const targetDS = await this.get(id);
 
     if (targetDS.is_default) {
-      throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
+      throw new DownloadSourceError(`Default download source ${id} cannot be deleted.`);
     }
+
+    if (targetDS.is_preconfigured && !options?.fromPreconfiguration) {
+      throw new DownloadSourceError(
+        `Preconfigured download source ${id} cannot be deleted outside of kibana config file.`
+      );
+    }
+
     await agentPolicyService.removeDefaultSourceFromAll(
       appContextService.getInternalUserESClient(),
       id

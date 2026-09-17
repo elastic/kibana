@@ -114,12 +114,12 @@ describe('executeActionPolicyOperations', () => {
 
     it('applies set_matcher', () => {
       const ops: ActionPolicyOperation[] = [
-        { operation: 'set_matcher', matcher: 'rule.name: "test"' },
+        { operation: 'set_matcher', matcher: { expression: 'rule.name: "test"' } },
       ];
 
       const result = executeActionPolicyOperations({}, ops);
 
-      expect(result.matcher).toBe('rule.name: "test"');
+      expect(result.matcher).toEqual({ expression: 'rule.name: "test"' });
     });
 
     it('applies set_grouping', () => {
@@ -129,8 +129,8 @@ describe('executeActionPolicyOperations', () => {
 
       const result = executeActionPolicyOperations({}, ops);
 
-      expect(result.groupingMode).toBe('per_field');
-      expect(result.groupBy).toEqual(['host.name']);
+      expect(result.grouping_mode).toBe('per_field');
+      expect(result.group_by).toEqual(['host.name']);
     });
 
     it('throws when per_field grouping has no groupBy fields', () => {
@@ -151,13 +151,13 @@ describe('executeActionPolicyOperations', () => {
         operation: 'set_destinations',
         destinations: [{ type: 'workflow', id: '00000000-0000-0000-0000-000000000001' }],
       },
-      { operation: 'set_matcher', matcher: 'rule.id: "rule-123"' },
+      { operation: 'set_matcher', matcher: { tags: ['critical'] } },
       { operation: 'validate' },
     ];
 
     const result = executeActionPolicyOperations({}, ops, { isNew: true });
 
-    expect(result.matcher).toBe('rule.id: "rule-123"');
+    expect(result.matcher).toEqual({ tags: ['critical'] });
   });
 
   describe('agent-builder provenance tag', () => {
@@ -232,7 +232,7 @@ describe('executeActionPolicyOperations', () => {
         { operation: 'set_throttle', strategy: 'time_interval', interval: '5m' },
       ];
 
-      expect(() => executeActionPolicyOperations({ groupingMode: 'per_episode' }, ops)).toThrow(
+      expect(() => executeActionPolicyOperations({ grouping_mode: 'per_episode' }, ops)).toThrow(
         'not valid for grouping mode'
       );
     });

@@ -8,7 +8,6 @@
 import { chunk } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
 import {
   type EuidSourceFields,
@@ -232,22 +231,20 @@ export const fetchEntityRelationships = async ({
   esClient,
   logger,
   entityIds,
-  spaceId,
-  entityStoreIndexExists,
+  entityStoreIndexName,
   pinnedIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
-  spaceId: string;
-  entityStoreIndexExists: boolean;
+  entityStoreIndexName: string | null;
   pinnedIds?: string[];
 }): Promise<EsqlToRecords<RelationshipEsqlRow>> => {
-  if (!entityStoreIndexExists) {
+  if (entityStoreIndexName == null) {
     return { columns: [], records: [] };
   }
 
-  const indexName = getEntitiesLatestIndexName(spaceId);
+  const indexName = entityStoreIndexName;
   logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
 
   const filter = buildRelationshipDslFilter(entityIds);
@@ -291,20 +288,18 @@ export const fetchEntities = async ({
   esClient,
   logger,
   entityIds,
-  spaceId,
-  entityStoreIndexExists,
+  entityStoreIndexName,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
-  spaceId: string;
-  entityStoreIndexExists: boolean;
+  entityStoreIndexName: string | null;
 }): Promise<EsqlToRecords<EntityRecord>> => {
-  if (entityIds.length === 0 || !entityStoreIndexExists) {
+  if (entityIds.length === 0 || entityStoreIndexName == null) {
     return { columns: [], records: [] };
   }
 
-  const indexName = getEntitiesLatestIndexName(spaceId);
+  const indexName = entityStoreIndexName;
 
   logger.trace(`Fetching entities from index [${indexName}] for ${entityIds.length} entities`);
   const esqlQuery = `SET unmapped_fields="nullify";

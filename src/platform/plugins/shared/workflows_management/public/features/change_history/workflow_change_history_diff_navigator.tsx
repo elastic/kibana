@@ -63,7 +63,7 @@ export const WorkflowChangeHistoryDiffNavigator = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={previousChangeLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             size="s"
             color="text"
             css={[styles.navButton, isFirst && styles.navButtonDisabled]}
@@ -95,7 +95,7 @@ export const WorkflowChangeHistoryDiffNavigator = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={nextChangeLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             size="s"
             color="text"
             css={[styles.navButton, isLast && styles.navButtonDisabled]}

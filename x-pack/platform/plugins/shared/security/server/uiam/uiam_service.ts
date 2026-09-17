@@ -18,6 +18,9 @@ import {
 } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
+  ServiceAccount,
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
@@ -35,6 +38,20 @@ import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
+
+/**
+ * Represents the request body for creating a service account via UIAM.
+ */
+interface CreateServiceAccountRequestBody {
+  /** Organization that owns the service account. */
+  organization_id: string;
+  /** A descriptive name for the service account. */
+  name: string;
+  /** Roles granted to the service account, referenced by name. */
+  role_assignments: ServiceAccountRoleAssignments;
+  /** Principals allowed to exchange the service account's credentials for a token. */
+  assumable_by: ServiceAccountAssumableBy[];
+}
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -56,6 +73,24 @@ export interface GrantUiamApiKeyRequestBody {
       resource: string[];
     };
   };
+}
+
+/**
+ * Options that control how a request is authenticated to UIAM.
+ */
+export interface UiamClientAuthenticationOptions {
+  /**
+   * Whether to present Kibana's shared secret header alongside the caller credential. UIAM
+   * authenticates the credential and Kibana independently, and requires the two to agree: an
+   * internal API key or a session token must arrive with the shared secret, while an external
+   * (organization) API key must arrive without it, so that internal credentials that leak cannot
+   * be replayed through customer-facing code paths. Presenting the wrong combination fails
+   * authentication. The mTLS client certificate is always presented when configured, regardless
+   * of this option.
+   *
+   * Defaults to `true`, which is correct for everything except an external API key.
+   */
+  includeClientAuthentication?: boolean;
 }
 
 /**
@@ -133,13 +168,13 @@ interface UiamErrorDetails {
 }
 
 /**
- * Telemetry `errorType` for an OAuth token exchange that Kibana itself rejected
+ * Telemetry `oauthErrorType` for an OAuth token exchange that Kibana itself rejected
  * as opposed to a failure reported by UIAM.
  */
 const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
 
 /**
- * Telemetry `errorType` for an OAuth token exchange failure that carries no
+ * Telemetry `oauthErrorType` for an OAuth token exchange failure that carries no
  * recognizable classification.
  */
 const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
@@ -201,11 +236,13 @@ export interface UiamServicePublic {
    * Grants an API key using the UIAM service.
    * @param authorization The HTTP authorization header containing scheme and credentials.
    * @param params The parameters for creating the API key (name and optional expiration).
+   * @param options The options that control how the grant request itself is authenticated to UIAM.
    * @returns A promise that resolves to an object containing the API key details.
    */
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
-    params: GrantUiamAPIKeyParams
+    params: GrantUiamAPIKeyParams,
+    options?: UiamClientAuthenticationOptions
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -230,6 +267,31 @@ export interface UiamServicePublic {
    * @returns A promise that resolves to a response containing per-key success/failure results.
    */
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
+
+  /**
+   * Creates a service account via the UIAM service.
+   *
+   * Called with the caller's own credential, so UIAM downscopes the new account
+   * to a subset of that caller's privileges.
+   *
+   * @param authorization The caller's UIAM authorization header.
+   * @param body The request body for creating the service account.
+   * @param options Whether to include Kibana client authentication.
+   */
+  createServiceAccount(
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    options?: UiamClientAuthenticationOptions
+  ): Promise<ServiceAccount>;
+
+  /**
+   * Exchanges a service account ID for an ephemeral access token via the UIAM service.
+   *
+   * UIAM authorizes the exchange against the service account's `assumable_by` policy.
+   *
+   * @param serviceAccountId The ID of the service account to exchange a token for.
+   */
+  exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }>;
 
   /**
    * Creates an OAuth client via the UIAM service.
@@ -494,7 +556,6 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -506,7 +567,7 @@ export class UiamService implements UiamServicePublic {
       if (audience !== expectedAudience) {
         throw Boom.badRequest(
           `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`,
-          { errorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
+          { oauthErrorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
         );
       }
 
@@ -518,7 +579,7 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
         outcome: 'failure',
-        errorType: UiamService.#getOAuthTokenExchangeErrorType(err),
+        ...UiamService.#getOAuthTokenExchangeErrorAttributes(err),
       });
 
       this.#logger.error(
@@ -532,7 +593,11 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.grantApiKey}.
    */
-  async grantApiKey(authorization: HTTPAuthorizationHeader, params: GrantUiamAPIKeyParams) {
+  async grantApiKey(
+    authorization: HTTPAuthorizationHeader,
+    params: GrantUiamAPIKeyParams,
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
+  ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
     );
@@ -552,20 +617,22 @@ export class UiamService implements UiamServicePublic {
           },
         },
       };
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...(includeClientAuthentication
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
+            : {}),
+          Authorization: authorization.toString(),
+        },
+        body: JSON.stringify(body),
+        dispatcher: this.#dispatcher,
+      };
 
       const response = await UiamService.#parseUiamResponse(
-        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: authorization.toString(),
-          },
-          body: JSON.stringify(body),
-          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-          dispatcher: this.#dispatcher,
-        })
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, requestOptions)
       );
 
       this.#logger.debug(`Successfully granted API key with id ${response.id}`);
@@ -648,6 +715,81 @@ export class UiamService implements UiamServicePublic {
 
       throw err;
     }
+  }
+
+  /**
+   * See {@link UiamService.createServiceAccount}.
+   */
+  async createServiceAccount(
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
+  ): Promise<ServiceAccount> {
+    try {
+      this.#logger.debug('Attempting to create service account.');
+
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...(includeClientAuthentication
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
+            : {}),
+          Authorization: authorization.toString(),
+        },
+        body: JSON.stringify({ ...body, type: 'project' }),
+        dispatcher: this.#dispatcher,
+      };
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/service-accounts`, requestOptions)
+      );
+
+      this.#logger.debug(`Successfully created service account with id ${response.id}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to create service account: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.exchangeServiceAccountToken}.
+   */
+  async exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }> {
+    this.#logger.debug(
+      `Attempting to exchange service account [id=${serviceAccountId}] for an ephemeral token.`
+    );
+    const requestOptions: RequestInit & { dispatcher: Agent | undefined } = {
+      method: 'POST',
+      headers: { 'User-Agent': this.#userAgentHeader },
+      // The certificate identifies Kibana's project for the account's assumable_by policy.
+      dispatcher: this.#dispatcher,
+    };
+    let response: { token: string };
+    try {
+      response = await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/service-accounts/${encodeURIComponent(
+            serviceAccountId
+          )}/credentials/_exchange`,
+          requestOptions
+        )
+      );
+    } catch (err) {
+      this.#logger.error(
+        `Failed to exchange service account [id=${serviceAccountId}] for a token (HTTP status: ${
+          Boom.isBoom(err) ? err.output.statusCode : 'unavailable'
+        }).`
+      );
+      throw err;
+    }
+
+    this.#logger.debug(
+      `Successfully exchanged service account [id=${serviceAccountId}] for an ephemeral token.`
+    );
+    return response;
   }
 
   /**
@@ -1141,13 +1283,19 @@ export class UiamService implements UiamServicePublic {
     throw err;
   }
 
-  static #getOAuthTokenExchangeErrorType(err: unknown): string {
+  static #getOAuthTokenExchangeErrorAttributes(err: unknown): {
+    oauthErrorType: string;
+    oauthErrorCode: string | undefined;
+  } {
     if (!Boom.isBoom(err)) {
-      return OAUTH_UNKNOWN_ERROR_TYPE;
+      return { oauthErrorType: OAUTH_UNKNOWN_ERROR_TYPE, oauthErrorCode: undefined };
     }
 
     const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
 
-    return err.data?.errorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE;
+    return {
+      oauthErrorType: err.data?.oauthErrorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE,
+      oauthErrorCode: payload?.error?.code,
+    };
   }
 }

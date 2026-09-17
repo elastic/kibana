@@ -52,7 +52,9 @@ export function createAlertActionsClient(): {
 
 export function createAlertActionsClientMock(): jest.Mocked<PublicMethodsOf<AlertActionsClient>> {
   return {
-    createAction: jest.fn(),
-    createBulkActions: jest.fn(),
+    createSeriesAction: jest.fn(),
+    createEpisodeAction: jest.fn(),
+    createBulkSeriesActions: jest.fn(),
+    createBulkEpisodeActions: jest.fn(),
   };
 }

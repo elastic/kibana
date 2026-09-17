@@ -33,7 +33,7 @@ dependsOn:
   - '@kbn/utils'
   - '@kbn/optimizer'
   - '@kbn/peggy'
-  - '@kbn/babel-transform'
+  - '@kbn/swc-config'
   - '@kbn/import-resolver'
   - '@kbn/find-used-node-modules'
   - '@kbn/ts-projects'

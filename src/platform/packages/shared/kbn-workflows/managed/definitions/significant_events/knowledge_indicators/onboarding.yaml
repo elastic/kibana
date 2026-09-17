@@ -3,7 +3,7 @@
 # Orchestrates the full KI onboarding pipeline for a stream:
 #   1. Features recency check (auto-skips identification if features are recent)
 #   2. Features identification (optional, skippable)
-#   3. Queries generation (optional, skippable — persistence handled by the child workflow)
+#   3. Queries generation (conditional — skipped when no new features were found)
 
 version: "1"
 name: "KI Onboarding"
@@ -51,6 +51,10 @@ triggers:
         type: number
         default: 5
         description: "Maximum number of LLM sampling iterations for features identification."
+      - name: featuresConvergencePatience
+        type: number
+        default: 2
+        description: "Stop features identification after this many healthy-successful passes without a new feature (degraded iterations are neutral and not counted)."
       - name: featuresSampleSize
         type: number
         description: "Number of documents sampled per features identification iteration."
@@ -79,7 +83,44 @@ triggers:
       - name: queriesMaxExistingForContext
         type: number
         description: "Max existing queries for LLM context in query generation."
+      - name: rootTriggeredBy
+        type: string
+        required: false
+        description: "Root workflow trigger type propagated by a managed driver."
 steps:
+  - name: check_budget
+    type: kibana.request
+    if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
+      body:
+        group: 'ki_extraction'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
+
+  - name: exit_if_budget_denied
+    type: if
+    condition: '${{ steps.check_budget.output.allowed == false }}'
+    steps:
+      - name: output_budget_denied
+        type: workflow.output
+        status: cancelled
+        with:
+          streamName: '${{ inputs.streamName }}'
+          featuresSkipped: true
+          featuresConnectorUsed: ''
+          discoveredFeatures: []
+          featuresTokensUsed: { prompt: 0, completion: 0, total: 0 }
+          queriesSkipped: true
+          queriesConnectorUsed: ''
+          persistedQueries: []
+          queriesTokensUsed: { prompt: 0, completion: 0, total: 0 }
+          keepAliveRefreshed: 0
+
   # -----------------------------------------------------------------------
   # Step 0: Initialize variables.
   # -----------------------------------------------------------------------
@@ -90,6 +131,7 @@ steps:
       generatedQueries: []
       persistedQueries: []
       skipFeatures: "${{ inputs.skipFeatures }}"
+      skipQueries: "${{ inputs.skipQueries }}"
       featuresTokensUsed: {}
       queriesTokensUsed: {}
       featuresConnectorUsed: ""
@@ -138,6 +180,7 @@ steps:
             start: "${{ inputs.featuresStart }}"
             end: "${{ inputs.featuresEnd }}"
             maxIterations: "${{ inputs.featuresMaxIterations }}"
+            convergencePatience: "${{ inputs.featuresConvergencePatience }}"
             sampleSize: "${{ inputs.featuresSampleSize }}"
             featureTtlDays: "${{ inputs.featuresTtlDays }}"
             entityFilteredRatio: "${{ inputs.featuresEntityFilteredRatio }}"
@@ -153,11 +196,24 @@ steps:
           featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
 
   # -----------------------------------------------------------------------
-  # Step 3: Queries generation (unless skipped)
+  # Step 3: Skip queries when no features were discovered this cycle.
+  #         inputs.skipFeatures == true (queries-only run) bypasses this gate.
+  # -----------------------------------------------------------------------
+  - name: check_should_generate_queries
+    type: if
+    condition: "${{ inputs.skipFeatures == false and variables.discoveredFeatures.size == 0 }}"
+    steps:
+      - name: set_skip_queries
+        type: data.set
+        with:
+          skipQueries: true
+
+  # -----------------------------------------------------------------------
+  # Step 4: Queries generation (unless skipped)
   # -----------------------------------------------------------------------
   - name: run_queries
     type: if
-    condition: "${{ inputs.skipQueries == false }}"
+    condition: "${{ variables.skipQueries == false }}"
     steps:
       - name: generate_queries
         type: workflow.execute
@@ -176,7 +232,7 @@ steps:
           queriesConnectorUsed: "${{ steps.generate_queries.output.connectorId }}"
 
   # -----------------------------------------------------------------------
-  # Step 4: Keep-alive — re-stamp persistent KIs (durable ones, plus excluded
+  # Step 5: Keep-alive — re-stamp persistent KIs (durable ones, plus excluded
   #         features whose exclusion must be remembered) not refreshed this
   #         cycle so DSL retention does not physically delete them.
   # -----------------------------------------------------------------------
@@ -191,7 +247,7 @@ steps:
         lastRefreshedBefore: "${{ variables.cycleStartedAt }}"
 
   # -----------------------------------------------------------------------
-  # Step 5: Output summary
+  # Step 6: Output summary
   # -----------------------------------------------------------------------
   - name: output_result
     type: workflow.output
@@ -201,7 +257,7 @@ steps:
       featuresConnectorUsed: "${{ variables.featuresConnectorUsed }}"
       discoveredFeatures: "${{ variables.discoveredFeatures }}"
       featuresTokensUsed: "${{ variables.featuresTokensUsed }}"
-      queriesSkipped: "${{ inputs.skipQueries }}"
+      queriesSkipped: "${{ variables.skipQueries }}"
       queriesConnectorUsed: "${{ variables.queriesConnectorUsed }}"
       persistedQueries: "${{ variables.persistedQueries }}"
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"

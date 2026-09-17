@@ -92,9 +92,10 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
 
   // Toggling `alerting:v2:enabled` on requires the Alerting V2 plugin, which only
   // ships enabled on stateful; on serverless the plugin is disabled.
+  // Constantly fails on ECH: https://github.com/elastic/kibana/issues/283926
   apiTest(
     'does not list the alerting V2 skills when only alerting:v2:enabled is on',
-    { tag: tags.stateful.classic },
+    { tag: '@local-stateful-classic' },
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
       const headers = { ...COMMON_HEADERS, ...apiKeyHeader };

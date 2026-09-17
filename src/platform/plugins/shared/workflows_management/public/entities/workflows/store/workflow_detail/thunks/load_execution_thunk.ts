@@ -34,7 +34,9 @@ export const loadExecutionThunk = createAsyncThunk<
     try {
       const previousExecution = getState().detail.execution;
 
-      const response = await api.getExecution(id, { includeInput: false, includeOutput: false });
+      // includeOutput so AI token metadata (LangChain tokenUsage) is available for
+      // tree badges / AI section before step.usage is populated by the engine.
+      const response = await api.getExecution(id, { includeInput: false, includeOutput: true });
       dispatch(setExecution(response));
 
       if (id !== previousExecution?.id) {

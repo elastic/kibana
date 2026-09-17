@@ -34,8 +34,9 @@ import { css } from '@emotion/react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FlyoutMetadataCard } from '../../../../components/flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
 import type { StreamQueryStats } from '../../../../hooks/use_fetch_query_occurrence_stats';
@@ -50,8 +51,7 @@ import {
   OPEN_IN_DISCOVER_ACTION_TITLE,
 } from './translations';
 import { AssetImage } from '../../../../components/asset_image';
-import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
-import { buildDiscoverParams } from '../../utils/discover_helpers';
+import { buildDiscoverParams } from '../../../../util/discover_helpers';
 
 interface QueryDetailsFlyoutProps {
   item: StreamQueryStats;
@@ -70,10 +70,16 @@ export function QueryDetailsFlyout({
 }: QueryDetailsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
     dependencies: {
       start: { share },
     },
   } = useKibana();
+  const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { timeState } = useTimefilter();
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const flyoutTitleId = useGeneratedHtmlId({
@@ -82,28 +88,15 @@ export function QueryDetailsFlyout({
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  useEffect(() => {
-    setIsActionsPopoverOpen(false);
-    setIsDeleteModalVisible(false);
-  }, [item.query.id]);
-
   const queryType = item.query.type ?? QUERY_TYPE_MATCH;
   const hasDetectedOccurrences = item.occurrences?.some((point) => point.y > 0) ?? false;
 
   const generalInfoItems = [
     {
-      title: TYPE_LABEL,
-      description: <QueryTypeBadge type={queryType} />,
-    },
-    {
       title: DESCRIPTION_LABEL,
       description: (
         <EuiText size="s">{item.query.description || DEFAULT_QUERY_PLACEHOLDER}</EuiText>
       ),
-    },
-    {
-      title: SEVERITY_DETAILS_LABEL,
-      description: <SeverityBadge score={item.query.severity_score} />,
     },
   ];
 
@@ -117,46 +110,47 @@ export function QueryDetailsFlyout({
         size="40%"
         hideCloseButton
       >
-        {/* First header: minimal toolbar with actions and close */}
         <FlyoutToolbarHeader>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-              button={
-                <EuiToolTip content={ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
-                    iconType="boxesVertical"
-                    aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                    onClick={() => setIsActionsPopoverOpen((value) => !value)}
-                  />
-                </EuiToolTip>
-              }
-              isOpen={isActionsPopoverOpen}
-              closePopover={() => setIsActionsPopoverOpen(false)}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-            >
-              <EuiContextMenuPanel
-                items={[
-                  <EuiContextMenuItem
-                    key="delete"
-                    icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-                    css={css`
-                      color: ${euiTheme.colors.danger};
-                    `}
-                    onClick={() => {
-                      setIsActionsPopoverOpen(false);
-                      setIsDeleteModalVisible(true);
-                    }}
-                    data-test-subj="queriesTableQueryDetailsFlyoutDeleteAction"
-                  >
-                    {DELETE_ACTION_LABEL}
-                  </EuiContextMenuItem>,
-                ]}
-              />
-            </EuiPopover>
-          </EuiFlexItem>
+          {canManage && (
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                button={
+                  <EuiToolTip content={ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
+                      iconType="ellipsis"
+                      aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                      onClick={() => setIsActionsPopoverOpen((value) => !value)}
+                    />
+                  </EuiToolTip>
+                }
+                isOpen={isActionsPopoverOpen}
+                closePopover={() => setIsActionsPopoverOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+              >
+                <EuiContextMenuPanel
+                  items={[
+                    <EuiContextMenuItem
+                      key="delete"
+                      icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+                      css={css`
+                        color: ${euiTheme.colors.danger};
+                      `}
+                      onClick={() => {
+                        setIsActionsPopoverOpen(false);
+                        setIsDeleteModalVisible(true);
+                      }}
+                      data-test-subj="queriesTableQueryDetailsFlyoutDeleteAction"
+                    >
+                      {DELETE_ACTION_LABEL}
+                    </EuiContextMenuItem>,
+                  ]}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -169,7 +163,6 @@ export function QueryDetailsFlyout({
           </EuiFlexItem>
         </FlyoutToolbarHeader>
 
-        {/* Second header: title and metadata cards */}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id={flyoutTitleId}>{item.query.title}</h2>
@@ -236,7 +229,9 @@ export function QueryDetailsFlyout({
                       iconType="discoverApp"
                       iconSide="left"
                       onClick={() =>
-                        discoverLocator.navigate(buildDiscoverParams(item.query, timeState))
+                        discoverLocator.navigate(
+                          buildDiscoverParams(item.query.esql.query, timeState.timeRange)
+                        )
                       }
                     >
                       {OPEN_IN_DISCOVER_ACTION_TITLE}

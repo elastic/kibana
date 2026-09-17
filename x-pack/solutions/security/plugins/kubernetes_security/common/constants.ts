@@ -59,6 +59,17 @@ export const DEFAULT_FILTER = {
   },
 };
 
+// Kubernetes Security receives the data view title, which can contain a remote
+// cluster alias followed by an index pattern. Keep this aligned with Session View.
+export const INDEX_PATTERN_MAX_LENGTH = 1000 + 1 + 256;
+// JSON-serialized ES bool query DSL passed as a query parameter and parsed server-side.
+// This carries the global KQL/filter bar serialized to Elasticsearch DSL, so a filter with
+// many clauses (e.g. an "is one of" with dozens of values) can expand well past a KQL string.
+// Sized generously (32 KB) to avoid rejecting legitimate power-user filters while still bounding input.
+export const QUERY_DSL_MAX_LENGTH = 32768;
+// Arbitrary fill value for missing field values in ES multi-terms aggregations.
+export const MISSING_VALUE_MAX_LENGTH = 1024;
+
 export const DEFAULT_FILTER_QUERY = JSON.stringify({
   bool: {
     must: [],

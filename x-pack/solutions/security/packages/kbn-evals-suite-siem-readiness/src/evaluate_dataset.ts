@@ -62,6 +62,7 @@ export function createSiemReadinessCriteriaEvaluator({
   return {
     name: 'SIEM Readiness Criteria',
     kind: 'LLM' as const,
+    direction: 'maximize',
     evaluate: async ({ expected, ...rest }) => {
       const exampleCriteria: string[] =
         (expected as SiemReadinessDatasetExample['output'])?.criteria ?? [];

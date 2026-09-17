@@ -6,7 +6,11 @@
  */
 
 import { Query } from '@elastic/eui';
-import { parseSearchQuery } from './utils';
+import {
+  RUN_STREAM_ONBOARDING_BUTTON_LABEL,
+  RUN_STREAM_ONBOARDING_CROSS_PROJECT_TOOLTIP,
+} from './translations';
+import { getOnboardStreamTooltip, parseSearchQuery } from './utils';
 
 describe('parseSearchQuery', () => {
   it('returns an empty query for empty input', () => {
@@ -17,11 +21,11 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery('logs').text).toBe('logs');
   });
 
-  it('parses field clauses such as dataQuality', () => {
-    const query = parseSearchQuery('dataQuality:degraded');
+  it('parses field clauses', () => {
+    const query = parseSearchQuery('status:open');
 
-    expect(query.ast.getFieldClauses('dataQuality')).toEqual([
-      expect.objectContaining({ field: 'dataQuality', value: 'degraded' }),
+    expect(query.ast.getFieldClauses('status')).toEqual([
+      expect.objectContaining({ field: 'status', value: 'open' }),
     ]);
   });
 
@@ -34,5 +38,28 @@ describe('parseSearchQuery', () => {
 
     expect(query.text).toBe(',');
     expect(query.ast.clauses).toEqual([]);
+  });
+});
+
+describe('getOnboardStreamTooltip', () => {
+  it('prefers the activity-block tooltip regardless of CPS scope', () => {
+    expect(
+      getOnboardStreamTooltip({ activityBlockTooltip: 'Paused', isCpsMultiProject: true })
+    ).toBe('Paused');
+    expect(
+      getOnboardStreamTooltip({ activityBlockTooltip: 'Paused', isCpsMultiProject: false })
+    ).toBe('Paused');
+  });
+
+  it('discloses the cross-project scope once CPS has linked projects', () => {
+    expect(
+      getOnboardStreamTooltip({ activityBlockTooltip: undefined, isCpsMultiProject: true })
+    ).toBe(RUN_STREAM_ONBOARDING_CROSS_PROJECT_TOOLTIP);
+  });
+
+  it('falls back to the plain label outside a multi-project CPS deployment', () => {
+    expect(
+      getOnboardStreamTooltip({ activityBlockTooltip: undefined, isCpsMultiProject: false })
+    ).toBe(RUN_STREAM_ONBOARDING_BUTTON_LABEL);
   });
 });

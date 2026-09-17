@@ -8,6 +8,7 @@
  */
 
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -15,7 +16,7 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDisabledActionIds,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesSavedObjectId,
@@ -122,7 +123,7 @@ export type LensApi = Simplify<
     // Let the container know about unsaved changes
     PublishesUnsavedChanges &
     PublishesProjectRoutingOverrides &
-    PublishesEsqlUsage &
+    PublishesEsql &
     // Lens specific API methods:
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &
@@ -130,7 +131,8 @@ export type LensApi = Simplify<
     LensApiCallbacks &
     LensHasEditPanel &
     LegacyLensStateApi &
-    SupportsJsonExport
+    SupportsJsonExport &
+    CanCancelRequests
 >;
 
 /**

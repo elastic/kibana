@@ -65,7 +65,7 @@ export function getAgentsColumns({
               data-test-subj="apmAgentExplorerListToggle"
               onClick={() => onAgentSelected(agent)}
               display={isSelected ? 'base' : 'empty'}
-              iconType={isSelected ? 'minimize' : 'expand'}
+              iconType={isSelected ? 'minimize' : 'maximize'}
               isSelected={isSelected}
             />
           </EuiToolTip>

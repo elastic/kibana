@@ -1,3 +1,5 @@
+@eslint-community/eslint-plugin-eslint-comments
+eslint-plugin-n
 @xterm/xterm
 knip
 safe-stable-stringify
@@ -42,6 +44,7 @@ lightningcss
 tar-fs
 browserslist
 react-day-picker
+mysql2
 jszip
 @rsdoctor/rspack-plugin
 @rspack/core
@@ -51,6 +54,7 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
+jsondiffpatch
 typescript-7
 immer-v9
 react-redux-v7
@@ -58,4 +62,6 @@ redux-thunk-v2
 redux-toolkit-v1
 redux-v4
 reselect-v4
+@swc/plugin-emotion
 graphql
+@cfworker/json-schema

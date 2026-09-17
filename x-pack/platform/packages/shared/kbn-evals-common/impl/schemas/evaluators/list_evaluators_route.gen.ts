@@ -16,6 +16,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { EvaluatorOrigin } from '../common_attributes.gen';
+
 export const ListEvaluatorsResponse = lazySchema(() =>
   z.object({
     evaluators: z.array(
@@ -23,6 +25,7 @@ export const ListEvaluatorsResponse = lazySchema(() =>
         name: z.string().max(256),
         version: z.string().max(64),
         kind: z.enum(['llm', 'code']),
+        origin: EvaluatorOrigin,
         description: z.string().max(2048),
         reference_data_schema: z.object({}).catchall(z.unknown()).optional(),
         evidence_schema: z.object({}).catchall(z.unknown()).optional(),

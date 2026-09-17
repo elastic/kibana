@@ -363,7 +363,7 @@ export const TakeActionButton = memo(
         data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}
         fill
         iconSide="right"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isDisabled={items.length === 0}
         onClick={togglePopoverHandler}
       >
