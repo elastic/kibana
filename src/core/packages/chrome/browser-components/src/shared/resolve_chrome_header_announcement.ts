@@ -40,19 +40,19 @@ export const getDeepestActiveNavigationTitle = (
   return undefined;
 };
 
-export interface ChromeNextAnnouncementSources {
+export interface ChromeHeaderAnnouncementSources {
   inline?: InlineAppHeaderState;
   registeredTitle?: AppHeaderTitle;
   docTitleParts?: readonly string[];
   activeNodes?: ChromeProjectNavigationNode[][];
 }
 
-export const resolveChromeNextAnnouncement = ({
+export const resolveChromeHeaderAnnouncement = ({
   inline,
   registeredTitle,
   docTitleParts,
   activeNodes,
-}: ChromeNextAnnouncementSources): string => {
+}: ChromeHeaderAnnouncementSources): string => {
   if (inline !== undefined) {
     const inlineTitle = normalizeAppHeaderTitle(inline.title);
     if (inlineTitle) {

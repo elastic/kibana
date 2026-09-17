@@ -11,10 +11,10 @@ export { ChromeComponentsProvider } from './src/context';
 export type { ChromeComponentsDeps } from './src/context';
 
 export { ClassicHeader } from './src/classic';
-export { ChromeNextGlobalHeader } from './src/chrome_next';
-export { ChromeAppHeaderRenderer, useHasChromeAppHeaderContent } from './src/project';
+export { ChromeHeader, ChromeAppHeaderRenderer, useHasChromeAppHeaderContent } from './src/project';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
 export { useHasInlineAppHeader } from './src/shared/chrome_hooks';
-export { HeaderActionButton, type HeaderActionButtonProps } from './src/chrome_next/global_header';
+export { HeaderActionButton, type HeaderActionButtonProps } from './src/shared/header_action_button';
+export { CHROME_HEADER_TEST_SUBJECTS } from './src/test_subjects';

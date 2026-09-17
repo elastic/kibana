@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
+import { SEARCH_MODAL_SELECTOR_PREFIX } from '@kbn/global-search-bar-plugin/common';
 import type { ScoutPage, Locator } from '@kbn/scout';
 
 export class GlobalSearch {
@@ -12,7 +14,7 @@ export class GlobalSearch {
 
   public get resultLabels(): Locator {
     return this.page.testSubj
-      .locator('chromeNextSearchModal')
+      .locator(SEARCH_MODAL_SELECTOR_PREFIX)
       .locator('.euiSelectableTemplateSitewide__listItemTitle');
   }
 
@@ -21,11 +23,11 @@ export class GlobalSearch {
   }
 
   async openSearch() {
-    const modal = this.page.testSubj.locator('chromeNextSearchModal');
+    const modal = this.page.testSubj.locator(SEARCH_MODAL_SELECTOR_PREFIX);
     if (await modal.isVisible()) {
       return;
     }
-    await this.page.testSubj.click('chromeNextGlobalHeaderSearchButton');
+    await this.page.testSubj.click(CHROME_HEADER_TEST_SUBJECTS.searchButton);
     await modal.waitFor({ state: 'visible' });
   }
 
@@ -36,7 +38,7 @@ export class GlobalSearch {
 
   async blur() {
     await this.page.keyboard.press('Escape');
-    await this.page.testSubj.locator('chromeNextSearchModal').waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator(SEARCH_MODAL_SELECTOR_PREFIX).waitFor({ state: 'hidden' });
   }
 
   async searchFor(term: string, { clear = true }: { clear?: boolean } = {}) {
@@ -56,7 +58,7 @@ export class GlobalSearch {
   }
 
   async isPopoverDisplayed() {
-    return await this.page.testSubj.locator('chromeNextSearchModal').isVisible();
+    return await this.page.testSubj.locator(SEARCH_MODAL_SELECTOR_PREFIX).isVisible();
   }
 
   async clickOnOption(index: number) {
@@ -67,7 +69,7 @@ export class GlobalSearch {
   async scrollToResult(label: string): Promise<Locator> {
     const item = this.resultLabels.filter({ hasText: label });
     const list = this.page.testSubj
-      .locator('chromeNextSearchModal')
+      .locator(SEARCH_MODAL_SELECTOR_PREFIX)
       .locator('.euiSelectableList__list');
 
     // EuiSelectable virtualizes rows, so off-screen labels are not in the DOM.

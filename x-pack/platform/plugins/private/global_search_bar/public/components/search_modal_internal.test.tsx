@@ -12,6 +12,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { SEARCH_MODAL_SELECTOR_PREFIX } from '../../common';
 import { EventReporter } from '../telemetry';
 import { SearchModalInternal } from './search_modal_internal';
 
@@ -57,7 +58,7 @@ describe('SearchModalInternal', () => {
     );
 
     expect(screen.getByTestId('nav-search-input')).toBeInTheDocument();
-    expect(screen.getByTestId('chromeNextSearchModalFooter')).toBeInTheDocument();
+    expect(screen.getByTestId(`${SEARCH_MODAL_SELECTOR_PREFIX}Footer`)).toBeInTheDocument();
   });
 
   it('reports searchFocus on mount and searchBlur on unmount', () => {

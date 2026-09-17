@@ -6,14 +6,16 @@
  */
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
+import { SEARCH_MODAL_SELECTOR_PREFIX } from '@kbn/global-search-bar-plugin/common';
 import { FtrService } from '../ftr_provider_context';
 
 interface SearchResult {
   label: string;
 }
 
-const SEARCH_BUTTON = 'chromeNextGlobalHeaderSearchButton';
-const SEARCH_MODAL = 'chromeNextSearchModal';
+const SEARCH_BUTTON = CHROME_HEADER_TEST_SUBJECTS.searchButton;
+const SEARCH_MODAL = SEARCH_MODAL_SELECTOR_PREFIX;
 
 export class NavigationalSearchPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
