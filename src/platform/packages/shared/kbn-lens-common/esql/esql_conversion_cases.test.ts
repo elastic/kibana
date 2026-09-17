@@ -23,7 +23,22 @@ const uiSettings = createEsqlConversionUiSettings();
 
 // Cases bind to the same sample-data indices the Scout API layer installs,
 // so unit and API layers pin the exact same queries.
-const runCase = (conversionCase: EsqlConversionCase) => {
+type SuccessfulConversionCase = EsqlConversionCase & {
+  expected: Extract<EsqlConversionCase['expected'], { success: true }>;
+};
+type FailedConversionCase = EsqlConversionCase & {
+  expected: Extract<EsqlConversionCase['expected'], { success: false }>;
+};
+
+const isSuccessfulConversionCase = (
+  conversionCase: EsqlConversionCase
+): conversionCase is SuccessfulConversionCase => conversionCase.expected.success;
+
+const isFailedConversionCase = (
+  conversionCase: EsqlConversionCase
+): conversionCase is FailedConversionCase => !conversionCase.expected.success;
+
+const generateQueryForCase = (conversionCase: EsqlConversionCase) => {
   const indexPattern = createEsqlConversionIndexPattern(
     conversionCase.dataset
   ) as unknown as IndexPattern;
@@ -51,35 +66,43 @@ const runCase = (conversionCase: EsqlConversionCase) => {
     conversionCase.columnRoles ? { ...conversionCase.columnRoles } : undefined
   );
 
-  if (conversionCase.expected.success) {
-    expect(result).toMatchObject({ success: true, esql: conversionCase.expected.esql });
-    if (result.success) {
-      // esAggsIdMap keys are the ES|QL output column names (insertion
-      // order differs from table order, so compare as sets).
-      expect(Object.keys(result.esAggsIdMap).sort()).toEqual(
-        [...conversionCase.expected.columnNames].sort()
-      );
-      const sourceIdsByOutputColumn = Object.fromEntries(
-        Object.entries(result.esAggsIdMap).map(([columnName, originalColumns]) => [
-          columnName,
-          originalColumns.map(({ id }) => id),
-        ])
-      );
-      expect(sourceIdsByOutputColumn).toEqual(conversionCase.expected.expectedSourceIds);
-      for (const [columnName, format] of Object.entries(
-        conversionCase.expected.expectedFormats ?? {}
-      )) {
-        expect(result.esAggsIdMap[columnName][0].format).toEqual(format);
-      }
-      for (const [columnName, label] of Object.entries(
-        conversionCase.expected.expectedLabels ?? {}
-      )) {
-        expect(result.esAggsIdMap[columnName][0].label).toBe(label);
-      }
-    }
-  } else {
-    expect(result).toMatchObject({ success: false, reason: conversionCase.expected.reason });
+  return result;
+};
+
+const runSuccessfulCase = (conversionCase: SuccessfulConversionCase) => {
+  const result = generateQueryForCase(conversionCase);
+
+  expect(result).toMatchObject({ success: true, esql: conversionCase.expected.esql });
+  if (!result.success) {
+    throw new Error(`Expected successful conversion for: ${conversionCase.description}`);
   }
+
+  // esAggsIdMap keys are the ES|QL output column names (insertion
+  // order differs from table order, so compare as sets).
+  expect(Object.keys(result.esAggsIdMap).sort()).toEqual(
+    [...conversionCase.expected.columnNames].sort()
+  );
+  const sourceIdsByOutputColumn = Object.fromEntries(
+    Object.entries(result.esAggsIdMap).map(([columnName, originalColumns]) => [
+      columnName,
+      originalColumns.map(({ id }) => id),
+    ])
+  );
+  expect(sourceIdsByOutputColumn).toEqual(conversionCase.expected.expectedSourceIds);
+  for (const [columnName, format] of Object.entries(
+    conversionCase.expected.expectedFormats ?? {}
+  )) {
+    expect(result.esAggsIdMap[columnName][0].format).toEqual(format);
+  }
+  for (const [columnName, label] of Object.entries(conversionCase.expected.expectedLabels ?? {})) {
+    expect(result.esAggsIdMap[columnName][0].label).toBe(label);
+  }
+};
+
+const runFailedCase = (conversionCase: FailedConversionCase) => {
+  const result = generateQueryForCase(conversionCase);
+
+  expect(result).toMatchObject({ success: false, reason: conversionCase.expected.reason });
 };
 
 const casesByGroup = buildEsqlConversionCasesByGroup();
@@ -87,9 +110,18 @@ const casesByGroup = buildEsqlConversionCasesByGroup();
 describe('form-based → ES|QL conversion case matrix (generation assertions)', () => {
   for (const [group, cases] of Object.entries(casesByGroup)) {
     describe(group, () => {
-      for (const conversionCase of cases) {
+      const successfulCases = cases.filter(isSuccessfulConversionCase);
+      const failedCases = cases.filter(isFailedConversionCase);
+
+      for (const conversionCase of successfulCases) {
         it(`converts: ${conversionCase.description}`, () => {
-          runCase(conversionCase);
+          runSuccessfulCase(conversionCase);
+        });
+      }
+
+      for (const conversionCase of failedCases) {
+        it(`does not convert: ${conversionCase.description}`, () => {
+          runFailedCase(conversionCase);
         });
       }
     });
