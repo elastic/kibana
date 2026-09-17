@@ -944,7 +944,6 @@ describe('SAFE_STEP_TYPES policy', () => {
       'kibana.getCase': ['GET'],
       'kibana.streams.list': ['GET'],
       'kibana.streams.get': ['GET'],
-      'kibana.streams.getSignificantEvents': ['GET'],
     };
 
     const internalConnectors = new Map(

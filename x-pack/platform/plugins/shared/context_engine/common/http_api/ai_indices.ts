@@ -116,6 +116,7 @@ export interface PutAiIndexResponse {
 
 export interface DeleteAiIndexResponse {
   acknowledged: boolean;
+  errors: string[];
 }
 
 export interface KiTypeCount {

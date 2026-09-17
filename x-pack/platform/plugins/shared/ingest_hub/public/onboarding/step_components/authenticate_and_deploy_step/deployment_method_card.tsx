@@ -59,6 +59,21 @@ const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
       { defaultMessage: 'Simpler setup, no agent required.' }
     ),
   },
+  {
+    value: 'agent_based',
+    text: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.selectText',
+      { defaultMessage: 'Agent-based' }
+    ),
+    name: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.name',
+      { defaultMessage: 'Agent-based' }
+    ),
+    tagline: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.tagline',
+      { defaultMessage: 'For environments that require an Elastic Agent.' }
+    ),
+  },
 ];
 
 interface DeploymentMethodCardProps {
@@ -72,7 +87,11 @@ export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMet
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draftMethod, setDraftMethod] = useState<DeploymentMethod>(selectedMethod);
 
-  const selectedOption = DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod)!;
+  // Defensive fallback: if a stale/hand-edited session-storage value carries an unknown method,
+  // show the first option rather than crashing. The type permits any DeploymentMethod string.
+  const selectedOption =
+    DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod) ??
+    DEPLOYMENT_METHOD_OPTIONS[0];
 
   const panelCss = css`
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};

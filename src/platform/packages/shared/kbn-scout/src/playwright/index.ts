@@ -76,10 +76,4 @@ export * from './eui_components';
 export * from './ui_components';
 
 // Page-object wrappers and helpers for shared Kibana surfaces.
-export {
-  ContentListWrapper,
-  ListingTable,
-  buildContentListSearch,
-  buildContentListUrlRegex,
-} from './page_objects';
-export type { ContentListUrlState } from './page_objects';
+export { AppMenu, ContentListWrapper, ListingTable } from './page_objects';
