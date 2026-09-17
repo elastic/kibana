@@ -305,7 +305,7 @@ export class AssetManagerClient {
       await this.removeExtractionTasks(type);
       await this.engineDescriptorClient.update(type, {
         status: ENGINE_STATUS.STOPPED,
-        nonPriorityStatus: ENGINE_STATUS.STOPPED,
+        ...(hasPriorityExtractionGate(type) ? { nonPriorityStatus: ENGINE_STATUS.STOPPED } : {}),
       });
     } catch (error) {
       this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, error);

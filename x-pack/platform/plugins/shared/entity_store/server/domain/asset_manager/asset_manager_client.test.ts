@@ -16,6 +16,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
 import { LATEST_LOG_EXTRACTION_DEFAULTS } from '../saved_objects/global_state/constants';
+import { ENGINE_STATUS } from '../constants';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -567,6 +568,24 @@ describe('AssetManagerClient', () => {
           (mode) => mode === EXTRACTION_MODE.single || mode === EXTRACTION_MODE.priority
         )
       ).toBe(true);
+    });
+
+    it('stop sets nonPriorityStatus to stopped for a dual-capable type (user)', async () => {
+      await createDualProcessClient().stop('user');
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ nonPriorityStatus: ENGINE_STATUS.STOPPED })
+      );
+    });
+
+    it('stop does not set nonPriorityStatus for types without a priority gate (host)', async () => {
+      await createDualProcessClient().stop('host');
+
+      const updateCalls = mockEngineDescriptorClient.update.mock.calls;
+      for (const [, attrs] of updateCalls) {
+        expect(attrs).not.toHaveProperty('nonPriorityStatus');
+      }
     });
   });
 });
