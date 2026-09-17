@@ -12,21 +12,27 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiSkeletonTitle,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { SEVERITY_DOT_COLOR } from '../common/severity';
 
 export interface InvestigationSeverityTilesProps {
   severityCounts: SeverityCounts;
+  scrollableSeverities: ReadonlySet<Severity>;
+  isLoading: boolean;
   onSeverityClick: (severity: Severity) => void;
 }
 
 export const InvestigationSeverityTiles = ({
   severityCounts,
+  scrollableSeverities,
+  isLoading,
   onSeverityClick,
 }: InvestigationSeverityTilesProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
@@ -35,8 +41,7 @@ export const InvestigationSeverityTiles = ({
     <EuiFlexGroup gutterSize="s" responsive={false}>
       {SEVERITY_OPTIONS.map((severity) => {
         const count = severityCounts[severity];
-        // Nothing to scroll to when a tier is empty, since its section is hidden.
-        const isMuted = count === 0;
+        const isMuted = !scrollableSeverities.has(severity);
 
         return (
           <EuiFlexItem key={severity}>
@@ -75,18 +80,35 @@ export const InvestigationSeverityTiles = ({
                   <EuiIcon type="dot" color={SEVERITY_DOT_COLOR[severity]} aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiTitle
+                  <EuiSkeletonTitle
                     size="s"
-                    css={
-                      isMuted
-                        ? css`
-                            color: ${euiTheme.colors.textSubdued};
-                          `
-                        : undefined
-                    }
+                    isLoading={isLoading}
+                    contentAriaLabel={i18n.translate(
+                      'xpack.nightshift.investigations.severityTileCountAriaLabel',
+                      {
+                        defaultMessage: '{severityLabel} investigation count',
+                        values: { severityLabel: getSeverityLabel(severity) },
+                      }
+                    )}
+                    css={css`
+                      inline-size: ${euiTheme.size.xl};
+                    `}
                   >
-                    <span data-test-subj={`nightshiftSeverityTileCount-${severity}`}>{count}</span>
-                  </EuiTitle>
+                    <EuiTitle
+                      size="s"
+                      css={
+                        isMuted
+                          ? css`
+                              color: ${euiTheme.colors.textSubdued};
+                            `
+                          : undefined
+                      }
+                    >
+                      <span data-test-subj={`nightshiftSeverityTileCount-${severity}`}>
+                        {count}
+                      </span>
+                    </EuiTitle>
+                  </EuiSkeletonTitle>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

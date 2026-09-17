@@ -30,6 +30,7 @@ import {
   type InvestigationListHandle,
 } from '../investigation/investigation_list';
 import { InvestigationDetailFlyout } from '../investigation/investigation_detail_flyout';
+import { isInvestigationSectionVisible } from '../investigation/investigation_section';
 import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
 import {
   clearNightshiftInvestigationIdParam,
@@ -72,6 +73,19 @@ export function NightshiftApp(): React.ReactElement {
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: searchQuery });
+
+  // A tile scrolls to its section, so it is only actionable while the list is rendering that
+  // section — which the list, not the count, decides.
+  const scrollableSeverities = useMemo(
+    () =>
+      new Set(
+        sections
+          .filter(isInvestigationSectionVisible)
+          .map(({ id }) => id)
+          .filter(isSeverity)
+      ),
+    [sections]
+  );
 
   const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
 
@@ -212,6 +226,8 @@ export function NightshiftApp(): React.ReactElement {
 
       <InvestigationSeverityTiles
         severityCounts={severityCounts}
+        scrollableSeverities={scrollableSeverities}
+        isLoading={isInitialLoading}
         onSeverityClick={handleSeverityClick}
       />
 

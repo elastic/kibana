@@ -21,9 +21,11 @@ const mockUseInvestigationSection = useFetchInvestigations as jest.MockedFunctio
 const sectionResult = ({
   total = 0,
   status,
+  isPreviousData = false,
 }: {
   total?: number;
   status?: 'pending' | 'completed' | 'failed';
+  isPreviousData?: boolean;
 } = {}) => ({
   investigations:
     status != null
@@ -41,6 +43,7 @@ const sectionResult = ({
   isInitialLoading: false,
   isFetchingNextPage: false,
   isFetching: false,
+  isPreviousData,
   error: null,
   fetchNextPage: jest.fn(),
   refetch: jest.fn(),
@@ -243,17 +246,19 @@ describe('useInvestigationSections', () => {
   const implementationWithInProgressIds =
     ({
       ids,
+      isPreviousData = false,
       refetchCritical,
       refetchFailed,
     }: {
       ids: string[];
+      isPreviousData?: boolean;
       refetchCritical: jest.Mock;
       refetchFailed: jest.Mock;
     }) =>
     ({ statuses, severities }: { statuses: InvestigationStatus[]; severities?: Severity[] }) => {
       if (statuses.includes('pending')) {
         return {
-          ...sectionResult({ total: ids.length }),
+          ...sectionResult({ total: ids.length, isPreviousData }),
           investigations: ids.map((id) => ({
             investigation_id: id,
             status: 'pending' as const,
@@ -313,6 +318,42 @@ describe('useInvestigationSections', () => {
 
     // A narrower search swaps the in-progress rows wholesale; the other sections are re-keyed by
     // the same query and refetch on their own.
+    mockUseInvestigationSection.mockImplementation(
+      implementationWithInProgressIds({ ids: ['running-c'], refetchCritical, refetchFailed })
+    );
+    rerender({ query: 'checkout errors' });
+
+    expect(refetchCritical).not.toHaveBeenCalled();
+    expect(refetchFailed).not.toHaveBeenCalled();
+  });
+
+  it('ignores the rows keepPreviousData is still serving from the outgoing search', () => {
+    const refetchCritical = jest.fn();
+    const refetchFailed = jest.fn();
+
+    mockUseInvestigationSection.mockImplementation(
+      implementationWithInProgressIds({
+        ids: ['running-a', 'running-b'],
+        refetchCritical,
+        refetchFailed,
+      })
+    );
+    const { rerender } = renderHook(({ query }) => useInvestigationSections({ query }), {
+      initialProps: { query: 'checkout' },
+    });
+
+    // The query changes a render before its rows arrive, so this render still holds the old ones.
+    mockUseInvestigationSection.mockImplementation(
+      implementationWithInProgressIds({
+        ids: ['running-a', 'running-b'],
+        isPreviousData: true,
+        refetchCritical,
+        refetchFailed,
+      })
+    );
+    rerender({ query: 'checkout errors' });
+
+    // The narrower search now resolves to fewer rows, which is a filter change, not work finishing.
     mockUseInvestigationSection.mockImplementation(
       implementationWithInProgressIds({ ids: ['running-c'], refetchCritical, refetchFailed })
     );

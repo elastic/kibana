@@ -69,6 +69,10 @@ const highInvestigation: ListInvestigationItem = {
 
 const refetchAll = jest.fn();
 
+// jsdom implements neither, and scrolling to a section is how a tile and `?severity=` both work.
+const scrollIntoView = jest.fn();
+Element.prototype.scrollIntoView = scrollIntoView;
+
 function makeSection(
   id: InvestigationSectionState['id'],
   overrides: Partial<InvestigationSectionState> = {}
@@ -81,6 +85,7 @@ function makeSection(
     isInitialLoading: false,
     isFetchingNextPage: false,
     isFetching: false,
+    isPreviousData: false,
     error: null,
     fetchNextPage: jest.fn(),
     refetch: jest.fn(),
@@ -149,6 +154,7 @@ function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {
 describe('NightshiftApp', () => {
   beforeEach(() => {
     refetchAll.mockClear();
+    scrollIntoView.mockClear();
     mockUsePageReady.mockClear();
     mockUseKibana.mockReturnValue({
       services: {
@@ -317,6 +323,41 @@ describe('NightshiftApp', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-80-critical'));
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('scrolls to a severity section from its tile', () => {
+    setSections({
+      sections: defaultSections({
+        '80-critical': { investigations: [criticalInvestigation], total: 1 },
+      }),
+    });
+
+    renderApp();
+
+    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-80-critical'));
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=80-critical');
+  });
+
+  it('keeps a severity tile actionable when its section failed to load, since it still renders', () => {
+    setSections({
+      sections: defaultSections({ '80-critical': { error: new Error('boom') } }),
+    });
+
+    renderApp();
+
+    expect(screen.getByTestId('nightshiftInvestigationSection-80-critical')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-80-critical'));
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show a count of zero on the tiles before the sections have loaded', () => {
+    setSections({ sections: defaultSections(), isInitialLoading: true });
+
+    renderApp();
+
+    expect(screen.queryByTestId('nightshiftSeverityTileCount-80-critical')).not.toBeInTheDocument();
   });
 
   it('opens and closes the selected investigation from the URL', () => {

@@ -38,6 +38,7 @@ export interface FetchInvestigationsResult {
   isInitialLoading: boolean;
   isFetchingNextPage: boolean;
   isFetching: boolean;
+  isPreviousData: boolean;
   error: Error | null;
   fetchNextPage: () => void;
   refetch: () => void;
@@ -82,6 +83,7 @@ export const useFetchInvestigations = ({
     isFetching,
     isFetchingNextPage,
     isInitialLoading,
+    isPreviousData,
     refetch,
   } = useInfiniteQuery<ListInvestigationsResponse, Error>({
     queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section', statuses, severities, query],
@@ -140,6 +142,7 @@ export const useFetchInvestigations = ({
       isInitialLoading,
       isFetchingNextPage,
       isFetching,
+      isPreviousData,
       error: error ?? null,
       fetchNextPage: handleFetchNextPage,
       refetch: handleRefetch,
@@ -151,6 +154,7 @@ export const useFetchInvestigations = ({
       isInitialLoading,
       isFetchingNextPage,
       isFetching,
+      isPreviousData,
       error,
       handleFetchNextPage,
       handleRefetch,

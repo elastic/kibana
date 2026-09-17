@@ -32,6 +32,7 @@ const makeSection = (
   isInitialLoading: false,
   isFetchingNextPage: false,
   isFetching: false,
+  isPreviousData: false,
   error: null,
   fetchNextPage: jest.fn(),
   refetch: jest.fn(),

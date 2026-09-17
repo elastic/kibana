@@ -116,6 +116,10 @@ export const useInvestigationSections = ({
   });
 
   useEffect(() => {
+    if (inProgress.isPreviousData) {
+      return;
+    }
+
     const ids = toInvestigationIds(inProgressInvestigations);
     const previous = previousInProgress.current;
     previousInProgress.current = { query, total: inProgress.total, ids };
@@ -139,6 +143,7 @@ export const useInvestigationSections = ({
   }, [
     query,
     inProgress.total,
+    inProgress.isPreviousData,
     inProgressInvestigations,
     refetchCritical,
     refetchHigh,
