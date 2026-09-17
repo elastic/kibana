@@ -55,7 +55,7 @@ describe('ActionPolicyInlineContent', () => {
 
   it('renders the matcher summary', () => {
     render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText(/rule\.id\s*:\s*"abc"/)).toBeDefined();
+    expect(screen.getByText(/expr:\s*episode_status:\s*"active"/)).toBeDefined();
   });
 
   it('renders "matches all" when matcher is null', () => {
