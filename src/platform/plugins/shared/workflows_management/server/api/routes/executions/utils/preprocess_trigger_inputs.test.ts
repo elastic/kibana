@@ -746,6 +746,14 @@ describe('preprocessTriggerInputs', () => {
         },
       });
 
+      const mockAlertHydration = (alertSource: Record<string, unknown>) => {
+        mockEsClient.mget = jest.fn().mockResolvedValue({
+          docs: [
+            { found: true, _id: 'alert-1', _index: '.alerts-test-default', _source: alertSource },
+          ],
+        });
+      };
+
       it('should expand alerts through the authorized alerts client', async () => {
         const alertSource = createMockAlertSource();
         mockAlertsClient.find.mockResolvedValueOnce(
@@ -754,6 +762,7 @@ describe('preprocessTriggerInputs', () => {
             1
           )
         );
+        mockAlertHydration(alertSource);
 
         const inputs = {
           event: {
@@ -769,14 +778,22 @@ describe('preprocessTriggerInputs', () => {
 
         expect(mockAlertsClient.find).toHaveBeenCalledWith(
           expect.objectContaining({
-            query: { bool: { must: [] } },
+            query: {
+              bool: {
+                filter: [{ bool: { must: [] } }, { exists: { field: 'kibana.alert.uuid' } }],
+              },
+            },
             index: '.alerts-security.alerts-default',
             track_total_hits: MAX_TRIGGER_EVENT_DOCS + 1,
           })
         );
         expect(mockEsClient.search).not.toHaveBeenCalled();
         expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
-        expect(mockEsClient.mget).not.toHaveBeenCalled();
+        // Sources are hydrated through the size-bounded mget rather than the alerts client.
+        expect(mockEsClient.mget).toHaveBeenCalledWith(
+          { docs: [{ _id: 'alert-1', _index: '.alerts-test-default' }] },
+          { maxResponseSize: expect.any(Number) }
+        );
 
         const event = result.event as { alerts: unknown[]; rule: { id: string } };
         expect(event.alerts.length).toBe(1);
@@ -792,6 +809,7 @@ describe('preprocessTriggerInputs', () => {
             'gte'
           )
         );
+        mockAlertHydration(alertSource);
 
         await preprocessTriggerInputs(
           {

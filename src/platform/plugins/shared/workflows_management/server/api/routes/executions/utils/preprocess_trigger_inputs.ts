@@ -150,6 +150,7 @@ async function preprocessAlertEvent(
     const { hits, total, totalRelation, truncated } = await fetchAlertsByQuery(
       { query, index },
       alertsClient,
+      esClient,
       logger
     );
     if (truncated) {

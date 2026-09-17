@@ -54,6 +54,7 @@ export const MAX_TRIGGER_EVENT_BYTES = 10 * 1024 * 1024;
 
 const SEARCH_PAGE_SIZE = 1000;
 const PIT_KEEP_ALIVE = '1m';
+const ALERT_UUID_FIELD = 'kibana.alert.uuid';
 
 const getDocumentSourceBytes = (source: Record<string, unknown>): number =>
   Buffer.byteLength(JSON.stringify(source), 'utf8');
@@ -68,7 +69,8 @@ const createSizeLimitError = (maxBytes: number): Error =>
 export async function fetchDocumentsByIds(
   ids: DocumentSelection[],
   esClient: ElasticsearchClient,
-  logger: Logger
+  logger: Logger,
+  maxBytes: number = MAX_TRIGGER_EVENT_BYTES
 ): Promise<RawDocumentHit[]> {
   if (ids.length === 0) {
     return [];
@@ -85,7 +87,7 @@ export async function fetchDocumentsByIds(
       {
         docs: ids.map(({ _id, _index }) => ({ _id, _index })),
       },
-      { maxResponseSize: MAX_TRIGGER_EVENT_BYTES }
+      { maxResponseSize: maxBytes }
     );
 
     const hits: RawDocumentHit[] = [];
@@ -237,36 +239,48 @@ export async function fetchDocumentsByQuery(
 }
 
 /**
+ * `search_after` cannot resume from a null sort value, and a keyword sort emits null for a
+ * document missing the field, so the tiebreaker must exist on every alert the query matches.
+ */
+const withPaginationTiebreaker = (query: QueryDslQueryContainer): QueryDslQueryContainer => ({
+  bool: { filter: [query, { exists: { field: ALERT_UUID_FIELD } }] },
+});
+
+/**
  * Fetches alerts through the Rule Registry client so every page is space-filtered,
  * privilege-filtered, post-validated, and audited by the alerting framework.
+ *
+ * Paging requests ids only, because the Rule Registry `find` API cannot bound its response
+ * size; the authorized ids are then hydrated through the same size-bounded `mget` the
+ * explicit-id path uses, so no page can allocate past `maxBytes` before it is inspected.
  */
 export async function fetchAlertsByQuery(
   params: FetchByQueryParams,
   alertsClient: Pick<AlertsClient, 'find'>,
+  esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<FetchByQueryResult> {
   const { query, index } = params;
   const maxDocs = params.maxDocs ?? MAX_TRIGGER_EVENT_DOCS;
   const maxBytes = params.maxBytes ?? MAX_TRIGGER_EVENT_BYTES;
   const maxPageSize = params.pageSize ?? SEARCH_PAGE_SIZE;
-  const hits: RawDocumentHit[] = [];
-  let sourceBytes = 0;
-  let scannedHits = 0;
+  const selections: DocumentSelection[] = [];
   let total = 0;
   let totalRelation: FetchByQueryResult['totalRelation'] = 'eq';
   let searchAfter: Array<string | number> | undefined;
 
   try {
-    while (scannedHits < maxDocs) {
-      const pageSize = Math.min(maxPageSize, maxDocs - scannedHits);
+    while (selections.length < maxDocs) {
+      const pageSize = Math.min(maxPageSize, maxDocs - selections.length);
       const response = await alertsClient.find({
-        query,
+        query: withPaginationTiebreaker(query),
         index: Array.isArray(index) ? index.join(',') : index,
         size: pageSize,
+        _source: false,
         track_total_hits: searchAfter === undefined ? maxDocs + 1 : false,
         sort: [
           { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
-          { 'kibana.alert.uuid': { order: 'asc', unmapped_type: 'keyword' } },
+          { [ALERT_UUID_FIELD]: { order: 'asc', unmapped_type: 'keyword' } },
         ],
         search_after: searchAfter,
       });
@@ -294,39 +308,37 @@ export async function fetchAlertsByQuery(
       }
 
       for (const hit of pageHits) {
-        scannedHits++;
-        if (hit._source) {
-          const source = hit._source as Record<string, unknown>;
-          const hitSourceBytes = getDocumentSourceBytes(source);
-          if (sourceBytes + hitSourceBytes > maxBytes) {
-            throw createSizeLimitError(maxBytes);
-          }
-          sourceBytes += hitSourceBytes;
-          hits.push({
-            _id: hit._id as string,
-            _index: hit._index,
-            _source: source,
-          });
-        }
+        selections.push({ _id: hit._id as string, _index: hit._index });
       }
 
-      const lastHit = pageHits[pageHits.length - 1];
-      const lastSort = lastHit.sort;
+      if (pageHits.length < pageSize || selections.length >= maxDocs) {
+        break;
+      }
+
+      const lastSort = pageHits[pageHits.length - 1].sort;
       searchAfter = lastSort?.every(
         (value): value is string | number => typeof value === 'string' || typeof value === 'number'
       )
         ? lastSort
         : undefined;
-      if (pageHits.length < pageSize || !searchAfter) {
-        break;
+      if (!searchAfter) {
+        throw new Error(
+          `Cannot page the alert selection past ${selections.length} alerts: the last hit has no usable sort cursor`
+        );
       }
+    }
+
+    const hits = await fetchDocumentsByIds(selections, esClient, logger, maxBytes);
+    const sourceBytes = hits.reduce((bytes, hit) => bytes + getDocumentSourceBytes(hit._source), 0);
+    if (sourceBytes > maxBytes) {
+      throw createSizeLimitError(maxBytes);
     }
 
     return {
       hits,
       total,
       totalRelation,
-      truncated: totalRelation === 'gte' || total > scannedHits,
+      truncated: totalRelation === 'gte' || total > selections.length,
     };
   } catch (error) {
     logger.error(
