@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,12 +15,14 @@ import { SINGLE_ACCOUNT } from '../../../../common';
 
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
+import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 
 import { AwsIdentityFederationSetup } from './aws_identity_federation_setup';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_get_cloud_connectors');
 jest.mock('../hooks/use_create_cloud_connector');
+jest.mock('../hooks/use_cloud_connector_template');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
@@ -28,6 +30,9 @@ const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
 >;
 const mockUseCreateCloudConnector = useCreateCloudConnector as jest.MockedFunction<
   typeof useCreateCloudConnector
+>;
+const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as jest.MockedFunction<
+  typeof useCloudConnectorTemplate
 >;
 
 const mockCloudConnectors = [
@@ -85,6 +90,12 @@ describe('AwsIdentityFederationSetup', () => {
       mutate: jest.fn(),
       isLoading: false,
     } as unknown as ReturnType<typeof useCreateCloudConnector>);
+
+    mockUseCloudConnectorTemplate.mockReturnValue({
+      launchButtonProps: { href: 'https://cf.example', target: '_blank' },
+      isDisabled: false,
+      isGeneratingTemplate: false,
+    });
 
     mockGetConnectors();
   });
@@ -155,6 +166,43 @@ describe('AwsIdentityFederationSetup', () => {
         expect(onConnectorIdChange).toHaveBeenCalledWith('new-connector', 'Freshly Created');
       });
       expect(onConnectorIdChange).not.toHaveBeenCalledWith('new-connector', undefined);
+    });
+
+    it('passes IaC confirm onto create after a successful render', async () => {
+      const mutate = jest.fn();
+      mockGetConnectors({ data: [] });
+      mockUseCreateCloudConnector.mockReturnValue({
+        mutate,
+        isLoading: false,
+      } as unknown as ReturnType<typeof useCreateCloudConnector>);
+      mockUseCloudConnectorTemplate.mockReturnValue({
+        launchButtonProps: { onClick: jest.fn() },
+        isDisabled: false,
+        isGeneratingTemplate: false,
+        iacConfirm: {
+          iac_key: 'sha256:abc',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: 'v1',
+        },
+      });
+
+      const { getByTestId } = renderSetup();
+      fireEvent.change(getByTestId('awsIdentityFederationSetup-connectorName'), {
+        target: { value: 'guardduty-connector' },
+      });
+      fireEvent.change(getByTestId('awsIdentityFederationSetup-roleArn'), {
+        target: { value: 'arn:aws:iam::1:role/Role' },
+      });
+      fireEvent.click(getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'guardduty-connector',
+          iac_key: 'sha256:abc',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: 'v1',
+        })
+      );
     });
   });
 });

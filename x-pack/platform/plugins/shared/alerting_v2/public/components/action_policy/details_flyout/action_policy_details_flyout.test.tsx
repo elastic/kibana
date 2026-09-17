@@ -69,7 +69,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   ],
   matcher: { expression: 'data.severity : "critical"' },
   group_by: ['host.name', 'service.name'],
-  tags: ['production', 'oncall'],
   grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozed_until: null,
@@ -291,25 +290,6 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout();
 
       expect(screen.getByText('Routes critical alerts to the oncall workflow')).toBeInTheDocument();
-      expect(screen.getByText('production')).toBeInTheDocument();
-    });
-
-    it('shows all tag badges in the header when tag count is within the visible threshold', () => {
-      renderFlyout();
-
-      expect(screen.getByText('production')).toBeInTheDocument();
-      expect(screen.getByText('oncall')).toBeInTheDocument();
-    });
-
-    it('collapses tag badges into an overflow chip when there are more than 5 badges total', () => {
-      renderFlyout({
-        policy: createPolicy({
-          tags: ['tag-1', 'tag-2', 'tag-3', 'tag-4', 'tag-5'],
-        }),
-      });
-
-      // 6 badges total (enabled + 5 tags) → overflow threshold exceeded
-      expect(screen.getByTestId('flyoutHeaderBadgeOverflow')).toBeInTheDocument();
     });
 
     it('renders the matcher as the KQL string when provided', () => {
