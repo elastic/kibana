@@ -22,6 +22,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
+import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
+import { context as otelContext } from '@opentelemetry/api';
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
@@ -921,6 +923,83 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(execution.executeAgent).toHaveBeenCalledWith(
         expect.objectContaining({ metadata: { workflow_execution_id: 'wf-exec-1' } })
       );
+    });
+  });
+
+  describe('workflow run id / OTel baggage bridge (#291310)', () => {
+    let otelContextManager: AsyncHooksContextManager;
+
+    beforeEach(() => {
+      otelContextManager = new AsyncHooksContextManager();
+      otelContextManager.enable();
+      otelContext.setGlobalContextManager(otelContextManager);
+    });
+
+    afterEach(() => {
+      otelContextManager.disable();
+    });
+
+    it('sets WORKFLOW_RUN_ID_BAGGAGE_KEY baggage around executeAgent when the workflow run id is known', async () => {
+      const { propagation } =
+        jest.requireActual<typeof import('@opentelemetry/api')>('@opentelemetry/api');
+      const { WORKFLOW_RUN_ID_BAGGAGE_KEY } =
+        jest.requireActual<typeof import('@kbn/inference-tracing')>('@kbn/inference-tracing');
+
+      let seenBaggageValue: string | undefined;
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = {
+        executeAgent: jest.fn().mockImplementation(async () => {
+          const baggage = propagation.getBaggage(otelContext.active());
+          seenBaggageValue = baggage?.getEntry(WORKFLOW_RUN_ID_BAGGAGE_KEY)?.value;
+          return { executionId: 'exec-1', events$ };
+        }),
+      };
+      const serviceManager = { internalStart: { execution } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          contextManager: {
+            getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
+            getContext: jest.fn().mockReturnValue({ execution: { id: 'wf-run-42' } }),
+            getScopedEsClient: jest.fn(),
+            renderInputTemplate: jest.fn(),
+            callKibanaApi: jest.fn(),
+          },
+        })
+      );
+
+      expect(seenBaggageValue).toBe('wf-run-42');
+    });
+
+    it('does not set baggage when the workflow run id is unknown (default context mock)', async () => {
+      const { propagation } =
+        jest.requireActual<typeof import('@opentelemetry/api')>('@opentelemetry/api');
+      const { WORKFLOW_RUN_ID_BAGGAGE_KEY } =
+        jest.requireActual<typeof import('@kbn/inference-tracing')>('@kbn/inference-tracing');
+
+      let baggageWasPresent = true;
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = {
+        executeAgent: jest.fn().mockImplementation(async () => {
+          const baggage = propagation.getBaggage(otelContext.active());
+          baggageWasPresent = !!baggage?.getEntry(WORKFLOW_RUN_ID_BAGGAGE_KEY);
+          return { executionId: 'exec-1', events$ };
+        }),
+      };
+      const serviceManager = { internalStart: { execution } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(createContext({ input: { message: 'hello' } }));
+
+      expect(baggageWasPresent).toBe(false);
     });
   });
 

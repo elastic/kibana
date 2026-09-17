@@ -29,6 +29,7 @@ export {
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
   EVALUATOR_NAME_BAGGAGE_KEY,
   CONVERSATION_ID_BAGGAGE_KEY,
+  WORKFLOW_RUN_ID_BAGGAGE_KEY,
 } from './src/baggage';
 export { parseJsonAttr } from './src/util/parse_json_attr';
 

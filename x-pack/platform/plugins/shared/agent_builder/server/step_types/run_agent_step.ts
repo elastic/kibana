@@ -17,6 +17,8 @@ import {
 } from '@kbn/agent-builder-common';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { context as otelContext, propagation } from '@opentelemetry/api';
+import { WORKFLOW_RUN_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 import { firstValueFrom, tap, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
 import {
@@ -45,6 +47,29 @@ export const parseMaxStepSize = (value: string): number | undefined => {
     return undefined;
   }
 };
+
+/**
+ * Wraps `cb` in an OTel context carrying the workflow execution's run id
+ * (`.workflows-executions` document id) as W3C baggage. Every inference span
+ * emitted inside `cb` — including the descendant `ai.agent` spans created by
+ * `executionService.executeAgent` — is tagged with this id as a plain span
+ * attribute (`kibana.workflows.run_id`), giving evals/observability a stable
+ * join key between a workflow execution and its agent spans even though the
+ * workflow engine's own trace id (an `elastic-apm-node` transaction id) lives
+ * in a disconnected id space from the OTel trace the agent spans are recorded
+ * under (see https://github.com/elastic/kibana/issues/291310).
+ */
+function withWorkflowRunIdBaggage<T>(workflowRunId: string | undefined, cb: () => T): T {
+  if (!workflowRunId) {
+    return cb();
+  }
+  const ctx = otelContext.active();
+  const baggage = (propagation.getBaggage(ctx) ?? propagation.createBaggage()).setEntry(
+    WORKFLOW_RUN_ID_BAGGAGE_KEY,
+    { value: workflowRunId }
+  );
+  return otelContext.with(propagation.setBaggage(ctx, baggage), cb);
+}
 
 /**
  * Server step definition for the "ai.agent" step.
@@ -134,56 +159,67 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           agentId: effectiveAgentId,
         });
 
-        const { events$ } = await executionService.executeAgent({
-          mode: AgentExecutionMode.conversation,
-          request,
-          abortSignal: context.abortSignal,
-          metadata,
-          interactive: createNonInteractiveConfig(
-            approvals?.auto_approved_apis && toAutoApprovedApis(approvals.auto_approved_apis)
-          ),
-          params: {
-            agentId: effectiveAgentId,
-            connectorId: effectiveConnectorId,
-            conversationId,
-            autoCreateConversationWithId: createConversation,
-            storeConversation,
-            accessControl,
-            structuredOutput: !!schema,
-            outputSchema: schema,
-            configurationOverrides,
-            nextInput: {
-              message,
-              attachments,
+        // Tag every inference span this executeAgent call produces with the
+        // workflow execution's run id, so agent OTel spans and the
+        // `.workflows-executions` doc stay joinable (see
+        // https://github.com/elastic/kibana/issues/291310 — the workflow
+        // engine's APM trace id and the OTel trace id these spans are
+        // recorded under live in disconnected id spaces).
+        const workflowRunId = context.contextManager.getContext()?.execution?.id;
+        const { events$ } = await withWorkflowRunIdBaggage(workflowRunId, () =>
+          executionService.executeAgent({
+            mode: AgentExecutionMode.conversation,
+            request,
+            abortSignal: context.abortSignal,
+            metadata,
+            interactive: createNonInteractiveConfig(
+              approvals?.auto_approved_apis && toAutoApprovedApis(approvals.auto_approved_apis)
+            ),
+            params: {
+              agentId: effectiveAgentId,
+              connectorId: effectiveConnectorId,
+              conversationId,
+              autoCreateConversationWithId: createConversation,
+              storeConversation,
+              accessControl,
+              structuredOutput: !!schema,
+              outputSchema: schema,
+              configurationOverrides,
+              nextInput: {
+                message,
+                attachments,
+              },
+              ...(maxContentLength !== undefined ? { maxContentLength } : {}),
+              ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
+              ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
             },
-            ...(maxContentLength !== undefined ? { maxContentLength } : {}),
-            ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
-            ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
-          },
-          // workflows already run as scheduled tasks
-          useTaskManager: false,
-        });
+            // workflows already run as scheduled tasks
+            useTaskManager: false,
+          })
+        );
 
-        const events = await firstValueFrom(
-          events$.pipe(
-            tap((event) => {
-              if (isRoundCompleteEvent(event)) {
-                const { model_usage: modelUsage } = event.data.round;
-                if (modelUsage) {
-                  // 'unknown' is the sentinel for a round that made no LLM call
-                  // (see add_round_complete_event.ts). A step uses one connector
-                  // today, so the last real value is the step's connector.
-                  if (modelUsage.connector_id && modelUsage.connector_id !== 'unknown') {
-                    usage.connectorId = modelUsage.connector_id;
+        const events = await withWorkflowRunIdBaggage(workflowRunId, () =>
+          firstValueFrom(
+            events$.pipe(
+              tap((event) => {
+                if (isRoundCompleteEvent(event)) {
+                  const { model_usage: modelUsage } = event.data.round;
+                  if (modelUsage) {
+                    // 'unknown' is the sentinel for a round that made no LLM call
+                    // (see add_round_complete_event.ts). A step uses one connector
+                    // today, so the last real value is the step's connector.
+                    if (modelUsage.connector_id && modelUsage.connector_id !== 'unknown') {
+                      usage.connectorId = modelUsage.connector_id;
+                    }
+                    usage.inputTokens += modelUsage.input_tokens;
+                    usage.outputTokens += modelUsage.output_tokens;
+                    usage.cachedTokens += modelUsage.cached_input_tokens ?? 0;
+                    usage.totalTokens += modelUsage.input_tokens + modelUsage.output_tokens;
                   }
-                  usage.inputTokens += modelUsage.input_tokens;
-                  usage.outputTokens += modelUsage.output_tokens;
-                  usage.cachedTokens += modelUsage.cached_input_tokens ?? 0;
-                  usage.totalTokens += modelUsage.input_tokens + modelUsage.output_tokens;
                 }
-              }
-            }),
-            toArray()
+              }),
+              toArray()
+            )
           )
         );
 

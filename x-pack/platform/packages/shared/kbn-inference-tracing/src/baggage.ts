@@ -36,3 +36,18 @@ export const EVAL_EXPERIMENT_ID_BAGGAGE_KEY = 'kibana.evals.experiment_id';
 export const EVALUATOR_NAME_BAGGAGE_KEY = 'kibana.evals.evaluator_name';
 
 export const CONVERSATION_ID_BAGGAGE_KEY = 'gen_ai.conversation.id';
+
+/**
+ * W3C baggage key used to tag inference spans emitted by an `ai.agent` workflow step
+ * with the workflow execution's run id (`StepContext.execution.id`, i.e. the
+ * `.workflows-executions` document id).
+ *
+ * The workflow execution engine's own trace id (from the `elastic-apm-node` transaction)
+ * and the OTel trace id under which inference spans are emitted live in disconnected id
+ * spaces today (the APM agent's `opentelemetryBridgeEnabled` defaults to `false` and Kibana
+ * does not override it), so a span-side `trace.id` can never equal the workflow-side
+ * `traceIds` value. This baggage key provides an independent, always-available join key:
+ * ES|QL can match `.workflows-executions._id` against this attribute directly, without
+ * requiring the two tracer stacks to share a trace id space.
+ */
+export const WORKFLOW_RUN_ID_BAGGAGE_KEY = 'kibana.workflows.run_id';
