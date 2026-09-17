@@ -463,8 +463,6 @@ describe('CountTimeframeStrategy', () => {
       until: AlertEpisodeStatus;
       maxEvaluations?: number;
     }) => {
-      // Recovery can only start from an episode that is already active, so the run is
-      // seeded with that state. A pending run starts with no prior episode at all.
       let previousEpisode =
         from != null
           ? buildLatestAlertEvent({ episodeStatus: from, eventStatus: alertEventStatus.breached })

@@ -303,16 +303,6 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     return { status: stayStatus, statusCount: nextCount };
   }
 
-  /**
-   * Evaluates the threshold on the evaluation that first enters `pending` or `recovering`.
-   *
-   * An ungated phase keeps the basic lifecycle: the episode enters the intermediate status and
-   * is gated on the following evaluation instead. Otherwise the threshold is evaluated from a
-   * zero baseline, because the entering evaluation is itself the first consecutive match for
-   * the phase and no time has been spent in it yet. That makes a count of 1 resolve straight
-   * to the success status, and keeps a timeframe from being satisfied by the gap since the
-   * previous run.
-   */
   private getFirstEntryStateTransition(
     config: ThresholdConfig,
     { successStatus, stayStatus }: Pick<StateTransitionOptions, 'successStatus' | 'stayStatus'>
