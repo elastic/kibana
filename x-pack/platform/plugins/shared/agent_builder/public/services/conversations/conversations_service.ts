@@ -21,7 +21,7 @@ import type {
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
   ConversationListOptions,
-  ConversationSearchOptions,
+  ConversationSearchRequestOptions,
   ConversationGetOptions,
   ConversationDeleteOptions,
 } from '../../../common/conversations';
@@ -60,7 +60,7 @@ export class ConversationsService {
     agentId,
     page,
     perPage,
-  }: ConversationSearchOptions): Promise<SearchConversationsResponse> {
+  }: ConversationSearchRequestOptions): Promise<SearchConversationsResponse> {
     return await this.http.get<SearchConversationsResponse>(
       buildPath(`${internalApiPath}/conversations/_search`),
       {

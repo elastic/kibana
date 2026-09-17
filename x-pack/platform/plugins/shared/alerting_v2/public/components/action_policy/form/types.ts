@@ -16,7 +16,6 @@ import type { InlineWorkflowActionDraft } from '@kbn/alerting-v2-rule-form';
 export interface ActionPolicyFormState {
   name: string;
   description: string;
-  tags: string[];
   matcher: PolicyMatcher | null;
   groupingMode: GroupingMode;
   groupBy: string[];
