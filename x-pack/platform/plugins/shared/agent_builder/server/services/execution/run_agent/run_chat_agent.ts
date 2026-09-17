@@ -493,7 +493,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
    */
   const toRoundInterrupted = (): RoundInterruptedEvent => {
     const endTime = new Date();
-    const { steps, summary } = buildInterruptedRound({
+    const { steps: interruptedSteps, summary } = buildInterruptedRound({
       events: collectedEvents,
       pendingRound,
       startTime,
@@ -549,7 +549,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         round_id: roundId,
         started_at: startTime.toISOString(),
         input,
-        steps,
+        steps: interruptedSteps,
         summary,
         attachments: context.attachmentStateManager.getAll(),
         ...(attachmentEvents.length > 0 ? { attachment_events: attachmentEvents } : {}),
