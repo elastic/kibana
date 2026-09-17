@@ -12,7 +12,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { ActionType, GenericValidationResult } from '../../../types';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -88,7 +88,6 @@ describe('connectors_selection', () => {
     render(
       <KibanaThemeProvider {...core}>
         <ConnectorsSelection
-          ariaLabelledBy="connectorLabel"
           accordionIndex={0}
           actionItem={actionItem}
           actionTypesIndex={actionTypeIndex}
@@ -106,7 +105,6 @@ describe('connectors_selection', () => {
     render(
       <KibanaThemeProvider {...core}>
         <ConnectorsSelection
-          ariaLabelledBy="connectorLabel"
           accordionIndex={0}
           actionItem={actionItem}
           actionTypesIndex={actionTypeIndex}
@@ -120,13 +118,11 @@ describe('connectors_selection', () => {
     expect(screen.getByRole('combobox')).toHaveValue('test pagerduty');
   });
 
-  it('takes its accessible name from the visible label', () => {
+  it('takes its accessible name from the wrapping EuiFormRow label', () => {
     render(
       <KibanaThemeProvider {...core}>
-        <>
-          <span id="connectorLabel">{'Test connector'}</span>
+        <EuiFormRow label="Test connector">
           <ConnectorsSelection
-            ariaLabelledBy="connectorLabel"
             accordionIndex={0}
             actionItem={actionItem}
             actionTypesIndex={actionTypeIndex}
@@ -134,7 +130,7 @@ describe('connectors_selection', () => {
             connectors={connectors}
             onConnectorSelected={jest.fn()}
           />
-        </>
+        </EuiFormRow>
       </KibanaThemeProvider>
     );
 

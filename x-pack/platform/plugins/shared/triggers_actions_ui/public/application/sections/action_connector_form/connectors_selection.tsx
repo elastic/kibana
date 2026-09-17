@@ -25,8 +25,11 @@ interface ConnectorOption {
 
 interface SelectionProps {
   allowGroupConnector?: string[];
-  /** ID of the element holding the visible label, so the announced name matches it. */
-  ariaLabelledBy: string;
+  /**
+   * Injected by the wrapping `EuiFormRow`, which renders its label with an
+   * `id` of `${id}-label`. Used to announce the visible label.
+   */
+  id?: string;
   actionItem: RuleUiAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
@@ -39,7 +42,7 @@ export const ConnectorsSelection = React.memo(ConnectorsSelectionComponent);
 
 function ConnectorsSelectionComponent({
   allowGroupConnector,
-  ariaLabelledBy,
+  id,
   actionItem,
   accordionIndex,
   actionTypesIndex,
@@ -82,7 +85,7 @@ function ConnectorsSelectionComponent({
 
   return (
     <EuiComboBox
-      aria-labelledby={ariaLabelledBy}
+      aria-labelledby={id ? `${id}-label` : undefined}
       data-test-subj={`selectActionConnector-${actionItem.actionTypeId}-${accordionIndex}`}
       fullWidth
       singleSelection={{ asPlainText: true }}
