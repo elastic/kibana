@@ -318,5 +318,7 @@
     "@kbn/ui-callout",
     "@kbn/shared-ux-utility",
     "@kbn/app-header",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock",
   ]
 }
