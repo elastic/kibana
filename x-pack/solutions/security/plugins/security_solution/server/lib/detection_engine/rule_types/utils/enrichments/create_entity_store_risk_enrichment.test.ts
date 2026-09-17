@@ -31,7 +31,7 @@ const makeEntityStoreCrudClient = (
 ): EntityStoreCRUDClient =>
   ({
     listEntities: jest.fn().mockResolvedValue({ entities }),
-  } as unknown as EntityStoreCRUDClient);
+  }) as unknown as EntityStoreCRUDClient;
 
 describe('createEntityStoreEnrichment', () => {
   let logger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;

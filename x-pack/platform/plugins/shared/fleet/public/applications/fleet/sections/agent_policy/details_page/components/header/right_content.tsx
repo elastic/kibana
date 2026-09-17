@@ -254,7 +254,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
               },
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index}>
-                {item.isDivider ?? false ? (
+                {(item.isDivider ?? false) ? (
                   <Divider />
                 ) : item.label ? (
                   <EuiDescriptionList compressed textStyle="reverse" css={{ textAlign: 'right' }}>

@@ -32,12 +32,10 @@ export const createResolveAction = (
       execute: (episodes, http) =>
         bulkDeactivateEpisodeActions(
           http,
-          episodes.map(
-            (ep): BulkDeactivateEpisodeActionItem => ({
-              episode_id: ep['episode.id'],
-              reason: i18n.RESOLVE_ACTION_REASON,
-            })
-          )
+          episodes.map((ep): BulkDeactivateEpisodeActionItem => ({
+            episode_id: ep['episode.id'],
+            reason: i18n.RESOLVE_ACTION_REASON,
+          }))
         ),
     },
     extension,

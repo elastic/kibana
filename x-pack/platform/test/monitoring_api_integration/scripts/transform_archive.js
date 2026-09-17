@@ -53,14 +53,14 @@ const {
         const product = source.logstash
           ? 'logstash'
           : source.kibana
-          ? 'kibana'
-          : source.beat
-          ? 'beats'
-          : source.enterprisesearch
-          ? 'ent-search'
-          : source.elasticsearch
-          ? 'es'
-          : null;
+            ? 'kibana'
+            : source.beat
+              ? 'beats'
+              : source.enterprisesearch
+                ? 'ent-search'
+                : source.elasticsearch
+                  ? 'es'
+                  : null;
         /* eslint-enable no-nested-ternary */
 
         if (!product) {

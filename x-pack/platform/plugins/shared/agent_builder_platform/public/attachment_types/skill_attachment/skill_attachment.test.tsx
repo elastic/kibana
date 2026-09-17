@@ -69,7 +69,7 @@ const buildCreateAttachment = (): SkillAttachment =>
     type: SKILL_ATTACHMENT_TYPE,
     data: { mode: 'create', skill: buildSkillData(), originalContent: 'instructions' },
     versionData: { version: 1, versionCount: 1, createdAt: TIMESTAMP_A },
-  } as unknown as SkillAttachment);
+  }) as unknown as SkillAttachment;
 
 /** Create attachment that has been patched — current content differs from first draft. */
 const buildPatchedCreateAttachment = (): SkillAttachment =>
@@ -82,7 +82,7 @@ const buildPatchedCreateAttachment = (): SkillAttachment =>
       originalContent: 'instructions',
     },
     versionData: { version: 2, versionCount: 2, createdAt: TIMESTAMP_B },
-  } as unknown as SkillAttachment);
+  }) as unknown as SkillAttachment;
 
 /** Create attachment after the skill was successfully created (committed). */
 const buildCreatedCommittedAttachment = (): SkillAttachment =>
@@ -101,7 +101,7 @@ const buildCreatedCommittedAttachment = (): SkillAttachment =>
       createdAt: TIMESTAMP_B,
       originSyncedAt: TIMESTAMP_B,
     },
-  } as unknown as SkillAttachment);
+  }) as unknown as SkillAttachment;
 
 /** Edit attachment freshly loaded by the agent — committed (no draft changes). */
 const buildLoadedEditAttachment = (): SkillAttachment =>
@@ -116,7 +116,7 @@ const buildLoadedEditAttachment = (): SkillAttachment =>
       createdAt: TIMESTAMP_A,
       originSyncedAt: TIMESTAMP_A,
     },
-  } as unknown as SkillAttachment);
+  }) as unknown as SkillAttachment;
 
 /** Edit attachment with draft changes applied — not committed. */
 const buildDirtyEditAttachment = (): SkillAttachment =>
@@ -135,7 +135,7 @@ const buildDirtyEditAttachment = (): SkillAttachment =>
       createdAt: TIMESTAMP_B,
       originSyncedAt: TIMESTAMP_A,
     },
-  } as unknown as SkillAttachment);
+  }) as unknown as SkillAttachment;
 
 /** Edit attachment after Save — committed, versionCount > 1. */
 const buildSavedEditAttachment = (): SkillAttachment =>
@@ -154,7 +154,7 @@ const buildSavedEditAttachment = (): SkillAttachment =>
       createdAt: TIMESTAMP_B,
       originSyncedAt: TIMESTAMP_B,
     },
-  } as unknown as SkillAttachment);
+  }) as unknown as SkillAttachment;
 
 /** Older (non-latest) committed version — e.g. viewing a previous round's render. */
 const buildOldCommittedAttachment = (): SkillAttachment =>
@@ -169,7 +169,7 @@ const buildOldCommittedAttachment = (): SkillAttachment =>
       createdAt: TIMESTAMP_A,
       originSyncedAt: TIMESTAMP_A,
     },
-  } as unknown as SkillAttachment);
+  }) as unknown as SkillAttachment;
 
 const setup = () => {
   const post = jest.fn().mockResolvedValue({ id: NEW_SKILL_ID });

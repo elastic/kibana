@@ -29,11 +29,9 @@ export const createUnackAction = (
       execute: (eps, http) =>
         bulkUnackEpisodeActions(
           http,
-          eps.map(
-            (ep): BulkUnackEpisodeActionItem => ({
-              episode_id: ep['episode.id'],
-            })
-          )
+          eps.map((ep): BulkUnackEpisodeActionItem => ({
+            episode_id: ep['episode.id'],
+          }))
         ),
     },
     extension,

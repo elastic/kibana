@@ -25,8 +25,10 @@ interface ProjectPickerListClickActionContext {
   state: ReturnType<typeof useProjectPickerState>;
 }
 
-interface ProjectPickerListContextMenuItemProps
-  extends Pick<EuiContextMenuItemProps, 'icon' | 'external'> {
+interface ProjectPickerListContextMenuItemProps extends Pick<
+  EuiContextMenuItemProps,
+  'icon' | 'external'
+> {
   label: string;
   testSubj: string;
   onClick: (props: Pick<ProjectPickerListClickActionContext, 'activeProject'>) => void;
@@ -34,7 +36,8 @@ interface ProjectPickerListContextMenuItemProps
 }
 
 interface ProjectPickerListItemContextMenuProps
-  extends Pick<EuiWrappingPopoverProps, 'button' | 'isOpen'>,
+  extends
+    Pick<EuiWrappingPopoverProps, 'button' | 'isOpen'>,
     Pick<ProjectPickerListClickActionContext, 'activeProject'> {
   closeHandler: () => void;
 }

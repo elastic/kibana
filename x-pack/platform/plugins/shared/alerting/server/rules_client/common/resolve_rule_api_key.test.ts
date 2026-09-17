@@ -29,7 +29,7 @@ const createMockContext = (overrides: Partial<RulesClientContext> = {}): RulesCl
     cloneAPIKey: jest.fn().mockResolvedValue(clonedKey),
     cloneApiKeysOnCreate: false,
     ...overrides,
-  } as unknown as RulesClientContext);
+  }) as unknown as RulesClientContext;
 
 describe('resolveRuleAPIKey', () => {
   describe('when rule is disabled', () => {

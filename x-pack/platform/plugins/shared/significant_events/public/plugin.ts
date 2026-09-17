@@ -17,14 +17,11 @@ export interface SignificantEventsPublicPluginStart {
   significantEventsRepositoryClient: SignificantEventsRepositoryClient;
 }
 
-export class SignificantEventsPublicPlugin
-  implements
-    Plugin<
-      SignificantEventsPublicPluginSetup,
-      SignificantEventsPublicPluginStart,
-      SignificantEventsPublicSetupDependencies
-    >
-{
+export class SignificantEventsPublicPlugin implements Plugin<
+  SignificantEventsPublicPluginSetup,
+  SignificantEventsPublicPluginStart,
+  SignificantEventsPublicSetupDependencies
+> {
   constructor(_ctx: PluginInitializerContext) {}
 
   setup(

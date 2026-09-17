@@ -31,7 +31,7 @@ const configSchema = schema.object({
     schema.arrayOf(
       schema.oneOf(
         KIBANA_GROUPS.map((groupName) => schema.literal(groupName)) as [
-          Type<KibanaGroup> // This cast is needed because it's different to Type<T>[] :sight:
+          Type<KibanaGroup>, // This cast is needed because it's different to Type<T>[] :sight:
         ]
       ),
       { maxSize: 50 }

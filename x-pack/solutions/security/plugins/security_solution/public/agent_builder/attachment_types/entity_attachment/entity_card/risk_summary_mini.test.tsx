@@ -42,7 +42,7 @@ const stats = (override: Partial<RiskStats> = {}): RiskStats =>
     rule_risks: [],
     multipliers: [],
     ...override,
-  } as unknown as RiskStats);
+  }) as unknown as RiskStats;
 
 const renderMini = (props: Partial<React.ComponentProps<typeof RiskSummaryMini>> = {}) =>
   render(

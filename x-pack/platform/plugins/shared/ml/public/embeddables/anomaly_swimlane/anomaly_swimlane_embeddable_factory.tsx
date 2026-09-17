@@ -138,7 +138,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             ...titleManager.getLatestState(),
             ...timeRangeManager.getLatestState(),
             ...swimlaneManager.getLatestState(),
-          } as AnomalySwimLaneEmbeddableState),
+          }) as AnomalySwimLaneEmbeddableState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,

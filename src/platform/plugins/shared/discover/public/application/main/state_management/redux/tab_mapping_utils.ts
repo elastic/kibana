@@ -187,7 +187,7 @@ export const fromTabStateToSavedObjectTab = ({
         globalState: tab.globalState,
         services,
       }).getSerializedFields()
-    : tab.initialInternalState?.serializedSearchSource ?? {};
+    : (tab.initialInternalState?.serializedSearchSource ?? {});
 
   const usesAdHocDataView = isObject(serializedSearchSource.index);
 

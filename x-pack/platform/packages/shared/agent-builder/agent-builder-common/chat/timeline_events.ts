@@ -108,8 +108,10 @@ export interface ServerAssignedEventFields {
  * `TType` is open here; `BaseTimelineEventInput` re-adds the `TimelineEventType` constraint so
  * the closed `TimelineEvent` union and all existing narrowing remain unaffected.
  */
-export interface ConversationEventInput<TType extends string = string, TData = unknown>
-  extends Partial<ServerAssignedEventFields> {
+export interface ConversationEventInput<
+  TType extends string = string,
+  TData = unknown,
+> extends Partial<ServerAssignedEventFields> {
   /** The event type discriminator. */
   type: TType;
   /** The type-specific payload. */
@@ -123,7 +125,7 @@ export interface ConversationEventInput<TType extends string = string, TData = u
 /** A stored conversation event: producer fields plus server-assigned fields made required. */
 export type ConversationEvent<
   TType extends string = string,
-  TData = unknown
+  TData = unknown,
 > = ConversationEventInput<TType, TData> & ServerAssignedEventFields;
 
 /** The fields a producer supplies for a timeline event. */
@@ -385,7 +387,7 @@ export type ValidConversationEventType<T extends string> =
   T extends `${string}${typeof CONVERSATION_EVENT_ID_DELIMITER}${string}`
     ? never
     : T extends ReservedConversationEventType
-    ? never
-    : T extends BuiltInConversationEventTypeValue
-    ? never
-    : T;
+      ? never
+      : T extends BuiltInConversationEventTypeValue
+        ? never
+        : T;

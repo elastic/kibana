@@ -77,13 +77,13 @@ const DatasetStepProgress: React.FC<{
   // step output is authoritative, so use it as-is.
   const done = settled ? rawDone : Math.max(rawDone, progressFloor?.examplesDone ?? 0);
   const scores = settled
-    ? progress?.scores_ingested ?? 0
+    ? (progress?.scores_ingested ?? 0)
     : Math.max(progress?.scores_ingested ?? 0, progressFloor?.scoresIngested ?? 0);
 
   const knownTotal = typeof total === 'number' && total > 0 ? total : undefined;
 
   const indeterminate = !settled && done === 0;
-  const max = indeterminate ? undefined : knownTotal ?? Math.max(done, 1);
+  const max = indeterminate ? undefined : (knownTotal ?? Math.max(done, 1));
   const value = indeterminate ? undefined : settled ? max : done;
 
   return (

@@ -43,7 +43,7 @@ const mockRouteContext = (response = mockResponse()) =>
     savedObjectsClient: {} as any,
     monitorConfigRepository: {} as any,
     syntheticsMonitorClient: {} as any,
-  } as any);
+  }) as any;
 
 const installPreprocessResult = (preprocess: any) => {
   const { UpdateMonitorAPI } = jest.requireMock('../services/update_monitor_api');

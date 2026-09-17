@@ -211,7 +211,7 @@ export const selectSignals = async (
   const destMatch = buildTargetMatch(splitExpressions(destValue));
 
   const conversationIds = destMatch
-    ? (
+    ? ((
         await esClient.search<Signal, ConversationAggregations>({
           index,
           ...LENIENT_INDEX_OPTIONS,
@@ -233,7 +233,7 @@ export const selectSignals = async (
             },
           },
         })
-      ).aggregations?.conversations.buckets.map(({ key }) => key) ?? []
+      ).aggregations?.conversations.buckets.map(({ key }) => key) ?? [])
     : [];
 
   const rawMatch = buildTargetMatch(rawIndexExpressionsFor(sources));
@@ -309,7 +309,9 @@ export const selectSignals = async (
   });
 
   const signalCount =
-    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : (response.hits.total?.value ?? 0);
 
   return {
     patterns: buildPatterns(response.aggregations),

@@ -46,7 +46,7 @@ export const useAsyncThunkState = <R, P, C extends {}>(
   asyncThunk: AsyncThunk<R, P, C>
 ): [
   start: (params: P) => Promise<void>,
-  { result: R | undefined; isLoading: boolean; error: Error | null }
+  { result: R | undefined; isLoading: boolean; error: Error | null },
 ] => {
   const dispatchAsyncThunk = useDispatch<AsyncThunkDispatch>();
   const [state, dispatch] = useReducer(asyncReducer<R>, initialState<R>());

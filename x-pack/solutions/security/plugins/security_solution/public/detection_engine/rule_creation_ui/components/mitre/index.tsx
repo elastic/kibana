@@ -150,7 +150,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
       const matchedOption = findCurrentTacticOption(threat);
       const valueOfSelected = isUnsupported
         ? threat.tactic.id
-        : matchedOption?.value ?? camelCase(tacticName);
+        : (matchedOption?.value ?? camelCase(tacticName));
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow>

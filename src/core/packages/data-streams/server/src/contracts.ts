@@ -26,7 +26,7 @@ export interface DataStreamsSetup {
   registerDataStream<
     MappingsInDefinition extends MappingsDefinition,
     FullDocumentType extends GetFieldsOf<MappingsInDefinition>,
-    SRM extends BaseSearchRuntimeMappings
+    SRM extends BaseSearchRuntimeMappings,
   >(
     dataStreamDefinition: DataStreamDefinition<MappingsInDefinition, FullDocumentType, SRM>
   ): void;
@@ -45,7 +45,7 @@ export interface DataStreamsStart {
   initializeClient<
     S extends MappingsDefinition,
     FullDocumentType extends GetFieldsOf<S> = GetFieldsOf<S>,
-    SRM extends BaseSearchRuntimeMappings = never
+    SRM extends BaseSearchRuntimeMappings = never,
   >(
     dataStreamName: string
   ): Promise<IDataStreamClient<S, FullDocumentType, SRM>>;

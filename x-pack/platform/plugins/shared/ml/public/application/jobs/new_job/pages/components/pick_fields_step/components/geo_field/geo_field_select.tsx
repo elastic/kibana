@@ -34,7 +34,7 @@ export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField
             label: f.name,
             field: f,
             css: optionCss,
-          } as DropDownLabel)
+          }) as DropDownLabel
       ),
     [fields, optionCss]
   );

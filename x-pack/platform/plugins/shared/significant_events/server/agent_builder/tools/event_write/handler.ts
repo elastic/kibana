@@ -358,7 +358,7 @@ const buildPendingWrite = (
 
   const signals = isContinuation
     ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
-    : candidate.input.signals ?? [];
+    : (candidate.input.signals ?? []);
 
   const episodeContext = isContinuation
     ? mergeEpisodeContext(priorDocs, rest, timestamp)

@@ -50,8 +50,8 @@ jest.mock('../utils/get_timeline_events_details_from_record', () => ({
       values: Array.isArray(value)
         ? value.map(String)
         : value != null
-        ? [String(value)]
-        : undefined,
+          ? [String(value)]
+          : undefined,
       originalValue: value,
       isObjectArray: Array.isArray(value) && value.length > 0 && typeof value[0] === 'object',
       category: field.split('.')[0],
@@ -155,7 +155,7 @@ const createMockHit = (
     raw: { _id: 'test-id', _index: index },
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const remoteAlertHit = createMockHit(
   { 'event.kind': 'signal' },

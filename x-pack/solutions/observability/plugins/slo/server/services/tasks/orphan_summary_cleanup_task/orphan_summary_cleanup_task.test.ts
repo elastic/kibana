@@ -31,7 +31,7 @@ const createMockAggregationResponse = (
         ...(afterKey ? { after_key: afterKey } : {}),
       },
     },
-  } as any);
+  }) as any;
 
 describe('cleanupOrphanSummaries', () => {
   let esClient: ElasticsearchClientMock;

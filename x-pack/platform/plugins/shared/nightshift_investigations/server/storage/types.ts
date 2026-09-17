@@ -76,7 +76,7 @@ export interface SeverityCountsQuery {
 }
 
 export interface FindInvestigationsQuery<
-  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes,
 > extends SeverityCountsQuery {
   severities?: Severity[];
   sortField?: 'created_at' | 'completed_at' | 'severity';
@@ -90,7 +90,7 @@ export interface FindInvestigationsQuery<
 export type SeverityCounts = Record<Severity, number>;
 
 export type FindInvestigationsResult<
-  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes,
 > = PaginatedResponse<ProjectedInvestigationRecord<Fields>>;
 
 export interface InvestigationRepository {
@@ -104,7 +104,7 @@ export interface InvestigationRepository {
 }
 
 export type FindInvestigationsAcrossSpacesResult<
-  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes,
 > = PaginatedResponse<{ investigation: ProjectedInvestigationRecord<Fields>; spaceId: string }>;
 
 /**

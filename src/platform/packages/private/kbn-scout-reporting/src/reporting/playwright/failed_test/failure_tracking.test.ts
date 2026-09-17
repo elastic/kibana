@@ -19,7 +19,7 @@ const createMockLog = (): ToolingLog =>
     info: jest.fn(),
     error: jest.fn(),
     success: jest.fn(),
-  } as unknown as ToolingLog);
+  }) as unknown as ToolingLog;
 
 const createMockFailure = (overrides: Partial<TestFailure> = {}): TestFailure => ({
   id: 'test-id-1',

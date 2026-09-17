@@ -43,26 +43,30 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       position: relative;
 
       // Only apply distinguished background styling for framed appearance
-      ${isFramedAppearance &&
-      css`
-        background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-radius: ${euiTheme.border.radius.medium};
+      ${
+        isFramedAppearance &&
+        css`
+          background-color: ${euiTheme.colors.backgroundBasePlain};
+          border-radius: ${euiTheme.border.radius.medium};
 
-        ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
+          ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
 
-        // The frame is an outline on this non-scrolling wrapper: it doesn't affect layout, doesn't
-        // scroll away with the content, isn't touched by focus styles (the focusable element is
-        // the scroll container), and sits outside the box where sticky/fixed bars (e.g. console)
-        // can't cover it.
-        // borderBaseFloating is transparent in light mode and visible in dark mode.
-        outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseFloating};
-      `}
-      ${!isFramedAppearance &&
-      css`
-        background-color: transparent;
-        border-radius: 0;
-        border: none;
-      `}
+          // The frame is an outline on this non-scrolling wrapper: it doesn't affect layout, doesn't
+          // scroll away with the content, isn't touched by focus styles (the focusable element is
+          // the scroll container), and sits outside the box where sticky/fixed bars (e.g. console)
+          // can't cover it.
+          // borderBaseFloating is transparent in light mode and visible in dark mode.
+          outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseFloating};
+        `
+      }
+      ${
+        !isFramedAppearance &&
+        css`
+          background-color: transparent;
+          border-radius: 0;
+          border: none;
+        `
+      }
     `;
   };
 };

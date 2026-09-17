@@ -108,9 +108,8 @@ export class MonitorConfigRepository {
         namespaces: [namespace],
       })),
     ];
-    const { saved_objects: results } = await soClient.bulkGet<EncryptedSyntheticsMonitorAttributes>(
-      bulkObjects
-    );
+    const { saved_objects: results } =
+      await soClient.bulkGet<EncryptedSyntheticsMonitorAttributes>(bulkObjects);
     const resolved = results.find(
       (obj): obj is SavedObject<EncryptedSyntheticsMonitorAttributes> =>
         !isSavedObjectErrorResult(obj)
@@ -220,9 +219,8 @@ export class MonitorConfigRepository {
           references,
         };
       });
-    const result = await this.soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(
-      newMonitors
-    );
+    const result =
+      await this.soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(newMonitors);
     return result.saved_objects;
   }
 
@@ -409,7 +407,7 @@ export class MonitorConfigRepository {
   }
 
   async getAll<
-    T extends EncryptedSyntheticsMonitorAttributes = EncryptedSyntheticsMonitorAttributes
+    T extends EncryptedSyntheticsMonitorAttributes = EncryptedSyntheticsMonitorAttributes,
   >({
     search,
     fields,

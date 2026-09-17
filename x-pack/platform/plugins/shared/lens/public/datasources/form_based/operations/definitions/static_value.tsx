@@ -68,7 +68,7 @@ export const staticValueOperation: OperationDefinition<
     const label = isValid
       ? useDisplayLabel
         ? currentColumn.label
-        : params?.value ?? staticValueLabelDefault
+        : (params?.value ?? staticValueLabelDefault)
       : staticValueLabelDefault;
 
     return [

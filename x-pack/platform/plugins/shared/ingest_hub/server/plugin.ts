@@ -16,9 +16,12 @@ import type {
 import type { IngestHubServerSetupDeps, IngestHubServerStartDeps } from './types';
 import { registerRoutes } from './routes';
 
-export class IngestHubPlugin
-  implements Plugin<void, void, IngestHubServerSetupDeps, IngestHubServerStartDeps>
-{
+export class IngestHubPlugin implements Plugin<
+  void,
+  void,
+  IngestHubServerSetupDeps,
+  IngestHubServerStartDeps
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

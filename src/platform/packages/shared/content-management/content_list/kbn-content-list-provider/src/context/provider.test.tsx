@@ -16,12 +16,10 @@ import type { ContentListItem } from '../item';
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 
 describe('ContentListProvider', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: [],
-      total: 0,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: [],
+    total: 0,
+  }));
 
   const createWrapper = (props?: Partial<ContentListProviderProps>) => {
     const defaultProps: ContentListProviderProps = {

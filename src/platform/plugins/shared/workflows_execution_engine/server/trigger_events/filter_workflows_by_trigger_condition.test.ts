@@ -35,7 +35,7 @@ const createMockWorkflow = (
       ...overrides.definition,
     } as WorkflowDetailDto['definition'],
     ...overrides,
-  } as WorkflowDetailDto);
+  }) as WorkflowDetailDto;
 
 describe('workflowMatchesTriggerCondition', () => {
   const mockLogger: Logger = {

@@ -29,7 +29,7 @@ const createManagementApi = () =>
   ({
     getWorkflow: jest.fn(),
     updateWorkflow: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+  }) as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
 
 const request = {} as KibanaRequest;
 

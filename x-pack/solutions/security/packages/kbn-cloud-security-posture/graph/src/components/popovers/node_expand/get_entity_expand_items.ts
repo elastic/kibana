@@ -388,10 +388,10 @@ export const getRelatedEventsFilter = (
     type === 'user'
       ? { field: RELATED_USER, values: valuesForPrefix('user.') }
       : type === 'host'
-      ? { field: RELATED_HOST, values: valuesForPrefix('host.') }
-      : type === 'service'
-      ? { field: RELATED_ENTITY, values: valuesForPrefix('service.') }
-      : { field: RELATED_ENTITY, values: valuesForPrefix('entity.') };
+        ? { field: RELATED_HOST, values: valuesForPrefix('host.') }
+        : type === 'service'
+          ? { field: RELATED_ENTITY, values: valuesForPrefix('service.') }
+          : { field: RELATED_ENTITY, values: valuesForPrefix('entity.') };
 
   // No usable values: emit nothing rather than a filter that cannot match.
   return values.length > 0 ? { field, values } : undefined;

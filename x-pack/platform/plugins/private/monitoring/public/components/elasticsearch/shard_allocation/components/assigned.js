@@ -46,23 +46,29 @@ const childStyle = (data, shardStats) => (theme) =>
     border-radius: ${theme.euiTheme.size.xs};
     ${logicalCSS('padding', `calc(${theme.euiTheme.size.xs} / 2) 0`)}
 
-    ${data.type === 'index' &&
-    logicalCSS(
-      'border-left',
-      `${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.borderStrongSuccess}`
-    )}
+    ${
+      data.type === 'index' &&
+      logicalCSS(
+        'border-left',
+        `${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.borderStrongSuccess}`
+      )
+    }
 
-    ${shardStats?.status === 'red' &&
-    logicalCSS(
-      'border-left',
-      `${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.borderStrongDanger}`
-    )}
+    ${
+      shardStats?.status === 'red' &&
+      logicalCSS(
+        'border-left',
+        `${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.borderStrongDanger}`
+      )
+    }
 
-    ${shardStats?.status === 'yellow' &&
-    logicalCSS(
-      'border-left',
-      `${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.borderStrongWarning}`
-    )}
+    ${
+      shardStats?.status === 'yellow' &&
+      logicalCSS(
+        'border-left',
+        `${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.borderStrongWarning}`
+      )
+    }
 
     ${data.type === 'shard' && shardStyle(theme)}
   `;

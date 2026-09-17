@@ -45,8 +45,8 @@ const getEntryValue = (type: string, value: string | string[], showValueListModa
 export const getEntryOperator = (type: ListOperatorTypeEnum, operator: string) => {
   if (type === 'nested') return '';
   return operator === 'included'
-    ? OPERATOR_TYPE_LABELS_INCLUDED[type] ?? type
-    : OPERATOR_TYPE_LABELS_EXCLUDED[type] ?? type;
+    ? (OPERATOR_TYPE_LABELS_INCLUDED[type] ?? type)
+    : (OPERATOR_TYPE_LABELS_EXCLUDED[type] ?? type);
 };
 
 export const getValue = (entry: Entry) => {

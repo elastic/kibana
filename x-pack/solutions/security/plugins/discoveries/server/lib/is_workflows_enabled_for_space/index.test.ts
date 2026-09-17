@@ -16,12 +16,12 @@ const UI_SETTING_KEY = 'securitySolution:enableAttackDiscoveryWorkflows';
 const buildFeatureFlags = (value: boolean): CoreStart['featureFlags'] =>
   ({
     getBooleanValue: jest.fn().mockResolvedValue(value),
-  } as unknown as CoreStart['featureFlags']);
+  }) as unknown as CoreStart['featureFlags'];
 
 const buildUiSettingsClient = (value: boolean): IUiSettingsClient =>
   ({
     get: jest.fn().mockResolvedValue(value),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 describe('isWorkflowsEnabledForSpace', () => {
   beforeEach(() => {

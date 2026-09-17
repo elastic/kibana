@@ -33,15 +33,12 @@ import type {
 import { DataViewsStorage } from './content_management';
 import { cacheMaxAge } from './ui_settings';
 
-export class DataViewsServerPlugin
-  implements
-    Plugin<
-      DataViewsServerPluginSetup,
-      DataViewsServerPluginStart,
-      DataViewsServerPluginSetupDependencies,
-      DataViewsServerPluginStartDependencies
-    >
-{
+export class DataViewsServerPlugin implements Plugin<
+  DataViewsServerPluginSetup,
+  DataViewsServerPluginStart,
+  DataViewsServerPluginSetupDependencies,
+  DataViewsServerPluginStartDependencies
+> {
   private readonly logger: Logger;
   private rollupsEnabled: boolean = false;
 

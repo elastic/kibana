@@ -66,7 +66,7 @@ const EXTRA_SOURCE_FIELD_COLUMNS = [
  */
 const firstValue = <T>(value: T | T[] | null | undefined): T | null => {
   if (value == null) return null;
-  return Array.isArray(value) ? value[0] ?? null : value;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
 };
 
 /** Drops asset criticality levels the graph does not model, so they never reach the DTO. */

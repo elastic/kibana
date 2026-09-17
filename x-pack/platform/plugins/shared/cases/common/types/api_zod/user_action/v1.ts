@@ -30,7 +30,7 @@ const UserActionFindRequestTypes = {
 
 const UserActionFindRequestTypesValues = Object.values(UserActionFindRequestTypes) as [
   string,
-  ...string[]
+  ...string[],
 ];
 
 export const CaseUserActionStatsSchema = z.object({

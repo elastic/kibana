@@ -162,8 +162,10 @@ interface NodeDefinitionCommon<LinkId extends AppDeepLinkId, Id extends string> 
   badgeType?: BadgeType;
 }
 
-interface ChromeNavigationNodeCommon
-  extends Omit<NodeDefinitionCommon<AppDeepLinkId, string>, 'link' | 'cloudLink'> {
+interface ChromeNavigationNodeCommon extends Omit<
+  NodeDefinitionCommon<AppDeepLinkId, string>,
+  'link' | 'cloudLink'
+> {
   id: string;
   /** Path in the tree of the node */
   path: string;
@@ -210,7 +212,7 @@ export interface ChromeSetProjectBreadcrumbsParams {
 export type StandardNodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > = NodeDefinitionCommon<LinkId, Id> & {
   renderAs?: never;
   children?: Array<
@@ -225,13 +227,13 @@ export type StandardNodeDefinition<
 /** Allowed only under `panelOpener.children`. */
 export type PanelOpenerChildDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string
+  Id extends string = string,
 > = StandardNodeDefinition<LinkId, Id, Id>;
 
 export type RootNodePanelOpenerDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > = NodeDefinitionCommon<LinkId, Id> & {
   renderAs: 'panelOpener';
   children?: Array<PanelOpenerChildDefinition<LinkId, ChildrenId>>;
@@ -241,7 +243,7 @@ export type RootNodePanelOpenerDefinition<
 export type RootNodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > =
   | StandardNodeDefinition<LinkId, Id, ChildrenId>
   | RootNodePanelOpenerDefinition<LinkId, Id, ChildrenId>;
@@ -257,7 +259,7 @@ export type RootNodeDefinition<
 export type NodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > = RootNodeDefinition<LinkId, Id, ChildrenId>;
 
 /**
@@ -268,7 +270,7 @@ export type NodeDefinition<
 export interface NavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > {
   /**
    * Main content of the navigation.

@@ -45,9 +45,8 @@ export const registerEmbeddables = ({
   plugins.embeddable.registerLegacyURLTransform(
     SLO_OVERVIEW_EMBEDDABLE_ID,
     async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-      const { getTransformOut } = await import(
-        '../common/embeddables/overview/transforms/get_transform_out'
-      );
+      const { getTransformOut } =
+        await import('../common/embeddables/overview/transforms/get_transform_out');
       const transformOut = getTransformOut(transformDrilldownsOut);
       return (
         storedState: object,
@@ -69,9 +68,8 @@ export const registerEmbeddables = ({
   plugins.embeddable.registerLegacyURLTransform(
     SLO_ALERTS_EMBEDDABLE_ID,
     async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-      const { getTransformOut } = await import(
-        '../common/embeddables/alerts/transforms/get_transform_out'
-      );
+      const { getTransformOut } =
+        await import('../common/embeddables/alerts/transforms/get_transform_out');
       const transformOut = getTransformOut(transformDrilldownsOut);
       return (
         storedState: object,

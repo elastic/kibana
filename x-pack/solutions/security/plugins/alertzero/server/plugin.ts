@@ -40,15 +40,12 @@ import { ActionsService } from './services/actions/actions_service';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
-export class AlertZeroPlugin
-  implements
-    Plugin<
-      AlertZeroPluginSetup,
-      AlertZeroPluginStart,
-      AlertZeroSetupDependencies,
-      AlertZeroStartDependencies
-    >
-{
+export class AlertZeroPlugin implements Plugin<
+  AlertZeroPluginSetup,
+  AlertZeroPluginStart,
+  AlertZeroSetupDependencies,
+  AlertZeroStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: AlertZeroConfig;
   private spaces?: AlertZeroStartDependencies['spaces'];

@@ -138,8 +138,8 @@ export const mapClassicAlertToEpisode = (
     durationUs != null
       ? Math.round(durationUs / 1000)
       : start
-      ? Math.max(0, new Date(lastTimestamp).getTime() - new Date(start).getTime())
-      : 0;
+        ? Math.max(0, new Date(lastTimestamp).getTime() - new Date(start).getTime())
+        : 0;
 
   const workflowTags = asStringArray(source[ALERT_WORKFLOW_TAGS]);
 

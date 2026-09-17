@@ -63,7 +63,7 @@ const fakeBundle = (): SecurityCanvasEmbeddedBundle =>
       uiActions: { getTriggerCompatibleActions: jest.fn() },
       upselling: {},
     },
-  } as unknown as SecurityCanvasEmbeddedBundle);
+  }) as unknown as SecurityCanvasEmbeddedBundle;
 
 const renderProvider = (
   resolveCanvasContext: SecurityReduxEmbeddedProviderProps['resolveCanvasContext']

@@ -136,7 +136,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         //   (including the very first Next click when the flyout ran), so we target the existing
         //   policy to avoid creating a second one (double-creation guard applies on retry too).
         if (agentHostsMode === 'existing' || agentPolicyId) {
-          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : (selectedAgentPolicyIds ?? []);
 
           const result = await deployToExistingAgentPolicies(targetsToDeploy, {
             ...baseOpts,

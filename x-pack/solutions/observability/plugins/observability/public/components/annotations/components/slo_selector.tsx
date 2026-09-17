@@ -32,7 +32,7 @@ const mapSlosToOptions = (slos: SLOWithSummaryResponse[] | SloItem[] | undefined
     label:
       slo.instanceId !== ALL_VALUE
         ? `${slo.name ?? slo.id} (${slo.instanceId})`
-        : slo.name ?? slo.id,
+        : (slo.name ?? slo.id),
     value: `${slo.id}-${slo.instanceId}`,
   })) ?? [];
 

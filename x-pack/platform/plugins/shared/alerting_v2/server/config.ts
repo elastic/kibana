@@ -107,7 +107,7 @@ const rulesSchema = schema.object({
 const esqlSchema = schema.object({
   responseFormat: schema.oneOf(
     ESQL_RESPONSE_FORMAT_NAMES.map((name) => schema.literal(name)) as [
-      Type<EsqlResponseFormatName>
+      Type<EsqlResponseFormatName>,
     ],
     { defaultValue: DEFAULT_ESQL_RESPONSE_FORMAT }
   ),

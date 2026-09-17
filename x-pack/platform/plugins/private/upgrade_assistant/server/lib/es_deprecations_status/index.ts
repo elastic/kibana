@@ -46,10 +46,13 @@ export async function getESUpgradeStatus(
         });
 
         // Extract index sizes from response
-        indexSizes = Object.entries(response.indices || {}).reduce((acc, [indexName, stats]) => {
-          acc[indexName] = stats.total?.store?.size_in_bytes || 0;
-          return acc;
-        }, {} as Record<string, number>);
+        indexSizes = Object.entries(response.indices || {}).reduce(
+          (acc, [indexName, stats]) => {
+            acc[indexName] = stats.total?.store?.size_in_bytes || 0;
+            return acc;
+          },
+          {} as Record<string, number>
+        );
       } catch (error) {
         // If we can't get sizes, continue without them
         // Log error but continue without index sizes

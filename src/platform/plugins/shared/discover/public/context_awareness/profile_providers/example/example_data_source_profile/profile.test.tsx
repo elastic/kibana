@@ -60,7 +60,7 @@ const DATA_VIEW_FLATTENED = {
 };
 
 const buildRecord = (flattened: Record<string, unknown>) =>
-  ({ id: 'my-example-logs::1::', raw: {}, flattened } as unknown as DataTableRecord);
+  ({ id: 'my-example-logs::1::', raw: {}, flattened }) as unknown as DataTableRecord;
 
 /**
  * Resolves the profile for the given params and returns its doc viewer, driven the way Discover

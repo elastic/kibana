@@ -25,7 +25,7 @@ export const withMinimumLicense = <
   P = unknown,
   Q = unknown,
   B = unknown,
-  Method extends RouteMethod = never
+  Method extends RouteMethod = never,
 >(
   handler: RequestHandler<P, Q, B, SecuritySolutionRequestHandlerContext, Method>,
   minimumLicenseRequired: LicenseType = 'enterprise'

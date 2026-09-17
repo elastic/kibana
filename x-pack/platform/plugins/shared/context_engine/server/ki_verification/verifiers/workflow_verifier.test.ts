@@ -25,7 +25,7 @@ describe('resolveKiVerifierChain', () => {
   let getWorkflowExecution: jest.Mock;
 
   const execWith = (context: Record<string, unknown>) =>
-    ({ context } as unknown as WorkflowExecutionDto);
+    ({ context }) as unknown as WorkflowExecutionDto;
 
   beforeEach(() => {
     getWorkflowExecution = jest.fn();
@@ -103,7 +103,7 @@ const workflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetail
     definition: { name: 'my-verifier', triggers: [{ type: 'manual' }], steps: [] },
     yaml: '',
     ...overrides,
-  } as unknown as WorkflowDetailDto);
+  }) as unknown as WorkflowDetailDto;
 
 const execution = (
   status: ExecutionStatus,
@@ -113,7 +113,7 @@ const execution = (
     status,
     error: overrides.error ?? null,
     context: 'output' in overrides ? { output: overrides.output } : undefined,
-  } as unknown as WorkflowExecutionDto);
+  }) as unknown as WorkflowExecutionDto;
 
 describe('createWorkflowVerifier', () => {
   let workflowsManagement: jest.Mocked<KiVerifierWorkflowRunner>;

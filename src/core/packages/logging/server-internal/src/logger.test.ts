@@ -461,7 +461,7 @@ describe('trace context in log records', () => {
   const createMockOtelSpan = (traceId: string, spanId: string): Span =>
     ({
       spanContext: () => ({ traceId, spanId, traceFlags: 1 }),
-    } as unknown as Span);
+    }) as unknown as Span;
 
   const getLastLogRecord = (): LogRecord => (appenderMocks[0].append as jest.Mock).mock.calls[0][0];
 

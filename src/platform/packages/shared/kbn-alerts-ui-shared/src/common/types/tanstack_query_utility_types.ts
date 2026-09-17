@@ -15,8 +15,8 @@ import type { UseQueryOptions } from '@kbn/react-query';
 export type FetchFnData<TFetchFn> = TFetchFn extends (...args: any) => Promise<infer TData>
   ? TData
   : TFetchFn extends (...args: any) => infer TData
-  ? TData
-  : never;
+    ? TData
+    : never;
 
 /**
  * A utility type used to correctly type options overrides for `useQuery`
@@ -28,7 +28,7 @@ export type QueryOptionsOverrides<
   TFetchFn,
   TQueryFnData = FetchFnData<TFetchFn>,
   TError = unknown,
-  TData = TQueryFnData
+  TData = TQueryFnData,
 > = Omit<
   UseQueryOptions<TQueryFnData, TError, TData, string[]>,
   'queryKey' | 'queryFn' | 'initialData'

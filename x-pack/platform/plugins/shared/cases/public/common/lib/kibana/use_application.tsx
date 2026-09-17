@@ -37,7 +37,7 @@ export const useApplication = (): UseApplicationReturn => {
   const applications = useStatefulObservable(applications$);
 
   const appTitle = appId
-    ? applications?.get(appId)?.category?.label ?? applications?.get(appId)?.title
+    ? (applications?.get(appId)?.category?.label ?? applications?.get(appId)?.title)
     : undefined;
 
   return { appId, appTitle };

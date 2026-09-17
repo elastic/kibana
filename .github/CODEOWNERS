@@ -666,6 +666,7 @@ src/platform/packages/shared/kbn-opentelemetry-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-otel-demo @elastic/streams-ui
 src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/streams-ui
+src/platform/packages/shared/kbn-oxfmt @elastic/kibana-operations
 src/platform/packages/shared/kbn-palettes @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-profiler @elastic/observability-ui
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-signals-logs-team

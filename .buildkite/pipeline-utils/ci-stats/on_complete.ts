@@ -52,8 +52,8 @@ export async function onComplete() {
     const annotationType = report.success
       ? 'info'
       : isMissingMergeBaseBaselineReport(report.md)
-      ? 'warning'
-      : 'error';
+        ? 'warning'
+        : 'error';
     buildkite.setAnnotation('ci-stats-report', annotationType, report.md);
   }
 

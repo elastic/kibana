@@ -16,8 +16,8 @@ export const getStatusCode = (err: ErrorTypes) => {
   return isBoom(err)
     ? err.output.statusCode
     : err instanceof errors.ResponseError
-    ? err.statusCode
-    : undefined;
+      ? err.statusCode
+      : undefined;
 };
 
 export function handleError(err: ErrorTypes, req?: LegacyRequest) {

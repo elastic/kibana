@@ -21,7 +21,7 @@ const getConnectorErrorMsg = (actionId: string, connector: { id: string; name: s
 
 export const buildExecutor = <
   Config extends Record<string, unknown>,
-  Secrets extends Record<string, unknown>
+  Secrets extends Record<string, unknown>,
 >({
   configurationUtilities,
   connector,

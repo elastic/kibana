@@ -32,15 +32,12 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
   defaultMessage: 'Advanced Settings',
 });
 
-export class AdvancedSettingsPlugin
-  implements
-    Plugin<
-      AdvancedSettingsSetup,
-      AdvancedSettingsStart,
-      AdvancedSettingsPluginSetup,
-      AdvancedSettingsPluginStart
-    >
-{
+export class AdvancedSettingsPlugin implements Plugin<
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+  AdvancedSettingsPluginSetup,
+  AdvancedSettingsPluginStart
+> {
   public setup(
     core: CoreSetup<AdvancedSettingsPluginStart>,
     { management, home }: AdvancedSettingsPluginSetup

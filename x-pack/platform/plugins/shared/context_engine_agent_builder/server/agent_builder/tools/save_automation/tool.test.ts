@@ -37,7 +37,7 @@ describe('save_automation tool', () => {
       getWorkflowsManagement: () =>
         ({
           getWorkflow: getWorkflowMock,
-        } as never),
+        }) as never,
     });
 
   const createAttachments = (): AttachmentStateManager =>
@@ -72,7 +72,7 @@ describe('save_automation tool', () => {
           ],
         },
       ]),
-    } as unknown as AttachmentStateManager);
+    }) as unknown as AttachmentStateManager;
 
   const createConfirmationContext = (
     toolParams: {

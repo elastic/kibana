@@ -36,7 +36,7 @@ export const useRecentlyViewedMonitors = () => {
   const updateRecentlyViewed = useCallback(() => {
     const updatedIdsToPersist = fetchedMonitorsRef.current.length
       ? fetchedMonitorsRef.current.map(({ monitorQueryId: id }) => id)
-      : recentlyViewedMonitorQueryIds ?? [];
+      : (recentlyViewedMonitorQueryIds ?? []);
 
     if (monitorQueryId) {
       setRecentlyViewedMonitorQueryIds(

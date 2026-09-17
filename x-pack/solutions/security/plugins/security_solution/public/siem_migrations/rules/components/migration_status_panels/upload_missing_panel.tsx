@@ -53,8 +53,7 @@ export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadM
 );
 RuleMigrationsUploadMissingPanel.displayName = 'RuleMigrationsUploadMissingPanel';
 
-interface RuleMigrationsUploadMissingPanelContentProps
-  extends RuleMigrationsUploadMissingPanelProps {
+interface RuleMigrationsUploadMissingPanelContentProps extends RuleMigrationsUploadMissingPanelProps {
   missingResources: SiemMigrationResourceBase[];
 }
 const RuleMigrationsUploadMissingPanelContent =

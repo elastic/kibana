@@ -107,8 +107,8 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
     yaml && fleetProxy?.proxy_headers
       ? yaml.stringify(fleetProxy.proxy_headers)
       : fleetProxy?.proxy_headers
-      ? JSON.stringify(fleetProxy.proxy_headers)
-      : '';
+        ? JSON.stringify(fleetProxy.proxy_headers)
+        : '';
 
   const nameInput = useInput(fleetProxy?.name ?? '', validateName, isEditDisabled);
   const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isEditDisabled);

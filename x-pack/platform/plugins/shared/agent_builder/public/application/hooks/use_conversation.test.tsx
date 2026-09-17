@@ -52,7 +52,7 @@ const createConversation = (roundIds: string[]) =>
   ({
     id: 'conversation-1',
     rounds: roundIds.map((id) => ({ id })),
-  } as Conversation);
+  }) as Conversation;
 
 const renderUseIsUnpersistedConversation = ({
   conversation = createConversation([]),
@@ -158,7 +158,7 @@ const createFetchedConversation = (accessControl?: ConversationAccessControl) =>
     id: conversationId,
     rounds: [{ id: 'round-1', status: ConversationRoundStatus.completed }],
     ...(accessControl ? { access_control: accessControl } : {}),
-  } as Conversation);
+  }) as Conversation;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

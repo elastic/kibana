@@ -34,8 +34,8 @@ export const ThumbButton: React.FC<ThumbButtonProps> = ({
   const ebtAction = isActive
     ? AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_RETRACT
     : direction === 'up'
-    ? AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_THUMB_UP
-    : AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_THUMB_DOWN;
+      ? AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_THUMB_UP
+      : AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_THUMB_DOWN;
 
   return (
     <EuiToolTip content={label} disableScreenReaderOutput>

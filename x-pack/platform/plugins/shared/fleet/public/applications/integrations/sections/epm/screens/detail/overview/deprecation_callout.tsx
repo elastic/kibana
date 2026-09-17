@@ -63,12 +63,12 @@ export const DeprecationCallout: React.FC<{
                     values: { version: deprecated.since },
                   })
                 : isUpcoming
-                ? i18n.translate('xpack.fleet.epm.futureDeprecatedIntegrationTitle', {
-                    defaultMessage: 'This integration will be deprecated in a future version',
-                  })
-                : i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
-                    defaultMessage: 'This integration is deprecated',
-                  })
+                  ? i18n.translate('xpack.fleet.epm.futureDeprecatedIntegrationTitle', {
+                      defaultMessage: 'This integration will be deprecated in a future version',
+                    })
+                  : i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
+                      defaultMessage: 'This integration is deprecated',
+                    })
             }
             text={
               <>
@@ -122,13 +122,11 @@ const deprecatedVars = (
 ): DeprecatedFeature[] =>
   vars
     .filter((v): v is typeof v & { deprecated: { description: string } } => !!v.deprecated)
-    .map(
-      (v): DeprecatedFeature => ({
-        type: 'variable',
-        name: v.title || v.name,
-        description: v.deprecated.description,
-      })
-    );
+    .map((v): DeprecatedFeature => ({
+      type: 'variable',
+      name: v.title || v.name,
+      description: v.deprecated.description,
+    }));
 
 const getDeprecatedFeatures = (packageInfo: PackageInfo): DeprecatedFeature[] => {
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
@@ -137,13 +135,11 @@ const getDeprecatedFeatures = (packageInfo: PackageInfo): DeprecatedFeature[] =>
     ? []
     : (packageInfo.policy_templates || [])
         .filter((pt) => !!pt.deprecated)
-        .map(
-          (pt): DeprecatedFeature => ({
-            type: 'policy template',
-            name: pt.title,
-            description: pt.deprecated!.description,
-          })
-        );
+        .map((pt): DeprecatedFeature => ({
+          type: 'policy template',
+          name: pt.title,
+          description: pt.deprecated!.description,
+        }));
 
   const deprecatedInputFeatures = (packageInfo.policy_templates || []).flatMap((policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);

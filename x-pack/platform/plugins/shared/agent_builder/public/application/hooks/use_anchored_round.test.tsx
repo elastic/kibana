@@ -53,7 +53,7 @@ const streamState = (overrides: Partial<ReturnType<typeof useConversationStream>
     error: null,
     isResuming: false,
     ...overrides,
-  } as ReturnType<typeof useConversationStream>);
+  }) as ReturnType<typeof useConversationStream>;
 
 describe('useAnchoredRoundIndex', () => {
   beforeEach(() => {

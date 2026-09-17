@@ -127,7 +127,7 @@ describe('Processor: Grok', () => {
     expect(processors[0][GROK_TYPE]).toEqual({
       field: 'test_grok_processor',
       patterns: ['pattern1'],
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       pattern_definitions: { pattern_1: 'aaa\"bbb', pattern_2: 'aaa(bbb' },
     });
   });

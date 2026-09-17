@@ -414,8 +414,7 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 }
 
 export interface BulkCreateAttachmentUserAction
-  extends Omit<CommonUserActionArgs, 'owner'>,
-    IndexRefresh {
+  extends Omit<CommonUserActionArgs, 'owner'>, IndexRefresh {
   attachments: Array<{
     id: string;
     owner: string;

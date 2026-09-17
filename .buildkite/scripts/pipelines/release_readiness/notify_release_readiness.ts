@@ -133,8 +133,8 @@ export function buildSignals(input: ReadinessInput): Signal[] {
     ftrRun.state === 'passed'
       ? 'passed'
       : ftrRun.state === 'failed'
-      ? 'failed'
-      : `is ${ftrRun.state}`;
+        ? 'failed'
+        : `is ${ftrRun.state}`;
 
   const ftrSignal: Signal = {
     // Only claim the latest `dev` commit was tested when it actually was

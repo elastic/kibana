@@ -16,9 +16,7 @@ export interface TopNFunctionsLocatorParams extends SerializableRecord {
 
 export type TopNFunctionsLocator = LocatorPublic<TopNFunctionsLocatorParams>;
 
-export class TopNFunctionsLocatorDefinition
-  implements LocatorDefinition<TopNFunctionsLocatorParams>
-{
+export class TopNFunctionsLocatorDefinition implements LocatorDefinition<TopNFunctionsLocatorParams> {
   public readonly id = 'topNFunctionsLocator';
 
   public readonly getLocation = async ({

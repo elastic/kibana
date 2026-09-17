@@ -34,6 +34,6 @@ export const useCertStatus = (expiryDate?: string, issueDate?: string) => {
   return isExpiringSoon
     ? CERT_STATUS.EXPIRING_SOON
     : isTooOld
-    ? CERT_STATUS.TOO_OLD
-    : CERT_STATUS.OK;
+      ? CERT_STATUS.TOO_OLD
+      : CERT_STATUS.OK;
 };

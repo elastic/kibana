@@ -92,11 +92,11 @@ export const OverviewPage: React.FC = () => {
   // monitors exist, so it must not suppress the Getting Started redirect.
   const hasActiveOverviewFilter = Boolean(
     pageState.query ||
-      pageState.tags?.length ||
-      pageState.locations?.length ||
-      pageState.monitorTypes?.length ||
-      pageState.projects?.length ||
-      pageState.schedules?.length
+    pageState.tags?.length ||
+    pageState.locations?.length ||
+    pageState.monitorTypes?.length ||
+    pageState.projects?.length ||
+    pageState.schedules?.length
   );
 
   // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,

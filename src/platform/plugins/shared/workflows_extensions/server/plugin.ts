@@ -35,15 +35,12 @@ import type {
   WorkflowsExtensionsServerPluginStartDeps,
 } from './types';
 
-export class WorkflowsExtensionsServerPlugin
-  implements
-    Plugin<
-      WorkflowsExtensionsServerPluginSetup,
-      WorkflowsExtensionsServerPluginStart,
-      WorkflowsExtensionsServerPluginSetupDeps,
-      WorkflowsExtensionsServerPluginStartDeps
-    >
-{
+export class WorkflowsExtensionsServerPlugin implements Plugin<
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+  WorkflowsExtensionsServerPluginSetupDeps,
+  WorkflowsExtensionsServerPluginStartDeps
+> {
   private readonly logger: Logger;
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;

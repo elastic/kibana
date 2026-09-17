@@ -12,7 +12,7 @@ import type {
 import type { EffectScope } from './trusted_apps';
 
 export interface TrustedDeviceConditionEntry<
-  T extends TrustedDeviceConditionEntryField = TrustedDeviceConditionEntryField
+  T extends TrustedDeviceConditionEntryField = TrustedDeviceConditionEntryField,
 > {
   field: T;
   type: 'match' | 'wildcard';

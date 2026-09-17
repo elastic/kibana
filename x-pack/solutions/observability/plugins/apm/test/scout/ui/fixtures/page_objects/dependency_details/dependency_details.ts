@@ -21,7 +21,10 @@ export class DependencyDetailsPage {
   public readonly operationsTab: OperationsTab;
   public readonly operationDetailSubpage: OperationDetailSubpage;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.overviewTab = createLazyPageObject(
       OverviewTab,
       this.page,

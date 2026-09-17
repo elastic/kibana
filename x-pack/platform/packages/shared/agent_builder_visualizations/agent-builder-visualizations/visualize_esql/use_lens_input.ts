@@ -52,7 +52,7 @@ export function useLensInput({
             id: c.name,
             name: c.name,
             meta: { type: esFieldTypeToKibanaFieldType(c.type) },
-          } as DatatableColumn)
+          }) as DatatableColumn
       ),
     [esqlColumns]
   );

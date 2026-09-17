@@ -20,8 +20,10 @@ import type {
 } from '../types';
 import { useBulkLoadActions } from './use_load_actions';
 
-export interface UseDataGridColumnsCellActionsProps
-  extends Pick<CellActionsProps, 'metadata' | 'disabledActionTypes'> {
+export interface UseDataGridColumnsCellActionsProps extends Pick<
+  CellActionsProps,
+  'metadata' | 'disabledActionTypes'
+> {
   /**
    * Optional trigger ID to used to retrieve the cell actions.
    * returns empty array if not provided
@@ -47,7 +49,7 @@ export interface UseDataGridColumnsCellActionsProps
   disableCellActions?: boolean;
 }
 export type UseDataGridColumnsCellActions<
-  P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps
+  P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps,
 > = (props: P) => EuiDataGridColumnCellAction[][];
 
 const emptyActions: EuiDataGridColumnCellAction[][] = [];
@@ -113,8 +115,10 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   return cellActions;
 };
 
-interface CreateColumnCellActionParams
-  extends Pick<UseDataGridColumnsCellActionsProps, 'getCellValue' | 'metadata' | 'dataGridRef'> {
+interface CreateColumnCellActionParams extends Pick<
+  UseDataGridColumnsCellActionsProps,
+  'getCellValue' | 'metadata' | 'dataGridRef'
+> {
   field: FieldSpec;
   triggerId: string;
   action: CellAction;

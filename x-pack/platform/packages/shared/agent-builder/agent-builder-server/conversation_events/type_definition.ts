@@ -10,7 +10,7 @@ import type { z, ZodObject } from '@kbn/zod/v4';
 /** Server-side definition of a conversation event type. */
 export interface ConversationEventTypeDefinition<
   TType extends string = string,
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodObject<any> = ZodObject<any>,
 > {
   /** Unique discriminator written to `event.type` in the stored document. */
   type: TType;

@@ -17,9 +17,10 @@ export interface SpecDefinitionsJson {
 }
 
 /** @public */
-export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['setup']>;
+export type ConsoleSetup =
+  ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
+    ? U
+    : ReturnType<ConsoleServerPlugin['setup']>;
 
 /** @public */
 export interface ConsoleStart {

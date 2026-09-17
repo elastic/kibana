@@ -45,7 +45,7 @@ const createReasoningResponse = (arguments_: Record<string, unknown>) =>
       },
     ],
     tokens: { prompt: 10, completion: 5, total: 15 },
-  } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+  }) as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>;
 
 const responseWithoutFinalTool = {
   content: '',

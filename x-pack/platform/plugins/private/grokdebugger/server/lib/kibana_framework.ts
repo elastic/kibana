@@ -46,7 +46,7 @@ export class KibanaFramework {
     Params = unknown,
     Query = unknown,
     Body = unknown,
-    Method extends RouteMethod = RouteMethod
+    Method extends RouteMethod = RouteMethod,
   >(
     config: GrokDebuggerRouteConfig<Params, Query, Body, Method>,
     handler: RequestHandler<Params, Query, Body>

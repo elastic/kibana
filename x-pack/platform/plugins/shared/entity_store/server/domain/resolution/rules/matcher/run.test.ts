@@ -52,7 +52,7 @@ const esqlResponse = (columns: string[], values: unknown[][]): ESQLSearchRespons
   ({
     columns: columns.map((name) => ({ name, type: 'keyword' })),
     values,
-  } as ESQLSearchResponse);
+  }) as ESQLSearchResponse;
 
 const emptyGroups = () =>
   esqlResponse(

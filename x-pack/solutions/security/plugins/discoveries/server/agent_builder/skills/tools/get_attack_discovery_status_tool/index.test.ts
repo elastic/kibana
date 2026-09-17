@@ -44,7 +44,7 @@ const getMockExecution = (overrides: Partial<WorkflowExecutionDto> = {}): Workfl
     workflowName: 'Workflow',
     yaml: '',
     ...overrides,
-  } as unknown as WorkflowExecutionDto);
+  }) as unknown as WorkflowExecutionDto;
 
 describe('GET_ATTACK_DISCOVERY_STATUS_TOOL_ID', () => {
   it('has the expected value', () => {

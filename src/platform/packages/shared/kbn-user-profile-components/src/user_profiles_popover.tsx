@@ -18,8 +18,9 @@ import { UserProfilesSelectable } from './user_profiles_selectable';
 /**
  * Props of {@link UserProfilesPopover} component
  */
-export interface UserProfilesPopoverProps<Option extends UserProfileWithAvatar | null>
-  extends EuiPopoverProps {
+export interface UserProfilesPopoverProps<
+  Option extends UserProfileWithAvatar | null,
+> extends EuiPopoverProps {
   /**
    * Title of the popover
    * @see EuiContextMenuPanelProps

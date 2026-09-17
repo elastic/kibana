@@ -28,7 +28,7 @@ export function fnv1a32(str: string): number {
   let t1 = 0;
   let v1 = 0x811c;
 
-  for (i = 0; i < l; ) {
+  for (i = 0; i < l;) {
     v0 ^= str.charCodeAt(i++);
     t0 = v0 * 403;
     t1 = v1 * 403;

@@ -42,7 +42,7 @@ const createProvider = ({
       ({
         ssl: { enabled: true, requestCert: false, certificate: serverCertificate },
         selfHttp: { ssl: { verificationMode, certificateAuthorities } },
-      } as HttpConfig)
+      }) as HttpConfig
   );
 
   const provider = new SelfHttpDispatcherProvider({
@@ -195,7 +195,7 @@ describe('SelfHttpDispatcherProvider', () => {
             ({
               ssl: { enabled: true, requestCert: false },
               selfHttp: { ssl: { verificationMode, certificateAuthorities } },
-            } as HttpConfig)
+            }) as HttpConfig
         ),
         target: 'auto',
       });
@@ -219,7 +219,7 @@ describe('SelfHttpDispatcherProvider', () => {
             ({
               ssl: { enabled: true, requestCert: false },
               selfHttp: { ssl: { verificationMode, certificateAuthorities: ['public CA'] } },
-            } as HttpConfig)
+            }) as HttpConfig
         ),
         target: 'auto',
       });

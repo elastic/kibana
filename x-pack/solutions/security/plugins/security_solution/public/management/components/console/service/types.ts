@@ -19,8 +19,9 @@ export interface ParsedCommandInput<TArgs extends object = any> {
   };
 }
 
-export interface ParsedCommandInterface<TArgs extends object = any>
-  extends ParsedCommandInput<TArgs> {
+export interface ParsedCommandInterface<
+  TArgs extends object = any,
+> extends ParsedCommandInput<TArgs> {
   input: string;
 
   /**

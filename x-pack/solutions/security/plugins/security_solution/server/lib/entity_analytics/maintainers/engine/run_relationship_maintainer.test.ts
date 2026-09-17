@@ -1030,7 +1030,7 @@ describe('runRelationshipMaintainer', () => {
         maintainerName: 'communicates_with',
       });
       const [esqlArg] = esql.mock.calls[0] as [
-        { query: string; filter: { bool: { filter: unknown[] } } }
+        { query: string; filter: { bool: { filter: unknown[] } } },
       ];
       const filterStr = JSON.stringify(esqlArg.filter);
       expect(filterStr).toContain('@timestamp');
@@ -1055,7 +1055,7 @@ describe('runRelationshipMaintainer', () => {
         maintainerName: 'communicates_with',
       });
       const [esqlArg] = esql.mock.calls[0] as [
-        { query: string; filter: { bool: { filter: unknown[] } } }
+        { query: string; filter: { bool: { filter: unknown[] } } },
       ];
       const filterStr = JSON.stringify(esqlArg.filter);
       // No lookback range, but the bucket-derived actor terms filter remains.
@@ -1335,7 +1335,7 @@ describe('runRelationshipMaintainer', () => {
         maintainerName: 'communicates_with',
       });
       const [docs] = bulkAppend.mock.calls[0] as [
-        Array<{ Maintainer: { kind: string; lookback_window: string } }>
+        Array<{ Maintainer: { kind: string; lookback_window: string } }>,
       ];
       expect(docs.length).toBeGreaterThan(0);
       for (const d of docs) {

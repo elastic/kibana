@@ -18,52 +18,55 @@ export function getDisplayedFeaturePrivileges(container: HTMLElement) {
     '[data-test-subj~="featurePrivilegeControls"]'
   );
 
-  return Array.from(featurePrivilegeControls).reduce((acc, featureControls) => {
-    const idElement = featureControls.querySelector('[id^="featurePrivilegeControls_"]');
-    const featureId = idElement
-      ? idElement.id.replace('featurePrivilegeControls_', '').replace(/--.*/, '')
-      : '';
+  return Array.from(featurePrivilegeControls).reduce(
+    (acc, featureControls) => {
+      const idElement = featureControls.querySelector('[id^="featurePrivilegeControls_"]');
+      const featureId = idElement
+        ? idElement.id.replace('featurePrivilegeControls_', '').replace(/--.*/, '')
+        : '';
 
-    if (!featureId) return acc;
+      if (!featureId) return acc;
 
-    const primaryGroup = featureControls.querySelector(
-      '[data-test-subj~="primaryFeaturePrivilegeControl"]'
-    );
-    // EUI EuiButtonGroupButton stores option id as data-test-subj, not as HTML id
-    const selectedPrimaryBtn = primaryGroup?.querySelector('[aria-pressed="true"]');
-    const idSelected = selectedPrimaryBtn?.getAttribute('data-test-subj');
-    expect(idSelected).toBeDefined();
+      const primaryGroup = featureControls.querySelector(
+        '[data-test-subj~="primaryFeaturePrivilegeControl"]'
+      );
+      // EUI EuiButtonGroupButton stores option id as data-test-subj, not as HTML id
+      const selectedPrimaryBtn = primaryGroup?.querySelector('[aria-pressed="true"]');
+      const idSelected = selectedPrimaryBtn?.getAttribute('data-test-subj');
+      expect(idSelected).toBeDefined();
 
-    const primaryFeaturePrivilege = idSelected
-      ? idSelected.substring(`${featureId}_`.length)
-      : 'none';
-    const subFeaturePrivileges: string[] = [];
+      const primaryFeaturePrivilege = idSelected
+        ? idSelected.substring(`${featureId}_`.length)
+        : 'none';
+      const subFeaturePrivileges: string[] = [];
 
-    // EUI EuiCheckbox puts data-test-subj on the <input> element itself via ...rest
-    const checkedCheckboxes = featureControls.querySelectorAll(
-      'input[type="checkbox"][data-test-subj~="independentSubFeaturePrivilegeControl"]:checked'
-    );
-    checkedCheckboxes.forEach((checkbox) => {
-      subFeaturePrivileges.push(checkbox.id);
-    });
+      // EUI EuiCheckbox puts data-test-subj on the <input> element itself via ...rest
+      const checkedCheckboxes = featureControls.querySelectorAll(
+        'input[type="checkbox"][data-test-subj~="independentSubFeaturePrivilegeControl"]:checked'
+      );
+      checkedCheckboxes.forEach((checkbox) => {
+        subFeaturePrivileges.push(checkbox.id);
+      });
 
-    const subGroups = featureControls.querySelectorAll(
-      '[data-test-subj~="mutexSubFeaturePrivilegeControl"]'
-    );
-    subGroups.forEach((group) => {
-      const selectedBtn = group.querySelector('[aria-pressed="true"]');
-      const selectedId = selectedBtn?.getAttribute('data-test-subj') ?? '';
-      if (selectedId && selectedId !== 'none') {
-        subFeaturePrivileges.push(selectedId);
-      }
-    });
+      const subGroups = featureControls.querySelectorAll(
+        '[data-test-subj~="mutexSubFeaturePrivilegeControl"]'
+      );
+      subGroups.forEach((group) => {
+        const selectedBtn = group.querySelector('[aria-pressed="true"]');
+        const selectedId = selectedBtn?.getAttribute('data-test-subj') ?? '';
+        if (selectedId && selectedId !== 'none') {
+          subFeaturePrivileges.push(selectedId);
+        }
+      });
 
-    return {
-      ...acc,
-      [featureId]: {
-        primaryFeaturePrivilege,
-        subFeaturePrivileges,
-      },
-    };
-  }, {} as Record<string, { primaryFeaturePrivilege: string; subFeaturePrivileges: string[] }>);
+      return {
+        ...acc,
+        [featureId]: {
+          primaryFeaturePrivilege,
+          subFeaturePrivileges,
+        },
+      };
+    },
+    {} as Record<string, { primaryFeaturePrivilege: string; subFeaturePrivileges: string[] }>
+  );
 }

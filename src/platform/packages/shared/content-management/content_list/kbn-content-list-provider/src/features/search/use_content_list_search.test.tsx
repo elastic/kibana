@@ -15,12 +15,10 @@ import { useContentListState } from '../../state';
 import { useContentListSearch } from './use_content_list_search';
 
 describe('useContentListSearch', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: [],
-      total: 0,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: [],
+    total: 0,
+  }));
 
   const createWrapper = (options?: {
     initialSearch?: string;

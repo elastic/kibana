@@ -50,7 +50,10 @@ export class LensDimensions {
   readonly dimensionColorPicker;
   readonly dimensionNameInput;
 
-  constructor(private readonly page: ScoutPage, private readonly deps: LensDimensionsDeps) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly deps: LensDimensionsDeps
+  ) {
     this.dimensionTriggerLocator = this.page.testSubj.locator('lns-dimensionTrigger');
     this.editorCloseButton = deps.closeDimensionEditorButton;
     this.quickFunctionsTab = this.page.testSubj.locator('lens-dimensionTabs-quickFunctions');

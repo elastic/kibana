@@ -56,7 +56,10 @@ export class ObservabilityClassicRulesPage {
   public readonly historyTab: Locator;
   public readonly ruleDetailsTabs: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.backLink = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.back);
     this.rulesList = this.page.testSubj.locator('rulesList');

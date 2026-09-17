@@ -25,7 +25,10 @@ type Callback<T> = (error?: any, result?: T) => void;
 export class BundleRemotesPlugin {
   private allowedBundleIds = new Set<string>();
 
-  constructor(private readonly bundle: Bundle, private readonly remotes: BundleRemotes) {}
+  constructor(
+    private readonly bundle: Bundle,
+    private readonly remotes: BundleRemotes
+  ) {}
 
   /**
    * Called by webpack when the plugin is passed in the webpack config

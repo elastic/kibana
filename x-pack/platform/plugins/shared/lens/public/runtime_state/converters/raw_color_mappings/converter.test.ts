@@ -107,7 +107,7 @@ describe('converter', () => {
       type MatchExactlyTestCase = [
         oldStringValue: string | string[],
         defaultExpectedRule: ExpectedRule,
-        expectedRulesByType: ExpectedRulesByType[]
+        expectedRulesByType: ExpectedRulesByType[],
       ];
 
       const buildOldColorMappingFromValues = (values: Array<string | string[]>) =>

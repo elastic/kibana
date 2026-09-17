@@ -45,7 +45,7 @@ export function savedObjectClientsFactory(
 }
 
 export function getSavedObjectClientError(error: any) {
-  return error.isBoom && error.output?.payload ? error.output.payload : error.body ?? error;
+  return error.isBoom && error.output?.payload ? error.output.payload : (error.body ?? error);
 }
 
 export function getJobDetailsFromTrainedModel(

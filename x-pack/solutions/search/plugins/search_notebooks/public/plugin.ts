@@ -20,9 +20,10 @@ import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_
 import { createUsageTracker } from './utils/usage_tracker';
 import { removeNotebookParameter, setNotebookParameter } from './utils/notebook_query_param';
 
-export class SearchNotebooksPlugin
-  implements Plugin<SearchNotebooksPluginSetup, SearchNotebooksPluginStart>
-{
+export class SearchNotebooksPlugin implements Plugin<
+  SearchNotebooksPluginSetup,
+  SearchNotebooksPluginStart
+> {
   private notebooksList: NotebookListValue = null;
   private queryClient: QueryClient | undefined;
   private usageTracker: AppMetricsTracker | undefined;

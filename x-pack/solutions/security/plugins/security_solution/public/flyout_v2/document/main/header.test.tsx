@@ -117,7 +117,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     raw: {},
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const alertHit = createMockHit({
   'event.kind': 'signal',

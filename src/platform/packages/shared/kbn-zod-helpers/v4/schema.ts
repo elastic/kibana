@@ -11,7 +11,7 @@ import type { z } from '@kbn/zod/v4';
 
 export function createIsNarrowSchema<
   TBaseSchema extends z.ZodType,
-  TNarrowSchema extends z.ZodType
+  TNarrowSchema extends z.ZodType,
 >(_base: TBaseSchema, narrow: TNarrowSchema) {
   return <TValue extends z.input<TBaseSchema>>(
     value: TValue

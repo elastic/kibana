@@ -39,12 +39,10 @@ const SelectionBarWithSetup = ({ itemsToSelect }: { itemsToSelect: ContentListIt
 };
 
 describe('SelectionBar', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: mockItems,
-      total: mockItems.length,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: mockItems,
+    total: mockItems.length,
+  }));
 
   const mockOnDelete = jest.fn(async () => {});
 

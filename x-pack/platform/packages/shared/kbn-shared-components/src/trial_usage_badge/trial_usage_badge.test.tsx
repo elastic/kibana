@@ -28,7 +28,7 @@ const createCloudMock = (
       billingUrl: overrides.billingUrl,
     }),
     isServerlessEnabled: overrides.isServerlessEnabled ?? false,
-  } as unknown as CloudStart);
+  }) as unknown as CloudStart;
 
 const renderBadge = async (cloud: CloudStart) => {
   let result: ReturnType<typeof render>;

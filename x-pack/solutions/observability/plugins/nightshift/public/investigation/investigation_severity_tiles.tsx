@@ -57,9 +57,9 @@ export function InvestigationSeverityTiles({
               }}
               css={css`
                 cursor: pointer;
-                outline: ${isActive
-                  ? `2px solid ${euiTheme.colors.primary}`
-                  : '2px solid transparent'};
+                outline: ${
+                  isActive ? `2px solid ${euiTheme.colors.primary}` : '2px solid transparent'
+                };
                 transition: outline 150ms ease;
                 &:hover,
                 &:focus-visible {

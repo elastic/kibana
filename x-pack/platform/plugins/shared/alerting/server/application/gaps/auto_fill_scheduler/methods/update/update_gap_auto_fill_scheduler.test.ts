@@ -96,7 +96,7 @@ const getParams = (overrides: Partial<UpdateGapAutoFillSchedulerParams> = {}) =>
     ruleTypes: [defaultRuleType],
     request: {} as KibanaRequest,
     ...overrides,
-  } satisfies UpdateGapAutoFillSchedulerParams);
+  }) satisfies UpdateGapAutoFillSchedulerParams;
 
 function setupSchedulerSo(attrs?: Partial<GapAutoFillSchedulerSO>) {
   const so: SavedObject<GapAutoFillSchedulerSO> = {

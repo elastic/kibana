@@ -20,7 +20,7 @@ const makeCoreStatus = (
   ({
     elasticsearch: { level: elasticsearchLevel, summary: 'test' },
     savedObjects: { level: ServiceStatusLevels.available, summary: 'test' },
-  } as CoreStatus);
+  }) as CoreStatus;
 
 describe('waitForManagedWorkflowInstallReadiness', () => {
   const logger = loggerMock.create();

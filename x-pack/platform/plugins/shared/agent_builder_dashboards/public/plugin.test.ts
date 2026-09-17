@@ -40,7 +40,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
       rendering: {
         addContext: jest.fn(),
       },
-    } as unknown as CoreStart);
+    }) as unknown as CoreStart;
 
   const createStartDependencies = () =>
     ({
@@ -60,7 +60,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
       uiActions: {
         registerActionAsync,
       },
-    } as unknown as AgentBuilderDashboardsPluginPublicStartDependencies);
+    }) as unknown as AgentBuilderDashboardsPluginPublicStartDependencies;
 
   beforeEach(() => {
     registerActionAsync.mockClear();

@@ -142,10 +142,10 @@ export const createGridCell = (
           : undefined;
       const solidProgressColor =
         fillStyle.fillMode === 'solid'
-          ? paletteService
+          ? (paletteService
               .get('custom')
               .getColorForValue?.(rawValue, solidPaletteState, { min, max }) ??
-            DEFAULT_PROGRESS_BAR_COLOR
+            DEFAULT_PROGRESS_BAR_COLOR)
           : undefined;
       const fill: MeterFill =
         fillStyle.fillMode === 'solid'

@@ -27,7 +27,7 @@ const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResp
       type: 'detection',
       metadata: { rule_uuid: ruleId },
     })),
-  } as SignificantEventResponse);
+  }) as SignificantEventResponse;
 
 const createEventClient = (pages: SignificantEventResponse[][]): EventClient =>
   ({
@@ -40,12 +40,12 @@ const createEventClient = (pages: SignificantEventResponse[][]): EventClient =>
             : pages.findIndex((page) => page.at(-1)?.event_id === afterEventId);
         return Promise.resolve({ hits: pages[previousPageIndex + 1] ?? [] });
       }),
-  } as unknown as EventClient);
+  }) as unknown as EventClient;
 
 const createRulesClient = (existingIds: string[]): IRulesManagementClient =>
   ({
     findExistingRuleIds: jest.fn().mockResolvedValue(existingIds),
-  } as unknown as IRulesManagementClient);
+  }) as unknown as IRulesManagementClient;
 
 describe('cleanupStaleEvents', () => {
   beforeEach(() => {

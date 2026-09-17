@@ -21,7 +21,7 @@ const DISCOVERY_ALTERNATIVES = [INDEX_EXPLORER, LIST_INDICES];
 const outputWithToolCalls = (toolIds: string[]): TaskOutput =>
   ({
     steps: toolIds.map((toolId) => ({ type: 'tool_call', tool_id: toolId })),
-  } as unknown as TaskOutput);
+  }) as unknown as TaskOutput;
 
 describe('createExpectedToolCalledEvaluator', () => {
   const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>

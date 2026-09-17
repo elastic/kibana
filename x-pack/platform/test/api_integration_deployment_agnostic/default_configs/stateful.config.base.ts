@@ -62,9 +62,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     );
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
-    const idpPath = require.resolve(
-      '@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml'
-    );
+    const idpPath =
+      require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml');
     const samlIdPPlugin = path.resolve(
       __dirname,
       '../../security_api_integration/plugins/saml_provider'

@@ -34,9 +34,8 @@ export function registerLegacyURLTransform(
 }
 
 export async function getLegacyURLTransform(embeddableType: string) {
-  const { getTransformDrilldownsOut, transformDashboardDrilldown } = await import(
-    '../async_module'
-  );
+  const { getTransformDrilldownsOut, transformDashboardDrilldown } =
+    await import('../async_module');
   const transformDrilldownsOut = getTransformDrilldownsOut((drilldownType: string) => {
     return drilldownType === 'dashboard_drilldown' ? transformDashboardDrilldown : undefined;
   });

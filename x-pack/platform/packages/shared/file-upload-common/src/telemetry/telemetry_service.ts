@@ -58,7 +58,10 @@ interface UploadSessionEvent {
 }
 
 export class FileUploadTelemetryService {
-  constructor(private analytics: AnalyticsServiceStart, private location: string) {}
+  constructor(
+    private analytics: AnalyticsServiceStart,
+    private location: string
+  ) {}
 
   public static generateId(): string {
     return crypto.randomUUID().substring(0, 13);

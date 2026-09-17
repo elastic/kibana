@@ -36,7 +36,7 @@ const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableR
     id: 'test-id',
     raw: { _id: 'test-id', _index: 'test-index' },
     flattened,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const alertHit = createMockHit({ 'kibana.alert.rule.uuid': 'rule-uuid' });
 const eventHit = createMockHit({ 'event.kind': 'event' });

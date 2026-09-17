@@ -62,7 +62,7 @@ const mockContext = (overrides: Partial<QueryActivityAppContextValue> = {}) =>
       missingClusterPrivileges: [],
     },
     ...overrides,
-  } as QueryActivityAppContextValue);
+  }) as QueryActivityAppContextValue;
 
 const renderTable = async (params: {
   queries: RunningQuery[];

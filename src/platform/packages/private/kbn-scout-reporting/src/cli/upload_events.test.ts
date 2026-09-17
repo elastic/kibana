@@ -243,8 +243,8 @@ describe('uploadAllEventsFromPath', () => {
         const key = filePathStr.endsWith('file1.ndjson')
           ? 'file1.ndjson'
           : filePathStr.endsWith('file2.ndjson')
-          ? 'file2.ndjson'
-          : '';
+            ? 'file2.ndjson'
+            : '';
         const content = fileContents[key] ?? '';
         return Readable.from([content]) as fs.ReadStream;
       });

@@ -12,7 +12,7 @@ const createApiMock = () =>
   ({
     listRuleChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     getRuleChangeEvent: jest.fn().mockResolvedValue({ id: 'evt-1', snapshot: {} }),
-  } as unknown as jest.Mocked<RuleChangeHistoryApi>);
+  }) as unknown as jest.Mocked<RuleChangeHistoryApi>;
 
 describe('createRuleChangeHistoryAdapter', () => {
   describe('listChanges', () => {

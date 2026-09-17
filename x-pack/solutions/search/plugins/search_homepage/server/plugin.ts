@@ -22,9 +22,12 @@ export interface RouteDependencies {
   router: IRouter;
   getSecurity: () => Promise<SecurityPluginStart>;
 }
-export class SearchHomepagePlugin
-  implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
-{
+export class SearchHomepagePlugin implements Plugin<
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginStart,
+  {},
+  {}
+> {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
 

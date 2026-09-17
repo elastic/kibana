@@ -45,9 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
         await createIndexTemplate(templateName, getTemplatePayload());
 
         // Load the templates and verify that our new template is in the list
-        const { body: templates }: { body: IlmTemplateListItem[] } = await loadTemplates().expect(
-          200
-        );
+        const { body: templates }: { body: IlmTemplateListItem[] } =
+          await loadTemplates().expect(200);
         const templateNames = templates.map((t) => t.name);
         expect(templateNames).to.contain(templateName);
       });
@@ -59,9 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
         await createIndexTemplate(templateName, { ...template, index_patterns: ['no-wildcard'] });
 
         // Load the templates and verify that our new template is **not** in the list
-        const { body: templates }: { body: IlmTemplateListItem[] } = await loadTemplates().expect(
-          200
-        );
+        const { body: templates }: { body: IlmTemplateListItem[] } =
+          await loadTemplates().expect(200);
         const templateNames = templates.map((t) => t.name);
         expect(templateNames).not.to.contain(templateName);
       });

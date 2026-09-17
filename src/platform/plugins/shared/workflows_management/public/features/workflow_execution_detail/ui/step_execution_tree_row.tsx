@@ -376,25 +376,28 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
           border-radius: ${radius};
           background-color: ${rowBg};
           opacity: ${showNotRun || isSkeleton ? 0.55 : 1};
-          ${allowHover
-            ? `
+          ${
+            allowHover
+              ? `
             cursor: pointer;
             &:hover {
               background-color: ${
                 showDangerFill
                   ? euiTheme.colors.backgroundBaseDanger
                   : selected
-                  ? selectBg
-                  : hoverBg
+                    ? selectBg
+                    : hoverBg
               };
             }
           `
-            : isInteractive
-            ? `cursor: pointer;`
-            : ''}
+              : isInteractive
+                ? `cursor: pointer;`
+                : ''
+          }
           ${showDangerSelectionBorder ? `outline: 1px solid ${dangerSelectionBorder};` : ''}
-          ${arrivalPulse
-            ? `
+          ${
+            arrivalPulse
+              ? `
             @keyframes workflowDangerArrivalPulse {
               0%,
               100% {
@@ -402,16 +405,17 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
               }
               50% {
                 box-shadow: 0 0 0 ${euiTheme.size.xs} ${transparentize(
-                euiTheme.colors.danger,
-                0.35
-              )};
+                  euiTheme.colors.danger,
+                  0.35
+                )};
               }
             }
             @media (prefers-reduced-motion: no-preference) {
               animation: workflowDangerArrivalPulse 0.6s ease-out 2;
             }
           `
-            : ''}
+              : ''
+          }
         `}
       >
         <EuiFlexGroup
@@ -510,7 +514,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
               <span data-test-subj="workflowStepTreeIterationIcon">
                 <StepIcon
                   stepType={stepType}
-                  executionStatus={isDangerous ? ExecutionStatus.FAILED : status ?? null}
+                  executionStatus={isDangerous ? ExecutionStatus.FAILED : (status ?? null)}
                   color={dangerIconColor}
                   iconColor={dangerIconColor}
                 />
@@ -518,7 +522,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
             ) : (
               <StepIcon
                 stepType={stepType || stepId}
-                executionStatus={isTrigger ? null : status ?? null}
+                executionStatus={isTrigger ? null : (status ?? null)}
                 color={dangerIconColor}
                 iconColor={dangerIconColor}
               />
@@ -548,13 +552,15 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
                   size="s"
                   css={css`
                     font-weight: ${isExpandable || hasFailedPin ? 500 : 400};
-                    color: ${selected
-                      ? euiTheme.colors.textPrimary
-                      : tintDanger
-                      ? euiTheme.colors.danger
-                      : isInactive
-                      ? euiTheme.colors.textDisabled
-                      : 'inherit'};
+                    color: ${
+                      selected
+                        ? euiTheme.colors.textPrimary
+                        : tintDanger
+                          ? euiTheme.colors.danger
+                          : isInactive
+                            ? euiTheme.colors.textDisabled
+                            : 'inherit'
+                    };
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;

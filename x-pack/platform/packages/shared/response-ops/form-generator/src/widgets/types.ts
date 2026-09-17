@@ -23,7 +23,7 @@ export enum WidgetType {
 export interface BaseWidgetProps<
   TSchema extends z.ZodType = z.ZodType,
   TEuiFieldProps = Record<string, unknown>,
-  TOption = unknown
+  TOption = unknown,
 > {
   /* The dot-notated path to the field within the form data */
   path: string;
@@ -39,7 +39,7 @@ export interface BaseWidgetProps<
     validations: [
       {
         validator: (...args: Parameters<ValidationFunc>) => ReturnType<ValidationFunc<any>>;
-      }
+      },
     ];
     defaultValue?: z.infer<TSchema>;
   } & Record<string, unknown>;
@@ -52,7 +52,7 @@ export interface BaseWidgetProps<
 export type BaseWidgetPropsWithOptions<
   TSchema extends z.ZodType = z.ZodType,
   TEuiFieldProps = Record<string, unknown>,
-  TOption = Record<string, unknown>
+  TOption = Record<string, unknown>,
 > = BaseWidgetProps<TSchema, TEuiFieldProps, TOption> & {
   options: TOption[];
 };

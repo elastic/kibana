@@ -17,4 +17,4 @@ export const getPartitionType = (chartType: ChartTypes) =>
     [ChartTypes.TREEMAP]: PartitionLayout.treemap,
     [ChartTypes.MOSAIC]: PartitionLayout.mosaic,
     [ChartTypes.WAFFLE]: PartitionLayout.waffle,
-  }[chartType]);
+  })[chartType];

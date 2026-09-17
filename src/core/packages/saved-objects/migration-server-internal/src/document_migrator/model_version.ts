@@ -31,17 +31,20 @@ export const getModelVersionSchemas = ({
   const modelVersionMap =
     typeof typeDefinition.modelVersions === 'function'
       ? typeDefinition.modelVersions()
-      : typeDefinition.modelVersions ?? {};
+      : (typeDefinition.modelVersions ?? {});
 
-  return Object.entries(modelVersionMap).reduce((map, [rawModelVersion, versionDefinition]) => {
-    const schema = versionDefinition.schemas?.forwardCompatibility;
-    if (schema) {
-      const modelVersion = assertValidModelVersion(rawModelVersion);
-      const virtualVersion = modelVersionToVirtualVersion(modelVersion);
-      map[virtualVersion] = convertModelVersionBackwardConversionSchema(schema);
-    }
-    return map;
-  }, {} as Record<string, TypeVersionSchema>);
+  return Object.entries(modelVersionMap).reduce(
+    (map, [rawModelVersion, versionDefinition]) => {
+      const schema = versionDefinition.schemas?.forwardCompatibility;
+      if (schema) {
+        const modelVersion = assertValidModelVersion(rawModelVersion);
+        const virtualVersion = modelVersionToVirtualVersion(modelVersion);
+        map[virtualVersion] = convertModelVersionBackwardConversionSchema(schema);
+      }
+      return map;
+    },
+    {} as Record<string, TypeVersionSchema>
+  );
 };
 
 export const getModelVersionTransforms = ({
@@ -54,7 +57,7 @@ export const getModelVersionTransforms = ({
   const modelVersionMap =
     typeof typeDefinition.modelVersions === 'function'
       ? typeDefinition.modelVersions()
-      : typeDefinition.modelVersions ?? {};
+      : (typeDefinition.modelVersions ?? {});
 
   return Object.entries(modelVersionMap).map<Transform>(([rawModelVersion, definition]) => {
     const modelVersion = assertValidModelVersion(rawModelVersion);

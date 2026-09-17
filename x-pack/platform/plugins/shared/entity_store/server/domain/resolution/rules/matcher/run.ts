@@ -196,7 +196,7 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
   return {
     lastProcessedTimestamp: holdWatermark
       ? state.lastProcessedTimestamp
-      : maxTimestamp ?? state.lastProcessedTimestamp,
+      : (maxTimestamp ?? state.lastProcessedTimestamp),
     lastRun: {
       resolutionsCreated: stats.resolutionsCreated,
       skippedAmbiguousBuckets: stats.skippedAmbiguousBuckets,

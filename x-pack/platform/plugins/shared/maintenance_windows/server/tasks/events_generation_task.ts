@@ -201,9 +201,8 @@ export const updateMaintenanceWindowsEvents = async ({
             };
           });
 
-          const result = await savedObjectsClient.bulkUpdate<MaintenanceWindowAttributes>(
-            bulkUpdateReq
-          );
+          const result =
+            await savedObjectsClient.bulkUpdate<MaintenanceWindowAttributes>(bulkUpdateReq);
 
           for (const savedObject of result.saved_objects) {
             if (isSavedObjectErrorResult(savedObject)) {

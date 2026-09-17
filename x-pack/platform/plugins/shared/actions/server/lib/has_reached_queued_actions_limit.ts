@@ -34,7 +34,7 @@ export async function hasReachedTheQueuedActionsLimit(
     },
     aggs: {},
   });
-  const tasks = typeof total === 'number' ? total : total?.value ?? 0;
+  const tasks = typeof total === 'number' ? total : (total?.value ?? 0);
   const numberOfTasks = tasks + numberOfActions;
   const hasReachedLimit = numberOfTasks >= limit;
   return {

@@ -28,7 +28,10 @@ class TagModal extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly header = this.ctx.getPageObject('header');
 
-  constructor(ctx: FtrProviderContext, private readonly page: TagManagementPageObject) {
+  constructor(
+    ctx: FtrProviderContext,
+    private readonly page: TagManagementPageObject
+  ) {
     super(ctx);
   }
 
@@ -188,7 +191,10 @@ class TagModal extends FtrService {
 class TagAssignmentFlyout extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
-  constructor(ctx: FtrProviderContext, private readonly page: TagManagementPageObject) {
+  constructor(
+    ctx: FtrProviderContext,
+    private readonly page: TagManagementPageObject
+  ) {
     super(ctx);
   }
 

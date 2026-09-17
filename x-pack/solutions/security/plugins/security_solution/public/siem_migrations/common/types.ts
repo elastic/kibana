@@ -75,7 +75,7 @@ export interface MigrationStepProps {
 
 export interface Step<
   Props = MigrationStepProps,
-  C extends React.ComponentType<Props> = React.ComponentType<Props>
+  C extends React.ComponentType<Props> = React.ComponentType<Props>,
 > {
   id: string;
   Component: C;

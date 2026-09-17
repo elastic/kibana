@@ -72,4 +72,4 @@ export const getDepsMock = ({
         },
       },
     },
-  } as any);
+  }) as any;

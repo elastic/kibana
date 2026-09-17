@@ -39,8 +39,7 @@ export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOpt
 }
 
 export interface ApmSynthtraceEsClient
-  extends SynthtraceEsClient<ApmFields | ApmOtelFields>,
-    PackageManagement {
+  extends SynthtraceEsClient<ApmFields | ApmOtelFields>, PackageManagement {
   updateComponentTemplate(
     name: ComponentTemplateName,
     modify: (

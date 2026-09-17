@@ -162,7 +162,7 @@ export class LogsExtractionClient {
     const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
     const engineState =
       this.extractionMode === 'nonPriority'
-        ? engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE
+        ? (engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE)
         : engineDescriptor.logExtractionState;
     return {
       config: getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig),

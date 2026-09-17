@@ -166,18 +166,16 @@ function StreamsCanvasInner() {
     const graphNodes = [
       ...configuredSourceNodes,
       ...unconfiguredSourceNodes,
-      ...nextGraph.nodes.map(
-        (node): ClassicCanvasNode =>
-          node.type === DESTINATION_NODE_TYPE
-            ? {
-                ...node,
-                data: {
-                  ...node.data,
-                  onProcessingClick: (streamName: string) =>
-                    openFlyoutTab(streamName, 'processing'),
-                },
-              }
-            : node
+      ...nextGraph.nodes.map((node): ClassicCanvasNode =>
+        node.type === DESTINATION_NODE_TYPE
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                onProcessingClick: (streamName: string) => openFlyoutTab(streamName, 'processing'),
+              },
+            }
+          : node
       ),
     ];
     return {

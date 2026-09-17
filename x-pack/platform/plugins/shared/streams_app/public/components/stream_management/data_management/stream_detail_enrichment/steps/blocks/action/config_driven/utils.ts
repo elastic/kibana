@@ -11,7 +11,7 @@ import type { ConfigDrivenProcessorFormState, FieldConfiguration, FieldOptions }
 
 export const getConvertFormStateToConfig = <
   FormState extends ConfigDrivenProcessorFormState,
-  ProcessorState extends StreamlangProcessorDefinition
+  ProcessorState extends StreamlangProcessorDefinition,
 >(
   fieldConfigurations: FieldConfiguration[],
   fieldOptions: FieldOptions

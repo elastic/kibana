@@ -24,7 +24,10 @@ export class MetricsExplorerPage {
   // The selected metrics render as combo-box pills; their count is the number of plotted metrics.
   public readonly selectedMetricPills: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.metricsComboBox = this.page.getByTestId('metricsExplorer-metrics');
     this.charts = this.page.getByTestId('metricsExplorer-chart');
     this.missingMetricMessage = this.page.getByTestId('metricsExplorer-missingMetricMessage');

@@ -55,7 +55,7 @@ export function registerLensEmbeddableTransforms(
       ({
         transformIn: getTransformIn(builder, drilldownTransforms.transformIn, false),
         transformOut: getTransformOut(builder, drilldownTransforms.transformOut, false),
-      } satisfies LensTransforms),
+      }) satisfies LensTransforms,
     getSchema: (getDrilldownsSchema) => {
       return getLensPanelSchema(getDrilldownsSchema);
     },
@@ -104,7 +104,7 @@ export const getLensPanelSchema = (
 ): z.ZodUnion<
   readonly [
     ReturnType<typeof getLensByValuePanelSchema>,
-    ReturnType<typeof getLensByRefPanelSchema>
+    ReturnType<typeof getLensByRefPanelSchema>,
   ]
 > =>
   z

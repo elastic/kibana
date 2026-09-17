@@ -37,7 +37,7 @@ const fixtureConversation = (rounds: ConversationRound[]): Conversation =>
     created_at: EPOCH,
     updated_at: EPOCH,
     rounds,
-  } as Conversation);
+  }) as Conversation;
 
 /** An events-native conversation storing `events` (its rounds projection is irrelevant here). */
 export const eventsNativeConversation = (events: TimelineEvent[]): Conversation => ({

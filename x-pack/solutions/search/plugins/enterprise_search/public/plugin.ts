@@ -180,9 +180,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchContent } = await import(
-          './applications/enterprise_search_content'
-        );
+        const { EnterpriseSearchContent } =
+          await import('./applications/enterprise_search_content');
 
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },

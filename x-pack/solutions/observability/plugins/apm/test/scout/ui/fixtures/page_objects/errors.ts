@@ -12,7 +12,10 @@ export class ErrorsPage {
   public tableSearchInput: Locator;
   public errorDistributionChart: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.tableSearchInput = page.testSubj.locator('tableSearchInput');
     this.errorDistributionChart = page.testSubj.locator('errorDistribution');
   }

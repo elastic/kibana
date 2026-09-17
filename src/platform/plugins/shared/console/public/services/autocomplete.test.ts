@@ -31,7 +31,7 @@ const createSettings = () =>
       templates: true,
       dataStreams: true,
     }),
-  } as unknown as Settings);
+  }) as unknown as Settings;
 
 const flushAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
 

@@ -180,10 +180,13 @@ export async function createCCSIndexPatterns(
     namespaces: ['*'],
     fields: ['namespaces'],
   });
-  const existingIndexPatterns = results.saved_objects.reduce((acc, savedObject) => {
-    acc[savedObject.id] = { namespaces: savedObject.namespaces ?? [], id: savedObject.id };
-    return acc;
-  }, {} as Record<string, { namespaces: string[]; id: string }>);
+  const existingIndexPatterns = results.saved_objects.reduce(
+    (acc, savedObject) => {
+      acc[savedObject.id] = { namespaces: savedObject.namespaces ?? [], id: savedObject.id };
+      return acc;
+    },
+    {} as Record<string, { namespaces: string[]; id: string }>
+  );
 
   const notExistingIndexPatterns = indexPatternSavedObjectsWithRemoteCluster.filter(
     (indexPatternSavedObject) => !existingIndexPatterns[indexPatternSavedObject.id]

@@ -59,7 +59,7 @@ const makeMonitor = (
     [ConfigKey.ENABLED]: enabled,
     [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
     [ConfigKey.LOCATIONS]: [{ id: 'loc', isServiceManaged: serviceManaged }],
-  } as unknown as EncryptedSyntheticsSavedMonitor);
+  }) as unknown as EncryptedSyntheticsSavedMonitor;
 
 describe('<BulkOperations />', () => {
   const setMonitorPendingStatusUpdate = jest.fn();

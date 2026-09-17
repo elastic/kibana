@@ -26,7 +26,7 @@ const buildServer = () =>
   ({
     logger: loggerMock.create(),
     pluginsStart: { taskManager: taskManagerMock.createStart() },
-  } as unknown as RouteContext['server']);
+  }) as unknown as RouteContext['server'];
 
 const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext =>
   ({
@@ -38,7 +38,7 @@ const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext 
       privateLocationAPI: { clearShardConditions: jest.fn().mockResolvedValue({ cleared: 0 }) },
     },
     ...overrides,
-  } as unknown as RouteContext);
+  }) as unknown as RouteContext;
 
 describe('dynamic settings routes', () => {
   afterEach(() => {

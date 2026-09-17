@@ -126,7 +126,7 @@ export function runRspackCli(options: CliOptions = {}): void {
       const limitsPath =
         typeof flags.limits === 'string' && flags.limits.length > 0
           ? Path.resolve(flags.limits)
-          : options.defaultLimitsPath ?? DEFAULT_LIMITS_PATH;
+          : (options.defaultLimitsPath ?? DEFAULT_LIMITS_PATH);
 
       // Parsed (and validated) up front so an invalid group errors in every mode. The
       // limits modes operate on the canonical full plugin set, so a filtered build there

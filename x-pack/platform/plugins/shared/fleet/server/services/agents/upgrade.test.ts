@@ -244,7 +244,7 @@ describe('sendUpgradeAgentsActions kuery path — cheap count and sync/async bra
         () =>
           ({
             runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
-          } as any)
+          }) as any
       );
   });
 

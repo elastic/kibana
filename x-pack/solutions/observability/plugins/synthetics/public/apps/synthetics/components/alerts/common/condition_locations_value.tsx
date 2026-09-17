@@ -32,7 +32,7 @@ export const LocationsValueExpression = ({ ruleParams, setRuleParams }: Props) =
   );
 
   const locationsThreshold =
-    condition && 'locationsThreshold' in condition ? condition.locationsThreshold ?? 1 : 1;
+    condition && 'locationsThreshold' in condition ? (condition.locationsThreshold ?? 1) : 1;
   return (
     <PopoverExpression
       value={i18n.translate('xpack.synthetics.windowValueExpression.percentLabel', {

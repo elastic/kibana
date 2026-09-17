@@ -39,7 +39,7 @@ const createSetupDeps = ({
     ...(registerInvestigationQuota
       ? { nightshiftInvestigations: { registerInvestigationQuota } }
       : {}),
-  } as unknown as SignificantEventsPluginSetupDependencies);
+  }) as unknown as SignificantEventsPluginSetupDependencies;
 
 describe('SignificantEventsPlugin investigation quota setup', () => {
   beforeEach(() => {

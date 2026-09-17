@@ -30,15 +30,12 @@ const APP_TITLE = i18n.translate('xpack.alertzero.appTitle', {
   defaultMessage: 'AlertZero',
 });
 
-export class AlertZeroPublicPlugin
-  implements
-    Plugin<
-      AlertZeroPublicSetup,
-      AlertZeroPublicStart,
-      AlertZeroSetupDependencies,
-      AlertZeroStartDependencies
-    >
-{
+export class AlertZeroPublicPlugin implements Plugin<
+  AlertZeroPublicSetup,
+  AlertZeroPublicStart,
+  AlertZeroSetupDependencies,
+  AlertZeroStartDependencies
+> {
   private readonly config: AlertZeroClientConfig;
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {

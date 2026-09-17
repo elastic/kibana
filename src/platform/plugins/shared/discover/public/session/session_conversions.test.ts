@@ -421,7 +421,7 @@ describe('Discover session conversion and UI preparation', () => {
     expect(inlineTab.serializedSearchSource.filter?.[1].meta.index).toBe('foreign-data-view-id');
 
     const apiTab = toDiscoverSessionApiData(session).tabs[1];
-    const filters = 'filters' in apiTab ? apiTab.filters ?? [] : [];
+    const filters = 'filters' in apiTab ? (apiTab.filters ?? []) : [];
     expect(apiTab.data_source).not.toHaveProperty('id');
     expect(filters[0].data_view_id).toBeUndefined();
     expect(filters[1].data_view_id).toBe('foreign-data-view-id');

@@ -131,7 +131,7 @@ export const extractDocumentation = async ({
   const totalHits =
     typeof response.hits.total === 'number'
       ? response.hits.total // This format is to be removed in 8.0
-      : response.hits.total?.value ?? response.hits.hits.length;
+      : (response.hits.total?.value ?? response.hits.hits.length);
 
   if (totalHits > 10_000) {
     throw new Error('Found more than 10k documents to extract - aborting');

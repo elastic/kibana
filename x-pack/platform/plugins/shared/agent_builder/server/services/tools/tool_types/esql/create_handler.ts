@@ -22,23 +22,26 @@ export const resolveToolParameters = (
   paramDefinitions: EsqlToolConfig['params'],
   providedParams: Record<string, EsqlToolParamValue>
 ): Record<string, EsqlToolParamValue | null> => {
-  return Object.keys(paramDefinitions).reduce((acc, paramName) => {
-    const param = paramDefinitions[paramName];
-    const providedValue = providedParams[paramName];
+  return Object.keys(paramDefinitions).reduce(
+    (acc, paramName) => {
+      const param = paramDefinitions[paramName];
+      const providedValue = providedParams[paramName];
 
-    if (providedValue !== undefined) {
-      // LLM provided a value, use it
-      acc[paramName] = providedValue;
-    } else if (param.optional && param.defaultValue !== undefined) {
-      // LLM didn't provide a value, but we have a default
-      acc[paramName] = param.defaultValue;
-    } else {
-      // No value provided and no default, use null
-      acc[paramName] = null;
-    }
+      if (providedValue !== undefined) {
+        // LLM provided a value, use it
+        acc[paramName] = providedValue;
+      } else if (param.optional && param.defaultValue !== undefined) {
+        // LLM didn't provide a value, but we have a default
+        acc[paramName] = param.defaultValue;
+      } else {
+        // No value provided and no default, use null
+        acc[paramName] = null;
+      }
 
-    return acc;
-  }, {} as Record<string, EsqlToolParamValue | null>);
+      return acc;
+    },
+    {} as Record<string, EsqlToolParamValue | null>
+  );
 };
 
 export const createHandler = (

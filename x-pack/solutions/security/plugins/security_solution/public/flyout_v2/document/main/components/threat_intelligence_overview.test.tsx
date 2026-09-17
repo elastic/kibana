@@ -66,7 +66,7 @@ const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableR
     raw: {},
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockOnShowThreatIntelligence = jest.fn();
 

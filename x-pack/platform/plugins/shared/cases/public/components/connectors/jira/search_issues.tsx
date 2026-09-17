@@ -56,7 +56,7 @@ const SearchIssuesFieldComponent: React.FC<FieldProps> = ({
     .filter((value): value is EuiComboBoxOptionOption<string> => value != null);
 
   const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    field.setValue(changedOptions.length ? changedOptions[0].value ?? '' : '');
+    field.setValue(changedOptions.length ? (changedOptions[0].value ?? '') : '');
   };
 
   return (

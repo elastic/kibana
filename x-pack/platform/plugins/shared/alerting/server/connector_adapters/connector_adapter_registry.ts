@@ -19,7 +19,7 @@ export class ConnectorAdapterRegistry {
 
   public register<
     RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
-    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams,
   >(connectorAdapter: ConnectorAdapter<RuleActionParams, ConnectorParams>) {
     if (this.has(connectorAdapter.connectorTypeId)) {
       throw new Error(

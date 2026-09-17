@@ -39,7 +39,7 @@ const createServer = ({ spacesAvailable = true }: { spacesAvailable?: boolean } 
       savedObjects: { getScopedClient },
       uiSettings: { asScopedToClient },
     },
-  } as unknown as SignificantEventsServer);
+  }) as unknown as SignificantEventsServer;
 
 describe('resolveTokenTrackingCoverage', () => {
   beforeEach(() => {

@@ -12,8 +12,10 @@ import type {
   GenAiSettingsPluginStartDependencies,
 } from '../types';
 
-export interface GenAiSettingsRouteHandlerResources
-  extends Omit<DefaultRouteHandlerResources, 'context' | 'response'> {
+export interface GenAiSettingsRouteHandlerResources extends Omit<
+  DefaultRouteHandlerResources,
+  'context' | 'response'
+> {
   plugins: {
     core: {
       setup: CoreSetup<GenAiSettingsPluginStartDependencies>;

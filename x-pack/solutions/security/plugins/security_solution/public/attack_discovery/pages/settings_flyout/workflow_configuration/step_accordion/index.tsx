@@ -45,8 +45,9 @@ const StepAccordionComponent: React.FC<StepAccordionProps> = ({
     () =>
       css`
         position: relative;
-        ${!isLast
-          ? `
+        ${
+          !isLast
+            ? `
             padding-block-end: ${euiTheme.size.xl};
             &::before {
               content: '';
@@ -57,7 +58,8 @@ const StepAccordionComponent: React.FC<StepAccordionProps> = ({
               border-inline-start: ${euiTheme.border.thick};
             }
           `
-          : ''}
+            : ''
+        }
       `,
     [euiTheme.border.thick, euiTheme.border.width.thick, euiTheme.size.xl, isLast]
   );

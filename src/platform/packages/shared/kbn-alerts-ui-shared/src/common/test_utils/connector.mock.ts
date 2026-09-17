@@ -21,14 +21,14 @@ export function createMockActionConnector(
 export function createMockActionConnector(overrides: Partial<SystemAction>): SystemAction;
 export function createMockActionConnector<
   Secrets = Record<string, unknown>,
-  Config = Record<string, unknown>
+  Config = Record<string, unknown>,
 >(
   overrides: Partial<UserConfiguredActionConnector<Secrets, Config>>
 ): UserConfiguredActionConnector<Secrets, Config>;
 
 export function createMockActionConnector<
   Config = Record<string, unknown>,
-  Secrets = Record<string, unknown>
+  Secrets = Record<string, unknown>,
 >(
   overrides: Partial<ActionConnector> = {}
 ): PreConfiguredActionConnector | SystemAction | UserConfiguredActionConnector<Secrets, Config> {

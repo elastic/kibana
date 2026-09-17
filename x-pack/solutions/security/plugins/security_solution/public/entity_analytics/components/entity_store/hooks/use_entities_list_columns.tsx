@@ -46,7 +46,7 @@ export type EntitiesListColumns = [
   Columns<CriticalityLevels, Entity>,
   Columns<Entity>,
   Columns<Entity>,
-  Columns<string, Entity>
+  Columns<string, Entity>,
 ];
 
 export const useEntitiesListColumns = (): EntitiesListColumns => {

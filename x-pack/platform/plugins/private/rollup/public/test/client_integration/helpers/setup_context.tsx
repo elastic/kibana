@@ -18,11 +18,10 @@ const services = {
 
 const wrapComponent =
   <P extends Record<string, unknown>>(Component: FunctionComponent<P>) =>
-  (props: P) =>
-    (
-      <KibanaContextProvider services={services}>
-        <Component {...props} />
-      </KibanaContextProvider>
-    );
+  (props: P) => (
+    <KibanaContextProvider services={services}>
+      <Component {...props} />
+    </KibanaContextProvider>
+  );
 
 export { wrapComponent };

@@ -153,10 +153,10 @@ const flattenToRows = (
       val === null
         ? 'null'
         : Array.isArray(val)
-        ? JSON.stringify(val)
-        : typeof val === 'string'
-        ? val
-        : String(val);
+          ? JSON.stringify(val)
+          : typeof val === 'string'
+            ? val
+            : String(val);
     return [{ field: fullKey, value: display, fieldType }];
   });
 };
@@ -618,7 +618,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
 
     const { data: fullStepExecution, isLoading: isLoadingStepData } = useStepExecution(
       executionId,
-      isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
+      isPseudoStep ? undefined : (selectedStepExecutionId ?? undefined),
       selectedLightStep?.status
     );
     const { childExecutions, isLoading: isLoadingChildExecutions } =

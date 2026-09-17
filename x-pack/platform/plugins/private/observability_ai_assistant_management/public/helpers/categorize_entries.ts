@@ -19,20 +19,28 @@ export function categorizeEntries({
 }: {
   entries: KnowledgeBaseEntry[];
 }): KnowledgeBaseEntryCategory[] {
-  return entries.reduce((acc, entry) => {
-    const categoryKey = entry.labels?.category ?? entry.id;
+  return entries.reduce(
+    (acc, entry) => {
+      const categoryKey = entry.labels?.category ?? entry.id;
 
-    const existingEntry = acc.find((item) => item.categoryKey === categoryKey);
-    if (existingEntry) {
-      existingEntry.entries.push(entry);
-      return acc;
-    }
+      const existingEntry = acc.find((item) => item.categoryKey === categoryKey);
+      if (existingEntry) {
+        existingEntry.entries.push(entry);
+        return acc;
+      }
 
-    return acc.concat({
-      categoryKey,
-      title: entry.labels?.category ?? entry.title ?? 'No title',
-      entries: [entry],
-      '@timestamp': entry['@timestamp'],
-    });
-  }, [] as Array<{ categoryKey: string; title: string; entries: KnowledgeBaseEntry[]; '@timestamp': string }>);
+      return acc.concat({
+        categoryKey,
+        title: entry.labels?.category ?? entry.title ?? 'No title',
+        entries: [entry],
+        '@timestamp': entry['@timestamp'],
+      });
+    },
+    [] as Array<{
+      categoryKey: string;
+      title: string;
+      entries: KnowledgeBaseEntry[];
+      '@timestamp': string;
+    }>
+  );
 }

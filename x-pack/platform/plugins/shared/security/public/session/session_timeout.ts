@@ -30,8 +30,10 @@ import {
 import { LogoutReason } from '../../common/types';
 import type { SessionInfo } from '../../common/types';
 
-export interface SessionState
-  extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended' | 'expirationReason'> {
+export interface SessionState extends Pick<
+  SessionInfo,
+  'expiresInMs' | 'canBeExtended' | 'expirationReason'
+> {
   lastExtensionTime: number;
 }
 

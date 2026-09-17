@@ -34,7 +34,7 @@ export const createStubStats = (): StubStats =>
       });
       return summary;
     },
-  } as any);
+  }) as any;
 
 export const createStubLogger = (): ToolingLog =>
   ({
@@ -43,7 +43,7 @@ export const createStubLogger = (): ToolingLog =>
     success: sinon.stub(),
     warning: sinon.stub(),
     error: sinon.stub(),
-  } as any);
+  }) as any;
 
 export const createStubIndexRecord = (index: string, aliases = {}) => ({
   type: 'index',
@@ -163,4 +163,4 @@ export const createStubClient = (
       putIndexTemplate: sinon.spy(async ({ name }) => {}),
       deleteIndexTemplate: sinon.spy(async ({ name }) => {}),
     },
-  } as any);
+  }) as any;

@@ -97,7 +97,7 @@ interface CategorizeTextAggregationResult {
 }
 
 export async function runCategorizeTextAggregation<
-  TChanges extends boolean | undefined = undefined
+  TChanges extends boolean | undefined = undefined,
 >(
   options: CategorizeTextOptions & { includeChanges?: TChanges }
 ): Promise<Array<FieldPatternResult<TChanges>>>;

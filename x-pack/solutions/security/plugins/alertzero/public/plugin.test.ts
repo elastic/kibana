@@ -18,7 +18,7 @@ const createConfig = (overrides: Partial<AlertZeroClientConfig> = {}): AlertZero
 const createContext = (config: AlertZeroClientConfig) =>
   ({
     config: { get: () => config },
-  } as unknown as ConstructorParameters<typeof AlertZeroPublicPlugin>[0]);
+  }) as unknown as ConstructorParameters<typeof AlertZeroPublicPlugin>[0];
 
 describe('AlertZeroPublicPlugin feature-flag gating', () => {
   it('does not register the browser app when disabled', () => {

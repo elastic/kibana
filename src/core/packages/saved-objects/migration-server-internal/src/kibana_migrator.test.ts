@@ -58,8 +58,8 @@ jest.mock('./run_v2_migration', () => {
 
 jest.mock('./zdt', () => {
   return {
-    runZeroDowntimeMigration: jest.fn(
-      (): Promise<MigrationResult[]> => Promise.resolve(ZDT_SUCCESSFUL_MIGRATION_RESULT)
+    runZeroDowntimeMigration: jest.fn((): Promise<MigrationResult[]> =>
+      Promise.resolve(ZDT_SUCCESSFUL_MIGRATION_RESULT)
     ),
   };
 });

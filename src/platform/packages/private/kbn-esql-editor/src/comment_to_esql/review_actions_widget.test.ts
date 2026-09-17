@@ -23,7 +23,7 @@ const buildEditor = () =>
     }),
     addContentWidget: jest.fn(),
     removeContentWidget: jest.fn(),
-  } as unknown as monaco.editor.ICodeEditor);
+  }) as unknown as monaco.editor.ICodeEditor;
 
 describe('ReviewActionsWidget', () => {
   // Outside an EuiProvider, useEuiTheme returns the Amsterdam defaults — enough

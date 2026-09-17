@@ -205,8 +205,8 @@ export function AgentBasedSection({
   const isNextReady = isPolicyCreated
     ? true // policy exists; Next will attach package policies to it
     : agentHostsMode === 'existing'
-    ? selectedAgentPolicyIds.length > 0
-    : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
+      ? selectedAgentPolicyIds.length > 0
+      : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
 
   const onNextReadyChangeRef = useRef(onNextReadyChange);
   onNextReadyChangeRef.current = onNextReadyChange;

@@ -407,7 +407,7 @@ export function registerPutDataStreamFailureStore({
         const results = await Promise.all(promises);
         const warnings = results
           .map((headers) =>
-            headers?.warning ? getEsWarningText(headers.warning) ?? headers.warning : null
+            headers?.warning ? (getEsWarningText(headers.warning) ?? headers.warning) : null
           )
           .filter(Boolean);
 

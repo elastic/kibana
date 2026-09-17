@@ -20,7 +20,10 @@ export class NotFoundPage {
   public readonly logsApp: Locator;
   public readonly metricsApp: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.notFoundPage = this.page.getByTestId('infraNotFoundPage');
     this.logsApp = this.page.getByTestId('infraLogsPage');
     this.metricsApp = this.page.getByTestId('infraMetricsPage');

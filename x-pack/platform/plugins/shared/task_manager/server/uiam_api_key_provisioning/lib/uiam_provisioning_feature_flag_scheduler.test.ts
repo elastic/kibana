@@ -18,7 +18,7 @@ const makeLogger = (): jest.Mocked<Logger> =>
     error: jest.fn(),
     warn: jest.fn(),
     debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+  }) as unknown as jest.Mocked<Logger>;
 
 const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
 

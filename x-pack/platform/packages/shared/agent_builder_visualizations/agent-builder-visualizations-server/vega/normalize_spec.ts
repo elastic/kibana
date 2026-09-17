@@ -80,7 +80,7 @@ const buildEsqlDataUrl = ({
   const effectiveTimefield =
     timefield ??
     (usesTimeParams(esqlQuery)
-      ? extractSourceTimeField(esqlQuery) ?? findDateColumn(columns) ?? DEFAULT_TIMEFIELD
+      ? (extractSourceTimeField(esqlQuery) ?? findDateColumn(columns) ?? DEFAULT_TIMEFIELD)
       : undefined);
 
   return {

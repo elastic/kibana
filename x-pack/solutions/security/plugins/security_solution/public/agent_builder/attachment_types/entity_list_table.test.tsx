@@ -48,7 +48,7 @@ const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as jest.
 const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as jest.Mock;
 
 const buildApplication = (): ApplicationStart =>
-  ({ navigateToApp: jest.fn() } as unknown as ApplicationStart);
+  ({ navigateToApp: jest.fn() }) as unknown as ApplicationStart;
 
 const renderTable = (
   rows: EntityListRow[],

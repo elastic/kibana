@@ -89,4 +89,4 @@ export const createStorybookKibanaServices = (): StartServices =>
     },
     appParams: { history: {} },
     plugins: {},
-  } as unknown as StartServices);
+  }) as unknown as StartServices;

@@ -248,35 +248,33 @@ const createSaveFixture = () => {
     tags: ['tag-1'],
     tabs: [
       // Identical specs may have different IDs after editing. Saving must keep both IDs.
-      ...['inline-a', 'inline-b'].map(
-        (id): DiscoverSessionTab => ({
-          ...runtimeTab,
-          id,
-          label: id,
-          usesAdHocDataView: true,
-          serializedSearchSource: {
-            index: {
-              id: `runtime-${id}`,
-              title: 'logs-*',
-              timeFieldName: '@timestamp',
-              sourceFilters: [{ value: 'secret.*' }],
-              fieldFormats: {},
-              runtimeFieldMap: {},
-              fieldAttrs: {},
-              allowNoIndex: false,
-              allowHidden: false,
-              managed: false,
-            },
-            filter: [
-              {
-                meta: { index: `runtime-${id}` },
-                query: { match_all: {} },
-                $state: { store: FilterStateStore.GLOBAL_STATE },
-              },
-            ],
+      ...['inline-a', 'inline-b'].map((id): DiscoverSessionTab => ({
+        ...runtimeTab,
+        id,
+        label: id,
+        usesAdHocDataView: true,
+        serializedSearchSource: {
+          index: {
+            id: `runtime-${id}`,
+            title: 'logs-*',
+            timeFieldName: '@timestamp',
+            sourceFilters: [{ value: 'secret.*' }],
+            fieldFormats: {},
+            runtimeFieldMap: {},
+            fieldAttrs: {},
+            allowNoIndex: false,
+            allowHidden: false,
+            managed: false,
           },
-        })
-      ),
+          filter: [
+            {
+              meta: { index: `runtime-${id}` },
+              query: { match_all: {} },
+              $state: { store: FilterStateStore.GLOBAL_STATE },
+            },
+          ],
+        },
+      })),
       {
         ...runtimeTab,
         id: 'esql',
@@ -319,26 +317,24 @@ const createSaveFixture = () => {
     ...apiData,
     tags: ['tag-1'],
     tabs: [
-      ...['inline-a', 'inline-b'].map(
-        (id): DiscoverSessionApiTab => ({
-          id,
-          label: id,
-          type: DiscoverTabType.Default,
-          sort: [],
-          column_order: [],
-          filters: [{ type: 'dsl', dsl: { query: { match_all: {} } } }],
-          data_source: {
-            type: 'data_view_spec',
-            index_pattern: 'logs-*',
-            time_field: '@timestamp',
-            allow_hidden_indices: false,
-            field_filters: ['secret.*'],
-          },
-          view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-          hide_chart: false,
-          hide_table: false,
-        })
-      ),
+      ...['inline-a', 'inline-b'].map((id): DiscoverSessionApiTab => ({
+        id,
+        label: id,
+        type: DiscoverTabType.Default,
+        sort: [],
+        column_order: [],
+        filters: [{ type: 'dsl', dsl: { query: { match_all: {} } } }],
+        data_source: {
+          type: 'data_view_spec',
+          index_pattern: 'logs-*',
+          time_field: '@timestamp',
+          allow_hidden_indices: false,
+          field_filters: ['secret.*'],
+        },
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+        hide_chart: false,
+        hide_table: false,
+      })),
       {
         id: 'esql',
         label: 'ES|QL',

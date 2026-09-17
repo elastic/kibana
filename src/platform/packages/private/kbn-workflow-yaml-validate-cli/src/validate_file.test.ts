@@ -301,7 +301,7 @@ describe('validateFile', () => {
         keyword: 'oneOf',
         params: { passingSchemas: [0, 1] },
         message: 'must match exactly one schema in oneOf',
-      } as ErrorObject);
+      }) as ErrorObject;
 
     const warningsOf = (result: { issues: ValidationIssue[] }) =>
       result.issues.filter((issue) => issue.severity === 'warning');
@@ -550,7 +550,7 @@ describe('validateFile', () => {
         keyword: 'type',
         params: { type: 'number' },
         message: 'must be number',
-      } as ErrorObject);
+      }) as ErrorObject;
 
     const warningsOf = (result: { issues: ValidationIssue[] }) =>
       result.issues.filter((issue) => issue.severity === 'warning');

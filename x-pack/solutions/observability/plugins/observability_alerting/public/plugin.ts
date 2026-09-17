@@ -39,15 +39,12 @@ import type {
   ObservabilityAlertingStartDependencies,
 } from './types';
 
-export class ObservabilityAlertingPlugin
-  implements
-    Plugin<
-      ObservabilityAlertingPublicSetup,
-      ObservabilityAlertingPublicStart,
-      ObservabilityAlertingSetupDependencies,
-      ObservabilityAlertingStartDependencies
-    >
-{
+export class ObservabilityAlertingPlugin implements Plugin<
+  ObservabilityAlertingPublicSetup,
+  ObservabilityAlertingPublicStart,
+  ObservabilityAlertingSetupDependencies,
+  ObservabilityAlertingStartDependencies
+> {
   public setup(
     coreSetup: CoreSetup<ObservabilityAlertingStartDependencies, ObservabilityAlertingPublicStart>
   ): ObservabilityAlertingPublicSetup {
@@ -65,12 +62,9 @@ export class ObservabilityAlertingPlugin
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
           coreStart.settings.globalClient.get$<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false).pipe(
-            map(
-              (settingEnabled): AppUpdater =>
-                () => ({
-                  status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-                })
-            )
+            map((settingEnabled): AppUpdater => () => ({
+              status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+            }))
           )
         )
       ),

@@ -80,8 +80,8 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
           action.type === 'bulk_upgrade'
             ? await sendGetOneBulkUpgradePackagesForRq(action.taskId)
             : action.type === 'bulk_uninstall'
-            ? await sendGetOneBulkUninstallPackagesForRq(action.taskId)
-            : await sendGetBulkRollbackInfoPackagesForRq(action.taskId);
+              ? await sendGetOneBulkUninstallPackagesForRq(action.taskId)
+              : await sendGetBulkRollbackInfoPackagesForRq(action.taskId);
 
         if (res.status !== 'pending') {
           await queryClient.invalidateQueries(['get-packages']);
@@ -98,18 +98,18 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
                       }
                     )
                   : action.type === 'bulk_uninstall'
-                  ? i18n.translate(
-                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallSuccessTitle',
-                      {
-                        defaultMessage: 'Uninstall succeeded',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackSuccessTitle',
-                      {
-                        defaultMessage: 'Rollback succeeded',
-                      }
-                    ),
+                    ? i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallSuccessTitle',
+                        {
+                          defaultMessage: 'Uninstall succeeded',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackSuccessTitle',
+                        {
+                          defaultMessage: 'Rollback succeeded',
+                        }
+                      ),
             });
             if (actionCompletedCallback) {
               actionCompletedCallback('success');
@@ -118,11 +118,11 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
             const errorMessage = res.error?.message
               ? res.error?.message
               : res.results
-              ? res.results
-                  .filter((result) => result.error)
-                  .map((result) => `${result.name}: ${result.error?.message}`)
-                  .join('\n')
-              : 'Unexpected error';
+                ? res.results
+                    .filter((result) => result.error)
+                    .map((result) => `${result.name}: ${result.error?.message}`)
+                    .join('\n')
+                : 'Unexpected error';
             const error = new Error(errorMessage);
 
             toasts.addError(error, {
@@ -135,18 +135,18 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
                       }
                     )
                   : action.type === 'bulk_uninstall'
-                  ? i18n.translate(
-                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallFailedTitle',
-                      {
-                        defaultMessage: 'Uninstall failed',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackFailedTitle',
-                      {
-                        defaultMessage: 'Rollback failed',
-                      }
-                    ),
+                    ? i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallFailedTitle',
+                        {
+                          defaultMessage: 'Uninstall failed',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackFailedTitle',
+                        {
+                          defaultMessage: 'Rollback failed',
+                        }
+                      ),
             });
             if (actionCompletedCallback) {
               actionCompletedCallback('failed');

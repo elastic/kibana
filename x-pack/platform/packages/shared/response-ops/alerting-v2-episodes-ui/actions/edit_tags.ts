@@ -45,9 +45,9 @@ export const createEditTagsAction = (
   displayName: i18n.EDIT_TAGS,
   iconType: 'tag',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.some((ep) => (ep.source_id == null ? true : extension?.isCompatible(ep) ?? false)),
+    episodes.some((ep) => (ep.source_id == null ? true : (extension?.isCompatible(ep) ?? false))),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
+    const currentTags = episodes.length === 1 ? (episodes[0].last_tags ?? []) : [];
     const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
       expressions: deps.expressions,
       spaces: deps.spaces,
@@ -62,12 +62,10 @@ export const createEditTagsAction = (
         nativeExecute: (eps, http) =>
           bulkTagEpisodeActions(
             http,
-            eps.map(
-              (ep): BulkTagEpisodeActionItem => ({
-                episode_id: ep['episode.id'],
-                tags,
-              })
-            )
+            eps.map((ep): BulkTagEpisodeActionItem => ({
+              episode_id: ep['episode.id'],
+              tags,
+            }))
           ),
         extension,
         extensionContext: { tags },

@@ -29,7 +29,8 @@ import type { ESQLDataGroupNode } from './types';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
 
 interface ESQLDataCascadeLeafCellProps
-  extends Pick<
+  extends
+    Pick<
       UnifiedDataTableProps,
       | 'dataGridDensityState'
       | 'showTimeCol'
@@ -48,8 +49,7 @@ interface ESQLDataCascadeLeafCellProps
 }
 
 interface CustomCascadeGridBodyProps
-  extends EuiDataGridCustomBodyProps,
-    Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController'> {
+  extends EuiDataGridCustomBodyProps, Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController'> {
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
   cellId: string;
@@ -109,7 +109,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
 
   const items = virtualizer.getVirtualItems();
 
-  const scrollMargin = isDetached ? 0 : virtualizer.measurementsCache[0]?.start ?? 0;
+  const scrollMargin = isDetached ? 0 : (virtualizer.measurementsCache[0]?.start ?? 0);
   const translateY = items.length > 0 ? items[0].start - scrollMargin : 0;
 
   return (

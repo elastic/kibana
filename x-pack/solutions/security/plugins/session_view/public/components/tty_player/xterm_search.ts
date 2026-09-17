@@ -40,7 +40,7 @@ type LineCacheEntry = [
   /**
    * The offsets where each line starts when the entry describes a wrapped line.
    */
-  lineOffsets: number[]
+  lineOffsets: number[],
 ];
 
 const LINES_CACHE_TIME_TO_LIVE = 15 * 1000; // 15 secs

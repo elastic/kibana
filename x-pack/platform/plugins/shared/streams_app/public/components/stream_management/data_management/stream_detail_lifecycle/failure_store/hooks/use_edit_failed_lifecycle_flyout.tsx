@@ -151,7 +151,7 @@ export const useEditFailedLifecycleFlyout = ({
   const inheritedFailureStoreOrNull = inheritedFetchEnabled
     ? isLoadingInheritedFailureStore
       ? null
-      : inheritedFailureStore ?? null
+      : (inheritedFailureStore ?? null)
     : null;
 
   useRegisterLifecycleFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.failedLifecycle, isMainFlyoutOpen);
@@ -222,8 +222,8 @@ export const useEditFailedLifecycleFlyout = ({
       }
       const lifecycleEnabled = isEnabledLifecycleFailureStore(inheritedFailureStoreOrNull);
       const retention = lifecycleEnabled
-        ? getInheritedFailureStoreRetention(inheritedFailureStoreOrNull) ??
-          effectiveDefaultRetentionPeriod
+        ? (getInheritedFailureStoreRetention(inheritedFailureStoreOrNull) ??
+          effectiveDefaultRetentionPeriod)
         : null;
       return { action: 'apply', retentionPeriod: retention, dataPhasesCount: retention ? 2 : 1 };
     }
@@ -342,10 +342,10 @@ export const useEditFailedLifecycleFlyout = ({
       payload.inheritLifecycle === true
         ? { inherit: {} }
         : payload.failureStoreEnabled
-        ? payload.retention
-          ? { lifecycle: { enabled: { data_retention: payload.retention } } }
-          : enabledWithoutRetention
-        : { disabled: {} };
+          ? payload.retention
+            ? { lifecycle: { enabled: { data_retention: payload.retention } } }
+            : enabledWithoutRetention
+          : { disabled: {} };
 
     return saveFailureStore(nextFailureStore, {
       successMessage: saveSuccessMessage,
@@ -415,7 +415,7 @@ export const useEditFailedLifecycleFlyout = ({
     // to the effective default so the preview keeps showing a delete phase
     // (2 data phases) instead of collapsing to infinite retention (1 data phase).
     const nextRetention = failedDeletePhaseInitialValue.deletePhaseEnabled
-      ? failedDeletePhaseInitialRetention ?? effectiveDefaultRetentionPeriod
+      ? (failedDeletePhaseInitialRetention ?? effectiveDefaultRetentionPeriod)
       : effectiveDefaultRetentionPeriod;
     syncDeletePhasePreview(nextRetention ?? null);
   }, [

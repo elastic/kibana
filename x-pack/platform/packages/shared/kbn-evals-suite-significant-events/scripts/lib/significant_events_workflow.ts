@@ -501,7 +501,7 @@ async function readRawDataStreamDocs(
   });
 
   const total =
-    typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
+    typeof result.hits.total === 'number' ? result.hits.total : (result.hits.total?.value ?? 0);
   if (total > RAW_DATA_STREAM_SEARCH_LIMIT) {
     throw new Error(
       `${label}: ${total} docs exceed the capture limit of ${RAW_DATA_STREAM_SEARCH_LIMIT}; ` +

@@ -145,8 +145,8 @@ export const useFooterLinks = ({
     const inviteUsersHref = canInviteUsersViaCloud
       ? usersAndRolesUrl
       : canInviteUsersViaKibana
-      ? application.getUrlForApp('management', { path: 'security/users' })
-      : undefined;
+        ? application.getUrlForApp('management', { path: 'security/users' })
+        : undefined;
 
     // "Invite users" link
     if (inviteUsersHref) {

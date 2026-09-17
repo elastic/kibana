@@ -38,8 +38,8 @@ describe('SalesforceConnector', () => {
 
   describe('auth', () => {
     it('supports oauth_client_credentials auth', () => {
-      const types = (SalesforceConnector.auth?.types as Array<string | { type: string }>).map((t) =>
-        typeof t === 'string' ? t : t.type
+      const types = (SalesforceConnector.auth?.types as Array<string | { type: string }>).map(
+        (t) => (typeof t === 'string' ? t : t.type)
       );
       expect(types).toContain('oauth_client_credentials');
     });

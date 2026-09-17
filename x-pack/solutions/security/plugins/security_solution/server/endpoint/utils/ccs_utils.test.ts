@@ -14,7 +14,7 @@ describe('hasConnectedRemoteClusters', () => {
       cluster: {
         remoteInfo: jest.fn().mockResolvedValue(remoteInfo),
       },
-    } as unknown as ElasticsearchClient);
+    }) as unknown as ElasticsearchClient;
 
   it('returns true when at least one remote cluster is connected', async () => {
     const esClient = mockEsClient({

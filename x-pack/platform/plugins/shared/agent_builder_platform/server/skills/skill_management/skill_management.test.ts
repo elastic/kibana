@@ -36,8 +36,8 @@ const stubToolProvider = (
       readonly: true,
       experimental: false,
       configuration: {},
-      getSchema: async () => ({} as any),
-      execute: async () => ({} as any),
+      getSchema: async () => ({}) as any,
+      execute: async () => ({}) as any,
     }))
   ),
   has: jest.fn(),

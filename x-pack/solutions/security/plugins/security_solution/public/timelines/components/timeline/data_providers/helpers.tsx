@@ -185,8 +185,8 @@ export const moveProvidersBetweenGroups = ({
         i === sourceGroupIndex
           ? [...updatedSourcererScope]
           : i === destinationGroupIndex
-          ? [...updatedDestinationGroup]
-          : [...group],
+            ? [...updatedDestinationGroup]
+            : [...group],
       ],
       []
     );

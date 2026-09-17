@@ -70,8 +70,8 @@ export const loadWorkflowsThunk = createAsyncThunk<
         typeof errorMessage === 'string'
           ? errorMessage
           : error instanceof Error
-          ? error.message
-          : 'Failed to load workflows';
+            ? error.message
+            : 'Failed to load workflows';
 
       notifications.toasts.addError(new Error(message), {
         title: 'Failed to load workflows',

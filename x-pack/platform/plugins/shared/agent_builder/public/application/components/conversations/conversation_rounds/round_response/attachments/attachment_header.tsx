@@ -102,18 +102,20 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const headerBorderRadius = isCanvas
     ? `0 ${euiTheme.border.radius.small} 0 0`
     : isHeaderOnly
-    ? `${AB_PANEL_RADIUS}px`
-    : `${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 0`;
+      ? `${AB_PANEL_RADIUS}px`
+      : `${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 0`;
 
   const headerStyles = css`
     position: relative;
     display: flex;
-    ${!isHeaderOnly
-      ? `
+    ${
+      !isHeaderOnly
+        ? `
       border-bottom: ${euiTheme.border.thin};
       border-color: ${euiTheme.colors.borderBaseSubdued};
     `
-      : ''}
+        : ''
+    }
     border-radius: ${headerBorderRadius};
     min-height: ${HEADER_HEIGHT}px;
   `;

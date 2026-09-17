@@ -1424,7 +1424,7 @@ describe('Metric Threshold Alerts Executor', () => {
         comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
         timeSize: 5,
         ...(aggType !== 'count' ? { metric: 'test.metric' } : {}),
-      } as MetricExpressionParams);
+      }) as MetricExpressionParams;
 
     beforeAll(async () => {
       await esClient.index({

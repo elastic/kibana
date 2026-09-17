@@ -45,7 +45,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     abortSignal: new AbortController().signal,
     stepId: 'create_proposal',
     stepType: 'investigations.createProposal',
-  } as unknown as StepHandlerContext<never, never>);
+  }) as unknown as StepHandlerContext<never, never>;
 
 describe('investigations.createProposal input schema', () => {
   // Liquid renders a template for an absent workflow input as `''`, so the
@@ -146,7 +146,7 @@ describe('investigations.createProposal step', () => {
       category: 'tune',
     });
     const definition = getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
+      getProposalsService: () => ({ create }) as unknown as ProposalsService,
       resolveUser,
     });
 
@@ -181,7 +181,7 @@ describe('investigations.createProposal step', () => {
       category: 'tune',
     });
     const definition = getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
+      getProposalsService: () => ({ create }) as unknown as ProposalsService,
       resolveUser,
     });
 
@@ -195,7 +195,7 @@ describe('investigations.createProposal step', () => {
   it('should default impact, confidence and origin when the caller omits them', async () => {
     const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', category: 'tune' });
     const definition = getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
+      getProposalsService: () => ({ create }) as unknown as ProposalsService,
       resolveUser,
     });
 
@@ -212,7 +212,7 @@ describe('investigations.createProposal step', () => {
   it('should return an error result rather than throwing when the service fails', async () => {
     const create = jest.fn().mockRejectedValue(new Error('index unavailable'));
     const definition = getCreateProposalStepDefinition({
-      getProposalsService: () => ({ create } as unknown as ProposalsService),
+      getProposalsService: () => ({ create }) as unknown as ProposalsService,
       resolveUser,
     });
 
@@ -229,7 +229,7 @@ describe('investigations.updateProposal step', () => {
   it('should record the outcome against the space from the step context', async () => {
     const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
     const definition = getUpdateProposalStepDefinition({
-      getProposalsService: () => ({ update } as unknown as ProposalsService),
+      getProposalsService: () => ({ update }) as unknown as ProposalsService,
     });
 
     const result = await definition.handler(
@@ -246,7 +246,7 @@ describe('investigations.updateProposal step', () => {
   it('should pass the failure detail through', async () => {
     const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' });
     const definition = getUpdateProposalStepDefinition({
-      getProposalsService: () => ({ update } as unknown as ProposalsService),
+      getProposalsService: () => ({ update }) as unknown as ProposalsService,
     });
 
     await definition.handler(

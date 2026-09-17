@@ -88,9 +88,9 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   }
 }
 
-export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
-  implements PersistableStateService<ExpressionAstExpression>
-{
+export class Executor<
+  Context extends Record<string, unknown> = Record<string, unknown>,
+> implements PersistableStateService<ExpressionAstExpression> {
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
     logger?: Logger,
     state?: ExecutorState<Ctx>

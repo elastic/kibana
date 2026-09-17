@@ -19,7 +19,7 @@ jest.mock(
       MlUserJobDescription: (props) => {
         return <div data-test-subj="userMock">{props.job.id}</div>;
       },
-    } as Record<string, React.FC<{ job: MlSummaryJob }>>)
+    }) as Record<string, React.FC<{ job: MlSummaryJob }>>
 );
 
 jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs');

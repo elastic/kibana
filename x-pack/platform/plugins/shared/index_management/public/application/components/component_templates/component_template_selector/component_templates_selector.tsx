@@ -65,11 +65,13 @@ const useStyles = ({ hasSelection }: { hasSelection: boolean }) => {
       padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
       color: ${euiTheme.colors.darkShade};
 
-      ${!hasSelection &&
-      css`
-        align-items: center;
-        justify-content: center;
-      `}
+      ${
+        !hasSelection &&
+        css`
+          align-items: center;
+          justify-content: center;
+        `
+      }
     `,
     selectionHeader: css`
       background-color: ${euiTheme.colors.lightestShade};

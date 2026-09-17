@@ -92,7 +92,7 @@ const createMockConfigurationService = (): jest.Mocked<ConfigurationService> =>
     getOtelTelemetryConfiguration$: jest
       .fn()
       .mockReturnValue(of(DEFAULT_OTEL_TELEMETRY_CONFIGURATION)),
-  } as any);
+  }) as any;
 
 describe('OtelTelemetryService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

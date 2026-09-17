@@ -35,7 +35,7 @@ const createEsClient = (responses: Record<string, MockQueryResult>): Elasticsear
         return { columns: r?.columns ?? [], values: r?.values ?? [] };
       }),
     },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 const GOLD_QUERY = 'FROM logs-* | STATS count = COUNT(*) BY user.name';
 const CANDIDATE_QUERY = 'FROM logs-* | STATS total = COUNT(*) BY user.name';

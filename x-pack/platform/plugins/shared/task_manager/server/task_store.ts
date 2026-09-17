@@ -1241,9 +1241,8 @@ export class TaskStore {
     }
 
     const allSortedTasks = claimSort(this.definitions, allTasks);
-    const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(
-      allSortedTasks
-    );
+    const tasksWithDecryptedApiKeys =
+      await this.bulkGetAndMergeTasksWithDecryptedApiKey(allSortedTasks);
     return { docs: tasksWithDecryptedApiKeys, versionMap };
   }
 
@@ -1277,9 +1276,8 @@ export class TaskStore {
 
       const versionMap = this.createVersionMap(tasks);
       const concreteTasks = this.filterTasks(tasks);
-      const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(
-        concreteTasks
-      );
+      const tasksWithDecryptedApiKeys =
+        await this.bulkGetAndMergeTasksWithDecryptedApiKey(concreteTasks);
 
       return {
         docs: tasksWithDecryptedApiKeys,

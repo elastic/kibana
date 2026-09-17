@@ -42,7 +42,7 @@ const searchResponse = (
         },
       })),
     },
-  } as estypes.SearchResponse<unknown>);
+  }) as estypes.SearchResponse<unknown>;
 
 describe('executeCascadeListField', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
