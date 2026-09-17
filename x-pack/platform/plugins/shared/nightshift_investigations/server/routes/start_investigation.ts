@@ -9,7 +9,7 @@ import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { freeFormContextSchema } from '../../common';
-import { MAX_KEYWORD_LENGTH } from '../../common';
+import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, MAX_KEYWORD_LENGTH } from '../../common';
 import { fetchAlertSnapshot } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
@@ -19,8 +19,22 @@ const subjectIdAndSummary = {
   summary: z.string().max(MAX_TEXT_LENGTH).optional(),
 };
 
+const startInvestigationMessage = {
+  message: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
+};
+
 /** Headline shown in the list and flyout from the moment the record exists. */
 const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
+
+/** Keeps a derived title to one readable line, since it is rendered as a list headline. */
+const MAX_DERIVED_TITLE_LENGTH = 200;
+
+/**
+ * A manual investigation is defined by its question, so when the caller names no title the
+ * question stands in for it, collapsed to one line the way the client derives the subject summary.
+ */
+const deriveTitleFromMessage = (message: string): string =>
+  message.replace(/\s+/g, ' ').trim().slice(0, MAX_DERIVED_TITLE_LENGTH);
 
 // A union rather than one object with a loose `context`, so that an alert investigation is
 // always backed by alert data: the alert branch accepts no caller context — the handler loads
@@ -36,6 +50,7 @@ const startInvestigationBodySchema = z.union([
     // Optional here only: the handler derives it from the alert's rule name when omitted.
     title: titleSchema.optional(),
     concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+    ...startInvestigationMessage,
   }),
   z.object({
     subject: z.object({
@@ -45,15 +60,37 @@ const startInvestigationBodySchema = z.union([
     title: titleSchema,
     concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     context: freeFormContextSchema.optional(),
+    ...startInvestigationMessage,
+  }),
+  // A manual investigation is defined by its question, so `message` is required and the
+  // subject id is optional: there is no entity to point at, only the prompt. The title is
+  // optional for the same reason: the handler derives it from the question when omitted.
+  z.object({
+    subject: z.object({
+      type: z.literal('manual'),
+      id: z
+        .string()
+        .min(1)
+        .max(MAX_KEYWORD_LENGTH)
+        .default(DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID),
+      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+    }),
+    title: titleSchema.optional(),
+    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+    context: freeFormContextSchema.optional(),
+    message: z.string().min(1).max(MAX_TEXT_LENGTH),
   }),
 ]);
 
 type StartInvestigationBody = z.infer<typeof startInvestigationBodySchema>;
 type AlertInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'alert' } }>;
+type ManualInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'manual' } }>;
 
 /** Narrows the whole body, which a `switch` on the nested `subject.type` cannot do. */
 const isAlertBody = (body: StartInvestigationBody): body is AlertInvestigationBody =>
   body.subject.type === 'alert';
+const isManualBody = (body: StartInvestigationBody): body is ManualInvestigationBody =>
+  body.subject.type === 'manual';
 
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations',
@@ -93,6 +130,14 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           title: body.title ?? snapshot.rule_name,
           concurrency_key: body.concurrency_key ?? snapshot.id,
           context: { alerts: [snapshot] },
+          trigger_type: 'manual',
+          message: body.message,
+        });
+      }
+      if (isManualBody(body)) {
+        return await client.start({
+          ...body,
+          title: body.title ?? deriveTitleFromMessage(body.message),
           trigger_type: 'manual',
         });
       }
