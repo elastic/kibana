@@ -44,30 +44,20 @@ Use this when deciding whether a new helper belongs in `@kbn/scout`, a solution 
 
 **Three tiers.** The tier follows what renders the UI the helper targets, not the helper's name or current folder.
 
-| Tier                    | Lives in                                                                                | Wraps                                                                      | Reached through                      |
-| ----------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------ |
-| EUI component object    | `@elastic/eui-test-helpers`, re-exported from `kbn-scout/src/playwright/eui_components` | One EUI component. Re-exports only                                         | `page.components.<name>(testSubj)`   |
-| Kibana component object | `kbn-scout/src/playwright/ui_components`                                                | One Kibana component that two or more apps render (`@kbn/*`, plugin, core) | `pageObjects.<key>` or direct import |
-| App page object         | `kbn-scout/src/playwright/page_objects`, a solution package, or plugin-local            | One app, management screen, or chrome area                                 | `pageObjects.<key>`                  |
+| Tier                    | Lives in                                                                                | Wraps                                                                                                     | Reached through                      |
+| ----------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| EUI component object    | `@elastic/eui-test-helpers`, re-exported from `kbn-scout/src/playwright/eui_components` | One EUI component. Re-exports only                                                                        | `page.components.<name>(testSubj)`   |
+| Kibana component object | `kbn-scout/src/playwright/ui_components`                                                | One shared Kibana component, rendered by two or more plugins (from a `@kbn/*` package, a plugin, or core) | `pageObjects.<key>` or direct import |
+| App page object         | `kbn-scout/src/playwright/page_objects`, a solution package, or plugin-local            | One screen that a single plugin renders (an app, a management section, a chrome area)                     | `pageObjects.<key>`                  |
 
 **Where it goes.**
 
-- A Kibana component rendered by two or more apps: `@kbn/scout`, even if only one test uses it today. Moving a shared component's test API into the one plugin that happens to use it makes that plugin the de facto owner, and the next consumer copies it.
-- A platform app that tests in another module drive, or that a `@kbn/scout` fixture depends on: `@kbn/scout`. A platform app only its own tests drive: plugin-local.
-- A solution app: the solution package when two or more of that solution's modules drive it, otherwise plugin-local. Never `@kbn/scout`.
-- If an EUI component has no helper yet, contribute one to [EUI test helpers](./eui-test-helpers.md) rather than wrapping it in Kibana. Do not target EUI internals by CSS class when a helper method exists (`@kbn/eslint/scout_no_raw_eui_selectors` enforces the covered cases).
+- A helper for a shared Kibana component goes in `@kbn/scout`, even if only one plugin's tests use it today. The component is already rendered by several plugins, so their tests will need it too. If the helper sits in the first plugin that needed it, the next plugin copies it.
+- A helper for a screen that a platform plugin renders goes in `@kbn/scout` only when tests outside that plugin drive it, or when a `@kbn/scout` fixture depends on it (the login page under `browserAuth`). If only the plugin's own tests drive it, keep it plugin-local. Any change to `@kbn/scout` re-runs the whole Scout suite.
+- A helper for a screen that a solution plugin renders goes in that solution's Scout package when two or more of the solution's plugins drive it, otherwise plugin-local. Never in `@kbn/scout`.
 - Before adding a class, search all Scout locations for the same class name. Same name in two places is a duplicate until proven otherwise.
 
 **Fixture keys are public API.** `pageObjects.<key>`, `page.components.<key>` and `apiServices.<key>` never change. A file may move between tiers or folders and keep its key.
-
-**Consumer counts** come from `node scripts/scout audit`. Page objects are Proxy fixtures, so import graph tools report every one of them as unused. That signal is wrong, not the page object.
-
-**Recording an exception.** When a review flags something and the decision is to keep it, record it next to the code:
-
-```ts
-// scout-audit: keep -- wraps @kbn/unified-tabs, Discover is the only consumer today
-export class UnifiedTabs {
-```
 
 To make your page object available as `pageObjects.newPage`, register it in your plugin fixtures.
 
