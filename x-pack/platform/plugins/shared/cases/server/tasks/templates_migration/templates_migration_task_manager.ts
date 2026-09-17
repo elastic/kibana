@@ -90,15 +90,11 @@ export class TemplatesMigrationTaskManager {
             throw new Error('TemplatesMigrationTaskManager: internal repository not initialized');
           }
           const repo = this.internalRepo;
-          const log = this.logger;
           const previousState = (taskInstance?.state ?? {}) as MigrationTaskState;
           // Task Manager aborts this signal on timeout/cancel; the backfill checks it between pages
           // and persists its cursor so the next run resumes rather than running past the timeout.
           return {
             run: () => this.run(repo, previousState, signal),
-            cancel: async () => {
-              log.debug('Cases templates v2 migration task cancelled — aborting scan');
-            },
           };
         },
       },
