@@ -37,6 +37,34 @@ export const parseAwsRegionFromArn = (arn: string | undefined): string | undefin
 };
 
 /**
+ * Public console host per AWS partition. The stack ARN validator accepts any `aws-*` partition, so
+ * a console link built from an ARN must land on that partition's console, not the commercial one.
+ * The four isolated partitions (`aws-iso`, `aws-iso-b`, `aws-iso-e`, `aws-iso-f`) are air-gapped
+ * and have no public console, so they are deliberately absent: no link beats a wrong one.
+ */
+const AWS_CONSOLE_HOST_BY_PARTITION: Record<string, string> = {
+  aws: 'console.aws.amazon.com',
+  'aws-us-gov': 'console.amazonaws-us-gov.com',
+  'aws-cn': 'console.amazonaws.cn',
+  'aws-eusc': 'console.amazonaws-eusc.eu',
+};
+
+/**
+ * The console host for the partition an ARN belongs to (`arn:<partition>:...`); undefined when
+ * the value is not an ARN or its partition has no public console.
+ */
+export const getAwsConsoleHostFromArn = (arn: string | undefined): string | undefined => {
+  if (!arn) {
+    return undefined;
+  }
+  const parts = arn.split(':');
+  if (parts.length < 6 || parts[0] !== 'arn') {
+    return undefined;
+  }
+  return AWS_CONSOLE_HOST_BY_PARTITION[parts[1]];
+};
+
+/**
  * Whether `value` is a CloudFormation stack ARN. Shared by the browser's stack ARN fields and the
  * connector API's `iac_deployment_id` validation, so what the UI accepts is what the server
  * stores.

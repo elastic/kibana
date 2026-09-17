@@ -18,6 +18,7 @@ import type {
 import { isCloudProvider } from '../../../common/types';
 import {
   getIacTemplateUrlFromVarGroupSelection,
+  getAwsConsoleHostFromArn,
   isCloudFormationStackArn,
   parseAwsRegionFromArn,
 } from '../../../common/services/cloud_connectors';
@@ -600,18 +601,23 @@ export const getIacLaunchUrl = ({
     return undefined;
   }
   const encodedArtifact = encodeURIComponent(artifactUrl);
-  const region = parseAwsRegionFromArn(deploymentId);
-  if (deploymentId && region) {
-    // Console deep link. AWS does not document this format; it must be verified manually
-    // against the console before shipping.
-    return `https://console.aws.amazon.com/cloudformation/home?region=${region}#/stacks/update/template?stackId=${encodeURIComponent(
+  if (deploymentId) {
+    // Only a CloudFormation stack ARN can be updated: a region alone does not make one (a
+    // CloudWatch Logs ARN has a region too), so the same validator the fields and the API use
+    // gates the link. A malformed value, a non-stack ARN, or a partition with no public console
+    // means there is no stack to link to; do not fall through to the quick-create path or a new
+    // stack would be created.
+    const region = parseAwsRegionFromArn(deploymentId);
+    const host = getAwsConsoleHostFromArn(deploymentId);
+    if (!isCloudFormationStackArn(deploymentId) || !region || !host) {
+      return undefined;
+    }
+    // Console deep link on the ARN's own partition (GovCloud and China have their own console
+    // hosts). AWS does not document this format; it must be verified manually against the
+    // console before shipping.
+    return `https://${host}/cloudformation/home?region=${region}#/stacks/update/template?stackId=${encodeURIComponent(
       deploymentId
     )}&templateURL=${encodedArtifact}`;
-  }
-  // A truthy deploymentId with no parseable region means the ARN is malformed;
-  // do not fall through to the quick-create path or a new stack would be created.
-  if (deploymentId) {
-    return undefined;
   }
   if (!staticUrl || !hasTemplateUrlParam(staticUrl)) {
     return undefined;
@@ -651,12 +657,14 @@ export const isStackArnInvalid = (stackArn: string | undefined): boolean => {
 /** Read-only link to the deployed stack; needs no render. */
 export const getAwsStackConsoleUrl = (deploymentId: string | undefined): string | undefined => {
   const region = parseAwsRegionFromArn(deploymentId);
-  if (!deploymentId || !region) {
+  const host = getAwsConsoleHostFromArn(deploymentId);
+  // A stored legacy value may predate validation; never link a non-stack ARN as a stack.
+  if (!deploymentId || !isCloudFormationStackArn(deploymentId) || !region || !host) {
     return undefined;
   }
-  // Console deep link. AWS does not document this format; it must be verified manually
-  // against the console before shipping.
-  return `https://console.aws.amazon.com/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${encodeURIComponent(
+  // Console deep link on the ARN's own partition. AWS does not document this format; it must be
+  // verified manually against the console before shipping.
+  return `https://${host}/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${encodeURIComponent(
     deploymentId
   )}`;
 };

@@ -1076,6 +1076,60 @@ describe('IaC launch URL helpers', () => {
     ).toBeUndefined();
   });
 
+  it('getIacLaunchUrl and getAwsStackConsoleUrl link to the console of the ARN partition', () => {
+    // The ARN validator accepts GovCloud and China stacks; their consoles live on other hosts.
+    const GOV_ARN = 'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/s/u';
+    const CN_ARN = 'arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/s/u';
+
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: GOV_ARN,
+      })
+    ).toBe(
+      `https://console.amazonaws-us-gov.com/cloudformation/home?region=us-gov-west-1#/stacks/update/template?stackId=${encodeURIComponent(
+        GOV_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
+    );
+    expect(getAwsStackConsoleUrl(CN_ARN)).toBe(
+      `https://console.amazonaws.cn/cloudformation/home?region=cn-north-1#/stacks/stackinfo?stackId=${encodeURIComponent(
+        CN_ARN
+      )}`
+    );
+  });
+
+  it('returns undefined for a partition with no public console instead of a commercial link', () => {
+    const ISO_ARN = 'arn:aws-iso:cloudformation:us-iso-east-1:123456789012:stack/s/u';
+
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: ISO_ARN,
+      })
+    ).toBeUndefined();
+    expect(getAwsStackConsoleUrl(ISO_ARN)).toBeUndefined();
+  });
+
+  it('returns undefined for a regional ARN that is not a CloudFormation stack', () => {
+    // A CloudWatch Logs ARN has a parseable region and a console host, but no stack to update or
+    // view; a legacy stored value like this must not be linked as a stack.
+    const LOGS_ARN = 'arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/fn:*';
+
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: LOGS_ARN,
+      })
+    ).toBeUndefined();
+    expect(getAwsStackConsoleUrl(LOGS_ARN)).toBeUndefined();
+  });
+
   it('getIacLaunchUrl returns undefined for a malformed deploymentId that has no parseable region', () => {
     expect(
       getIacLaunchUrl({

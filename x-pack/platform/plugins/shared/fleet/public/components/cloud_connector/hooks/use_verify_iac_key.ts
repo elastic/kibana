@@ -54,8 +54,7 @@ export const useVerifyIacKey = ({
       // A comparing check is a full render on the provisioner (artifact included), so do not
       // re-run it just because the user came back from the CloudFormation tab: a changed
       // integration set changes the query key, and the flyout re-checks explicitly after an
-      // Update. Seen in the 2026-09-09 walkthrough: seven identical checks in forty seconds from
-      // window-focus refetches.
+      // Update.
       refetchOnWindowFocus: false,
       staleTime: VERIFY_IAC_KEY_STALE_TIME_MS,
     }

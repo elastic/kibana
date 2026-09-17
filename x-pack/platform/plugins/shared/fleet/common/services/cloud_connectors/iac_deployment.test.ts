@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { isCloudFormationStackArn, parseAwsRegionFromArn } from './iac_deployment';
+import {
+  getAwsConsoleHostFromArn,
+  isCloudFormationStackArn,
+  parseAwsRegionFromArn,
+} from './iac_deployment';
 
 describe('isCloudFormationStackArn', () => {
   it.each([
@@ -67,5 +71,35 @@ describe('parseAwsRegionFromArn', () => {
     ['arn:aws:cloudformation:us-east-1'],
   ])('returns undefined for %p', (value) => {
     expect(parseAwsRegionFromArn(value)).toBeUndefined();
+  });
+});
+
+describe('getAwsConsoleHostFromArn', () => {
+  it.each([
+    ['arn:aws:cloudformation:us-east-1:123456789012:stack/s/u', 'console.aws.amazon.com'],
+    [
+      'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/s/u',
+      'console.amazonaws-us-gov.com',
+    ],
+    ['arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/s/u', 'console.amazonaws.cn'],
+    [
+      'arn:aws-eusc:cloudformation:eusc-de-east-1:123456789012:stack/s/u',
+      'console.amazonaws-eusc.eu',
+    ],
+  ])('maps the partition of %s to %s', (arn, host) => {
+    expect(getAwsConsoleHostFromArn(arn)).toBe(host);
+  });
+
+  it.each([
+    [undefined],
+    ['not-an-arn'],
+    // Isolated partitions have no public console; a commercial link would be wrong.
+    ['arn:aws-iso:cloudformation:us-iso-east-1:123456789012:stack/s/u'],
+    ['arn:aws-iso-b:cloudformation:us-isob-east-1:123456789012:stack/s/u'],
+    ['arn:aws-iso-e:cloudformation:eu-isoe-west-1:123456789012:stack/s/u'],
+    ['arn:aws-iso-f:cloudformation:us-isof-east-1:123456789012:stack/s/u'],
+    ['arn:gcp:cloudformation:us-east-1:123456789012:stack/s/u'],
+  ])('returns undefined for %p', (value) => {
+    expect(getAwsConsoleHostFromArn(value)).toBeUndefined();
   });
 });

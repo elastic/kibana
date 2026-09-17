@@ -58,4 +58,8 @@ export {
 } from './var_group_helpers';
 
 // IaC deployment helpers
-export { parseAwsRegionFromArn, isCloudFormationStackArn } from './iac_deployment';
+export {
+  getAwsConsoleHostFromArn,
+  parseAwsRegionFromArn,
+  isCloudFormationStackArn,
+} from './iac_deployment';
