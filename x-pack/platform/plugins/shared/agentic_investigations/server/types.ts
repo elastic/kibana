@@ -13,6 +13,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './proposals/services/proposals_service';
 import type { IncidentsService } from './incidents/services/incidents_service';
 
@@ -20,6 +21,7 @@ export interface AgenticInvestigationsSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {

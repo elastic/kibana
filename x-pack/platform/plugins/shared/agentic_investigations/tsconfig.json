@@ -27,7 +27,15 @@
     "@kbn/zod-helpers",
     "@kbn/std",
     "@kbn/agent-builder-common",
-    "@kbn/agent-builder-server"
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
+    "@kbn/agentic-investigations-common",
+    "@kbn/core-http-browser",
+    "@kbn/ui-callout",
+    "@kbn/std",
+    "@kbn/react-query",
+    "@kbn/kibana-react-plugin"
   ],
   "exclude": ["target/**/*"]
 }
