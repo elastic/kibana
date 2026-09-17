@@ -38,20 +38,24 @@ export function useTransactionDetailFlyoutLinks() {
     });
   }, [share, serviceName, transactionName, environment, rangeFrom, rangeTo]);
 
-  const { href: discoverHref, esqlQuery: discoverEsqlQuery } = getFlyoutDiscoverNavigation({
-    share,
-    indices,
-    indexType: 'traces',
-    rangeFrom,
-    rangeTo,
-    queryParams: {
-      serviceName,
-      transactionName,
-      transactionType,
-      environment,
-      sortDirection: 'DESC',
-    },
-  });
+  const { href: discoverHref, esqlQuery: discoverEsqlQuery } = useMemo(
+    () =>
+      getFlyoutDiscoverNavigation({
+        share,
+        indices,
+        indexType: 'traces',
+        rangeFrom,
+        rangeTo,
+        queryParams: {
+          serviceName,
+          transactionName,
+          transactionType,
+          environment,
+          sortDirection: 'DESC',
+        },
+      }),
+    [share, indices, rangeFrom, rangeTo, serviceName, transactionName, transactionType, environment]
+  );
 
   const openInDiscoverTab = useCallback(() => {
     if (!openInNewDiscoverTab || !discoverEsqlQuery) {

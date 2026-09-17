@@ -12,8 +12,13 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
+<<<<<<< HEAD
   alertzero: 4489
   apm: 35746
+=======
+  alertzero: 10276
+  apm: 31419
+>>>>>>> upstream/main
   apmShared: 1896
   apmSourcesAccess: 1174
   automaticImport: 13257

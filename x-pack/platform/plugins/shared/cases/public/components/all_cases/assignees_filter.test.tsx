@@ -275,7 +275,15 @@ describe('AssigneesFilterPopover', () => {
         `You've selected the maximum number of ${MAX_ASSIGNEES_FILTER_LENGTH} assignees`
       )
     ).toBeInTheDocument();
-    expect(await screen.findByTitle('No assignees')).toHaveAttribute('aria-checked', 'false');
-    expect(await screen.findByTitle('No assignees')).toHaveAttribute('aria-disabled', 'true');
+
+    expect(screen.getByRole('option', { name: 'No assignees' })).toHaveAttribute(
+      'aria-checked',
+      'false'
+    );
+
+    expect(screen.getByRole('option', { name: 'No assignees' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 });
