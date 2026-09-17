@@ -141,6 +141,22 @@ export const generateExecutorFunction = ({
     }
 
     const pool = getClientLeasePool();
+    const acquiredClients: Array<{
+      clientType: ClientTypeSpec<unknown>;
+      key: string;
+      promise: Promise<unknown>;
+    }> = [];
+
+    const invalidateAcquiredClientsForError = async (error: unknown): Promise<void> => {
+      await Promise.all(
+        acquiredClients.map(async ({ clientType, key, promise }) => {
+          if (clientType.shouldInvalidateOnError?.(error)) {
+            await pool.invalidate(key, promise);
+          }
+        })
+      );
+    };
+
     // Shared by getClient (authMode) and the Relay gate. Specs that route through the Relay
     // (isRelayAuth) read this same secrets.authType, so the two cannot disagree: the discriminated
     // union makes authType mandatory on saved connectors and buildConnector sets it on the
@@ -180,14 +196,15 @@ export const generateExecutorFunction = ({
         if (!connectorVersion) {
           throw new Error(`Missing saved-object version for persisted connector "${connectorId}".`);
         }
-        return await pool.lease(
-          buildClientLeaseKey({
-            connectorId,
-            clientTypeId: id,
-            authMode: derivedAuthMode,
-            profileUid,
-            connectorVersion,
-          }),
+        const key = buildClientLeaseKey({
+          connectorId,
+          clientTypeId: id,
+          authMode: derivedAuthMode,
+          profileUid,
+          connectorVersion,
+        });
+        const promise = pool.lease(
+          key,
           () =>
             clientType.build({
               logger,
@@ -203,6 +220,8 @@ export const generateExecutorFunction = ({
             }),
           (client) => clientType.terminate(client)
         );
+        acquiredClients.push({ clientType, key, promise });
+        return await promise;
       } catch (err) {
         const isUser = isClientUserError(err, clientType);
         const error = err instanceof Error ? err : new Error(String(err));
@@ -229,6 +248,7 @@ export const generateExecutorFunction = ({
 
       return { status: 'ok', data, actionId: connectorId };
     } catch (error) {
+      await invalidateAcquiredClientsForError(error);
       const errorSource = error instanceof Error ? getErrorSource(error) : undefined;
       if (errorSource === TaskErrorSource.FRAMEWORK) throw error;
       const errorMessage = error instanceof Error ? error.message : String(error);

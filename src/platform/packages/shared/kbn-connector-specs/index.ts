@@ -100,7 +100,9 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+} from './src/lib/clients/client_type_spec';
+export type {
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,
-} from './src/lib/clients';
+} from './src/lib/clients/client_registry';
