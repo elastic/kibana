@@ -117,9 +117,19 @@ export interface CloudConnectorFormProps {
   templateSha?: string;
 }
 
+// organizationId, csp, region and cloudHost only exist on CloudSetup, not on CloudStart.
 export type CloudSetupForCloudConnector = Pick<
   CloudSetup,
-  'isCloudEnabled' | 'cloudId' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
+  | 'isCloudEnabled'
+  | 'cloudId'
+  | 'cloudHost'
+  | 'baseUrl'
+  | 'deploymentUrl'
+  | 'organizationId'
+  | 'csp'
+  | 'region'
+  | 'serverless'
+  | 'isServerlessEnabled'
 >;
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {

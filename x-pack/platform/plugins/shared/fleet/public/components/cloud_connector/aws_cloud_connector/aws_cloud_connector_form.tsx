@@ -21,7 +21,12 @@ import {
 } from '../../../../common/services/cloud_connectors';
 import { type CloudConnectorFormProps } from '../types';
 
-import { updateInputVarsWithCredentials, isAwsCredentials } from '../utils';
+import {
+  updateInputVarsWithCredentials,
+  isAwsCredentials,
+  getMissingTemplateContext,
+  isWorkloadIdentityTemplateUrl,
+} from '../utils';
 import { ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
@@ -31,6 +36,7 @@ import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template
 
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
+import { CloudFormationTemplateUnavailableCallout } from './cloud_formation_template_unavailable_callout';
 
 export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   newPolicy,
@@ -83,6 +89,14 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     };
   }, [iacConfirm, newPolicy.name]);
 
+  const isTemplateUnavailable = isDisabled && !!iacTemplateUrl;
+  const missingTemplateContext = isTemplateUnavailable
+    ? getMissingTemplateContext({ cloud, accountType, iacTemplateUrl })
+    : [];
+  const guideCredentialType = isWorkloadIdentityTemplateUrl(iacTemplateUrl)
+    ? 'workload_identity'
+    : 'identity_federation';
+
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
 
@@ -114,7 +128,10 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         buttonContent={<EuiLink>{'Steps to assume role'}</EuiLink>}
         paddingSize="l"
       >
-        <CloudFormationCloudCredentialsGuide accountType={accountType} />
+        <CloudFormationCloudCredentialsGuide
+          accountType={accountType}
+          credentialType={guideCredentialType}
+        />
       </EuiAccordion>
       <EuiSpacer size="l" />
       <EuiButton
@@ -132,6 +149,12 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           defaultMessage="Launch CloudFormation"
         />
       </EuiButton>
+      {isTemplateUnavailable && (
+        <>
+          <EuiSpacer size="m" />
+          <CloudFormationTemplateUnavailableCallout missingContext={missingTemplateContext} />
+        </>
+      )}
       {templateGenerationError && (
         <>
           <EuiSpacer size="m" />

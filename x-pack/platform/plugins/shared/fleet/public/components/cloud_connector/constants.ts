@@ -4,8 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+// Tokens in `iac_template_url` that Kibana replaces with values of the current deployment.
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
+// Workload Identity templates take the JWT `iss` (without scheme) and `sub` claims.
+export const TEMPLATE_URL_ELASTIC_ISSUER_ENV_VAR = 'ISSUER';
+export const TEMPLATE_URL_ELASTIC_SUBJECT_ENV_VAR = 'SUBJECT';
+
+export const TEMPLATE_URL_TOKENS = [
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_ISSUER_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_SUBJECT_ENV_VAR,
+] as const;
+export type TemplateUrlToken = (typeof TEMPLATE_URL_TOKENS)[number];
+
+// JWT subject prefix: `deployment:<id>` on ECH, `project:<id>` on serverless.
+export const ELASTIC_RESOURCE_TYPE_DEPLOYMENT = 'deployment';
+export const ELASTIC_RESOURCE_TYPE_PROJECT = 'project';
+export type ElasticResourceType =
+  | typeof ELASTIC_RESOURCE_TYPE_DEPLOYMENT
+  | typeof ELASTIC_RESOURCE_TYPE_PROJECT;
+
+export const ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION = 'production';
+export const ELASTIC_CLOUD_ENVIRONMENT_STAGING = 'staging';
+export const ELASTIC_CLOUD_ENVIRONMENT_QA = 'qa';
+export type ElasticCloudEnvironment =
+  | typeof ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION
+  | typeof ELASTIC_CLOUD_ENVIRONMENT_STAGING
+  | typeof ELASTIC_CLOUD_ENVIRONMENT_QA;
+
+export const WORKLOAD_IDENTITY_ISSUER_DOMAINS: Record<ElasticCloudEnvironment, string> = {
+  [ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION]: 'svc.elastic.cloud',
+  [ELASTIC_CLOUD_ENVIRONMENT_STAGING]: 'svc.staging.elastic.cloud',
+  [ELASTIC_CLOUD_ENVIRONMENT_QA]: 'svc.qa.elastic.cloud',
+};
+
 export const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS =
   'cloud_formation_cloud_connectors_template';
 export const ARM_TEMPLATE_URL_CLOUD_CONNECTORS = 'arm_template_cloud_connectors_url';

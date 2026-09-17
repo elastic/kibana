@@ -27,7 +27,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLocation } from 'react-router-dom';
 import {
@@ -41,6 +40,7 @@ import type {
   CloudSetupForCloudConnector,
   RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
+import type { IngestHubCloudService } from '../../../types';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
 import { getIacRenderIntegrations } from './iac_render_integrations';
@@ -69,7 +69,7 @@ export function ManagedIntegrationsSection({
   isDone,
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
-  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
+  const { services } = useKibana<CoreStart & { cloud?: IngestHubCloudService }>();
   const { setConnectorId, setStaticKeys, authenticateAndDeployStep, awsServicesMap } =
     useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
@@ -120,7 +120,7 @@ export function ManagedIntegrationsSection({
     () => getIacRenderIntegrations(serviceIds, awsServicesMap, serviceVars),
     [serviceIds, awsServicesMap, serviceVars]
   );
-  const cloud = services.cloud as CloudSetupForCloudConnector | undefined;
+  const cloud: CloudSetupForCloudConnector | undefined = services.cloud;
 
   const radioOptions = [
     {

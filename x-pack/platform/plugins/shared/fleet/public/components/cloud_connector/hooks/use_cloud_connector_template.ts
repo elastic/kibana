@@ -27,7 +27,7 @@ import {
 } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
 import type { CloudSetupForCloudConnector } from '../types';
-import { getCloudConnectorRemoteRoleTemplate } from '../utils';
+import { getCloudConnectorRemoteRoleTemplate, isWorkloadIdentityTemplateUrl } from '../utils';
 
 const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
 
@@ -255,7 +255,9 @@ export const useCloudConnectorTemplate = ({
     }
   }, [analytics, integrations, packageName, policyTemplates, staticTemplateUrl, templateSha]);
 
-  if (!isIacProvisionerEnabled) {
+  // The provisioner still renders the legacy trust policy, so Workload Identity templates
+  // keep the static URL.
+  if (!isIacProvisionerEnabled || isWorkloadIdentityTemplateUrl(iacTemplateUrl)) {
     return {
       launchButtonProps: { href: staticTemplateUrl, target: '_blank' },
       isDisabled: !staticTemplateUrl,
