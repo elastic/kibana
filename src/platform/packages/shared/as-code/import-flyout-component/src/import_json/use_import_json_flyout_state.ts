@@ -20,7 +20,7 @@ interface UseImportJsonFlyoutStateParams<SanitizedState> {
   title: string;
   closeFlyout: () => void;
   services: ImportJsonFlyoutServices;
-  serverValidationError: string;
+  serverValidationErrorTitle: string;
   sanitizeImportJson: SanitizeImportJson<SanitizedState>;
   createFromJson: CreateFromJson<SanitizedState>;
   onImportSuccess: (id: string, title: string) => void;
@@ -30,7 +30,7 @@ export const useImportJsonFlyoutState = <SanitizedState>({
   title,
   closeFlyout,
   services,
-  serverValidationError,
+  serverValidationErrorTitle,
   sanitizeImportJson,
   createFromJson,
   onImportSuccess,
@@ -120,7 +120,7 @@ export const useImportJsonFlyoutState = <SanitizedState>({
               error_type: 'SanitizeImportJsonFailure',
             },
           });
-          setServerError(serverValidationError);
+          setServerError(serverValidationErrorTitle);
         }
       } finally {
         if (sanitizeAbortRef.current === abortController) {
@@ -129,7 +129,7 @@ export const useImportJsonFlyoutState = <SanitizedState>({
         }
       }
     },
-    [abortSanitize, sanitizeImportJson, serverValidationError]
+    [abortSanitize, sanitizeImportJson, serverValidationErrorTitle]
   );
 
   const onImport = useCallback(async () => {

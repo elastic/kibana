@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 import {
   EuiBetaBadge,
@@ -23,10 +23,11 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { importJsonFlyoutStrings } from './import_json_strings';
 import { ImportJsonWarningsCallout } from './import_json_warnings_callout';
@@ -38,11 +39,10 @@ export interface ImportJsonFlyoutContentProps<SanitizedState> {
   titleId: string;
   closeFlyout: () => void;
   dataTestSubjPrefix: string;
-  /** Display name of the exporting app in the info callout (e.g. "Dashboard application"). */
-  exportApplication: string;
   services: ImportJsonFlyoutServices;
   isTechnicalPreview?: boolean;
-  serverValidationError: string;
+  serverValidationErrorTitle: string;
+  serverValidationErrorText?: ReactNode;
   /** Override the default generic warnings summary. */
   getWarningsSummary?: (count: number) => string;
   sanitizeImportJson: SanitizeImportJson<SanitizedState>;
@@ -55,10 +55,10 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
   titleId,
   closeFlyout,
   dataTestSubjPrefix,
-  exportApplication,
   services,
   isTechnicalPreview = false,
-  serverValidationError,
+  serverValidationErrorTitle,
+  serverValidationErrorText,
   getWarningsSummary,
   sanitizeImportJson,
   createFromJson,
@@ -83,7 +83,7 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
     title,
     closeFlyout,
     services,
-    serverValidationError,
+    serverValidationErrorTitle,
     sanitizeImportJson,
     createFromJson,
     onImportSuccess,
@@ -109,9 +109,17 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <KbnInfoCallout
-          title={importJsonFlyoutStrings.getInfoCalloutTitle(exportApplication)}
-          text={
+        <EuiText size="s">
+          <p>
+            {importJsonFlyoutStrings.getExportSourceNote()}{' '}
+            <EuiLink
+              href="https://www.elastic.co/docs/explore-analyze/dashboards/sharing#export-dashboards"
+              target="_blank"
+            >
+              {importJsonFlyoutStrings.getLearnMoreLabel()}
+            </EuiLink>
+          </p>
+          <p>
             <FormattedMessage
               id="asCodeImport.importJson.ndjsonNote"
               defaultMessage="If you have an NDJSON file, import it from {link} instead."
@@ -123,8 +131,8 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
                 ),
               }}
             />
-          }
-        />
+          </p>
+        </EuiText>
         <EuiSpacer size="m" />
 
         {serverError && (
@@ -133,7 +141,9 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
               announceOnMount
               title={serverError}
               data-test-subj={`${dataTestSubjPrefix}ServerError`}
-            />
+            >
+              {serverValidationErrorText}
+            </KbnDangerCallout>
             <EuiSpacer size="m" />
           </>
         )}

@@ -58,10 +58,9 @@ const renderFlyout = ({
         titleId="import-json-title"
         closeFlyout={closeFlyout}
         dataTestSubjPrefix="test"
-        exportApplication="Test application"
         services={services}
         isTechnicalPreview
-        serverValidationError="The file could not be imported."
+        serverValidationErrorTitle="The file could not be imported."
         sanitizeImportJson={sanitizeImportJson}
         createFromJson={createFromJson}
         onImportSuccess={onImportSuccess}
@@ -87,7 +86,8 @@ describe('ImportJsonFlyoutContent', () => {
     renderFlyout();
     expect(screen.getByTestId('testFilePicker')).toBeInTheDocument();
     expect(screen.getByTestId('testTechnicalPreviewBadge')).toBeInTheDocument();
-    expect(screen.getByText(/exported from Test application/)).toBeInTheDocument();
+    expect(screen.getByText(/Use a JSON file obtained from/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Learn more' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'the Saved Objects page' })).toHaveAttribute(
       'href',
       '/app/management/kibana/objects'
@@ -190,10 +190,9 @@ describe('ImportJsonFlyoutContent', () => {
           titleId="import-json-title"
           closeFlyout={jest.fn()}
           dataTestSubjPrefix="test"
-          exportApplication="Test application"
           services={createServices()}
           isTechnicalPreview
-          serverValidationError="The file could not be imported."
+          serverValidationErrorTitle="The file could not be imported."
           sanitizeImportJson={sanitizeImportJson}
           createFromJson={jest.fn()}
           onImportSuccess={jest.fn()}

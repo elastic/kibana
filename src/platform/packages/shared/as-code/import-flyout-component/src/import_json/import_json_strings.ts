@@ -43,10 +43,14 @@ export const importJsonFlyoutStrings = {
       defaultMessage:
         'This functionality is experimental and not supported. It may change or be removed at any time.',
     }),
-  getInfoCalloutTitle: (exportApplication: string) =>
-    i18n.translate('asCodeImport.importJson.infoCalloutTitle', {
-      defaultMessage: 'Only JSON files that are exported from {exportApplication} are supported.',
-      values: { exportApplication },
+  getExportSourceNote: () =>
+    i18n.translate('asCodeImport.importJson.exportSourceNote', {
+      defaultMessage:
+        'Use a JSON file obtained from the "Export JSON" option available on any dashboard.',
+    }),
+  getLearnMoreLabel: () =>
+    i18n.translate('asCodeImport.importJson.learnMore', {
+      defaultMessage: 'Learn more',
     }),
   getNdjsonNoteLinkLabel: () =>
     i18n.translate('asCodeImport.importJson.ndjsonNoteLink', {

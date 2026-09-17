@@ -34,10 +34,10 @@ export const ImportDashboardJsonFlyout = ({
       titleId={titleId}
       closeFlyout={closeFlyout}
       dataTestSubjPrefix="importDashboardJson"
-      exportApplication={importDashboardJsonStrings.getExportApplication()}
       services={coreServices}
       isTechnicalPreview
-      serverValidationError={importDashboardJsonStrings.getServerValidationError()}
+      serverValidationErrorTitle={importDashboardJsonStrings.getServerValidationErrorTitle()}
+      serverValidationErrorText={importDashboardJsonStrings.getServerValidationErrorText()}
       getWarningsSummary={importDashboardJsonStrings.getWarningsBody}
       sanitizeImportJson={sanitizeDashboard}
       createFromJson={async (data) => {
