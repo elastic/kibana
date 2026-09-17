@@ -28,7 +28,7 @@ function title(t?: number) {
   return t ?? '-';
 }
 
-interface MonitorStatProps {
+export interface MonitorStatProps {
   dataTestSubj: string;
   statName: string;
   statNo: number | '-';
@@ -38,7 +38,7 @@ interface MonitorStatProps {
   tooltipContent?: string;
 }
 
-const MonitorStat = ({
+export const MonitorStat = ({
   dataTestSubj,
   statName,
   statNo,
@@ -81,10 +81,12 @@ export function OverviewStatus({
   titleAppend,
   hideTitle,
   areStatsClickable = false,
+  children,
 }: {
   titleAppend?: React.ReactNode;
   hideTitle?: boolean;
   areStatsClickable?: boolean;
+  children?: React.ReactNode;
 }) {
   const { statusFilter } = useGetUrlParams();
   const { application } = useKibana().services;
@@ -249,6 +251,14 @@ export function OverviewStatus({
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
+      {children && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
+            {children}
+          </EuiFlexGroup>
+        </>
+      )}
     </EmbeddablePanelWrapper>
   );
 }

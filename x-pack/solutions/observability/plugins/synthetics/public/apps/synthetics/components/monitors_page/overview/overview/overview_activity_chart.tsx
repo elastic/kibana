@@ -5,74 +5,64 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { Position } from '@elastic/charts';
-import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import {
-  SYNTHETICS_STATUS_RULE,
-  SYNTHETICS_TLS_RULE,
-} from '../../../../../../../common/constants/synthetics_alerts';
 import type { ClientPluginsStart } from '../../../../../../plugin';
-import { useGetUrlParams } from '../../../../hooks';
 import { useOverviewRefreshedRange } from '../../common/use_overview_date_range';
 import { AlertsLink } from '../../../common/links/view_alerts';
 import {
   ERRORS_LABEL,
-  ErrorStatesIconTip,
+  ERROR_STATES_TOOLTIP,
 } from '../../../monitor_details/monitor_summary/monitor_errors_count';
+import { useErrorStats } from '../../hooks/use_error_stats';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
+import { useOverviewAlertsCount } from '../../hooks/use_overview_alerts_count';
 import { useOverviewDataViewIndexPatterns } from '../../hooks/use_overview_data_view_index_patterns';
-import { OverviewErrorsCount } from './overview_errors/overview_errors_count';
+import { MonitorStat } from './overview_status';
 
-// The Lens embeddable only ever resolves a single data view, scoped to the
-// first series' dataType (see exploratory_view's embeddable/index.tsx), so an
-// `alerts` layer can't share this chart with the `synthetics` ping/error
-// layers below — it renders as a separate small embeddable instead.
-const AlertsCount = ({ from, to }: { from: string; to: string }) => {
-  const {
-    exploratoryView: { ExploratoryViewEmbeddable },
-  } = useKibana<ClientPluginsStart>().services;
-  const { euiTheme } = useEuiTheme();
-  const { locations } = useGetUrlParams();
-  const alertsFilters = useMonitorFilters({ forAlerts: true });
-  const time = useMemo(() => ({ from, to }), [from, to]);
+// Rendered as extra stats inside the Monitors status panel (see `OverviewStatus`'s
+// `children` slot), so the Errors/Alerts counts sit alongside Up/Down/Pending —
+// plain EuiStat via `MonitorStat`, matching those, rather than a Lens embeddable
+// (which doesn't align visually with the rest of the panel).
+export const OverviewActivityStats = () => {
+  const { stats: errorStats } = useErrorStats();
+  const { count: alertsCount } = useOverviewAlertsCount(useOverviewRefreshedRange());
 
   return (
-    <ExploratoryViewEmbeddable
-      id="overviewActivityAlertsCount"
-      dataTestSubj="overviewActivityAlertsCount"
-      align="left"
-      customHeight="70px"
-      reportType="single-metric"
-      attributes={[
-        {
-          time,
-          reportDefinitions: {
-            'kibana.alert.rule.rule_type_id': [SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE],
-            ...(locations?.length ? { 'observer.geo.name': locations } : {}),
-          },
-          dataType: 'alerts',
-          selectedMetricField: RECORDS_FIELD,
-          name: alertsLabel,
-          filters: [
-            { field: 'kibana.alert.status', values: ['active', 'recovered'] },
-            ...alertsFilters,
-          ],
-          color: euiTheme.colors.vis.euiColorVis6,
-        },
-      ]}
-    />
+    <>
+      <EuiFlexItem grow={false}>
+        <MonitorStat
+          dataTestSubj="overviewActivityErrorStates"
+          statName={ERRORS_LABEL}
+          statNo={errorStats?.errorCount ?? 0}
+          numberColor="danger"
+          isClickable={false}
+          onClickStat={() => {}}
+          tooltipContent={ERROR_STATES_TOOLTIP}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <MonitorStat
+              dataTestSubj="overviewActivityAlertsCount"
+              statName={alertsLabel}
+              statNo={alertsCount}
+              numberColor="danger"
+              isClickable={false}
+              onClickStat={() => {}}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ paddingTop: 4 }}>
+            <AlertsLink />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </>
   );
 };
 
@@ -101,87 +91,63 @@ export const OverviewActivityChart = () => {
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>{headingText}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ErrorStatesIconTip />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AlertsLink />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>{headingText}</h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
-          <OverviewErrorsCount from={from} to={to} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
-          <AlertsCount from={from} to={to} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          {!loading && (
-            <ExploratoryViewEmbeddable
-              id="overviewActivityChart"
-              dataTestSubj="overviewActivityChart"
-              reportType="kpi-over-time"
-              customHeight={ACTIVITY_CHART_HEIGHT}
-              legendIsVisible={true}
-              legendPosition={Position.Bottom}
-              dslFilters={queryFilters}
-              dataTypesIndexPatterns={dataTypesIndexPatterns}
-              attributes={[
-                {
-                  time,
-                  seriesType: 'bar_stacked',
-                  reportDefinitions: monitorTypeReportDefinition,
-                  dataType: 'synthetics',
-                  selectedMetricField: 'summary.up',
-                  operationType: 'sum',
-                  name: upLabel,
-                  color: euiTheme.colors.success,
-                  filters,
-                },
-                {
-                  time,
-                  seriesType: 'bar_stacked',
-                  reportDefinitions: monitorTypeReportDefinition,
-                  dataType: 'synthetics',
-                  selectedMetricField: 'summary.down',
-                  operationType: 'sum',
-                  name: downLabel,
-                  color: euiTheme.colors.danger,
-                  filters,
-                },
-                {
-                  time,
-                  seriesType: 'line',
-                  reportDefinitions: monitorTypeReportDefinition,
-                  dataType: 'synthetics',
-                  selectedMetricField: 'monitor_errors',
-                  operationType: 'unique_count',
-                  name: ERRORS_LABEL,
-                  color: euiTheme.colors.vis.euiColorVis6,
-                  filters,
-                },
-              ]}
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {!loading && (
+        <ExploratoryViewEmbeddable
+          id="overviewActivityChart"
+          dataTestSubj="overviewActivityChart"
+          reportType="kpi-over-time"
+          customHeight={ACTIVITY_CHART_HEIGHT}
+          legendIsVisible={true}
+          legendPosition={Position.Right}
+          dslFilters={queryFilters}
+          dataTypesIndexPatterns={dataTypesIndexPatterns}
+          attributes={[
+            {
+              time,
+              seriesType: 'bar_stacked',
+              reportDefinitions: monitorTypeReportDefinition,
+              dataType: 'synthetics',
+              selectedMetricField: 'summary.up',
+              operationType: 'sum',
+              name: upLabel,
+              color: euiTheme.colors.success,
+              filters,
+            },
+            {
+              time,
+              seriesType: 'bar_stacked',
+              reportDefinitions: monitorTypeReportDefinition,
+              dataType: 'synthetics',
+              selectedMetricField: 'summary.down',
+              operationType: 'sum',
+              name: downLabel,
+              color: euiTheme.colors.danger,
+              filters,
+            },
+            {
+              time,
+              seriesType: 'line',
+              reportDefinitions: monitorTypeReportDefinition,
+              dataType: 'synthetics',
+              selectedMetricField: 'monitor_errors',
+              operationType: 'unique_count',
+              name: ERRORS_LABEL,
+              color: euiTheme.colors.vis.euiColorVis6,
+              filters,
+            },
+          ]}
+        />
+      )}
     </EuiPanel>
   );
 };
 
 const headingText = i18n.translate('xpack.synthetics.overview.activity.headingText', {
-  defaultMessage: 'Checks, errors & alerts',
+  defaultMessage: 'Pings over time',
 });
 
 const upLabel = i18n.translate('xpack.synthetics.overview.activity.up', {
