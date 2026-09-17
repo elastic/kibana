@@ -9,11 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { isDecided } from '../../../common';
-import { PROPOSAL_WITHOUT_ACTION_LABEL, STATUS_BADGE_LABELS } from '../translations';
+import { isAwaitingDecision } from '../../../common';
+import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
 import type {
   ProposalWithMetadata,
   PROPOSAL_ATTACHMENT_TYPE,
+  ProposalDecision,
   ProposalImpact,
   ProposalStatus,
 } from '../../../common';
@@ -30,13 +31,54 @@ const IMPACT_BADGE_COLORS: Record<ProposalImpact, string> = {
   critical: 'danger',
 };
 
-/** Badge color map for decided statuses. */
+/** Translated labels for how far a proposal got. */
+const STATUS_BADGE_LABELS: Record<ProposalStatus, string> = {
+  pending: i18n.translate('xpack.agenticInvestigations.proposals.attachments.statusBadge.pending', {
+    defaultMessage: 'Pending',
+  }),
+  executing: i18n.translate(
+    'xpack.agenticInvestigations.proposals.attachments.statusBadge.executing',
+    { defaultMessage: 'Executing' }
+  ),
+  succeeded: i18n.translate(
+    'xpack.agenticInvestigations.proposals.attachments.statusBadge.succeeded',
+    { defaultMessage: 'Succeeded' }
+  ),
+  failed: i18n.translate('xpack.agenticInvestigations.proposals.attachments.statusBadge.failed', {
+    defaultMessage: 'Failed',
+  }),
+  expired: i18n.translate('xpack.agenticInvestigations.proposals.attachments.statusBadge.expired', {
+    defaultMessage: 'Expired',
+  }),
+  // `no_action` describes the absence of an outcome, so the decision is what
+  // the badge reports instead — see DECISION_BADGE_LABELS.
+  no_action: '',
+};
+
+/** Badge color map for how far a proposal got. */
 const STATUS_BADGE_COLORS: Record<ProposalStatus, string> = {
-  approved: 'success',
   pending: 'default',
   executing: 'accent',
   succeeded: 'success',
   failed: 'danger',
+  expired: 'danger',
+  no_action: 'default',
+};
+
+/** Translated labels for what an analyst concluded. */
+const DECISION_BADGE_LABELS: Record<ProposalDecision, string> = {
+  approved: i18n.translate(
+    'xpack.agenticInvestigations.proposals.attachments.statusBadge.approved',
+    { defaultMessage: 'Approved' }
+  ),
+  dismissed: i18n.translate(
+    'xpack.agenticInvestigations.proposals.attachments.statusBadge.dismissed',
+    { defaultMessage: 'Dismissed' }
+  ),
+};
+
+const DECISION_BADGE_COLORS: Record<ProposalDecision, string> = {
+  approved: 'success',
   dismissed: 'default',
 };
 
@@ -54,8 +96,12 @@ export const createProposalAttachmentDefinition =
       const { data } = attachment;
       const badges: HeaderBadge[] = [];
 
-      // Status badge — suppressed for pending (the card footer shows the actions instead)
-      if (data.expired) {
+      // Status badge — suppressed while awaiting a decision (the card footer
+      // shows the actions instead). `data.expired` is the computed flag for a
+      // deadline that has passed; `status: 'expired'` is the durable
+      // settlement, and the workflow can write it before the deadline when no
+      // decision was reached, so both have to be checked.
+      if (data.expired || data.status === 'expired') {
         badges.push({
           label: i18n.translate(
             'xpack.agenticInvestigations.proposals.attachments.expiredBadgeLabel',
@@ -63,10 +109,18 @@ export const createProposalAttachmentDefinition =
           ),
           color: 'danger',
         });
-      } else if (isDecided(data.status)) {
+      } else if (!isAwaitingDecision(data)) {
+        // Which axis to report depends on whether anything ran: `no_action`
+        // means nothing did, so the analyst's decision is the whole story,
+        // while the execution states describe what an approval went on to do.
+        const decision = data.status === 'no_action' ? data.decision : undefined;
         badges.push({
-          label: STATUS_BADGE_LABELS[data.status],
-          color: STATUS_BADGE_COLORS[data.status],
+          label: decision
+            ? DECISION_BADGE_LABELS[decision]
+            : STATUS_BADGE_LABELS[data.status] ?? data.status,
+          color: decision
+            ? DECISION_BADGE_COLORS[decision]
+            : STATUS_BADGE_COLORS[data.status] ?? 'default',
         });
       }
 

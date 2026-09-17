@@ -7,14 +7,16 @@
 
 import type { RouteDependencies } from '../types';
 import { registerApproveProposalRoute } from './approve_proposal';
-import { registerCreateProposalRoute } from './create_proposal';
 import { registerDismissProposalRoute } from './dismiss_proposal';
 import { registerGetProposalRoute } from './get_proposal';
 import { registerListProposalsRoute } from './list_proposals';
 import { registerProposalStatsRoute } from './proposal_charts_summary';
 
+// No create route: a proposal's decision is written behind its gate, so one
+// without a gate execution could never be decided. The gate workflow's
+// `proposals.createProposal` step is the only way to make one, and it is the
+// only caller that knows the execution id to stamp.
 export const registerRoutes = (deps: RouteDependencies) => {
-  registerCreateProposalRoute(deps);
   registerListProposalsRoute(deps);
   registerGetProposalRoute(deps);
   registerApproveProposalRoute(deps);
