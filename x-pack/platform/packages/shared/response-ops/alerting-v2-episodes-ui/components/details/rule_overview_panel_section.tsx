@@ -29,12 +29,18 @@ export interface AlertEpisodeRuleOverviewPanelSectionProps {
   episodeId: string;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
   getRuleDetailsHref: (ruleId: string) => string;
+  /** Renders the "Rule overview" heading above the panel. Defaults to true. */
+  showTitle?: boolean;
+  /** Renders the rule name and link one step smaller, for narrow hosts like the details flyout. */
+  compressed?: boolean;
 }
 
 export const AlertEpisodeRuleOverviewPanelSection = ({
   episodeId,
   services,
   getRuleDetailsHref,
+  showTitle,
+  compressed,
 }: AlertEpisodeRuleOverviewPanelSectionProps) => {
   const {
     data: episode,
@@ -88,6 +94,8 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     <AlertEpisodeRuleOverviewPanel
       rule={ruleState.rule}
       ruleDetailsHref={getRuleDetailsHref(resolvedRuleId)}
+      showTitle={showTitle}
+      compressed={compressed}
     />
   );
 };

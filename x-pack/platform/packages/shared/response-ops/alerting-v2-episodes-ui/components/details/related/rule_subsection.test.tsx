@@ -121,4 +121,26 @@ describe('RelatedEpisodesRuleSubsection', () => {
     expect(screen.getByTestId('alertingV2RelatedEpisodesRuleEmpty')).toBeInTheDocument();
     expect(screen.getByText('No other related episodes for this rule.')).toBeInTheDocument();
   });
+
+  it.each([
+    ['a heading when not compressed', false, 'H4'],
+    ['bold text when compressed', true, 'STRONG'],
+  ])('renders the subsection label as %s', (_name, compressed, tagName) => {
+    mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesRuleSubsection
+          currentEpisodeId="ep-1"
+          currentGroupHash="gh-1"
+          {...mockRuleProps}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+          compressed={compressed}
+        />
+      </I18nProvider>
+    );
+
+    // Drops to bold text when compressed, to stay under the panel title.
+    expect(screen.getByText('Other groups for this rule').tagName).toBe(tagName);
+  });
 });

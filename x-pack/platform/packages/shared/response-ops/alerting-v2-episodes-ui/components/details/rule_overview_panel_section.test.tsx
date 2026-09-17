@@ -69,6 +69,40 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
       'href',
       `/host-aware/rules/${mockRule.id}`
     );
+    // Heading shows unless the caller opts out, so the full details page keeps it.
+    expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewHeading')).toBeInTheDocument();
+  });
+
+  it('forwards showTitle=false to the panel', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+    });
+    mockHttp.get.mockResolvedValueOnce(mockRule);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+          showTitle={false}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(
+      await screen.findByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsRuleOverviewHeading')
+    ).not.toBeInTheDocument();
   });
 
   it('renders a loading spinner while data is loading', () => {

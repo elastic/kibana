@@ -103,9 +103,16 @@ export function RelatedEpisodesGroupSubsection({
 
   return (
     <div data-test-subj="alertingV2RelatedEpisodesGroupSubsection">
-      <EuiTitle size={compressed ? 'xxs' : 'xs'}>
-        <h4>{i18n.RELATED_SAME_GROUP_TITLE}</h4>
-      </EuiTitle>
+      {/* Bold text when compressed, so it stays under the panel title above. */}
+      {compressed ? (
+        <EuiText size="xs">
+          <strong>{i18n.RELATED_SAME_GROUP_TITLE}</strong>
+        </EuiText>
+      ) : (
+        <EuiTitle size="xs">
+          <h4>{i18n.RELATED_SAME_GROUP_TITLE}</h4>
+        </EuiTitle>
+      )}
       <EuiText
         size={compressed ? 'xs' : 's'}
         color="subdued"

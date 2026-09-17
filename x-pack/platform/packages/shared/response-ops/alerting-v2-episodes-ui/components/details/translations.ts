@@ -58,13 +58,6 @@ export const FLYOUT_TAB_OVERVIEW = i18n.translate(
   }
 );
 
-export const FLYOUT_TAB_RELATED = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.flyout.tab.related',
-  {
-    defaultMessage: 'Related',
-  }
-);
-
 export const FLYOUT_TAB_TIMELINE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.timeline',
   {
@@ -79,10 +72,86 @@ export const FLYOUT_TAB_METADATA = i18n.translate(
   }
 );
 
-export const FLYOUT_TAB_RUNBOOK = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.flyout.tab.runbook',
+export const FLYOUT_ACCORDION_ABOUT = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.accordion.about',
   {
-    defaultMessage: 'Runbook',
+    defaultMessage: 'About',
+  }
+);
+
+export const FLYOUT_ACCORDION_INVESTIGATION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.accordion.investigation',
+  {
+    defaultMessage: 'Investigation',
+  }
+);
+
+export const FLYOUT_ACCORDION_RULE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.accordion.rule',
+  {
+    defaultMessage: 'Rule',
+  }
+);
+
+export const FLYOUT_INFO_BLOCK_ALERT_ID = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertId',
+  {
+    defaultMessage: 'Alert ID',
+  }
+);
+
+export const getFlyoutCopyAlertIdTooltip = (alertId: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.flyout.infoBlock.copyAlertIdTooltip', {
+    defaultMessage: 'Click to copy the full alert ID: {alertId}',
+    values: { alertId },
+  });
+
+export const FLYOUT_ALERT_ID_COPIED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertIdCopied',
+  {
+    defaultMessage: 'Alert ID copied',
+  }
+);
+
+export const FLYOUT_INFO_BLOCK_SEVERITY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.severity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const FLYOUT_INFO_BLOCK_ASSIGNEE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.assignee',
+  {
+    defaultMessage: 'Assignee',
+  }
+);
+
+export const FLYOUT_INFO_BLOCK_DURATION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.duration',
+  {
+    defaultMessage: 'Duration',
+  }
+);
+
+export const FLYOUT_BADGE_FLAPPING = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.badge.flapping',
+  {
+    defaultMessage: 'Flapping',
+  }
+);
+
+export const FLYOUT_BADGE_SNOOZED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.badge.snoozed',
+  {
+    defaultMessage: 'Snoozed',
+  }
+);
+
+export const FLYOUT_BADGE_ACKNOWLEDGED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.badge.acknowledged',
+  {
+    defaultMessage: 'Acknowledged',
   }
 );
 
@@ -173,7 +242,7 @@ export const LIFECYCLE_HEATMAP_UNKNOWN_STATUS_LABEL = i18n.translate(
 export const SEVERITY_HEATMAP_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.severityHeatmap.title',
   {
-    defaultMessage: 'Severity Timeline',
+    defaultMessage: 'Severity timeline',
   }
 );
 
@@ -396,6 +465,24 @@ export const RULE_OVERVIEW_PANEL_SECTION_ERROR_TITLE = i18n.translate(
 );
 
 /** --- Runbook --- */
+export const RUNBOOK_TITLE = i18n.translate('xpack.alertingV2EpisodesUi.details.runbook.title', {
+  defaultMessage: 'Runbook',
+});
+
+export const RUNBOOK_SHOW_FULL_GUIDE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.runbook.showFullGuide',
+  {
+    defaultMessage: 'Show full guide',
+  }
+);
+
+export const RUNBOOK_FULL_GUIDE_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.runbook.fullGuideAriaLabel',
+  {
+    defaultMessage: 'Runbook full guide',
+  }
+);
+
 export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2EpisodesUi.details.runbook.empty', {
   defaultMessage: 'No runbook available for this rule.',
 });

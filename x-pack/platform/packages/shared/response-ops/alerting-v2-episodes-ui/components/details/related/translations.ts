@@ -7,6 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+/** Short form used where the surrounding panel already gives the context. */
+export const RELATED_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.shortTitle',
+  {
+    defaultMessage: 'Related',
+  }
+);
+
 export const RELATED_EPISODES_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.title',
   {
