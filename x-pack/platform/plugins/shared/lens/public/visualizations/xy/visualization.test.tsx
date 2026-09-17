@@ -2747,6 +2747,28 @@ describe('xy_visualization', () => {
             triggerIconType: 'custom',
           },
         ]);
+        expect(config.groups[0].supportsMoreColumns).toBe(true);
+      });
+
+      it('prevents adding annotations when a data layer is not time-based', () => {
+        const state = getStateWithAnnotationLayer();
+        state.layers.splice(1, 0, {
+          layerId: 'second',
+          layerType: layerTypes.DATA,
+          seriesType: 'area',
+          splitAccessors: undefined,
+          xAccessor: 'not-date',
+          accessors: ['c'],
+        });
+        frame.datasourceLayers.second = mockDatasource.publicAPIMock;
+
+        const config = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'annotations',
+        });
+
+        expect(config.groups[0].supportsMoreColumns).toBe(false);
       });
     });
 
