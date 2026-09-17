@@ -188,8 +188,7 @@ describe('IacKeyCheckCallout', () => {
   });
 
   it('offers Update as its only action: no Verify button', () => {
-    // Verify only re-compared the digest Kibana had just stored, so it never verified anything
-    // (https://github.com/elastic/ingest-dev/issues/9415).
+    // Verify only re-compared the digest Kibana had just stored, so it never verified anything.
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}

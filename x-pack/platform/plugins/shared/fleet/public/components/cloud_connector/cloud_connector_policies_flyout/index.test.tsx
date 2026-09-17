@@ -91,7 +91,7 @@ const mockCloud = { isCloudEnabled: true, cloudId: 'cid' };
 
 const VALID_STACK_ARN =
   'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/guid-guid-guid';
-// Blueprint provenance the hook reports with every rendered key.
+// Blueprint details the hook reports with every rendered key.
 const RENDERED_BLUEPRINT = { blueprintId: 'federated-identity', blueprintVersion: '1.0.0' };
 
 describe('CloudConnectorPoliciesFlyout', () => {
@@ -999,7 +999,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     it('(i-no-verify) the upgrade callout offers no Verify button', () => {
       // Verify only re-compared the digest Kibana had just stored; the flyout re-checks on its
-      // own after Update instead (https://github.com/elastic/ingest-dev/issues/9415).
+      // own after Update instead.
       mockUseVerifyIacKey.mockReturnValue({
         data: { matches: false, reason: 'key_mismatch', integrations: [] },
         isFetching: false,
@@ -1792,8 +1792,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
   describe('Launch CloudFormation (no stack ARN on record)', () => {
     // A legacy identity (no iac_deployment_id, often no iac_key) or one whose ARN was never saved
-    // has no stack to update; Launch creates one from the current template
-    // (https://github.com/elastic/ingest-dev/issues/9415).
+    // has no stack to update; Launch creates one from the current template.
     const integrations = [
       { name: 'aws', policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }] },
     ];

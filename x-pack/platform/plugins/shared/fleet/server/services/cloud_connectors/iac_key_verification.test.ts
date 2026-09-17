@@ -586,8 +586,7 @@ describe('verifyCloudConnectorIacKey', () => {
     };
 
     it('writes the status only, never the checked-at stamp, which belongs to the daily task', async () => {
-      // A re-check that stamped the time would make it look as if the task had just run
-      // (https://github.com/elastic/ingest-dev/issues/9415).
+      // A re-check that stamped the time would make it look as if the task had just run.
       soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:same' }));
       mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
 

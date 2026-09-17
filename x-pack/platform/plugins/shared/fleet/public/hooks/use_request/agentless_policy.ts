@@ -34,6 +34,7 @@ import type { RequestError } from './use_request';
 
 export const sendCreateAgentlessPolicy = async (
   body: CreateAgentlessPolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
   { onIacPersistError }: CloudConnectorIacPersistOptions = {}
 ) => {
   const result = await sendRequestForRq<CreateAgentlessPolicyResponse>({
@@ -53,6 +54,7 @@ export const sendCreateAgentlessPolicy = async (
 export const sendUpdateAgentlessPolicy = async (
   policyId: string,
   body: UpdateAgentlessPolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
   { onIacPersistError }: CloudConnectorIacPersistOptions = {}
 ) => {
   const result = await sendRequestForRq<UpdateAgentlessPolicyResponse>({

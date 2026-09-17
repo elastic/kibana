@@ -398,7 +398,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           // same privileges as updating the connector (PUT above), not READ. Consequence: a
           // read-only user gets 403 on the flyout's compare:false read as well; the flyout
           // tolerates that (no integration set → no Redeploy/Launch, the callout still follows the
-          // stored status) (https://github.com/elastic/ingest-dev/issues/9415).
+          // stored status).
           requiredPrivileges: [
             {
               anyRequired: [

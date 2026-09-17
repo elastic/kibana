@@ -174,8 +174,7 @@ export function buildPackageInputs(
  * a template (original + duplicate, or two services aliasing one manifest template) merge into
  * one entry with the union of the input types active across their enabled data streams. Takes
  * deploy-group members and resolves vars per instance exactly like deployGroup, so the template
- * the user launches grants exactly what Deploy creates
- * (https://github.com/elastic/ingest-dev/issues/9415).
+ * the user launches grants exactly what Deploy creates.
  * Sorted by package, template and input so the result is a stable react-query key.
  */
 export function buildIacIntegrations(

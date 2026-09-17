@@ -28,7 +28,7 @@ import {
   useStartServices,
 } from '../../../../hooks';
 import type { RequestError } from '../../../../hooks';
-import { IAC_PROVENANCE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
 import type {
   PackagePolicyConfigRecord,
   UpdatePackagePolicy,
@@ -122,10 +122,9 @@ export function usePackagePolicyWithRelatedData(
   const isAgentlessPolicy = isAgentlessOption || (agentlessUIEnabled && detectedAgentless);
   const yaml = useYaml();
   const { notifications } = useStartServices();
-  // The policy is saved either way; only the identity's template provenance is missing
-  // (https://github.com/elastic/ingest-dev/issues/9415).
+  // The policy is saved either way; only the identity's template details is missing.
   const iacPersistOptions = {
-    onIacPersistError: () => notifications.toasts.addWarning(IAC_PROVENANCE_WRITE_FAILED_TOAST),
+    onIacPersistError: () => notifications.toasts.addWarning(IAC_TEMPLATE_WRITE_FAILED_TOAST),
   };
 
   // Form state

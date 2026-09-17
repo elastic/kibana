@@ -69,7 +69,7 @@ function setupMocks({
   cloud = undefined,
   setConnectorId = jest.fn(),
   setStaticKeys = jest.fn(),
-  setPendingIac = jest.fn(),
+  setPendingIacTemplate = jest.fn(),
   connectorId = undefined,
   authMethod = undefined,
   searchParams = '',
@@ -77,7 +77,7 @@ function setupMocks({
   cloud?: object;
   setConnectorId?: jest.Mock;
   setStaticKeys?: jest.Mock;
-  setPendingIac?: jest.Mock;
+  setPendingIacTemplate?: jest.Mock;
   connectorId?: string;
   authMethod?: 'identity_federation' | 'static_keys';
   searchParams?: string;
@@ -89,7 +89,7 @@ function setupMocks({
   mockUseOnboardingFlow.mockReturnValue({
     setConnectorId,
     setStaticKeys,
-    setPendingIac,
+    setPendingIacTemplate,
     authenticateAndDeployStep: { connectorId, authMethod },
     awsServicesMap: new Map([
       [
@@ -109,12 +109,12 @@ function setupMocks({
     ({
       onReadyChange,
       onConnectorIdChange,
-      onIacProvenanceRendered,
+      onIacTemplateRecorded,
       initialConnectorId: initId,
     }: {
       onReadyChange?: (v: boolean) => void;
       onConnectorIdChange?: (id: string | undefined, name?: string) => void;
-      onIacProvenanceRendered?: (iac: {
+      onIacTemplateRecorded?: (iac: {
         iac_key: string;
         iac_blueprint_id?: string;
         iac_blueprint_version?: string;
@@ -128,14 +128,14 @@ function setupMocks({
         <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
         <button
           onClick={() =>
-            onIacProvenanceRendered?.({
+            onIacTemplateRecorded?.({
               iac_key: 'sha256:new',
               iac_blueprint_id: 'federated-identity',
               iac_blueprint_version: '1.0.0',
             })
           }
         >
-          render-provenance
+          record-template
         </button>
       </div>
     )
@@ -332,20 +332,20 @@ describe('ManagedIntegrationsSection', () => {
     });
   });
 
-  describe('Federated Identity template provenance', () => {
+  describe('Federated Identity template details', () => {
     // The Existing Identity check hands the rendered key here instead of writing the connector;
-    // it is parked on the flow for the post-Deploy write (https://github.com/elastic/ingest-dev/issues/9415).
-    it('parks the rendered provenance on the flow, tagged with the selected connector', () => {
-      const setPendingIac = jest.fn();
-      setupMocks({ setPendingIac, connectorId: 'persisted-connector' });
+    // it is parked on the flow for the post-Deploy write.
+    it('parks the rendered template details on the flow, tagged with the selected connector', () => {
+      const setPendingIacTemplate = jest.fn();
+      setupMocks({ setPendingIacTemplate, connectorId: 'persisted-connector' });
       renderSection({ showIdentityFederation: true });
 
       act(() => {
-        fireEvent.click(screen.getByText('render-provenance'));
+        fireEvent.click(screen.getByText('record-template'));
       });
 
-      expect(setPendingIac).toHaveBeenCalledTimes(1);
-      expect(setPendingIac).toHaveBeenCalledWith({
+      expect(setPendingIacTemplate).toHaveBeenCalledTimes(1);
+      expect(setPendingIacTemplate).toHaveBeenCalledWith({
         connectorId: 'persisted-connector',
         iac_key: 'sha256:new',
         iac_blueprint_id: 'federated-identity',
@@ -354,8 +354,8 @@ describe('ManagedIntegrationsSection', () => {
     });
 
     it('uses the connector id current at render time, not the one from mount', () => {
-      const setPendingIac = jest.fn();
-      setupMocks({ setPendingIac, connectorId: undefined });
+      const setPendingIacTemplate = jest.fn();
+      setupMocks({ setPendingIacTemplate, connectorId: undefined });
       const { rerender } = renderSection({ showIdentityFederation: true });
 
       // The user picks an identity after mount: the flow now carries its id.
@@ -380,24 +380,24 @@ describe('ManagedIntegrationsSection', () => {
       );
 
       act(() => {
-        fireEvent.click(screen.getByText('render-provenance'));
+        fireEvent.click(screen.getByText('record-template'));
       });
 
-      expect(setPendingIac).toHaveBeenCalledWith(
+      expect(setPendingIacTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'picked-later' })
       );
     });
 
     it('parks nothing while no connector is selected', () => {
-      const setPendingIac = jest.fn();
-      setupMocks({ setPendingIac, connectorId: undefined });
+      const setPendingIacTemplate = jest.fn();
+      setupMocks({ setPendingIacTemplate, connectorId: undefined });
       renderSection({ showIdentityFederation: true });
 
       act(() => {
-        fireEvent.click(screen.getByText('render-provenance'));
+        fireEvent.click(screen.getByText('record-template'));
       });
 
-      expect(setPendingIac).not.toHaveBeenCalled();
+      expect(setPendingIacTemplate).not.toHaveBeenCalled();
     });
   });
 

@@ -55,7 +55,7 @@ const { useIacProvisioner: mockUseIacProvisioner } = jest.requireMock('../../../
 
 const STATIC_TEMPLATE_URL = 'https://console.aws.amazon.com/cloudformation/static';
 const VALID_STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc';
-// Provenance the hook owns after a successful live render (key + blueprint), which Create
+// Template details the hook owns after a successful live render (key + blueprint), which Create
 // forwards verbatim as iac_key / iac_blueprint_*.
 const RENDERED_IAC_CONFIRM: CloudConnectorIacState = {
   iac_key: 'sha256:abc',
@@ -445,7 +445,7 @@ describe('AwsIdentityFederationSetup', () => {
       expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeDisabled();
     });
 
-    it('clears the form, the stack ARN and the render provenance on create success and hands the new identity to IacKeyCheck', async () => {
+    it('clears the form, the stack ARN and the rendered template details on create success and hands the new identity to IacKeyCheck', async () => {
       let onSuccess: ((connector: { id: string; name: string }) => void) | undefined;
       mockUseCreateCloudConnector.mockImplementation((cb) => {
         onSuccess = cb as typeof onSuccess;
@@ -453,7 +453,7 @@ describe('AwsIdentityFederationSetup', () => {
           typeof useCreateCloudConnector
         >;
       });
-      // Stateful stub of the hook's confirm-once contract: the provenance stays until the
+      // Stateful stub of the hook's confirm-once contract: the template details stays until the
       // component clears it, after which the hook reports nothing to post.
       let iacConfirm: CloudConnectorIacState | undefined = RENDERED_IAC_CONFIRM;
       const clearIacConfirm = jest.fn(() => {
@@ -486,7 +486,7 @@ describe('AwsIdentityFederationSetup', () => {
       expect(onConnectorIdChange).toHaveBeenLastCalledWith('new-connector', 'Freshly Created');
       expect(clearIacConfirm).toHaveBeenCalledTimes(1);
 
-      // Back on the New tab the component's own fields are blank and the render provenance was
+      // Back on the New tab the component's own fields are blank and the rendered template details was
       // consumed by the first Create: a second Create without a new Launch posts neither the
       // previous key/blueprint nor the cleared stack ARN.
       await user.click(screen.getByRole('tab', { name: 'New Identity' }));
@@ -546,39 +546,39 @@ describe('AwsIdentityFederationSetup', () => {
       expect(props?.onValidityChange).toEqual(expect.any(Function));
     });
 
-    it('lets IacKeyCheck write the rendered key itself when no provenance callback is given', () => {
+    it('lets IacKeyCheck write the rendered key itself when no template-recorded callback is given', () => {
       renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
 
       const props = lastIacKeyCheckProps();
       expect(props).not.toHaveProperty('writeOnRender');
-      expect(props).not.toHaveProperty('onProvenanceRendered');
+      expect(props).not.toHaveProperty('onTemplateRecorded');
     });
 
-    it('turns off the click-time write and forwards the provenance when onIacProvenanceRendered is given', () => {
+    it('turns off the click-time write and forwards the template details when onIacTemplateRecorded is given', () => {
       // The onboarding stores the key after Deploy succeeds, so a launch the user never applies
-      // leaves the connector untouched (https://github.com/elastic/ingest-dev/issues/9415).
-      const onIacProvenanceRendered = jest.fn();
+      // leaves the connector untouched.
+      const onIacTemplateRecorded = jest.fn();
       renderSetup({
         cloud,
         integrations,
         initialConnectorId: 'connector-1',
-        onIacProvenanceRendered,
+        onIacTemplateRecorded,
       });
 
       const props = lastIacKeyCheckProps();
       expect(props?.writeOnRender).toBe(false);
-      expect(props?.onProvenanceRendered).toBe(onIacProvenanceRendered);
+      expect(props?.onTemplateRecorded).toBe(onIacTemplateRecorded);
     });
 
     it('becomes ready once the check reports the launch, while its verdict is still key_mismatch', async () => {
       // IacKeyCheck reports validity, not the raw verdict: after the user launches the update it
       // reports true even though the deployed template has not been re-checked ("let them finish").
-      const onIacProvenanceRendered = jest.fn();
+      const onIacTemplateRecorded = jest.fn();
       renderSetup({
         cloud,
         integrations,
         initialConnectorId: 'connector-1',
-        onIacProvenanceRendered,
+        onIacTemplateRecorded,
       });
       await waitFor(() => expect(onReadyChange).toHaveBeenCalled());
 
@@ -587,9 +587,9 @@ describe('AwsIdentityFederationSetup', () => {
       });
       expect(lastReadyValue(onReadyChange)).toBe(false);
 
-      // The launch: the check hands the provenance to the host and lifts its block.
+      // The launch: the check hands the template details to the host and lifts its block.
       act(() => {
-        lastIacKeyCheckProps()?.onProvenanceRendered?.({
+        lastIacKeyCheckProps()?.onTemplateRecorded?.({
           iac_key: 'sha256:new',
           iac_blueprint_id: 'federated-identity',
           iac_blueprint_version: '1.0.0',
@@ -597,7 +597,7 @@ describe('AwsIdentityFederationSetup', () => {
         lastIacKeyCheckProps()?.onValidityChange?.(true);
       });
 
-      expect(onIacProvenanceRendered).toHaveBeenCalledWith({
+      expect(onIacTemplateRecorded).toHaveBeenCalledWith({
         iac_key: 'sha256:new',
         iac_blueprint_id: 'federated-identity',
         iac_blueprint_version: '1.0.0',
@@ -607,7 +607,7 @@ describe('AwsIdentityFederationSetup', () => {
 
     it('starts not ready while the check is pending and follows the verdicts it reports', async () => {
       // Readiness starts pessimistic exactly when a check will run, so Deploy/Save cannot be
-      // pressed during the verify round-trip (https://github.com/elastic/ingest-dev/issues/9415).
+      // pressed during the verify round-trip.
       renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
       await waitFor(() => expect(onReadyChange).toHaveBeenCalled());
       expect(onReadyChange).not.toHaveBeenCalledWith(true);

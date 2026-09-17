@@ -159,8 +159,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
   // A read of the connector's integration set (compare: false): Update and Redeploy render
   // exactly this set. No IaCP comparison and no status write on open — the daily task is the only
-  // thing that discovers upgrades and stamps the check time; the flyout displays and acts
-  // (https://github.com/elastic/ingest-dev/issues/9415).
+  // thing that discovers upgrades and stamps the check time; the flyout displays and acts.
   const { data: verification } = useVerifyIacKey({
     cloudConnectorId,
     compare: false,
@@ -170,11 +169,11 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const onTemplateRendered = useCallback(
     ({ key, blueprintId, blueprintVersion }: TemplateRendered) => {
       // Runs on the Update / Redeploy / Launch click once the console has opened; Kibana cannot
-      // see the user apply the update in AWS, so the key and its blueprint provenance are stored
+      // see the user apply the update in AWS, so the key and its blueprint details are stored
       // at click time (idempotent when unchanged). One comparing re-check follows: with the new
       // key stored it answers `matches` and the server persists `up_to_date`, and the
       // invalidations re-read the stored status that drives the callout, so it clears itself
-      // without a second click (https://github.com/elastic/ingest-dev/issues/9415).
+      // without a second click.
       // A failed write is surfaced: without the new key the callout would stay until the daily
       // task runs again and the user would not know why; there is nothing to re-check then.
       if (key && cloudConnectorId) {
@@ -194,11 +193,11 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           () => {
             notifications.toasts.addWarning({
               title: i18n.translate(
-                'xpack.fleet.cloudConnector.policiesFlyout.provenanceWriteFailed.title',
+                'xpack.fleet.cloudConnector.policiesFlyout.templateWriteFailed.title',
                 { defaultMessage: 'Template details were not saved on the identity' }
               ),
               text: i18n.translate(
-                'xpack.fleet.cloudConnector.policiesFlyout.provenanceWriteFailed.text',
+                'xpack.fleet.cloudConnector.policiesFlyout.templateWriteFailed.text',
                 {
                   defaultMessage:
                     'Kibana could not record the new template for this identity, so the upgrade callout will stay until the daily check runs again. Try Update again.',
@@ -240,7 +239,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     integrations: verification?.integrations,
     deploymentId: deploymentIdInvalid ? undefined : editedIacDeploymentId || undefined,
     // This identity already has a generated template; sending the user to the static one
-    // would downgrade it (https://github.com/elastic/ingest-dev/issues/9415).
+    // would downgrade it.
     staticTemplateFallback: false,
     onTemplateRendered,
   });
@@ -269,7 +268,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   // Redeploy is a forced render for identities whose stack is current as far as Kibana knows,
   // for when the stack was not deployed or updated when the user was asked to. Offered to
   // keyless connectors too, but not alongside the upgrade callout, whose Update is the action
-  // then (https://github.com/elastic/ingest-dev/issues/9415).
+  // then.
   const showRedeploy =
     showIac && !showUpgradeCallout && hasRenderableIntegrations && hasValidDeploymentId;
   // With no stack ARN on record (legacy identity, or an ARN never saved) there is no stack to

@@ -10,7 +10,7 @@ import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
 import { sendCreateAgentlessPolicy } from '../../../../../../hooks/use_request/agentless_policy';
-import { IAC_PROVENANCE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
 
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -502,8 +502,8 @@ describe('When on the package policy create page', () => {
       });
     });
 
-    test('warns when the policy saved but its cloud connector could not record the template provenance', async () => {
-      // The request helper reports the failed provenance write through the options it is handed;
+    test('warns when the policy saved but its cloud connector could not record the template details', async () => {
+      // The request helper reports the failed template-details write through the options it is handed;
       // the save itself succeeded, so the page must add a warning next to the success toast.
       (sendCreatePackagePolicyForRq as jest.MockedFunction<any>).mockImplementationOnce(
         async (_body: unknown, options?: { onIacPersistError?: (error: Error) => void }) => {
@@ -532,7 +532,7 @@ describe('When on the package policy create page', () => {
       });
 
       expect(useStartServices().notifications.toasts.addWarning).toHaveBeenCalledWith(
-        IAC_PROVENANCE_WRITE_FAILED_TOAST
+        IAC_TEMPLATE_WRITE_FAILED_TOAST
       );
       await waitFor(() => {
         expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();

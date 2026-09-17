@@ -104,7 +104,7 @@ export const checkIacTemplate = async (
     }
     reportIacProvisionerRenderRequested({ flow, integrationCount: integrations.length });
     // The client rejects a body without render/templateSha (IacProvisionerUnavailableError),
-    // so a resolved response always carries the verdict. https://github.com/elastic/ingest-dev/issues/9415
+    // so a resolved response always carries the verdict.
     const { render, templateSha } = await iacProvisionerService.renderTemplate({
       provider,
       workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
@@ -215,8 +215,8 @@ export const toUpgradeStatus = (
  * A re-check of the connector as it stands asks exactly what the daily upgrade task asks, so a
  * definite answer replaces the stored status instead of waiting up to a day for the task. Only
  * the status is written: `iac_upgrade_checked_at` is the daily task's stamp (the only thing that
- * discovers upgrades), and a re-check must not make it look as if the task had just run
- * (https://github.com/elastic/ingest-dev/issues/9415). A failed write is logged and swallowed:
+ * discovers upgrades), and a re-check must not make it look as if the task had just run.
+ * A failed write is logged and swallowed:
  * the caller still gets its answer and the task will retry.
  */
 const persistUpgradeStatus = async (

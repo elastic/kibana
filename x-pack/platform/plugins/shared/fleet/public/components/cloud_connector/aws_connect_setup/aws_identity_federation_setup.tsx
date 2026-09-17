@@ -35,7 +35,7 @@ import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_t
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
-import { IacKeyCheck, type IacRenderedProvenance } from '../components/iac_key_check';
+import { IacKeyCheck, type IacRenderedTemplate } from '../components/iac_key_check';
 import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
 import { StackArnField } from '../components/stack_arn_field';
 import { getCloudConnectorNameError, isStackArnInvalid } from '../utils';
@@ -56,8 +56,8 @@ export interface AwsIdentityFederationSetupProps {
    * Integrations this identity must cover: one entry per package with the policy templates and
    * input types the user enabled. When given, the New Identity tab renders the template live and
    * stores the returned key and stack ARN on the connector, and the Existing Identity tab checks
-   * the selected identity's deployed template against this set
-   * (https://github.com/elastic/ingest-dev/issues/9415). Omit to keep the static-template flow.
+   * the selected identity's deployed template against this set.
+   * Omit to keep the static-template flow.
    * Callers must remount this component when the set changes; it is not re-rendered against a
    * new set.
    */
@@ -66,11 +66,10 @@ export interface AwsIdentityFederationSetupProps {
   onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
   /**
    * Existing Identity only. When given, the stack-update launch does not write the rendered key
-   * to the connector; the provenance is handed here instead, for the host to store once its own
-   * flow succeeds (the onboarding writes it after Deploy). Readiness still lifts on the launch
-   * (https://github.com/elastic/ingest-dev/issues/9415).
+   * to the connector; the template details is handed here instead, for the host to store once its own
+   * flow succeeds (the onboarding writes it after Deploy). Readiness still lifts on the launch.
    */
-  onIacProvenanceRendered?: (iac: IacRenderedProvenance) => void;
+  onIacTemplateRecorded?: (iac: IacRenderedTemplate) => void;
 }
 
 export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProps> = ({
@@ -85,7 +84,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   integrations,
   onReadyChange,
   onConnectorIdChange,
-  onIacProvenanceRendered,
+  onIacTemplateRecorded,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { data: cloudConnectors = [], isLoading: isLoadingConnectors } = useGetCloudConnectors({
@@ -104,8 +103,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // IacKeyCheck reports false while the selected identity's deployed template is out of date,
   // and while its first verdict is pending. Readiness therefore starts pessimistic exactly when
   // a check will run (same condition IacKeyCheck uses), so Deploy cannot be pressed during the
-  // verify round-trip; with no check coming, nothing would ever flip it back to true
-  // (https://github.com/elastic/ingest-dev/issues/9415).
+  // verify round-trip; with no check coming, nothing would ever flip it back to true.
   const willRunIacCheck = isIacProvisionerEnabled && (integrations?.length ?? 0) > 0;
   // Stable identity of the set, for the IacKeyCheck remount key below.
   const integrationsKey = useMemo(() => JSON.stringify(integrations ?? []), [integrations]);
@@ -159,10 +157,10 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     onConnectorIdChange?.(selected?.id, selected?.name);
   }, [selected, isCheckValid, isAwaitingInitialName, onReadyChange, onConnectorIdChange]);
 
-  // `iacConfirm` is the provenance of the last launch (key + blueprint from the render, or nulls
+  // `iacConfirm` is the template details of the last launch (key + blueprint from the render, or nulls
   // after a static-template fallback); Create stores it as iac_key / iac_blueprint_* so the
   // upgrade check can later compare the deployed template against what the identity's
-  // integrations need (https://github.com/elastic/ingest-dev/issues/9415).
+  // integrations need.
   // No stale-render guard here: see the `integrations` prop contract.
   // The hook's `templateAlreadyCurrent` is not consumed: it only fires when a stored digest is
   // sent, and New Identity never has one.
@@ -192,7 +190,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       setRoleArn('');
       setConnectorName('');
       setStackArn('');
-      // The provenance belongs to the identity just created; a second Create without a new
+      // The template details belong to the identity just created; a second Create without a new
       // Launch must not re-post it.
       clearIacConfirm();
     }
@@ -366,8 +364,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 accountType={accountType}
                 iacTemplateUrl={iacTemplateUrl}
                 onValidityChange={setIsCheckValid}
-                {...(onIacProvenanceRendered
-                  ? { writeOnRender: false, onProvenanceRendered: onIacProvenanceRendered }
+                {...(onIacTemplateRecorded
+                  ? { writeOnRender: false, onTemplateRecorded: onIacTemplateRecorded }
                   : {})}
               />
             </>

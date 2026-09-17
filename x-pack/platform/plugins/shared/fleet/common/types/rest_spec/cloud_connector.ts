@@ -83,7 +83,7 @@ export interface VerifyCloudConnectorIacKeyRequest {
   /**
    * Default true. False returns the connector's integration set with outcome `not_checked` and
    * no IaCP comparison, so a surface that only needs the set to render from (the flyout on open)
-   * does not trigger a render or a status write (https://github.com/elastic/ingest-dev/issues/9415).
+   * does not trigger a render or a status write.
    */
   compare?: boolean;
 }

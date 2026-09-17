@@ -39,6 +39,7 @@ import { sendRequest, sendRequestForRq, useRequest } from './use_request';
  */
 export const sendCreatePackagePolicy = async (
   body: CreatePackagePolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
   { onIacPersistError }: CloudConnectorIacPersistOptions = {}
 ) => {
   const response = await sendRequest<CreatePackagePolicyResponse>({
@@ -59,6 +60,7 @@ export const sendCreatePackagePolicy = async (
 
 export const sendCreatePackagePolicyForRq = async (
   body: CreatePackagePolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
   { onIacPersistError }: CloudConnectorIacPersistOptions = {}
 ) => {
   const result = await sendRequestForRq<CreatePackagePolicyResponse>({
@@ -78,6 +80,7 @@ export const sendCreatePackagePolicyForRq = async (
 export const sendUpdatePackagePolicy = async (
   packagePolicyId: string,
   body: UpdatePackagePolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
   { onIacPersistError }: CloudConnectorIacPersistOptions = {}
 ) => {
   const response = await sendRequest<UpdatePackagePolicyResponse>({

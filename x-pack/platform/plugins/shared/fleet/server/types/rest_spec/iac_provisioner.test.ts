@@ -77,7 +77,7 @@ describe('RenderIacTemplateResponseSchema', () => {
 
   it('rejects a response without templateSha, render or blueprint (pre-contract provider)', () => {
     // The contract requires the verdict fields; the client fails such bodies open before they
-    // reach the route. https://github.com/elastic/ingest-dev/issues/9415
+    // reach the route.
     expect(() => RenderIacTemplateResponseSchema.validate(base)).toThrow();
   });
 

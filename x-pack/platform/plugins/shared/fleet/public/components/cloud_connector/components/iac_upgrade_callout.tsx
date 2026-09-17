@@ -24,8 +24,7 @@ export interface IacUpgradeCalloutProps {
  * Upgrade callout shown in the connector flyout when iac_upgrade_status is 'upgrade_available'.
  * One message whether the stored key is missing or mismatched: users are never told an identity
  * "uses the static template". Its only action is Update: the click stores the rendered key and
- * the flyout re-checks on its own, so the callout clears itself
- * (https://github.com/elastic/ingest-dev/issues/9415).
+ * the flyout re-checks on its own, so the callout clears itself.
  */
 export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
   checkedAt,

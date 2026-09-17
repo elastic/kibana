@@ -23,8 +23,7 @@ export interface IacKeyCheckCalloutProps {
   /**
    * The user has launched the stack update for this verdict (`key_mismatch` or `no_key`, both
    * blocking). The callout switches to a "launched" state that tells them to finish in the AWS
-   * console and continue; Update stays available to relaunch
-   * (https://github.com/elastic/ingest-dev/issues/9415).
+   * console and continue; Update stays available to relaunch.
    */
   updateLaunched?: boolean;
 }
@@ -43,7 +42,7 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
 
   // One message whether the stored key is missing (no_key) or mismatched: both mean the deployed
   // template does not cover the selection, and users are never told an identity "uses the static
-  // template" (https://github.com/elastic/ingest-dev/issues/9415).
+  // template".
   const title = updateLaunched ? (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.iacCheck.launchedTitle"

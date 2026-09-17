@@ -195,10 +195,10 @@ describe('OnboardingFlowProvider', () => {
     });
   });
 
-  describe('pendingIac', () => {
-    // Provenance of a stack update the user launched for an existing Federated Identity, held
-    // until Deploy succeeds (https://github.com/elastic/ingest-dev/issues/9415).
-    const pendingIac = {
+  describe('pendingIacTemplate', () => {
+    // Template details of a stack update the user launched for an existing Federated Identity, held
+    // until Deploy succeeds.
+    const pendingIacTemplate = {
       connectorId: 'connector-1',
       iac_key: 'sha256:new',
       iac_blueprint_id: 'federated-identity',
@@ -207,20 +207,22 @@ describe('OnboardingFlowProvider', () => {
 
     it('is undefined by default and is exposed once set', () => {
       const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
-      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+      expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toBeUndefined();
 
       act(() => {
-        result.current.setPendingIac(pendingIac);
+        result.current.setPendingIacTemplate(pendingIacTemplate);
       });
 
-      expect(result.current.authenticateAndDeployStep.pendingIac).toEqual(pendingIac);
+      expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toEqual(
+        pendingIacTemplate
+      );
     });
 
     it('is not written to session storage', () => {
       const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
 
       act(() => {
-        result.current.setPendingIac(pendingIac);
+        result.current.setPendingIacTemplate(pendingIacTemplate);
       });
 
       const persistedWrites = mockUseSessionStorage.mock.results
@@ -237,7 +239,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
       act(() => {
-        result.current.setPendingIac(pendingIac);
+        result.current.setPendingIacTemplate(pendingIacTemplate);
       });
       rerender();
 
@@ -247,7 +249,9 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
 
-      expect(result.current.authenticateAndDeployStep.pendingIac).toEqual(pendingIac);
+      expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toEqual(
+        pendingIacTemplate
+      );
     });
 
     it('is cleared when a different connector is selected', () => {
@@ -258,7 +262,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
       act(() => {
-        result.current.setPendingIac(pendingIac);
+        result.current.setPendingIacTemplate(pendingIacTemplate);
       });
       rerender();
 
@@ -267,7 +271,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
 
-      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+      expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toBeUndefined();
     });
 
     it('is cleared when the connector is deselected', () => {
@@ -278,7 +282,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
       act(() => {
-        result.current.setPendingIac(pendingIac);
+        result.current.setPendingIacTemplate(pendingIacTemplate);
       });
       rerender();
 
@@ -287,7 +291,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
 
-      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+      expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toBeUndefined();
     });
 
     it('is cleared when the selected services change: the template was rendered for the old set', () => {
@@ -299,7 +303,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
       act(() => {
-        result.current.setPendingIac(pendingIac);
+        result.current.setPendingIacTemplate(pendingIacTemplate);
       });
       rerender();
 
@@ -308,14 +312,14 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
 
-      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+      expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toBeUndefined();
     });
 
     it('is cleared when the data format changes, which empties the selection', () => {
       const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
 
       act(() => {
-        result.current.setPendingIac(pendingIac);
+        result.current.setPendingIacTemplate(pendingIacTemplate);
       });
       rerender();
 
@@ -324,7 +328,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
 
-      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+      expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toBeUndefined();
     });
 
     it('is cleared when static keys replace the identity', () => {
@@ -335,7 +339,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
       act(() => {
-        result.current.setPendingIac(pendingIac);
+        result.current.setPendingIacTemplate(pendingIacTemplate);
       });
       rerender();
 
@@ -344,7 +348,7 @@ describe('OnboardingFlowProvider', () => {
       });
       rerender();
 
-      expect(result.current.authenticateAndDeployStep.pendingIac).toBeUndefined();
+      expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toBeUndefined();
     });
   });
 

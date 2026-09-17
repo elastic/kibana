@@ -39,7 +39,7 @@ import {
 import type {
   AwsStaticKeyCredentials,
   CloudSetupForCloudConnector,
-  IacRenderedProvenance,
+  IacRenderedTemplate,
   RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -52,8 +52,7 @@ interface ManagedIntegrationsSectionProps {
   showIdentityFederation: boolean;
   /**
    * Integration set the Federated Identity must cover (built by buildIacIntegrations). Fleet renders
-   * the CloudFormation template for exactly this set and gates readiness on it
-   * (https://github.com/elastic/ingest-dev/issues/9415).
+   * the CloudFormation template for exactly this set and gates readiness on it.
    */
   iacIntegrations: RenderIacTemplateIntegration[];
   onDeploy: () => void;
@@ -72,25 +71,25 @@ export function ManagedIntegrationsSection({
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { setConnectorId, setStaticKeys, setPendingIac, authenticateAndDeployStep } =
+  const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
     useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
-  // The Existing Identity check renders the stack update without writing the key; the provenance
-  // is parked on the flow and written to the connector after Deploy succeeds
-  // (https://github.com/elastic/ingest-dev/issues/9415). The id is read at call time through a
+  // The Existing Identity check renders the stack update without writing the key; the template
+  // details are parked on the flow and written to the connector after Deploy succeeds.
+  // The id is read at call time through a
   // ref so the callback stays stable and always names the identity currently selected.
   const connectorIdRef = useRef(authenticateAndDeployStep.connectorId);
   connectorIdRef.current = authenticateAndDeployStep.connectorId;
-  const handleIacProvenanceRendered = useCallback(
-    (iac: IacRenderedProvenance) => {
+  const handleIacTemplateRecorded = useCallback(
+    (iac: IacRenderedTemplate) => {
       const connectorId = connectorIdRef.current;
       if (!connectorId) {
         return;
       }
-      setPendingIac({ connectorId, ...iac });
+      setPendingIacTemplate({ connectorId, ...iac });
     },
-    [setPendingIac]
+    [setPendingIacTemplate]
   );
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
@@ -276,7 +275,7 @@ export function ManagedIntegrationsSection({
                   integrations={iacIntegrations}
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
-                  onIacProvenanceRendered={handleIacProvenanceRendered}
+                  onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
                 />
               ) : isStaticKeysEditMode ? (

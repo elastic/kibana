@@ -98,7 +98,7 @@ describe('IacUpgradeCallout', () => {
 
   it('offers Update as its only action: no Verify button', () => {
     // Verify only re-compared the digest Kibana had just stored, so it never verified anything;
-    // the flyout re-checks on its own after Update (https://github.com/elastic/ingest-dev/issues/9415).
+    // the flyout re-checks on its own after Update.
     renderComponent();
 
     expect(screen.getAllByRole('button')).toHaveLength(1);

@@ -85,7 +85,7 @@ const defaultProps = {
   integrations,
 };
 
-// Blueprint provenance the hook reports with every rendered key.
+// Blueprint details the hook reports with every rendered key.
 const RENDERED_BLUEPRINT = { blueprintId: 'federated-identity', blueprintVersion: '1.0.0' };
 
 // ---------- shared before/after ----------
@@ -192,8 +192,7 @@ describe('IacKeyCheck', () => {
     });
 
     it('renders the callout on no_key and blocks, like a mismatch', async () => {
-      // A missing key means the deployed template is not known to cover the selection
-      // (https://github.com/elastic/ingest-dev/issues/9415).
+      // A missing key means the deployed template is not known to cover the selection.
       mockVerifyResult({ matches: false, reason: 'no_key', integrations: [] });
       const onValidityChange = jest.fn();
 
@@ -256,7 +255,7 @@ describe('IacKeyCheck', () => {
     it('says nothing while the first check is pending, then reports valid once the template matches', async () => {
       // Neither verdict is backed yet: "valid" would enable Save/Deploy for the round-trip, and
       // "invalid" would hand extension hosts (which only forward a block) a false they cannot
-      // clear (https://github.com/elastic/ingest-dev/issues/9415).
+      // clear.
       pendingFirstCheck();
       const onValidityChange = jest.fn();
 
@@ -372,8 +371,7 @@ describe('IacKeyCheck', () => {
     });
 
     it('offers no Verify button', async () => {
-      // Verify only re-compared the digest Kibana had just stored, so it never verified anything
-      // (https://github.com/elastic/ingest-dev/issues/9415).
+      // Verify only re-compared the digest Kibana had just stored, so it never verified anything.
       mockVerifyResult({ matches: false, reason: 'no_key', integrations: [] });
 
       renderWithIntl(<IacKeyCheck {...defaultProps} />);
@@ -478,7 +476,7 @@ describe('IacKeyCheck', () => {
 
     it('lifts the block once the update is launched, while the verdict is still key_mismatch', async () => {
       // Kibana cannot see the user apply the update in AWS, so the launch is what unblocks
-      // Deploy (https://github.com/elastic/ingest-dev/issues/9415).
+      // Deploy.
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
       const getOnTemplateRendered = captureOnTemplateRendered();
       const onValidityChange = jest.fn();
@@ -618,17 +616,17 @@ describe('IacKeyCheck', () => {
     });
 
     describe('writeOnRender={false}', () => {
-      it('hands the provenance to the host instead of writing the connector', async () => {
+      it('hands the template details to the host instead of writing the connector', async () => {
         mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
         const getOnTemplateRendered = captureOnTemplateRendered();
-        const onProvenanceRendered = jest.fn();
+        const onTemplateRecorded = jest.fn();
         const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
         renderWithIntl(
           <IacKeyCheck
             {...defaultProps}
             writeOnRender={false}
-            onProvenanceRendered={onProvenanceRendered}
+            onTemplateRecorded={onTemplateRecorded}
           />
         );
 
@@ -636,8 +634,8 @@ describe('IacKeyCheck', () => {
           getOnTemplateRendered()?.(rendered);
         });
 
-        expect(onProvenanceRendered).toHaveBeenCalledTimes(1);
-        expect(onProvenanceRendered).toHaveBeenCalledWith({
+        expect(onTemplateRecorded).toHaveBeenCalledTimes(1);
+        expect(onTemplateRecorded).toHaveBeenCalledWith({
           iac_key: 'sha256:new',
           iac_blueprint_id: 'federated-identity',
           iac_blueprint_version: '1.0.0',
@@ -655,7 +653,7 @@ describe('IacKeyCheck', () => {
           <IacKeyCheck
             {...defaultProps}
             writeOnRender={false}
-            onProvenanceRendered={jest.fn()}
+            onTemplateRecorded={jest.fn()}
             onValidityChange={onValidityChange}
           />
         );
@@ -676,11 +674,11 @@ describe('IacKeyCheck', () => {
         const second = jest.fn();
 
         const { rerender } = renderWithIntl(
-          <IacKeyCheck {...defaultProps} writeOnRender={false} onProvenanceRendered={first} />
+          <IacKeyCheck {...defaultProps} writeOnRender={false} onTemplateRecorded={first} />
         );
         rerender(
           withProviders(
-            <IacKeyCheck {...defaultProps} writeOnRender={false} onProvenanceRendered={second} />
+            <IacKeyCheck {...defaultProps} writeOnRender={false} onTemplateRecorded={second} />
           )
         );
 

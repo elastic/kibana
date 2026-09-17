@@ -588,8 +588,7 @@ export interface IacLaunchUrlParams {
 
 /**
  * Per-provider seam for turning a rendered artifact into a console launch URL.
- * Only AWS is implemented: IaCP has no Azure/GCP blueprints yet
- * (https://github.com/elastic/ingest-dev/issues/9415).
+ * Only AWS is implemented: IaCP has no Azure/GCP blueprints yet.
  */
 export const getIacLaunchUrl = ({
   provider,
@@ -604,7 +603,7 @@ export const getIacLaunchUrl = ({
   const region = parseAwsRegionFromArn(deploymentId);
   if (deploymentId && region) {
     // Console deep link. AWS does not document this format; it must be verified manually
-    // against the console before shipping (https://github.com/elastic/ingest-dev/issues/9415).
+    // against the console before shipping.
     return `https://console.aws.amazon.com/cloudformation/home?region=${region}#/stacks/update/template?stackId=${encodeURIComponent(
       deploymentId
     )}&templateURL=${encodedArtifact}`;
@@ -656,7 +655,7 @@ export const getAwsStackConsoleUrl = (deploymentId: string | undefined): string 
     return undefined;
   }
   // Console deep link. AWS does not document this format; it must be verified manually
-  // against the console before shipping (https://github.com/elastic/ingest-dev/issues/9415).
+  // against the console before shipping.
   return `https://console.aws.amazon.com/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${encodeURIComponent(
     deploymentId
   )}`;

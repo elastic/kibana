@@ -39,7 +39,7 @@ export const parseAwsRegionFromArn = (arn: string | undefined): string | undefin
 /**
  * Whether `value` is a CloudFormation stack ARN. Shared by the browser's stack ARN fields and the
  * connector API's `iac_deployment_id` validation, so what the UI accepts is what the server
- * stores (https://github.com/elastic/ingest-dev/issues/9415).
+ * stores.
  */
 export const isCloudFormationStackArn = (value: string | undefined): boolean =>
   value !== undefined && CLOUDFORMATION_STACK_ARN_PATTERN.test(value);

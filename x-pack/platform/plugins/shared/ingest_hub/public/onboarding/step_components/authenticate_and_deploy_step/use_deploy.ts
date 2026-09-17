@@ -51,7 +51,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   const {
     servicesStep,
     authenticateAndDeployStep,
-    setPendingIac,
+    setPendingIacTemplate,
     detectAndReviewStep,
     updateDetectAndReviewStep,
     getLatestFailedInstances,
@@ -60,22 +60,22 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   const { selectedServiceIds, dataFormat } = servicesStep;
 
   // The Existing Identity check renders the stack update without touching the connector; the
-  // template's provenance is written only once every integration it was rendered for is deployed,
-  // so a launch the user abandoned never marks the identity as upgraded
-  // (https://github.com/elastic/ingest-dev/issues/9415). Best-effort: until the write lands the
+  // template's details are written only once every integration it was rendered for is deployed,
+  // so a launch the user abandoned never marks the identity as upgraded.
+  // Best-effort: until the write lands the
   // identity may be reported as needing an update, and the next Deploy retries it — including a
   // Deploy with nothing left to deploy, which is what "deploy again" means once every instance is
   // tracked.
-  const persistPendingProvenance = useCallback(async () => {
-    const { connectorId, pendingIac } = authenticateAndDeployStep;
-    if (!connectorId || !pendingIac || pendingIac.connectorId !== connectorId) {
+  const persistPendingIacTemplate = useCallback(async () => {
+    const { connectorId, pendingIacTemplate } = authenticateAndDeployStep;
+    if (!connectorId || !pendingIacTemplate || pendingIacTemplate.connectorId !== connectorId) {
       return;
     }
     const {
       iac_key: iacKey,
       iac_blueprint_id: blueprintId,
       iac_blueprint_version: version,
-    } = pendingIac;
+    } = pendingIacTemplate;
     try {
       const { error } = await sendUpdateCloudConnector(connectorId, {
         iac_key: iacKey,
@@ -85,15 +85,15 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       if (error) {
         throw error;
       }
-      setPendingIac(undefined);
+      setPendingIacTemplate(undefined);
     } catch {
       services.notifications.toasts.addWarning({
         title: i18n.translate(
-          'xpack.ingestHub.authenticateAndDeployStep.iacProvenanceWriteFailed.title',
+          'xpack.ingestHub.authenticateAndDeployStep.iacTemplateWriteFailed.title',
           { defaultMessage: 'Template details were not saved on the identity' }
         ),
         text: i18n.translate(
-          'xpack.ingestHub.authenticateAndDeployStep.iacProvenanceWriteFailed.text',
+          'xpack.ingestHub.authenticateAndDeployStep.iacTemplateWriteFailed.text',
           {
             defaultMessage:
               'Your integrations were deployed, but Kibana could not record which CloudFormation template this identity uses, so it may be reported as needing an update. Kibana will retry if you deploy again.',
@@ -101,7 +101,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         ),
       });
     }
-  }, [authenticateAndDeployStep, services, setPendingIac]);
+  }, [authenticateAndDeployStep, services, setPendingIacTemplate]);
 
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
@@ -194,9 +194,9 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
         if (targets.length === 0 && Object.keys(newNonAgentlessStatuses).length === 0) {
           onContinue();
-          // Everything is already deployed: the only work left is a provenance write that failed
+          // Everything is already deployed: the only work left is a template-details write that failed
           // last time.
-          await persistPendingProvenance();
+          await persistPendingIacTemplate();
           return;
         }
 
@@ -209,7 +209,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         onContinue();
 
         if (targets.length === 0) {
-          await persistPendingProvenance();
+          await persistPendingIacTemplate();
           return;
         }
       } else {
@@ -305,7 +305,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       }
 
       if (mergedFailed.length === 0) {
-        await persistPendingProvenance();
+        await persistPendingIacTemplate();
       }
 
       setIsDeploying(false);
@@ -339,7 +339,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       dataFormat,
       servicesMap,
       hasEcfServices,
-      persistPendingProvenance,
+      persistPendingIacTemplate,
     ]
   );
 

@@ -72,7 +72,7 @@ export interface TemplateRendered {
   key: string;
   /** The integration set the template was rendered for; lets callers detect a later edit. */
   integrations: RenderIacTemplateIntegration[];
-  /** Blueprint provenance to store alongside the key. */
+  /** Blueprint details to store alongside the key. */
   blueprintId: string;
   blueprintVersion: string;
 }
@@ -112,9 +112,8 @@ export interface UseCloudConnectorTemplateParams {
   staticTemplateFallback?: boolean;
   /**
    * Called once the console has opened on the rendered template (never when a pop-up blocker kept
-   * it closed), with the key IaCP returned for it, its blueprint provenance and the integration
-   * set it was rendered for. Callers that write the connector at click time store all of it
-   * (https://github.com/elastic/ingest-dev/issues/9415).
+   * it closed), with the key IaCP returned for it, its blueprint details and the integration
+   * set it was rendered for. Callers that write the connector at click time store all of it.
    */
   onTemplateRendered?: (rendered: TemplateRendered) => void;
 }
@@ -143,7 +142,7 @@ export interface UseCloudConnectorTemplateResult {
   iacConfirm?: CloudConnectorIacState;
   /**
    * Drops `iacConfirm` once a consumer has stored it, so a later save without a new Launch
-   * cannot re-post the previous render's provenance.
+   * cannot re-post the previous render's template details.
    */
   clearIacConfirm: () => void;
   isIacProvisionerEnabled: boolean;
@@ -279,7 +278,7 @@ export const useCloudConnectorTemplate = ({
         return;
       }
 
-      // Compute the launch URL before recording provenance so iacConfirm and
+      // Compute the launch URL before recording the template details so iacConfirm and
       // onTemplateRendered only reflect renders that actually open the console.
       // artifactUrl embeds signing credentials — never cache it and never write
       // it anywhere other than the URL.
@@ -295,10 +294,9 @@ export const useCloudConnectorTemplate = ({
         return;
       }
 
-      // Navigate first: the provenance is only recorded (and callers only unblock) for a template
+      // Navigate first: the template details is only recorded (and callers only unblock) for a template
       // the user can actually see in the console. A pop-up blocker that ate both tabs must not
-      // leave a digest on the connector for a stack that was never opened
-      // (https://github.com/elastic/ingest-dev/issues/9415).
+      // leave a digest on the connector for a stack that was never opened.
       if (!navigateTo(launchUrl)) {
         setTemplateGenerationError(CONSOLE_OPEN_FAILED_ERROR);
         return;

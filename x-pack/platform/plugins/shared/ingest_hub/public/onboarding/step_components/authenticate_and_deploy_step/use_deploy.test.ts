@@ -150,7 +150,7 @@ import {
   sendUpdateCloudConnector,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { PendingIacProvenance } from '../../onboarding_flow_context';
+import type { PendingIacTemplate } from '../../onboarding_flow_context';
 import { useAwsServicesMap } from '../../use_aws_service_matrix';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useHistory, useParams } from 'react-router-dom';
@@ -697,7 +697,7 @@ function setupMocks({
   selectedServiceIds = ['ec2'],
   connectorId = undefined as string | undefined,
   staticKeys = undefined as { access_key_id: string; secret_access_key: string } | undefined,
-  pendingIac = undefined as PendingIacProvenance | undefined,
+  pendingIacTemplate = undefined as PendingIacTemplate | undefined,
   globalRegion = 'us-east-1',
   pkgVersion = '2.0.0',
   detectAndReviewStep = {} as Record<string, unknown>,
@@ -709,7 +709,7 @@ function setupMocks({
   selectedServiceIds?: string[];
   connectorId?: string;
   staticKeys?: { access_key_id: string; secret_access_key: string };
-  pendingIac?: PendingIacProvenance;
+  pendingIacTemplate?: PendingIacTemplate;
   globalRegion?: string;
   pkgVersion?: string;
   detectAndReviewStep?: Record<string, unknown>;
@@ -725,8 +725,8 @@ function setupMocks({
 
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
-    authenticateAndDeployStep: { connectorId, staticKeys, pendingIac },
-    setPendingIac: jest.fn(),
+    authenticateAndDeployStep: { connectorId, staticKeys, pendingIacTemplate },
+    setPendingIacTemplate: jest.fn(),
     detectAndReviewStep: {
       isDeploying: false,
       serviceStatuses: {},
@@ -1405,25 +1405,25 @@ describe('useDeploy', () => {
     });
   });
 
-  // ─── Federated Identity template provenance (written after Deploy) ─────────
+  // ─── Federated Identity template details (written after Deploy) ─────────
 
-  describe('pending IaC provenance', () => {
+  describe('pending IaC template', () => {
     // The Existing Identity check renders the stack update without writing the connector; the
-    // key lands only once Deploy succeeds (https://github.com/elastic/ingest-dev/issues/9415).
-    const pendingIac: PendingIacProvenance = {
+    // key lands only once Deploy succeeds.
+    const pendingIacTemplate: PendingIacTemplate = {
       connectorId: 'connector-abc',
       iac_key: 'sha256:new',
       iac_blueprint_id: 'federated-identity',
       iac_blueprint_version: '1.0.0',
     };
     const setPendingIacMock = () =>
-      mockUseOnboardingFlow.mock.results[0].value.setPendingIac as jest.Mock;
+      mockUseOnboardingFlow.mock.results[0].value.setPendingIacTemplate as jest.Mock;
     const addWarningMock = () =>
       mockUseKibana.mock.results[0]?.value?.services?.notifications?.toasts
         ?.addWarning as jest.Mock;
 
-    it('writes the key and blueprint to the connector after a fully successful run, then clears the pending provenance', async () => {
-      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIac });
+    it('writes the key and blueprint to the connector after a fully successful run, then clears the pending template details', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 
       await act(async () => {
@@ -1441,7 +1441,7 @@ describe('useDeploy', () => {
     });
 
     it('does not write when any integration failed to deploy', async () => {
-      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIac });
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });
       mockSendCreateAgentlessPolicy.mockRejectedValue(new Error('API error'));
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 
@@ -1460,7 +1460,7 @@ describe('useDeploy', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
         connectorId: 'connector-abc',
-        pendingIac,
+        pendingIacTemplate,
         detectAndReviewStep: {
           serviceStatuses: { ec2: 'error', lambda: 'error' },
           failedInstances: ['ec2', 'lambda'],
@@ -1482,7 +1482,7 @@ describe('useDeploy', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
         connectorId: 'connector-abc',
-        pendingIac,
+        pendingIacTemplate,
         detectAndReviewStep: {
           serviceStatuses: { ec2: 'error' },
           failedInstances: ['ec2'],
@@ -1508,7 +1508,7 @@ describe('useDeploy', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
         connectorId: 'connector-abc',
-        pendingIac,
+        pendingIacTemplate,
         detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
       });
       const onContinue = jest.fn();
@@ -1533,7 +1533,7 @@ describe('useDeploy', () => {
       setupMocks({
         selectedServiceIds: ['ec2', 'cloudtrail'],
         connectorId: 'connector-abc',
-        pendingIac,
+        pendingIacTemplate,
         detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
@@ -1562,7 +1562,7 @@ describe('useDeploy', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
         connectorId: 'connector-other',
-        pendingIac,
+        pendingIacTemplate,
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 
@@ -1578,7 +1578,7 @@ describe('useDeploy', () => {
         selectedServiceIds: ['ec2'],
         connectorId: undefined,
         staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
-        pendingIac,
+        pendingIacTemplate,
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 
@@ -1589,8 +1589,8 @@ describe('useDeploy', () => {
       expect(mockSendUpdateCloudConnector).not.toHaveBeenCalled();
     });
 
-    it('warns and keeps the pending provenance when the connector API answers with an error', async () => {
-      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIac });
+    it('warns and keeps the pending template details when the connector API answers with an error', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });
       mockSendUpdateCloudConnector.mockResolvedValue({
         data: undefined,
         error: new Error('403 Forbidden'),
@@ -1613,8 +1613,8 @@ describe('useDeploy', () => {
       expect(result.current.isDeploying).toBe(false);
     });
 
-    it('warns and keeps the pending provenance when the request throws', async () => {
-      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIac });
+    it('warns and keeps the pending template details when the request throws', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });
       mockSendUpdateCloudConnector.mockRejectedValue(new Error('network down'));
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 

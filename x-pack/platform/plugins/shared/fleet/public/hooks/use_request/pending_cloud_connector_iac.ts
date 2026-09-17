@@ -14,11 +14,19 @@ import { sendUpdateCloudConnector } from './cloud_connector';
 
 const pendingByPolicyName = new Map<string, CloudConnectorIacState>();
 
-/** Options the policy save helpers forward so a caller can surface a failed provenance write. */
+/**
+ * Lets a save flow hear about a failed post-save write of the connector's template details.
+ * When the package-policy wizard creates a Federated Identity, the rendered template's digest and
+ * blueprint are held per policy and written to the connector only after the policy save succeeds
+ * (see persistPendingCloudConnectorIac). The request helpers that perform that write are plain
+ * functions with no access to notifications, so the wizard's save hooks inject this callback to
+ * show a warning toast; the payload is kept and retried on the next save of the same policy.
+ * Callers that do not care (onboarding, tests) omit it.
+ */
 export interface CloudConnectorIacPersistOptions {
   /**
    * Called when the policy saved but its cloud connector could not record the template
-   * provenance; the payload is kept so the next save of the same policy retries.
+   * details; the payload is kept so the next save of the same policy retries.
    */
   onIacPersistError?: (error: Error) => void;
 }
@@ -76,7 +84,7 @@ export const persistPendingCloudConnectorIac = async ({
   }
   // Policy save already succeeded; a failed IAC write must not fail the save.
   // Keep the pending payload so a later save can retry, and tell the caller
-  // so the user learns the identity is missing its template provenance.
+  // so the user learns the identity is missing its template details.
   let failure: Error | undefined;
   try {
     const { error } = await sendUpdateCloudConnector(cloudConnectorId, iac);

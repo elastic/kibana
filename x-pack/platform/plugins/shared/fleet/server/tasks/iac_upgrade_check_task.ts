@@ -33,7 +33,7 @@ const TASK_TYPE = 'fleet:iac_upgrade_check';
 const TASK_TITLE = 'Fleet IaC template upgrade check';
 const TASK_TIMEOUT = '1h';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
-// Placeholder cadence for MVP; the IaCP team may want shorter (https://github.com/elastic/ingest-dev/issues/9415).
+// Placeholder cadence for MVP; the IaCP team may want shorter.
 const TASK_INTERVAL = '24h';
 const CONNECTORS_PER_PAGE = 50;
 export const IAC_UPGRADE_CHECK_TASK = '[IaC Upgrade Check Task]';

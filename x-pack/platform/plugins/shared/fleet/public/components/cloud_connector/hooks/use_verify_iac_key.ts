@@ -20,8 +20,7 @@ export interface UseVerifyIacKeyParams {
   integrations?: RenderIacTemplateIntegration[];
   /**
    * False asks for the integration set only (outcome `not_checked`): no IaCP comparison, no
-   * status write. The flyout uses it on open; the daily task is what discovers upgrades
-   * (https://github.com/elastic/ingest-dev/issues/9415).
+   * status write. The flyout uses it on open; the daily task is what discovers upgrades.
    */
   compare?: boolean;
   enabled: boolean;

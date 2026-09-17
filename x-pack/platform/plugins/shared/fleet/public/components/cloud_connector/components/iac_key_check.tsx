@@ -29,8 +29,8 @@ import { AWS_PROVIDER } from '../constants';
 
 import { IacKeyCheckCallout } from './iac_key_check_callout';
 
-/** Provenance of a rendered template, in the shape the connector API stores it. */
-export interface IacRenderedProvenance {
+/** Template details of a rendered template, in the shape the connector API stores it. */
+export interface IacRenderedTemplate {
   iac_key: string;
   iac_blueprint_id?: string;
   iac_blueprint_version?: string;
@@ -47,12 +47,11 @@ export interface IacKeyCheckProps {
   /**
    * Store the rendered key and blueprint on the connector as soon as the Update click renders
    * (default). Hosts that must not record the template before their own flow succeeds pass
-   * false and take the provenance from `onProvenanceRendered` instead
-   * (https://github.com/elastic/ingest-dev/issues/9415).
+   * false and take the template details from `onTemplateRecorded` instead.
    */
   writeOnRender?: boolean;
-  /** Called with the rendered provenance when `writeOnRender` is false. */
-  onProvenanceRendered?: (iac: IacRenderedProvenance) => void;
+  /** Called with the rendered template details when `writeOnRender` is false. */
+  onTemplateRecorded?: (iac: IacRenderedTemplate) => void;
 }
 
 /**
@@ -68,7 +67,7 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
   iacTemplateUrl,
   onValidityChange,
   writeOnRender = true,
-  onProvenanceRendered,
+  onTemplateRecorded,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { analytics, http } = useStartServices();
@@ -96,8 +95,8 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     launchedFor.connectorId === cloudConnectorId &&
     launchedFor.integrationsKey === integrationsKey;
 
-  const onProvenanceRenderedRef = useRef(onProvenanceRendered);
-  onProvenanceRenderedRef.current = onProvenanceRendered;
+  const onTemplateRecordedRef = useRef(onTemplateRecorded);
+  onTemplateRecordedRef.current = onTemplateRecorded;
 
   const onTemplateRendered = useCallback(
     ({ key, blueprintId, blueprintVersion }: TemplateRendered) => {
@@ -105,16 +104,16 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
       // has opened on it (never when a pop-up blocker kept it closed). Kibana cannot observe the
       // user applying the update in AWS, so the launch itself is what lifts the block ("let them
       // finish"): the callout switches to its launched state and the host is told the identity is
-      // ready (https://github.com/elastic/ingest-dev/issues/9415).
+      // ready.
       if (!key || !cloudConnectorId) {
         return;
       }
       setLaunchedFor({ connectorId: cloudConnectorId, integrationsKey });
 
       if (!writeOnRender) {
-        // The host records the provenance once its own flow succeeds (the onboarding writes it
+        // The host records the template details once its own flow succeeds (the onboarding writes it
         // after Deploy), so a launch the user never applies leaves the connector untouched.
-        onProvenanceRenderedRef.current?.({
+        onTemplateRecordedRef.current?.({
           iac_key: key,
           iac_blueprint_id: blueprintId,
           iac_blueprint_version: blueprintVersion,
@@ -148,13 +147,13 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
       integrations: data?.integrations,
       deploymentId: data?.deploymentId,
       // This identity already has a generated template; sending the user to the static one
-      // would downgrade it (https://github.com/elastic/ingest-dev/issues/9415).
+      // would downgrade it.
       staticTemplateFallback: false,
       onTemplateRendered,
     });
 
   // A missing key blocks like a mismatched one: either way the deployed template is not known to
-  // cover the selection (https://github.com/elastic/ingest-dev/issues/9415).
+  // cover the selection.
   const isBlocking =
     data?.matches === false && (data.reason === 'key_mismatch' || data.reason === 'no_key');
   // The block lasts until the user has launched the update; Kibana cannot see them apply it.
@@ -178,8 +177,7 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     // enable Save/Deploy for the whole verify round-trip; reporting "invalid" would hand hosts
     // that only forward a block (extension forms via cloud_connector_setup.tsx) a false that no
     // verdict backs and that they cannot clear. Hosts that must block during the round-trip start
-    // pessimistic themselves, as AwsIdentityFederationSetup does
-    // (https://github.com/elastic/ingest-dev/issues/9415).
+    // pessimistic themselves, as AwsIdentityFederationSetup does.
     if (isAwaitingFirstVerdict) {
       return;
     }

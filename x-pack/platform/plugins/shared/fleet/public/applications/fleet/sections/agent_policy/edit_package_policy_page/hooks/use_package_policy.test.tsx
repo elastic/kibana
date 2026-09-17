@@ -23,7 +23,7 @@ import {
   sendUpdatePackagePolicy,
   sendUpgradePackagePolicyDryRun,
 } from '../../../../../../hooks';
-import { IAC_PROVENANCE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 import { ExperimentalFeaturesService } from '../../../../../../services';
@@ -1041,8 +1041,8 @@ describe('usePackagePolicy - agentless policies UI kill switch off', () => {
     expect(sendUpdateAgentlessPolicy).not.toHaveBeenCalled();
   });
 
-  it('warns when the policy saved but its cloud connector could not record the template provenance', async () => {
-    // The request helper reports a failed provenance write through the options it is handed;
+  it('warns when the policy saved but its cloud connector could not record the template details', async () => {
+    // The request helper reports a failed template-details write through the options it is handed;
     // the save itself still succeeds, so the hook must surface it as a warning, not an error.
     jest.mocked(sendUpdatePackagePolicy).mockImplementation(async (_id, _body, options) => {
       options?.onIacPersistError?.(new Error('connector update failed'));
@@ -1062,7 +1062,7 @@ describe('usePackagePolicy - agentless policies UI kill switch off', () => {
 
     expect(saveResult.error).toBeNull();
     expect(renderer.startServices.notifications.toasts.addWarning).toHaveBeenCalledWith(
-      IAC_PROVENANCE_WRITE_FAILED_TOAST
+      IAC_TEMPLATE_WRITE_FAILED_TOAST
     );
     expect(renderer.startServices.notifications.toasts.addError).not.toHaveBeenCalled();
   });

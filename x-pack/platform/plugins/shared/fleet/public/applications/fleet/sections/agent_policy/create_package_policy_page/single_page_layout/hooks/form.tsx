@@ -19,7 +19,7 @@ import { toNewAgentlessPolicy } from '../../../../../../../../common/services';
 
 import { sendCreateAgentlessPolicy } from '../../../../../../../hooks/use_request/agentless_policy';
 import type { CloudConnectorIacPersistOptions } from '../../../../../../../hooks/use_request/pending_cloud_connector_iac';
-import { IAC_PROVENANCE_WRITE_FAILED_TOAST } from '../../../../../../../components/cloud_connector/constants';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../../components/cloud_connector/constants';
 
 import {
   AgentlessAgentCreateFleetUnreachableError,
@@ -155,6 +155,7 @@ async function savePackagePolicy(
   pkgPolicy: CreatePackagePolicyRequest['body'],
   varGroups?: RegistryVarGroup[],
   packageInfo?: PackageInfo,
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
   iacPersistOptions?: CloudConnectorIacPersistOptions
 ): Promise<SavedPolicyResult> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
@@ -739,10 +740,9 @@ export function useOnSubmit({
           varGroups,
           packageInfo,
           {
-            // The policy is saved either way; only the identity's template provenance is missing
-            // (https://github.com/elastic/ingest-dev/issues/9415).
+            // The policy is saved either way; only the identity's template details is missing.
             onIacPersistError: () =>
-              notifications.toasts.addWarning(IAC_PROVENANCE_WRITE_FAILED_TOAST),
+              notifications.toasts.addWarning(IAC_TEMPLATE_WRITE_FAILED_TOAST),
           }
         );
 

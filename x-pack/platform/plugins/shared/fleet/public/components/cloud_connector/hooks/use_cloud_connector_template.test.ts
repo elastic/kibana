@@ -339,7 +339,7 @@ describe('useCloudConnectorTemplate', () => {
       });
       expect(result.current.iacConfirm).toBeUndefined();
 
-      // A new launch records its own provenance again.
+      // A new launch records its own template details again.
       await launch(result);
       expect(result.current.iacConfirm).toEqual({
         iac_key: 'sha256:661cb7def1c7101f',
@@ -348,7 +348,7 @@ describe('useCloudConnectorTemplate', () => {
       });
     });
 
-    it('falls back to a direct window.open when the pre-opened tab was blocked, and still records provenance when that opens', async () => {
+    it('falls back to a direct window.open when the pre-opened tab was blocked, and still records the template details when that opens', async () => {
       windowOpenSpy.mockReturnValueOnce(null);
       const onTemplateRendered = jest.fn();
 
@@ -370,8 +370,7 @@ describe('useCloudConnectorTemplate', () => {
 
     it('records nothing and reports an error when the console could not be opened at all', async () => {
       // Both the pre-opened tab and the direct open were eaten by a pop-up blocker: the user never
-      // saw the template, so no digest may be recorded and no caller unblocked
-      // (https://github.com/elastic/ingest-dev/issues/9415).
+      // saw the template, so no digest may be recorded and no caller unblocked.
       windowOpenSpy.mockReturnValue(null);
       const onTemplateRendered = jest.fn();
 
@@ -389,7 +388,7 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.isGeneratingTemplate).toBe(false);
     });
 
-    it('records provenance only after navigating the pre-opened tab', async () => {
+    it('records the template details only after navigating the pre-opened tab', async () => {
       // Captured inside the callback and asserted afterwards: an expect thrown inside it would be
       // swallowed by the hook's catch and the test would pass on a regressed order.
       let hrefWhenNotified: string | undefined;
@@ -558,7 +557,7 @@ describe('useCloudConnectorTemplate', () => {
 
         // The rendered set travels with the key so callers can tell when the enabled
         // inputs were edited after the template was generated; the blueprint lets them
-        // store provenance alongside the key.
+        // store the template details alongside the key.
         expect(onTemplateRendered).toHaveBeenCalledWith({
           key: 'sha256:abc',
           integrations: [{ name: 'cloud_security_posture', policyTemplates: POLICY_TEMPLATES }],
@@ -691,7 +690,7 @@ describe('useCloudConnectorTemplate', () => {
         expect(cloudFormationTab.close).toHaveBeenCalled();
         expect(cloudFormationTab.location.href).toBe('');
         expect(result.current.templateGenerationError).toBeDefined();
-        // Neither provenance nor the callback may reflect a console that never opened.
+        // Neither the template details nor the callback may reflect a console that never opened.
         expect(result.current.iacConfirm).toBeUndefined();
         expect(onTemplateRendered).not.toHaveBeenCalled();
       });

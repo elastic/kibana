@@ -172,7 +172,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   }, [miServiceIds, awsServicesMap]);
 
   // The Federated Identity template must cover exactly the instances Deploy will create as
-  // managed integrations, duplicates included (https://github.com/elastic/ingest-dev/issues/9415).
+  // managed integrations, duplicates included.
   const iacIntegrations = useMemo(
     () =>
       buildIacIntegrations(

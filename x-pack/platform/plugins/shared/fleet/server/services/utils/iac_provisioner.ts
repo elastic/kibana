@@ -61,7 +61,6 @@ const IAC_PROVISIONER_SUPPORTED_PROVIDERS: readonly CloudProvider[] = [AWS_CLOUD
 /**
  * Gates every IaC-key check: IaCP must be enabled AND have blueprints for this provider, so
  * keyless Azure/GCP connectors are never flagged for an upgrade that has no dynamic template.
- * Design: https://github.com/elastic/ingest-dev/issues/9415
  */
 export const isIacProvisionerSupportedFor = async (provider: CloudProvider): Promise<boolean> =>
   IAC_PROVISIONER_SUPPORTED_PROVIDERS.includes(provider) && (await isIacProvisionerEnabled());

@@ -72,15 +72,14 @@ export const CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION = '3.3.0-preview06';
 export const CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.5.0-preview04';
 
 /**
- * Warning toast for a failed template-provenance write after a successful policy save. The
- * pending payload lives in memory only, so the retry happens on a later save in this same tab
- * (https://github.com/elastic/ingest-dev/issues/9415).
+ * Warning toast for a failed template-details write after a successful policy save. The
+ * pending payload lives in memory only, so the retry happens on a later save in this same tab.
  */
-export const IAC_PROVENANCE_WRITE_FAILED_TOAST = {
-  title: i18n.translate('xpack.fleet.cloudConnector.iacProvenanceWriteFailed.title', {
+export const IAC_TEMPLATE_WRITE_FAILED_TOAST = {
+  title: i18n.translate('xpack.fleet.cloudConnector.iacTemplateWriteFailed.title', {
     defaultMessage: 'Template details were not saved on the identity',
   }),
-  text: i18n.translate('xpack.fleet.cloudConnector.iacProvenanceWriteFailed.text', {
+  text: i18n.translate('xpack.fleet.cloudConnector.iacTemplateWriteFailed.text', {
     defaultMessage:
       'The integration was saved, but Kibana could not record which CloudFormation template this identity uses, so it may be reported as needing an update. Kibana will retry if you edit and save this integration again.',
   }),
