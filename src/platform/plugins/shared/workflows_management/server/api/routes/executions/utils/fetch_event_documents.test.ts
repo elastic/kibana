@@ -10,7 +10,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  fetchAlertsByQuery,
   fetchDocumentsByIds,
   fetchDocumentsByQuery,
   MAX_TRIGGER_EVENT_BYTES,
@@ -24,7 +23,6 @@ describe('fetch_event_documents', () => {
     search: jest.Mock;
     closePointInTime: jest.Mock;
   };
-  let mockAlertsClient: { find: jest.Mock };
   let logger: ReturnType<typeof loggerMock.create>;
 
   const asEsClient = () => mockEsClient as unknown as ElasticsearchClient;
@@ -36,7 +34,6 @@ describe('fetch_event_documents', () => {
       search: jest.fn(),
       closePointInTime: jest.fn().mockResolvedValue({ succeeded: true }),
     };
-    mockAlertsClient = { find: jest.fn() };
     logger = loggerMock.create();
   });
 
@@ -129,7 +126,7 @@ describe('fetch_event_documents', () => {
         { _shard_doc: 'asc' },
       ]);
       expect(mockEsClient.search.mock.calls[0][0].allow_partial_search_results).toBe(false);
-      expect(mockEsClient.search.mock.calls[0][0].track_total_hits).toBe(1001);
+      expect(mockEsClient.search.mock.calls[0][0].track_total_hits).toBe(true);
       expect(mockEsClient.search.mock.calls[1][0].track_total_hits).toBe(false);
       expect(mockEsClient.search.mock.calls[0][1]).toEqual({
         maxResponseSize: MAX_TRIGGER_EVENT_BYTES,
@@ -139,7 +136,6 @@ describe('fetch_event_documents', () => {
       expect(mockEsClient.search.mock.calls[1][0].search_after).toEqual(['b']);
       expect(result.hits.map((h) => h._id)).toEqual(['a', 'b', 'c']);
       expect(result.total).toBe(3);
-      expect(result.totalRelation).toBe('eq');
       expect(result.truncated).toBe(false);
       expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
     });
@@ -155,38 +151,10 @@ describe('fetch_event_documents', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
       expect(mockEsClient.search.mock.calls[0][0].size).toBe(2);
-      expect(mockEsClient.search.mock.calls[0][0].track_total_hits).toBe(3);
       expect(result.hits).toHaveLength(2);
       expect(result.total).toBe(10);
-      expect(result.totalRelation).toBe('eq');
       expect(result.truncated).toBe(true);
       expect(mockEsClient.closePointInTime).toHaveBeenCalled();
-    });
-
-    it('preserves an inexact tracked total when reporting truncation', async () => {
-      mockEsClient.search.mockResolvedValueOnce({
-        ...page(['a', 'b'], 3),
-        hits: {
-          ...page(['a', 'b'], 3).hits,
-          total: { value: 3, relation: 'gte' },
-        },
-      });
-
-      const result = await fetchDocumentsByQuery(
-        { query: { match_all: {} }, index: 'idx', maxDocs: 2 },
-        asEsClient(),
-        logger
-      );
-
-      expect(result).toEqual({
-        hits: [
-          { _id: 'a', _index: 'idx', _source: { id: 'a' } },
-          { _id: 'b', _index: 'idx', _source: { id: 'b' } },
-        ],
-        total: 3,
-        totalRelation: 'gte',
-        truncated: true,
-      });
     });
 
     it('counts source-less search hits toward maxDocs', async () => {
@@ -208,12 +176,7 @@ describe('fetch_event_documents', () => {
       );
 
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({
-        hits: [],
-        total: 10,
-        totalRelation: 'eq',
-        truncated: true,
-      });
+      expect(result).toEqual({ hits: [], total: 10, truncated: true });
     });
 
     it('rejects accumulated document sources that exceed maxBytes', async () => {
@@ -266,169 +229,6 @@ describe('fetch_event_documents', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to fetch documents by query')
       );
-    });
-  });
-
-  describe('fetchAlertsByQuery', () => {
-    const ALERTS_INDEX = '.alerts-test-default';
-
-    const page = (
-      ids: Array<string | { id: string; sort: unknown[] }>,
-      total: number,
-      relation: 'eq' | 'gte' = 'eq'
-    ) => ({
-      hits: {
-        total: { value: total, relation },
-        hits: ids.map((entry) => {
-          const { id, sort } =
-            typeof entry === 'string'
-              ? { id: entry, sort: ['2026-01-01T00:00:00.000Z', entry] }
-              : entry;
-          return { _id: id, _index: ALERTS_INDEX, sort };
-        }),
-      },
-    });
-
-    const mgetDocs = (ids: string[]) =>
-      mockEsClient.mget.mockResolvedValue({
-        docs: ids.map((id) => ({ found: true, _id: id, _index: ALERTS_INDEX, _source: { id } })),
-      });
-
-    it('pages through the authorized alerts client with bounded total tracking', async () => {
-      mockAlertsClient.find
-        .mockResolvedValueOnce(page(['a', 'b'], 3))
-        .mockResolvedValueOnce(page(['c'], 3));
-      mgetDocs(['a', 'b', 'c']);
-
-      const result = await fetchAlertsByQuery(
-        {
-          query: { match_all: {} },
-          index: [ALERTS_INDEX, '.alerts-observability-default'],
-          maxDocs: 1000,
-          pageSize: 2,
-        },
-        mockAlertsClient,
-        asEsClient(),
-        logger
-      );
-
-      expect(mockAlertsClient.find.mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: [{ match_all: {} }, { exists: { field: 'kibana.alert.uuid' } }],
-            },
-          },
-          index: '.alerts-test-default,.alerts-observability-default',
-          size: 2,
-          track_total_hits: 1001,
-          search_after: undefined,
-        })
-      );
-      expect(mockAlertsClient.find.mock.calls[1][0]).toEqual(
-        expect.objectContaining({
-          track_total_hits: false,
-          search_after: ['2026-01-01T00:00:00.000Z', 'b'],
-        })
-      );
-      expect(result).toEqual({
-        hits: [
-          { _id: 'a', _index: ALERTS_INDEX, _source: { id: 'a' } },
-          { _id: 'b', _index: ALERTS_INDEX, _source: { id: 'b' } },
-          { _id: 'c', _index: ALERTS_INDEX, _source: { id: 'c' } },
-        ],
-        total: 3,
-        totalRelation: 'eq',
-        truncated: false,
-      });
-    });
-
-    it('pages ids only and hydrates the sources under a bounded mget', async () => {
-      mockAlertsClient.find.mockResolvedValueOnce(page(['a'], 1));
-      mgetDocs(['a']);
-
-      await fetchAlertsByQuery(
-        { query: { match_all: {} }, index: ALERTS_INDEX, maxBytes: 4096 },
-        mockAlertsClient,
-        asEsClient(),
-        logger
-      );
-
-      expect(mockAlertsClient.find.mock.calls[0][0]._source).toBe(false);
-      expect(mockEsClient.mget).toHaveBeenCalledWith(
-        { docs: [{ _id: 'a', _index: ALERTS_INDEX }] },
-        { maxResponseSize: 4096 }
-      );
-    });
-
-    it('preserves the lower-bound relation when the authorized result is capped', async () => {
-      mockAlertsClient.find.mockResolvedValueOnce(page(['a', 'b'], 3, 'gte'));
-      mgetDocs(['a', 'b']);
-
-      const result = await fetchAlertsByQuery(
-        { query: { match_all: {} }, index: ALERTS_INDEX, maxDocs: 2 },
-        mockAlertsClient,
-        asEsClient(),
-        logger
-      );
-
-      expect(mockAlertsClient.find.mock.calls[0][0].track_total_hits).toBe(3);
-      expect(result.total).toBe(3);
-      expect(result.totalRelation).toBe('gte');
-      expect(result.truncated).toBe(true);
-    });
-
-    it('rejects a full page whose sort cursor cannot be resumed', async () => {
-      mockAlertsClient.find.mockResolvedValueOnce(
-        page(
-          [
-            { id: 'a', sort: ['2026-01-01T00:00:00.000Z', 'a'] },
-            { id: 'b', sort: ['2026-01-01T00:00:00.000Z', null] },
-          ],
-          10
-        )
-      );
-
-      await expect(
-        fetchAlertsByQuery(
-          { query: { match_all: {} }, index: ALERTS_INDEX, maxDocs: 10, pageSize: 2 },
-          mockAlertsClient,
-          asEsClient(),
-          logger
-        )
-      ).rejects.toThrow('no usable sort cursor');
-      expect(mockEsClient.mget).not.toHaveBeenCalled();
-    });
-
-    it('rejects hydrated alert sources that exceed maxBytes', async () => {
-      mockAlertsClient.find.mockResolvedValueOnce(page(['a'], 1));
-      mgetDocs(['a']);
-
-      await expect(
-        fetchAlertsByQuery(
-          { query: { match_all: {} }, index: ALERTS_INDEX, maxBytes: 5 },
-          mockAlertsClient,
-          asEsClient(),
-          logger
-        )
-      ).rejects.toThrow('Trigger event document sources exceed the 5 byte limit');
-    });
-
-    it.each([
-      ['times out', { timed_out: true }],
-      ['has failed shards', { _shards: { failed: 1 } }],
-    ])('rejects an incomplete response that %s', async (_description, incompleteResponse) => {
-      mockAlertsClient.find.mockResolvedValueOnce({ ...page(['a'], 1), ...incompleteResponse });
-
-      await expect(
-        fetchAlertsByQuery(
-          { query: { match_all: {} }, index: ALERTS_INDEX },
-          mockAlertsClient,
-          asEsClient(),
-          logger
-        )
-      ).rejects.toThrow('Incomplete alert query response');
-      expect(mockEsClient.mget).not.toHaveBeenCalled();
     });
   });
 });

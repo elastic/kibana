@@ -34,7 +34,7 @@
       "uiActions",
       "licensing"
     ],
-    "optionalPlugins": ["alerting", "ruleRegistry", "serverless", "cloud", "inbox"],
+    "optionalPlugins": ["alerting", "serverless", "cloud", "inbox"],
     "runtimePluginDependencies": ["agentBuilder"],
     "extraPublicDirs": ["common"]
   }
