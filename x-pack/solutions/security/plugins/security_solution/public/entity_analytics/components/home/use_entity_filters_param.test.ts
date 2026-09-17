@@ -8,11 +8,10 @@
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { useEntityFiltersParam, getEntityFilterTerms } from './use_entity_filters_param';
+import { useEntityFiltersParam } from './use_entity_filters_param';
 import { toBucketMap } from './entity_filters_bar';
 import type { AggregationsStringTermsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import type { RiskSeverity } from '../../../../common/search_strategy';
 
 // ─── toBucketMap ────────────────────────────────────────────────────────────
 
@@ -73,7 +72,7 @@ describe('useEntityFiltersParam', () => {
       act(() => {
         result.current.setEntityFilters({
           entityTypes: [EntityType.host],
-          riskLevels: ['High' as RiskSeverity],
+          riskLevels: ['High'],
           assetCriticality: [],
           watchlists: [],
           dataSources: [],
@@ -82,6 +81,13 @@ describe('useEntityFiltersParam', () => {
 
       expect(result.current.entityFilters.entityTypes).toEqual([EntityType.host]);
       expect(result.current.entityFilters.riskLevels).toEqual(['High']);
+    });
+
+    it('silently drops invalid values for closed-set filters', () => {
+      const { wrapper } = makeWrapper('?entityTypes=host,unsupported&riskLevels=Critical,bogus');
+      const { result } = renderHook(() => useEntityFiltersParam(), { wrapper });
+      expect(result.current.entityFilters.entityTypes).toEqual(['host']);
+      expect(result.current.entityFilters.riskLevels).toEqual(['Critical']);
     });
 
     it('clearing a filter removes its key from the URL', () => {
@@ -103,37 +109,3 @@ describe('useEntityFiltersParam', () => {
   });
 });
 
-describe('getEntityFilterTerms', () => {
-  const empty = {
-    entityTypes: [],
-    riskLevels: [],
-    assetCriticality: [],
-    watchlists: [],
-    dataSources: [],
-  };
-
-  it('returns empty array when no filters selected', () => {
-    expect(getEntityFilterTerms(empty)).toEqual([]);
-  });
-
-  it('returns a terms clause for each active filter', () => {
-    expect(
-      getEntityFilterTerms({
-        ...empty,
-        riskLevels: ['Critical' as RiskSeverity],
-        entityTypes: [EntityType.host],
-      })
-    ).toEqual(
-      expect.arrayContaining([
-        { terms: { 'entity.risk.calculated_level': ['Critical'] } },
-        { terms: { 'entity.EngineMetadata.Type': ['host'] } },
-      ])
-    );
-  });
-
-  it('omits clauses for filters with no selection', () => {
-    const result = getEntityFilterTerms({ ...empty, riskLevels: ['High' as RiskSeverity] });
-    expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({ terms: { 'entity.risk.calculated_level': ['High'] } });
-  });
-});

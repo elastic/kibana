@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiFilterGroup,
@@ -17,12 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@kbn/react-query';
-import { lastValueFrom } from 'rxjs';
-import type {
-  AggregationsStringTermsAggregate,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { MultiselectFilter } from '../../../common/components/multiselect_filter';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
@@ -38,124 +33,31 @@ import {
   EntitySourceValue,
   toEntitySourceArray,
 } from '../../../flyout/entity_details/shared/components/entity_source_value';
-import { useKibana } from '../../../common/lib/kibana';
-import { useErrorToast } from '../../../common/hooks/use_error_toast';
-import { getEntitiesAlias, ENTITY_LATEST } from './constants';
-import { getEntityFilterTerms } from './use_entity_filters_param';
 import type { EntityFilters } from './use_entity_filters_param';
-
-export const combineFilters = (
-  parts: Array<QueryDslQueryContainer | null | undefined>
-): QueryDslQueryContainer | undefined => {
-  const active = parts.filter((p): p is QueryDslQueryContainer => p !== null && p !== undefined);
-  if (!active.length) return undefined;
-  return { bool: { filter: active } };
-};
-
-export interface EntityFilterBarCounts {
-  entity_types: Record<string, number>;
-  risk_levels: Record<string, number>;
-  asset_criticality: Record<string, number>;
-  watchlists: Record<string, number>;
-  data_sources: Record<string, number>;
-}
-
-const EMPTY_FILTER_COUNTS: EntityFilterBarCounts = {
-  entity_types: {},
-  risk_levels: {},
-  asset_criticality: {},
-  watchlists: {},
-  data_sources: {},
-};
-
-export const toBucketMap = (
-  raw: AggregationsStringTermsAggregate | undefined
-): Record<string, number> => {
-  const buckets = Array.isArray(raw?.buckets) ? raw.buckets : [];
-  return Object.fromEntries(buckets.map(({ key, doc_count }) => [key, doc_count]));
-};
-
-const getResolvedViewFilter = (view: 'resolved' | 'raw') =>
-  view === 'resolved'
-    ? [
-        {
-          bool: {
-            must_not: {
-              exists: { field: 'entity.relationships.resolution.resolved_to' },
-            },
-          },
-        },
-      ]
-    : [];
-
-const useEntityFilterBarCounts = ({
-  spaceId,
-  view,
-  filter,
-}: {
-  spaceId: string | undefined;
-  view: 'resolved' | 'raw';
-  filter?: QueryDslQueryContainer;
-}): EntityFilterBarCounts => {
-  const { data: dataServices } = useKibana().services;
-
-  const { data, error } = useQuery({
-    queryKey: ['entity-filter-aggregations', spaceId, view, filter],
-    enabled: !!spaceId,
-    queryFn: async (): Promise<EntityFilterBarCounts> => {
-      const index = getEntitiesAlias(ENTITY_LATEST, spaceId as string);
-
-      const { rawResponse } = await lastValueFrom(
-        dataServices.search.search({
-          params: {
-            index: [index],
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { terms: { 'entity.EngineMetadata.Type': getEntityAnalyticsEntityTypes() } },
-                  ...(filter ? [filter] : []),
-                  ...getResolvedViewFilter(view),
-                ],
-              },
-            },
-            aggs: {
-              entity_types: { terms: { field: 'entity.EngineMetadata.Type', size: 10 } },
-              risk_levels: { terms: { field: 'entity.risk.calculated_level', size: 10 } },
-              asset_criticality: { terms: { field: 'asset.criticality', size: 10 } },
-              watchlists: { terms: { field: 'entity.attributes.watchlists', size: 200 } },
-              data_sources: { terms: { field: 'entity.source', size: 200 } },
-            },
-          },
-        })
-      );
-
-      const aggs = rawResponse.aggregations as
-        | Record<string, AggregationsStringTermsAggregate>
-        | undefined;
-
-      return {
-        entity_types: toBucketMap(aggs?.entity_types),
-        risk_levels: toBucketMap(aggs?.risk_levels),
-        asset_criticality: toBucketMap(aggs?.asset_criticality),
-        watchlists: toBucketMap(aggs?.watchlists),
-        data_sources: toBucketMap(aggs?.data_sources),
-      };
-    },
-  });
-
-  useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.home.filterCounts.queryError', {
-      defaultMessage: 'There was an error loading entity filter counts',
-    }),
-    error
-  );
-
-  return data ?? EMPTY_FILTER_COUNTS;
-};
+import { useEntityFilterBarCounts } from './use_entity_filter_bar_counts';
+export { toBucketMap } from './use_entity_filter_bar_counts';
 
 const ENTITY_TYPE_OPTIONS = getEntityAnalyticsEntityTypes();
 const RISK_LEVEL_OPTIONS = SEVERITY_UI_SORT_ORDER.slice().reverse();
+
+const FILTER_TITLES = {
+  entityType: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.entityType', {
+    defaultMessage: 'Entity type',
+  }),
+  riskLevel: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.riskLevel', {
+    defaultMessage: 'Risk level',
+  }),
+  assetCriticality: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.home.filter.assetCriticality',
+    { defaultMessage: 'Asset criticality' }
+  ),
+  dataSource: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.dataSource', {
+    defaultMessage: 'Data source',
+  }),
+  watchlist: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.watchlist', {
+    defaultMessage: 'Watchlist',
+  }),
+};
 
 const FilterEntry = ({ children }: { children: React.ReactNode }) => (
   <EuiFlexItem>
@@ -201,7 +103,6 @@ interface Props {
   spaceId: string | undefined;
   view: 'resolved' | 'raw';
   esFilter?: QueryDslQueryContainer;
-  tileFilter?: QueryDslQueryContainer;
   watchlistNames: Map<string, string>;
 }
 
@@ -211,20 +112,12 @@ export const EntityFiltersBar: React.FC<Props> = ({
   spaceId,
   view,
   esFilter,
-  tileFilter,
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const baseFilter = useMemo(
-    () =>
-      combineFilters([
-        esFilter,
-        tileFilter,
-        ...getEntityFilterTerms(filters),
-      ]),
-    [esFilter, tileFilter, filters]
-  );
-  const filterCounts = useEntityFilterBarCounts({ spaceId, view, filter: baseFilter });
+  const filterCounts = useEntityFilterBarCounts({ spaceId, view, filter: esFilter });
+
+  // static options
   const entityTypeOptions = ENTITY_TYPE_OPTIONS.map((value) => ({
     value,
     count: filterCounts.entity_types[value] ?? 0,
@@ -240,22 +133,32 @@ export const EntityFiltersBar: React.FC<Props> = ({
     count: filterCounts.asset_criticality[value] ?? 0,
   }));
 
-  const dataSourceOptions = Object.entries(filterCounts.data_sources).map(([value, count]) => ({
-    value,
-    count,
-  }));
+  const dataSourceOptions = [
+    ...Object.keys(filterCounts.data_sources).map((value) => ({
+      value,
+      count: filterCounts.data_sources[value],
+    })),
+    ...filters.dataSources
+      .filter((v) => !(v in filterCounts.data_sources))
+      .map((v) => ({ value: v, count: 0 })),
+  ];
 
-  const watchlistOptions = [...watchlistNames.entries()].map(([id, name]) => ({
-    id,
-    name,
-    count: filterCounts.watchlists[id] ?? 0,
-  }));
+  const watchlistOptions = [
+    ...[...watchlistNames.entries()].map(([id, name]) => ({
+      id,
+      name,
+      count: filterCounts.watchlists[id] ?? 0,
+    })),
+    ...filters.watchlists
+      .filter((id) => !watchlistNames.has(id))
+      .map((id) => ({ id, name: id, count: filterCounts.watchlists[id] ?? 0 })),
+  ];
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <FilterEntry>
         <MultiselectFilter<EntityType>
-          title="Entity type"
+          title={FILTER_TITLES.entityType}
           items={entityTypeOptions.map((o) => o.value)}
           selectedItems={filters.entityTypes}
           onSelectionChange={(entityTypes) => onFiltersChange({ ...filters, entityTypes })}
@@ -277,7 +180,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<RiskSeverity>
-          title="Risk level"
+          title={FILTER_TITLES.riskLevel}
           items={riskLevelOptions.map((o) => o.value)}
           selectedItems={filters.riskLevels}
           onSelectionChange={(riskLevels) => onFiltersChange({ ...filters, riskLevels })}
@@ -307,7 +210,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<string>
-          title="Asset criticality"
+          title={FILTER_TITLES.assetCriticality}
           items={criticalityOptions.map((o) => o.value)}
           selectedItems={filters.assetCriticality}
           onSelectionChange={(assetCriticality) =>
@@ -327,7 +230,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<string>
-          title="Data source"
+          title={FILTER_TITLES.dataSource}
           items={dataSourceOptions.map((o) => o.value)}
           selectedItems={filters.dataSources}
           onSelectionChange={(dataSources) => onFiltersChange({ ...filters, dataSources })}
@@ -342,7 +245,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<string>
-          title="Watchlist"
+          title={FILTER_TITLES.watchlist}
           items={watchlistOptions.map((o) => o.id)}
           selectedItems={filters.watchlists}
           onSelectionChange={(watchlists) => onFiltersChange({ ...filters, watchlists })}

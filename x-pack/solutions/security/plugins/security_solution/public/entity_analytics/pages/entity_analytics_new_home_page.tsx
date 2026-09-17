@@ -11,26 +11,23 @@ import { EuiLoadingSpinner, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eu
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
-import { buildEsQuery } from '@kbn/es-query';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { EntitySearchBar } from '../components/home/entity_search_bar';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useSpaceId } from '../../common/hooks/use_space_id';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import {
-  globalFiltersQuerySelector,
-  globalQuerySelector,
-} from '../../common/store/inputs/selectors';
+import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
-import { useWatchlistNames } from '../components/home/use_watchlist_names';
+import { DataViewErrorComponent } from '../../common/components/data_view_error';
+import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
+import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { useTimeRangeParam } from '../components/home/use_time_range_param';
 import {
   useEntityFiltersParam,
   getEntityFilterTerms,
 } from '../components/home/use_entity_filters_param';
-import { EntityFiltersBar, combineFilters } from '../components/home/entity_filters_bar';
+import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
   useEntitiesWithAlertsCount,
   useEntitiesWithAnomaliesCount,
@@ -61,6 +58,14 @@ const MANAGEMENT_LABEL = i18n.translate(
   { defaultMessage: 'Management' }
 );
 
+const combineFilters = (
+  parts: Array<QueryDslQueryContainer | null | undefined>
+): QueryDslQueryContainer | undefined => {
+  const active = parts.filter((p): p is QueryDslQueryContainer => p !== null && p !== undefined);
+  if (!active.length) return undefined;
+  return { bool: { filter: active } };
+};
+
 // ES has a 1 MB HTTP body limit. A terms filter with thousands of entity IDs easily
 // exceeds it once the grouping aggregation is added. Cap at 500 IDs; beyond that,
 // return null so the table shows all entities (tile stays highlighted for context).
@@ -81,22 +86,31 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
 
 export const EntityAnalyticsNewHomePage: React.FC = () => {
   const spaceId = useSpaceId();
-  const { dataView, isLoading: isDataViewLoading } = useEntityStoreDataView(spaceId);
+  const {
+    dataView,
+    isLoading: isDataViewLoading,
+    error: isDataViewError,
+  } = useEntityStoreDataView(spaceId);
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { euiTheme } = useEuiTheme();
 
-  const globalFilters = useDeepEqualSelector(globalFiltersQuerySelector());
-  const globalQuery = useDeepEqualSelector(globalQuerySelector());
+  const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
 
-  const esFilter = useMemo(() => {
-    try {
-      return buildEsQuery(dataView, [globalQuery], globalFilters);
-    } catch {
-      return undefined;
+  const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
+  useErrorToast(
+    i18n.translate('xpack.securitySolution.entityAnalytics.home.watchlists.queryError', {
+      defaultMessage: 'There was an error loading watchlists',
+    }),
+    watchlistsError
+  );
+  const watchlistNames = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const w of watchlistsData ?? []) {
+      if (w.id) map.set(w.id, w.name);
     }
-  }, [dataView, globalQuery, globalFilters]);
+    return map;
+  }, [watchlistsData]);
 
-  const watchlistNames = useWatchlistNames();
   const [timeRange, setTimeRange] = useTimeRangeParam();
   const [viewBy] = useState<'resolved' | 'raw'>('resolved');
   const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
@@ -245,6 +259,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   );
 
   if (isDataViewLoading) return <EuiLoadingSpinner size="l" />;
+  if (isDataViewError) return <DataViewErrorComponent />;
 
   return (
     <>
@@ -253,33 +268,31 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         <div
           css={css`
             padding-block-start: ${euiTheme.size.s};
-            margin-inline-start: -${euiTheme.size.s};
             display: flex;
             flex-direction: column;
             height: 100%;
           `}
         >
-          <EntitySearchBar
-            dataView={dataView}
-            timeRange={timeRange}
-            onTimeRangeChange={setTimeRange}
-          />
-          <EuiSpacer size="s" />
           <div
             css={css`
-              padding-inline-start: ${euiTheme.size.s};
+              margin-inline-start: -${euiTheme.size.s};
             `}
           >
-            <EntityFiltersBar
-              filters={entityFilters}
-              onFiltersChange={setEntityFilters}
-              spaceId={spaceId}
-              view={viewBy}
-              esFilter={esFilter}
-              tileFilter={cardFilter ?? undefined}
-              watchlistNames={watchlistNames}
+            <EntitySearchBar
+              dataView={dataView}
+              timeRange={timeRange}
+              onTimeRangeChange={setTimeRange}
             />
           </div>
+          <EuiSpacer size="s" />
+          <EntityFiltersBar
+            filters={entityFilters}
+            onFiltersChange={setEntityFilters}
+            spaceId={spaceId}
+            view={viewBy}
+            esFilter={esFilter}
+            watchlistNames={watchlistNames}
+          />
           <EuiSpacer size="m" />
           <div
             css={css`
