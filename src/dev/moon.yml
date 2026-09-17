@@ -51,6 +51,8 @@ dependsOn:
   - '@kbn/yarn-lock-validator'
   - '@kbn/sort-package-json'
   - '@kbn/swc-register'
+  - '@kbn/setup-node-env'
+  - '@kbn/moon'
   - '@kbn/rspack-optimizer'
   - '@kbn/dev-validation-runner'
 tags:
