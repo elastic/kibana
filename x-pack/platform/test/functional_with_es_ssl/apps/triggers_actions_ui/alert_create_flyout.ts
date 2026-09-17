@@ -8,8 +8,6 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
-import { apm, timerange } from '@kbn/synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -23,7 +21,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const rules = getService('rules');
   const toasts = getService('toasts');
-  const synthtraceClient = getService('synthtrace');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -48,26 +45,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function createWebhookConnector(connectorName: string) {
-    await pageObjects.common.navigateToApp('triggersActionsConnectors');
-    await testSubjects.click('connectorsTab');
-
-    await testSubjects.click('createConnectorButton');
-    await testSubjects.scrollIntoView('.webhook-card');
-    await testSubjects.click('.webhook-card');
-
-    await testSubjects.setValue('nameInput', connectorName);
-    await testSubjects.setValue('webhookUrlText', 'https://test.test');
-    await testSubjects.setValue('webhookUserInput', 'fakeuser');
-    await testSubjects.setValue('webhookPasswordInput', 'fakepassword');
-
-    await retry.try(async () => {
-      await find.clickByCssSelector(
-        '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
-      );
-    });
-
-    const toastTitle = await toasts.getTitleAndDismiss();
-    expect(toastTitle).to.eql(`Created '${connectorName}'`);
+    await supertest
+      .post('/api/actions/connector')
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: connectorName,
+        connector_type_id: '.webhook',
+        config: {
+          url: 'https://test.test',
+          method: 'post',
+          hasAuth: true,
+        },
+        secrets: {
+          user: 'fakeuser',
+          password: 'fakepassword',
+        },
+      })
+      .expect(200);
   }
 
   async function deleteConnectorByName(connectorName: string) {
@@ -148,9 +142,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/283714
-  describe.skip('create alert', function () {
-    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+  describe('create alert', function () {
     const webhookConnectorName = 'webhook-test';
     let esQueryRuleId: string;
     const generatedRuleNames: string[] = [];
@@ -182,44 +174,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         .expect(200);
 
       esQueryRuleId = createdESRule.id;
-
-      const clients = await synthtraceClient.getClients(['apmEsClient']);
-      apmSynthtraceEsClient = clients.apmEsClient;
-
-      await apmSynthtraceEsClient.initializePackage({ skipInstallation: false });
-
-      const opbeansJava = apm
-        .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
-        .instance('instance');
-
-      const opbeansNode = apm
-        .service({ name: 'opbeans-node', environment: 'production', agentName: 'node' })
-        .instance('instance');
-
-      const events = timerange('now-15m', 'now')
-        .ratePerMinute(1)
-        .generator((timestamp) => {
-          return [
-            opbeansJava
-              .transaction({ transactionName: 'tx-java' })
-              .timestamp(timestamp)
-              .duration(100)
-              .failure()
-              .errors(opbeansJava.error({ message: 'a java error' }).timestamp(timestamp + 50)),
-
-            opbeansNode
-              .transaction({ transactionName: 'tx-node' })
-              .timestamp(timestamp)
-              .duration(100)
-              .success(),
-          ];
-        });
-
-      return Promise.all([apmSynthtraceEsClient.index(events)]);
     });
 
     after(async () => {
-      await apmSynthtraceEsClient?.clean();
       await esArchiver.unload(
         'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );

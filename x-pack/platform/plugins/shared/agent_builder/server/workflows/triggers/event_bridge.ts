@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { ConversationMetadataUpdatedTriggerId } from '../../../common/workflows/triggers';
 import type { ConversationEventBus } from './conversation_event_bus';
+import { toAttachmentTriggerEvent } from './attachment_trigger_mapping';
 
 /**
  * Registers bridge listeners that forward conversation domain events to workflows_extensions.
@@ -35,7 +36,39 @@ export function registerConversationWorkflowEventBridge(
     }
   };
 
+  // Resolves the flag and the client once, then emits each trigger independently so one
+  // failing emit does not drop the rest of the batch.
+  const forwardBatch = async (
+    request: KibanaRequest,
+    triggers: Array<{ triggerId: string; payload: unknown }>
+  ) => {
+    let client: Awaited<ReturnType<typeof workflowsExtensions.getClient>>;
+    try {
+      if (!(await isExperimentalEnabled(request))) {
+        return;
+      }
+      client = await workflowsExtensions.getClient(request);
+    } catch (error) {
+      logger.warn(`Failed to resolve workflows client for attachment triggers: ${error}`);
+      return;
+    }
+    for (const { triggerId, payload } of triggers) {
+      try {
+        await client.emitEvent(triggerId, payload as Record<string, unknown>);
+      } catch (error) {
+        logger.warn(`Failed to emit workflow trigger "${triggerId}": ${error}`);
+      }
+    }
+  };
+
   conversationEventBus.onMetadataPatched((request, payload) => {
     void forward(ConversationMetadataUpdatedTriggerId, payload, request);
+  });
+
+  conversationEventBus.onAttachmentEvents((request, { conversationId, events }) => {
+    void forwardBatch(
+      request,
+      events.map((event) => toAttachmentTriggerEvent(conversationId, event))
+    );
   });
 }
