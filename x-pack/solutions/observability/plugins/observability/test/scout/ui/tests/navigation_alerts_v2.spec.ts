@@ -323,9 +323,11 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
       await nav.openPanelById(ALERTS_PANEL_ID);
 
-      await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.alerts)).toBeVisible({
-        timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-      });
+      await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.alerts)).toBeVisible(
+        {
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        }
+      );
       await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)).toBeVisible({
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
