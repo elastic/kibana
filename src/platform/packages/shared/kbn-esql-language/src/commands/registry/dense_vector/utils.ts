@@ -103,19 +103,23 @@ const getTextAfterCommandKeyword = (
 
 /**
  * Whether the `suffix = "..." ON` modifier can still be typed: it must come first and only
- * once, so only while nothing at all has been typed after the keyword.
+ * once, so only while nothing at all has been typed after the keyword. That also rules out a
+ * target assignment, which cannot exist without a `=` in the text.
  */
 export const canSuggestSuffixModifier = (
   query: string,
   command: ESQLAstDenseVectorCommand,
   cursorPosition: number
-): boolean =>
-  command.targetField === undefined &&
-  getTextAfterCommandKeyword(query, command, cursorPosition).trim() === '';
+): boolean => getTextAfterCommandKeyword(query, command, cursorPosition).trim() === '';
 
-/** A complete `suffix = "..."` clause with nothing typed after it. */
+/**
+ * A complete `suffix = "..."` clause with nothing after it but a part-typed `ON`. The trailing
+ * `o?` keeps the guard alive while the user types the keyword: the parser only fills in
+ * {@link ESQLAstDenseVectorCommand.suffix} once `ON` is whole, so without it the first keystroke
+ * would fall through to the field list.
+ */
 const AWAITING_SUFFIX_ON_REGEX = new RegExp(
-  `^\\s*${DENSE_VECTOR_SUFFIX_KEYWORD}\\s*=\\s*"[^"]*"\\s*$`,
+  `^\\s*${DENSE_VECTOR_SUFFIX_KEYWORD}\\s*=\\s*"[^"]*"\\s*o?$`,
   'i'
 );
 

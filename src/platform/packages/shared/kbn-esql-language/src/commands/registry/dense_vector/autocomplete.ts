@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands, ESQLAstDenseVectorCommand } from '@elastic/esql/types';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstDenseVectorCommand,
+  ESQLAstField,
+} from '@elastic/esql/types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import { Location } from '../types';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
@@ -92,6 +96,36 @@ export async function autocomplete(
 
   const position = getPosition(denseVectorCommand, cursorPosition);
 
+  /**
+   * Both of the command's field lists are suggested the same way. They differ only in whether
+   * the list may be continued with a comma, and whether it may be opened by a `target =`
+   * assignment — the `ON` list allows neither.
+   */
+  const suggestFields = (
+    fieldList: ESQLAstField[],
+    { allowTargetAssignment = false, allowComma = true } = {}
+  ) =>
+    suggestFieldsList(
+      query,
+      command,
+      fieldList,
+      Location.DENSE_VECTOR,
+      callbacks,
+      context,
+      cursorPosition,
+      {
+        // `includePipeAndCommaSuggestions` covers the newline and pipe as well, so when the
+        // comma is dropped those two have to be re-added by hand.
+        afterCompleteSuggestions: allowComma
+          ? [withCompleteItem]
+          : [withCompleteItem, newLineCompleteItem, pipeCompleteItem],
+        includePipeAndCommaSuggestions: allowComma,
+        allowSingleColumnFields: true,
+        disableNewColumnSuggestion: !allowTargetAssignment,
+        preferredExpressionType: ['text', 'keyword'],
+      }
+    );
+
   switch (position) {
     case CaretPosition.FIELD_LIST: {
       // A half-typed `suffix = "..."` clause is indistinguishable from an empty command in the
@@ -100,34 +134,17 @@ export async function autocomplete(
         return [onCompleteItem];
       }
 
-      // `target = field` names one output column, so the list cannot go on — offering a comma
-      // would only lead to `denseVectorMultipleFieldsWithTarget`. The shared option covers the
-      // newline and pipe too, so those are re-added by hand.
-      const namesSingleField = denseVectorCommand.targetField !== undefined;
-
-      const suggestions = await suggestFieldsList(
-        query,
-        command,
-        getFieldListExpressions(denseVectorCommand),
-        Location.DENSE_VECTOR,
-        callbacks,
-        context,
-        cursorPosition,
-        {
-          afterCompleteSuggestions: namesSingleField
-            ? [withCompleteItem, newLineCompleteItem, pipeCompleteItem]
-            : [withCompleteItem],
-          includePipeAndCommaSuggestions: !namesSingleField,
-          allowSingleColumnFields: true,
-          // `col0 = field` names the output column, but only as the first item of the list.
-          disableNewColumnSuggestion: !canSuggestTargetAssignment(
-            query,
-            denseVectorCommand,
-            cursorPosition
-          ),
-          preferredExpressionType: ['text', 'keyword'],
-        }
-      );
+      const suggestions = await suggestFields(getFieldListExpressions(denseVectorCommand), {
+        // `col0 = field` names the output column, but only as the first item of the list.
+        allowTargetAssignment: canSuggestTargetAssignment(
+          query,
+          denseVectorCommand,
+          cursorPosition
+        ),
+        // A named output column covers a single field, so the list cannot go on — a comma could
+        // only lead to `denseVectorMultipleFieldsWithTarget`.
+        allowComma: denseVectorCommand.targetField === undefined,
+      });
 
       // The `suffix = "..." ON` modifier has to come first, so it is only offered up front.
       if (canSuggestSuffixModifier(query, denseVectorCommand, cursorPosition)) {
@@ -138,22 +155,7 @@ export async function autocomplete(
     }
 
     case CaretPosition.SUFFIX_ON_FIELD_LIST: {
-      return suggestFieldsList(
-        query,
-        command,
-        denseVectorCommand.fields ?? [],
-        Location.DENSE_VECTOR,
-        callbacks,
-        context,
-        cursorPosition,
-        {
-          afterCompleteSuggestions: [withCompleteItem],
-          allowSingleColumnFields: true,
-          // The ON list accepts plain column names only.
-          disableNewColumnSuggestion: true,
-          preferredExpressionType: ['text', 'keyword'],
-        }
-      );
+      return suggestFields(denseVectorCommand.fields ?? []);
     }
 
     case CaretPosition.AFTER_WITH_KEYWORD: {

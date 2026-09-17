@@ -85,6 +85,16 @@ describe('DENSE_VECTOR > columnsAfter', () => {
       expect(result[0].type).toBe('dense_vector');
     });
 
+    // The user named this column, so it is user-defined — the same split COMPLETION and RERANK
+    // make. Marking it as a plain field would rank it as one and offer it as an ENRICH match.
+    it('marks a named column as user-defined, unlike a suffixed one', () => {
+      const [named] = columnsAfter(parseCommand('DENSE_VECTOR vec = description'), []);
+      expect(named.userDefined).toBe(true);
+
+      const [suffixed] = columnsAfter(parseCommand('DENSE_VECTOR description'), []);
+      expect(suffixed.userDefined).toBe(false);
+    });
+
     it('replaces an existing column of the same name', () => {
       const previous: ESQLColumnData[] = [{ name: 'vec', type: 'keyword', userDefined: false }];
       const result = columnsAfter(parseCommand('DENSE_VECTOR vec = description'), previous);

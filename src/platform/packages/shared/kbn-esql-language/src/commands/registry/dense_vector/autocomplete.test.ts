@@ -200,6 +200,9 @@ describe('DENSE_VECTOR Autocomplete', () => {
       'from a | dense_vector suffix = "_dense_vector"',
       'from a | dense_vector suffix = "_dense_vector" ',
       'from a | dense_vector SUFFIX = "_dv" ',
+      // The keyword is only recognised once whole, so the guard has to survive its first
+      // keystroke — otherwise the field list appears mid-word.
+      'from a | dense_vector suffix = "_dv" O',
     ])('suggests only ON while the suffix clause awaits it: %s', async (query) => {
       await expectDenseVectorSuggestions(query, [onCompleteItem.text], mockCallbacks);
     });

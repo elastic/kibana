@@ -15,13 +15,22 @@ export const columnsAfter = (
   previousColumns: ESQLColumnData[]
 ): ESQLColumnData[] => {
   const denseVectorCommand = command as ESQLAstDenseVectorCommand;
+  const { targetField } = denseVectorCommand;
 
   // Keyed by name so a generated column replaces a same-named one, which is what ES does when
   // an explicit `target =` or suffix collides with a column already in the pipeline.
   const columnMap = new Map<string, ESQLColumnData>(previousColumns.map((c) => [c.name, c]));
 
   for (const name of getDenseVectorColumnNames(denseVectorCommand)) {
-    columnMap.set(name, { name, type: 'dense_vector' as const, userDefined: false });
+    columnMap.set(name, {
+      name,
+      type: 'dense_vector' as const,
+      // A `target =` column was named by the user, so it is user-defined — same split as
+      // COMPLETION and RERANK. The suffixed columns are derived from a field, like HIGHLIGHT's.
+      ...(targetField !== undefined
+        ? { userDefined: true as const, location: targetField.location }
+        : { userDefined: false as const }),
+    });
   }
 
   return [...columnMap.values()];
