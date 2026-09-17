@@ -26,6 +26,11 @@ export const INFERENCE_MANAGEMENT_APP_ID = 'management';
 
 export const INFERENCE_MANAGEMENT_PATH = '/modelManagement/model_settings';
 
+export const useIsAgentWorkspaceMount = (): boolean => {
+  const { services } = useKibana();
+  return services.appParams?.isAgentWorkspaceMount === true;
+};
+
 export const useIsOnManagementLlmConnectorsPage = (): boolean => {
   const {
     services: { application },

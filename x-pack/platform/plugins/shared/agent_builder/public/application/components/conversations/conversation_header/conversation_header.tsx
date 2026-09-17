@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { ConversationRightActions } from './conversation_actions_right';
 import { ConversationTitle } from './conversation_title';
 import { useConversationReadOnly } from '../../../hooks/use_conversation';
+import { useSidebarPopoverContext } from '../../layout/unified_sidebar/sidebar_popover_context';
+import { SidebarPopoverTrigger } from '../../layout/unified_sidebar/sidebar_popover_trigger';
 
 const titleSlotStyles = css`
   min-width: 0;
@@ -45,6 +47,7 @@ interface ConversationHeaderProps {
 }
 export const ConversationHeader = ({ ariaLabelledBy }: ConversationHeaderProps) => {
   const { isReadOnly } = useConversationReadOnly();
+  const sidebarPopoverContext = useSidebarPopoverContext();
 
   return (
     <EuiFlexGroup
@@ -55,6 +58,11 @@ export const ConversationHeader = ({ ariaLabelledBy }: ConversationHeaderProps) 
     >
       <EuiFlexItem grow={true} css={titleSlotStyles}>
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          {sidebarPopoverContext ? (
+            <EuiFlexItem grow={false}>
+              <SidebarPopoverTrigger onToggleCondensed={sidebarPopoverContext.onToggleCondensed} />
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false} css={titleSlotStyles}>
             <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
           </EuiFlexItem>
