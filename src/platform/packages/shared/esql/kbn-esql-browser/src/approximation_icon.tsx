@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 const approximationTooltip = i18n.translate('esqlBrowser.approximationAppliedTooltip', {
   defaultMessage:
-    'shows approximate results because fast mode is enabled or the query enables approximation.',
+    'Shows approximate results because fast mode is enabled or the query enables approximation.',
 });
 
 export const ApproximationIcon: React.FC<{
