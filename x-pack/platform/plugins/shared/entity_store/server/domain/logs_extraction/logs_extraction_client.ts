@@ -173,10 +173,7 @@ export class LogsExtractionClient {
     const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
     const status = engineDescriptor[this.descriptorFields.status];
     if (status !== ENGINE_STATUS.STARTED) {
-      if (
-        this.extractionMode === EXTRACTION_MODE.nonPriority &&
-        status === ENGINE_STATUS.STOPPED
-      ) {
+      if (this.extractionMode === EXTRACTION_MODE.nonPriority && status === ENGINE_STATUS.STOPPED) {
         throw new NonPriorityExtractionDisabledError();
       }
       throw new EntityStoreNotRunningError();
