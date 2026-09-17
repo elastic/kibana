@@ -11285,7 +11285,7 @@ The legacy `optimize.*` settings have been removed. If your configuration uses t
 For more information, refer to {kibana-pull}113296[#113296].
 
 *Impact* +
-To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. For more details, refer to {kibana-pull}73154[#73154].
+To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `pnpm start`. For more details, refer to {kibana-pull}73154[#73154].
 ====
 
 [discrete]

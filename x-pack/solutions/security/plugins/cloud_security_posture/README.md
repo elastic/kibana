@@ -95,7 +95,7 @@ node scripts/type_check.js --project=x-pack/solutions/security/plugins/cloud_sec
 Run **ESLint**:
 
 ```bash
-yarn lint:es x-pack/solutions/security/plugins/cloud_security_posture
+pnpm lint:es x-pack/solutions/security/plugins/cloud_security_posture
 ```
 
 Run **i18n check**:
@@ -112,7 +112,7 @@ node scripts/i18n_check.js
 Run [**Unit Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing):
 
 ```bash
-yarn test:jest --config x-pack/solutions/security/plugins/cloud_security_posture/jest.config.js
+pnpm test:jest --config x-pack/solutions/security/plugins/cloud_security_posture/jest.config.js
 ```
 
 > **Note**
@@ -122,17 +122,17 @@ yarn test:jest --config x-pack/solutions/security/plugins/cloud_security_posture
 Run [**Integration Tests**](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#):
 
 ```bash
-yarn test:ftr --config x-pack/solutions/security/test/api_integration/config.ts
+pnpm test:ftr --config x-pack/solutions/security/test/api_integration/config.ts
 ```
 
 Run [**End-to-End Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_running_functional_tests):
 
 ```bash
-yarn test:ftr --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
-yarn test:ftr --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
-yarn test:ftr --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
-yarn test:ftr --config x-pack/solutions/security/test/serverless/api_integration/configs/config.ts --include-tag=cloud_security_posture
-yarn test:ftr --config x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.basic.ts
+pnpm test:ftr --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
+pnpm test:ftr --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
+pnpm test:ftr --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
+pnpm test:ftr --config x-pack/solutions/security/test/serverless/api_integration/configs/config.ts --include-tag=cloud_security_posture
+pnpm test:ftr --config x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.basic.ts
 ```
 
 Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/test/security_solution_cypress/cypress):
@@ -140,10 +140,10 @@ Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x
 >
 > Run this from security_solution_cypress folder
 ```bash
-yarn cypress:open:serverless
-yarn cypress:open:ess
-yarn cypress:cloud_security_posture:run:serverless
-yarn cypress:cloud_security_posture:run:ess
+pnpm cypress:open:serverless
+pnpm cypress:open:ess
+pnpm cypress:cloud_security_posture:run:serverless
+pnpm cypress:cloud_security_posture:run:ess
 ```
 
 #### Run **FTR tests (integration or e2e) for development**
@@ -154,39 +154,39 @@ For example,
 
 run ESS (stateful) api integration tests:
 ```bash
-yarn test:ftr:server --config x-pack/solutions/security/test/api_integration/config.ts
-yarn test:ftr:runner --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
+pnpm test:ftr:server --config x-pack/solutions/security/test/api_integration/config.ts
+pnpm test:ftr:runner --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
 ```
 
 run ESS (stateful) telemetry integration tests:
 ```bash
-yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
-yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
+pnpm test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
+pnpm test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
 ```
 
 run ESS (stateful) e2e tests:
 ```bash
-yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
-yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
+pnpm test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
+pnpm test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 ```
 
 run data view migration tests:
 
 ```bash
-yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
-yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
+pnpm test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
+pnpm test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
 ```
 
 run serverless api integration tests:
 ```bash
-yarn test:ftr:server --config x-pack/solutions/security/test/serverless/api_integration/test_suites/security/config.ts
-yarn test:ftr:runner --config x-pack/solutions/security/test/serverless/api_integration/test_suites/security/config.ts --include-tag=cloud_security_posture
+pnpm test:ftr:server --config x-pack/solutions/security/test/serverless/api_integration/test_suites/security/config.ts
+pnpm test:ftr:runner --config x-pack/solutions/security/test/serverless/api_integration/test_suites/security/config.ts --include-tag=cloud_security_posture
 ```
 
 run serverless e2e tests:
 ```bash
-yarn test:ftr:server --config x-pack/solutions/security/test/serverless/functional/test_suites/security/config.cloud_security_posture.ts
-yarn test:ftr:runner ---config x-pack/solutions/security/test/serverless/functional/test_suites/security/config.cloud_security_posture.ts
+pnpm test:ftr:server --config x-pack/solutions/security/test/serverless/functional/test_suites/security/config.cloud_security_posture.ts
+pnpm test:ftr:runner ---config x-pack/solutions/security/test/serverless/functional/test_suites/security/config.cloud_security_posture.ts
 ```
 
 #### Run **Cypress tests (e2e) for development**
@@ -194,22 +194,22 @@ When developing feature outside our plugin folder, instead of using FTRs for e2e
 
 run ess e2e tests:
 ```bash
-yarn cypress:open:ess
+pnpm cypress:open:ess
 ```
 
 run ess Cloud Security Posture e2e tests:
 ```bash
-yarn cypress:cloud_security_posture:run:ess
+pnpm cypress:cloud_security_posture:run:ess
 ```
 
 run serverless e2e tests:
 ```bash
-yarn cypress:open:serverless
+pnpm cypress:open:serverless
 ```
 
 run serverless Cloud Security Posture e2e tests:
 ```bash
-yarn cypress:cloud_security_posture:run:serverless
+pnpm cypress:cloud_security_posture:run:serverless
 ```
 
 Unlike FTR where we have to set server and runner separately, Cypress handles everything in 1 go, so just running the above the script is enough to get it running

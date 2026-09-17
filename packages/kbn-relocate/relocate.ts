@@ -70,7 +70,7 @@ const relocateModules = async (toMove: Package[], log: ToolingLog): Promise<numb
     await moveModule(module, log);
 
     // after move operations
-    await safeExec('yarn kbn bootstrap');
+    await safeExec('node scripts/kbn bootstrap');
     await safeExec('node scripts/build_plugin_list_docs');
     await safeExec('node scripts/generate codeowners');
     await safeExec('node scripts/lint_packages --fix');
@@ -230,7 +230,7 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
       await checkoutBranch(NEW_BRANCH);
     }
 
-    await safeExec(`yarn kbn bootstrap`);
+    await safeExec('node scripts/kbn bootstrap');
   }
   await inquirer.prompt({
     type: 'confirm',

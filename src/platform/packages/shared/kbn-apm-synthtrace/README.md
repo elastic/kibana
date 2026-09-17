@@ -6,7 +6,7 @@ At a high-level, the module works by modeling APM events/metricsets with [a flue
 
 ## Usage
 
-This section assumes that you've installed Kibana's dependencies by running `yarn kbn bootstrap` in the repository's root folder.
+This section assumes that you've installed Kibana's dependencies by running `pnpm kbn bootstrap` in the repository's root folder.
 
 This library can currently be used in two ways:
 

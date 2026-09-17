@@ -57,7 +57,7 @@ When updating Security AI Prompts saved objects in the `elastic/integrations` re
 
    ```bash
    cd $KIBANA_HOME/x-pack/solutions/security/plugins/elastic_assistant
-   yarn generate-security-ai-prompts
+   pnpm generate-security-ai-prompts
    ```
 
 2. **Copy the generated prompt files into the integration package:**
@@ -117,7 +117,7 @@ When updating Security AI Prompts saved objects in the `elastic/integrations` re
 
 2. Start Kibana with:
    ```
-   NODE_EXTRA_CA_CERTS=~/.elastic-package/profiles/default/certs/kibana/ca-cert.pem yarn start --no-base-path
+   NODE_EXTRA_CA_CERTS=~/.elastic-package/profiles/default/certs/kibana/ca-cert.pem pnpm start --no-base-path
    ```
 
 3. Visit the Integration page and find Security AI Prompts (you may need to toggle Display beta integrations). Install it. Then go to the saved objects are to verify the saved objects have been installed and are what you expect. At this time, you can test your AI flow to ensure the updated prompt is being used, or use dev_tools to query for the prompt. For example:
