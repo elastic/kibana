@@ -34,6 +34,12 @@ export interface QueryServiceContract {
 
 const DROP_NULL_COLUMNS = true;
 
+/**
+ * Rows per batch yielded by the JSON (non-streaming) path. Keeps the per-slice working set
+ * small so downstream steps never hold more than one slice of row objects at a time.
+ */
+export const JSON_STREAM_BATCH_SIZE = 100;
+
 @injectable()
 export class QueryService implements QueryServiceContract {
   constructor(
@@ -99,8 +105,11 @@ export class QueryService implements QueryServiceContract {
   }
 
   /**
-   * Runs the single-shot JSON query and yields the full result set as one in-memory batch,
-   * preserving the `AsyncIterable<T[]>` contract. Cancellation is scoped to this
+   * Runs the single-shot JSON query and yields the result set in slices of
+   * `JSON_STREAM_BATCH_SIZE` rows, preserving the `AsyncIterable<T[]>` contract.
+   * The raw response is still materialised in full (that is the format's limit), but
+   * slicing bounds every downstream copy (row objects, alert events, bulk bodies) to
+   * one slice at a time instead of the whole result. Cancellation is scoped to this
    * rule-execution streaming boundary, mirroring the arrow path.
    */
   private async *streamJson<T>({
@@ -131,19 +140,18 @@ export class QueryService implements QueryServiceContract {
 
       context.throwIfAborted();
 
-      const rows = this.toRows<T>(response, { normalizeDates: true });
-
       this.logger.debug({
         message: `QueryService: Streaming query completed successfully (json)`,
       });
 
       // Empty results return nothing, this mirrors the arrow path so callers
       // relying on `withAtLeastOne` keep the same fallback behaviour.
-      if (rows.length === 0) {
-        return;
+      const { values } = response;
+      for (let start = 0; start < values.length; start += JSON_STREAM_BATCH_SIZE) {
+        context.throwIfAborted();
+        const slice = values.slice(start, start + JSON_STREAM_BATCH_SIZE);
+        yield this.toRows<T>({ ...response, values: slice }, { normalizeDates: true });
       }
-
-      yield rows;
     } catch (error) {
       if (this.isCancellation(error, context)) {
         this.logger.debug({

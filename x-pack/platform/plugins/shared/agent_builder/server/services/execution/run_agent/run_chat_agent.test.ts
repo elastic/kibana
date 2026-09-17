@@ -6,16 +6,17 @@
  */
 
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { ToolOrigin } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, ToolOrigin } from '@kbn/agent-builder-common';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
 import { createAgentHandlerContextMock } from '../../../test_utils/runner';
-import { createRound } from '../../../test_utils/conversations';
+import { createEmptyConversation, createRound } from '../../../test_utils/conversations';
 import { createMockedExecutableTool } from '../../../test_utils/tools';
 
 import { runDefaultAgentMode } from './run_chat_agent';
 import {
+  addRoundCompleteEvent,
   prepareConversation,
   selectTools,
   selectSkills,
@@ -67,6 +68,9 @@ const selectSkillsMock = selectSkills as jest.MockedFn<typeof selectSkills>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
 const getPendingRoundMock = getPendingRound as jest.MockedFn<typeof getPendingRound>;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
+const addRoundCompleteEventMock = addRoundCompleteEvent as jest.MockedFn<
+  typeof addRoundCompleteEvent
+>;
 const createPromptFactoryMock = createPromptFactory as jest.MockedFn<typeof createPromptFactory>;
 const createImageResolverMock = createImageResolver as jest.MockedFn<typeof createImageResolver>;
 
@@ -101,7 +105,7 @@ describe('runDefaultAgentMode', () => {
     } as any);
 
     prepareConversationMock.mockResolvedValue({
-      previousRounds: [],
+      timeline: [],
       nextInput: { message: 'hello', attachments: [] },
       attachments: [],
       attachmentTypes: [],
@@ -160,6 +164,43 @@ describe('runDefaultAgentMode', () => {
     );
   });
 
+  it('never resolves a pending round when regenerating, so a paused round is not resumed', async () => {
+    const context = createAgentHandlerContextMock();
+    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      connector: { name: 'test-connector' },
+      chatModel: {} as any,
+    } as any);
+    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+    context.toolManager.getDynamicToolIds.mockReturnValue([]);
+    selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+    prepareConversationMock.mockResolvedValue({
+      timeline: [],
+      nextInput: { message: 'hello', attachments: [] },
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: context.attachmentStateManager,
+    } as any);
+    extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+    createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+
+    await runDefaultAgentMode(
+      {
+        nextInput: {},
+        action: 'regenerate',
+        agentConfiguration: { tools: [] } as any,
+        conversation: createEmptyConversation({
+          rounds: [createRound({ id: 'paused', status: ConversationRoundStatus.awaitingPrompt })],
+        }) as any,
+      },
+      context
+    );
+
+    expect(getPendingRoundMock).not.toHaveBeenCalled();
+    expect(prepareConversationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'regenerate' })
+    );
+  });
+
   it('configures the tool-result length guardrail budget on the toolManager', async () => {
     const context = createAgentHandlerContextMock();
 
@@ -179,7 +220,7 @@ describe('runDefaultAgentMode', () => {
     } as any);
 
     prepareConversationMock.mockResolvedValue({
-      previousRounds: [],
+      timeline: [],
       nextInput: { message: 'hello', attachments: [] },
       attachments: [],
       attachmentTypes: [],
@@ -218,7 +259,7 @@ describe('runDefaultAgentMode', () => {
       getPendingRoundMock.mockReturnValue(undefined);
       selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
       prepareConversationMock.mockResolvedValue({
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: 'hello', attachments: [] },
         attachments: [],
         attachmentTypes: [],
@@ -288,6 +329,65 @@ describe('runDefaultAgentMode', () => {
     });
   });
 
+  describe('threaded roundId', () => {
+    const setupBase = async (context: ReturnType<typeof createAgentHandlerContextMock>) => {
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingRoundMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    };
+
+    it('uses the caller-provided roundId when threaded from the execution runner', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          roundId: 'preminted-round-id',
+        },
+        context
+      );
+
+      expect(addRoundCompleteEventMock).toHaveBeenCalledWith(
+        expect.objectContaining({ roundId: 'preminted-round-id' })
+      );
+    });
+
+    it('mints its own roundId when the caller does not provide one (legacy path)', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+        },
+        context
+      );
+
+      const call = addRoundCompleteEventMock.mock.calls[0][0];
+      expect(typeof call.roundId).toBe('string');
+      expect(call.roundId).not.toBe('preminted-round-id');
+      // UUID v4 format sanity: 36 chars with dashes at expected positions.
+      expect(call.roundId).toMatch(/^[0-9a-f-]{36}$/);
+    });
+  });
+
   it('passes an image resolver built from the attachment state manager to the prompt factory', async () => {
     const context = createAgentHandlerContextMock();
     jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
@@ -299,7 +399,7 @@ describe('runDefaultAgentMode', () => {
     getPendingRoundMock.mockReturnValue(undefined);
     selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
     prepareConversationMock.mockResolvedValue({
-      previousRounds: [],
+      timeline: [],
       nextInput: { message: 'hello', attachments: [] },
       attachments: [],
       attachmentTypes: [],

@@ -82,6 +82,15 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         list: jest.fn(),
       }),
     },
+    attachments: {
+      getScopedClient: jest.fn().mockResolvedValue({
+        create: jest.fn(),
+        get: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        list: jest.fn().mockResolvedValue({ results: [], total_token_estimate: 0 }),
+      }),
+    },
     conversationTemplates: {
       get: jest.fn(),
       list: jest.fn(),

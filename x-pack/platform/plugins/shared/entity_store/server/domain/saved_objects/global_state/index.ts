@@ -11,8 +11,67 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { EntityStoreGlobalState, HistorySnapshotState, LogExtractionConfig } from './constants';
+import {
+  EntityStoreGlobalState,
+  EntityStoreGlobalStateOverrides,
+  HistorySnapshotState,
+  LogExtractionConfig,
+  type LogExtractionOverride,
+} from './constants';
 import { EntityStoreGlobalStateTypeName } from './types';
+import { getLegacyLogExtractionOverrides } from './legacy_defaults';
+import { retryOnConflict, type RetryOnConflictOptions } from '../../../infra/elasticsearch';
+
+const getLogsExtractionOverrides = (attrs: EntityStoreGlobalStateOverrides) =>
+  attrs.defaultsVersion === 'latest'
+    ? attrs.logsExtraction ?? {}
+    : getLegacyLogExtractionOverrides(attrs.logsExtraction ?? {});
+
+/** Applies incoming overrides on top of the stored ones. `undefined` leaves a key alone, `null` deletes it. */
+const applyLogExtractionOverrides = (
+  stored: Partial<LogExtractionConfig>,
+  incoming: LogExtractionOverride = {}
+): Partial<LogExtractionConfig> => {
+  const next: Partial<LogExtractionConfig> = { ...stored };
+  for (const key of Object.keys(incoming) as Array<keyof LogExtractionOverride>) {
+    const value = incoming[key];
+    if (value === null) {
+      delete next[key];
+    } else if (value !== undefined) {
+      (next as Record<string, unknown>)[key] = value;
+    }
+  }
+  return next;
+};
+
+/** Write-path input. Like the persisted overrides, but each log extraction field also accepts `null` to delete it. */
+export type GlobalStateOverridesInput = Omit<EntityStoreGlobalStateOverrides, 'logsExtraction'> & {
+  logsExtraction?: LogExtractionOverride;
+};
+
+// takes existing config, strips legacy defaults (if exists) and merges with new overrides
+const mergeOverrides = (
+  raw: EntityStoreGlobalStateOverrides,
+  overrides: GlobalStateOverridesInput
+): EntityStoreGlobalStateOverrides =>
+  EntityStoreGlobalStateOverrides.parse({
+    defaultsVersion: 'latest',
+    historySnapshot: {
+      ...HistorySnapshotState.parse(raw.historySnapshot ?? {}),
+      ...overrides.historySnapshot,
+    },
+    logsExtraction: applyLogExtractionOverrides(
+      getLogsExtractionOverrides(raw),
+      overrides.logsExtraction
+    ),
+  });
+
+// Read path: stored attributes in, full config out (missing fields get the current defaults).
+const getWithLatestDefaults = (state: EntityStoreGlobalStateOverrides): EntityStoreGlobalState =>
+  EntityStoreGlobalState.parse({
+    historySnapshot: HistorySnapshotState.parse(state.historySnapshot ?? {}),
+    logsExtraction: LogExtractionConfig.parse(getLogsExtractionOverrides(state)),
+  });
 
 export class EntityStoreGlobalStateClient {
   constructor(
@@ -22,14 +81,8 @@ export class EntityStoreGlobalStateClient {
   ) {}
 
   async find(): Promise<EntityStoreGlobalState | undefined> {
-    const response = await this.findSO();
-    if (response.total === 0) {
-      return undefined;
-    }
-    // Apply zod defaults to the persisted attributes so that fields added in newer Kibana
-    // versions (e.g. `maxTimeWindowSize`) are populated for SOs that were written before the
-    // field existed. This avoids `undefined` reaching consumers like `parseDurationToMs`.
-    return EntityStoreGlobalState.parse(response.saved_objects[0].attributes);
+    const raw = await this.findRaw();
+    return raw === undefined ? undefined : getWithLatestDefaults(raw.attributes);
   }
 
   async findOrThrow(): Promise<EntityStoreGlobalState> {
@@ -42,52 +95,63 @@ export class EntityStoreGlobalStateClient {
     return response;
   }
 
-  async init(
-    initialState?: Partial<EntityStoreGlobalState>
-  ): Promise<Partial<EntityStoreGlobalState>> {
-    const existing = await this.find();
-    if (existing !== undefined) {
-      return this.updateInternal(this.getSavedObjectId(), initialState ?? {});
+  /** Store-wide log extraction overrides without the code defaults applied. The layered merge needs this sparse view, not `find()`. */
+  async findLogExtractionOverrides(): Promise<Partial<LogExtractionConfig>> {
+    const raw = await this.findRaw();
+    return raw === undefined ? {} : getLogsExtractionOverrides(raw.attributes);
+  }
+
+  async init(initialState?: GlobalStateOverridesInput): Promise<EntityStoreGlobalState> {
+    const raw = await this.findRaw();
+    if (raw !== undefined) {
+      return this.update(initialState ?? {});
     }
 
     const id = this.getSavedObjectId();
     this.logger.debug(`Creating global state with id ${id}`);
 
-    const historySnapshot = HistorySnapshotState.parse(initialState?.historySnapshot ?? {});
-    const logsExtraction = LogExtractionConfig.parse(initialState?.logsExtraction ?? {});
-    const defaultState: EntityStoreGlobalState = {
-      historySnapshot,
-      logsExtraction,
-    };
-    const parsed = EntityStoreGlobalState.parse(defaultState);
-
-    const { attributes } = await this.soClient.create<EntityStoreGlobalState>(
+    const { attributes } = await this.soClient.create<EntityStoreGlobalStateOverrides>(
       EntityStoreGlobalStateTypeName,
-      parsed,
+      EntityStoreGlobalStateOverrides.parse({
+        ...initialState,
+        logsExtraction: applyLogExtractionOverrides({}, initialState?.logsExtraction),
+        defaultsVersion: 'latest',
+      }),
       { id }
     );
 
-    return attributes;
+    return getWithLatestDefaults(attributes);
   }
 
-  async update(partial: Partial<EntityStoreGlobalState>): Promise<Partial<EntityStoreGlobalState>> {
-    await this.findOrThrow();
-
-    const id = this.getSavedObjectId();
-    return this.updateInternal(id, partial);
+  async update(
+    overrides: GlobalStateOverridesInput,
+    retryOpts?: RetryOnConflictOptions
+  ): Promise<EntityStoreGlobalState> {
+    // retries on version conflict, so concurrent writers
+    // (e.g. the history snapshot task vs a config update) cannot overwrite each other
+    return retryOnConflict(async () => {
+      const raw = await this.findRaw();
+      if (raw === undefined) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          'No global state found for this namespace'
+        );
+      }
+      return this.replace(mergeOverrides(raw.attributes, overrides), raw.version);
+    }, retryOpts);
   }
 
-  private async updateInternal(
-    id: string,
-    partial: Partial<EntityStoreGlobalState>
-  ): Promise<Partial<EntityStoreGlobalState>> {
-    const { attributes } = await this.soClient.update<EntityStoreGlobalState>(
+  private async replace(
+    overrides: EntityStoreGlobalStateOverrides,
+    version?: string
+  ): Promise<EntityStoreGlobalState> {
+    const { attributes } = await this.soClient.update<EntityStoreGlobalStateOverrides>(
       EntityStoreGlobalStateTypeName,
-      id,
-      partial,
-      { refresh: 'wait_for', mergeAttributes: true }
+      this.getSavedObjectId(),
+      overrides,
+      { refresh: 'wait_for', mergeAttributes: false, version }
     );
-    return attributes;
+
+    return getWithLatestDefaults(attributes);
   }
 
   async delete(): Promise<void> {
@@ -112,8 +176,20 @@ export class EntityStoreGlobalStateClient {
     return `${EntityStoreGlobalStateTypeName}-${this.namespace}`;
   }
 
-  private findSO(): Promise<SavedObjectsFindResponse<EntityStoreGlobalState>> {
-    return this.soClient.find<EntityStoreGlobalState>({
+  private async findRaw(): Promise<
+    { attributes: EntityStoreGlobalStateOverrides; version?: string } | undefined
+  > {
+    const response = await this.findSO();
+    if (response.total === 0) {
+      return undefined;
+    }
+
+    const { attributes, version } = response.saved_objects[0];
+    return { attributes, version };
+  }
+
+  private findSO(): Promise<SavedObjectsFindResponse<EntityStoreGlobalStateOverrides>> {
+    return this.soClient.find<EntityStoreGlobalStateOverrides>({
       type: EntityStoreGlobalStateTypeName,
       namespaces: [this.namespace],
       perPage: 1,

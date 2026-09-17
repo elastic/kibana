@@ -113,4 +113,6 @@ export interface ServicesStartDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  /** `xpack.agentBuilder.deductive.register` for this deployment. */
+  deductiveRegister: boolean;
 }

@@ -78,6 +78,7 @@ export const prepareRule = async <Params extends RuleParams>({
         username,
         shouldUpdateApiKey: true,
         errorMessage: 'Error creating rule: could not create API key',
+        refresh: false,
       });
       apiKeys.set(id, {
         apiKey: apiKeyProps.apiKey ?? null,
@@ -105,9 +106,9 @@ export const prepareRule = async <Params extends RuleParams>({
     const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
       data.tags,
       apiKeyProps.uiamApiKey,
-      apiKeyProps.apiKeyCreatedByUser,
       context.isServerless,
-      context.shouldGrantUiam
+      context.shouldGrantUiam,
+      context.apiKeyType
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({

@@ -37,6 +37,7 @@ interface CreateAlertActionRouteForTypeOptions<
     Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>
   >;
   oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
+  access?: RouteConfigOptions<RouteMethod>['access'];
 }
 
 export const createAlertActionRouteForType = <
@@ -47,6 +48,7 @@ export const createAlertActionRouteForType = <
   summary,
   bodySchema,
   oasOperationObject,
+  access,
 }: CreateAlertActionRouteForTypeOptions<TAction>): RouteDefinition<
   CreateAlertActionParams,
   unknown,
@@ -65,6 +67,7 @@ export const createAlertActionRouteForType = <
       },
     };
     static routeOptions = {
+      access,
       summary,
       description: 'Create an action for a specific alert group.',
       oasOperationObject,

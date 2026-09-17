@@ -18,4 +18,5 @@ export const CreateAckAlertActionRoute = createAlertActionRouteForType({
   summary: 'Acknowledge an alert',
   bodySchema: createAckAlertActionBodySchema,
   oasOperationObject: createAckAlertActionOasExamples,
+  access: 'public' as const,
 });

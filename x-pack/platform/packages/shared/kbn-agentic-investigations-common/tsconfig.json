@@ -1,0 +1,22 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@testing-library/jest-dom",
+    ]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
+  ]
+}

@@ -7,7 +7,7 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import { AttachmentRequestRtV2 } from '../../../common/types/api/attachment/v2';
+import { UnifiedAttachmentPayloadRt } from '../../../common/types/domain/attachment/v2';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CaseCommentModel } from '../../common/models';
@@ -27,7 +27,7 @@ import { emitAttachmentsAddedEvent } from './trigger_utils';
  * @ignore
  */
 export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs): Promise<Case> => {
-  const { comment, caseId, mode = 'legacy' } = addArgs;
+  const { comment, caseId } = addArgs;
 
   const {
     logger,
@@ -37,10 +37,10 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrow(AttachmentRequestRtV2)(comment);
+    const query = decodeWithExcessOrThrow(UnifiedAttachmentPayloadRt)(comment);
+    decodeCommentRequestV2(query, unifiedAttachmentTypeRegistry);
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
-    decodeCommentRequestV2(comment, unifiedAttachmentTypeRegistry);
 
     const savedObjectID = SavedObjectsUtils.generateId();
     await authorization.ensureAuthorized({
@@ -48,7 +48,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
       entities: [
         {
           id: savedObjectID,
-          owner: comment.owner,
+          owner: query.owner,
         },
       ],
     });
@@ -67,12 +67,12 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
       id: savedObjectID,
     });
 
-    const updatedCase = await updatedModel.encodeWithComments({ mode });
+    const updatedCase = await updatedModel.encodeWithComments();
 
     emitAttachmentsAddedEvent(clientArgs, updatedCase, [savedObjectID], query.type);
 
     // This call never throws — failures are logged and do not abort the attachment creation.
-    await extractAndAddObservables(caseId, [comment], updatedCase, clientArgs);
+    await extractAndAddObservables(caseId, [query], updatedCase, clientArgs);
 
     return updatedCase;
   } catch (error) {

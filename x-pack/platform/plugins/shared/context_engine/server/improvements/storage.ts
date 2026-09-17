@@ -22,11 +22,18 @@ export const IMPROVEMENTS_INDEX_TEMPLATE = `${IMPROVEMENTS_INDEX}-index-template
 /**
  * Mapping for the global improvements index.
  *
- * `payload` and `resolution` are `object({ enabled: false })`: kept in `_source` but not indexed.
- * Proposed KI content and workflow YAML routinely run to several kilobytes, so `flattened` with
- * its `ignore_above` would silently drop them, and nothing queries inside the change anyway. The
- * queries that matter — "every suggestion touching workflow X" — are served by `target.*`, with
- * the exception of `target.source_value`, which is unbounded for the same reason.
+ * `payload` is `object({ enabled: false })`: kept in `_source` but not indexed. Proposed KI content
+ * and workflow YAML routinely run to several kilobytes, so `flattened` with its `ignore_above`
+ * would silently drop them, and nothing queries inside the change anyway. The queries that matter —
+ * "every suggestion touching workflow X" — are served by `target.*`, with the exception of
+ * `target.source_value`, which is unbounded for the same reason.
+ *
+ * `resolution` is mapped, unlike `payload`, because an analysis run reads it: it queries this index
+ * for the lineage of what it is about to propose, and a rejection without the reviewer's reason
+ * tells it nothing it can act on. ES|QL can only select mapped fields, so leaving the subtree
+ * unindexed would have put the one part worth reading out of reach. `dynamic: strict` means every
+ * subfield has to be declared here, which is the point — the runner's query is written against
+ * these names.
  */
 export const improvementsSchema = {
   properties: {
@@ -58,7 +65,14 @@ export const improvementsSchema = {
       },
     }),
     payload: types.object({ enabled: false }),
-    resolution: types.object({ enabled: false }),
+    resolution: types.object({
+      properties: {
+        by: types.keyword({}),
+        reason: types.text({}),
+        error: types.text({}),
+        applied_target_id: types.keyword({}),
+      },
+    }),
     provenance: types.object({
       properties: {
         agent_run_id: types.keyword({}),

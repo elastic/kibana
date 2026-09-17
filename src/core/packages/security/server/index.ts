@@ -16,6 +16,12 @@ export type {
 export type { CoreAuditService } from './src/audit';
 export type { CoreServiceAccountsService } from './src/service_accounts';
 export type {
+  ServiceAccount,
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
+  CreateServiceAccountParams,
+} from '@kbn/core-security-common';
+export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
   AuditServiceContract,
@@ -61,3 +67,4 @@ export {
   flattenSecurityPrivileges,
 } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
+export type { UiamProjectType } from './src/uiam';

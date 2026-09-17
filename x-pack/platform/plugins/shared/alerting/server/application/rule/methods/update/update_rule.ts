@@ -343,9 +343,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
     updateRuleData.tags,
     apiKeyAttributes.uiamApiKey,
-    apiKeyAttributes.apiKeyCreatedByUser,
     context.isServerless,
-    context.shouldGrantUiam
+    context.shouldGrantUiam,
+    context.apiKeyType
   );
 
   const notifyWhen = getRuleNotifyWhenType(

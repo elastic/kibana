@@ -35,6 +35,7 @@ import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineRuleTypes } from './rule_types';
 import { defineConnectorAdapters } from './connector_adapters';
+import { defineTaskTypes } from './task_types';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -109,7 +110,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
   public setup(
     core: CoreSetup<FixtureStartDeps>,
-    { features, actions, alerting, ruleRegistry, eventLog }: FixtureSetupDeps
+    { features, actions, alerting, taskManager, ruleRegistry, eventLog }: FixtureSetupDeps
   ) {
     CHANGE_HISTORY_FLAGS.FEATURE_ENABLED = true;
     features.registerKibanaFeature({
@@ -207,6 +208,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     defineActionTypes(core, { actions });
     defineRuleTypes(core, { alerting, ruleRegistry }, this.logger);
     defineConnectorAdapters(core, { alerting });
+    defineTaskTypes(core, taskManager, this.alertingStart);
     const eventLogger = eventLog.getLogger({
       event: { provider: 'alerting' },
     });

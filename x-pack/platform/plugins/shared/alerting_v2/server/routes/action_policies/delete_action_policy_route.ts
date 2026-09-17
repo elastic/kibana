@@ -19,7 +19,13 @@ import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { ACTION_POLICY_NOT_FOUND_DESCRIPTION } from './action_policy_route_descriptions';
 
 const deleteActionPolicyParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
+  id: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .describe(
+      'The ID of the action policy to delete. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.'
+    ),
 });
 
 @injectable()
@@ -32,8 +38,10 @@ export class DeleteActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Delete an action policy',
-    description: 'Delete an action policy by identifier.',
+    description:
+      'Deletes the action policy whose ID you include in the URL path. Use the `id` returned when you created the policy, or from get or list. This request has no body.',
     oasOperationObject: deleteActionPolicyOasExamples,
   } as const;
   static schemas = {

@@ -106,6 +106,7 @@ toc:
           - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-docs-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
+          - file: connectors-kibana/google-threat-intelligence-action-type.md
           - file: connectors-kibana/grafana-action-type.md
           - file: connectors-kibana/graphql-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
@@ -116,6 +117,7 @@ toc:
           - file: connectors-kibana/kubernetes-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/monday-com-action-type.md
+          - file: connectors-kibana/misp-action-type.md
           - file: connectors-kibana/new-relic-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/okta-action-type.md

@@ -41,7 +41,6 @@ export const bulkGetAttachmentsRoute = createCasesRoute({
       const res: attachmentApiV2.BulkGetAttachmentsResponseV2 = await client.attachments.bulkGet({
         caseID: request.params.case_id,
         savedObjectIds: requestBody.ids,
-        mode: 'unified',
       });
 
       return response.ok({

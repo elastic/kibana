@@ -9,7 +9,17 @@ import type { RawRule } from '../../types';
 import type { CreateAPIKeyResult } from '../types';
 import type { RuleDomain } from '../../application/rule/types';
 import { MISSING_UIAM_API_KEY_TAG } from '../../application/rule/constants';
+import { ApiKeyType } from '../../task_runner/types';
 
+/**
+ * Stale API key attributes to remove from a rule's stored attributes before spreading in a newly
+ * created key set. `getApiKeyRuleProperties` omits the UIAM attributes when no UIAM key was
+ * minted, so without this the old values would survive the spread.
+ *
+ * Callers must persist the result as a whole document (`create` with `overwrite: true`, or
+ * `bulkCreate`). In a partial saved-object update attributes are merged, so a stripped attribute
+ * is merely absent from the payload and keeps its stored value instead of being removed.
+ */
 export const API_KEY_ATTRIBUTES_TO_STRIP = [
   'apiKey',
   'apiKeyOwner',
@@ -68,10 +78,9 @@ const getApiKeyRuleProperties = (
     ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
     // UIAM's verdict on whether the key is an external (user-created Cloud) API key, captured
     // at authentication time. Rule runs use it to withhold the UIAM shared secret, which UIAM
-    // rejects for external keys. Written whenever a UIAM key is written, not only when true:
-    // `updateRuleApiKey` and `enableRule` persist through a partial saved-object update, where
-    // omitting the attribute leaves the previously stored value in place. A stale `true` would
-    // then withhold the shared secret from a freshly granted internal key.
+    // rejects for external keys. Written whenever a UIAM key is written, not only when true,
+    // so that it can never disagree with the key it describes: a stale `true` would withhold
+    // the shared secret from a freshly granted internal key.
     ...(encodedUiamApiKey ? { uiamApiKeyExternal: apiKey.uiamResult?.external === true } : {}),
   };
 };
@@ -106,19 +115,20 @@ export function apiKeyAsRuleDomainProperties(
  * Determines if the missing UIAM API key tag should be added to a rule.
  * The tag is added when:
  * - The environment is serverless
- * - UIAM API key granting is enabled (shouldGrantUiam)
+ * - Rules use UIAM API keys in this deployment
  * - uiamApiKey is not set (null/undefined)
- * - AND apiKeyCreatedByUser is false (system-created API key)
  *
- * This indicates that the UIAM key rollout attempted to create a UIAM key but failed.
+ * The `shouldGrantUiam` and `apiKeyType` checks are the same pair the task runner uses to
+ * decide if a rule runs with a UIAM key. Without them, rules would get the tag on
+ * deployments that still use ES keys, where no rule has a UIAM key to begin with.
  */
 export function shouldAddMissingUiamKeyTag(
   uiamApiKey: string | null | undefined,
-  apiKeyCreatedByUser: boolean | null | undefined,
   isServerless: boolean,
-  shouldGrantUiam: boolean | undefined
+  shouldGrantUiam: boolean | undefined,
+  apiKeyType: ApiKeyType | undefined
 ): boolean {
-  return isServerless && shouldGrantUiam === true && !uiamApiKey && apiKeyCreatedByUser === false;
+  return isServerless && !!shouldGrantUiam && apiKeyType === ApiKeyType.UIAM && !uiamApiKey;
 }
 
 /**
@@ -128,11 +138,11 @@ export function shouldAddMissingUiamKeyTag(
 export function addMissingUiamKeyTagIfNeeded(
   tags: string[],
   uiamApiKey: string | null | undefined,
-  apiKeyCreatedByUser: boolean | null | undefined,
   isServerless: boolean,
-  shouldGrantUiam: boolean | undefined
+  shouldGrantUiam: boolean | undefined,
+  apiKeyType: ApiKeyType | undefined
 ): string[] {
-  if (shouldAddMissingUiamKeyTag(uiamApiKey, apiKeyCreatedByUser, isServerless, shouldGrantUiam)) {
+  if (shouldAddMissingUiamKeyTag(uiamApiKey, isServerless, shouldGrantUiam, apiKeyType)) {
     // Avoid duplicates
     if (!tags.includes(MISSING_UIAM_API_KEY_TAG)) {
       return [...tags, MISSING_UIAM_API_KEY_TAG];

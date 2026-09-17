@@ -68,6 +68,7 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
         targetIdsNotInStore: result.totalTargetIdsNotInStore,
         failed: result.totalWriteErrors,
         metadataDocsApplied: result.totalMetadataDocsApplied,
+        metadataDocsFailed: result.totalMetadataDocsFailed,
       },
       sources: collector.sources,
       ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
@@ -79,7 +80,7 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `[supervises] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[supervises] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended, ${result.totalMetadataDocsFailed} metadata docs failed`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should

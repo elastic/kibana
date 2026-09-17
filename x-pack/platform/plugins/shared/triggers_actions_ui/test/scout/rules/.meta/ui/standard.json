@@ -1,5 +1,5 @@
 {
-  "sha1": "1daeef4ecbb0a7f4baaa0b099f37dfe6087aebc7",
+  "sha1": "e5f45a8889325091fcc4122be58cc58e3a533380",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -271,6 +271,45 @@
       }
     },
     {
+      "id": "bd9490acf6f74e1-9d28720e02e6524",
+      "title": "Rules page Logs visibility hides the classic Logs tab when the user lacks rule-type read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_logs_visibility.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "bd9490acf6f74e1-cb3905a385c6076",
+      "title": "Rules page Logs visibility omits the Logs menu item when the user lacks rule-type read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_logs_visibility.spec.ts",
+        "line": 46,
+        "column": 23
+      }
+    },
+    {
+      "id": "bd9490acf6f74e1-eec97efa4a5cc65",
+      "title": "Rules page Logs visibility shows the Logs child page with its own heading, back button, no tabs, and no create button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_logs_visibility.spec.ts",
+        "line": 60,
+        "column": 9
+      }
+    },
+    {
       "id": "03978358df368fa-3e48a64dc4d9cf8",
       "title": "Rules page navigation and loading loads the Stack Management rules page",
       "expectedStatus": "passed",
@@ -282,6 +321,32 @@
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_navigation.spec.ts",
         "line": 24,
         "column": 8
+      }
+    },
+    {
+      "id": "2aeef73611b17a7-1c516239081bd78",
+      "title": "Rules page heading tabs - alerting v2 privileges shows the V1 and V2 rules tabs when the user can read both surfaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
+        "line": 46,
+        "column": 15
+      }
+    },
+    {
+      "id": "2aeef73611b17a7-f2b6d3aaeeac5bf",
+      "title": "Rules page heading tabs - alerting v2 privileges hides all heading tabs when the user cannot read Alerting v2 rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
+        "line": 54,
+        "column": 7
       }
     },
     {

@@ -23,7 +23,7 @@ describe('RuleChangeHistoryApi', () => {
       await api.listRuleChanges({ id: 'rule-1' });
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/alerting/v2/rules/rule-1/history',
+        '/internal/alerting/v2/rules/rule-1/history',
         expect.any(Object)
       );
     });
@@ -34,7 +34,7 @@ describe('RuleChangeHistoryApi', () => {
       await api.listRuleChanges({ id: 'a/b c' });
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/alerting/v2/rules/a%2Fb%20c/history',
+        '/internal/alerting/v2/rules/a%2Fb%20c/history',
         expect.any(Object)
       );
     });
@@ -44,7 +44,7 @@ describe('RuleChangeHistoryApi', () => {
 
       await api.listRuleChanges({ id: 'rule-1', page: 2, perPage: 25 });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/rules/rule-1/history', {
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/rules/rule-1/history', {
         query: { page: 2, per_page: 25 },
         signal: undefined,
       });
@@ -55,7 +55,7 @@ describe('RuleChangeHistoryApi', () => {
 
       await api.listRuleChanges({ id: 'rule-1' });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/rules/rule-1/history', {
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/rules/rule-1/history', {
         query: { page: undefined, per_page: undefined },
         signal: undefined,
       });
@@ -68,7 +68,7 @@ describe('RuleChangeHistoryApi', () => {
       await api.listRuleChanges({ id: 'rule-1', signal });
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/alerting/v2/rules/rule-1/history',
+        '/internal/alerting/v2/rules/rule-1/history',
         expect.objectContaining({ signal })
       );
     });
@@ -95,7 +95,7 @@ describe('RuleChangeHistoryApi', () => {
 
       await api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1' });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/rules/rule-1/history/evt-1', {
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/rules/rule-1/history/evt-1', {
         signal: undefined,
       });
     });
@@ -105,7 +105,7 @@ describe('RuleChangeHistoryApi', () => {
 
       await api.getRuleChangeEvent({ id: 'a/b', eventId: 'c/d' });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/rules/a%2Fb/history/c%2Fd', {
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/rules/a%2Fb/history/c%2Fd', {
         signal: undefined,
       });
     });
@@ -117,7 +117,7 @@ describe('RuleChangeHistoryApi', () => {
       await api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1', signal });
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/alerting/v2/rules/rule-1/history/evt-1',
+        '/internal/alerting/v2/rules/rule-1/history/evt-1',
         expect.objectContaining({ signal })
       );
     });

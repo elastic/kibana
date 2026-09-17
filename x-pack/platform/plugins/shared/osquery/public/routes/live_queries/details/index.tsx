@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
-import { useGoBack } from '../../../common/use_go_back';
 import { fullWidthContentCss, WithoutHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { pagePathGetters } from '../../../common/page_paths';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 import { SavedQueryFlyout } from '../../../saved_queries';
 import { useSaveQueryFromDetails } from './use_save_query_from_details';
@@ -27,8 +22,6 @@ const tableWrapperCss = {
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
   useBreadcrumbs('history_details', { liveQueryId: actionId });
-  const handleGoBack = useGoBack(pagePathGetters.history());
-  const liveQueryListProps = useRouterNavigate(pagePathGetters.history(), handleGoBack);
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });
 
@@ -39,15 +32,6 @@ const LiveQueryDetailsPageComponent = () => {
     handleCloseSaveQueryFlyout,
     savedQueryDefaultValue,
   } = useSaveQueryFromDetails({ data });
-
-  const backLink = (
-    <EuiButtonEmpty iconType="chevronSingleLeft" {...liveQueryListProps} flush="left" size="xs">
-      <FormattedMessage
-        id="xpack.osquery.liveQueryDetails.viewHistoryTitle"
-        defaultMessage="View history"
-      />
-    </EuiButtonEmpty>
-  );
 
   useLayoutEffect(() => {
     setIsLive(() => !(data?.status === 'completed'));
@@ -63,8 +47,6 @@ const LiveQueryDetailsPageComponent = () => {
     <>
       <WithoutHeaderLayout restrictWidth={false}>
         <div css={fullWidthContentCss}>
-          {backLink}
-          <EuiSpacer size="m" />
           <div css={tableWrapperCss}>
             <PackQueriesStatusTable
               actionId={actionId}
@@ -73,6 +55,7 @@ const LiveQueryDetailsPageComponent = () => {
               expirationDate={data?.expiration}
               agentIds={data?.agents}
               showResultsHeader
+              hideResultsTitle
               tags={data?.tags}
               onSaveQuery={onSaveQuery}
             />

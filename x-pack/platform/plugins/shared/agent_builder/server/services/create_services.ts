@@ -14,6 +14,7 @@ import type {
   ServicesStartDeps,
   ServiceSetupDeps,
 } from './types';
+import type { ConversationEventBus } from '../workflows/triggers/conversation_event_bus';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
@@ -122,7 +123,9 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
-  }: ServicesStartDeps): InternalStartServices {
+    deductiveRegister,
+    conversationEventBus,
+  }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
@@ -200,6 +203,7 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       agents,
+      eventBus: conversationEventBus,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -225,6 +229,7 @@ export class ServiceManager {
       getExecutionService,
       searchInferenceEndpoints,
       conversationTemplates: conversationTemplatesStart,
+      deductiveRegister,
     });
     runner = runnerFactory.getRunner();
 

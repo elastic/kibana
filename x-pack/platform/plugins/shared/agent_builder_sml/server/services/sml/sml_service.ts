@@ -178,14 +178,6 @@ export const isNotFoundError = (error: unknown): boolean => {
 };
 
 /**
- * Empty-but-fully-shaped permissions object. Used as a fallback when
- * `_source.permissions` is somehow missing (legacy / test docs).
- */
-const emptyPermissions = (): SmlDocument['permissions'] => ({
-  kibana: { privileges: [] },
-});
-
-/**
  * Privilege check for SML entries. Batch-checks which of the given Kibana
  * action strings are authorized for the user in the current space via a
  * single `_has_privileges` call (Kibana's `checkPrivileges` wrapper).
@@ -408,12 +400,10 @@ const resolveAuthorizedUniverse = async ({
  *   privilege enforcement is skipped, matching the open-access semantics of every other
  *   Kibana surface in that configuration.
  *
- * The `count: 0` escape is what makes a type that omits `getPermissions` public *within its
- * spaces*, which is the contract {@link SmlTypeDefinition.getPermissions} advertises. Such a type
- * still gets one element per space stamped, just with an empty action list. That branch also
- * requires the element to carry no action names, so it is deliberately stricter than the
- * Elasticsearch-side DLS query: the indexer derives `count` from the action list, so an element
- * with `count: 0` *and* names is malformed and must fail CLOSED instead of reading as public.
+ * `count: 0` with no names is the public escape a type without `getPermissions` gets (one empty
+ * element per space), per {@link SmlTypeDefinition.getPermissions}. Since the indexer derives
+ * `count` from the list, `count: 0` *with* a name is malformed: the public branch requires no
+ * names, the gated branch requires `count > 0`, so both reject it and it fails CLOSED.
  *
  * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
  * values live on child documents, so a root-level `exists` on a nested leaf matches everything and
@@ -460,10 +450,7 @@ const buildVisibilityFilter = ({
                         bool: {
                           minimum_should_match: 1,
                           should: [
-                            // `terms_set` cannot express minimum_should_match_field: 0.
-                            // The absent-name half is to be extra defensive: the indexer always writes
-                            // `count: actions.length`, so a `count: 0` element carrying action
-                            // names is malformed and must not be read.
+                            // Public escape: zero required actions, no names.
                             {
                               bool: {
                                 filter: [
@@ -473,11 +460,18 @@ const buildVisibilityFilter = ({
                               },
                             },
                             {
-                              terms_set: {
-                                [PERM_NAME_FIELD]: {
-                                  terms: authz.authorizedActions,
-                                  minimum_should_match_field: PERM_COUNT_FIELD,
-                                },
+                              bool: {
+                                filter: [
+                                  { range: { [PERM_COUNT_FIELD]: { gt: 0 } } },
+                                  {
+                                    terms_set: {
+                                      [PERM_NAME_FIELD]: {
+                                        terms: authz.authorizedActions,
+                                        minimum_should_match_field: PERM_COUNT_FIELD,
+                                      },
+                                    },
+                                  },
+                                ],
                               },
                             },
                           ],
@@ -494,25 +488,16 @@ const buildVisibilityFilter = ({
   },
 });
 
-/**
- * The action-sets an item requires in a given space: one entry per privilege group scoped to that
- * space or to the global wildcard. Mirrors the ES-side DLS clause — a caller must hold ALL actions
- * within a single group, and groups for other spaces are irrelevant.
- */
-const requiredActionsInSpace = (
+/** Privilege groups scoped to this space or the global wildcard; others are irrelevant. */
+const relevantGroupsInSpace = (
   privileges: SmlKibanaPrivilegeGroup[],
   spaceId: string
-): string[][] =>
-  privileges.filter((g) => g.space === spaceId || g.space === '*').map((g) => g.name);
+): SmlKibanaPrivilegeGroup[] => privileges.filter((g) => g.space === spaceId || g.space === '*');
 
 /**
- * Check whether the current user has access to specific SML items.
- * For each id, the access verdict checks that all listed Kibana
- * `permissions.kibana.privileges[].name` action strings are authorized.
- *
- * Chunks without any kibana privileges are visible to anyone in the
- * space. When the security plugin is absent, all ids resolve to `true`
- * (open access).
+ * Whether the caller may access each SML item. Grants when it holds at least `count` distinct named
+ * actions of a group scoped to this space (or the wildcard). Items with no privileges are public;
+ * with the security plugin absent every id resolves to `true` (open access).
  */
 const checkItemsAccess = async ({
   ids,
@@ -541,17 +526,19 @@ const checkItemsAccess = async ({
 
   let docAuthz: Map<string, SmlKibanaPrivilegeGroup[]>;
   try {
-    const response = await esClient.asInternalUser.search<Pick<SmlDocument, 'id' | 'permissions'>>({
+    const response = await esClient.asInternalUser.search<
+      Pick<SmlDocument, 'attributes' | 'permissions'>
+    >({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ terms: { id: ids } }],
+          filter: [{ terms: { 'attributes.id': ids } }],
         },
       },
-      _source: ['id', 'permissions'],
+      _source: ['attributes.id', 'permissions'],
     });
 
     docAuthz = new Map(
@@ -559,7 +546,7 @@ const checkItemsAccess = async ({
         .filter((hit) => hit._source != null)
         .map((hit) => {
           const source = hit._source!;
-          return [source.id ?? '', source.permissions?.kibana?.privileges ?? []] as [
+          return [source.attributes?.id ?? '', source.permissions?.kibana?.privileges ?? []] as [
             string,
             SmlKibanaPrivilegeGroup[]
           ];
@@ -579,12 +566,14 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  const relevantGroupsByDoc = new Map<string, string[][]>();
+  const relevantGroupsByDoc = new Map<string, SmlKibanaPrivilegeGroup[]>();
   for (const [id, groups] of docAuthz) {
-    relevantGroupsByDoc.set(id, requiredActionsInSpace(groups, spaceId));
+    relevantGroupsByDoc.set(id, relevantGroupsInSpace(groups, spaceId));
   }
 
-  const uniqueActions = [...new Set([...relevantGroupsByDoc.values()].flat(2))];
+  const uniqueActions = [
+    ...new Set([...relevantGroupsByDoc.values()].flat().flatMap((g) => g.name)),
+  ];
 
   const authorizedPerms = await getAuthorizedPrivileges({
     permissions: uniqueActions,
@@ -607,10 +596,15 @@ const checkItemsAccess = async ({
       accessMap.set(id, true);
       continue;
     }
-    // Existential across groups, universal within one — the same shape as the nested DLS query.
     accessMap.set(
       id,
-      groups.some((actions) => actions.every((a) => authorizedPerms.has(a)))
+      groups.some((group) => {
+        if (group.count === 0) {
+          return group.name.length === 0;
+        }
+        const distinctHeld = new Set(group.name.filter((action) => authorizedPerms.has(action)));
+        return group.count > 0 && group.name.length > 0 && distinctHeld.size >= group.count;
+      })
     );
   }
 
@@ -675,6 +669,12 @@ const buildSmlEsqlQuery = ({
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
 
+  // ES|QL cannot address keys of a `flattened` field as `attributes.x`; FIELD_EXTRACT them into
+  // plain keyword columns up front so the WHERE / SORT / KEEP below can use them.
+  lines.push(
+    '| EVAL id = FIELD_EXTRACT(attributes, "id"), origin_uri = FIELD_EXTRACT(attributes, "origin.uri")'
+  );
+
   // runtime-imposed per-type id-allowlist constraints
   if (constraints) {
     for (const [typeId, criteria] of Object.entries(constraints)) {
@@ -687,7 +687,7 @@ const buildSmlEsqlQuery = ({
         // Non-empty → allow matching docs of this type, pass through other types
         const uriPlaceholders = criteria.ids.map(() => '?').join(', ');
         params.push(typeId, ...criteria.ids.map((id) => `${typeId}://${id}`));
-        lines.push(`| WHERE type != ? OR origin.uri IN (${uriPlaceholders})`);
+        lines.push(`| WHERE type != ? OR origin_uri IN (${uriPlaceholders})`);
       }
     }
   }
@@ -743,8 +743,7 @@ const buildSmlEsqlQuery = ({
   const shouldKeep = (f: string) =>
     fields !== undefined ? fields.includes(f) : DEFAULT_FIELDS.has(f);
 
-  // Materialize object sub-fields into flat columns before KEEP.
-  lines.push('| EVAL origin_uri = origin.uri');
+  // Materialize `references.uri` into a flat column before KEEP.
   if (shouldKeep('references')) {
     lines.push('| EVAL ref_uris = references.uri');
   }
@@ -797,7 +796,7 @@ export const buildConstraintsFilter = (
         bool: {
           should: [
             {
-              terms: { 'origin.uri': criteria.ids.map((id) => `${typeId}://${id}`) },
+              terms: { 'attributes.origin.uri': criteria.ids.map((id) => `${typeId}://${id}`) },
             },
             {
               bool: {
@@ -1148,9 +1147,14 @@ const autocompleteSml = async ({
           filter: filterClauses,
         },
       },
-      // Order will be arbitrary as every result scores the same.
-      sort: [{ _score: { order: 'desc' } }, { updated_at: 'desc' }, { id: 'asc' }],
-      _source: ['id', 'type', 'title', 'origin'],
+      // Order will be arbitrary as every result scores the same. `attributes.updated_at` is a
+      // `flattened` keyword holding an ISO-8601 string, so a lexical sort is still chronological.
+      sort: [
+        { _score: { order: 'desc' } },
+        { 'attributes.updated_at': 'desc' },
+        { 'attributes.id': 'asc' },
+      ],
+      _source: ['attributes.id', 'type', 'title', 'attributes.origin'],
     });
 
     const results: SmlAutocompleteResult[] = response.hits.hits
@@ -1158,10 +1162,10 @@ const autocompleteSml = async ({
       .map((hit) => {
         const source = hit._source!;
         return {
-          id: source.id ?? '',
+          id: source.attributes?.id ?? '',
           type: source.type ?? '',
           title: source.title ?? '',
-          origin: { uri: source.origin?.uri ?? '' },
+          origin: { uri: source.attributes?.origin?.uri ?? '' },
         };
       });
 
@@ -1203,15 +1207,14 @@ const getDocumentsByIds = async ({
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ terms: { id: ids } }, buildVisibilityFilter({ spaceId })],
+          filter: [{ terms: { 'attributes.id': ids } }, buildVisibilityFilter({ spaceId })],
         },
       },
     });
 
-    for (const hit of response.hits.hits) {
-      if (!hit._source) continue;
-      const doc = hydrateDocument(hit._source);
-      docMap.set(doc.id, doc);
+    for (const { _source: doc } of response.hits.hits) {
+      if (!doc) continue;
+      docMap.set(doc.attributes.id, doc);
     }
   } catch (error) {
     if (!isNotFoundError(error)) {
@@ -1220,32 +1223,4 @@ const getDocumentsByIds = async ({
   }
 
   return docMap;
-};
-
-/**
- * Project an ES `_source` payload into the canonical `SmlDocument`
- * shape used everywhere downstream. Centralised because `getDocumentsByIds`
- * (and any future reader) applies the same mapping — keeping them in sync
- * by-hand is a footgun.
- */
-const hydrateDocument = (source: SmlDocument): SmlDocument => {
-  const originUri = source.origin?.uri ?? '';
-  const doc: SmlDocument = {
-    id: source.id ?? '',
-    type: source.type ?? '',
-    title: source.title ?? '',
-    origin_id: source.origin_id ?? originUri.split('://')[1] ?? '',
-    origin: { uri: originUri },
-    content: source.content ?? '',
-    created_at: source.created_at ?? '',
-    updated_at: source.updated_at ?? '',
-    permissions: source.permissions ?? emptyPermissions(),
-    ingestion_method: source.ingestion_method ?? 'crawled',
-  };
-  if (source.description !== undefined) doc.description = source.description;
-  if (source.tags !== undefined) doc.tags = source.tags;
-  if (source.extended_attrs !== undefined) doc.extended_attrs = source.extended_attrs;
-  if (source.user_id !== undefined) doc.user_id = source.user_id;
-  if (source.references !== undefined) doc.references = source.references;
-  return doc;
 };

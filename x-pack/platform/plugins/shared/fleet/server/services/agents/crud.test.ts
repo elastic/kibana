@@ -19,6 +19,8 @@ import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
 import type { AgentStatus } from '../../../common/types';
+import { agentPolicyService } from '../agent_policy';
+import { buildPolicyBaseIdsWithFallbackEsFilter } from '../../../common/services/version_specific_policies_utils';
 
 import { auditLoggingService } from '../audit_logging';
 
@@ -37,6 +39,14 @@ import {
 } from './crud';
 
 jest.mock('../audit_logging');
+jest.mock('../agent_policy', () => ({
+  agentPolicyService: {
+    list: jest.fn().mockResolvedValue({ items: [] }),
+    get: jest.fn().mockResolvedValue(null),
+    getByIds: jest.fn().mockResolvedValue([]),
+    getInactivityTimeouts: jest.fn().mockResolvedValue([]),
+  },
+}));
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeAvailable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
@@ -708,6 +718,58 @@ describe('Agents CRUD test', () => {
         expect(query.bool.filter[0].bool.should[0].match).toEqual({
           'agent.identifying_attributes.agent.id': 'agent1',
         });
+      });
+    });
+
+    describe('showAgentless filter', () => {
+      const agentlessPolicyIds = ['policy-agentless-1', 'policy-agentless-2'];
+
+      beforeEach(() => {
+        searchMock.mockResolvedValue(getEsResponse([], 0, 'online'));
+      });
+
+      afterEach(() => {
+        (agentPolicyService.list as jest.Mock).mockReset();
+        (agentPolicyService.list as jest.Mock).mockResolvedValue({ items: [] });
+      });
+
+      it('excludes agents on versioned agentless policies using policy_base_id fallback', async () => {
+        (agentPolicyService.list as jest.Mock).mockResolvedValueOnce({
+          items: agentlessPolicyIds.map((id) => ({ id })),
+        });
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        // The exclusion is injected as a must_not using `terms` queries (constant clause count)
+        // rather than KQL which would emit N individual `term` clauses per field.
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.must_not).toEqual([
+          buildPolicyBaseIdsWithFallbackEsFilter(agentlessPolicyIds),
+        ]);
+        // Verify the other filters (active + enrolled) are still applied via the filter branch.
+        const filterStr = JSON.stringify(query.bool.filter);
+        expect(filterStr).toContain('unenrolled');
+        // Explicit field check so the intent of the must_not is obvious.
+        const queryStr = JSON.stringify(query);
+        expect(queryStr).toContain('policy_base_id');
+        expect(queryStr).toContain('policy-agentless-1');
+        expect(queryStr).toContain('policy-agentless-2');
+      });
+
+      it('adds no exclusion clause when there are no agentless policies', async () => {
+        // agentPolicyService.list returns { items: [] } by default (see mock above).
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        const queryStr = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
+        expect(queryStr).not.toContain('policy_base_id');
+        expect(queryStr).not.toContain('policy_id');
       });
     });
   });

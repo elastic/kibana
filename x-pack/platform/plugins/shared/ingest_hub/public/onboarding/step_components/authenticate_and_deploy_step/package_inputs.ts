@@ -166,3 +166,38 @@ export function buildPackageVars(
 export function getPackageVarNames(pkgInfo: { vars?: Array<{ name: string }> }): Set<string> {
   return new Set((pkgInfo.vars ?? []).map((v) => v.name));
 }
+
+/**
+ * Converts raw serviceVars (string values from session storage) to typed form for SO persistence.
+ * Multi-value fields (e.g. `regions`) are split from comma-separated strings to string arrays so
+ * the SO reflects the exact typed values that would be sent to the Fleet API.
+ */
+export function toSOServiceVars(
+  serviceVars: Record<string, ServiceVars>,
+  servicesMap: Map<string, AwsServiceMatrixEntry>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [serviceId, vars] of Object.entries(serviceVars)) {
+    const service = servicesMap.get(serviceId);
+    if (!service) {
+      result[serviceId] = vars;
+      continue;
+    }
+    const typedVarsByDataStream: Record<string, unknown> = {};
+    for (const [dsId, dsVars] of Object.entries(vars.varsByDataStream)) {
+      const dsView = makeDsView(service, dsId);
+      const typedVarsByInput: Record<string, Record<string, unknown>> = {};
+      for (const [inputType, inputVars] of Object.entries(dsVars.varsByInput)) {
+        const typedFields: Record<string, unknown> = {};
+        for (const [fieldKey, rawValue] of Object.entries(inputVars)) {
+          const meta = resolveFieldMeta(dsView, inputType, fieldKey);
+          typedFields[fieldKey] = meta ? toTyped(rawValue, meta) : rawValue;
+        }
+        typedVarsByInput[inputType] = typedFields;
+      }
+      typedVarsByDataStream[dsId] = { ...dsVars, varsByInput: typedVarsByInput };
+    }
+    result[serviceId] = { ...vars, varsByDataStream: typedVarsByDataStream };
+  }
+  return result;
+}

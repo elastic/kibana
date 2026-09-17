@@ -199,11 +199,7 @@
     },
     {
       "groupName": "Enzyme dependencies",
-      "matchDepNames": [
-        "@wojtekmaj/enzyme-adapter-react-17",
-        "enzyme",
-        "@types/enzyme"
-      ],
+      "matchDepNames": ["@wojtekmaj/enzyme-adapter-react-17", "enzyme", "@types/enzyme"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "matchUpdateTypes": ["patch"],
@@ -456,7 +452,7 @@
     {
       "groupName": "@reduxjs/toolkit",
       "matchDepNames": ["@reduxjs/toolkit", "immer", "redux-toolkit-v1", "immer-v9"],
-      "reviewers": ["team:kibana-visualizations", "team:security-solution"],
+      "reviewers": ["team:kibana-dashboards", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -516,7 +512,7 @@
     {
       "groupName": "use-resize-observer",
       "matchDepNames": ["use-resize-observer"],
-      "reviewers": ["team:kibana-presentation", "team:security-solution"],
+      "reviewers": ["team:kibana-dashboards", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -636,7 +632,7 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@elastic/kibana-data-discovery dependencies",
+      "groupName": "@elastic/kibana-discover dependencies",
       "matchDepNames": [
         "@elastic/datemath",
         "diff",
@@ -644,7 +640,7 @@
         "usng.js",
         "react-reverse-portal"
       ],
-      "reviewers": ["team:kibana-data-discovery"],
+      "reviewers": ["team:kibana-discover"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:DataDiscovery"],
       "enabled": true,
@@ -698,7 +694,7 @@
     {
       "groupName": "@elastic/charts",
       "matchDepNames": ["@elastic/charts"],
-      "reviewers": ["team:kibana-visualizations", "markov00", "nickofthyme"],
+      "reviewers": ["team:kibana-dashboards", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
       "enabled": true
@@ -1208,7 +1204,7 @@
     {
       "groupName": "jquery",
       "matchDepNames": ["jquery", "@types/jquery"],
-      "reviewers": ["team:kibana-visualizations"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Visualizations"],
       "minimumReleaseAge": "14 days",
@@ -1217,16 +1213,16 @@
     {
       "groupName": "memoize-one",
       "matchDepNames": ["memoize-one"],
-      "reviewers": ["team:kibana-visualizations"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Visualizations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
-      "groupName": "@elastic/kibana-visualizations Color related modules",
+      "groupName": "@elastic/kibana-dashboards Color related modules",
       "matchDepNames": ["chroma-js", "@types/chroma-js"],
-      "reviewers": ["team:kibana-visualizations"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Feature:Vega", "Team:Visualizations"],
       "minimumReleaseAge": "14 days",
@@ -1235,7 +1231,7 @@
     {
       "groupName": "hjson",
       "matchDepNames": ["@types/hjson", "hjson"],
-      "reviewers": ["team:kibana-visualizations", "team:streams-ui"],
+      "reviewers": ["team:kibana-dashboards", "team:streams-ui"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Feature:Vega", "Team:Visualizations"],
       "minimumReleaseAge": "14 days",
@@ -1251,7 +1247,7 @@
         "vega-spec-injector",
         "vega-tooltip"
       ],
-      "reviewers": ["team:kibana-visualizations"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Feature:Vega", "Team:Visualizations"],
       "dependencyDashboardApproval": true,
@@ -1278,7 +1274,7 @@
         "d3-selection",
         "d3-transition"
       ],
-      "reviewers": ["team:kibana-visualizations"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Feature:Vega", "Team:Visualizations"],
       "minimumReleaseAge": "14 days",
@@ -1372,8 +1368,8 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/yarn.lock utils",
-      "matchDepNames": ["@yarnpkg/lockfile", "sort-package-json", "yarn-deduplicate"],
+      "groupName": "package.json/pnpm-lock.yaml utils",
+      "matchDepNames": ["sort-package-json"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1410,7 +1406,7 @@
     {
       "groupName": "dnd-kit",
       "matchDepNames": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
@@ -1419,7 +1415,7 @@
     {
       "groupName": "@elastic/ems client",
       "matchDepNames": ["@elastic/ems-client"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
@@ -1428,7 +1424,7 @@
     {
       "groupName": "loaders.gl",
       "matchDepNames": ["@loaders.gl/core", "@loaders.gl/json", "@loaders.gl/shapefile"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
@@ -1437,7 +1433,7 @@
     {
       "groupName": "mapbox-gl-draw (pinned until Kibana supports ESM)",
       "matchDepNames": ["@mapbox/mapbox-gl-draw"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
@@ -1447,7 +1443,7 @@
     {
       "groupName": "mapbox-gl-rtl-text (pinned until Kibana supports ESM)",
       "matchDepNames": ["@mapbox/mapbox-gl-rtl-text"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
@@ -1457,7 +1453,7 @@
     {
       "groupName": "mapbox-vector-tile (pinned until Kibana supports ESM)",
       "matchDepNames": ["@mapbox/vector-tile", "@types/mapbox__vector-tile"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
@@ -1468,7 +1464,7 @@
       "groupName": "mapbox-gl-supported",
       "description": "versions >=3 mark WebGL1 as incompatible, but maplibre-gl-js supports WebGL1 and WebGL2",
       "matchDepNames": ["@mapbox/mapbox-gl-supported"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
@@ -1483,48 +1479,48 @@
         "maplibre-gl",
         "@types/geojson"
       ],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
-      "groupName": "misc kibana-presentation dependencies",
+      "groupName": "misc kibana-dashboards dependencies",
       "matchDepNames": ["jsts", "pbf", "@types/flot", "@types/pbf"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
-      "groupName": "kibana-presentation react dependencies",
+      "groupName": "kibana-dashboards react dependencies",
       "matchDepNames": [
         "react-dropzone",
         "react-recompose",
         "react-shortcuts",
         "@types/react-recompose"
       ],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
-      "groupName": "kibana-presentation misc maps dependencies",
+      "groupName": "kibana-dashboards misc maps dependencies",
       "matchDepNames": ["bitmap-sdf", "canvg", "wellknown"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
-      "groupName": "kibana-presentation misc canvas dependencies",
+      "groupName": "kibana-dashboards misc canvas dependencies",
       "matchDepNames": ["safe-squel"],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
@@ -1562,7 +1558,7 @@
         "@turf/helpers",
         "@turf/length"
       ],
-      "reviewers": ["team:kibana-presentation"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
@@ -1804,7 +1800,7 @@
     {
       "groupName": "p-limit",
       "matchDepNames": ["p-limit"],
-      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "allowedVersions": "<4.0.0",
       "minimumReleaseAge": "14 days",
@@ -1813,7 +1809,7 @@
     {
       "groupName": "p-map - ESM Required",
       "matchDepNames": ["p-map"],
-      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
@@ -1822,7 +1818,7 @@
     {
       "groupName": "p-retry - ESM Required",
       "matchDepNames": ["p-retry"],
-      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["blocked", "effort:low"],
       "minimumReleaseAge": "14 days",
@@ -1831,7 +1827,7 @@
     {
       "groupName": "redux-actions",
       "matchDepNames": ["redux-actions", "@types/redux-actions"],
-      "reviewers": ["team:kibana-management", "team:actionable-obs-team"],
+      "reviewers": ["team:kibana-management", "team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1847,7 +1843,7 @@
     {
       "groupName": "redux-thunk",
       "matchDepNames": ["redux-thunk-v2"],
-      "reviewers": ["team:kibana-presentation", "team:kibana-management", "team:security-solution"],
+      "reviewers": ["team:kibana-dashboards", "team:kibana-management", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2026,7 +2022,7 @@
     {
       "groupName": "react-hook-form",
       "matchDepNames": ["react-hook-form"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
@@ -2035,7 +2031,7 @@
     {
       "groupName": "react-window-infinite-loader",
       "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
@@ -2044,7 +2040,7 @@
     {
       "groupName": "form-data",
       "matchDepNames": ["form-data"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
@@ -2053,7 +2049,7 @@
     {
       "groupName": "@faker-js/faker",
       "matchDepNames": ["@faker-js/faker"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
@@ -2070,7 +2066,7 @@
     {
       "groupName": "redux-saga",
       "matchDepNames": ["redux-saga"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
@@ -2088,8 +2084,8 @@
       ],
       "reviewers": [
         "team:search-ml-ux",
-        "team:kibana-presentation",
-        "team:kibana-data-discovery",
+        "team:kibana-dashboards",
+        "team:kibana-discover",
         "team:kibana-management",
         "team:security-solution"
       ],
@@ -2101,7 +2097,7 @@
     {
       "groupName": "Peggy",
       "matchDepNames": ["peggy"],
-      "reviewers": ["team:kibana-visualizations", "team:kibana-data-discovery"],
+      "reviewers": ["team:kibana-dashboards", "team:kibana-discover"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2221,15 +2217,21 @@
     {
       "groupName": "antlr4",
       "matchDepNames": ["antlr4"],
-      "reviewers": ["team:appex-sharedux", "team:kibana-esql"],
+      "reviewers": ["team:appex-sharedux", "team:kibana-discover"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "esql-js",
-      "matchDepNames": ["@elastic/esql"],
-      "reviewers": ["team:kibana-esql"],
+      "matchDepNames": [
+        "@elastic/esql",
+        "@elastic/esql-grammar",
+        "@elastic/esql-promql-grammar",
+        "@elastic/esql-types",
+        "@elastic/pretty-printer"
+      ],
+      "reviewers": ["team:kibana-discover"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2376,7 +2378,7 @@
     {
       "groupName": "Kibana ES|QL Team",
       "matchDepNames": ["recast"],
-      "reviewers": ["team:kibana-esql"],
+      "reviewers": ["team:kibana-discover"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:ESQL"],
       "minimumReleaseAge": "14 days",
@@ -2385,7 +2387,7 @@
     {
       "groupName": "Kibana ES|QL Highlighting",
       "matchDepNames": ["@elastic/monaco-esql"],
-      "reviewers": ["team:kibana-esql"],
+      "reviewers": ["team:kibana-discover"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:ESQL", "release_note:skip", "backport:version"],
       "enabled": true
@@ -2393,7 +2395,7 @@
     {
       "groupName": "re2js",
       "matchDepNames": ["re2js"],
-      "reviewers": ["team:kibana-visualizations"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Visualizations"],
       "enabled": true,
@@ -2561,6 +2563,14 @@
       "addLabels": ["Team:EUI"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "jsondiffpatch",
+      "matchDepNames": ["jsondiffpatch"],
+      "reviewers": ["team:kibana-dashboards", "team:security-solution"],
+      "matchBaseBranches": ["main"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
     },
     {
       "groupName": "eui-illustrations",

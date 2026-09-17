@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
-import type { SavedObject } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -39,6 +39,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   let oldUiamApiKeyToInvalidate: string | undefined | null;
   let attributes: RawRule;
   let version: string | undefined;
+  let references: SavedObjectReference[];
 
   try {
     updateApiKeyParamsSchema.validate({ id });
@@ -60,10 +61,15 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     oldUiamApiKeyToInvalidate = decryptedAlert.attributes.uiamApiKey;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
+    references = decryptedAlert.references;
   } catch (e) {
-    // We'll skip invalidating the API key since we failed to load the decrypted saved object
+    // We'll skip invalidating the API key since we failed to load the decrypted saved object.
+    // The rotation still goes ahead so that this endpoint remains the recovery path for a rule
+    // whose keys can no longer be decrypted, but the previous keys are abandoned without being
+    // invalidated: a non-decryptable value cannot be read, so it cannot be queued for
+    // invalidation. Log it so the abandoned credentials are auditable rather than silent.
     context.logger.error(
-      `updateApiKey(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+      `updateApiKey(): Failed to load API key to invalidate on alert ${id}: ${e.message}. The previous API keys of this rule will be abandoned without being invalidated.`
     );
     // Still attempt to load the attributes and version using SOC
     const alert = await context.unsecuredSavedObjectsClient.get<RawRule>(
@@ -72,6 +78,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     );
     attributes = alert.attributes;
     version = alert.version;
+    references = alert.references;
   }
 
   try {
@@ -124,17 +131,24 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   try {
-    const updatedRuleSavedObject = await context.unsecuredSavedObjectsClient.update(
+    // Write the whole document instead of a partial update. A partial update merges attributes,
+    // so the API key attributes stripped above would keep their stored values rather than being
+    // removed, leaving the rule holding a key that is queued for invalidation below. It also
+    // avoids the AAD hazard that makes `apiKey` unsafe to partially update at all
+    // (see `RuleAttributesNotPartiallyUpdatable`).
+    const updatedRuleSavedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
       RULE_SAVED_OBJECT_TYPE,
-      id,
       updateAttributes,
       {
+        id,
+        overwrite: true,
         version,
+        references,
       }
     );
 
     await logRuleChanges({
-      ruleSOs: [updatedRuleSavedObject] as Array<SavedObject<RawRule>>,
+      ruleSOs: [updatedRuleSavedObject],
       encryptedFieldsMap: new Map([
         [id, { apiKey: apiKeyAttributes.apiKey, uiamApiKey: apiKeyAttributes.uiamApiKey ?? null }],
       ]),

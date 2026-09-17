@@ -56,6 +56,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.ml}.query_anomalies`,
 
   // Security Solution
+  `${internalNamespaces.security}.alertzero.actions.list`,
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
   `${internalNamespaces.security}.run_rule_preview`,
@@ -114,6 +115,12 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
 
+  // Nightshift – Sandbox
+  'nightshift_sandbox_bash',
+  'nightshift_sandbox_view_file',
+  'nightshift_sandbox_str_replace',
+  'nightshift_sandbox_write_file',
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -134,6 +141,7 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  'deductive.ai',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -155,6 +163,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
+  `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -198,6 +207,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'feature-identification',
   'streams-memory-synthesis',
   'streams-memory-consolidation',
   'streams-conversation-scraper',
@@ -205,8 +215,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-gap-detection',
 
   // Platform – Context Engine
-  'ki-automation-generation',
   'ki-retrieval',
+  'analyze-and-improve',
+  'context-engine-signals',
+  'ai-index-sources',
+  'ai-index-automations',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -226,6 +239,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
+  'detection-coverage',
   'pci-compliance',
   'endpoint-forensic-analysis',
   'investigate-rule',
@@ -243,6 +257,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+  'observability.investigate-service-map',
 
   // ML
   `${internalNamespaces.ml}.anomaly-detection`,
@@ -357,6 +372,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – APM
   'observability.service-map',
+  'observability.service-map-context',
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',

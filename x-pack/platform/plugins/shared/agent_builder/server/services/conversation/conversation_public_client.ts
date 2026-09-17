@@ -28,7 +28,7 @@ export const createConversationPublicClient = ({
   return {
     get: client.get.bind(client),
     list: client.list.bind(client),
-    create: async ({ agentId, id, title, accessControl }) => {
+    create: async ({ agentId, id, title, accessControl, templateId, metadata }) => {
       const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
 
       await agentRegistry.get(effectiveAgentId, { access: 'use' });
@@ -51,6 +51,8 @@ export const createConversationPublicClient = ({
               })),
             }
           : undefined,
+        template_id: templateId,
+        metadata,
         rounds: [],
       });
     },

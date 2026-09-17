@@ -13,12 +13,13 @@ import {
   groupingModeSchema,
   throttleStrategySchema,
   durationSchema,
+  policyMatcherSchema,
   tagsSchema,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
 } from '@kbn/alerting-v2-schemas';
-import { attachmentDataToActionPolicyPayload } from '../../../../common/agent_builder/action_policy_mappers';
+import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 // Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
@@ -69,11 +70,9 @@ export const setDestinationsOperationSchema = z
 export const setMatcherOperationSchema = z
   .object({
     operation: z.literal('set_matcher'),
-    matcher: z
-      .string()
-      .max(4096)
+    matcher: policyMatcherSchema
       .nullable()
-      .describe('A KQL query to match alert episodes, or null for a catch-all.'),
+      .describe('Structured matcher for alert episodes, or null for a catch-all.'),
   })
   .describe(
     'Use `set_matcher` to limit which alert episodes this policy notifies on. An empty or null matcher matches all episodes in the space.'

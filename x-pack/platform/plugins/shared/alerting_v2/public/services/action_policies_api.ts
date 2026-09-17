@@ -17,7 +17,10 @@ import type {
   FindActionPoliciesResponse,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
+  ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+} from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
@@ -142,16 +145,19 @@ export class ActionPoliciesApi {
   public async fetchRuleEventFields(matcher?: string) {
     const trimmed = matcher?.trim();
     return this.http.get<string[]>(
-      ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+      ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
       trimmed ? { query: { matcher: trimmed } } : {}
     );
   }
 
   public async fetchTags(params?: { search?: string }) {
-    return this.http.get<{ tags: string[] }>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/tags`, {
-      query: {
-        search: params?.search || undefined,
-      },
-    });
+    return this.http.get<{ tags: string[] }>(
+      `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/tags`,
+      {
+        query: {
+          search: params?.search || undefined,
+        },
+      }
+    );
   }
 }

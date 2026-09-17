@@ -46,6 +46,7 @@ interface PackResultsHeadersProps {
   scheduleId?: string;
   executionCount?: number;
   onSaveQuery?: () => void;
+  hideTitle?: boolean;
 }
 
 const actionsGroupCss = {
@@ -62,6 +63,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
     scheduleId,
     executionCount,
     onSaveQuery,
+    hideTitle,
   }) => {
     const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
     const permissions = useKibana().services.application.capabilities.osquery;
@@ -90,19 +92,21 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
         <EuiFlexGroup
           direction="row"
           gutterSize="m"
-          justifyContent="spaceBetween"
+          justifyContent={hideTitle ? 'flexEnd' : 'spaceBetween'}
           alignItems="center"
         >
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.osquery.liveQueryActionResults.results"
-                  defaultMessage="Query results"
-                />
-              </h1>
-            </EuiText>
-          </EuiFlexItem>
+          {!hideTitle && (
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryActionResults.results"
+                    defaultMessage="Query results"
+                  />
+                </h1>
+              </EuiText>
+            </EuiFlexItem>
+          )}
           {actionId && (
             <EuiFlexItem grow={false} css={actionsGroupCss}>
               <EuiFlexGroup gutterSize="s" alignItems="center">

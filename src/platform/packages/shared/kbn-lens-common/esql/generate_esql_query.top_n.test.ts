@@ -7,37 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { IndexPattern } from '../types';
+import type { DateHistogramIndexPatternColumn } from '../datasources/operations';
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 
 import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { defaultUiSettingsGet } from './__mocks__/ui_settings';
-import { mockDateRange } from './__mocks__/esql_query_mocks';
+import { createTermsColumn, mockDateRange, mockLayer } from './__mocks__/esql_query_mocks';
 
-const mockAggEntries: Array<readonly [string, GenericIndexPatternColumn]> = [
-  [
-    '1',
-    {
-      label: 'Top 5 values of host.keyword',
-      dataType: 'string',
-      operationType: 'terms',
-      sourceField: 'host.keyword',
-      isBucketed: true,
-    },
-  ],
-  [
-    '2',
-    {
-      label: 'Average of bytes',
-      dataType: 'number',
-      operationType: 'average',
-      sourceField: 'bytes',
-      isBucketed: false,
-    },
-  ],
-];
+const createAverageColumn = (): GenericIndexPatternColumn => ({
+  label: 'Average of bytes',
+  dataType: 'number',
+  operationType: 'average',
+  sourceField: 'bytes',
+  isBucketed: false,
+});
 
-const mockIndexPattern = {
+const mockSampleLogsIndexPattern = {
   title: 'kibana_sample_data_logs',
   timeFieldName: 'timestamp',
   getFieldByName: (field: string) => {
@@ -47,28 +33,17 @@ const mockIndexPattern = {
   getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
 } as unknown as IndexPattern;
 
-const mockLayer: FormBasedLayer = {
+const buildTermsAverageLayer = (terms: ReturnType<typeof createTermsColumn>): FormBasedLayer => ({
+  ...mockLayer,
   columns: {
-    '1': {
-      label: 'Top 5 values of host.keyword',
-      dataType: 'string',
-      operationType: 'terms',
-      sourceField: 'host.keyword',
-      isBucketed: true,
-    },
-    '2': {
-      label: 'Average of bytes',
-      dataType: 'number',
-      operationType: 'average',
-      sourceField: 'bytes',
-      isBucketed: false,
-    },
+    '1': terms,
+    '2': createAverageColumn(),
   },
   columnOrder: ['1', '2'],
   incompleteColumns: {},
   sampling: 1,
-  indexPatternId: mockIndexPattern.id,
-};
+  indexPatternId: mockSampleLogsIndexPattern.id,
+});
 
 describe('generateEsqlQuery top N', () => {
   const { uiSettings } = createCoreSetupMock();
@@ -76,13 +51,94 @@ describe('generateEsqlQuery top N', () => {
     return defaultUiSettingsGet(key);
   });
 
-  // Note: operationDefinitionMap for "terms" does not support toESQL
-  // should generate a valid ESQL query for top N terms and average aggregation
-  it('should return failure with terms_not_supported reason for top N terms and average aggregation', () => {
+  it('should return terms_not_supported for an otherwise eligible terms column', () => {
+    const terms = createTermsColumn();
     const result = generateEsqlQuery(
-      mockAggEntries,
-      mockLayer,
-      mockIndexPattern,
+      [
+        ['1', terms],
+        ['2', createAverageColumn()],
+      ],
+      buildTermsAverageLayer(terms),
+      mockSampleLogsIndexPattern,
+      uiSettings,
+      mockDateRange,
+      new Date()
+    );
+
+    expect(result).toEqual({
+      success: false,
+      reason: 'terms_not_supported',
+    });
+  });
+
+  it('should return terms_other_bucket_not_supported when other bucket is enabled', () => {
+    const terms = createTermsColumn({ otherBucket: true });
+    const result = generateEsqlQuery(
+      [
+        ['1', terms],
+        ['2', createAverageColumn()],
+      ],
+      buildTermsAverageLayer(terms),
+      mockSampleLogsIndexPattern,
+      uiSettings,
+      mockDateRange,
+      new Date()
+    );
+
+    expect(result).toEqual({
+      success: false,
+      reason: 'terms_other_bucket_not_supported',
+    });
+  });
+
+  it('should return terms_order_by_not_supported for rare ranking', () => {
+    const terms = createTermsColumn({ orderBy: { type: 'rare', maxDocCount: 3 } });
+    const result = generateEsqlQuery(
+      [
+        ['1', terms],
+        ['2', createAverageColumn()],
+      ],
+      buildTermsAverageLayer(terms),
+      mockSampleLogsIndexPattern,
+      uiSettings,
+      mockDateRange,
+      new Date()
+    );
+
+    expect(result).toEqual({
+      success: false,
+      reason: 'terms_order_by_not_supported',
+    });
+  });
+
+  it('should return terms_not_supported when terms is combined with a date histogram', () => {
+    const terms = createTermsColumn();
+    const dateHistogram: DateHistogramIndexPatternColumn = {
+      label: 'timestamp',
+      dataType: 'date',
+      operationType: 'date_histogram',
+      sourceField: 'timestamp',
+      isBucketed: true,
+      params: { interval: 'auto' },
+    };
+    const layer: FormBasedLayer = {
+      ...buildTermsAverageLayer(terms),
+      columns: {
+        '1': dateHistogram,
+        '2': terms,
+        '3': createAverageColumn(),
+      },
+      columnOrder: ['1', '2', '3'],
+    };
+
+    const result = generateEsqlQuery(
+      [
+        ['1', dateHistogram],
+        ['2', terms],
+        ['3', createAverageColumn()],
+      ],
+      layer,
+      mockSampleLogsIndexPattern,
       uiSettings,
       mockDateRange,
       new Date()

@@ -13,7 +13,6 @@ import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
 import { fullWidthContentCss, WithoutHeaderLayout } from '../../components/layouts';
-import { useGoBack } from '../../common/use_go_back';
 import {
   useScheduledExecutionDetails,
   mapScheduledDetailsToQueryData,
@@ -39,8 +38,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
   });
 
   const historyPath = pagePathGetters.history();
-  const handleGoBack = useGoBack(historyPath);
-  const historyNavProps = useRouterNavigate(historyPath, handleGoBack);
+  const historyNavProps = useRouterNavigate(historyPath);
 
   const { data, isLoading, isError } = useScheduledExecutionDetails({
     scheduleId,
@@ -51,15 +49,6 @@ const ScheduledExecutionDetailsPageComponent = () => {
   const queryData = useMemo(
     () => (data ? mapScheduledDetailsToQueryData(data, scheduleId) : undefined),
     [data, scheduleId]
-  );
-
-  const backLink = (
-    <EuiButtonEmpty iconType="chevronSingleLeft" {...historyNavProps} flush="left" size="xs">
-      <FormattedMessage
-        id="xpack.osquery.scheduledExecutionDetails.viewHistoryTitle"
-        defaultMessage="View history"
-      />
-    </EuiButtonEmpty>
   );
 
   if (!isValid) {
@@ -73,6 +62,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
         data={queryData}
         startDate={data?.timestamp}
         showResultsHeader
+        hideResultsTitle
         scheduleId={scheduleId}
         executionCount={executionCount}
         packName={data?.packName}
@@ -127,10 +117,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
 
   return (
     <WithoutHeaderLayout restrictWidth={false}>
-      <div css={fullWidthContentCss}>
-        {backLink}
-        {content}
-      </div>
+      <div css={fullWidthContentCss}>{content}</div>
     </WithoutHeaderLayout>
   );
 };

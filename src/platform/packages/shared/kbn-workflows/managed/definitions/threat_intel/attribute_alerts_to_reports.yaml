@@ -10,7 +10,7 @@ name: Attribute alerts to reports
 description: Count environment alerts linked to each threat report and store totals on the report
 tags:
   - threat-intel
-enabled: true
+enabled: false
 settings:
   concurrency:
     key: "threat-intel-attribute-{{ workflow.spaceId }}"

@@ -36,6 +36,7 @@ import type {
   CoreStatus,
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { LICENSE_TYPE } from '@kbn/licensing-types';
 import type {
@@ -240,6 +241,7 @@ export class AlertingPlugin {
   private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private readonly serverUuid: string;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private kibanaBaseUrl: string | undefined;
@@ -269,6 +271,7 @@ export class AlertingPlugin {
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.serverUuid = initializerContext.env.instanceUuid;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
@@ -358,6 +361,7 @@ export class AlertingPlugin {
           logger: this.logger,
           pluginStop$: this.pluginStop$,
           kibanaVersion: this.kibanaVersion,
+          serverUuid: this.serverUuid,
           dataStreamAdapter: this.dataStreamAdapter!,
           elasticsearchClientPromise: core
             .getStartServices()
@@ -365,6 +369,11 @@ export class AlertingPlugin {
           elasticsearchAndSOAvailability$,
           isServerless: this.isServerless,
           totalFieldsLimit: this.config.alertsService.totalFieldsLimit,
+          // Coordinate resource installation across nodes with a cluster-wide lock
+          // unless disabled via config.
+          lockManager: this.config.alertsService.coordinateInstallation
+            ? new LockManagerService(core, this.logger)
+            : undefined,
         });
       }
     }
@@ -705,6 +714,7 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
       securityService: core.security,
       shouldGrantUiam,
+      apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       isServerless: this.isServerless,
       analytics: core.analytics,
     });

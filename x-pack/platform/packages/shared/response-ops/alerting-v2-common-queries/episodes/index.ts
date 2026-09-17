@@ -21,6 +21,7 @@ export type { TypedEsqlQuery } from './typed_esql_query';
 
 export {
   ALERT_EPISODE_FIELDS,
+  DURATION_LOWER_BOUND_FIELD,
   buildEpisodesBaseQuery,
   buildEpisodesQuery,
   addEpisodeAggregation,
@@ -48,6 +49,7 @@ export type { EpisodeActionRow } from './episode_actions_query';
 export { buildEpisodeActionsHistoryQuery } from './episode_actions_history_query';
 export type {
   EpisodeActionHistoryEntry,
+  RawEpisodeActionHistoryEntry,
   BuildEpisodeActionsHistoryQueryOptions,
 } from './episode_actions_history_query';
 

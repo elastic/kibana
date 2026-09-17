@@ -9,6 +9,7 @@ import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/atta
 import type {
   AttachmentResolveContext,
   AttachmentTypeDefinition,
+  AttachmentValidateContext,
 } from '@kbn/agent-builder-server/attachments';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
@@ -21,10 +22,12 @@ export const validateAttachment = async <Type extends string, Data>({
   attachment,
   registry,
   resolveContext,
+  validateContext,
 }: {
   attachment: AttachmentInput<Type, Data>;
   registry: AttachmentTypeRegistry;
   resolveContext: AttachmentResolveContext;
+  validateContext: AttachmentValidateContext;
 }): Promise<ValidateAttachmentResult<Type, Data>> => {
   if (!registry.has(attachment.type)) {
     return { valid: false, error: `Unknown attachment type: ${attachment.type}` };
@@ -34,7 +37,7 @@ export const validateAttachment = async <Type extends string, Data>({
 
   try {
     const resolvedData = await resolveAttachment({ attachment, resolveContext, typeDefinition });
-    const typeValidation = await typeDefinition.validate(resolvedData);
+    const typeValidation = await typeDefinition.validate(resolvedData, validateContext);
     if (!typeValidation.valid) {
       return { valid: false, error: typeValidation.error };
     }

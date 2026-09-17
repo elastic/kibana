@@ -12,6 +12,7 @@ import {
   type AddEventsStepInput,
 } from '../../../common/workflows/steps/add_events';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 import { LEGACY_EVENT_TYPE } from '../../../common/constants/attachments';
@@ -54,9 +55,11 @@ export const addEventsStepDefinition = (
           attachments,
         });
 
+        // The client returns unified comments; the output schema mirrors the
+        // public (legacy) wire shape, so convert back before validating.
         return safeParseCaseForWorkflowOutput(
           addEventsStepCommonDefinition.outputSchema.shape.case,
-          updatedCase
+          toLegacyCaseResponse(updatedCase)
         );
       });
     }),

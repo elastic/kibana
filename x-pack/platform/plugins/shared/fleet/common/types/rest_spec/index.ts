@@ -9,6 +9,7 @@ export type * from './agent_policy';
 export * from './agent';
 export type * from './app';
 export type * from './cloud_connector';
+export type * from './cloud_onboarding_deployment';
 export type * from './common';
 export type * from './data_stream';
 export type * from './download_sources';

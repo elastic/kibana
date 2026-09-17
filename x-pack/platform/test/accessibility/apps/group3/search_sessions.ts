@@ -84,6 +84,16 @@ const SEARCH_SESSIONS = [
   },
 ];
 
+/**
+ * Migration recommendation: MIXED. See individual tests. These are axe snapshots, so they
+ * cannot move to Jest. Keep Scout `page.checkA11y` checkpoints for composed page states
+ * (landing page, actions menu, inspect flyout, rename/delete modals). Drop stock EUI
+ * search-bar filter scans. Merge keepers into one Scout a11y spec with `test.step` (see
+ * x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_a11y.spec.ts).
+ * No serverless FTR mirror. Scout already has a search_sessions server config set and
+ * BackgroundSearchManagementPage.
+ */
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { searchSessionsManagement } = getPageObjects(['searchSessionsManagement']);
   const a11y = getService('a11y');
@@ -137,16 +147,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT a11y. High-value landing page (AppHeader +
+     * populated table). Rendering is covered in
+     * src/platform/plugins/shared/data/public/search/session/sessions_mgmt/components/main.test.tsx
+     * and table.test.tsx, but those do not run axe.
+     */
     it('Search sessions management page populated with search sessions meets a11y requirements', async () => {
       await a11y.testAppSnapshot();
     });
 
+    /**
+     * Migration recommendation: DELETE. Stock EUI search-bar `field_value_selection` filter.
+     * Filter presence is already asserted in table.test.tsx (`getByLabelText('Status Selection')`).
+     * EUI owns the popover a11y.
+     */
     it('Toggle status panel meets a11y requirements', async () => {
       await (await find.byCssSelector('[data-text="Status"]')).click(); // Open the status select
       await a11y.testAppSnapshot();
       await (await find.byCssSelector('[data-text="Status"]')).click(); // Close the status select
     });
 
+    /**
+     * Migration recommendation: DELETE. Same table as the landing-page scan with fewer rows.
+     * No new custom markup. Status filtering is EuiInMemoryTable behavior.
+     */
     it('Search sessions management toggled on a single status meets a11y requirements ', async () => {
       await (await find.byCssSelector('[data-text="Status"]')).click();
       await (await find.byCssSelector('[title="expired"]')).click();
@@ -157,12 +182,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('clearSearchButton');
     });
 
+    /**
+     * Migration recommendation: DELETE. Same as the Status filter — stock EUI
+     * `field_value_selection`. Presence is covered in table.test.tsx
+     * (`getByLabelText('App Selection')`).
+     */
     it('App filter panel meets a11y requirements', async () => {
       await (await find.byCssSelector('[data-text="App"]')).click();
       await a11y.testAppSnapshot();
       await (await find.byCssSelector('[data-text="App"]')).click(); // Close the popover
     });
 
+    /**
+     * Migration recommendation: DELETE. Same table as the landing-page scan with fewer rows.
+     * No new custom markup.
+     */
     it('Session management filtered by applications meets a11y requirements', async () => {
       await (await find.byCssSelector('[data-text="App"]')).click();
       await (await find.byCssSelector('[title="dashboards"]')).click();
@@ -170,16 +204,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.pressKeys(browser.keys.ESCAPE); // Close the App filter popover
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT a11y. Custom aria-labels on the EuiPopover /
+     * EuiButtonIcon / EuiContextMenu wrapper. Which actions appear by status is covered in
+     * get_actions.test.ts, not a11y. This test and the three below form a sequential journey;
+     * merge them into one Scout spec with `test.step`.
+     */
     it('Session management more actions panel pop-over meets a111y requirements', async () => {
       await testSubjects.click('sessionManagementActionsCol');
       await a11y.testAppSnapshot();
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT a11y. Custom flyout body with a read-only
+     * CodeEditor. Scout a11y docs recommend scanning flyouts as interaction states.
+     */
     it('Session management inspect panel from actions pop-over meets a111y requirements', async () => {
       await testSubjects.click('sessionManagementPopoverAction-inspect');
       await a11y.testAppSnapshot();
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT a11y. Custom rename modal (aria-labelledby,
+     * form label, initialFocus). Rename behavior is already covered in
+     * src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_management.spec.ts;
+     * keep only the axe scan.
+     */
     it('Session management edit name panel from actions pop-over meets a11y requirements ', async () => {
       await testSubjects.click('euiFlyoutCloseButton');
       await testSubjects.click('sessionManagementActionsCol');
@@ -188,6 +238,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('cancelEditName'); // Close the edit name panel
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT a11y. EuiConfirmModal with a custom title
+     * and aria-labelledby. Scout a11y pattern (tags_a11y.spec.ts) keeps delete-confirmation
+     * scans. Do not re-test the delete API here.
+     */
     it('Session management delete panel from actions pop-over meets a11y requirements ', async () => {
       await testSubjects.click('sessionManagementActionsCol');
       await testSubjects.click('sessionManagementPopoverAction-delete');

@@ -341,25 +341,55 @@ describe('ImprovementsService', () => {
     });
   });
 
-  describe('historyFor', () => {
-    it('returns every improvement for the AI index regardless of status, capped', async () => {
-      search.mockResolvedValue(searchResponse([hitOf(makeHead())]));
+  describe('historySummaryFor', () => {
+    const summaryResponse = (
+      buckets: Array<{ key: string; doc_count: number }>,
+      total = buckets.reduce((sum, { doc_count: count }) => sum + count, 0)
+    ) => ({
+      hits: { hits: [], total: { value: total, relation: 'eq' } },
+      aggregations: { status: { buckets } },
+    });
 
-      await service.historyFor('sales');
+    it('counts the AI index heads by status without fetching any of them', async () => {
+      search.mockResolvedValue(
+        summaryResponse([
+          { key: 'rejected', doc_count: 4 },
+          { key: 'suggested', doc_count: 2 },
+        ])
+      );
+
+      const summary = await service.historySummaryFor('sales');
 
       const [request] = search.mock.calls[0];
+      expect(request.size).toBe(0);
       expect(request.query.bool.filter).toEqual([
         { term: { latest: true } },
         { term: { ai_index_id: 'sales' } },
       ]);
+      expect(summary).toEqual({ total: 6, by_status: { rejected: 4, suggested: 2 } });
     });
 
-    it('is not clamped by the review UI page size, but is capped by the briefing budget', async () => {
-      await service.historyFor('sales');
-      expect(search.mock.calls[0][0].size).toBe(200);
+    it('reports a total the counted statuses do not have to add up to', async () => {
+      // `track_total_hits` is what the briefing quotes, so it is read from the hits rather than
+      // summed from buckets a `size`-capped terms agg could have truncated.
+      search.mockResolvedValue(summaryResponse([{ key: 'rejected', doc_count: 4 }], 9));
 
-      await service.historyFor('sales', { size: 10_000 });
-      expect(search.mock.calls[1][0].size).toBe(200);
+      expect(await service.historySummaryFor('sales')).toEqual({
+        total: 9,
+        by_status: { rejected: 4 },
+      });
+    });
+
+    it('ignores a bucket key that is not a status this store writes', async () => {
+      search.mockResolvedValue(summaryResponse([{ key: 'archived', doc_count: 3 }], 3));
+
+      expect((await service.historySummaryFor('sales')).by_status).toEqual({});
+    });
+
+    it('reports an index with no proposals as empty rather than failing', async () => {
+      search.mockResolvedValue({ hits: { hits: [], total: { value: 0, relation: 'eq' } } });
+
+      expect(await service.historySummaryFor('sales')).toEqual({ total: 0, by_status: {} });
     });
   });
 

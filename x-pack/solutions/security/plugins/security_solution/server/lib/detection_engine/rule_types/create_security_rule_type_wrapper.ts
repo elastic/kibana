@@ -420,6 +420,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   state: runState,
                   sharedParams: {
                     completeRule,
+                    // Only pass analytics for real runs so preview executions report no telemetry.
+                    analytics: isPreview ? undefined : analytics,
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,

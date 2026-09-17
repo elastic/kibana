@@ -1,5 +1,5 @@
 {
-  "sha1": "01ec7a642876d3003dcbf82659f0ee3a1434235c",
+  "sha1": "f83b158a9fc278c50e47a36b4ac2c9321143d1ca",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,32 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "f0aa70d045832f5-cefaa0e86801e0f",
+      "title": "ES|QL Discover session dashboard editing saves a linked session edit and returns to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 23,
+        "column": 35
+      }
+    },
+    {
+      "id": "f0aa70d045832f5-0d2d13699cc210b",
+      "title": "ES|QL Discover session dashboard editing opens a normal Discover session when saving a linked edit as new",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 38,
+        "column": 25
       }
     },
     {

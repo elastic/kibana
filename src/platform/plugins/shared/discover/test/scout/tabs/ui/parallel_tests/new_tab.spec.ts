@@ -12,10 +12,20 @@
  * and stability when many tabs are opened quickly.
  */
 
+import { setTimeout as delay } from 'timers/promises';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
+const ESQL_ASYNC_ENDPOINT = '/internal/search/esql_async';
+// Keeps a tab's fetch in flight while the next tab opens.
+const ESQL_RESPONSE_DELAY_MS = 1_000;
+// Search start only; delaying the polls inflates `pollSearch`'s back-off.
+const isEsqlSearchStart = (url: URL) => url.pathname.endsWith(ESQL_ASYNC_ENDPOINT);
+
 spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-classic' }, () => {
+  // Several tabs through full fetches plus data view creation exceeds the default (#274869).
+  spaceTest.setTimeout(150_000);
+
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
@@ -124,21 +134,25 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
   });
 
   // TODO should be removed/modified after empty canvas is implemented #255686
-  spaceTest('should be able to complete all quickly opened tabs', async ({ pageObjects }) => {
-    const { discover, datePicker, unifiedTabs } = pageObjects;
+  spaceTest('should be able to complete all quickly opened tabs', async ({ page, pageObjects }) => {
+    const { discover, unifiedTabs } = pageObjects;
 
-    await spaceTest.step(
-      'set up an ES|QL query over all indices and a wide time range',
-      async () => {
-        await discover.writeAndSubmitEsqlQuery('FROM *');
-        await discover.waitUntilTabIsLoaded();
-        await datePicker.setAbsoluteRange({
-          from: 'Jan 10, 2000 @ 00:00:00.000',
-          to: 'Dec 10, 2025 @ 00:00:00.000',
-        });
-        await discover.waitUntilTabIsLoaded();
+    // Opens the rapid-open race window deterministically, unlike the expensive query it
+    // replaces, whose window tracked dataset size and CI load (#274834).
+    let holdSearches = true;
+
+    await page.route(isEsqlSearchStart, async (route) => {
+      if (holdSearches) {
+        await delay(ESQL_RESPONSE_DELAY_MS);
       }
-    );
+      await route.continue();
+    });
+
+    await spaceTest.step('set up an ES|QL query', async () => {
+      // A single pattern, not `FROM *`: resolving all indices costs ~1s per tab fetch.
+      await discover.writeAndSubmitEsqlQuery('FROM logstash-*');
+      await discover.waitUntilTabIsLoaded();
+    });
 
     await spaceTest.step('open many tabs rapidly, then confirm each one loads', async () => {
       const newTabCount = 7;
@@ -148,6 +162,8 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
         await unifiedTabs.clickNewTabButton();
       }
       await discover.waitUntilTabIsLoaded();
+
+      holdSearches = false;
 
       // The initial tab plus every rapidly-opened tab should be present.
       await expect(unifiedTabs.getTabs()).toHaveCount(newTabCount + 1);

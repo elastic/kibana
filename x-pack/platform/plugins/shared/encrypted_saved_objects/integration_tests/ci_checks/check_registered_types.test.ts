@@ -64,7 +64,7 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "1246557bd7101a6f8f732c6fe2fcebb582b2dfb6154816c43cce224ceaee4239",
+        "action": "c2291acc23b540b16a7e33ca80289a18d7b26663e268d290f943929e047ffc75",
         "action_task_params": "06aa563283bdcd5c07ec433a7d0b8425019ad11d75595ee1431691667ecd2cec",
         "ad_hoc_run_params": "492d390fb70fba457acb3b33ce76d4ea027625b3a7d7e9dd76c5c3255655c544",
         "alert": "878a3b83179bbf2ad9d3862fcba539b7066429869b14c120a1dc7a8d39f4a7fa",
@@ -114,11 +114,14 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(modelVersionMap).toMatchInlineSnapshot(`
       Array [
+        "action|3",
         "action|2",
         "action|1",
+        "action_task_params|4",
         "action_task_params|3",
         "action_task_params|2",
         "action_task_params|1",
+        "ad_hoc_run_params|6",
         "ad_hoc_run_params|5",
         "ad_hoc_run_params|4",
         "ad_hoc_run_params|3",
@@ -139,6 +142,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|11",
         "alert|10",
         "alert|1",
+        "alerting_action_policy|3",
         "alerting_action_policy|2",
         "alerting_action_policy|1",
         "anonymization-salt|1",

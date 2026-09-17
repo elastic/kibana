@@ -142,6 +142,44 @@ describe('OnboardingFlowProvider', () => {
 
       expect(result.current.detectAndReviewStep.isDeploying).toBe(true);
     });
+
+    it('preserves onboardingDeploymentId across subsequent updates that do not include it', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({ onboardingDeploymentId: 'dep-abc' });
+      });
+      rerender();
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({ failedInstances: ['inst_x'] });
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.onboardingDeploymentId).toBe('dep-abc');
+    });
+  });
+
+  describe('removeDeployInstance', () => {
+    it('preserves onboardingDeploymentId when removing an instance', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          onboardingDeploymentId: 'dep-xyz',
+          serviceStatuses: { inst_a: 'receiving' },
+          policyIdsByInstance: { inst_a: 'p-1' },
+        });
+      });
+      rerender();
+
+      act(() => {
+        result.current.removeDeployInstance('inst_a');
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.onboardingDeploymentId).toBe('dep-xyz');
+    });
   });
 
   describe('getLatestFailedInstances', () => {
