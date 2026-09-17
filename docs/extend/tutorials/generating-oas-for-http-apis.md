@@ -172,7 +172,7 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
 
 ##### Set an operation ID
 
-Set an explicit `operationId` on public routes. If you omit it, the generator derives an ID from the method and path, which yields names like `post-foo`. SDK and CLI generators turn that ID into method and command names.
+Set an explicit `operationId` on public routes. If you omit it, the generator derives an ID from the method and path, which yields names like `post-foo`. SDK and CLI generators turn that ID into method and command names, so in some cases setting an explicit, user-friendly ID is recommeded.
 
 Prefer kebab-case `verb-resource` names such as `create-foo`. The ID must be unique in the generated document. A duplicate raises an error during OAS generation.
 
