@@ -15,6 +15,7 @@ paths:
       parameters:
         - name: resource
           in: path
+          required: true
           description: The KnowledgeBase `resource` value.
           schema:
             type: string
@@ -71,6 +72,7 @@ paths:
       parameters:
         - name: resource
           in: path
+          required: true
           description: The KnowledgeBase `resource` value.
           schema:
             type: string
