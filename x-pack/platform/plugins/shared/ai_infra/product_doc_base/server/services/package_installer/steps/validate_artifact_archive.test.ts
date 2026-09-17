@@ -18,6 +18,9 @@ const createMockArchive = (entryPaths: string[]): ZipArchive => {
     getEntryContent: () => {
       throw new Error('non implemented');
     },
+    getEntryStream: () => {
+      throw new Error('non implemented');
+    },
     close: () => undefined,
   };
 };

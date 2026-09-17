@@ -35,6 +35,8 @@ import {
   type ZipArchive,
   ensureInferenceDeployed,
   isLegacySemanticTextVersion,
+  indexNdjsonEntry,
+  rewriteInferenceId,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -772,15 +774,20 @@ export class PackageInstaller {
           throw new Error(`No content files found for ${productName} in archive`);
         }
 
+        const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
         for (const entryPath of contentEntries) {
           this.log.debug(`Indexing content for entry ${entryPath}`);
-          const contentBuffer = await zipArchive.getEntryContent(entryPath);
-          await this.indexContentFile({
+          await indexNdjsonEntry({
+            archive: zipArchive,
+            entryPath,
             indexName,
             esClient: this.esClient,
-            contentBuffer,
-            manifestVersion,
-            inferenceId: effectiveInferenceId,
+            transformDocument: (document) =>
+              rewriteInferenceId({
+                document,
+                inferenceId: effectiveInferenceId,
+                legacySemanticText,
+              }),
           });
         }
 
@@ -983,78 +990,6 @@ export class PackageInstaller {
       await this.esClient.indices.delete({ index: indexName }, { ignore: [404] });
       await this.productDocClient.setOpenapiSpecUninstalled(inferenceId);
     }
-  }
-
-  private async indexContentFile({
-    indexName,
-    esClient,
-    contentBuffer,
-    manifestVersion,
-    inferenceId,
-  }: {
-    indexName: string;
-    esClient: ElasticsearchClient;
-    contentBuffer: Buffer;
-    manifestVersion: string;
-    inferenceId: string;
-  }): Promise<void> {
-    const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
-
-    const fileContent = contentBuffer.toString('utf-8');
-    const lines = fileContent.split('\n');
-
-    const documents = lines
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0)
-      .map((line) => JSON.parse(line))
-      .map((doc) => this.rewriteInferenceId(doc, inferenceId, legacySemanticText));
-
-    const operations: Array<{ index: { _index: string } } | Record<string, any>> = [];
-    for (const document of documents) {
-      operations.push({ index: { _index: indexName } }, document);
-    }
-
-    const response = await esClient.bulk({
-      refresh: false,
-      operations,
-    });
-
-    if (response.errors) {
-      const error =
-        response.items.find((item) => item.index?.error)?.index?.error ?? 'unknown error';
-      throw new Error(`Error indexing documents: ${JSON.stringify(error)}`);
-    }
-  }
-
-  private rewriteInferenceId(
-    document: Record<string, any>,
-    inferenceId: string,
-    legacySemanticText: boolean
-  ): Record<string, any> {
-    // Clone the document to avoid mutating the original
-    const clonedDoc = { ...document };
-
-    if (legacySemanticText) {
-      // For legacy semantic text, modify fields directly on the document
-      Object.values(clonedDoc).forEach((field: any) => {
-        if (field?.inference) {
-          field.inference.inference_id = inferenceId;
-        }
-      });
-    } else {
-      // For non-legacy semantic text, modify fields within _inference_fields
-      if (clonedDoc._inference_fields) {
-        // Clone _inference_fields to avoid mutation issues
-        clonedDoc._inference_fields = { ...clonedDoc._inference_fields };
-        Object.values(clonedDoc._inference_fields).forEach((field: any) => {
-          if (field?.inference) {
-            field.inference = { ...field.inference, inference_id: inferenceId };
-          }
-        });
-      }
-    }
-
-    return clonedDoc;
   }
 
   /**

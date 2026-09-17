@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import { times } from 'lodash';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -20,6 +21,7 @@ const createMockArchive = (entries: Record<string, string>): ZipArchive => {
     hasEntry: (entryPath) => Object.keys(entries).includes(entryPath),
     getEntryPaths: () => Object.keys(entries),
     getEntryContent: async (entryPath) => Buffer.from(entries[entryPath]),
+    getEntryStream: async (entryPath) => Readable.from([Buffer.from(entries[entryPath])]),
     close: () => undefined,
   };
 };

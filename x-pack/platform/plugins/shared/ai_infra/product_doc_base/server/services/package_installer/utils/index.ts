@@ -13,3 +13,4 @@ export {
   ensureInferenceDeployed,
 } from './ensure_default_elser_deployed';
 export { isLegacySemanticTextVersion } from './manifest_versions';
+export { indexNdjsonEntry, rewriteInferenceId } from './index_ndjson_entry';

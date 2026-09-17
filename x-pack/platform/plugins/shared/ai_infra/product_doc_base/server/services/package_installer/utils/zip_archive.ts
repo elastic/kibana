@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
 import yauzl from 'yauzl';
 
 export interface ZipArchive {
   hasEntry(entryPath: string): boolean;
   getEntryPaths(): string[];
   getEntryContent(entryPath: string): Promise<Buffer>;
+  getEntryStream(entryPath: string): Promise<Readable>;
   close(): void;
 }
 
@@ -57,11 +59,19 @@ class ZipArchiveImpl implements ZipArchive {
   }
 
   getEntryContent(entryPath: string) {
+    return getZipEntryContent(this.zipFile, this.getEntry(entryPath));
+  }
+
+  getEntryStream(entryPath: string) {
+    return openZipEntryStream(this.zipFile, this.getEntry(entryPath));
+  }
+
+  private getEntry(entryPath: string): yauzl.Entry {
     const foundEntry = this.entries.get(entryPath);
     if (!foundEntry) {
       throw new Error(`Entry ${entryPath} not found in archive`);
     }
-    return getZipEntryContent(this.zipFile, foundEntry);
+    return foundEntry;
   }
 
   close() {
@@ -69,23 +79,29 @@ class ZipArchiveImpl implements ZipArchive {
   }
 }
 
-const getZipEntryContent = async (zipFile: yauzl.ZipFile, entry: yauzl.Entry): Promise<Buffer> => {
+const openZipEntryStream = (zipFile: yauzl.ZipFile, entry: yauzl.Entry): Promise<Readable> => {
   return new Promise((resolve, reject) => {
     zipFile.openReadStream(entry, (err, readStream) => {
-      if (err) {
-        return reject(err);
-      } else {
-        const chunks: Buffer[] = [];
-        readStream!.on('data', (chunk: Buffer) => {
-          chunks.push(chunk);
-        });
-        readStream!.on('end', () => {
-          resolve(Buffer.concat(chunks));
-        });
-        readStream!.on('error', () => {
-          reject();
-        });
+      if (err || !readStream) {
+        return reject(err ?? new Error(`Could not open read stream for entry ${entry.fileName}`));
       }
+      resolve(readStream);
+    });
+  });
+};
+
+const getZipEntryContent = async (zipFile: yauzl.ZipFile, entry: yauzl.Entry): Promise<Buffer> => {
+  const readStream = await openZipEntryStream(zipFile, entry);
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    readStream.on('data', (chunk: Buffer) => {
+      chunks.push(chunk);
+    });
+    readStream.on('end', () => {
+      resolve(Buffer.concat(chunks));
+    });
+    readStream.on('error', (streamError) => {
+      reject(streamError);
     });
   });
 };

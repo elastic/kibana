@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import {
   downloadToDiskMock,
   createIndexMock,
@@ -742,6 +743,21 @@ describe('PackageInstaller', () => {
           'kibana/content/content-0.ndjson',
           'elasticsearch/content/content-0.ndjson',
         ]),
+      getEntryStream: jest.fn().mockImplementation(async () =>
+        Readable.from([
+          Buffer.from(
+            JSON.stringify({
+              _inference_fields: {
+                semantic: {
+                  inference: {
+                    inference_id: defaultInferenceEndpoints.ELSER,
+                  },
+                },
+              },
+            })
+          ),
+        ])
+      ),
       getEntryContent: jest.fn().mockImplementation(async (entryPath: string) => {
         if (entryPath.endsWith('manifest.json')) {
           return Buffer.from(JSON.stringify({ formatVersion: TEST_FORMAT_VERSION }), 'utf-8');
