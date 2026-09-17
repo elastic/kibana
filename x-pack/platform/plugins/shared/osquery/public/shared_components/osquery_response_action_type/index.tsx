@@ -13,11 +13,34 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { map, omit } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { isEmptyOrAllPlatforms } from '../../../common/platform';
 import { usePack } from '../../packs/use_pack';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useKibana } from '../../common/lib/kibana';
 import LiveQueryQueryField from '../../live_queries/form/live_query_query_field';
 import { PackFieldWrapper } from './pack_field_wrapper';
+
+/**
+ * A pack query as persisted onto the rule's response action.
+ *
+ * This mirrors the `OsqueryQuery` wire schema in security_solution
+ * (`rule_response_actions/response_actions.schema.yaml`), which is the
+ * contract the saved rule is validated against. Fields are carried through
+ * from the pack rather than recomputed: the response action is stored on the
+ * rule and replayed at alert time, so anything dropped here is lost from the
+ * execution request for dynamic-parameter packs.
+ */
+interface OsqueryResponseActionQuery {
+  id: string;
+  ecs_mapping: ECSMapping;
+  query: string;
+  interval?: number;
+  platform?: string;
+  version?: string;
+  snapshot?: boolean;
+  removed?: boolean;
+  timeout?: number;
+}
 
 interface OsqueryResponseActionsValues {
   savedQueryId?: string | null;
@@ -26,13 +49,7 @@ interface OsqueryResponseActionsValues {
   query?: string;
   timeout: number;
   packId?: string;
-  queries?: Array<{
-    id: string;
-    ecs_mapping: ECSMapping;
-    query: string;
-    interval?: number;
-    timeout?: number;
-  }>;
+  queries?: OsqueryResponseActionQuery[];
 }
 
 interface OsqueryResponseActionsParamsFormFields {
@@ -41,13 +58,7 @@ interface OsqueryResponseActionsParamsFormFields {
   timeout: number;
   query: string;
   packId?: string[];
-  queries: Array<{
-    id: string;
-    ecs_mapping: ECSMapping;
-    query: string;
-    interval?: number;
-    timeout?: number;
-  }>;
+  queries: OsqueryResponseActionQuery[];
   queryType: 'query' | 'pack';
 }
 
@@ -92,20 +103,40 @@ const OsqueryResponseActionParamsFormComponent = ({
 
   useEffect(() => {
     if (packData?.queries) {
-      // `interval` is carried through deliberately: the response action is
-      // persisted onto the rule, and `create_queries` spreads these fields onto
-      // the action document at execution time. Dropping it here silently
-      // changed the cadence recorded for every pack response action. The pack
-      // read API types it as `number | string`, so normalize to a number the
-      // way the pack forms do.
-      const queriesArray = map(packData.queries, (query, queryId: string) => ({
-        id: queryId,
-        query: query.query,
-        interval:
-          typeof query.interval === 'string' ? parseInt(query.interval, 10) : query.interval,
-        ecs_mapping: (query.ecs_mapping ?? {}) as NonNullable<typeof query.ecs_mapping>,
-        timeout: query.timeout,
-      }));
+      // Carry through every field the `OsqueryQuery` wire schema accepts, and
+      // resolve pack-level execution defaults while doing so.
+      //
+      // The read-pack API returns `platform` / `min_osquery_version` at the
+      // pack level, and only emits the per-query value when that query really
+      // overrides it (`convertSOQueriesToPack` strips an absent or all-OS
+      // platform). A plain passthrough would persist `undefined` for every
+      // inheriting query and lose the pack default, because the response
+      // action stores a flat query list with no pack context to inherit from
+      // at execution time.
+      //
+      // This mirrors the server's `resolveEffectiveQueryExecution` — per-query
+      // wins, an empty or all-OS platform counts as unset — which is what the
+      // scheduled emit and the live-query path both apply.
+      const queriesArray = map(packData.queries, (query, queryId: string) => {
+        const effectiveVersion = query.version || packData.min_osquery_version || undefined;
+        const perQueryPlatform = isEmptyOrAllPlatforms(query.platform) ? undefined : query.platform;
+        const effectivePlatform = perQueryPlatform ?? packData.platform;
+
+        return {
+          id: queryId,
+          query: query.query,
+          // The pack read API types `interval` as `number | string`; normalize
+          // to a number the way the pack forms do.
+          interval:
+            typeof query.interval === 'string' ? parseInt(query.interval, 10) : query.interval,
+          ...(isEmptyOrAllPlatforms(effectivePlatform) ? {} : { platform: effectivePlatform }),
+          ...(effectiveVersion ? { version: effectiveVersion } : {}),
+          snapshot: query.snapshot,
+          removed: query.removed,
+          ecs_mapping: (query.ecs_mapping ?? {}) as NonNullable<typeof query.ecs_mapping>,
+          timeout: query.timeout,
+        };
+      });
 
       replace(queriesArray);
     }
