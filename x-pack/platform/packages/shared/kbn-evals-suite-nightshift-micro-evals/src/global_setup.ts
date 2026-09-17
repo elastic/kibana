@@ -8,7 +8,7 @@
 import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { EvalsClient, getEvaluationsKbnClient } from '@kbn/evals';
+import { EvalsClient, getEvaluationsKbnClient, getSpaceIdsFromEnv } from '@kbn/evals';
 import { KbnClient } from '@kbn/kbn-client';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -32,7 +32,8 @@ const setupMicroDatasets = async (): Promise<() => void> => {
   const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
   const client = new EvalsClient(
     getEvaluationsKbnClient({ kbnClient: new KbnClient({ url, log }), log }),
-    log
+    log,
+    { spaceIds: getSpaceIdsFromEnv() }
   );
   const directory = mkdtempSync(join(tmpdir(), 'nightshift-micro-'));
   try {
