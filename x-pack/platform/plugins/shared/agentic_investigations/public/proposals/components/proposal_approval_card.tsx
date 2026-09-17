@@ -13,14 +13,24 @@ import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { ApprovalContent } from '@kbn/agentic-investigations-common';
 import type { ApprovalAction } from '@kbn/agentic-investigations-common';
-import { isDecided } from '../../../common';
+import { isAwaitingDecision } from '../../../common';
 import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
-import type { DismissReason } from '../../../common';
+import type { DismissReason, ProposalDecision } from '../../../common';
 import { toBlastRadiusItems } from '../attachments/to_blast_radius_items';
 import { useApproveProposal, useDismissProposal, useProposal } from '../hooks/use_proposals_api';
 import { ProposalDismissForm } from './proposal_dismiss_form';
 
 type CardMode = 'view' | 'dismissing';
+
+/** What the analyst concluded, which is separate from how far it then got. */
+const DECISION_LABELS: Record<ProposalDecision, string> = {
+  approved: i18n.translate('xpack.agenticInvestigations.proposalCard.decision.approved', {
+    defaultMessage: 'approved',
+  }),
+  dismissed: i18n.translate('xpack.agenticInvestigations.proposalCard.decision.dismissed', {
+    defaultMessage: 'dismissed',
+  }),
+};
 
 type ErrorCallout =
   | { type: 'conflict'; message: string }
@@ -147,9 +157,16 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const actionName =
     liveProposal.action?.name ?? liveProposal.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION_LABEL;
 
-  const isPending = liveProposal.status === 'pending';
-  const isExpired = liveProposal.expired;
-  const isAlreadyDecided = isDecided(liveProposal.status);
+  const isPending = isAwaitingDecision(liveProposal);
+  // `expired` is the computed flag for a deadline that has passed; `status:
+  // 'expired'` is the durable settlement, which the workflow can write before
+  // the deadline when no decision was reached. Without both, a proposal
+  // settled early shows neither actions nor an explanation.
+  const isExpired = liveProposal.expired || liveProposal.status === 'expired';
+  // The decision, not the status: a proposal stays `pending` while its
+  // approval is still travelling through the gate workflow, and an expired one
+  // is settled without anyone having decided anything.
+  const decision = liveProposal.decision;
 
   const impact = liveProposal.action?.impact ?? liveProposal.impact;
   const tone =
@@ -223,7 +240,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         secondaryActions={secondaryActions}
       >
         {/* Outcome callouts for decided/expired states */}
-        {isExpired && !isAlreadyDecided && (
+        {isExpired && !decision && (
           <>
             <EuiSpacer size="m" />
             <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
@@ -238,7 +255,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
             </div>
           </>
         )}
-        {isAlreadyDecided && (
+        {decision && (
           <>
             <EuiSpacer size="m" />
             <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
@@ -247,8 +264,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
                 size="s"
                 title={i18n.translate('xpack.agenticInvestigations.proposalCard.decidedCallout', {
                   defaultMessage:
-                    'This proposal has already been decided ({status}). No further action is needed.',
-                  values: { status: liveProposal.status },
+                    'This proposal has already been decided ({decision}). No further action is needed.',
+                  values: { decision: DECISION_LABELS[decision] },
                 })}
               />
             </div>
