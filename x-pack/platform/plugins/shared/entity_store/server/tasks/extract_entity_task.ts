@@ -122,7 +122,7 @@ async function bootstrapNonPriorityTask({
     );
     const descriptor = await engineDescriptorClient.findOrThrow(entityType);
 
-    if (descriptor.nonPriorityStatus === null) {
+    if (descriptor.nonPriorityStatus === null || descriptor.nonPriorityStatus === undefined) {
       await engineDescriptorClient.update(entityType, {
         nonPriorityStatus: dualProcessEnabled ? ENGINE_STATUS.STARTED : ENGINE_STATUS.STOPPED,
       });
