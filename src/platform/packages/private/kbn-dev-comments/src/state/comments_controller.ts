@@ -94,11 +94,6 @@ export interface CommentsController {
   dismissNotice(): void;
 }
 
-export interface CommentsControllerOptions {
-  /** Start in comment mode (the host loaded the layer because the user asked for it). */
-  initialActive?: boolean;
-}
-
 const NOTICE_TIMEOUT_MS = 4000;
 
 const errorMessage = (error: unknown): string =>
@@ -138,17 +133,14 @@ const storeDisplayName = (displayName: string) => {
 const droppingDraft = (state: CommentsState): Partial<CommentsState> =>
   state.pending?.saving ? {} : { pending: null };
 
-export const createCommentsController = (
-  services: CommentsHostServices,
-  { initialActive = false }: CommentsControllerOptions = {}
-): CommentsController => {
+export const createCommentsController = (services: CommentsHostServices): CommentsController => {
   const { api, location } = services;
   const ignoreSelectors = services.ignoreSelectors ?? [];
 
   const store = createStore<CommentsState>({
     pageKey: location.getPageKey(),
     comments: [],
-    active: initialActive,
+    active: false,
     panelMinimized: false,
     activeThreadId: null,
     focusPinId: null,

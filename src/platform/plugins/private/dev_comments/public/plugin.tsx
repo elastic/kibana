@@ -16,11 +16,11 @@ interface PluginStartDeps {
   developerToolbar?: DeveloperToolbarStart;
 }
 
-// The launcher loads the comments layer itself on first use.
-const LazyCommentsLauncher = lazy(() =>
-  import('./comments_launcher').then(({ CommentsLauncher }) => ({
-    default: CommentsLauncher,
-  }))
+// The layer mounts with the toolbar item rather than on first use: it records the
+// clicks that reveal UI from the start, so that a comment made inside a flyout
+// opened before comment mode was ever switched on can still lead readers there.
+const LazyCommentsItem = lazy(() =>
+  import('./comments_item').then(({ CommentsItem }) => ({ default: CommentsItem }))
 );
 
 export class DevCommentsPlugin implements Plugin<void, void, never, PluginStartDeps> {
@@ -42,7 +42,7 @@ export class DevCommentsPlugin implements Plugin<void, void, never, PluginStartD
       id: 'Comments',
       children: (
         <Suspense fallback={null}>
-          <LazyCommentsLauncher core={core} />
+          <LazyCommentsItem core={core} />
         </Suspense>
       ),
     });

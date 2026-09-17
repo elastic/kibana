@@ -96,7 +96,7 @@ describe('CommentsClient', () => {
   });
 
   describe('create', () => {
-    it('claims a slot before indexing and gives it back when indexing fails', async () => {
+    it('claims a slot before indexing and gives it back when the comment was not written', async () => {
       const created = await client().create(input);
       expect(created).toEqual(expect.objectContaining({ ...input, id: expect.any(String) }));
       expect(quotaCalls()).toEqual([1]);
@@ -113,8 +113,28 @@ describe('CommentsClient', () => {
       );
 
       esClient.index.mockRejectedValueOnce(new Error('boom'));
+      esClient.exists.mockResponseOnce(false);
       await expect(client().create(input)).rejects.toThrow('boom');
+      expect(esClient.exists).toHaveBeenCalledWith({
+        index: COMMENTS_INDEX,
+        id: esClient.index.mock.calls[1][0].id,
+      });
       expect(quotaCalls()).toEqual([1, 1, -1]);
+    });
+
+    it('keeps the slot when the comment was written despite the error, or when that cannot be told', async () => {
+      // Elasticsearch can commit the document and still fail the request, e.g. by timing out on the refresh.
+      esClient.index.mockRejectedValueOnce(new Error('timeout'));
+      esClient.exists.mockResponseOnce(true);
+      const created = await client().create(input);
+      expect(created).toEqual(expect.objectContaining({ ...input, id: expect.any(String) }));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('was stored although'));
+
+      esClient.index.mockRejectedValueOnce(new Error('boom'));
+      esClient.exists.mockRejectedValueOnce(new Error('unreachable'));
+      await expect(client().create(input)).rejects.toThrow('boom');
+
+      expect(quotaCalls()).toEqual([1, 1]);
     });
 
     it('creates a missing quota document from the comments already stored', async () => {

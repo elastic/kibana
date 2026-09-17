@@ -21,7 +21,7 @@ const services: CommentsHostServices = {
 <CommentsButton services={services} />;
 ```
 
-`CommentsButton` renders the button that toggles comment mode and mounts the layer itself (pins, popovers, panel) in portals on `document.body`, so it can be placed anywhere in the host's UI. Hosts that want to keep the package out of their page load can render a stand-in button and mount `CommentsButton` with `initialActive` on the first click or `⌘⇧K` / `Ctrl+Shift+K`.
+`CommentsButton` renders the button that toggles comment mode and mounts the layer itself (pins, popovers, panel) in portals on `document.body`, so it can be placed anywhere in the host's UI. Mount it as the page loads rather than when the user first asks for comment mode: the clicks that reveal UI (see the trail below) are recorded from the moment it mounts, and a comment made in UI opened before that would have none.
 
 ## Comment mode
 

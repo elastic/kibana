@@ -16,12 +16,15 @@ import { CommentsToolbarButton } from './comments_toolbar_button';
 
 export interface CommentsButtonProps {
   services: CommentsHostServices;
-  /** Start in comment mode, for hosts that mount the layer when the user first asks for it. */
-  initialActive?: boolean;
 }
 
-export const CommentsButton = ({ services, initialActive = false }: CommentsButtonProps) => {
-  const [controller] = useState(() => createCommentsController(services, { initialActive }));
+/**
+ * The button that toggles comment mode, and the layer itself. Mount it as the
+ * page loads rather than on first use: the clicks that reveal UI are recorded
+ * from then on, and a comment made in UI opened earlier would have no trail.
+ */
+export const CommentsButton = ({ services }: CommentsButtonProps) => {
+  const [controller] = useState(() => createCommentsController(services));
 
   useEffect(() => {
     controller.start();

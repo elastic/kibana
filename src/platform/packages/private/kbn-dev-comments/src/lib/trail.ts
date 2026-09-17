@@ -109,7 +109,7 @@ export const createTrailRecorder = ({
   let pageKey = location.getPageKey();
   let unsubscribe: (() => void) | undefined;
   let candidate: Candidate | undefined;
-  /** A click whose UI has not shown up yet; it gets one more look. */
+  /** A click whose UI has not shown up yet; it gets one more look, at the latest when the next click comes in. */
   let awaited: { candidate: Candidate; timer: ReturnType<typeof setTimeout> } | undefined;
 
   /** Records the step if the click disclosed UI and its control is still there; false when neither is the case yet. */
@@ -138,6 +138,9 @@ export const createTrailRecorder = ({
   // rather than opened, and a click that disclosed nothing changed data instead.
   const onClickCapture = ({ target }: MouseEvent) => {
     candidate = undefined;
+    // The previous click gets its last look before this one has had any effect
+    // on the page, so that what this click discloses is not credited to it.
+    settleAwaited({ finalLook: true });
     if (!isRecording() || !(target instanceof Element) || isIgnored(target, ignoreSelectors)) {
       return;
     }
@@ -157,8 +160,6 @@ export const createTrailRecorder = ({
     }
     const current = candidate;
     candidate = undefined;
-    // The previous click gets its last look first, so that steps stay in click order.
-    settleAwaited({ finalLook: true });
     if (!record(current)) {
       awaited = {
         candidate: current,

@@ -108,8 +108,18 @@ export class CommentsClient {
     try {
       await this.esClient.index({ index: COMMENTS_INDEX, id, document, refresh: 'wait_for' });
     } catch (error) {
-      await this.release(1);
-      throw error;
+      // A timeout or a lost connection, for example while waiting for the refresh,
+      // can hide a write that went through. The slot is given back only when the
+      // document is not there; when even that cannot be told, it stays claimed
+      // (a conservative quota is corrected when it next reports the store full).
+      const stored = await this.isStored(id);
+      if (stored === false) {
+        await this.release(1);
+      }
+      if (!stored) {
+        throw error;
+      }
+      this.logger.warn(`Comment ${id} was stored although indexing it failed: ${error}`);
     }
     return withoutImage(fromStored(id, document));
   }
@@ -240,6 +250,16 @@ export class CommentsClient {
       }
     }
     throw new Error(`Could not claim room for ${count} comments: the quota kept changing.`);
+  }
+
+  /** Whether a comment with that id is in the index; undefined when Elasticsearch could not say. */
+  private async isStored(id: string): Promise<boolean | undefined> {
+    try {
+      return await this.esClient.exists({ index: COMMENTS_INDEX, id });
+    } catch (error) {
+      this.logger.warn(`Could not tell whether comment ${id} was stored: ${error}`);
+      return undefined;
+    }
   }
 
   /** Gives back room claimed for comments that were not written after all; a failure here only makes the quota conservative. */

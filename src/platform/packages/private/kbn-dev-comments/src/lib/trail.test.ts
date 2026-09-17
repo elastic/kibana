@@ -143,6 +143,34 @@ describe('trail', () => {
     expect(labels()).toEqual(['Open flyout', 'Open lazy flyout']);
   });
 
+  it('does not credit a click with what a later click disclosed', () => {
+    jest.useFakeTimers();
+    render(`
+      <button type="button" id="delete">Delete</button>
+      <button type="button" id="flyout">Open flyout</button>
+      <button type="button" id="acknowledge">Acknowledge</button>
+      <div id="card">Card</div>
+    `);
+    query('#delete').addEventListener('click', (event) => {
+      (event.target as Element).textContent = 'Deleted';
+    });
+    query('#flyout').addEventListener('click', openDialog);
+    query('#acknowledge').addEventListener('click', (event) => {
+      (event.target as Element).textContent = 'Acknowledged';
+    });
+    // Clickable, but not a control: it can disclose UI without ever being recorded itself.
+    query('#card').addEventListener('click', openDialog);
+
+    query('#delete').click();
+    query('#flyout').click();
+    expect(labels()).toEqual(['Open flyout']);
+
+    query('#acknowledge').click();
+    query('#card').click();
+    jest.advanceTimersByTime(500);
+    expect(labels()).toEqual(['Open flyout']);
+  });
+
   it('skips clicks the page swallowed, clicks that removed the control, and clicks on excluded UI', () => {
     render(`
       <button type="button" id="swallowed">Swallowed</button>
