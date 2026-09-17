@@ -276,7 +276,7 @@ export function OverviewStatus({
     >
       {statRows.map((row, rowIndex) => (
         <React.Fragment key={rowIndex}>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="xl">
             {row.map((props) => (
               <EuiFlexItem grow={false} css={{ width: STAT_COLUMN_WIDTH }} key={props.dataTestSubj}>
