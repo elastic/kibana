@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -25,15 +25,8 @@ import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
-import {
-  useWorkerScrollSpy,
-  WatchWorkersSummaryRail,
-  workerSectionDomId,
-} from './components/watch_workers_summary_rail';
 import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
-
-const RAIL_NARROW_BREAKPOINT_PX = 1020;
 
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
@@ -76,20 +69,11 @@ export const WatchDetailPage: React.FC = () => {
     setSaveBlockedByInvalidDraft(false);
   }, [discard]);
 
-  const workerIds = useMemo(() => members.map((worker) => worker.id), [members]);
   const isMultiWorker = members.length > 1;
 
-  // Track which Workers the reader has collapsed (default: all expanded) and which is active in
-  // the summary rail. Both reset when navigating to another Watch.
+  // Track which Workers the reader has collapsed (default: all expanded). Resets when
+  // navigating to another Watch (state is keyed on watchId via the parent route change).
   const [collapsedWorkerIds, setCollapsedWorkerIds] = useState<Set<string>>(() => new Set());
-  const [activeWorkerId, setActiveWorkerId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setCollapsedWorkerIds(new Set());
-    setActiveWorkerId(null);
-  }, [watchId]);
-
-  const effectiveActiveWorkerId = activeWorkerId ?? members[0]?.id ?? null;
 
   const handleToggleWorker = useCallback((workerId: string, isOpen: boolean) => {
     setCollapsedWorkerIds((current) => {
@@ -101,34 +85,15 @@ export const WatchDetailPage: React.FC = () => {
       }
       return next;
     });
-    if (isOpen) {
-      setActiveWorkerId(workerId);
-    }
   }, []);
-
-  useWorkerScrollSpy(workerIds, isMultiWorker, setActiveWorkerId);
 
   const layoutStyles = useMemo(
     () => ({
-      twoColumn: css`
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 300px;
-        gap: ${euiTheme.size.l};
-        align-items: start;
-        max-width: 1180px;
-        margin-inline: auto;
-        @media (max-width: ${RAIL_NARROW_BREAKPOINT_PX}px) {
-          grid-template-columns: minmax(0, 1fr);
-        }
-      `,
-      railColumn: css`
-        min-width: 0;
-        @media (max-width: ${RAIL_NARROW_BREAKPOINT_PX}px) {
-          order: -1;
-        }
-      `,
-      workerSection: css`
-        scroll-margin-top: ${euiTheme.size.xl};
+      singleColumn: css`
+        display: flex;
+        flex-direction: column;
+        gap: ${euiTheme.size.m};
+        max-width: 720px;
       `,
     }),
     [euiTheme]
@@ -208,38 +173,27 @@ export const WatchDetailPage: React.FC = () => {
     }
 
     return (
-      <div css={layoutStyles.twoColumn}>
-        <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-          {members.map((worker) => {
-            const draft = resolve(worker);
-            return (
-              <EuiFlexItem key={worker.id} grow={false}>
-                <section
-                  id={workerSectionDomId(worker.id)}
-                  css={layoutStyles.workerSection}
-                  data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
-                >
-                  <WorkerSettingsPanel
-                    worker={worker}
-                    isAccordion={isMultiWorker}
-                    isExpanded={!collapsedWorkerIds.has(worker.id)}
-                    onToggle={handleToggleWorker}
-                    enabled={draft.enabled}
-                    settings={draft.settings}
-                    error={draft.error}
-                    settingsLocked={worker.state === 'unavailable'}
-                    isSaving={isSaving}
-                    onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
-                    onSettingsChange={(patch) => updateSettings(worker, patch)}
-                  />
-                </section>
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
-        <div css={layoutStyles.railColumn}>
-          <WatchWorkersSummaryRail workers={members} activeWorkerId={effectiveActiveWorkerId} />
-        </div>
+      <div css={layoutStyles.singleColumn}>
+        {members.map((worker) => {
+          const draft = resolve(worker);
+          return (
+            <section key={worker.id} data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}>
+              <WorkerSettingsPanel
+                worker={worker}
+                isAccordion={isMultiWorker}
+                isExpanded={!collapsedWorkerIds.has(worker.id)}
+                onToggle={handleToggleWorker}
+                enabled={draft.enabled}
+                settings={draft.settings}
+                error={draft.error}
+                settingsLocked={worker.state === 'unavailable'}
+                isSaving={isSaving}
+                onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
+                onSettingsChange={(patch) => updateSettings(worker, patch)}
+              />
+            </section>
+          );
+        })}
       </div>
     );
   };

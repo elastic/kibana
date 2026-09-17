@@ -248,18 +248,19 @@ describe('WatchDetailPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a summary rail card per member and marks the first as active', () => {
+  it('renders each member as a section in a single column — no summary rail', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
     const [first, second] = floorWorkers;
-    expect(screen.getByTestId('alertZeroWatchWorkersRail')).toBeInTheDocument();
-    expect(screen.getByTestId(`alertZeroWatchWorkerSummary-${first.id}`)).toHaveAttribute(
-      'aria-current',
-      'true'
-    );
-    expect(screen.getByTestId(`alertZeroWatchWorkerSummary-${second.id}`)).not.toHaveAttribute(
-      'aria-current'
-    );
+    expect(screen.queryByTestId('alertZeroWatchWorkersRail')).not.toBeInTheDocument();
+
+    const firstSection = screen.getByTestId(`alertZeroWatchWorkerSection-${first.id}`);
+    const secondSection = screen.getByTestId(`alertZeroWatchWorkerSection-${second.id}`);
+    expect(firstSection).toBeInTheDocument();
+    expect(secondSection).toBeInTheDocument();
+    // Document order: first Worker's section precedes the second's in the single column.
+    const allSections = screen.getAllByTestId(/^alertZeroWatchWorkerSection-/);
+    expect(allSections.indexOf(firstSection)).toBeLessThan(allSections.indexOf(secondSection));
   });
 
   it('offers only the autonomy levels a Worker allows', () => {
