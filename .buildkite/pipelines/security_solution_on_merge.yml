@@ -526,10 +526,14 @@ steps:
     key: notify-serverless-entity-analytics
     depends_on:
       - step: serverless-entity-analytics
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-entity-analytics)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-entity-analytics)"; then
+        echo "Could not read outcome for serverless-entity-analytics; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -558,10 +562,14 @@ steps:
     key: notify-serverless-explore
     depends_on:
       - step: serverless-explore
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-explore)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-explore)"; then
+        echo "Could not read outcome for serverless-explore; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -590,10 +598,14 @@ steps:
     key: notify-serverless-investigations
     depends_on:
       - step: serverless-investigations
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-investigations)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-investigations)"; then
+        echo "Could not read outcome for serverless-investigations; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -622,10 +634,14 @@ steps:
     key: notify-serverless-rule-management
     depends_on:
       - step: serverless-rule-management
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-rule-management)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management)"; then
+        echo "Could not read outcome for serverless-rule-management; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -654,10 +670,14 @@ steps:
     key: notify-serverless-rule-management-prebuilt-rules-customization
     depends_on:
       - step: serverless-rule-management-prebuilt-rules-customization
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-customization)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-customization)"; then
+        echo "Could not read outcome for serverless-rule-management-prebuilt-rules-customization; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -686,10 +706,14 @@ steps:
     key: notify-serverless-rule-management-prebuilt-rules-installation
     depends_on:
       - step: serverless-rule-management-prebuilt-rules-installation
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-installation)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-installation)"; then
+        echo "Could not read outcome for serverless-rule-management-prebuilt-rules-installation; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -718,10 +742,14 @@ steps:
     key: notify-serverless-rule-management-prebuilt-rules-management
     depends_on:
       - step: serverless-rule-management-prebuilt-rules-management
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-management)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-management)"; then
+        echo "Could not read outcome for serverless-rule-management-prebuilt-rules-management; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -750,10 +778,14 @@ steps:
     key: notify-serverless-rule-management-prebuilt-rules-upgrade
     depends_on:
       - step: serverless-rule-management-prebuilt-rules-upgrade
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-upgrade)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-rule-management-prebuilt-rules-upgrade)"; then
+        echo "Could not read outcome for serverless-rule-management-prebuilt-rules-upgrade; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -782,9 +814,13 @@ steps:
     key: notify-rule-management
     depends_on:
       - step: rule-management
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step rule-management)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step rule-management)"; then
+        echo "Could not read outcome for rule-management; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -813,9 +849,13 @@ steps:
     key: notify-rule-management-prebuilt-rules-customization
     depends_on:
       - step: rule-management-prebuilt-rules-customization
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-customization)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-customization)"; then
+        echo "Could not read outcome for rule-management-prebuilt-rules-customization; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -844,9 +884,13 @@ steps:
     key: notify-rule-management-prebuilt-rules-installation
     depends_on:
       - step: rule-management-prebuilt-rules-installation
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-installation)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-installation)"; then
+        echo "Could not read outcome for rule-management-prebuilt-rules-installation; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -875,9 +919,13 @@ steps:
     key: notify-rule-management-prebuilt-rules-management
     depends_on:
       - step: rule-management-prebuilt-rules-management
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-management)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-management)"; then
+        echo "Could not read outcome for rule-management-prebuilt-rules-management; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -906,9 +954,13 @@ steps:
     key: notify-rule-management-prebuilt-rules-upgrade
     depends_on:
       - step: rule-management-prebuilt-rules-upgrade
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-upgrade)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step rule-management-prebuilt-rules-upgrade)"; then
+        echo "Could not read outcome for rule-management-prebuilt-rules-upgrade; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -937,10 +989,14 @@ steps:
     key: notify-serverless-detection-engine
     depends_on:
       - step: serverless-detection-engine
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-detection-engine)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-detection-engine)"; then
+        echo "Could not read outcome for serverless-detection-engine; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -969,10 +1025,14 @@ steps:
     key: notify-serverless-detection-engine-exceptions
     depends_on:
       - step: serverless-detection-engine-exceptions
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-detection-engine-exceptions)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-detection-engine-exceptions)"; then
+        echo "Could not read outcome for serverless-detection-engine-exceptions; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1001,9 +1061,13 @@ steps:
     key: notify-detection-engine
     depends_on:
       - step: detection-engine
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step detection-engine)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step detection-engine)"; then
+        echo "Could not read outcome for detection-engine; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1032,9 +1096,13 @@ steps:
     key: notify-detection-engine-exceptions
     depends_on:
       - step: detection-engine-exceptions
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step detection-engine-exceptions)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step detection-engine-exceptions)"; then
+        echo "Could not read outcome for detection-engine-exceptions; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1063,10 +1131,14 @@ steps:
     key: notify-serverless-ai-assistant
     depends_on:
       - step: serverless-ai-assistant
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step serverless-ai-assistant)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step serverless-ai-assistant)"; then
+        echo "Could not read outcome for serverless-ai-assistant; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1095,9 +1167,13 @@ steps:
     key: notify-ai-assistant
     depends_on:
       - step: ai-assistant
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step ai-assistant)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step ai-assistant)"; then
+        echo "Could not read outcome for ai-assistant; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1126,9 +1202,13 @@ steps:
     key: notify-entity-analytics
     depends_on:
       - step: entity-analytics
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step entity-analytics)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step entity-analytics)"; then
+        echo "Could not read outcome for entity-analytics; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1157,9 +1237,13 @@ steps:
     key: notify-explore
     depends_on:
       - step: explore
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step explore)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step explore)"; then
+        echo "Could not read outcome for explore; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1188,9 +1272,13 @@ steps:
     key: notify-investigations
     depends_on:
       - step: investigations
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step investigations)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step investigations)"; then
+        echo "Could not read outcome for investigations; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1219,9 +1307,13 @@ steps:
     key: notify-osquery
     depends_on:
       - step: osquery
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step osquery)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step osquery)"; then
+        echo "Could not read outcome for osquery; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1250,10 +1342,14 @@ steps:
     key: notify-osquery-serverless
     depends_on:
       - step: osquery-serverless
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step osquery-serverless)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step osquery-serverless)"; then
+        echo "Could not read outcome for osquery-serverless; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1282,9 +1378,13 @@ steps:
     key: notify-defend-workflows
     depends_on:
       - step: defend-workflows
-        allow_dependency_failure: true
+        allow_failure: true
     command: |
-      outcome="$(buildkite-agent step get outcome --step defend-workflows)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step defend-workflows)"; then
+        echo "Could not read outcome for defend-workflows; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
@@ -1313,10 +1413,14 @@ steps:
     key: notify-defend-workflows-serverless
     depends_on:
       - step: defend-workflows-serverless
-        allow_dependency_failure: true
+        allow_failure: true
     branches: main
     command: |
-      outcome="$(buildkite-agent step get outcome --step defend-workflows-serverless)"
+      set -euo pipefail
+      if ! outcome="$(buildkite-agent step get outcome --step defend-workflows-serverless)"; then
+        echo "Could not read outcome for defend-workflows-serverless; alerting rather than staying silent"
+        exit 1
+      fi
       if [ "$outcome" = "hard_failed" ] || [ "$outcome" = "errored" ]; then
         exit 1
       fi
