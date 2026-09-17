@@ -41,6 +41,7 @@ import { fillPool, FillPoolResult } from './lib/fill_pool';
 import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
+import { isWorkerTaskDefinition } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
 import type { TaskRunner } from './task_running';
@@ -66,6 +67,7 @@ import type { BackpressureReason } from './lib/backpressure_reason';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 import type { TaskExecutionControlService, TaskExecutionControlState } from './execution_control';
+import type { WorkerPoolService } from './worker_pool';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -88,6 +90,8 @@ export interface TaskPollingLifecycleOpts {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  /** Prototype: shared worker-thread pool. Undefined when worker threads are disabled. */
+  workerPool?: WorkerPoolService;
 }
 
 export type TaskLifecycleEvent =
@@ -135,6 +139,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private apiKeyStrategy: ApiKeyStrategy;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
   private enrichFakeRequest?: FakeRequestEnricher;
+  private readonly workerPool?: WorkerPoolService;
 
   private eventLogger: TaskEventLogger;
 
@@ -159,6 +164,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    workerPool,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -170,6 +176,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.apiKeyStrategy = apiKeyStrategy;
     this.executionControlService = executionControlService;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.workerPool = workerPool;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
@@ -268,6 +275,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         this.executionControlService.isInitialized()
           ? this.executionControlService.getState()
           : { paused: true, pausedTaskTypes: [] },
+      getWorkerPoolIncapableTaskTypes: () => this.getWorkerPoolIncapableTaskTypes(),
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
@@ -401,8 +409,30 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
       enrichFakeRequest: this.enrichFakeRequest,
+      workerPool: this.workerPool,
     });
   };
+
+  /**
+   * Task types that declare `workerModuleId` but whose declared `workerResources.memoryMb`
+   * doesn't fit the worker pool's current memory budget. Excluded from this poll cycle's
+   * claim so Task Manager doesn't claim work it has nowhere to run - mirroring how paused
+   * task types are excluded above. This is a best-effort check: `runInWorker` reservations
+   * from other, already-running tasks can still consume the budget between this check and
+   * dispatch, in which case `WorkerPoolService.run()` is the authoritative gate and the task
+   * fails retryably instead of running.
+   */
+  private getWorkerPoolIncapableTaskTypes(): string[] {
+    if (!this.workerPool?.enabled) {
+      return [];
+    }
+    const workerPool = this.workerPool;
+    return this.definitions
+      .getAllDefinitions()
+      .filter(isWorkerTaskDefinition)
+      .filter((definition) => !workerPool.hasCapacityFor(definition.workerResources.memoryMb))
+      .map((definition) => definition.type);
+  }
 
   private pollForWork = async (): Promise<TimedFillPoolResult> => {
     return fillPool(

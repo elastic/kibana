@@ -10,6 +10,7 @@ import { KibanaDiscoveryService } from './kibana_discovery_service';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { ApiKeyType, type TaskManagerConfig } from './config';
+import { configMock } from './config.mock';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
@@ -65,6 +66,7 @@ const pluginInitializerContextParams = {
   unsafe: {
     exclude_task_types: [],
     authenticate_background_task_utilization: true,
+    worker_threads: configMock.create().unsafe.worker_threads,
   },
   event_loop_delay: {
     monitor: true,
@@ -109,6 +111,7 @@ describe('TaskManagerPlugin', () => {
         unsafe: {
           exclude_task_types: ['*'],
           authenticate_background_task_utilization: true,
+          worker_threads: configMock.create().unsafe.worker_threads,
         },
       });
 
@@ -127,6 +130,7 @@ describe('TaskManagerPlugin', () => {
         unsafe: {
           exclude_task_types: [],
           authenticate_background_task_utilization: false,
+          worker_threads: configMock.create().unsafe.worker_threads,
         },
       });
 

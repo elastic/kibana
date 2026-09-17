@@ -35,6 +35,7 @@ import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import type { TaskEventLogger } from './task';
 import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
+import { configMock } from './config.mock';
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import type { TaskManagerBackpressure } from './task_events';
@@ -130,6 +131,7 @@ describe('TaskPollingLifecycle', () => {
       unsafe: {
         exclude_task_types: [],
         authenticate_background_task_utilization: true,
+        worker_threads: configMock.create().unsafe.worker_threads,
       },
       event_loop_delay: {
         monitor: true,

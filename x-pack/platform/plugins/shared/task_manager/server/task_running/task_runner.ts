@@ -47,13 +47,22 @@ import type {
   TaskDefinition,
   TaskEventLogger,
   TaskTypeGroup,
+  WorkerRunResult,
+  WorkerTaskInput,
 } from '../task';
-import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
+import {
+  isFailedRunResult,
+  isWorkerTaskDefinition,
+  TaskStatus,
+  TaskCost,
+  getTaskCostFromInstance,
+} from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
 import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
+import type { WorkerPoolService } from '../worker_pool';
 import { TaskValidator } from '../task_validator';
 import { getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
@@ -127,6 +136,8 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  /** Prototype: shared worker-thread pool. Undefined when worker threads are disabled. */
+  workerPool?: WorkerPoolService;
 } & Pick<Middleware, 'beforeRun'>;
 
 export enum TaskRunResult {
@@ -184,6 +195,7 @@ export class TaskManagerRunner implements TaskRunner {
   private isCancelled = false;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
   private taskRunEventCustomFields?: Record<string, unknown>;
+  private readonly workerPool?: WorkerPoolService;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -211,6 +223,7 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    workerPool,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -232,6 +245,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.workerPool = workerPool;
   }
 
   /**
@@ -456,14 +470,17 @@ export class TaskManagerRunner implements TaskRunner {
 
           const abortController = new AbortController();
 
-          this.task = definition.createTaskRunner({
-            taskInstance: sanitizedTaskInstance,
-            fakeRequest,
-            signal: abortController.signal,
-            enrichRequest,
-            executionUuid: this.uuid,
-            setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
-          });
+          this.task = isWorkerTaskDefinition(definition)
+            ? this.createWorkerTask(definition, sanitizedTaskInstance, abortController.signal)
+            : definition.createTaskRunner({
+                taskInstance: sanitizedTaskInstance,
+                fakeRequest,
+                signal: abortController.signal,
+                enrichRequest,
+                executionUuid: this.uuid,
+                setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
+                runInWorker: this.buildRunInWorker(abortController.signal),
+              });
 
           const originalTaskCancel = this.task.cancel;
 
@@ -534,6 +551,74 @@ export class TaskManagerRunner implements TaskRunner {
         }
       }
     );
+  }
+
+  /**
+   * Builds the `CancellableTask` for a `workerModuleId` task type: its `run()` dispatches to
+   * the shared worker pool instead of invoking a main-thread `createTaskRunner` closure. Only
+   * a structured-cloneable subset of the task instance crosses into the worker.
+   */
+  private createWorkerTask(
+    definition: Extract<TaskDefinition, { workerModuleId: string }>,
+    taskInstance: ConcreteTaskInstance,
+    signal: AbortSignal
+  ): CancellableTask {
+    if (!this.workerPool?.enabled) {
+      throw new Error(
+        `Task type "${this.taskType}" requires worker threads, but xpack.task_manager.unsafe.worker_threads.enabled is false.`
+      );
+    }
+    const workerPool = this.workerPool;
+    const moduleId = definition.workerModuleId;
+    const memoryMb = definition.workerResources.memoryMb;
+    const input: WorkerTaskInput = {
+      taskInstance: {
+        id: taskInstance.id,
+        taskType: taskInstance.taskType,
+        attempts: taskInstance.attempts,
+        params: taskInstance.params,
+        state: taskInstance.state,
+        scheduledAt: taskInstance.scheduledAt.toISOString(),
+        runAt: taskInstance.runAt.toISOString(),
+      },
+    };
+
+    return {
+      run: async (): Promise<SuccessfulRunResult | FailedRunResult> => {
+        const result = await workerPool.run<WorkerRunResult>(moduleId, input, {
+          memoryMb,
+          signal,
+        });
+        if (result.error) {
+          return { state: result.state, error: new Error(result.error.message) };
+        }
+        return {
+          state: result.state,
+          ...(result.runAt ? { runAt: new Date(result.runAt) } : {}),
+        };
+      },
+    };
+  }
+
+  /**
+   * Builds the `runInWorker` function exposed on `RunContext` for classic (`createTaskRunner`)
+   * task types, so any task can offload part of its work to the shared worker pool. Chains
+   * the task's own abort signal so cancelling the task also cancels an in-flight worker run.
+   */
+  private buildRunInWorker(taskSignal: AbortSignal) {
+    if (!this.workerPool?.enabled) {
+      return undefined;
+    }
+    const workerPool = this.workerPool;
+    return <TInput, TResult>(
+      moduleId: string,
+      input: TInput,
+      options: { memoryMb: number; signal?: AbortSignal }
+    ): Promise<TResult> =>
+      workerPool.run<TResult>(moduleId, input, {
+        memoryMb: options.memoryMb,
+        signal: options.signal ?? taskSignal,
+      });
   }
 
   private validateTaskState(taskInstance: ConcreteTaskInstance) {

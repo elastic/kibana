@@ -58,6 +58,13 @@ describe('config validation', () => {
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
+          "worker_threads": Object {
+            "enabled": false,
+            "idle_timeout": "PT30S",
+            "max_task_heap_mb": 256,
+            "max_threads": 2,
+            "max_total_memory_mb": 512,
+          },
         },
         "version_conflict_threshold": 80,
       }
@@ -125,6 +132,13 @@ describe('config validation', () => {
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
+          "worker_threads": Object {
+            "enabled": false,
+            "idle_timeout": "PT30S",
+            "max_task_heap_mb": 256,
+            "max_threads": 2,
+            "max_total_memory_mb": 512,
+          },
         },
         "version_conflict_threshold": 80,
       }
@@ -195,6 +209,13 @@ describe('config validation', () => {
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
+          "worker_threads": Object {
+            "enabled": false,
+            "idle_timeout": "PT30S",
+            "max_task_heap_mb": 256,
+            "max_threads": 2,
+            "max_total_memory_mb": 512,
+          },
         },
         "version_conflict_threshold": 80,
       }

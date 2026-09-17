@@ -56,6 +56,7 @@
     "@kbn/scout",
     "@kbn/std",
     "@kbn/mock-idp-utils",
+    "@kbn/setup-node-env",
   ],
   "exclude": ["target/**/*"]
 }

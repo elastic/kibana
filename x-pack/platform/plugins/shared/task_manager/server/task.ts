@@ -172,6 +172,69 @@ export interface RunContext {
    *  dropped with a warning to protect the shared event log index.
    */
   setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
+
+  /**
+   * Runs `moduleId`'s default export with `input` in a worker thread from the shared task
+   * manager worker pool, offloading CPU-bound work without blocking Kibana's (or this
+   * task's) event loop. Only present when
+   * `xpack.task_manager.unsafe.worker_threads.enabled` is `true`. The worker has no Kibana
+   * services - no ES/SO clients, no logger - so `input` and the resolved value must be
+   * structured-cloneable.
+   *
+   * `memoryMb` declares this call's memory requirement upfront; it is reserved against the
+   * pool's shared memory budget for the duration of the call and released once it settles.
+   * If the budget doesn't have room, the call rejects immediately with
+   * `WorkerPoolAtCapacityError` (see `server/worker_pool`) rather than queueing - callers
+   * should treat that as retryable and either fail the task run (to be rescheduled) or fall
+   * back to computing inline.
+   */
+  runInWorker?: <TInput, TResult>(
+    moduleId: string,
+    input: TInput,
+    options: { memoryMb: number; signal?: AbortSignal }
+  ) => Promise<TResult>;
+}
+
+/**
+ * Declares the resources a worker-thread task type (or `runInWorker` call) requires upfront,
+ * so Task Manager can tell whether there's room to run another task with such requirements.
+ * Only memory is declarable: Node has no API for reserving or limiting CPU on a per-thread
+ * basis, so CPU is implicitly "one thread" per running task, capped by
+ * `unsafe.worker_threads.max_threads`.
+ */
+export interface WorkerTaskResources {
+  /** Declared memory requirement, in megabytes, for one run of this task type. */
+  memoryMb: number;
+}
+
+/**
+ * The subset of a task instance forwarded into a worker thread for a `workerModuleId` task
+ * type. Workers get no Kibana services, so only structured-cloneable task data - no
+ * `Date` instances, functions, or class instances - crosses the thread boundary.
+ */
+export interface WorkerTaskInput {
+  taskInstance: {
+    id: string;
+    taskType: string;
+    attempts: number;
+    params: Record<string, unknown>;
+    state: Record<string, unknown>;
+    scheduledAt: string;
+    runAt: string;
+  };
+}
+
+/**
+ * The structured-cloneable result a `workerModuleId` task type's module resolves with. A
+ * restricted subset of {@link SuccessfulRunResult}/{@link FailedRunResult}: no `schedule`
+ * objects or `DecoratedError` class instances, since those cannot cross the thread boundary.
+ */
+export interface WorkerRunResult {
+  state: Record<string, unknown>;
+  /** ISO string; a new `runAt` for this task, mirroring `SuccessfulRunResult.runAt`. */
+  runAt?: string;
+  /** Presence indicates failure, mirroring `FailedRunResult.error`. */
+  error?: { message: string };
 }
 
 /**
@@ -224,6 +287,18 @@ export const getDeleteTaskRunResult = () => ({
   state: {},
   shouldDeleteTask: true,
 });
+
+/**
+ * Type guard narrowing a `TaskDefinition` to its worker-task variant. Declared explicitly
+ * (rather than relying on control-flow narrowing of `definition.workerModuleId` directly)
+ * because `workerModuleId`/`createTaskRunner` are mutually-`never` across the union, which
+ * TypeScript's narrowing doesn't always resolve cleanly at call sites.
+ */
+export function isWorkerTaskDefinition(
+  definition: TaskDefinition
+): definition is Extract<TaskDefinition, { workerModuleId: string }> {
+  return typeof definition.workerModuleId === 'string';
+}
 
 export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
@@ -315,6 +390,21 @@ export const taskDefinitionSchema = schema.object(
     taskTypeGroup: schema.maybe(
       schema.oneOf([schema.literal('alerting'), schema.literal('actions')])
     ),
+
+    /**
+     * Prototype: path (from `require.resolve(...)`) to a module whose default export runs
+     * this task type's work entirely in a worker thread, in place of `createTaskRunner`.
+     * Declared in the schema (rather than left as a plain object property) so it survives
+     * `taskDefinitionSchema.validate()` - unlike `createTaskRunner`, its value isn't a
+     * function, so an undeclared key here would be rejected as an unknown property.
+     */
+    workerModuleId: schema.maybe(schema.string({ minLength: 1 })),
+    /** Required alongside `workerModuleId` - see {@link WorkerTaskResources}. */
+    workerResources: schema.maybe(
+      schema.object({
+        memoryMb: schema.number({ min: 1 }),
+      })
+    ),
   },
   {
     validate({ timeout, priority, cost }) {
@@ -337,19 +427,10 @@ export const taskDefinitionSchema = schema.object(
   }
 );
 
-/**
- * Defines a task which can be scheduled and run by the Kibana
- * task manager.
- */
-export type TaskDefinition = Omit<
+type TaskDefinitionCommon = Omit<
   TypeOf<typeof taskDefinitionSchema>,
   'paramsSchema' | 'taskTypeGroup'
 > & {
-  /**
-   * Creates an object that has a run function which performs the task's work,
-   * and an optional cancel function which cancels the task.
-   */
-  createTaskRunner: TaskRunCreatorFunction;
   stateSchemaByVersion?: Record<
     number,
     {
@@ -360,6 +441,37 @@ export type TaskDefinition = Omit<
   paramsSchema?: ObjectType;
   taskTypeGroup?: TaskTypeGroup;
 };
+
+/**
+ * Defines a task which can be scheduled and run by the Kibana task manager. A task type
+ * either provides a `createTaskRunner` closure (the classic contract - runs on the main
+ * thread with full access to whatever the plugin closed over at registration time), or a
+ * `workerModuleId` + `workerResources` pair (runs entirely in a worker thread with no
+ * Kibana services). Exactly one must be set.
+ */
+export type TaskDefinition = TaskDefinitionCommon &
+  (
+    | {
+        /**
+         * Creates an object that has a run function which performs the task's work,
+         * and an optional cancel function which cancels the task.
+         */
+        createTaskRunner: TaskRunCreatorFunction;
+        workerModuleId?: never;
+        workerResources?: never;
+      }
+    | {
+        /**
+         * Absolute path (from `require.resolve(...)`) to a module whose default export
+         * performs this task type's work entirely inside a worker thread, in place of
+         * `createTaskRunner`. Its default export receives a {@link WorkerTaskInput} and
+         * resolves with a {@link WorkerRunResult}.
+         */
+        workerModuleId: string;
+        workerResources: WorkerTaskResources;
+        createTaskRunner?: never;
+      }
+  );
 
 export enum TaskStatus {
   Idle = 'idle',

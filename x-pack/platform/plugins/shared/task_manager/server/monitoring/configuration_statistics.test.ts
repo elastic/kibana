@@ -9,6 +9,7 @@ import { Subject, firstValueFrom } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
 import { ApiKeyType, type TaskManagerConfig } from '../config';
+import { configMock } from '../config.mock';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import { taskExecutionControlServiceMock } from '../execution_control/task_execution_control_service.mock';
 
@@ -60,6 +61,7 @@ describe('Configuration Statistics Aggregator', () => {
     unsafe: {
       exclude_task_types: [],
       authenticate_background_task_utilization: true,
+      worker_threads: configMock.create().unsafe.worker_threads,
     },
     event_loop_delay: {
       monitor: true,

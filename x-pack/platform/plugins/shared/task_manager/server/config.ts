@@ -211,6 +211,34 @@ export const configSchema = schema.object(
     unsafe: schema.object({
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
+      /**
+       * Prototype: opt-in execution of task work in Node.js worker threads via a shared
+       * Piscina pool. Tasks that declare `workerModuleId` run entirely in a worker; any
+       * task can also offload part of its work via `context.runInWorker(...)`. Workers get
+       * no Kibana services (no ES/SO clients) - payloads and results must be
+       * structured-cloneable. Disabled by default.
+       */
+      worker_threads: schema.object(
+        {
+          enabled: schema.boolean({ defaultValue: false }),
+          /* Max number of worker threads in the pool. Each running task occupies one thread. */
+          max_threads: schema.number({ defaultValue: 2, min: 1, max: 8 }),
+          /* Memory budget (MB) for admission control across all in-flight worker runs. */
+          max_total_memory_mb: schema.number({ defaultValue: 512, min: 1 }),
+          /* Pool-wide per-thread heap cap (MB), enforced via Piscina's resourceLimits. A task
+           * exceeding this OOMs its own thread rather than the main Kibana process. */
+          max_task_heap_mb: schema.number({ defaultValue: 256, min: 1 }),
+          /* How long an idle thread is kept alive before being torn down. */
+          idle_timeout: schema.duration({ defaultValue: '30s' }),
+        },
+        {
+          validate(config) {
+            if (config.max_task_heap_mb > config.max_total_memory_mb) {
+              return `max_task_heap_mb (${config.max_task_heap_mb}) must be less than, or equal to, max_total_memory_mb (${config.max_total_memory_mb})`;
+            }
+          },
+        }
+      ),
     }),
     /* The threshold percenatge for workers experiencing version conflicts for shifting the polling interval. */
     version_conflict_threshold: schema.number({
@@ -244,3 +272,4 @@ export const configSchema = schema.object(
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
+export type WorkerThreadsConfig = TaskManagerConfig['unsafe']['worker_threads'];

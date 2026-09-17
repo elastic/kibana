@@ -92,6 +92,7 @@ import {
   UiamApiKeyProvisioningTask,
   taskManagerUiamProvisioningEvents,
 } from './uiam_api_key_provisioning';
+import { WorkerPoolService } from './worker_pool';
 
 export interface TaskManagerSetupContract {
   /**
@@ -179,6 +180,7 @@ export class TaskManagerPlugin
   private startContract?: TaskManagerStartContract;
   private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
   private enrichFakeRequest?: FakeRequestEnricher;
+  private workerPool?: WorkerPoolService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -359,6 +361,12 @@ export class TaskManagerPlugin
       this.logger.warn(`Disabling authentication for background task utilization API`);
     }
 
+    if (this.config.unsafe.worker_threads.enabled) {
+      this.logger.warn(
+        `Task Manager worker threads are enabled (prototype): maxThreads=${this.config.unsafe.worker_threads.max_threads} maxTotalMemoryMb=${this.config.unsafe.worker_threads.max_total_memory_mb}`
+      );
+    }
+
     // for nodes with background_tasks mode only, log health metrics every hour
     if (this.isNodeBackgroundTasksOnly()) {
       setupIntervalLogging(monitoredHealth$, this.logger, LogHealthForBackgroundTasksOnlyMinutes);
@@ -471,6 +479,14 @@ export class TaskManagerPlugin
 
     const startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
 
+    // Prototype: shared worker-thread pool for task work. No-ops unless
+    // xpack.task_manager.unsafe.worker_threads.enabled is true, and only started on nodes
+    // that actually run tasks.
+    if (this.shouldRunBackgroundTasks) {
+      this.workerPool = new WorkerPoolService(this.config.unsafe.worker_threads, this.logger);
+      this.workerPool.start();
+    }
+
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
@@ -502,6 +518,7 @@ export class TaskManagerPlugin
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
+        workerPool: this.workerPool,
       });
     }
 
@@ -602,5 +619,7 @@ export class TaskManagerPlugin
         this.logger.error(`Deleting current node has failed. error: ${e.message}`);
       }
     }
+
+    await this.workerPool?.stop();
   }
 }
