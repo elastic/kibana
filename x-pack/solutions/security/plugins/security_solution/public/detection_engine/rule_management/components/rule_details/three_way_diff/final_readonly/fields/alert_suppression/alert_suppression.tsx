@@ -53,7 +53,7 @@ export function AlertSuppressionReadOnly({
           ruleType={ruleType}
         />
       ),
-      description: <SuppressAlertsByField fields={alertSuppression.group_by} />,
+      description: <SuppressAlertsByField fields={alertSuppression.group_by ?? []} />,
     });
   }
 

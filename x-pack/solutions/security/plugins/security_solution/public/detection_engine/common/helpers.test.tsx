@@ -41,6 +41,7 @@ import {
   ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
@@ -125,6 +126,7 @@ describe('rule helpers', () => {
           tiebreakerField: undefined,
         },
         [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: ['host.name'],
+        [ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME]: [],
         [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
           [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: 5,
           [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: 'm',

@@ -1,0 +1,32 @@
+{
+  "rule_id": "example-eql-sequence-suppression-group-by-v2",
+  "type": "eql",
+  "language": "eql",
+  "name": "Example EQL sequence with group_by_v2 suppression",
+  "description": "Two-step sequence (process start then network) suppressed using fields from specific sequence events via group_by_v2.sequence_index.",
+  "severity": "medium",
+  "risk_score": 47,
+  "interval": "5m",
+  "from": "now-6m",
+  "to": "now",
+  "max_signals": 100,
+  "index": ["logs-*"],
+  "query": "sequence by host.name with maxspan=5m [process where event.type == \"start\" and process.name != \"\"] [network where event.type == \"connection\" and destination.ip != null]",
+  "alert_suppression": {
+    "group_by_v2": [
+      {
+        "field": "process.name",
+        "sequence_index": 0
+      },
+      {
+        "field": "destination.ip",
+        "sequence_index": 1
+      }
+    ],
+    "duration": {
+      "value": 1,
+      "unit": "h"
+    },
+    "missing_fields_strategy": "suppress"
+  }
+}

@@ -6,6 +6,7 @@
  */
 
 import type { RuleSearchResult } from '../../../types';
+import { getEffectiveSuppressionGroupByFields } from '../../../../lib/detection_engine/rule_types/utils/effective_alert_suppression_fields';
 
 export const getAlertSuppressionUsage = (
   ruleAttributes: RuleSearchResult
@@ -45,7 +46,9 @@ export const getAlertSuppressionUsage = (
         hasAlertSuppressionPerTimePeriod: ruleAttributes.params.alertSuppression.duration != null,
         hasAlertSuppressionMissingFieldsStrategyDoNotSuppress:
           ruleAttributes.params.alertSuppression.missingFieldsStrategy === 'doNotSuppress',
-        alertSuppressionFieldsCount: ruleAttributes.params.alertSuppression.groupBy?.length || 0,
+        alertSuppressionFieldsCount: getEffectiveSuppressionGroupByFields(
+          ruleAttributes.params.alertSuppression
+        ).length,
       };
     default:
       return {
