@@ -49,7 +49,6 @@ export interface FindActionPoliciesArgs {
   perPage?: number;
   search?: string;
   enabled?: boolean;
-  tags?: string[];
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }
