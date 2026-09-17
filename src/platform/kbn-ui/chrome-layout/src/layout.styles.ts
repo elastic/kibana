@@ -39,15 +39,19 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
     bannerHeight,
     headerHeight,
     footerHeight,
+    applicationMarginRight,
     applicationWorkspaceOpen,
+    agentWorkspaceOpen,
+    hasAgent,
   } = layoutState;
 
   const applicationColumn = applicationWorkspaceOpen === false ? '0px' : '1fr';
+  const agentColumnGutter = hasAgent && agentWorkspaceOpen ? applicationMarginRight : 0;
 
   const style = {
     gridTemplateColumns: `
       ${navigationWidth}px
-      ${agentWidth}px
+      ${agentWidth + agentColumnGutter}px
       ${applicationColumn}
       ${sidebarWidth}px
     `,

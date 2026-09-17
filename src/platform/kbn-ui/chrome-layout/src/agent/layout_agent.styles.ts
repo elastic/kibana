@@ -33,6 +33,7 @@ const shell = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       margin-top: ${layoutVar('application.marginTop')};
       margin-bottom: ${layoutVar('application.marginBottom')};
       margin-left: ${layoutVar('agent.marginLeft', '0px')};
+      margin-right: ${layoutVar('application.marginRight', '0px')};
       min-width: 0;
       min-height: 0;
 

@@ -179,7 +179,6 @@ export class GridLayout implements LayoutService {
                 agentPreferredWidth: agentWorkspaceWidth,
                 navigationWidth,
                 sidebarWidth,
-                agentMarginLeft: AGENT_FIRST_LAYOUT_OVERRIDES.agentMarginLeft ?? 0,
                 applicationMarginRight: AGENT_FIRST_LAYOUT_OVERRIDES.applicationMarginRight ?? 0,
               }),
               applicationWorkspaceOpen: effectiveApplicationWorkspaceOpen,

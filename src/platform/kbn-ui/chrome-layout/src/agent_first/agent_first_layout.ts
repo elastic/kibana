@@ -12,15 +12,10 @@ import type { LayoutConfig } from '../layout_config_context';
 
 export const AGENT_FIRST_LAYOUT_OVERRIDES: Pick<
   LayoutConfig,
-  | 'applicationMarginRight'
-  | 'applicationMarginBottom'
-  | 'applicationMarginTop'
-  | 'agentMarginLeft'
-  | 'headerHeight'
+  'applicationMarginRight' | 'applicationMarginBottom' | 'applicationMarginTop' | 'headerHeight'
 > = {
   applicationMarginRight: AGENT_FIRST_GAP,
   applicationMarginBottom: AGENT_FIRST_GAP,
   applicationMarginTop: AGENT_FIRST_GAP,
-  agentMarginLeft: AGENT_FIRST_GAP,
   headerHeight: 0,
 };

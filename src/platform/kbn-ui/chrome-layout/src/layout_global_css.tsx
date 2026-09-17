@@ -31,6 +31,8 @@ export const LayoutGlobalCSS = () => {
     applicationMarginBottom,
     applicationMarginRight,
     agentMarginLeft,
+    agentWorkspaceOpen,
+    hasAgent,
   } = useLayoutState();
 
   // Pre-calculate composite values for simplified CSS expressions
@@ -38,7 +40,8 @@ export const LayoutGlobalCSS = () => {
   const applicationTop = headerAndBannerHeight + applicationMarginTop;
   const applicationBottom = footerHeight + applicationMarginBottom;
   const applicationRight = applicationMarginRight + sidebarWidth;
-  const applicationLeft = navigationWidth + agentWidth + agentMarginLeft;
+  const agentAppGutter = hasAgent && agentWorkspaceOpen ? applicationMarginRight : 0;
+  const applicationLeft = navigationWidth + agentWidth + agentMarginLeft + agentAppGutter;
   const applicationHorizontalOffset = applicationLeft + applicationRight;
   const contentTop = applicationTop + applicationTopBarHeight;
   const contentBottom = applicationBottom + applicationBottomBarHeight;
