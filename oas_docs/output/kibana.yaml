@@ -44028,7 +44028,7 @@ paths:
                           type: string
                           x-state: Experimental; added in 9.6.0
                         iac_deployment_id:
-                          description: Identifier of the last CloudFormation stack deployed for this connector.
+                          description: ARN of the last CloudFormation stack deployed for this connector (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>).
                           maxLength: 2048
                           minLength: 1
                           type: string
@@ -44185,7 +44185,7 @@ paths:
                   type: string
                   x-state: Experimental; added in 9.6.0
                 iac_deployment_id:
-                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  description: ARN of the last CloudFormation stack deployed for this connector (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>).
                   maxLength: 2048
                   minLength: 1
                   type: string
@@ -44292,7 +44292,7 @@ paths:
                         type: string
                         x-state: Experimental; added in 9.6.0
                       iac_deployment_id:
-                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        description: ARN of the last CloudFormation stack deployed for this connector (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>).
                         maxLength: 2048
                         minLength: 1
                         type: string
@@ -44536,7 +44536,7 @@ paths:
                         type: string
                         x-state: Experimental; added in 9.6.0
                       iac_deployment_id:
-                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        description: ARN of the last CloudFormation stack deployed for this connector (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>).
                         maxLength: 2048
                         minLength: 1
                         type: string
@@ -44688,7 +44688,7 @@ paths:
                   type: string
                   x-state: Experimental; added in 9.6.0
                 iac_deployment_id:
-                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  description: ARN of the last CloudFormation stack deployed for this connector (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>).
                   maxLength: 2048
                   minLength: 1
                   type: string
@@ -44791,7 +44791,7 @@ paths:
                         type: string
                         x-state: Experimental; added in 9.6.0
                       iac_deployment_id:
-                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        description: ARN of the last CloudFormation stack deployed for this connector (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>).
                         maxLength: 2048
                         minLength: 1
                         type: string
