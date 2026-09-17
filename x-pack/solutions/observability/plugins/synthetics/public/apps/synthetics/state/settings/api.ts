@@ -58,6 +58,24 @@ export const setDynamicSettings = async ({
   );
 };
 
+export interface MonitorTypesPolicy {
+  allowedMonitorTypes: string[];
+  spaces: string[];
+}
+
+export const getAllowedMonitorTypesPolicy = async (): Promise<MonitorTypesPolicy> => {
+  return await apiService.get(SYNTHETICS_API_URLS.MONITOR_TYPES_POLICY);
+};
+
+export const setAllowedMonitorTypes = async (
+  allowedMonitorTypes: string[],
+  spaces?: string[]
+): Promise<MonitorTypesPolicy> => {
+  // Only forward `spaces` when at least one is selected; an empty list means "keep current".
+  const body = spaces?.length ? { allowedMonitorTypes, spaces } : { allowedMonitorTypes };
+  return await apiService.put(SYNTHETICS_API_URLS.MONITOR_TYPES_POLICY, body);
+};
+
 export const triggerMwSync = async (): Promise<void> => {
   const url = SYNTHETICS_API_URLS.TRIGGER_TASK_RUN.replace(
     '{taskType}',

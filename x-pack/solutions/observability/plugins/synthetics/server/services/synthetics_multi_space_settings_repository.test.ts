@@ -125,6 +125,7 @@ describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
       expect(result).toEqual({
         useAllRemoteClusters: true,
         selectedRemoteClusters: ['cluster-a', 'cluster-b'],
+        allowedMonitorTypes: [],
         spaces: ['default', 'marketing'],
       });
     });
@@ -140,6 +141,7 @@ describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
       expect(result).toEqual({
         useAllRemoteClusters: true,
         selectedRemoteClusters: DEFAULT_MULTI_SPACE_SETTINGS.selectedRemoteClusters,
+        allowedMonitorTypes: DEFAULT_MULTI_SPACE_SETTINGS.allowedMonitorTypes,
         spaces: ['default'],
       });
     });
@@ -218,7 +220,11 @@ describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
 
         expect(soClient.create).toHaveBeenCalledWith(
           SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
-          { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] },
+          {
+            useAllRemoteClusters: true,
+            selectedRemoteClusters: ['cluster-a'],
+            allowedMonitorTypes: [],
+          },
           { initialNamespaces: ['marketing'] }
         );
         expect(soClient.update).not.toHaveBeenCalled();
@@ -226,6 +232,7 @@ describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
         expect(result).toEqual({
           useAllRemoteClusters: true,
           selectedRemoteClusters: ['cluster-a'],
+          allowedMonitorTypes: [],
           spaces: ['marketing'],
         });
       });
@@ -242,7 +249,7 @@ describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
 
         expect(soClient.create).toHaveBeenCalledWith(
           SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
-          { useAllRemoteClusters: false, selectedRemoteClusters: [] },
+          { useAllRemoteClusters: false, selectedRemoteClusters: [], allowedMonitorTypes: [] },
           { initialNamespaces: [DEFAULT_SPACE_ID] }
         );
         expect(result.spaces).toEqual([DEFAULT_SPACE_ID]);
@@ -259,7 +266,11 @@ describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
 
         expect(soClient.create).toHaveBeenCalledWith(
           SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
-          { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] },
+          {
+            useAllRemoteClusters: true,
+            selectedRemoteClusters: ['cluster-a'],
+            allowedMonitorTypes: [],
+          },
           { initialNamespaces: ['default', 'marketing'] }
         );
         expect(result.spaces).toEqual(['default', 'marketing']);
@@ -339,7 +350,11 @@ describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
         expect(soClient.update).toHaveBeenCalledWith(
           SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
           'existing-id',
-          { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] }
+          {
+            useAllRemoteClusters: true,
+            selectedRemoteClusters: ['cluster-a'],
+            allowedMonitorTypes: [],
+          }
         );
         expect(soClient.create).not.toHaveBeenCalled();
         expect(result.spaces).toEqual(['new_space']);
@@ -408,13 +423,18 @@ describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
         expect(soClient.update).toHaveBeenCalledWith(
           SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
           'existing-id',
-          { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-x'] }
+          {
+            useAllRemoteClusters: true,
+            selectedRemoteClusters: ['cluster-x'],
+            allowedMonitorTypes: [],
+          }
         );
         expect(soClient.updateObjectsSpaces).not.toHaveBeenCalled();
         expect(soClient.create).not.toHaveBeenCalled();
         expect(result).toEqual({
           useAllRemoteClusters: true,
           selectedRemoteClusters: ['cluster-x'],
+          allowedMonitorTypes: [],
           spaces: ['default', 'marketing'],
         });
       });
@@ -532,7 +552,11 @@ describe('DefaultSyntheticsMultiSpaceSettingsRepository', () => {
         expect(soClient.update).toHaveBeenCalledWith(
           SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
           'newer-id',
-          { useAllRemoteClusters: false, selectedRemoteClusters: ['cluster-a'] }
+          {
+            useAllRemoteClusters: false,
+            selectedRemoteClusters: ['cluster-a'],
+            allowedMonitorTypes: [],
+          }
         );
         expect(soClient.create).not.toHaveBeenCalled();
       });

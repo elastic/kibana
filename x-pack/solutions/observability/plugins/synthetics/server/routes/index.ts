@@ -20,6 +20,10 @@ import {
   createPostDynamicSettingsRoute,
 } from './settings/dynamic_settings';
 import {
+  editMonitorTypesPolicyRoute,
+  getMonitorTypesPolicyRoute,
+} from './settings/monitor_types_policy';
+import {
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
 } from './settings/multi_space_settings';
@@ -127,6 +131,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getConnectorTypesRoute,
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
+  editMonitorTypesPolicyRoute,
+  getMonitorTypesPolicyRoute,
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
   syntheticsGetPingHeatmapRoute,

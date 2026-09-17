@@ -13,6 +13,8 @@ import * as t from 'io-ts';
 export const syntheticsMultiSpaceSettingsSchema = t.partial({
   useAllRemoteClusters: t.boolean,
   selectedRemoteClusters: t.array(t.string),
+  // Per-space allow-list of creatable monitor types. Empty/undefined = all allowed.
+  allowedMonitorTypes: t.array(t.string),
 });
 
 export type SyntheticsMultiSpaceSettings = t.TypeOf<typeof syntheticsMultiSpaceSettingsSchema>;

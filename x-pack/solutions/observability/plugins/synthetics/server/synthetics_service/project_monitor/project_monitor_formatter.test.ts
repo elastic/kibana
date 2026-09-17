@@ -28,6 +28,12 @@ jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
   getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
 }));
 
+// The monitor-type allow-list reads the multi-space settings SO via a scoped client;
+// this suite isn't exercising the policy, so resolve to "no restriction".
+jest.mock('../../services/allowed_monitor_types', () => ({
+  getAllowedMonitorTypes: jest.fn().mockResolvedValue(undefined),
+}));
+
 const testMonitors = [
   {
     type: 'browser',

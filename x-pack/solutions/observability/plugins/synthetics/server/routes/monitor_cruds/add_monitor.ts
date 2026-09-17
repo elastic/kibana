@@ -24,6 +24,7 @@ import { ConfigKey } from '../../../common/runtime_types';
 import type { MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
+import { getAllowedMonitorTypes } from '../../services/allowed_monitor_types';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 import {
@@ -114,10 +115,13 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         maintenanceWindows
       );
 
+      const allowedMonitorTypes = await getAllowedMonitorTypes(server, request);
+
       const validationResult = validateMonitor(
         monitorWithDefaults,
         spaceId,
-        server.cloud?.isServerlessEnabled
+        server.cloud?.isServerlessEnabled,
+        allowedMonitorTypes
       );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {

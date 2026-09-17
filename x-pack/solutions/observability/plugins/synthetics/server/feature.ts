@@ -32,6 +32,7 @@ import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
 export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
 export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';
+export const MANAGE_MONITOR_POLICY_API = 'manage-monitor-policy';
 
 const alertingFeatures = SYNTHETICS_ALERTING_FEATURES;
 
@@ -145,6 +146,30 @@ const canManageRulesPrivilege: SubFeaturePrivilegeGroupConfig = {
         },
       },
       ui: ['canManageRules'],
+    },
+  ],
+};
+
+const canManageMonitorPolicyPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent',
+  privileges: [
+    {
+      id: 'can_manage_monitor_policy',
+      name: i18n.translate('xpack.synthetics.features.canManageMonitorPolicy.label', {
+        defaultMessage: 'Manage monitor policy',
+      }),
+      // `includeIn: 'none'` — never granted implicitly, not even to base `all`.
+      // Base `all` (monitor writers) can create monitors but must NOT be able to
+      // widen the creation policy that constrains them (allowed monitor types
+      // today; e.g. allowed locations in future). Only a role that explicitly adds
+      // this privilege can edit the policy via the dedicated route.
+      includeIn: 'none',
+      api: [MANAGE_MONITOR_POLICY_API],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['canManageMonitorPolicy'],
     },
   ],
 };
@@ -275,6 +300,16 @@ export const syntheticsFeature = {
           'Create, update, delete, enable, disable, run, and backfill Synthetics and Uptime alert rules, including the default status and TLS rules. This does not grant permission to create or edit monitors.',
       }),
       privilegeGroups: [canManageRulesPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.monitorPolicy', {
+        defaultMessage: 'Monitor policy',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.monitorPolicy.description', {
+        defaultMessage:
+          'Configure the monitor creation policy for a space, such as which monitor types (e.g. HTTP, TCP, ICMP, browser) may be created. This does not grant permission to create or edit monitors.',
+      }),
+      privilegeGroups: [canManageMonitorPolicyPrivilege],
     },
   ],
 };

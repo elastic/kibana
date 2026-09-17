@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Redirect, useParams } from 'react-router-dom';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { AlertDefaultsForm } from './alerting_defaults/alert_defaults_form';
 import { ProjectAPIKeys } from './project_api_keys/project_api_keys';
 import type { SettingsTabId } from './page_header';
@@ -17,6 +17,7 @@ import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
 import { ManagePrivateLocations } from './private_locations/manage_private_locations';
 import { AdvancedSettingsForm } from './advanced/advanced_settings_form';
 import { RemoteClustersForm } from './remote_clusters/remote_clusters_form';
+import { MonitorTypesForm } from './monitor_types/monitor_types_form';
 
 export const SettingsPage = () => {
   useSettingsBreadcrumbs();
@@ -41,9 +42,15 @@ export const SettingsPage = () => {
         );
       case 'advanced':
         return (
-          <EuiPanel hasShadow={false} hasBorder={true}>
-            <AdvancedSettingsForm />
-          </EuiPanel>
+          <>
+            <EuiPanel hasShadow={false} hasBorder={true}>
+              <AdvancedSettingsForm />
+            </EuiPanel>
+            <EuiSpacer size="m" />
+            <EuiPanel hasShadow={false} hasBorder={true}>
+              <MonitorTypesForm />
+            </EuiPanel>
+          </>
         );
       case 'remote-clusters':
         return (

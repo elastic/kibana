@@ -25,6 +25,7 @@ export interface SyntheticsMultiSpaceSettingsRepository {
 export const DEFAULT_MULTI_SPACE_SETTINGS: SyntheticsMultiSpaceSettings = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
+  allowedMonitorTypes: [],
 };
 
 const SETTINGS_FIND_PER_PAGE = 100;
@@ -78,10 +79,15 @@ export class DefaultSyntheticsMultiSpaceSettingsRepository
       // scope the client to one of the SO's existing namespaces so the writes succeed.
       const writeClient = this.scopedWriteClient(existing.namespaces);
 
+      // Merge over the existing attributes rather than replacing them: this singleton is
+      // shared by independent settings groups (CCS remote clusters, monitor-type policy),
+      // so a caller that only touches one group must not reset the others.
+      const updated = this.mergeForUpdate(existing.attributes, settings);
+
       await writeClient.update<SyntheticsMultiSpaceSettings>(
         SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
         existing.id,
-        merged
+        updated
       );
 
       const effectiveSpaces = await this.reconcileSpaces(
@@ -91,7 +97,7 @@ export class DefaultSyntheticsMultiSpaceSettingsRepository
         spaces
       );
 
-      return { ...merged, spaces: effectiveSpaces };
+      return { ...updated, spaces: effectiveSpaces };
     }
 
     const initialNamespaces = spaces?.length
@@ -185,6 +191,21 @@ export class DefaultSyntheticsMultiSpaceSettingsRepository
         settings.useAllRemoteClusters ?? DEFAULT_MULTI_SPACE_SETTINGS.useAllRemoteClusters,
       selectedRemoteClusters:
         settings.selectedRemoteClusters ?? DEFAULT_MULTI_SPACE_SETTINGS.selectedRemoteClusters,
+      allowedMonitorTypes:
+        settings.allowedMonitorTypes ?? DEFAULT_MULTI_SPACE_SETTINGS.allowedMonitorTypes,
+    };
+  }
+
+  // Preserve stored values for any field the caller did not explicitly provide.
+  private mergeForUpdate(
+    existing: Partial<SyntheticsMultiSpaceSettings>,
+    incoming: SyntheticsMultiSpaceSettings
+  ): SyntheticsMultiSpaceSettings {
+    const base = this.applyDefaults(existing);
+    return {
+      useAllRemoteClusters: incoming.useAllRemoteClusters ?? base.useAllRemoteClusters,
+      selectedRemoteClusters: incoming.selectedRemoteClusters ?? base.selectedRemoteClusters,
+      allowedMonitorTypes: incoming.allowedMonitorTypes ?? base.allowedMonitorTypes,
     };
   }
 }

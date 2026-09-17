@@ -15,6 +15,7 @@ import { InvalidMaintenanceWindowError } from '../maintenance_windows/resolve_ma
 import type { SyntheticsServerSetup } from '../../types';
 import type { RouteContext } from '../../routes/types';
 import { getAllLocations } from '../get_all_locations';
+import { getAllowedMonitorTypes } from '../../services/allowed_monitor_types';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import type { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import type { MonitorConfigUpdate } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
@@ -70,6 +71,7 @@ export class ProjectMonitorFormatter {
   private publicLocations: Locations;
   private privateLocations: SyntheticsPrivateLocations;
   private maintenanceWindows: MaintenanceWindow[];
+  private allowedMonitorTypes?: string[];
   private savedObjectsClient: SavedObjectsClientContract;
   private monitors: ProjectMonitor[] = [];
   public createdMonitors: string[] = [];
@@ -111,6 +113,10 @@ export class ProjectMonitorFormatter {
       savedObjectsClient: this.savedObjectsClient,
       excludeAgentPolicies: true,
     });
+    const allowedMonitorTypesPromise = getAllowedMonitorTypes(
+      this.server,
+      this.routeContext.request
+    );
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
     // Only fetch maintenance windows when a monitor actually references one, so
     // pushes that don't use them avoid the extra alerting lookup.
@@ -121,17 +127,20 @@ export class ProjectMonitorFormatter {
       ? this.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(this.spaceId)
       : Promise.resolve([]);
 
-    const [locations, existingMonitors, maintenanceWindows] = await Promise.all([
-      locationsPromise,
-      existingMonitorsPromise,
-      maintenanceWindowsPromise,
-    ]);
+    const [locations, existingMonitors, maintenanceWindows, allowedMonitorTypes] =
+      await Promise.all([
+        locationsPromise,
+        existingMonitorsPromise,
+        maintenanceWindowsPromise,
+        allowedMonitorTypesPromise,
+      ]);
 
     const { publicLocations, privateLocations } = locations;
 
     this.publicLocations = publicLocations;
     this.privateLocations = privateLocations;
     this.maintenanceWindows = maintenanceWindows ?? [];
+    this.allowedMonitorTypes = allowedMonitorTypes;
 
     return existingMonitors;
   };
@@ -243,11 +252,15 @@ export class ProjectMonitorFormatter {
       }
 
       /* Validates that the normalized monitor is a valid monitor saved object type */
+      // Grandfather existing project monitors: only enforce the per-space
+      // monitor-type allow-list on brand-new monitors, so re-pushing a monitor
+      // created before the policy tightened doesn't start failing.
       const { valid: isNormalizedMonitorValid, decodedMonitor } = this.validateMonitor({
         validationResult: validateMonitor(
           normalizedMonitor as MonitorFields,
           this.spaceId,
-          isServerless
+          isServerless,
+          isNewMonitor ? this.allowedMonitorTypes : undefined
         ),
         monitorId: monitor.id,
       });
