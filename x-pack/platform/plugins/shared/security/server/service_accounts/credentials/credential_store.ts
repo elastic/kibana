@@ -89,13 +89,13 @@ export class ServiceAccountCredentialStore {
   async getDecrypted(serviceAccountId: string): Promise<ServiceAccountCredentialAttributes | null> {
     const id = getCredentialId(serviceAccountId);
 
+    let attributes: ServiceAccountCredentialAttributes;
     try {
-      const { attributes } =
+      ({ attributes } =
         await this.encryptedClient.getDecryptedAsInternalUser<ServiceAccountCredentialAttributes>(
           SERVICE_ACCOUNT_CREDENTIAL_TYPE,
           id
-        );
-      return attributes;
+        ));
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         return null;
@@ -114,5 +114,20 @@ export class ServiceAccountCredentialStore {
 
       throw e;
     }
+
+    // Decryption skips an encrypted attribute that is absent rather than failing, and `token` is
+    // the only one this type has, so a document whose token was stripped would "decrypt" without
+    // any of its other attributes having been authenticated. The token's presence is what proves
+    // the authentication tag was checked.
+    if (typeof attributes.token !== 'string' || attributes.token.length === 0) {
+      this.logger.error(
+        `Service account credential [${id}] failed integrity verification: the token is missing.`
+      );
+      throw Boom.forbidden(
+        'The credential for this service account failed integrity verification.'
+      );
+    }
+
+    return attributes;
   }
 }

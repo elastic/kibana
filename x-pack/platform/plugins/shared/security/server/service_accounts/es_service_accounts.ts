@@ -27,19 +27,25 @@ import type { SecurityLicense } from '../../common';
 import {
   ES_SERVICE_ACCOUNT_FALLBACK_ROLE,
   ES_SERVICE_ACCOUNT_NAMESPACE,
+  ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_MAX_ROLES,
-  SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   serviceAccountRoleNameSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
 
 /**
- * Elasticsearch reports an account keyed by its `{namespace}/{service}` principal. Validated so
- * that a shape change fails here rather than leaking a partially-undefined account to callers.
+ * The discriminator on an account Elasticsearch reports, which decides whether the account is one
+ * Kibana manages at all.
+ */
+const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
+
+/**
+ * The rest of what Elasticsearch reports for an account keyed by its `{namespace}/{service}`
+ * principal. Parsed separately from the discriminator above, so "this is not Kibana's account"
+ * and "Kibana cannot read this account" stay different answers.
  */
 const accountEntrySchema = z.object({
-  type: z.literal('user_managed'),
   roles: z.array(serviceAccountRoleNameSchema).max(SERVICE_ACCOUNT_MAX_ROLES),
   enabled: z.boolean(),
 });
@@ -47,7 +53,7 @@ const accountEntrySchema = z.object({
 const createTokenResponseSchema = z.object({
   token: z.object({
     // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
-    value: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
+    value: z.string().min(1).max(ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
   }),
 });
 
@@ -222,9 +228,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   releaseFakeRequest(): void {}
 
   /**
-   * Reads the account back, resolving `undefined` when it does not exist. A principal that
-   * resolves to a built-in account is reported as absent: those are not Kibana's to manage, and
-   * must never be mistaken for one it created.
+   * Reads the account back, resolving `undefined` when it does not exist, or when the principal
+   * resolves to a built-in account: those are not Kibana's to manage, and must never be mistaken
+   * for one it created.
+   *
+   * Throws when a user-managed account is there but Kibana cannot read it. The caller refuses a
+   * taken name on the strength of this, and the Elasticsearch PUT behind it is a full
+   * replacement, so "I cannot parse this" must never read as "the name is free".
    */
   private async readAccount(
     esClient: ElasticsearchClient,
@@ -234,10 +244,15 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     const principal = `${namespace}/${name}`;
 
     const response = await esClient.transport.request<Record<string, unknown>>(
-      { method: 'GET', path: accountPath(namespace, name) },
-      // A scoped GET returns both built-in and user-managed accounts, and an unknown principal
-      // is an empty 200 rather than a 404 — but ignore 404 too, so a future tightening upstream
-      // does not turn "no such account" into an error.
+      {
+        method: 'GET',
+        path: accountPath(namespace, name),
+        // Asked for explicitly, because the API's default depends on the shape of the path.
+        // Kibana only ever manages user-managed accounts.
+        querystring: { type: 'user_managed' },
+      },
+      // An unknown principal is an empty 200 rather than a 404. Ignore 404 as well, so a future
+      // tightening upstream does not turn "no such account" into an error.
       { ignore: [404] }
     );
 
@@ -246,12 +261,24 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       return undefined;
     }
 
+    // The type filter above should keep built-in accounts out of the response. This is what holds
+    // if it does not, and what makes a future third account type read as "not Kibana's" rather
+    // than as unreadable.
+    if (!userManagedEntrySchema.safeParse(entry).success) {
+      this.logger.debug(`Service account [${principal}] is not a user-managed account`);
+      return undefined;
+    }
+
     const parsed = accountEntrySchema.safeParse(entry);
     if (!parsed.success) {
-      this.logger.debug(
-        `Service account [${principal}] is not a user-managed account: ${parsed.error.message}`
+      // Refused rather than reported absent: this name belongs to an account Kibana manages, and
+      // the caller would otherwise overwrite it.
+      this.logger.error(
+        `Elasticsearch reported service account [${principal}] in an unrecognized shape: ${parsed.error.message}`
       );
-      return undefined;
+      throw Boom.badGateway(
+        `Cannot determine the state of service account [${name}]: Elasticsearch reported it in an unrecognized shape.`
+      );
     }
 
     return {

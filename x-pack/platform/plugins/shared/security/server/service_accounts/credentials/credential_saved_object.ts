@@ -102,6 +102,22 @@ export const registerServiceAccountCredentialSavedObjectType = (
         serviceAccountId: { type: 'keyword', ignore_above: 1024 },
         // Mapped now so credentials can later be reported on by age without a migration.
         createdAt: { type: 'date' },
+        // Reusing the binder shape is what keeps "everything this person set up" answerable
+        // across credentials and workload bindings, so it has to be queryable here too. Explicit,
+        // so that adding a fourth variant is a deliberate mapping decision rather than something
+        // that starts indexing on its own, and mapped now because adding a mapping once
+        // credentials exist costs a model version.
+        createdBy: {
+          dynamic: false,
+          properties: {
+            type: { type: 'keyword', ignore_above: 1024 },
+            username: { type: 'keyword', ignore_above: 1024 },
+            userProfileId: { type: 'keyword', ignore_above: 1024 },
+            apiKeyId: { type: 'keyword', ignore_above: 1024 },
+            variant: { type: 'keyword', ignore_above: 1024 },
+            serviceAccountId: { type: 'keyword', ignore_above: 1024 },
+          },
+        },
         // `token` is deliberately unmapped: it is ciphertext, and nothing queries it.
       },
     },

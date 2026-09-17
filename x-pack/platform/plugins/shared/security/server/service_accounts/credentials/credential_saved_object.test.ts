@@ -82,4 +82,22 @@ describe('registerServiceAccountCredentialSavedObjectType', () => {
 
     expect(Object.keys(type.mappings.properties ?? {})).not.toContain('token');
   });
+
+  // The binder shape is reused so that "everything this person set up" stays answerable across
+  // credentials and workload bindings, which only works if the attribution is indexed.
+  it('maps every `createdBy` variant, so the attribution it records is queryable', () => {
+    const { type } = register();
+
+    expect(type.mappings.properties?.createdBy).toEqual({
+      dynamic: false,
+      properties: {
+        type: { type: 'keyword', ignore_above: 1024 },
+        username: { type: 'keyword', ignore_above: 1024 },
+        userProfileId: { type: 'keyword', ignore_above: 1024 },
+        apiKeyId: { type: 'keyword', ignore_above: 1024 },
+        variant: { type: 'keyword', ignore_above: 1024 },
+        serviceAccountId: { type: 'keyword', ignore_above: 1024 },
+      },
+    });
+  });
 });

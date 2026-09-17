@@ -17,8 +17,11 @@ import type { CheckPrivileges, CheckPrivilegesResponse } from '@kbn/security-plu
 import type { ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH } from '../../common/service_accounts';
 
 const ACCOUNT_PATH = '/_security/service/kibana/nightshift-relay';
+/** Kibana only ever manages user-managed accounts, so the GET asks for that type explicitly. */
+const READ_ACCOUNT = { method: 'GET', path: ACCOUNT_PATH, querystring: { type: 'user_managed' } };
 const TOKEN_PATH = `${ACCOUNT_PATH}/credential/token/kibana-managed`;
 
 const clusterPrivilegesResponse = (authorized: boolean) =>
@@ -101,7 +104,7 @@ describe('EsServiceAccounts', () => {
       });
 
       const calls = esClient.asCurrentUser.transport.request.mock.calls;
-      expect(calls[0][0]).toEqual({ method: 'GET', path: ACCOUNT_PATH });
+      expect(calls[0][0]).toEqual(READ_ACCOUNT);
       expect(calls[1][0]).toEqual({
         method: 'PUT',
         path: ACCOUNT_PATH,
@@ -209,6 +212,24 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.set).not.toHaveBeenCalled();
     });
 
+    // A third account type, a renamed field, or a role list outside Kibana's caps would
+    // otherwise read as "the name is free", and the PUT that follows is a full replacement.
+    it('refuses rather than overwriting an account it cannot read', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        'kibana/nightshift-relay': { type: 'user_managed', roles: 'superuser', enabled: true },
+      });
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(credentialStore.set).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('in an unrecognized shape')
+      );
+    });
+
     it('treats a built-in account at the same principal as absent', async () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce({
@@ -275,6 +296,21 @@ describe('EsServiceAccounts', () => {
 
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('refuses a token longer than Elasticsearch should ever report, and rolls back', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({})
+        .mockResolvedValueOnce({ created: true })
+        .mockResolvedValueOnce({
+          token: { value: 'a'.repeat(ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH + 1) },
+        });
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
+
+      expect(credentialStore.set).not.toHaveBeenCalled();
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[3][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
     });
 
     it('rolls back the token and the account when the credential cannot be stored', async () => {

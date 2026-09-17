@@ -136,6 +136,27 @@ describe('ServiceAccountCredentialStore', () => {
       );
     });
 
+    // Decryption skips an absent encrypted attribute instead of failing, so this document comes
+    // back reporting success with none of its other attributes having been authenticated.
+    it.each([{ token: undefined }, { token: '' }])(
+      'refuses with a 403 when the stored token is missing (%j)',
+      async (overrides) => {
+        encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: getCredentialId(SERVICE_ACCOUNT_ID),
+          type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+          references: [],
+          attributes: attributes(overrides),
+        });
+
+        await expect(store.getDecrypted(SERVICE_ACCOUNT_ID)).rejects.toMatchObject({
+          output: { statusCode: 403 },
+        });
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('failed integrity verification: the token is missing')
+        );
+      }
+    );
+
     it('rethrows anything else', async () => {
       encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(
         new Error('cluster unreachable')
