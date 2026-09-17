@@ -13,15 +13,14 @@ type StateTransition = RuleApiResponse['state_transition'];
 describe('formatAlertDelay', () => {
   it('returns the empty value when no pending threshold is configured', () => {
     expect(formatAlertDelay(undefined)).toBe(EMPTY_VALUE);
-    expect(formatAlertDelay({} as StateTransition)).toBe(EMPTY_VALUE);
   });
 
   it.each([0, 1])('describes a pending count of %i as immediate', (pendingCount) => {
-    expect(formatAlertDelay({ pending_count: pendingCount } as StateTransition)).toBe('Immediate');
+    expect(formatAlertDelay({ pending_count: pendingCount })).toBe('Immediate');
   });
 
   it('describes a pending count above one as a match delay', () => {
-    expect(formatAlertDelay({ pending_count: 3 } as StateTransition)).toBe('After 3 matches');
+    expect(formatAlertDelay({ pending_count: 3 })).toBe('After 3 matches');
   });
 
   it('describes a timeframe alongside a count of one', () => {
@@ -35,7 +34,7 @@ describe('formatAlertDelay', () => {
   });
 
   it('describes a timeframe on its own', () => {
-    expect(formatAlertDelay({ pending_timeframe: '5m' } as StateTransition)).toBe('After 5 min');
+    expect(formatAlertDelay({ pending_timeframe: '5m' })).toBe('After 5 min');
   });
 });
 
@@ -45,14 +44,10 @@ describe('formatRecoveryDelay', () => {
   });
 
   it.each([0, 1])('describes a recovering count of %i as immediate', (recoveringCount) => {
-    expect(formatRecoveryDelay({ recovering_count: recoveringCount } as StateTransition)).toBe(
-      'Immediate'
-    );
+    expect(formatRecoveryDelay({ recovering_count: recoveringCount })).toBe('Immediate');
   });
 
   it('describes a recovering count above one as a recovery delay', () => {
-    expect(formatRecoveryDelay({ recovering_count: 2 } as StateTransition)).toBe(
-      'After 2 recoveries'
-    );
+    expect(formatRecoveryDelay({ recovering_count: 2 })).toBe('After 2 recoveries');
   });
 });

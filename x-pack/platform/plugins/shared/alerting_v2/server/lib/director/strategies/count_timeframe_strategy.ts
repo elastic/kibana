@@ -25,6 +25,9 @@ const DEFAULT_STATUS_COUNT = 1;
 /** No time has been spent in a status that is being entered on this evaluation. */
 const NO_ELAPSED_TIME = 0;
 
+/** No evaluation has been counted yet towards a status that is being entered. */
+const NO_STATUS_COUNT = 0;
+
 type Operator = NonNullable<NonNullable<RuleResponse['state_transition']>['pending_operator']>;
 const DEFAULT_OPERATOR: Operator = 'OR';
 
@@ -32,6 +35,12 @@ interface ThresholdConfig {
   operator: Operator;
   count?: number;
   timeframeMs?: number;
+}
+
+/** The gating configuration for one phase, plus where that phase leads. */
+interface PhaseThreshold extends ThresholdConfig {
+  successStatus: AlertEpisodeStatus;
+  stayStatus: AlertEpisodeStatus;
 }
 
 /**
@@ -162,35 +171,17 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
 
     // --- Pending → Active threshold ---
     if (this.isPendingToActiveTransition(currentEpisodeStatus, basicResult.status)) {
-      return this.getNextStateTransition({
+      return this.getNextStateTransition(this.getPendingThreshold(rule, stateTransition), {
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.pending_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.pending_count,
-        timeframeMs: this.safeParseDurationToMs(
-          stateTransition.pending_timeframe,
-          rule.id,
-          'pending_timeframe'
-        ),
-        successStatus: alertEpisodeStatus.active,
-        stayStatus: alertEpisodeStatus.pending,
       });
     }
 
     // --- Recovering → Inactive threshold ---
     if (this.isRecoveringToInactiveTransition(currentEpisodeStatus, basicResult.status)) {
-      return this.getNextStateTransition({
+      return this.getNextStateTransition(this.getRecoveringThreshold(rule, stateTransition), {
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.recovering_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.recovering_count,
-        timeframeMs: this.safeParseDurationToMs(
-          stateTransition.recovering_timeframe,
-          rule.id,
-          'recovering_timeframe'
-        ),
-        successStatus: alertEpisodeStatus.inactive,
-        stayStatus: alertEpisodeStatus.recovering,
       });
     }
 
@@ -198,34 +189,14 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     if (
       this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.pending)
     ) {
-      return this.getFirstEntryStateTransition({
-        operator: stateTransition.pending_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.pending_count,
-        timeframeMs: this.safeParseDurationToMs(
-          stateTransition.pending_timeframe,
-          rule.id,
-          'pending_timeframe'
-        ),
-        successStatus: alertEpisodeStatus.active,
-        stayStatus: alertEpisodeStatus.pending,
-      });
+      return this.getFirstEntryStateTransition(this.getPendingThreshold(rule, stateTransition));
     }
 
     // --- Changing to recovering for the first time ---
     if (
       this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.recovering)
     ) {
-      return this.getFirstEntryStateTransition({
-        operator: stateTransition.recovering_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.recovering_count,
-        timeframeMs: this.safeParseDurationToMs(
-          stateTransition.recovering_timeframe,
-          rule.id,
-          'recovering_timeframe'
-        ),
-        successStatus: alertEpisodeStatus.inactive,
-        stayStatus: alertEpisodeStatus.recovering,
-      });
+      return this.getFirstEntryStateTransition(this.getRecoveringThreshold(rule, stateTransition));
     }
 
     return basicResult;
@@ -277,23 +248,44 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     return nextStatus === targetStatus && currentStatus !== targetStatus;
   }
 
-  private getNextStateTransition({
-    currentStatusCount,
-    elapsedMs,
-    operator,
-    count,
-    timeframeMs,
-    successStatus,
-    stayStatus,
-  }: {
-    currentStatusCount: number;
-    elapsedMs: number;
-    operator: Operator;
-    count?: number;
-    timeframeMs?: number;
-    successStatus: AlertEpisodeStatus;
-    stayStatus: AlertEpisodeStatus;
-  }): StateTransitionResult {
+  private getPendingThreshold(
+    rule: RuleResponse,
+    stateTransition: NonNullable<RuleResponse['state_transition']>
+  ): PhaseThreshold {
+    return {
+      operator: stateTransition.pending_operator ?? DEFAULT_OPERATOR,
+      count: stateTransition.pending_count,
+      timeframeMs: this.safeParseDurationToMs(
+        stateTransition.pending_timeframe,
+        rule.id,
+        'pending_timeframe'
+      ),
+      successStatus: alertEpisodeStatus.active,
+      stayStatus: alertEpisodeStatus.pending,
+    };
+  }
+
+  private getRecoveringThreshold(
+    rule: RuleResponse,
+    stateTransition: NonNullable<RuleResponse['state_transition']>
+  ): PhaseThreshold {
+    return {
+      operator: stateTransition.recovering_operator ?? DEFAULT_OPERATOR,
+      count: stateTransition.recovering_count,
+      timeframeMs: this.safeParseDurationToMs(
+        stateTransition.recovering_timeframe,
+        rule.id,
+        'recovering_timeframe'
+      ),
+      successStatus: alertEpisodeStatus.inactive,
+      stayStatus: alertEpisodeStatus.recovering,
+    };
+  }
+
+  private getNextStateTransition(
+    { operator, count, timeframeMs, successStatus, stayStatus }: PhaseThreshold,
+    { currentStatusCount, elapsedMs }: { currentStatusCount: number; elapsedMs: number }
+  ): StateTransitionResult {
     const nextCount = currentStatusCount + 1;
     const config: ThresholdConfig = { operator, count, timeframeMs };
 
@@ -307,39 +299,22 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   /**
    * Evaluates the threshold on the evaluation that first enters `pending` or `recovering`.
    *
-   * That evaluation is itself the first consecutive match for the phase, so a count of 1 is
-   * already satisfied and resolves straight to the success status. No time has been spent in
-   * the phase yet, so the timeframe dimension is evaluated against a zero elapsed time rather
-   * than against the gap since the previous run. When neither dimension is configured the
-   * episode enters the intermediate status, preserving the basic state machine.
+   * An ungated phase keeps the basic lifecycle: the episode enters the intermediate status and
+   * is gated on the following evaluation instead. Otherwise the threshold is evaluated from a
+   * zero baseline, because the entering evaluation is itself the first consecutive match for
+   * the phase and no time has been spent in it yet. That makes a count of 1 resolve straight
+   * to the success status, and keeps a timeframe from being satisfied by the gap since the
+   * previous run.
    */
-  private getFirstEntryStateTransition({
-    operator,
-    count,
-    timeframeMs,
-    successStatus,
-    stayStatus,
-  }: {
-    operator: Operator;
-    count?: number;
-    timeframeMs?: number;
-    successStatus: AlertEpisodeStatus;
-    stayStatus: AlertEpisodeStatus;
-  }): StateTransitionResult {
-    const stayResult: StateTransitionResult = {
-      status: stayStatus,
-      statusCount: DEFAULT_STATUS_COUNT,
-    };
-
-    if (count == null && timeframeMs == null) {
-      return stayResult;
+  private getFirstEntryStateTransition(phase: PhaseThreshold): StateTransitionResult {
+    if (phase.count == null && phase.timeframeMs == null) {
+      return { status: phase.stayStatus, statusCount: DEFAULT_STATUS_COUNT };
     }
 
-    if (isThresholdMet(DEFAULT_STATUS_COUNT, NO_ELAPSED_TIME, { operator, count, timeframeMs })) {
-      return { status: successStatus };
-    }
-
-    return stayResult;
+    return this.getNextStateTransition(phase, {
+      currentStatusCount: NO_STATUS_COUNT,
+      elapsedMs: NO_ELAPSED_TIME,
+    });
   }
 
   /**
