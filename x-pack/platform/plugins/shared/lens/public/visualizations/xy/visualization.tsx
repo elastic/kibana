@@ -373,7 +373,8 @@ export const getXyVisualization = ({
     state,
     setState,
     registerLibraryAnnotationGroup,
-    isSaveable
+    isSaveable,
+    framePublicAPI
   ) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
@@ -387,6 +388,9 @@ export const getXyVisualization = ({
           registerLibraryAnnotationGroup,
           core,
           isSaveable,
+          // Annotation library groups are data-view-based. Until the library supports
+          // ES|QL static annotations, hide both loading and saving library groups.
+          isAnnotationLibrarySupported: !isEsqlChart(framePublicAPI?.datasourceLayers ?? {}),
           eventAnnotationService,
           savedObjectsTagging,
           dataViews: data.dataViews,

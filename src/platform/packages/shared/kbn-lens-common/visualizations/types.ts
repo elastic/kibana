@@ -315,7 +315,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     state: T,
     setState: StateSetter<T>,
     registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction,
-    isSaveable?: boolean
+    isSaveable?: boolean,
+    framePublicAPI?: Pick<FramePublicAPI, 'datasourceLayers'>
   ) => LayerAction[];
 
   /**

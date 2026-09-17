@@ -162,7 +162,8 @@ export function LayerTabs({
             visualizationState,
             updateVisualization,
             registerLibraryAnnotationGroupFunction,
-            isSaveable
+            isSaveable,
+            framePublicAPI
           )
           .map((action) => ({
             ...action,
@@ -215,6 +216,7 @@ export function LayerTabs({
     activeVisualization,
     coreStart,
     dispatchLens,
+    framePublicAPI,
     isSaveable,
     layerIds.length,
     getLayerTabsLabel,

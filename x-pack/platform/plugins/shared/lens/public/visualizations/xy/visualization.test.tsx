@@ -4282,6 +4282,35 @@ describe('xy_visualization', () => {
         ).toBeTruthy();
       });
 
+      it('should not show save to library action for annotations on an ES|QL chart', () => {
+        const annotationLayer: XYByValueAnnotationLayerConfig = {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2],
+          ignoreGlobalFilters: true,
+          indexPatternId: 'myIndexPattern',
+        };
+        const esqlFrame = createMockFramePublicAPI();
+        esqlFrame.datasourceLayers = {
+          first: { datasourceId: 'textBased' } as DatasourcePublicAPI,
+        };
+
+        const actions = xyVisualization.getSupportedActionsForLayer?.(
+          'annotation',
+          { ...exampleState(), layers: [annotationLayer] },
+          jest.fn(),
+          jest.fn(),
+          true,
+          esqlFrame
+        );
+
+        expect(
+          actions?.some(
+            (action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary'
+          )
+        ).toBeFalsy();
+      });
+
       describe('by-ref layer', () => {
         const annotationLayer: XYByReferenceAnnotationLayerConfig = {
           annotationGroupId: 'some-group',

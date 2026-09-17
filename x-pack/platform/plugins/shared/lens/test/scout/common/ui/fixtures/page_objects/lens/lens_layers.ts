@@ -105,17 +105,27 @@ export class LensLayers {
     await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
   }
 
-  /**
-   * Opens the layer-actions popover for the layer at `index` and clicks the given action
-   * (e.g. `lnsXY_annotationLayer_saveToLibrary`).
-   */
-  async performLayerAction(testSubject: string, layerIndex = 0) {
+  /** Opens the layer-actions popover for the layer at `index`. */
+  async openLayerActions(layerIndex = 0) {
     await this.hoverLayerTab(layerIndex);
     // The layer actions mount after the hover, so wait for the popover trigger to render
     // instead of clicking straight away.
     const splitButton = this.page.testSubj.locator(`lnsLayerSplitButton--${layerIndex}`);
     await splitButton.waitFor({ state: 'visible' });
     await splitButton.click();
+  }
+
+  /** Closes the open layer-actions popover. */
+  async closeLayerActions() {
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * Opens the layer-actions popover for the layer at `index` and clicks the given action
+   * (e.g. `lnsXY_annotationLayer_saveToLibrary`).
+   */
+  async performLayerAction(testSubject: string, layerIndex = 0) {
+    await this.openLayerActions(layerIndex);
     await this.page.testSubj.click(testSubject);
   }
 
