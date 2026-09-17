@@ -8,6 +8,8 @@
 // Default source URI used to download Elastic Agent
 export const DEFAULT_DOWNLOAD_SOURCE_URI = 'https://artifacts.elastic.co/downloads/';
 
+export const DEFAULT_DOWNLOAD_SOURCE_NAME = 'Elastic Artifacts';
+
 export const DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE = 'ingest-download-sources';
 
 export const DEFAULT_DOWNLOAD_SOURCE_ID = 'fleet-default-download-source';

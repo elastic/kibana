@@ -13,6 +13,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import {
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   DEFAULT_DOWNLOAD_SOURCE_URI,
+  DEFAULT_DOWNLOAD_SOURCE_NAME,
   DEFAULT_DOWNLOAD_SOURCE_ID,
 } from '../constants';
 
@@ -475,7 +476,7 @@ class DownloadSourceService {
 
     if (!defaultDS) {
       const newDefaultDS: DownloadSourceBase = {
-        name: 'Elastic Artifacts',
+        name: DEFAULT_DOWNLOAD_SOURCE_NAME,
         is_default: true,
         host: DEFAULT_DOWNLOAD_SOURCE_URI,
       };
