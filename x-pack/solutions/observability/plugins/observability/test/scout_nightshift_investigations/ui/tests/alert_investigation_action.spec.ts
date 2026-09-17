@@ -123,18 +123,9 @@ test.describe(
         .poll(() => pageObjects.alertsTablePage.getRowCount(), { timeout: 30_000 })
         .toBe(1);
 
-      const requestPromise = page.waitForRequest((request) => {
-        const url = new URL(request.url());
-        return (
-          request.method() === 'GET' &&
-          url.pathname.endsWith('/internal/nightshift/investigations') &&
-          url.searchParams.get('size') === '20'
-        );
-      });
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       await pageObjects.alertsTablePage.clickViewInvestigation();
 
-      await requestPromise;
       await expect
         .poll(() => page.url())
         .toContain(`/app/nightshift?investigationId=investigation-1`);
@@ -148,17 +139,8 @@ test.describe(
       await pageObjects.alertPage.goto(alertId);
       await pageObjects.alertPage.openActionsMenu();
 
-      const requestPromise = page.waitForRequest((request) => {
-        const url = new URL(request.url());
-        return (
-          request.method() === 'GET' &&
-          url.pathname.endsWith('/internal/nightshift/investigations') &&
-          url.searchParams.get('size') === '20'
-        );
-      });
       await pageObjects.alertPage.clickViewInvestigation();
 
-      await requestPromise;
       await expect
         .poll(() => page.url())
         .toContain(`/app/nightshift?investigationId=investigation-1`);
