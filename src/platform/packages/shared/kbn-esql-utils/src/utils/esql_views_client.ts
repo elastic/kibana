@@ -13,10 +13,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
 import {
-  type DeleteEsqlViewsRequest,
   type EsqlView,
   type EsqlViewsResult,
-  type UpsertEsqlViewRequest,
   VIEWS_BULK_DELETE_ROUTE,
   VIEWS_ROUTE,
 } from '@kbn/esql-types';
@@ -43,6 +41,12 @@ export class EsqlViewsClientError extends Error {
     super(message);
     this.name = 'EsqlViewsClientError';
   }
+}
+
+export interface UpsertEsqlViewRequest {
+  name: string;
+  query: string;
+  description?: string;
 }
 
 export interface EsqlViewsClient {
@@ -126,10 +130,9 @@ export const createEsqlViewsClient = (http: HttpStart): EsqlViewsClient => {
       return runRequest(() => http.delete<EsqlDeleteViewResponse>(getViewRoute(names[0])));
     }
 
-    const request: DeleteEsqlViewsRequest = { names };
     return runRequest(() =>
       http.post<EsqlDeleteViewResponse>(VIEWS_BULK_DELETE_ROUTE, {
-        body: JSON.stringify(request),
+        body: JSON.stringify({ names }),
       })
     );
   };
