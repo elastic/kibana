@@ -155,6 +155,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
         const { views } = await esClient.esql.getView({ name: DS_VIEW_NAME });
         expect(views).toHaveLength(1);
         expect(views[0].query).toContain('INLINE STATS latest = MAX(@timestamp) BY id');
+        expect(views[0].query).toContain('INLINE STATS latest_doc = MAX(_id) BY id');
       });
 
       await apiTest.step('writes multiple revisions per KI', async () => {
@@ -175,6 +176,10 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
             }),
             { create: {} },
             ki('single'),
+            { create: { _id: 'tied-a' } },
+            ki('tied', { title: 'tied-a' }),
+            { create: { _id: 'tied-b' } },
+            ki('tied', { title: 'tied-b' }),
           ],
         });
       });
@@ -186,6 +191,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
         expect(response.values).toStrictEqual([
           ['revised', 'revised-v2'],
           ['single', 'single'],
+          ['tied', 'tied-b'],
         ]);
       });
     }

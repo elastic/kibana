@@ -222,7 +222,9 @@ describe('AiIndexService', () => {
           'EVAL id = COALESCE(id, _id)',
           'INLINE STATS latest = MAX(@timestamp) BY id',
           'WHERE @timestamp == latest',
-          'DROP latest',
+          'INLINE STATS latest_doc = MAX(_id) BY id',
+          'WHERE _id == latest_doc',
+          'DROP latest, latest_doc',
           'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
           'WHERE expires_at IS NULL OR expires_at > NOW()',
           'DROP governance.*',
@@ -259,6 +261,7 @@ describe('AiIndexService', () => {
       await expect(service.create('customer_support', DEFAULT_SPACE, properties)).rejects.toThrow(
         'views are disabled'
       );
+      expect(storageClient.index).not.toHaveBeenCalled();
     });
 
     it('rejects an invalid dest before writing', async () => {

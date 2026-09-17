@@ -26,7 +26,9 @@ export const kiViewQuery = ({ type, value }: AiIndexDest): string =>
         'EVAL id = COALESCE(id, _id)',
         'INLINE STATS latest = MAX(@timestamp) BY id',
         'WHERE @timestamp == latest',
-        'DROP latest',
+        'INLINE STATS latest_doc = MAX(_id) BY id',
+        'WHERE _id == latest_doc',
+        'DROP latest, latest_doc',
         ...LIFECYCLE_FILTERS,
       ]
     : [`FROM ${value}`, ...LIFECYCLE_FILTERS]

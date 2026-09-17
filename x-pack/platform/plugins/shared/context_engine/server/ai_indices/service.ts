@@ -129,6 +129,7 @@ export class AiIndexService {
     if (existing) {
       throw new AiIndexAlreadyExistsError(aiIndexId);
     }
+    await this.putView(aiIndexId, properties.dest);
 
     // Uniqueness is a read-then-write check rather than `op_type: 'create'`, matching the Agent Builder persisted clients.
     await this.writeDocument(
@@ -137,7 +138,6 @@ export class AiIndexService {
       { ...properties, id: aiIndexId, space: spaceId, managed: false },
       undefined
     );
-    await this.putView(aiIndexId, properties.dest);
   }
 
   /**
@@ -158,14 +158,13 @@ export class AiIndexService {
       throw new AiIndexManagedError(aiIndexId);
     }
 
-    const result = await this.writeDocument(
+    await this.putView(aiIndexId, properties.dest);
+    return this.writeDocument(
       aiIndexId,
       spaceId,
       { ...properties, id: aiIndexId, space: spaceId, managed: false },
       existing
     );
-    await this.putView(aiIndexId, properties.dest);
-    return result;
   }
 
   /**
@@ -189,15 +188,14 @@ export class AiIndexService {
     if (existing && !existing.document.managed) {
       throw new AiIndexIdConflictError(aiIndexId);
     }
-    const result = await this.writeDocument(
+    await this.putView(aiIndexId, properties.dest);
+    return this.writeDocument(
       aiIndexId,
       spaceId,
       { ...properties, id: aiIndexId, space: spaceId, managed: true },
       existing,
       { docId: buildManagedAiIndexDocId(spaceId, aiIndexId) }
     );
-    await this.putView(aiIndexId, properties.dest);
-    return result;
   }
 
   private async writeDocument(
