@@ -6,6 +6,7 @@
  */
 
 import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import type { LocatorHost } from '@kbn/rule-data-utils';
 
 /**
  * In-app path for the Observability-mounted Alerting v2 rule library.
@@ -14,12 +15,7 @@ import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
  */
 export const OBSERVABILITY_RULE_LIBRARY_PATH = '/rule-library';
 
-export interface AlertingV2LocatorHost {
-  app: string;
-  pathPrefix: string;
-}
-
-export const OBSERVABILITY_RULE_LIBRARY_HOST: AlertingV2LocatorHost = {
+export const OBSERVABILITY_RULE_LIBRARY_HOST: LocatorHost = {
   app: OBSERVABILITY_ALERTING_APP_ID,
   pathPrefix: OBSERVABILITY_RULE_LIBRARY_PATH,
 };
@@ -47,5 +43,5 @@ export const isObservabilityContext = ({
  */
 export const resolveAlertingV2RuleLibraryHost = (
   signals: ObservabilityContextSignals
-): AlertingV2LocatorHost | undefined =>
+): LocatorHost | undefined =>
   isObservabilityContext(signals) ? OBSERVABILITY_RULE_LIBRARY_HOST : undefined;

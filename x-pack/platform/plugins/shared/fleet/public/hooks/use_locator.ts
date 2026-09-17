@@ -9,10 +9,8 @@ import { EMPTY } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
-import {
-  resolveAlertingV2RuleLibraryHost,
-  type AlertingV2LocatorHost,
-} from '@kbn/alerting-v2-utils';
+import type { LocatorHost } from '@kbn/rule-data-utils';
+import { resolveAlertingV2RuleLibraryHost } from '@kbn/alerting-v2-utils';
 
 import { LOCATORS_IDS } from '../constants';
 
@@ -20,7 +18,7 @@ import { useStartServices } from './use_core';
 
 export interface AlertingV2RuleLibraryLocatorParams extends SerializableRecord {
   templateId?: string;
-  host?: AlertingV2LocatorHost;
+  host?: LocatorHost;
 }
 
 export function useLocator<T extends SerializableRecord>(

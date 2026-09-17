@@ -28,6 +28,5 @@ export {
   resolveAlertingV2RuleLibraryHost,
   OBSERVABILITY_RULE_LIBRARY_HOST,
   OBSERVABILITY_RULE_LIBRARY_PATH,
-  type AlertingV2LocatorHost,
   type ObservabilityContextSignals,
 } from './resolve_rule_library_host';
