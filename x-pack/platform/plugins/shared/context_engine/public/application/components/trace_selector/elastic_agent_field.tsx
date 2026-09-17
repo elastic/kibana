@@ -7,17 +7,30 @@
 
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import type { AiIndexTrace } from '../../../../common/http_api/ai_indices';
+import React, { useEffect, useMemo } from 'react';
 import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
+import { useKibana } from '../../hooks/use_kibana';
+import type { EditableAiIndexTrace } from './types';
 
 interface ElasticAgentFieldProps {
-  value: AiIndexTrace | undefined;
-  onChange: (trace: AiIndexTrace | undefined) => void;
+  value: EditableAiIndexTrace | undefined;
+  onChange: (trace: EditableAiIndexTrace | undefined) => void;
 }
 
 export const ElasticAgentField = ({ value, onChange }: ElasticAgentFieldProps) => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
+  const {
+    services: { notifications },
+  } = useKibana();
+
+  useEffect(() => {
+    if (!error) return;
+    notifications.toasts.addWarning({
+      title: i18n.translate('xpack.contextEngine.traceSelector.agentField.loadError', {
+        defaultMessage: 'Unable to load Agent Builder agents.',
+      }),
+    });
+  }, [error, notifications]);
 
   const options = useMemo(
     () => agents.map((agent) => ({ label: agent.name, value: agent.id })),
@@ -37,12 +50,6 @@ export const ElasticAgentField = ({ value, onChange }: ElasticAgentFieldProps) =
     onChange(next ? { type: 'elastic_agent', value: next } : undefined);
   };
 
-  const errorMessage = error
-    ? i18n.translate('xpack.contextEngine.traceSelector.agentField.loadError', {
-        defaultMessage: 'Unable to load Agent Builder agents.',
-      })
-    : undefined;
-
   return (
     <EuiFormRow
       label={i18n.translate('xpack.contextEngine.traceSelector.agentField.label', {
@@ -52,12 +59,9 @@ export const ElasticAgentField = ({ value, onChange }: ElasticAgentFieldProps) =
         defaultMessage:
           'Agents registered in Agent Builder. Traces are matched on gen_ai.agent.id.',
       })}
-      error={errorMessage}
-      isInvalid={Boolean(errorMessage)}
       fullWidth
     >
       <EuiComboBox
-        isInvalid={Boolean(errorMessage)}
         singleSelection={{ asPlainText: true }}
         fullWidth
         isLoading={isLoading}

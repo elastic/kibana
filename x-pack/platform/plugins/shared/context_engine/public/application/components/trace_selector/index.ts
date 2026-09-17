@@ -6,3 +6,4 @@
  */
 
 export { TraceSelector } from './trace_selector';
+export type { EditableAiIndexTrace, EditableTraceType } from './types';

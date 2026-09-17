@@ -8,26 +8,21 @@
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import type { AiIndexTrace } from '../../../../common/http_api/ai_indices';
 import { DataStreamField } from './data_stream_field';
 import { ElasticAgentField } from './elastic_agent_field';
-
-type TraceMode = 'elastic_agent' | 'index';
+import type { EditableAiIndexTrace, EditableTraceType } from './types';
 
 interface TraceSelectorProps {
-  value: AiIndexTrace | undefined;
-  onChange: (trace: AiIndexTrace | undefined) => void;
+  value: EditableAiIndexTrace | undefined;
+  onChange: (trace: EditableAiIndexTrace | undefined) => void;
 }
 
-const getTraceMode = (trace: AiIndexTrace | undefined): TraceMode =>
-  trace?.type === 'index' ? 'index' : 'elastic_agent';
-
 export const TraceSelector = ({ value, onChange }: TraceSelectorProps) => {
-  const [mode, setMode] = useState<TraceMode>(() => getTraceMode(value));
+  const [mode, setMode] = useState<EditableTraceType>(value?.type ?? 'elastic_agent');
 
   useEffect(() => {
     if (value !== undefined) {
-      setMode(getTraceMode(value));
+      setMode(value.type);
     }
   }, [value]);
 

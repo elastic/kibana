@@ -8,13 +8,10 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
-import type {
-  AiIndexProperties,
-  AiIndexTrace,
-  AiIndexType,
-} from '../../../common/http_api/ai_indices';
+import type { AiIndexProperties, AiIndexType } from '../../../common/http_api/ai_indices';
 import { createAiIndex as createAiIndexRequest } from '../api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
+import type { EditableAiIndexTrace } from '../components/trace_selector';
 import { getAiIndexDest } from '../utils/ai_index_dest';
 import { getErrorMessage } from '../utils/get_error_message';
 import { toAiIndexSources } from '../utils/sources';
@@ -30,7 +27,7 @@ export interface CreateAiIndexArgs {
   description: string;
   storageType: AiIndexType;
   sources: SelectedSource[];
-  trace?: AiIndexTrace;
+  trace?: EditableAiIndexTrace;
 }
 
 export const useCreateAiIndex = () => {

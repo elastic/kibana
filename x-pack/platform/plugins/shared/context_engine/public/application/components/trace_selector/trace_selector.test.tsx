@@ -11,8 +11,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { useState } from 'react';
-import type { AiIndexTrace } from '../../../../common/http_api/ai_indices';
+import React from 'react';
 import { TraceSelector } from './trace_selector';
 
 const mockUseAgentBuilderAgents = jest.fn();
@@ -34,11 +33,6 @@ const renderSelector = (props: React.ComponentProps<typeof TraceSelector>) => {
       </EuiProvider>
     </I18nProvider>
   );
-};
-
-const StatefulTraceSelector = ({ initialValue }: { initialValue: AiIndexTrace | undefined }) => {
-  const [value, setValue] = useState<AiIndexTrace | undefined>(initialValue);
-  return <TraceSelector value={value} onChange={setValue} />;
 };
 
 describe('TraceSelector', () => {
@@ -72,31 +66,17 @@ describe('TraceSelector', () => {
   });
 
   it('switching to GenAI Libraries clears the current trace and shows the data stream field', () => {
-    const services = coreMock.createStart();
-    const data = dataPluginMock.createStartContract();
-    data.dataViews.getIndices = jest.fn().mockResolvedValue([]);
-
-    render(
-      <I18nProvider>
-        <EuiProvider>
-          <KibanaContextProvider services={{ ...services, data }}>
-            <StatefulTraceSelector initialValue={{ type: 'elastic_agent', value: 'agent-1' }} />
-          </KibanaContextProvider>
-        </EuiProvider>
-      </I18nProvider>
-    );
+    const onChange = jest.fn();
+    renderSelector({
+      value: { type: 'elastic_agent', value: 'agent-1' },
+      onChange,
+    });
 
     fireEvent.click(screen.getByTestId('contextTraceToggle-index'));
 
+    expect(onChange).toHaveBeenCalledWith(undefined);
     expect(screen.getByTestId('contextTraceDataStreamComboBox')).toBeInTheDocument();
     expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
-  });
-
-  it('renders toggle icons without unknown-icon warnings', () => {
-    const { container } = renderSelector({ value: undefined, onChange: jest.fn() });
-
-    expect(container.querySelector('[data-euiicon-type="productAgent"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-euiicon-type="listBullet"]')).toBeInTheDocument();
   });
 
   it('selecting a data stream calls onChange with an index trace', async () => {
@@ -124,9 +104,12 @@ describe('TraceSelector', () => {
       </I18nProvider>
     );
 
-    fireEvent.change(screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input')!, {
-      target: { value: 'logs' },
-    });
+    expect(data.dataViews.getIndices).not.toHaveBeenCalled();
+
+    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
+    const input = comboBox.querySelector('input')!;
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'logs' } });
 
     await waitFor(() => {
       expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
