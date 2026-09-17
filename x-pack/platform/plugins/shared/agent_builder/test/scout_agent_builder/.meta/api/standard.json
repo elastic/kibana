@@ -1,5 +1,5 @@
 {
-  "sha1": "0ed213065f054f6c5ee8691f7796536843d198a3",
+  "sha1": "9e3ca5d3235488dc7fff2799c7015d9d57815bdf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -669,6 +669,22 @@
       }
     },
     {
+      "id": "5a26de1931ab3a5-83fed8ff3b9d10d",
+      "title": "Agent Builder — chat API converse (/api/chat) user message sync requests persist context for the next model request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
+        "line": 132,
+        "column": 8
+      }
+    },
+    {
       "id": "5a26de1931ab3a5-be0896f70545849",
       "title": "Agent Builder — chat API converse (/api/chat) converse returns the conversation with its events timeline",
       "expectedStatus": "passed",
@@ -680,7 +696,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
-        "line": 118,
+        "line": 244,
         "column": 13
       }
     },
@@ -696,8 +712,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
-        "line": 140,
-        "column": 55
+        "line": 282,
+        "column": 23
       }
     },
     {
@@ -712,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
-        "line": 173,
-        "column": 24
+        "line": 314,
+        "column": 28
       }
     },
     {
@@ -728,8 +744,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
-        "line": 219,
-        "column": 27
+        "line": 372,
+        "column": 14
       }
     },
     {
@@ -814,166 +830,6 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
         "line": 1275,
         "column": 29
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-0f41c2ca71e3bd8",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 200 and the materialized event with server-assigned fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 49,
-        "column": 29
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-9c0436ebfd72161",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events event persists on GET and does not affect the rounds projection",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 72,
-        "column": 9
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-85738948a0328eb",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events batch append: two events → two distinct ids in response",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 98,
-        "column": 16
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-000005f826cd408",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events batch atomicity: a bad event in the batch rejects the whole request and appends nothing",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 117,
-        "column": 10
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-42e35748e2cdee1",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 404 for a conversation that does not exist",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 142,
-        "column": 16
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-9045d459f709ef0",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 for an unregistered event type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 157,
-        "column": 5
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-1c69536502ad422",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 for a built-in (internal) event type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 169,
-        "column": 68
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-442fd5a02702a42",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 when events array is empty",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 179,
-        "column": 88
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-b3a802c6e4a7111",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 when actor is supplied in an event (unknown key)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 184,
-        "column": 23
-      }
-    },
-    {
-      "id": "a1750f6ef8a9b5d-afca348780bcdc6",
-      "title": "Agent Builder — POST /conversations/{id}/_add_events returns 400 when id is supplied on an event (unknown key)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_add_events_api.spec.ts",
-        "line": 204,
-        "column": 13
       }
     },
     {
@@ -1436,8 +1292,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 76,
-        "column": 33
+        "line": 86,
+        "column": 22
       }
     },
     {
@@ -1452,8 +1308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 88,
-        "column": 94
+        "line": 99,
+        "column": 28
       }
     },
     {
@@ -1468,8 +1324,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 110,
-        "column": 27
+        "line": 121,
+        "column": 21
       }
     },
     {
@@ -1484,8 +1340,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 121,
-        "column": 21
+        "line": 132,
+        "column": 6
       }
     },
     {
@@ -1500,8 +1356,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 131,
-        "column": 25
+        "line": 142,
+        "column": 28
       }
     },
     {
@@ -1516,8 +1372,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 148,
-        "column": 9
+        "line": 157,
+        "column": 8
       }
     },
     {
@@ -1532,8 +1388,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 184,
-        "column": 27
+        "line": 194,
+        "column": 26
       }
     },
     {
@@ -1548,8 +1404,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 201,
-        "column": 30
+        "line": 202,
+        "column": 27
       }
     },
     {
@@ -1564,8 +1420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 251,
-        "column": 21
+        "line": 261,
+        "column": 27
       }
     },
     {
@@ -1580,8 +1436,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 291,
-        "column": 9
+        "line": 301,
+        "column": 30
       }
     },
     {
@@ -1596,8 +1452,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 98,
-        "column": 27
+        "line": 123,
+        "column": 30
       }
     },
     {
@@ -1612,8 +1468,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 124,
-        "column": 21
+        "line": 136,
+        "column": 7
       }
     },
     {
@@ -1628,8 +1484,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 135,
-        "column": 63
+        "line": 144,
+        "column": 21
       }
     },
     {
@@ -1644,8 +1500,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 143,
-        "column": 83
+        "line": 153,
+        "column": 19
       }
     },
     {
@@ -1660,8 +1516,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 152,
-        "column": 68
+        "line": 159,
+        "column": 70
       }
     },
     {
@@ -1676,8 +1532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 161,
-        "column": 25
+        "line": 167,
+        "column": 78
       }
     },
     {
@@ -1692,8 +1548,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 170,
-        "column": 5
+        "line": 178,
+        "column": 68
       }
     },
     {
@@ -1708,8 +1564,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 180,
-        "column": 7
+        "line": 190,
+        "column": 30
       }
     },
     {
@@ -1724,7 +1580,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 224,
+        "line": 233,
         "column": 21
       }
     },
@@ -1740,8 +1596,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 231,
-        "column": 30
+        "line": 240,
+        "column": 9
+      }
+    },
+    {
+      "id": "6c038a293723f6d-71b6896dfee7952",
+      "title": "Agent Builder — conversations search API whitespace-only query returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 249,
+        "column": 5
       }
     },
     {
@@ -1756,8 +1628,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 239,
-        "column": 9
+        "line": 254,
+        "column": 25
       }
     },
     {
@@ -1772,8 +1644,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 247,
-        "column": 13
+        "line": 258,
+        "column": 63
       }
     },
     {

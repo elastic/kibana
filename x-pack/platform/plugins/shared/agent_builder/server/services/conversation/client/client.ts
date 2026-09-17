@@ -40,6 +40,7 @@ import {
   createInternalError,
   isAgentNotFoundError,
   isAgentUnavailableError,
+  isAttachmentEvent,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import type {
@@ -64,7 +65,6 @@ import {
   type ConversationAccess,
 } from '../access_control';
 import type {
-  AddAttachmentsToLastRoundRequest,
   AppendEventsRequest,
   ConversationCreateRequest,
   ConversationUpdatableFields,
@@ -73,7 +73,6 @@ import type {
   NormalizedConversation,
   ReplaceRoundEventsRequest,
   ConversationListResult,
-  UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
 import {
@@ -88,8 +87,7 @@ import { conversationIndexName, createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
-import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
-import { applyAttachmentRefsToRounds } from './migrate_attachments';
+import { reconcileAttachments } from './round_writes';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
 import { buildSearchSort, compileConversationFilter } from '../search';
@@ -106,7 +104,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
-import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
+import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import {
   materializeConversationEvents,
@@ -132,14 +130,6 @@ export interface ConversationClient {
   update(
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess; retryOnConflict?: boolean }
-  ): Promise<Conversation>;
-  addAttachmentsToLastRound(
-    request: AddAttachmentsToLastRoundRequest,
-    options?: { access: ConversationAccess }
-  ): Promise<Conversation>;
-  upsertRound(
-    request: UpsertRoundRequest,
-    options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   appendEvents(
     request: AppendEventsRequest,
@@ -233,7 +223,7 @@ export const createClient = ({
   user,
   agentRegistry,
   conversationEvents,
-  onMetadataPatched,
+  eventEmitter,
 }: {
   space: string;
   logger: Logger;
@@ -241,7 +231,7 @@ export const createClient = ({
   user: CurrentUser;
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
-  onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+  eventEmitter?: ScopedConversationEventEmitter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -252,7 +242,7 @@ export const createClient = ({
     agentRegistry,
     conversationEvents,
     logger,
-    onMetadataPatched,
+    eventEmitter,
   });
 };
 
@@ -264,7 +254,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly agentRegistry: AgentRegistry;
   private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
-  private readonly onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+  private readonly eventEmitter?: ScopedConversationEventEmitter;
 
   constructor({
     storage,
@@ -274,7 +264,7 @@ class ConversationClientImpl implements ConversationClient {
     agentRegistry,
     conversationEvents,
     logger,
-    onMetadataPatched,
+    eventEmitter,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -283,7 +273,7 @@ class ConversationClientImpl implements ConversationClient {
     agentRegistry: AgentRegistry;
     conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
-    onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+    eventEmitter?: ScopedConversationEventEmitter;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -292,7 +282,28 @@ class ConversationClientImpl implements ConversationClient {
     this.agentRegistry = agentRegistry;
     this.conversationEvents = conversationEvents;
     this.logger = logger;
-    this.onMetadataPatched = onMetadataPatched;
+    this.eventEmitter = eventEmitter;
+  }
+
+  /**
+   * Notifies the attachment-events listener with the attachment events that were just persisted.
+   * Best-effort: listener failures are logged and never fail the write.
+   */
+  private notifyAttachmentEvents(conversationId: string, writtenEvents: ConversationEvent[]): void {
+    if (!this.eventEmitter) {
+      return;
+    }
+    const attachmentEvents = writtenEvents.filter(isAttachmentEvent);
+    if (attachmentEvents.length === 0) {
+      return;
+    }
+    try {
+      this.eventEmitter.emitAttachmentEvents({ conversationId, events: attachmentEvents });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to notify attachment events for conversation "${conversationId}": ${error}`
+      );
+    }
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationListResult> {
@@ -629,6 +640,8 @@ class ConversationClientImpl implements ConversationClient {
       throw error;
     }
 
+    this.notifyAttachmentEvents(id, conversation.events ?? []);
+
     return this.get(id);
   }
 
@@ -646,68 +659,6 @@ class ConversationClientImpl implements ConversationClient {
       fields: () => withBoundedTitle(fields),
     });
 
-    return result;
-  }
-
-  async addAttachmentsToLastRound(
-    request: AddAttachmentsToLastRoundRequest,
-    options: { access: ConversationAccess } = { access: 'owner' }
-  ): Promise<Conversation> {
-    const { id: conversationId, refs, attachments } = request;
-    const { access } = options;
-
-    const result = await this.writeConversation({
-      conversationId,
-      access,
-      fields: (current) => {
-        if (current.rounds.length === 0) {
-          throw createBadRequestError(`Conversation ${conversationId} has no rounds to attach to`);
-        }
-
-        return {
-          rounds: applyAttachmentRefsToRounds(
-            current.rounds,
-            new Map([[current.rounds.length - 1, refs]])
-          ),
-          attachments: reconcileAttachments({
-            snapshot: attachments.snapshot,
-            stored: current.attachments ?? [],
-            produced: attachments.produced,
-          }),
-        };
-      },
-    });
-    return result;
-  }
-
-  async upsertRound(
-    request: UpsertRoundRequest,
-    options: { access: ConversationAccess } = { access: 'converse' }
-  ): Promise<Conversation> {
-    const { id: conversationId, round, replacesRoundId, state, attachments, workspaceId } = request;
-    const { access } = options;
-
-    const result = await this.writeConversation({
-      conversationId,
-      access,
-      fields: (current) => ({
-        rounds: upsertRoundInList(current.rounds, round, replacesRoundId),
-        status: round.status,
-        ...(state ? { state } : {}),
-        ...(attachments
-          ? {
-              attachments: reconcileAttachments({
-                snapshot: attachments.snapshot,
-                stored: current.attachments ?? [],
-                produced: attachments.produced,
-              }),
-            }
-          : {}),
-        ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
-        read_by: [],
-        read: false,
-      }),
-    });
     return result;
   }
 
@@ -733,6 +684,7 @@ class ConversationClientImpl implements ConversationClient {
     return materialized;
   }
 
+
   /** Appends timeline events onto a conversation.*/
   async appendEvents(
     request: AppendEventsRequest,
@@ -741,13 +693,17 @@ class ConversationClientImpl implements ConversationClient {
     const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
     const { access } = options;
 
-    return this.writeConversation({
+    // `fields` may run more than once on OCC retry; the last run is the one that was written.
+    let writtenEvents: ConversationEvent[] = [];
+
+    const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
         const currentEvents = current.events ?? [];
         const existingIds = new Set(currentEvents.map((event) => event.id));
         const newEvents = events.filter((event) => !existingIds.has(event.id));
+        writtenEvents = newEvents;
         const appended = [...currentEvents, ...newEvents];
         return {
           events: appended,
@@ -761,6 +717,7 @@ class ConversationClientImpl implements ConversationClient {
                   snapshot: attachments.snapshot,
                   stored: current.attachments ?? [],
                   produced: attachments.produced,
+                  storedRounds: current.rounds,
                 }),
               }
             : {}),
@@ -770,6 +727,9 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
+
+    this.notifyAttachmentEvents(result.id, writtenEvents);
+    return result;
   }
 
   async replaceRoundEvents(
@@ -789,13 +749,20 @@ class ConversationClientImpl implements ConversationClient {
     const { access } = options;
     const roundPrefix = `${roundId}::`;
 
-    return this.writeConversation({
+    let writtenEvents: ConversationEvent[] = [];
+
+    const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
         const currentEvents = current.events ?? [];
         const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
-        const replaced = [...nonRoundEvents, ...events];
+        const existingIds = new Set(nonRoundEvents.map((event) => event.id));
+        // Round-derived events for this round were just wiped, so they always pass; additive ids
+        // collide only when a caller re-inserts an existing uuid, which we drop.
+        const eventsToWrite = events.filter((event) => !existingIds.has(event.id));
+        writtenEvents = eventsToWrite;
+        const replaced = [...nonRoundEvents, ...eventsToWrite];
         return {
           events: replaced,
           schema_version: CONVERSATION_SCHEMA_VERSION,
@@ -808,6 +775,7 @@ class ConversationClientImpl implements ConversationClient {
                   snapshot: attachments.snapshot,
                   stored: current.attachments ?? [],
                   produced: attachments.produced,
+                  storedRounds: current.rounds,
                 }),
               }
             : {}),
@@ -817,6 +785,9 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
+
+    this.notifyAttachmentEvents(result.id, writtenEvents);
+    return result;
   }
 
   async markRead(conversationId: string, read: boolean): Promise<Conversation> {
@@ -1027,8 +998,8 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    if (changedFields.length > 0 && this.onMetadataPatched) {
-      this.onMetadataPatched({
+    if (changedFields.length > 0 && this.eventEmitter) {
+      this.eventEmitter.emitMetadataPatched({
         conversationId: result.id,
         templateId: result.template_id,
         parentId: result.parent_conversation?.id,

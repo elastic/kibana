@@ -14,7 +14,12 @@ import {
   AiIndexNotFoundError,
 } from '../ai_indices/errors';
 import { getCreateKiStepDefinition } from './create_ki';
-import { createMockStepContext, mockAiIndexService, mockKiStepTelemetry } from './test_utils';
+import {
+  createMockStepContext,
+  mockAiIndexService,
+  mockKiWriter,
+  mockKiStepTelemetry,
+} from './test_utils';
 
 const kiInput = {
   type: 'index_metadata',
@@ -42,11 +47,18 @@ describe('getCreateKiStepDefinition', () => {
     });
     const result = await handler(context);
 
-    expect(result).toEqual({ output: { id: 'ki-1' } });
+    expect(result).toEqual({ output: { id: expect.any(String) } });
     expect(esClient.index).toHaveBeenCalledWith(
       {
         index: 'ai-index-idx-my-ai-index',
-        document: expect.objectContaining({ ...kiInput, '@timestamp': expect.any(String) }),
+        id: expect.any(String),
+        document: {
+          ...kiInput,
+          '@timestamp': expect.any(String),
+          id: expect.any(String),
+          updated_at: expect.any(String),
+          governance: { provenance: { created_by: mockKiWriter, updated_by: mockKiWriter } },
+        },
         refresh: 'wait_for',
       },
       { signal: context.abortSignal }
@@ -115,13 +127,39 @@ describe('getCreateKiStepDefinition', () => {
 
     expect(result).toEqual({ output: { id: 'logs-index-profile' } });
     expect(esClient.index).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'ai-index-idx-my-ai-index', id: 'logs-index-profile' }),
+      expect.objectContaining({
+        index: 'ai-index-idx-my-ai-index',
+        id: 'logs-index-profile',
+        document: expect.objectContaining({ id: 'logs-index-profile' }),
+      }),
       { signal: context.abortSignal }
     );
   });
 
-  it('throws ValidationError when ki_id is provided for a data stream dest', async () => {
-    const esClient = { index: jest.fn() };
+  it('uses the generated id as both _id and the id field on an index dest', async () => {
+    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ignored' }) };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki: kiInput },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    const result = await handler(context);
+
+    const [{ id, document }] = esClient.index.mock.calls[0];
+    expect(id).toEqual(expect.any(String));
+    expect(document.id).toBe(id);
+    expect(result).toEqual({ output: { id } });
+  });
+
+  it('appends a data stream document carrying ki_id as its logical id', async () => {
+    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'generated' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
       esClient,
@@ -134,11 +172,18 @@ describe('getCreateKiStepDefinition', () => {
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
-    const thrown = await handler(context).catch((e) => e);
+    const result = await handler(context);
 
-    expect(thrown).toBeInstanceOf(ExecutionError);
-    expect(thrown.type).toBe('ValidationError');
-    expect(esClient.index).not.toHaveBeenCalled();
+    expect(result).toEqual({ output: { id: 'logs-index-profile' } });
+    expect(esClient.index).toHaveBeenCalledWith(
+      {
+        index: 'ai-index-ds-my-ai-index',
+        document: expect.objectContaining({ id: 'logs-index-profile' }),
+        op_type: 'create',
+        refresh: 'wait_for',
+      },
+      { signal: context.abortSignal }
+    );
   });
 
   it('throws ValidationError when the dest is an index pattern', async () => {
@@ -183,7 +228,7 @@ describe('getCreateKiStepDefinition', () => {
     });
     const result = await handler(context);
 
-    expect(result).toEqual({ output: { id: 'ki-1' } });
+    expect(result).toEqual({ output: { id: expect.any(String) } });
     expect(service.create).toHaveBeenCalledWith('new-ai-index', 'default', {
       dest: { type: 'index', value: 'ai-index-idx-new-ai-index' },
       automations: [],
@@ -245,7 +290,7 @@ describe('getCreateKiStepDefinition', () => {
     });
     const result = await handler(context);
 
-    expect(result).toEqual({ output: { id: 'ki-1' } });
+    expect(result).toEqual({ output: { id: expect.any(String) } });
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({ index: 'ai-index-ds-new-ai-index', op_type: 'create' }),
       { signal: context.abortSignal }
@@ -351,7 +396,7 @@ describe('getCreateKiStepDefinition', () => {
       outcome: 'success',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
-      "KI 'ki-1' created in AI index 'my-ai-index'"
+      expect.stringMatching(/^KI '.+' created in AI index 'my-ai-index'$/)
     );
   });
 

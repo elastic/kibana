@@ -8,13 +8,11 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   Conversation,
-  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
   ConversationAttachmentSummary,
   ConversationWithoutRounds,
   CurrentUser,
-  RoundInput,
   ToolResult,
   UserIdAndName,
   SerializedMetadataValue,
@@ -66,13 +64,9 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import {
-  isRoundDerivedEventId,
-  parseExecutionId,
-  roundToEvents,
-  roundsToEvents,
-} from './rounds_to_events';
+import { roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
+import { reconcileEvents } from './round_writes';
 
 export type Document = Omit<
   Required<
@@ -91,65 +85,6 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
     hit._primary_term !== undefined
   );
 };
-
-/** True when a round's stored timeline spans more than one execution (a HITL resume). */
-const hasResumeExecution = (roundId: string, storedEvents: ConversationEvent[]): boolean =>
-  storedEvents.some((event) => {
-    const execution = event.execution_id ? parseExecutionId(event.execution_id) : undefined;
-    return execution?.roundId === roundId && execution.index > 0;
-  });
-
-/**
- * Rebuilds round-derived events on a rounds-path write, preserving resumed executions and additive
- * events. Only attachment refs are refreshed: the folded message belongs to the resume, not the
- * original user message. Undefined refs mean no update; an empty array explicitly clears them.
- */
-const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
-  const stored = merged.events ?? [];
-  const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
-
-  const roundDerived: ConversationEvent[] = [];
-  for (const round of merged.rounds) {
-    const storedForRound = stored.filter(
-      (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
-    );
-    if (hasResumeExecution(round.id, storedForRound)) {
-      const userMessageId = `${round.id}::user_message`;
-      roundDerived.push(
-        ...storedForRound.map((event) => {
-          if (event.id !== userMessageId || !round.input.attachment_refs) {
-            return event;
-          }
-          const data = event.data as RoundInput;
-          return {
-            ...event,
-            data: { ...data, attachment_refs: round.input.attachment_refs },
-          } as ConversationEvent;
-        })
-      );
-    } else {
-      roundDerived.push(...roundToEvents(round, merged));
-    }
-  }
-
-  const events = [...roundDerived];
-  for (const event of additive) {
-    const insertAt = events.findIndex((existing) => existing.created_at > event.created_at);
-    if (insertAt === -1) {
-      events.push(event);
-    } else {
-      events.splice(insertAt, 0, event);
-    }
-  }
-  return events;
-};
-
-type ConversationAttachmentSource = Pick<VersionedAttachment, 'id' | 'type' | 'active'>;
-
-export const toAttachmentSummaries = (
-  attachments: ConversationAttachmentSource[] | undefined
-): ConversationAttachmentSummary[] =>
-  (attachments ?? []).filter(isAttachmentActive).map(({ id, type }) => ({ id, type }));
 
 export const fromEsWithoutRounds = (
   document: Document,
@@ -263,6 +198,13 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
     };
   });
 }
+
+type ConversationAttachmentSource = Pick<VersionedAttachment, 'id' | 'type' | 'active'>;
+
+export const toAttachmentSummaries = (
+  attachments: ConversationAttachmentSource[] | undefined
+): ConversationAttachmentSummary[] =>
+  (attachments ?? []).filter(isAttachmentActive).map(({ id, type }) => ({ id, type }));
 
 /**
  * Migrates legacy RoundState format.
