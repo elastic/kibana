@@ -163,6 +163,18 @@ export const subscribeToDualProcessFlag = ({
   logger: Logger;
   stop$: Subject<void>;
 }): void => {
+  // Reconcile on startup: pairwise() only reacts to in-session transitions, so flag changes
+  // between restarts (config edits, version upgrades) are handled here.
+  isDualProcessEnabled(coreStart.featureFlags)
+    .then((enabled) =>
+      enabled
+        ? enableNonPriorityTasks({ coreStart, logger })
+        : teardownNonPriorityTasks({ coreStart, logger })
+    )
+    .catch((err: Error) =>
+      logger.error(`Dual-process startup reconciliation failed: ${err.message}`)
+    );
+
   coreStart.featureFlags
     .getBooleanValue$(FF_DUAL_PROCESS_ENABLED, false)
     .pipe(
