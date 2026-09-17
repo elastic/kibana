@@ -49,7 +49,7 @@ const DISPLAY_OPTION_ROWS: DisplayOptionRowConfig[] = [
     field: 'showOutsideRegionPreferences',
     label: i18n.translate(
       'xpack.searchInferenceEndpoints.eisModelsPage.displayOptions.outsideRegionPreferencesLabel',
-      { defaultMessage: 'Models outside region preferences' }
+      { defaultMessage: 'Models outside your region preferences' }
     ),
     helpText: i18n.translate(
       'xpack.searchInferenceEndpoints.eisModelsPage.displayOptions.outsideRegionPreferencesDescription',
