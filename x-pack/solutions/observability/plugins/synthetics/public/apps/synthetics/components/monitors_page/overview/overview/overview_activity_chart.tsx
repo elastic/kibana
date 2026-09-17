@@ -30,8 +30,12 @@ import type { MonitorStatProps } from './overview_status';
 // line, and `Down` already covers current status, so a separate count would just
 // restate the chart.
 export const useOverviewActivityStats = (): MonitorStatProps[] => {
-  const { count: alertsCount } = useOverviewAlertsCount(useOverviewRefreshedRange());
-  const alertsUrl = useAlertsUrl({ rangeFrom: 'now-12h/h', rangeTo: 'now' });
+  const { from, to } = useOverviewRefreshedRange();
+  const { count: alertsCount } = useOverviewAlertsCount({ from, to });
+  // Same range the count above is scoped to — otherwise the count and the
+  // destination page's own filter can disagree (e.g. after changing the date
+  // picker, or brushing the chart to a different window).
+  const alertsUrl = useAlertsUrl({ rangeFrom: from, rangeTo: to });
 
   return [
     {
