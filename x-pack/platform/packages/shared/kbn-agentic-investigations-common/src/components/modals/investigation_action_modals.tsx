@@ -22,6 +22,21 @@ export interface InvestigationActionModalsProps {
   approvalInvestigation?: Investigation;
   onCloseAction: () => void;
   onCloseApproval: () => void;
+  /**
+   * Commits the approval. Receives the investigation rather than closing over it, so a
+   * caller's handler stays referentially stable across renders.
+   *
+   * Defaults to closing the modal, which is what the flyout footer needs: it mounts
+   * through `core.overlays.openFlyout`, outside the app's QueryClient, so it has no
+   * mutation to call.
+   */
+  onConfirmApproval?: (investigation: Investigation) => void;
+  /**
+   * Replaces the default rationale-only dismiss modal. Supplied when a solution's
+   * dismissal captures more than a rationale — a structured reason, say — which changes
+   * what the modal renders and what local state it owns, not just what confirming does.
+   */
+  renderDismissModal?: (props: { recordId: string; onClose: () => void }) => React.ReactNode;
 }
 
 /**
@@ -37,13 +52,16 @@ export const InvestigationActionModals = ({
   approvalInvestigation,
   onCloseAction,
   onCloseApproval,
+  onConfirmApproval,
+  renderDismissModal,
 }: InvestigationActionModalsProps) => (
   <>
     {approvalInvestigation ? (
       <ApprovalModal
         selectedRecommendedActionConversation={approvalInvestigation}
-        // TODO: use action API call hook
-        onConfirm={onCloseApproval}
+        onConfirm={() =>
+          onConfirmApproval ? onConfirmApproval(approvalInvestigation) : onCloseApproval()
+        }
         onClose={onCloseApproval}
       />
     ) : null}
@@ -58,20 +76,22 @@ export const InvestigationActionModals = ({
       />
     ) : null}
 
-    {action === 'dismiss' && recordId ? (
-      <BaseActionModal
-        type="dismiss"
-        title={MODAL_TRANSLATIONS.dismiss.title}
-        recordId={recordId}
-        onClose={onCloseAction}
-        rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-        primaryAction={{
-          color: 'danger',
-          label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-          // TODO: use dismiss action API call hook
-          onClick: onCloseAction,
-        }}
-      />
-    ) : null}
+    {action === 'dismiss' && recordId
+      ? renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
+          <BaseActionModal
+            type="dismiss"
+            title={MODAL_TRANSLATIONS.dismiss.title}
+            recordId={recordId}
+            onClose={onCloseAction}
+            rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
+            primaryAction={{
+              color: 'danger',
+              label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
+              // TODO: use dismiss action API call hook
+              onClick: onCloseAction,
+            }}
+          />
+        )
+      : null}
   </>
 );

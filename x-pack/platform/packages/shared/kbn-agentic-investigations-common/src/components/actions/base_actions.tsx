@@ -20,7 +20,7 @@ import { type Investigation } from '../../types';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
-import { getActionButtonIconProps } from '../helpers';
+import { getActionButtonIconProps, isDecided } from '../helpers';
 
 interface ActionConfig {
   key: string;
@@ -110,9 +110,13 @@ export const BaseActions = memo<BaseActionsProps>(
       />
     );
 
+    // A decided investigation keeps only the read-only items: approving, assigning or
+    // dismissing it again would submit a decision the API refuses.
+    const decided = isDecided(investigation);
+
     const actionConfigs = useMemo<ActionConfig[]>(
       () => [
-        ...(onClickRecommendedAction
+        ...(onClickRecommendedAction && !decided
           ? [
               {
                 key: 'proposedAction',
@@ -142,21 +146,25 @@ export const BaseActions = memo<BaseActionsProps>(
           name: ACTIONS_TRANSLATIONS.buttons.openIncident,
           onClick: () => onClickAction('openIncident', investigation.recordId),
         },
-        {
-          key: 'assign',
-          icon: 'user',
-          name: ACTIONS_TRANSLATIONS.buttons.assign,
-          onClick: () => onClickAction('assign', investigation.recordId),
-          separator: true,
-        },
-        {
-          key: 'dismiss',
-          icon: 'trash',
-          name: ACTIONS_TRANSLATIONS.buttons.dismiss,
-          onClick: () => onClickAction('dismiss', investigation.recordId),
-        },
+        ...(decided
+          ? []
+          : [
+              {
+                key: 'assign',
+                icon: 'user',
+                name: ACTIONS_TRANSLATIONS.buttons.assign,
+                onClick: () => onClickAction('assign', investigation.recordId),
+                separator: true,
+              },
+              {
+                key: 'dismiss',
+                icon: 'trash',
+                name: ACTIONS_TRANSLATIONS.buttons.dismiss,
+                onClick: () => onClickAction('dismiss', investigation.recordId),
+              },
+            ]),
       ],
-      [onClickRecommendedAction, investigation, isFlyout, onOpenChat, onClickAction]
+      [onClickRecommendedAction, decided, investigation, isFlyout, onOpenChat, onClickAction]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);

@@ -54,7 +54,7 @@ export {
 } from './src/template_ui/register';
 export type { InvestigationLoader } from './src/template_ui/investigation_slot';
 
-export { getEmptyValue, getActionButtonIconProps } from './src/components/helpers';
+export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';
 
 export type { Investigation, RecommendedAction, TimelineEvent } from './src/types/investigation';
 export {

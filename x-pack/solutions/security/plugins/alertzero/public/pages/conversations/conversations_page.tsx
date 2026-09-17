@@ -26,28 +26,40 @@ import {
   InvestigationActionModals,
   BlastRadius,
 } from '@kbn/agentic-investigations-common';
+import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useInvestigation } from '../../hooks/use_investigations_api';
 import { useProposalsList } from '../../hooks/use_proposals_api';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
-import { QUEUE_PAGE_INFO } from './translations';
+import { QUEUE_PAGE_INFO, DECISION_ERRORS } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
+import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { proposalToInvestigation } from './proposal_to_investigation';
 
-const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
-
-const isQueueRow = (investigation: Investigation): boolean =>
-  QUEUE_STATUSES.has(investigation.status ?? 'open');
+/**
+ * The proposals route distinguishes why a decision was refused — 410 the deadline passed,
+ * 409 someone decided first or the action input drifted, 400 an input the action rejects.
+ * The shared mutations have no `onError`, so the caller has to surface it or the dialog
+ * just closes as though the decision had landed.
+ */
+const decisionErrorMessage = (error: unknown): string => {
+  const status = isHttpFetchError(error) ? error.response?.status : undefined;
+  return DECISION_ERRORS[status ?? 0] ?? DECISION_ERRORS.default;
+};
 
 export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error } = useProposalsList();
+  const approve = useApproveProposal();
+  const dismiss = useDismissProposal();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
@@ -98,8 +110,63 @@ export const ConversationsPage: React.FC = () => {
     setModalState({ type: action, recordId });
   }, []);
 
+  // Cards are keyed by proposal id, but the flyout addresses an investigation, so the
+  // click has to be translated through the proposal's conversation. The clicked id is
+  // kept locally because the URL carries the conversation, which no card matches.
+  const [selectedCardId, setSelectedCardId] = useState<string | undefined>(undefined);
+
+  const onClickCard = useCallback(
+    (proposalId: Investigation['id']) => {
+      const conversationId = proposalsById.get(proposalId)?.conversationId;
+      if (conversationId) {
+        setSelectedCardId(proposalId);
+        selectConversation(conversationId);
+      }
+    },
+    [proposalsById, selectConversation]
+  );
+
   const closeModal = useCallback(() => setModalState({ type: null, recordId: null }), []);
   const closeApproval = useCallback(() => setSelectedIdForRecommendedAction(undefined), []);
+
+  const openInChat = useOpenInChat();
+  const {
+    services: { notifications },
+  } = useKibana<CoreStart>();
+
+  // Both decisions close on success only, and surface the refusal otherwise: an expired
+  // deadline or a proposal someone else already decided must not look like it landed.
+  const onDecisionError = useMemo(
+    () => (err: unknown) => notifications?.toasts.addDanger(decisionErrorMessage(err)),
+    [notifications]
+  );
+
+  const confirmApproval = useCallback(
+    (investigation: Investigation) => {
+      const proposal = proposalsById.get(investigation.id);
+      approve.mutate(
+        { id: investigation.id, body: { actionInput: proposal?.actionInput } },
+        { onSuccess: closeApproval, onError: onDecisionError }
+      );
+    },
+    [approve, closeApproval, onDecisionError, proposalsById]
+  );
+
+  const renderDismissModal = useCallback(
+    ({ recordId, onClose }: { recordId: string; onClose: () => void }) => (
+      <DismissProposalModal
+        proposalId={recordId}
+        onClose={onClose}
+        onConfirm={({ dismissReason, rationale }) =>
+          dismiss.mutate(
+            { id: recordId, body: { dismissReason, rationale } },
+            { onSuccess: onClose, onError: onDecisionError }
+          )
+        }
+      />
+    ),
+    [dismiss, onDecisionError]
+  );
 
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
     useCallback(
@@ -109,37 +176,30 @@ export const ConversationsPage: React.FC = () => {
       [setSelectedIdForRecommendedAction]
     );
 
-  const openInChat = useOpenInChat();
-  const {
-    services: { notifications },
-  } = useKibana<CoreStart>();
-
   // Both params are required: an id on its own leaves the flyout closed rather than guessing a tab.
-  const isFlyoutRequested = !!(selectedConversationId && show);
+  const flyoutConversationId = selectedConversationId && show ? selectedConversationId : undefined;
 
-  const selectedDetailsConversation = useMemo(
-    () =>
-      isFlyoutRequested ? conversations.find((c) => c.id === selectedConversationId) : undefined,
-    [conversations, isFlyoutRequested, selectedConversationId]
-  );
+  // The flyout shows the investigation the proposal belongs to, not the proposal again: a
+  // proposal has no timeline, watch or assignee, so rendering the adapted card here would
+  // just repeat the card with every detail field blank.
+  const investigationQuery = useInvestigation(flyoutConversationId);
+  const selectedInvestigation = investigationQuery.data?.investigation;
 
   // A link to a conversation that no longer exists closes the flyout rather than leaving an empty
-  // one open. Gated on `isLoading` so a background refetch cannot close a flyout that is in use.
+  // one open. Gated on loading so a background refetch cannot close a flyout that is in use.
   // Dismissed rather than closed, so Back cannot return to the bad id and warn all over again.
   useEffect(() => {
-    if (!selectedConversationId || !show || isLoading || error || selectedDetailsConversation) {
+    if (!flyoutConversationId || investigationQuery.isLoading || selectedInvestigation) {
       return;
     }
-    notifications?.toasts.addDanger(QUEUE_PAGE_INFO.conversationNotFound(selectedConversationId));
+    notifications?.toasts.addDanger(QUEUE_PAGE_INFO.conversationNotFound(flyoutConversationId));
     dismissMissingConversation();
   }, [
     dismissMissingConversation,
-    error,
-    isLoading,
+    flyoutConversationId,
+    investigationQuery.isLoading,
     notifications,
-    selectedConversationId,
-    selectedDetailsConversation,
-    show,
+    selectedInvestigation,
   ]);
 
   const actionInvestigation = useMemo(
@@ -158,9 +218,11 @@ export const ConversationsPage: React.FC = () => {
     [conversations, selectedIdForRecommendedAction]
   );
 
+  // `listByWindow` sorts createdAt-ascending, which buries the proposals that matter;
+  // the adapter's synthetic priorityScore is what restores an impact-first ordering.
   const sortedConversations = useMemo(
     () =>
-      conversations.filter(isQueueRow).sort((a, b) => {
+      conversations.toSorted((a, b) => {
         const priorityDiff = (b.priorityScore ?? 0) - (a.priorityScore ?? 0);
         if (priorityDiff !== 0) {
           return priorityDiff;
@@ -179,22 +241,18 @@ export const ConversationsPage: React.FC = () => {
     [sortedConversations, surfaceFilter]
   );
 
-  const groupedBriefingItems = useMemo(() => {
-    const groups: Array<{
-      id: RecommendedAction;
-      label: string;
-      items: Investigation[];
-    }> = [];
-    for (const bucket of CONVERSATION_QUEUE_CATEGORIES) {
-      const items = filteredQueueItems.filter(
-        (conversation) => conversation.recommendedAction === bucket.id
-      );
-      if (items.length >= 0) {
-        groups.push({ ...bucket, items });
-      }
-    }
-    return groups;
-  }, [filteredQueueItems]);
+  // Every bucket is rendered, empty or not: the accordions are the page's structure, so
+  // one disappearing would move the others as the queue drains.
+  const groupedBriefingItems = useMemo(
+    (): Array<{ id: RecommendedAction; label: string; items: Investigation[] }> =>
+      CONVERSATION_QUEUE_CATEGORIES.map((bucket) => ({
+        ...bucket,
+        items: filteredQueueItems.filter(
+          (conversation) => conversation.recommendedAction === bucket.id
+        ),
+      })),
+    [filteredQueueItems]
+  );
 
   return (
     <AlertZeroPageSection
@@ -206,14 +264,14 @@ export const ConversationsPage: React.FC = () => {
         `,
       }}
     >
-      {isFlyoutRequested && (
+      {flyoutConversationId && show && (
         <InvestigationDetailsFlyout
-          investigation={selectedDetailsConversation}
-          isLoading={isLoading}
+          investigation={selectedInvestigation}
+          isLoading={investigationQuery.isLoading}
           selectedTab={show}
           onSelectTab={showTab}
           onClose={clearSelectedConversation}
-          onOpenChat={() => openInChat(selectedConversationId)}
+          onOpenChat={() => openInChat(flyoutConversationId)}
         />
       )}
 
@@ -224,6 +282,8 @@ export const ConversationsPage: React.FC = () => {
         approvalInvestigation={selectedRecommendedActionConversation}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
+        onConfirmApproval={confirmApproval}
+        renderDismissModal={renderDismissModal}
       />
 
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
@@ -233,7 +293,10 @@ export const ConversationsPage: React.FC = () => {
             // Keep the count visible during a background refetch: only hide it
             // when there is an error AND no previously-loaded data to show.
             hasError={Boolean(error) && !data}
-            isQueueEmpty={conversations.length === 0}
+            // Closed proposals are rows but not work: a window holding only decisions
+            // already made is an empty queue, and must not read as "0 actions need you"
+            // beside a populated header.
+            isQueueEmpty={openCount === 0}
             eventCount={openCount}
           />
         </EuiFlexItem>
@@ -283,9 +346,9 @@ export const ConversationsPage: React.FC = () => {
                   isFiltered={filteredQueueItems.length !== sortedConversations.length}
                   onClickRecommendedAction={onClickRecommendedAction}
                   onClickAction={onClickAction}
-                  onClickCard={selectConversation}
+                  onClickCard={onClickCard}
                   onOpenChat={openInChat}
-                  selectedId={selectedConversationId}
+                  selectedId={selectedCardId}
                 />
               </EuiFlexItem>
             ))
