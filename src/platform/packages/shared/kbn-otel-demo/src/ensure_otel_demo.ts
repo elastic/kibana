@@ -193,7 +193,7 @@ export async function deployDemo({
   const kibanaHostname = `http://${serverConfig.host}:${serverConfig.port}${serverConfig.basePath}`;
 
   // Resolve the actual Kibana URL by detecting any dev mode base path
-  // When running `yarn start` without `--no-base-path`, Kibana uses a random 3-letter prefix
+  // When running `pnpm start` without `--no-base-path`, Kibana uses a random 3-letter prefix
   const kibanaUrl = await resolveKibanaUrl(kibanaHostname, log);
 
   log.info(`Kibana: ${kibanaUrl}`);
