@@ -36,8 +36,6 @@ export interface MonitorStatProps {
   isClickable: boolean;
   onClickStat: () => void;
   tooltipContent?: string;
-  // Companion content rendered next to the stat, e.g. the "View alerts" link.
-  append?: React.ReactNode;
 }
 
 const STATS_PER_ROW = 3;
@@ -53,17 +51,18 @@ export const MonitorStat = ({
   isClickable,
   onClickStat,
   tooltipContent,
-  append,
 }: MonitorStatProps) => {
-  const description = tooltipContent ? (
+  // Always the same flex structure (icon slot present but empty when there's
+  // no tooltip), so every stat's label sits at the same height/baseline —
+  // conditionally swapping between plain text and a flex-wrapped row shifted
+  // "Pending"/"Stale" (which have a tooltip) out of line with the rest.
+  const description = (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{statName}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIconTip type="question" content={tooltipContent} position="top" />
+        {tooltipContent && <EuiIconTip type="question" content={tooltipContent} position="top" />}
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : (
-    statName
   );
 
   const statComponent = (
@@ -89,16 +88,7 @@ export const MonitorStat = ({
     statComponent
   );
 
-  return append ? (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>{stat}</EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ paddingTop: 4 }}>
-        {append}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    stat
-  );
+  return stat;
 };
 
 export function OverviewStatus({
