@@ -496,6 +496,42 @@ steps:
                   Could not resolve a host for Attack Discovery alert `{{ steps.resolve_request.output.attack_discovery_alert_id }}`.
                   Endpoint analysis was not run.
 
+    else:
+      # The indicator exists but names no Attack Discovery alert or no investigation.
+      # No later run can do better: the inputs the analysis needs are absent and
+      # nothing fills them in after the fact. Left `pending` it would be re-dispatched
+      # on every sweep for the whole lookback window, so it is retired here.
+      - name: attach_invalid_request
+        type: ai.attachment.add
+        # Only possible when there is an investigation to attach to; when that is the
+        # missing field there is nowhere to put this note.
+        if: "${{ steps.resolve_request.output.investigation_id != blank }}"
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+          type: text
+          description: Could not start endpoint analysis
+          data:
+            content: |-
+              Indicator `{{ inputs.ki_id }}` names no Attack Discovery alert, so endpoint
+              analysis could not run. The indicator was retired and will not be retried.
+
+      # Skipped when `read_ki` found nothing: there is no document to retire, and the
+      # sweep cannot re-select one that does not exist, so that case settles itself.
+      - name: mark_invalid
+        type: context-engine.updateKi
+        if: "${{ steps.read_ki.output.hits.hits[0]._id != blank }}"
+        on-failure:
+          continue: true
+        with:
+          ai_index_id: "{{ inputs.ai_index_id }}"
+          ki_id: "{{ inputs.ki_id }}"
+          ki:
+            attributes:
+              status: invalid
+              invalid_reason: "Missing attack_discovery_alert_id or investigation_id"
+
     # Only `attributes.status` is written. `attributes` merges on update; `tags`
     # is a list and a partial update would replace the full list.
   - name: mark_processed

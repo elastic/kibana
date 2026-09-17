@@ -92,4 +92,44 @@ describe('Endpoint analysis run', () => {
       })
     );
   });
+
+  // A malformed indicator stays `pending` unless something retires it, and the sweep
+  // selects on exactly that, so leaving it would re-dispatch it every minute for the
+  // whole lookback window. These three tests are what keep that loop closed.
+  describe('an indicator that names no alert or investigation', () => {
+    const whenKiValid = definition.steps.find(({ name }) => name === 'when_ki_valid');
+
+    it('is retired to a status the sweep does not select', () => {
+      const markInvalid = stepByName('mark_invalid');
+      expect(whenKiValid?.else?.map(({ name }) => name)).toContain('mark_invalid');
+      expect(markInvalid?.type).toBe('context-engine.updateKi');
+      expect(markInvalid?.with).toEqual({
+        ai_index_id: '{{ inputs.ai_index_id }}',
+        ki_id: '{{ inputs.ki_id }}',
+        ki: {
+          attributes: {
+            status: 'invalid',
+            invalid_reason: 'Missing attack_discovery_alert_id or investigation_id',
+          },
+        },
+      });
+    });
+
+    // Zero hits needs no write: there is no document to retire, and the sweep cannot
+    // re-select one that does not exist, so that case settles itself.
+    it('writes only when the document exists', () => {
+      expect(stepByName('mark_invalid')?.if).toContain('steps.read_ki.output.hits.hits[0]._id');
+    });
+
+    // When the investigation id is the missing field there is nowhere to attach.
+    it('explains itself on the investigation when there is one', () => {
+      const attach = stepByName('attach_invalid_request');
+      expect(whenKiValid?.else?.map(({ name }) => name)).toContain('attach_invalid_request');
+      expect(attach?.type).toBe('ai.attachment.add');
+      expect(attach?.if).toContain('investigation_id');
+      expect(attach?.with?.conversation_id).toBe(
+        '{{ steps.resolve_request.output.investigation_id }}'
+      );
+    });
+  });
 });
