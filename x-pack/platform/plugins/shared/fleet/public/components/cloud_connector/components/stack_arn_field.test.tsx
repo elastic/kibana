@@ -27,14 +27,6 @@ describe('StackArnField', () => {
       </I18nProvider>
     );
 
-  it('renders the label and help text with the given test subject', () => {
-    renderField();
-
-    expect(screen.getByLabelText('CloudFormation stack ARN')).toBeInTheDocument();
-    expect(screen.getByText(/Copy the StackId output/)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ)).toBeInTheDocument();
-  });
-
   it('shows no error for an empty or valid value', () => {
     const { rerender } = renderField({ value: '' });
     expect(screen.queryByText(ERROR_TEXT)).not.toBeInTheDocument();

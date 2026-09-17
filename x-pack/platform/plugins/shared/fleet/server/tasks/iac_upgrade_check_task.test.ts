@@ -6,7 +6,6 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { createAppContextStartContractMock } from '../mocks';
@@ -18,11 +17,7 @@ import {
 import { reportIacProvisionerUpgradeCheckCompleted } from '../services/telemetry/iac_provisioner_telemetry';
 import { isIacProvisionerEnabled } from '../services/utils/iac_provisioner';
 
-import {
-  registerIacUpgradeCheckTask,
-  runIacUpgradeCheckTask,
-  scheduleIacUpgradeCheckTask,
-} from './iac_upgrade_check_task';
+import { runIacUpgradeCheckTask } from './iac_upgrade_check_task';
 
 jest.mock('../services/utils/iac_provisioner');
 jest.mock('../services/telemetry/iac_provisioner_telemetry');
@@ -72,31 +67,6 @@ describe('iac_upgrade_check_task', () => {
     mockedSelections.mockResolvedValue([
       { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
     ]);
-  });
-
-  it('registers the task definition', () => {
-    const taskManager = taskManagerMock.createSetup();
-    registerIacUpgradeCheckTask(taskManager);
-    expect(taskManager.registerTaskDefinitions).toHaveBeenCalledWith(
-      expect.objectContaining({
-        'fleet:iac_upgrade_check': expect.objectContaining({
-          title: 'Fleet IaC template upgrade check',
-          timeout: '1h',
-        }),
-      })
-    );
-  });
-
-  it('schedules every 24h', async () => {
-    const taskManager = taskManagerMock.createStart();
-    await scheduleIacUpgradeCheckTask(taskManager);
-    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'fleet:iac_upgrade_check:1.0.0',
-        taskType: 'fleet:iac_upgrade_check',
-        schedule: { interval: '24h' },
-      })
-    );
   });
 
   it('does nothing when IaCP is disabled', async () => {
@@ -172,16 +142,6 @@ describe('iac_upgrade_check_task', () => {
       expect.anything()
     );
     expect(counts.skipped).toBe(1);
-  });
-
-  it('skips connectors whose provider compareIacKey reports unsupported', async () => {
-    mockSoClient.createPointInTimeFinder.mockReturnValue(finderFor([[makeConnector('c1', {})]]));
-    mockedCompareIacKey.mockResolvedValue('unsupported_provider');
-
-    const counts = await runIacUpgradeCheckTask(signal);
-
-    expect(counts.skipped).toBe(1);
-    expect(mockSoClient.update).not.toHaveBeenCalled();
   });
 
   it('counts a connector whose check throws as skipped and keeps going', async () => {

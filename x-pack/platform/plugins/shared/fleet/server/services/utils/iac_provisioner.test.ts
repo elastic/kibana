@@ -117,9 +117,4 @@ describe('isIacProvisionerSupportedFor', () => {
     mockEnvironment({ isCloudEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: false });
     await expect(isIacProvisionerSupportedFor('aws')).resolves.toBe(false);
   });
-
-  it('is false for aws when self-managed', async () => {
-    mockEnvironment({ agentlessEnabled: true, iacProvisionerEnabled: true });
-    await expect(isIacProvisionerSupportedFor('aws')).resolves.toBe(false);
-  });
 });

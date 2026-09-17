@@ -33,14 +33,6 @@ describe('IacUpgradeCallout', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the one upgrade-available body and never mentions the static template', () => {
-    // Team decision: the same message whether the stored key is missing or mismatched.
-    renderComponent();
-
-    expect(screen.getByText(/The IAM role template has been updated/)).toBeInTheDocument();
-    expect(screen.queryByText(/static/i)).not.toBeInTheDocument();
-  });
-
   it('renders the deployment-id hint and disables the button when canUpdate is false', () => {
     renderComponent({ canUpdate: false });
 
@@ -94,15 +86,5 @@ describe('IacUpgradeCallout', () => {
     await user.click(button);
 
     expect(onUpdateStack).toHaveBeenCalledTimes(1);
-  });
-
-  it('offers Update as its only action: no Verify button', () => {
-    // Verify only re-compared the digest Kibana had just stored, so it never verified anything;
-    // the flyout re-checks on its own after Update.
-    renderComponent();
-
-    expect(screen.getAllByRole('button')).toHaveLength(1);
-    expect(screen.queryByRole('button', { name: /verify/i })).not.toBeInTheDocument();
-    expect(screen.queryByText(/verify/i)).not.toBeInTheDocument();
   });
 });

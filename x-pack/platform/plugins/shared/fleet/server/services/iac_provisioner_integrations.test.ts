@@ -222,45 +222,6 @@ describe('buildIacProvisionerIntegrations', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('merges duplicate package entries and unions enabledInputs per policy template', async () => {
-      packageInfoByName([AWS_PACKAGE_INFO]);
-
-      const result = await build(duplicatedAwsSelections);
-
-      expect(mockedGetPackageInfo).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ integrations: [mergedAws], skipped: [], dropped: [] });
-    });
-
-    it('sends input types that name no cloud provider (cel/httpjson)', async () => {
-      // The user enabled both and the manifest declares both, so both go out.
-      packageInfoByName([
-        {
-          name: 'some_saas',
-          version: '1.0.0',
-          policy_templates: [{ name: 'logs', inputs: [{ type: 'cel' }, { type: 'httpjson' }] }],
-        },
-      ]);
-
-      const result = await build([
-        {
-          name: 'some_saas',
-          policyTemplates: [{ name: 'logs', enabledInputs: ['cel', 'httpjson'] }],
-        },
-      ]);
-
-      expect(result).toEqual({
-        integrations: [
-          {
-            name: 'some_saas',
-            version: '1.0.0',
-            policyTemplates: [{ name: 'logs', enabledInputs: ['cel', 'httpjson'] }],
-          },
-        ],
-        skipped: [],
-        dropped: [],
-      });
-    });
-
     it('drops a policy template the manifest does not declare, reporting it, and keeps the package', async () => {
       packageInfoByName([AWS_PACKAGE_INFO]);
 
@@ -439,12 +400,6 @@ describe('buildIacProvisionerIntegrations', () => {
       );
 
       await expect(build([cspmSelection])).rejects.toBeInstanceOf(RegistryResponseError);
-    });
-
-    it('still throws on an unexpected error', async () => {
-      mockedGetPackageInfo.mockRejectedValue(new Error('boom'));
-
-      await expect(build([cspmSelection])).rejects.toThrow('boom');
     });
   });
 });

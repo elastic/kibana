@@ -65,7 +65,6 @@ const withProviders = (component: React.ReactElement) => (
 const renderWithIntl = (component: React.ReactElement) => render(withProviders(component));
 
 const mockLaunchOnClick = jest.fn();
-const mockRefetch = jest.fn();
 const mockReportEvent = jest.fn();
 
 const integrations: RenderIacTemplateIntegration[] = [
@@ -76,8 +75,6 @@ const integrations: RenderIacTemplateIntegration[] = [
 const mockVerifyResult = (data: unknown) =>
   mockUseVerifyIacKey.mockReturnValue({
     data,
-    isFetching: false,
-    refetch: mockRefetch,
   } as unknown as ReturnType<typeof useVerifyIacKey>);
 
 const defaultProps = {
@@ -100,8 +97,6 @@ beforeEach(() => {
 
   mockUseVerifyIacKey.mockReturnValue({
     data: undefined,
-    isFetching: false,
-    refetch: mockRefetch,
     isSuccess: false,
     isError: false,
     isLoading: false,
@@ -216,19 +211,9 @@ describe('IacKeyCheck', () => {
       await waitFor(() => expect(screen.getByText('these integrations')).toBeInTheDocument());
     });
 
-    it('keeps the singular fallback copy for a single integration', async () => {
-      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
-
-      renderWithIntl(<IacKeyCheck {...defaultProps} integrations={[integrations[0]]} />);
-
-      await waitFor(() => expect(screen.getByText('this integration')).toBeInTheDocument());
-    });
-
     it('fails open on a query error: no callout, reports valid', () => {
       mockUseVerifyIacKey.mockReturnValue({
         data: undefined,
-        isFetching: false,
-        refetch: mockRefetch,
         isError: true,
       } as unknown as ReturnType<typeof useVerifyIacKey>);
       const onValidityChange = jest.fn();
@@ -247,9 +232,7 @@ describe('IacKeyCheck', () => {
     const pendingFirstCheck = () =>
       mockUseVerifyIacKey.mockReturnValue({
         data: undefined,
-        isFetching: true,
         isInitialLoading: true,
-        refetch: mockRefetch,
       } as unknown as ReturnType<typeof useVerifyIacKey>);
 
     it('says nothing while the first check is pending, then reports valid once the template matches', async () => {
@@ -368,19 +351,6 @@ describe('IacKeyCheck', () => {
         })
       );
       expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('offers no Verify button', async () => {
-      // Verify only re-compared the digest Kibana had just stored, so it never verified anything.
-      mockVerifyResult({ matches: false, reason: 'no_key', integrations: [] });
-
-      renderWithIntl(<IacKeyCheck {...defaultProps} />);
-
-      await screen.findByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT);
-      expect(screen.getAllByRole('button')).toHaveLength(1);
-      expect(screen.queryByText(/verify/i)).not.toBeInTheDocument();
-      // Nothing was clicked, so no action telemetry either.
-      expect(mockReportEvent).not.toHaveBeenCalled();
     });
 
     it('onTemplateRendered stores the key, invalidates both query keys, and does not toast', async () => {

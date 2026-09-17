@@ -56,8 +56,6 @@ export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
       {checkedAt && (
         <p>
           <EuiTextColor color="subdued">
-            {/* Absolute first: "1 second ago" alone hides whether this is the daily task's
-                verdict or the re-check that just ran. */}
             <FormattedMessage
               id="xpack.fleet.cloudConnector.policiesFlyout.checkedAt"
               defaultMessage="Checked {when} ({ago})"
@@ -87,8 +85,6 @@ export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
       title={i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.upgradeTitle', {
         defaultMessage: 'CloudFormation stack upgrade available',
       })}
-      // Medium, not small: EUI renders a small callout's `text` inline (title · text), which
-      // would run these paragraphs together on one line.
       size="m"
       announceOnMount
       data-test-subj={IAC_UPGRADE_CALLOUT}

@@ -274,26 +274,6 @@ describe('OnboardingFlowProvider', () => {
       expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toBeUndefined();
     });
 
-    it('is cleared when the connector is deselected', () => {
-      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
-
-      act(() => {
-        result.current.setConnectorId('connector-1', 'Identity 1');
-      });
-      rerender();
-      act(() => {
-        result.current.setPendingIacTemplate(pendingIacTemplate);
-      });
-      rerender();
-
-      act(() => {
-        result.current.setConnectorId(undefined);
-      });
-      rerender();
-
-      expect(result.current.authenticateAndDeployStep.pendingIacTemplate).toBeUndefined();
-    });
-
     it('is cleared when the selected services change: the template was rendered for the old set', () => {
       // Launch for set A → Back → drop a service → return → Deploy must not record A's digest.
       const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });

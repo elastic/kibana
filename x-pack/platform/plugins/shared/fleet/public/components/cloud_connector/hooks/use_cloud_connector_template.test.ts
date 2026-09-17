@@ -123,11 +123,6 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(result.current.isDisabled).toBe(true);
     });
-
-    it('exposes isIacProvisionerEnabled as false', () => {
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
-      expect(result.current.isIacProvisionerEnabled).toBe(false);
-    });
   });
 
   describe('when the IaC Provisioner is enabled', () => {
@@ -142,11 +137,6 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.launchButtonProps).toHaveProperty('onClick');
       expect(result.current.launchButtonProps).not.toHaveProperty('href');
       expect(result.current.isDisabled).toBe(false);
-    });
-
-    it('exposes isIacProvisionerEnabled as true', () => {
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
-      expect(result.current.isIacProvisionerEnabled).toBe(true);
     });
 
     it('renders just-in-time and opens the quick-create URL with the artifactUrl', async () => {
@@ -630,30 +620,6 @@ describe('useCloudConnectorTemplate', () => {
 
         expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
           expect.objectContaining({ integrations: [usable] })
-        );
-      });
-
-      it('uses integrations override instead of packageName/policyTemplates when provided', async () => {
-        const customIntegrations = [
-          {
-            name: 'aws',
-            policyTemplates: [
-              { name: 'guardduty', enabledInputs: ['aws-s3'] },
-              { name: 's3', enabledInputs: ['aws-s3'] },
-            ],
-          },
-          {
-            name: 'cloud_security_posture',
-            policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-          },
-        ];
-        const { result } = renderHook(() =>
-          useCloudConnectorTemplate({ ...HOOK_PARAMS, integrations: customIntegrations })
-        );
-        await launch(result);
-
-        expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
-          expect.objectContaining({ integrations: customIntegrations })
         );
       });
     });

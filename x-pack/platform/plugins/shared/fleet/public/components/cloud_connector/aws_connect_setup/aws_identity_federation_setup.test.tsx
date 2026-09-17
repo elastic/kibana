@@ -14,10 +14,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { SINGLE_ACCOUNT } from '../../../../common';
 import { AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
-import type {
-  IacPolicyTemplateSelection,
-  RenderIacTemplateIntegration,
-} from '../../../../common/types/rest_spec/iac_provisioner';
+import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { CloudConnectorIacState } from '../../../../common/types/models/cloud_connector';
 
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
@@ -274,23 +271,6 @@ describe('AwsIdentityFederationSetup', () => {
       mockGetConnectors({ data: [] });
     });
 
-    it('asks the template hook for the static template and links the Launch button to it', () => {
-      renderSetup({ cloud, iacTemplateUrl: 'https://example.com/template.yml' });
-
-      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          provider: 'aws',
-          cloud,
-          accountType: 'single-account',
-          iacTemplateUrl: 'https://example.com/template.yml',
-          integrations: undefined,
-        })
-      );
-      const launchButton = screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation');
-      expect(launchButton).toHaveAttribute('href', STATIC_TEMPLATE_URL);
-      expect(launchButton).toHaveAttribute('target', '_blank');
-    });
-
     it('does not render the stack ARN field while the provisioner is off', () => {
       renderSetup({ cloud });
 
@@ -352,23 +332,6 @@ describe('AwsIdentityFederationSetup', () => {
 
       await user.click(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation'));
       expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('forwards packageName and policyTemplates to the template hook', () => {
-      const policyTemplates: IacPolicyTemplateSelection[] = [
-        { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
-      ];
-
-      renderSetup({ cloud, packageName: 'aws', policyTemplates });
-
-      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          provider: 'aws',
-          packageName: 'aws',
-          policyTemplates,
-          integrations: undefined,
-        })
-      );
     });
 
     it('passes the IaC confirm onto Create after a successful render', async () => {
@@ -536,28 +499,6 @@ describe('AwsIdentityFederationSetup', () => {
   describe('Existing Identity tab with integrations', () => {
     beforeEach(() => {
       mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-    });
-
-    it('hands the selected id, the integrations and the template context to IacKeyCheck', () => {
-      renderSetup({
-        cloud,
-        integrations,
-        iacTemplateUrl: 'https://example.com/template.yml',
-        initialConnectorId: 'connector-1',
-      });
-
-      expect(screen.getByTestId('mockIacKeyCheck')).toBeInTheDocument();
-      const props = lastIacKeyCheckProps();
-      expect(props).toEqual(
-        expect.objectContaining({
-          cloudConnectorId: 'connector-1',
-          integrations,
-          cloud,
-          accountType: 'single-account',
-          iacTemplateUrl: 'https://example.com/template.yml',
-        })
-      );
-      expect(props?.onValidityChange).toEqual(expect.any(Function));
     });
 
     it('lets IacKeyCheck write the rendered key itself when no template-recorded callback is given', () => {

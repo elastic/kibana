@@ -273,9 +273,10 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     showIac && !showUpgradeCallout && hasRenderableIntegrations && hasValidDeploymentId;
   // With no stack ARN on record (legacy identity, or an ARN never saved) there is no stack to
   // update: Launch creates one from the current template, which also moves the identity onto the
-  // generated template once the render writes its key.
-  const showLaunch =
-    showIac && !showUpgradeCallout && hasRenderableIntegrations && !hasValidDeploymentId;
+  // generated template once the render writes its key. Offered alongside the upgrade callout
+  // too: the daily task flags every keyless legacy identity as upgrade available, and the
+  // callout's Update needs an ARN, so without Launch those identities would have no way forward.
+  const showLaunch = showIac && hasRenderableIntegrations && !hasValidDeploymentId;
   // With the provisioner on the hook never disables the button, but the quick-create landing
   // still needs the scaffold only `cloud` and the package template URL provide.
   const isLaunchUnavailable = isLaunchDisabled || !cloud || !iacTemplateUrl;
@@ -512,19 +513,22 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               isDeploymentIdInvalid={deploymentIdInvalid}
               onIacDeploymentIdChange={setEditedIacDeploymentId}
               // One stack action at a time: the upgrade callout's Update while an update is
-              // pending; otherwise Redeploy with a stack ARN on record, Launch without one. The
-              // render error follows whichever is shown.
+              // pending and a stack ARN is on record; Redeploy with an ARN and no update pending;
+              // Launch without an ARN, under the callout if one shows. The render error follows
+              // whichever is shown.
               actions={
                 showUpgradeCallout || showRedeploy || showLaunch ? (
                   <>
-                    {showUpgradeCallout ? (
+                    {showUpgradeCallout && (
                       <IacUpgradeCallout
                         checkedAt={iacUpgradeCheckedAt}
                         canUpdate={hasValidDeploymentId && hasRenderableIntegrations}
                         isUpdating={isGeneratingTemplate}
                         onUpdateStack={() => launchTemplate('update_stack_clicked')}
                       />
-                    ) : showLaunch ? (
+                    )}
+                    {showUpgradeCallout && showLaunch && <EuiSpacer size="s" />}
+                    {showLaunch ? (
                       <>
                         <LaunchCloudFormationButton
                           // showIac implies the provisioner is on, so the hook always launches
@@ -546,12 +550,12 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                           <p>
                             <FormattedMessage
                               id="xpack.fleet.cloudConnector.policiesFlyout.launchHelp"
-                              defaultMessage="This identity has no CloudFormation stack on record: it predates generated templates or its stack ARN was never saved. If the stack already exists, paste its StackId below and save, then use Redeploy. Otherwise Launch creates a stack from the current template; paste the new stack's StackId below and save."
+                              defaultMessage="This identity has no CloudFormation stack on record: it predates generated templates or its stack ARN was never saved. If the stack already exists, paste its StackId below and save, then update it from here. Otherwise Launch creates a stack from the current template; paste the new stack's StackId below and save."
                             />
                           </p>
                         </EuiText>
                       </>
-                    ) : (
+                    ) : showRedeploy ? (
                       <>
                         <EuiButton
                           size="s"
@@ -577,7 +581,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                           </p>
                         </EuiText>
                       </>
-                    )}
+                    ) : null}
                     {templateGenerationError && (
                       <>
                         <EuiSpacer size="s" />

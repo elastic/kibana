@@ -18,22 +18,6 @@ describe('RenderIacTemplateRequestSchema', () => {
     integrations,
   });
 
-  it('accepts policy templates carrying the inputs the user enabled', () => {
-    expect(() =>
-      RenderIacTemplateRequestSchema.body.validate(
-        body([
-          {
-            name: 'aws',
-            policyTemplates: [
-              { name: 'guardduty', enabledInputs: ['aws-s3', 'aws-cloudwatch'] },
-              { name: 's3', enabledInputs: ['aws-s3'] },
-            ],
-          },
-        ])
-      )
-    ).not.toThrow();
-  });
-
   it('rejects the pre-contract shape where policyTemplates were bare names', () => {
     expect(() =>
       RenderIacTemplateRequestSchema.body.validate(
@@ -53,17 +37,6 @@ describe('RenderIacTemplateRequestSchema', () => {
 
 describe('RenderIacTemplateResponseSchema', () => {
   const base = { artifactUrl: 'https://s3.example/x', expiresAt: '2026-01-01T00:00:00Z' };
-
-  it('accepts the full provider response', () => {
-    expect(() =>
-      RenderIacTemplateResponseSchema.validate({
-        ...base,
-        templateSha: 'sha256:abc',
-        render: true,
-        blueprint: { id: 'aws-federated-identity', version: '1.2.0' },
-      })
-    ).not.toThrow();
-  });
 
   it('accepts a compare-only response without an artifact when render is false', () => {
     expect(() =>

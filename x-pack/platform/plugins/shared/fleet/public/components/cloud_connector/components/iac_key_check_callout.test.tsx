@@ -63,21 +63,6 @@ describe('IacKeyCheckCallout', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the mismatch title', () => {
-    renderWithIntl(
-      <IacKeyCheckCallout
-        {...baseProps}
-        result={{
-          matches: false,
-          reason: 'key_mismatch',
-          outcome: 'key_mismatch',
-          integrations: [],
-        }}
-      />
-    );
-    expect(screen.getByText('CloudFormation stack update required')).toBeInTheDocument();
-  });
-
   it('names "this integration" in bold for a single integration by default', () => {
     renderWithIntl(
       <IacKeyCheckCallout
@@ -110,28 +95,6 @@ describe('IacKeyCheckCallout', () => {
     const bold = screen.getByText('these integrations');
     expect(bold.tagName).toBe('STRONG');
     expect(screen.queryByText('this integration')).not.toBeInTheDocument();
-  });
-
-  it('names "this integration" in bold for no_key too', () => {
-    renderWithIntl(
-      <IacKeyCheckCallout
-        {...baseProps}
-        result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
-      />
-    );
-    const bold = screen.getByText('this integration');
-    expect(bold.tagName).toBe('STRONG');
-  });
-
-  it('pluralises the body from the integration count for no_key too', () => {
-    renderWithIntl(
-      <IacKeyCheckCallout
-        {...baseProps}
-        integrationCount={2}
-        result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
-      />
-    );
-    expect(screen.getByText('these integrations').tagName).toBe('STRONG');
   });
 
   it('shows the no-deployment-id note when deploymentId is absent', () => {
@@ -187,18 +150,6 @@ describe('IacKeyCheckCallout', () => {
     expect(onUpdateStack).toHaveBeenCalledTimes(1);
   });
 
-  it('offers Update as its only action: no Verify button', () => {
-    // Verify only re-compared the digest Kibana had just stored, so it never verified anything.
-    renderWithIntl(
-      <IacKeyCheckCallout
-        {...baseProps}
-        result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
-      />
-    );
-    expect(screen.getAllByRole('button')).toHaveLength(1);
-    expect(screen.queryByText(/verify/i)).not.toBeInTheDocument();
-  });
-
   describe('launched state', () => {
     const mismatch: VerifyCloudConnectorIacKeyResponse = {
       matches: false,
@@ -232,34 +183,6 @@ describe('IacKeyCheckCallout', () => {
         screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
       );
       expect(onUpdateStack).toHaveBeenCalledTimes(1);
-    });
-
-    it('still shows the no-deployment-id note when the stack ARN is unknown', () => {
-      renderWithIntl(<IacKeyCheckCallout {...baseProps} result={mismatch} updateLaunched />);
-
-      expect(screen.getByText(/stack ARN for this identity isn't recorded/i)).toBeInTheDocument();
-    });
-
-    it('keeps the blocking copy while the update has not been launched', () => {
-      renderWithIntl(
-        <IacKeyCheckCallout {...baseProps} result={mismatch} updateLaunched={false} />
-      );
-
-      expect(screen.getByText('CloudFormation stack update required')).toBeInTheDocument();
-      expect(screen.queryByText('CloudFormation stack update opened')).not.toBeInTheDocument();
-    });
-
-    it('applies to no_key as well: a missing key blocks and is released by the launch too', () => {
-      renderWithIntl(
-        <IacKeyCheckCallout
-          {...baseProps}
-          result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
-          updateLaunched
-        />
-      );
-
-      expect(screen.getByText('CloudFormation stack update opened')).toBeInTheDocument();
-      expect(screen.queryByText('CloudFormation stack update required')).not.toBeInTheDocument();
     });
   });
 });

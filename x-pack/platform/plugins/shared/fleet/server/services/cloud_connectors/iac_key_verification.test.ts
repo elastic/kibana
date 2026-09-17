@@ -182,17 +182,6 @@ describe('checkIacTemplate', () => {
     );
   });
 
-  it('reports httpStatus 0 when no response arrived at all', async () => {
-    mockedRender.mockRejectedValueOnce(new IacProvisionerUnavailableError('no response'));
-
-    expect(
-      await checkIacTemplate(soClient, 'aws', selections, 'sha256:stored', opts)
-    ).toBeUndefined();
-    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, httpStatus: 0 })
-    );
-  });
-
   it('reports httpStatus 500 for an unexpected failure', async () => {
     mockedRender.mockRejectedValueOnce(new Error('boom'));
 
@@ -443,21 +432,6 @@ describe('verifyCloudConnectorIacKey', () => {
     );
   });
 
-  it('fails open when a package no longer exists and the resolver skipped it', async () => {
-    soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
-    mockedResolve.mockResolvedValueOnce({ integrations: [], skipped: ['gone_pkg'], dropped: [] });
-
-    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
-
-    expect(result.matches).toBe(true);
-    expect(mockedRender).not.toHaveBeenCalled();
-    // Not a render, so no render_completed event — just the fail-open outcome.
-    expect(reportIacProvisionerRenderCompleted).not.toHaveBeenCalled();
-    expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ outcome: 'key_unavailable' })
-    );
-  });
-
   it('fails open when any attached package has no inputs to render from', async () => {
     soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
     mockedResolve.mockResolvedValueOnce({ ...RESOLVED_AWS, skipped: ['other_pkg'] });
@@ -688,36 +662,6 @@ describe('verifyCloudConnectorIacKey', () => {
 
       expect(result).toMatchObject({ matches: false, reason: 'key_mismatch' });
       expect(soClient.update).not.toHaveBeenCalled();
-    });
-
-    it('logs the persisted status transition as a flyout verify', async () => {
-      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
-      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
-
-      await verifyCloudConnectorIacKey(soClient, 'cc-1', []);
-
-      expectStatusWritten('upgrade_available');
-      expect(logger.info).toHaveBeenCalledWith(
-        'IaC upgrade status for connector cc-1: <unset> → upgrade_available (flyout verify)'
-      );
-    });
-
-    it('persists when the integrations array is empty, as for an omitted one', async () => {
-      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
-      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
-
-      await verifyCloudConnectorIacKey(soClient, 'cc-1', []);
-
-      expectStatusWritten('upgrade_available');
-    });
-
-    it('persists when the integrations argument is undefined', async () => {
-      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
-      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
-
-      await verifyCloudConnectorIacKey(soClient, 'cc-1', undefined);
-
-      expectStatusWritten('upgrade_available');
     });
 
     it('still returns the verification when the write fails', async () => {

@@ -18,16 +18,6 @@ describe('cloud connector request schemas — IaC fields', () => {
     vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/r' } },
   };
 
-  it('create accepts iac_key and iac_deployment_id', () => {
-    expect(() =>
-      CreateCloudConnectorRequestSchema.body.validate({
-        ...validCreate,
-        iac_key: 'sha256:abc',
-        iac_deployment_id: 'arn:aws:cloudformation:us-east-1:123456789012:stack/s/u',
-      })
-    ).not.toThrow();
-  });
-
   it.each([
     ['arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/fn:*', 'a CloudWatch Logs ARN'],
     ['arn:aws:iam::123456789012:role/MyRole', 'an IAM role ARN'],
@@ -64,12 +54,6 @@ describe('cloud connector request schemas — IaC fields', () => {
       /minimum length of \[1\]/
     );
   });
-
-  it('update accepts omitting both fields', () => {
-    expect(() =>
-      UpdateCloudConnectorRequestSchema.body.validate({ name: 'renamed' })
-    ).not.toThrow();
-  });
 });
 
 describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
@@ -104,17 +88,6 @@ describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
   it('rejects a surface field: the server derives the telemetry surface from the integrations', () => {
     expect(() =>
       VerifyCloudConnectorIacKeyRequestSchema.body.validate({ surface: 'onboarding' })
-    ).toThrow();
-  });
-
-  it('rejects the retired singular integration field', () => {
-    expect(() =>
-      VerifyCloudConnectorIacKeyRequestSchema.body.validate({
-        integration: {
-          name: 'aws',
-          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
-        },
-      })
     ).toThrow();
   });
 

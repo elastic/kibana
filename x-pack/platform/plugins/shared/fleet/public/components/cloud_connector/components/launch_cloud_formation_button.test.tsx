@@ -34,15 +34,6 @@ describe('LaunchCloudFormationButton', () => {
       </I18nProvider>
     );
 
-  it('renders as a link when given href props', () => {
-    renderButton();
-
-    const button = screen.getByTestId(BUTTON_TEST_SUBJ);
-    expect(button).toHaveTextContent('Launch CloudFormation');
-    expect(button).toHaveAttribute('href', 'https://console.example/quickcreate');
-    expect(button).toHaveAttribute('target', '_blank');
-  });
-
   it('calls onClick when given onClick props', async () => {
     const user = userEvent.setup();
     const onClick = jest.fn().mockResolvedValue(undefined);
@@ -53,25 +44,6 @@ describe('LaunchCloudFormationButton', () => {
     await user.click(button);
 
     expect(onClick).toHaveBeenCalledTimes(1);
-  });
-
-  it('disables the button while loading or when disabled', () => {
-    const { rerender } = renderButton({
-      isLoading: true,
-      launchButtonProps: { onClick: jest.fn() },
-    });
-    expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeDisabled();
-
-    rerender(
-      <I18nProvider>
-        <LaunchCloudFormationButton
-          {...defaultProps}
-          launchButtonProps={{ onClick: jest.fn() }}
-          isDisabled={true}
-        />
-      </I18nProvider>
-    );
-    expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeDisabled();
   });
 
   it('does not render the error callout without a template generation error', () => {

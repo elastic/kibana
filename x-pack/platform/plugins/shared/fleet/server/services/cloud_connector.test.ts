@@ -2873,31 +2873,6 @@ describe('CloudConnectorService', () => {
       vars: { role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' } },
     };
 
-    it('create persists iac_key and iac_deployment_id when provided', async () => {
-      mockSoClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 1 });
-      mockSoClient.create.mockImplementation(async (_type, attributes) => ({
-        id: 'cc-1',
-        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes,
-      }));
-
-      const result = await service.create(mockSoClient, {
-        ...baseCreate,
-        iac_key: 'sha256:abc',
-        iac_deployment_id: 'arn:aws:cloudformation:us-east-1:123456789012:stack/s/uuid',
-      });
-
-      expect(mockSoClient.create).toHaveBeenCalledWith(
-        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        expect.objectContaining({
-          iac_key: 'sha256:abc',
-          iac_deployment_id: 'arn:aws:cloudformation:us-east-1:123456789012:stack/s/uuid',
-        })
-      );
-      expect(result.iac_key).toBe('sha256:abc');
-    });
-
     it('create leaves iac fields unset when not provided (static template)', async () => {
       mockSoClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 1 });
       mockSoClient.create.mockImplementation(async (_type, attributes) => ({

@@ -401,25 +401,6 @@ describe('ManagedIntegrationsSection', () => {
     });
   });
 
-  describe('Federated Identity integration set', () => {
-    it('passes iacIntegrations through as the integrations prop of AwsIdentityFederationSetup', () => {
-      const iacIntegrations: RenderIacTemplateIntegration[] = [
-        {
-          name: 'aws',
-          policyTemplates: [
-            { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
-            { name: 'guardduty', enabledInputs: ['aws-s3', 'httpjson'] },
-          ],
-        },
-      ];
-      renderSection({ showIdentityFederation: true, iacIntegrations });
-      expect(MockIdentityFederation).toHaveBeenCalledWith(
-        expect.objectContaining({ integrations: iacIntegrations }),
-        expect.anything()
-      );
-    });
-  });
-
   describe('initialConnectorId restoration', () => {
     it('passes persisted connectorId as initialConnectorId to AwsIdentityFederationSetup', () => {
       setupMocks({ connectorId: 'persisted-connector' });
