@@ -353,9 +353,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
     warnSpy.mockRestore();
   });
 
-  it('a panel with no items warns instead of crashing the flyout', async () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(noop);
-
+  it('a panel with no items does not crash the flyout', async () => {
     // Reachable from JS callers and from annotating with EuiContextMenuPanelDescriptor[],
     // where `items` is optional.
     const panelsWithoutItems = [
@@ -368,8 +366,6 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
 
     expect(await screen.findByRole('menuitem', { name: 'Real item' })).toBeInTheDocument();
     expect(screen.queryByText('nope')).not.toBeInTheDocument();
-
-    warnSpy.mockRestore();
   });
 
   it('leaves a handler-less item as an inert div rather than a focusable button', async () => {
