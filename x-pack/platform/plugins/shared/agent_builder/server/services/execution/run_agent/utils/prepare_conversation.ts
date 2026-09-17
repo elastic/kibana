@@ -7,7 +7,6 @@
 
 import type {
   CompactionSummary,
-  ConversationAction,
   ConversationRoundAuthor,
   ConverseInput,
   RoundInput,
@@ -15,7 +14,7 @@ import type {
   SubagentEntry,
   TimelineEvent,
 } from '@kbn/agent-builder-common';
-import { createBadRequestError, TimelineEventType } from '@kbn/agent-builder-common';
+import { TimelineEventType } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
@@ -30,11 +29,7 @@ import { mergeAttachmentInputs } from '../../../attachments/merge_attachment_inp
 import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
 import { formatAttachmentsMetadata } from './attachment_presentation';
-import type {
-  ProcessedTimelineEvent,
-  ProcessedUserMessageEvent,
-  TimelineRound,
-} from './context_timeline';
+import type { ProcessedTimelineEvent, ProcessedUserMessageEvent } from './context_timeline';
 import { groupTimelineRounds, groupTimelineEntries, isTimelineRound } from './context_timeline';
 
 export interface ProcessedConversation {
@@ -60,41 +55,11 @@ export interface ProcessedConversation {
   template_id?: string;
 }
 
-/**
- * Prepare the rounds and input based on the action.
- * - 'regenerate': Strip the last round and use its input for re-execution
- * - Default: Use rounds and input as provided
- */
-const prepareForAction = ({
-  action,
-  rounds,
-  nextInput,
-}: {
-  action?: ConversationAction;
-  rounds: TimelineRound[];
-  nextInput: ConverseInput;
-}): { effectiveRounds: TimelineRound[]; effectiveNextInput: ConverseInput } => {
-  if (action === 'regenerate') {
-    if (rounds.length === 0) {
-      throw createBadRequestError('Cannot regenerate: conversation has no rounds');
-    }
-    const lastRound = rounds[rounds.length - 1];
-    // Faithfully replay the original request by copying the full stored input shape
-    return {
-      effectiveRounds: rounds.slice(0, -1),
-      effectiveNextInput: { ...lastRound.userMessage.data },
-    };
-  }
-
-  return { effectiveRounds: rounds, effectiveNextInput: nextInput };
-};
-
 export const prepareConversation = async ({
   timeline,
   nextInput,
   nextInputAuthor,
   context,
-  action,
   metadata,
   templateId,
 }: {
@@ -103,7 +68,6 @@ export const prepareConversation = async ({
   nextInput: ConverseInput;
   nextInputAuthor?: ConversationRoundAuthor;
   context: AgentHandlerContext;
-  action?: ConversationAction;
   metadata?: Record<string, MetadataFieldValue>;
   templateId?: string;
 }): Promise<ProcessedConversation> => {
@@ -117,12 +81,8 @@ export const prepareConversation = async ({
     request: context.request,
   };
 
-  // Handle regenerate action: use last round's input and strip it from the timeline
-  const { effectiveRounds, effectiveNextInput } = prepareForAction({
-    action,
-    rounds: groupTimelineRounds(timeline),
-    nextInput,
-  });
+  const effectiveRounds = groupTimelineRounds(timeline);
+  const effectiveNextInput = nextInput;
 
   // Process complete executions and independent messages in order so attachment versions
   // resolve consistently. Incomplete execution inputs remain outside the model history.
@@ -169,6 +129,9 @@ export const prepareConversation = async ({
   }
 
   attachmentStateManager.clearAccessTracking();
+  // History re-migration above is idempotent bookkeeping, not a user action: drop its changes so
+  // only the next input's attachments surface as chat_input attachment events.
+  attachmentStateManager.clearChanges();
   const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
   await mergeAttachmentInputs({
     stateManager: attachmentStateManager,

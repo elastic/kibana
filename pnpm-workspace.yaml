@@ -710,6 +710,7 @@ packages:
   - 'src/platform/packages/shared/deeplinks/vectordb'
   - 'src/platform/packages/shared/deeplinks/workflows'
   - 'src/platform/packages/shared/deeplinks/workplace_ai'
+  - 'src/platform/packages/shared/esql/kbn-esql-browser'
   - 'src/platform/packages/shared/home/sample_data_card'
   - 'src/platform/packages/shared/home/sample_data_tab'
   - 'src/platform/packages/shared/home/sample_data_types'

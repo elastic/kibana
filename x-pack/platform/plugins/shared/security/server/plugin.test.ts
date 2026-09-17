@@ -12,6 +12,7 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { PluginInitializerContextMock } from '@kbn/core/server/mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -63,6 +64,7 @@ describe('Security Plugin', () => {
       },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
     } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();
@@ -83,6 +85,7 @@ describe('Security Plugin', () => {
       features: featuresPluginMock.createStart(),
       licensing: licensingMock.createStart(),
       taskManager: taskManagerMock.createStart(),
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
     };
   });
 

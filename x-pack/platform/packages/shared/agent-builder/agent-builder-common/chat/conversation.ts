@@ -707,7 +707,18 @@ export interface BackgroundExecutionState {
   completed_at?: BackgroundExecutionCompletedAt;
 }
 
-export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+/**
+ * Identity of one attachment, without any of its version content.
+ */
+export type ConversationAttachmentSummary = Pick<VersionedAttachment, 'id' | 'type'>;
+
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds' | 'attachments'> & {
+  /**
+   * The conversation's active attachments, narrowed to their id and type: rows returned without
+   * rounds exclude attachment content from the query's `_source`
+   */
+  attachments?: ConversationAttachmentSummary[];
+};
 
 export interface ConversationPermissions {
   rename: boolean;
@@ -728,6 +739,9 @@ export interface ConversationListResult {
   total: number;
 }
 
+/**
+ * @deprecated The regenerate capability has been removed.
+ */
 export type ConversationAction = 'regenerate';
 
 // Compaction summary types

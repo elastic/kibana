@@ -19,14 +19,17 @@ consts:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+    extras:
+      analysisWindowDays: __WORKER_ANALYSIS_WINDOW_DAYS__
 steps:
   # Async: the sweep joins on its review gates and can park for up to 72h.
   # A synchronous call would park this worker run with it and stack every later
-  # scheduled run behind a pending gate. Tuning thresholds (FP count, FP rate,
-  # analysis window, preview depth) live as consts on the sweep itself.
+  # scheduled run behind a pending gate. FP count / rate still live as consts on
+  # the sweep; the analysis window is a per-space Worker setting forwarded here.
   - name: run_rule_tuning
     type: workflow.executeAsync
     with:
       workflow-id: system-security-rule-tuning-worker
       inputs:
         autonomy_level: "{{ consts.worker_settings.autonomy }}"
+        analysis_window_days: __WORKER_ANALYSIS_WINDOW_DAYS__
