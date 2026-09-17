@@ -201,7 +201,13 @@ export function createEvaluateResponseActionsDataset({
     await executorClient.runExperiment(
       {
         datasets: [dataset],
-        task: async ({ input }) => converseQuestionToTaskOutput(agentBuilderClient, input.question),
+        task: async ({ input }) =>
+          converseQuestionToTaskOutput(agentBuilderClient, input.question, {
+            // Confirmation-gated write tools (isolate/release) park the round on a
+            // platform confirmation card. Answer it so the tool actually executes
+            // and its call reaches the trajectory evaluator.
+            confirmations: 'allow',
+          }),
       },
       buildResponseActionsEvaluators({ evaluators, traceEsClient, log })
     );
