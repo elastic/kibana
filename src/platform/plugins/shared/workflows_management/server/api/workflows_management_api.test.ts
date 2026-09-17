@@ -1798,6 +1798,88 @@ steps:
     });
   });
 
+  it('loads shared documents once and checks each caller independently', async () => {
+    const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+    if (!workflow) throw new Error('Missing workflow fixture');
+    const owner = httpServerMock.createKibanaRequest();
+    const executor = httpServerMock.createKibanaRequest();
+    const outsider = httpServerMock.createKibanaRequest();
+    const core = coreMock.createStart();
+    const profiles = new Map([
+      [owner, 'owner'],
+      [executor, 'executor'],
+      [outsider, 'outsider'],
+    ]);
+    core.userProfile.getCurrentProfileId.mockImplementation(
+      async ({ request }) => profiles.get(request) ?? null
+    );
+    const access = new WorkflowAccessControlService(core, {
+      getWorkflowDocumentWithVersion: jest.fn(),
+      writeWorkflowDocumentWithOcc: jest.fn(),
+    });
+    mockWorkflowsService.getAccessControl.mockResolvedValue(access);
+    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+      {
+        ...workflow,
+        id: 'private',
+        owner_id: 'owner',
+        access_control: {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: 'executor', role: 'executor', added_at: '2026-09-17' }],
+        },
+      },
+      { ...workflow, id: 'public' },
+    ]);
+    const requests = [owner, executor, outsider];
+    const results = await api.getWorkflowsByIdsForRequests(
+      Array.from({ length: 100 }, (_, i) => ({
+        ids: ['private', 'public'],
+        spaceId: 'default',
+        request: requests[i % requests.length],
+      }))
+    );
+    expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledTimes(1);
+    expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['private', 'public'],
+      'default'
+    );
+    expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledTimes(3);
+    for (const [index, result] of results.entries()) {
+      expect(result.status).toBe('fulfilled');
+      if (result.status === 'fulfilled') {
+        expect(result.value.map(({ id }) => id)).toEqual(
+          index % 3 === 2 ? ['public'] : ['private', 'public']
+        );
+      }
+    }
+    const client = api.getClient(executor);
+    await expect(client.getWorkflowsByIds(['private', 'public'], 'default')).resolves.toEqual(
+      results[1].status === 'fulfilled' ? results[1].value : []
+    );
+  });
+
+  it('keeps batch lookup failures in their own space', async () => {
+    const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+    if (!workflow) throw new Error('Missing workflow fixture');
+    const error = new Error('lookup failed');
+    mockWorkflowsService.getWorkflowsByIds.mockImplementation(async (_ids, spaceId) => {
+      if (spaceId === 'broken') throw error;
+      return [{ ...workflow, id: 'workflow-1' }];
+    });
+    const result = await api.getWorkflowsByIdsForRequests(
+      ['broken', 'working'].map((spaceId) => ({
+        ids: ['workflow-1'],
+        spaceId,
+        request: mockRequest,
+      }))
+    );
+    expect(result[0]).toEqual({ status: 'rejected', reason: error });
+    expect(result[1]).toEqual({
+      status: 'fulfilled',
+      value: [expect.objectContaining({ id: 'workflow-1' })],
+    });
+  });
+
   describe('delegation', () => {
     it('delegates disableAllWorkflows with spaceId and request', async () => {
       mockWorkflowsService.disableAllWorkflows.mockResolvedValue({
@@ -1820,11 +1902,13 @@ steps:
       mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(history);
 
       const result = await api.getHistoryForWorkflow('wf-1', 'default', {
+        request: mockRequest,
         page: 2,
         perPage: 10,
       });
 
       expect(mockWorkflowsService.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+        request: mockRequest,
         page: 2,
         perPage: 10,
       });

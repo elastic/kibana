@@ -16,6 +16,7 @@ import type {
 import type {
   BulkScheduleWorkflowItem,
   WorkflowsServerPluginSetup,
+  WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
@@ -37,6 +38,13 @@ import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constant
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
 const ACTION_POLICY_TRIGGER = 'action_policy';
+
+interface DispatchBatch {
+  groups: ActionGroup[];
+  request: KibanaRequest;
+  workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>;
+  failedSpaces: Map<string, Error>;
+}
 
 interface PendingSchedule {
   group: ActionGroup;
@@ -113,9 +121,15 @@ export class DispatchStep implements DispatcherStep {
       return done();
     }
 
-    for (const [apiKey, groups] of groupsByApiKey) {
-      const request = this.craftFakeRequest(apiKey);
-      const { workflowsBySpace, failedSpaces } = await this.prefetchWorkflows(groups, request);
+    const batches: DispatchBatch[] = [...groupsByApiKey].map(([apiKey, groups]) => ({
+      groups,
+      request: this.craftFakeRequest(apiKey),
+      workflowsBySpace: new Map(),
+      failedSpaces: new Map(),
+    }));
+    await this.prefetchWorkflows(batches);
+    for (const { groups, request, workflowsBySpace, failedSpaces } of batches) {
+      if (signal.aborted) break;
       const pending = this.buildPendingSchedules(
         groups,
         workflowsBySpace,
@@ -129,7 +143,7 @@ export class DispatchStep implements DispatcherStep {
         }
         await this.dispatchChunk(
           pending.slice(offset, offset + DISPATCH_CHUNK_SIZE),
-          request,
+          this.workflowsManagement.getClient(request),
           dispatchedExecutions,
           dispatchFailures,
           logger
@@ -156,39 +170,38 @@ export class DispatchStep implements DispatcherStep {
     );
   }
 
-  private async prefetchWorkflows(
-    groups: ActionGroup[],
-    request: KibanaRequest
-  ): Promise<{
-    workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>;
-    failedSpaces: Map<string, Error>;
-  }> {
-    const idsBySpace = new Map<string, Set<string>>();
-    for (const group of groups) {
-      for (const destination of workflowDestinations(group)) {
-        addMapSet(idsBySpace, group.spaceId, destination.id);
+  private async prefetchWorkflows(batches: DispatchBatch[]): Promise<void> {
+    const lookups: Array<{
+      batch: DispatchBatch;
+      ids: string[];
+      spaceId: string;
+      request: KibanaRequest;
+    }> = [];
+    for (const batch of batches) {
+      const idsBySpace = new Map<string, Set<string>>();
+      for (const group of batch.groups) {
+        for (const destination of workflowDestinations(group)) {
+          addMapSet(idsBySpace, group.spaceId, destination.id);
+        }
+      }
+      for (const [spaceId, ids] of idsBySpace) {
+        lookups.push({ batch, ids: [...ids], spaceId, request: batch.request });
       }
     }
-
-    const workflowsBySpace = new Map<string, Map<string, WorkflowDetailDto>>();
-    const failedSpaces = new Map<string, Error>();
-    for (const [spaceId, ids] of idsBySpace) {
-      try {
-        const workflows = await this.workflowsManagement.getWorkflowsByIds(
-          [...ids],
+    const results = await this.workflowsManagement.getWorkflowsByIdsForRequests(
+      lookups.map(({ ids, spaceId, request }) => ({ ids, spaceId, request }))
+    );
+    results.forEach((result, index) => {
+      const { batch, spaceId } = lookups[index];
+      if (result.status === 'rejected') {
+        batch.failedSpaces.set(spaceId, toError(result.reason));
+      } else {
+        batch.workflowsBySpace.set(
           spaceId,
-          request
+          new Map(result.value.map((workflow) => [workflow.id, workflow]))
         );
-        workflowsBySpace.set(
-          spaceId,
-          new Map(workflows.map((workflow) => [workflow.id, workflow]))
-        );
-      } catch (err) {
-        failedSpaces.set(spaceId, toError(err));
       }
-    }
-
-    return { workflowsBySpace, failedSpaces };
+    });
   }
 
   private buildPendingSchedules(
@@ -319,17 +332,15 @@ export class DispatchStep implements DispatcherStep {
 
   private async dispatchChunk(
     chunk: PendingSchedule[],
-    request: KibanaRequest,
+    client: WorkflowsManagementClient,
     dispatchedExecutions: Map<ActionGroupId, string[]>,
     dispatchFailures: DispatchFailure[],
     logger: LoggerServiceContract
   ): Promise<void> {
     try {
-      const results: BulkScheduleWorkflowResult =
-        await this.workflowsManagement.bulkScheduleWorkflow(
-          chunk.map((pending) => pending.item),
-          request
-        );
+      const results: BulkScheduleWorkflowResult = await client.bulkScheduleWorkflow(
+        chunk.map((pending) => pending.item)
+      );
       for (let i = 0; i < chunk.length; i++) {
         this.applyScheduleResult(
           chunk[i],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import pLimit from 'p-limit';
@@ -47,11 +47,13 @@ export const resolveStatusFromExecution = (
 
 export const resolveInvestigationStatuses = async ({
   workflowsManagement,
+  request,
   spaceId,
   workflowExecutionIds,
   logger,
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
+  request: KibanaRequest;
   spaceId: string;
   workflowExecutionIds: string[];
   logger: Logger;
@@ -68,9 +70,11 @@ export const resolveInvestigationStatuses = async ({
     uniqueIds.map((id) =>
       limit(async () => {
         try {
-          const execution = await workflowsManagement.management.getWorkflowExecution(id, spaceId, {
-            includeOutput: true,
-          });
+          const execution = await workflowsManagement.management
+            .getClient(request)
+            .getWorkflowExecution(id, spaceId, {
+              includeOutput: true,
+            });
           return execution ? ([id, resolveStatusFromExecution(execution)] as const) : undefined;
         } catch (error) {
           const reason = error instanceof Error ? error.message : String(error);

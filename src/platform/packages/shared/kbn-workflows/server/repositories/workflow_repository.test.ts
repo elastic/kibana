@@ -23,6 +23,46 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
     });
   });
 
+  it('loads ACLs and enabled state together for global workflows', async () => {
+    const accessControl = { access_mode: 'private', entries: [] };
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'private',
+            _source: {
+              spaceId: '*',
+              enabled: true,
+              owner_id: 'owner',
+              access_control: accessControl,
+            },
+          },
+        ],
+      },
+    });
+    const result = await repository.getWorkflowExecutionStates(
+      [
+        { workflowId: 'private', spaceId: 'space-a' },
+        { workflowId: 'private', spaceId: 'space-b' },
+        { workflowId: 'missing', spaceId: 'space-a' },
+      ],
+      { includeGlobal: true }
+    );
+    const state = { enabled: true, owner_id: 'owner', access_control: accessControl };
+    expect([...result]).toEqual([
+      ['space-a:private', state],
+      ['space-b:private', state],
+      ['space-a:missing', { enabled: false }],
+    ]);
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
+        allow_partial_search_results: false,
+      })
+    );
+  });
+
   it('returns an empty map without hitting ES when refs is empty', async () => {
     const result = await repository.areWorkflowsEnabled([]);
     expect(result.size).toBe(0);
@@ -48,7 +88,7 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: WORKFLOW_INDEX_NAME,
-        _source: ['enabled', 'spaceId'],
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
         size: 2,
         query: expect.objectContaining({
           bool: expect.objectContaining({

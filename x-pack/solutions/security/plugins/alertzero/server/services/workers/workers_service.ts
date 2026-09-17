@@ -115,7 +115,7 @@ export class WorkersService {
     const workers = await Promise.all(
       workerRegistry
         .list()
-        .map((registration) => this.projectWorker(registration, spaceId, agentLookup))
+        .map((registration) => this.projectWorker(registration, spaceId, request, agentLookup))
     );
     return ListWorkersResponse.parse({ workers });
   }
@@ -132,7 +132,7 @@ export class WorkersService {
     }
 
     const agentLookup = await this.buildAgentLookup(request);
-    return this.projectWorker(registration, spaceId, agentLookup);
+    return this.projectWorker(registration, spaceId, request, agentLookup);
   }
 
   async update(
@@ -228,13 +228,14 @@ export class WorkersService {
     }
 
     const agentLookup = await this.buildAgentLookup(request);
-    const worker = await this.projectWorker(registration, spaceId, agentLookup);
+    const worker = await this.projectWorker(registration, spaceId, request, agentLookup);
     return { outcome: 'updated', response: { worker } };
   }
 
   private async projectWorker(
     registration: WorkerRegistration,
     spaceId: string,
+    request: KibanaRequest,
     agentLookupCallback?: AgentLookup
   ): Promise<Worker> {
     const managedWorkflows = await this.requireManagedWorkflows();
@@ -274,10 +275,11 @@ export class WorkersService {
       try {
         const management = this.requireManagement();
         const [detail, executions] = await Promise.all([
-          management.getWorkflow(status.workflowId, spaceId),
+          management.getWorkflow(status.workflowId, spaceId, request),
           management.getWorkflowExecutions(
             { workflowId: status.workflowId, page: 1, size: 1 },
-            spaceId
+            spaceId,
+            request
           ),
         ]);
         definition = detail?.definition ?? null;

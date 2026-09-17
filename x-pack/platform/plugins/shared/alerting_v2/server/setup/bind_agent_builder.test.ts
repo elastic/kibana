@@ -76,7 +76,11 @@ describe('bindAgentBuilder', () => {
   let agentBuilder: ReturnType<typeof agentBuilderMocks.createSetup>;
   let agentBuilderSml: { registerType: jest.Mock };
   let settings: { get: jest.Mock };
-  let workflowsManagementApi: { getWorkflow: jest.Mock; getAvailableConnectors: jest.Mock };
+  let workflowsManagementApi: {
+    getClient: jest.Mock;
+    getWorkflow: jest.Mock;
+    getAvailableConnectors: jest.Mock;
+  };
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
 
   const runOnSetup = (): void => {
@@ -93,6 +97,7 @@ describe('bindAgentBuilder', () => {
     agentBuilderSml = { registerType: jest.fn() };
     settings = { get: jest.fn().mockResolvedValue(true) };
     workflowsManagementApi = {
+      getClient: jest.fn(() => ({ getWorkflow: workflowsManagementApi.getWorkflow })),
       getWorkflow: jest.fn(),
       getAvailableConnectors: jest.fn(),
     };
@@ -203,7 +208,7 @@ describe('bindAgentBuilder', () => {
         agentBuilder,
         expect.objectContaining({
           logger: expect.anything(),
-          getWorkflow: expect.any(Function),
+          getWorkflowClient: expect.any(Function),
           getAvailableConnectors: expect.any(Function),
         })
       );
@@ -216,12 +221,9 @@ describe('bindAgentBuilder', () => {
       const deps = registerSkillsMock.mock.calls[0][1];
       const request = {} as never;
 
-      await deps.getWorkflow('workflow-1', 'space-1', request);
-      expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
-        'workflow-1',
-        'space-1',
-        request
-      );
+      await deps.getWorkflowClient(request).getWorkflow('workflow-1', 'space-1');
+      expect(workflowsManagementApi.getClient).toHaveBeenCalledWith(request);
+      expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith('workflow-1', 'space-1');
 
       await deps.getAvailableConnectors('space-1', request);
       expect(workflowsManagementApi.getAvailableConnectors).toHaveBeenCalledWith(

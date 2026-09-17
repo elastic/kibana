@@ -30,7 +30,9 @@ const createDeps = (
   logger: LoggerServiceContract = createLogger() as unknown as LoggerServiceContract
 ): ManageActionPolicyToolDeps => ({
   logger,
-  getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+  getWorkflowClient: jest.fn(() => ({
+    getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+  })),
   getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
 });
 
@@ -68,7 +70,7 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
-      expect(deps.getWorkflow).toHaveBeenCalledWith('wf-1', ctx.spaceId, ctx.request);
+      expect(deps.getWorkflowClient).toHaveBeenCalledWith(ctx.request);
       expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
       expect(ctx.attachments.update).not.toHaveBeenCalled();
       const { results } = result as {

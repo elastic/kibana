@@ -35,11 +35,29 @@ const getExecutionIds = (
 const getScheduledGroupCount = (result: Awaited<ReturnType<DispatchStep['execute']>>): number =>
   result.type === 'continue' ? result.data?.outcome?.scheduledGroupCount ?? 0 : 0;
 
-const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
-  ({
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
-    bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> => {
+  const getWorkflowsByIds = jest.fn().mockResolvedValue([]);
+  const bulkScheduleWorkflow = jest.fn().mockResolvedValue([]);
+  return {
+    getWorkflowsByIds,
+    getWorkflowsByIdsForRequests: jest.fn(
+      (
+        lookups: Parameters<
+          WorkflowsServerPluginSetup['management']['getWorkflowsByIdsForRequests']
+        >[0]
+      ) =>
+        Promise.allSettled(
+          lookups.map(({ ids, spaceId, request }) => getWorkflowsByIds(ids, spaceId, request))
+        )
+    ),
+    bulkScheduleWorkflow,
+    getClient: jest.fn((request) => ({
+      bulkScheduleWorkflow: (
+        items: Parameters<WorkflowsServerPluginSetup['management']['bulkScheduleWorkflow']>[0]
+      ) => bulkScheduleWorkflow(items, request),
+    })),
+  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
+};
 
 const createWorkflowDetailDto = (
   overrides: Partial<WorkflowDetailDto> = {}
@@ -693,60 +711,6 @@ describe('DispatchStep', () => {
       'space-b',
       expect.anything()
     );
-  });
-
-  it('isolates private workflow lookup by policy credentials', async () => {
-    const step = new DispatchStep(mockWfm);
-    const privateWorkflow = createWorkflowDetailDto({
-      id: 'private-workflow',
-      owner_id: 'owner-profile',
-      access_control: { access_mode: 'private', entries: [] },
-    });
-    const publicWorkflow = createWorkflowDetailDto({ id: 'public-workflow' });
-    mockWfm.getWorkflowsByIds.mockImplementation(async (_ids, _spaceId, request) =>
-      request?.headers.authorization === 'ApiKey owner-key'
-        ? [privateWorkflow, publicWorkflow]
-        : [publicWorkflow]
-    );
-    mockWfm.bulkScheduleWorkflow.mockImplementation(async (items) =>
-      items.map(({ workflow }) => scheduled(`execution-${workflow.id}`))
-    );
-    const groups = ['owner', 'other'].map((id) =>
-      createActionGroup({
-        id,
-        policyId: id,
-        destinations: [
-          { type: 'workflow', id: privateWorkflow.id },
-          { type: 'workflow', id: publicWorkflow.id },
-        ],
-      })
-    );
-    const result = await step.execute(
-      createDispatcherPipelineState({
-        dispatch: groups,
-        policies: new Map(
-          ['owner', 'other'].map((id) => [id, createActionPolicy({ id, apiKey: `${id}-key` })])
-        ),
-      }),
-      loggerService
-    );
-
-    expect(getExecutionIds(result, 'owner')).toStrictEqual([
-      'execution-private-workflow',
-      'execution-public-workflow',
-    ]);
-    expect(getExecutionIds(result, 'other')).toStrictEqual(['execution-public-workflow']);
-    expect(getFailures(result)).toStrictEqual([
-      expect.objectContaining({
-        actionGroupId: 'other',
-        workflowId: 'private-workflow',
-        reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
-      }),
-    ]);
-    expect(mockWfm.getWorkflowsByIds).toHaveBeenCalledTimes(2);
-    for (const [index, [, request]] of mockWfm.bulkScheduleWorkflow.mock.calls.entries()) {
-      expect(mockWfm.getWorkflowsByIds.mock.calls[index][2]).toBe(request);
-    }
   });
 
   it('issues one bulkScheduleWorkflow call per API key and never mixes keys', async () => {

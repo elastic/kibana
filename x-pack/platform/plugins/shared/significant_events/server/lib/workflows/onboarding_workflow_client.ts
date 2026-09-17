@@ -249,8 +249,15 @@ export class SignificantEventsKIsOnboardingClient {
    * For completed executions a second fetch retrieves the full execution
    * context so output counts can be included in the result.
    */
-  async getStatus({ streamName }: { streamName: string }): Promise<KIsOnboardingStatusResult> {
+  async getStatus({
+    streamName,
+    request,
+  }: {
+    streamName: string;
+    request: KibanaRequest;
+  }): Promise<KIsOnboardingStatusResult> {
     const result = await this.workflowExecutionService.getStatus({
+      request,
       spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       queryParams: { concurrencyGroupKey: buildConcurrencyKey(streamName) },
     });
@@ -260,6 +267,7 @@ export class SignificantEventsKIsOnboardingClient {
     }
 
     const fullExecution = await this.workflowExecutionService.getExecution({
+      request,
       id: result.executionId,
       spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       options: { includeOutput: true },
@@ -282,8 +290,10 @@ export class SignificantEventsKIsOnboardingClient {
    */
   async getStatuses({
     streamNames,
+    request,
   }: {
     streamNames: string[];
+    request: KibanaRequest;
   }): Promise<Record<string, SignificantEventsWorkflowStatusResult>> {
     if (streamNames.length === 0) {
       return {};
@@ -299,7 +309,7 @@ export class SignificantEventsKIsOnboardingClient {
     }
 
     const requested = new Set(streamNames);
-    const executions = await this.getRecentExecutions();
+    const executions = await this.getRecentExecutions(request);
 
     for (const execution of executions) {
       if (execution.concurrencyGroupKey === undefined) {
@@ -348,7 +358,8 @@ export class SignificantEventsKIsOnboardingClient {
   async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<number> {
     const { results } = await this.workflowExecutionService.getExecutions(
       { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
-      ONBOARDING_EXECUTIONS_SPACE_ID
+      ONBOARDING_EXECUTIONS_SPACE_ID,
+      request
     );
 
     if (results.length === 0) {
@@ -378,7 +389,7 @@ export class SignificantEventsKIsOnboardingClient {
    * finishedAt, and sorting by finishedAt would hide it behind an older
    * completed run, breaking the "already running" classification.
    */
-  async getRecentExecutions(): Promise<WorkflowExecutionListItemDto[]> {
+  async getRecentExecutions(request: KibanaRequest): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.workflowExecutionService.getExecutions(
       {
         size: MAX_STREAMS_PER_QUERY,
@@ -386,7 +397,8 @@ export class SignificantEventsKIsOnboardingClient {
         sortOrder: 'desc',
         collapse: 'concurrencyGroupKey',
       },
-      ONBOARDING_EXECUTIONS_SPACE_ID
+      ONBOARDING_EXECUTIONS_SPACE_ID,
+      request
     );
 
     return results;

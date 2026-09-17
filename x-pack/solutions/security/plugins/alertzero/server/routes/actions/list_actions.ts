@@ -43,6 +43,7 @@ export const registerListActionsRoute = ({
           const categories = readActionCategoriesQueryParam(request);
           const body: ListActionsResponse = await getActionsService().list(
             getSpaceId(request),
+            request,
             categories
           );
           return response.ok({ body });

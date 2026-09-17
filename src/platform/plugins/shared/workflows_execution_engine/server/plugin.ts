@@ -19,6 +19,7 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
+  getWorkflowPermissions,
   isTerminalStatus,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
@@ -1485,14 +1486,6 @@ export class WorkflowsExecutionEnginePlugin
         return [];
       }
 
-      for (const item of items) {
-        await ensureExecutionAccess(
-          item.workflow,
-          (item.context.spaceId as string | undefined) || 'default',
-          request
-        );
-      }
-
       await checkLicense(plugins.licensing);
 
       const authenticatedUser = await getAuthenticatedUser(
@@ -1507,17 +1500,18 @@ export class WorkflowsExecutionEnginePlugin
       const spaceIdFor = (item: (typeof items)[number]) =>
         (item.context.spaceId as string | undefined) || 'default';
 
-      // Single ES search for the enabled flags of every (workflowId, spaceId)
-      // referenced by the batch. Skips ephemeral items (they are not indexed as workflows).
       const enabledRefs = items
         .filter((item) => !item.workflow.isEphemeral)
         .map((item) => ({ workflowId: item.workflow.id, spaceId: spaceIdFor(item) }));
-      const enabledMap =
-        enabledRefs.length === 0
-          ? new Map<string, boolean>()
-          : await workflowRepository.areWorkflowsEnabled(enabledRefs, {
-              includeGlobal: true,
-            });
+      const executionStates = await workflowRepository.getWorkflowExecutionStates(enabledRefs, {
+        includeGlobal: true,
+      });
+      const hasPrivateWorkflows = [...executionStates.values()].some(
+        ({ access_control }) => access_control?.access_mode === 'private'
+      );
+      const profileId = hasPrivateWorkflows
+        ? (await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined
+        : undefined;
 
       interface PreparedItem {
         idx: number;
@@ -1530,8 +1524,11 @@ export class WorkflowsExecutionEnginePlugin
         try {
           if (!item.workflow.isEphemeral) {
             const spaceId = spaceIdFor(item);
-            const enabled = enabledMap.get(`${spaceId}:${item.workflow.id}`) ?? false;
-            if (!enabled) {
+            const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
+            if (state && !getWorkflowPermissions(state, profileId).execute) {
+              throw new Error('You do not have permission to execute this workflow.');
+            }
+            if (!state?.enabled) {
               throw new Error(
                 `Workflow is disabled: ${item.workflow.id}. Enable the workflow to run it.`
               );

@@ -45,10 +45,11 @@ export const createKiIdentificationStatusTool = ({
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStatusSchema,
-  handler: async ({ stream_name: streamName }) => {
+  handler: async ({ stream_name: streamName }, { request }) => {
     try {
       const data = await getKiIdentificationStatusToolHandler({
         streamName,
+        request,
         streamsKIsOnboardingClient,
       });
 

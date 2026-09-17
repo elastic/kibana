@@ -18,7 +18,7 @@ const createDeps = (): ManageActionPolicyToolDeps => ({
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
-  getWorkflow: jest.fn(async () => null),
+  getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn(async () => null) })),
   getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
 });
 

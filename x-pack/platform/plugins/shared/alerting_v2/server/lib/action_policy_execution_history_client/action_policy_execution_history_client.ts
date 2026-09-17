@@ -191,7 +191,7 @@ export class ActionPolicyExecutionHistoryClient {
     const [policiesRes, rulesRes, workflowsRes] = await Promise.allSettled([
       this.actionPolicyClient.getActionPolicies({ ids: policyIds }),
       this.lookupRulesByIds(ruleIds),
-      this.workflowsManagement.getWorkflowsByIds(workflowIds, spaceId, request),
+      this.workflowsManagement.getClient(request).getWorkflowsByIds(workflowIds, spaceId),
     ]);
 
     const policies = this.unwrapArray(

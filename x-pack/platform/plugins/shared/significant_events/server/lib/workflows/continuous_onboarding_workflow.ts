@@ -102,10 +102,12 @@ export const createContinuousKiOnboardingWorkflowService = ({
     enabled: boolean;
     request: KibanaRequest;
   }) => {
-    const existing = await managementApi.getWorkflow(
-      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-      MANAGED_WORKFLOW_SPACE_ID
-    );
+    const existing = await managementApi
+      .getClient(request)
+      .getWorkflow(
+        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        MANAGED_WORKFLOW_SPACE_ID
+      );
 
     if (!existing) {
       if (enabled) {

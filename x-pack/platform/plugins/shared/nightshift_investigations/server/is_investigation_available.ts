@@ -42,10 +42,9 @@ export const isInvestigationAvailable = async ({
     const resolvedSpaceId =
       spaceId ?? spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const [workflow, { endpoints }] = await Promise.all([
-      workflowsManagement.management.getWorkflow(
-        SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-        resolvedSpaceId
-      ),
+      workflowsManagement.management
+        .getClient(request)
+        .getWorkflow(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID, resolvedSpaceId),
       searchInferenceEndpoints.endpoints.getForFeature(
         SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
         request
