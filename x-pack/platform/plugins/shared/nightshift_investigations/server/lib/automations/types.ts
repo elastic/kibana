@@ -30,6 +30,7 @@ export type NightshiftTriggerRow =
       ruleNamePattern?: string;
       ruleNameMatchMode?: RuleNameMatchMode;
       alertStatus?: AlertStatus;
+      tags?: string[];
     }
   | {
       kind: 'schedule';

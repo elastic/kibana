@@ -25,6 +25,7 @@ const triggerRowSchema = z.discriminatedUnion('kind', [
     ruleNamePattern: z.string().optional(),
     ruleNameMatchMode: z.enum(['substring', 'regex']).optional(),
     alertStatus: z.enum(['firing', 'recovered', 'any']).optional(),
+    tags: z.array(z.string()).optional(),
   }),
   z.object({
     kind: z.literal('schedule'),
