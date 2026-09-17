@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { useQuery } from '@kbn/react-query';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_INTERNAL_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import type { RuleTagsResponse } from '@kbn/alerting-v2-schemas';
 import { ruleFormKeys } from './query_key_factory';
 
@@ -19,11 +19,14 @@ export const useFetchRuleTags = ({ http, search }: { http: HttpStart; search?: s
   return useQuery<string[], Error>({
     queryKey: ruleFormKeys.tags(normalizedSearch),
     queryFn: async () => {
-      const { tags } = await http.get<RuleTagsResponse>(`${ALERTING_V2_RULE_API_PATH}/tags`, {
-        query: {
-          search: normalizedSearch,
-        },
-      });
+      const { tags } = await http.get<RuleTagsResponse>(
+        `${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`,
+        {
+          query: {
+            search: normalizedSearch,
+          },
+        }
+      );
       return tags;
     },
     refetchOnWindowFocus: false,

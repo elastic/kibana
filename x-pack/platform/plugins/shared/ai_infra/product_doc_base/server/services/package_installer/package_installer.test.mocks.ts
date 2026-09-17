@@ -30,6 +30,7 @@ export const openZipArchiveMock = jest.fn();
 export const loadMappingFileMock = jest.fn();
 export const loadManifestFileMock = jest.fn();
 export const ensureDefaultElserDeployedMock = jest.fn();
+export const ensureInferenceDeployedMock = jest.fn();
 
 jest.doMock('./utils', () => {
   const actual = jest.requireActual('./utils');
@@ -40,5 +41,6 @@ jest.doMock('./utils', () => {
     loadMappingFile: loadMappingFileMock,
     loadManifestFile: loadManifestFileMock,
     ensureDefaultElserDeployed: ensureDefaultElserDeployedMock,
+    ensureInferenceDeployed: ensureInferenceDeployedMock,
   };
 });

@@ -1,5 +1,5 @@
 {
-  "sha1": "6d5807ea403e79f61ac8ac7e4b403dc0a0fd4d7b",
+  "sha1": "984fb6fd5e1ef817addbbdd187e968cb6608c3cb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -65,6 +65,20 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/discover_lighthouse.spec.ts",
         "line": 26,
         "column": 20
+      }
+    },
+    {
+      "id": "46b994c39174ab8-843fa5bab50f38c",
+      "title": "recently accessed hover list shows viewed Discover sessions in the Discover hover list and navigates on click",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/recently_accessed.spec.ts",
+        "line": 59,
+        "column": 7
       }
     },
     {
