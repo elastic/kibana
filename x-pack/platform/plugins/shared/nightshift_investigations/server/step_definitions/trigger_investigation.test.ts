@@ -99,6 +99,7 @@ describe('triggerInvestigationStepDefinition', () => {
       createContext({
         subject_type: 'alert',
         subject_id: 'alert-1',
+        title: 'CPU threshold',
         context: {
           alerts: [
             {
