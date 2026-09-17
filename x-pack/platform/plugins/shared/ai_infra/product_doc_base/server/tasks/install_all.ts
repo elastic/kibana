@@ -82,6 +82,9 @@ export const scheduleInstallAllTask = async ({
     ? INSTALL_ALL_TASK_ID
     : INSTALL_ALL_TASK_ID_MULTILINGUAL;
   try {
+    // A new request replaces the persisted plan of an earlier install so that a stale continuation,
+    // e.g. one cancelled by an uninstall in between, cannot absorb it
+    await taskManager.removeIfExists(taskId);
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: INSTALL_ALL_TASK_TYPE,

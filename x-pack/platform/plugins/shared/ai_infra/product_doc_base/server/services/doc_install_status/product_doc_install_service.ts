@@ -309,6 +309,7 @@ export class ProductDocInstallClient {
         ...(so.attributes.last_installation_failure_reason
           ? { failureReason: so.attributes.last_installation_failure_reason }
           : {}),
+        ...(so.updated_at ? { updatedAt: so.updated_at } : {}),
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {

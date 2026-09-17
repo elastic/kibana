@@ -508,6 +508,12 @@ describe('PackageInstaller', () => {
   describe('wasUninstalledSince', () => {
     const since = new Date('2026-09-17T10:00:00.000Z');
 
+    beforeEach(() => {
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'uninstalled',
+      });
+    });
+
     it('propagates status read failures instead of reporting an uninstall', async () => {
       productDocClient.getInstallationStatusOrThrow.mockRejectedValue(new Error('es unavailable'));
 
@@ -525,6 +531,31 @@ describe('PackageInstaller', () => {
       await expect(
         packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
       ).resolves.toBe(true);
+    });
+
+    it('returns true when the OpenAPI spec was uninstalled after the given time', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.15', updatedAt: '2026-09-17T09:00:00.000Z' },
+      } as never);
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'uninstalled',
+        updatedAt: '2026-09-17T10:02:00.000Z',
+      });
+
+      await expect(
+        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
+      ).resolves.toBe(true);
+    });
+
+    it('propagates OpenAPI spec status read failures', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({} as never);
+      productDocClient.getOpenapiSpecInstallationStatus.mockRejectedValue(
+        new Error('es unavailable')
+      );
+
+      await expect(
+        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
+      ).rejects.toThrow('es unavailable');
     });
 
     it('returns false when the uninstall predates the given time or products have no status', async () => {

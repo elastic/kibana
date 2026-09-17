@@ -11,7 +11,13 @@ import { isUnrecoverableError, type RunContext } from '@kbn/task-manager-plugin/
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
-import { registerInstallAllTaskDefinition, INSTALL_ALL_TASK_TYPE } from './install_all';
+import {
+  registerInstallAllTaskDefinition,
+  scheduleInstallAllTask,
+  INSTALL_ALL_TASK_TYPE,
+  INSTALL_ALL_TASK_ID,
+  INSTALL_ALL_TASK_ID_MULTILINGUAL,
+} from './install_all';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../services/install_lock';
 import { MAX_INSTALL_ITEM_RETRIES } from './utils';
 
@@ -177,5 +183,44 @@ describe('InstallAll task', () => {
     const result = await runTask({ remaining: ['kibana', 'security'], attempts: 2 });
 
     expect(result).toEqual({ state: { remaining: ['security'] }, runAt: expect.any(Date) });
+  });
+});
+
+describe('scheduleInstallAllTask', () => {
+  it('replaces an existing task so a reinstall request does not wake a stale continuation', async () => {
+    const taskManager = taskManagerMock.createStart();
+
+    const taskId = await scheduleInstallAllTask({
+      taskManager,
+      logger: loggerMock.create(),
+      inferenceId: '.elser',
+    });
+
+    expect(taskId).toBe(INSTALL_ALL_TASK_ID);
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(INSTALL_ALL_TASK_ID);
+    expect(taskManager.removeIfExists.mock.invocationCallOrder[0]).toBeLessThan(
+      taskManager.ensureScheduled.mock.invocationCallOrder[0]
+    );
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: INSTALL_ALL_TASK_ID,
+        params: { inferenceId: '.elser' },
+        state: {},
+      })
+    );
+    expect(taskManager.runSoon).toHaveBeenCalledWith(INSTALL_ALL_TASK_ID);
+  });
+
+  it('uses the multilingual task id for non-default inference ids', async () => {
+    const taskManager = taskManagerMock.createStart();
+
+    const taskId = await scheduleInstallAllTask({
+      taskManager,
+      logger: loggerMock.create(),
+      inferenceId: '.multilingual-e5-small',
+    });
+
+    expect(taskId).toBe(INSTALL_ALL_TASK_ID_MULTILINGUAL);
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(INSTALL_ALL_TASK_ID_MULTILINGUAL);
   });
 });

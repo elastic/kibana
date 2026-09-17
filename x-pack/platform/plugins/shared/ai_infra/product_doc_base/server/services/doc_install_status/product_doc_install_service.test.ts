@@ -170,6 +170,29 @@ describe('ProductDocInstallClient', () => {
     });
   });
 
+  describe('getOpenapiSpecInstallationStatus', () => {
+    it('exposes when the OpenAPI spec status was last written', async () => {
+      soClient.get.mockResolvedValue({
+        id: 'openapi',
+        type: 'type',
+        references: [],
+        updated_at: '2026-09-17T10:00:00.000Z',
+        attributes: {
+          product_name: 'kibana',
+          product_version: '9.5',
+          installation_status: 'uninstalled',
+          resource_type: ResourceTypes.openapiSpec,
+        },
+      });
+
+      await expect(service.getOpenapiSpecInstallationStatus({ inferenceId })).resolves.toEqual({
+        status: 'uninstalled',
+        version: '9.5',
+        updatedAt: '2026-09-17T10:00:00.000Z',
+      });
+    });
+  });
+
   describe('status setters', () => {
     it('writes resource_type=product_doc when setting installation started', async () => {
       soClient.update.mockResolvedValueOnce({} as any);
