@@ -269,7 +269,6 @@ describe('Discover topnav component', () => {
     });
   });
 
-
   test('disables submit on an uninitialized ES|QL tab with an empty query', async () => {
     const { toolkit, props } = await setup();
     const tabId = toolkit.getCurrentTab().id;
