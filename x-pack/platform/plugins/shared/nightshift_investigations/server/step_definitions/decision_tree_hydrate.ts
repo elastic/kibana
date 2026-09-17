@@ -59,12 +59,13 @@ export const decisionTreeHydrateStepDefinition = ({
       const scopedConversationId = scopeConversationId(spaceId, conversationId);
 
       const treeCount = await withTimeout(
-        hydrateDecisionTreeWorkspace({
-          apiClient: manager.apiClient,
-          conversationId: scopedConversationId,
-          esClient: context.contextManager.getScopedEsClient(),
-          logger,
-        }),
+        (_signal) =>
+          hydrateDecisionTreeWorkspace({
+            apiClient: manager.apiClient,
+            conversationId: scopedConversationId,
+            esClient: context.contextManager.getScopedEsClient(),
+            logger,
+          }),
         HYDRATE_TIMEOUT_MS,
         `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
       );
