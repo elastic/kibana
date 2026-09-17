@@ -45,7 +45,10 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
  * shred `{ service: { name: 'checkout' } }` into `kibana.alert.grouping.service.name` and drop the
  * snapshot enrichment. Evaluation is flattened on purpose: parse reads the leaf dotted keys.
  */
-const OBJECT_VALUED_AAD_FIELDS = new Set([ALERT_GROUPING, ALERT_RULE_PARAMETERS]);
+const OBJECT_VALUED_AAD_FIELDS: ReadonlySet<string> = new Set([
+  ALERT_GROUPING,
+  ALERT_RULE_PARAMETERS,
+]);
 
 /**
  * AAD documents arrive nested (`kibana: { alert: { uuid } }`) from v1 rule-action events and
