@@ -7,12 +7,11 @@
 
 import type { Subject } from 'rxjs';
 import { pairwise, concatMap, takeUntil } from 'rxjs';
-import type { CoreStart, FeatureFlagsStart, Logger } from '@kbn/core/server';
+import type { CoreStart, FeatureFlagsStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { FF_DUAL_PROCESS_ENABLED } from '../../../common';
 import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
-import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../../domain/constants';
-import { EngineDescriptorTypeName } from '../../domain/saved_objects';
+import { EngineDescriptorTypeName, EngineDescriptorClient } from '../../domain/saved_objects';
 import type { EngineDescriptor } from '../../domain/saved_objects';
 
 /**
@@ -28,10 +27,6 @@ export const isDualProcessEnabled = (featureFlags: FeatureFlagsStart): Promise<b
 // ---------------------------------------------------------------------------
 
 const MAX_ENGINES_PER_PAGE = 10_000;
-
-/** Saved object ID for an engine descriptor, matching EngineDescriptorClient.getSavedObjectId. */
-const getEngineDescriptorSoId = (type: EntityType, namespace: string): string =>
-  `${EngineDescriptorTypeName}-${type}-${namespace}`;
 
 interface EngineEntry {
   attributes: EngineDescriptor;
@@ -67,7 +62,6 @@ async function teardownNonPriorityTasks({
   logger: Logger;
 }): Promise<void> {
   const engines = await findAllEngineDescriptors(coreStart);
-  const soClient = coreStart.savedObjects.createInternalRepository([EngineDescriptorTypeName]);
 
   const targets = engines.filter(
     ({ attributes }) =>
@@ -80,30 +74,28 @@ async function teardownNonPriorityTasks({
       logger.info(
         `Dual-process flag turned off: suspending non-priority extraction for ${type} in namespace ${namespace}`
       );
-      await soClient.update<EngineDescriptor>(
-        EngineDescriptorTypeName,
-        getEngineDescriptorSoId(type, namespace),
-        {
-          nonPriorityStatus: ENGINE_STATUS.STOPPED,
-          nonPriorityLogExtractionState: null,
-          nonPriorityError: null,
-        },
-        { mergeAttributes: true, namespace }
+      const soClient = coreStart.savedObjects.createInternalRepository([EngineDescriptorTypeName]);
+      const engineDescriptorClient = new EngineDescriptorClient(
+        soClient as unknown as SavedObjectsClientContract,
+        namespace,
+        logger
       );
+      await engineDescriptorClient.update(type, {
+        nonPriorityStatus: ENGINE_STATUS.STOPPED,
+        nonPriorityLogExtractionState: null,
+        nonPriorityError: null,
+      });
     })
   );
 }
 
 /**
- * Schedules the non-priority extraction task for every engine where the dual-process
- * flag just flipped on and the engine is running but does not yet have a non-priority
- * process.
+ * Marks the non-priority extraction process as started in the SO for every engine where
+ * the dual-process flag just flipped on and the engine is actively running.
  *
- * No cursor is set, so the new process starts from now - lookbackPeriod rather than
- * replaying the backlog that accumulated while the flag was off.
- *
- * The nonPriorityStatus null guard ensures only one node acts per engine; Task Manager
- * deduplicates the schedule by task ID.
+ * Engines with nonPriorityStatus === null (pre-v10, not yet bootstrapped) are handled
+ * separately by the priority task's bootstrap step. Task Manager scheduling happens
+ * there too, so this function only manages SO state for already-bootstrapped engines.
  */
 async function enableNonPriorityTasks({
   coreStart,
@@ -113,7 +105,6 @@ async function enableNonPriorityTasks({
   logger: Logger;
 }): Promise<void> {
   const engines = await findAllEngineDescriptors(coreStart);
-  const soClient = coreStart.savedObjects.createInternalRepository([EngineDescriptorTypeName]);
 
   const targets = engines.filter(
     ({ attributes }) =>
@@ -127,12 +118,13 @@ async function enableNonPriorityTasks({
       logger.info(
         `Dual-process flag turned on: resuming non-priority extraction for ${type} in namespace ${namespace}`
       );
-      await soClient.update<EngineDescriptor>(
-        EngineDescriptorTypeName,
-        getEngineDescriptorSoId(type, namespace),
-        { nonPriorityStatus: ENGINE_STATUS.STARTED },
-        { mergeAttributes: true, namespace }
+      const soClient = coreStart.savedObjects.createInternalRepository([EngineDescriptorTypeName]);
+      const engineDescriptorClient = new EngineDescriptorClient(
+        soClient as unknown as SavedObjectsClientContract,
+        namespace,
+        logger
       );
+      await engineDescriptorClient.update(type, { nonPriorityStatus: ENGINE_STATUS.STARTED });
     })
   );
 }

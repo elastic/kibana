@@ -303,7 +303,11 @@ describe('subscribeToDualProcessFlag', () => {
 
       const mockFind = jest
         .fn()
+        // teardown: findAllEngineDescriptors, then findOrThrow inside EngineDescriptorClient.update
         .mockResolvedValueOnce({ saved_objects: [soRowStarted] })
+        .mockResolvedValueOnce({ saved_objects: [soRowStarted] })
+        // enable: findAllEngineDescriptors, then findOrThrow inside EngineDescriptorClient.update
+        .mockResolvedValueOnce({ saved_objects: [soRowStopped] })
         .mockResolvedValueOnce({ saved_objects: [soRowStopped] });
 
       const mockUpdate = jest.fn().mockResolvedValue({});

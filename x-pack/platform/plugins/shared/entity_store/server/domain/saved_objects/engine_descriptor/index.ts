@@ -57,7 +57,7 @@ export class EngineDescriptorClient {
       );
     }
 
-    const id = this.getSavedObjectId(entityType);
+    const id = this.getLocalSavedObjectId(entityType);
     this.logger.debug(`Creating engine descriptor with id ${id}`);
 
     const logExtractionState = EngineLogExtractionState.parse({});
@@ -84,7 +84,7 @@ export class EngineDescriptorClient {
   ): Promise<Partial<EngineDescriptor>> {
     await this.findOrThrow(entityType);
 
-    const id = this.getSavedObjectId(entityType);
+    const id = this.getLocalSavedObjectId(entityType);
     const { attributes } = await this.soClient.update<EngineDescriptor>(
       EngineDescriptorTypeName,
       id,
@@ -92,6 +92,7 @@ export class EngineDescriptorClient {
       {
         refresh: 'wait_for',
         mergeAttributes,
+        namespace: this.namespace,
       }
     );
 
@@ -101,13 +102,17 @@ export class EngineDescriptorClient {
   async delete(entityType: EntityType) {
     await this.findOrThrow(entityType);
 
-    const id = this.getSavedObjectId(entityType);
+    const id = this.getLocalSavedObjectId(entityType);
     this.logger.debug(`Deleting engine descriptor with id ${id}`);
     await this.soClient.delete(EngineDescriptorTypeName, id);
   }
 
-  private getSavedObjectId(entityType: EntityType): string {
-    return `${EngineDescriptorTypeName}-${entityType}-${this.namespace}`;
+  static getSavedObjectId(entityType: EntityType, namespace: string): string {
+    return `${EngineDescriptorTypeName}-${entityType}-${namespace}`;
+  }
+
+  private getLocalSavedObjectId(entityType: EntityType): string {
+    return EngineDescriptorClient.getSavedObjectId(entityType, this.namespace);
   }
 
   private find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {

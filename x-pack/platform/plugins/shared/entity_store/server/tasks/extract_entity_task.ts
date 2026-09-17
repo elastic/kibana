@@ -16,7 +16,7 @@ import type {
   RunResult,
 } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import moment from 'moment';
 import { TasksConfig, type EntityStoreTaskConfig } from './config';
 import { EntityStoreTaskType } from './constants';
@@ -29,6 +29,8 @@ import {
   hasPriorityExtractionGate,
   resolveExtractionMode,
 } from '../../common/domain/definitions/registry';
+import { ENGINE_STATUS } from '../domain/constants';
+import { EngineDescriptorTypeName, EngineDescriptorClient } from '../domain/saved_objects';
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
@@ -75,6 +77,61 @@ export const getNewSchedule = (
     };
   }
 };
+
+/**
+ * Ensures the non-priority task exists and that nonPriorityStatus is initialised for engines
+ * that predate model version 10 (where the field was introduced). Called on every shared-task
+ * tick; ensureScheduled is idempotent so repeated calls are cheap no-ops once the task exists.
+ * The SO update only fires when nonPriorityStatus is null (first run after upgrade).
+ */
+async function bootstrapNonPriorityTask({
+  core,
+  fakeRequest,
+  entityType,
+  namespace,
+  dualProcessEnabled,
+  logger,
+}: {
+  core: types.EntityStoreCoreSetup;
+  fakeRequest: KibanaRequest;
+  entityType: EntityType;
+  namespace: string;
+  dualProcessEnabled: boolean;
+  logger: Logger;
+}): Promise<void> {
+  try {
+    const [coreStart, pluginsStart] = await core.getStartServices();
+
+    await pluginsStart.taskManager.ensureScheduled(
+      {
+        id: getExtractEntityTaskId(entityType, namespace, EXTRACTION_MODE.nonPriority),
+        taskType: `${getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority).type}:${entityType}`,
+        schedule: { interval: getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority).interval! },
+        state: { namespace },
+        params: {},
+      },
+      { request: fakeRequest }
+    );
+
+    const soClient = coreStart.savedObjects.createInternalRepository([EngineDescriptorTypeName]);
+    const engineDescriptorClient = new EngineDescriptorClient(
+      soClient as unknown as SavedObjectsClientContract,
+      namespace,
+      logger
+    );
+    const descriptor = await engineDescriptorClient.findOrThrow(entityType);
+
+    if (descriptor.nonPriorityStatus === null) {
+      await engineDescriptorClient.update(entityType, {
+        nonPriorityStatus: dualProcessEnabled ? ENGINE_STATUS.STARTED : ENGINE_STATUS.STOPPED,
+      });
+    }
+  } catch (err) {
+    logger.warn(
+      `Non-priority task bootstrap failed for ${entityType} in ${namespace}: ${(err as Error).message}`
+    );
+  }
+}
 
 async function runTask({
   taskInstance,
@@ -137,6 +194,20 @@ async function runTask({
         ...currentState,
       },
     };
+  }
+
+  if (
+    hasPriorityExtractionGate(entityType) &&
+    registeredExtractionMode !== EXTRACTION_MODE.nonPriority
+  ) {
+    await bootstrapNonPriorityTask({
+      core,
+      fakeRequest,
+      entityType,
+      namespace,
+      dualProcessEnabled,
+      logger,
+    });
   }
 
   let remote = false;
