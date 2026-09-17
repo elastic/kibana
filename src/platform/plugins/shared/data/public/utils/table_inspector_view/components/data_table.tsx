@@ -21,7 +21,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { isMissingValue } from '@kbn/field-formats-common';
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -170,8 +169,15 @@ class DataTableFormatClass extends Component<
         field: dataColumn.id,
         sortable: true,
         render: (value: any) => {
+          // Cells are rendered directly inside `EuiFlexItem` (not inside an anchor/img), so
+          // `convertToReact` is safe for every value — no risk of wrapping a formatter's own
+          // anchor in another one. In `'table'` mode we therefore use React for all values so
+          // URL/color/etc. formatters render richly and missing values pick up the accessible
+          // dash + tooltip that `convertToReact` produces. Other consumers stay on
+          // `convertToText` to preserve the plain `(null)` label chart inspectors have always
+          // shown.
           const formattedValue =
-            missingValueDisplay === 'table' && isMissingValue(value)
+            missingValueDisplay === 'table'
               ? fieldFormatter.convertToReact(value)
               : fieldFormatter.convertToText(value);
           const rowIndex = data.rows.findIndex((row) => row[dataColumn.id] === value) || 0;

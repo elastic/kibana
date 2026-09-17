@@ -257,6 +257,11 @@ export const createGridCell = (
         );
 
       case 'link': {
+        // `LinkCell` wraps `linkContent` inside an `<EuiLink>` (an anchor), so present values
+        // stay as plain text to avoid nested anchors — e.g. the URL formatter's own `<a>`
+        // rendered via React would produce invalid, unusable markup. Missing values are the
+        // exception: the dash + tooltip is a React-only rendering with no
+        // interactive elements, so it is safe inside the outer anchor.
         const linkContent =
           formatter && isMissingValue(rawValue)
             ? formatter.convertToReact(rawValue)
