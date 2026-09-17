@@ -227,7 +227,6 @@ export const EPISODE_STATUS_FILTER_OPTIONS: EpisodeStatusFilterOption[] = [
 export const DEFAULT_FORM_STATE: ActionPolicyFormState = {
   name: '',
   description: '',
-  tags: [],
   matcher: null,
   groupingMode: 'per_episode',
   groupBy: [],

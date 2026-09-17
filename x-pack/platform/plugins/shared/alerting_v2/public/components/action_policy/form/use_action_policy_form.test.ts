@@ -30,7 +30,6 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   enabled: true,
   matcher: { expression: 'data.severity : "critical"' },
   group_by: ['host.name', 'service.name'],
-  tags: ['production'],
   grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozed_until: null,
@@ -91,7 +90,6 @@ describe('useActionPolicyForm', () => {
       expect(onSubmitCreate).toHaveBeenCalledWith({
         name: 'My policy',
         description: 'A description',
-        tags: [],
         matcher: null,
         groupingMode: 'per_episode',
         groupBy: [],
@@ -180,7 +178,6 @@ describe('useActionPolicyForm', () => {
       expect(result.current.methods.getValues()).toEqual({
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
-        tags: ['production'],
         matcher: { expression: 'data.severity : "critical"' },
         groupingMode: 'per_field',
         groupBy: ['host.name', 'service.name'],
@@ -230,7 +227,6 @@ describe('useActionPolicyForm', () => {
           name: 'Critical production alerts',
           description: 'Routes critical alerts',
           groupingMode: 'per_field',
-          tags: ['production'],
           matcher: { expression: 'data.severity : "critical"' },
           groupBy: ['host.name', 'service.name'],
           throttleStrategy: 'time_interval',
