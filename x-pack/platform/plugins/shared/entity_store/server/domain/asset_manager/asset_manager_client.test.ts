@@ -187,7 +187,11 @@ describe('AssetManagerClient', () => {
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledTimes(2);
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('user');
-    expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(2);
+    // host: 1 (single) + user: 2 (priority + non-priority, always scheduled regardless of FF)
+    expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(3);
+    expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'user', extractionMode: EXTRACTION_MODE.nonPriority })
+    );
   });
 
   it('schedules status and history tasks only after engine descriptors exist', async () => {
