@@ -9,8 +9,16 @@ import React from 'react';
 import * as URL from '../../../../hooks/use_url_params';
 import { fireEvent } from '@testing-library/react';
 import { render } from '../../../../utils/testing/rtl_helpers';
-import type { SyntheticsUrlParams } from '../../../../utils/url_params/get_supported_url_params';
+import {
+  getSupportedUrlParams,
+  type SyntheticsUrlParams,
+} from '../../../../utils/url_params/get_supported_url_params';
 import { SelectedFilterPills } from './selected_filter_pills';
+
+const mockUrlParams = (overrides: Partial<SyntheticsUrlParams> = {}): SyntheticsUrlParams => ({
+  ...getSupportedUrlParams({}),
+  ...overrides,
+});
 
 describe('SelectedFilterPills', () => {
   let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
@@ -32,18 +40,7 @@ describe('SelectedFilterPills', () => {
   });
 
   it('is hidden when no filters are selected', () => {
-    useGetUrlParamsSpy.mockReturnValue({
-      query: '',
-      statusFilter: '',
-      tags: [],
-      locations: [],
-      monitorTypes: [],
-      projects: [],
-      schedules: [],
-      remoteNames: [],
-      useLogicalAndFor: [],
-      configIds: [],
-    } as SyntheticsUrlParams);
+    useGetUrlParamsSpy.mockReturnValue(mockUrlParams());
 
     const { queryByText } = render(<SelectedFilterPills handleFilterChange={handleFilterChange} />);
 
@@ -52,18 +49,14 @@ describe('SelectedFilterPills', () => {
   });
 
   it('renders a pill per selected filter and removes one value', () => {
-    useGetUrlParamsSpy.mockReturnValue({
-      query: '',
-      statusFilter: 'down',
-      tags: ['prod'],
-      locations: ['us_east'],
-      monitorTypes: ['http', 'tcp'],
-      projects: [],
-      schedules: [],
-      remoteNames: [],
-      useLogicalAndFor: [],
-      configIds: [],
-    } as SyntheticsUrlParams);
+    useGetUrlParamsSpy.mockReturnValue(
+      mockUrlParams({
+        statusFilter: 'down',
+        tags: ['prod'],
+        locations: ['us_east'],
+        monitorTypes: ['http', 'tcp'],
+      })
+    );
 
     const { getByText, getByRole } = render(
       <SelectedFilterPills handleFilterChange={handleFilterChange} />
@@ -82,18 +75,7 @@ describe('SelectedFilterPills', () => {
   });
 
   it('clears the last remaining value for a field', () => {
-    useGetUrlParamsSpy.mockReturnValue({
-      query: '',
-      statusFilter: '',
-      tags: ['prod'],
-      locations: [],
-      monitorTypes: [],
-      projects: [],
-      schedules: [],
-      remoteNames: [],
-      useLogicalAndFor: [],
-      configIds: [],
-    } as SyntheticsUrlParams);
+    useGetUrlParamsSpy.mockReturnValue(mockUrlParams({ tags: ['prod'] }));
 
     const { getByRole } = render(<SelectedFilterPills handleFilterChange={handleFilterChange} />);
 
@@ -103,18 +85,7 @@ describe('SelectedFilterPills', () => {
   });
 
   it('omits excluded fields', () => {
-    useGetUrlParamsSpy.mockReturnValue({
-      query: '',
-      statusFilter: '',
-      tags: [],
-      locations: [],
-      monitorTypes: [],
-      projects: [],
-      schedules: ['3'],
-      remoteNames: [],
-      useLogicalAndFor: [],
-      configIds: [],
-    } as SyntheticsUrlParams);
+    useGetUrlParamsSpy.mockReturnValue(mockUrlParams({ schedules: ['3'] }));
 
     const { queryByText } = render(
       <SelectedFilterPills handleFilterChange={handleFilterChange} excludeFields={['schedules']} />

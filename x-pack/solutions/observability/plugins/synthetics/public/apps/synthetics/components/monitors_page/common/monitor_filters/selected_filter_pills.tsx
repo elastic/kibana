@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux-v7';
+import { isLogicalAndField } from '../../../../../../../common/constants';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
 import { hasActiveMonitorFilters } from '../../../../utils/filters/clear_monitor_filter_params';
@@ -75,7 +76,11 @@ export function SelectedFilterPills({
           handleFilterChange(
             field,
             remaining.length > 0 ? remaining : undefined,
-            Boolean(remaining.length && urlParams.useLogicalAndFor?.includes(field))
+            Boolean(
+              remaining.length &&
+                isLogicalAndField(field) &&
+                urlParams.useLogicalAndFor?.includes(field)
+            )
           );
         },
       });
