@@ -6,7 +6,19 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { filter, finalize, from, merge, ReplaySubject, shareReplay } from 'rxjs';
+import {
+  catchError,
+  concat,
+  filter,
+  finalize,
+  from,
+  merge,
+  of,
+  ReplaySubject,
+  shareReplay,
+  tap,
+  throwError,
+} from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import {
   isStreamEvent,
@@ -19,6 +31,7 @@ import type {
   ConversationRound,
   MetadataFieldValue,
   RoundInput,
+  RoundInterruptedEvent,
   SubagentEntry,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
@@ -57,7 +70,11 @@ import { computeContextBudget } from './utils/context_budget';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
-import { convertGraphEvents } from './convert_graph_events';
+import { convertGraphEvents, type ConvertedEvents } from './convert_graph_events';
+import { buildAttachmentEvents } from './utils/add_round_complete_event';
+import { buildInterruptedRound } from './utils/round_summary';
+import { formatAttachmentsMetadata } from './utils/attachment_presentation';
+import { mergeAttachmentRefs } from '../../conversation/client/migrate_attachments';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
@@ -457,8 +474,89 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+  const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
+
+  // Every event of the run, collected for the interruption path. `addRoundCompleteEvent` keeps its
+  // own `toArray()` as the completion signal for `round_complete`; this holds the same references.
+  const collectedEvents: ConvertedEvents[] = [];
+
+  /**
+   * What is known about the run when it errors or is cancelled: the steps completed so far, the
+   * partial run summary, the processed input and the attachment state — built with the same
+   * expressions the success path uses for `round_complete`, so the persisted projection matches.
+   */
+  const toRoundInterrupted = (): RoundInterruptedEvent => {
+    const endTime = new Date();
+    const { steps, summary } = buildInterruptedRound({
+      events: collectedEvents,
+      pendingRound,
+      startTime,
+      endTime,
+      modelProvider,
+      mainConnectorId: model.connector.connectorId,
+      configurationOverrides: effectiveOverrides,
+      compactionResult,
+      relevantSkillsSelection,
+      initialTodos,
+    });
+
+    const accessedRefs = context.attachmentStateManager.getAccessedRefs();
+    let input: RoundInput =
+      accessedRefs.length > 0
+        ? {
+            ...processedInput,
+            attachment_refs: mergeAttachmentRefs(processedInput.attachment_refs, accessedRefs),
+          }
+        : processedInput;
+    if (input.attachment_refs && input.attachment_refs.length > 0) {
+      const attachmentContext = formatAttachmentsMetadata(
+        input.attachment_refs,
+        context.attachmentStateManager
+      );
+      if (attachmentContext) {
+        input = { ...input, attachment_context: attachmentContext };
+      }
+    }
+
+    // Identity of the round the success path would have produced: a resume keeps the pending
+    // round's id / author / origin, a fresh round gets the handler's.
+    const identity: Pick<ConversationRound, 'id' | 'author' | 'origin'> = pendingRound
+      ? { id: pendingRound.id, author: pendingRound.author, origin: pendingRound.origin }
+      : {
+          id: roundId,
+          ...(author ? { author } : {}),
+          ...(origin ? { origin: { type: origin.type } } : {}),
+        };
+    const attachmentEvents = buildAttachmentEvents({
+      conversation,
+      round: identity,
+      chatInputChanges,
+      executionChanges: context.attachmentStateManager.drainChanges(),
+      agentId: agentIdForEvents,
+      createdAt: endTime.toISOString(),
+    });
+    const workspaceId = context.bashService?.getWorkspaceId();
+
+    return {
+      type: ChatEventType.roundInterrupted,
+      data: {
+        round_id: roundId,
+        started_at: startTime.toISOString(),
+        input,
+        steps,
+        summary,
+        attachments: context.attachmentStateManager.getAll(),
+        ...(attachmentEvents.length > 0 ? { attachment_events: attachmentEvents } : {}),
+        ...(workspaceId ? { workspace_id: workspaceId } : {}),
+        ...(pendingRound ? { resumed: true } : {}),
+      },
+    };
+  };
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
+    tap((event) => {
+      collectedEvents.push(event);
+    }),
     addRoundCompleteEvent({
       userInput: processedInput,
       origin,
@@ -485,10 +583,27 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       relevantSkillsSelection,
       getWorkspaceId: () => context.bashService?.getWorkspaceId(),
       chatInputChanges,
-      agentId: agentId ?? conversation?.agent_id ?? 'unknown',
+      agentId: agentIdForEvents,
       conversation,
     }),
     evictInternalEvents(),
+    // Placed after eviction so `round_interrupted` reaches the runner like any other chat event.
+    // The original error is always rethrown; the summary is best effort.
+    catchError((err) => {
+      try {
+        return concat(
+          of(toRoundInterrupted()),
+          throwError(() => err)
+        );
+      } catch (summaryError) {
+        logger.warn(
+          `Failed to build round_interrupted summary: ${
+            summaryError instanceof Error ? summaryError.message : String(summaryError)
+          }`
+        );
+        return throwError(() => err);
+      }
+    }),
     shareReplay()
   );
 
