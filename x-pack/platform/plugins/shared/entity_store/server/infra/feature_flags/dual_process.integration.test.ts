@@ -156,10 +156,7 @@ describe('dual-process FF reactive path — integration', () => {
     it('handles multiple spaces: writes to each matching engine in its own namespace', async () => {
       const flagSubject = new Subject<boolean>();
       const { coreStart, mockRepo } = buildCoreStart(flagSubject, {
-        saved_objects: [
-          makeSavedObject('user', 'space-a'),
-          makeSavedObject('user', 'space-b'),
-        ],
+        saved_objects: [makeSavedObject('user', 'space-a'), makeSavedObject('user', 'space-b')],
       });
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -290,9 +287,7 @@ describe('dual-process FF reactive path — integration', () => {
         new Error('LD unreachable')
       );
 
-      expect(() =>
-        subscribeToDualProcessFlag({ coreStart, logger, stop$ })
-      ).not.toThrow();
+      expect(() => subscribeToDualProcessFlag({ coreStart, logger, stop$ })).not.toThrow();
 
       await flushPromises();
 
@@ -314,13 +309,17 @@ describe('dual-process FF reactive path — integration', () => {
       const mockRepo = savedObjectsRepositoryMock.create();
       mockRepo.find
         .mockResolvedValueOnce({
-          saved_objects: [makeSavedObject('user', 'default', { nonPriorityStatus: ENGINE_STATUS.STARTED })],
+          saved_objects: [
+            makeSavedObject('user', 'default', { nonPriorityStatus: ENGINE_STATUS.STARTED }),
+          ],
           total: 1,
           per_page: 10_000,
           page: 1,
         })
         .mockResolvedValue({
-          saved_objects: [makeSavedObject('user', 'default', { nonPriorityStatus: ENGINE_STATUS.STOPPED })],
+          saved_objects: [
+            makeSavedObject('user', 'default', { nonPriorityStatus: ENGINE_STATUS.STOPPED }),
+          ],
           total: 1,
           per_page: 10_000,
           page: 1,
