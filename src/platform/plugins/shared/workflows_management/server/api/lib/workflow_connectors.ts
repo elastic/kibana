@@ -19,7 +19,7 @@ import type {
   GetAvailableConnectorsResponse,
 } from '@kbn/workflows/types/v1';
 
-import { CONNECTOR_SUB_ACTIONS_MAP } from '../../../common/connector_sub_actions_map';
+import { CONNECTOR_SUB_ACTIONS_MAP } from '../../connector_sub_actions_map';
 
 const eventConnectorTypeIds = new Set(
   Object.values(connectorsSpecs)

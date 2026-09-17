@@ -32,8 +32,8 @@ import { stepSchemas } from './step_schemas';
 
 // Defers ~16 MB of zod-schema heap until the first workflow edit/execute call.
 // connector_action_schema.ts eagerly builds Maps of Zod schemas from
-// stack_connectors_schema/* and @kbn/connector-specs; keeping it behind a
-// lazy require() avoids that cost at Kibana startup. See #264175.
+// stack_connectors_schema/* and the connector-specs catalog cache; keeping it
+// behind a lazy require() avoids that cost at Kibana startup. See #264175.
 let _connectorSchemas: typeof import('./connector_action_schema') | null = null;
 function getConnectorSchemas(): typeof import('./connector_action_schema') {
   if (_connectorSchemas === null) {

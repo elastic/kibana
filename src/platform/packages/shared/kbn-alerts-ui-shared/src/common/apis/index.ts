@@ -14,5 +14,6 @@ export * from './fetch_connector';
 export * from './fetch_connectors';
 export * from './fetch_connector_types';
 export * from './fetch_connector_spec';
+export * from './fetch_connector_specs';
 export * from './fetch_rule_type_alert_fields';
 export * from './fetch_ui_health_status';

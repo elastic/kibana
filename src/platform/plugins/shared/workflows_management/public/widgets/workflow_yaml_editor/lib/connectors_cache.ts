@@ -10,7 +10,11 @@
 import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
 import { getAllConnectors, getAllConnectorsWithDynamic } from '../../../../common/schema';
 
-// Use the provided dynamic connectors or fall back to global cache
+/**
+ * Reads the preloaded connector catalog. Spec-based action schemas come from
+ * the bulk catalog applied at plugin start / editor mount — never from
+ * `@kbn/connector-specs` in the browser.
+ */
 export function getCachedAllConnectors(
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {

@@ -82,6 +82,7 @@ describe('registerConnectorEventTriggers', () => {
     registerConnectorEventTriggers({
       inboundEventsEnabled: false,
       registerTriggerDefinition,
+      specs: [],
     });
 
     expect(registerTriggerDefinition).not.toHaveBeenCalled();
@@ -114,6 +115,7 @@ describe('registerConnectorEventTriggers', () => {
     registerConnectorEventTriggers({
       inboundEventsEnabled: true,
       registerTriggerDefinition,
+      specs: Object.values(connectorsSpecs),
     });
 
     const registered = registerTriggerDefinition.mock.calls.map(

@@ -100,7 +100,7 @@ export function getActionOptions(
   euiTheme: UseEuiTheme['euiTheme'],
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart
 ): ActionOptionData[] {
-  const connectors = getAllConnectors();
+  const connectors = getAllConnectors(); // preloaded catalog (plugin start / editor mount)
   const builtInTriggerOptions = buildBuiltInTriggerOptions(euiTheme);
   const registeredTriggerOptions = buildRegisteredTriggerOptions(
     triggerSchemas.getTriggerDefinitions(),

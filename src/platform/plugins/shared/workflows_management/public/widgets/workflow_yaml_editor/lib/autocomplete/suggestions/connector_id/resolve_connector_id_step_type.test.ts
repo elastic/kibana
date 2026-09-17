@@ -8,10 +8,16 @@
  */
 
 import { parseDocument } from 'yaml';
+import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs-common';
+import { z } from '@kbn/zod/v4';
 import {
   resolveConnectorIdStepType,
   resolveConnectorIdTriggerType,
 } from './resolve_connector_id_step_type';
+import {
+  applyConnectorSpecsCatalog,
+  resetConnectorSpecsCatalog,
+} from '../../../../../../../common/connector_specs_catalog';
 import type { StepInfo, StepPropInfo } from '../../../../../../entities/workflows/store';
 
 describe('resolveConnectorIdStepType', () => {
@@ -72,6 +78,30 @@ describe('resolveConnectorIdTriggerType', () => {
   - type: inboundWebhook.received
     connector-id: testyng
 `);
+
+  beforeEach(() => {
+    applyConnectorSpecsCatalog([
+      {
+        id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+        isInboundOnly: true,
+        actions: {},
+        events: {
+          definitions: [
+            {
+              eventId: 'inboundWebhook.received',
+              title: 'Received',
+              description: 'Inbound payload',
+              eventSchema: z.object({ body: z.unknown() }),
+            },
+          ],
+        },
+      },
+    ]);
+  });
+
+  afterEach(() => {
+    resetConnectorSpecsCatalog();
+  });
 
   it('maps a connector-event trigger connector-id to the spec type id', () => {
     expect(resolveConnectorIdTriggerType(['triggers', 0, 'connector-id'], yamlDocument)).toBe(

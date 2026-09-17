@@ -44,7 +44,7 @@ export const WorkflowDetailConnectorFlyout = React.memo(
       queryKey: ['connectorTypes'],
       queryFn: () => fetchConnectorTypes({ http }),
       staleTime: 5 * 60 * 1000,
-      enabled: isOpen,
+      enabled: Boolean(isOpen),
     });
 
     const addConnectorFlyout = useMemo(() => {

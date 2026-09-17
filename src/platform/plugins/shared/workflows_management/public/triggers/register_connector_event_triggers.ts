@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import type { RehydratedConnectorSpecCatalogEntry } from '../../common/connector_specs_catalog';
 import { getConnectorEventTriggerDefinitions } from '../../common/triggers/connector_event_triggers';
 
 const connectorEventTriggerIcon = React.lazy(() =>
@@ -19,7 +19,7 @@ const connectorEventTriggerIcon = React.lazy(() =>
 export interface RegisterConnectorEventTriggersPublicParams {
   inboundEventsEnabled: boolean;
   registerTriggerDefinition: (definition: PublicTriggerDefinition) => void;
-  specs?: ConnectorSpec[];
+  specs: RehydratedConnectorSpecCatalogEntry[];
 }
 
 /**

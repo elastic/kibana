@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { connectorsSpecs } from '@kbn/connector-specs';
 import type {
   CoreSetup,
   CoreStart,
@@ -31,7 +32,10 @@ import {
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
-import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
+import {
+  connectorSpecToCatalogEntry,
+  registerConnectorEventTriggers,
+} from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -40,6 +44,7 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
+import { applyConnectorSpecsCatalog } from '../common/connector_specs_catalog';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
@@ -97,6 +102,7 @@ export class WorkflowsPlugin
           .isInboundEventsEnabled(),
         registerTriggerDefinition: (definition) =>
           plugins.workflowsExtensions.registerTriggerDefinition(definition),
+        specs: Object.values(connectorsSpecs),
       });
     }
 
@@ -141,6 +147,7 @@ export class WorkflowsPlugin
     this.workflowsService?.setStopping(false);
 
     stepSchemas.initialize(plugins.workflowsExtensions);
+    applyConnectorSpecsCatalog(Object.values(connectorsSpecs).map(connectorSpecToCatalogEntry));
 
     if (this.api) {
       this.availabilityUpdater = new AvailabilityUpdater({

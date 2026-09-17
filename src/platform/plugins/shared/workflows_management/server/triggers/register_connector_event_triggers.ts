@@ -8,7 +8,9 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
+import type { RehydratedConnectorSpecCatalogEntry } from '../../common/connector_specs_catalog';
 import { getConnectorEventTriggerDefinitions } from '../../common/triggers/connector_event_triggers';
 
 export { toConnectorEventTriggerSchema } from '../../common/triggers/connector_event_triggers';
@@ -16,8 +18,26 @@ export { toConnectorEventTriggerSchema } from '../../common/triggers/connector_e
 export interface RegisterConnectorEventTriggersParams {
   inboundEventsEnabled: boolean;
   registerTriggerDefinition: (definition: ServerTriggerDefinition) => void;
-  specs?: ConnectorSpec[];
+  specs: ConnectorSpec[];
 }
+
+export const connectorSpecToCatalogEntry = (
+  spec: ConnectorSpec
+): RehydratedConnectorSpecCatalogEntry => ({
+  id: spec.metadata.id,
+  isInboundOnly: isInboundOnlyConnectorSpec(spec),
+  actions: Object.fromEntries(
+    Object.entries(spec.actions).map(([name, action]) => [
+      name,
+      {
+        ...(action.description !== undefined ? { description: action.description } : {}),
+        ...(action.isTool !== undefined ? { isTool: action.isTool } : {}),
+        input: action.input,
+      },
+    ])
+  ),
+  ...(spec.events ? { events: { definitions: Object.values(spec.events.definitions) } } : {}),
+});
 
 /**
  * Publishes `spec.events` as Workflows triggers when inbound events are enabled.
@@ -27,7 +47,10 @@ export function registerConnectorEventTriggers({
   registerTriggerDefinition,
   specs,
 }: RegisterConnectorEventTriggersParams): void {
-  const definitions = getConnectorEventTriggerDefinitions({ inboundEventsEnabled, specs });
+  const definitions = getConnectorEventTriggerDefinitions({
+    inboundEventsEnabled,
+    specs: specs.map(connectorSpecToCatalogEntry),
+  });
   for (const definition of definitions) {
     registerTriggerDefinition(definition);
   }

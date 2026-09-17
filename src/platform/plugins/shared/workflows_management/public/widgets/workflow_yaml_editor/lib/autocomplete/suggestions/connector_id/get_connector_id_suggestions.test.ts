@@ -8,9 +8,15 @@
  */
 
 import { parseDocument } from 'yaml';
+import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs-common';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { parseLineForCompletion } from '@kbn/workflows-yaml';
+import { z } from '@kbn/zod/v4';
 import { getConnectorIdSuggestions } from './get_connector_id_suggestions';
+import {
+  applyConnectorSpecsCatalog,
+  resetConnectorSpecsCatalog,
+} from '../../../../../../../common/connector_specs_catalog';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 describe('getConnectorIdSuggestions', () => {
@@ -95,6 +101,24 @@ describe('getConnectorIdSuggestions', () => {
   });
 
   it('should suggest inbound webhook instances for a trigger connector-id', () => {
+    applyConnectorSpecsCatalog([
+      {
+        id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+        isInboundOnly: true,
+        actions: {},
+        events: {
+          definitions: [
+            {
+              eventId: 'inboundWebhook.received',
+              title: 'Received',
+              description: 'Inbound payload',
+              eventSchema: z.object({ body: z.unknown() }),
+            },
+          ],
+        },
+      },
+    ]);
+
     const line = '    connector-id: ';
     const yamlDocument = parseDocument(`triggers:
   - type: inboundWebhook.received
@@ -139,5 +163,6 @@ describe('getConnectorIdSuggestions', () => {
         documentation: 'Starts the workflow for events from every connector instance of this type.',
       })
     );
+    resetConnectorSpecsCatalog();
   });
 });

@@ -7,8 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs-common';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import { z } from '@kbn/zod/v4';
 import { registerConnectorEventTriggersPublic } from './register_connector_event_triggers';
+import type { RehydratedConnectorSpecCatalogEntry } from '../../common/connector_specs_catalog';
+
+const inboundWebhookCatalog: RehydratedConnectorSpecCatalogEntry[] = [
+  {
+    id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+    isInboundOnly: true,
+    actions: {},
+    events: {
+      definitions: [
+        {
+          eventId: 'inboundWebhook.received',
+          title: 'Received',
+          description: 'Inbound payload',
+          eventSchema: z.object({ body: z.unknown() }),
+        },
+      ],
+    },
+  },
+];
 
 describe('registerConnectorEventTriggersPublic', () => {
   it('does not register inboundWebhook.received when inbound events are disabled', () => {
@@ -17,6 +38,7 @@ describe('registerConnectorEventTriggersPublic', () => {
     registerConnectorEventTriggersPublic({
       inboundEventsEnabled: false,
       registerTriggerDefinition,
+      specs: inboundWebhookCatalog,
     });
 
     expect(registerTriggerDefinition).not.toHaveBeenCalled();
@@ -28,6 +50,7 @@ describe('registerConnectorEventTriggersPublic', () => {
     registerConnectorEventTriggersPublic({
       inboundEventsEnabled: true,
       registerTriggerDefinition,
+      specs: inboundWebhookCatalog,
     });
 
     const registered = registerTriggerDefinition.mock.calls.map(

@@ -43,6 +43,7 @@ jest.mock('./connector/get_all_system', () => ({
 jest.mock('./connector/auth_status', () => ({ connectorAuthStatusRoute: jest.fn() }));
 jest.mock('./connector/list_types_system', () => ({ listTypesWithSystemRoute: jest.fn() }));
 jest.mock('./connector/get_spec', () => ({ getConnectorSpecRoute: jest.fn() }));
+jest.mock('./connector/get_specs', () => ({ getConnectorSpecsRoute: jest.fn() }));
 
 const inboundEventsRouteMock = inboundEventsRoute as jest.MockedFunction<typeof inboundEventsRoute>;
 const rotateInboundIngressRouteMock = rotateInboundIngressRoute as jest.MockedFunction<

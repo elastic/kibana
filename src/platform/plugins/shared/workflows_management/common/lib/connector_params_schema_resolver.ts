@@ -12,7 +12,7 @@ import { getAllConnectors } from '../schema';
 
 /**
  * Resolves the Zod params schema for a given step/connector type from the
- * plugin's connector catalog. Used to inject connector-aware enrichment into
+ * plugin's preloaded connector catalog (bulk spec catalog + stack schemas).
  * the connector-agnostic validation utilities exported from
  * `@kbn/workflows-yaml`.
  */

@@ -9,7 +9,7 @@
 
 import { getWorkflowJsonSchema, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { CONNECTOR_SUB_ACTIONS_MAP } from './connector_sub_actions_map';
+import { applyConnectorSpecsCatalog, resetConnectorSpecsCatalog } from './connector_specs_catalog';
 import {
   createMockConnectorInstance,
   createMockConnectorTypeInfo,
@@ -26,6 +26,7 @@ import {
 } from './schema';
 import { EmailParamsSchema } from './stack_connectors_schema/email';
 import { stepSchemas } from './step_schemas';
+import { CONNECTOR_SUB_ACTIONS_MAP } from '../server/connector_sub_actions_map';
 
 describe('schema - additional coverage', () => {
   describe('EmailParamsSchema', () => {
@@ -310,6 +311,14 @@ describe('schema - additional coverage', () => {
     });
 
     it('should skip inbound-only connector types so they are not step types', () => {
+      applyConnectorSpecsCatalog([
+        {
+          id: '.inboundWebhook',
+          isInboundOnly: true,
+          actions: {},
+        },
+      ]);
+
       const types = {
         '.inboundWebhook': createMockConnectorTypeInfo({
           actionTypeId: '.inboundWebhook',
@@ -318,6 +327,7 @@ describe('schema - additional coverage', () => {
       };
 
       expect(convertDynamicConnectorsToContracts(types)).toEqual([]);
+      resetConnectorSpecsCatalog();
     });
 
     it('should skip disabled connectors', () => {

@@ -11,8 +11,9 @@
  * Regression tests for the lazy-loading boundary in schema.ts (see #264175).
  *
  * schema.ts is the sole consumer of connector_action_schema.ts. It defers the
- * require() so the heavy stack_connectors_schema/* and @kbn/connector-specs
- * modules are not loaded at Kibana startup. These tests guard that invariant.
+ * require() so the heavy stack_connectors_schema/* modules are not loaded at
+ * Kibana startup. Spec implementations live in @kbn/connector-specs and must
+ * not be pulled into this common/browser-reachable graph. See #283868.
  */
 
 const SEP = __dirname.includes('\\') ? '\\' : '/';
@@ -27,17 +28,23 @@ const CONNECTOR_SPECS_DIR = CONNECTOR_SPECS_RESOLVED_PATH.slice(
 );
 
 const isHeavyModule = (p: string) =>
-  p === CONNECTOR_ACTION_SCHEMA_PATH ||
-  p.startsWith(STACK_CONNECTOR_SCHEMA_DIR + SEP) ||
-  p.startsWith(CONNECTOR_SPECS_DIR);
+  p === CONNECTOR_ACTION_SCHEMA_PATH || p.startsWith(STACK_CONNECTOR_SCHEMA_DIR + SEP);
+
+const isConnectorSpecsModule = (p: string) => p.startsWith(CONNECTOR_SPECS_DIR);
 
 const getLoadedHeavyModules = () => Object.keys(require.cache).filter(isHeavyModule);
+const getLoadedConnectorSpecsModules = () =>
+  Object.keys(require.cache).filter(isConnectorSpecsModule);
 
 describe('schema.ts lazy-loading boundary', () => {
   beforeEach(() => {
     jest.resetModules();
     for (const modulePath of Object.keys(require.cache)) {
-      if (modulePath === SCHEMA_PATH || isHeavyModule(modulePath)) {
+      if (
+        modulePath === SCHEMA_PATH ||
+        isHeavyModule(modulePath) ||
+        isConnectorSpecsModule(modulePath)
+      ) {
         delete require.cache[modulePath];
       }
     }
@@ -46,6 +53,7 @@ describe('schema.ts lazy-loading boundary', () => {
   it('does not load connector_action_schema or its transitive deps when schema.ts is imported', () => {
     require('./schema');
     expect(getLoadedHeavyModules()).toEqual([]);
+    expect(getLoadedConnectorSpecsModules()).toEqual([]);
   });
 
   it('loads connector_action_schema after a consumer function triggers the boundary', () => {
@@ -56,5 +64,13 @@ describe('schema.ts lazy-loading boundary', () => {
     getAllConnectors();
 
     expect(getLoadedHeavyModules().length).toBeGreaterThan(0);
+    expect(getLoadedHeavyModules()).toContain(CONNECTOR_ACTION_SCHEMA_PATH);
+  });
+
+  it('does not pull @kbn/connector-specs when connector_action_schema loads', () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getAllConnectors } = require('./schema') as typeof import('./schema');
+    getAllConnectors();
+    expect(getLoadedConnectorSpecsModules()).toEqual([]);
   });
 });

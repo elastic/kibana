@@ -16,6 +16,7 @@ import {
   ConnectorSpecsInputSchemas,
   staticConnectors,
 } from './connector_action_schema';
+import { applyConnectorSpecsCatalog, resetConnectorSpecsCatalog } from './connector_specs_catalog';
 
 const expectedConnectorInputKeys = [...ConnectorInputSchemas.keys()];
 const expectedConnectorOutputKeys = [...ConnectorOutputSchemas.keys()];
@@ -72,7 +73,23 @@ describe('ConnectorActionOutputSchemas', () => {
 });
 
 describe('ConnectorSpecsInputSchemas', () => {
-  it('is populated from connector specs', () => {
+  beforeEach(() => {
+    applyConnectorSpecsCatalog([
+      {
+        id: '.alienvault-otx',
+        isInboundOnly: false,
+        actions: {
+          getIndicator: { input: z.object({ indicator: z.string() }) },
+        },
+      },
+    ]);
+  });
+
+  afterEach(() => {
+    resetConnectorSpecsCatalog();
+  });
+
+  it('is populated from the connector specs catalog', () => {
     expect(ConnectorSpecsInputSchemas.size).toBeGreaterThan(0);
   });
 

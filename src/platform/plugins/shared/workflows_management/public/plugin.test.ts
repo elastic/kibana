@@ -8,6 +8,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { fetchConnectorSpecs } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector_specs';
+import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs-common';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -20,7 +22,16 @@ import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks'
 import { WorkflowsPlugin } from './plugin';
 import { triggerSchemas } from './trigger_schemas';
 import { PLUGIN_ID } from '../common';
+import { resetConnectorSpecsCatalog } from '../common/connector_specs_catalog';
 import { stepSchemas } from '../common/step_schemas';
+
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector_specs', () => ({
+  fetchConnectorSpecs: jest.fn(),
+}));
+
+const mockFetchConnectorSpecs = fetchConnectorSpecs as jest.MockedFunction<
+  typeof fetchConnectorSpecs
+>;
 
 jest.mock('./common/lib/telemetry/telemetry_service', () => {
   return {
@@ -32,7 +43,11 @@ jest.mock('./common/lib/telemetry/telemetry_service', () => {
 });
 
 jest.mock('../common/step_schemas', () => ({
-  stepSchemas: { initialize: jest.fn() },
+  stepSchemas: {
+    initialize: jest.fn(),
+    setAllConnectorsCache: jest.fn(),
+    setAllConnectorsMapCache: jest.fn(),
+  },
 }));
 
 jest.mock('./trigger_schemas', () => ({
@@ -68,6 +83,8 @@ describe('WorkflowsPlugin', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetConnectorSpecsCatalog();
+    mockFetchConnectorSpecs.mockResolvedValue([]);
     plugin = createPlugin();
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
@@ -119,19 +136,64 @@ describe('WorkflowsPlugin', () => {
       expect(result).toEqual({});
     });
 
-    it('does not register inboundWebhook.received when inbound events are disabled', () => {
+    it('does not register inboundWebhook.received during setup', () => {
       coreSetup.uiSettings.get.mockReturnValue(true);
+      setupDeps.actions.isInboundEventsEnabled = true;
 
       plugin.setup(coreSetup, setupDeps as any);
 
       expect(setupDeps.workflowsExtensions.registerTriggerDefinition).not.toHaveBeenCalled();
     });
+  });
 
-    it('registers inboundWebhook.received when inbound events are enabled', () => {
+  describe('start()', () => {
+    it('should initialize step and trigger schema registries', async () => {
+      // Setup first (UI disabled path is fine for start testing)
+      coreSetup.uiSettings.get.mockReturnValue(false);
+      plugin.setup(coreSetup, setupDeps as any);
+
+      plugin.start(coreStart, startDeps as any);
+      await Promise.resolve();
+
+      expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
+      expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
+      expect(mockFetchConnectorSpecs).not.toHaveBeenCalled();
+    });
+
+    it('registers inboundWebhook.received after the bulk catalog loads', async () => {
       coreSetup.uiSettings.get.mockReturnValue(true);
       setupDeps.actions.isInboundEventsEnabled = true;
+      mockFetchConnectorSpecs.mockResolvedValue([
+        {
+          id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+          metadata: {
+            id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+            displayName: 'Inbound webhook',
+            description: 'Inbound',
+            minimumLicense: 'gold',
+            supportedFeatureIds: ['workflows'],
+          },
+          isInboundOnly: true,
+          actions: {},
+          events: {
+            definitions: [
+              {
+                eventId: 'inboundWebhook.received',
+                title: 'Received',
+                description: 'Inbound payload',
+                eventJsonSchema: { type: 'object' },
+              },
+            ],
+          },
+        },
+      ]);
 
       plugin.setup(coreSetup, setupDeps as any);
+      plugin.start(coreStart, startDeps as any);
+
+      await mockFetchConnectorSpecs.mock.results[0].value;
+      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(setupDeps.workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -140,19 +202,6 @@ describe('WorkflowsPlugin', () => {
           requiresConnectorId: true,
         })
       );
-    });
-  });
-
-  describe('start()', () => {
-    it('should initialize step and trigger schema registries', () => {
-      // Setup first (UI disabled path is fine for start testing)
-      coreSetup.uiSettings.get.mockReturnValue(false);
-      plugin.setup(coreSetup, setupDeps as any);
-
-      plugin.start(coreStart, startDeps as any);
-
-      expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
-      expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
     });
 
     describe('app visibility (visibleIn)', () => {

@@ -8,7 +8,13 @@
  */
 
 import { LineCounter, parseDocument } from 'yaml';
+import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs-common';
+import { z } from '@kbn/zod/v4';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
+import {
+  applyConnectorSpecsCatalog,
+  resetConnectorSpecsCatalog,
+} from '../../../../common/connector_specs_catalog';
 
 describe('collectAllConnectorIds', () => {
   it('should return empty array for default steps', () => {
@@ -127,6 +133,24 @@ steps:
   });
 
   it('maps trigger connector-id to the connector type id from the event spec', () => {
+    applyConnectorSpecsCatalog([
+      {
+        id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+        isInboundOnly: true,
+        actions: {},
+        events: {
+          definitions: [
+            {
+              eventId: 'inboundWebhook.received',
+              title: 'Received',
+              description: 'Inbound payload',
+              eventSchema: z.object({ body: z.unknown() }),
+            },
+          ],
+        },
+      },
+    ]);
+
     const yaml = `
 name: Test Workflow
 triggers:
@@ -145,5 +169,6 @@ steps:
     expect(result).toHaveLength(1);
     expect(result[0].key).toBe('testyng');
     expect(result[0].connectorType).toBe('.inboundWebhook');
+    resetConnectorSpecsCatalog();
   });
 });

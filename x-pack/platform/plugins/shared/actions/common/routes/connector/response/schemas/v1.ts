@@ -345,3 +345,82 @@ export const getConnectorSpecResponseBodySchema = schema.object({
     },
   }),
 });
+
+const MAX_CONNECTOR_SPECS_CATALOG_SIZE = 500;
+const MAX_CONNECTOR_SPEC_EVENTS = 50;
+
+export const connectorSpecCatalogActionSchema = schema.object({
+  description: schema.maybe(
+    schema.string({
+      meta: { description: 'Human-readable description of this connector action.' },
+    })
+  ),
+  is_tool: schema.maybe(
+    schema.boolean({
+      meta: { description: 'When true, this action is exposed as a tool.' },
+    })
+  ),
+  input_json_schema: schema.recordOf(schema.string(), schema.any(), {
+    meta: { description: 'JSON Schema for this action input.' },
+  }),
+});
+
+export const connectorSpecCatalogEventDefinitionSchema = schema.object({
+  event_id: schema.string({
+    meta: { description: 'Globally unique inbound event identifier.' },
+  }),
+  title: schema.string({
+    meta: { description: 'Human-readable event title.' },
+  }),
+  description: schema.string({
+    meta: { description: 'Human-readable event description.' },
+  }),
+  event_json_schema: schema.recordOf(schema.string(), schema.any(), {
+    meta: { description: 'JSON Schema for the event payload.' },
+  }),
+});
+
+export const connectorSpecCatalogEntrySchema = schema.object({
+  id: schema.string({
+    meta: { description: 'The connector type identifier.' },
+  }),
+  metadata: schema.object(
+    {
+      id: schema.string(),
+      display_name: schema.string(),
+      description: schema.string(),
+      minimum_license: schema.string(),
+      supported_feature_ids: schema.arrayOf(schema.string(), { maxSize: 100 }),
+      icon: schema.maybe(schema.string()),
+      docs_url: schema.maybe(schema.string()),
+      is_technical_preview: schema.maybe(schema.boolean()),
+    },
+    {
+      meta: { description: 'Connector spec metadata (snake_case HTTP shape).' },
+    }
+  ),
+  is_inbound_only: schema.boolean({
+    meta: {
+      description:
+        'Indicates whether the connector type has inbound events and no outbound actions.',
+    },
+  }),
+  actions: schema.recordOf(schema.string({ maxLength: 128 }), connectorSpecCatalogActionSchema, {
+    meta: { description: 'Serialized action input schemas keyed by action name.' },
+  }),
+  events: schema.maybe(
+    schema.object({
+      definitions: schema.arrayOf(connectorSpecCatalogEventDefinitionSchema, {
+        maxSize: MAX_CONNECTOR_SPEC_EVENTS,
+        meta: { description: 'Serialized inbound event definitions.' },
+      }),
+    })
+  ),
+});
+
+export const getConnectorSpecsResponseBodySchema = schema.object({
+  specs: schema.arrayOf(connectorSpecCatalogEntrySchema, {
+    maxSize: MAX_CONNECTOR_SPECS_CATALOG_SIZE,
+    meta: { description: 'Serialized connector spec catalog entries.' },
+  }),
+});

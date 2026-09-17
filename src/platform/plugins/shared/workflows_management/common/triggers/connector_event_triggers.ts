@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
-import type { ConnectorSpec } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
+import {
+  getConnectorSpecsCatalog,
+  type RehydratedConnectorSpecCatalogEntry,
+} from '../connector_specs_catalog';
 
-type ConnectorSpecWithEvents = ConnectorSpec & {
-  events: NonNullable<ConnectorSpec['events']>;
+type CatalogSpecWithEvents = RehydratedConnectorSpecCatalogEntry & {
+  events: NonNullable<RehydratedConnectorSpecCatalogEntry['events']>;
 };
 
-const isConnectorSpecWithEvents = (spec: ConnectorSpec): spec is ConnectorSpecWithEvents =>
-  connectorSpecHasEvents(spec);
+const isCatalogSpecWithEvents = (
+  spec: RehydratedConnectorSpecCatalogEntry
+): spec is CatalogSpecWithEvents => (spec.events?.definitions.length ?? 0) > 0;
 
 /**
  * Hub/bridge fields always present on connector-event payloads at emit time.
@@ -54,17 +57,17 @@ export const toConnectorEventTriggerSchema = (specEventSchema: z.ZodObject): z.Z
 
 export const getConnectorEventTriggerDefinitions = ({
   inboundEventsEnabled,
-  specs = Object.values(connectorsSpecs),
+  specs,
 }: {
   inboundEventsEnabled: boolean;
-  specs?: ConnectorSpec[];
+  specs: RehydratedConnectorSpecCatalogEntry[];
 }): CommonTriggerDefinition[] => {
   if (!inboundEventsEnabled) {
     return [];
   }
 
-  return specs.filter(isConnectorSpecWithEvents).flatMap((spec) =>
-    Object.values(spec.events.definitions).map((eventDefinition) => ({
+  return specs.filter(isCatalogSpecWithEvents).flatMap((spec) =>
+    spec.events.definitions.map((eventDefinition) => ({
       id: eventDefinition.eventId,
       title: eventDefinition.title,
       description: eventDefinition.description,
@@ -81,14 +84,12 @@ export const getConnectorEventTriggerDefinitions = ({
  */
 export const getConnectorTypeIdForTriggerEventId = (
   eventId: string,
-  specs: ConnectorSpec[] = Object.values(connectorsSpecs)
+  specs: RehydratedConnectorSpecCatalogEntry[] = getConnectorSpecsCatalog()
 ): string | undefined => {
   const spec = specs
-    .filter(isConnectorSpecWithEvents)
+    .filter(isCatalogSpecWithEvents)
     .find((candidate) =>
-      Object.values(candidate.events.definitions).some(
-        (eventDefinition) => eventDefinition.eventId === eventId
-      )
+      candidate.events.definitions.some((eventDefinition) => eventDefinition.eventId === eventId)
     );
-  return spec?.metadata.id;
+  return spec?.id;
 };

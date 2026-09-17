@@ -17,11 +17,12 @@ import {
   XSOARRunActionParamsSchema,
   XSOARRunActionResponseSchema,
 } from '@kbn/connector-schemas/xsoar';
-import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
 import { FetcherConfigSchema, KibanaHttpMethodSchema, KibanaStepMetaSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
+
+import { ConnectorSpecsInputSchemas, inboundOnlyConnectorTypeIds } from './connector_specs_catalog';
 
 import {
   BedrockParamsSchema,
@@ -129,23 +130,7 @@ import {
 /**
  * Connector input schemas
  */
-export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSchema>>(
-  Object.values(connectorsSpecs).map((connectorSpec) => [
-    connectorSpec.metadata.id,
-    Object.fromEntries(
-      Object.entries(connectorSpec.actions).map(([actionName, action]) => [
-        actionName,
-        action.input,
-      ])
-    ),
-  ])
-);
-
-export const inboundOnlyConnectorTypeIds = new Set(
-  Object.values(connectorsSpecs)
-    .filter(isInboundOnlyConnectorSpec)
-    .map((spec) => spec.metadata.id)
-);
+export { ConnectorSpecsInputSchemas, inboundOnlyConnectorTypeIds };
 
 export const ConnectorInputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackParamsSchema],

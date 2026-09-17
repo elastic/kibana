@@ -9,12 +9,14 @@
 
 import { combineLatest, filter, type Observable, Subject, type Subscription } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { fetchConnectorSpecs } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector_specs';
 import type {
   AppDeepLinkLocations,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
+  HttpSetup,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -33,7 +35,10 @@ import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
 import { triggerSchemas } from './trigger_schemas';
-import { registerConnectorEventTriggersPublic } from './triggers/register_connector_event_triggers';
+import {
+  registerConnectorEventTriggersPublic,
+  type RegisterConnectorEventTriggersPublicParams,
+} from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
@@ -43,6 +48,10 @@ import type {
   WorkflowsServices,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import {
+  ensureConnectorSpecsCatalogLoaded,
+  type SerializedConnectorSpecCatalogEntry,
+} from '../common/connector_specs_catalog';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
@@ -62,6 +71,9 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
+  private workflowsUiEnabled = false;
+  private connectorEventTriggers?: Omit<RegisterConnectorEventTriggersPublicParams, 'specs'>;
+  private catalogLoadPromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
@@ -95,11 +107,12 @@ export class WorkflowsPlugin
 
     registerConnectorType();
 
-    registerConnectorEventTriggersPublic({
+    this.workflowsUiEnabled = true;
+    this.connectorEventTriggers = {
       inboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
       registerTriggerDefinition: (definition) =>
         plugins.workflowsExtensions.registerTriggerDefinition(definition),
-    });
+    };
 
     this.setupAgentBuilderStart(core);
 
@@ -119,6 +132,7 @@ export class WorkflowsPlugin
         // Load application bundle
         const { renderApp } = await import('./application');
         const services = await this.createWorkflowsStartServices(core);
+        await this.loadConnectorSpecsCatalog(services.http);
 
         return renderApp(services, params);
       },
@@ -134,6 +148,8 @@ export class WorkflowsPlugin
     // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
     triggerSchemas.initialize(plugins.workflowsExtensions);
+
+    void this.loadConnectorSpecsCatalog(core.http);
 
     this.subscribeToWorkflowsSettingChange(core);
 
@@ -164,6 +180,47 @@ export class WorkflowsPlugin
     this.settingsSubscription?.unsubscribe();
     this.appVisibilitySubscription?.unsubscribe();
     this.availabilityService.stop();
+  }
+
+  /**
+   * Fetches the bulk connector-spec catalog once, rehydrates action/event
+   * schemas for the YAML editor, and registers connector-event triggers.
+   */
+  private async loadConnectorSpecsCatalog(http: HttpSetup): Promise<void> {
+    if (!this.workflowsUiEnabled) {
+      return;
+    }
+    if (!this.catalogLoadPromise) {
+      this.catalogLoadPromise = ensureConnectorSpecsCatalogLoaded(async () => {
+        const specs = await fetchConnectorSpecs({ http });
+        return specs.map(
+          ({ id, isInboundOnly, actions, events }): SerializedConnectorSpecCatalogEntry => ({
+            id,
+            isInboundOnly,
+            actions,
+            ...(events !== undefined ? { events } : {}),
+          })
+        );
+      })
+        .then((catalog) => {
+          if (this.connectorEventTriggers) {
+            registerConnectorEventTriggersPublic({
+              ...this.connectorEventTriggers,
+              specs: catalog,
+            });
+          }
+        })
+        .catch((error) => {
+          this.catalogLoadPromise = undefined;
+          this.logger.error('Failed to load connector specs catalog', { error });
+          throw error;
+        });
+    }
+    try {
+      await this.catalogLoadPromise;
+    } catch {
+      // YAML editor still mounts; spec connectors stay unavailable until retry.
+    }
   }
 
   /**
