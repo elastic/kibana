@@ -40,6 +40,29 @@ const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.
   defaultMessage: 'Something went wrong while loading this conversation.',
 });
 
+const EmptyChatInfoTab = () => null;
+
+const builtinTabFallbacks: Record<string, ConversationTemplateTabDefinition> = {
+  overview: {
+    label: i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.tabs.overview', {
+      defaultMessage: 'Overview',
+    }),
+    content: EmptyChatInfoTab,
+  },
+  attachments: {
+    label: i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.tabs.attachments', {
+      defaultMessage: 'Attachments',
+    }),
+    content: EmptyChatInfoTab,
+  },
+  timeline: {
+    label: i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.tabs.timeline', {
+      defaultMessage: 'Timeline',
+    }),
+    content: EmptyChatInfoTab,
+  },
+};
+
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
 const buildTabs = (
@@ -55,7 +78,7 @@ const buildTabs = (
   const tabIds = [...templateTabIds, ...builtinTabIds];
 
   return tabIds.flatMap((id) => {
-    const tab = conversationTemplatesService.getTab(id);
+    const tab = conversationTemplatesService.getTab(id) ?? builtinTabFallbacks[id];
     return tab ? [{ id, ...tab }] : [];
   });
 };
