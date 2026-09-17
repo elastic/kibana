@@ -13,6 +13,7 @@ import {
   loadManifestFileMock,
   openZipArchiveMock,
   validateArtifactArchiveMock,
+  validateOpenApiArtifactArchiveMock,
   fetchArtifactVersionsMock,
   fetchSecurityLabsVersionsMock,
   ensureDefaultElserDeployedMock,
@@ -73,6 +74,7 @@ describe('PackageInstaller', () => {
     });
 
     validateArtifactArchiveMock.mockReturnValue({ valid: true });
+    validateOpenApiArtifactArchiveMock.mockReturnValue({ valid: true });
   });
 
   afterEach(() => {
@@ -83,6 +85,7 @@ describe('PackageInstaller', () => {
     loadManifestFileMock.mockReset();
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
+    validateOpenApiArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
     fetchSecurityLabsVersionsMock.mockReset();
     ensureDefaultElserDeployedMock.mockReset();
