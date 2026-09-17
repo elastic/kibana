@@ -429,8 +429,20 @@ export class KibanaCodeEditorWrapper {
     return this.page.locator(`.${decorationClassName}`);
   }
 
-  private getHoverPopover(): Locator {
-    return this.page.locator('.monaco-hover');
+  /**
+   * Monaco also renders a separate glyph-margin hover widget
+   * (`widgetid="editor.contrib.modesGlyphHoverWidget"`) alongside the content hover widget,
+   * normally hidden but still matching `.monaco-hover`,
+   * so we provide an aaffordance to select the hover popover of interest
+   */
+  private getHoverPopover(matchGlyphHoverWidget?: boolean): Locator {
+    if (matchGlyphHoverWidget) {
+      return this.page.locator('.monaco-hover[widgetid="editor.contrib.modesGlyphHoverWidget"]');
+    }
+
+    return this.page.locator(
+      '.monaco-hover:not([widgetid="editor.contrib.modesGlyphHoverWidget"])'
+    );
   }
 
   /**
