@@ -69,8 +69,31 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
         ).toBeVisible();
 
         const fieldCombo = page.components.comboBox('text-based-dimension-field');
-        await expect.poll(async () => fieldCombo.getAllVisibleOptions()).not.toEqual([]);
-        await fieldCombo.setSelectedOptions(['bytes']);
+        const fieldSearchInput = page.testSubj
+          .locator('text-based-dimension-field')
+          .getByTestId('comboBoxSearchInput');
+        const fieldOptionsList = page.testSubj.locator('text-based-dimension-field-optionsList');
+
+        // The field list is fetched asynchronously (ES|QL `| limit 0`). Wait for it
+        // here, then close the dropdown: EuiComboBox arms a `closeOnScroll` listener
+        // 500ms after opening, and a dropdown left open that long can be closed by
+        // any ancestor scroll (including Playwright's scroll-into-view before a click).
+        await expect
+          .poll(() => fieldCombo.getAllVisibleOptions(), { timeout: 10_000 })
+          .not.toStrictEqual([]);
+        await fieldSearchInput.blur();
+        await expect(fieldOptionsList).toBeHidden();
+
+        // Select via keyboard so no option row has to be scrolled into view or hit-tested.
+        await fieldSearchInput.click();
+        await fieldSearchInput.fill('bytes');
+        await expect(
+          fieldOptionsList.getByRole('option').filter({ hasText: /^bytes$/ })
+        ).toBeVisible();
+        // ArrowDown skips the "Available fields" group label and lands on `bytes`.
+        await fieldSearchInput.press('ArrowDown');
+        await fieldSearchInput.press('Enter');
+        await expect.poll(() => fieldCombo.getSelectedOptions()).toStrictEqual(['bytes']);
         await lens.closeDimensionEditor();
       });
 
