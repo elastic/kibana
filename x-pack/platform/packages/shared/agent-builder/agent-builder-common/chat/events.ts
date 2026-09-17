@@ -6,7 +6,11 @@
  */
 
 import type { AgentBuilderEvent } from '../base/events';
-import type { ExecutionStartedEvent, ExecutionTerminatedEvent } from './timeline_events';
+import type {
+  AttachmentTimelineEvent,
+  ExecutionStartedEvent,
+  ExecutionTerminatedEvent,
+} from './timeline_events';
 import { TimelineEventType } from './timeline_events';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
@@ -339,6 +343,11 @@ export interface RoundCompleteEventData {
    * Updated conversation-level attachments after this round.
    **/
   attachments?: VersionedAttachment[];
+  /**
+   * Attachment lifecycle events produced by this round: `chat_input` changes (attachments sent with
+   * the message) and `execution` changes (made by tools). Persisted alongside the round's events.
+   */
+  attachment_events?: AttachmentTimelineEvent[];
   /**
    * Set when this round initialized the bash/VFS workspace for this conversation.
    */
