@@ -55,9 +55,9 @@ const toTemplateValues = (
 });
 
 /**
- * Reads persisted template values back into complete settings, exactly as stored: nothing is
- * defaulted or merged in, and a document from an older development shape fails here so the
- * Worker projects as unavailable until that state is reset.
+ * Reads persisted template values back into complete settings. Documents from an older
+ * development shape fail here so the Worker projects as unavailable until that state is
+ * reset.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
@@ -65,6 +65,7 @@ const parseWorkerValues = (
 ): WorkerSettings => {
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
   const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
+
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`

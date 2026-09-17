@@ -11,6 +11,7 @@ import { parse } from 'yaml';
 import {
   ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW,
   ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID,
+  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '.';
 
 interface YamlStep {
@@ -18,67 +19,55 @@ interface YamlStep {
   type: string;
   with?: Record<string, unknown>;
   steps?: YamlStep[];
-  else?: YamlStep[];
-  if?: string;
-  condition?: string;
-  settings?: unknown;
 }
 
 const definition = parse(ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW.yaml) as {
+  name?: string;
   tags?: string[];
   settings?: { concurrency?: { key?: string; strategy?: string; max?: number } };
-  triggers?: Array<{
-    type: string;
-    inputs?: { required?: string[] };
-  }>;
+  triggers?: Array<{ type: string; with?: { every?: string } }>;
   steps: YamlStep[];
 };
 
 const flatten = (steps: YamlStep[]): YamlStep[] =>
-  steps.flatMap((step) => [step, ...flatten(step.steps ?? []), ...flatten(step.else ?? [])]);
+  steps.flatMap((step) => [step, ...flatten(step.steps ?? [])]);
 
-const allSteps = flatten(definition.steps);
-const stepByName = (name: string) => allSteps.find((step) => step.name === name);
+const startRun = flatten(definition.steps).find((step) => step.name === 'start_run');
 
-describe('Endpoint analysis run', () => {
-  it('is the global child, not a Watch catalog member', () => {
+describe('Endpoint analysis sweep', () => {
+  it('is the untagged global dispatcher on a one-minute schedule', () => {
     expect(ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW.id).toBe(
       ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID
     );
+    expect(definition.name).toBe('Endpoint analysis sweep');
     expect(definition.tags).toEqual(['security', 'endpoint-analysis']);
     expect(definition.tags).not.toContain('watch');
+    expect(definition.triggers?.map(({ type }) => type)).toEqual(['scheduled', 'manual']);
+    expect(definition.triggers?.[0]?.with?.every).toBe('1m');
   });
 
-  it('requires ki_id and ai_index_id only', () => {
-    expect(definition.triggers?.[0]?.inputs?.required).toEqual(['ki_id', 'ai_index_id']);
-  });
-
-  it('drops a second analysis in the same space', () => {
-    expect(definition.settings?.concurrency).toEqual({
-      key: 'endpoint-analysis-{{ workflow.spaceId }}',
-      strategy: 'drop',
-      max: 1,
-    });
-  });
-
-  it('reads the indicator before any forensic step', () => {
-    expect(definition.steps[0]?.name).toBe('read_ki');
-    expect(stepByName('fetch_attack_discovery_alert')).toBeDefined();
-    expect(definition.steps.findIndex((s) => s.name === 'read_ki')).toBeLessThan(
-      definition.steps.findIndex((s) => s.name === 'when_ki_valid')
+  it('starts the space-suffixed Watch worker and does not write indicators', () => {
+    expect(startRun?.type).toBe('kibana.request');
+    expect(String(startRun?.with?.path)).toContain(
+      `${ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID}-`
+    );
+    expect(flatten(definition.steps).some((step) => step.type === 'context-engine.updateKi')).toBe(
+      false
+    );
+    expect(flatten(definition.steps).some((step) => step.type === 'context-engine.createKi')).toBe(
+      false
     );
   });
 
-  it('marks the indicator processed only after a valid request', () => {
-    const mark = stepByName('mark_processed');
-    expect(mark?.type).toBe('context-engine.updateKi');
-    expect(mark?.if).toContain('attack_discovery_alert_id');
-    expect(mark?.if).toContain('investigation_id');
-    expect(mark?.with).toEqual(
-      expect.objectContaining({
-        ai_index_id: '{{ inputs.ai_index_id }}',
-        ki_id: '{{ inputs.ki_id }}',
-      })
+  it('starts up to two analyses per sweep', () => {
+    const search = flatten(definition.steps).find(
+      (step) => step.name === 'search_pending_indicators'
     );
+    expect(search?.with?.size).toBe(2);
+    expect(ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW.yaml).toContain('batch_size: 2');
+    const query = JSON.stringify(search?.with);
+    expect(query).toContain('security.analyze_endpoint');
+    expect(query).toContain('attributes.status');
+    expect(query).toContain('attributes.space_id');
   });
 });

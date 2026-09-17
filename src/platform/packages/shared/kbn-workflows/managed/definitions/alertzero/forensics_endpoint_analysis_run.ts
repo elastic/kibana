@@ -18,15 +18,16 @@ export const ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID =
   'system-security-forensics-endpoint-analysis-run';
 
 /**
- * Per-indicator forensic pass, invoked by the per-space Endpoint analysis
- * worker via `workflow.executeAsync`. Owns no Watch toggle, so enablement is
- * enforced rather than restorable.
+ * Global KI sweep. Starts the per-space Endpoint analysis Watch worker via the
+ * space-scoped run API. Owns no Watch toggle, so enablement is enforced rather
+ * than restorable. The historical `-run` id is kept so already-installed
+ * global documents upgrade in place.
  */
 export const ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW = {
   billable: false,
   id: ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yaml: FORENSICS_ENDPOINT_ANALYSIS_RUN_YAML,
 } as const satisfies ManagedWorkflowDefinition;

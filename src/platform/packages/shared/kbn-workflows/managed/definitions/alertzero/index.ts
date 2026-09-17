@@ -130,8 +130,8 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Endpoint analysis child: the global per-indicator run. Installed globally so
- * the per-space Watch worker can dispatch to it.
+ * Endpoint analysis sweep: the global scheduled dispatcher. Installed globally
+ * so it can start the per-space Watch worker in each indicator's space.
  */
 export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
   ALERTZERO_FORENSICS_ENDPOINT_ANALYSIS_RUN_WORKFLOW_ID,
