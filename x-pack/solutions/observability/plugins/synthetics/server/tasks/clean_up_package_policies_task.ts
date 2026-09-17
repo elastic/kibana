@@ -37,6 +37,8 @@ const DELETE_LIGHTWEIGHT_MINUTES = 2;
 /** 20m bump retries before falling back to the leftover 24h cadence. */
 export const MAX_FAILED_BUMP_FAST_RETRIES = 3;
 export const TEST_NOW_LIST_PAGE_SIZE = 1000;
+/** Leftovers are not produced on the happy path, so a daily enumeration is enough. */
+export const LEFTOVER_SCAN_INTERVAL_HOURS = 24;
 
 export { getFilterForTestNowRun };
 
@@ -44,7 +46,24 @@ export interface CleanUpPackagePoliciesTaskState {
   failedAgentPolicyBumps?: string[];
   failedBumpFastRetries?: number;
   leftoverRecreateRetries?: number;
+  lastLeftoverScanAt?: string;
 }
+
+/**
+ * Keeps the leftover enumeration on its own daily cadence. Test Now cleanup runs
+ * every 20m while a run-once policy is alive, and that schedule used to drag a
+ * full cross-space monitor and package-policy scan along with it.
+ */
+const hasScannedLeftoversRecently = (state: ConcreteTaskInstance['state']): boolean => {
+  const value = state.lastLeftoverScanAt;
+  if (typeof value !== 'string') {
+    return false;
+  }
+  const lastScan = moment(value);
+  return (
+    lastScan.isValid() && lastScan.isAfter(moment().subtract(LEFTOVER_SCAN_INTERVAL_HOURS, 'hours'))
+  );
+};
 
 /**
  * Recreate budget survives runs: a rebuild that can never succeed would otherwise
@@ -150,8 +169,10 @@ export async function runCleanUpPackagePoliciesTask(
     let failedBumpFastRetries = getFailedBumpFastRetries(state);
     let leftoverRecreateRetries = getLeftoverRecreateRetries(state);
     let leftoverWorkPending = false;
+    let lastLeftoverScanAt = state.lastLeftoverScanAt;
     const skipLeftoverScan =
-      remainingTestNow === 0 && previousFailedBumps.length > 0 && failedBumpFastRetries > 0;
+      hasScannedLeftoversRecently(state) ||
+      (remainingTestNow === 0 && previousFailedBumps.length > 0 && failedBumpFastRetries > 0);
 
     try {
       if (skipLeftoverScan) {
@@ -168,6 +189,11 @@ export async function runCleanUpPackagePoliciesTask(
         failedAgentPolicyBumps = leftover.failedAgentPolicyBumps;
         leftoverRecreateRetries = leftover.recreateRetries;
         leftoverWorkPending = leftover.recreateRequested;
+        // Only a pass that finished with nothing outstanding starts the clock;
+        // anything else has to be re-checked on the next run.
+        if (leftover.scanCompleted && !leftover.recreateRequested) {
+          lastLeftoverScanAt = new Date().toISOString();
+        }
         const previousFailed = new Set(previousFailedBumps);
         if (failedAgentPolicyBumps.length === 0) {
           failedBumpFastRetries = 0;
@@ -186,6 +212,7 @@ export async function runCleanUpPackagePoliciesTask(
       failedAgentPolicyBumps,
       failedBumpFastRetries,
       leftoverRecreateRetries,
+      lastLeftoverScanAt,
     };
     return {
       state: nextState,
@@ -262,10 +289,12 @@ async function cleanUpLeftoverPrivateLocationPolicies(
   failedAgentPolicyBumps: string[];
   recreateRetries: number;
   recreateRequested: boolean;
+  scanCompleted: boolean;
 }> {
   let failedAgentPolicyIds: string[] = [];
   let attemptedAgentPolicyIds: string[] = [];
   let recreateRequested = false;
+  let scanCompleted = false;
   // Fresh leftover-scan latch each run: leftovers are not created on the happy
   // path, so a daily scan is enough and a persisted latch would hide them. Only
   // the recreate budget carries over.
@@ -291,6 +320,7 @@ async function cleanUpLeftoverPrivateLocationPolicies(
         });
       }
     }
+    scanCompleted = true;
   } catch (e) {
     serverSetup.logger.error(e);
   }
@@ -304,6 +334,7 @@ async function cleanUpLeftoverPrivateLocationPolicies(
     failedAgentPolicyBumps: [...new Set([...failedAgentPolicyIds, ...retriedFailed])],
     recreateRetries: leftoverState.maxCleanUpRetries,
     recreateRequested,
+    scanCompleted,
   };
 }
 
@@ -345,6 +376,7 @@ export async function triggerCleanUpPackagePoliciesTask(server: SyntheticsServer
       ...state,
       failedBumpFastRetries: 0,
       leftoverRecreateRetries: DEFAULT_MAX_CLEANUP_RETRIES,
+      lastLeftoverScanAt: undefined,
     })
   );
 

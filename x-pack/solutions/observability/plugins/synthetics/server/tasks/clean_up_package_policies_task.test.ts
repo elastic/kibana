@@ -28,6 +28,7 @@ import {
   runTaskPerPrivateLocation,
 } from './sync_private_locations_monitors_task';
 import {
+  LEFTOVER_SCAN_INTERVAL_HOURS,
   MAX_FAILED_BUMP_FAST_RETRIES,
   TEST_NOW_LIST_PAGE_SIZE,
   ensureCleanUpTaskScheduled,
@@ -268,6 +269,78 @@ describe('clean_up_package_policies_task', () => {
       privateLocationId: 'pl-2',
     });
     expect(result.schedule).toEqual({ interval: '20m' });
+  });
+
+  it('does not rescan leftovers on the Test Now cadence when one completed recently', async () => {
+    mockFleet.packagePolicyService.list.mockResolvedValue({
+      items: [
+        {
+          id: 'lw-1',
+          name: LIGHTWEIGHT_TEST_NOW_RUN,
+          created_at: moment().subtract(1, 'minute').toISOString(),
+        },
+      ],
+      total: 1,
+    } as any);
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { lastLeftoverScanAt: moment().subtract(1, 'hour').toISOString() },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(cleanUpDuplicatedPackagePoliciesMock).not.toHaveBeenCalled();
+    expect(result.schedule).toEqual({ interval: '20m' });
+  });
+
+  it('rescans leftovers once the scan interval has elapsed', async () => {
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: {
+        lastLeftoverScanAt: moment()
+          .subtract(LEFTOVER_SCAN_INTERVAL_HOURS + 1, 'hours')
+          .toISOString(),
+      },
+    };
+
+    await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(cleanUpDuplicatedPackagePoliciesMock).toHaveBeenCalled();
+  });
+
+  it('scans when no leftover scan has ever been recorded', async () => {
+    await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
+
+    expect(cleanUpDuplicatedPackagePoliciesMock).toHaveBeenCalled();
+  });
+
+  it('stamps the scan time when the scan comes back clean', async () => {
+    const before = Date.now();
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
+
+    expect(Date.parse(result.state.lastLeftoverScanAt as string)).toBeGreaterThanOrEqual(before);
+  });
+
+  it('does not stamp the scan time while a recreate is still outstanding', async () => {
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: true,
+      failedAgentPolicyIds: [],
+      attemptedAgentPolicyIds: [],
+    });
+    getPrivateLocationsMock.mockResolvedValue([{ id: 'pl-1' }] as any);
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
+
+    expect(result.state.lastLeftoverScanAt).toBeUndefined();
+  });
+
+  it('does not stamp the scan time when the scan throws', async () => {
+    cleanUpDuplicatedPackagePoliciesMock.mockRejectedValue(new Error('scan failed'));
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
+
+    expect(result.state.lastLeftoverScanAt).toBeUndefined();
   });
 
   it('carries the leftover recreate budget over to the next run', async () => {
@@ -634,10 +707,17 @@ describe('clean_up_package_policies_task', () => {
     const updater = mockTaskManagerStart.bulkUpdateState.mock.calls[0][1] as (
       state: Record<string, unknown>
     ) => Record<string, unknown>;
-    expect(updater({ failedAgentPolicyBumps: ['agent-a'], failedBumpFastRetries: 3 })).toEqual({
+    expect(
+      updater({
+        failedAgentPolicyBumps: ['agent-a'],
+        failedBumpFastRetries: 3,
+        lastLeftoverScanAt: moment().toISOString(),
+      })
+    ).toEqual({
       failedAgentPolicyBumps: ['agent-a'],
       failedBumpFastRetries: 0,
       leftoverRecreateRetries: DEFAULT_MAX_CLEANUP_RETRIES,
+      lastLeftoverScanAt: undefined,
     });
   });
 
