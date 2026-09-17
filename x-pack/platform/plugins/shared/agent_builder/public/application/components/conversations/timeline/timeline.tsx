@@ -7,10 +7,12 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
 import { PromptResponseEvent } from './items/prompt_response_event';
 import { AgentTurn } from './agent_turn';
+import { ConversationDateDivider } from './conversation_date_divider';
 import type { TimelineItem } from './to_timeline_items';
 
 interface TimelineProps {
@@ -19,11 +21,17 @@ interface TimelineProps {
   conversationAttachments?: VersionedAttachment[];
 }
 
+const itemDate = (item: TimelineItem): string =>
+  item.kind === 'agentTurn' ? item.startedAt : item.event.created_at;
+
 export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAttachments }) => {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        {items.map((item) => {
+        {items.map((item, index) => {
+          const previous = items[index - 1];
+          const showDivider =
+            !previous || !moment(itemDate(item)).isSame(moment(itemDate(previous)), 'day');
           let content: React.ReactNode;
           switch (item.kind) {
             case 'userMessage':
@@ -51,9 +59,12 @@ export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAt
               content = null;
           }
           return (
-            <EuiFlexItem key={item.key} grow={false} data-timeline-item-key={item.key}>
-              {content}
-            </EuiFlexItem>
+            <React.Fragment key={item.key}>
+              {showDivider && <ConversationDateDivider date={itemDate(item)} />}
+              <EuiFlexItem grow={false} data-timeline-item-key={item.key}>
+                {content}
+              </EuiFlexItem>
+            </React.Fragment>
           );
         })}
       </EuiFlexGroup>
