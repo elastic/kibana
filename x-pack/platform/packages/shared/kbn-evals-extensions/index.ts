@@ -23,3 +23,4 @@ export type { EvaluationScoreDocument } from '@kbn/evals-common';
 export * as cli from './src/cli';
 export { runRedTeam, RED_TEAM_MODULE_IDS } from './src/red_team';
 export type { RedTeamConfig, RedTeamReport, RedTeamModuleId } from './src/red_team';
+export { selectDatasetExamples } from './src/utils/select_dataset_examples';

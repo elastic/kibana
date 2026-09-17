@@ -162,6 +162,23 @@
       ]
     },
     {
+      "id": "nightshift-micro-evals",
+      "name": "Nightshift Micro Evals",
+      "slackChannel": "#nightshift-alerts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-nightshift-micro-evals/playwright.config.ts",
+      "tags": [
+        "platform",
+        "nightshift-investigations"
+      ],
+      "ciLabels": [
+        "evals:nightshift-micro-evals"
+      ],
+      "stepTimeoutInMinutes": 30,
+      "defaultModelGroups": [
+        "eis/anthropic-claude-4.6-sonnet"
+      ]
+    },
+    {
       "id": "llm-tasks",
       "name": "LLM Tasks",
       "slackChannel": "#search-ml-ux-team",
