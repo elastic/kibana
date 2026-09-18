@@ -288,6 +288,17 @@ export interface UiamServicePublic {
   exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }>;
 
   /**
+   * Authenticates to UIAM as Kibana itself, using only the mTLS client certificate, and returns
+   * the resulting principal details together with a short-lived, non-refreshable token that
+   * identifies this Kibana on cross-region requests to other Elastic services.
+   *
+   * The response is UIAM's raw `_authenticate` payload; callers validate the shape they need.
+   *
+   * @param signal Aborts the in-flight request.
+   */
+  authenticateAsKibana(signal?: AbortSignal): Promise<unknown>;
+
+  /**
    * Creates an OAuth client via the UIAM service.
    * @param request The request carrying the UIAM access token and optional client authentication.
    * @param body The request body for creating the OAuth client.
@@ -820,6 +831,46 @@ export class UiamService implements UiamServicePublic {
     this.#logger.debug(
       `Successfully exchanged service account [id=${serviceAccountId}] for an ephemeral token.`
     );
+    return response;
+  }
+
+  /**
+   * See {@link UiamServicePublic.authenticateAsKibana}.
+   */
+  async authenticateAsKibana(signal?: AbortSignal): Promise<unknown> {
+    this.#logger.debug('Attempting to authenticate as Kibana and obtain an ephemeral token.');
+
+    const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
+    url.searchParams.set('include_token', 'true');
+
+    const requestOptions: RequestInit & { dispatcher: Agent | undefined } = {
+      method: 'POST',
+      // No `Authorization` or shared-secret header: the mTLS client certificate presented by the
+      // dispatcher is the sole credential, and UIAM resolves Kibana's project service account from it.
+      headers: { 'User-Agent': this.#userAgentHeader },
+      dispatcher: this.#dispatcher,
+      signal,
+    };
+    let response: unknown;
+    try {
+      response = await UiamService.#parseUiamResponse(await fetch(url.toString(), requestOptions));
+    } catch (err) {
+      // A caller cancelling its own request is routine, not a failure to report.
+      if (signal?.aborted) {
+        this.#logger.debug('Authenticating as Kibana was aborted by the caller.');
+        throw err;
+      }
+
+      // The failure may carry a credential in its message; log only the status.
+      this.#logger.error(
+        `Failed to authenticate as Kibana (HTTP status: ${
+          Boom.isBoom(err) ? err.output.statusCode : 'unavailable'
+        }).`
+      );
+      throw err;
+    }
+
+    this.#logger.debug('Successfully authenticated as Kibana and obtained an ephemeral token.');
     return response;
   }
 
