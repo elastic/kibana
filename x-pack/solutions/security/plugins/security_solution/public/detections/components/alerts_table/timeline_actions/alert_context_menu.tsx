@@ -240,20 +240,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ecsRowData,
   });
 
-  const documentForWorkflow = useMemo(() => {
-    const fields: Record<string, unknown> = {};
-    for (const { field, value } of flattenedEcsData) {
-      fields[field] = value;
-    }
-    return [{ _id: ecsRowData._id, _index: ecsRowData._index ?? '', ...fields }];
-  }, [ecsRowData._id, ecsRowData._index, flattenedEcsData]);
+  const documentIdForWorkflow = useMemo(
+    () => [{ _id: ecsRowData._id, _index: ecsRowData._index ?? '' }],
+    [ecsRowData._id, ecsRowData._index]
+  );
 
   const {
     runWorkflowMenuItem: runDocumentWorkflowMenuItem,
     runDocumentWorkflowPanel: runDocumentWorkflowPanels,
   } = useRunDocumentWorkflowPanel({
     closePopover,
-    documents: documentForWorkflow,
+    documentIds: documentIdForWorkflow,
   });
 
   const { addToChatActionItems } = useAddToChatAction({
