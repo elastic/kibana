@@ -320,14 +320,18 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                       onResize={(size) => chartWidth$.next(size)}
                       selection={selectedCells}
                       onCellsSelection={viewMode === 'preview' ? undefined : onCellsSelection}
-                      onPaginationChange={(update) => {
-                        if (update.fromPage) {
-                          api.updatePagination({ fromPage: update.fromPage });
-                        }
-                        if (update.perPage) {
-                          api.updatePagination({ perPage: update.perPage, fromPage: 1 });
-                        }
-                      }}
+                      onPaginationChange={
+                        viewMode === 'preview'
+                          ? undefined
+                          : (update) => {
+                              if (update.fromPage) {
+                                api.updatePagination({ fromPage: update.fromPage });
+                              }
+                              if (update.perPage) {
+                                api.updatePagination({ perPage: update.perPage, fromPage: 1 });
+                              }
+                            }
+                      }
                       isLoading={isLoading!}
                       yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
                       noDataWarning={

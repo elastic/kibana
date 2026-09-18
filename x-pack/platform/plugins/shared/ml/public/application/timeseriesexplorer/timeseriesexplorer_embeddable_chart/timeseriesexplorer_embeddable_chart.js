@@ -594,7 +594,6 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     this.previousChartProps = chartProps;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
-
     return (
       <SingleMetricViewerChartSurface
         fieldNamesWithEmptyValues={fieldNamesWithEmptyValues}
@@ -630,6 +629,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
               <EntityFieldNamesAndFilterButtons
                 api={this.props.api}
                 entityData={chartDetails.entityData}
+                previewMode={previewMode}
               />
               <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
                 {!previewMode && showModelBoundsCheckbox && (
