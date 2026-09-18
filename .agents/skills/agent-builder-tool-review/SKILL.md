@@ -81,7 +81,7 @@ Check the tool's description string, `ToolResultType` usage in the handler, and 
 ### C5: Confirmation policy for destructive operations
 
 Tools that create, update, or delete resources must:
-1. Set `annotations.destructiveHint: true` (for delete/irreversible overwrite) or `annotations.readOnlyHint: false` (for create/update)
+1. Set `annotations.destructiveHint: true` (for delete/irreversible overwrite) or ensure `annotations.readOnlyHint` is not `true` (for create/update)
 2. If `annotations.destructiveHint: true`: set `confirmation.askUser` to `'once'` or `'always'`
 3. Never set both `readOnlyHint: true` and `destructiveHint: true`
 
@@ -139,17 +139,17 @@ Flag descriptions that:
 
 All five annotation fields must be set and accurate:
 
-| Pattern | readOnlyHint | destructiveHint | idempotentHint | openWorldHint |
-|---------|-------------|-----------------|----------------|---------------|
-| Pure read (search, list, get) | true | false | true | false |
-| Create / upsert | false | false | false | false |
-| Delete / irreversible overwrite | false | true | false | false |
-| Calls external API/webhook | combine with above | combine with above | combine with above | true |
+| Pattern | title | readOnlyHint | destructiveHint | idempotentHint | openWorldHint |
+|---------|-------|-------------|-----------------|----------------|---------------|
+| Pure read (search, list, get) | 2-5 word noun phrase | true | false | true | false |
+| Create / upsert | 2-5 word noun phrase | false | false | false | false |
+| Delete / irreversible overwrite | 2-5 word noun phrase | false | true | false | false |
+| Calls external API/webhook | 2-5 word noun phrase | combine with above | combine with above | combine with above | true |
 
 Rules:
+- `title` should be concise and descriptive (2-5 words)
 - `readOnlyHint` and `destructiveHint` must never both be `true`
 - Read-only tools should set `idempotentHint: true`
-- `title` should be concise and descriptive (2-5 words)
 
 ### Q7: Tags (severity 1)
 
