@@ -168,21 +168,15 @@ describe('detection rule workflows', () => {
       expect(types).not.toContain('waitForInput');
       expect(types).not.toContain('security.createRule');
 
-      // The worker also reports an undraftable gap through the same gate; only the
-      // creation proposal may carry the action.
-      const gates = all
-        .filter(
-          ({ type, with: input }) =>
-            type === 'workflow.execute' &&
-            input?.['workflow-id'] === 'system-create-investigation-proposal'
-        )
-        .map(({ with: input }) => input?.inputs as Record<string, unknown>);
-      const withAction = gates.filter((inputs) => inputs.actionWorkflowId);
-      expect(withAction).toHaveLength(1);
-      expect(withAction[0].actionWorkflowId).toBe('system-alertzero-action-create-rule');
-      expect(withAction[0].actionInput).toBe(
-        '${{ steps.draft_creation.output.structured_output.rule }}'
+      const gates = all.filter(
+        ({ type, with: input }) =>
+          type === 'workflow.execute' &&
+          input?.['workflow-id'] === 'system-create-investigation-proposal'
       );
+      expect(gates).toHaveLength(1);
+      const inputs = gates[0].with?.inputs as Record<string, unknown>;
+      expect(inputs.actionWorkflowId).toBe('system-alertzero-action-create-rule');
+      expect(inputs.actionInput).toBe('${{ steps.draft_creation.output.structured_output.rule }}');
     });
 
     // Query and manual decisions live on the investigation as proposals, and the gate
