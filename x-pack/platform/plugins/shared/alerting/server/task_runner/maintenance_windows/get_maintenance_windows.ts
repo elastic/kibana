@@ -32,8 +32,8 @@ export const filterMaintenanceWindows = ({
     const a = scope?.alerting;
     // enabled absent or false → v1 not selected; never applies to v1.
     if (!a?.enabled) return false;
-    // enabled=true, no kql → no filter → !withScopedQuery bucket.
-    if (!a.kql) return !withScopedQuery;
+    // enabled=true, no kql and no filters → no filter → !withScopedQuery bucket.
+    if (!a.kql && !a.filters?.length) return !withScopedQuery;
     // enabled=true with kql → has filter → withScopedQuery bucket.
     return withScopedQuery;
   });

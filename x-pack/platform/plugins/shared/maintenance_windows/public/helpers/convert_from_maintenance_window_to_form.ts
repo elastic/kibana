@@ -38,8 +38,8 @@ export const convertFromMaintenanceWindowToForm = (
   const rawAlerting = maintenanceWindow.scope?.alerting;
   const legacyScopedQuery = maintenanceWindow.scopedQuery;
   const scopeAlerting: ScopedQueryAttributes | null | undefined = hasExplicitScope
-    ? isV1Selected && rawAlerting?.kql
-      ? { kql: rawAlerting.kql, filters: rawAlerting.filters ?? [] }
+    ? isV1Selected && (rawAlerting?.kql || rawAlerting?.filters?.length)
+      ? { kql: rawAlerting!.kql ?? '', filters: rawAlerting!.filters ?? [] }
       : isV1Selected
       ? null // selected but no filter
       : undefined

@@ -124,12 +124,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
-  const onCreateOrUpdateError = useCallback((error: IHttpFetchError<KibanaServerError>) => {
-    if (!error.body?.message) return;
-    if (isScopedQueryError(error.body.message)) {
-      setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
-    }
-  }, []);
+  const onCreateOrUpdateError = useCallback(
+    (error: IHttpFetchError<KibanaServerError>) => {
+      if (!error.body?.message) return;
+      if (isScopedQueryError(error.body.message)) {
+        if (isAlertingV2Enabled && !isScopedQueryEnabled) {
+          setAlertingV2Errors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
+        } else {
+          setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
+        }
+      }
+    },
+    [isAlertingV2Enabled, isScopedQueryEnabled]
+  );
 
   const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
     useCreateMaintenanceWindow({ onError: onCreateOrUpdateError });
