@@ -61,16 +61,20 @@ describe('classifyCustomContentMode', () => {
     ).resolves.toBe('data');
   });
 
-  it('returns data when the model call fails, rather than falling back to a static panel', async () => {
+  it('propagates model call failures so the caller can choose a fallback', async () => {
     mockOutput.mockRejectedValue(new Error('connector timeout'));
 
     await expect(
       classifyCustomContentMode({ prompt: 'A status board per host', modelProvider })
-    ).resolves.toBe('data');
+    ).rejects.toThrow('connector timeout');
   });
 
-  it('returns data when the structured output is missing or not a known mode', async () => {
-    mockOutput.mockResolvedValue({ output: { mode: 'maybe' } });
+  it.each([
+    ['an unknown mode', { output: { mode: 'maybe' } }],
+    ['missing output', {}],
+    ['missing mode', { output: {} }],
+  ])('returns data when the structured output is %s', async (_label, response) => {
+    mockOutput.mockResolvedValue(response);
 
     await expect(
       classifyCustomContentMode({ prompt: 'Show something', modelProvider })

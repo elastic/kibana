@@ -140,7 +140,7 @@ ${
 
 ### Custom content
 
-Pass \`renderer: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Omit \`chartType\`. Do not write HTML. To change an existing panel, pass its \`attachment_id\` and describe the update.
+Pass \`renderer: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Omit \`chartType\`. Do not write HTML, and never pass a template: the markup is generated server-side. To change an existing panel, call this tool again with its \`attachment_id\` and describe the update — do not read the attachment to edit the HTML. If the generated query is rejected, correct \`query\` (or pass a validated \`esql\`) and retry; do not fall back to writing markup yourself.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 

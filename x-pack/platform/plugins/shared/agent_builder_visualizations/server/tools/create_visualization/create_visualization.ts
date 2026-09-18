@@ -21,6 +21,7 @@ import {
 import {
   classifyCustomContentMode,
   createCustomContentTemplateResolver,
+  type CustomContentMode,
 } from '@kbn/custom-content-server';
 import {
   ToolResultType,
@@ -255,7 +256,18 @@ Ground first: make sure the target index exists and every field you reference is
           // No query on hand: a new panel, or a stored static panel. Custom content
           // internals decide whether this prompt needs data; the agent does not.
           if (!mergedEsql) {
-            const mode = await classifyCustomContentMode({ prompt: nlQuery, modelProvider });
+            let mode: CustomContentMode;
+            try {
+              mode = await classifyCustomContentMode({ prompt: nlQuery, modelProvider });
+            } catch (err) {
+              // New panels fail open to data so a timeout cannot persist an empty panel.
+              // An established static panel stays static so a wording tweak cannot invent a query.
+              mode = existingData ? 'static' : 'data';
+              const message = err instanceof Error ? err.message : String(err);
+              logger.warn(
+                `custom_content mode classification failed (${message}); treating panel as ${mode}`
+              );
+            }
             if (mode === 'static') {
               isQueryChanging = false;
             } else {

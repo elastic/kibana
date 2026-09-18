@@ -600,6 +600,22 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
+    it('still generates a query when classification fails on a new panel', async () => {
+      mockClassifyMode.mockRejectedValue(new Error('connector timeout'));
+
+      const { result, logger } = await runHandler({
+        query: 'a status board per host',
+        renderer: 'custom_content',
+      });
+
+      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connector timeout'));
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.visualization);
+      expect(data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
     // Static is a request, not what you get by forgetting `esql`.
     it('fails rather than falling back to static when query generation fails', async () => {
       mockGenerateEsql.mockResolvedValue({ error: 'no suitable index' });
@@ -709,6 +725,22 @@ describe('createVisualizationTool handler', () => {
       expect(mockResolveTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ esqlQuery: undefined, existingTemplate: '<div>hi</div>' })
       );
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.visualization);
+      expect(data.esql).toBeUndefined();
+    });
+
+    it('does not generate a query when classification fails on a panel that is already static', async () => {
+      mockClassifyMode.mockRejectedValue(new Error('connector timeout'));
+
+      const { result, logger } = await runHandler(
+        { query: 'make the subtitle smaller', attachment_id: 'banner' },
+        { attachments: staticAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connector timeout'));
 
       const [{ type, data }] = result.results;
       expect(type).toBe(ToolResultType.visualization);

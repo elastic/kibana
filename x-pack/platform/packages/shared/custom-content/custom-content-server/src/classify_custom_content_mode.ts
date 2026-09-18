@@ -30,12 +30,9 @@ Return "data" when it shows any live values — KPI cards, status boards, counts
 When in doubt, return "data". Static is never a fallback for a panel that might need a query.`;
 
 /**
- * Decides whether a custom content panel is query-backed. Callers that auto-generate
- * ES|QL when it is omitted (create_visualization) use this instead of asking the agent.
- *
- * Uses the low-effort model (same path as ES|QL generation). A failed or unparseable
- * classification returns "data" so a sampling/generation error surfaces rather than
- * silently persisting an empty static panel.
+ * Decides whether a custom content panel is query-backed. Unparseable structured
+ * output returns "data"; model or connector failures throw so the caller can
+ * choose a fallback that matches whether the panel already exists.
  */
 export const classifyCustomContentMode = async ({
   prompt,
@@ -44,16 +41,12 @@ export const classifyCustomContentMode = async ({
   prompt: string;
   modelProvider: ModelProvider;
 }): Promise<CustomContentMode> => {
-  try {
-    const { inferenceClient } = await modelProvider.selectModel({ effortLevel: 'low' });
-    const response = await inferenceClient.output({
-      id: 'classify_custom_content_mode',
-      system: SYSTEM_PROMPT,
-      input: prompt,
-      schema: MODE_SCHEMA,
-    });
-    return response.output?.mode === 'static' ? 'static' : 'data';
-  } catch {
-    return 'data';
-  }
+  const { inferenceClient } = await modelProvider.selectModel({ effortLevel: 'low' });
+  const response = await inferenceClient.output({
+    id: 'classify_custom_content_mode',
+    system: SYSTEM_PROMPT,
+    input: prompt,
+    schema: MODE_SCHEMA,
+  });
+  return response.output?.mode === 'static' ? 'static' : 'data';
 };
