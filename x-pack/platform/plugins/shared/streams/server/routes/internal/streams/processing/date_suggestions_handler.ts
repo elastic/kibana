@@ -27,7 +27,7 @@ export interface ProcessingDateSuggestionsHandlerDeps {
 export const processingDateSuggestionsSchema = z.object({
   path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
-    dates: z.array(z.unknown()).nonempty(),
+    dates: z.array(z.unknown()).nonempty().max(100),
   }),
 }) satisfies z.Schema<ProcessingDateSuggestionsParams>;
 
@@ -85,6 +85,7 @@ function parseDatesInput(dates: unknown[]): string[] {
       ])
     )
     .nonempty()
+    .max(100)
     .safeParse(dates).success;
 
   if (!areValidDates) {

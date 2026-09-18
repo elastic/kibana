@@ -41,6 +41,7 @@ export const suggestPartitionsSchema = z.object({
     user_prompt: z.string().max(2000).optional(),
     existing_partitions: z
       .array(z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH), condition: conditionSchema }))
+      .max(100)
       .optional(),
   }),
 }) satisfies z.Schema<SuggestPartitionsParams>;

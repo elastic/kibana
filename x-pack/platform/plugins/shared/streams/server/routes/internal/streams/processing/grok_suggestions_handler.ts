@@ -50,7 +50,7 @@ export const processingGrokSuggestionsSchema = z.object({
   body: z.object({
     connector_id: z.string().max(256),
     field_name: z.string().max(256),
-    sample_messages: z.array(z.string().max(10000)),
+    sample_messages: z.array(z.string().max(10000)).max(500),
   }),
 }) satisfies z.Schema<ProcessingGrokSuggestionsParams>;
 
