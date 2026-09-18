@@ -817,7 +817,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'PUT /agents/{id}/access_control accepts legacy name-only entries and rejects entries with neither id nor name',
+      'PUT /agents/{id}/access_control rejects a new name-only entry and entries with neither id nor name',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-put-name-${randomUUID().slice(0, 8)}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
@@ -832,19 +832,13 @@ apiTest.describe(
             responseType: 'json',
           }
         );
-        expect(nameOnly).toHaveStatusCode(200);
-        expect(nameOnly.body.entries).toHaveLength(1);
-        expect(nameOnly.body.entries[0]).toMatchObject({
-          type: 'user',
-          name: bob.username,
-          role: AgentAccessControlRole.User,
-        });
+        expect(nameOnly).toHaveStatusCode(400);
 
         const bobRead = await apiClient.get(
           `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
           { headers: headersFor(bob), responseType: 'json' }
         );
-        expect(bobRead).toHaveStatusCode(200);
+        expect(bobRead).toHaveStatusCode(404);
 
         const noPrincipal = await apiClient.put(
           `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}/access_control`,

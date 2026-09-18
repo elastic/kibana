@@ -597,13 +597,13 @@ describe('validateAccessControlEntries', () => {
 
   const validate = ({
     entries,
+    currentEntries = [],
     owner,
-    addedAtById = new Map<string, string>(),
   }: {
     entries: AgentAccessControlEntry[];
+    currentEntries?: AgentAccessControlEntry[];
     owner?: UserIdAndName;
-    addedAtById?: Map<string, string>;
-  }) => validateAccessControlEntries({ entries, owner, addedAtById });
+  }) => validateAccessControlEntries({ entries, currentEntries, owner });
 
   test('accepts an empty list', () => {
     expect(validate({ entries: [] })).toEqual([]);
@@ -650,11 +650,29 @@ describe('validateAccessControlEntries', () => {
           { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
           entry({ id: 'u_bob' }),
         ],
+        currentEntries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.User }],
       })
     ).toEqual([
       expect.objectContaining({ name: 'alice' }),
       expect.objectContaining({ id: 'u_bob' }),
     ]);
+  });
+
+  test('rejects a name-only entry that does not already exist', () => {
+    expect(() =>
+      validate({ entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.User }] })
+    ).toThrow(/requires an id/);
+  });
+
+  test('rejects a name-only entry whose role changed but keeps the grant when unchanged', () => {
+    const current = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.User }];
+
+    expect(
+      validate({
+        entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Manager }],
+        currentEntries: current,
+      })
+    ).toEqual([expect.objectContaining({ name: 'alice', role: AgentAccessControlRole.Manager })]);
   });
 
   test('rejects entries with neither id nor name', () => {
@@ -721,6 +739,7 @@ describe('validateAccessControlEntries', () => {
           { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
           { type: 'user', name: 'alice', role: AgentAccessControlRole.Manager },
         ],
+        currentEntries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.User }],
       })
     ).toThrow(/Duplicate/);
   });
@@ -747,7 +766,7 @@ describe('validateAccessControlEntries', () => {
     const existing = '2020-01-01T00:00:00.000Z';
     const result = validate({
       entries: [entry({ id: 'u_alice' }), entry({ id: 'u_bob' })],
-      addedAtById: new Map([['user:id:u_alice', existing]]),
+      currentEntries: [entry({ id: 'u_alice', added_at: existing })],
     });
 
     expect(result[0].added_at).toBe(existing);

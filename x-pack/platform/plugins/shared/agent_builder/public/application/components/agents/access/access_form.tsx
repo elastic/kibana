@@ -111,7 +111,7 @@ export const AccessForm: React.FC<AccessFormProps> = ({
 
   const excludedUsernames = [
     ...entries.map((entry) => (entry.id === undefined ? entry.name : undefined)),
-    owner?.username,
+    owner?.id === undefined ? owner?.username : undefined,
   ].filter((name): name is string => name !== undefined);
 
   const handleAdd = (profile: UserProfileWithAvatar) => {

@@ -607,18 +607,13 @@ class AgentClientImpl implements AgentClient {
     const source = document._source;
 
     const currentAccessControl = normalizeAccessControl(source);
-    const addedAtById = new Map(
-      currentAccessControl.entries.flatMap((entry) =>
-        entry.added_at !== undefined ? [[getAccessControlEntryKey(entry), entry.added_at]] : []
-      )
-    );
 
     const nextAccessControl: AgentAccessControl = {
       ...currentAccessControl,
       entries: validateAccessControlEntries({
         entries: update.entries,
+        currentEntries: currentAccessControl.entries,
         owner: sourceToOwner(source),
-        addedAtById,
       }),
     };
 
@@ -723,18 +718,25 @@ const validatePrincipal = (entry: AgentAccessControlEntry): string | undefined =
 
 export const validateAccessControlEntries = ({
   entries,
+  currentEntries,
   owner,
-  addedAtById,
 }: {
   entries: AgentAccessControlEntry[];
+  currentEntries: AgentAccessControlEntry[];
   owner: UserIdAndName | undefined;
-  addedAtById: Map<string, string>;
 }): AgentAccessControlEntry[] => {
   if (entries.length > AGENT_ACCESS_CONTROL_MAX_ENTRIES) {
     throw createBadRequestError(
       `ACL entries exceed maximum of ${AGENT_ACCESS_CONTROL_MAX_ENTRIES}`
     );
   }
+
+  const addedAtByKey = new Map(
+    currentEntries.flatMap((entry) =>
+      entry.added_at !== undefined ? [[getAccessControlEntryKey(entry), entry.added_at]] : []
+    )
+  );
+  const currentKeys = new Set(currentEntries.map(getAccessControlEntryKey));
 
   const now = new Date().toISOString();
   const seen = new Set<string>();
@@ -759,6 +761,12 @@ export const validateAccessControlEntries = ({
     }
 
     const key = getAccessControlEntryKey(entry);
+
+    if (entry.id === undefined && !currentKeys.has(key)) {
+      throw createBadRequestError(
+        `ACL entry for "${entry.name}" requires an id. A name identifies a principal only for grants that already exist, because it cannot distinguish same-named users across realms.`
+      );
+    }
     if (seen.has(key)) {
       throw createBadRequestError(
         `Duplicate ACL entry for ${entry.type} "${entry.id ?? entry.name}"`
@@ -768,7 +776,7 @@ export const validateAccessControlEntries = ({
 
     normalizedEntries.push({
       ...entry,
-      added_at: addedAtById.get(key) ?? now,
+      added_at: addedAtByKey.get(key) ?? now,
     });
   }
 
