@@ -6,6 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
@@ -79,7 +80,7 @@ function getMockedEncryptedSoClient() {
         });
       }
       default:
-        throw new Error('not found: ' + id);
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
   });
 

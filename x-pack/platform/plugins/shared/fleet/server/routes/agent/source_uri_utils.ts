@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
 import { DEFAULT_DOWNLOAD_SOURCE_REFERENCE } from '../../constants';
 import { downloadSourceService } from '../../services';
 import { appContextService } from '../../services/app_context';
@@ -33,7 +35,10 @@ export const getDownloadSourcesForAgentPolicy = async (
       const resolvedId = id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE ? defaultDownloadSourceId : id;
       try {
         return await downloadSourceService.get(resolvedId);
-      } catch {
+      } catch (e) {
+        if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+          throw e;
+        }
         logger.warn(`Download source host not found ${resolvedId}, skipping`);
         return null;
       }
@@ -46,7 +51,10 @@ export const getDownloadSourcesForAgentPolicy = async (
     let defaultSource: DownloadSource;
     try {
       defaultSource = await downloadSourceService.get(defaultDownloadSourceId);
-    } catch {
+    } catch (e) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw e;
+      }
       throw new DownloadSourceNotFound(`Download source host not found ${defaultDownloadSourceId}`);
     }
     return [defaultSource];

@@ -2839,7 +2839,15 @@ class AgentPolicyService {
   private normalizeDownloadSourceFields<T extends Partial<AgentPolicySOAttributes>>(
     agentPolicy: T
   ): T {
-    if ('download_source_id' in agentPolicy && !('download_source_ids' in agentPolicy)) {
+    if ('download_source_ids' in agentPolicy) {
+      // Keep download_source_id in sync with the primary entry so older nodes
+      // that only read this field compile the correct sourceURI during rolling upgrades.
+      return {
+        ...agentPolicy,
+        download_source_id: agentPolicy.download_source_ids?.[0] ?? null,
+      };
+    }
+    if ('download_source_id' in agentPolicy) {
       return {
         ...agentPolicy,
         download_source_ids: agentPolicy.download_source_id ? [agentPolicy.download_source_id] : [],
