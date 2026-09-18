@@ -64,8 +64,7 @@ export const isFilterableColumnSet = (
 };
 
 /**
- * Returns the warning message to show when filterable chart columns are computed ES|QL fields
- * that cannot be used for filtering, or when a blank text field value is present.
+ * Returns the warning message to show when chart columns cannot be used for filtering.
  */
 export const getFilterDrilldownWarningMessage = (
   columns: Array<DatatableColumn | undefined>,
