@@ -82,7 +82,7 @@ const parseStepNames = (yaml: string): string[] => {
 };
 
 /**
- * Asserts the managed rule-creation workflow the pnd plugin installs at start is present, and
+ * Asserts the managed rule-creation workflow the alertzero plugin installs at start is present, and
  * returns its yaml.
  *
  * This deliberately does NOT create the workflow. The eval must measure the artifact production
@@ -113,8 +113,8 @@ export const assertWorkflowInstalled = async ({
   } catch (err) {
     throw new Error(
       `Managed workflow "${RULE_CREATION_WORKFLOW_ID}" is not installed. It is installed at ` +
-        `plugin start by the pnd plugin (installStatic / PND_WATCH_WORKFLOW_IDS), so this ` +
-        `usually means the pnd plugin is disabled or the Workflows feature is unavailable. ` +
+        `plugin start by the alertzero plugin (installStatic / ALERTZERO_WATCH_WORKFLOW_IDS), so this ` +
+        `usually means the alertzero plugin is disabled or the Workflows feature is unavailable. ` +
         `This suite does not create the workflow itself: it must measure the workflow that ships. ` +
         `Original error: ${err instanceof Error ? err.message : String(err)}`
     );

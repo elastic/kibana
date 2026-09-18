@@ -15,6 +15,7 @@ import {
   type EntityDefinition,
   type EntityField,
   type EntityType,
+  type GatedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import {
   getEuidEsqlEvaluation,
@@ -62,7 +63,7 @@ const FIELDS_TO_KEEP = [
 interface LogsExtractionQueryParams {
   indexPatterns: string[];
   latestIndex: string;
-  entityDefinition: EntityDefinition;
+  entityDefinition: GatedEntityDefinition;
   docsLimit: number;
   fromDateISO: string;
   toDateISO: string;
@@ -92,7 +93,7 @@ export function buildLogsExtractionEsqlQuery({
   parts.push(
     buildExtractionSourceClause({
       indexPatterns,
-      type,
+      entityDefinition,
       fromDateISO,
       toDateISO,
       logsPageCursorStart,

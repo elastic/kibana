@@ -11,7 +11,7 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
+  EuiIllustration,
   EuiText,
   EuiTitle,
   EuiButton,
@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsQuerySnapshot } from '@kbn/alerting-types';
 import { css } from '@emotion/react';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-import icon from '../assets/illustration_product_no_results_magnifying_glass.svg';
+import { notFound } from '@elastic/eui-illustrations';
 import { AlertsQueryInspector } from './alerts_query_inspector';
 import {
   ALERTS_TABLE_TITLE,
@@ -183,10 +183,15 @@ export const EmptyState: React.FC<
                 hasShadow={false}
                 css={error ? undefined : panelStyle}
               >
-                <EuiFlexGroup alignItems={variant === 'transparent' ? 'center' : 'flexStart'}>
+                <EuiFlexGroup alignItems="center">
                   <EuiFlexItem>{error ? renderErrorState() : renderEmptyState()}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiImage css={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
+                    <EuiIllustration
+                      type={notFound}
+                      alt=""
+                      fullWidth={false}
+                      style={{ maxInlineSize: 160 }}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>

@@ -12,6 +12,7 @@ import { converseQuestionToTaskOutput } from './converse_task';
 describe('converse_task', () => {
   it('converseQuestionToTaskOutput uses the default agent and maps eval task shape', async () => {
     const agentBuilderClient: AgentBuilderClient = {
+      createConversation: jest.fn(),
       converse: jest.fn().mockResolvedValue({
         message: 'assistant answer',
         steps: [{ type: 'tool_call', tool_id: 'platform.core.execute_esql' }],

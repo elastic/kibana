@@ -18,10 +18,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { getFeaturesFromKIs } from '../../../../components/knowledge_indicators/utils/get_features_from_kis';
 import { AssetImage } from '../../../../components/asset_image';
 import { LoadingPanel } from '../../../../components/loading_panel';
@@ -30,6 +32,7 @@ import { DeleteTableItemsModal } from '../../../../components/knowledge_indicato
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
 import { GenerateSplitButton } from '../shared/generate_split_button';
+import { getGenerateDisabledTooltip } from '../shared/translations';
 import { StreamPicker } from '../shared/stream_picker';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useKiGeneration } from './ki_generation_context';
@@ -49,6 +52,14 @@ import {
 
 export function KnowledgeIndicatorsTable() {
   const { euiTheme } = useEuiTheme();
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [generationStreamNames, setGenerationStreamNames] = useState<string[]>([]);
 
@@ -180,6 +191,7 @@ export function KnowledgeIndicatorsTable() {
     selectedKnowledgeIndicatorId,
     toggleSelectedKnowledgeIndicator,
     setKnowledgeIndicatorsToDelete,
+    canManage,
   });
 
   const generationRow = (
@@ -207,7 +219,10 @@ export function KnowledgeIndicatorsTable() {
           onRunFeaturesOnly={onRunFeaturesOnly}
           onRunQueriesOnly={onRunQueriesOnly}
           isRunDisabled={isRunDisabled}
-          runDisabledTooltip={activityBlockTooltip}
+          runDisabledTooltip={getGenerateDisabledTooltip({
+            activityBlockTooltip,
+            hasSelectedStreams: generationStreamNames.length > 0,
+          })}
           isConfigDisabled={generationStreamNames.length === 0}
           isLoading={isScheduling}
         />
@@ -252,14 +267,14 @@ export function KnowledgeIndicatorsTable() {
         icon={<AssetImage type="knowledgeIndicatorsEmptyState" size={140} />}
         title={<h2>{EMPTY_STATE_TITLE}</h2>}
         body={<p>{EMPTY_STATE_DESCRIPTION}</p>}
-        actions={generationRow}
+        actions={canManage ? generationRow : undefined}
       />
     );
   }
 
   return (
     <EuiPanel hasBorder hasShadow={false}>
-      {generationRow}
+      {canManage && generationRow}
       {generationProgressCallout}
       <EuiSpacer size="m" />
       <KnowledgeIndicatorsToolbar
@@ -293,6 +308,7 @@ export function KnowledgeIndicatorsTable() {
         onBulkRestore={handleBulkRestore}
         onBulkPromote={handleBulkPromote}
         onDeleteSelected={() => setKnowledgeIndicatorsToDelete(selectedKnowledgeIndicators)}
+        canManage={canManage}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule
@@ -343,10 +359,14 @@ export function KnowledgeIndicatorsTable() {
           rowProps={(ki: KnowledgeIndicator) => ({
             isSelected: selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki),
           })}
-          selection={{
-            selected: selectedKnowledgeIndicators,
-            onSelectionChange: setSelectedKnowledgeIndicators,
-          }}
+          selection={
+            canManage
+              ? {
+                  selected: selectedKnowledgeIndicators,
+                  onSelectionChange: setSelectedKnowledgeIndicators,
+                }
+              : undefined
+          }
           pagination={{
             pageIndex: pagination.pageIndex,
             pageSize: pagination.pageSize,
