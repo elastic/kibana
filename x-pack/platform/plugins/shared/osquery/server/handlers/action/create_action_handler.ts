@@ -10,6 +10,7 @@ import moment from 'moment';
 import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createDynamicQueries, replacedQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
@@ -20,7 +21,9 @@ import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
+import { PACK_LOOKUP_FAILED, PACK_NOT_FOUND } from '../../../common/translations/errors';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import type { ResolvedQueryReference } from '../../lib/resolve_query_reference';
 
 interface Metadata {
   currentUser: string | undefined;
@@ -44,6 +47,15 @@ interface CreateActionHandlerOptions {
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
+  /** When true, dispatch stored SO content even if the caller supplied a query. */
+  useStoredQuery?: boolean;
+  /** Authz-resolved saved query; when set, dispatch skips a second lookup. */
+  storedQuery?: ResolvedQueryReference;
+  /**
+   * Rule runs cannot surface a thrown status code to a caller, so unresolvable stored content
+   * is recorded on the action document instead of throwing.
+   */
+  reportErrorsOnAction?: boolean;
 }
 
 export const createActionHandler = async (
@@ -59,7 +71,7 @@ export const createActionHandler = async (
     options.space?.id ?? DEFAULT_SPACE_ID
   );
 
-  const { metadata, alertData, error } = options;
+  const { metadata, alertData, error, useStoredQuery, storedQuery, reportErrorsOnAction } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
   const {
     agent_all: agentAll,
@@ -85,12 +97,27 @@ export const createActionHandler = async (
   }
 
   let packSO;
+  let unresolvedPackError: string | undefined;
+  const packId = params.pack_id?.trim();
 
-  if (params.pack_id) {
-    packSO = await spaceScopedInternalSavedObjectsClient.get<PackSavedObject>(
-      packSavedObjectType,
-      params.pack_id
-    );
+  if (packId) {
+    try {
+      packSO = await spaceScopedInternalSavedObjectsClient.get<PackSavedObject>(
+        packSavedObjectType,
+        storedQuery?.savedObjectId ?? packId
+      );
+    } catch (packError) {
+      // A rule run cannot surface a thrown status code to a caller: letting this propagate
+      // makes the run report `succeeded` with no action document at all. Record the failure
+      // on the action instead, mirroring the saved-query path in `createDynamicQueries`.
+      if (!reportErrorsOnAction) {
+        throw packError;
+      }
+
+      unresolvedPackError = SavedObjectsErrorHelpers.isNotFoundError(packError)
+        ? PACK_NOT_FOUND
+        : PACK_LOOKUP_FAILED;
+    }
   }
 
   const osqueryAction = {
@@ -110,16 +137,28 @@ export const createActionHandler = async (
     user_id: metadata?.currentUser,
     user_profile_uid: metadata?.userProfileUid,
     metadata: params.metadata,
-    pack_id: params.pack_id,
+    pack_id: packId,
     pack_name: packSO?.attributes?.name,
-    pack_prebuilt: params.pack_id
-      ? some(packSO?.references, ['type', 'osquery-pack-asset'])
-      : undefined,
+    pack_prebuilt: packId ? some(packSO?.references, ['type', 'osquery-pack-asset']) : undefined,
     tags: [],
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
-    queries: packSO
+    queries: unresolvedPackError
+      ? // No pack means no stored content to dispatch. Emit a single error-bearing entry so the
+        // failure is visible in the alert's Osquery Results tab rather than silently dropped.
+        [
+          {
+            action_id: uuidv4(),
+            id: packId,
+            error: unresolvedPackError,
+            agents: selectedAgents,
+          },
+        ]
+      : packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
-          const replacedQuery = replacedQueries(packQuery.query, alertData);
+          // Only flag unsubstituted templates when this run is dispatching stored content on
+          // the caller's behalf. A `writeLiveQueries` caller running a pack ad hoc is entitled
+          // to send `{{...}}` through, exactly as before this change.
+          const replacedQuery = replacedQueries(packQuery.query, alertData, useStoredQuery);
 
           return pickBy(
             {
@@ -144,6 +183,9 @@ export const createActionHandler = async (
           error,
           spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
           spaceScopedClient: spaceScopedInternalSavedObjectsClient,
+          useStoredQuery,
+          storedQuery,
+          reportErrorsOnAction,
         }),
   };
 

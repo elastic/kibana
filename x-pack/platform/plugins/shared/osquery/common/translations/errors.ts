@@ -21,3 +21,32 @@ export const PARAMETER_NOT_FOUND = i18n.translate(
       "This query hasn't been called due to parameter used and its value not found in the alert.",
   }
 );
+
+export const SAVED_QUERY_NOT_FOUND = i18n.translate(
+  'xpack.osquery.liveQueryActions.error.savedQueryNotFound',
+  {
+    defaultMessage:
+      "This query hasn't been called because the saved query it references no longer exists or is not available in this space.",
+  }
+);
+
+export const PACK_NOT_FOUND = i18n.translate('xpack.osquery.liveQueryActions.error.packNotFound', {
+  defaultMessage:
+    "This query hasn't been called because the pack it references no longer exists or is not available in this space.",
+});
+
+export const SAVED_QUERY_LOOKUP_FAILED = i18n.translate(
+  'xpack.osquery.liveQueryActions.error.savedQueryLookupFailed',
+  {
+    defaultMessage:
+      "This query hasn't been called because the saved query it references could not be loaded.",
+  }
+);
+
+export const PACK_LOOKUP_FAILED = i18n.translate(
+  'xpack.osquery.liveQueryActions.error.packLookupFailed',
+  {
+    defaultMessage:
+      "This query hasn't been called because the pack it references could not be loaded.",
+  }
+);

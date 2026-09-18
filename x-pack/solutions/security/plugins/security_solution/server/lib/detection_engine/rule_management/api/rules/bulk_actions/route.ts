@@ -19,6 +19,7 @@ import type {
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
+import { transformAlertToRuleResponseAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -342,13 +343,26 @@ export const performBulkActionRoute = (
                   await validateBulkDuplicateRule({ mlAuthz, rule });
 
                   await validateRuleResponseActions({
+                    // A duplicate persists the source rule's response actions on a brand-new
+                    // rule, so it is validated exactly like a create: the actions are the
+                    // payload and there is no `existingRule`. Passing `{}` with `existingRule`
+                    // instead makes every action look like it is being *removed*, which trips
+                    // the removal carve-outs and skips validation entirely - the dry run would
+                    // then report success for a duplicate that `rulesClient.create` denies.
+                    // Skip Defend runscript *payload* revalidation (script library) so dry-run
+                    // does not newly fail copies whose scripts have changed since the source
+                    // rule was saved. Osquery authz and Endpoint authz still run.
+                    rulePayload: {
+                      response_actions: rule.params.responseActions?.map(
+                        transformAlertToRuleResponseAction
+                      ),
+                    },
                     endpointAuthz,
                     endpointService,
-                    rulePayload: {},
                     spaceId,
-                    existingRule: rule,
                     checkOsqueryResponseActionAuthz:
                       ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
+                    skipRunscriptPayloadValidation: true,
                   });
 
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early

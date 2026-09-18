@@ -473,6 +473,70 @@ describe('Rules Endpoint response actions validators', () => {
         await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
         expect(scriptsClientMock.list).not.toHaveBeenCalled();
       });
+
+      it('should skip runscript payload revalidation when skipRunscriptPayloadValidation is set', async () => {
+        scriptsClientMock.list.mockResolvedValue({ total: 0, data: [] });
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: 'missing-script' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '' },
+              },
+            },
+          }),
+        ];
+        options.skipRunscriptPayloadValidation = true;
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+        expect(scriptsClientMock.list).not.toHaveBeenCalled();
+      });
+
+      it('should still enforce runscript authz when skipRunscriptPayloadValidation is set', async () => {
+        endpointAuthz.canWriteExecuteOperations = false;
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '1-2-3' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '' },
+              },
+            },
+          }),
+        ];
+        options.skipRunscriptPayloadValidation = true;
+
+        await expect(validateRuleResponseActions(options)).rejects.toThrow(
+          'User is not authorized to create/update runscript response action'
+        );
+        expect(scriptsClientMock.list).not.toHaveBeenCalled();
+      });
+
+      it('should still reject runscript when the feature flag is off even if skipRunscriptPayloadValidation is set', async () => {
+        // @ts-expect-error assignment to readonly is ok here
+        endpointService.experimentalFeatures.responseActionsEndpointAutomatedRunScript = false;
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '1-2-3' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '' },
+              },
+            },
+          }),
+        ];
+        options.skipRunscriptPayloadValidation = true;
+
+        await expect(validateRuleResponseActions(options)).rejects.toThrow(
+          'Endpoint runscript automated response action is not enabled'
+        );
+      });
     });
   });
 
@@ -598,6 +662,9 @@ describe('Rules Endpoint response actions validators', () => {
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
         saved_query_id: undefined,
         pack_id: undefined,
+        query: 'SELECT * FROM processes',
+        queries: undefined,
+        ecs_mapping: undefined,
       });
     });
 
@@ -616,6 +683,9 @@ describe('Rules Endpoint response actions validators', () => {
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
         saved_query_id: 'test-saved-query',
         pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: undefined,
       });
     });
 
@@ -634,6 +704,33 @@ describe('Rules Endpoint response actions validators', () => {
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
         saved_query_id: undefined,
         pack_id: 'test-pack',
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: undefined,
+      });
+    });
+
+    it('should pass ecs_mapping to osquery authz checker', async () => {
+      options.rulePayload = {
+        response_actions: [
+          {
+            action_type_id: '.osquery' as const,
+            params: {
+              saved_query_id: 'test-saved-query',
+              ecs_mapping: { 'host.name': { field: 'name' } },
+            },
+          },
+        ],
+      };
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: 'test-saved-query',
+        pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: { 'host.name': { field: 'name' } },
       });
     });
 
@@ -656,10 +753,22 @@ describe('Rules Endpoint response actions validators', () => {
       await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
     });
 
+    it('should still authorize osquery when skipRunscriptPayloadValidation is set', async () => {
+      options.skipRunscriptPayloadValidation = true;
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledTimes(1);
+    });
+
     it('should handle camelCase params from existing rule (savedQueryId)', async () => {
-      // Existing rule stores params in camelCase (RuleResponseOsqueryAction).
-      // When the action is modified, the old camelCase version appears in the xor diff.
-      options.rulePayload = { response_actions: [] };
+      // Existing rule stores params in camelCase (RuleResponseOsqueryAction); the payload uses
+      // snake_case. A modified action must still be authorized with the new payload values.
+      options.rulePayload = {
+        response_actions: [
+          { action_type_id: '.osquery', params: { saved_query_id: 'new-saved-query' } },
+        ],
+      } as typeof options.rulePayload;
       existingRule.params.responseActions = [
         { actionTypeId: '.osquery', params: { savedQueryId: 'existing-saved-query' } },
       ] as RuleResponseAction[];
@@ -668,13 +777,18 @@ describe('Rules Endpoint response actions validators', () => {
       await validateRuleResponseActions(options);
 
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
-        saved_query_id: 'existing-saved-query',
+        saved_query_id: 'new-saved-query',
         pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: undefined,
       });
     });
 
     it('should handle camelCase params from existing rule (packId)', async () => {
-      options.rulePayload = { response_actions: [] };
+      options.rulePayload = {
+        response_actions: [{ action_type_id: '.osquery', params: { pack_id: 'new-pack' } }],
+      } as typeof options.rulePayload;
       existingRule.params.responseActions = [
         { actionTypeId: '.osquery', params: { packId: 'existing-pack' } },
       ] as RuleResponseAction[];
@@ -684,8 +798,43 @@ describe('Rules Endpoint response actions validators', () => {
 
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
         saved_query_id: undefined,
-        pack_id: 'existing-pack',
+        pack_id: 'new-pack',
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: undefined,
       });
+    });
+
+    it('should not re-authorize an osquery action that is being removed', async () => {
+      // Removing the action must never be blocked: otherwise a saved query that is later
+      // deleted or moved out of the space pins the action on the rule permanently.
+      options.rulePayload = { response_actions: [] };
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { savedQueryId: 'existing-saved-query' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).not.toHaveBeenCalled();
+    });
+
+    it('should not re-authorize an unchanged osquery action stored in camelCase', async () => {
+      // The payload is snake_case and the stored copy camelCase; normalization must make
+      // them compare equal so a no-op edit does not re-authorize the saved query.
+      options.rulePayload = {
+        response_actions: [
+          { action_type_id: '.osquery', params: { saved_query_id: 'existing-saved-query' } },
+        ],
+      } as typeof options.rulePayload;
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { savedQueryId: 'existing-saved-query' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).not.toHaveBeenCalled();
     });
 
     it('should not validate unchanged osquery actions on update', async () => {
@@ -703,6 +852,32 @@ describe('Rules Endpoint response actions validators', () => {
 
       // Osquery authz should not be called since the action is unchanged
       expect(mockOsqueryAuthz).not.toHaveBeenCalled();
+    });
+
+    it('should authorize a duplicated osquery action ([A] -> [A, A])', async () => {
+      // xorWith is set-like, so a second identical copy would skip authz after camelCase
+      // persisted params and snake_case payload params are normalized into one shape.
+      options.rulePayload = {
+        response_actions: [
+          { action_type_id: '.osquery', params: { saved_query_id: 'existing-saved-query' } },
+          { action_type_id: '.osquery', params: { saved_query_id: 'existing-saved-query' } },
+        ],
+      } as typeof options.rulePayload;
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { savedQueryId: 'existing-saved-query' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledTimes(1);
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: 'existing-saved-query',
+        pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: undefined,
+      });
     });
   });
 });
