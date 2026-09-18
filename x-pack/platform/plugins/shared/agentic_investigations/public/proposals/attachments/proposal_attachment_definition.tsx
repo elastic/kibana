@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { isAwaitingDecision } from '../../../common';
 import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
@@ -15,8 +15,8 @@ import type {
   ProposalWithMetadata,
   PROPOSAL_ATTACHMENT_TYPE,
   ProposalDecision,
-  ProposalStatus,
   ProposalImpact,
+  ProposalStatus,
 } from '../../../common';
 import { ProposalApprovalCard } from '../components/proposal_approval_card';
 
@@ -94,7 +94,7 @@ export const createProposalAttachmentDefinition =
 
     getHeader: ({ attachment }) => {
       const { data } = attachment;
-      const badges = [];
+      const badges: HeaderBadge[] = [];
 
       // Status badge — suppressed while awaiting a decision (the card footer
       // shows the actions instead). `data.expired` is the computed flag for a
@@ -133,7 +133,7 @@ export const createProposalAttachmentDefinition =
             values: { impact: data.impact },
           }
         ),
-        color: IMPACT_BADGE_COLORS[data.impact] ?? 'default',
+        color: IMPACT_BADGE_COLORS[data.impact],
       });
 
       // Confidence badge

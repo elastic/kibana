@@ -13,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { ApprovalContent } from '@kbn/agentic-investigations-common';
 import type { ApprovalAction } from '@kbn/agentic-investigations-common';
-import { isAwaitingDecision } from '../../../common';
 import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
 import type { DismissReason, ProposalDecision } from '../../../common';
+import { isAwaitingDecision } from '../../../common';
 import { toBlastRadiusItems } from '../attachments/to_blast_radius_items';
 import { useApproveProposal, useDismissProposal, useProposal } from '../hooks/use_proposals_api';
 import { ProposalDismissForm } from './proposal_dismiss_form';
@@ -123,7 +123,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     try {
       await dismissMutation.mutateAsync({
         id: proposalId,
-        body: { dismissReason, rationale },
+        body: { dismissReason, rationale: rationale.trim() || undefined },
       });
       setMode('view');
     } catch {
@@ -206,7 +206,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         }),
         color: 'danger',
         onClick: handleDismissConfirm,
-        isDisabled: isLoading || !rationale,
+        isDisabled: isLoading || !rationale.trim(),
         isLoading,
         'data-test-subj': `agenticInvestigationsProposalDismissConfirm-${proposalId}`,
       };

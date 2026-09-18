@@ -8,9 +8,9 @@
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { API_VERSIONS, ALERTZERO_PROPOSALS_URL } from '@kbn/alertzero-common';
+import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import type { GetProposalsListResponse } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
-import { retryOnTransientError } from './use_watches_api';
 
 export const DEFAULT_PROPOSALS_WINDOW_HOURS = 24;
 
