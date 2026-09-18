@@ -105,15 +105,15 @@ test.describe(
       const menuButton = page.testSubj.locator('unifiedDataTable_additionalRowControl_actionsMenu');
       await expect(menuButton).toBeVisible({ timeout: 30_000 });
 
+      await menuButton.click();
+      const investigateItem = page.testSubj.locator('investigateAlert');
+      await expect(investigateItem).toBeVisible();
+
       const requestPromise = page.waitForRequest(
         (request) =>
           request.method() === 'POST' &&
           request.url().endsWith('/internal/nightshift/investigations')
       );
-
-      await menuButton.click();
-      const investigateItem = page.testSubj.locator('investigateAlert');
-      await expect(investigateItem).toBeVisible();
       await investigateItem.click();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
@@ -130,20 +130,20 @@ test.describe(
       await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
       await expect(alerting.expandRowButton).toBeVisible({ timeout: 30_000 });
 
-      await alerting.openEpisodeFlyout();
+      await alerting.expandRowButton.click();
       await expect(page.testSubj.locator('classicAlertEpisodeDetailsTabs')).toBeVisible({
         timeout: 30_000,
       });
+
+      await page.testSubj.locator('alertingV2EpisodeFlyoutTakeActionButton').click();
+      const investigateItem = page.testSubj.locator('investigateAlert');
+      await expect(investigateItem).toBeVisible();
 
       const requestPromise = page.waitForRequest(
         (request) =>
           request.method() === 'POST' &&
           request.url().endsWith('/internal/nightshift/investigations')
       );
-
-      await page.testSubj.locator('alertingV2EpisodeFlyoutTakeActionButton').click();
-      const investigateItem = page.testSubj.locator('investigateAlert');
-      await expect(investigateItem).toBeVisible();
       await investigateItem.click();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
