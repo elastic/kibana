@@ -28,6 +28,8 @@ const TAGGED_ACTION_POLICY_RESPONSE = {
 export const MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE: MatchActionPoliciesForRuleResponse = {
   items: [{ actionPolicy: TAGGED_ACTION_POLICY_RESPONSE, category: 'tags' }],
   total: 1,
+  evaluated_count: 1,
+  is_truncated: false,
 };
 
 export const matchActionPoliciesForRuleOasExamples = (): AlertingOasOperationObject =>
