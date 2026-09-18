@@ -116,6 +116,8 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
+pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
+
 importers:
 
   .:
@@ -4433,7 +4435,7 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8(redux@4.2.1)
+        version: 2.13.8
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
@@ -4442,10 +4444,10 @@ importers:
         version: 2.0.2
       redux-thunk:
         specifier: 2.4.2
-        version: 2.4.2(redux@4.2.1)
+        version: 2.4.2
       redux-thunks:
         specifier: 1.0.0
-        version: 1.0.0(redux-thunk@2.4.2(redux@4.2.1))
+        version: 1.0.0(redux-thunk@2.4.2)
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -23166,8 +23168,6 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
-    peerDependencies:
-      redux: ^3.1.0 || ^4.0.0
 
   redux-saga-testing@2.0.2:
     resolution: {integrity: sha512-8IVPTaEw0Typ9TGCAsktFrrU+I5ACbmwPmzW0DQjUgZvja0k1jP2ILnUn+fZDF1gT8c0L/Ubj//bsej5X3OkaQ==}
@@ -23177,8 +23177,6 @@ packages:
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
-    peerDependencies:
-      redux: ^4
 
   redux-thunks@1.0.0:
     resolution: {integrity: sha512-/obl3xW0jc3cCnWxOyVlLkJ0b/jokBkqXKWE0DSqbuwdDZq0JMCLpRl7PSUfgpup0Eu2x8hzD6OPe45lv/ngBQ==}
@@ -31007,7 +31005,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2(redux@4.2.1)
+      redux-thunk: 2.4.2
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -31017,7 +31015,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2(redux@4.2.1)
+      redux-thunk: 2.4.2
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -42645,7 +42643,7 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8(redux@4.2.1):
+  redux-devtools-extension@2.13.8:
     dependencies:
       redux: 4.2.1
 
@@ -42655,13 +42653,13 @@ snapshots:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2(redux@4.2.1):
+  redux-thunk@2.4.2:
     dependencies:
       redux: 4.2.1
 
-  redux-thunks@1.0.0(redux-thunk@2.4.2(redux@4.2.1)):
+  redux-thunks@1.0.0(redux-thunk@2.4.2):
     dependencies:
-      redux-thunk: 2.4.2(redux@4.2.1)
+      redux-thunk: 2.4.2
 
   redux@4.2.1:
     dependencies:
