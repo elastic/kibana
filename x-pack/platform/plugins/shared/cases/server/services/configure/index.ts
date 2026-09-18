@@ -242,6 +242,10 @@ function transformToExternalModel(
     : (configuration.attributes
         .observableTypes as ConfigurationTransformedAttributes['observableTypes']);
 
+  const workflowTags = !configuration.attributes.workflowTags
+    ? []
+    : (configuration.attributes.workflowTags as ConfigurationTransformedAttributes['workflowTags']);
+
   return {
     ...configuration,
     attributes: {
@@ -250,6 +254,7 @@ function transformToExternalModel(
       customFields,
       templates,
       observableTypes,
+      workflowTags,
     },
   };
 }
