@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/zod'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/shared-ux-button-toolbar'
 tags:
   - plugin
   - prod
