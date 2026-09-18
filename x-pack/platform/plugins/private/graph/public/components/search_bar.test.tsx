@@ -9,17 +9,12 @@ import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { SearchBarProps, SearchBarStateProps } from './search_bar';
 import { SearchBar, SearchBarComponent } from './search_bar';
 import React, { useState } from 'react';
-import type {
-  DocLinksStart,
-  HttpStart,
-  IUiSettingsClient,
-  NotificationsStart,
-  OverlayStart,
-} from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { openSourceModal } from '../services/source_modal';
@@ -28,52 +23,59 @@ import type { GraphStore } from '../state_management';
 import { setDatasource, submitSearchSaga } from '../state_management';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
-import { createQueryStringInput } from '@kbn/kql/public/components/query_string_input/get_query_string_input';
-import { kqlPluginMock } from '@kbn/kql/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
-const getServiceMocks = () => {
-  const docLinks = {
-    links: {
-      query: {
-        kueryQuerySyntax: '',
-        luceneQuerySyntax: '',
-      },
-    },
-  } as DocLinksStart;
-  const uiSettings = {
-    get: () => 10,
-  } as unknown as IUiSettingsClient;
-  const kqlMock = kqlPluginMock.createStartContract();
+// Lightweight stand-in for the real KQL QueryStringInput: mounting the live editor kicks off
+// autocomplete/data-view async that intermittently overruns Jest's 5s budget under CI load. The
+// suite only needs the query text, language toggle, and onChange forwarding; KQL-to-DSL parsing
+// happens in the product's queryToString, not this input.
+const QueryStringInputStub = ({
+  query,
+  onChange,
+}: {
+  query: Query;
+  onChange: (updatedQuery: Query) => void;
+}) => {
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
 
-  return {
-    overlays: {} as OverlayStart,
-    appName: 'graph',
-    kql: {
-      QueryStringInput: createQueryStringInput({
-        docLinks,
-        uiSettings,
-        storage: {
-          get: () => {},
-          set: () => {},
-          remove: () => {},
-          clear: () => {},
-        } as IStorageWrapper,
-        data: dataPluginMock.createStartContract(),
-        autocomplete: kqlMock.autocomplete,
-        notifications: {} as NotificationsStart,
-        http: {
-          post: jest.fn().mockResolvedValue(undefined),
-        } as unknown as HttpStart,
-        dataViews: dataViewPluginMocks.createStartContract(),
-      }),
-    },
-  };
+  return (
+    <div>
+      <button
+        type="button"
+        data-test-subj="switchQueryLanguageButton"
+        onClick={() => setIsLanguageMenuOpen(true)}
+      >
+        {query.language}
+      </button>
+      {isLanguageMenuOpen && (
+        <button
+          type="button"
+          data-test-subj="luceneLanguageMenuItem"
+          onClick={() => {
+            onChange({ query: query.query, language: 'lucene' });
+            setIsLanguageMenuOpen(false);
+          }}
+        >
+          Lucene
+        </button>
+      )}
+      <input
+        data-test-subj="queryInput"
+        value={typeof query.query === 'string' ? query.query : ''}
+        onChange={(event) => onChange({ query: event.target.value, language: query.language })}
+      />
+    </div>
+  );
 };
+
+const getServiceMocks = () => ({
+  overlays: {} as OverlayStart,
+  appName: 'graph',
+  kql: {
+    QueryStringInput: QueryStringInputStub,
+  },
+});
 
 const SearchBarHarness = (props: SearchBarProps) => {
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView | undefined>(
