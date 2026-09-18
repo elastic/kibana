@@ -91,6 +91,12 @@ export const indexFailures = async (
   items: Array<{
     input: Record<string, unknown>;
     output: unknown;
+    /**
+     * Original dataset position of this item. Callers that skip examples (e.g.
+     * inference failures) must set it: without it the array position is used and
+     * failures get attributed to the wrong input/output.
+     */
+    index?: number;
   }>,
   logger: Logger,
   config: Partial<HarvestConfig> = {}
@@ -104,8 +110,15 @@ export const indexFailures = async (
 
   await ensureFailuresIndex(esClient);
 
+  // Key by the original dataset index so a skipped example doesn't shift every
+  // later lookup; callers passing dense arrays fall back to the array position.
+  const itemsByIndex = new Map<number, (typeof items)[number]>();
+  items.forEach((item, position) => {
+    itemsByIndex.set(typeof item.index === 'number' ? item.index : position, item);
+  });
+
   const operations = failures.flatMap((failure) => {
-    const item = items[failure.itemIndex];
+    const item = itemsByIndex.get(failure.itemIndex);
     if (!item) return [];
 
     const inputQuery = String(

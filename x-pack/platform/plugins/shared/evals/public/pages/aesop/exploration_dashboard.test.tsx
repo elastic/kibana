@@ -272,10 +272,9 @@ describe('ExplorationDashboard Component', () => {
       });
 
       const row = screen.getByText('exec-100').closest('tr');
-      if (row) {
-        await user.click(row);
-        expect(history.location.pathname).toContain('exec-100');
-      }
+      expect(row).not.toBeNull();
+      await user.click(row as HTMLElement);
+      expect(history.location.pathname).toContain('exec-100');
     });
   });
 

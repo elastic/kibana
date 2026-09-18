@@ -29,6 +29,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isResourceAlreadyExistsError } from '../errors/aesop_errors';
 
 export interface WorkflowPhaseState {
   phase_number: number;
@@ -56,7 +57,7 @@ export interface WorkflowExecutionState {
   phases: WorkflowPhaseState[];
 }
 
-const WORKFLOW_EXECUTIONS_INDEX = '.aesop-workflow-executions';
+export const WORKFLOW_EXECUTIONS_INDEX = '.aesop-workflow-executions';
 
 /**
  * Phase definitions for self-exploration workflow
@@ -131,6 +132,15 @@ export class WorkflowStateTracker {
         this.logger.info(`[WorkflowStateTracker] Created index: ${WORKFLOW_EXECUTIONS_INDEX}`);
       }
     } catch (error) {
+      // Two callers can pass the exists() check together and race to create the
+      // index; the loser gets resource_already_exists_exception even though the
+      // desired end state (index exists) has been reached.
+      if (isResourceAlreadyExistsError(error)) {
+        this.logger.debug(
+          `[WorkflowStateTracker] Index already created concurrently: ${WORKFLOW_EXECUTIONS_INDEX}`
+        );
+        return;
+      }
       this.logger.error(
         `[WorkflowStateTracker] Failed to ensure index exists: ${
           error instanceof Error ? error.message : String(error)
@@ -308,6 +318,21 @@ export class WorkflowStateTracker {
     const now = new Date().toISOString();
 
     try {
+      // Close out any phase still marked running, mirroring failExecution:
+      // otherwise the execution reads as completed while one of its phases
+      // still reads as running.
+      const state = await this.getExecutionState(executionId);
+      const updatedPhases = (state?.phases ?? []).map((p) =>
+        p.status === 'running'
+          ? {
+              ...p,
+              status: 'completed' as const,
+              completed_at: now,
+              duration_ms: p.started_at ? Date.parse(now) - Date.parse(p.started_at) : p.duration_ms,
+            }
+          : p
+      );
+
       await this.esClient.update({
         index: WORKFLOW_EXECUTIONS_INDEX,
         id: executionId,
@@ -315,6 +340,7 @@ export class WorkflowStateTracker {
           status: 'completed',
           progress_percentage: 100,
           estimated_time_remaining_ms: 0,
+          ...(state ? { phases: updatedPhases } : {}),
           completed_at: now,
           updated_at: now,
         },
@@ -423,19 +449,23 @@ export class WorkflowStateTracker {
   ): number {
     // If we have actual duration data from completed phases, use it
     const completedPhases = state.phases.filter((p) => p.status === 'completed');
-    void completedPhases.reduce((sum, p) => sum + (p.duration_ms || 0), 0);
+    const measuredDurationMs = completedPhases.reduce((sum, p) => sum + (p.duration_ms || 0), 0);
+    const measuredAvgPhaseMs =
+      completedPhases.length > 0 ? measuredDurationMs / completedPhases.length : undefined;
 
-    // Estimate remaining phases based on average durations
+    // Estimate remaining phases based on measured averages where we have them,
+    // falling back to the static per-phase table before any phase completes.
     const remainingPhases = SELF_EXPLORATION_PHASES.filter((p) => p.phase_number > currentPhase);
     const estimatedRemainingDuration = remainingPhases.reduce(
-      (sum, p) => sum + p.avg_duration_ms,
+      (sum, p) => sum + (measuredAvgPhaseMs ?? p.avg_duration_ms),
       0
     );
 
     // Estimate current phase remaining time
     const currentPhaseConfig = SELF_EXPLORATION_PHASES.find((p) => p.phase_number === currentPhase);
+    const currentPhaseAverageMs = measuredAvgPhaseMs ?? currentPhaseConfig?.avg_duration_ms ?? 0;
     const currentPhaseEstimate = currentPhaseConfig
-      ? currentPhaseConfig.avg_duration_ms * (1 - progressPercentage / 100)
+      ? currentPhaseAverageMs * (1 - progressPercentage / 100)
       : 0;
 
     return Math.max(0, estimatedRemainingDuration + currentPhaseEstimate);

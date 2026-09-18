@@ -57,26 +57,11 @@ export class ReadOnlyEnforcer {
 
     // POST: Only allow specific read-only endpoints
     if (normalizedMethod === 'POST') {
-      // Allowed read-only POST endpoints
-      const allowedReadOnlyPaths = [
-        '/_search', // Search queries
-        '/_async_search', // Async search
-        '/_count', // Count queries
-        '/_field_caps', // Field capabilities
-        '/_msearch', // Multi-search
-        '/_render/template', // Template rendering (read-only)
-        '/_validate/query', // Query validation
-      ];
-
-      const isAllowedReadOnly = allowedReadOnlyPaths.some((allowed) =>
-        normalizedPath.includes(allowed)
-      );
-
-      if (isAllowedReadOnly) {
-        return;
-      }
-
-      // Blocked write paths (explicit deny list)
+      // Blocked write paths (explicit deny list). Evaluated BEFORE the
+      // read-only allowlist: the allowlist matches on substring (see below),
+      // so a path that merely *contains* an allowed endpoint — e.g.
+      // POST /_create/_search — would otherwise short-circuit and never reach
+      // this deny list.
       const blockedWritePaths = [
         '/_create',
         '/_update',
@@ -103,6 +88,29 @@ export class ReadOnlyEnforcer {
         throw new SecurityError(
           `POST to ${path} not allowed (write operation). Only read operations like /_search, /_count permitted during exploration.`
         );
+      }
+
+      // Allowed read-only POST endpoints. Matched on substring on purpose:
+      // Elasticsearch read endpoints are suffixes on an index expression
+      // (`/<index>/_search`) and some read-only continuations extend the
+      // endpoint (`/_search/scroll`, `/_async_search/<id>`), which exact or
+      // suffix matching would wrongly reject.
+      const allowedReadOnlyPaths = [
+        '/_search', // Search queries
+        '/_async_search', // Async search
+        '/_count', // Count queries
+        '/_field_caps', // Field capabilities
+        '/_msearch', // Multi-search
+        '/_render/template', // Template rendering (read-only)
+        '/_validate/query', // Query validation
+      ];
+
+      const isAllowedReadOnly = allowedReadOnlyPaths.some((allowed) =>
+        normalizedPath.includes(allowed)
+      );
+
+      if (isAllowedReadOnly) {
+        return;
       }
 
       // If it's a POST to an index endpoint without explicit read-only suffix, block it

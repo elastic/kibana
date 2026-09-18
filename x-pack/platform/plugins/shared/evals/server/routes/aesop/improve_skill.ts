@@ -11,6 +11,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 import type { ProposedSkillDocument } from '../../lib/aesop/types';
+import { isNotFoundError } from '../../lib/aesop/errors/aesop_errors';
 import {
   buildLlmRequestBody,
   extractLlmResponseText,
@@ -58,10 +59,25 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
         const { connector_id: connectorId, use_agent: useAgent } = request.body;
 
         try {
-          const skillDoc = await esClient.get({
-            index: '.aesop-proposed-skills',
-            id: skillId,
-          });
+          const skillDoc = await esClient
+            .get({
+              index: '.aesop-proposed-skills',
+              id: skillId,
+            })
+            .catch((getErr: unknown) => {
+              // `.get()` throws for a missing document, so the `!skill` guard
+              // below never runs for it — answer 404 rather than 500.
+              if (isNotFoundError(getErr)) {
+                return null;
+              }
+              throw getErr;
+            });
+
+          if (!skillDoc) {
+            return response.notFound({
+              body: { message: `Skill ${skillId} not found` },
+            });
+          }
 
           const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
@@ -108,7 +124,13 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
                   ...(skill.validation?.suggestions || []),
                 ].join('\n');
 
-                const improved = await orchestrator.improveSkill(skill.markdown || '', feedback);
+                // The direct-LLM path reads either field; keep the agent path
+                // consistent so a skill stored with only `content` isn't sent as
+                // an empty string.
+                const improved = await orchestrator.improveSkill(
+                  skill.markdown || skill.content || '',
+                  feedback
+                );
 
                 if (improved?.markdown) {
                   await esClient.update({
@@ -169,12 +191,21 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
                     });
                   }
 
+                  if (!validationResult) {
+                    logger.warn(
+                      `[AESOP] Agent re-validation returned no result skill_id=${skillId}; validation status remains pending`
+                    );
+                  }
+
                   return response.ok({
                     body: {
                       success: true,
                       skill_id: skillId,
-                      message: `Skill improved and re-validated by agent`,
+                      message: validationResult
+                        ? 'Skill improved and re-validated by agent'
+                        : 'Skill improved by agent; re-validation did not complete — run validation again',
                       mode: 'agent',
+                      revalidated: Boolean(validationResult),
                     },
                   });
                 }
@@ -375,10 +406,12 @@ function parseImprovedSkill(response: string): {
       markdown: String(parsed.markdown ?? ''),
     };
   } catch {
+    // Fall back to the cleaned text: `response` still carries  thinking blocks
+    // and markdown fences that would otherwise be persisted as skill content.
     return {
       name: 'Improved Skill',
       description: '',
-      markdown: response,
+      markdown: cleaned,
     };
   }
 }
@@ -495,6 +528,10 @@ async function autoValidateImprovedSkill({
           }`
         );
       });
+
+    // Rethrow so the fire-and-forget caller logs the failure; otherwise the only
+    // trace of a failed auto-validation is the document written above.
+    throw error;
   }
 }
 

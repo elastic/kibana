@@ -166,30 +166,41 @@ export const runPairwiseExperiment = async (
     }));
 
   // Run both skills. If one fails, we still return partial results for the other.
-  let runA: { results: Array<{ evaluatorResults: ServerEvaluatorResult[] }> } | undefined;
-  let runB: { results: Array<{ evaluatorResults: ServerEvaluatorResult[] }> } | undefined;
+  const repetitionsPerformed = Math.max(repetitions, 1);
 
-  try {
-    runA = await runner.run({
-      items: buildItems(skillA),
-      evaluatorNames,
-      connectorId,
-      concurrency: 3,
-    });
-  } catch (error) {
-    logger.error(`Pairwise: Skill A (${skillA.id}) evaluation failed: ${error}`);
-  }
+  // Re-run each skill `repetitions` times and pool the evaluator results, so the
+  // reported repetition count matches the sample significance is computed from.
+  const runSkill = async (
+    skill: PairwiseSkill,
+    label: 'A' | 'B'
+  ): Promise<{ results: Array<{ evaluatorResults: ServerEvaluatorResult[] }> } | undefined> => {
+    const runs: Array<{ results: Array<{ evaluatorResults: ServerEvaluatorResult[] }> }> = [];
 
-  try {
-    runB = await runner.run({
-      items: buildItems(skillB),
-      evaluatorNames,
-      connectorId,
-      concurrency: 3,
-    });
-  } catch (error) {
-    logger.error(`Pairwise: Skill B (${skillB.id}) evaluation failed: ${error}`);
-  }
+    for (let repetition = 0; repetition < repetitionsPerformed; repetition++) {
+      try {
+        runs.push(
+          await runner.run({
+            items: buildItems(skill),
+            evaluatorNames,
+            connectorId,
+            concurrency: 3,
+          })
+        );
+      } catch (error) {
+        logger.error(
+          `Pairwise: Skill ${label} (${skill.id}) evaluation failed on repetition ${
+            repetition + 1
+          }: ${error}`
+        );
+      }
+    }
+
+    if (runs.length === 0) return undefined;
+    return { results: runs.flatMap((run) => run.results) };
+  };
+
+  const runA = await runSkill(skillA, 'A');
+  const runB = await runSkill(skillB, 'B');
 
   // If both failed, return an empty result
   const emptyResults = { results: [] as Array<{ evaluatorResults: ServerEvaluatorResult[] }> };
@@ -226,7 +237,7 @@ export const runPairwiseExperiment = async (
     details: {
       total_examples: examples.length,
       total_evaluators: evaluatorNames.length,
-      repetitions,
+      repetitions: repetitionsPerformed,
       duration_ms: Date.now() - startTime,
     },
     timestamp: new Date().toISOString(),

@@ -18,6 +18,17 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+/**
+ * Painless source summing the gen_ai token counters for a document.
+ *
+ * Documents matched by the skill/agent filters are not guaranteed to carry
+ * either token field, and an unguarded `doc['...'].value` lookup on a missing
+ * field aborts the whole aggregation with a null pointer exception — which
+ * would drop the entire metrics response, not just one bucket.
+ */
+const TOTAL_TOKENS_PAINLESS_SOURCE =
+  "(doc.containsKey('attributes.gen_ai.usage.prompt_tokens') && doc['attributes.gen_ai.usage.prompt_tokens'].size() > 0 ? doc['attributes.gen_ai.usage.prompt_tokens'].value : 0) + (doc.containsKey('attributes.gen_ai.usage.completion_tokens') && doc['attributes.gen_ai.usage.completion_tokens'].size() > 0 ? doc['attributes.gen_ai.usage.completion_tokens'].value : 0)";
+
 export interface TimeRange {
   from: string;
   to: string;
@@ -197,8 +208,7 @@ export class MetricsCollectorService {
           total_tokens_sum: {
             sum: {
               script: {
-                source:
-                  "doc['attributes.gen_ai.usage.prompt_tokens'].value + doc['attributes.gen_ai.usage.completion_tokens'].value",
+                source: TOTAL_TOKENS_PAINLESS_SOURCE,
                 lang: 'painless',
               },
             },
@@ -552,8 +562,7 @@ export class MetricsCollectorService {
               total_tokens: {
                 sum: {
                   script: {
-                    source:
-                      "doc['attributes.gen_ai.usage.prompt_tokens'].value + doc['attributes.gen_ai.usage.completion_tokens'].value",
+                    source: TOTAL_TOKENS_PAINLESS_SOURCE,
                     lang: 'painless',
                   },
                 },

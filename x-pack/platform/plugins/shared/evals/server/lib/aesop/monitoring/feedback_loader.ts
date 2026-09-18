@@ -62,6 +62,22 @@ export class FeedbackLoaderService {
     this.logger.debug(`[AESOP Feedback] Loading recent feedback cycleWindow=${cycleWindow}`);
 
     try {
+      // Restrict the query to the requested cycle window. `metadata.cycle_number`
+      // is only present on records written after cycle tracking was added, so
+      // when no record carries one the filter is omitted rather than excluding
+      // every record.
+      const maxCycle = await this.getMaxCycleNumber();
+      const cycleFilter =
+        maxCycle === undefined
+          ? []
+          : [
+              {
+                range: {
+                  'metadata.cycle_number': { gte: Math.max(maxCycle - cycleWindow + 1, 0) },
+                },
+              },
+            ];
+
       // Query .aesop-proposed-skills for feedback records
       const result = await this.esClient.search({
         index: '.aesop-proposed-skills',
@@ -75,6 +91,7 @@ export class FeedbackLoaderService {
                   'review.status': ['approved', 'rejected'],
                 },
               },
+              ...cycleFilter,
             ],
           },
         },
@@ -154,6 +171,26 @@ export class FeedbackLoaderService {
       );
       throw error;
     }
+  }
+
+  /**
+   * Highest `metadata.cycle_number` present in .aesop-proposed-skills.
+   * Returns undefined when no record carries the field (or the index is empty),
+   * which callers treat as "no cycle filter".
+   */
+  private async getMaxCycleNumber(): Promise<number | undefined> {
+    const result = await this.esClient.search({
+      index: '.aesop-proposed-skills',
+      size: 0,
+      aggs: {
+        max_cycle: {
+          max: { field: 'metadata.cycle_number' },
+        },
+      },
+    });
+
+    const value = (result.aggregations?.max_cycle as { value?: number | null } | undefined)?.value;
+    return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
   }
 
   /**

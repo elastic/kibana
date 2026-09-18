@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import { isNotFoundError } from '../../lib/aesop/errors/aesop_errors';
 
 const updateSkillParamsSchema = z.object({
   skillId: z.string().min(1),
@@ -69,12 +70,23 @@ export function registerUpdateSkillRoute({ router, logger }: AESOPRouteDependenc
             };
           }
 
-          await esClient.update({
-            index: '.aesop-proposed-skills',
-            id: skillId,
-            doc: updates,
-            refresh: 'wait_for',
-          });
+          try {
+            await esClient.update({
+              index: '.aesop-proposed-skills',
+              id: skillId,
+              doc: updates,
+              refresh: 'wait_for',
+            });
+          } catch (updateError) {
+            // `.update()` throws for a missing document — report 404 instead of
+            // letting the outer catch turn it into a 500.
+            if (isNotFoundError(updateError)) {
+              return response.notFound({
+                body: { message: `Skill ${skillId} not found` },
+              });
+            }
+            throw updateError;
+          }
 
           logger.info(
             `[AESOP] Skill updated skill_id=${skillId} fields_updated=${Object.keys(updates).join(

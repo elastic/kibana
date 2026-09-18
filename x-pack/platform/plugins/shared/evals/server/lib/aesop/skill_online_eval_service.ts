@@ -280,7 +280,9 @@ export class SkillOnlineEvalService {
         runId,
         skill.id,
         allFlatResults,
-        allItems.map((i) => ({ input: i.input, output: i.output })),
+        // Pass the items with their original dataset index: examples that failed
+        // inference were skipped, so positions no longer match itemIndex.
+        allItems.map((i) => ({ input: i.input, output: i.output, index: i.index })),
         this.logger
       );
     } catch (harvestErr) {
@@ -446,7 +448,10 @@ export class SkillOnlineEvalService {
 
       return extractLlmResponseText((result as any)?.data);
     } catch (error) {
-      return { error: error instanceof Error ? error.message : String(error) };
+      // Rethrow rather than returning an error object: runOnlineEval treats a
+      // throw as "skip this example", while a returned object would be scored
+      // and persisted as if it were a real agent answer.
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 }

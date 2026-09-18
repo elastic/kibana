@@ -764,11 +764,23 @@ xdescribe('AESOP Competitive Benchmarks (placeholder thresholds — see file hea
       // TODO: Query APM metrics for skill retrieval latency
       // const metrics = await getApmMetrics('aesop-skill-retrieval', 'transaction.duration.us');
 
-      // Mock: Simulated latency distribution
-      const mockLatencies = [45, 52, 58, 63, 71, 78, 85, 92, 120, 145]; // p95 = 145ms
+      // Mock: Simulated latency distribution (ascending)
+      const mockLatencies = [45, 52, 58, 63, 71, 78, 85, 92, 120, 145];
 
-      const p95Latency = mockLatencies[Math.floor(mockLatencies.length * 0.95)];
+      // Nearest-rank on 10 samples would land on the last element (p100), so
+      // interpolate between the two nearest ranks instead:
+      // rank = 0.95 * (10 - 1) = 8.55 -> 120 + 0.55 * (145 - 120) = 133.75ms.
+      const percentile = (samples: number[], p: number): number => {
+        const sorted = [...samples].sort((a, b) => a - b);
+        const rank = (sorted.length - 1) * p;
+        const lower = Math.floor(rank);
+        const upper = Math.ceil(rank);
+        return sorted[lower] + (sorted[upper] - sorted[lower]) * (rank - lower);
+      };
 
+      const p95Latency = percentile(mockLatencies, 0.95);
+
+      expect(p95Latency).toBeCloseTo(133.75, 2);
       expect(p95Latency).toBeLessThan(maxP95Latency);
     });
   });

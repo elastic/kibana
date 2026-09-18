@@ -47,8 +47,11 @@ export class SkillClient {
   }): Promise<SavedObjectsFindResponse<ProposedSkillAttributes>> {
     const filters: string[] = [];
 
-    // Escape double quotes in user-supplied values to prevent KQL injection
-    const escapeKql = (value: string): string => value.replace(/"/g, '\\"');
+    // Escape backslashes before quotes: escaping only quotes leaves a trailing
+    // backslash free to escape the closing quote and produce an unterminated
+    // KQL string (e.g. status "test\" -> "...: "test\"").
+    const escapeKql = (value: string): string =>
+      value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
     if (options?.status) {
       filters.push(

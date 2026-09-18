@@ -18,6 +18,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isResourceAlreadyExistsError } from '../errors/aesop_errors';
 
 export interface SkillVersion {
   skill_id: string;
@@ -129,19 +130,31 @@ export class SkillVersioningService {
       refresh: 'wait_for',
     });
 
-    // Update current skill pointer
-    await this.esClient.update({
-      index: '.aesop-proposed-skills',
-      id: skillId,
-      doc: {
-        markdown: improvedMarkdown,
-        current_version: newVersionNumber,
-        version_history: {
-          total_versions: newVersionNumber,
-          latest_version_id: `${skillId}-v${newVersionNumber}`,
+    // Update current skill pointer. If this fails the version document is left
+    // orphaned (indexed but unreferenced), so drop it before rethrowing — a later
+    // createNewVersion would otherwise number from a version nothing points at.
+    try {
+      await this.esClient.update({
+        index: '.aesop-proposed-skills',
+        id: skillId,
+        doc: {
+          markdown: improvedMarkdown,
+          current_version: newVersionNumber,
+          version_history: {
+            total_versions: newVersionNumber,
+            latest_version_id: `${skillId}-v${newVersionNumber}`,
+          },
         },
-      },
-    });
+      });
+    } catch (pointerError) {
+      await this.esClient
+        .delete({
+          index: '.aesop-skill-versions',
+          id: `${skillId}-v${newVersionNumber}`,
+        })
+        .catch(() => undefined);
+      throw pointerError;
+    }
 
     return newVersion;
   }
@@ -166,6 +179,24 @@ export class SkillVersioningService {
     }
 
     return result.hits.hits[0]._source as SkillVersion;
+  }
+
+  /**
+   * Version currently pointed at by the skill document, or undefined when the
+   * skill (or its pointer) is absent.
+   */
+  private async getActiveVersion(skillId: string): Promise<number | undefined> {
+    try {
+      const skillDoc = await this.esClient.get({
+        index: '.aesop-proposed-skills',
+        id: skillId,
+      });
+      const current = (skillDoc._source as { current_version?: number } | undefined)
+        ?.current_version;
+      return typeof current === 'number' ? current : undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   /**
@@ -196,6 +227,12 @@ export class SkillVersioningService {
 
     const targetVersionData = versionDoc._source as SkillVersion;
 
+    // Record what was actually active before this rollback. The highest version in
+    // .aesop-skill-versions can be ahead of the active pointer after an earlier
+    // rollback, so prefer `current_version` from the skill document.
+    const activeVersion = await this.getActiveVersion(skillId);
+    const rolledBackFrom = activeVersion ?? (await this.getLatestVersion(skillId)).version;
+
     // Update current skill to use target version's content
     await this.esClient.update({
       index: '.aesop-proposed-skills',
@@ -207,7 +244,7 @@ export class SkillVersioningService {
         current_version: targetVersion,
         rollback_metadata: {
           rolled_back_at: new Date().toISOString(),
-          rolled_back_from: await this.getLatestVersion(skillId).then((v) => v.version),
+          rolled_back_from: rolledBackFrom,
           rolled_back_to: targetVersion,
         },
       },
@@ -338,8 +375,7 @@ export async function initializeSkillVersioningIndex(esClient: ElasticsearchClie
     });
   } catch (error) {
     // Ignore if already exists
-    const errMsg = error instanceof Error ? error.message : String(error);
-    if (!errMsg.includes('already exists')) {
+    if (!isResourceAlreadyExistsError(error)) {
       throw error;
     }
   }

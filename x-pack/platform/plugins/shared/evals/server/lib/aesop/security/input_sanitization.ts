@@ -92,7 +92,11 @@ export function sanitizeSkillMarkdown(markdown: string): string {
   const sanitized = markdown
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // <script> tags
     .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '') // <iframe> tags
-    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '') // Event handlers (onclick, onerror, etc.)
+    // Event handlers (onclick, onerror, etc.). Browsers accept unquoted
+    // attribute values (`<img src=x onerror=alert(1)>`), so the value pattern
+    // must cover quoted and unquoted forms — a quoted-only pattern leaves the
+    // unquoted payload intact.
+    .replace(/\bon\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(/javascript:/gi, ''); // javascript: protocol
 
   // Validate YAML frontmatter if present

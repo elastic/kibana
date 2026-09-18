@@ -22,6 +22,7 @@
 import crypto from 'crypto';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowStateTracker } from './workflow_state_tracker';
+import { WORKFLOW_EXECUTIONS_INDEX } from './workflow_state_tracker';
 import type { IndexInfo } from '../../../services/index_discovery';
 import type { SamplingConfig } from '../../../services/sampling_strategy';
 import type { AnalystRole } from '../../../services/analyst_role_inference';
@@ -485,7 +486,7 @@ export class ExplorationWorkflowExecutor {
     // Step 4: Store schema summaries in execution doc
     await this.updateStep(1, 3, 4, 'Storing schema summaries...');
     await this.esClient.update({
-      index: '.aesop-workflow-executions',
+      index: WORKFLOW_EXECUTIONS_INDEX,
       id: this.config.executionId,
       doc: {
         schemas_discovered: this.schemas.map((s) => ({
@@ -832,6 +833,11 @@ export class ExplorationWorkflowExecutor {
           agentBuilderStart ? 'available' : 'missing'
         } connectorId=${connectorId ? 'set' : 'missing'}`
       );
+      // Persist the improvement proposals generated above before bailing
+      // out — the storage step lives in the agent path below.
+      if (this.skills.length > 0) {
+        await this.persistProposedSkills();
+      }
       return;
     }
 
@@ -992,6 +998,42 @@ export class ExplorationWorkflowExecutor {
     const existingDedupedIds = new Set(existingDeduped.map((s) => s.id));
     this.skills = this.skills.filter((s) => existingDedupedIds.has(s.skillId));
 
+    await this.persistProposedSkills();
+
+    // Update execution metrics
+    await this.esClient.update({
+      index: WORKFLOW_EXECUTIONS_INDEX,
+      id: this.config.executionId,
+      doc: {
+        metrics: {
+          indices_explored: this.schemas.length,
+          relationships_discovered: this.relationships.length,
+          patterns_found: this.patterns.length,
+          skills_generated: this.skills.length,
+        },
+      },
+    });
+
+    // Proactive pipeline: validate → generate dataset → run eval (all fire-and-forget)
+    if (connectorId && this.skills.length > 0) {
+      this.runProactivePipeline(agentBuilderStart, connectorId).catch((err) => {
+        this.logger.warn(
+          `[AESOP] Proactive pipeline failed: ${err instanceof Error ? err.message : String(err)}`
+        );
+      });
+    }
+
+    await this.updateStep(5, 6, 6, 'Skill synthesis complete');
+  }
+
+  /**
+   * Store the skills collected for phase 5 in .aesop-proposed-skills.
+   *
+   * Extracted from phaseSkillSynthesis so the improvement-only path — which
+   * returns early when Agent Builder is unavailable — still persists the
+   * proposals it generated instead of only logging them.
+   */
+  private async persistProposedSkills(): Promise<void> {
     // Store proposed skills
     await this.updateStep(5, 5, 6, 'Storing proposed skills...');
     await this.ensureIndex(PROPOSED_SKILLS_INDEX);
@@ -1038,30 +1080,6 @@ export class ExplorationWorkflowExecutor {
       });
     }
 
-    // Update execution metrics
-    await this.esClient.update({
-      index: '.aesop-workflow-executions',
-      id: this.config.executionId,
-      doc: {
-        metrics: {
-          indices_explored: this.schemas.length,
-          relationships_discovered: this.relationships.length,
-          patterns_found: this.patterns.length,
-          skills_generated: this.skills.length,
-        },
-      },
-    });
-
-    // Proactive pipeline: validate → generate dataset → run eval (all fire-and-forget)
-    if (connectorId && this.skills.length > 0) {
-      this.runProactivePipeline(agentBuilderStart, connectorId).catch((err) => {
-        this.logger.warn(
-          `[AESOP] Proactive pipeline failed: ${err instanceof Error ? err.message : String(err)}`
-        );
-      });
-    }
-
-    await this.updateStep(5, 6, 6, 'Skill synthesis complete');
   }
 
   // ---------------------------------------------------------------------------
@@ -1609,7 +1627,7 @@ If no improvements are warranted, return an empty array: []`;
     const { executionId, userId, indices, roleDescription, samplingConfig } = this.config;
 
     await this.esClient.update({
-      index: '.aesop-workflow-executions',
+      index: WORKFLOW_EXECUTIONS_INDEX,
       id: executionId,
       doc: {
         config: {

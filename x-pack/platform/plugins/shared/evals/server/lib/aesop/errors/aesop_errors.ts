@@ -481,3 +481,44 @@ export function isRetryableError(error: unknown): boolean {
     message.includes('429') // Rate limit
   );
 }
+
+/**
+ * Detects the Elasticsearch "index already exists" failure.
+ *
+ * Used when two callers race to create an index: the loser must be treated as
+ * success, because the desired end state has been reached. Matching on the
+ * error *type* (and the message text) rather than the HTTP status matters —
+ * a 400 covers invalid mappings and malformed requests too, and swallowing
+ * those would leave callers operating against an index that was never created.
+ */
+export function isResourceAlreadyExistsError(error: unknown): boolean {
+  const message = getErrorMessage(error);
+  if (message.includes('resource_already_exists_exception')) {
+    return true;
+  }
+
+  const errorType = (error as { body?: { error?: { type?: string } }; meta?: { body?: { error?: { type?: string } } } })
+    ?.body?.error?.type ?? (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type;
+
+  return errorType === 'resource_already_exists_exception';
+}
+
+/**
+ * Detects an Elasticsearch 404 (missing document or index).
+ *
+ * `client.get()` throws rather than returning an empty result, so a route that
+ * only guards `if (!doc._source)` answers 500 for a genuinely missing document.
+ */
+export function isNotFoundError(error: unknown): boolean {
+  const statusCode =
+    (error as { meta?: { statusCode?: number }; statusCode?: number })?.meta?.statusCode ??
+    (error as { statusCode?: number })?.statusCode;
+  if (statusCode === 404) {
+    return true;
+  }
+
+  const message = getErrorMessage(error);
+  return (
+    message.includes('document_missing_exception') || message.includes('index_not_found_exception')
+  );
+}

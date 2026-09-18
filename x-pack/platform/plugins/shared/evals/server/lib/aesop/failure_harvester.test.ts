@@ -181,6 +181,30 @@ describe('failure_harvester', () => {
       const count = await indexFailures(esClient, 'run-1', 'skill-1', results, baseItems, logger);
       expect(count).toBe(0);
     });
+
+    it('attributes failures to the original dataset index when examples were skipped', async () => {
+      // Example 1 failed inference and was skipped, so `items` holds examples 0
+      // and 2 while itemIndex still refers to dataset positions.
+      const items = [
+        { input: { query: 'example 0' }, output: 'out 0', index: 0 },
+        { input: { query: 'example 2' }, output: 'out 2', index: 2 },
+      ];
+      const results = [
+        { itemIndex: 0, evaluator: 'acc', score: 0.1, label: 'fail' },
+        { itemIndex: 2, evaluator: 'acc', score: 0.1, label: 'fail' },
+      ];
+
+      (esClient.bulk as jest.Mock).mockResolvedValueOnce({
+        items: [{ create: { status: 201 } }, { create: { status: 201 } }],
+      });
+
+      await indexFailures(esClient, 'run-1', 'skill-1', results, items, logger);
+
+      const { operations } = (esClient.bulk as jest.Mock).mock.calls[0][0];
+      expect(operations).toHaveLength(4);
+      expect(operations[1].input_query).toBe('example 0');
+      expect(operations[3].input_query).toBe('example 2');
+    });
   });
 
   describe('harvestRegressionCases', () => {

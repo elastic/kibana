@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 import type { ProposedSkillDocument } from '../../lib/aesop/types';
+import { isNotFoundError } from '../../lib/aesop/errors/aesop_errors';
 import { selectEvaluatorsForSkill } from '../../lib/aesop/skill_evaluator_selector';
 
 const runEvalParamsSchema = z.object({ skillId: z.string() });
@@ -52,10 +53,25 @@ export function registerRunOnlineEvalRoute({
 
         try {
           // Load skill
-          const skillDoc = await scopedEsClient.get({
-            index: '.aesop-proposed-skills',
-            id: skillId,
-          });
+          const skillDoc = await scopedEsClient
+            .get({
+              index: '.aesop-proposed-skills',
+              id: skillId,
+            })
+            .catch((getErr: unknown) => {
+              // `.get()` throws for a missing document, so the `!skill` guard
+              // below never runs for it — answer 404 rather than 500.
+              if (isNotFoundError(getErr)) {
+                return null;
+              }
+              throw getErr;
+            });
+          if (!skillDoc) {
+            return response.notFound({
+              body: { message: `Skill ${skillId} not found` },
+            });
+          }
+
           const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
             return response.notFound({

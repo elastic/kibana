@@ -141,9 +141,12 @@ export const useAcknowledgeAlert = () => {
         }
       );
     },
-    onSuccess: async (response, { skillId }) => {
+    onSuccess: async (response) => {
       if (response.acknowledged) {
-        await queryClient.invalidateQueries({ queryKey: queryKeys.monitoring.alerts(skillId) });
+        // The monitoring dashboard renders alerts from useSkillMetrics
+        // (monitoring.metrics), not from monitoring.alerts — invalidating only
+        // the alerts key would leave the visible alert list stale.
+        await queryClient.invalidateQueries({ queryKey: queryKeys.monitoring.all });
       }
     },
   });

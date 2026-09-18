@@ -116,6 +116,10 @@ export function registerRunSkillValidationRoute({
         const coreContext = await context.core;
         const evalsContext = await context.evals;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        // Validation continues after this handler returns, so every client used by
+        // the background tasks below must be request-independent: the
+        // request-scoped client is torn down with the request.
+        const backgroundEsClient = coreContext.elasticsearch.client.asInternalUser;
 
         const { skillId } = request.params;
         const {
@@ -186,7 +190,7 @@ export function registerRunSkillValidationRoute({
                 // Fire-and-forget agent-based validation
                 const agentStartTime = Date.now();
                 const cancelWatchdog = startValidationWatchdog({
-                  esClient,
+                  esClient: backgroundEsClient,
                   skillId,
                   mode: 'agent',
                   logger,
@@ -198,14 +202,14 @@ export function registerRunSkillValidationRoute({
                       // Orchestrator returned nothing — treat as a failure so the
                       // skill does not sit in 'validating' indefinitely.
                       await markValidationFailed({
-                        esClient,
+                        esClient: backgroundEsClient,
                         skillId,
                         reason: 'Agent orchestrator returned no result',
                         logger,
                       });
                       return;
                     }
-                    await esClient.update({
+                    await backgroundEsClient.update({
                       index: '.aesop-proposed-skills',
                       id: skillId,
                       doc: {
@@ -233,7 +237,7 @@ export function registerRunSkillValidationRoute({
                       }`
                     );
                     await markValidationFailed({
-                      esClient,
+                      esClient: backgroundEsClient,
                       skillId,
                       reason: `Agent validation failed: ${
                         err instanceof Error ? err.message : String(err)
@@ -272,13 +276,13 @@ export function registerRunSkillValidationRoute({
             // registry (per-criterion evaluators, CODE gates, multi-step
             // scoring) — no monolithic LLM prompt.
             const cancelWatchdog = startValidationWatchdog({
-              esClient,
+              esClient: backgroundEsClient,
               skillId,
               mode: 'convergence',
               logger,
             });
             void runConvergenceValidation({
-              esClient,
+              esClient: backgroundEsClient,
               actionsClient,
               connectorId,
               skillId,
@@ -293,7 +297,7 @@ export function registerRunSkillValidationRoute({
                   }`
                 );
                 await markValidationFailed({
-                  esClient,
+                  esClient: backgroundEsClient,
                   skillId,
                   reason: `Convergence validation failed: ${
                     err instanceof Error ? err.message : String(err)
@@ -309,13 +313,13 @@ export function registerRunSkillValidationRoute({
             // registry, no improvement loop. Watchdog preserves Step-6
             // stuck-state correctness.
             const cancelWatchdog = startValidationWatchdog({
-              esClient,
+              esClient: backgroundEsClient,
               skillId,
               mode: 'single',
               logger,
             });
             runLLMValidation({
-              esClient,
+              esClient: backgroundEsClient,
               actionsClient,
               connectorId,
               skillId,

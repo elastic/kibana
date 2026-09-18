@@ -185,19 +185,19 @@ export const ExplorationDashboard = () => {
       field: 'indices_discovered',
       name: 'Indices',
       width: '8%',
-      render: (count?: number) => count || '-',
+      render: (count?: number) => count ?? '-',
     },
     {
       field: 'relationships_found',
       name: 'Relationships',
       width: '10%',
-      render: (count?: number) => count || '-',
+      render: (count?: number) => count ?? '-',
     },
     {
       field: 'patterns_identified',
       name: 'Patterns',
       width: '8%',
-      render: (count?: number) => count || '-',
+      render: (count?: number) => count ?? '-',
     },
     {
       field: 'skills_proposed',
@@ -234,6 +234,10 @@ export const ExplorationDashboard = () => {
   const viewDetails = (executionId: string) => {
     history.push(`/aesop/exploration/${executionId}`);
   };
+
+  const handleExplorationComplete = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['aesop', 'explorations'] });
+  }, [queryClient]);
 
   const handleDeployDashboard = useCallback(async () => {
     setIsDeployingDashboard(true);
@@ -340,9 +344,7 @@ export const ExplorationDashboard = () => {
                 <div key={exploration.execution_id}>
                   <ExplorationProgress
                     executionId={exploration.execution_id}
-                    onComplete={() => {
-                      queryClient.invalidateQueries({ queryKey: ['aesop', 'explorations'] });
-                    }}
+                    onComplete={handleExplorationComplete}
                   />
                   <EuiSpacer size="m" />
                 </div>
@@ -420,7 +422,9 @@ export const ExplorationDashboard = () => {
                   selectedOptions={scopedIndices}
                   onChange={setScopedIndices}
                   onCreateOption={(searchValue) => {
-                    setScopedIndices([...scopedIndices, { label: searchValue }]);
+                    // Functional update: the captured `scopedIndices` is stale when
+                    // the user creates several options in a row.
+                    setScopedIndices((prev) => [...prev, { label: searchValue }]);
                   }}
                   isClearable
                 />

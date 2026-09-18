@@ -44,6 +44,25 @@ describe('tool_args evaluator', () => {
     expect(result.label).toBe('fail');
   });
 
+  it('should fail when an expected zero-arg tool is never called', async () => {
+    const result = await evaluate([], {
+      toolArgs: [{ toolName: 'list_indices', args: {} }],
+    });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('fail');
+    expect(result.metadata?.perTool).toEqual([
+      { toolName: 'list_indices', matched: 0, total: 1, mismatches: ['tool not called'] },
+    ]);
+  });
+
+  it('should pass when an expected zero-arg tool is called', async () => {
+    const result = await evaluate([{ toolName: 'list_indices', args: {} }], {
+      toolArgs: [{ toolName: 'list_indices', args: {} }],
+    });
+    expect(result.score).toBe(1.0);
+    expect(result.label).toBe('pass');
+  });
+
   it('should penalize extra args by default', async () => {
     const result = await evaluate(
       [{ toolName: 'search', args: { query: 'test', limit: 10, extra: true } }],

@@ -83,6 +83,9 @@ export class DashboardGeneratorService {
               title: panel.panelConfig.title,
             },
             panelRefName: `panel_${index}`,
+            // Kibana resolves the embeddable implementation from `type`; a panel
+            // without it fails to render.
+            type: panel.panelConfig.type,
           }))
         ),
         optionsJSON: JSON.stringify({

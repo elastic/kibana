@@ -17,6 +17,10 @@ const GetSkillAlertsParams = z.object({
   skillId: z.string(),
 });
 
+const GetSkillAlertsQuery = z.object({
+  skill_name: z.string().optional(),
+});
+
 export const registerGetSkillAlertsRoute = ({
   router,
   logger,
@@ -37,12 +41,14 @@ export const registerGetSkillAlertsRoute = ({
         validate: {
           request: {
             params: buildRouteValidationWithZod(GetSkillAlertsParams),
+            query: buildRouteValidationWithZod(GetSkillAlertsQuery),
           },
         },
       },
       async (context, request, response) => {
         try {
           const { skillId } = request.params;
+          const { skill_name: skillName } = request.query;
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
@@ -50,9 +56,11 @@ export const registerGetSkillAlertsRoute = ({
           const from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
           const to = now.toISOString();
 
+          // Second argument is the display name, not a second id — mirror
+          // get_skill_metrics.ts and fall back to the id when the caller omits it.
           const metrics = await monitoringService.getSkillMetrics(
             skillId,
-            skillId,
+            skillName ?? skillId,
             new Date().toISOString(),
             { from, to },
             esClient

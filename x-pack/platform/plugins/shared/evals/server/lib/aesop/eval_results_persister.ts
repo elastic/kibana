@@ -68,7 +68,10 @@ export const persistEvalRun = async (options: PersistEvalRunOptions): Promise<vo
         experiment_id: runId,
         example: {
           id: item.exampleId,
-          index: result.itemIndex,
+          // `item.index` is the dataset position; `result.itemIndex` is the
+          // position within the array passed to this call (the incremental
+          // persist path passes a single item, so it is always 0).
+          index: item.index,
           input: persistedInput,
           dataset: { id: options.datasetId, name: options.datasetName },
         },

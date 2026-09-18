@@ -190,25 +190,38 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
             `[AESOP] Skill rejected successfully skill_id=${skillId} rejection_reason=${rejection_reason} duration_ms=${durationMs}`
           );
 
-          // 5. Cross-evaluate remaining pending skills with rejection context
+          // 5. Cross-evaluate remaining pending skills with rejection context.
+          // Isolated from the writes above: the rejection is already persisted, so a
+          // failure while *starting* the background evaluation must not surface as a
+          // 500 and push the caller into retrying a write that has already landed.
+          let crossEvaluationTriggered = false;
           if (connectorId) {
-            const evalsContext = await context.evals;
-            const actionsStart = evalsContext.getActionsStart();
-            if (actionsStart) {
-              // Fire-and-forget: evaluate siblings in the background
-              crossEvaluatePendingSkills({
-                esClient,
-                actionsClient: await actionsStart.getActionsClientWithRequest(request),
-                connectorId,
-                rejectedSkill: { id: skillId, name: skill.name, rejection_reason, review_notes },
-                logger,
-              }).catch((err) => {
-                logger.error(
-                  `[AESOP] Background cross-evaluation failed: ${
-                    err instanceof Error ? err.message : String(err)
-                  }`
-                );
-              });
+            try {
+              const evalsContext = await context.evals;
+              const actionsStart = evalsContext.getActionsStart();
+              if (actionsStart) {
+                // Fire-and-forget: evaluate siblings in the background
+                crossEvaluationTriggered = true;
+                crossEvaluatePendingSkills({
+                  esClient,
+                  actionsClient: await actionsStart.getActionsClientWithRequest(request),
+                  connectorId,
+                  rejectedSkill: { id: skillId, name: skill.name, rejection_reason, review_notes },
+                  logger,
+                }).catch((err) => {
+                  logger.error(
+                    `[AESOP] Background cross-evaluation failed: ${
+                      err instanceof Error ? err.message : String(err)
+                    }`
+                  );
+                });
+              }
+            } catch (crossEvalError) {
+              logger.warn(
+                `[AESOP] Cross-evaluation unavailable after rejecting skill_id=${skillId}: ${getErrorMessage(
+                  crossEvalError
+                )}`
+              );
             }
           }
 
@@ -224,7 +237,7 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
               skill_name: skill.name,
               rejection_reason,
               feedback_stored: true,
-              cross_evaluation_triggered: !!connectorId,
+              cross_evaluation_triggered: crossEvaluationTriggered,
             },
           });
         } catch (error) {
@@ -361,6 +374,7 @@ Respond with ONLY a JSON array (no markdown fences):
 
     const rawResponse = extractLlmResponseText(llmResult.data);
     const evaluations = parseCrossEvaluation(rawResponse);
+    const pendingSkillIds = new Set(skillSummaries.map((s) => s.id));
 
     // Act on affected skills based on severity
     let autoRejected = 0;
@@ -368,6 +382,15 @@ Respond with ONLY a JSON array (no markdown fences):
 
     for (const evaluation of evaluations) {
       if (!evaluation.affected || evaluation.severity === 'none') continue;
+
+      // Only act on ids we actually offered to the model: an id it invented (or
+      // one belonging to a ...[truncated]
+      if (!pendingSkillIds.has(evaluation.id)) {
+        logger.warn(
+          `[AESOP] Cross-evaluation referenced unknown skill id ${evaluation.id}; ignoring`
+        );
+        continue;
+      }
 
       if (evaluation.severity === 'high') {
         // Auto-reject: same fundamental issues, not worth improving
@@ -393,12 +416,15 @@ Respond with ONLY a JSON array (no markdown fences):
             },
             refresh: 'wait_for',
           })
+          .then(() => {
+            autoRejected++;
+            logger.info(`[AESOP] Auto-rejected skill ${evaluation.id}: ${evaluation.reason}`);
+          })
           .catch((err: Error) => {
+            // Incremented only on success — a failed update must not inflate the
+            // auto-rejected total reported in the completion log.
             logger.warn(`[AESOP] Failed to auto-reject skill ${evaluation.id}: ${err.message}`);
           });
-
-        autoRejected++;
-        logger.info(`[AESOP] Auto-rejected skill ${evaluation.id}: ${evaluation.reason}`);
       } else {
         // Medium/low severity: flag with warning but keep for review
         await esClient
@@ -415,14 +441,16 @@ Respond with ONLY a JSON array (no markdown fences):
               },
             },
           })
+          .then(() => {
+            autoImproved++;
+            logger.info(
+              `[AESOP] Flagged skill ${evaluation.id} (${evaluation.severity}): ${evaluation.reason}`
+            );
+          })
           .catch((err: Error) => {
+            // Incremented only on success — see autoRejected above.
             logger.warn(`[AESOP] Failed to flag skill ${evaluation.id}: ${err.message}`);
           });
-
-        autoImproved++;
-        logger.info(
-          `[AESOP] Flagged skill ${evaluation.id} (${evaluation.severity}): ${evaluation.reason}`
-        );
       }
     }
 

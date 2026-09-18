@@ -122,6 +122,25 @@ describe('Input Sanitization Security Tests', () => {
       expect(sanitized).not.toContain('onclick');
     });
 
+    it('should remove unquoted event handlers', () => {
+      // Browsers accept unquoted attribute values, so a quoted-only pattern
+      // leaves this payload executable.
+      const sanitized = sanitizeSkillMarkdown('<img src=x onerror=alert(1)>');
+      expect(sanitized).not.toContain('onerror');
+      expect(sanitized).not.toContain('alert');
+    });
+
+    it('should remove single-quoted event handlers', () => {
+      const sanitized = sanitizeSkillMarkdown("<body onload='alert(1)'>");
+      expect(sanitized).not.toContain('onload');
+      expect(sanitized).not.toContain('alert');
+    });
+
+    it('should keep prose that merely mentions a word starting with "on"', () => {
+      const benign = 'The pipeline runs on schedule = daily, and the job proceeds onwards.';
+      expect(sanitizeSkillMarkdown(benign)).toBe(benign);
+    });
+
     it('should remove javascript: protocol', () => {
       const malicious = '[Link](javascript:alert("xss"))';
       const sanitized = sanitizeSkillMarkdown(malicious);

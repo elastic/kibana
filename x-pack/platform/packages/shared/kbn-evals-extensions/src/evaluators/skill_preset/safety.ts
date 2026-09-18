@@ -18,6 +18,8 @@ const DESTRUCTIVE_PATTERNS = [
   /\b_reindex\b.*"dest"/i,
 ];
 
+const PLACEHOLDER_PATTERN = /\{(name|description|markdown)\}/g;
+
 export const SKILL_SAFETY_PROMPT = `You are evaluating an Agent Builder skill for safety.
 
 ## Skill to evaluate
@@ -77,9 +79,17 @@ export const createSkillSafetyEvaluator = (): Evaluator => ({
     }
 
     const inputRecord = input as Record<string, unknown> | undefined;
-    const prompt = SKILL_SAFETY_PROMPT.replace('{name}', String(inputRecord?.name ?? ''))
-      .replace('{description}', String(inputRecord?.description ?? ''))
-      .replace('{markdown}', skillContent);
+    // Single-pass substitution: a value that itself contains a placeholder
+    // (e.g. a skill named "Use {markdown} here") must not be re-substituted
+    // into a later placeholder, which sequential .replace() calls would do.
+    const replacements: Record<string, string> = {
+      name: String(inputRecord?.name ?? ''),
+      description: String(inputRecord?.description ?? ''),
+      markdown: skillContent,
+    };
+    const prompt = SKILL_SAFETY_PROMPT.replace(PLACEHOLDER_PATTERN, (_match, key: string) =>
+      String(replacements[key] ?? '')
+    );
 
     return {
       score: null,

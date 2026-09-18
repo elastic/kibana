@@ -147,6 +147,29 @@ describe('ReadOnlyEnforcer', () => {
           'not explicitly allowed'
         );
       });
+
+      it('should block write paths that also contain an allowlisted read endpoint', () => {
+        // The read-only allowlist matches on substring, so the deny list has to
+        // be evaluated first or this path returns early as "allowed".
+        expect(() => enforcer.validateReadOnlyRequest('POST', '/_create/_search')).toThrow(
+          SecurityError
+        );
+        expect(() => enforcer.validateReadOnlyRequest('POST', '/_create/_search')).toThrow(
+          'write operation'
+        );
+        expect(() => enforcer.validateReadOnlyRequest('POST', '/my-index/_update/_search')).toThrow(
+          SecurityError
+        );
+      });
+
+      it('should still allow read-only continuations of allowlisted endpoints', () => {
+        // Scrolling and async-search result retrieval are read-only and extend
+        // the allowlisted endpoint, so substring matching is retained.
+        expect(() => enforcer.validateReadOnlyRequest('POST', '/_search/scroll')).not.toThrow();
+        expect(() =>
+          enforcer.validateReadOnlyRequest('POST', '/_async_search/abc123')
+        ).not.toThrow();
+      });
     });
 
     describe('Case insensitivity', () => {

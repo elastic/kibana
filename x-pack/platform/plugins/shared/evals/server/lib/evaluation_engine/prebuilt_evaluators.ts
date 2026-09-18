@@ -87,13 +87,16 @@ const evaluateWithLlmJudge = async (
   const markdownStr = input?.markdown ? String(input.markdown) : outputStr;
 
   const prompt = promptTemplate
-    .replace(/\{input\}/g, JSON.stringify(input))
-    .replace(/\{output\}/g, outputStr)
-    .replace(/\{reference\}/g, JSON.stringify(params.expected ?? ''))
-    .replace(/\{name\}/g, String(input?.name ?? ''))
-    .replace(/\{description\}/g, String(input?.description ?? ''))
-    .replace(/\{markdown\}/g, markdownStr)
-    .replace(/\{query\}/g, String(input?.query ?? ''));
+    // Replacer functions, not strings: a literal value containing `$&`, `$'`
+    // or `$1` would otherwise be interpreted as a replacement directive and
+    // corrupt the prompt.
+    .replace(/\{input\}/g, () => JSON.stringify(input))
+    .replace(/\{output\}/g, () => outputStr)
+    .replace(/\{reference\}/g, () => JSON.stringify(params.expected ?? ''))
+    .replace(/\{name\}/g, () => String(input?.name ?? ''))
+    .replace(/\{description\}/g, () => String(input?.description ?? ''))
+    .replace(/\{markdown\}/g, () => markdownStr)
+    .replace(/\{query\}/g, () => String(input?.query ?? ''));
 
   const client = params.inferenceClient as {
     chatComplete: (p: {

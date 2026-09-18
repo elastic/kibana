@@ -124,7 +124,11 @@ export const createToolArgsEvaluator = (config?: ToolArgsConfig): Evaluator => (
       if (actualCallIndex >= 0) consumedIndices.add(actualCallIndex);
 
       if (!actualCall) {
-        const expectedKeyCount = Object.keys(expectedTool.args).length;
+        // A tool that was never called counts as one failed unit even when it
+        // expects no args. Without the floor, a run that calls none of the
+        // expected zero-arg tools leaves totalKeys at 0 and scores a perfect
+        // 1.0 despite the tools being missing.
+        const expectedKeyCount = Math.max(Object.keys(expectedTool.args).length, 1);
         totalKeys += expectedKeyCount;
         perTool.push({
           toolName: expectedTool.toolName,
