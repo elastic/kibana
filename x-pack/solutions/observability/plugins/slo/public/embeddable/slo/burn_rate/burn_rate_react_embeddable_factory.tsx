@@ -7,7 +7,11 @@
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import {
+  getViewModeSubject,
+  initializeStateApi,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -104,13 +108,16 @@ export const getBurnRateEmbeddableFactory = ({
           reload$.next(next.isReload);
         });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
-          const [sloId, sloInstanceId, duration] = useBatchedPublishingSubjects(
+          const [sloId, sloInstanceId, duration, viewMode] = useBatchedPublishingSubjects(
             sloBurnRateManager.api.sloId$, // from slo_id key
             sloBurnRateManager.api.sloInstanceId$, // from slo_instance_id key
-            sloBurnRateManager.api.duration$
+            sloBurnRateManager.api.duration$,
+            viewMode$
           );
 
           useEffect(() => {
@@ -139,6 +146,7 @@ export const getBurnRateEmbeddableFactory = ({
                     sloInstanceId={sloInstanceId}
                     duration={duration}
                     reloadSubject={reload$}
+                    previewMode={viewMode === 'preview'}
                   />
                 </QueryClientProvider>
               </PluginContext.Provider>

@@ -17,7 +17,13 @@ import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 import type { EmbeddableProps } from './types';
 
-export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: EmbeddableProps) {
+export function BurnRate({
+  sloId,
+  sloInstanceId,
+  duration,
+  reloadSubject,
+  previewMode = false,
+}: EmbeddableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
   const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
@@ -80,6 +86,7 @@ export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: Embe
               onClick={() => {
                 setSelectedSlo(slo);
               }}
+              disabled={previewMode}
             >
               <h2>{slo.name}</h2>
             </EuiLink>
