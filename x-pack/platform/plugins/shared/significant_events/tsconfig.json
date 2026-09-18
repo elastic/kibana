@@ -15,6 +15,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agent-builder-elastic-ai-index-ki-types",
+    "@kbn/nightshift-shared",
     "@kbn/streams-plugin",
     "@kbn/core",
     "@kbn/core-pricing-common",
@@ -42,7 +43,7 @@
     "@kbn/nightshift-ai",
     "@kbn/config-schema",
     "@kbn/management-settings-ids",
-    "@kbn/data-streams",
+    "@kbn/core-data-streams-server",
     "@kbn/streamlang",
     "@kbn/es-mappings",
     "@kbn/alerting-plugin",
@@ -79,6 +80,6 @@
     "@kbn/cps-server-utils",
     "@kbn/inference-prompt-utils",
     "@kbn/esql-utils",
-    "@kbn/nightshift-investigations-plugin",
+    "@kbn/nightshift-investigations-plugin"
   ]
 }

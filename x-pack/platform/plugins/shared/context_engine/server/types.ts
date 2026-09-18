@@ -6,7 +6,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -33,10 +33,25 @@ export interface ContextEnginePluginStart {
   /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
   /**
-   * The improvements store, bound to the caller's Elasticsearch client. Pass a request-scoped one:
-   * the store is a user-owned index, so Elasticsearch authorizes each read and write.
+   * The improvements store for one space, bound to the caller's Elasticsearch client.
+   * Pass a request-scoped client: the store is a user-owned index, so Elasticsearch authorizes each read and write.
    */
-  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getImprovementsService: (
+    esClient: ElasticsearchClient,
+    spaceId: string
+  ) => ImprovementsServiceApi;
+}
+
+/** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */
+export interface DeleteWorkflowsApi {
+  deleteWorkflows(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest,
+    options?: { force?: boolean }
+  ): Promise<{
+    failures: Array<{ id: string; error: string }>;
+  }>;
 }
 
 export interface ContextEngineSetupDependencies {

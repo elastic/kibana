@@ -6,12 +6,21 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiConfirmModal,
+  EuiButton,
+  EuiButtonEmpty,
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiText,
+  useEuiMaxBreakpoint,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -43,10 +52,20 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
   const modalTitleId = useGeneratedHtmlId();
+  // EuiConfirmModal anchors itself to the bottom of small screens; EuiModal fills them. Keep the confirmation layout.
+  const confirmationModalStyles = css({
+    [useEuiMaxBreakpoint('m')]: {
+      insetBlockStart: 'auto',
+    },
+  });
 
   const deleteSnapshotPrompt: DeleteSnapshot = (ids, onSuccess = () => undefined) => {
     if (!ids || !ids.length) {
       throw new Error('No snapshot IDs specified for deletion');
+    }
+    // A deletion in flight owns the modal and the success callback until Elasticsearch answers.
+    if (isDeleting) {
+      return;
     }
     setIsModalOpen(true);
     setSnapshotIds(ids);
@@ -58,13 +77,21 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
     setSnapshotIds([]);
   };
 
+  // Dismissing the modal would not stop the deletion, so it stays open until the result arrives.
+  const cancelDelete = () => {
+    if (isDeleting) {
+      return;
+    }
+    closeModal();
+  };
+
   const deleteSnapshot = () => {
     const snapshotsToDelete = [...snapshotIds];
     setIsDeleting(true);
     deleteSnapshots(snapshotsToDelete).then(({ data, error }) => {
       const { itemsDeleted, errors } = data || { itemsDeleted: undefined, errors: undefined };
 
-      // Wait until request is done to close modal; deleting snapshots take longer due to their sequential nature
+      // Report the result only after Elasticsearch completes the deletion request.
       closeModal();
       setIsDeleting(false);
 
@@ -119,71 +146,59 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
     const isSingle = snapshotIds.length === 1;
 
     return (
-      <EuiConfirmModal
+      <EuiModal
+        role="alertdialog"
         aria-labelledby={modalTitleId}
-        title={
-          isSingle ? (
-            <FormattedMessage
-              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteSingleTitle"
-              defaultMessage="Delete snapshot ''{name}''?"
-              values={{ name: snapshotIds[0].snapshot }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleTitle"
-              defaultMessage="Delete {count} snapshots?"
-              values={{ count: snapshotIds.length }}
-            />
-          )
-        }
-        titleProps={{ id: modalTitleId }}
-        onCancel={closeModal}
-        onConfirm={deleteSnapshot}
-        cancelButtonText={
-          <FormattedMessage
-            id="xpack.snapshotRestore.deleteSnapshot.confirmModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        }
-        confirmButtonText={
-          <FormattedMessage
-            id="xpack.snapshotRestore.deleteSnapshot.confirmModal.confirmButtonLabel"
-            defaultMessage="Delete {count, plural, one {snapshot} other {snapshots}}"
-            values={{ count: snapshotIds.length }}
-          />
-        }
-        confirmButtonDisabled={isDeleting}
-        buttonColor="danger"
+        onClose={cancelDelete}
+        css={confirmationModalStyles}
         data-test-subj="srdeleteSnapshotConfirmationModal"
       >
-        {!isSingle ? (
-          <Fragment>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmModalTitleText">
+            {isSingle ? (
+              <FormattedMessage
+                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteSingleTitle"
+                defaultMessage="Delete snapshot ''{name}''?"
+                values={{ name: snapshotIds[0].snapshot }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleTitle"
+                defaultMessage="Delete {count} snapshots?"
+                values={{ count: snapshotIds.length }}
+              />
+            )}
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          <EuiText data-test-subj="confirmModalBodyText">
+            {!isSingle ? (
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleListDescription"
+                    defaultMessage="You are about to delete these snapshots:"
+                  />
+                </p>
+                <ul>
+                  {snapshotIds.map(({ snapshot, repository }) => (
+                    <li key={`${repository}/${snapshot}`}>{snapshot}</li>
+                  ))}
+                </ul>
+              </Fragment>
+            ) : null}
             <p>
               <FormattedMessage
-                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleListDescription"
-                defaultMessage="You are about to delete these snapshots:"
+                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleDescription"
+                defaultMessage="Restore operations associated with {count, plural, one {this snapshot} other {these snapshots}} will stop."
+                values={{ count: snapshotIds.length }}
               />
             </p>
-            <ul>
-              {snapshotIds.map(({ snapshot, repository }) => (
-                <li key={`${repository}/${snapshot}`}>{snapshot}</li>
-              ))}
-            </ul>
-          </Fragment>
-        ) : null}
-        <p>
-          <FormattedMessage
-            id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleDescription"
-            defaultMessage="Restore operations associated with {count, plural, one {this snapshot} other {these snapshots}} will stop."
-            values={{ count: snapshotIds.length }}
-          />
-        </p>
-        {!isSingle && isDeleting ? (
-          <Fragment>
-            <KbnWarningCallout
-              announceOnMount
-              title={
-                <Fragment>
+            {isDeleting ? (
+              <KbnWarningCallout
+                announceOnMount
+                title={
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiLoadingSpinner />
@@ -191,24 +206,51 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
                     <EuiFlexItem>
                       <FormattedMessage
                         id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutTitle"
-                        defaultMessage="Deleting snapshots"
+                        defaultMessage="Deleting {count, plural, one {snapshot} other {snapshots}}"
+                        values={{ count: snapshotIds.length }}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                </Fragment>
-              }
-              text={
-                <p>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutDescription"
-                    defaultMessage="This may take a few minutes."
-                  />
-                </p>
-              }
+                }
+                text={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutDescription"
+                      defaultMessage="This may take a few minutes."
+                    />
+                  </p>
+                }
+              />
+            ) : null}
+          </EuiText>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty
+            onClick={cancelDelete}
+            isDisabled={isDeleting}
+            data-test-subj="confirmModalCancelButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.cancelButtonLabel"
+              defaultMessage="Cancel"
             />
-          </Fragment>
-        ) : null}
-      </EuiConfirmModal>
+          </EuiButtonEmpty>
+          <EuiButton
+            onClick={deleteSnapshot}
+            isDisabled={isDeleting}
+            fill
+            color="danger"
+            data-test-subj="confirmModalConfirmButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.confirmButtonLabel"
+              defaultMessage="Delete {count, plural, one {snapshot} other {snapshots}}"
+              values={{ count: snapshotIds.length }}
+            />
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
     );
   };
 
