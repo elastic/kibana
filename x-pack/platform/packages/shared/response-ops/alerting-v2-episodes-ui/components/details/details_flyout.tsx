@@ -32,6 +32,7 @@ import { AlertEpisodesRelatedSection } from './related_section';
 import { AlertEpisodeRunbookSection } from './runbook_section';
 import { AlertEpisodeTimelineSection } from './timeline_section';
 import { AlertEpisodeMetadataSection } from './metadata_section';
+import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from './metadata_layout';
 import { EpisodeFooterActionMenu } from './footer_action_menu';
 import { EMPTY_VALUE } from '../../constants';
 import { formatDateTime } from '../../utils/format_date_time';
@@ -61,11 +62,6 @@ const FLYOUT_HISTORY_KEY = Symbol('alertingV2EpisodeDetails');
 const FLYOUT_TEST_SUBJ = 'alertingV2EpisodeFlyout';
 const FLYOUT_FOOTER_TEST_SUBJ = 'alertingV2EpisodeFlyoutFooter';
 const METADATA_PANEL_TEST_SUBJ = 'alertingV2EpisodeFlyoutMetadataPanel';
-const METADATA_CALLOUT_TEST_SUBJ = 'alertingV2EpisodeMetadataTabStaleCallout';
-
-/** The doc viewer only flexes its grid once it has some height. Any small number does. */
-const DOC_VIEWER_FLEX_ACTIVATION_OFFSET = 80;
-
 /** Marks our wrapper, so the styles below can match on it instead of a test subject. */
 const METADATA_SCOPE_CLASS = 'alertingV2EpisodeMetadataScope';
 
@@ -100,24 +96,13 @@ const metadataBodyStyles = css`
 const metadataTabStyles = (euiTheme: EuiThemeComputed) => css`
   block-size: 100%;
 
-  /* The doc viewer measures this off window.innerHeight, which overshoots the body.
-     Its parent already has the right height, so just fill it. */
-  [class*='table--containerHeight'] {
-    height: 100%;
-  }
-
-  /* Pad the search and toggle rows only, so the table stays flush. Each row is found
-     by the control inside it, not by position. */
-  [class*='euiFlexItem']:has(
-      > [class*='euiFormControlLayout'] [data-test-subj='unifiedDocViewerFieldsSearchInput'],
-      > [class*='euiFlexGroup'] > [class*='euiFlexItem'] > [class*='euiSwitch']
-    ) {
+  /* Keep the controls inset while the document table itself remains edge-to-edge. */
+  :has(> input[type='search']) {
     padding-inline: ${euiTheme.size.m};
   }
 
-  [data-test-subj='${METADATA_CALLOUT_TEST_SUBJ}'] {
-    margin-block-start: ${euiTheme.size.m};
-    margin-inline: ${euiTheme.size.m};
+  :has(> button[role='switch']) {
+    padding-inline: ${euiTheme.size.m};
   }
 `;
 
@@ -433,12 +418,16 @@ export const AlertEpisodeDetailsFlyout = ({
               data-test-subj={METADATA_PANEL_TEST_SUBJ}
             >
               <Global styles={metadataBodyStyles} />
-              <div className={METADATA_SCOPE_CLASS} css={metadataTabStyles(euiTheme)}>
+              <div
+                className={METADATA_SCOPE_CLASS}
+                css={metadataTabStyles(euiTheme)}
+                data-test-subj="alertingV2EpisodeFlyoutMetadataScope"
+              >
                 <AlertEpisodeMetadataSection
                   episodeId={episodeId}
                   services={services}
-                  // Only needs to be non-zero: see DOC_VIEWER_FLEX_ACTIVATION_OFFSET.
-                  decreaseAvailableHeightBy={DOC_VIEWER_FLEX_ACTIVATION_OFFSET}
+                  decreaseAvailableHeightBy={DOC_VIEWER_FLEX_HEIGHT_SENTINEL}
+                  calloutMarginSize="m"
                 />
               </div>
             </FlyoutTemplate.Body.TabPanel>

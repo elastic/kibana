@@ -42,4 +42,20 @@ describe('AlertEpisodeMetadataTable', () => {
     );
     expect(screen.getByTestId('alertingV2EpisodeMetadataTabStaleCallout')).toBeInTheDocument();
   });
+
+  it('applies the requested margin directly to the stale-data callout', () => {
+    render(
+      <AlertEpisodeMetadataTable
+        hit={mockHit}
+        dataView={mockDataView}
+        renderTable={() => null}
+        isStale
+        calloutMarginSize="m"
+      />
+    );
+
+    const callout = screen.getByTestId('alertingV2EpisodeMetadataTabStaleCallout');
+    expect(callout).toHaveStyleRule('margin-block-start', '12px');
+    expect(callout).toHaveStyleRule('margin-inline', '12px');
+  });
 });

@@ -13,6 +13,7 @@ import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { EDIT_EPISODE_ASSIGNEE_ACTION_ID } from '../../actions/edit_assignee';
 import type { EpisodeAction } from '../../actions/types';
 import { AlertEpisodeRunbookSection } from './runbook_section';
+import { AlertEpisodeMetadataSection } from './metadata_section';
 import { useEpisodeDetailsHeaderData } from '../../hooks/use_episode_details_header_data';
 import type { RuleState } from '../../types/rule_state';
 import { RuleStateStatus } from '../../types/rule_state';
@@ -60,12 +61,22 @@ jest.mock('./timeline_section', () => ({
   AlertEpisodeTimelineSection: () => <div data-test-subj="timelineSectionStub" />,
 }));
 jest.mock('./metadata_section', () => ({
-  AlertEpisodeMetadataSection: () => <div data-test-subj="metadataSectionStub" />,
+  AlertEpisodeMetadataSection: jest.fn(() => (
+    <div data-test-subj="metadataSectionStub">
+      <div>
+        <input type="search" />
+      </div>
+      <div>
+        <button type="button" role="switch" aria-checked={false} />
+      </div>
+    </div>
+  )),
 }));
 
 const mockUseEpisodeDetailsHeaderData = jest.mocked(useEpisodeDetailsHeaderData);
 const mockFlyoutAccordion = jest.mocked(FlyoutAccordion);
 const mockRunbookSection = jest.mocked(AlertEpisodeRunbookSection);
+const mockMetadataSection = jest.mocked(AlertEpisodeMetadataSection);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
@@ -155,6 +166,23 @@ describe('AlertEpisodeDetailsFlyout', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
     expect(screen.getByTestId('metadataSectionStub')).toBeInTheDocument();
+  });
+
+  it('activates the document viewer flex layout and pads its semantic controls', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
+
+    const metadataScope = screen.getByTestId('alertingV2EpisodeFlyoutMetadataScope');
+    expect(metadataScope).toHaveStyleRule('padding-inline', '12px', {
+      target: ":has(> input[type='search'])",
+    });
+    expect(metadataScope).toHaveStyleRule('padding-inline', '12px', {
+      target: ":has(> button[role='switch'])",
+    });
+    expect(mockMetadataSection).toHaveBeenCalledWith(
+      expect.objectContaining({ decreaseAvailableHeightBy: Number.MAX_SAFE_INTEGER }),
+      expect.anything()
+    );
   });
 
   it('hides the metadata tab when the rule is not loaded', () => {

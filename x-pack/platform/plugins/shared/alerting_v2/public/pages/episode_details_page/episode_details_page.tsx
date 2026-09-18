@@ -19,7 +19,6 @@ import {
   EuiTitle,
   logicalCSS,
   useEuiMinBreakpoint,
-  useEuiMaxBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
@@ -44,6 +43,7 @@ import { AlertEpisodeTrendChartSection } from '@kbn/alerting-v2-episodes-ui/comp
 import { AlertEpisodeTimelineHeatmapsSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section';
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
+import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_layout';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
 import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -90,7 +90,6 @@ export function EpisodeDetailsPage() {
   const { data, http, spaces } = services;
   const history = useHistory();
 
-  const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
@@ -457,27 +456,6 @@ export function EpisodeDetailsPage() {
               paddingSize="none"
               css={css`
                 min-width: 0;
-
-                ${smallMediaQuery} {
-                  [class*='InternalDocViewerTable'] {
-                    display: block;
-                    height: unset;
-                  }
-                }
-
-                ${largeMediaQuery} {
-                  // The doc-viewer table uses a fixed height by default; set
-                  // it to 100% so it fills the available flex height instead
-                  // of measuring against \`window.innerHeight\`.
-                  [class*='InternalDocViewerTable'] {
-                    height: 100%;
-
-                    & > :nth-child(2),
-                    & > :nth-child(4) {
-                      padding-right: ${euiTheme.size.s};
-                    }
-                  }
-                }
               `}
             >
               {actualMainPanel === 'timeline' ? (
@@ -495,7 +473,11 @@ export function EpisodeDetailsPage() {
                 />
               ) : actualMainPanel === 'metadata' ? (
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-                  <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
+                  <AlertEpisodeMetadataSection
+                    episodeId={episodeId}
+                    services={metadataServices}
+                    decreaseAvailableHeightBy={DOC_VIEWER_FLEX_HEIGHT_SENTINEL}
+                  />
                 </EuiPanel>
               ) : (
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
