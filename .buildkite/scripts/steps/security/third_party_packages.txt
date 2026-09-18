@@ -62,9 +62,12 @@ redux-thunk-v2
 redux-toolkit-v1
 redux-v4
 reselect-v4
+@swc/jest
 mongodb
 mongodb-connection-string-url
 @swc/plugin-emotion
+@ampproject/remapping
+magic-string
 graphql
 @cfworker/json-schema
 bump-cli
