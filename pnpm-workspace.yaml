@@ -1464,6 +1464,7 @@ packages:
   - 'x-pack/platform/plugins/shared/ml'
   - 'x-pack/platform/plugins/shared/ml/evals'
   - 'x-pack/platform/plugins/shared/nightshift_investigations'
+  - 'x-pack/platform/plugins/shared/nightshift_sources'
   - 'x-pack/platform/plugins/shared/notification_center'
   - 'x-pack/platform/plugins/shared/notifications'
   - 'x-pack/platform/plugins/shared/observability_ai_assistant'

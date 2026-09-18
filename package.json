@@ -963,6 +963,7 @@
     "@kbn/nightshift-investigations-plugin": "workspace:*",
     "@kbn/nightshift-plugin": "workspace:*",
     "@kbn/nightshift-shared": "workspace:*",
+    "@kbn/nightshift-sources-plugin": "workspace:*",
     "@kbn/no-data-page-plugin": "workspace:*",
     "@kbn/node-libs-browser-webpack-plugin": "workspace:*",
     "@kbn/notification-center-plugin": "workspace:*",
