@@ -22,7 +22,7 @@ import { DATA_SOURCE_TYPES_TO_ICONS } from '../../common';
 import { CreateDataSourceFlyout } from '../create_data_source_flyout';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
-import { createDatasetFormStrings } from './create_dataset_form_i18n';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
 const CONNECT_NEW_DATA_SOURCE = '__connect_new_data_source__';
 
@@ -76,7 +76,7 @@ export function DataSourceSelect({
         'data-test-subj': `createDatasetDataSource-${dataSource.name}`,
       };
     });
-    const connectLabel = createDatasetFormStrings.connectNewDataSourceDropDownOptionLabel();
+    const connectLabel = createDatasetWizardStrings.connectNewDataSourceDropDownOptionLabel;
     const connectOption = {
       value: CONNECT_NEW_DATA_SOURCE,
       inputDisplay: connectLabel,
@@ -139,11 +139,11 @@ export function DataSourceSelect({
         data-test-subj="createDatasetDataSource"
         fullWidth
         name="data_source"
-        aria-label={createDatasetFormStrings.dataSourceLabel()}
+        aria-label={createDatasetWizardStrings.dataSourceLabel}
         valueOfSelected={value ? value : undefined}
         onChange={onSelectChange}
         onBlur={onBlur}
-        placeholder={createDatasetFormStrings.dataSourcePlaceholder()}
+        placeholder={createDatasetWizardStrings.dataSourcePlaceholder}
         isInvalid={isInvalid}
       />
       {isCreateDataSourceOpen ? (

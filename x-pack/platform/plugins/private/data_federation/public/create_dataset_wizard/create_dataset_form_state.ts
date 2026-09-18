@@ -7,7 +7,7 @@
 
 import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
 
-import { createDatasetFormStrings } from './create_dataset_form_i18n';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
 export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
@@ -111,7 +111,7 @@ const parseBooleanFormValue = (value: DatasetBooleanFormValue): boolean | undefi
 export const validateSchemaSampleSize = (value: string): true | string => {
   const parsed = parseOptionalPositiveInteger(value);
   if (value?.trim() && parsed === undefined) {
-    return createDatasetFormStrings.settingsSchemaSampleSizeInvalid();
+    return createDatasetWizardStrings.settingsSchemaSampleSizeInvalid;
   }
   return true;
 };
@@ -119,21 +119,21 @@ export const validateSchemaSampleSize = (value: string): true | string => {
 export const validateMaxErrors = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseNonNegativeInteger(value);
-  if (parsed === undefined) return createDatasetFormStrings.settingsMaxErrorsInvalid();
+  if (parsed === undefined) return createDatasetWizardStrings.settingsMaxErrorsInvalid;
   return true;
 };
 
 export const validateMaxErrorRatio = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseRatio(value);
-  if (parsed === undefined) return createDatasetFormStrings.settingsMaxErrorRatioInvalid();
+  if (parsed === undefined) return createDatasetWizardStrings.settingsMaxErrorRatioInvalid;
   return true;
 };
 
 export const validateMaxFieldSize = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseNonNegativeInteger(value);
-  if (parsed === undefined) return createDatasetFormStrings.settingsMaxFieldSizeInvalid();
+  if (parsed === undefined) return createDatasetWizardStrings.settingsMaxFieldSizeInvalid;
   return true;
 };
 

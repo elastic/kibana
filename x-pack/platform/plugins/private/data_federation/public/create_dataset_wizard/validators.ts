@@ -6,7 +6,7 @@
  */
 
 import { validateIndexNameRules } from '../../common';
-import { createDatasetFormStrings } from './create_dataset_form_i18n';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
 export const validateDatasetName =
   ({
@@ -20,7 +20,7 @@ export const validateDatasetName =
   }) =>
   (value: string): true | string => {
     if (!value) {
-      return createDatasetFormStrings.nameRequired();
+      return createDatasetWizardStrings.nameRequired;
     }
 
     const nameValidation = validateIndexNameRules(value);
@@ -34,5 +34,5 @@ export const validateDatasetName =
       }
       return n === value;
     });
-    return isDuplicate ? createDatasetFormStrings.nameAlreadyExists() : true;
+    return isDuplicate ? createDatasetWizardStrings.nameAlreadyExists : true;
   };

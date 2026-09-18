@@ -12,7 +12,7 @@ import { useController } from 'react-hook-form';
 
 import type { DataSource } from '../../common';
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
-import { createDatasetFormStrings } from './create_dataset_form_i18n';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { DataSourceSelect } from './data_source_select';
 import { validateDatasetName } from './validators';
 
@@ -59,7 +59,7 @@ export function CreateDatasetDetailsFields({
     name: 'data_source',
     control,
     rules: {
-      validate: trimRequired(createDatasetFormStrings.dataSourceRequired()),
+      validate: trimRequired(createDatasetWizardStrings.dataSourceRequired),
     },
   });
 
@@ -67,14 +67,14 @@ export function CreateDatasetDetailsFields({
     name: 'resource',
     control,
     rules: {
-      validate: trimRequired(createDatasetFormStrings.resourceRequired()),
+      validate: trimRequired(createDatasetWizardStrings.resourceRequired),
     },
   });
 
   return (
     <>
       <EuiFormRow
-        label={createDatasetFormStrings.dataSourceLabel()}
+        label={createDatasetWizardStrings.dataSourceLabel}
         fullWidth
         isInvalid={Boolean(dataSourceFieldState.error)}
         error={dataSourceFieldState.error?.message}
@@ -89,8 +89,8 @@ export function CreateDatasetDetailsFields({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFormStrings.nameLabel()}
-        helpText={createDatasetFormStrings.nameHelp()}
+        label={createDatasetWizardStrings.nameLabel}
+        helpText={createDatasetWizardStrings.nameHelp}
         fullWidth
         isInvalid={Boolean(nameFieldState.error)}
         error={nameFieldState.error?.message}
@@ -98,7 +98,7 @@ export function CreateDatasetDetailsFields({
         <EuiFieldText
           data-test-subj="createDatasetName"
           fullWidth
-          placeholder={createDatasetFormStrings.namePlaceholder()}
+          placeholder={createDatasetWizardStrings.namePlaceholder}
           isInvalid={Boolean(nameFieldState.error)}
           value={nameField.value}
           onChange={(e) => nameField.onChange(e.target.value)}
@@ -107,15 +107,15 @@ export function CreateDatasetDetailsFields({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFormStrings.descriptionLabel()}
-        helpText={createDatasetFormStrings.descriptionHelp()}
+        label={createDatasetWizardStrings.descriptionLabel}
+        helpText={createDatasetWizardStrings.descriptionHelp}
         fullWidth
       >
         <EuiTextArea
           data-test-subj="createDatasetDescription"
           fullWidth
           rows={1}
-          placeholder={createDatasetFormStrings.descriptionPlaceholder()}
+          placeholder={createDatasetWizardStrings.descriptionPlaceholder}
           value={descriptionField.value}
           onChange={(e) => descriptionField.onChange(e.target.value)}
           name={descriptionField.name}
@@ -123,8 +123,8 @@ export function CreateDatasetDetailsFields({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFormStrings.resourceLabel()}
-        helpText={createDatasetFormStrings.resourceHelp()}
+        label={createDatasetWizardStrings.resourceLabel}
+        helpText={createDatasetWizardStrings.resourceHelp}
         fullWidth
         isInvalid={Boolean(resourceFieldState.error)}
         error={resourceFieldState.error?.message}

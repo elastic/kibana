@@ -20,7 +20,6 @@ import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useFormContext } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
-import { createDatasetFormStrings } from './create_dataset_form_i18n';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { DatasetWizardSection } from './types';
 
@@ -43,7 +42,7 @@ const ReviewSection: React.FC<{
           onClick={() => onEdit(stepId)}
           data-test-subj={`createDatasetWizardEdit${stepId}`}
         >
-          {createDatasetWizardStrings.editButton()}
+          {createDatasetWizardStrings.editButton}
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -52,7 +51,7 @@ const ReviewSection: React.FC<{
   </>
 );
 
-const displayValue = (value: string) => value.trim() || createDatasetWizardStrings.notSet();
+const displayValue = (value: string) => value.trim() || createDatasetWizardStrings.notSet;
 
 export function StepReview() {
   const { navigateToStep } = Forms.useFormWizardContext<DatasetWizardSection>();
@@ -62,41 +61,41 @@ export function StepReview() {
   return (
     <div data-test-subj="createDatasetWizardReviewStep">
       <ReviewSection
-        title={createDatasetWizardStrings.datasetStepLabel()}
+        title={createDatasetWizardStrings.datasetStepLabel}
         stepId="dataset"
         onEdit={navigateToStep}
       >
         <EuiDescriptionList textStyle="reverse" compressed>
           <EuiDescriptionListTitle>
-            {createDatasetFormStrings.dataSourceLabel()}
+            {createDatasetWizardStrings.dataSourceLabel}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewDataSource">
             {displayValue(values.data_source)}
           </EuiDescriptionListDescription>
-          <EuiDescriptionListTitle>{createDatasetFormStrings.nameLabel()}</EuiDescriptionListTitle>
+          <EuiDescriptionListTitle>{createDatasetWizardStrings.nameLabel}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewName">
             {displayValue(values.name)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFormStrings.descriptionLabel()}
+            {createDatasetWizardStrings.descriptionLabel}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewDescription">
             {displayValue(values.description)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFormStrings.resourceLabel()}
+            {createDatasetWizardStrings.resourceLabel}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewResource">
             {displayValue(values.resource)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFormStrings.settingsFormatLabel()}
+            {createDatasetWizardStrings.settingsFormatLabel}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewFormat">
             {displayValue(values.settings.format)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFormStrings.settingsPartitionDetectionLabel()}
+            {createDatasetWizardStrings.settingsPartitionDetectionLabel}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewPartitionDetection">
             {displayValue(values.settings.partition_detection)}
@@ -107,25 +106,25 @@ export function StepReview() {
       <EuiSpacer size="l" />
 
       <ReviewSection
-        title={createDatasetWizardStrings.advancedStepLabel()}
+        title={createDatasetWizardStrings.advancedStepLabel}
         stepId="settings"
         onEdit={navigateToStep}
       >
         <EuiDescriptionList textStyle="reverse" compressed>
           <EuiDescriptionListTitle>
-            {createDatasetFormStrings.settingsSchemaResolutionLabel()}
+            {createDatasetWizardStrings.settingsSchemaResolutionLabel}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewSchemaResolution">
             {displayValue(values.settings.schema_resolution)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFormStrings.settingsPartitionPathLabel()}
+            {createDatasetWizardStrings.settingsPartitionPathLabel}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewPartitionPath">
             {displayValue(values.settings.partition_path)}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
-            {createDatasetFormStrings.settingsHivePartitioningLabel()}
+            {createDatasetWizardStrings.settingsHivePartitioningLabel}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewHivePartitioning">
             {displayValue(values.settings.hive_partitioning)}

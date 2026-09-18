@@ -28,9 +28,8 @@ import {
   buildDatasetSettingsFromFormValues,
   type CreateDatasetFormValues,
 } from './create_dataset_form_state';
-import { createDatasetFormStrings } from './create_dataset_form_i18n';
-import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
+import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
 import { StepAdvanced } from './step_advanced';
 import { StepDataset } from './step_dataset';
 import { StepReview } from './step_review';
@@ -97,7 +96,7 @@ export function CreateDatasetWizardPage({
 
     const formatValid = await methods.trigger('settings.format');
     if (!formatValid) {
-      setSaveError(createDatasetFormStrings.settingsFormatRequired());
+      setSaveError(createDatasetWizardStrings.settingsFormatRequired);
       return;
     }
 
@@ -146,7 +145,7 @@ export function CreateDatasetWizardPage({
             <h2>
               {initialDataSet
                 ? createDatasetWizardStrings.editPageTitle(initialDataSet.name)
-                : createDatasetWizardStrings.pageTitle()}
+                : createDatasetWizardStrings.pageTitle}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
@@ -156,7 +155,7 @@ export function CreateDatasetWizardPage({
             disabled={isSaving}
             data-test-subj="createDatasetWizardCancel"
           >
-            {createDatasetFormStrings.cancelButton()}
+            {createDatasetWizardStrings.cancelButton}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -171,13 +170,13 @@ export function CreateDatasetWizardPage({
           apiError={apiError}
           texts={{
             save: isEditMode
-              ? createDatasetFormStrings.saveButton()
-              : createDatasetFormStrings.addButton(),
+              ? createDatasetWizardStrings.saveButton
+              : createDatasetWizardStrings.addButton,
           }}
         >
           <FormWizardStep
             id="dataset"
-            label={createDatasetWizardStrings.datasetStepLabel()}
+            label={createDatasetWizardStrings.datasetStepLabel}
             isRequired
           >
             <div css={wizardContentCss} data-test-subj="createDatasetWizardContent">
@@ -190,12 +189,12 @@ export function CreateDatasetWizardPage({
               />
             </div>
           </FormWizardStep>
-          <FormWizardStep id="settings" label={createDatasetWizardStrings.advancedStepLabel()}>
+          <FormWizardStep id="settings" label={createDatasetWizardStrings.advancedStepLabel}>
             <div css={wizardContentCss} data-test-subj="createDatasetWizardContent">
               <StepAdvanced />
             </div>
           </FormWizardStep>
-          <FormWizardStep id="review" label={createDatasetWizardStrings.reviewStepLabel()}>
+          <FormWizardStep id="review" label={createDatasetWizardStrings.reviewStepLabel}>
             <div css={wizardContentCss} data-test-subj="createDatasetWizardContent">
               <StepReview />
             </div>

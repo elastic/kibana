@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createDatasetFormStrings } from './create_dataset_form_i18n';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { validateDatasetName } from './validators';
 
 describe('validateDatasetName', () => {
@@ -25,7 +25,7 @@ describe('validateDatasetName', () => {
     })(value);
 
   it('rejects an empty name', () => {
-    expect(validate('')).toBe(createDatasetFormStrings.nameRequired());
+    expect(validate('')).toBe(createDatasetWizardStrings.nameRequired);
   });
 
   it('rejects a name that fails index-name rules', () => {
@@ -34,7 +34,7 @@ describe('validateDatasetName', () => {
 
   it('rejects a name that already exists', () => {
     expect(validate('logs-dataset', { existingDataSetNames: ['logs-dataset'] })).toBe(
-      createDatasetFormStrings.nameAlreadyExists()
+      createDatasetWizardStrings.nameAlreadyExists
     );
   });
 
