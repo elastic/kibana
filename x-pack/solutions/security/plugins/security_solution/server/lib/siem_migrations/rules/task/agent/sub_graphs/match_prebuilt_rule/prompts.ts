@@ -37,23 +37,36 @@ changes, a good query is:
 "windows host endpoint netsh.exe process creation command-line utility network configuration persistence proxy dll execution sysmon event id 1"
 </query_guidelines>`;
 
-const MATCH_CORE_GUIDELINE_BULLETS_SPLUNK = [
-  '- Carefully analyze the Splunk Detection Rule data provided by the user.',
-  '- Match the Splunk rule to the most relevant Elastic Prebuilt Rules from the list provided above but only if the usecase is almost identical.',
-  '- If no related Elastic Prebuilt Rule is found, ensure the value of "match" in the response is an empty string.',
-  '- Provide a concise reasoning summary for your decision, explaining why the selected Prebuilt Rule is the best fit, or why no suitable match was found.',
-];
-
 const MATCH_CORE_GUIDELINE_BULLETS = [
-  '- Carefully analyze the natural language description of the rule provided by the user.',
-  '- Match the described rule to the best available Elastic Prebuilt Rule from the list provided above. Prefer candidates where the use case is almost identical; if no such candidate exists, accept the closest candidate if it addresses the same threat category or security objective, even if the detection mechanism (e.g. ML anomaly detection vs. threshold-based detection) or data source differs.',
-  '- If no candidate covers the same threat category or security objective, ensure the value of "match" in the response is an empty string.',
-  '- Provide a concise reasoning summary for your decision, explaining why the selected Prebuilt Rule is the best fit, or why no suitable match was found.',
+  '- Carefully analyze the source detection rule provided by the user.',
+  '- Match it to a candidate from the list above only if the use case is almost identical, as defined in <match_criteria>.',
+  '- If no candidate meets those criteria, ensure the value of "match" in the response is an empty string.',
+  '- Provide a concise reasoning summary for your decision, naming the criterion that decided it.',
 ];
 
-const buildMatchGuidelines = (bullets: string[]) => `<matching_guidelines>
+const MATCH_CRITERIA = `<match_criteria>
+A candidate covers almost the same use case when all of these hold:
+- Same security objective: it detects the same threat behaviour, not merely a related one.
+- Same defining trigger: the condition that fires the rule is the same (e.g. repeated authentication failures, audit log clearing, port enumeration).
+- Same grouping and direction: it aggregates over the same entity in the same direction (e.g. many failures against one account, not one account against many hosts) and preserves any required sequence.
+- Compatible platform and technology: the candidate targets the same OS platform, product, or vendor as the source rule, or a subset of it. A candidate scoped to a different platform or product is never a match, even when the attack technique is identical.
+
+These may differ and do not disqualify a candidate:
+- Threshold values and time windows.
+- The specific integration or telemetry source, as long as it stays within the platform the source rule targets.
+- How narrowly the candidate is scoped, as long as it stays inside the source rule's scope.
+
+These disqualify a candidate even when the topic looks similar:
+- It reverses the grouping direction.
+- It replaces the measured quantity with a different one (e.g. aggregate traffic volume instead of distinct destination ports).
+- It restricts the trigger to a different condition.
+</match_criteria>`;
+
+const MATCH_GUIDELINES = `${MATCH_CRITERIA}
+
+<matching_guidelines>
 Evaluate the candidates returned by your last searchPrebuiltRules call:
-${bullets.join('\n')}
+${MATCH_CORE_GUIDELINE_BULLETS.join('\n')}
 
 If one of them is a match, reply with the final JSON described below — do not search again hoping for a better candidate.
 searchPrebuiltRules is a semantic similarity search over the whole catalog, so it already returns the rules closest to your query and a reworded query samples almost the same set. When none of the candidates matches, it is far more likely that no Elastic pre-built rule covers this source rule than that a better query exists: reply with the final JSON and an empty "match".
@@ -62,16 +75,13 @@ Search again only if you can name a specific defect in the query you just issued
 - it named the wrong data source or event type;
 - it missed the attack technique the source rule detects;
 - all returned candidates are completely unrelated to the source rule (different technology, different attack domain, different use case) — this signals the query keywords were wrong, not that no rule exists.
-A scope difference alone is not a query defect: if a candidate is merely broader or narrower than the source rule but covers the same use case, answer with an empty "match" instead.
+A scope difference alone is not a query defect: if a candidate is merely narrower than the source rule but meets <match_criteria>, do not search again — select it.
 You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS} times in total. Once that many queries are listed below, you cannot search again — decide from the candidates you already have and reply with the final JSON.
 </matching_guidelines>`;
 
-const MATCH_GUIDELINES_SPLUNK = buildMatchGuidelines(MATCH_CORE_GUIDELINE_BULLETS_SPLUNK);
-const MATCH_GUIDELINES_GENERIC = buildMatchGuidelines(MATCH_CORE_GUIDELINE_BULLETS);
-
 const OUTPUT_FORMAT_GUIDELINES = `<expected_output>
 - Always reply with a JSON object with the field "match" and the value being the most relevant matched elastic detection rule name if any, else the value should be an emptry string, and a "summary" entry with the reasons behind the match. Do not reply with anything else.
-- Only reply with exact matches, if you are unsure or do not find a very confident match, always reply with an empty string value in the match field, do not guess or reply with anything else.
+- Only reply with a match that meets <match_criteria>. If you are unsure, always reply with an empty string value in the match field, do not guess or reply with anything else.
 - If the source rule is a much more complex usecase with custom logic not covered by the prebuilt rules, reply with an empty string in the match field.
 - If there is only one match, answer with the name of the rule in the "match" key. Do not reply with anything else.
 - If there are multiple matches, answer with the most specific of them, for example: "Linux User Account Creation" is more specific than "User Account Creation".
@@ -84,7 +94,7 @@ A: Please find the resulting JSON response below:
 \`\`\`json
 {{
   "match": "Linux User Account Creation",
-  "summary": "## Prebuilt Rule Matching Summary\\nThe source rule matches Elastic prebuilt rule \\"Linux User Account Creation\\" because both detect user account creation on Linux systems."
+  "summary": "## Prebuilt Rule Matching Summary\\nThe source rule matches Elastic prebuilt rule \\"Linux User Account Creation\\": same security objective, same defining trigger, and the same Linux platform. The prebuilt rule is narrower, relying on Elastic Defend process events rather than the source rule's syslog data, which the criteria permit."
 }}
 \`\`\`
 </example_response_match>
@@ -94,7 +104,7 @@ A: Please find the resulting JSON response below:
 \`\`\`json
 {{
   "match": "",
-  "summary": "## Prebuilt Rule Matching Summary\\nThe closest candidate, \\"Spike in Network Traffic\\", is a machine learning rule on aggregate traffic volume, while the source rule is a threshold rule on specific TCP flow fields. The scope and detection mechanism differ, so no Elastic pre-built rule covers this source rule."
+  "summary": "## Prebuilt Rule Matching Summary\\nThe closest candidate, \\"Spike in Network Traffic\\", measures aggregate traffic volume, while the source rule counts distinct destination ports per host. The measured quantity is replaced rather than narrowed, so no Elastic pre-built rule covers this source rule."
 }}
 \`\`\`
 </example_response_no_match>`;
@@ -188,19 +198,10 @@ export const formatRetrySearchPrompt = (
   );
 };
 
-export const MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2 = ChatPromptTemplate.fromMessages([
+export const MATCH_PREBUILT_RULE_PROMPT_V2 = ChatPromptTemplate.fromMessages([
   [
     'human',
-    `${MATCH_GUIDELINES_SPLUNK}
-
-${OUTPUT_FORMAT_GUIDELINES}`,
-  ],
-]);
-
-export const MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2 = ChatPromptTemplate.fromMessages([
-  [
-    'human',
-    `${MATCH_GUIDELINES_GENERIC}
+    `${MATCH_GUIDELINES}
 
 ${OUTPUT_FORMAT_GUIDELINES}`,
   ],

@@ -12,8 +12,7 @@ import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { ChatModel } from '../../../../../../../common/task/util/actions_client_chat';
 import {
   CREATE_PREBUILT_RULE_SEMANTIC_QUERY_PROMPT_V2,
-  MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2,
-  MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2,
+  MATCH_PREBUILT_RULE_PROMPT_V2,
   MATCH_PREBUILT_RULE_SYSTEM_PROMPT_V2,
   formatRetrySearchPrompt,
   formatSemanticQueryInstructions,
@@ -91,11 +90,7 @@ const getPromptMessages = async (state: MatchPrebuiltRuleState): Promise<BaseMes
   }
 
   if (hasCandidatesToEvaluate(history)) {
-    const matchPrompt =
-      state.original_rule.vendor === 'splunk'
-        ? MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2
-        : MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2;
-    return matchPrompt.formatMessages({});
+    return MATCH_PREBUILT_RULE_PROMPT_V2.formatMessages({});
   }
 
   return formatCreateSemanticQueryMessages(state);
