@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
-import { errors } from '@elastic/elasticsearch';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -29,6 +29,7 @@ import {
   aiIndexPath,
 } from '../../common/constants';
 import { aiIndicesIndexName } from '../ai_indices/storage';
+import { kiIdQuery } from '../ai_indices/ki_get';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 import { apiPrivileges } from '../../common/features';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
@@ -115,6 +116,7 @@ describe('ai indices routes', () => {
   let actions: ReturnType<typeof actionsMock.createStart>;
   let auditLogger: { log: jest.Mock };
   let esSearch: jest.Mock;
+  let esEsqlQuery: jest.Mock;
   let esGet: jest.Mock;
   let esDeleteDataStream: jest.Mock;
   let esDeleteIndex: jest.Mock;
@@ -140,6 +142,7 @@ describe('ai indices routes', () => {
             asCurrentUser: {
               search: esSearch,
               get: esGet,
+              esql: { query: esEsqlQuery },
               indices: {
                 deleteDataStream: esDeleteDataStream,
                 delete: esDeleteIndex,
@@ -172,6 +175,7 @@ describe('ai indices routes', () => {
     auditLogger = { log: jest.fn() };
     esSearch = jest.fn();
     esGet = jest.fn();
+    esEsqlQuery = jest.fn();
     esDeleteDataStream = jest.fn().mockResolvedValue({ acknowledged: true });
     esDeleteIndex = jest.fn().mockResolvedValue({ acknowledged: true });
     esResolveIndex = jest.fn().mockResolvedValue({
@@ -634,31 +638,29 @@ describe('ai indices routes', () => {
   });
 
   describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis', () => {
-    it('returns paginated Knowledge Indicators from the destination', async () => {
+    const rows = (values: unknown[][]) => ({
+      columns: [{ name: '_index' }, { name: 'id' }, { name: 'type' }, { name: 'title' }],
+      values,
+    });
+    const probe = {
+      columns: ['id', '@timestamp', 'type', 'title', 'governance.lifecycle.status'].map((name) => ({
+        name,
+      })),
+      values: [],
+    };
+    const totals = (total: number) => ({ columns: [{ name: 'total' }], values: [[total]] });
+    const buckets = (values: unknown[][]) => ({
+      columns: [{ name: 'count' }, { name: 'type' }],
+      values,
+    });
+
+    it('returns the current Knowledge Indicators from the destination', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      esSearch.mockResolvedValue({
-        hits: {
-          total: { value: 1 },
-          hits: [
-            {
-              _id: 'ki-1',
-              _index: kiBackingIndex,
-              _source: {
-                type: 'playbook',
-                title: 'Refund playbook',
-              },
-            },
-          ],
-        },
-        aggregations: {
-          all_kis: {
-            doc_count: 12,
-            counts_by_type: {
-              buckets: [{ key: 'playbook', doc_count: 12 }],
-            },
-          },
-        },
-      });
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(rows([[kiBackingIndex, 'ki-1', 'playbook', 'Refund playbook']]))
+        .mockResolvedValueOnce(totals(12))
+        .mockResolvedValueOnce(buckets([[12, 'playbook']]));
 
       await callRoute('GET', aiIndexKiListPath, {
         params: { aiIndexId: 'customer_support' },
@@ -666,30 +668,13 @@ describe('ai indices routes', () => {
       });
 
       expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'default');
-      expect(esSearch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: aiIndexItem.dest.value,
-          from: 0,
-          size: 25,
-          aggs: {
-            all_kis: {
-              global: {},
-              aggs: {
-                counts_by_type: {
-                  terms: {
-                    field: 'type',
-                    size: 5,
-                    order: { _count: 'desc' },
-                  },
-                },
-              },
-            },
-          },
-        })
+      expect(esEsqlQuery.mock.calls[0][0].query).toBe(
+        `FROM "${aiIndexItem.dest.value}" METADATA _id, _index\n| LIMIT 0`
       );
+      expect(esEsqlQuery.mock.calls[1][0].query).toContain('| LIMIT 25');
       expect(response.ok).toHaveBeenCalledWith({
         body: {
-          total: 1,
+          total: 12,
           summary: {
             total: 12,
             counts_by_type: [{ type: 'playbook', count: 12 }],
@@ -708,12 +693,14 @@ describe('ai indices routes', () => {
 
     it('passes type filter to Elasticsearch', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      esSearch.mockResolvedValue({
-        hits: { total: { value: 0 }, hits: [] },
-        aggregations: {
-          all_kis: { doc_count: 0, counts_by_type: { buckets: [] } },
-        },
-      });
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(rows([]))
+        .mockResolvedValueOnce({
+          columns: [{ name: 'total' }, { name: 'filtered' }],
+          values: [[0, 0]],
+        })
+        .mockResolvedValueOnce(buckets([]));
 
       await callRoute('GET', aiIndexKiListPath, {
         params: { aiIndexId: 'customer_support' },
@@ -723,15 +710,10 @@ describe('ai indices routes', () => {
         },
       });
 
-      expect(esSearch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: [{ term: { type: 'fact' } }],
-            },
-          },
-        })
-      );
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('| WHERE type == ?type'),
+        params: [{ type: 'fact' }],
+      });
     });
 
     it('returns 404 when the AI index does not exist', async () => {
@@ -744,27 +726,23 @@ describe('ai indices routes', () => {
       expect(response.notFound).toHaveBeenCalled();
     });
 
-    it('returns an empty list when the backing store has no documents yet', async () => {
+    it('returns an empty list when the backing store does not exist yet', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      esSearch.mockResolvedValue({
-        hits: { total: { value: 0 }, hits: [] },
-        aggregations: {
-          all_kis: { doc_count: 0, counts_by_type: { buckets: [] } },
-        },
-      });
+      esEsqlQuery.mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode: 400,
+          body: { error: { type: 'verification_exception', reason: 'Unknown index [x]' } },
+          warnings: [],
+          meta: {} as never,
+        })
+      );
 
       await callRoute('GET', aiIndexKiListPath, {
         params: { aiIndexId: 'customer_support' },
         query: { size: 25 },
       });
 
-      expect(esSearch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: aiIndexItem.dest.value,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        })
-      );
+      expect(esEsqlQuery).toHaveBeenCalledTimes(1);
       expect(response.ok).toHaveBeenCalledWith({
         body: {
           total: 0,
@@ -807,10 +785,11 @@ describe('ai indices routes', () => {
           index: aiIndexItem.dest.value,
           query: {
             bool: {
-              filter: [{ ids: { values: ['ki-1'] } }, { term: { _index: kiBackingIndex } }],
+              filter: [kiIdQuery('ki-1')],
             },
           },
-          size: 1,
+          // A data stream dest fetches the tie window of newest revisions.
+          size: 10,
         })
       );
       expect(response.ok).toHaveBeenCalledWith({
