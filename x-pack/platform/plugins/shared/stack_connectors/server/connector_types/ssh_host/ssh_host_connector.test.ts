@@ -262,14 +262,24 @@ describe('SshHostConnector', () => {
   });
 
   describe('downloadFile', () => {
-    it('invokes scp with a destination argv, not a quoted shell target', async () => {
+    const mockDownload = (remoteSize: string, fileContent: string) => {
       mockedExecFile.mockImplementation((bin, args, options, callback) => {
         const cb = typeof options === 'function' ? options : callback;
-        const localPath = (args as string[])[(args as string[]).length - 1];
-        writeFileSync(localPath, 'hello');
+        const argv = args as string[];
+        const isScp = bin === 'scp' || argv.includes('scp');
+        if (!isScp) {
+          cb?.(null, remoteSize, '');
+          return {} as ReturnType<typeof execFile>;
+        }
+        const localPath = argv[argv.length - 1];
+        writeFileSync(localPath, fileContent);
         cb?.(null, '', '');
         return {} as ReturnType<typeof execFile>;
       });
+    };
+
+    it('invokes scp with a destination argv, not a quoted shell target', async () => {
+      mockDownload('5', 'hello');
 
       const connector = createConnector();
       const result = await connector.downloadFile({
@@ -281,35 +291,28 @@ describe('SshHostConnector', () => {
         encoding: 'base64',
       });
 
-      const [bin, args] = mockedExecFile.mock.calls[0];
+      expect(mockedExecFile).toHaveBeenCalledTimes(2);
+      const [statBin, statArgs] = mockedExecFile.mock.calls[0];
+      expect(statBin).toBe('ssh');
+      expect(statArgs).toContain('wc -c < "/var/log/app.log\\"; id; echo \\""');
+
+      const [bin, args] = mockedExecFile.mock.calls[1];
       expect(bin).toBe('scp');
       expect(args).toContain('alice@example.com:/var/log/app.log"; id; echo "');
       expect((args as string[]).some((arg) => arg.includes(':"/'))).toBe(false);
     });
 
     it('brackets IPv6 in the scp destination', async () => {
-      mockedExecFile.mockImplementation((bin, args, options, callback) => {
-        const cb = typeof options === 'function' ? options : callback;
-        const localPath = (args as string[])[(args as string[]).length - 1];
-        writeFileSync(localPath, 'hello');
-        cb?.(null, '', '');
-        return {} as ReturnType<typeof execFile>;
-      });
+      mockDownload('5', 'hello');
 
       await createConnector({ host: '::1' }).downloadFile({ remotePath: '/tmp/a' });
 
-      const args = mockedExecFile.mock.calls[0][1] as string[];
+      const args = mockedExecFile.mock.calls[1][1] as string[];
       expect(args).toContain('alice@[::1]:/tmp/a');
     });
 
-    it('rejects files larger than maxBytes', async () => {
-      mockedExecFile.mockImplementation((bin, args, options, callback) => {
-        const cb = typeof options === 'function' ? options : callback;
-        const localPath = (args as string[])[(args as string[]).length - 1];
-        writeFileSync(localPath, 'too-large-payload');
-        cb?.(null, '', '');
-        return {} as ReturnType<typeof execFile>;
-      });
+    it('rejects files larger than maxBytes before copying', async () => {
+      mockDownload('17', 'too-large-payload');
 
       await expect(
         createConnector().downloadFile({
@@ -317,6 +320,8 @@ describe('SshHostConnector', () => {
           maxBytes: 4,
         })
       ).rejects.toThrow(/exceeds max-step-size/);
+      expect(mockedExecFile).toHaveBeenCalledTimes(1);
+      expect(mockedExecFile.mock.calls[0][0]).toBe('ssh');
     });
   });
 

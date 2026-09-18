@@ -160,7 +160,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     const { username } = this.secrets;
     const tempDir = mkdtempSync(join(tmpdir(), 'ssh_host_download_'));
     const tempDownloadPath = join(tempDir, 'file');
-    const { scp, authArgs, env, cleanup } = await this.resolveCredentials();
+    const { ssh, scp, authArgs, env, cleanup } = await this.resolveCredentials();
 
     const args = [
       ...scp.prefixArgs,
@@ -170,6 +170,26 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     ];
 
     try {
+      const remoteStat = await runExecFile(
+        ssh.bin,
+        [
+          ...ssh.prefixArgs,
+          ...this.getTransportArgs('-p', port, authArgs),
+          sshDestination(username, hostname),
+          `wc -c < ${JSON.stringify(remotePath)}`,
+        ],
+        env
+      );
+      if (remoteStat.code !== 0) {
+        throw new Error(remoteStat.stderr || `Failed to stat remote file ${remotePath}`);
+      }
+      const remoteSize = parseInt(remoteStat.stdout, 10);
+      if (!Number.isNaN(remoteSize) && remoteSize > maxBytes) {
+        throw new Error(
+          `Remote file exceeds max-step-size (${remoteSize} bytes > ${maxBytes} bytes). Increase max-step-size on this step or download a smaller file.`
+        );
+      }
+
       const { stderr, code } = await runExecFile(scp.bin, args, env);
       if (code !== 0) {
         throw new Error(stderr || `scp exited with code ${code}`);
