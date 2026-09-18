@@ -9,6 +9,7 @@ import { BehaviorSubject, EMPTY } from 'rxjs';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  ConversationsServiceStartContract,
   ConversationTemplateServiceStartContract,
   RendererServiceStartContract,
   ToolServiceStartContract,
@@ -29,6 +30,7 @@ export type AttachmentServiceStartContractMock = jest.Mocked<AttachmentServiceSt
 export type ConversationTemplateServiceStartContractMock =
   jest.Mocked<ConversationTemplateServiceStartContract>;
 export type RendererServiceStartContractMock = jest.Mocked<RendererServiceStartContract>;
+export type ConversationsServiceStartContractMock = jest.Mocked<ConversationsServiceStartContract>;
 export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
 
 export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> & {
@@ -86,6 +88,10 @@ const createToolStartMock = (): ToolServiceStartContractMock => {
   };
 };
 
+const createConversationsStartMock = (): ConversationsServiceStartContractMock => {
+  return { addEvents: jest.fn() };
+};
+
 const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
     agents: createAgentStartMock(),
@@ -93,6 +99,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     conversationTemplates: createConversationTemplatesStartMock(),
     renderers: createRendererStartMock(),
     tools: createToolStartMock(),
+    conversations: createConversationsStartMock(),
     events: {
       chat$: EMPTY,
       getChatEvents$: jest.fn().mockReturnValue(EMPTY),

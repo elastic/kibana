@@ -19,15 +19,18 @@ import type {
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
 import {
+  type ConversationEvent,
   type CurrentUser,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAddEventInput,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
+  EventActorType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -45,7 +48,6 @@ import type {
   ConversationSearchOptions,
   SerializedMetadataValue,
   MetadataFieldValue,
-  TimelineEvent,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
@@ -104,6 +106,11 @@ import {
   type Document,
 } from './converters';
 import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
+import {
+  materializeConversationEvents,
+  validateConversationEvents,
+} from '../../conversation_events';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
 // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
@@ -129,6 +136,10 @@ export interface ConversationClient {
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  addCustomEvents(request: {
+    id: string;
+    events: ConversationAddEventInput[];
+  }): Promise<ConversationEvent[]>;
   replaceRoundEvents(
     request: ReplaceRoundEventsRequest,
     options?: { access: ConversationAccess }
@@ -212,6 +223,7 @@ export const createClient = ({
   esClient,
   user,
   agentRegistry,
+  conversationEvents,
   eventEmitter,
 }: {
   space: string;
@@ -219,6 +231,7 @@ export const createClient = ({
   esClient: ElasticsearchClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
+  conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
@@ -228,6 +241,7 @@ export const createClient = ({
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
     eventEmitter,
   });
@@ -261,6 +275,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
+  private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
   private readonly eventEmitter?: ScopedConversationEventEmitter;
 
@@ -270,6 +285,7 @@ class ConversationClientImpl implements ConversationClient {
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
     eventEmitter,
   }: {
@@ -278,6 +294,7 @@ class ConversationClientImpl implements ConversationClient {
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
+    conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
     eventEmitter?: ScopedConversationEventEmitter;
   }) {
@@ -286,6 +303,7 @@ class ConversationClientImpl implements ConversationClient {
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
+    this.conversationEvents = conversationEvents;
     this.logger = logger;
     this.eventEmitter = eventEmitter;
   }
@@ -294,7 +312,7 @@ class ConversationClientImpl implements ConversationClient {
    * Notifies the attachment-events listener with the attachment events that were just persisted.
    * Best-effort: listener failures are logged and never fail the write.
    */
-  private notifyAttachmentEvents(conversationId: string, writtenEvents: TimelineEvent[]): void {
+  private notifyAttachmentEvents(conversationId: string, writtenEvents: ConversationEvent[]): void {
     if (!this.eventEmitter) {
       return;
     }
@@ -667,6 +685,28 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
+  async addCustomEvents({
+    id,
+    events: inputs,
+  }: {
+    id: string;
+    events: ConversationAddEventInput[];
+  }): Promise<ConversationEvent[]> {
+    const actor = {
+      type: EventActorType.user,
+      id: this.user.id ?? this.user.username,
+      ...(this.user.username ? { username: this.user.username } : {}),
+    };
+    const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
+    const materialized = materializeConversationEvents({
+      events: validatedEvents,
+      actor,
+      now: new Date(),
+    });
+    await this.appendEvents({ id, events: materialized });
+    return materialized;
+  }
+
   /** Appends timeline events onto a conversation.*/
   async appendEvents(
     request: AppendEventsRequest,
@@ -685,7 +725,7 @@ class ConversationClientImpl implements ConversationClient {
     const { access } = options;
 
     // `fields` may run more than once on OCC retry; the last run is the one that was written.
-    let writtenEvents: TimelineEvent[] = [];
+    let writtenEvents: ConversationEvent[] = [];
 
     const result = await this.writeConversation({
       conversationId,
@@ -744,7 +784,7 @@ class ConversationClientImpl implements ConversationClient {
     const { access } = options;
     const roundPrefix = `${roundId}::`;
 
-    let writtenEvents: TimelineEvent[] = [];
+    let writtenEvents: ConversationEvent[] = [];
 
     const result = await this.writeConversation({
       conversationId,

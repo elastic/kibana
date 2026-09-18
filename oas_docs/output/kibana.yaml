@@ -2499,6 +2499,131 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/agent_builder/conversations/{conversation_id}/_add_events:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/_add_events</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Append custom events to a conversation's timeline. The caller must be the owner, a member, or the conversation must be public. Server assigns id, created_at, and actor for each event; the body provides type and data. Only registered custom event types are accepted — built-in lifecycle types are rejected. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: post-agent-builder-conversations-conversation-id-add-events
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              addEventsRequestExample:
+                description: Example request appending two custom events to a conversation
+                value:
+                  events:
+                    - data:
+                        text: First note on this conversation
+                      type: text_note
+                    - data:
+                        text: Second note on this conversation
+                      type: text_note
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                events:
+                  description: Events to append. Between 1 and 10.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      data:
+                        additionalProperties: true
+                        description: The event payload. Its shape is defined by the event type.
+                        type: object
+                        properties: {}
+                      type:
+                        description: The registered custom event type.
+                        maxLength: 256
+                        minLength: 1
+                        type: string
+                    required:
+                      - type
+                      - data
+                  maxItems: 10
+                  minItems: 1
+                  type: array
+              required:
+                - events
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                addEventsResponseExample:
+                  description: Example response returning the materialized events with server-assigned fields
+                  value:
+                    events:
+                      - actor:
+                          id: u_abc123_uid
+                          type: user
+                          username: elastic
+                        created_at: '2026-09-14T10:00:00.000Z'
+                        data:
+                          text: First note on this conversation
+                        id: 7d3f1a2b-4c5e-6f7a-8b9c-0d1e2f3a4b5c
+                        type: text_note
+                      - actor:
+                          id: u_abc123_uid
+                          type: user
+                          username: elastic
+                        created_at: '2026-09-14T10:00:00.000Z'
+                        data:
+                          text: Second note on this conversation
+                        id: 8e4f2b3c-5d6f-7a8b-9c0d-1e2f3a4b5c6d
+                        type: text_note
+          description: Indicates a successful response
+      summary: Add events to a conversation
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/conversations/${CONVERSATION_ID}/_add_events" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "elastic-api-version: 2023-10-31" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "events": [
+                  { "type": "text_note", "data": { "text": "A note on this conversation" } }
+                ]
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/conversations/${CONVERSATION_ID}/_add_events
+            {
+              "events": [
+                { "type": "text_note", "data": { "text": "A note on this conversation" } }
+              ]
+            }
+      x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/conversations/{conversation_id}/access_control:
     put:
       description: |-

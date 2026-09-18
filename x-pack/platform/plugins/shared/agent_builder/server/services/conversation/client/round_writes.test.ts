@@ -6,6 +6,7 @@
  */
 
 import type {
+  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
   TimelineEvent,
@@ -48,7 +49,7 @@ describe('reconcileEvents', () => {
     } as TimelineEvent,
   ];
 
-  const ids = (events: TimelineEvent[]) => events.map((event) => event.id);
+  const ids = (events: ConversationEvent[]) => events.map((event) => event.id);
 
   it('preserves a stored round block with no execution_terminated (interrupted execution)', () => {
     const result = reconcileEvents({ ...conversation, rounds: [], events: failedBlock() });
