@@ -152,16 +152,16 @@ describe('loadRunOrderConfig', () => {
     process.env.MERGE_QUEUE_MERGE_BASE = 'abc123';
     const cfg = loadRunOrderConfig();
     expect(cfg.useSelectiveTesting).toBe(true);
-    expect(cfg.prMergeBase).toBe('abc123');
+    expect(cfg.selectiveMergeBase).toBe('abc123');
   });
 
   // This should never happen, but it's worth documenting
-  it('prefers GITHUB_PR_MERGE_BASE over MERGE_QUEUE_MERGE_BASE for prMergeBase', () => {
+  it('prefers GITHUB_PR_MERGE_BASE over MERGE_QUEUE_MERGE_BASE for selectiveMergeBase', () => {
     process.env.GITHUB_PR_NUMBER = '99';
     process.env.GITHUB_PR_MERGE_BASE = 'pr-base';
     process.env.MERGE_QUEUE_MERGE_BASE = 'mq-base';
     const cfg = loadRunOrderConfig();
-    expect(cfg.prMergeBase).toBe('pr-base');
+    expect(cfg.selectiveMergeBase).toBe('pr-base');
   });
 
   it('uses TEST_GROUP_TYPE_* overrides when provided', () => {

@@ -38,10 +38,10 @@ export function buildCiStatsSources(args: {
   ownBranch: string;
   pipelineSlug: string;
   prNumber: string | undefined;
-  prMergeBase: string | undefined;
+  selectiveMergeBase: string | undefined;
   mergeQueueMergeBase: string | undefined;
 }): CiStatsSource[] {
-  const { trackedBranch, ownBranch, pipelineSlug, prNumber, prMergeBase, mergeQueueMergeBase } =
+  const { trackedBranch, ownBranch, pipelineSlug, prNumber, selectiveMergeBase, mergeQueueMergeBase } =
     args;
 
   const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
@@ -73,10 +73,10 @@ export function buildCiStatsSources(args: {
       : []),
     // try to get times from the mergeBase commit; with a merge queue enabled the
     // merge base may only have been built by the merge-queue pipeline
-    ...(prMergeBase
+    ...(selectiveMergeBase
       ? [
-          { commit: prMergeBase, jobName: PIPELINES.ON_MERGE },
-          { commit: prMergeBase, jobName: PIPELINES.MERGE_QUEUE },
+          { commit: selectiveMergeBase, jobName: PIPELINES.ON_MERGE },
+          { commit: selectiveMergeBase, jobName: PIPELINES.MERGE_QUEUE },
         ]
       : []),
     // merge-queue builds report the target branch as their branch, so recent queue
