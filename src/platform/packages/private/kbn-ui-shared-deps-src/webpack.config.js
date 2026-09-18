@@ -142,6 +142,12 @@ module.exports = {
       '@elastic/eui/lib/components/provider/nested$':
         '@elastic/eui/optimize/es/components/provider/nested',
       '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
+      // Alias the bare specifier to the same lightweight API
+      // module `@kbn/monaco`'s own imports already resolve to, so webpack dedupes it
+      // instead of bundling the barrel a second time.
+      // This forces any `import 'monaco-editor'` from other dependecies
+      // to receive only the required API, retain our control over what is imported globally into Kibana
+      'monaco-editor$': 'monaco-editor/editor/editor.api.js',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
