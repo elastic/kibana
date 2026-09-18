@@ -9,7 +9,7 @@
 
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { DynamicWorkflowContextSchema } from '@kbn/workflows';
+import { DynamicStepContextSchema, DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 
 jest.mock('../context/get_context_for_path');
@@ -29,6 +29,7 @@ import {
 } from '../context/get_context_for_path';
 import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
 import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+import { createStepContextResolver } from '../context/step_context_resolver';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
@@ -111,9 +112,8 @@ describe('validateVariables', () => {
     mockValidateVariable.mockReturnValue({} as YamlValidationResult);
 
     const result = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(emptyRegistry, mockWorkflowDefinition, mockWorkflowGraph),
       variables,
-      mockWorkflowGraph,
       mockWorkflowDefinition
     );
 
@@ -169,9 +169,8 @@ describe('validateVariables', () => {
       });
 
     const result = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(emptyRegistry, mockWorkflowDefinition, mockWorkflowGraph),
       variables,
-      mockWorkflowGraph,
       mockWorkflowDefinition
     );
 
@@ -207,9 +206,8 @@ describe('validateVariables', () => {
     mockValidateVariable.mockReturnValue(expectedError);
 
     const result = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(emptyRegistry, mockWorkflowDefinition, mockWorkflowGraph),
       [skippedVariable, validatedVariable],
-      mockWorkflowGraph,
       mockWorkflowDefinition
     );
 
@@ -226,7 +224,11 @@ describe('validateVariables', () => {
     });
 
     expect(() =>
-      validateVariables(emptyRegistry, [variable], mockWorkflowGraph, mockWorkflowDefinition)
+      validateVariables(
+        createStepContextResolver(emptyRegistry, mockWorkflowDefinition, mockWorkflowGraph),
+        [variable],
+        mockWorkflowDefinition
+      )
     ).toThrow('Variable validator failed');
   });
 
@@ -294,9 +296,8 @@ describe('validateVariables', () => {
       });
 
     const result = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(emptyRegistry, mockWorkflowDefinition, mockWorkflowGraph),
       variables,
-      mockWorkflowGraph,
       mockWorkflowDefinition
     );
 
@@ -309,7 +310,11 @@ describe('validateVariables', () => {
   });
 
   it('should handle empty variable list', () => {
-    const result = validateVariables(emptyRegistry, [], mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      createStepContextResolver(emptyRegistry, mockWorkflowDefinition, mockWorkflowGraph),
+      [],
+      mockWorkflowDefinition
+    );
 
     expect(result).toEqual([]);
     expect(mockGetContextSchemaForStep).not.toHaveBeenCalled();
@@ -327,9 +332,13 @@ describe('validateVariables', () => {
     mockValidateVariable.mockReturnValue({} as YamlValidationResult);
 
     validateVariables(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        mockWorkflowDefinition,
+        mockWorkflowGraph,
+        {} as Document
+      ),
       variables,
-      mockWorkflowGraph,
       mockWorkflowDefinition,
       {} as Document
     );
@@ -338,6 +347,48 @@ describe('validateVariables', () => {
     expect(mockExtendWithPathSpecificContext).toHaveBeenCalledTimes(1);
     expect(mockGetContextSchemaWithTemplateLocals).toHaveBeenCalledTimes(1);
     expect(mockValidateVariable).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps distinct step and path pairs separate when their colon-delimited keys collide', () => {
+    const definition = {
+      ...mockWorkflowDefinition,
+      steps: [
+        { name: 'a:b', type: 'console', with: { x: '{{ test.variable }}' } },
+        { name: 'a', type: 'console', 'b:with': { x: '{{ test.variable }}' } },
+      ],
+    };
+    const graph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const variables = [
+      createVariableItem({ yamlPath: ['steps', 0, 'with', 'x'] }),
+      createVariableItem({ yamlPath: ['steps', 1, 'b:with', 'x'] }),
+    ];
+    const firstContext = DynamicStepContextSchema.extend({});
+    const secondContext = DynamicStepContextSchema.extend({});
+    mockExtendWithPathSpecificContext
+      .mockReturnValueOnce(firstContext)
+      .mockReturnValueOnce(secondContext);
+
+    validateVariables(
+      createStepContextResolver(emptyRegistry, definition, graph),
+      variables,
+      definition
+    );
+
+    expect(mockExtendWithPathSpecificContext).toHaveBeenCalledTimes(2);
+    expect(mockExtendWithPathSpecificContext).toHaveBeenNthCalledWith(
+      1,
+      mockStepSchema,
+      definition.steps[0],
+      ['with', 'x']
+    );
+    expect(mockExtendWithPathSpecificContext).toHaveBeenNthCalledWith(
+      2,
+      mockStepSchema,
+      definition.steps[1],
+      ['b:with', 'x']
+    );
+    expect(mockValidateVariable).toHaveBeenNthCalledWith(1, variables[0], firstContext);
+    expect(mockValidateVariable).toHaveBeenNthCalledWith(2, variables[1], secondContext);
   });
 
   it('should pass correct parameters to validateVariable', () => {
@@ -350,7 +401,11 @@ describe('validateVariables', () => {
     mockGetContextSchemaForStep.mockReturnValue(mockContext as any);
     mockValidateVariable.mockReturnValue({} as YamlValidationResult);
 
-    validateVariables(emptyRegistry, [variable], mockWorkflowGraph, mockWorkflowDefinition);
+    validateVariables(
+      createStepContextResolver(emptyRegistry, mockWorkflowDefinition, mockWorkflowGraph),
+      [variable],
+      mockWorkflowDefinition
+    );
 
     expect(mockGetContextSchemaForStep).toHaveBeenCalledWith(
       emptyRegistry,
@@ -383,9 +438,8 @@ describe('validateVariables', () => {
     });
 
     const result = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(emptyRegistry, mockWorkflowDefinition, mockWorkflowGraph),
       [foreachVariable],
-      mockWorkflowGraph,
       mockWorkflowDefinition
     );
 
@@ -445,9 +499,13 @@ describe('validateVariables', () => {
     });
 
     const result = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        mockWorkflowDefinition,
+        mockWorkflowGraph,
+        mockYamlDocument
+      ),
       [variableItem],
-      mockWorkflowGraph,
       mockWorkflowDefinition,
       mockYamlDocument,
       mockModel
@@ -482,9 +540,8 @@ describe('validateVariables', () => {
     });
 
     const result = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(emptyRegistry, mockWorkflowDefinition, mockWorkflowGraph),
       [variable],
-      mockWorkflowGraph,
       mockWorkflowDefinition
     );
 

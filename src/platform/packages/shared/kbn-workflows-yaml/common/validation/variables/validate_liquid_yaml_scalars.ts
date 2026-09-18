@@ -10,10 +10,8 @@
 import _ from 'lodash';
 import type { Document, LineCounter, Node, Pair, Scalar } from 'yaml';
 import { visit } from 'yaml';
-import type { DynamicStepContextSchema } from '@kbn/workflows';
-import type { WorkflowYaml } from '@kbn/workflows';
+import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { YamlValidationErrorSeverity, YamlValidationResult } from '../types';
 import { extractLiquidErrorPosition } from '../../liquid/extract_liquid_error_position';
 import { parseTemplateString } from '../../liquid/liquid_parse_cache';
@@ -33,11 +31,7 @@ import {
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
 import { getNearestStepPath } from '../context/get_nearest_step_path';
-import type { WorkflowContextRegistry } from '../context/registry';
-import {
-  createStepContextResolver,
-  type StepContextResolver,
-} from '../context/step_context_resolver';
+import type { StepContextResolver } from '../context/step_context_resolver';
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';
@@ -51,19 +45,14 @@ interface CollectionDiagnostic {
 
 /** Grouped because the Liquid syntax pass runs without them, on YAML that fails schema parse or graph build. */
 export interface LiquidContextDeps {
-  readonly registry: WorkflowContextRegistry;
-  readonly workflowGraph: WorkflowGraph;
   readonly workflowDefinition: WorkflowYaml;
+  readonly stepContext: StepContextResolver;
 }
 
-interface ForLoopValidationContext {
+interface ForLoopValidationContext extends LiquidContextDeps {
   readonly yamlString: string;
   readonly lineCounter: LineCounter;
-  readonly registry: WorkflowContextRegistry;
-  readonly workflowGraph: WorkflowGraph;
-  readonly workflowDefinition: WorkflowYaml;
   readonly yamlDocument: Document;
-  readonly stepContext: StepContextResolver;
 }
 
 /**
@@ -74,8 +63,7 @@ export function validateLiquidYamlScalars(
   yamlString: string,
   yamlDocument: Document,
   lineCounter: LineCounter,
-  contextDeps?: LiquidContextDeps,
-  stepContextResolver?: StepContextResolver
+  contextDeps?: LiquidContextDeps
 ): YamlValidationResult[] {
   if (lineCounter.lineStarts.length === 0) {
     throw new Error('LineCounter must be initialized by parsing the YAML source');
@@ -88,14 +76,6 @@ export function validateLiquidYamlScalars(
         lineCounter,
         ...contextDeps,
         yamlDocument,
-        stepContext:
-          stepContextResolver ??
-          createStepContextResolver(
-            contextDeps.registry,
-            contextDeps.workflowDefinition,
-            contextDeps.workflowGraph,
-            yamlDocument
-          ),
       }
     : null;
 

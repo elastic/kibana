@@ -29,6 +29,7 @@ import { positionAt } from './__fixtures__/text_position';
 import { extendContextWithTemplateLocals } from '../context/extend_context_with_template_locals';
 import { FOREACH_ITEM_SCHEMA_DESC } from '../context/get_foreach_state_schema';
 import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+import { createStepContextResolver } from '../context/step_context_resolver';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
@@ -58,9 +59,13 @@ describe('validateVariables for-loop integration', () => {
 
   it('treats loop variable yy as valid when iterating steps.iterate_items.items', () => {
     const results = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopValidationWorkflowDefinition,
+        workflowGraph,
+        yamlDocument
+      ),
       [variableItemForKey('yy.name')],
-      workflowGraph,
       forLoopValidationWorkflowDefinition,
       yamlDocument,
       FOR_LOOP_VALIDATION_YAML
@@ -73,10 +78,15 @@ describe('validateVariables for-loop integration', () => {
 
   it('does not report variable error for loop var when collection is invalid but collection validator does', () => {
     const badVar = variableItemForKey('xx');
-    const varResults = validateVariables(
+    const stepContext = createStepContextResolver(
       emptyRegistry,
-      [badVar],
+      forLoopValidationWorkflowDefinition,
       workflowGraph,
+      yamlDocument
+    );
+    const varResults = validateVariables(
+      stepContext,
+      [badVar],
       forLoopValidationWorkflowDefinition,
       yamlDocument,
       FOR_LOOP_VALIDATION_YAML
@@ -85,11 +95,10 @@ describe('validateVariables for-loop integration', () => {
     expect(xxVarResult?.severity).toBeNull();
 
     const collectionResults = validateLiquidForLoopCollections(
-      emptyRegistry,
+      stepContext,
       FOR_LOOP_VALIDATION_YAML,
       yamlDocument,
       lineCounter,
-      workflowGraph,
       forLoopValidationWorkflowDefinition
     );
     expect(collectionResults.some((r) => r.message?.includes('steps.non_existing_step'))).toBe(
@@ -146,7 +155,7 @@ steps:
     const end = positionAt(templateYaml, offset + match![0].length);
 
     const results = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(emptyRegistry, definition, graph, doc),
       [
         {
           id: 'forloop-index',
@@ -160,7 +169,6 @@ steps:
           offset,
         },
       ],
-      graph,
       definition,
       doc,
       templateYaml
@@ -241,7 +249,7 @@ steps:
     const end = positionAt(yamlSource, varOffset + '{{ yy.name }}'.length);
 
     const results = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(emptyRegistry, literalDefinition, literalGraph, literalDoc),
       [
         {
           id: 'yy-literal',
@@ -255,7 +263,6 @@ steps:
           offset: varOffset,
         },
       ],
-      literalGraph,
       literalDefinition,
       literalDoc,
       yamlSource
@@ -276,7 +283,12 @@ steps:
     const innerEnd = positionAt(FOR_LOOP_NESTED_YAML, innerOffset + innerMatch![0].length);
 
     const innerResults = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopNestedWorkflowDefinition,
+        nestedGraph,
+        nestedDoc
+      ),
       [
         {
           id: 'inner-var',
@@ -290,7 +302,6 @@ steps:
           offset: innerOffset,
         },
       ],
-      nestedGraph,
       forLoopNestedWorkflowDefinition,
       nestedDoc,
       FOR_LOOP_NESTED_YAML
@@ -313,9 +324,13 @@ steps:
     expect(collectionItem?.key).toBe('steps.run_query.output.values[0][0]');
 
     const results = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        foreachStepEsqlCellWorkflowDefinition,
+        esqlGraph,
+        esqlDoc
+      ),
       variableItems,
-      esqlGraph,
       foreachStepEsqlCellWorkflowDefinition,
       esqlDoc,
       FOREACH_STEP_ESQL_CELL_YAML

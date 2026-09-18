@@ -15,10 +15,7 @@ import { getContextSchemaForStep } from './get_context_for_path';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 import type { WorkflowContextRegistry } from './registry';
 
-/**
- * Memoised step context schemas. Share one instance across the validators
- * running over a document so each step context is built once.
- */
+/** Shares step context schemas across validators within one validation run. */
 export interface StepContextResolver {
   readonly baseSchema: typeof DynamicStepContextSchema;
   forStep(stepName?: string): typeof DynamicStepContextSchema;
