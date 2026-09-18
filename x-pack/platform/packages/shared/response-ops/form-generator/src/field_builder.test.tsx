@@ -325,6 +325,31 @@ describe('Field Builder', () => {
       expect(screen.getByPlaceholderText('Enter username')).toBeDefined();
     });
 
+    it('falls back to a startCase label from the path when meta has no label', () => {
+      const schema = z.string();
+      const path = 'threadTs';
+
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
+
+      render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
+
+      expect(screen.getByText('Thread Ts')).toBeDefined();
+    });
+
+    it('falls back to description meta for helpText', () => {
+      const schema = z.string();
+      addMeta(schema, { description: 'Conversation ID to send to' });
+      const path = 'channel';
+
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
+
+      render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
+
+      expect(screen.getByText('Conversation ID to send to')).toBeDefined();
+    });
+
     it('should pass correct props to widget including path', () => {
       const schema = z.string();
       addMeta(schema, { label: 'Test Field' });

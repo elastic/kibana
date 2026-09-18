@@ -23,6 +23,7 @@ import type {
 } from '../apis/fetch_connector_spec';
 import { transformConnectorSpecResponse } from '../apis/fetch_connector_spec';
 import type { ActionConnectorFieldsProps, ActionTypeModel } from '../types/action_types';
+import { getSpecDefaultSubAction, validateSpecActionParams } from './spec_action_params_schema';
 
 export type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 
@@ -148,8 +149,17 @@ export function transformSpecToActionTypeModel(
       }
       return { default: SpecConnectorFormFields };
     }),
-    actionParamsFields: lazy(async () => ({ default: () => null })),
-    validateParams: async () => ({ errors: {} }),
+    actionParamsFields: lazy(async () => {
+      const { bindSpecActionParamsFields } = await import(
+        /* webpackPrefetch: true */ '../components/spec_action_params_fields'
+      );
+      return { default: bindSpecActionParamsFields(spec) };
+    }),
+    defaultActionParams: {
+      subAction: getSpecDefaultSubAction(spec),
+      subActionParams: {},
+    },
+    validateParams: async (params) => validateSpecActionParams(spec, params),
     connectorForm: {
       serializer: createConnectorFormSerializer() as unknown as NonNullable<
         ActionTypeModel['connectorForm']

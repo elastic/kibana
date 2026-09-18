@@ -41,6 +41,21 @@ Zod Schema → Field Definitions → Widget Components → React Elements
 
 **Fields** (data layer) define what to validate → **Widgets** (UI layer) define how to render
 
+## Widgets
+
+Default schema mappings:
+
+- `z.string()` → Text (or Password when `sensitive` meta is set)
+- `z.number()` → Number
+- `z.boolean()` → Boolean (`EuiSwitch`)
+- `z.enum()` → Select
+- `z.object()` → Object
+- `z.discriminatedUnion()` → Form fieldset
+- `z.literal()` → disabled Text
+- `z.url()` → Text
+
+When a field has no `label` meta, the last path segment is converted with `startCase` (for example `threadTs` → `Thread Ts`). When `helpText` is absent, `description` meta is used.
+
 ## Development
 
 ```sh
