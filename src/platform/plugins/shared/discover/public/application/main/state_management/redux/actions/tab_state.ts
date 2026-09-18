@@ -469,7 +469,10 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
         if (match?.id) {
           dataView = await services.dataViews.get(match.id);
         } else {
-          const adHocDataView = await services.dataViews.create({ title: currentSource.title });
+          const adHocDataView = await services.dataViews.create({
+            title: currentSource.title,
+            timeFieldName: currentSource.timeFieldName,
+          });
           await services.dataViews.refreshFields(adHocDataView);
           dispatch(appendAdHocDataViews(adHocDataView));
           dataView = adHocDataView;

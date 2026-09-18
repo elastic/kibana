@@ -24,6 +24,7 @@ import {
   DISCOVER_QUERY_MODE_KEY,
 } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
+import { EsqlSource } from '@kbn/data-source';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -830,8 +831,8 @@ describe('tab_state actions', () => {
         query: '',
       });
       expect(tab.appState.columns).toEqual([]);
-      // The transition resolves a DataView for the current ES|QL query ('FROM test-index'),
-      // which creates an ad-hoc DataView without a time field, so sort is empty.
+      // Ad-hoc DataView for FROM test-index: no persisted match. Time field comes from EsqlSource
+      // when present; this setup's source has none, so sort is empty.
       expect(tab.appState.sort).toEqual([]);
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.DataView,
@@ -855,6 +856,31 @@ describe('tab_state actions', () => {
       expect(storageSetSpy).toHaveBeenCalledWith(DISCOVER_QUERY_MODE_KEY, {
         currentMode: 'classic',
         defaultMode: 'classic',
+      });
+    });
+
+    it('creates an ad-hoc DataView with the ES|QL time field so Classic histogram is time-based', async () => {
+      const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
+      const esqlSource = await EsqlSource.create({
+        query: 'FROM logs-*',
+        timeFieldName: '@timestamp',
+      });
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(esqlSource);
+
+      await internalState.dispatch(
+        internalStateActions.transitionFromESQLToDataView({
+          tabId,
+          dataView: dataViewMockWithTimeField,
+        })
+      );
+
+      expect(services.dataViews.create).toHaveBeenCalledWith({
+        title: 'logs-*',
+        timeFieldName: '@timestamp',
+      });
+      expect(getCurrentTab().appState.dataSource).toStrictEqual({
+        type: DataSourceType.DataView,
+        dataViewId: 'logs-*-id',
       });
     });
   });
