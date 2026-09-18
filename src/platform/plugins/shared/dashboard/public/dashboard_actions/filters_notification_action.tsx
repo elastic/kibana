@@ -43,10 +43,7 @@ export type FiltersNotificationActionApi = HasUniqueId &
   Partial<CanAccessViewMode>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
-  Boolean(
-    apiHasUniqueId(api) &&
-      (apiPublishesPartialUnifiedSearch(api) || apiPublishesEsql(api))
-  );
+  Boolean(apiHasUniqueId(api) && (apiPublishesPartialUnifiedSearch(api) || apiPublishesEsql(api)));
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   if (!isApiCompatible(api)) return false;

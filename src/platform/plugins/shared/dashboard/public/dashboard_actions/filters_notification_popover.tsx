@@ -44,10 +44,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const filters = useMemo(() => api.filters$?.value, [api]);
-  const esqlStatements = useMemo(
-    () => (api.esql$?.value ?? []).map((query) => query.esql),
-    [api]
-  );
+  const esqlStatements = useMemo(() => (api.esql$?.value ?? []).map((query) => query.esql), [api]);
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
 
   const closePopover = useCallback(() => {
@@ -94,10 +91,12 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     getViewModeSubject(api) ?? new BehaviorSubject(undefined)
   );
 
-  const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
-  const hasUnifiedSearch = Boolean(queryString) || Boolean(filters?.length);
-  const showEditButton =
-    hasUnifiedSearch && parentViewMode === 'edit' && canEditUnifiedSearch;
+  const showEditButton = useMemo(() => {
+    if (parentViewMode !== 'edit') return false;
+    const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
+    if (!canEditUnifiedSearch) return false;
+    return Boolean(queryString) || Boolean(filters?.length);
+  }, [queryString, filters, parentViewMode, api]);
 
   return (
     <EuiPopover
