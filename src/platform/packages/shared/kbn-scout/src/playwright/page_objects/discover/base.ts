@@ -54,6 +54,8 @@ export class DiscoverAppBase {
   public readonly saveModal: SavedObjectSaveModal;
   protected readonly appMenu: AppMenu;
 
+  public readonly esqlEditorTestSubjValue = 'ESQLEditor';
+
   constructor(protected readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
