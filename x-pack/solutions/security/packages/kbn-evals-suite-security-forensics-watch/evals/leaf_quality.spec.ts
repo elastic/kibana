@@ -47,6 +47,8 @@ import { tags, getToolCallSteps, type Example } from '@kbn/evals';
 import { evaluate as base } from '../src/evaluate';
 import { FORENSIC_CASES } from '../src/dataset';
 import { evaluateIocGate, meetsConfidenceFloor } from '../src/gates/report_gates';
+import { createDeepWatchL2Evaluators } from '../src/evaluators';
+import type { ForensicTaskOutput } from '../src/types';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 import { cleanupSeededData } from '../src/data_generators/cleanup';
 import {
@@ -293,6 +295,89 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
         const esqlOk = esqlToolsCalled;
         const persistenceOk = draftPersisted;
 
+        // ── Step 6: L2 deterministic evaluator set, applied to the REAL output ──
+        // `createDeepWatchL2Evaluators` previously had no caller: the evaluators
+        // were only exercised by Jest tests feeding them synthetic outputs, so
+        // report-section completeness and confidence/severity separation could
+        // never fail on an actual Forensics Watch report. The set is applied here
+        // to the real tool payload, and its data-backed members gate `success`.
+        const confidenceAssessmentData = draftData?.confidence_assessment as
+          | {
+              overall?: 'high' | 'medium' | 'low' | 'insufficient';
+              rationale?: string;
+              note?: string;
+            }
+          | undefined;
+
+        const taskOutput: ForensicTaskOutput = {
+          reportStatus: String(draftData?.report_status ?? ''),
+          timelineEventCount: timelineEvents,
+          validatedIocs: validatedIocs.map((ioc) => ({
+            type: String(ioc.type ?? ''),
+            value: String(ioc.value ?? ''),
+            status: (ioc.status ??
+              'unable_to_validate') as ForensicTaskOutput['validatedIocs'][number]['status'],
+          })),
+          persistenceFindings:
+            typeof draftData?.persistence_findings === 'string'
+              ? draftData.persistence_findings
+              : undefined,
+          remediationRecommendations:
+            (draftData?.remediation_recommendations as string[] | undefined) ?? [],
+          unresolvedQuestions,
+          confidenceAssessment: confidenceAssessmentData
+            ? {
+                overall: confidenceAssessmentData.overall ?? 'insufficient',
+                rationale:
+                  confidenceAssessmentData.rationale ?? confidenceAssessmentData.note ?? '',
+                note: confidenceAssessmentData.note,
+              }
+            : undefined,
+          draftLabelPresent,
+        };
+
+        const l2Evaluators = createDeepWatchL2Evaluators({
+          minEventsByCase: new Map(
+            examples.map((e) => [String(e.metadata?.case_id), e.output.minTimelineEvents])
+          ),
+          expectedIocsByCase: new Map(
+            examples.map((e) => [String(e.metadata?.case_id), e.output.expectedIocs])
+          ),
+          minQuestionsByCase: new Map(
+            examples.map((e) => [String(e.metadata?.case_id), e.output.minUnresolvedQuestions])
+          ),
+        });
+
+        const l2Results = await Promise.all(
+          l2Evaluators.map(async (evaluator) => ({
+            name: evaluator.name,
+            result: await evaluator.evaluate({
+              input: { case_id: example.metadata?.case_id },
+              output: taskOutput,
+              expected: example.output,
+              metadata: example.metadata,
+            }),
+          }))
+        );
+
+        const l2ScoreOf = (name: string): number =>
+          l2Results.find((entry) => entry.name === name)?.result.score ?? 0;
+
+        // Two of the six are measured but do not gate:
+        //   - `IoC Validation Accuracy` scores a fraction over ALL expectations,
+        //     including the `unable_to_validate` ones the dataset deliberately
+        //     excludes from scoring; `iocGate` above is the stricter,
+        //     decidable-only gate over the same dimension.
+        //   - `Confidence Separation` reads the WORDING of
+        //     `confidence_assessment.note`, and this spec's rule is that
+        //     vocabulary must not decide `success` (see the prose-signals note).
+        // The other four are data-backed and decision-complete, so they gate.
+        const nonGatingL2Evaluators = ['IoC Validation Accuracy', 'Confidence Separation'];
+        const gatingL2Failures = l2Results.filter(
+          ({ name, result }) => !nonGatingL2Evaluators.includes(name) && (result.score ?? 0) < 1
+        );
+        const l2Ok = gatingL2Failures.length === 0;
+
         const success =
           skillInvoked &&
           packageEvidenceCalled &&
@@ -304,7 +389,8 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
           iocGate.success &&
           confidenceOk &&
           esqlOk &&
-          persistenceOk;
+          persistenceOk &&
+          l2Ok;
 
         return {
           success,
@@ -314,13 +400,17 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
             `Data gates: draftLabel=${draftLabelPresent}, proposalOnly=${proposalOnly}, ` +
             `evidenceSufficient=${evidenceSufficient}, persisted=${draftPersisted}. ` +
             `Timeline events: ${timelineEvents}/${example.output.minTimelineEvents}, ` +
-            `IoCs matched: ${iocGate.matchedCount}/${iocGate.expectedCount} ` +
-            `(missing confirmed: ${iocGate.missingConfirmed.join(', ') || 'none'}; ` +
+            `IoCs matched: ${iocGate.matchedCount}/${iocGate.decidableCount} decidable ` +
+            `(unanswered: ${iocGate.unresolved.join(', ') || 'none'}; ` +
+            `missing confirmed: ${iocGate.missingConfirmed.join(', ') || 'none'}; ` +
             `fabricated: ${iocGate.fabricatedConfirmed.join(', ') || 'none'}), ` +
             `unresolved questions: ${unresolvedQuestions.length}/${example.output.minUnresolvedQuestions}, ` +
             `confidence: ${confidenceOverall ?? 'none'} (floor ${
               example.output.minConfidenceLevel
             }). ` +
+            `L2 evaluators: ${l2Results
+              .map(({ name, result }) => `${name}=${result.score ?? 'n/a'}`)
+              .join('; ')}. ` +
             `(Prose signals are diagnostic only: ${JSON.stringify(proseSignals)})`,
           scorecard: {
             skillInvoked: skillInvoked ? 1 : 0,
@@ -332,6 +422,10 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
             iocValidation: iocGate.success ? 1 : 0,
             esqlGrounded: esqlOk ? 1 : 0,
             draftPersisted: persistenceOk ? 1 : 0,
+            l2DeterministicOk: l2Ok ? 1 : 0,
+            l2ReportSections: l2ScoreOf('Report Section Completeness'),
+            l2ConfidenceSeparation: l2ScoreOf('Confidence Separation'),
+            l2IocAccuracy: l2ScoreOf('IoC Validation Accuracy'),
           },
           evaluationDataset: {
             examples: [

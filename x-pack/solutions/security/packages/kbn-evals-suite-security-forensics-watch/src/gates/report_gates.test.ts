@@ -14,7 +14,7 @@ const EXPECTED = [
 ];
 
 describe('evaluateIocGate', () => {
-  it('passes when confirmed IoCs are confirmed and absent ones are not claimed', () => {
+  it('passes when every decidable IoC is answered at the expected status', () => {
     const result = evaluateIocGate(EXPECTED, [
       { type: 'network_destination', value: '185.220.101.42', status: 'confirmed' },
       { type: 'file_hash', value: 'a3f5', status: 'not_found' },
@@ -23,6 +23,23 @@ describe('evaluateIocGate', () => {
 
     expect(result.success).toBe(true);
     expect(result.matchedCount).toBe(3);
+    expect(result.decidableCount).toBe(2);
+    expect(result.unresolved).toEqual([]);
+  });
+
+  it('fails when only one decidable expectation is answered', () => {
+    // The regression the `matchedCount >= 1` gate could not catch, and the
+    // shape every scenario in the dataset has: the report confirms the network
+    // IoC and simply never mentions the expected `not_found` hash. Nothing is
+    // missing-confirmed and nothing is fabricated, so the old gate passed.
+    const result = evaluateIocGate(EXPECTED, [
+      { type: 'network_destination', value: '185.220.101.42', status: 'confirmed' },
+    ]);
+
+    expect(result.unresolved).toEqual(['file_hash::a3f5']);
+    expect(result.missingConfirmed).toEqual([]);
+    expect(result.fabricatedConfirmed).toEqual([]);
+    expect(result.success).toBe(false);
   });
 
   it('fails when telemetry the fixture contains was not confirmed', () => {
@@ -55,12 +72,25 @@ describe('evaluateIocGate', () => {
 
     // Not fabricated (the expectation was not `not_found`) and not a match.
     expect(result.matchedCount).toBe(2);
+    expect(result.decidableCount).toBe(2);
     expect(result.success).toBe(true);
   });
 
   it('fails when nothing was validated at all', () => {
     const result = evaluateIocGate(EXPECTED, []);
     expect(result.matchedCount).toBe(0);
+    expect(result.success).toBe(false);
+  });
+
+  it('fails when every expectation is unvalidatable (no decidable evidence)', () => {
+    // A gate that cannot decide anything must not report success: an
+    // all-`unable_to_validate` expectation set would otherwise pass vacuously.
+    const result = evaluateIocGate(
+      [{ type: 'registry_key', value: 'HKCU\\Run', status: 'unable_to_validate' }],
+      []
+    );
+
+    expect(result.decidableCount).toBe(0);
     expect(result.success).toBe(false);
   });
 });

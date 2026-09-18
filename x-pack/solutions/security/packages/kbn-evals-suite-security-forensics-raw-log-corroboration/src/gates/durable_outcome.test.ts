@@ -17,7 +17,7 @@ const RUN_STARTED_AT = '2026-08-18T10:00:00.000Z';
 const hit = (source: Record<string, unknown>): ReadbackHit => ({ _source: source });
 
 describe('evaluateDurableOutcome', () => {
-  it('passes when a record correlated to this run stores corroboration content', () => {
+  it('passes when a record correlated to this run stores structured findings', () => {
     const result = evaluateDurableOutcome({
       runId: RUN_ID,
       runStartedAt: RUN_STARTED_AT,
@@ -31,7 +31,7 @@ describe('evaluateDurableOutcome', () => {
     });
 
     expect(result.correlatedCount).toBe(1);
-    expect(result.corroborationContentStored).toBe(true);
+    expect(result.structuredFindingsStored).toBe(true);
     expect(result.success).toBe(true);
   });
 
@@ -56,7 +56,7 @@ describe('evaluateDurableOutcome', () => {
     expect(result.success).toBe(false);
   });
 
-  it('fails on a correlated record that carries no corroboration content', () => {
+  it('fails on a correlated record whose findings field is empty', () => {
     const result = evaluateDurableOutcome({
       runId: RUN_ID,
       runStartedAt: RUN_STARTED_AT,
@@ -70,7 +70,7 @@ describe('evaluateDurableOutcome', () => {
     });
 
     expect(result.correlatedCount).toBe(1);
-    expect(result.corroborationContentStored).toBe(false);
+    expect(result.structuredFindingsStored).toBe(false);
     expect(result.success).toBe(false);
   });
 
@@ -111,7 +111,7 @@ describe('evaluateDurableOutcome', () => {
     expect(result).toEqual({
       recentCount: 0,
       correlatedCount: 0,
-      corroborationContentStored: false,
+      structuredFindingsStored: false,
       success: false,
     });
   });
@@ -127,11 +127,56 @@ describe('evaluateDurableOutcome', () => {
         hit({
           '@timestamp': '2026-08-18T10:00:05.000Z',
           summary: 'Corroboration report for run raw-log-l4-9f3c1d-extra',
+          corroborated_events: [{ stage: 'initial-access' }],
         }),
       ],
     });
 
     expect(result.correlatedCount).toBe(1);
+    expect(result.structuredFindingsStored).toBe(true);
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a correlated document whose only content is a corroboration heading', () => {
+    // The regression this gate exists for. The previous check accepted any
+    // string containing "corroborat", so a document holding nothing but
+    // `summary: "Corroboration report for <runId>"` scored as a durable
+    // outcome with no corroborated event and no gap recorded — the same
+    // false-green the gate was written to remove, one level down.
+    const result = evaluateDurableOutcome({
+      runId: RUN_ID,
+      runStartedAt: RUN_STARTED_AT,
+      hits: [
+        hit({
+          '@timestamp': '2026-08-18T10:00:05.000Z',
+          summary: `Corroboration report for ${RUN_ID}`,
+          report_status: 'DRAFT',
+        }),
+      ],
+    });
+
+    expect(result.correlatedCount).toBe(1);
+    expect(result.structuredFindingsStored).toBe(false);
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts findings nested under a report field', () => {
+    // The stored document may wrap the report. Only the finding FIELDS are
+    // required, not their depth.
+    const result = evaluateDurableOutcome({
+      runId: RUN_ID,
+      runStartedAt: RUN_STARTED_AT,
+      hits: [
+        hit({
+          '@timestamp': '2026-08-18T10:00:05.000Z',
+          run_id: RUN_ID,
+          report: { gap_events: [{ stage: 'lateral-movement' }] },
+        }),
+      ],
+    });
+
+    expect(result.correlatedCount).toBe(1);
+    expect(result.structuredFindingsStored).toBe(true);
     expect(result.success).toBe(true);
   });
 });

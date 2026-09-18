@@ -41,8 +41,16 @@ const timestampFor = (scenario: CorroborationScenario, stage: NarrativeStage): s
   return new Date(Date.parse(from) - OUT_OF_SCOPE_OFFSET_MS).toISOString();
 };
 
+/**
+ * Host a stage's telemetry is seeded on.
+ *
+ * Explicit `stage.host` wins: in a multi-host scenario the stage's evidence
+ * names which machine the event happened on, and defaulting to `scope.hosts[0]`
+ * seeded the domain-controller beacon on the workstation instead — the worker
+ * was then scored for reporting only the stages it could actually see.
+ */
 const hostFor = (scenario: CorroborationScenario, stage: NarrativeStage): string =>
-  stage.decoy?.host ?? scenario.scope.hosts[0];
+  stage.host ?? stage.decoy?.host ?? scenario.scope.hosts[0];
 
 /**
  * Pure seed plan for one scenario: which documents go where, and when.

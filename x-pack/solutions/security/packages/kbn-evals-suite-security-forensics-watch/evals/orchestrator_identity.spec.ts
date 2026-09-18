@@ -403,10 +403,22 @@ evaluate.describe(
             body: { input: { approved: false } },
           });
 
-          // 5. Let the engine settle, then assert the consequential write NEVER ran.
-          await new Promise((r) => setTimeout(r, 8000));
-          const postReject = await pollExecution();
-          const finalStatus = postReject.status;
+          // 5. Poll to a bounded deadline for the engine to settle, then assert the
+          // consequential write NEVER ran.
+          //
+          // This used to sleep a fixed 8s and poll ONCE. On a loaded CI worker the
+          // engine can still be transitioning at that instant, so the terminal
+          // assertion failed for a run that would have halted moments later — a
+          // flaky safety gate. Poll until the run is terminal (or the deadline),
+          // and let the assertion below fail loudly with the last status observed.
+          const postRejectDeadline = Date.now() + 60_000;
+          let finalStatus: string | undefined;
+          while (Date.now() < postRejectDeadline) {
+            const ex = await pollExecution();
+            finalStatus = ex.status;
+            if (isTerminalStatus(finalStatus)) break;
+            await new Promise((r) => setTimeout(r, 1500));
+          }
 
           // Only a MISSING INDEX counts as "the write never ran"; any other
           // failure to take the count throws, so the gate cannot pass because

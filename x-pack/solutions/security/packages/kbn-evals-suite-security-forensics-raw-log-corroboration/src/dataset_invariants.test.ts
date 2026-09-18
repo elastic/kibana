@@ -216,4 +216,49 @@ describe('raw_log_corroboration dataset invariants', () => {
       expect(floor).toBeLessThanOrEqual(1);
     }
   });
+
+  // ── Host placement ─────────────────────────────────────────────────────────
+  // The seeder used to place EVERY stage on `scope.hosts[0]`. In `partial-gap`
+  // the command-and-control stage's evidence says the beacon came from
+  // SRV-DC01, but the event was written on WKSTN-EVAL02, so a correctly scoped
+  // report could only find two of the three corroborated stages and the eval
+  // failed for a fixture error. These two invariants pin the fix: telemetry is
+  // placed on the host the stage's own evidence names, and an explicit host is
+  // one the prompt actually tells the agent to query.
+
+  it('seeds every stage on a host its own evidence names', () => {
+    const violations: string[] = [];
+
+    for (const scenario of SCENARIOS) {
+      for (const event of planSeedEvents(scenario)) {
+        const stage = scenario.stages.find((s) => event.id.startsWith(`${scenario.id}-${s.id}-`));
+        if (stage === undefined) {
+          violations.push(`${event.id}: no stage owns this event`);
+        } else if (!stage.evidence.includes(event.host)) {
+          violations.push(
+            `${event.id}: seeded on ${event.host}, evidence says "${stage.evidence}"`
+          );
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
+  it('an explicit stage host is in scope and never a decoy', () => {
+    // `stage.host` overrides the seeder's default, so it must be a host the
+    // prompt names — otherwise the fixture corroborates a stage with telemetry
+    // the agent was never asked to look at. It is also mutually exclusive with
+    // `decoy`: a decoy is out of scope by definition, so `host` would silently
+    // override the decoy host and turn out-of-scope telemetry into in-scope.
+    for (const scenario of SCENARIOS) {
+      for (const stage of scenario.stages) {
+        if (stage.host !== undefined) {
+          expect(scenario.scope.hosts).toContain(stage.host);
+          expect(stage.corroborated).toBe(true);
+          expect(stage.decoy).toBeUndefined();
+        }
+      }
+    }
+  });
 });

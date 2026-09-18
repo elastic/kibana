@@ -35,7 +35,11 @@ export interface ValidatedIoc {
 
 export interface IocGateResult {
   expectedCount: number;
+  /** Expectations the platform can decide (`status !== 'unable_to_validate'`). */
+  decidableCount: number;
   matchedCount: number;
+  /** Decidable expectations the report did not answer at the expected status. */
+  unresolved: string[];
   /** Expected `confirmed` IoCs the report did not confirm. */
   missingConfirmed: string[];
   /** IoCs the dataset expects to be ABSENT that the report claims to confirm. */
@@ -49,44 +53,56 @@ const iocKey = (ioc: { type?: string; value?: string }): string =>
 /**
  * Compares the report's validated IoCs against the dataset expectation.
  *
- * Two independent failure modes, both real:
+ * Three independent failure modes, all real:
  *   - a `confirmed` expectation the report did not confirm means the worker
  *     ignored telemetry the fixture actually contains;
  *   - a `not_found` expectation the report claims to confirm means the worker
- *     fabricated a confirmation (the fixture deliberately does not contain it).
+ *     fabricated a confirmation (the fixture deliberately does not contain it);
+ *   - a decidable expectation the report never answered means the report
+ *     validated less than the scenario asks for. The gate previously accepted
+ *     `matchedCount >= 1`, so a report that confirmed the one network IoC and
+ *     silently dropped the expected `not_found` hash passed — every scenario in
+ *     the dataset has that shape, so the "IoC validation" gate was in practice a
+ *     one-IoC check.
  *
  * `unable_to_validate` expectations are deliberately not scored in either
  * direction: they are the cases the platform cannot answer either way, so
  * neither confirming nor declining them is treated as a failure. Only the
- * decidable expectations carry gate weight.
+ * decidable expectations carry gate weight — and ALL of them must be answered.
  */
 export const evaluateIocGate = (expected: ExpectedIoc[], actual: ValidatedIoc[]): IocGateResult => {
   const actualByKey = new Map(actual.map((ioc) => [iocKey(ioc), ioc]));
+  const unresolved: string[] = [];
   const missingConfirmed: string[] = [];
   const fabricatedConfirmed: string[] = [];
+  let decidableCount = 0;
   let matchedCount = 0;
 
   for (const exp of expected) {
     const got = actualByKey.get(iocKey(exp));
-    if (got?.status === exp.status) matchedCount++;
-    if (exp.status === 'confirmed' && got?.status !== 'confirmed') {
-      missingConfirmed.push(iocKey(exp));
-    }
-    if (exp.status === 'not_found' && got?.status === 'confirmed') {
-      fabricatedConfirmed.push(iocKey(exp));
+    const matched = got?.status === exp.status;
+    if (matched) matchedCount++;
+
+    if (exp.status !== 'unable_to_validate') {
+      decidableCount++;
+      if (!matched) unresolved.push(iocKey(exp));
+      if (exp.status === 'confirmed' && got?.status !== 'confirmed') {
+        missingConfirmed.push(iocKey(exp));
+      }
+      if (exp.status === 'not_found' && got?.status === 'confirmed') {
+        fabricatedConfirmed.push(iocKey(exp));
+      }
     }
   }
 
   return {
     expectedCount: expected.length,
+    decidableCount,
     matchedCount,
+    unresolved,
     missingConfirmed,
     fabricatedConfirmed,
-    success:
-      expected.length > 0 &&
-      matchedCount >= 1 &&
-      missingConfirmed.length === 0 &&
-      fabricatedConfirmed.length === 0,
+    success: decidableCount > 0 && unresolved.length === 0,
   };
 };
 

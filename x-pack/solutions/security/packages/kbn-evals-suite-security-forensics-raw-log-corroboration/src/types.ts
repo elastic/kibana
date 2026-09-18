@@ -46,6 +46,16 @@ export interface NarrativeStage {
   /** True when in-scope telemetry exists. Drives seeding and the lower bound. */
   corroborated: boolean;
   /**
+   * The host this stage's telemetry belongs to, when the evidence names one.
+   *
+   * The seeder used to place every stage on `scope.hosts[0]`, so a stage whose
+   * evidence names a SECOND host in scope ("tcp connection ... from SRV-DC01")
+   * was seeded on the first one. The eval then scored the worker for reporting
+   * only the stages it could see, which was a fixture bug, not a model failure.
+   * Omit it for a single-host scenario, where `scope.hosts[0]` is unambiguous.
+   */
+  host?: string;
+  /**
    * Seeds matching telemetry that does NOT corroborate the stage: it belongs to
    * another host, sits outside `scope.timeRange`, or both. Real log data a
    * careless read would count as confirmation — the point of a decoy scenario.

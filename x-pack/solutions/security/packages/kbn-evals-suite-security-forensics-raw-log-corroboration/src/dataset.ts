@@ -96,6 +96,9 @@ export const SCENARIOS: CorroborationScenario[] = [
         id: 'command-and-control',
         evidence: 'tcp connection to 192.168.1.50:443 from SRV-DC01',
         corroborated: true,
+        // The second host in scope: the beacon is recorded on the domain
+        // controller, not on the workstation the previous stages ran on.
+        host: 'SRV-DC01',
       },
     ],
     expected: {

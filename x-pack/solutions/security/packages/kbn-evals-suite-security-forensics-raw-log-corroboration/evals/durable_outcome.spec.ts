@@ -108,7 +108,7 @@ evaluate.describe(
           });
           log.info(
             `[L4] readback: recent=${durable.recentCount}, correlated=${durable.correlatedCount}, ` +
-              `content=${durable.corroborationContentStored}`
+              `structuredFindings=${durable.structuredFindingsStored}`
           );
         } catch (e) {
           log.warning(`[L4] ES readback failed: ${(e as Error).message}`);
@@ -132,7 +132,7 @@ evaluate.describe(
             `Persistence tool called: ${hasEmitCorroboration}. ` +
             `Records written since the run started: ${durable.recentCount}; ` +
             `of those carrying run id ${runId}: ${durable.correlatedCount}; ` +
-            `stored content mentions corroboration: ${durable.corroborationContentStored}.`,
+            `stored structured findings: ${durable.structuredFindingsStored}.`,
           scorecard,
         };
       }

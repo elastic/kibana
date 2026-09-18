@@ -33,8 +33,8 @@ export interface DurableOutcomeEvaluation {
   recentCount: number;
   /** Recent hits that carry this run's identifier. */
   correlatedCount: number;
-  /** Correlated hits whose stored content mentions corroboration. */
-  corroborationContentStored: boolean;
+  /** Correlated hits whose stored document carries non-empty structured findings. */
+  structuredFindingsStored: boolean;
   success: boolean;
 }
 
@@ -42,31 +42,44 @@ const documentOf = (hit: ReadbackHit): Record<string, unknown> =>
   (hit._source ?? (hit as Record<string, unknown>)) as Record<string, unknown>;
 
 /**
- * True when the stored record carries corroboration FINDINGS.
+ * The report contract's FINDING fields, in both spellings the worker uses.
  *
- * Matching the serialized document for the word "corroborat" was too weak: a
- * record holding `corroborated_events: []` matched on its key alone and scored
- * as storing findings. Values are walked instead, so a corroboration-shaped key
- * counts only when it holds something.
+ * A persisted report is only evidence of a durable outcome when it carries
+ * findings — a heading is not a finding.
  */
-const carriesCorroborationContent = (value: unknown, underCorroborationKey = false): boolean => {
+const FINDING_FIELDS: readonly string[] = [
+  'corroboratedEvents',
+  'corroborated_events',
+  'gapEvents',
+  'gap_events',
+  'unresolvedQuestions',
+  'unresolved_questions',
+];
+
+/**
+ * True when the stored record carries non-empty STRUCTURED findings.
+ *
+ * Two weaker versions came before this one and both scored a non-answer as a
+ * durable outcome:
+ *   - matching the serialized document for the word "corroborat" accepted a
+ *     document whose only content was `summary: "Corroboration report"`;
+ *   - walking values under corroboration-shaped keys still accepted the same
+ *     summary, because the prose itself contains the word.
+ *
+ * So the check is now structural: some finding field of the report contract has
+ * to hold at least one entry. `summary: "Corroboration report for <runId>"` is
+ * exactly the shape this rejects — the document proves the report was written,
+ * not that any corroboration was recorded.
+ */
+const hasStructuredFindings = (value: unknown): boolean => {
   if (Array.isArray(value)) {
-    return (
-      value.length > 0 &&
-      (underCorroborationKey ||
-        value.some((entry) => carriesCorroborationContent(entry, underCorroborationKey)))
-    );
+    return value.some((entry) => hasStructuredFindings(entry));
   }
   if (value !== null && typeof value === 'object') {
-    return Object.entries(value as Record<string, unknown>).some(([key, entry]) =>
-      carriesCorroborationContent(entry, underCorroborationKey || /corroborat/i.test(key))
-    );
-  }
-  if (typeof value === 'string') {
-    return /corroborat/i.test(value) || (underCorroborationKey && value.trim().length > 0);
-  }
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return underCorroborationKey;
+    return Object.entries(value as Record<string, unknown>).some(([key, entry]) => {
+      if (FINDING_FIELDS.includes(key) && Array.isArray(entry) && entry.length > 0) return true;
+      return hasStructuredFindings(entry);
+    });
   }
   return false;
 };
@@ -125,14 +138,12 @@ export const evaluateDurableOutcome = ({
 
   const correlated = recent.filter((hit) => JSON.stringify(documentOf(hit)).includes(runId));
 
-  const corroborationContentStored = correlated.some((hit) =>
-    carriesCorroborationContent(documentOf(hit))
-  );
+  const structuredFindingsStored = correlated.some((hit) => hasStructuredFindings(documentOf(hit)));
 
   return {
     recentCount: recent.length,
     correlatedCount: correlated.length,
-    corroborationContentStored,
-    success: correlated.length > 0 && corroborationContentStored,
+    structuredFindingsStored,
+    success: correlated.length > 0 && structuredFindingsStored,
   };
 };
