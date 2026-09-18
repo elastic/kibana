@@ -9,7 +9,6 @@ export { indexExplorer, type IndexExplorerResponse } from './index_explorer';
 export {
   generateEsql,
   type GenerateEsqlResponse,
-  type GenerateEsqlExecute,
   GenerateEsqlNoDataError,
   generateEsqlCompletion,
   type GenerateEsqlCompletionResponse,

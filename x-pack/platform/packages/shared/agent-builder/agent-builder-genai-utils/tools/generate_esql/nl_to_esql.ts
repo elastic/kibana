@@ -68,7 +68,7 @@ export type GenerateEsqlDeps = GenerateEsqlModelDeps & {
   events?: ToolEventEmitter;
 };
 
-export type GenerateEsqlExecute = 'none' | 'schema' | 'data';
+type GenerateEsqlExecute = 'none' | 'schema' | 'data';
 
 export interface GenerateEsqlOptions {
   /**
