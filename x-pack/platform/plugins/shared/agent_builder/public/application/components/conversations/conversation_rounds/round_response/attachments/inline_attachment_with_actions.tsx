@@ -168,7 +168,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       `}
     >
       <AttachmentHeader
-        icon={header?.icon}
+        icon={header?.icon ?? uiDefinition.getIcon?.()}
         title={title}
         subtitle={header?.subtitle}
         badges={header?.badges}
@@ -183,6 +183,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
           paddingSize="none"
           css={css`
             border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+            min-width: 0;
             overflow: hidden;
 
             /* Nested panels default to EUI medium radius (6px); match the card shell (12px). */

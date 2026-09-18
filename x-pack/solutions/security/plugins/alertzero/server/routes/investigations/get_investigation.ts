@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
@@ -16,12 +17,18 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { getMockInvestigationById } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { conversationToInvestigation } from './helpers/conversation_to_investigation';
 
 const GetInvestigationRequestParams = z.object({
   id: z.string().min(1).max(256),
 });
 
-export const registerGetInvestigationRoute = ({ router, logger, config }: RouteDependencies) => {
+export const registerGetInvestigationRoute = ({
+  config,
+  getConversationProposalsService,
+  logger,
+  router,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: ALERTZERO_INVESTIGATION_URL_TEMPLATE,
@@ -55,10 +62,17 @@ export const registerGetInvestigationRoute = ({ router, logger, config }: RouteD
             return response.ok({ body });
           }
 
-          return response.notFound({
-            body: { message: `Investigation "${id}" not found` },
-          });
+          const conversation = await getConversationProposalsService().get(id, request);
+          const body: GetInvestigationResponse = {
+            investigation: conversationToInvestigation(conversation),
+          };
+          return response.ok({ body });
         } catch (error) {
+          if (isConversationNotFoundError(error)) {
+            return response.notFound({
+              body: { message: `Investigation "${request.params.id}" not found` },
+            });
+          }
           logger.error(`Failed to get investigation: ${error}`);
           return response.customError({
             statusCode: 500,

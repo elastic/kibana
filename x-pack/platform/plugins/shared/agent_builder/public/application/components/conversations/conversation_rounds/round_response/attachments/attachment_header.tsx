@@ -126,12 +126,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     z-index: ${euiTheme.levels.content};
   `;
 
-  const hasCloseButton = Boolean(onClose);
   const hasActionButtons = actionButtons && actionButtons.length > 0;
-
-  if (!hasCloseButton && !hasActionButtons) {
-    return null;
-  }
 
   return (
     <div ref={measureRef} style={{ width: '100%' }}>

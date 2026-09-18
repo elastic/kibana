@@ -12,6 +12,7 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import {
+  ATTACK_DISCOVERY_INLINE_CONTENT_TEST_ID,
   ATTACK_DISCOVERY_INLINE_DETAILS_TEST_ID,
   ATTACK_DISCOVERY_INLINE_SCOPE_ID,
   ATTACK_DISCOVERY_INLINE_SUMMARY_TEST_ID,
@@ -68,6 +69,15 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
     const element = definition.renderInlineContent?.({
       attachment: makeAttachment({ details_markdown: 'd', summary_markdown: 's' }),
       isSidebar: false,
+    }) as React.ReactElement;
+
+    expect(element.type).toBe(AttackDiscoveryInlineContent);
+  });
+
+  it('reuses AttackDiscoveryInlineContent for the conversation details flyout', () => {
+    const definition = createAttackDiscoveryAttachmentDefinition();
+    const element = definition.renderConversationDetailsContent?.({
+      attachment: makeAttachment({ details_markdown: 'd', summary_markdown: 's' }),
     }) as React.ReactElement;
 
     expect(element.type).toBe(AttackDiscoveryInlineContent);
@@ -137,13 +147,25 @@ describe('AttackDiscoveryInlineContent', () => {
     ]);
   });
 
-  it('keeps field pills enabled', () => {
+  it('keeps inline markdown inside a padded wrapping container', () => {
     renderInline({
       details_markdown: detailsMarkdown,
       summary_markdown: summaryMarkdown,
     });
 
-    expect(mockFormatter.mock.calls.map(([props]) => props.disableActions)).toEqual([false, false]);
+    expect(screen.getByTestId(ATTACK_DISCOVERY_INLINE_CONTENT_TEST_ID)).toHaveAttribute(
+      'data-markdown-wrap',
+      'true'
+    );
+  });
+
+  it('disables field-pill actions so the attachment can render outside Security flyout providers', () => {
+    renderInline({
+      details_markdown: detailsMarkdown,
+      summary_markdown: summaryMarkdown,
+    });
+
+    expect(mockFormatter.mock.calls.map(([props]) => props.disableActions)).toEqual([true, true]);
   });
 
   it('renders summary markdown through the Attack Discovery formatter', () => {

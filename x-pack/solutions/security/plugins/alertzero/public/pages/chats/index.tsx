@@ -23,7 +23,8 @@ export const ChatsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const { search } = useLocation();
-  const sessionTag = new URLSearchParams(search).get(CHAT_ID_PARAM) ?? DEFAULT_SESSION_TAG;
+  const chatId = new URLSearchParams(search).get(CHAT_ID_PARAM);
+  const sessionTag = chatId ?? DEFAULT_SESSION_TAG;
   const { services } = useKibana<{ agentBuilder?: AgentBuilderPluginStart }>();
   const { agentBuilder } = services;
   useAlertZeroDocTitle(i18n.PAGE_TITLE);
@@ -73,10 +74,12 @@ export const ChatsPage: React.FC = () => {
       >
         <EmbeddableConversation
           agentId={agentBuilderDefaultAgentId}
-          sessionTag={sessionTag}
-          greetingMessage={i18n.GREETING}
           ariaLabelledBy="alertzero-chats-agent-builder"
+          conversationId={chatId ?? undefined}
+          greetingMessage={i18n.GREETING}
+          key={sessionTag}
           onClose={onClose}
+          sessionTag={sessionTag}
         />
       </React.Suspense>
     </div>

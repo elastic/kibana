@@ -92,6 +92,56 @@ describe('InlineAttachmentWithActions', () => {
     jest.clearAllMocks();
   });
 
+  it('renders the attachment title when there are no action buttons', () => {
+    const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
+    const attachmentsService = {
+      getAttachmentUiDefinition: jest.fn().mockReturnValue({
+        getIcon: () => 'sparkles',
+        getLabel: () => 'OneNote to Qbot C2 Injection',
+        renderInlineContent: () => <div>Discovery markdown</div>,
+      }),
+      updateOrigin: jest.fn(),
+    };
+
+    render(
+      <InlineAttachmentWithActions
+        attachment={attachment}
+        attachmentsService={attachmentsService as unknown as AttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(screen.getByText('OneNote to Qbot C2 Injection')).toBeInTheDocument();
+    expect(screen.getByText('Discovery markdown')).toBeInTheDocument();
+  });
+
+  it('renders a header-only attachment when there is a label but no inline content', () => {
+    const attachment: UnknownAttachment = {
+      id: 'correlated-alerts',
+      type: 'security.alerts',
+      data: {},
+    };
+    const attachmentsService = {
+      getAttachmentUiDefinition: jest.fn().mockReturnValue({
+        getIcon: () => 'bell',
+        getLabel: () => '8 alerts',
+      }),
+      updateOrigin: jest.fn(),
+    };
+
+    render(
+      <InlineAttachmentWithActions
+        attachment={attachment}
+        attachmentsService={attachmentsService as unknown as AttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(screen.getByText('8 alerts')).toBeInTheDocument();
+  });
+
   it('shows a fallback instead of crashing when renderInlineContent throws', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
