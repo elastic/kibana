@@ -37,7 +37,7 @@ const KIBANA_VERSION_HEADER = 'kbn-version';
 
 /**
  * Supplies request-scoped authentication headers that only Core may stamp. Called last, with the
- * fully built outbound headers, so it can bind its output to the credential actually being sent.
+ * fully built outbound headers.
  * @internal
  */
 export type SelfClientAuthHeaderAugmenter = (

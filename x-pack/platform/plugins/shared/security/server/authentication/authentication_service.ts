@@ -490,6 +490,7 @@ export class AuthenticationService {
               convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
               getInternalCallerAttestationHeaders:
                 uiamAPIKeys.getInternalCallerAttestationHeaders.bind(uiamAPIKeys),
+              isOwnClientAuthentication: uiamAPIKeys.isOwnClientAuthentication.bind(uiamAPIKeys),
             }
           : null,
       },

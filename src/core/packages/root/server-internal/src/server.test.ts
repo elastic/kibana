@@ -665,6 +665,29 @@ describe('self client UIAM auth header augmenter', () => {
     );
   });
 
+  it('still attests a cookie session after Core copies Kibana client authentication onto the request', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION);
+    uiam.isOwnClientAuthentication.mockImplementation(
+      (value: string) => value === 'kibana-shared-secret'
+    );
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: {
+        authorization: 'Bearer essu_session_token',
+        [ES_CLIENT_AUTHENTICATION_HEADER]: 'kibana-shared-secret',
+      },
+    });
+    const outboundHeaders = new Headers({ authorization: 'Bearer essu_session_token' });
+
+    expect(augmenter(request, outboundHeaders)).toEqual(ATTESTATION);
+    expect(uiam.isOwnClientAuthentication).toHaveBeenCalledWith('kibana-shared-secret');
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_session_token' })
+    );
+  });
+
   it('mints an attestation the receiving UIAM service accepts', async () => {
     const sharedSecret = 'shared-secret';
     const uiam = getUiamMock();

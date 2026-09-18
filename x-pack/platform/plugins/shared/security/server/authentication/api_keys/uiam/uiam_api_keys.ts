@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { timingSafeEqual } from 'crypto';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
@@ -195,6 +196,13 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    */
   getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
     return this.uiam.getInternalCallerAttestationHeaders(credential);
+  }
+
+  isOwnClientAuthentication(value: string): boolean {
+    const own = this.uiam.getClientAuthentication().value;
+    const presented = Buffer.from(value);
+    const expected = Buffer.from(own);
+    return presented.length === expected.length && timingSafeEqual(presented, expected);
   }
 
   /**

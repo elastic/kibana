@@ -615,11 +615,6 @@ export class Server {
     const uiam = securityStart.authc.apiKeys.uiam;
     if (uiam) {
       httpStart.setSelfClientAuthHeaderAugmenter((request, outboundHeaders) => {
-        const inboundHasClientSecret = (value: string | string[] | undefined) =>
-          typeof value === 'string'
-            ? value.length > 0
-            : Array.isArray(value) && value.some((entry) => entry.length > 0);
-
         const authorization = outboundHeaders.get('authorization');
         const credential = authorization
           ? HTTPAuthorizationHeader.parseFromValue(authorization)
@@ -630,11 +625,21 @@ export class Server {
         if (isExternalUiamCredential(request)) {
           return undefined;
         }
-        if (inboundHasClientSecret(request.headers[ES_CLIENT_AUTHENTICATION_HEADER])) {
+
+        const inboundClientSecret = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
+        let inboundSecrets: string[] = [];
+        if (typeof inboundClientSecret === 'string') {
+          inboundSecrets = [inboundClientSecret];
+        } else if (Array.isArray(inboundClientSecret)) {
+          inboundSecrets = inboundClientSecret;
+        }
+        const hasUpstreamSecret = inboundSecrets.some(
+          (entry) => entry.length > 0 && !uiam.isOwnClientAuthentication(entry)
+        );
+        if (hasUpstreamSecret) {
           return undefined;
         }
 
-        // Cookie-session self-calls still stamp (gist option 1 / Elena A).
         return uiam.getInternalCallerAttestationHeaders(credential);
       });
     }
