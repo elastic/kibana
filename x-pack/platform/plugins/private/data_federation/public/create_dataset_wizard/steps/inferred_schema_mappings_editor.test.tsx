@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
 
@@ -151,14 +151,20 @@ const inferredFields: TestConfigurationPreviewField[] = [
 const TestHarness = ({
   automaticFieldTypes = {},
   flowVariant = DATASET_WIZARD_FLOW_VARIANT_3,
+  format = '',
 }: {
   automaticFieldTypes?: Record<string, string>;
   flowVariant?: DatasetWizardFlowVariant;
+  format?: DatasetWizardFormValues['settings']['format'];
 }) => {
   const { control, watch } = useForm<DatasetWizardFormValues>({
     defaultValues: {
       ...emptyDatasetWizardFormValues(),
       automatic_field_types: automaticFieldTypes,
+      settings: {
+        ...emptyDatasetWizardFormValues().settings,
+        ...(format ? { format } : {}),
+      },
     },
   });
 
@@ -404,6 +410,30 @@ describe('InferredSchemaMappingsEditor', () => {
         'Map at least one field, unmapped fields will not be inferred at query time, so nothing will be available to query until you add mappings.'
       );
       expect(queryByTestId('datasetWizardFieldMappingsOptionalDescription')).toBeNull();
+    });
+  });
+
+  it('shows schema resolution under Infer schema advanced settings in flow 3 9.6', async () => {
+    const { getByRole, getByTestId, queryByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} format="parquet" />
+    );
+
+    expect(queryByTestId('datasetWizardSettingsSchemaResolution')).toBeNull();
+
+    fireEvent.click(getByRole('button', { name: /Configure schema resolution \(optional\)/i }));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByRole('radio', { name: /Define schema/i }));
+
+    await waitFor(() => {
+      expect(
+        within(getByTestId('datasetWizardSettingsSchemaResolution')).getByTestId(
+          'comboBoxSearchInput'
+        )
+      ).toBeDisabled();
     });
   });
 

@@ -615,6 +615,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Infer schema',
     }),
 
+  schemaInferenceAdvancedSettingsToggle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaInferenceAdvancedSettingsToggle', {
+      defaultMessage: 'Configure schema resolution (optional)',
+    }),
+
   schemaInferenceModeInferDescription: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaInferenceModeInferDescription', {
       defaultMessage:

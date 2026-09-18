@@ -308,6 +308,32 @@ export const getReviewSettingsRows = (
   return rows;
 };
 
+const appendFlow396SchemaResolutionReviewRow = (
+  rows: ReviewSummaryRow[],
+  values: DatasetWizardFormValues
+) => {
+  const format = values.settings.format;
+
+  if (!format || !isFieldVisibleForFormat('schema_resolution', format)) {
+    return;
+  }
+
+  const value = values.settings.schema_resolution?.trim() ?? '';
+
+  if (!value) {
+    return;
+  }
+
+  const defaultValue = getDefaultSettingsForFormat(format).schema_resolution;
+  const isDefault = defaultValue !== undefined && value === defaultValue;
+
+  rows.push({
+    label: getDatasetSettingsFieldLabel('schema_resolution'),
+    displayValue: formatSettingsFieldDisplayValue('schema_resolution', value),
+    badge: isDefault ? 'default' : 'modified',
+  });
+};
+
 const appendFlow396TimeseriesReviewRows = (
   rows: ReviewSummaryRow[],
   values: DatasetWizardFormValues
@@ -376,6 +402,7 @@ export const getReviewSchemaMappingRows = (
             : datasetWizardStrings.reviewSchemaInferenceManual(),
           badge: isDynamicEnabled ? 'default' : 'modified',
         });
+        appendFlow396SchemaResolutionReviewRow(rows, values);
       } else {
         rows.push({
           label: datasetWizardStrings.dynamicFieldsTitle(),

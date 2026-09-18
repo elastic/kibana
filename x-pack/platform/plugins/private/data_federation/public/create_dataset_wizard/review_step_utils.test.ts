@@ -521,12 +521,12 @@ describe('review_step_utils', () => {
     );
     const schemaRows = getReviewSchemaMappingRows(values, DATASET_WIZARD_FLOW_VARIANT_3_9_6);
 
-    expect(additionalRows).toEqual(
+    expect(additionalRows.map(({ label }) => label)).not.toContain('Schema resolution');
+    expect(schemaRows).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ label: 'Schema resolution', displayValue: 'Strict' }),
       ])
     );
-    expect(schemaRows.map(({ label }) => label)).not.toContain('Schema resolution');
   });
 
   it('returns automatic schema mapping rows when inferred field types were modified', () => {

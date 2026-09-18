@@ -21,9 +21,10 @@ export const SCHEMA_MAPPING_SETTINGS_FIELD_IDS: readonly DatasetSettingsFieldId[
   'schema_resolution',
 ];
 
-/** Flow 3 9.6 hides these on additional settings; schema resolution lives in advanced settings instead. */
+/** Flow 3 9.6 hides these on optional settings; schema resolution lives on the Infer schema card. */
 export const FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS: readonly DatasetSettingsFieldId[] = [
   'schema_sample_size',
+  'schema_resolution',
 ];
 
 export interface GetSchemaMappingSettingsFieldIdsOptions {

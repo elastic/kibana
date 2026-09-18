@@ -534,8 +534,8 @@ describe('AdditionalSettingsStep', () => {
       expect(queryByTestId('datasetWizardSettingsFormat')).toBeNull();
     });
 
-    it('keeps schema resolution in advanced settings for orc in flow 3 9.6', async () => {
-      const { getByTestId } = render(
+    it('omits schema resolution from optional settings for orc in flow 3 9.6', async () => {
+      const { getByTestId, queryByTestId } = render(
         <TestHarness
           resource="s3://bucket/data.orc"
           flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
@@ -546,8 +546,7 @@ describe('AdditionalSettingsStep', () => {
         expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
       });
 
-      expect(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeInTheDocument();
-      expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
+      expect(queryByTestId('datasetWizardSettingsSchemaResolution')).toBeNull();
     });
 
     it('keeps the advanced accordion for a format that still has fields for it', async () => {
@@ -825,7 +824,7 @@ describe('AdditionalSettingsStep', () => {
       expect(queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
     });
 
-    it('shows schema resolution in advanced settings in flow 3 9.6', async () => {
+    it('omits schema resolution from optional settings in flow 3 9.6', async () => {
       const { getByTestId, queryByTestId } = render(
         <TestHarness
           resource="s3://bucket/data.parquet"
@@ -837,7 +836,7 @@ describe('AdditionalSettingsStep', () => {
         expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
       });
 
-      expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
+      expect(queryByTestId('datasetWizardSettingsSchemaResolution')).toBeNull();
       expect(queryByTestId('datasetWizardSettingsSchemaSampleSize')).toBeNull();
     });
 

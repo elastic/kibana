@@ -52,6 +52,11 @@ export interface DatasetSettingsFieldProps {
   variant?: 'settings' | 'step';
   /** When false, fields use the same sizing as a step's own fields. */
   compressed?: boolean;
+  /** When true, the form row omits the visible label (caller shows it elsewhere). */
+  hideLabel?: boolean;
+  /** With hideLabel, show field help in an icon beside the control. */
+  inlineDescriptionTip?: boolean;
+  disabled?: boolean;
 }
 
 export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> = ({
@@ -60,6 +65,9 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
   testSubjPrefix,
   variant = 'settings',
   compressed,
+  hideLabel = false,
+  inlineDescriptionTip = false,
+  disabled = false,
 }) => {
   const isStepField = variant === 'step';
   const isCompressed = compressed ?? !isStepField;
@@ -133,15 +141,18 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           control={control}
           name="settings.schema_resolution"
           label={
-            isStepField
-              ? createDatasetFlyoutStrings.settingsSchemaResolutionOptionalLabel()
-              : createDatasetFlyoutStrings.settingsSchemaResolutionLabel()
+            !isStepField
+              ? createDatasetFlyoutStrings.settingsSchemaResolutionLabel()
+              : createDatasetFlyoutStrings.settingsSchemaResolutionOptionalLabel()
           }
           helpText={createDatasetFlyoutStrings.settingsSchemaResolutionHelp()}
           placeholder={createDatasetFlyoutStrings.settingsSchemaResolutionPlaceholder()}
           options={SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsSchemaResolution`}
           isCompressed={isCompressed}
+          hideLabel={hideLabel}
+          inlineDescriptionTip={inlineDescriptionTip}
+          disabled={disabled}
         />
       );
     case 'delimiter':

@@ -178,6 +178,10 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     control,
     name: 'settings.format',
   }) as DatasetFormatFormValue;
+  const errorMode = useWatch({
+    control,
+    name: 'settings.error_mode',
+  });
   const inlineOptionalDateFormatField = useMemo(
     () => getMappingDateFormatFieldConfig(datasetFormat),
     [datasetFormat]
@@ -525,7 +529,11 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
             data-test-subj="datasetWizardTimestampSchemaModeDivider"
           />
           <EuiSpacer size="l" />
-          <SchemaInferenceModeCards control={control} />
+          <SchemaInferenceModeCards
+            control={control}
+            format={datasetFormat}
+            errorMode={errorMode}
+          />
           <EuiSpacer size="l" />
           <div data-test-subj="datasetWizardMappedFields">
             {mappedFieldsEditor}

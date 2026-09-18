@@ -8,12 +8,21 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiSuperSelect, EuiTextColor } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSuperSelect,
+  EuiTextColor,
+} from '@elastic/eui';
 import type { Control, FieldPath, RegisterOptions } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 import {
+  DATASET_SETTING_DESCRIPTION_TIP_TEST_SUBJ,
   useDatasetSettingDefaultHint,
   useDatasetSettingDefaultsShown,
   useSettingFieldText,
@@ -39,6 +48,11 @@ export interface SettingsEnumFieldProps<T extends string> {
   rules?: RegisterOptions<CreateDatasetFormValues, FieldPath<CreateDatasetFormValues>>;
   /** Off where the field sits among a step's own fields rather than a settings panel. */
   isCompressed?: boolean;
+  /** Label is provided elsewhere (e.g. a collapsible section trigger). */
+  hideLabel?: boolean;
+  /** With hideLabel, show the field description in an icon beside the control. */
+  inlineDescriptionTip?: boolean;
+  disabled?: boolean;
 }
 
 /**
@@ -56,11 +70,21 @@ export function SettingsEnumField<T extends string>({
   'data-test-subj': dataTestSubj,
   rules,
   isCompressed = true,
+  hideLabel = false,
+  inlineDescriptionTip = false,
+  disabled = false,
 }: SettingsEnumFieldProps<T>): ReturnType<FunctionComponent> {
   const { field, fieldState } = useController({ name, control, rules });
   const defaultHint = useDatasetSettingDefaultHint(name);
   const isClearable = useDatasetSettingDefaultsShown();
-  const fieldText = useSettingFieldText(name, { label, description, helpText, placeholder });
+  const showInlineDescriptionTip = hideLabel && inlineDescriptionTip;
+  const inlineDescription = description ?? helpText;
+  const fieldText = useSettingFieldText(name, {
+    label,
+    description: showInlineDescriptionTip ? undefined : description,
+    helpText: showInlineDescriptionTip ? undefined : helpText,
+    placeholder,
+  });
 
   const value = field.value as T | '';
   const isInvalid = Boolean(fieldState.error);
@@ -129,45 +153,64 @@ export function SettingsEnumField<T extends string>({
 
   const hasDescriptions = options.some((option) => Boolean(option.description));
 
+  const enumControl = isClearable ? (
+    <EuiComboBox
+      options={comboBoxOptions}
+      selectedOptions={selectedOptions}
+      onChange={handleComboBoxChange}
+      renderOption={renderOption}
+      rowHeight={hasDescriptions ? 'auto' : undefined}
+      data-test-subj={dataTestSubj}
+      fullWidth
+      compressed={isCompressed}
+      isClearable={!disabled}
+      isDisabled={disabled}
+      isInvalid={isInvalid}
+      aria-label={label}
+      placeholder={fieldText.placeholder}
+      singleSelection={{ asPlainText: true }}
+      inputRef={field.ref}
+    />
+  ) : (
+    <EuiSuperSelect
+      options={superSelectOptions}
+      data-test-subj={dataTestSubj}
+      fullWidth
+      compressed={isCompressed}
+      disabled={disabled}
+      aria-label={label}
+      placeholder={placeholder}
+      valueOfSelected={value || undefined}
+      onChange={(nextValue) => field.onChange(nextValue)}
+      name={field.name}
+      buttonRef={field.ref}
+      isInvalid={isInvalid}
+    />
+  );
+
   return (
     <EuiFormRow
-      label={fieldText.label}
+      label={hideLabel ? undefined : fieldText.label}
       helpText={fieldText.helpText}
       fullWidth
       isInvalid={isInvalid}
       error={fieldState.error?.message}
     >
-      {isClearable ? (
-        <EuiComboBox
-          options={comboBoxOptions}
-          selectedOptions={selectedOptions}
-          onChange={handleComboBoxChange}
-          renderOption={renderOption}
-          rowHeight={hasDescriptions ? 'auto' : undefined}
-          data-test-subj={dataTestSubj}
-          fullWidth
-          compressed={isCompressed}
-          isClearable
-          isInvalid={isInvalid}
-          aria-label={label}
-          placeholder={fieldText.placeholder}
-          singleSelection={{ asPlainText: true }}
-          inputRef={field.ref}
-        />
+      {showInlineDescriptionTip && inlineDescription ? (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow>{enumControl}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type="info"
+              size="m"
+              color="subdued"
+              content={inlineDescription}
+              iconProps={{ 'data-test-subj': DATASET_SETTING_DESCRIPTION_TIP_TEST_SUBJ }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
-        <EuiSuperSelect
-          options={superSelectOptions}
-          data-test-subj={dataTestSubj}
-          fullWidth
-          compressed={isCompressed}
-          aria-label={label}
-          placeholder={placeholder}
-          valueOfSelected={value || undefined}
-          onChange={(nextValue) => field.onChange(nextValue)}
-          name={field.name}
-          buttonRef={field.ref}
-          isInvalid={isInvalid}
-        />
+        enumControl
       )}
     </EuiFormRow>
   );

@@ -15,7 +15,7 @@ import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
 const UNIVERSAL_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
   partition_detection: 'auto',
-  schema_resolution: 'union_by_name',
+  schema_resolution: 'first_file_wins',
 };
 
 const CSV_TSV_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
