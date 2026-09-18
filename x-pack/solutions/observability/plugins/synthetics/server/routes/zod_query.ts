@@ -9,7 +9,7 @@ import type { RouteValidationFunction } from '@kbn/core-http-server';
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
-export const MAX_ROUTE_ID_LENGTH = 4096;
+export const MAX_ROUTE_ID_LENGTH = 1024;
 export const MAX_ROUTE_STRING_LENGTH = 4096;
 export const MAX_DATE_RANGE_LENGTH = 4096;
 // Pre-existing product cap (project-monitor delete + overview trends).
