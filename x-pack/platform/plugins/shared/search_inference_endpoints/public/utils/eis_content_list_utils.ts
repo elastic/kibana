@@ -14,9 +14,11 @@ import type {
   IncludeExcludeFilter,
 } from '@kbn/content-list-provider';
 import {
+  DEFAULT_EIS_DISPLAY_OPTIONS,
   filterGroupedModels,
   getProviderOptions,
   TASK_TYPE_FILTERS,
+  type EisDisplayOptions,
   type GroupedModel,
   type TaskTypeCategory,
 } from './eis_utils';
@@ -81,7 +83,10 @@ const sortModels = (models: GroupedModel[], sort: FindItemsParams['sort']): Grou
  * the model detail flyout stay in agreement about what matches a query.
  */
 export const createEisFindItems =
-  (models: GroupedModel[]): FindItemsFn =>
+  (
+    models: GroupedModel[],
+    displayOptions: EisDisplayOptions = DEFAULT_EIS_DISPLAY_OPTIONS
+  ): FindItemsFn =>
   async ({ searchQuery, filters, sort }) => {
     const providerFilter = getIncludeExclude(filters[EIS_PROVIDER_FILTER_ID]);
     const categoryFilter = getIncludeExclude(filters[EIS_CATEGORY_FILTER_ID]);
@@ -92,6 +97,7 @@ export const createEisFindItems =
         searchQuery,
         selectedProviders: providerFilter.include,
         selectedTaskTypes,
+        ...displayOptions,
       }).filter(
         ({ modelCreator, categories }) =>
           !providerFilter.exclude.includes(modelCreator) &&
