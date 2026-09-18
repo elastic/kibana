@@ -9,20 +9,31 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/significant-events-schema';
 import React, { useCallback, useMemo, useState } from 'react';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { TableRow } from './utils';
 import { parseSearchQuery } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import type { SignificantEventsSearchBarProps } from '../../../../components/search_bar';
 import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { GenerateSplitButton } from '../shared/generate_split_button';
+import { getGenerateDisabledTooltip } from '../shared/translations';
 import { FindSignificantEventsButton } from './find_significant_events_button';
 import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 import { StreamsTreeTable } from './tree_table';
 
 export function StreamsView() {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  const { canManage } = getNightshiftCapabilities(nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
 
@@ -122,31 +133,36 @@ export function StreamsView() {
               isClearable
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <GenerateSplitButton
-              size="s"
-              config={onboardingConfig}
-              allConnectors={allConnectors}
-              connectorError={connectorError}
-              featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
-              queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
-              onConfigChange={setOnboardingConfig}
-              onRun={onBulkOnboardStreamsClick}
-              onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
-              onRunQueriesOnly={onBulkOnboardQueriesOnly}
-              isRunDisabled={
-                blocksActivity ||
-                selectedStreams.length === 0 ||
-                isConnectorCatalogUnavailable ||
-                featuresConnectors.loading ||
-                queriesConnectors.loading ||
-                isScheduling
-              }
-              runDisabledTooltip={activityBlockTooltip}
-              isConfigDisabled={selectedStreams.length === 0}
-              isLoading={isScheduling}
-            />
-          </EuiFlexItem>
+          {canManage && (
+            <EuiFlexItem grow={false}>
+              <GenerateSplitButton
+                size="s"
+                config={onboardingConfig}
+                allConnectors={allConnectors}
+                connectorError={connectorError}
+                featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
+                queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
+                onConfigChange={setOnboardingConfig}
+                onRun={onBulkOnboardStreamsClick}
+                onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
+                onRunQueriesOnly={onBulkOnboardQueriesOnly}
+                isRunDisabled={
+                  blocksActivity ||
+                  selectedStreams.length === 0 ||
+                  isConnectorCatalogUnavailable ||
+                  featuresConnectors.loading ||
+                  queriesConnectors.loading ||
+                  isScheduling
+                }
+                runDisabledTooltip={getGenerateDisabledTooltip({
+                  activityBlockTooltip,
+                  hasSelectedStreams: selectedStreams.length > 0,
+                })}
+                isConfigDisabled={selectedStreams.length === 0}
+                isLoading={isScheduling}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <FindSignificantEventsButton
               onRun={handleRun}
@@ -177,11 +193,16 @@ export function StreamsView() {
           searchQuery={searchQuery}
           blocksActivity={blocksActivity}
           activityBlockTooltip={activityBlockTooltip}
-          selection={{
-            selected: selectedStreams,
-            onSelectionChange: setSelectedStreams,
-            selectable: (row) => isStreamActionable(row.stream.name),
-          }}
+          canManage={canManage}
+          selection={
+            canManage
+              ? {
+                  selected: selectedStreams,
+                  onSelectionChange: setSelectedStreams,
+                  selectable: (row) => isStreamActionable(row.stream.name),
+                }
+              : undefined
+          }
           onOnboardStreamActionClick={onOnboardStreamActionClick}
           onStopOnboardingActionClick={onStopOnboardingActionClick}
         />
