@@ -50,11 +50,33 @@ export const WorkflowDetailTestModal = () => {
     async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
       if (isProductionReplay) {
         if (!workflowId) {
-          return;
+          const missingIdError = new Error(
+            i18n.translate('workflows.detail.testModal.reRunMissingWorkflowId', {
+              defaultMessage: 'Workflow id is missing',
+            })
+          );
+          notifications.toasts.addError(missingIdError, {
+            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
+              defaultMessage: 'Failed to re-run workflow',
+            }),
+            toastLifeTimeMs: 5000,
+          });
+          throw missingIdError;
         }
-        const result = await runWorkflow({ id: workflowId, inputs });
-        if (result?.workflowExecutionId) {
-          setSelectedExecution(result.workflowExecutionId);
+
+        try {
+          const result = await runWorkflow({ id: workflowId, inputs });
+          if (result?.workflowExecutionId) {
+            setSelectedExecution(result.workflowExecutionId);
+          }
+        } catch (error) {
+          notifications.toasts.addError(error as Error, {
+            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
+              defaultMessage: 'Failed to re-run workflow',
+            }),
+            toastLifeTimeMs: 5000,
+          });
+          throw error;
         }
         return;
       }
@@ -65,7 +87,14 @@ export const WorkflowDetailTestModal = () => {
         setSelectedExecution(executionId.workflowExecutionId);
       }
     },
-    [isProductionReplay, runWorkflow, setSelectedExecution, testWorkflow, workflowId]
+    [
+      isProductionReplay,
+      notifications.toasts,
+      runWorkflow,
+      setSelectedExecution,
+      testWorkflow,
+      workflowId,
+    ]
   );
 
   const closeModal = useCallback(() => {

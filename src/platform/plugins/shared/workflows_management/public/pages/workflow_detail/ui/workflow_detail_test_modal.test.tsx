@@ -80,7 +80,9 @@ jest.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => ({
       <button
         type="button"
         data-test-subj="submit-modal"
-        onClick={() => onSubmit({ test: 'input' }, 'manual')}
+        onClick={() => {
+          void Promise.resolve(onSubmit({ test: 'input' }, 'manual')).catch(() => undefined);
+        }}
       >
         {'Run'}
       </button>
@@ -137,6 +139,7 @@ describe('WorkflowDetailTestModal', () => {
         notifications: {
           toasts: {
             addWarning: jest.fn(),
+            addError: jest.fn(),
           },
         },
       },
@@ -253,6 +256,41 @@ describe('WorkflowDetailTestModal', () => {
     });
     expect(mockTestWorkflow).not.toHaveBeenCalled();
     expect(mockSetSelectedExecution).toHaveBeenCalledWith('new-exec');
+  });
+
+  it('toasts and does not select an execution when production replay fails', async () => {
+    const apiError = new Error('run failed');
+    mockRunWorkflow.mockRejectedValue(apiError);
+    (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue('exec-1');
+    (selectWorkflowId as unknown as jest.Mock).mockReturnValue('wf-1');
+
+    const addError = jest.fn();
+    mockUseKibana.mockReturnValue({
+      services: {
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+            addError,
+          },
+        },
+      },
+    });
+
+    const mockSetSelectedExecution = jest.fn();
+    mockUseWorkflowUrlState.mockReturnValue({
+      setSelectedExecution: mockSetSelectedExecution,
+    });
+
+    const { getByTestId } = renderModal();
+    fireEvent.click(getByTestId('submit-modal'));
+
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalledWith(
+        apiError,
+        expect.objectContaining({ title: expect.any(String) })
+      );
+    });
+    expect(mockSetSelectedExecution).not.toHaveBeenCalled();
   });
 
   describe('warnings', () => {
