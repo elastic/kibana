@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { BlastRadius } from './blast_radius';
+export { Impact } from './impact';
