@@ -35,7 +35,10 @@ import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
 import { portSchema } from '../lib/schemas';
-import { serviceParamValueToKbnSettingMap as emailKbnSettings } from '../../../common/email/constants';
+import {
+  serviceParamValueToKbnSettingMap as emailKbnSettings,
+  TEST_MESSAGE,
+} from '../../../common/email/constants';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -346,6 +349,7 @@ async function executor(
     services,
     logger,
     connectorUsageCollector,
+    source,
   } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
   const awsSesConfig = configurationUtilities.getAwsSesConfig();
@@ -420,8 +424,21 @@ async function executor(
     transport.service = config.service;
   }
 
+  // use the test message for HTTP sourced, except when the service is JSON (for testing)
+  const isSourceHttp = source?.type === ActionExecutionSourceType.HTTP_REQUEST;
+  const isJSONService = config.service === JSON_TRANSPORT_SERVICE;
+  const useTestMessage = isSourceHttp && !isJSONService;
+
   let actualMessage: string | null | undefined = params.message;
   let actualHTMLMessage: string | null | undefined = params.messageHTML;
+
+  // use HTTP sourced, except when the service is JSON (for testing)
+  if (useTestMessage) {
+    actualMessage = TEST_MESSAGE;
+    if (actualHTMLMessage != null) {
+      actualHTMLMessage = TEST_MESSAGE;
+    }
+  }
 
   actualMessage = trimMessageIfRequired(
     actionId,
@@ -439,7 +456,7 @@ async function executor(
     configurationUtilities
   );
 
-  if (configurationUtilities.enableFooterInEmail()) {
+  if (configurationUtilities.enableFooterInEmail() && !useTestMessage) {
     const footerMessage = getFooterMessage({
       publicBaseUrl,
       kibanaFooterLink: params.kibanaFooterLink,
@@ -457,7 +474,7 @@ async function executor(
       bcc: params.bcc,
     },
     content: {
-      subject: params.subject,
+      subject: useTestMessage ? TEST_MESSAGE : params.subject,
       message: actualMessage || 'no message set',
       messageHTML: actualHTMLMessage,
     },
