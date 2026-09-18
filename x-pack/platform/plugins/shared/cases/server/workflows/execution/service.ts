@@ -21,7 +21,15 @@ import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../c
 import { AttachmentType } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
 import type { CasesRequestHandlerContext } from '../../types';
-import { parseSelectedAlertPairs, validateOrigin } from './validate_origin';
+import {
+  getTriggerSelectionType,
+  parseSelectedTriggerPairs,
+  rejectQuerySelection,
+  type TriggerSelectionType,
+  validateOrigin,
+  validateSelectionMembership,
+  type WorkflowSelectionTarget,
+} from './validate_origin';
 import type { EnsureAuthorizedToRunWorkflowParams } from './authorize_workflow_run';
 
 interface RunWorkflowParams {
@@ -41,6 +49,25 @@ interface CasesWorkflowRunServiceDeps {
     ensureAuthorizedToRunWorkflow: (params: EnsureAuthorizedToRunWorkflowParams) => Promise<void>;
   }>;
 }
+
+const buildTrustedTriggerInputs = (
+  inputs: Record<string, unknown>,
+  selectionType: TriggerSelectionType,
+  selectedTargets: WorkflowSelectionTarget[]
+): Record<string, unknown> => {
+  const event = isPlainObject(inputs.event) ? (inputs.event as Record<string, unknown>) : {};
+  const selectionKey = selectionType === 'alert' ? 'alertIds' : 'documentIds';
+  const selection = selectedTargets.map(({ id, index }) => ({ _id: id, _index: index }));
+
+  return {
+    ...inputs,
+    event: {
+      ...omit(event, ['alerts', 'documents', 'alertIds', 'documentIds', 'querySelection']),
+      triggerType: selectionType,
+      [selectionKey]: selection,
+    },
+  };
+};
 
 export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
@@ -111,7 +138,7 @@ export class CasesWorkflowRunService {
       throw Boom.forbidden('Workflows require an active Enterprise license.');
     }
 
-    const { caseIds } = body;
+    const { caseIds, origin } = body;
 
     // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
     // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
@@ -119,39 +146,61 @@ export class CasesWorkflowRunService {
     const { ensureAuthorizedToRunWorkflow } = await this.getWorkflowRunAuthorizer(request);
     await ensureAuthorizedToRunWorkflow({ ids: caseIds });
 
-    // `origin` is optional. When absent the run is a list-surface (bulk) run: the caller
-    // was not looking at any specific sub-entity, alert inputs are not permitted, and no
-    // case fetch is needed. When present the run is scoped to a single case with a specific
-    // sub-entity context; origin-entity membership and alert attachment are validated.
-    // Parse and validate alertIds shape eagerly — any malformed entry throws 400 here,
-    // before any case fetch, so the validated set equals what preprocessing later fetches.
-    const selectedAlerts = parseSelectedAlertPairs(body.inputs);
+    // Cases only accepts concrete trigger selections so membership can be validated before any
+    // document is fetched or workflow execution is scheduled.
+    rejectQuerySelection(body.inputs);
+    const triggerSelectionType = getTriggerSelectionType(body.inputs);
+    const selectedTargets =
+      triggerSelectionType !== undefined
+        ? parseSelectedTriggerPairs(body.inputs, triggerSelectionType)
+        : [];
 
-    if (body.origin === undefined) {
-      if (selectedAlerts.length > 0) {
-        throw Boom.badRequest('Alert inputs can only be used with a single case.');
+    if (origin === undefined) {
+      if (triggerSelectionType !== undefined) {
+        throw Boom.badRequest('Trigger selections can only be used with a single case.');
       }
     } else {
       if (caseIds.length > 1) {
         throw Boom.badRequest(
-          `Workflow origin type "${body.origin.type}" can only be used with a single case.`
+          `Workflow origin type "${origin.type}" can only be used with a single case.`
         );
       }
       const theCase = await casesClient.cases.get({ id: caseIds[0] });
+
       const attachedAlerts =
-        selectedAlerts.length > 0
+        triggerSelectionType === 'alert'
           ? await casesClient.attachments.getAllDocumentsAttachedToCase({
               caseId: caseIds[0],
               attachmentTypes: [AttachmentType.alert],
             })
           : [];
+
+      const attachedEvents =
+        triggerSelectionType === 'document'
+          ? await casesClient.attachments.getAllDocumentsAttachedToCase({
+              caseId: caseIds[0],
+              attachmentTypes: [AttachmentType.event],
+            })
+          : [];
+
       validateOrigin({
-        origin: body.origin,
+        origin,
         caseId: caseIds[0],
-        selectedAlerts,
+        selectedAlerts:
+          triggerSelectionType === 'alert'
+            ? selectedTargets.map(({ id, index }) => ({ _id: id, _index: index }))
+            : [],
         theCase,
         attachedAlerts,
       });
+
+      if (triggerSelectionType === 'document') {
+        validateSelectionMembership({
+          selectionType: 'document',
+          selectedTargets,
+          attachedDocuments: attachedEvents,
+        });
+      }
     }
 
     const workflow = await this.management.getWorkflow(workflowId, spaceId);
@@ -167,7 +216,13 @@ export class CasesWorkflowRunService {
 
     // Strip any client-supplied event.caseIds so the client cannot pre-seed the value;
     // the server re-injects the authorized set via eventOverrides after preprocessing.
-    const { event: rawEvent, ...otherInputs } = body.inputs;
+    // Pre-expanded selections are reduced to their validated identities so preprocessing refetches
+    // authoritative document sources instead of trusting client-supplied event content.
+    const trustedInputs =
+      triggerSelectionType !== undefined
+        ? buildTrustedTriggerInputs(body.inputs, triggerSelectionType, selectedTargets)
+        : body.inputs;
+    const { event: rawEvent, ...otherInputs } = trustedInputs;
     const strippedEvent = isPlainObject(rawEvent)
       ? omit(rawEvent as Record<string, unknown>, 'caseIds')
       : rawEvent;
@@ -178,7 +233,7 @@ export class CasesWorkflowRunService {
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
       source: CASES_WORKFLOW_EXECUTION_SOURCE,
       caseIds,
-      origin: body.origin,
+      origin,
     });
 
     // Use runWorkflow instead of executeWorkflow so the call returns as soon as the execution
@@ -186,10 +241,10 @@ export class CasesWorkflowRunService {
     // document to appear even when waitForCompletion=false, which adds measurable latency to
     // every interactive "run workflow from a case" click.
     //
-    // eventOverrides injects the server-owned caseIds into `event` *after* alert preprocessing
-    // runs. preprocessAlertInputs replaces the whole `event` object with the alert-event shape,
-    // so pre-merging caseIds into event (before the call) would silently drop them on alert runs.
-    const { workflowExecutionId } = await this.management.runWorkflowWithAlertPreprocessing({
+    // eventOverrides injects the server-owned caseIds into `event` *after* trigger-input
+    // preprocessing runs. For alerts, preprocessTriggerInputs replaces the whole `event` object,
+    // so pre-merging caseIds into event (before the call) would silently drop them.
+    const { workflowExecutionId } = await this.management.runWorkflowWithPreprocessing({
       workflow: toWorkflowExecutionEngineModel(workflow),
       spaceId,
       inputs: sanitizedInputs,

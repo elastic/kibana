@@ -20,21 +20,28 @@ const isRecord = (value: unknown): value is Record<string, unknown> => isPlainOb
 const getRecord = (value: unknown): Record<string, unknown> | undefined =>
   isRecord(value) ? value : undefined;
 
-interface AlertPair {
+interface DocumentPair {
   _id: string;
   _index: string;
 }
 
+export interface WorkflowSelectionTarget {
+  id: string;
+  index: string;
+}
+
+export type TriggerSelectionType = 'alert' | 'document';
+
 /**
- * Reads the (id, index) pairs from `inputs.event.alertIds`.
+ * Reads the explicit (id, index) pairs from `inputs.event.alertIds`.
  *
  * Malformed entries are rejected, never skipped. The pairs returned here are the ones
- * `validateOrigin` checks for case membership, while alert preprocessing fetches from the *raw*
+ * `validateOrigin` checks for case membership, while trigger preprocessing fetches from the *raw*
  * `inputs.event.alertIds` array — so dropping an entry would let it escape the membership check
  * and still be fetched and injected into the workflow event. A nullish `alertIds` is treated as
  * "no alert inputs" to match how preprocessing decides whether to expand alerts at all.
  */
-export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPair[] => {
+export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): DocumentPair[] => {
   const { alertIds } = getRecord(inputs.event) ?? {};
 
   if (alertIds === undefined || alertIds === null) {
@@ -69,6 +76,152 @@ export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): AlertP
   });
 };
 
+/** Resolves a Cases trigger selection from its discriminator or selection fields. */
+export const getTriggerSelectionType = (
+  inputs: Record<string, unknown>
+): TriggerSelectionType | undefined => {
+  const event = getRecord(inputs.event);
+  if (!event) {
+    return undefined;
+  }
+
+  const hasAlertSelection = event.alertIds != null || event.alerts != null;
+  const hasDocumentSelection = event.documentIds != null || event.documents != null;
+
+  if (hasAlertSelection && hasDocumentSelection) {
+    throw Boom.badRequest('Case workflow inputs cannot mix alert and document selections.');
+  }
+
+  let inferredSelectionType: TriggerSelectionType | undefined;
+  if (hasAlertSelection) {
+    inferredSelectionType = 'alert';
+  } else if (hasDocumentSelection) {
+    inferredSelectionType = 'document';
+  }
+  const { triggerType } = event;
+
+  if (triggerType === 'alert' || triggerType === 'document') {
+    if (inferredSelectionType !== undefined && inferredSelectionType !== triggerType) {
+      throw Boom.badRequest(
+        `Case workflow ${inferredSelectionType} selection does not match triggerType "${triggerType}".`
+      );
+    }
+    return triggerType;
+  }
+
+  if (triggerType !== undefined && inferredSelectionType !== undefined) {
+    throw Boom.badRequest(
+      `Case workflow ${inferredSelectionType} selection requires triggerType "${inferredSelectionType}".`
+    );
+  }
+
+  return inferredSelectionType;
+};
+
+export const rejectQuerySelection = (inputs: Record<string, unknown>): void => {
+  const { querySelection } = getRecord(inputs.event) ?? {};
+  if (querySelection !== undefined) {
+    throw Boom.badRequest('Query-based trigger selections are not supported for case workflows.');
+  }
+};
+
+/**
+ * Reads the concrete alert or document pairs supplied to a case workflow.
+ */
+export const parseSelectedTriggerPairs = (
+  inputs: Record<string, unknown>,
+  selectionType: TriggerSelectionType
+): WorkflowSelectionTarget[] => {
+  const event = getRecord(inputs.event);
+  if (selectionType === 'alert') {
+    const alertIds = parseSelectedAlertPairs(inputs);
+    if (alertIds.length > 0) {
+      return alertIds.map(({ _id, _index }) => ({ id: _id, index: _index }));
+    }
+  }
+
+  const preExpandedSelection = event?.[selectionType === 'alert' ? 'alerts' : 'documents'];
+  const explicitDocumentIds = selectionType === 'document' ? event?.documentIds : undefined;
+  const selection =
+    Array.isArray(preExpandedSelection) && preExpandedSelection.length > 0
+      ? preExpandedSelection
+      : explicitDocumentIds ?? preExpandedSelection;
+
+  if (!Array.isArray(selection)) {
+    throw Boom.badRequest(`Case workflow ${selectionType} selection must be an array.`);
+  }
+  if (selection.length === 0) {
+    throw Boom.badRequest(`Case workflow ${selectionType} selection cannot be empty.`);
+  }
+
+  return selection.map((entry) => {
+    const record = getRecord(entry);
+    const usesExplicitDocumentIds = selection === explicitDocumentIds;
+    const id =
+      selectionType === 'alert' || usesExplicitDocumentIds
+        ? record?._id
+        : record?.id ?? record?._id;
+    const index =
+      selectionType === 'alert' || usesExplicitDocumentIds
+        ? record?._index
+        : record?.index ?? record?._index;
+    const hasConflictingDocumentIdentity =
+      selectionType === 'document' &&
+      !usesExplicitDocumentIds &&
+      ((record?.id !== undefined && record?._id !== undefined && record.id !== record._id) ||
+        (record?.index !== undefined &&
+          record?._index !== undefined &&
+          record.index !== record._index));
+
+    if (typeof id !== 'string' || typeof index !== 'string' || hasConflictingDocumentIdentity) {
+      throw Boom.badRequest(
+        `Every selected ${selectionType} must contain string id and index properties.`
+      );
+    }
+
+    return { id, index };
+  });
+};
+
+export const validateOriginContext = ({
+  origin,
+  caseId,
+  theCase,
+}: {
+  origin: CaseWorkflowRunOrigin;
+  caseId: string;
+  theCase: Case;
+}): void => {
+  if (origin.caseId !== caseId) {
+    throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
+  }
+
+  if (
+    origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE &&
+    !theCase.observables.some(({ id }) => id === origin.observableId)
+  ) {
+    throw Boom.badRequest(
+      `Observable "${origin.observableId}" does not belong to case "${caseId}".`
+    );
+  }
+};
+
+export const validateSelectionMembership = ({
+  selectionType,
+  selectedTargets,
+  attachedDocuments,
+}: {
+  selectionType: TriggerSelectionType;
+  selectedTargets: WorkflowSelectionTarget[];
+  attachedDocuments: DocumentResponse;
+}): void => {
+  const attachedPairs = new Set(attachedDocuments.map(({ id, index }) => `${id}|${index}`));
+  if (selectedTargets.some(({ id, index }) => !attachedPairs.has(`${id}|${index}`))) {
+    const selectionLabel = selectionType === 'alert' ? 'alerts' : 'documents';
+    throw Boom.badRequest(`All selected ${selectionLabel} must belong to the case.`);
+  }
+};
+
 /**
  * Validates that the requested workflow `origin` is consistent with `caseId`
  * and, when alert inputs are present, that every selected alert is attached
@@ -78,9 +231,8 @@ export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): AlertP
  * cannot bypass it by using a `cases.case` or `cases.observable` origin type while
  * still injecting arbitrary alert documents into the workflow via `inputs.event.alertIds`.
  *
- * `selectedAlerts` must come from `parseSelectedAlertPairs` — it is the only reader of
- * `inputs.event.alertIds`, which keeps the validated set identical to the set that alert
- * preprocessing later fetches.
+ * `selectedAlerts` must come from the selection parsers above so malformed identities cannot be
+ * skipped during membership validation.
  */
 export const validateOrigin = ({
   origin,
@@ -91,33 +243,23 @@ export const validateOrigin = ({
 }: {
   origin: CaseWorkflowRunOrigin;
   caseId: string;
-  selectedAlerts: AlertPair[];
+  selectedAlerts: DocumentPair[];
   theCase: Case;
   attachedAlerts: DocumentResponse;
 }): void => {
-  // Step 1 — origin-entity membership checks.
-  if (origin.caseId !== caseId) {
-    throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
-  }
-  if (
-    origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE &&
-    !theCase.observables.some(({ id }) => id === origin.observableId)
-  ) {
-    throw Boom.badRequest(
-      `Observable "${origin.observableId}" does not belong to case "${caseId}".`
-    );
-  }
+  validateOriginContext({ origin, caseId, theCase });
 
-  // Step 2 — alert-membership check: applied whenever alertIds appear in inputs,
-  // regardless of origin type, using (id, index) pairs for precise matching.
-  // `selectedAlerts` comes from `parseSelectedAlertPairs` — the same parsed set that alert
-  // preprocessing will later fetch, so the validated set and the fetched set are identical.
+  // Step 2 — alert-membership check: applied whenever alerts appear in inputs, regardless of
+  // origin type, using (id, index) pairs for precise matching.
   if (selectedAlerts.length > 0) {
-    const attachedPairs = new Set(attachedAlerts.map(({ id, index }) => `${id}|${index}`));
-    if (selectedAlerts.some(({ _id, _index }) => !attachedPairs.has(`${_id}|${_index}`))) {
-      throw Boom.badRequest('All selected alerts must belong to the case.');
-    }
-    // For a single-alert origin the named alert must also be among the selected ones.
+    validateSelectionMembership({
+      selectionType: 'alert',
+      selectedTargets: selectedAlerts.map(({ _id, _index }) => ({
+        id: _id,
+        index: _index,
+      })),
+      attachedDocuments: attachedAlerts,
+    });
     if (
       origin.type === ALERT_WORKFLOW_ORIGIN_TYPE &&
       !selectedAlerts.some(({ _id }) => _id === origin.alertId)
