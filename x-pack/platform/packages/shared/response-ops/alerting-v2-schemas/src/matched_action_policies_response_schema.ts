@@ -58,6 +58,18 @@ export const matchActionPoliciesForRuleResponseSchema = z
       .describe(
         'Total number of action policies in the space. If greater than the number evaluated, the match results may be incomplete.'
       ),
+    evaluated_count: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Number of action policies evaluated for a match, including policies that did not match.'
+      ),
+    is_truncated: z
+      .boolean()
+      .describe(
+        'Whether total exceeds evaluated_count, meaning the match results may be incomplete.'
+      ),
   })
   .describe('Action policies that match a given rule, grouped by match category.')
   .meta({ id: 'alerting_match_action_policies_for_rule_response' });

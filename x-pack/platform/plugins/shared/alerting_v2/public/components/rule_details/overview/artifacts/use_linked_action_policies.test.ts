@@ -7,10 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
-import {
-  useLinkedActionPolicies,
-  LINKED_ACTION_POLICIES_FETCH_LIMIT,
-} from './use_linked_action_policies';
+import { useLinkedActionPolicies } from './use_linked_action_policies';
 
 const mockUseMatchedActionPolicies = jest.fn();
 const mockHttp = { fake: 'http-start-contract' };
@@ -60,6 +57,8 @@ describe('useLinkedActionPolicies', () => {
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
   });
 
@@ -79,6 +78,8 @@ describe('useLinkedActionPolicies', () => {
         buildItem('tags', { id: 'filtered-2' }),
       ],
       total: 3,
+      evaluatedCount: 3,
+      isTruncated: false,
     });
 
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
@@ -95,13 +96,16 @@ describe('useLinkedActionPolicies', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
-      items: [buildItem('tags')],
-      total: LINKED_ACTION_POLICIES_FETCH_LIMIT + 1,
+      items: [buildItem('tags'), buildItem('tags')],
+      evaluatedCount: 2,
+      total: 3,
+      isTruncated: true,
     });
 
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
-    expect(result.current.totalCount).toBe(1);
+    expect(result.current.totalCount).toBe(2);
+    expect(result.current.evaluatedCount).toBe(2);
     expect(result.current.isCountTruncated).toBe(true);
   });
 
@@ -111,6 +115,8 @@ describe('useLinkedActionPolicies', () => {
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
@@ -124,6 +130,8 @@ describe('useLinkedActionPolicies', () => {
       error: new Error('network error'),
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
