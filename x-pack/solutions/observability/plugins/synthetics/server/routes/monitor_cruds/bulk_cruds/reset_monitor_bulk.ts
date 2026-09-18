@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { MAX_MONITOR_BULK_SIZE, routeId } from '../../zod_query';
+import { MAX_MONITOR_BATCH_SIZE, routeId } from '../../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { ResetMonitorAPI } from '../services/reset_monitor_api';
@@ -16,7 +16,7 @@ export const resetSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory = ()
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_RESET,
   validate: {
     body: z.object({
-      ids: z.array(routeId).min(1).max(MAX_MONITOR_BULK_SIZE),
+      ids: z.array(routeId).min(1).max(MAX_MONITOR_BATCH_SIZE),
     }),
   },
   handler: async (routeContext): Promise<any> => {

@@ -33,7 +33,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       params: RequestParamsSchema,
-      body: z.object({
+      body: z.strictObject({
         key: z.string().min(1).max(MAX_ROUTE_ID_LENGTH).optional(),
         value: z.string().min(1).max(MAX_PARAM_VALUE_LENGTH).optional(),
         description: z.string().max(4096).optional(),

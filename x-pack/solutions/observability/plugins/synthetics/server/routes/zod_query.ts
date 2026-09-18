@@ -12,7 +12,7 @@ import { BooleanFromString } from '@kbn/zod-helpers';
 export const MAX_ROUTE_ID_LENGTH = 1024;
 export const MAX_ROUTE_STRING_LENGTH = 4096;
 export const MAX_DATE_RANGE_LENGTH = 4096;
-// Pre-existing product cap (project-monitor delete + overview trends).
+// Pre-existing product cap (project-monitor delete, overview trends, bulk reset).
 export const MAX_MONITOR_BATCH_SIZE = 500;
 // Public bulk id lists were unbounded; decrypt finder paginates past perPage 500.
 export const MAX_MONITOR_BULK_SIZE = 10_000;

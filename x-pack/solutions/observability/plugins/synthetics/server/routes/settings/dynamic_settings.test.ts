@@ -230,5 +230,23 @@ describe('dynamic settings routes', () => {
         DynamicSettingsSchema.parse({ rebalancePrivateLocationShardsEnabled: 'nope' })
       ).toThrow();
     });
+
+    it('rejects unknown defaultEmail keys so a typo cannot drop cc or bcc', () => {
+      expect(
+        DynamicSettingsSchema.safeParse({
+          defaultEmail: { to: ['alerts@example.com'], ccc: ['copy@example.com'] },
+        }).success
+      ).toBe(false);
+    });
+
+    it('accepts a known defaultEmail payload', () => {
+      expect(
+        DynamicSettingsSchema.parse({
+          defaultEmail: { to: ['alerts@example.com'], cc: ['copy@example.com'] },
+        })
+      ).toEqual({
+        defaultEmail: { to: ['alerts@example.com'], cc: ['copy@example.com'] },
+      });
+    });
   });
 });

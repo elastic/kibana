@@ -24,7 +24,7 @@ import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 import { syntheticsMonitorSOTypes } from '../../../../common/types/saved_objects';
 
-const EditPrivateLocationSchema = z.object({
+export const EditPrivateLocationSchema = z.strictObject({
   label: z
     .string()
     .min(1, { error: minLengthMessage(1) })

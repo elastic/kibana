@@ -25,7 +25,7 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
-const ParamsObjectSchema = z.object({
+export const ParamsObjectSchema = z.strictObject({
   key: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
   value: z.string().min(1).max(MAX_PARAM_VALUE_LENGTH),
   description: z.string().max(4096).optional(),

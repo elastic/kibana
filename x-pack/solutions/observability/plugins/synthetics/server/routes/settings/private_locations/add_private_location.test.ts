@@ -249,4 +249,8 @@ describe('PrivateLocationSchema isAgentSharding', () => {
   it('rejects a non-boolean flag', () => {
     expect(() => PrivateLocationSchema.parse({ ...base, isAgentSharding: 'yes' })).toThrow();
   });
+
+  it('rejects unknown keys so a sharding typo cannot persist a classic location', () => {
+    expect(() => PrivateLocationSchema.parse({ ...base, isAgentShardng: true })).toThrow();
+  });
 });

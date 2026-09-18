@@ -188,7 +188,7 @@ export const DynamicSettingsSchema = z.object({
   defaultTLSRuleEnabled: z.boolean().optional(),
   rebalancePrivateLocationShardsEnabled: z.boolean().optional(),
   defaultEmail: z
-    .object({
+    .strictObject({
       to: emailList,
       cc: emailList.optional(),
       bcc: emailList.optional(),

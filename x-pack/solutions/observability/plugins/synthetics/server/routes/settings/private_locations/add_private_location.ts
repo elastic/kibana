@@ -21,12 +21,12 @@ import { assertCanEnableAgentSharding } from './agent_sharding_license';
 import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
-export const PrivateLocationSchema = z.object({
+export const PrivateLocationSchema = z.strictObject({
   label: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
   agentPolicyId: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
   tags: z.array(z.string().max(256)).max(100).optional(),
   geo: z
-    .object({
+    .strictObject({
       lat: z.number(),
       lon: z.number(),
     })
