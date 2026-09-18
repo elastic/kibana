@@ -38,6 +38,12 @@ export interface InvestigationActionModalsProps {
    */
   onAssignSubmit?: (assignee: string, rationale: string) => void;
   /**
+   * Commits the investigation close. Receives the close reason, performs the API call,
+   * and closes when done. Supplied by the solution layer which owns the mutation hook;
+   * when absent the modal closes immediately without writing.
+   */
+  onCloseSubmit?: (closeReason: string) => void;
+  /**
    * Replaces the default rationale-only dismiss modal. Supplied when a solution's
    * dismissal captures more than a rationale — a structured reason, say — which changes
    * what the modal renders and what local state it owns, not just what confirming does.
@@ -60,6 +66,7 @@ export const InvestigationActionModals = ({
   onCloseApproval,
   onConfirmApproval,
   onAssignSubmit,
+  onCloseSubmit,
   renderDismissModal,
 }: InvestigationActionModalsProps) => (
   <>
@@ -93,8 +100,7 @@ export const InvestigationActionModals = ({
             primaryAction={{
               color: 'danger',
               label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-              // TODO: use dismiss action API call hook
-              onClick: onCloseAction,
+              onClick: onCloseSubmit ? () => onCloseSubmit('other') : onCloseAction,
             }}
           />
         )

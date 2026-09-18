@@ -15,6 +15,8 @@ import {
 } from '@kbn/alertzero-common';
 import type { GetInvestigationResponse, ListInvestigationsResponse } from '@kbn/alertzero-common';
 import type {
+  CloseInvestigationRequest,
+  CloseInvestigationResponse,
   ListProposalsResponse,
   UpdateAssigneesRequest,
   UpdateAssigneesResponse,
@@ -100,6 +102,28 @@ export const useUpdateAssignees = (investigationId: string) => {
     mutationFn: async (body: UpdateAssigneesRequest): Promise<UpdateAssigneesResponse> =>
       services.http!.patch<UpdateAssigneesResponse>(
         `/internal/investigations/${encodeURIComponent(investigationId)}/assignees`,
+        {
+          body: JSON.stringify(body),
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        }
+      ),
+  });
+};
+
+/**
+ * Closes an investigation, declining all open proposals and cancelling the
+ * associated workflow execution.
+ *
+ * Routes through the agentic_investigations plugin at
+ * POST /internal/investigations/{id}/close.
+ */
+export const useCloseInvestigation = (investigationId: string) => {
+  const { services } = useKibana();
+
+  return useMutation({
+    mutationFn: async (body: CloseInvestigationRequest): Promise<CloseInvestigationResponse> =>
+      services.http!.post<CloseInvestigationResponse>(
+        `/internal/investigations/${encodeURIComponent(investigationId)}/close`,
         {
           body: JSON.stringify(body),
           version: AGENTIC_INVESTIGATIONS_API_VERSION,

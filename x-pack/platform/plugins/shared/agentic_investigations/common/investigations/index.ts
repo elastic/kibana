@@ -8,6 +8,7 @@
 export {
   INVESTIGATION_ASSIGNEES_URL,
   INVESTIGATION_BY_ID_URL,
+  INVESTIGATION_CLOSE_URL,
   INVESTIGATION_TEMPLATE_ID,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
@@ -15,9 +16,17 @@ export {
   MAX_INVESTIGATIONS_PAGE_SIZE,
 } from './constants';
 
-export { investigationIdParamsSchema, updateAssigneesRequestSchema } from './investigation';
+export {
+  closeInvestigationRequestSchema,
+  closeReasonSchema,
+  investigationIdParamsSchema,
+  updateAssigneesRequestSchema,
+} from './investigation';
 
 export type {
+  CloseInvestigationRequest,
+  CloseInvestigationResponse,
+  CloseReason,
   InvestigationIdParams,
   UpdateAssigneesRequest,
   UpdateAssigneesResponse,

@@ -99,15 +99,21 @@ export type {
 export {
   INVESTIGATION_ASSIGNEES_URL,
   INVESTIGATION_BY_ID_URL,
+  INVESTIGATION_CLOSE_URL,
   INVESTIGATION_TEMPLATE_ID,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
+  closeInvestigationRequestSchema,
+  closeReasonSchema,
   investigationIdParamsSchema,
   updateAssigneesRequestSchema,
 } from './investigations';
 
 export type {
+  CloseInvestigationRequest,
+  CloseInvestigationResponse,
+  CloseReason,
   InvestigationIdParams,
   UpdateAssigneesRequest,
   UpdateAssigneesResponse,

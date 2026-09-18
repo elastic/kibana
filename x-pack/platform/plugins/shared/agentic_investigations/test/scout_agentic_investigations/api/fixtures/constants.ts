@@ -24,6 +24,8 @@ export const ESCALATION_BY_ID_PATH = (id: string) => `internal/investigations/es
 export const INVESTIGATION_ASSIGNEES_PATH = (id: string) =>
   `internal/investigations/${id}/assignees`;
 
+export const INVESTIGATION_CLOSE_PATH = (id: string) => `internal/investigations/${id}/close`;
+
 /** Agent Builder public conversations API. */
 export const AB_CONVERSATIONS_PATH = 'api/agent_builder/conversations';
 export const AB_CONVERSATION_BY_ID_PATH = (id: string) => `api/agent_builder/conversations/${id}`;

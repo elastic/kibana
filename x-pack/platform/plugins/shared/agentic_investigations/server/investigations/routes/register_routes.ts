@@ -6,8 +6,10 @@
  */
 
 import type { InvestigationRouteDependencies } from '../types';
+import { registerCloseInvestigationRoute } from './close_investigation';
 import { registerUpdateAssigneesRoute } from './update_assignees';
 
 export const registerInvestigationRoutes = (deps: InvestigationRouteDependencies) => {
   registerUpdateAssigneesRoute(deps);
+  registerCloseInvestigationRoute(deps);
 };

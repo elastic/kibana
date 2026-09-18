@@ -117,6 +117,7 @@ export class AgenticInvestigationsPlugin
       router,
       logger: this.logger,
       getInvestigationsService: () => this.requireInvestigationsService(),
+      getSpaceId: (request) => this.getSpaceId(request),
     });
 
     return {};
@@ -158,6 +159,8 @@ export class AgenticInvestigationsPlugin
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
       userProfile: coreStart.userProfile,
+      getProposalsService: () => this.requireProposalsService(),
+      getWorkflowsApi: () => this.requireWorkflowsApi(),
     });
 
     void initializeManagedWorkflows({

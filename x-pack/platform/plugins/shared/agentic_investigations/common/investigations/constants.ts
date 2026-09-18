@@ -11,6 +11,7 @@ import { AGENTIC_INVESTIGATIONS_INTERNAL_URL } from '../constants';
 export const INVESTIGATIONS_INTERNAL_URL = AGENTIC_INVESTIGATIONS_INTERNAL_URL as const;
 export const INVESTIGATION_BY_ID_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}` as const;
 export const INVESTIGATION_ASSIGNEES_URL = `${INVESTIGATION_BY_ID_URL}/assignees` as const;
+export const INVESTIGATION_CLOSE_URL = `${INVESTIGATION_BY_ID_URL}/close` as const;
 
 /**
  * Template id for investigation conversations.

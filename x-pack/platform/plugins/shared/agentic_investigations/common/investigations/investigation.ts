@@ -39,3 +39,26 @@ export type UpdateAssigneesRequest = z.infer<typeof updateAssigneesRequestSchema
 export interface UpdateAssigneesResponse {
   assignees: string[];
 }
+
+/** Close reason values match the investigation template's close_reason SELECT field. */
+export const closeReasonSchema = z.enum([
+  'false_positive',
+  'benign',
+  'resolved',
+  'duplicate',
+  'other',
+]);
+export type CloseReason = z.infer<typeof closeReasonSchema>;
+
+export const closeInvestigationRequestSchema = z.object({
+  closeReason: closeReasonSchema,
+});
+export type CloseInvestigationRequest = z.infer<typeof closeInvestigationRequestSchema>;
+
+export interface CloseInvestigationResponse {
+  status: 'closed';
+  /** Number of pending proposals that were declined as part of closing. */
+  declinedProposalCount: number;
+  /** Whether the investigation's workflow execution was successfully cancelled. */
+  workflowCancelled: boolean;
+}

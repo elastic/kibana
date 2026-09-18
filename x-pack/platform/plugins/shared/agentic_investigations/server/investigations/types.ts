@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { InvestigationsService } from './services/investigations_service';
 
 export interface InvestigationRouteDependencies {
   router: IRouter;
   logger: Logger;
   getInvestigationsService: () => InvestigationsService;
+  getSpaceId: (request: KibanaRequest) => string;
 }
