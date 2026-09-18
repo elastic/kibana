@@ -16,6 +16,7 @@ import {
 import {
   identifyKIQueries as identifyKIQueriesThroughAgent,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+  significantEventsPrompt,
 } from '@kbn/nightshift-ai';
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { ReasoningPromptDiagnostics } from '@kbn/inference-prompt-utils';
@@ -39,7 +40,7 @@ type KiDiscoveryToolset = MemoryDiscoveryTools | KiExtractionContextTools | Sema
 interface Params {
   definition: Streams.all.Definition;
   connectorId: string;
-  systemPrompt: string;
+  systemPrompt?: string;
   maxExistingQueriesForContext?: number;
   maxDurationMs?: number;
   queryValidationTimeoutMs?: number;
@@ -68,7 +69,7 @@ export async function identifyKIQueries(
   const {
     definition,
     connectorId,
-    systemPrompt,
+    systemPrompt = significantEventsPrompt,
     maxExistingQueriesForContext,
     maxDurationMs,
     queryValidationTimeoutMs,
