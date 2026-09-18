@@ -142,7 +142,10 @@ describe('AdditionalSettingsStep', () => {
     );
     expect(renderedFields.indexOf(region)).toBeLessThan(renderedFields.indexOf(format));
     expect(getByTestId('datasetWizardAdditionalSettingsStep')).toHaveTextContent(
-      'Optional settings'
+      'Additional settings'
+    );
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toHaveTextContent(
+      'Additional settings (optional)'
     );
   });
 
@@ -194,10 +197,26 @@ describe('AdditionalSettingsStep', () => {
     expect(queryByTestId('datasetWizardDataSourceSetupWarning')).toBeNull();
   });
 
+  it('uses Optional settings title in flow 3 9.6', () => {
+    const { getByTestId } = render(
+      <TestHarness
+        resource="s3://bucket/data.parquet"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+      />
+    );
+
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).toHaveTextContent(
+      'Optional settings'
+    );
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toHaveTextContent(
+      'Additional settings (optional)'
+    );
+  });
+
   it('renders format field and accordions when format is auto-detected', async () => {
     const { getByTestId, getByText } = render(<TestHarness resource="s3://bucket/data.csv" />);
 
-    expect(getByText('Optional settings')).toBeInTheDocument();
+    expect(getByText('Additional settings (optional)')).toBeInTheDocument();
     expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
 
     await waitFor(() => {

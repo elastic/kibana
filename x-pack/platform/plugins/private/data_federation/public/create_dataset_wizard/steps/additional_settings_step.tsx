@@ -113,7 +113,9 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
     <div data-test-subj="datasetWizardAdditionalSettingsStep">
       <EuiTitle size="s">
         <h3>
-          {isDatasetWizardFlow3(flowVariant)
+          {isFlow396
+            ? datasetWizardStrings.additionalSettingsTitleFlow396()
+            : isDatasetWizardFlow3(flowVariant)
             ? datasetWizardStrings.additionalSettingsTitleFlow3()
             : datasetWizardStrings.additionalSettingsTitle()}
         </h3>

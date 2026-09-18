@@ -190,6 +190,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const isFlow1 = flowVariant === DATASET_WIZARD_FLOW_VARIANT_1;
   const isFlow3 = isDatasetWizardFlow3(flowVariant);
   const isFlow4 = isDatasetWizardFlow4(flowVariant);
+  const isFlow396 = isDatasetWizardFlow396(flowVariant);
   const hasPreviewResultsStep = hasDatasetWizardPreviewResultsStep(flowVariant);
   const reviewStep = getReviewStep(flowVariant);
   const formMaxWidth = getDatasetWizardFormMaxWidth(flowVariant);
@@ -567,7 +568,9 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           ]
         : []),
       {
-        title: datasetWizardStrings.stepAdditionalSettings(),
+        title: isFlow396
+          ? datasetWizardStrings.stepOptionalSettingsFlow396()
+          : datasetWizardStrings.stepAdditionalSettings(),
         disabled: isStepDisabled(ADDITIONAL_SETTINGS_STEP),
         status: (currentStep === ADDITIONAL_SETTINGS_STEP
           ? 'current'
@@ -613,6 +616,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       flowVariant,
       hasPreviewResultsStep,
       isFlow4,
+      isFlow396,
       isStepDisabled,
       logisticsStepComplete,
       reviewStep,

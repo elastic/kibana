@@ -200,7 +200,7 @@ describe('DatasetWizard step navigation', () => {
     });
 
     const currentStepIndicator = container.querySelector('[data-step-status="current"]');
-    expect(currentStepIndicator).toHaveTextContent('Optional settings');
+    expect(currentStepIndicator).toHaveTextContent('Additional settings');
   });
 
   it('restores persisted form values on load', () => {
@@ -568,7 +568,7 @@ describe('DatasetWizard step navigation', () => {
   });
 
   it('collects format on logistics in flow 3 9.6 and hides it on additional settings', async () => {
-    const { getByRole, getByTestId } = renderWizard(
+    const { container, getByRole, getByTestId } = renderWizard(
       '/create?flow=flow_3_9_6',
       emptyDatasetWizardFormValues(),
       DATASET_WIZARD_FLOW_VARIANT_3_9_6
@@ -590,6 +590,12 @@ describe('DatasetWizard step navigation', () => {
     await waitFor(() => {
       expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
     });
+
+    const currentStepIndicator = container.querySelector('[data-step-status="current"]');
+    expect(currentStepIndicator).toHaveTextContent('Optional settings');
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).toHaveTextContent(
+      'Optional settings'
+    );
 
     expect(
       within(getByTestId('datasetWizardAdditionalSettingsStep')).queryByTestId(

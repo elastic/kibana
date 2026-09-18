@@ -259,7 +259,11 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={useTwoColumnSettings ? 2 : 1}>
             <EuiTitle size="xs">
-              <h4>{datasetWizardStrings.reviewSettingsSectionTitle()}</h4>
+              <h4>
+                {isFlow396
+                  ? datasetWizardStrings.reviewSettingsSectionTitleFlow396()
+                  : datasetWizardStrings.reviewSettingsSectionTitle()}
+              </h4>
             </EuiTitle>
             <EuiSpacer size={summarySectionTitleSpacerSize} />
             <SettingsSummarySection rows={settingsRows} badgeStyle={badgeStyle} />

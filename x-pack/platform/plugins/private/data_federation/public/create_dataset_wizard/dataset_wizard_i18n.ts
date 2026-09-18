@@ -47,6 +47,11 @@ export const datasetWizardStrings = {
 
   stepAdditionalSettings: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.stepAdditionalSettings', {
+      defaultMessage: 'Additional settings',
+    }),
+
+  stepOptionalSettingsFlow396: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.stepOptionalSettingsFlow396', {
       defaultMessage: 'Optional settings',
     }),
 
@@ -407,11 +412,16 @@ export const datasetWizardStrings = {
 
   additionalSettingsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.additionalSettingsTitle', {
-      defaultMessage: 'Optional settings',
+      defaultMessage: 'Additional settings (optional)',
     }),
 
   additionalSettingsTitleFlow3: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.additionalSettingsTitleFlow3', {
+      defaultMessage: 'Additional settings',
+    }),
+
+  additionalSettingsTitleFlow396: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.additionalSettingsTitleFlow396', {
       defaultMessage: 'Optional settings',
     }),
 
@@ -1037,6 +1047,11 @@ export const datasetWizardStrings = {
 
   reviewSettingsSectionTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.reviewSettingsSectionTitle', {
+      defaultMessage: 'Additional settings',
+    }),
+
+  reviewSettingsSectionTitleFlow396: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewSettingsSectionTitleFlow396', {
       defaultMessage: 'Optional settings',
     }),
 
