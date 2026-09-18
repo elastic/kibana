@@ -188,6 +188,7 @@ import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/cases_alert_status_bridge';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
+import { findRulesReferencingValueList } from './lib/detection_engine/rule_management/logic/search/find_rules_referencing_value_list';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
 
@@ -745,6 +746,28 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.taskManager) {
       this.completeExternalResponseActionsTask.setup({ taskManager: plugins.taskManager });
     }
+
+    // POC: supply the lists value-list migration endpoint with a detection-rule scanner,
+    // so the referencing-rule warning is owned here (rule domain) while the endpoint stays
+    // with the rest of list management in the lists plugin.
+    plugins.lists?.registerValueListRuleScanner(
+      async ({ accessNames, exceptionListIds, itemsIndex, listId, request, verifyReadOn }) => {
+        try {
+          const [, startPlugins] = await core.getStartServices();
+          const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+          return await findRulesReferencingValueList({
+            accessNames,
+            exceptionListIds,
+            itemsIndex,
+            listId,
+            rulesClient,
+            verifyReadOn,
+          });
+        } catch {
+          return { level: 'unverified' };
+        }
+      }
+    );
 
     core
       .getStartServices()

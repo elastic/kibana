@@ -440,6 +440,29 @@ export class RulesClientFactory {
       isServerless: this.isServerless,
       analytics: this.analytics,
 
+      checkApiKeyIndexPrivileges: securityPluginStart
+        ? async ({ apiKey, index }) => {
+            const fakeRawRequest: FakeRawRequest = {
+              headers: { authorization: `ApiKey ${apiKey}` },
+              spaceId,
+            };
+            const checkPrivileges = securityPluginStart.authz.checkPrivilegesWithRequest(
+              kibanaRequestFactory(fakeRawRequest)
+            );
+            const { privileges } = await checkPrivileges.globally({
+              elasticsearch: { cluster: [], index },
+            });
+            return Object.fromEntries(
+              Object.entries(privileges.elasticsearch.index).map(([name, indexPrivileges]) => [
+                name,
+                Object.fromEntries(
+                  indexPrivileges.map(({ privilege, authorized }) => [privilege, authorized])
+                ),
+              ])
+            );
+          }
+        : undefined,
+
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
         return user?.username ?? null;

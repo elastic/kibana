@@ -7,11 +7,7 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  INTERNAL_FIND_LISTS_BY_SIZE,
-  MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
-  MAXIMUM_SMALL_VALUE_LIST_SIZE,
-} from '@kbn/securitysolution-list-constants';
+import { INTERNAL_FIND_LISTS_BY_SIZE } from '@kbn/securitysolution-list-constants';
 import { chunk } from 'lodash';
 import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
@@ -85,66 +81,12 @@ export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
 
             const listBooleans: boolean[] = [];
 
+            // The small versus large decision, including the legacy versus lookup
+            // storage split and the range-specific counting, lives in the ListClient.
             const chunks = chunk(valueLists.data, 10);
             for (const listChunk of chunks) {
               const booleans = await Promise.all(
-                listChunk.map(async (valueList) => {
-                  // Currently the only list types we support for exceptions
-                  if (
-                    valueList.type !== 'ip_range' &&
-                    valueList.type !== 'ip' &&
-                    valueList.type !== 'keyword'
-                  ) {
-                    return false;
-                  }
-
-                  const list = await listClient.findListItem({
-                    currentIndexPosition: 0,
-                    filter: '',
-                    listId: valueList.id,
-                    page: 0,
-                    perPage: 0,
-                    runtimeMappings: undefined,
-                    searchAfter: [],
-                    sortField: undefined,
-                    sortOrder: undefined,
-                  });
-
-                  if (
-                    valueList.type === 'ip_range' &&
-                    list &&
-                    list.total < MAXIMUM_SMALL_VALUE_LIST_SIZE
-                  ) {
-                    const rangeList = await listClient.findListItem({
-                      currentIndexPosition: 0,
-                      filter: 'is_cidr: false',
-                      listId: valueList.id,
-                      page: 0,
-                      perPage: 0,
-                      runtimeMappings: {
-                        is_cidr: {
-                          script: `
-                          if (params._source["ip_range"] instanceof String) {
-                            emit(true);
-                          } else {
-                            emit(false);
-                          }
-                          `,
-                          type: 'boolean',
-                        },
-                      },
-                      searchAfter: [],
-                      sortField: undefined,
-                      sortOrder: undefined,
-                    });
-
-                    return rangeList &&
-                      rangeList.total < MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE
-                      ? true
-                      : false;
-                  }
-                  return list && list.total < MAXIMUM_SMALL_VALUE_LIST_SIZE ? true : false;
-                })
+                listChunk.map((valueList) => listClient.isSmallList({ list: valueList }))
               );
               listBooleans.push(...booleans);
             }

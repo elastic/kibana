@@ -94,6 +94,16 @@ export interface RulesClientContext {
   readonly getEventLogClient: () => Promise<IEventLogClient>;
   readonly internalSavedObjectsRepository: ISavedObjectsRepository;
   readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  /**
+   * Checks Elasticsearch index privileges as the given API key (base64 `id:key`), by
+   * authenticating a fake request with it. Lets a consumer ask whether a rule's stored
+   * key can read an index before that index is restricted. Undefined when security is
+   * disabled.
+   */
+  readonly checkApiKeyIndexPrivileges?: (params: {
+    apiKey: string;
+    index: Record<string, string[]>;
+  }) => Promise<Record<string, Record<string, boolean>>>;
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;

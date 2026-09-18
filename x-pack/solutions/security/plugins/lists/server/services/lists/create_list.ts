@@ -14,6 +14,7 @@ import type {
   ListSchema,
   MetaOrUndefined,
   Name,
+  StorageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
@@ -30,6 +31,7 @@ export interface CreateListOptions {
   listIndex: string;
   user: string;
   meta: MetaOrUndefined;
+  storage?: StorageOrUndefined;
   dateNow?: string;
   tieBreaker?: string;
   immutable: Immutable;
@@ -45,6 +47,7 @@ export const createList = async ({
   listIndex,
   user,
   meta,
+  storage,
   dateNow,
   tieBreaker,
   immutable,
@@ -59,6 +62,7 @@ export const createList = async ({
     immutable,
     meta,
     name,
+    ...(storage != null ? { storage } : {}),
     tie_breaker_id: tieBreaker ?? uuidv4(),
     type,
     updated_at: createdAt,
