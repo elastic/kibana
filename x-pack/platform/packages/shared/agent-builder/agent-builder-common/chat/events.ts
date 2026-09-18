@@ -370,10 +370,23 @@ export const isRoundCompleteEvent = (
 
 // Round interrupted
 
+/** The two ways an execution can end without an outcome. */
+export type ExecutionInterruptionType = 'failed' | 'aborted';
+
+/** The run errored; `error` is exactly what the client received. */
+export interface ExecutionFailedInterruption {
+  type: 'failed';
+  error: SerializedExecutionError;
+}
+
+/** The run was cancelled; `aborted_by` tells where the abort came from, when known. */
+export interface ExecutionAbortedInterruption {
+  type: 'aborted';
+  aborted_by?: ExecutionAbortReason;
+}
+
 /** How an execution was interrupted. */
-export type ExecutionInterruption =
-  | { type: 'failed'; error: SerializedExecutionError }
-  | { type: 'aborted'; aborted_by?: ExecutionAbortReason };
+export type ExecutionInterruption = ExecutionFailedInterruption | ExecutionAbortedInterruption;
 
 /**
  * Emitted by the agent handler when the run errors (or is cancelled) after it started: what is

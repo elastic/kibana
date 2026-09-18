@@ -12,6 +12,7 @@ import type {
   ConversationRoundStep,
   EventActor,
   ExecutionInterruption,
+  ExecutionInterruptionType,
   ExecutionOutcome,
   ExecutionPartialRunSummary,
   ExecutionRunSummary,
@@ -403,7 +404,7 @@ export const resumeExecutionToEvents = ({
 export const executionInterruptedEventId = (
   roundId: string,
   executionIndex: number,
-  interruptionType: ExecutionInterruption['type']
+  interruptionType: ExecutionInterruptionType
 ): string => {
   const suffix =
     interruptionType === 'failed'
