@@ -425,13 +425,11 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     };
   }
 
-  generateYaraRuleText(osMeta: MetaOsValue[]): string {
-    const metaArch = this.randomChoice([
-      MetaArchValue.X86,
-      MetaArchValue.ARM64,
-      `${MetaArchValue.X86}, ${MetaArchValue.ARM64}`,
-    ]);
-
+  generateYaraRuleText(
+    metaOs: MetaOsValue[],
+    metaArch: MetaArchValue[],
+    metaScanType: MetaScanTypeValue[]
+  ): string {
     const condition = this.randomChoice([
       'condition: true',
       'condition: false',
@@ -444,12 +442,12 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
         meta:
           description = "Generated test YARA rule"
           ${
-            this.randomBoolean()
-              ? `${YaraMetaKeyOfInterest.SCAN_TYPE} = "${MetaScanTypeValue.MEMORY}"`
+            metaScanType.length
+              ? `${YaraMetaKeyOfInterest.SCAN_TYPE} = "${metaScanType.join(', ')}"`
               : ''
           }
-          ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.ARCH} = "${metaArch}"` : ''}
-          ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.OS} = "${osMeta.join(', ')}"` : ''}
+          ${metaArch.length ? `${YaraMetaKeyOfInterest.ARCH} = "${metaArch.join(', ')}"` : ''}
+          ${metaOs.length ? `${YaraMetaKeyOfInterest.OS} = "${metaOs.join(', ')}"` : ''}
 
         ${condition}
       }`;
@@ -457,7 +455,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
   generateMatchingOsTypesAndYaraOsMeta(): {
     osTypes: OsTypeArray;
-    osMeta: MetaOsValue[];
+    metaOs: MetaOsValue[];
   } {
     const possibleOsMetaVariations: MetaOsValue[][] = [
       [MetaOsValue.WINDOWS],
@@ -469,10 +467,10 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       [MetaOsValue.WINDOWS, MetaOsValue.LINUX, MetaOsValue.MACOS],
     ];
 
-    const osMeta: MetaOsValue[] = this.randomChoice(possibleOsMetaVariations);
-    const osTypes: OsTypeArray = osMeta.map<OsType>((os) => os.toLowerCase() as OsType);
+    const metaOs: MetaOsValue[] = this.randomChoice(possibleOsMetaVariations);
+    const osTypes: OsTypeArray = metaOs.map<OsType>((os) => os.toLowerCase() as OsType);
 
-    return { osTypes, osMeta };
+    return { osTypes, metaOs: this.randomBoolean() ? metaOs : [] };
   }
 
   convertOsTypeToMetaOsValue(osType: OsType): MetaOsValue {
@@ -492,18 +490,29 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     overrides: Partial<ExceptionListItemSchema> = {}
   ): ExceptionListItemSchema {
     let osTypes: OsTypeArray;
-    let osMeta: MetaOsValue[];
+    let metaOs: MetaOsValue[];
 
     if (overrides.os_types) {
       osTypes = overrides.os_types;
-      osMeta = osTypes.map((osType) => this.convertOsTypeToMetaOsValue(osType));
+      metaOs = osTypes.map((osType) => this.convertOsTypeToMetaOsValue(osType));
     } else {
-      ({ osTypes, osMeta } = this.generateMatchingOsTypesAndYaraOsMeta());
+      ({ osTypes, metaOs } = this.generateMatchingOsTypesAndYaraOsMeta());
     }
 
+    const metaArch: MetaArchValue[] = this.randomChoice([
+      [],
+      [MetaArchValue.X86],
+      [MetaArchValue.ARM64],
+      [MetaArchValue.X86, MetaArchValue.ARM64],
+    ]);
+
+    const metaScanType: MetaScanTypeValue[] = this.randomChoice([[], [MetaScanTypeValue.MEMORY]]);
+
     const numberOfRules = this.randomN(9) + 1;
+
+    // meta fields are shared amongst all rules in one entry: either all the same or all omitted
     const ruleText = Array.from({ length: numberOfRules }, () =>
-      this.generateYaraRuleText(osMeta)
+      this.generateYaraRuleText(metaOs, metaArch, metaScanType)
     ).join('\n\n');
 
     const item = this.generate({
