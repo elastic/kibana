@@ -45,6 +45,11 @@ export {
 } from './src/sources/view_name';
 
 export {
+  MAX_SOURCE_DESCRIPTION_LENGTH,
+  MAX_SOURCE_ESQL_LENGTH,
+  MAX_SOURCE_TAG_LENGTH,
+  MAX_SOURCE_TAGS,
+  MAX_SOURCE_TITLE_LENGTH,
   createSourceRequestSchema,
   listSourcesQuerySchema,
   updateSourceRequestSchema,

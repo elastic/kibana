@@ -7,13 +7,16 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
+import { MAX_SOURCE_TAG_LENGTH, MAX_SOURCE_TAGS } from '@kbn/nightshift-shared';
 
 export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
 
 const nightshiftSourceAttributesSchemaV1 = schema.object({
   title: schema.string(),
   description: schema.maybe(schema.string()),
-  tags: schema.arrayOf(schema.string()),
+  tags: schema.arrayOf(schema.string({ maxLength: MAX_SOURCE_TAG_LENGTH }), {
+    maxSize: MAX_SOURCE_TAGS,
+  }),
   esql: schema.string(),
   view_name: schema.string(),
   enabled: schema.boolean(),
