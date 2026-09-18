@@ -64,7 +64,7 @@ export const authenticationStrings = {
         'xpack.dataFederation.createFlyout.authentication.federatedIdentityDescription.gcs',
         {
           defaultMessage:
-            'Elastic impersonates a service account you grant read access. No keys are stored.',
+            'No keys are stored. GCP trusts the identity Elastic issues and grants scoped read access to your bucket.',
         }
       ),
     azure: () =>
@@ -90,7 +90,7 @@ export const authenticationStrings = {
       i18n.translate(
         'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeysDescription.gcs',
         {
-          defaultMessage: 'Elastic stores a service account key that can read your bucket.',
+          defaultMessage: 'Elastic stores a service account key that can read your bucket. Rotating it breaks the connection until you update it.',
         }
       ),
     azure: () =>
