@@ -62,6 +62,7 @@ steps:
       TARGET_ENV: production-noncanary-ds-5
 
   - label: ':memo: Notify documentation release-notes automation'
+    if: build.env("ENVIRONMENT") == "production-noncanary" && build.env("DEPLOYMENT_SLICES") =~ /(^|.*, *)production-noncanary-ds-5( *,.*|$$)/
     soft_fail: true
     trigger: docs-release-notes # https://buildkite.com/elastic/docs-release-notes
     async: true
