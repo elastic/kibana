@@ -8,7 +8,6 @@
 import type {
   ActionPolicyResponse,
   CreateActionPolicyDataInput,
-  MatchedActionPolicy,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 
@@ -62,9 +61,4 @@ export interface FindActionPoliciesResponse {
 
 export interface MatchActionPoliciesParams {
   ruleTags?: string[];
-}
-
-export interface MatchActionPoliciesResponse {
-  items: MatchedActionPolicy[];
-  total: number;
 }

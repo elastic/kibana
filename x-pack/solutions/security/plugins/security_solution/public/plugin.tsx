@@ -92,6 +92,8 @@ import {
   registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerInvestigationTimelineAttachment,
+  registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -416,6 +418,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           getServices: () => this.getDiscoverFlyoutServices(coreSetup),
           getStore: () => this.getDiscoverFlyoutStore(coreSetup),
           spaces: plugins.spaces,
+        });
+      }
+      if (this.experimentalFeatures.endpointForensicAnalysisSkill) {
+        registerInvestigationTimelineAttachment({
+          attachments: plugins.agentBuilder.attachments,
+        });
+        registerInvestigationIocsAttachment({
+          attachments: plugins.agentBuilder.attachments,
         });
       }
     }
@@ -1010,6 +1020,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       package: 'cribl',
       view: 'package-policy-replace-define-step',
       Component: LazyCustomCriblExtension,
+      useWidePageLayout: true,
     });
   }
 
