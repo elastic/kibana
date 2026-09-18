@@ -21,6 +21,7 @@
     "@kbn/zod",
     "@kbn/scout",
     "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/logging-mocks",
     "@kbn/significant-events-schema",

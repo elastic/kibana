@@ -7,8 +7,8 @@ enabled: true
 settings:
   timeout: '60m'
   concurrency:
-    key: 'deductive-investigation-{{ inputs.concurrency_key | default: execution.id }}'
-    strategy: cancel-in-progress
+    key: 'deductive-investigation-{{ inputs.investigation_id | default: inputs.concurrency_key | default: execution.id }}'
+    strategy: queue
     max: 1
 tags:
   - observability
@@ -40,6 +40,12 @@ triggers:
         concurrency_key:
           type: string
           description: Optional key for concurrency deduplication. Defaults to the workflow execution ID.
+        investigation_id:
+          type: string
+          description: Stable Nightshift investigation identity. Defaults to the execution ID.
+        conversation_id:
+          type: string
+          description: Stable internal conversation identity for all inputs to the investigation.
       required:
         - message
         - title
@@ -55,9 +61,11 @@ steps:
     type: kibana.request
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/_ensure'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/_ensure'
       headers:
         x-elastic-internal-origin: 'kibana'
+      body:
+        execution_id: '{{ execution.id }}'
     on-failure:
       retry:
         max-attempts: 3
@@ -68,7 +76,7 @@ steps:
     type: kibana.request
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -88,6 +96,7 @@ steps:
     with:
       metadata:
         workflow_execution_id: '{{ execution.id }}'
+      conversation_id: '{{ inputs.conversation_id | default: execution.id }}'
       message: |
         {{ inputs.message }}
 
@@ -207,7 +216,7 @@ steps:
     if: '${{ steps.investigate.error == null }}'
     with:
       method: PATCH
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -219,6 +228,7 @@ steps:
         hypotheses: ${{ steps.investigate.output.structured_output.hypotheses }}
         recommendations: ${{ steps.investigate.output.structured_output.recommendations }}
         conversation_id: "${{ steps.investigate.output.conversation_id }}"
+        execution_id: '{{ execution.id }}'
     on-failure:
       retry:
         max-attempts: 3
@@ -230,13 +240,14 @@ steps:
     if: '${{ steps.investigate.error != null }}'
     with:
       method: PATCH
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
         status: "failed"
         error: "${{ steps.investigate.error.message | default: 'Investigation failed' }}"
         conversation_id: "${{ steps.investigate.output.conversation_id }}"
+        execution_id: '{{ execution.id }}'
     on-failure:
       retry:
         max-attempts: 3
@@ -246,12 +257,39 @@ steps:
       # nothing ever signals the failure.
       continue: true
 
+  - name: update_investigation_attachment
+    type: ai.attachment.update
+    if: '${{ steps.investigate.error == null and steps.persist_investigation_completed.output.acknowledged == true }}'
+    with:
+      conversation_id: '{{ inputs.conversation_id | default: execution.id }}'
+      attachment_id: nightshift-investigation
+      data:
+        investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+        state: ${{ steps.investigate.output.structured_output }}
+      description: Latest successful Nightshift investigation findings
+    on-failure:
+      continue: true
+
+  - name: create_investigation_attachment
+    type: ai.attachment.add
+    if: '${{ steps.investigate.error == null and steps.persist_investigation_completed.output.acknowledged == true and steps.update_investigation_attachment.error != null }}'
+    with:
+      conversation_id: '{{ inputs.conversation_id | default: execution.id }}'
+      id: nightshift-investigation
+      type: platform.nightshift_investigation
+      data:
+        investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+        state: ${{ steps.investigate.output.structured_output }}
+      description: Latest successful Nightshift investigation findings
+    on-failure:
+      continue: true
+
   - name: emit_investigation_completed
     type: kibana.request
-    if: '${{ steps.investigate.error == null }}'
+    if: '${{ steps.investigate.error == null and steps.persist_investigation_completed.output.acknowledged == true }}'
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -261,10 +299,10 @@ steps:
 
   - name: emit_investigation_failed
     type: kibana.request
-    if: '${{ steps.investigate.error != null }}'
+    if: '${{ steps.investigate.error != null and steps.persist_investigation_failed.output.acknowledged == true }}'
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:

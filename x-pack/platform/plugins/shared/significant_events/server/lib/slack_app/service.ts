@@ -232,7 +232,7 @@ export class SlackAppService {
     // only happens on success.
     const existingConnection = await this.readConnection(soClient);
 
-    // Mint a managed, read-only, least-privilege ES API key for the agent. The key
+    // Mint a managed, least-privilege ES API key for the agent. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
     // outlive their owner). Because the grant intersects with the owner's privileges, the
     // connecting user must themselves hold every privilege below or the key is silently
@@ -243,8 +243,10 @@ export class SlackAppService {
     //   without regenerating the key when new data is onboarded.
     // - Nightshift data is reached through the `nightshift` Kibana feature (read includes
     //   every engine via includeIn), Streams data through `streams` (read), and
-    //   connectors/LLM through `actions` (read). Those go via the internal Kibana client,
-    //   so no grants on system/dot indices (unsupported in serverless) are needed.
+    //   connectors/LLM through `actions` (read). Agent Builder needs `all` because the
+    //   admitted workflow persists its lifecycle through write-protected Nightshift routes.
+    //   Those go via the internal Kibana client, so no grants on system/dot indices
+    //   (unsupported in serverless) are needed.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
@@ -266,7 +268,7 @@ export class SlackAppService {
               feature: {
                 nightshift: ['read'],
                 streams: ['read'],
-                agentBuilder: ['read'],
+                agentBuilder: ['all'],
                 actions: ['read'],
                 workflowsManagement: ['read'],
               },
@@ -309,7 +311,6 @@ export class SlackAppService {
       await this.invalidateApiKey(apiKeyResult.id, 'after Relay install error');
       throw error;
     }
-
     // The new key has taken over — safe to invalidate whatever it's replacing now.
     if (existingConnection?.apiKeyId) {
       await this.invalidateApiKey(existingConnection.apiKeyId, 'after successful reconnect');

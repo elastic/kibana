@@ -32,6 +32,10 @@ export const buildInvestigationFilter = <Fields extends keyof InvestigationAttri
     filters.push(`${attr('concurrency_key')}: "${escapeQuotes(query.concurrencyKey)}"`);
   }
 
+  if (query.sourceKey) {
+    filters.push(`${attr('source_keys')}: "${escapeQuotes(query.sourceKey)}"`);
+  }
+
   const rangeFilters: Array<[string, string | undefined, '>=' | '<=']> = [
     ['created_at', query.createdAfter, '>='],
     ['created_at', query.createdBefore, '<='],

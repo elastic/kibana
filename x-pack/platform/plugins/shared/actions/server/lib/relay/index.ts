@@ -14,6 +14,8 @@ export type {
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
+  RelayPostMessageInput,
   RelayTriggerInput,
   RelayTriggerResponse,
+  RelayUpdateInput,
 } from './types';

@@ -28,6 +28,8 @@ import type { InvestigationAttributes } from '../storage/types';
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
 const MAX_ISO_DATE_LENGTH = 64;
+const MAX_INVESTIGATION_ADMISSIONS = 1000;
+const MAX_INVESTIGATION_SOURCE_KEYS = 100;
 
 const isoDateStringSchema = schema.string({
   maxLength: MAX_ISO_DATE_LENGTH,
@@ -88,6 +90,30 @@ const investigationAttributesSchemaV2 = investigationAttributesSchemaV1.extends(
   title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
 });
 
+const investigationAttributesSchemaV3 = investigationAttributesSchemaV2.extends({
+  latest_execution_id: optionalKeyword,
+  source_keys: schema.maybe(schema.arrayOf(keyword, { maxSize: MAX_INVESTIGATION_SOURCE_KEYS })),
+  admissions: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        idempotency_key: keyword,
+        // Absent while an admission is reserved and its run has not started yet.
+        execution_id: optionalKeyword,
+      }),
+      { maxSize: MAX_INVESTIGATION_ADMISSIONS }
+    )
+  ),
+  reply_target: schema.maybe(
+    schema.object({
+      surface: schema.literal('slack'),
+      tenant_key: keyword,
+      channel: keyword,
+      thread_ts: keyword,
+      message_ts: optionalKeyword,
+    })
+  ),
+});
+
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
   name: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   hidden: true,
@@ -108,6 +134,7 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       conclusion: { type: 'text' },
       severity: { type: 'keyword', ignore_above: 1024 },
       impact: { type: 'flattened', ignore_above: 1024 },
+      source_keys: { type: 'keyword', ignore_above: 1024 },
     },
   },
   management: {
@@ -126,6 +153,20 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       schemas: {
         create: investigationAttributesSchemaV2,
         forwardCompatibility: investigationAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    3: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            source_keys: { type: 'keyword', ignore_above: 1024 },
+          },
+        },
+      ],
+      schemas: {
+        create: investigationAttributesSchemaV3,
+        forwardCompatibility: investigationAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
       },
     },
   },

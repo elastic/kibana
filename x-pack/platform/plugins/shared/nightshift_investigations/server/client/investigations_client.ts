@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { createHash, randomUUID } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
@@ -14,6 +15,11 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import {
+  RelayRequestError,
+  type RelayClientContract,
+  type RelayPostMessageInput,
+} from '@kbn/actions-plugin/server';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -43,8 +49,10 @@ import {
 } from '../../common';
 import type {
   InvestigationAttributes,
+  InvestigationAdmission,
   InvestigationPatch,
   InvestigationRecord,
+  InvestigationReplyTarget,
   InvestigationRepository,
   ProjectedInvestigationRecord,
 } from '../storage';
@@ -91,6 +99,24 @@ const INVESTIGATION_WORKFLOW_IDS = new Set([
   DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
 ]);
 
+const stableInvestigationIdForSource = (sourceKey: string): string =>
+  `source-${createHash('sha256').update(sourceKey).digest('hex').slice(0, 40)}`;
+
+export interface AdmitSlackInvestigationInput {
+  sourceKey: string;
+  idempotencyKey: string;
+  message: string;
+  replyTarget: InvestigationReplyTarget;
+  senderId?: string;
+  startIfMissing?: boolean;
+}
+
+export interface AdmittedInvestigationInput {
+  investigation_id: string;
+  /** Absent when a concurrent delivery of the same message is still starting the run. */
+  execution_id?: string;
+}
+
 /**
  * A manual investigation has no stored entity to write results back to, so it runs the lean
  * deductive workflow; every other subject runs the significant-events workflow, which attaches
@@ -107,6 +133,9 @@ const installAgentForSubject = (subject: InvestigationSubject) =>
 
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
+
+/** Only reached when a Slack message is admitted with no text to derive a headline from. */
+const SLACK_INVESTIGATION_FALLBACK_TITLE = 'Slack investigation';
 
 /**
  * A manual investigation's subject id is the placeholder `manual`, so until the agent writes its
@@ -315,6 +344,8 @@ export interface NightshiftInvestigationsClientDeps {
    */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
+  relayClient?: RelayClientContract;
+  kibanaUrl?: string;
   investigationQuotaCallback?: InvestigationQuotaCallback;
   investigationRepository: InvestigationRepository;
   isAvailable: () => Promise<boolean>;
@@ -327,6 +358,8 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
+  private readonly relayClient?: RelayClientContract;
+  private readonly kibanaUrl?: string;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly investigationRepository: InvestigationRepository;
   private readonly checkAvailability: () => Promise<boolean>;
@@ -338,6 +371,8 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
+    this.relayClient = deps.relayClient;
+    this.kibanaUrl = deps.kibanaUrl;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.investigationRepository = deps.investigationRepository;
     this.checkAvailability = deps.isAvailable;
@@ -351,6 +386,29 @@ export class NightshiftInvestigationsClient {
       this.spaces?.spacesService.getSpaceId(this.request) ??
       DEFAULT_SPACE_ID
     );
+  }
+
+  private getInvestigationUrl(investigationId: string): string | undefined {
+    if (!this.kibanaUrl) {
+      return undefined;
+    }
+    const url = new URL(addSpaceIdToPath(this.kibanaUrl, this.getSpaceId(), '/app/nightshift'));
+    url.searchParams.set('investigationId', investigationId);
+    return url.toString();
+  }
+
+  private async postSlackMessage(input: RelayPostMessageInput) {
+    if (!this.relayClient) {
+      throw new Error('Relay client is unavailable');
+    }
+    try {
+      return await this.relayClient.postMessage(input);
+    } catch (error) {
+      if (!(error instanceof RelayRequestError) || error.statusCode !== 404) {
+        throw error;
+      }
+      return this.relayClient.trigger(input);
+    }
   }
 
   /**
@@ -485,6 +543,209 @@ export class NightshiftInvestigationsClient {
     return { investigation_id: executionId };
   }
 
+  async admitSlackInput({
+    sourceKey,
+    idempotencyKey,
+    message,
+    replyTarget,
+    senderId,
+    startIfMissing = true,
+  }: AdmitSlackInvestigationInput): Promise<AdmittedInvestigationInput | undefined> {
+    if (!this.workflowsManagement) {
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
+    }
+    if (!this.agentBuilder) {
+      throw new InvestigationUnavailableError('agentBuilder is not available');
+    }
+    if (!(await this.isAvailable())) {
+      throw new InvestigationUnavailableError('Investigations are not available');
+    }
+
+    const existingBySource = await this.findBySourceKey(sourceKey);
+    const investigationId = existingBySource?.id ?? stableInvestigationIdForSource(sourceKey);
+    let investigation =
+      existingBySource ?? (await this.investigationRepository.get(investigationId));
+
+    if (!investigation && !startIfMissing) {
+      return undefined;
+    }
+
+    const previousAdmission = investigation?.admissions?.find(
+      (admission) => admission.idempotency_key === idempotencyKey
+    );
+    if (previousAdmission) {
+      return {
+        investigation_id: investigationId,
+        execution_id: previousAdmission.execution_id,
+      };
+    }
+
+    if (investigation?.status === 'cancelled') {
+      throw InvestigationConflictError.settled(investigationId, investigation.status);
+    }
+
+    const sourceKeys = Array.from(new Set([...(investigation?.source_keys ?? []), sourceKey]));
+    const subject: InvestigationSubject = {
+      type: 'manual',
+      id: investigationId,
+      summary: withDerivedSubjectSummary({ type: 'manual', id: investigationId }, message).summary,
+    };
+
+    if (!investigation) {
+      await this.createIgnoringConflict({
+        id: investigationId,
+        attributes: {
+          status: 'pending',
+          ...toSubjectFields(subject),
+          // The Slack message is the question, so it stands in as the headline exactly as it does
+          // for a manual investigation started from the UI.
+          title: subject.summary ?? SLACK_INVESTIGATION_FALLBACK_TITLE,
+          trigger_type: 'manual',
+          concurrency_key: investigationId,
+          created_at: new Date().toISOString(),
+          conversation_id: randomUUID(),
+          source_keys: sourceKeys,
+          admissions: [],
+          reply_target: replyTarget,
+        },
+      });
+      investigation = await this.investigationRepository.get(investigationId);
+    } else {
+      await this.investigationRepository.update({
+        id: investigationId,
+        patch: {
+          ...(isTerminalStatus(investigation.status) ? { status: 'pending' as const } : {}),
+          source_keys: sourceKeys,
+          reply_target: replyTarget,
+        },
+        version: investigation.version,
+      });
+    }
+
+    // Read the conversation back from the record rather than reusing the id this call generated:
+    // a concurrent admission for the same thread may have won the create, and its conversation is
+    // the one the thread is already bound to. Writing ours would strand the earlier run's history.
+    const conversationId = investigation?.conversation_id;
+    if (!conversationId) {
+      throw new InvestigationUnavailableError(
+        `Investigation "${investigationId}" has no conversation to admit input into`
+      );
+    }
+
+    // Reserved before the run starts so a redelivery arriving mid-start resolves to this
+    // admission instead of starting a second run for the same Slack message.
+    await this.appendAdmission(investigationId, { idempotency_key: idempotencyKey }, replyTarget);
+
+    const spaceId = this.getSpaceId();
+    const workflow = await this.workflowsManagement.management.getWorkflow(
+      DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      spaceId
+    );
+    if (!workflow?.definition) {
+      throw new InvestigationUnavailableError(
+        `Investigation workflow "${DEDUCTIVE_INVESTIGATION_WORKFLOW_ID}" is not installed`
+      );
+    }
+
+    await installDeductiveInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
+
+    let executionId: string;
+    try {
+      executionId = await this.workflowsManagement.management.runWorkflow(
+        { ...workflow, definition: workflow.definition },
+        spaceId,
+        {
+          message,
+          stream_names: [],
+          investigation_id: investigationId,
+          conversation_id: conversationId,
+          concurrency_key: investigationId,
+          context: {
+            source: 'manual',
+            manual_id: investigationId,
+            trigger_type: 'manual',
+            ...(senderId ? { sender_id: senderId } : {}),
+          },
+        },
+        this.request,
+        'nightshift-slack'
+      );
+    } catch (error) {
+      // Nothing is running, so the reservation would otherwise suppress the retry of this message.
+      await this.releaseAdmission(investigationId, idempotencyKey);
+      throw error;
+    }
+
+    await this.updateAdmissions(investigationId, (admissions) =>
+      admissions.map((admission) =>
+        admission.idempotency_key === idempotencyKey
+          ? { ...admission, execution_id: executionId }
+          : admission
+      )
+    );
+
+    return { investigation_id: investigationId, execution_id: executionId };
+  }
+
+  /** Adds an admission, keeping the reply target fresh in the same write. */
+  private async appendAdmission(
+    investigationId: string,
+    admission: InvestigationAdmission,
+    replyTarget: InvestigationReplyTarget
+  ): Promise<void> {
+    await this.updateAdmissions(
+      investigationId,
+      (admissions) => [...admissions, admission],
+      replyTarget
+    );
+  }
+
+  private async releaseAdmission(investigationId: string, idempotencyKey: string): Promise<void> {
+    await this.updateAdmissions(investigationId, (admissions) =>
+      admissions.filter((admission) => admission.idempotency_key !== idempotencyKey)
+    );
+  }
+
+  /**
+   * Rewrites the admissions list under optimistic concurrency. `mutate` runs against the stored
+   * list, so a concurrent admission for the same thread is preserved rather than clobbered; a
+   * stale write is retried once against the version that won.
+   */
+  private async updateAdmissions(
+    investigationId: string,
+    mutate: (admissions: InvestigationAdmission[]) => InvestigationAdmission[],
+    replyTarget?: InvestigationReplyTarget
+  ): Promise<void> {
+    const write = async (record: InvestigationRecord | undefined): Promise<void> => {
+      const patch: InvestigationPatch = {
+        admissions: mutate(record?.admissions ?? []),
+        ...(replyTarget ? { reply_target: replyTarget } : {}),
+      };
+      await this.investigationRepository.update({
+        id: investigationId,
+        patch,
+        version: record?.version,
+      });
+    };
+
+    try {
+      await write(await this.investigationRepository.get(investigationId));
+    } catch (error) {
+      if (!(error instanceof InvestigationStaleWriteError)) {
+        throw error;
+      }
+      await write(await this.investigationRepository.get(investigationId));
+    }
+  }
+
+  private async findBySourceKey(sourceKey: string): Promise<InvestigationRecord | undefined> {
+    const { results } = await this.investigationRepository.find({
+      sourceKey,
+      perPage: 1,
+    });
+    return results[0] as InvestigationRecord | undefined;
+  }
+
   /**
    * Creates a new investigation record as `pending`. Called from start() so the id is readable
    * immediately. The workflow's persist_investigation_started step later transitions the record
@@ -533,12 +794,19 @@ export class NightshiftInvestigationsClient {
    * run's executor, and stamping the transition with the wall clock would date the record to when
    * the persist step happened to run rather than to when the run began.
    */
-  async ensureOrCreate(investigationId: string): Promise<void> {
+  async ensureOrCreate(investigationId: string, executionId = investigationId): Promise<void> {
     const existing = await this.investigationRepository.get(investigationId);
-    if (existing && isTerminalStatus(existing.status)) {
+    const isAdmittedExecution = existing?.admissions?.some(
+      (admission) => admission.execution_id === executionId
+    );
+    if (existing && isTerminalStatus(existing.status) && !isAdmittedExecution) {
       throw InvestigationConflictError.settled(investigationId, existing.status);
     }
-    if (existing && existing.status !== 'pending') {
+    if (
+      existing &&
+      existing.status !== 'pending' &&
+      (!isAdmittedExecution || existing.latest_execution_id === executionId)
+    ) {
       return;
     }
 
@@ -548,7 +816,7 @@ export class NightshiftInvestigationsClient {
 
     const spaceId = this.getSpaceId();
     const execution = await this.workflowsManagement.management.getWorkflowExecution(
-      investigationId,
+      executionId,
       spaceId,
       { includeOutput: false }
     );
@@ -565,6 +833,7 @@ export class NightshiftInvestigationsClient {
         version: existing.version,
         startedAt,
         executedBy: execution.executedBy,
+        executionId,
       });
       return;
     }
@@ -590,6 +859,7 @@ export class NightshiftInvestigationsClient {
         trigger_type: triggerType,
         concurrency_key: concurrencyKey,
         executed_by: execution.executedBy,
+        latest_execution_id: executionId,
         created_at: startedAt,
         started_at: startedAt,
       },
@@ -601,16 +871,23 @@ export class NightshiftInvestigationsClient {
     version,
     startedAt,
     executedBy,
+    executionId,
   }: {
     investigationId: string;
     version?: string;
     startedAt: string;
     executedBy?: string;
+    executionId: string;
   }): Promise<void> {
     try {
       await this.investigationRepository.update({
         id: investigationId,
-        patch: { status: 'running', started_at: startedAt, executed_by: executedBy },
+        patch: {
+          status: 'running',
+          started_at: startedAt,
+          executed_by: executedBy,
+          latest_execution_id: executionId,
+        },
         version,
       });
     } catch (error) {
@@ -686,17 +963,28 @@ export class NightshiftInvestigationsClient {
     }
   }
 
-  async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
+  async update(investigationId: string, state: UpdateInvestigationRequest): Promise<boolean> {
     const existing = await this.investigationRepository.get(investigationId);
     if (!existing) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const { status, error, ...output } = state;
+    const { status, error, execution_id: executionId, ...output } = state;
+
+    if (
+      executionId &&
+      existing.latest_execution_id &&
+      executionId !== existing.latest_execution_id
+    ) {
+      this.logger.warn(
+        `Ignored stale update for investigation "${investigationId}" from execution "${executionId}"`
+      );
+      return false;
+    }
 
     if (isTerminalStatus(existing.status)) {
       if (status === existing.status) {
-        return;
+        return true;
       }
       throw InvestigationConflictError.settled(investigationId, existing.status);
     }
@@ -712,6 +1000,63 @@ export class NightshiftInvestigationsClient {
       ...output,
     };
 
+    if (
+      this.relayClient &&
+      existing.reply_target?.surface === 'slack' &&
+      (status === 'completed' || status === 'failed')
+    ) {
+      const replyTarget = existing.reply_target;
+      const result =
+        status === 'failed'
+          ? `Nightshift investigation failed: ${error ?? FALLBACK_INVESTIGATION_ERROR}`
+          : [output.summary, output.conclusion].filter(Boolean).join('\n\n') ||
+            'Nightshift investigation completed.';
+      const investigationUrl = this.getInvestigationUrl(investigationId);
+      const message = investigationUrl
+        ? `${result}\n\n<${investigationUrl}|View in Kibana>`
+        : result;
+
+      if (status === 'completed' && replyTarget.message_ts) {
+        try {
+          await this.relayClient.update({
+            tenantKey: replyTarget.tenant_key,
+            channel: replyTarget.channel,
+            messageTs: replyTarget.message_ts,
+            message,
+          });
+        } catch (relayError) {
+          if (!(relayError instanceof RelayRequestError) || relayError.statusCode !== 404) {
+            throw relayError;
+          }
+          const replacement = await this.postSlackMessage({
+            tenantKey: replyTarget.tenant_key,
+            channel: replyTarget.channel,
+            threadTs: replyTarget.thread_ts,
+            message,
+            idempotencyKey: executionId ?? investigationId,
+          });
+          patch.reply_target = {
+            ...replyTarget,
+            message_ts: replacement.ref,
+          };
+        }
+      } else {
+        const delivered = await this.postSlackMessage({
+          tenantKey: replyTarget.tenant_key,
+          channel: replyTarget.channel,
+          threadTs: replyTarget.thread_ts,
+          message,
+          idempotencyKey: executionId ?? investigationId,
+        });
+        if (status === 'completed') {
+          patch.reply_target = {
+            ...replyTarget,
+            message_ts: delivered.ref,
+          };
+        }
+      }
+    }
+
     try {
       await this.investigationRepository.update({
         id: investigationId,
@@ -724,6 +1069,7 @@ export class NightshiftInvestigationsClient {
       }
       throw err;
     }
+    return true;
   }
 
   /**

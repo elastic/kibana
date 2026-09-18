@@ -50,8 +50,10 @@ export type {
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
+  RelayPostMessageInput,
   RelayTriggerInput,
   RelayTriggerResponse,
+  RelayUpdateInput,
 } from './lib/relay';
 
 export {

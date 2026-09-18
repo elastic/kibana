@@ -318,6 +318,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Platform – Dashboards
   'platform.dashboard.dashboard_state',
 
+  // Platform – Nightshift investigations
+  'platform.nightshift_investigation',
+
   // Platform – Streams (significant events)
   'platform.sig_event',
   'platform.ki_feature',

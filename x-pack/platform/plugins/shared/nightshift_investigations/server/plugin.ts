@@ -37,6 +37,7 @@ import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/reg
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerDeductiveInvestigationAgentType } from './agents/deductive_investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
+import { createInvestigationAttachmentType } from './agent_builder/investigation_attachment_type';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
@@ -80,6 +81,7 @@ export class NightshiftInvestigationsPlugin
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
+  private kibanaUrl?: string;
   private actionsStart?: ActionsPluginStart;
   private cortexEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
@@ -136,6 +138,11 @@ export class NightshiftInvestigationsPlugin
         createInvestigationProgressReportTool({
           logger: this.logger.get('investigation_progress_report_tool'),
         })
+      );
+      plugins.agentBuilder.attachments.registerType(
+        createInvestigationAttachmentType() as Parameters<
+          typeof plugins.agentBuilder.attachments.registerType
+        >[0]
       );
 
       if (plugins.sandbox?.isAvailable) {
@@ -265,6 +272,7 @@ export class NightshiftInvestigationsPlugin
     this.inference = plugins.inference;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
+    this.kibanaUrl = coreStart.http.basePath.publicBaseUrl ?? getFallbackKibanaUrl(coreStart);
     this.actionsStart = plugins.actions;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -319,6 +327,8 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
+      relayClient: this.actionsStart?.getRelayClient(),
+      kibanaUrl: this.kibanaUrl,
       investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
       isAvailable: () =>
@@ -369,4 +379,10 @@ export class NightshiftInvestigationsPlugin
   }
 
   stop(): void {}
+}
+
+function getFallbackKibanaUrl({ http }: CoreStart): string {
+  const { protocol, hostname, port } = http.getServerInfo();
+  const serverBasePath = http.basePath.prepend('/').slice(0, -1);
+  return `${protocol}://${hostname}:${port}${serverBasePath}`;
 }
