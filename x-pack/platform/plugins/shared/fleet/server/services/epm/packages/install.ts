@@ -996,6 +996,26 @@ async function installPackageByUpload({
       packageInfo,
     });
 
+    // If preflight ran, verify no new Spaces were added between the preflight snapshot and now.
+    // Throwing here (before setLastUploadInstallCache) keeps the install record untouched so
+    // the caller can retry; throwing inside the state machine would mark the record install_failed.
+    if (authorizedSpaces.length > 0 && installedPkg) {
+      const primarySpaceId =
+        installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+      const isAdditionalSpaceInstall = primarySpaceId !== spaceId;
+      if (!isAdditionalSpaceInstall) {
+        const newSpaces = Object.keys(
+          installedPkg.attributes.additional_spaces_installed_kibana ?? {}
+        ).filter((s) => s !== primarySpaceId && !authorizedSpaces.includes(s));
+        if (newSpaces.length > 0) {
+          throw new FleetUnauthorizedError(
+            `Upload aborted: the package was added to new Spaces (${newSpaces.join(', ')}) after ` +
+              `authorization was checked. Please retry the upload to include all destination Spaces.`
+          );
+        }
+      }
+    }
+
     const packageInstallContext: PackageInstallContext = {
       packageInfo: { ...packageInfo, version: pkgVersion },
       paths,
