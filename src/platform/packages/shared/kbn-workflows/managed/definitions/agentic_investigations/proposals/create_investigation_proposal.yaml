@@ -330,6 +330,30 @@ steps:
               gate_approved: true
               decided_by: ''
 
+      # The gate belongs to the chain, not to any one revision, so the id the
+      # loop carries can go stale while it is parked: a revision appended during
+      # the park marks the row this execution created `superseded`, which is
+      # terminal. Every write below — the decision, the status, the clone —
+      # targets the carried id, so it is re-resolved to the live head once the
+      # gate has answered and before anything is written. This is the adoption
+      # the dismissal branch used to defer to the tune route.
+      #
+      # Wrapped in an `if` rather than guarded with a step-level `if` on the
+      # `data.set`: a skipped step still returns its previous output, and a
+      # blank id would otherwise overwrite the carried one.
+      - name: adopt_live_head_branch
+        type: if
+        condition: '${{ variables.current_proposal_id != blank }}'
+        steps:
+          - name: resolve_live_head
+            type: proposals.getLatestRevision
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+          - name: adopt_live_head
+            type: data.set
+            with:
+              current_proposal_id: '{{ steps.resolve_live_head.output.proposalId }}'
+
       # The clock is re-read after the gate, not only before it. The deadline
       # check at the top of the iteration was evaluated before the park, which
       # may have lasted days — and only the HTTP routes refuse an expired
@@ -402,10 +426,10 @@ steps:
         type: if
         condition: '${{ variables.gate_approved != true }}'
         steps:
-          # Adopting a `supersededBy` successor belongs here and lands with the
-          # tune route, which is the only thing that will write that field onto
-          # a proposal still awaiting a decision. `cloneProposal` writes it onto
-          # one that already failed, so there is nothing to adopt today.
+          # The successor adoption this branch used to defer to the tune route
+          # now happens above, before any write: the revise route is what writes
+          # `supersededBy` onto a proposal still awaiting a decision, so by the
+          # time the gate answers, the carried id may already be terminal.
           - name: record_dismissal
             type: proposals.updateProposal
             with:

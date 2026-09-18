@@ -12,6 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ALERTZERO_PROPOSALS_REVISE_TOOL_ID } from '@kbn/alertzero-common';
 import {
+  boundedActionInput,
   proposalConfidenceSchema,
   proposalImpactSchema,
 } from '@kbn/agentic-investigations-plugin/common';
@@ -23,7 +24,7 @@ const reviseProposalSchema = z.object({
     .min(1)
     .max(256)
     .describe(
-      'The id of the proposal being replaced. Any live proposal in a chain works, not only the root — the service resolves the current revision internally.'
+      'The id of the proposal being replaced. Any id in a revision chain works, not only the root — the live head is resolved before the revision is appended.'
     ),
   comment: z
     .string()
@@ -32,10 +33,11 @@ const reviseProposalSchema = z.object({
     .describe(
       "Override for the proposal's analyst-facing comment, rendered as markdown. Omit to keep the original."
     ),
-  actionInput: z
-    .record(z.string(), z.unknown())
+  actionInput: boundedActionInput
     .optional()
-    .describe("Override for the action workflow's input, merged over the original's actionInput."),
+    .describe(
+      "Override for the action workflow's input, merged over the original's actionInput — send only the keys you are changing. The merged input is validated against the action workflow, so a change the action cannot accept is rejected instead of stored."
+    ),
   impact: proposalImpactSchema.optional().describe('Override for the impact rating.'),
   confidence: proposalConfidenceSchema.optional().describe('Override for the confidence rating.'),
 });
@@ -80,15 +82,34 @@ export const reviseProposalTool = (
       const agenticInvestigations = getAgenticInvestigations();
       await agenticInvestigations.getProposalPrivileges().assertCanManage(request);
 
-      const { proposalId: newProposalId, revision } = await agenticInvestigations
-        .getProposalsService()
-        .revise({ id: proposalId, ...overrides }, spaceId);
+      const service = agenticInvestigations.getProposalsService();
+
+      // Any id in the chain is accepted, as the schema promises: `revise()`
+      // refuses a superseded predecessor, so the live head has to be resolved
+      // here first. Without this, a follow-up revision addressed to the
+      // original — the id the model was given when the proposal was created —
+      // would fail after the first revision.
+      const { proposalId: liveProposalId } = await service.getLatestRevision(proposalId, spaceId);
+
+      const { proposalId: newProposalId, revision } = await service.revise(
+        { id: liveProposalId, ...overrides },
+        spaceId
+      );
 
       return {
         results: [
           {
             type: ToolResultType.other,
-            data: { proposalId: newProposalId, revision, supersedes: proposalId },
+            // `status` is part of the documented tool output contract
+            // (elastic/security-team#19289) — a revision is always created
+            // pending — and `supersedes` names the revision this one replaced,
+            // which is the live head rather than whatever id was passed in.
+            data: {
+              proposalId: newProposalId,
+              revision,
+              status: 'pending',
+              supersedes: liveProposalId,
+            },
           },
         ],
       };

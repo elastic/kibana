@@ -17,6 +17,13 @@ const IMPACT_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, l
 const CONFIDENCE_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
 
 /**
+ * Same convention as the Agent Builder spaces suite: the default Space is
+ * reached unprefixed, every other Space through its `/s/<space>` prefix.
+ */
+export const spaceUrl = (url: string, spaceId: string): string =>
+  spaceId && spaceId !== 'default' ? `/s/${spaceId}/${url}` : `/${url}`;
+
+/**
  * Guards against the same race every seed in this suite would otherwise hit:
  * an `esClient.index()`/`update()` call against an alias that does not exist
  * yet either auto-creates a *plain* index with that literal name (colliding
@@ -27,70 +34,92 @@ const CONFIDENCE_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
  * adapter installs (see `proposals_storage.ts` for the mapping this mirrors)
  * before any write sidesteps both: idempotent (`create: false`), and later
  * calls from the plugin itself just find it already there and no-op.
+ *
+ * Whatever this suite installs it also removes again (see
+ * `cleanupProposalFixtures`): `create: false` overwrites an application-owned
+ * template rather than making an isolated test resource, so leaving it behind
+ * would leak into every later suite sharing this stack.
  */
 let indexReady: Promise<void> | undefined;
+let templateExistedBeforeSuite = false;
+let indexCreatedBySuite = false;
+
 const ensureProposalsIndex = (esClient: Client): Promise<void> => {
   if (!indexReady) {
     indexReady = esClient.indices
-      .putIndexTemplate({
-        name: PROPOSALS_INDEX_ALIAS,
-        create: false,
-        allow_auto_create: false,
-        index_patterns: [`${PROPOSALS_INDEX_ALIAS}-*`],
-        template: {
-          mappings: {
-            dynamic: 'strict',
-            properties: {
-              spaceId: { type: 'keyword' },
-              conversationId: { type: 'keyword' },
-              comment: { type: 'text' },
-              actionWorkflowId: { type: 'keyword' },
-              actionInput: { type: 'flattened' },
-              status: { type: 'keyword' },
-              decision: { type: 'keyword' },
-              supersededBy: { type: 'keyword' },
-              rootProposalId: { type: 'keyword' },
-              supersedes: { type: 'keyword' },
-              revision: { type: 'long' },
-              impact: { type: 'keyword' },
-              confidence: { type: 'keyword' },
-              category: { type: 'keyword' },
-              origin: { type: 'keyword' },
-              expiresAt: { type: 'date', format: 'strict_date_optional_time' },
-              impactRank: { type: 'byte' },
-              confidenceRank: { type: 'byte' },
-              decidedBy: {
-                type: 'object',
-                properties: {
-                  username: { type: 'keyword' },
-                  fullName: { type: 'keyword' },
-                  email: { type: 'keyword' },
-                  profileUid: { type: 'keyword' },
+      .existsIndexTemplate({ name: PROPOSALS_INDEX_ALIAS })
+      .then((exists) => {
+        templateExistedBeforeSuite = Boolean(exists);
+      })
+      .catch(() => {
+        // A stack too old for the `_index_template` API still gets the
+        // template; the suite just cannot claim to have created it.
+        templateExistedBeforeSuite = true;
+      })
+      .then(() =>
+        esClient.indices.putIndexTemplate({
+          name: PROPOSALS_INDEX_ALIAS,
+          create: false,
+          allow_auto_create: false,
+          index_patterns: [`${PROPOSALS_INDEX_ALIAS}-*`],
+          template: {
+            mappings: {
+              dynamic: 'strict',
+              properties: {
+                spaceId: { type: 'keyword' },
+                conversationId: { type: 'keyword' },
+                comment: { type: 'text' },
+                actionWorkflowId: { type: 'keyword' },
+                actionInput: { type: 'flattened' },
+                status: { type: 'keyword' },
+                decision: { type: 'keyword' },
+                supersededBy: { type: 'keyword' },
+                rootProposalId: { type: 'keyword' },
+                supersedes: { type: 'keyword' },
+                revision: { type: 'long' },
+                impact: { type: 'keyword' },
+                confidence: { type: 'keyword' },
+                category: { type: 'keyword' },
+                origin: { type: 'keyword' },
+                expiresAt: { type: 'date', format: 'strict_date_optional_time' },
+                impactRank: { type: 'byte' },
+                confidenceRank: { type: 'byte' },
+                decidedBy: {
+                  type: 'object',
+                  properties: {
+                    username: { type: 'keyword' },
+                    fullName: { type: 'keyword' },
+                    email: { type: 'keyword' },
+                    profileUid: { type: 'keyword' },
+                  },
                 },
-              },
-              decidedAt: { type: 'date', format: 'strict_date_optional_time' },
-              dismissReason: { type: 'keyword' },
-              rationale: { type: 'text' },
-              executionError: { type: 'text' },
-              workflowExecutionId: { type: 'keyword' },
-              createdAt: { type: 'date', format: 'strict_date_optional_time' },
-              createdBy: {
-                type: 'object',
-                properties: {
-                  username: { type: 'keyword' },
-                  fullName: { type: 'keyword' },
-                  email: { type: 'keyword' },
-                  profileUid: { type: 'keyword' },
+                decidedAt: { type: 'date', format: 'strict_date_optional_time' },
+                dismissReason: { type: 'keyword' },
+                rationale: { type: 'text' },
+                executionError: { type: 'text' },
+                workflowExecutionId: { type: 'keyword' },
+                createdAt: { type: 'date', format: 'strict_date_optional_time' },
+                createdBy: {
+                  type: 'object',
+                  properties: {
+                    username: { type: 'keyword' },
+                    fullName: { type: 'keyword' },
+                    email: { type: 'keyword' },
+                    profileUid: { type: 'keyword' },
+                  },
                 },
               },
             },
+            aliases: { [PROPOSALS_INDEX_ALIAS]: { is_write_index: true } },
           },
-          aliases: { [PROPOSALS_INDEX_ALIAS]: { is_write_index: true } },
-        },
-      })
+        })
+      )
       .then(() =>
         esClient.indices
           .create({ index: PROPOSALS_WRITE_INDEX })
+          .then(() => {
+            indexCreatedBySuite = true;
+          })
           .catch((error: { statusCode?: number }) => {
             if (error?.statusCode === 400) {
               return; // resource_already_exists_exception — another worker won the race.
@@ -103,7 +132,66 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
   return indexReady;
 };
 
+/**
+ * Ids this suite is responsible for: the seeded roots plus every revision the
+ * routes created for them. `revise()` mints ids server-side, so a caller that
+ * revises has to hand the returned id back through `trackProposal` or the
+ * document outlives the run.
+ */
+const trackedProposalIds = new Set<string>();
+
+export const trackProposal = (id: string): string => {
+  trackedProposalIds.add(id);
+  return id;
+};
+
+const isNotFound = (error: unknown): boolean => {
+  const statusCode =
+    (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode ??
+    (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
+  return statusCode === 404;
+};
+
+/**
+ * Removes everything this suite put into the stack, so a rerun starts from the
+ * same state as the first run. Called from the specs' `afterAll`.
+ */
+export const cleanupProposalFixtures = async (esClient: Client): Promise<void> => {
+  for (const id of trackedProposalIds) {
+    try {
+      await esClient.delete({ index: PROPOSALS_INDEX_ALIAS, id, refresh: 'wait_for' });
+    } catch (error) {
+      if (!isNotFound(error)) throw error;
+    }
+  }
+  trackedProposalIds.clear();
+
+  if (indexCreatedBySuite) {
+    try {
+      await esClient.indices.delete({ index: PROPOSALS_WRITE_INDEX });
+    } catch (error) {
+      if (!isNotFound(error)) throw error;
+    }
+    indexCreatedBySuite = false;
+  }
+
+  if (!templateExistedBeforeSuite) {
+    try {
+      await esClient.indices.deleteIndexTemplate({ name: PROPOSALS_INDEX_ALIAS });
+    } catch (error) {
+      if (!isNotFound(error)) throw error;
+    }
+    templateExistedBeforeSuite = false;
+  }
+
+  // The next suite in this worker has to re-run the readiness dance: the
+  // index may be gone now.
+  indexReady = undefined;
+};
+
 export interface SeedProposalOptions {
+  /** Space the document is written for. Defaults to the default Space. */
+  spaceId?: string;
   conversationId?: string;
   comment?: string;
   impact?: string;
@@ -136,11 +224,12 @@ export const seedProposal = async (
   const response = await esClient.index({
     index: PROPOSALS_INDEX_ALIAS,
     document: {
-      spaceId: 'default',
+      spaceId: options.spaceId ?? 'default',
       conversationId: options.conversationId ?? `scout-conversation-${Date.now()}`,
       comment: options.comment ?? 'Seeded by the revisions Scout suite',
       status: options.status ?? 'pending',
       rootProposalId: undefined,
+      revision: 1,
       impact,
       confidence,
       impactRank: IMPACT_RANK[impact],
@@ -162,15 +251,17 @@ export const seedProposal = async (
     doc: { rootProposalId: id },
     refresh: 'wait_for',
   });
+  trackProposal(id);
   return { id };
 };
 
 export const getProposal = (
   apiClient: ApiClientFixture,
   cookieHeader: Record<string, string>,
-  id: string
+  id: string,
+  spaceId: string = 'default'
 ): Promise<ApiClientResponse> =>
-  apiClient.get(`${PROPOSALS_PATH}/${id}`, {
+  apiClient.get(spaceUrl(`${PROPOSALS_PATH}/${id}`, spaceId), {
     headers: { ...COMMON_HEADERS, ...cookieHeader },
     responseType: 'json',
   });
@@ -179,9 +270,10 @@ export const reviseProposal = (
   apiClient: ApiClientFixture,
   cookieHeader: Record<string, string>,
   id: string,
-  body: Record<string, unknown> = {}
+  body: Record<string, unknown> = {},
+  spaceId: string = 'default'
 ): Promise<ApiClientResponse> =>
-  apiClient.post(`${PROPOSALS_PATH}/${id}/revisions`, {
+  apiClient.post(spaceUrl(`${PROPOSALS_PATH}/${id}/revisions`, spaceId), {
     headers: { ...COMMON_HEADERS, ...cookieHeader },
     body,
     responseType: 'json',
@@ -191,9 +283,10 @@ export const dismissProposal = (
   apiClient: ApiClientFixture,
   cookieHeader: Record<string, string>,
   id: string,
-  body: Record<string, unknown> = { dismissReason: 'other' }
+  body: Record<string, unknown> = { dismissReason: 'other' },
+  spaceId: string = 'default'
 ): Promise<ApiClientResponse> =>
-  apiClient.post(`${PROPOSALS_PATH}/${id}/dismiss`, {
+  apiClient.post(spaceUrl(`${PROPOSALS_PATH}/${id}/dismiss`, spaceId), {
     headers: { ...COMMON_HEADERS, ...cookieHeader },
     body,
     responseType: 'json',

@@ -276,6 +276,93 @@ describe('ProposalApprovalCard', () => {
     });
   });
 
+  describe('superseded row', () => {
+    /**
+     * A conversation attachment keeps the id it was created with, and a
+     * revision supersedes that row — so without the redirect the analyst is
+     * left with a card that offers no actions for a proposal that is no longer
+     * the one awaiting their decision.
+     */
+    it('renders the revision that replaced it, not the superseded row', () => {
+      setupMocks();
+      useProposalMock.mockImplementation(
+        (id: string | undefined) =>
+          ({
+            data:
+              id === 'proposal-1'
+                ? baseProposal({
+                    id: 'proposal-1',
+                    status: 'superseded',
+                    supersededBy: 'proposal-2',
+                  })
+                : baseProposal({ id: 'proposal-2', revision: 2 }),
+            isLoading: false,
+            isError: false,
+          } as unknown as ReturnType<typeof useProposal>)
+      );
+
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(useProposalMock).toHaveBeenCalledWith('proposal-2');
+      expect(
+        container.querySelector(
+          '[data-test-subj="agenticInvestigationsProposalApprove-proposal-2"]'
+        )
+      ).toBeInTheDocument();
+      expect(
+        container.querySelector('[data-test-subj="agenticInvestigationsProposalCard-proposal-1"]')
+      ).toBeNull();
+    });
+
+    it('follows the pointer more than one hop', () => {
+      setupMocks();
+      // A three-link chain: reaching the live head takes two redirects, so a
+      // redirect that only ever resolves one level would stop at proposal-2.
+      useProposalMock.mockImplementation((id: string | undefined) => {
+        const askedFor = id ?? PROPOSAL_ID;
+        return {
+          data:
+            askedFor === 'proposal-1'
+              ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-2' })
+              : askedFor === 'proposal-2'
+              ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-3' })
+              : baseProposal({ id: askedFor, revision: 3 }),
+          isLoading: false,
+          isError: false,
+        } as unknown as ReturnType<typeof useProposal>;
+      });
+
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(useProposalMock).toHaveBeenCalledWith('proposal-3');
+      expect(
+        container.querySelector(
+          '[data-test-subj="agenticInvestigationsProposalApprove-proposal-3"]'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('stops instead of looping forever on a chain that points in a circle', () => {
+      setupMocks();
+      useProposalMock.mockImplementation((id: string | undefined) => {
+        const askedFor = id ?? PROPOSAL_ID;
+        return {
+          data: baseProposal({
+            id: askedFor,
+            status: 'superseded',
+            supersededBy: `${askedFor}-next`,
+          }),
+          isLoading: false,
+          isError: false,
+        } as unknown as ReturnType<typeof useProposal>;
+      });
+
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(getByTestId('warning-callout')).toBeInTheDocument();
+    });
+  });
+
   describe('approve flow', () => {
     it('calls approveProposal.mutateAsync when the Approve button is clicked', async () => {
       const mutateAsync = jest.fn().mockResolvedValue({ id: PROPOSAL_ID });

@@ -490,12 +490,36 @@ describe('create-investigation-proposal workflow', () => {
       expect(findStep(workflow.steps, 'break_dismissed')?.type).toBe('loop.break');
     });
 
-    it('does not read the proposal back, since nothing in the loop adopts a successor', () => {
-      // `cloneProposal` writes `supersededBy` onto a proposal that already
-      // failed, never one awaiting a decision, so there is nothing to adopt
-      // until the tune route lands.
-      expect(findStep(workflow.steps, 'read_proposal')).toBeUndefined();
-      expect(findStep(workflow.steps, 'adopt_superseded')).toBeUndefined();
+    it('adopts the live head after the gate, since a revision moves the chain under it', () => {
+      // The gate belongs to the chain, not to one revision: a revision appended
+      // while it was parked marks the row this execution created `superseded`,
+      // which is terminal, so a decision written on the carried id would be
+      // refused. This is the adoption the dismissal branch used to defer.
+      const resolve = findStep(workflow.steps, 'resolve_live_head');
+      const adopt = findStep(workflow.steps, 'adopt_live_head');
+
+      expect(resolve?.type).toBe('proposals.getLatestRevision');
+      expect(String(resolve?.with?.proposalId)).toContain('variables.current_proposal_id');
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.resolve_live_head.output.proposalId'
+      );
+    });
+
+    it('adopts before any write, so the decision lands on the current revision', () => {
+      // Ordering is the whole point: adopting after a write would leave that
+      // write on a row the service now refuses to settle.
+      const body = (loop().steps ?? []).map(({ name }) => name);
+      const adoptIndex = body.indexOf('adopt_live_head_branch');
+
+      expect(adoptIndex).toBeGreaterThan(body.indexOf('gate_branch'));
+      for (const write of [
+        'settle_expired_after_gate',
+        'handle_dismissal',
+        'approve_without_action',
+        'approve_with_action',
+      ]) {
+        expect(body.indexOf(write)).toBeGreaterThan(adoptIndex);
+      }
     });
   });
 

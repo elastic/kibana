@@ -31,6 +31,7 @@ export {
   PROPOSAL_CHARTS_SUMMARY_URL,
   actionMetadataSchema,
   approveProposalRequestSchema,
+  boundedActionInput,
   createProposalRequestSchema,
   dismissProposalRequestSchema,
   dismissReasonSchema,

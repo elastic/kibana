@@ -71,12 +71,14 @@ const createStorage = (document?: ProposalDocument) => {
   const hits = document ? [searchHit(document)] : [];
   return {
     index: jest.fn().mockResolvedValue({ _id: 'proposal-1' }),
+    delete: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
     search: jest.fn().mockResolvedValue({
       hits: { hits, total: { value: hits.length } },
     }),
     esql: jest.fn().mockResolvedValue(emptyEsql()),
   } as unknown as jest.Mocked<ProposalsStorageClient> & {
     index: jest.Mock;
+    delete: jest.Mock;
     search: jest.Mock;
     esql: jest.Mock;
   };
@@ -884,6 +886,19 @@ describe('ProposalsService', () => {
       expect(storage.index).not.toHaveBeenCalled();
     });
 
+    it('should refuse to move a proposal to superseded, which only revise() establishes', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      // The undecided status pair admits `superseded`, so without this guard a
+      // direct caller could write a terminal row with no successor — one the
+      // latest-revision query would still count as live.
+      await expect(
+        service.update({ id: 'proposal-1', status: 'superseded' }, SPACE_ID)
+      ).rejects.toThrow(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
     it('should accept a dismissal written with its status in one call', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
@@ -1308,6 +1323,133 @@ describe('ProposalsService', () => {
 
       expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
+
+    it('merges an actionInput override over the original instead of replacing it', async () => {
+      const storage = createStorage(
+        baseDocument({ actionInput: { name: 'Suspicious PowerShell', severity: 'medium' } })
+      );
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', actionInput: { severity: 'high' } }, SPACE_ID);
+
+      // The stored input keeps the keys the caller did not mention: a
+      // replacement would silently drop `name`, which the action requires.
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            actionInput: { name: 'Suspicious PowerShell', severity: 'high' },
+          }),
+        })
+      );
+    });
+
+    it('validates the merged actionInput against the original action workflow', async () => {
+      const storage = createStorage(
+        baseDocument({ actionInput: { name: 'Suspicious PowerShell' } })
+      );
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({
+        definition: {
+          consts: { actionMetadata: { name: 'Create rule', category: 'tune' } },
+          triggers: [
+            {
+              type: 'manual',
+              inputs: {
+                properties: {
+                  actionInput: {
+                    type: 'object',
+                    properties: { name: { type: 'string' } },
+                    required: ['name'],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      });
+      const { service } = createService(storage, workflowsApi);
+
+      // The original input was valid; only the override makes it unrunnable.
+      // Caught here rather than after the analyst approves the revision.
+      await expect(
+        service.revise({ id: 'proposal-1', actionInput: { name: 123 } }, SPACE_ID)
+      ).rejects.toThrow(ProposalInvalidActionInputError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('recomputes the sort ranks when the rating overrides change', async () => {
+      const storage = createStorage(
+        baseDocument({ impact: 'low', confidence: 'medium', impactRank: 3, confidenceRank: 1 })
+      );
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', impact: 'critical', confidence: 'low' }, SPACE_ID);
+
+      // Without the recompute the revision would read `critical` while still
+      // sorting as `low`, because the queue orders on the rank mirrors.
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            impact: 'critical',
+            confidence: 'low',
+            impactRank: 0,
+            confidenceRank: 2,
+          }),
+        })
+      );
+    });
+
+    it('keeps the inherited rating rank when only the other rating is overridden', async () => {
+      const storage = createStorage(
+        baseDocument({ impact: 'low', confidence: 'medium', impactRank: 3, confidenceRank: 1 })
+      );
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', confidence: 'high' }, SPACE_ID);
+
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            impact: 'low',
+            confidence: 'high',
+            impactRank: 3,
+            confidenceRank: 0,
+          }),
+        })
+      );
+    });
+
+    it('retires the revision it created when the predecessor write loses its race', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+      storage.index
+        .mockResolvedValueOnce({ _id: 'revision-1' })
+        .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }));
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+
+      // The losing side must not leave a live, unreferenced second head behind.
+      const createdId = storage.index.mock.calls[0][0].id;
+      expect(storage.delete).toHaveBeenCalledWith({ id: createdId });
+    });
+
+    it('leaves the created revision in place when the predecessor write fails ambiguously', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+      storage.index
+        .mockResolvedValueOnce({ _id: 'revision-1' })
+        .mockRejectedValueOnce(new Error('connection reset'));
+
+      // A non-conflict failure does not prove the predecessor write did not
+      // land, so deleting the revision could orphan the predecessor's pointer
+      // instead — the ambiguous case keeps both rows.
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toThrow(
+        'connection reset'
+      );
+      expect(storage.delete).not.toHaveBeenCalled();
+    });
   });
 
   describe('getLatestRevision', () => {
@@ -1384,6 +1526,60 @@ describe('ProposalsService', () => {
         status: 'pending',
         decision: undefined,
       });
+    });
+
+    it('follows supersededBy pointers for a chain written before rootProposalId existed', async () => {
+      // No `rootProposalId` on either row: the term query below cannot find
+      // this chain, so the pointer walk is the only way to the live head.
+      const legacyRoot = baseDocument({ supersededBy: 'proposal-2' });
+      const live = baseDocument({ supersedes: 'proposal-1', revision: 2, status: 'pending' });
+      const storage = createStorage(legacyRoot);
+      // Dispatch on the query, not on call order. The chain query filters on
+      // `rootProposalId`, which a legacy row does not carry, so it answers
+      // empty — the answer Elasticsearch gives. Both `load` reads go by id,
+      // and answering either of them in the chain query's place would let this
+      // test pass without the pointer walk ever running.
+      // The request is a union of every query container, so the shape is
+      // narrowed once here rather than asserted at each call site.
+      interface QueryClause {
+        term?: Record<string, unknown>;
+        ids?: { values: string[] };
+      }
+      const queryFilter = (request: { query?: unknown }): QueryClause[] =>
+        (request.query as { bool?: { filter?: QueryClause[] } } | undefined)?.bool?.filter ?? [];
+      storage.search.mockImplementation(async (request) => {
+        const filter = queryFilter(request);
+        if (filter.some((clause) => clause.term?.rootProposalId !== undefined)) {
+          return { hits: { hits: [], total: { value: 0 } } };
+        }
+        const requestedId = filter.find((clause) => clause.ids !== undefined)?.ids?.values[0];
+        return requestedId === 'proposal-2'
+          ? { hits: { hits: [searchHit(live, 'proposal-2')], total: { value: 1 } } }
+          : { hits: { hits: [searchHit(legacyRoot, 'proposal-1')], total: { value: 1 } } };
+      });
+      const { service } = createService(storage);
+
+      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
+
+      // Answering with the stale member would hand a parked gate an id whose
+      // decision write `update()` then refuses.
+      expect(result).toEqual({
+        proposalId: 'proposal-2',
+        revision: 2,
+        status: 'pending',
+        decision: undefined,
+      });
+      // The successor is reached by following its pointer, not by the root
+      // term — a chain query for this row would be an empty answer.
+      expect(storage.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [{ ids: { values: ['proposal-2'] } }, { term: { spaceId: SPACE_ID } }],
+            },
+          },
+        })
+      );
     });
   });
 
@@ -1811,6 +2007,25 @@ describe('ProposalsService', () => {
 
       for (const query of issuedQueries(storage)) {
         expect(query).not.toMatch(/expiresAt\s*>\s*NOW\(\)/i);
+      }
+    });
+
+    /**
+     * The regression this guards: a superseded proposal has no `decidedAt` —
+     * being revised is not a decision — and inherits its predecessor's
+     * `expiresAt`, so without this term the anchor, opens and expiries queries
+     * all count it as still open alongside the revision that replaced it.
+     */
+    it('should exclude superseded proposals from every query', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      const queries = issuedQueries(storage);
+      expect(queries).toHaveLength(4);
+      for (const query of queries) {
+        expect(query).toMatch(/supersededBy\s+IS\s+NULL/i);
       }
     });
 

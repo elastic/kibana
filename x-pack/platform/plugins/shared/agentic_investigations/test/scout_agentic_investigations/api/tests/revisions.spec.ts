@@ -9,17 +9,26 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import {
   apiTest,
+  cleanupProposalFixtures,
   getProposal,
   PROPOSALS_MANAGE_ROLE,
   PROPOSALS_READ_ONLY_ROLE,
   seedProposal,
   reviseProposal,
+  trackProposal,
 } from '../fixtures';
 
 apiTest.describe(
   'POST /internal/investigations/proposals/{proposalId}/revisions',
   { tag: [...tags.stateful.classic] },
   () => {
+    // Every seed and every revision this file creates is removed again, so a
+    // rerun starts from the same state as the first run instead of inheriting
+    // documents (and their chains) from it.
+    apiTest.afterAll(async ({ esClient }) => {
+      await cleanupProposalFixtures(esClient);
+    });
+
     apiTest(
       'creates a new pending revision and supersedes the original',
       async ({ apiClient, esClient, samlAuth }) => {
@@ -37,6 +46,7 @@ apiTest.describe(
         });
         expect(reviseResponse).toHaveStatusCode(200);
         const { proposalId: newProposalId, revision } = reviseResponse.body;
+        trackProposal(newProposalId);
         expect(typeof newProposalId).toBe('string');
         expect(newProposalId).not.toBe(originalId);
         expect(revision).toBe(2);
@@ -77,14 +87,14 @@ apiTest.describe(
           comment: 'revision 2',
         });
         expect(firstRevise).toHaveStatusCode(200);
-        const secondId = firstRevise.body.proposalId;
+        const secondId = trackProposal(firstRevise.body.proposalId);
         expect(firstRevise.body.revision).toBe(2);
 
         const secondRevise = await reviseProposal(apiClient, cookieHeader, secondId, {
           comment: 'revision 3',
         });
         expect(secondRevise).toHaveStatusCode(200);
-        const thirdId = secondRevise.body.proposalId;
+        const thirdId = trackProposal(secondRevise.body.proposalId);
         expect(secondRevise.body.revision).toBe(3);
 
         const thirdProposal = await getProposal(apiClient, cookieHeader, thirdId);
@@ -127,6 +137,7 @@ apiTest.describe(
           comment: 'first',
         });
         expect(firstRevise).toHaveStatusCode(200);
+        trackProposal(firstRevise.body.proposalId);
 
         // The original is now superseded; a second revise attempt on it must
         // fail even though it was never explicitly dismissed.
@@ -166,6 +177,59 @@ apiTest.describe(
           comment: 'x'.repeat(8193),
         });
         expect(response).toHaveStatusCode(400);
+      }
+    );
+
+    // Feature-privilege isolation (the 403 case above) and Space isolation are
+    // different boundaries: the same authorized user must not be able to reach
+    // a proposal that lives in another Space.
+    apiTest(
+      'does not revise a proposal from another space',
+      async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+        const SPACE_A = 'agentic-investigations-space-a';
+        const SPACE_B = 'agentic-investigations-space-b';
+        for (const spaceId of [SPACE_A, SPACE_B]) {
+          await kbnClient.request({
+            method: 'POST',
+            path: '/api/spaces/space',
+            body: { id: spaceId, name: spaceId, disabledFeatures: [] },
+          });
+        }
+
+        try {
+          // `PROPOSALS_MANAGE_ROLE` is scoped to `spaces: ['*']`, so this user
+          // is genuinely authorized in both spaces — the rejection below can
+          // only come from the document's own space, not from privileges.
+          const { cookieHeader } = await samlAuth.asInteractiveUser(PROPOSALS_MANAGE_ROLE);
+          const { id } = await seedProposal(esClient, {
+            spaceId: SPACE_A,
+            comment: 'Space A only',
+          });
+
+          const crossSpaceRead = await getProposal(apiClient, cookieHeader, id, SPACE_B);
+          expect(crossSpaceRead).toHaveStatusCode(404);
+
+          const crossSpaceRevise = await reviseProposal(
+            apiClient,
+            cookieHeader,
+            id,
+            { comment: 'revised from the wrong space' },
+            SPACE_B
+          );
+          expect(crossSpaceRevise).toHaveStatusCode(404);
+
+          // And the rejected attempt changed nothing in the Space A document:
+          // still the root, still pending, no successor appended.
+          const inOwningSpace = await getProposal(apiClient, cookieHeader, id, SPACE_A);
+          expect(inOwningSpace).toHaveStatusCode(200);
+          expect(inOwningSpace.body.status).toBe('pending');
+          expect(inOwningSpace.body.revision).toBe(1);
+          expect(inOwningSpace.body.supersededBy).toBeUndefined();
+        } finally {
+          for (const spaceId of [SPACE_A, SPACE_B]) {
+            await kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` });
+          }
+        }
       }
     );
   }

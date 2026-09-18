@@ -7,5 +7,13 @@
 
 export { apiTest } from '@kbn/scout';
 export { COMMON_HEADERS, PROPOSALS_MANAGE_ROLE, PROPOSALS_READ_ONLY_ROLE } from './constants';
-export { seedProposal, getProposal, reviseProposal, dismissProposal } from './helpers';
+export {
+  cleanupProposalFixtures,
+  seedProposal,
+  getProposal,
+  reviseProposal,
+  dismissProposal,
+  spaceUrl,
+  trackProposal,
+} from './helpers';
 export type { SeedProposalOptions } from './helpers';
