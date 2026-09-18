@@ -60,7 +60,14 @@ const resolveFeatureConnectorId = async ({
     return null;
   }
 
-  const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(featureId, request);
+  // `onlyReturnConfigured` keeps the answer to "what did the operator pick for this
+  // tier". The default mode appends the whole connector catalog behind the
+  // recommendations and moves the platform default to the front when none of them are
+  // provisioned, so `endpoints[0]` would be an unrelated connector and the list would
+  // never come back empty, making the fallback below unreachable.
+  const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(featureId, request, {
+    onlyReturnConfigured: true,
+  });
 
   if (endpoints.length === 0) {
     logger.debug(() => `Feature ${featureId} resolved no endpoints, ignoring feature_id`);

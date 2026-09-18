@@ -73,7 +73,9 @@ describe('resolveDefaultConnectorId', () => {
         uiSettingsClient: mockUiSettingsClient,
       });
 
-      expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_generation', mockRequest);
+      expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_generation', mockRequest, {
+        onlyReturnConfigured: true,
+      });
     });
 
     // The tier is deliberately above the cluster-wide default in the resolution
