@@ -92,7 +92,7 @@ const getSearchErrorAttributes = (error: unknown): IEsErrorAttributes | undefine
  */
 const getErrorCause = (error: unknown): unknown => {
   if (isEsqlResponseError(error)) {
-    return { type: error.type, root_cause: error.rootCause };
+    return { type: error.type, root_cause: error.rootCause, caused_by: error.causedBy };
   }
 
   return getSearchErrorAttributes(error)?.error;

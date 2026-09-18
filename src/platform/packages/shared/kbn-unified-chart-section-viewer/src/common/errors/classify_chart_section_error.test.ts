@@ -247,6 +247,22 @@ describe('classifyChartSectionError', () => {
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
     });
+
+    it('classifies a circuit breaker nested under an embedded-error wrapper as a resource limit', () => {
+      const error = new EsqlResponseError(
+        {
+          type: 'search_phase_execution_exception',
+          reason: 'all shards failed',
+          caused_by: {
+            type: 'circuit_breaking_exception',
+            reason: 'data too large',
+          } as estypes.ErrorCause,
+        },
+        { status: 429 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
   });
 
   describe('unknown', () => {
@@ -345,6 +361,25 @@ describe('getChartSectionErrorMeta', () => {
     });
 
     expect(getChartSectionErrorMeta(error)).toEqual({ type: 'es_rejected_execution_exception' });
+  });
+
+  it('reports the resource-limit cause nested under an EsqlResponseError caused_by', () => {
+    const error = new EsqlResponseError(
+      {
+        type: 'search_phase_execution_exception',
+        reason: 'all shards failed',
+        caused_by: {
+          type: 'circuit_breaking_exception',
+          reason: 'data too large',
+        } as estypes.ErrorCause,
+      },
+      { status: 429 }
+    );
+
+    expect(getChartSectionErrorMeta(error)).toEqual({
+      type: 'circuit_breaking_exception',
+      status: 429,
+    });
   });
 
   it('falls back to the outermost type when no nested cause is recognized', () => {
