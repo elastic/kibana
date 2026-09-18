@@ -38,6 +38,12 @@ describe('listRuleChangeHistoryRequestSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('rejects unknown keys (strict mode)', () => {
+    expect(listRuleChangeHistoryRequestSchema.safeParse({ unknown_field: 'x' }).success).toBe(
+      false
+    );
+  });
 });
 
 describe('getRuleChangeHistoryEventParamsSchema', () => {
@@ -46,6 +52,16 @@ describe('getRuleChangeHistoryEventParamsSchema', () => {
       getRuleChangeHistoryEventParamsSchema.parse({ id: 'rule-1', eventId: 'event-1' })
     ).toEqual({ id: 'rule-1', eventId: 'event-1' });
     expect(getRuleChangeHistoryEventParamsSchema.safeParse({ id: 'rule-1' }).success).toBe(false);
+  });
+
+  it('rejects unknown keys', () => {
+    expect(
+      getRuleChangeHistoryEventParamsSchema.safeParse({
+        id: 'rule-1',
+        eventId: 'event-1',
+        foo: 'bar',
+      }).success
+    ).toBe(false);
   });
 });
 
