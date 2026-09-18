@@ -267,6 +267,69 @@ describe('AD2 scenario registry (dense profile)', () => {
     }
   });
 
+  it('does not let raw-backed AND 4-step AND high/critical jointly separate target from noise', () => {
+    // The former leak, one level up from the three single-dimension tests
+    // above: fixing raw-event backing, chain length, and severity in three
+    // DIFFERENT background chains left their conjunction untouched. Every
+    // target chain is 4-step + raw + contains a high/critical step; grouping
+    // by host and keeping only hosts whose occurrence satisfied all three
+    // still recovered exactly the four references, because no single
+    // background occurrence combined them. `bg-endpoint-inventory` now does,
+    // so the joint predicate has to keep at least one background host too.
+    const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const matchesJointProfile = (scenario: Ad2ScenarioDefinition): boolean =>
+      scenario.raw &&
+      scenario.steps.length === 4 &&
+      scenario.steps.some((step) => step.severity === 'high' || step.severity === 'critical');
+
+    const targetScenarios = dense.scenarioKeys
+      .filter((key) => !isBackgroundScenarioKey(key))
+      .map((key) => getAd2Scenario(key, 'dense'))
+      .filter((scenario): scenario is Ad2ScenarioDefinition => scenario !== undefined);
+    const backgroundScenarios = dense.scenarioKeys
+      .filter(isBackgroundScenarioKey)
+      .map((key) => getAd2Scenario(key, 'dense'))
+      .filter((scenario): scenario is Ad2ScenarioDefinition => scenario !== undefined);
+
+    // Non-vacuity: every target has to actually satisfy the joint profile, or
+    // the predicate below isn't the one that used to separate the sides.
+    expect(targetScenarios.length).toBeGreaterThan(0);
+    expect(targetScenarios.every(matchesJointProfile)).toBe(true);
+
+    expect(backgroundScenarios.some(matchesJointProfile)).toBe(true);
+  });
+
+  it('does not let host/user cardinality separate target from noise', () => {
+    // The former leak: every background template copied one fixed `user`
+    // literal into every expanded occurrence, so at the 95-alert budget each
+    // background user sat on several hosts while every clean/reference user
+    // sat on exactly one. "Group by user, keep only users seen on a single
+    // host" then recovered the four references without reading an alert
+    // field. Background users are now occurrence-local, so no user should be
+    // shared across more than one host.
+    const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const scenarios = dense.scenarioKeys
+      .map((key) => getAd2Scenario(key, 'dense'))
+      .filter((scenario): scenario is Ad2ScenarioDefinition => scenario !== undefined);
+    const hostsByUser = new Map<string, Set<string>>();
+
+    for (const scenario of scenarios) {
+      const hosts = hostsByUser.get(scenario.user) ?? new Set<string>();
+      hosts.add(scenario.host);
+      hostsByUser.set(scenario.user, hosts);
+    }
+
+    // Non-vacuity: the dense profile actually re-uses background templates
+    // across multiple occurrences, or user cardinality was never at risk of
+    // colliding in the first place.
+    const backgroundKeyCount = dense.scenarioKeys.filter(isBackgroundScenarioKey).length;
+    expect(backgroundKeyCount).toBeGreaterThan(AD2_DENSE_BACKGROUND_TEMPLATES.length);
+
+    for (const [, hosts] of hostsByUser) {
+      expect(hosts.size).toBe(1);
+    }
+  });
+
   it('keeps every escalated background step benign on its own fields', () => {
     // A background step is only allowed to be high|critical when its own fields
     // does not contain, and the Criteria evaluator then scores a model that read
@@ -277,6 +340,7 @@ describe('AD2 scenario registry (dense profile)', () => {
     // this table first.
     const escalatedMarkerByTemplate: Record<string, string> = {
       'bg-vendor-update': 'vendor-signed',
+      'bg-endpoint-inventory': 'elevated service account',
     };
 
     const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });

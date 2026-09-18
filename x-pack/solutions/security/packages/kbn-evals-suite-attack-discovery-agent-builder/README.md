@@ -4,12 +4,13 @@ Isolated evaluation suite for the Attack Discovery 2.0 Agent Builder integration
 
 ## Eval profiles and CI cadence
 
-This package ships **two eval cohorts** plus a documented third profile that is not automated here yet.
+This package ships **three eval cohorts** plus a documented fourth profile that is not automated here yet.
 
 | Profile | Spec | Seed data | CI cadence | Primary question |
 | --- | --- | --- | --- | --- |
 | **Golden-path** | `evals/attack_discovery_agent_builder.spec.ts` | `src/fixtures.ts` — 2 marker alerts | **Weekly** (`llm_evals.yml` sets `EVAL_GREP`) | Does the default agent **route**, **call AD tools**, and **complete the workflow**? |
 | **Clean profile** | `evals/clean_profile_provided_alerts.spec.ts` | `src/scenario_registry/` — 4 chains, 16 alerts + raw events | **On-demand** (full suite or `--grep "clean profile"`) | On realistic multi-stage chains, does AD produce **quality discoveries** with context gathering? |
+| **Dense profile** | `evals/dense_profile_live_retrieval.spec.ts` | `src/scenario_registry/` — the 4 clean chains + background noise, 95 alerts | **On-demand** (full suite or `--grep "dense profile"`) | At a realistic alert volume, does AD **retrieve and correlate** the real chains out of a crowded index, live, without being handed the alerts? |
 | **Full profile** | — (not in this package) | External noise generator (~150+ distractor alerts) | Manual / future follow-up | With ~150+ distractor alerts, does AD find real chains **without noise false positives**? |
 
 ### Golden-path (`fixtures.ts`)
@@ -74,7 +75,14 @@ node scripts/evals run --suite attack-discovery-agent-builder \
   --grep "clean profile"
 ```
 
-Full package (golden-path + clean profile):
+Dense profile (on-demand):
+
+```bash
+node scripts/evals run --suite attack-discovery-agent-builder \
+  --grep "dense profile"
+```
+
+Full package (golden-path + clean profile + dense profile):
 
 ```bash
 node scripts/evals run --suite attack-discovery-agent-builder

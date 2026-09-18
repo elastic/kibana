@@ -100,6 +100,21 @@ const occurrenceHost = (base: string, occurrence: number): string => {
 };
 
 /**
+ * `alice.chen` -> `alice.chen-2`, ... — each occurrence's OWN user, the same
+ * reason `occurrenceHost` is occurrence-local.
+ *
+ * Every clean/reference user appears on exactly one host. Copying one fixed
+ * `template.user` literal into every occurrence instead put every background
+ * template's user on N hosts while every target's stayed on 1 — a host/user
+ * cardinality predicate (group by user, drop any user seen on >1 host) then
+ * recovered the four references without reading a single alert field. The
+ * first occurrence keeps the template's literal user unchanged, so no
+ * existing snapshot or fixture reference shifts.
+ */
+const occurrenceUser = (base: string, occurrence: number): string =>
+  occurrence === 1 ? base : `${base}-${occurrence}`;
+
+/**
  * Background chains: plausible, non-actionable, and NOT part of the four target
  * chains. Severity and risk score do not separate them from those chains either
  * — see `bg-vendor-update` below — so the population cannot be solved by
@@ -261,16 +276,16 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
     host: 'wks-ops-40',
     os: 'linux',
     user: 'svc.inventory',
-    // The one background chain with real raw events backing its alerts, and
-    // the one that reaches 4 steps — the two properties `raw: false` and
-    // "background chains cap at 2 steps" gave an agent for free (see the
-    // `raw` field's doc comment above, and the length invariant this file's
-    // tests pin). Every step below carries an observable, occurrence-scoped
-    // reading of "routine, scheduled, signed inventory sweep" in its own
-    // fields, the same pattern `bg-vendor-update` uses for severity: without
-    // that reading, raising rawness/length would create a recall target the
-    // reference does not contain, and a model that surfaces it correctly
-    // would be scored as a false positive.
+    // This chain jointly overlaps the target on every dimension the OTHER
+    // background chains overlap it on separately: 4 steps (`bg-vendor-update`
+    // stays at 2), raw-backed (every other background is `raw: false`), AND a
+    // high-severity step (the only other high/critical background,
+    // `bg-vendor-update`, is 2 steps with no raw backing). Splitting these
+    // across disjoint chains left "group by host, keep 4-step AND raw AND
+    // high/critical" as a working joint answer key even after no single
+    // dimension worked alone — this chain removes that gap by being the
+    // counterexample to all three predicates at once, the same way
+    // `bg-vendor-update` alone is the counterexample to severity alone.
     raw: true,
     stepsFor: ({ host }) => {
       const agentPath = `/opt/inventory-agent/bin/scan-${host}.sh`;
@@ -286,11 +301,17 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
           'process',
           agentPath
         ),
+        // Escalated for the same reason `bg-vendor-update`'s steps are: the
+        // RULE scores privileged enumeration tooling high/critical whether or
+        // not it is the routine signed agent, so the field cannot discriminate
+        // — see that chain's comment. The benign reading is in THIS
+        // occurrence's own fields: a signed, scheduled agent enumerating one
+        // host's own catalog, not an ad hoc privilege-escalation attempt.
         step(
-          'Software Catalog Enumerated',
-          'low',
-          20,
-          `The inventory agent enumerated installed packages on ${host} for the asset catalog`,
+          'Software Catalog Enumerated With Elevated Privileges',
+          'high',
+          71,
+          `The signed inventory agent enumerated installed packages on ${host} for the asset catalog using its granted elevated service account`,
           'inventory-agent',
           null,
           'file',
@@ -326,10 +347,9 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
     os: 'windows',
     user: 'finance.lee',
     stepsFor: ({ host }) => {
-      // The one background chain that is NOT low/medium, and the reason the
-      // dense population can no longer be solved by `severity IN ('high',
-      // 'critical')`: it carries the severities the four reference chains use,
-      // so no severity predicate drops the noise while keeping the targets.
+      // One of two background chains carrying a high/critical step (the other
+      // is `bg-endpoint-inventory` above), so no severity predicate drops the
+      // noise while keeping the targets.
       //
       // Escalating severity is only fair because the benign reading is in the
       // occurrence's OWN fields — `management agent` and `vendor-signed` in the
@@ -424,7 +444,7 @@ const buildBackgroundScenarios = (): Record<string, Ad2ScenarioDefinition> => {
           title: template.title,
           host,
           os: template.os,
-          user: template.user,
+          user: occurrenceUser(template.user, occurrence),
           // Spread across the window so they do not all share one timestamp.
           startHoursAgo: 1 + ((templateIndex * 7 + round) % 20),
           raw: template.raw ?? false,
