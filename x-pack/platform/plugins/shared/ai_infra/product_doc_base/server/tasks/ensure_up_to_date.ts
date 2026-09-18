@@ -67,17 +67,25 @@ export const registerEnsureUpToDateTaskDefinition = ({
               requestedAt,
               items,
               attempts,
-              // `scheduledAt` is the time of the latest update request for this task
               isSuperseded: () =>
-                packageInstaller.wasUninstalledSince({
-                  inferenceId,
-                  since: taskInstance.scheduledAt,
-                }),
+                packageInstaller.wasUninstalledSince({ inferenceId, since: new Date(requestedAt) }),
+              // Each item re-checks under the lock whether it still needs updating, so two update
+              // tasks for the same inference ID (e.g. ordinary and forced) do not install it twice
               install: async (item) => {
+                const since = new Date(requestedAt);
                 if (item === OPENAPI_SPEC_ITEM) {
-                  await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId, forceUpdate });
+                  await packageInstaller.ensureOpenApiSpecUpToDate({
+                    inferenceId,
+                    forceUpdate,
+                    since,
+                  });
                 } else if (isProductName(item)) {
-                  await packageInstaller.installProduct({ productName: item, inferenceId });
+                  await packageInstaller.updateProductIfNeeded({
+                    productName: item,
+                    inferenceId,
+                    forceUpdate,
+                    since,
+                  });
                 }
               },
               metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },

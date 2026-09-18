@@ -30,8 +30,11 @@ const itemsSchema = schema.arrayOf(schema.string({ maxLength: 100 }), {
 });
 
 export const chunkedTaskStateSchema = schema.object({
-  // `scheduledAt` of the request this plan belongs to; a newer request (runSoon) starts over
+  // Time of the request this plan belongs to (ISO 8601)
   requestedAt: schema.maybe(schema.string({ maxLength: 64 })),
+  // `runAt` this task returned for its next run. Task Manager copies `runAt` into `scheduledAt`
+  // when it claims the task, while `runSoon` (a new request) stamps the current time instead.
+  nextRunAt: schema.maybe(schema.string({ maxLength: 64 })),
   remaining: schema.maybe(itemsSchema),
   // Failed attempts for the current item
   attempts: schema.maybe(schema.number({ min: 0 })),
@@ -62,21 +65,29 @@ export const isProductName = (value: string): value is ProductName =>
 
 /**
  * The persisted plan of a chunked task, or an empty state when the task has been requested again
- * (Task Manager sets `scheduledAt` on every `runSoon`) since the plan was persisted.
+ * since the plan was persisted. A run continues its plan when it was claimed for the `runAt` the
+ * previous run returned, or when Task Manager is retrying a failed run; any other `scheduledAt`
+ * comes from `runSoon`, i.e. a new request.
  */
 export const getChunkedTaskState = (
-  taskInstance: Pick<ConcreteTaskInstance, 'state' | 'scheduledAt'>
+  taskInstance: Pick<ConcreteTaskInstance, 'state' | 'scheduledAt' | 'attempts'>
 ): { requestedAt: string; state: ChunkedTaskState } => {
-  const requestedAt = taskInstance.scheduledAt.toISOString();
+  const scheduledAt = taskInstance.scheduledAt.toISOString();
   const state = taskInstance.state as ChunkedTaskState;
-  return { requestedAt, state: state.requestedAt === requestedAt ? state : {} };
+  const { requestedAt } = state;
+  const isContinuation =
+    requestedAt !== undefined && (state.nextRunAt === scheduledAt || taskInstance.attempts > 1);
+  return isContinuation ? { requestedAt, state } : { requestedAt: scheduledAt, state: {} };
 };
 
-// Re-runs the task shortly without consuming an attempt, e.g. while another install holds the lock
-export const deferredRunResult = (state: Record<string, unknown>) => ({
-  state,
-  runAt: new Date(Date.now() + INSTALL_LOCK_RETRY_DELAY_MS),
+// Reschedules the task, recording the `runAt` so the next run can recognise itself as a continuation
+const rescheduledRunResult = (state: Omit<ChunkedTaskState, 'nextRunAt'>, runAt: Date) => ({
+  state: { ...state, nextRunAt: runAt.toISOString() },
+  runAt,
 });
+
+// Re-runs the task shortly without consuming an attempt, e.g. while another install holds the lock
+const lockRetryAt = () => new Date(Date.now() + INSTALL_LOCK_RETRY_DELAY_MS);
 
 /**
  * Runs `run` under the cluster-wide install lock, deferring the task run when another install holds it.
@@ -91,7 +102,7 @@ export const runTaskUnderInstallLock = async ({
   metadata?: Record<string, unknown>;
 }) => {
   const acquired = await tryWithInstallLock({ lockManager, run, metadata });
-  return acquired ? { state: {} } : deferredRunResult({});
+  return acquired ? { state: {} } : { state: {}, runAt: lockRetryAt() };
 };
 
 /**
@@ -144,7 +155,10 @@ export const runInstallChunk = async <T extends string>({
     metadata: { ...metadata, item },
   });
   if (!acquired) {
-    return deferredRunResult({ requestedAt, remaining: items, ...(attempts ? { attempts } : {}) });
+    return rescheduledRunResult(
+      { requestedAt, remaining: items, ...(attempts ? { attempts } : {}) },
+      lockRetryAt()
+    );
   }
   if (superseded) {
     logger.info(`Documentation item [${item}] skipped: a later request superseded this task`);
@@ -164,15 +178,15 @@ export const runInstallChunk = async <T extends string>({
         delayMs / 1000
       }s: ${installError.message}`
     );
-    return {
-      state: { requestedAt, remaining: items, attempts: failedAttempts },
-      runAt: new Date(Date.now() + delayMs),
-    };
+    return rescheduledRunResult(
+      { requestedAt, remaining: items, attempts: failedAttempts },
+      new Date(Date.now() + delayMs)
+    );
   }
   // Returning `runAt` makes Task Manager run the task again for the next item, so a run only holds
   // a capacity slot for one item and completed items are not redone when a later attempt fails.
   return rest.length > 0
-    ? { state: { requestedAt, remaining: rest }, runAt: new Date() }
+    ? rescheduledRunResult({ requestedAt, remaining: rest }, new Date())
     : { state: {} };
 };
 

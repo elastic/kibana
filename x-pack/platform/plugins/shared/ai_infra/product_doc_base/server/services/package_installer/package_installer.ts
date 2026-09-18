@@ -54,6 +54,7 @@ import {
 
 import { overrideInferenceSettings } from './steps/create_index';
 import { LATEST_PRODUCT_VERSION } from '../../../common/consts';
+import type { InstallationStatus } from '../../../common/install_status';
 interface PackageInstallerOpts {
   artifactsFolder: string;
   logger: Logger;
@@ -269,6 +270,51 @@ export class PackageInstaller {
   }
 
   /**
+   * Re-installs a product planned for update unless that is no longer needed: it was uninstalled in
+   * the meantime, or it already is at the selected version and, for forced updates, was (re)installed
+   * after `since` by another task. Resolves to whether an install ran.
+   */
+  async updateProductIfNeeded(params: {
+    productName: ProductName;
+    inferenceId: string;
+    forceUpdate?: boolean;
+    since: Date;
+  }): Promise<boolean> {
+    const { productName, inferenceId, forceUpdate, since } = params;
+    const [repositoryVersions, installStatuses] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
+    ]);
+    const productState = installStatuses[productName];
+    const availableVersions = repositoryVersions[productName];
+    if (!productState || productState.status === 'uninstalled' || !availableVersions?.length) {
+      this.log.info(
+        `Skipping update of product [${productName}]: not installed or no version available`
+      );
+      return false;
+    }
+    const selectedVersion = selectVersion(
+      this.currentVersion,
+      availableVersions,
+      this.isServerless
+    );
+    if (
+      !isUpdateNeeded({
+        status: productState.status,
+        version: productState.version,
+        updatedAt: productState.updatedAt,
+        selectedVersion,
+        forceUpdate,
+        since,
+      })
+    ) {
+      this.log.info(`Skipping update of product [${productName}]: already at [${selectedVersion}]`);
+      return false;
+    }
+    return this.installProduct({ productName, inferenceId });
+  }
+
+  /**
    * Whether a product or the OpenAPI spec of this inference ID was uninstalled after `since`, meaning an
    * uninstall request superseded the task that started at `since`. Status read failures are propagated
    * so that they are not mistaken for an uninstall.
@@ -293,8 +339,10 @@ export class PackageInstaller {
   async ensureOpenApiSpecUpToDate(params: {
     inferenceId: string;
     forceUpdate?: boolean;
+    /** Forced updates skip a spec another task already (re)installed after this time */
+    since?: Date;
   }): Promise<void> {
-    const { inferenceId, forceUpdate } = params;
+    const { inferenceId, forceUpdate, since } = params;
     const [repositoryVersions, openapiSpecInstallStatus] = await Promise.all([
       fetchArtifactVersions(this.getArtifactRepositoryOptions()),
       this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
@@ -304,7 +352,16 @@ export class PackageInstaller {
       repositoryVersions.openapi,
       this.isServerless
     );
-    if (forceUpdate || openapiSpecInstallStatus.version !== openAPISpecVersionToUpgradeTo) {
+    if (
+      isUpdateNeeded({
+        status: openapiSpecInstallStatus.status,
+        version: openapiSpecInstallStatus.version,
+        updatedAt: openapiSpecInstallStatus.updatedAt,
+        selectedVersion: openAPISpecVersionToUpgradeTo,
+        forceUpdate,
+        since,
+      })
+    ) {
       await this.installOpenAPISpec({
         version: openAPISpecVersionToUpgradeTo,
         inferenceId,
@@ -364,13 +421,13 @@ export class PackageInstaller {
 
     let zipArchive: ZipArchive | undefined;
     let artifactFullPath: string | undefined;
+    // The persisted status is only touched once the new archive is ready to replace the index, so a
+    // failure before that point leaves an installed version reported as such
+    const previousStatus = (await this.productDocClient.getInstallationStatus({ inferenceId }))?.[
+      productName
+    ]?.status;
+    let replacing = false;
     try {
-      await this.productDocClient.setInstallationStarted({
-        productName,
-        productVersion: artifactProductVersion,
-        inferenceId,
-      });
-
       if (
         customInference &&
         !isImpliedDefaultElserInferenceId(customInference.inference_id) &&
@@ -412,6 +469,12 @@ export class PackageInstaller {
       const modifiedMappings = cloneDeep(mappings);
       overrideInferenceSettings(modifiedMappings, inferenceId!);
 
+      replacing = true;
+      await this.productDocClient.setInstallationStarted({
+        productName,
+        productVersion: artifactProductVersion,
+        inferenceId,
+      });
       await this.deleteIndex(indexName);
       await createIndex({
         indexName,
@@ -451,7 +514,13 @@ export class PackageInstaller {
         `Error during documentation installation of product [${productName}]/[${productVersion}] : ${message}`
       );
 
-      await this.productDocClient.setInstallationFailed(productName, message, inferenceId);
+      if (!replacing && previousStatus === 'installed') {
+        this.log.warn(
+          `Keeping the installed documentation for product [${productName}]: the new version could not be prepared`
+        );
+      } else {
+        await this.productDocClient.setInstallationFailed(productName, message, inferenceId);
+      }
       throw e;
     } finally {
       zipArchive?.close();
@@ -512,6 +581,11 @@ export class PackageInstaller {
     let zipArchive: ZipArchive | undefined;
     let selectedVersion: string | undefined;
     let artifactFullPath: string | undefined;
+    const { status: previousStatus } =
+      await this.productDocClient.getSecurityLabsInstallationStatus({
+        inferenceId: effectiveInferenceId,
+      });
+    let replacing = false;
     try {
       await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
 
@@ -528,11 +602,6 @@ export class PackageInstaller {
         // Select the latest version for this inference ID
         selectedVersion = availableVersions.sort().reverse()[0];
       }
-
-      await this.productDocClient.setSecurityLabsInstallationStarted({
-        version: selectedVersion,
-        inferenceId: effectiveInferenceId,
-      });
 
       const artifactFileName = getSecurityLabsArtifactName({
         version: selectedVersion,
@@ -563,6 +632,11 @@ export class PackageInstaller {
       const modifiedMappings = cloneDeep(mappings);
       overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
 
+      replacing = true;
+      await this.productDocClient.setSecurityLabsInstallationStarted({
+        version: selectedVersion,
+        inferenceId: effectiveInferenceId,
+      });
       await this.deleteIndex(indexName);
       await createIndex({
         indexName,
@@ -601,11 +675,17 @@ export class PackageInstaller {
         );
       }
       this.log.error(`Error during Security Labs installation: ${message}`);
-      await this.productDocClient.setSecurityLabsInstallationFailed({
-        version: selectedVersion,
-        failureReason: message,
-        inferenceId: effectiveInferenceId,
-      });
+      if (!replacing && previousStatus === 'installed') {
+        this.log.warn(
+          `Keeping the installed Security Labs content: the new version could not be prepared`
+        );
+      } else {
+        await this.productDocClient.setSecurityLabsInstallationFailed({
+          version: selectedVersion,
+          failureReason: message,
+          inferenceId: effectiveInferenceId,
+        });
+      }
       throw e;
     } finally {
       zipArchive?.close();
@@ -742,6 +822,10 @@ export class PackageInstaller {
 
     let zipArchive: ZipArchive | undefined;
     let artifactFullPath: string | undefined;
+    const { status: previousStatus } = await this.productDocClient.getOpenapiSpecInstallationStatus(
+      { inferenceId: effectiveInferenceId }
+    );
+    let replacing = false;
     try {
       await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
       const artifactFileName = this.getOpenApiArtifactFileName({
@@ -765,6 +849,7 @@ export class PackageInstaller {
       for (const { productName, indexName: unmodifiedIndexName } of OPEN_API_SPEC_PRODUCTS) {
         this.log.info(`Installing OpenAPI spec for ${productName}`);
 
+        replacing = true;
         await this.productDocClient.setOpenapiSpecInstallationStarted({
           productName,
           productVersion: stackVersion,
@@ -854,14 +939,23 @@ export class PackageInstaller {
         );
       }
       this.log.error(`Error during OpenAPI Spec installation: ${message}`);
-      // Mark both products as failed
-      for (const productName of [DocumentationProduct.elasticsearch, DocumentationProduct.kibana]) {
-        await this.productDocClient.setOpenapiSpecInstallationFailed({
-          productName: productName as 'elasticsearch' | 'kibana',
-          productVersion: stackVersion,
-          failureReason: message,
-          inferenceId: effectiveInferenceId,
-        });
+      if (!replacing && previousStatus === 'installed') {
+        this.log.warn(
+          `Keeping the installed OpenAPI Spec content: the new version could not be prepared`
+        );
+      } else {
+        // Mark both products as failed
+        for (const productName of [
+          DocumentationProduct.elasticsearch,
+          DocumentationProduct.kibana,
+        ]) {
+          await this.productDocClient.setOpenapiSpecInstallationFailed({
+            productName: productName as 'elasticsearch' | 'kibana',
+            productVersion: stackVersion,
+            failureReason: message,
+            inferenceId: effectiveInferenceId,
+          });
+        }
       }
       throw e;
     } finally {
@@ -1135,6 +1229,37 @@ export class PackageInstaller {
     }
   }
 }
+
+// An item needs (re)installing when its version differs from the selected one, or when the update is
+// forced and nobody else has (re)installed it at that version since the forced update was requested
+const isUpdateNeeded = ({
+  status,
+  version,
+  updatedAt,
+  selectedVersion,
+  forceUpdate,
+  since,
+}: {
+  status: InstallationStatus;
+  version?: string;
+  updatedAt?: string;
+  selectedVersion: string;
+  forceUpdate?: boolean;
+  since?: Date;
+}): boolean => {
+  if (version !== selectedVersion) {
+    return true;
+  }
+  if (!forceUpdate) {
+    return false;
+  }
+  const refreshedSinceRequest =
+    status === 'installed' &&
+    since !== undefined &&
+    updatedAt !== undefined &&
+    new Date(updatedAt).getTime() > since.getTime();
+  return !refreshedSinceRequest;
+};
 
 const selectVersion = (
   currentVersion: string,

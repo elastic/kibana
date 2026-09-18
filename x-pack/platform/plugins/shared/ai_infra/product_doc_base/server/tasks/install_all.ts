@@ -57,12 +57,8 @@ export const registerInstallAllTaskDefinition = ({
               attempts,
               install: (productName) =>
                 packageInstaller.installProduct({ productName, inferenceId }),
-              // `scheduledAt` is the time of the latest install request for this task
               isSuperseded: () =>
-                packageInstaller.wasUninstalledSince({
-                  inferenceId,
-                  since: taskInstance.scheduledAt,
-                }),
+                packageInstaller.wasUninstalledSince({ inferenceId, since: new Date(requestedAt) }),
               metadata: { taskType: INSTALL_ALL_TASK_TYPE, inferenceId },
             });
           },
