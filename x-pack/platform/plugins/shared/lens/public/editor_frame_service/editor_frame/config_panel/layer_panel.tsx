@@ -40,6 +40,7 @@ import { useObservable } from '@kbn/use-observable';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
+import { useHasMultipleVisibleLayers } from './use_has_multiple_visible_layers';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import {
   onActiveDataChange,
@@ -345,9 +346,12 @@ export function LayerPanel(props: LayerPanelProps) {
     ? (layerDatasourceState as TextBasedPrivateState | undefined)
     : undefined;
   const layerQuery = textBasedDatasourceState?.layers?.[layerId]?.query;
-  const usesLayerScopedQuery =
-    textBasedDatasourceState !== undefined &&
-    activeVisualization.getLayerIds(visualizationState).length > 1;
+  const hasMultipleVisibleLayers = useHasMultipleVisibleLayers({
+    activeVisualization,
+    visualizationState,
+    framePublicAPI: props.framePublicAPI,
+  });
+  const usesLayerScopedQuery = textBasedDatasourceState !== undefined && hasMultipleVisibleLayers;
   const shouldRenderESQLEditor =
     isTextBasedLanguage && canEditTextBasedQuery && isTextBasedAttributes(editorProps.attributes);
 

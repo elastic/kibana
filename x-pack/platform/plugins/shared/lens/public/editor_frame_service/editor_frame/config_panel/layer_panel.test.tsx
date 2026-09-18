@@ -39,11 +39,16 @@ import { ESQLEditor } from './esql_editor';
 import type { LayerPanelProps } from './types';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 import { onActiveDataChange } from '../../../state_management';
+import { useHasMultipleVisibleLayers } from './use_has_multiple_visible_layers';
 
 jest.mock('../../../id_generator');
 
 jest.mock('./esql_editor', () => ({
   ESQLEditor: jest.fn(() => <div data-test-subj="mockESQLEditor" />),
+}));
+
+jest.mock('./use_has_multiple_visible_layers', () => ({
+  useHasMultipleVisibleLayers: jest.fn(),
 }));
 
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
@@ -177,6 +182,12 @@ describe('LayerPanel', () => {
   beforeEach(() => {
     mockVisualization = createMockVisualization(faker.string.alphanumeric());
     mockVisualization.getLayerIds.mockReturnValue(['first']);
+    jest
+      .mocked(useHasMultipleVisibleLayers)
+      .mockImplementation(
+        ({ activeVisualization, visualizationState }) =>
+          (activeVisualization?.getLayerIds(visualizationState).length ?? 0) > 1
+      );
     mockDatasource = createMockDatasource();
     mockTextBasedDatasource = createMockDatasource('textBased', {
       isTextBasedLanguage: jest.fn(() => true),
@@ -1190,6 +1201,46 @@ describe('LayerPanel', () => {
       expect(jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0]).toEqual(
         expect.objectContaining({ onLayerQuerySubmit: expect.any(Function) })
       );
+    });
+
+    it('uses the global query path when the only additional layer is a hidden trendline', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['data', 'trendline']);
+      jest.mocked(useHasMultipleVisibleLayers).mockReturnValue(false);
+      const framePublicAPI = {
+        ...createMockFramePublicAPI(),
+        datasourceLayers: {
+          data: mockTextBasedDatasource.publicAPIMock,
+          trendline: mockTextBasedDatasource.publicAPIMock,
+        },
+      };
+      const textBasedState = {
+        query: esqlQuery,
+        datasourceStates: {
+          textBased: {
+            isLoading: false,
+            state: {
+              layers: {
+                data: { query: esqlQuery },
+                trendline: { query: esqlQuery },
+              },
+            },
+          },
+        },
+      };
+
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'data',
+          isOnlyLayer: false,
+          framePublicAPI,
+          attributes: makeTextBasedAttributes(
+            textBasedState.datasourceStates.textBased.state.layers
+          ),
+        },
+        preloadedState: textBasedState,
+      });
+
+      expect(jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0].onLayerQuerySubmit).toBeUndefined();
     });
 
     it('does not render the editor for a selected static annotation layer', () => {
