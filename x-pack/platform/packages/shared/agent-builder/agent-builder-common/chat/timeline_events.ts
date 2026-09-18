@@ -6,7 +6,7 @@
  */
 
 import type { PromptRequest, PromptResponse } from '../agents/prompts';
-import type { SerializedExecutionError } from '../agents/execution_status';
+import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type {
   AssistantResponse,
@@ -90,6 +90,10 @@ export enum TimelineEventType {
   executionTerminated = 'execution_terminated',
   executionFailed = 'execution_failed',
   executionAborted = 'execution_aborted',
+  // Attachment lifecycle
+  attachmentAdded = 'attachment_added',
+  attachmentUpdated = 'attachment_updated',
+  attachmentDeleted = 'attachment_deleted',
 }
 
 /** Fields the server fills in when an event is accepted; absent on producer input. */
@@ -217,9 +221,27 @@ export type ExecutionTerminatedEvent = BaseTimelineEvent<
   ExecutionTerminatedEventData
 >;
 
+/**
+ * The run summary of an execution that did not complete. Same fields as `ExecutionRunSummary`
+ * minus `steps` (stored as separate `execution_step` events), `state` (an interrupted execution is
+ * never resumed) and `time_to_first_token` (unknown when no answer streamed).
+ *
+ * Invariants: an execution has at most one terminal event (`execution_terminated`,
+ * `execution_failed` or `execution_aborted`), and exactly one whenever the conversation store
+ * accepted the terminal write. An execution with no `execution_terminated` never forms a round
+ * and never answers a prompt.
+ */
+export type ExecutionPartialRunSummary = Pick<
+  ExecutionRunSummary,
+  'time_to_last_token' | 'trace_id' | 'configuration_overrides'
+> & {
+  /** Model usage; absent when the run failed before the model provider was resolved. */
+  model_usage?: RoundModelUsageStats;
+};
+
 /** A run that ended in an error. */
-export interface ExecutionFailedEventData {
-  /** The serialized error. */
+export interface ExecutionFailedEventData extends ExecutionPartialRunSummary {
+  /** The serialized error, identical to what the client received. */
   error: SerializedExecutionError;
 }
 export type ExecutionFailedEvent = BaseTimelineEvent<
@@ -228,14 +250,94 @@ export type ExecutionFailedEvent = BaseTimelineEvent<
 >;
 
 /** A run that was stopped before it completed. */
-export interface ExecutionAbortedEventData {
-  /** Who aborted the run, when known. */
-  aborted_by?: EventActor;
-}
+export type ExecutionAbortedEventData = ExecutionPartialRunSummary & {
+  /** Where the abort came from and who asked for it, when known. */
+  aborted_by?: ExecutionAbortReason;
+};
 export type ExecutionAbortedEvent = BaseTimelineEvent<
   TimelineEventType.executionAborted,
   ExecutionAbortedEventData
 >;
+
+/** What triggered an attachment mutation. */
+export type AttachmentEventSource =
+  | 'workflow'
+  | 'http_api'
+  | 'server_api'
+  | 'chat_input'
+  | 'execution';
+
+/** An attachment was created in the conversation. */
+export interface AttachmentAddedEventData {
+  attachment_id: string;
+  attachment_type: string;
+  /** Always 1 today; kept so consumers never special-case the first version. */
+  current_version: number;
+  /** When true, the UI should render the attachment automatically on open. */
+  render_inline: boolean;
+  source: AttachmentEventSource;
+}
+export type AttachmentAddedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentAdded,
+  AttachmentAddedEventData
+>;
+
+/** An attachment received a new content version. */
+export interface AttachmentUpdatedEventData {
+  attachment_id: string;
+  attachment_type: string;
+  previous_version: number;
+  current_version: number;
+  render_inline: boolean;
+  source: AttachmentEventSource;
+}
+export type AttachmentUpdatedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentUpdated,
+  AttachmentUpdatedEventData
+>;
+
+/** An attachment was soft- or hard-deleted. */
+export interface AttachmentDeletedEventData {
+  attachment_id: string;
+  attachment_type: string;
+  hard_delete: boolean;
+  source: AttachmentEventSource;
+}
+export type AttachmentDeletedEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentDeleted,
+  AttachmentDeletedEventData
+>;
+
+export type AttachmentTimelineEvent =
+  | AttachmentAddedEvent
+  | AttachmentUpdatedEvent
+  | AttachmentDeletedEvent;
+
+const ATTACHMENT_EVENT_TYPES: ReadonlySet<string> = new Set([
+  TimelineEventType.attachmentAdded,
+  TimelineEventType.attachmentUpdated,
+  TimelineEventType.attachmentDeleted,
+]);
+
+export const isAttachmentEvent = (event: { type: string }): event is AttachmentTimelineEvent =>
+  ATTACHMENT_EVENT_TYPES.has(event.type);
+
+const EXECUTION_TERMINAL_EVENT_TYPES: ReadonlySet<string> = new Set([
+  TimelineEventType.executionTerminated,
+  TimelineEventType.executionFailed,
+  TimelineEventType.executionAborted,
+]);
+
+/** The three events that end an execution: with an outcome, with an error, or by cancellation. */
+export type ExecutionTerminalEvent =
+  | ExecutionTerminatedEvent
+  | ExecutionFailedEvent
+  | ExecutionAbortedEvent;
+
+/** True for any of the three events that end an execution. */
+export const isExecutionTerminalEvent = (event: {
+  type: string;
+}): event is ExecutionTerminalEvent => EXECUTION_TERMINAL_EVENT_TYPES.has(event.type);
 
 /** The discriminated union of all stored timeline events. */
 export type TimelineEvent =
@@ -245,7 +347,10 @@ export type TimelineEvent =
   | ExecutionStepEvent
   | ExecutionTerminatedEvent
   | ExecutionFailedEvent
-  | ExecutionAbortedEvent;
+  | ExecutionAbortedEvent
+  | AttachmentAddedEvent
+  | AttachmentUpdatedEvent
+  | AttachmentDeletedEvent;
 
 /** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
 export type TimelineEventInput =
@@ -255,7 +360,10 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData>
   | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
-  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>;
+  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentAdded, AttachmentAddedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentUpdated, AttachmentUpdatedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>;
 
 /**
  * The run lock held on a conversation while an execution is active.
@@ -272,6 +380,45 @@ export interface ActiveExecution {
  * indistinguishable from round-derived ones and get silently dropped or overwritten.
  */
 export const CONVERSATION_EVENT_ID_DELIMITER = '::' as const;
+
+/**
+ * Suffixes used to build the ids of every round-derived timeline event.
+ */
+export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
+  userMessage: '::user_message',
+  executionStarted: '::execution_started',
+  executionTerminated: '::execution_terminated',
+  executionFailed: '::execution_failed',
+  executionAborted: '::execution_aborted',
+  execution: '::execution',
+  stepPrefix: '::step::',
+  promptResponse: '::prompt_response',
+} as const;
+
+/** ID for a step event. */
+export const roundStepEventId = (roundId: string, sequence: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
+
+/** Builds an execution id for a resume appended to a round without rewriting its initial run. */
+export const resumeExecutionId = (roundId: string, executionIndex: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}::${executionIndex}`;
+
+/** Parses initial and resume execution ids, returning undefined for unrelated ids. */
+export const parseExecutionId = (id: string): { roundId: string; index: number } | undefined => {
+  const match = id.match(/^(.*)::execution(?:::(\d+))?$/);
+  if (!match) {
+    return undefined;
+  }
+  return { roundId: match[1], index: Number(match[2] ?? 0) };
+};
+
+/** The `execution_terminated` event id for an execution index (0 = the initial run). */
+export const executionTerminatedEventId = (roundId: string, executionIndex: number): string =>
+  executionIndex === 0
+    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated}`
+    : `${resumeExecutionId(roundId, executionIndex)}${
+        ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated
+      }`;
 
 /**
  * Type names that are not covered by a `TimelineEventType` member but would still

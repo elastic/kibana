@@ -2822,6 +2822,10 @@ paths:
                   description: Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
                   maxLength: 256
@@ -3107,6 +3111,10 @@ paths:
                   description: Optional new description for the attachment.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
               required:
                 - data
       responses:
@@ -3408,7 +3416,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview; added in 9.5.0
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
@@ -3889,7 +3898,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview; added in 9.5.0
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
@@ -8643,8 +8653,9 @@ paths:
           name: page
           required: false
           schema:
+            maximum: 10000
             minimum: 1
-            type: number
+            type: integer
         - description: The number of action policies to return per page. Defaults to 20.
           in: query
           name: per_page
@@ -8652,7 +8663,7 @@ paths:
           schema:
             maximum: 100
             minimum: 1
-            type: number
+            type: integer
         - description: A text string to search across action policy fields.
           in: query
           name: search
@@ -8661,17 +8672,6 @@ paths:
             maxLength: 256
             minLength: 1
             type: string
-        - description: Filter by tags. Accepts a single string or an array.
-          in: query
-          name: tags
-          required: false
-          schema:
-            items:
-              maxLength: 128
-              minLength: 1
-              type: string
-            maxItems: 10
-            type: array
         - description: Filter by enabled status. Accepts the strings true or false.
           in: query
           name: enabled
@@ -8723,11 +8723,10 @@ paths:
                         grouping_mode: per_episode
                         id: action-policy-1
                         matcher:
-                          expression: 'rule.tags: "production"'
+                          tags:
+                            - production
                         name: Notify on production alerts
                         snoozed_until: null
-                        tags:
-                          - production
                         throttle:
                           interval: null
                           strategy: on_status_change
@@ -8850,10 +8849,9 @@ paths:
                       type: workflow
                   grouping_mode: per_episode
                   matcher:
-                    expression: 'rule.tags: "production"'
+                    tags:
+                      - production
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -8880,11 +8878,10 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9732,7 +9729,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to delete. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9848,7 +9845,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: The ID of the action policy to get. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9878,11 +9875,10 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10004,7 +10000,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10046,11 +10042,10 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts (updated)
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10188,7 +10183,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the action policy.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10209,10 +10204,9 @@ paths:
                       type: workflow
                   grouping_mode: per_episode
                   matcher:
-                    expression: 'rule.tags: "production"'
+                    tags:
+                      - production
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -10239,11 +10233,10 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10274,11 +10267,10 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10417,7 +10409,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to disable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10447,11 +10439,10 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10589,7 +10580,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to enable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10619,11 +10610,10 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10761,7 +10751,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to snooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10801,11 +10791,10 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10943,7 +10932,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to unsnooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10973,11 +10962,10 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -11115,7 +11103,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy of the API key to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -13148,13 +13136,14 @@ paths:
         [Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: get-alerting-v2-rules
       parameters:
-        - description: The page number to return. Defaults to 1.
+        - description: The page number to return. Defaults to 1. `page * per_page` cannot exceed 10000.
           in: query
           name: page
           required: false
           schema:
+            maximum: 10000
             minimum: 1
-            type: number
+            type: integer
         - description: The number of rules to return per page. Defaults to 20.
           in: query
           name: per_page
@@ -13162,7 +13151,7 @@ paths:
           schema:
             maximum: 1000
             minimum: 1
-            type: number
+            type: integer
         - description: The filter to apply to the rules.
           in: query
           name: filter
@@ -84780,6 +84769,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Include execution input data.
           in: query
@@ -84791,6 +84781,13 @@ paths:
         - description: Include execution output data.
           in: query
           name: includeOutput
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: When `true`, omit the embedded `stepExecutions` array. Defaults to `false`. When this is `false`, the embed is capped at 5000 steps.
+          in: query
+          name: omitStepExecutions
           required: false
           schema:
             default: false
@@ -84903,6 +84900,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -84941,6 +84939,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -85004,6 +85003,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter logs by a specific step execution ID.
           in: query
@@ -85118,6 +85118,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -85207,12 +85208,14 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Step execution ID.
           in: path
           name: stepExecutionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -85286,6 +85289,86 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/workflows/executions/{executionId}/steps:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}. If a page exceeds Kibana's response buffer, the handler still returns 200 with `results: []` and the page `total`.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
+      operationId: get-workflows-executions-executionid-steps
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: Number of step executions per page.
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 1000
+            maximum: 5000
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getExecutionStepsResponseExample:
+                  description: Example response returning a page of step executions for a workflow run
+                  value:
+                    page: 1
+                    results:
+                      - executionTimeMs: 1000
+                        finishedAt: '2025-11-20T12:00:02.000Z'
+                        globalExecutionIndex: 0
+                        id: step-exec-001
+                        isTestRun: false
+                        scopeStack: []
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:01.000Z'
+                        status: completed
+                        stepExecutionIndex: 0
+                        stepId: hello_world_step
+                        stepType: console
+                        topologicalIndex: 0
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        workflowRunId: exec-a1b2c3d4-e5f6-7890
+                    size: 1000
+                    total: 1
+          description: "Indicates a successful response. If the page exceeds Kibana's response buffer, the handler still returns 200 with results: [] and the page total."
+      summary: Get execution step executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps?page=1&size=1000" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/steps?page=1&size=1000
       x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -85614,6 +85697,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -86298,6 +86382,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.
           in: query
@@ -86350,6 +86435,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -86438,6 +86524,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -86554,6 +86641,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -86644,6 +86732,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -86725,6 +86814,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter by execution status.
           in: query
@@ -86940,6 +87030,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -86978,6 +87069,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter by step ID.
           in: query
@@ -97886,8 +97978,17 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
+            maxLength: 500
+            type: string
+          maxItems: 3
+          type: array
         fips_agents:
           type: number
         fleet_server_host_id:
@@ -98373,12 +98474,12 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. `matcher.tags` is separate from the policy's own `tags` field, which is used to organize and filter action policies. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 256
                 minLength: 1
@@ -98393,12 +98494,6 @@ components:
           description: The ISO datetime until which the policy is snoozed, or null if not snoozed.
           nullable: true
           type: string
-        tags:
-          description: Tags associated with the action policy.
-          items:
-            type: string
-          nullable: true
-          type: array
         throttle:
           additionalProperties: false
           description: The throttle configuration for notifications.
@@ -98407,6 +98502,7 @@ components:
           properties:
             interval:
               description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+              maxLength: 32
               nullable: true
               type: string
             strategy:
@@ -98448,7 +98544,6 @@ components:
         - destinations
         - matcher
         - group_by
-        - tags
         - grouping_mode
         - throttle
         - snoozed_until
@@ -98463,6 +98558,7 @@ components:
       properties:
         interval:
           description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+          maxLength: 32
           nullable: true
           type: string
         strategy:
@@ -98697,6 +98793,7 @@ components:
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
               description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -98711,6 +98808,7 @@ components:
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
@@ -99122,12 +99220,12 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. `matcher.tags` is separate from the policy's own `tags` field, which is used to organize and filter action policies. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 256
                 minLength: 1
@@ -99140,14 +99238,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          type: array
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
           description: The throttle configuration for notifications.
@@ -99270,6 +99360,7 @@ components:
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
               description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -99284,6 +99375,7 @@ components:
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
@@ -99760,6 +99852,7 @@ components:
               type: string
             pending_timeframe:
               description: Time window used with `pending_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
             recovering_count:
               description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -99774,6 +99867,7 @@ components:
               type: string
             recovering_timeframe:
               description: Time window used with `recovering_count`, for example `5m` or `15m`.
+              maxLength: 32
               type: string
         time_field:
           default: '@timestamp'
@@ -99847,9 +99941,11 @@ components:
       properties:
         every:
           description: Execution interval, e.g. 1m, 5m, 1h.
+          maxLength: 32
           type: string
         lookback:
           description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+          maxLength: 32
           type: string
       required:
         - every
@@ -99948,12 +100044,12 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. `matcher.tags` is separate from the policy's own `tags` field, which is used to organize and filter action policies. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 256
                 minLength: 1
@@ -99966,15 +100062,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          nullable: true
-          type: array
         throttle:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
@@ -100077,9 +100164,11 @@ components:
           properties:
             every:
               description: Execution interval, e.g. 1m, 5m, 1h.
+              maxLength: 32
               type: string
             lookback:
               description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+              maxLength: 32
               type: string
         state_transition:
           anyOf:
@@ -100100,6 +100189,7 @@ components:
                   type: string
                 pending_timeframe:
                   description: Time window used with `pending_count`, for example `5m` or `15m`.
+                  maxLength: 32
                   type: string
                 recovering_count:
                   description: Number of consecutive recoveries required before the alert becomes `inactive`.
@@ -100114,6 +100204,7 @@ components:
                   type: string
                 recovering_timeframe:
                   description: Time window used with `recovering_count`, for example `5m` or `15m`.
+                  maxLength: 32
                   type: string
             - nullable: true
           nullable: true
@@ -104935,6 +105026,11 @@ components:
                               type: string
                       required:
                         - key
+                sources:
+                  items:
+                    type: string
+                  maxItems: 3
+                  type: array
                 sourceURI:
                   type: string
                 ssl:
@@ -108498,6 +108594,12 @@ components:
                                 - direction
                             maxItems: 100
                             type: array
+                          type:
+                            default: default
+                            description: Identifies the type of profile settings saved with the tab. The `default` value indicates that no profile settings are included.
+                            enum:
+                              - default
+                            type: string
                           view_mode:
                             anyOf:
                               - enum:
@@ -108618,11 +108720,172 @@ components:
                                 - direction
                             maxItems: 100
                             type: array
+                          type:
+                            default: default
+                            description: Identifies the type of profile settings saved with the tab. The `default` value indicates that no profile settings are included.
+                            enum:
+                              - default
+                            type: string
                           wrap_lines:
                             description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
                             type: boolean
                         required:
                           - data_source
+                      - additionalProperties: false
+                        description: An ES|QL tab with saved metrics grid settings. The dashboard panel stores these settings and restores them in Discover. The panel does not render the metrics grid.
+                        properties:
+                          column_order:
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
+                            items:
+                              description: Field name of a column in display order.
+                              type: string
+                            maxItems: 100
+                            type: array
+                          column_settings:
+                            additionalProperties:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                width:
+                                  description: Optional width of the column in pixels.
+                                  minimum: 0
+                                  type: number
+                            description: Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.
+                            type: object
+                          counter_aggregation:
+                            description: Aggregation applied to counter metric fields.
+                            enum:
+                              - avg
+                              - sum
+                              - min
+                              - max
+                            type: string
+                          data_source:
+                            $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
+                          default_rendered_nodes:
+                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
+                            maximum: 200
+                            minimum: 10
+                            type: number
+                          density:
+                            anyOf:
+                              - enum:
+                                  - compact
+                                type: string
+                              - enum:
+                                  - expanded
+                                type: string
+                              - enum:
+                                  - normal
+                                type: string
+                            description: 'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
+                          dimensions:
+                            description: Fields used to group metrics in the metrics grid.
+                            items:
+                              maxLength: 1000
+                              type: string
+                            maxItems: 5
+                            type: array
+                          documents_display_mode:
+                            anyOf:
+                              - enum:
+                                  - table
+                                type: string
+                              - enum:
+                                  - json
+                                type: string
+                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
+                          gauge_aggregation:
+                            description: Aggregation applied to gauge metric fields.
+                            enum:
+                              - avg
+                              - sum
+                              - min
+                              - max
+                            type: string
+                          header_row_height:
+                            anyOf:
+                              - maximum: 5
+                                minimum: 1
+                                type: number
+                              - enum:
+                                  - auto
+                                type: string
+                            description: 'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
+                          hide_nulls:
+                            description: 'Discover display option: controls whether fields with null values are hidden in JSON document view.'
+                            type: boolean
+                          histogram_percentile:
+                            description: Percentile displayed for histogram metric fields.
+                            enum:
+                              - p50
+                              - p75
+                              - p90
+                              - p95
+                              - p99
+                            type: string
+                          row_height:
+                            anyOf:
+                              - maximum: 20
+                                minimum: 1
+                                type: number
+                              - enum:
+                                  - auto
+                                type: string
+                            description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
+                          rows_per_page:
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            maximum: 10000
+                            minimum: 1
+                            type: number
+                          sample_size:
+                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
+                            maximum: 10000
+                            minimum: 10
+                            type: number
+                          search_term:
+                            description: Search term used to filter metrics in the metrics grid.
+                            maxLength: 1000
+                            type: string
+                          sort:
+                            default: []
+                            description: Sort configuration for the data table (field and direction).
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                direction:
+                                  description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  enum:
+                                    - asc
+                                    - desc
+                                  type: string
+                                name:
+                                  description: The name of the field to sort by.
+                                  type: string
+                              required:
+                                - name
+                                - direction
+                            maxItems: 100
+                            type: array
+                          type:
+                            description: A tab with saved metrics grid settings. Requires an ES|QL data source. These settings are used only when the query supports the metrics experience.
+                            enum:
+                              - metrics
+                            type: string
+                          wrap_lines:
+                            description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
+                            type: boolean
+                        required:
+                          - data_source
+                          - type
+                          - dimensions
+                          - search_term
+                          - counter_aggregation
+                          - gauge_aggregation
+                          - histogram_percentile
+                        title: Metrics tab
+                        type: object
                   maxItems: 1
                   minItems: 1
                   type: array
@@ -114846,8 +115109,17 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
+            maxLength: 500
+            type: string
+          maxItems: 3
+          type: array
         fleet_server_host_id:
           nullable: true
           type: string
@@ -122896,8 +123168,17 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
+            maxLength: 500
+            type: string
+          maxItems: 3
+          type: array
         fleet_server_host_id:
           nullable: true
           type: string

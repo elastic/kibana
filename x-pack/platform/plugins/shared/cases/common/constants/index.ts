@@ -177,6 +177,7 @@ export const MAX_TAGS_FILTER_LENGTH = 100 as const;
 export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
 export const MAX_REPORTERS_FILTER_LENGTH = 100 as const;
 export const MAX_USER_ACTION_AUTHORS_FILTER_LENGTH = 100 as const;
+export const MAX_USER_ACTION_SOURCES_FILTER_LENGTH = 10 as const;
 export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
 
 /**
@@ -394,6 +395,7 @@ export const GET_CONNECTORS_CONFIGURE_API_TAG = 'casesGetConnectorsConfigure';
 export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
 export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
+export const NO_ACTION_SOURCE_FILTERING_KEYWORD = 'none';
 export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
 export const MAX_OBSERVABLES_PER_CASE = 50;
 
