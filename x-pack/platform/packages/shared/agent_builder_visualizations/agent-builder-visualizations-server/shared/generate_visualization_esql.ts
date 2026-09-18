@@ -15,7 +15,7 @@ import { buildEsqlAdditionalInstructions } from './esql_instructions';
 import { validateQueryTarget } from './validate_query_target';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */
-export interface GeneratedVisualizationEsql {
+interface GeneratedVisualizationEsql {
   /** The generated query. Absent when generation failed. */
   query?: string;
   /**
@@ -28,7 +28,7 @@ export interface GeneratedVisualizationEsql {
   error?: string;
 }
 
-export interface GenerateVisualizationEsqlParams {
+interface GenerateVisualizationEsqlParams {
   nlQuery: string;
   index: string | undefined;
   /**
@@ -61,10 +61,7 @@ export interface GenerateVisualizationEsqlParams {
  * there are no existing queries. Shared by the Lens and Vega engines so edits
  * are seeded the same way.
  */
-export const buildEsqlEditContext = (
-  nlQuery: string,
-  existingQueries: readonly string[] = []
-): string => {
+const buildEsqlEditContext = (nlQuery: string, existingQueries: readonly string[] = []): string => {
   if (existingQueries.length === 0) {
     return nlQuery;
   }
