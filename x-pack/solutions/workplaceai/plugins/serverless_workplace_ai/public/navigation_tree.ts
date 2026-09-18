@@ -26,7 +26,7 @@ export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition 
         link: 'agent_builder',
       },
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine',
       },
       ...getWorkflowsNavPanel(core),

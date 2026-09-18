@@ -70,6 +70,7 @@ export type {
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';
 
@@ -145,11 +146,9 @@ export {
   WATCHES_SEED,
   WORKERS_SEED,
   createMockInvestigation,
-  createMockProposal,
   getMockInvestigationById,
   getMockInvestigationsByWatchId,
-  getMockProposalById,
-  getMockProposalsByInvestigationId,
+  getMockProposalsByConversationId,
 } from './impl/samples';
 export {
   ANALYSIS_WINDOW_DAYS_DEFAULT,
