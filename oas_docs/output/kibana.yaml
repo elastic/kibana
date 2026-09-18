@@ -53750,7 +53750,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the number of agent policies and active agents using an output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.
+        Get the number of agent policies and active agents using an output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read AND fleet-agent-policies-read AND fleet-agents-read.
       operationId: get-fleet-outputs-outputid-agent-policy-count
       parameters:
         - description: The ID of the output
