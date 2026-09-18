@@ -23,6 +23,5 @@ export interface ResourceDefinition {
   version: number;
   mappings: MappingsDefinition;
   lifecycle: IndicesDataStreamLifecycleWithRollover;
-  /** Installed before the index template and wired as `index.final_pipeline`. */
   ingestPipeline: IngestPipelineDefinition;
 }

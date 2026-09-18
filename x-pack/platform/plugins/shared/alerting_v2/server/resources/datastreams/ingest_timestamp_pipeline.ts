@@ -10,7 +10,7 @@ import type { IngestPipelineDefinition } from './types';
 export const INGEST_TIMESTAMP_PIPELINE_VERSION = 1;
 
 /**
- * Stamps `@timestamp` with the moment Elasticsearch indexes the document, so
+ * Sets `@timestamp` with the moment Elasticsearch indexes the document, so
  * producers do not have to and watermark consumers see a timestamp bounded by the
  * refresh interval. Documents that already carry `@timestamp` keep it.
  */
