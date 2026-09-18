@@ -53,10 +53,12 @@ export const getEndpointStatusTool = (
           return insufficientPrivilegesResult('canReadSecuritySolution');
         }
 
+        const scoped = await endpointAppContextService.asScoped(request);
+
         // Resolve hostname -> endpoint id + EDR vendor. The service handles
         // hostname escaping, space validation, and multi-vendor `agentType`
         // resolution in one place so every host-lookup tool behaves the same.
-        const lookup = createEndpointLookupService(endpointAppContextService, spaceId);
+        const lookup = createEndpointLookupService(endpointAppContextService, spaceId, scoped);
         const resolved = await lookup.resolveByHostName(hostName);
 
         if (resolved.kind === 'not_found') {
@@ -95,13 +97,18 @@ export const getEndpointStatusTool = (
 
         const { agentId } = resolved.endpoint;
 
-        // Get detailed status from endpoint metadata service
+        // Get detailed status from endpoint metadata service. `scoped` (built
+        // above for the lookup) is threaded through so this read also fans out
+        // to linked projects under CPS.
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
-        const hostInfo = await metadataService.getHostMetadataList({
-          page: 0,
-          pageSize: 1,
-          kuery: `agent.id: ${escapeKuery(agentId)}`,
-        });
+        const hostInfo = await metadataService.getHostMetadataList(
+          {
+            page: 0,
+            pageSize: 1,
+            kuery: `agent.id: ${escapeKuery(agentId)}`,
+          },
+          scoped
+        );
 
         if (!hostInfo.data?.length) {
           // Agent exists in Fleet but no metadata document was found (index

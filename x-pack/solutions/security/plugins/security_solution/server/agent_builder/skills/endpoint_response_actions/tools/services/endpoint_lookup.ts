@@ -7,7 +7,11 @@
 
 import { escapeKuery } from '@kbn/es-query';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { HostStatus } from '../../../../../../common/endpoint/types';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../../../endpoint/endpoint_app_context_services';
 import { NotFoundError } from '../../../../../endpoint/errors';
 import { resolveAgentTypeFromPackages } from '../types';
 
@@ -57,12 +61,84 @@ export interface EndpointLookupService {
  *   rather than trusting Fleet's default sort to always put the live agent
  *   first — otherwise isolate/unisolate/status tools can silently act on a
  *   dead agent while reporting success.
+ * - Fleet itself is an origin-only service. Under cross-project search a host
+ *   enrolled in a linked project is absent from it, yet the Endpoint UI (which
+ *   reads the united metadata index with request-scoped services) shows it. So
+ *   when Fleet yields nothing we retry against the scoped metadata index, which
+ *   is the same fan-out the metadata route uses.
  */
 export function createEndpointLookupService(
   endpointAppContextService: EndpointAppContextService,
-  spaceId: string
+  spaceId: string,
+  scoped?: ScopedEndpointServices
 ): EndpointLookupService {
   const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
+
+  /**
+   * Fallback resolution through the request-scoped metadata index.
+   *
+   * Used only when Fleet (origin-only) has no record for the hostname, which
+   * under CPS means the host may belong to a linked project. Matching is
+   * done on `host.hostname` against the united index the Endpoint UI reads.
+   * Linked-project agents are absent from origin Fleet, so the integration
+   * package list is unavailable and `agentType` resolves to the `endpoint`
+   * default rather than being guessed from packages.
+   */
+  const resolveFromScopedMetadata = async (
+    hostName: string,
+    scopedServices: ScopedEndpointServices
+  ) => {
+    if (!scopedServices.isCpsRead()) {
+      return { kind: 'not_found' as const };
+    }
+
+    const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
+    const { data } = await metadataService.getHostMetadataList(
+      {
+        page: 0,
+        pageSize: 10,
+        kuery: `united.endpoint.host.hostname: ${escapeKuery(hostName)}`,
+      },
+      scopedServices
+    );
+
+    const candidates = (data ?? [])
+      .map((entry) => ({
+        agentId: entry.metadata?.agent?.id,
+        status: entry.host_status,
+      }))
+      .filter((candidate): candidate is { agentId: string; status: HostStatus } =>
+        Boolean(candidate.agentId)
+      );
+
+    if (!candidates.length) {
+      return { kind: 'not_found' as const };
+    }
+
+    // Metadata `host_status` is the HostStatus enum (`healthy`), not Fleet's
+    // agent-level `online`.
+    const live = candidates.filter((candidate) => candidate.status === HostStatus.HEALTHY);
+    if (live.length > 1) {
+      return {
+        kind: 'ambiguous' as const,
+        candidates: live.map((candidate) => ({
+          agentId: candidate.agentId,
+          status: candidate.status,
+        })),
+      };
+    }
+
+    const chosen = live[0] ?? candidates[0];
+
+    return {
+      kind: 'found' as const,
+      endpoint: {
+        agentId: chosen.agentId,
+        agentType: resolveAgentTypeFromPackages([]),
+        packages: [],
+      },
+    };
+  };
 
   return {
     async resolveByHostName(hostName: string): Promise<EndpointLookupResult> {
@@ -74,7 +150,9 @@ export function createEndpointLookupService(
       });
 
       if (!agents?.agents?.length) {
-        return { kind: 'not_found' };
+        // Fleet is origin-only. Under CPS the host may live in a linked
+        // project, where only the request-scoped metadata index can see it.
+        return scoped ? resolveFromScopedMetadata(hostName, scoped) : { kind: 'not_found' };
       }
 
       // Drop agents this space cannot see BEFORE deciding ambiguity, otherwise

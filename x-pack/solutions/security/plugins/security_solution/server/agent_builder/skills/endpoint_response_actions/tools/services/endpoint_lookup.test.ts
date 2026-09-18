@@ -8,6 +8,7 @@
 import { createEndpointLookupService } from './endpoint_lookup';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { NotFoundError } from '../../../../../endpoint/errors';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 
 describe('createEndpointLookupService', () => {
   const spaceId = 'default';
@@ -15,6 +16,8 @@ describe('createEndpointLookupService', () => {
   const buildService = (overrides?: {
     listAgents?: jest.Mock;
     ensureInCurrentSpace?: jest.Mock;
+    scoped?: { isCpsRead: () => boolean };
+    getHostMetadataList?: jest.Mock;
   }) => {
     const listAgents =
       overrides?.listAgents ??
@@ -23,18 +26,25 @@ describe('createEndpointLookupService', () => {
       });
     const ensureInCurrentSpace =
       overrides?.ensureInCurrentSpace ?? jest.fn().mockResolvedValue(undefined);
+    const getHostMetadataList = overrides?.getHostMetadataList ?? jest.fn();
 
     const endpointAppContextService = {
       getInternalFleetServices: jest.fn(() => ({
         agent: { listAgents },
         ensureInCurrentSpace,
       })),
+      getEndpointMetadataService: jest.fn(() => ({ getHostMetadataList })),
     } as unknown as EndpointAppContextService;
 
     return {
-      lookup: createEndpointLookupService(endpointAppContextService, spaceId),
+      lookup: createEndpointLookupService(
+        endpointAppContextService,
+        spaceId,
+        overrides?.scoped as never
+      ),
       listAgents,
       ensureInCurrentSpace,
+      getHostMetadataList,
     };
   };
 
@@ -275,5 +285,82 @@ describe('createEndpointLookupService', () => {
 
     expect(result.kind).toBe('found');
     expect(result).toHaveProperty('endpoint.agentId', 'visible-live');
+  });
+
+  describe('CPS fallback', () => {
+    it('falls back to the scoped metadata index when Fleet has no match', async () => {
+      // Fleet is origin-only. Under CPS the host may live in a linked project,
+      // where only the request-scoped metadata read can see it.
+      const { lookup, getHostMetadataList } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [{ metadata: { agent: { id: 'linked-agent' } }, host_status: HostStatus.HEALTHY }],
+          total: 1,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('linked-host');
+
+      expect(result.kind).toBe('found');
+      expect(result).toHaveProperty('endpoint.agentId', 'linked-agent');
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: 'united.endpoint.host.hostname: linked-host' }),
+        expect.objectContaining({ isCpsRead: expect.any(Function) })
+      );
+    });
+
+    it('reports ambiguity when two live linked-project agents share the hostname', async () => {
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            { metadata: { agent: { id: 'linked-a' } }, host_status: HostStatus.HEALTHY },
+            { metadata: { agent: { id: 'linked-b' } }, host_status: HostStatus.HEALTHY },
+          ],
+          total: 2,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('linked-host');
+
+      expect(result.kind).toBe('ambiguous');
+      expect(result).toHaveProperty('candidates', [
+        { agentId: 'linked-a', status: HostStatus.HEALTHY },
+        { agentId: 'linked-b', status: HostStatus.HEALTHY },
+      ]);
+    });
+
+    it('stays not_found when the fallback runs but finds nothing', async () => {
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      });
+
+      expect(await lookup.resolveByHostName('missing-host')).toEqual({ kind: 'not_found' });
+    });
+
+    it('does not consult the metadata index when CPS is inactive', async () => {
+      const { lookup, getHostMetadataList } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+        scoped: { isCpsRead: () => false },
+        getHostMetadataList: jest.fn(),
+      });
+
+      expect(await lookup.resolveByHostName('missing-host')).toEqual({ kind: 'not_found' });
+      expect(getHostMetadataList).not.toHaveBeenCalled();
+    });
+
+    it('does not consult the metadata index when no scoped services were supplied', async () => {
+      const { lookup, getHostMetadataList } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+        getHostMetadataList: jest.fn(),
+      });
+
+      expect(await lookup.resolveByHostName('missing-host')).toEqual({ kind: 'not_found' });
+      expect(getHostMetadataList).not.toHaveBeenCalled();
+    });
   });
 });

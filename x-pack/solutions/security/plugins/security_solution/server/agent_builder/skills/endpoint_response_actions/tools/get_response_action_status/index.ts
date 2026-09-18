@@ -14,7 +14,11 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { NotFoundError } from '../../../../../endpoint/errors';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
-import { insufficientPrivilegesResult, responseActionErrorResult } from '../types';
+import {
+  insufficientPrivilegesResult,
+  responseActionErrorResult,
+  summarizeActionOutputs,
+} from '../types';
 
 const getResponseActionStatusSchema = z.object({
   actionId: z
@@ -52,10 +56,18 @@ export const getResponseActionStatusTool = (
           return insufficientPrivilegesResult('canAccessEndpointActionsLogManagement');
         }
 
+        // Build request-scoped services so these reads fan out across linked
+        // projects under CPS. `getActionDetailsById` documents `scoped` as
+        // required for that: without it the read is origin-only and an action
+        // from a linked project is reported as `action_not_found` even though
+        // Response Actions history shows it.
+        const scoped = await endpointAppContextService.asScoped(request);
+
         const actionDetails = await getActionDetailsById(
           endpointAppContextService,
           spaceId,
-          actionId
+          actionId,
+          { scoped }
         );
 
         return {
@@ -74,7 +86,10 @@ export const getResponseActionStatusTool = (
                 wasCanceled: actionDetails.wasCanceled,
                 hosts: actionDetails.hosts,
                 parameters: actionDetails.parameters,
-                outputs: actionDetails.outputs,
+                // Bounded: raw `outputs` can carry multi-MB command output and
+                // one entry per process. Summarized so a single lookup cannot
+                // exhaust the conversation context.
+                outputs: summarizeActionOutputs(actionDetails.outputs),
                 startedAt: actionDetails.startedAt,
                 completedAt: actionDetails.completedAt,
                 createdBy: actionDetails.createdBy,

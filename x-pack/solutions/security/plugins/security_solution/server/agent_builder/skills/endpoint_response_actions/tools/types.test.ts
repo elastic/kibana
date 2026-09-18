@@ -10,6 +10,10 @@ import {
   insufficientPrivilegesResult,
   resolveAgentTypeFromPackages,
   responseActionErrorResult,
+  summarizeActionOutputs,
+  MAX_OUTPUT_AGENTS,
+  MAX_OUTPUT_ENTRIES_PER_AGENT,
+  MAX_OUTPUT_STRING_LENGTH,
 } from './types';
 import { ToolResultType } from '@kbn/agent-builder-common';
 
@@ -88,5 +92,64 @@ describe('resolveAgentTypeFromPackages', () => {
     expect(resolveAgentTypeFromPackages(['fleet_server', 'sentinel_one', 'system'])).toBe(
       'sentinel_one'
     );
+  });
+});
+
+describe('summarizeActionOutputs', () => {
+  it('returns undefined when there are no outputs', () => {
+    expect(summarizeActionOutputs(undefined)).toBeUndefined();
+    expect(summarizeActionOutputs(null)).toBeUndefined();
+  });
+
+  it('passes small outputs through unchanged', () => {
+    const result = summarizeActionOutputs({
+      'agent-1': { entries: [{ stdout: 'ok' }] },
+    });
+
+    expect(result).toEqual({
+      agents: [{ agentId: 'agent-1', entries: [{ stdout: 'ok' }], totalEntries: 1 }],
+      totalAgents: 1,
+    });
+  });
+
+  it('caps the number of agents and reports how many were dropped', () => {
+    const outputs: Record<string, unknown> = {};
+    for (let i = 0; i < MAX_OUTPUT_AGENTS + 3; i++) {
+      outputs[`agent-${i}`] = { entries: [] };
+    }
+
+    const result = summarizeActionOutputs(outputs)!;
+
+    expect(result.agents).toHaveLength(MAX_OUTPUT_AGENTS);
+    expect(result.totalAgents).toBe(MAX_OUTPUT_AGENTS + 3);
+    expect(result.agentsTruncated).toBe(3);
+  });
+
+  it('caps entries per agent and reports the dropped count', () => {
+    const entries = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT + 5 }, (_, i) => ({ i }));
+
+    const result = summarizeActionOutputs({ 'agent-1': { entries } })!;
+
+    expect(result.agents[0].entries).toHaveLength(MAX_OUTPUT_ENTRIES_PER_AGENT);
+    expect(result.agents[0].totalEntries).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT + 5);
+    expect(result.agents[0].entriesTruncated).toBe(5);
+  });
+
+  it('truncates oversized string fields and names them', () => {
+    const longOutput = 'x'.repeat(MAX_OUTPUT_STRING_LENGTH + 100);
+
+    const result = summarizeActionOutputs({ 'agent-1': { stdout: longOutput } })!;
+
+    const stdout = result.agents[0].stdout as string;
+    expect(stdout.length).toBeLessThan(longOutput.length);
+    expect(stdout).toContain('100 more characters');
+    expect(result.agents[0].truncatedFields).toEqual(['stdout']);
+  });
+
+  it('does not flag fields that are within the bound', () => {
+    const result = summarizeActionOutputs({ 'agent-1': { stdout: 'short' } })!;
+
+    expect(result.agents[0].stdout).toBe('short');
+    expect(result.agents[0].truncatedFields).toBeUndefined();
   });
 });

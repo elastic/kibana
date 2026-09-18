@@ -185,7 +185,10 @@ describe('listEndpointsTool', () => {
         expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
           expect.objectContaining({
             kuery: expect.stringContaining('prod-web'),
-          })
+          }),
+          // Scoped services must be threaded through, otherwise the read is
+          // origin-only under CPS and linked-project hosts disappear.
+          expect.objectContaining({ isCpsRead: expect.any(Function) })
         );
       } finally {
         mockEndpointAppContextService.getEndpointMetadataService =
@@ -273,7 +276,8 @@ describe('listEndpointsTool', () => {
           expect.objectContaining({
             page: 0,
             pageSize: 50,
-          })
+          }),
+          expect.objectContaining({ isCpsRead: expect.any(Function) })
         );
       } finally {
         mockEndpointAppContextService.getEndpointMetadataService =
@@ -296,7 +300,8 @@ describe('listEndpointsTool', () => {
         await tool.handler({ page: 2 }, mockContext);
 
         expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
-          expect.objectContaining({ page: 2, pageSize: 50 })
+          expect.objectContaining({ page: 2, pageSize: 50 }),
+          expect.objectContaining({ isCpsRead: expect.any(Function) })
         );
       } finally {
         mockEndpointAppContextService.getEndpointMetadataService =

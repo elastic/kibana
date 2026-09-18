@@ -130,7 +130,10 @@ describe('getResponseActionStatusTool', () => {
     expect(data.status).toBe('successful');
     expect(data.wasSuccessful).toBe(true);
     expect(data.isCompleted).toBe(true);
-    expect(mockGetActionDetailsById).toHaveBeenCalledWith(service, 'default', ACTION_ID);
+    expect(mockGetActionDetailsById).toHaveBeenCalledWith(service, 'default', ACTION_ID, {
+      // Scoped services are required for this read to fan out under CPS.
+      scoped: expect.objectContaining({ isCpsRead: expect.any(Function) }),
+    });
   });
 
   it('returns ToolResultType.error for unexpected lookup failures', async () => {

@@ -69,14 +69,23 @@ export const listEndpointsTool = (
 
         const page = (params.page as number | undefined) ?? 0;
 
-        const hostInfo = await metadataService.getHostMetadataList({
-          page,
-          // One page of results. The response reports `total`/`hasMore` so the
-          // caller can walk further pages instead of silently losing hosts
-          // beyond the first page.
-          pageSize: LIST_ENDPOINTS_PAGE_SIZE,
-          ...(kuery ? { kuery } : {}),
-        });
+        // Request-scoped services so this read fans out to linked projects
+        // under CPS. Without them the query is origin-only and a deployment
+        // with cross-project search silently reports an origin-only `total`
+        // as the visible inventory.
+        const scoped = await endpointAppContextService.asScoped(request);
+
+        const hostInfo = await metadataService.getHostMetadataList(
+          {
+            page,
+            // One page of results. The response reports `total`/`hasMore` so the
+            // caller can walk further pages instead of silently losing hosts
+            // beyond the first page.
+            pageSize: LIST_ENDPOINTS_PAGE_SIZE,
+            ...(kuery ? { kuery } : {}),
+          },
+          scoped
+        );
 
         const endpoints = (hostInfo.data ?? []).map((entry: HostInfo) => {
           const metadata = entry.metadata;

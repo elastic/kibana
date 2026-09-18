@@ -16,7 +16,7 @@ export const ENDPOINT_RESPONSE_ACTIONS_REFERENCE = `## Error Handling Reference
 |----------|-------------|----------------|
 | No enrolled endpoints | \`list_endpoints\` returns an empty \`endpoints\` list | Report that no response-action-capable endpoints are enrolled |
 | Host not found | \`found: false\`, \`reason: endpoint_not_found\` | Ask analyst to clarify hostname; do not guess |
-| Action not found | \`error: action_not_found\` | Ask analyst to verify the action ID from Response Actions history |
+| Action not found | \`found: false\`, \`reason: action_not_found\` | Ask analyst to verify the action ID from Response Actions history |
 | Action still pending | \`status: pending\` + action ID | Report it is still in flight; offer to re-check with \`get_response_action_status\` |
 | Insufficient privileges | \`error: insufficient_privileges\` | Tell analyst which privilege is missing; suggest Security UI |
 | Unexpected failure | \`error: unknown_error\` | Report the message; do not retry blindly |

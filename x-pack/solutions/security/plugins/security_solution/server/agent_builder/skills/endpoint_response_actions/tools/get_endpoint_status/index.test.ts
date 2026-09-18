@@ -160,11 +160,15 @@ describe('getEndpointStatusTool', () => {
         expect(data.isolated).toBe(true);
         expect(data.lastSeen).toBe('2024-01-01T00:00:00Z');
 
-        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith({
-          page: 0,
-          pageSize: 1,
-          kuery: 'agent.id: agent-123',
-        });
+        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+          {
+            page: 0,
+            pageSize: 1,
+            kuery: 'agent.id: agent-123',
+          },
+          // Scoped services are required for this read to fan out under CPS.
+          expect.objectContaining({ isCpsRead: expect.any(Function) })
+        );
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =

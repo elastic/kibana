@@ -31,6 +31,18 @@ export const DEFAULT_PAGE_SIZE = 20;
 export const LIST_ENDPOINTS_PAGE_SIZE = 50;
 
 /**
+ * Bounds applied to response-action `outputs` before they reach the model.
+ *
+ * `outputs` is unbounded by design: `execute`/`runscript` carry stdout/stderr
+ * that can reach tens of MB, and `get-processes` returns one entry per process.
+ * Forwarding it raw lets a single lookup exhaust the conversation context, so
+ * the tool returns a summary plus a bounded sample and reports what it dropped.
+ */
+export const MAX_OUTPUT_AGENTS = 10;
+export const MAX_OUTPUT_ENTRIES_PER_AGENT = 20;
+export const MAX_OUTPUT_STRING_LENGTH = 2000;
+
+/**
  * Typed error codes for all response-action tools. Keeping a closed union lets
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.
@@ -128,6 +140,86 @@ export function endpointNotFoundData(hostName: string): EndpointNotFoundResult {
     lastSeen: null,
     message: `No endpoint found with hostname '${hostName}'.`,
   };
+}
+
+/**
+ * Bounds an action's raw `outputs` payload into a model-safe summary.
+ *
+ * The raw payload is unbounded (`execute`/`runscript` stdout/stderr, one
+ * `get-processes` entry per process), so it is summarized rather than
+ * forwarded: per-agent entry counts and truncation flags are always reported,
+ * and only a bounded sample of entries is included.
+ */
+export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary | undefined {
+  if (!outputs || typeof outputs !== 'object') {
+    return undefined;
+  }
+
+  const byAgent = outputs as Record<string, unknown>;
+  const agentIds = Object.keys(byAgent);
+  const includedAgentIds = agentIds.slice(0, MAX_OUTPUT_AGENTS);
+
+  const agents: ActionOutputAgentSummary[] = includedAgentIds.map((agentId) => {
+    const raw = byAgent[agentId];
+    const record = (raw ?? {}) as Record<string, unknown>;
+    const entries = Array.isArray(record.entries) ? (record.entries as unknown[]) : undefined;
+    const totalEntries = entries?.length ?? 0;
+    const keptEntries = entries ? entries.slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT) : undefined;
+
+    const truncatedFields: string[] = [];
+    const bounded: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(record)) {
+      if (key !== 'entries') {
+        if (typeof value === 'string' && value.length > MAX_OUTPUT_STRING_LENGTH) {
+          bounded[key] = `${value.slice(0, MAX_OUTPUT_STRING_LENGTH)}… [truncated, ${
+            value.length - MAX_OUTPUT_STRING_LENGTH
+          } more characters]`;
+          truncatedFields.push(key);
+        } else {
+          bounded[key] = value;
+        }
+      }
+    }
+
+    return {
+      agentId,
+      ...bounded,
+      ...(keptEntries
+        ? {
+            entries: keptEntries,
+            totalEntries,
+            ...(totalEntries > keptEntries.length
+              ? { entriesTruncated: totalEntries - keptEntries.length }
+              : {}),
+          }
+        : {}),
+      ...(truncatedFields.length ? { truncatedFields } : {}),
+    };
+  });
+
+  return {
+    agents,
+    totalAgents: agentIds.length,
+    ...(agentIds.length > includedAgentIds.length
+      ? { agentsTruncated: agentIds.length - includedAgentIds.length }
+      : {}),
+  };
+}
+
+export interface ActionOutputAgentSummary {
+  agentId: string;
+  entries?: unknown[];
+  totalEntries?: number;
+  entriesTruncated?: number;
+  truncatedFields?: string[];
+  [key: string]: unknown;
+}
+
+export interface ActionOutputsSummary {
+  agents: ActionOutputAgentSummary[];
+  totalAgents: number;
+  agentsTruncated?: number;
 }
 
 /**
