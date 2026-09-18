@@ -1594,15 +1594,45 @@ class OutputService {
     esClient: ElasticsearchClient,
     output: Output
   ): Promise<{ agentPolicyCount: number; agentCount: number }> {
-    const agentPolicies = await getAgentPoliciesPerOutput(output.id, output.is_default, {
-      fields: ['id'],
-    });
-    const agentPolicyIds = (agentPolicies ?? []).map((p) => p.id);
-    const agentPolicyCount = agentPolicyIds.length;
+    const internalSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const escaped = escapeQuotes(output.id);
+
+    // Include both data_output_id and monitoring_output_id so monitoring-only outputs
+    // are counted correctly. Also cover the is_default fallback (no explicit data_output_id).
+    let agentPoliciesKuery =
+      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escaped}" or ` +
+      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${escaped}"`;
+
+    if (output.is_default) {
+      agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
+    }
+
+    const packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escaped}"`;
+
+    const [directPolicies, packagePolicySOs] = await Promise.all([
+      agentPolicyService.list(internalSoClient, {
+        kuery: agentPoliciesKuery,
+        perPage: SO_SEARCH_LIMIT,
+        spaceId: '*',
+        fields: ['id'],
+      }),
+      packagePolicyService.list(internalSoClient, {
+        kuery: packagePoliciesKuery,
+        perPage: SO_SEARCH_LIMIT,
+        spaceId: '*',
+      }),
+    ]);
+
+    const directPolicyIds = directPolicies.items.map((p) => p.id);
+    const pkgDerivedIds = packagePolicySOs.items.flatMap((pp) =>
+      pp.policy_ids.filter((id) => !directPolicyIds.includes(id))
+    );
+    const uniqueIds = [...new Set([...directPolicyIds, ...pkgDerivedIds])];
+    const agentPolicyCount = uniqueIds.length;
 
     let agentCount = 0;
     if (agentPolicyCount > 0) {
-      const counts = await getAgentCountForAgentPolicies(esClient, agentPolicyIds);
+      const counts = await getAgentCountForAgentPolicies(esClient, uniqueIds);
       agentCount = Object.values(counts).reduce((sum, n) => sum + n, 0);
     }
 

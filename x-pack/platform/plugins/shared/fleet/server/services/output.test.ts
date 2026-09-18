@@ -32,6 +32,7 @@ import {
   extractAndUpdateOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
@@ -39,6 +40,11 @@ jest.mock('./package_policy');
 jest.mock('./audit_logging');
 jest.mock('./secrets');
 jest.mock('./outputs/helpers');
+jest.mock('./agent_policies/agent_policy_agent_count');
+
+const mockedGetAgentCountForAgentPolicies = getAgentCountForAgentPolicies as jest.MockedFunction<
+  typeof getAgentCountForAgentPolicies
+>;
 
 const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
   typeof findAgentlessPolicies
@@ -4368,6 +4374,122 @@ describe('Output Service', () => {
       const output = outputSavedObjectToOutput(so as any);
 
       expect(output.id).toBe('otlp-uuid-fallback');
+    });
+  });
+
+  describe('getAgentAndPolicyCountForOutput', () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    beforeEach(() => {
+      getMockedSoClient();
+      mockedGetAgentCountForAgentPolicies.mockReset();
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({});
+      mockedAgentPolicyService.list.mockResolvedValue({ items: [], total: 0, page: 1, perPage: SO_SEARCH_LIMIT } as any);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [], total: 0, page: 1, perPage: SO_SEARCH_LIMIT } as any);
+    });
+
+    it('returns zero counts when no policies reference the output', async () => {
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(result).toEqual({ agentPolicyCount: 0, agentCount: 0 });
+      expect(mockedGetAgentCountForAgentPolicies).not.toHaveBeenCalled();
+    });
+
+    it('includes monitoring_output_id in kuery for non-default output', async () => {
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{ id: 'policy-monitoring-only' }],
+        total: 1,
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+      } as any);
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ 'policy-monitoring-only': 4 });
+
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      const kuery = mockedAgentPolicyService.list.mock.calls[0][1].kuery as string;
+      expect(kuery).toContain('monitoring_output_id:"output-test"');
+      expect(kuery).toContain('data_output_id:"output-test"');
+      expect(kuery).not.toContain('not fleet-agent-policies.data_output_id:*');
+      expect(result).toEqual({ agentPolicyCount: 1, agentCount: 4 });
+    });
+
+    it('adds is_default fallback clause for default output', async () => {
+      await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: true,
+      } as any);
+
+      const kuery = mockedAgentPolicyService.list.mock.calls[0][1].kuery as string;
+      expect(kuery).toContain('not fleet-agent-policies.data_output_id:*');
+    });
+
+    it('includes package-policy-derived policy IDs', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({
+        items: [{ output_id: 'output-test', policy_ids: ['policy-from-pkg'] }],
+        total: 1,
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+      } as any);
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ 'policy-from-pkg': 2 });
+
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(mockedGetAgentCountForAgentPolicies).toHaveBeenCalledWith(
+        esClient,
+        expect.arrayContaining(['policy-from-pkg'])
+      );
+      expect(result).toEqual({ agentPolicyCount: 1, agentCount: 2 });
+    });
+
+    it('deduplicates policy IDs present in both direct and package-policy results', async () => {
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{ id: 'shared-policy' }],
+        total: 1,
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+      } as any);
+      mockedPackagePolicyService.list.mockResolvedValue({
+        items: [{ output_id: 'output-test', policy_ids: ['shared-policy', 'extra-policy'] }],
+        total: 1,
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+      } as any);
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ 'shared-policy': 1, 'extra-policy': 3 });
+
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      const calledIds = mockedGetAgentCountForAgentPolicies.mock.calls[0][1] as string[];
+      expect(calledIds.filter((id) => id === 'shared-policy')).toHaveLength(1);
+      expect(result).toEqual({ agentPolicyCount: 2, agentCount: 4 });
+    });
+
+    it('sums agent counts across all policies', async () => {
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{ id: 'p1' }, { id: 'p2' }],
+        total: 2,
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+      } as any);
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ p1: 10, p2: 5 });
+
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(result).toEqual({ agentPolicyCount: 2, agentCount: 15 });
     });
   });
 });

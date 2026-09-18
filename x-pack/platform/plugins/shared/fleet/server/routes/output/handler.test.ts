@@ -9,10 +9,13 @@ import { SERVERLESS_DEFAULT_OUTPUT_ID } from '../../constants';
 import { agentPolicyService, appContextService, outputService } from '../../services';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
-import { postOutputHandler, putOutputHandler } from './handler';
+import { postOutputHandler, putOutputHandler, getOutputAgentPolicyCountHandler } from './handler';
 
 const putOutputHandlerWithErrorHandler = withDefaultErrorHandler(putOutputHandler);
 const postOutputHandlerWithErrorHandler = withDefaultErrorHandler(postOutputHandler);
+const getOutputAgentPolicyCountHandlerWithErrorHandler = withDefaultErrorHandler(
+  getOutputAgentPolicyCountHandler
+);
 
 describe('Outputs handler', () => {
   const mockContext = {
@@ -27,6 +30,7 @@ describe('Outputs handler', () => {
     customError: jest.fn().mockImplementation((options) => options),
     ok: jest.fn().mockImplementation((options) => options),
     badRequest: jest.fn().mockImplementation((options) => options),
+    notFound: jest.fn().mockImplementation((options) => options),
   };
 
   beforeEach(() => {
@@ -43,6 +47,9 @@ describe('Outputs handler', () => {
       }
     });
     jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
+    jest
+      .spyOn(outputService, 'getAgentAndPolicyCountForOutput')
+      .mockResolvedValue({ agentPolicyCount: 3, agentCount: 7 });
   });
 
   it('should return ok on post output using remote_elasticsearch in stateful', async () => {
@@ -361,6 +368,50 @@ describe('Outputs handler', () => {
       const updateCallArgs = (outputService.update as jest.Mock).mock.calls[0];
       expect(updateCallArgs[2]).toBe('output1');
       expect(updateCallArgs[3]).not.toHaveProperty('id');
+    });
+  });
+
+  describe('getOutputAgentPolicyCountHandler', () => {
+    it('returns agentPolicyCount and agentCount on success', async () => {
+      const res = await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'output1' } } as any,
+        mockResponse as any
+      );
+
+      expect(outputService.get).toHaveBeenCalledWith('output1');
+      expect(outputService.getAgentAndPolicyCountForOutput).toHaveBeenCalled();
+      expect(res).toEqual({ body: { agentPolicyCount: 3, agentCount: 7 } });
+    });
+
+    it('returns 404 when output does not exist', async () => {
+      const boomNotFound = { isBoom: true, output: { statusCode: 404 } };
+      jest.spyOn(outputService, 'get').mockRejectedValueOnce(boomNotFound);
+
+      await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'missing-output' } } as any,
+        mockResponse as any
+      );
+
+      expect(mockResponse.notFound).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ message: expect.stringContaining('missing-output') }),
+        })
+      );
+    });
+
+    it('surfaces non-404 errors as 500', async () => {
+      const unexpectedError = new Error('ES cluster down');
+      jest.spyOn(outputService, 'getAgentAndPolicyCountForOutput').mockRejectedValueOnce(unexpectedError);
+
+      const res = await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'output1' } } as any,
+        mockResponse as any
+      );
+
+      expect((res as any).statusCode).toBe(500);
     });
   });
 });
