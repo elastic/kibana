@@ -8,3 +8,4 @@
 export * from './get_observability_onboarding_flow';
 export * from './save_observability_onboarding_flow';
 export * from './flow_ownership';
+export * from './delete_legacy_onboarding_flows';
