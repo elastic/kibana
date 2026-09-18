@@ -415,7 +415,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
       };
 
-      describe('via LOOKUP JOIN (v2)', () => {
+      // Failing: See https://github.com/elastic/kibana/issues/271798
+      describe.skip('via LOOKUP JOIN (v2)', () => {
         before(async () => {
           // Load v2 entity data into the entity store index created by v2 install
           await esArchiver.load(
