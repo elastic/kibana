@@ -9,8 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { platformStreamsMemoryTools } from './tool_ids';
 import { getUserFromRequest } from './get_user_from_request';
 import type { MemoryToolsOptions } from './types';
@@ -23,17 +23,14 @@ const memoryDeleteSchema = z.object({
 export const createMemoryDeleteTool = ({
   getMemoryService,
   getSecurity,
-}: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryDeleteSchema> => ({
+}: MemoryToolsOptions): BuiltinSkillBoundedTool<typeof memoryDeleteSchema> => ({
   id: platformStreamsMemoryTools.memoryDelete,
   type: ToolType.builtin,
   description:
     'Delete a memory page. The page is removed but its version history is preserved for auditing.',
   schema: memoryDeleteSchema,
-  tags: ['memory'],
   confirmation: { askUser: 'never' },
   handler: async ({ id, name }, context) => {
-    const memoryService = getMemoryService(context.esClient.asCurrentUser);
-
     if (!name && !id) {
       return {
         results: [createErrorResult({ message: 'Either "name" or "id" must be provided.' })],
@@ -41,6 +38,7 @@ export const createMemoryDeleteTool = ({
     }
 
     try {
+      const memoryService = await getMemoryService(context.esClient.asCurrentUser);
       const { request, esClient } = context;
       const { username: user } = await getUserFromRequest({
         request,

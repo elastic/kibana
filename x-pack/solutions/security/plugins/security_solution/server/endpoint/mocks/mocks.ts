@@ -116,6 +116,7 @@ export const createMockEndpointAppContextService = (
     fleetStartServices,
     savedObjectsServiceStart,
     exceptionListsClient,
+    productFeaturesService,
   } = createMockEndpointAppContextServiceStartContract();
   const fleetServices = createEndpointFleetServicesFactoryMock({
     fleetDependencies: fleetStartServices,
@@ -140,11 +141,11 @@ export const createMockEndpointAppContextService = (
   const licenseServiceMock = createLicenseServiceMock();
   const telemetryServiceMock = analyticsServiceMock.createAnalyticsServiceSetup();
   const scriptsClient = ScriptsLibraryMock.getMockedClient();
-  const isCpsEnabled = jest.fn().mockReturnValue(false);
+  const isCpsActive = jest.fn().mockResolvedValue(false);
   // Hoisted so `asScoped` can delegate to the same mocks the service exposes directly. A test that
   // overrides one of these changes what the scoped instance answers too, so the two cannot disagree.
-  const getReadEsClient = jest.fn().mockReturnValue(esClient);
-  const getScopedSearchClient = jest.fn((request: KibanaRequest) =>
+  const getReadEsClient = jest.fn().mockResolvedValue(esClient);
+  const getScopedSearchClient = jest.fn(async (request: KibanaRequest) =>
     dataStart.search.asScoped(request)
   );
   const getActiveSpaceId = jest.fn().mockReturnValue(DEFAULT_SPACE_ID);
@@ -160,6 +161,7 @@ export const createMockEndpointAppContextService = (
     getEndpointMetadataService: jest.fn(() => endpointMetadataService),
     getInternalFleetServices: jest.fn(() => fleetServices),
     getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
+    getCurrentUsername: jest.fn().mockReturnValue('test-analyst'),
     getCasesClient: jest.fn().mockReturnValue(casesClientMock),
     getRulesClient: jest.fn(async (_req: KibanaRequest) => rulesClientMock.create()),
     getAlertingAuthorization: jest.fn(async (_req: KibanaRequest) => {
@@ -180,27 +182,36 @@ export const createMockEndpointAppContextService = (
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
     getFleetActionsClient: jest.fn(async () => fleetActionsClientMock),
     getTelemetryService: jest.fn().mockReturnValue(telemetryServiceMock),
+    getProductFeaturesService: jest.fn().mockReturnValue(productFeaturesService),
     getInternalResponseActionsClient: jest.fn((_) => {
       return responseActionsClientMock.create();
     }),
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
     isCcsEnabled: jest.fn().mockResolvedValue(false),
-    isCpsEnabled,
+    isCpsActive,
     // Mirrors production: a read with no request identity cannot fan out, whatever the flag says
-    isCpsRead: jest.fn((request?: KibanaRequest) => isCpsEnabled() && request != null),
+    isCpsRead: jest.fn((request?: KibanaRequest) =>
+      request ? isCpsActive(request) : Promise.resolve(false)
+    ),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
-    // Matches the flag-off branch; fan-out tests override this along with `isCpsEnabled`
+    // Matches the origin-only branch; fan-out tests override this along with `isCpsActive`
     getReadEsClient,
     getScopedSearchClient,
-    asScoped: jest.fn((request: KibanaRequest) => ({
-      isCpsRead: () => isCpsEnabled() && request != null,
-      getEsClient: () => getReadEsClient(request),
-      getSearchClient: () => getScopedSearchClient(request),
-      getSpaceId: () => getActiveSpaceId(request),
-      getSpace: () =>
-        Promise.resolve({ id: DEFAULT_SPACE_ID, name: 'default', disabledFeatures: [] }),
-    })),
+    asScoped: jest.fn(async (request: KibanaRequest) => {
+      const cpsRead = Boolean(request) && (await isCpsActive(request));
+      const esClientForRead = await getReadEsClient(request);
+      const searchClient = await getScopedSearchClient(request);
+
+      return {
+        isCpsRead: () => cpsRead,
+        getEsClient: () => esClientForRead,
+        getSearchClient: () => searchClient,
+        getSpaceId: () => getActiveSpaceId(request),
+        getSpace: () =>
+          Promise.resolve({ id: DEFAULT_SPACE_ID, name: 'default', disabledFeatures: [] }),
+      };
+    }),
     getActiveSpace: jest.fn(async (_) => ({
       id: DEFAULT_SPACE_ID,
       name: 'default',
@@ -333,7 +344,7 @@ export const createMockEndpointAppContextServiceStartContract =
         elasticsearchServiceMock.createClusterClient() as unknown as DeeplyMockedKeys<IClusterClient>,
       dataStart:
         dataPluginMock.createStartContract() as unknown as DeeplyMockedKeys<DataPluginStart>,
-      cpsEnabled: false,
+      isCpsActive: jest.fn().mockResolvedValue(false),
       savedObjectsServiceStart: savedObjectsServiceMock.createStartContract(),
       connectorActions: {
         getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),

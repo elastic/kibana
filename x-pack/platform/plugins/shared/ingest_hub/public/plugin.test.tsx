@@ -9,10 +9,14 @@ import { of } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { AppUpdater, PluginInitializerContext } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { IngestHubPlugin } from './plugin';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+
+const mockFleet = {} as unknown as FleetStart;
 
 const createPluginContext = (buildFlavor: 'traditional' | 'serverless' = 'traditional') =>
   ({
@@ -42,7 +46,7 @@ describe('IngestHubPlugin', () => {
       const coreStart = coreMock.createStart();
       disableFeatureFlag(coreStart);
 
-      const { navigationAvailable$ } = plugin.start(coreStart, {});
+      const { navigationAvailable$ } = plugin.start(coreStart, { fleet: mockFleet });
       await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(false);
     });
 
@@ -64,7 +68,7 @@ describe('IngestHubPlugin', () => {
           projectType: 'observability',
         } as CloudStart['serverless'];
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { cloud });
+        const { navigationAvailable$ } = plugin.start(coreStart, { cloud, fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(true);
       });
 
@@ -75,7 +79,7 @@ describe('IngestHubPlugin', () => {
           projectType: 'security',
         } as CloudStart['serverless'];
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { cloud });
+        const { navigationAvailable$ } = plugin.start(coreStart, { cloud, fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(false);
       });
     });
@@ -92,33 +96,33 @@ describe('IngestHubPlugin', () => {
       });
 
       it('emits true without spaces plugin', async () => {
-        const { navigationAvailable$ } = plugin.start(coreStart, {});
+        const { navigationAvailable$ } = plugin.start(coreStart, { fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(true);
       });
 
       it('emits true with oblt space solution', async () => {
         const spaces = spacesPluginMock.createStartContract();
         spaces.getActiveSpace.mockResolvedValue({
-          id: 'default',
+          id: asSpaceId('default'),
           name: 'Default',
           solution: 'oblt',
           disabledFeatures: [],
         });
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { spaces });
+        const { navigationAvailable$ } = plugin.start(coreStart, { spaces, fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(true);
       });
 
       it('emits false with es space solution', async () => {
         const spaces = spacesPluginMock.createStartContract();
         spaces.getActiveSpace.mockResolvedValue({
-          id: 'default',
+          id: asSpaceId('default'),
           name: 'Default',
           solution: 'es',
           disabledFeatures: [],
         });
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { spaces });
+        const { navigationAvailable$ } = plugin.start(coreStart, { spaces, fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(false);
       });
     });

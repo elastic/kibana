@@ -90,6 +90,7 @@ import type { ResponseActionAgentType } from '../../common/endpoint/service/resp
 import { ScopedEndpointArtifactListClient } from './services/scoped_endpoint_artifact_list_client';
 import { SimpleMemCache } from './lib/simple_mem_cache';
 import { hasConnectedRemoteClusters } from './utils/ccs_utils';
+import { setYaraLogger } from './lib/libyara';
 
 /** Time-to-live (seconds) for the cached connected-remote-clusters check backing `isCcsEnabled` */
 const CCS_CACHE_TTL_SECONDS = 60;
@@ -121,8 +122,11 @@ export interface EndpointAppContextServiceStartContract {
   clusterClient: IClusterClient;
   /** Used to build the project-routed search client that CPS search strategies fan out on */
   dataStart: DataPluginStart;
-  /** CPS enabled on the deployment AND the `defendCrossProjectSearch` flag on */
-  cpsEnabled: boolean;
+  /**
+   * Resolves whether THIS request can fan out: deployment capability AND the
+   * `defendCrossProjectSearch` flag AND at least one visible linked project.
+   */
+  isCpsActive: (request: KibanaRequest) => Promise<boolean>;
   productFeaturesService: ProductFeaturesService;
   savedObjectsServiceStart: SavedObjectsServiceStart;
   connectorActions: ActionsPluginStartContract;
@@ -153,6 +157,34 @@ export interface ScopedEndpointServices {
 }
 
 /**
+ * Options for {@link EndpointAppContextService#getInternalResponseActionsClient}.
+ *
+ * The option set is a discriminated union on `isAutomated` so that the two usage modes are
+ * each enforced by construction instead of by review discipline:
+ *  - `isAutomated: true` (or omitted) — system/rule-triggered actions (detection-rule response
+ *    actions, the pending-actions task runner). Username defaults to the internal `'elastic'`
+ *    system user, exactly as before this option existed.
+ *  - `isAutomated: false` — analyst/user-initiated actions (e.g. AI Agent skill tools gated
+ *    behind HITL confirmation). A `request` is REQUIRED: the username is derived from the
+ *    authenticated user so the audit trail never silently attributes a manual action to the
+ *    system user. The internal client performs no authz and skips the Enterprise license gate
+ *    (manual actions are not Enterprise-gated), so callers MUST still enforce endpoint
+ *    privileges via `getEndpointAuthz(request)` with the same privilege the equivalent HTTP
+ *    route requires (`withEndpointAuthz(...)`), which carries the license floor.
+ */
+export type GetInternalResponseActionsClientOptions = {
+  spaceId: string;
+  agentType?: ResponseActionAgentType;
+  /** Used with background task and needed for `UnsecuredActionsClient`  */
+  taskId?: string;
+  /** Used with background task and needed for `UnsecuredActionsClient`  */
+  taskType?: string;
+} & (
+  | { isAutomated?: true; username?: string; request?: undefined }
+  | { isAutomated: false; request: KibanaRequest; username?: undefined }
+);
+
+/**
  * A singleton that holds shared services that are initialized during the start up phase
  * of the plugin lifecycle. And stop during the stop phase, if needed.
  */
@@ -176,6 +208,8 @@ export class EndpointAppContextService {
 
     this.startDependencies = dependencies;
     this.security = dependencies.security;
+
+    setYaraLogger(this.createLogger('libyara'));
 
     const isScriptsLibraryEnabled =
       this.startDependencies.experimentalFeatures.responseActionsScriptLibraryManagement;
@@ -211,6 +245,7 @@ export class EndpointAppContextService {
   }
 
   public stop() {
+    setYaraLogger(undefined);
     this.startDependencies = null;
     this.savedObjectsFactoryService = null;
   }
@@ -353,13 +388,13 @@ export class EndpointAppContextService {
     return this.startDependencies.esClient;
   }
 
-  /** `true` when Defend reads should fan out across linked projects via Cross-Project Search */
-  public isCpsEnabled(): boolean {
+  /** `true` when this request can fan out across linked projects via Cross-Project Search */
+  public async isCpsActive(request: KibanaRequest): Promise<boolean> {
     if (this.startDependencies == null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.startDependencies.cpsEnabled;
+    return this.startDependencies.isCpsActive(request);
   }
 
   /**
@@ -368,30 +403,32 @@ export class EndpointAppContextService {
    * client choice and space filtering have to agree on one answer or a local document can be
    * filtered out of an origin-only read.
    */
-  public isCpsRead(request?: KibanaRequest): boolean {
-    if (!this.isCpsEnabled()) {
-      return false;
+  public async isCpsRead(request?: KibanaRequest): Promise<boolean> {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
     }
 
+    // Resolved before `isCpsActive`, because whether this deployment could fan out at all is only
+    // knowable per request now, and a caller with no request identity can never fan out regardless.
     if (!request) {
       this.createLogger('isCpsRead').debug(
-        'CPS is enabled but this read was requested without a KibanaRequest, so it cannot fan out and will return origin data only'
+        'This read was requested without a KibanaRequest, so it cannot fan out and will return origin data only'
       );
 
       return false;
     }
 
-    return true;
+    return this.startDependencies.isCpsActive(request);
   }
 
   /** The client for reads against Defend-owned indices. Fleet-owned ones keep `getInternalEsClient()` */
-  public getReadEsClient(request?: KibanaRequest): ElasticsearchClient {
+  public async getReadEsClient(request?: KibanaRequest): Promise<ElasticsearchClient> {
     if (!this.startDependencies?.clusterClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     // `isCpsRead` first, so a caller with no request gets its breadcrumb; the second half narrows
-    if (!this.isCpsRead(request) || !request) {
+    if (!(await this.isCpsRead(request)) || !request) {
       return this.getInternalEsClient();
     }
 
@@ -403,14 +440,14 @@ export class EndpointAppContextService {
    * The search client the Defend search strategies dispatch through. Carries the same routing as
    * `getReadEsClient()` when CPS is on, so callers do not branch on the flag themselves.
    */
-  public getScopedSearchClient(request: KibanaRequest): IScopedSearchClient {
+  public async getScopedSearchClient(request: KibanaRequest): Promise<IScopedSearchClient> {
     if (!this.startDependencies?.dataStart) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     const { dataStart } = this.startDependencies;
 
-    return this.isCpsEnabled()
+    return (await this.isCpsActive(request))
       ? dataStart.search.asScoped(request, { projectRouting: 'space' })
       : dataStart.search.asScoped(request);
   }
@@ -422,14 +459,22 @@ export class EndpointAppContextService {
    * "this read can fan out" visible in their signatures. A service that receives no scoped instance
    * cannot fan out, which is the same rule `isCpsRead` applies to a missing request.
    *
+   * This is the async boundary: whether the request can fan out is now per-request and requires an
+   * ES round trip, so it is resolved once here and handed to services as a plain boolean. Keeping
+   * `ScopedEndpointServices` members synchronous leaves the downstream service signatures untouched.
+   *
    * Modelled on `getScopedEndpointArtifactClient()`, which hands out a request-scoped service object
    * in the same way.
    */
-  public asScoped(request: KibanaRequest): ScopedEndpointServices {
+  public async asScoped(request: KibanaRequest): Promise<ScopedEndpointServices> {
+    const cpsRead = await this.isCpsRead(request);
+    const esClient = await this.getReadEsClient(request);
+    const searchClient = await this.getScopedSearchClient(request);
+
     return {
-      isCpsRead: () => this.isCpsRead(request),
-      getEsClient: () => this.getReadEsClient(request),
-      getSearchClient: () => this.getScopedSearchClient(request),
+      isCpsRead: () => cpsRead,
+      getEsClient: () => esClient,
+      getSearchClient: () => searchClient,
       getSpaceId: () => this.getActiveSpaceId(request),
       getSpace: () => this.getActiveSpace(request),
     };
@@ -456,6 +501,17 @@ export class EndpointAppContextService {
     }
 
     return this.setupDependencies.loggerFactory.get(...contextParts);
+  }
+
+  /**
+   * Username of the authenticated user for a request, or `'unknown'` when the user cannot be
+   * resolved (unauthenticated request, security plugin absent, or service not started) — matching
+   * the `user?.username || 'unknown'` convention of the response actions HTTP routes. Used to
+   * attribute agent-dispatched response actions to the initiating analyst for the audit trail;
+   * never returns the system user (`'elastic'`) for an unresolved caller.
+   */
+  public getCurrentUsername(request: KibanaRequest): string {
+    return this.security?.authc.getCurrentUser(request)?.username ?? 'unknown';
   }
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
@@ -506,6 +562,13 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.licenseService;
+  }
+
+  public getProductFeaturesService(): ProductFeaturesService {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.productFeaturesService;
   }
 
   public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
@@ -585,15 +648,9 @@ export class EndpointAppContextService {
     taskId,
     taskType,
     spaceId,
-  }: {
-    spaceId: string;
-    agentType?: ResponseActionAgentType;
-    username?: string;
-    /** Used with background task and needed for `UnsecuredActionsClient`  */
-    taskId?: string;
-    /** Used with background task and needed for `UnsecuredActionsClient`  */
-    taskType?: string;
-  }): ResponseActionsClient {
+    isAutomated = true,
+    request,
+  }: GetInternalResponseActionsClientOptions): ResponseActionsClient {
     if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
@@ -601,9 +658,9 @@ export class EndpointAppContextService {
     return getResponseActionsClient(agentType, {
       endpointService: this,
       esClient: this.startDependencies.esClient,
-      username,
+      username: isAutomated ? username : this.getCurrentUsername(request as KibanaRequest),
       spaceId,
-      isAutomated: true,
+      isAutomated,
       connectorActions: new NormalizedExternalConnectorClient(
         this.startDependencies.connectorActions.getUnsecuredActionsClient(),
         this.createLogger('responseActions'),

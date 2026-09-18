@@ -46,7 +46,7 @@ function buildValidationResult(
   if (hasError) {
     return {
       id: stepPropertyItem.id,
-      severity: 'error' as const,
+      severity: 'error',
       message: details.message,
       beforeMessage,
       afterMessage: null,
@@ -55,7 +55,8 @@ function buildValidationResult(
       startColumn: stepPropertyItem.startColumn,
       endLineNumber: stepPropertyItem.endLineNumber,
       endColumn: stepPropertyItem.endColumn,
-      owner: 'step-property-validation' as const,
+      owner: 'step-property-validation',
+      ruleId: 'invalidStepProperty',
     };
   }
 
@@ -70,7 +71,7 @@ function buildValidationResult(
     startColumn: stepPropertyItem.startColumn,
     endLineNumber: stepPropertyItem.endLineNumber,
     endColumn: stepPropertyItem.endColumn,
-    owner: 'step-property-validation' as const,
+    owner: 'step-property-validation',
   };
 }
 

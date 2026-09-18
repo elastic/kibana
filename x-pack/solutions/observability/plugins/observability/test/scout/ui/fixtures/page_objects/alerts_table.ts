@@ -202,6 +202,14 @@ export class AlertsTablePage {
     await this.page.testSubj.click('viewRuleDetails');
   }
 
+  async clickInvestigate() {
+    await this.page.testSubj.click('investigateAlert');
+  }
+
+  async clickViewInvestigation() {
+    await this.page.testSubj.click('viewAlertInvestigation');
+  }
+
   // Add to case (from the row actions menu opened via `openActionsMenuForRow`)
   async clickAddToNewCase() {
     await this.addToNewCaseAction.click();

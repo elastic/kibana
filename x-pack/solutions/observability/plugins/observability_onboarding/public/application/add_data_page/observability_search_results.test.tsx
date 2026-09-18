@@ -34,7 +34,7 @@ const renderResults = (searchTerm = 'redis', onOpenCollection = jest.fn()) => {
     <I18nProvider>
       <KibanaContextProvider services={coreMock.createStart()}>
         <MemoryRouter initialEntries={['/']}>
-          <FleetCardsProvider enabled>
+          <FleetCardsProvider>
             <ObservabilitySearchResults
               searchTerm={searchTerm}
               onOpenCollection={onOpenCollection}

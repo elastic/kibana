@@ -11,13 +11,13 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
-import { getDiverseSampleDocuments } from '@kbn/streams-ai';
+import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
 jest.mock('@kbn/ai-tools', () => ({
   getSampleDocumentsEsql: jest.fn(),
 }));
-jest.mock('@kbn/streams-ai', () => ({
+jest.mock('@kbn/nightshift-ai', () => ({
   getDiverseSampleDocuments: jest.fn(),
 }));
 
@@ -121,7 +121,7 @@ describe('fetchSampleDocuments', () => {
       start: 100,
       end: 200,
       sampleSize: 5,
-      requestTimeout: 30_000,
+      abortSignal: expect.any(AbortSignal),
     });
     expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
@@ -174,7 +174,7 @@ describe('fetchSampleDocuments', () => {
         end: 200,
         sampleSize: 4,
         unmappedFields: 'LOAD',
-        requestTimeout: 30_000,
+        abortSignal: expect.any(AbortSignal),
       })
     );
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
@@ -196,7 +196,7 @@ describe('fetchSampleDocuments', () => {
       start: 100,
       end: 200,
       sampleSize: 10,
-      requestTimeout: 30_000,
+      abortSignal: expect.any(AbortSignal),
     });
     expect(esClient.fieldCaps).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual([

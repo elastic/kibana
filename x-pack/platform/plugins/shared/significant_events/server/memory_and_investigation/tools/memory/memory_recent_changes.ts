@@ -8,8 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { platformStreamsMemoryTools } from './tool_ids';
 import type { MemoryToolsOptions } from './types';
 
@@ -24,7 +24,7 @@ const memoryRecentChangesSchema = z.object({
 
 export const createMemoryRecentChangesTool = ({
   getMemoryService,
-}: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryRecentChangesSchema> => ({
+}: MemoryToolsOptions): BuiltinSkillBoundedTool<typeof memoryRecentChangesSchema> => ({
   id: platformStreamsMemoryTools.memoryRecentChanges,
   type: ToolType.builtin,
   description:
@@ -32,11 +32,9 @@ export const createMemoryRecentChangesTool = ({
     'showing what was changed, by whom, and when. Useful for understanding recent ' +
     'activity and identifying pages that may need consolidation.',
   schema: memoryRecentChangesSchema,
-  tags: ['memory'],
   handler: async ({ size }, context) => {
-    const memoryService = getMemoryService(context.esClient.asCurrentUser);
-
     try {
+      const memoryService = await getMemoryService(context.esClient.asCurrentUser);
       const changes = await memoryService.getRecentChanges({ size: size ?? 20 });
 
       return {

@@ -6,18 +6,10 @@
  */
 
 import React from 'react';
-import {
-  render,
-  screen,
-  waitFor,
-  getByTitle,
-  queryByRole,
-  within,
-  fireEvent,
-} from '@testing-library/react';
+import { render, screen, waitFor, getByTitle, within, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 // Static EUI token values for assertions
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
@@ -51,6 +43,14 @@ const SELECTORS = {
   COLOR_PICKER: 'euiColorPickerAnchor',
 };
 
+type NameVisibility = NonNullable<MetricVisualizationState['secondaryNameVisibility']>;
+
+const NAME_VISIBILITY_TITLES: Record<NameVisibility, string> = {
+  hidden: 'Hide',
+  before: 'Before',
+  after: 'After',
+};
+
 describe('dimension editor', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
@@ -60,8 +60,18 @@ describe('dimension editor', () => {
     },
   };
 
+  // Current-state fixture. Initialize consumes secondaryPrefix, valuesTextAlign,
+  // titleWeight, and secondaryLabelPosition. secondaryLabel is omitted because it
+  // is optional leftover (kept as a render fallback), not because initialize deletes it.
   const fullState: Required<
-    Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
+    Omit<
+      MetricVisualizationState,
+      | 'secondaryPrefix'
+      | 'valuesTextAlign'
+      | 'titleWeight'
+      | 'secondaryLabel'
+      | 'secondaryLabelPosition'
+    >
   > = {
     layerId: 'first',
     layerType: 'data',
@@ -71,7 +81,6 @@ describe('dimension editor', () => {
     breakdownByAccessor: 'breakdown-col-id',
     collapseFn: 'sum',
     subtitle: faker.lorem.word(5),
-    secondaryLabel: faker.lorem.word(3),
     secondaryTrend: { type: 'none' },
     density: 'compact',
     progressDirection: 'vertical',
@@ -92,7 +101,7 @@ describe('dimension editor', () => {
     trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
-    secondaryLabelPosition: 'before',
+    secondaryNameVisibility: 'before',
     applyColorTo: 'background',
   };
 
@@ -323,20 +332,6 @@ describe('dimension editor', () => {
         />
       );
 
-      const customLabelGroup = screen.getByRole('group', { name: 'Label' });
-      const getCustomLabelTextbox = () =>
-        customLabelGroup.parentElement?.parentElement
-          ? queryByRole<HTMLInputElement>(customLabelGroup.parentElement.parentElement, 'textbox')
-          : null;
-      const typeLabel = async (label: string) => {
-        const customLabelTextbox = getCustomLabelTextbox();
-        if (customLabelTextbox === null) {
-          throw new Error('custom label textbox not found');
-        }
-        await userEvent.clear(customLabelTextbox);
-        await userEvent.type(customLabelTextbox, label);
-      };
-
       const getBaselineGroup = () => screen.getByRole('group', { name: 'Compare to' });
       const clickOnBaselineMode = async (mode: 'static' | 'primary') => {
         const baselineOption = getByTitle(getBaselineGroup(), mode, { exact: false });
@@ -386,24 +381,24 @@ describe('dimension editor', () => {
         await userEvent.clear(staticColorPicker);
       };
 
-      const labelPositionGroup = screen.queryByRole('group', { name: /Label position/i });
-      const clickOnLabelPosition = async (position: 'before' | 'after') => {
-        if (!labelPositionGroup) {
-          throw new Error('Label position group not found');
+      const nameVisibilityGroup = screen.queryByRole('group', { name: /Name display/i });
+      const getNameVisibilityOption = (visibility: NameVisibility) => {
+        if (!nameVisibilityGroup) {
+          throw new Error('Name visibility group not found');
         }
-        const labelPositionOption = getByTitle(labelPositionGroup, position, { exact: false });
-        if (!labelPositionOption) {
-          throw new Error(`Label position option '${position}' not found`);
+        const option = getByTitle(nameVisibilityGroup, NAME_VISIBILITY_TITLES[visibility], {
+          exact: false,
+        });
+        if (!option) {
+          throw new Error(`Name visibility option '${visibility}' not found`);
         }
-        await userEvent.click(labelPositionOption);
+        return option;
+      };
+      const clickOnNameVisibility = async (visibility: NameVisibility) => {
+        await userEvent.click(getNameVisibilityOption(visibility));
       };
 
       return {
-        getSettingNone: () => getByTitle(customLabelGroup, 'none', { exact: false }),
-        getSettingAuto: () => getByTitle(customLabelGroup, 'auto', { exact: false }),
-        getSettingCustom: () => getByTitle(customLabelGroup, 'custom', { exact: false }),
-        getCustomLabelTextbox,
-        typeLabel,
         getSelectedPalette,
         getCustomBaselineTextbox,
         getBaselineGroup,
@@ -416,8 +411,9 @@ describe('dimension editor', () => {
         getStaticColorPicker,
         typeColor,
         clearColor,
-        labelPositionGroup,
-        clickOnLabelPosition,
+        nameVisibilityGroup,
+        getNameVisibilityOption,
+        clickOnNameVisibility,
         ...rtlRender,
       };
     }
@@ -439,128 +435,61 @@ describe('dimension editor', () => {
       expect(screen.getByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeInTheDocument();
     });
 
-    describe('metric label', () => {
-      const NONE_SECONDARY_LABEL = '';
-      const AUTO_SECONDARY_LABEL = undefined;
+    describe('name visibility', () => {
       const localState = {
         ...fullState,
-        secondaryLabel: AUTO_SECONDARY_LABEL,
         secondaryMetricAccessor: accessor,
       };
-      it('correctly renders chosen auto label', () => {
-        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomLabelTextbox } =
-          renderSecondaryMetricEditor({
-            state: localState,
+
+      it('has no label controls, as the name is edited in the datasource section', () => {
+        renderSecondaryMetricEditor({ state: localState });
+
+        expect(screen.queryByRole('group', { name: 'Label' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('group', { name: /Label position/i })).not.toBeInTheDocument();
+      });
+
+      it.each(['hidden', 'before', 'after'] as const)(
+        'renders %s as the selected visibility',
+        (visibility) => {
+          const { getNameVisibilityOption } = renderSecondaryMetricEditor({
+            state: { ...localState, secondaryNameVisibility: visibility },
           });
 
-        expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'true');
-        expect(getSettingNone()).toHaveAttribute('aria-pressed', 'false');
-        expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'false');
-        expect(getCustomLabelTextbox()).not.toBeInTheDocument();
+          for (const option of ['hidden', 'before', 'after'] as const) {
+            expect(getNameVisibilityOption(option)).toHaveAttribute(
+              'aria-pressed',
+              `${option === visibility}`
+            );
+          }
+        }
+      );
+
+      it('falls back to the default visibility when unset', () => {
+        const { getNameVisibilityOption } = renderSecondaryMetricEditor({
+          state: { ...localState, secondaryNameVisibility: undefined },
+        });
+
+        expect(getNameVisibilityOption('hidden')).toHaveAttribute('aria-pressed', 'true');
       });
 
-      it('correctly renders chosen none label', () => {
-        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomLabelTextbox } =
-          renderSecondaryMetricEditor({
-            state: { ...localState, secondaryLabel: NONE_SECONDARY_LABEL },
+      it.each(['hidden', 'before', 'after'] as const)(
+        'sets the visibility to %s',
+        async (visibility) => {
+          const setState = jest.fn();
+          const { clickOnNameVisibility } = renderSecondaryMetricEditor({
+            setState,
+            state: {
+              ...localState,
+              secondaryNameVisibility: visibility === 'hidden' ? 'before' : 'hidden',
+            },
           });
 
-        expect(getSettingNone()).toHaveAttribute('aria-pressed', 'true');
-        expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
-        expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'false');
-        expect(getCustomLabelTextbox()).not.toBeInTheDocument();
-      });
-
-      it('correctly renders custom label', () => {
-        const customLabelState = { ...localState, secondaryLabel: faker.lorem.word(3) };
-        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomLabelTextbox } =
-          renderSecondaryMetricEditor({ state: customLabelState });
-
-        expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
-        expect(getSettingNone()).toHaveAttribute('aria-pressed', 'false');
-        expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'true');
-        expect(getCustomLabelTextbox()).toHaveValue(customLabelState.secondaryLabel);
-      });
-
-      it('clicking on the buttons calls setState with a correct secondaryLabel', async () => {
-        const customSecondaryLabel = faker.lorem.word(3);
-        const setState = jest.fn();
-
-        const { getSettingAuto, getSettingNone } = renderSecondaryMetricEditor({
-          setState,
-          state: { ...localState, secondaryLabel: customSecondaryLabel },
-        });
-
-        await userEvent.click(getSettingNone());
-        expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ secondaryLabel: NONE_SECONDARY_LABEL })
-        );
-
-        await userEvent.click(getSettingAuto());
-        expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ secondaryLabel: AUTO_SECONDARY_LABEL })
-        );
-      });
-
-      it('sets a custom label value', async () => {
-        const customSecondaryLabel = faker.lorem.word(3);
-        const setState = jest.fn();
-
-        const { typeLabel } = renderSecondaryMetricEditor({
-          setState,
-          state: { ...localState, secondaryLabel: customSecondaryLabel },
-        });
-
-        const newCustomSecondaryLabel = faker.lorem.word(3);
-        await typeLabel(newCustomSecondaryLabel);
-
-        await waitFor(() =>
+          await clickOnNameVisibility(visibility);
           expect(setState).toHaveBeenCalledWith(
-            expect.objectContaining({ secondaryLabel: newCustomSecondaryLabel })
-          )
-        );
-      });
-
-      it('does not show the label position option if Label is None', async () => {
-        const { labelPositionGroup: labelPostionGroup } = renderSecondaryMetricEditor({
-          state: {
-            ...localState,
-            secondaryLabel: NONE_SECONDARY_LABEL,
-          },
-        });
-        expect(labelPostionGroup).not.toBeInTheDocument();
-      });
-
-      it('sets the label position to after', async () => {
-        const setState = jest.fn();
-        const { clickOnLabelPosition: clickOnLabelPostion } = renderSecondaryMetricEditor({
-          setState,
-          state: localState,
-        });
-        await clickOnLabelPostion('after');
-        expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({
-            secondaryLabelPosition: 'after',
-          })
-        );
-      });
-
-      it('sets the label position to before', async () => {
-        const setState = jest.fn();
-        const { clickOnLabelPosition: clickOnLabelPostion } = renderSecondaryMetricEditor({
-          setState,
-          state: {
-            ...localState,
-            secondaryLabelPosition: 'after',
-          },
-        });
-        await clickOnLabelPostion('before');
-        expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({
-            secondaryLabelPosition: 'before',
-          })
-        );
-      });
+            expect.objectContaining({ secondaryNameVisibility: visibility })
+          );
+        }
+      );
     });
 
     describe('secondary trend', () => {
@@ -752,50 +681,13 @@ describe('dimension editor', () => {
         expect(getCustomBaselineTextbox()).not.toBeInTheDocument();
       });
 
-      it('should set a default secondary label if auto is set and Primary Metric is chosen', async () => {
-        const { getCustomLabelTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
-          state: {
-            ...localState,
-            secondaryLabel: undefined,
-            secondaryTrend: {
-              type: 'dynamic',
-              visuals: 'both',
-              reversed: false,
-              paletteId: 'compare_to',
-              baselineValue: 'primary',
-            },
-          },
-        });
-
-        expect(getByTitle(getBaselineGroup(), 'Primary metric')).toHaveAttribute(
-          'aria-pressed',
-          'true'
-        );
-        const el = getCustomLabelTextbox();
-        if (el == null) {
-          fail('secondary label textbox not in view');
-        }
-        expect(el.value).toBe('Difference');
-      });
-
-      it.each([
-        // mind that auto gets converted into {name: 'custom', value: 'Difference'}
-        { name: 'auto', value: undefined },
-        { name: 'none', value: '' },
-        { name: 'custom', value: 'customSecondaryLabel' },
-      ])(
-        'should preserve the current secondary label is set to $name and Primary Metric is chosen',
-        async ({ name, value }) => {
-          const {
-            getCustomLabelTextbox,
-            getBaselineGroup,
-            getSettingAuto,
-            getSettingCustom,
-            getSettingNone,
-          } = renderSecondaryMetricEditor({
+      it.each(['hidden', 'before', 'after'] as const)(
+        'should preserve the %s name visibility when Primary Metric is chosen',
+        async (visibility) => {
+          const { getBaselineGroup, getNameVisibilityOption } = renderSecondaryMetricEditor({
             state: {
               ...localState,
-              secondaryLabel: value,
+              secondaryNameVisibility: visibility,
               secondaryTrend: {
                 type: 'dynamic',
                 visuals: 'both',
@@ -810,22 +702,7 @@ describe('dimension editor', () => {
             'aria-pressed',
             'true'
           );
-
-          expect(getSettingAuto()).toHaveAttribute('aria-pressed', `false`);
-          expect(getSettingNone()).toHaveAttribute('aria-pressed', `${name === 'none'}`);
-          // When primary is chosen auto gets converted into Custom with the default 'Difference' secondary label
-          expect(getSettingCustom()).toHaveAttribute(
-            'aria-pressed',
-            `${name === 'custom' || name === 'auto'}`
-          );
-
-          if (value || name === 'auto') {
-            const el = getCustomLabelTextbox();
-            if (el == null) {
-              fail('secondary label textbox not in view');
-            }
-            expect(el.value).toBe(value ?? 'Difference');
-          }
+          expect(getNameVisibilityOption(visibility)).toHaveAttribute('aria-pressed', 'true');
         }
       );
     });
@@ -860,7 +737,7 @@ describe('dimension editor', () => {
 
     afterEach(() => mockSetState.mockClear());
 
-    function renderBreakdownEditor(overrides = {}) {
+    function renderBreakdownEditor(overrides = {}, user: UserEvent = userEvent.setup()) {
       const rtlRender = render(
         <DimensionEditor
           {...props}
@@ -873,8 +750,8 @@ describe('dimension editor', () => {
 
       const setMaxCols = async (maxCols: number) => {
         const maxColsInput = screen.getByLabelText(/layout columns/i);
-        await userEvent.clear(maxColsInput);
-        await userEvent.type(maxColsInput, maxCols.toString());
+        await user.clear(maxColsInput);
+        await user.type(maxColsInput, maxCols.toString());
       };
 
       return {
@@ -903,19 +780,25 @@ describe('dimension editor', () => {
     });
 
     it('sets max columns', async () => {
-      const { setMaxCols } = renderBreakdownEditor();
-      await setMaxCols(1);
-      await waitFor(() =>
-        expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 1 }))
-      );
-      await setMaxCols(2);
-      await waitFor(() =>
-        expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 2 }))
-      );
-      await setMaxCols(3);
-      await waitFor(() =>
-        expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 3 }))
-      );
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      try {
+        const { setMaxCols } = renderBreakdownEditor({}, user);
+        await setMaxCols(1);
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 1 }))
+        );
+        await setMaxCols(2);
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 2 }))
+        );
+        await setMaxCols(3);
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 3 }))
+        );
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     describe('data section', () => {

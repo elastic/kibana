@@ -47,7 +47,7 @@ test(`fails on circular references`, () => {
       [property]: value,
     };
     test(`can submit ${JSON.stringify(obj)}`, () => {
-      expect(() => ensureNoUnsafeProperties(obj)).not.toThrowError();
+      expect(() => ensureNoUnsafeProperties(obj)).not.toThrow();
     });
   });
 });

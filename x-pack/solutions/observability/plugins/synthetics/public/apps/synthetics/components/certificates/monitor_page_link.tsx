@@ -11,6 +11,7 @@ import { EuiLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RemoteMonitorInfo } from '../../../../../common/runtime_types';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
+import { getMonitorSpaceToAppend } from '../../hooks/use_edit_monitor_locator';
 import { createRemoteMonitorDetailUrl } from '../../utils/remote/remote_monitor_urls';
 
 interface DetailPageLinkProps {
@@ -19,12 +20,14 @@ interface DetailPageLinkProps {
   // present (matches the overview flyout), else fall back to local with
   // `?remoteName=<alias>`.
   remote?: RemoteMonitorInfo;
+  spaces?: string[];
 }
 
 export const MonitorPageLink: FC<PropsWithChildren<DetailPageLinkProps>> = ({
   children,
   configId,
   remote,
+  spaces,
 }) => {
   const basePath = useKibana().services.http?.basePath.get();
   const { space } = useKibanaSpace();
@@ -49,7 +52,15 @@ export const MonitorPageLink: FC<PropsWithChildren<DetailPageLinkProps>> = ({
     }
   }
 
-  const search = remote?.remoteName ? `?remoteName=${encodeURIComponent(remote.remoteName)}` : '';
+  const params = new URLSearchParams();
+  if (remote?.remoteName) {
+    params.set('remoteName', remote.remoteName);
+  }
+  const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
+  if (crossSpaceId) {
+    params.set('spaceId', crossSpaceId);
+  }
+  const search = params.toString() ? `?${params.toString()}` : '';
 
   return (
     <EuiLink

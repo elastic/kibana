@@ -323,7 +323,7 @@ test('individual keys can validated', () => {
   });
 
   const value = false;
-  expect(() => type.validateKey('foo', value)).not.toThrowError();
+  expect(() => type.validateKey('foo', value)).not.toThrow();
   expect(() => type.validateKey('bar', '')).toThrowErrorMatchingInlineSnapshot(
     `"bar is not a valid part of this schema"`
   );
@@ -783,7 +783,7 @@ describe('#extends', () => {
 
     expect(() => {
       extended.validate({ initial: 'foo', added: 42 });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       added: 12,
@@ -807,7 +807,7 @@ describe('#extends', () => {
 
     expect(() => {
       extended.validate({ string: 'foo' });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       string: 'foo',
@@ -832,7 +832,7 @@ describe('#extends', () => {
 
     expect(() => {
       extended.validate({ string: 'foo', mutated: 'bar' });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       string: 'foo',
@@ -864,7 +864,7 @@ describe('#extends', () => {
     );
     expect(() => {
       extended.validate({ original: 'foo', mutated: 'bar' });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       original: 'foo',

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
+import type { AiIndexHttpItem, GetAiIndexResponse } from '../common/http_api/ai_indices';
+import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
 /**
  * Context passed to the "Analyze & improve" chat opener: the AI index the user is looking at and,
@@ -40,14 +43,38 @@ export interface AnalyzeChatOptions {
   attachments: AttachmentInput[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEnginePluginSetup {}
+export type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEnginePluginStart {}
+export interface SuggestAutomationParams {
+  aiIndex: GetAiIndexResponse;
+  onSaved: () => void;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEngineSetupDependencies {}
+/** Powers the Suggest automation button. Registered via {@link AgentBuilderIntegration}. */
+export interface SuggestAutomationProvider {
+  canSuggest: (params: { aiIndex: GetAiIndexResponse | undefined; isManaged: boolean }) => boolean;
+  suggestAutomation: (params: SuggestAutomationParams) => void;
+  /** Subscribe to successful save_automation tool results for an AI index. Returns unsubscribe. */
+  subscribeToAutomationSaved: (aiIndexId: string, onSaved: () => void) => () => void;
+}
+
+/** Suggest-automation hooks registered by context_engine_agent_builder. */
+export interface AgentBuilderIntegration {
+  suggestAutomation: SuggestAutomationProvider;
+}
+
+export interface ContextEnginePluginSetup {
+  registerAppChromeAdapter: (adapter: ContextEngineAppChromeAdapter) => void;
+}
+
+export interface ContextEnginePluginStart {
+  /** Registers suggest-automation hooks used by the Context Engine UI. */
+  registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => void;
+}
+
+export interface ContextEngineSetupDependencies {
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+}
 
 export interface ContextEngineStartDependencies {
   data: DataPublicPluginStart;
@@ -56,3 +83,10 @@ export interface ContextEngineStartDependencies {
   console?: ConsolePluginStart;
   spaces?: SpacesPluginStart;
 }
+
+export interface ContextEngineServicesContextDeps {
+  history: AppMountParameters['history'];
+  appChrome?: ContextEngineAppChromeAdapter;
+}
+
+export type ContextEngineAppServices = CoreStart & ContextEngineServicesContextDeps;

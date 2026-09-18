@@ -2372,6 +2372,16 @@ components:
       description: A title for the case.
       type: string
       maxLength: 160
+    case_extended_fields:
+      title: Case extended fields
+      type: object
+      x-state: Technical preview; added in 9.5.0
+      description: |
+        Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+      maxProperties: 500
+      additionalProperties:
+        type: string
+        maxLength: 30000
     create_case_request:
       title: Create case request
       description: The create case API request body varies depending on the type of connector.
@@ -2442,6 +2452,8 @@ components:
                     maxLength: 160
                     nullable: true
                   - type: boolean
+        extended_fields:
+          $ref: '#/components/schemas/case_extended_fields'
         template:
           type: object
           nullable: true
@@ -2968,6 +2980,13 @@ components:
             The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
           nullable: true
           example: 120
+        extended_fields:
+          type: object
+          x-state: Technical preview; added in 9.5.0
+          description: |
+            The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+          additionalProperties:
+            type: string
         external_service:
           $ref: '#/components/schemas/external_service'
         id:
@@ -3116,6 +3135,8 @@ components:
                         - type: boolean
               description:
                 $ref: '#/components/schemas/case_description'
+              extended_fields:
+                $ref: '#/components/schemas/case_extended_fields'
               id:
                 description: The identifier for the case.
                 type: string

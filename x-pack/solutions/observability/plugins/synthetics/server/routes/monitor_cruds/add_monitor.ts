@@ -27,7 +27,7 @@ import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 import {
-  assertCanUpdateMonitorInAllSpaces,
+  assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
 
@@ -114,7 +114,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         maintenanceWindows
       );
 
-      const validationResult = validateMonitor(monitorWithDefaults, spaceId);
+      const validationResult = validateMonitor(
+        monitorWithDefaults,
+        spaceId,
+        server.cloud?.isServerlessEnabled
+      );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details } = validationResult;
@@ -146,7 +150,10 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const monitorSpaces = normalizedMonitor[ConfigKey.KIBANA_SPACES] ?? [];
       if (monitorSpaces.length > 0) {
-        const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(routeContext, monitorSpaces);
+        const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
+          routeContext,
+          monitorSpaces
+        );
         if (spaceAuthError) {
           return spaceAuthError;
         }

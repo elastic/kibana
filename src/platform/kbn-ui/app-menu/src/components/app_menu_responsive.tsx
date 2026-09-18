@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiHeaderLinks, type EuiBreakpointSize, useCurrentEuiBreakpoint } from '@elastic/eui';
-import { useCurrentChromeApplicationBreakpoint } from '@kbn/ui-chrome-layout-utils';
+import { useCurrentChromeApplicationBreakpoint } from '@kbn/ui-chrome-layout';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 export type AppMenuBreakpointSource = 'application' | 'viewport';

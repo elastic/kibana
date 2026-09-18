@@ -28,6 +28,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { PROJECT_ROUTING, useIsCpsMultiProject } from '@kbn/cps-utils';
 import { useTransformCapabilities } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import type { TransformId } from '../../../../../../common/types/transform';
@@ -134,28 +135,32 @@ export const useColumns = (
   const { canStartStopTransform } = useTransformCapabilities();
   const { cps } = useAppDependencies();
   const cpsManager = cps?.cpsManager;
-  const [hasLinkedProjects, setHasLinkedProjects] = React.useState(
-    () => cpsManager?.hasLinkedProjects() ?? false
-  );
+  const hasLinkedProjects = useIsCpsMultiProject(cpsManager);
+  const [originProjectId, setOriginProjectId] = React.useState<string | undefined>();
 
   React.useEffect(() => {
     let isMounted = true;
-    setHasLinkedProjects(cpsManager?.hasLinkedProjects() ?? false);
+    setOriginProjectId(undefined);
 
-    if (!cpsManager) {
-      return;
+    if (cpsManager && hasLinkedProjects) {
+      cpsManager
+        .fetchProjects(PROJECT_ROUTING.ORIGIN)
+        .then((projects) => {
+          if (isMounted) {
+            setOriginProjectId(projects?.origin?._id);
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setOriginProjectId(undefined);
+          }
+        });
     }
-
-    cpsManager.whenReady().then(() => {
-      if (isMounted) {
-        setHasLinkedProjects(cpsManager.hasLinkedProjects());
-      }
-    });
 
     return () => {
       isMounted = false;
     };
-  }, [cpsManager]);
+  }, [cpsManager, hasLinkedProjects]);
 
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
@@ -309,7 +314,7 @@ export const useColumns = (
             }),
             'data-test-subj': 'transformListColumnProjectScope',
             sortable: (item: TransformListRow) =>
-              getProjectScopeSortValue(item.config.source.project_routing),
+              getProjectScopeSortValue(item.config.source.project_routing, originProjectId),
             truncateText: true,
             render(item: TransformListRow) {
               return (

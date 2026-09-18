@@ -8,8 +8,13 @@
 import { createHash } from 'crypto';
 import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { resolveLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import type { EntityEnrichmentFields } from '../fetch_entity_enrichment';
+import type { AssetCriticalityCount, RiskScoreRange } from '../types';
+import {
+  ASSET_CRITICALITY_SEVERITY_ORDER,
+  isKnownAssetCriticalityLevel,
+} from '../asset_criticality_levels';
 
 /**
  * SHA-256 hash of a sorted, comma-joined id list. Used to derive a stable node id when
@@ -62,25 +67,28 @@ export const filterDocDataToIds = (
 };
 
 /**
- * Checks if the entities latest index exists.
- * Previously checked for lookup mode (required for LOOKUP JOIN), but since
- * enrichment now uses follow-up queries, only existence matters.
+ * Resolves the concrete entities latest index name to query, or null when no
+ * live index exists for the space. Legacy-aware: un-migrated deployments still
+ * hold `.entities.v2.latest.security_{space}` while the
+ * `entityStore.migrateLegacySecurityAssets` feature flag is off, and LOOKUP JOIN
+ * consumers need whichever concrete name is live.
  */
-export const checkIfEntitiesIndexExists = async (
+export const resolveEntitiesIndexName = async (
   esClient: IScopedClusterClient,
   logger: Logger,
   spaceId: string
-): Promise<boolean> => {
-  const indexName = getEntitiesLatestIndexName(spaceId);
+): Promise<string | null> => {
   try {
+    const indexName = await resolveLatestEntitiesIndexName(esClient.asInternalUser, spaceId);
     const exists = await esClient.asInternalUser.indices.exists({ index: indexName });
     if (!exists) {
       logger.debug(`Entities index ${indexName} does not exist`);
+      return null;
     }
-    return exists;
+    return indexName;
   } catch (error) {
-    logger.error(`Error checking entities index ${indexName}: ${error.message}`);
-    return false;
+    logger.error(`Error resolving entities index for space ${spaceId}: ${error.message}`);
+    return null;
   }
 };
 
@@ -117,6 +125,61 @@ const unionSourceFields = (records: Array<SourceFieldsRecord | undefined>): Sour
     merged[field] = values.size === 1 ? [...values][0] : [...values];
   }
   return merged;
+};
+
+/**
+ * Computes the risk score range across the entities behind a node.
+ *
+ * A node can represent several entities (merged by type/sub-type), each with its own score,
+ * so the spread is reported rather than a single value; for a single-entity node min === max.
+ * Returns undefined when no entity has a score — absent must stay distinguishable from zero.
+ */
+export const aggregateRiskScore = (
+  entityIds: string[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): RiskScoreRange | undefined => {
+  let min: number | undefined;
+  let max: number | undefined;
+
+  for (const entityId of entityIds) {
+    const score = enrichmentMap.get(entityId)?.riskScore;
+    if (score == null) continue;
+    if (min === undefined || score < min) min = score;
+    if (max === undefined || score > max) max = score;
+  }
+
+  return min === undefined || max === undefined ? undefined : { min, max };
+};
+
+/**
+ * Computes the asset criticality distribution across the entities behind a node: how many
+ * of them carry each criticality level.
+ *
+ * Levels the graph does not model are skipped. Returns undefined when no entity has a
+ * criticality. Entries are ordered most to least severe so consumers that render only the
+ * first entry show the most severe level. Levels stay raw — the consumer translates them.
+ */
+export const aggregateAssetCriticality = (
+  entityIds: string[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): AssetCriticalityCount[] | undefined => {
+  const countsByLevel = new Map<string, number>();
+
+  for (const entityId of entityIds) {
+    const level = enrichmentMap.get(entityId)?.assetCriticality;
+    if (level == null) continue;
+    if (!isKnownAssetCriticalityLevel(level)) continue;
+    countsByLevel.set(level, (countsByLevel.get(level) ?? 0) + 1);
+  }
+
+  if (countsByLevel.size === 0) return undefined;
+
+  return ASSET_CRITICALITY_SEVERITY_ORDER.filter((level) => countsByLevel.has(level)).map(
+    (level) => ({
+      level,
+      count: countsByLevel.get(level) as number,
+    })
+  );
 };
 
 /**
@@ -204,6 +267,20 @@ export const rebuildDocData = (
     if (enrichment?.subType != null) entityData.sub_type = enrichment.subType;
     if (enrichment?.engineType != null) entityData.engine_type = enrichment.engineType;
     if (enrichment?.hostIps?.length) entityData.host = { ip: enrichment.hostIps };
+    // Omitted entirely when absent: an unscored / uncategorized entity carries no key,
+    // rather than a null the client would have to distinguish from a real value.
+    if (enrichment?.riskScore != null) entityData.riskScore = enrichment.riskScore;
+    // Levels the graph does not model are dropped rather than passed through, so a future or
+    // invalid value can never reach a consumer whose label map has no entry for it. Enforced
+    // here as well as at the enrichment source, since this is the single point every entity
+    // document flows through.
+    if (
+      enrichment?.assetCriticality != null &&
+      isKnownAssetCriticalityLevel(enrichment.assetCriticality)
+    ) {
+      entityData.assetCriticality = enrichment.assetCriticality;
+    }
+    if (enrichment?.sources?.length) entityData.sources = enrichment.sources;
 
     delete doc.sourceFields;
     doc.entity = entityData;

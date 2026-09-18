@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
+import { existsSync } from 'fs';
+
+import { REPO_ROOT } from './paths.mjs';
 import { run } from './spawn.mjs';
 
 const getMoonExec = (() => {
@@ -14,11 +18,16 @@ const getMoonExec = (() => {
 
   return async () => {
     if (!moonExecPath) {
-      moonExecPath = (
-        await run('yarn', ['--silent', 'which', 'moon'], {
-          env: { NODE_NO_WARNINGS: '1' },
-        })
-      ).trim();
+      const moonBinPath = Path.resolve(REPO_ROOT, 'node_modules/.bin/moon');
+      if (existsSync(moonBinPath)) {
+        moonExecPath = moonBinPath;
+      } else {
+        moonExecPath = (
+          await run('pnpm', ['exec', 'which', 'moon'], {
+            env: { NODE_NO_WARNINGS: '1' },
+          })
+        ).trim();
+      }
       console.warn(`Using moon at ${moonExecPath}`);
     }
     return moonExecPath;
@@ -35,7 +44,7 @@ const getMoonExec = (() => {
  * @param {RunOpts & { passAlongArgs?: string[], noCache?: boolean, noActions?: boolean, quiet?: boolean }} opts
  */
 export async function moonRun(commandOrCommands, opts = {}) {
-  // Get moon's exec directly to avoid the yarn wrapping, allow for pass-along args
+  // Get moon's exec directly to avoid package-manager wrapping, allow for pass-along args
   const moonExec = await getMoonExec();
 
   const moonArgs = [];

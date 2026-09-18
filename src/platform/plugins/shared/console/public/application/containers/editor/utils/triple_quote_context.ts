@@ -13,12 +13,14 @@ import {
   checkForTripleQuotesAndEsqlQuery,
   findRequestLineNumber,
   getFallbackRequestStartPosition,
+  isInsideConsoleString,
 } from '@kbn/monaco/src/languages/console/utils';
 import type { AdjustedParsedRequest } from '../types';
 
 export interface TripleQuoteContext {
   insideTripleQuotes: boolean;
   insideEsqlQuery: boolean;
+  insideString?: boolean;
 }
 
 const OUTSIDE_TRIPLE_QUOTES: TripleQuoteContext = {
@@ -69,7 +71,7 @@ const getContentBeforePosition = (
 
 const toTripleQuoteContext = (content: string): TripleQuoteContext => {
   const { insideTripleQuotes, insideEsqlQuery } = checkForTripleQuotesAndEsqlQuery(content);
-  return { insideTripleQuotes, insideEsqlQuery };
+  return { insideTripleQuotes, insideEsqlQuery, insideString: isInsideConsoleString(content) };
 };
 
 const coversLine = (request: AdjustedParsedRequest, lineNumber: number): boolean =>
