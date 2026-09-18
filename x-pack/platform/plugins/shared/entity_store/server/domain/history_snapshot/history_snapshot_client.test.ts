@@ -315,6 +315,28 @@ describe('HistorySnapshotClient', () => {
       });
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('runSoon failed'));
     });
+
+    it('rolls back by disabling the task if the global state update fails', async () => {
+      mockGlobalStateClient.update.mockRejectedValue(new Error('SO unavailable'));
+
+      await expect(client.enable(request)).rejects.toThrow(
+        'Failed to persist history snapshot started status'
+      );
+      expect(mockTaskManager.bulkDisable).toHaveBeenCalledWith([taskId], false, { request });
+      expect(mockTaskManager.runSoon).not.toHaveBeenCalled();
+    });
+
+    it('logs a warning if the rollback bulkDisable also fails after the state update failure', async () => {
+      mockGlobalStateClient.update.mockRejectedValue(new Error('SO unavailable'));
+      mockTaskManager.bulkDisable.mockRejectedValue(new Error('TM unavailable'));
+
+      await expect(client.enable(request)).rejects.toThrow(
+        'Failed to persist history snapshot started status'
+      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('roll back task enable')
+      );
+    });
   });
 
   describe('disable', () => {
@@ -343,6 +365,27 @@ describe('HistorySnapshotClient', () => {
         'Failed to disable history snapshot task: Not Found'
       );
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+    });
+
+    it('rolls back by re-enabling the task if the global state update fails', async () => {
+      mockGlobalStateClient.update.mockRejectedValue(new Error('SO unavailable'));
+
+      await expect(client.disable(request)).rejects.toThrow(
+        'Failed to persist history snapshot stopped status'
+      );
+      expect(mockTaskManager.bulkEnable).toHaveBeenCalledWith([taskId], false, { request });
+    });
+
+    it('logs a warning if the rollback bulkEnable also fails after the state update failure', async () => {
+      mockGlobalStateClient.update.mockRejectedValue(new Error('SO unavailable'));
+      mockTaskManager.bulkEnable.mockRejectedValue(new Error('TM unavailable'));
+
+      await expect(client.disable(request)).rejects.toThrow(
+        'Failed to persist history snapshot stopped status'
+      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('roll back task disable')
+      );
     });
 
     describe('with clearHistorySnapshots', () => {

@@ -93,10 +93,24 @@ export class HistorySnapshotClient {
       throw new Error(`Failed to enable history snapshot task: ${error?.error?.message}`);
     }
 
-    // Step 2: Persist 'started' status
-    await this.globalStateClient.update({
-      historySnapshot: { ...globalState.historySnapshot, status: 'started' },
-    });
+    // Step 2: Persist 'started' status. If this fails, roll back the task enable so
+    // the task-enabled flag and the global state status stay in sync.
+    try {
+      await this.globalStateClient.update({
+        historySnapshot: { ...globalState.historySnapshot, status: 'started' },
+      });
+    } catch (updateErr) {
+      await this.taskManager.bulkDisable([taskId], false, { request }).catch((rollbackErr) => {
+        this.logger.warn(
+          `History snapshot: failed to roll back task enable after state update failure: ${getErrorMessage(
+            rollbackErr
+          )}`
+        );
+      });
+      throw new Error(
+        `Failed to persist history snapshot started status: ${getErrorMessage(updateErr)}`
+      );
+    }
 
     // Step 3: Schedule an immediate run. Non-fatal if this fails — the task is enabled
     // and will execute at its next scheduled cadence.
@@ -124,9 +138,24 @@ export class HistorySnapshotClient {
       throw new Error(`Failed to disable history snapshot task: ${error?.error?.message}`);
     }
 
-    await this.globalStateClient.update({
-      historySnapshot: { ...globalState.historySnapshot, status: 'stopped' },
-    });
+    // Persist 'stopped' status. If this fails, roll back the task disable so
+    // the task-enabled flag and the global state status stay in sync.
+    try {
+      await this.globalStateClient.update({
+        historySnapshot: { ...globalState.historySnapshot, status: 'stopped' },
+      });
+    } catch (updateErr) {
+      await this.taskManager.bulkEnable([taskId], false, { request }).catch((rollbackErr) => {
+        this.logger.warn(
+          `History snapshot: failed to roll back task disable after state update failure: ${getErrorMessage(
+            rollbackErr
+          )}`
+        );
+      });
+      throw new Error(
+        `Failed to persist history snapshot stopped status: ${getErrorMessage(updateErr)}`
+      );
+    }
     this.logger.debug(`Disabled history snapshot task ${taskId}`);
 
     if (options?.clearHistorySnapshots === true) {
