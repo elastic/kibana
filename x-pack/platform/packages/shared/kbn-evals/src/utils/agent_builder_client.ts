@@ -151,7 +151,7 @@ export function createAgentBuilderClient({
           ...(configurationOverrides
             ? {
                 configuration_overrides: {
-                  ...(configurationOverrides.instructions
+                  ...(configurationOverrides.instructions !== undefined
                     ? { instructions: configurationOverrides.instructions }
                     : {}),
                   ...(configurationOverrides.tools
