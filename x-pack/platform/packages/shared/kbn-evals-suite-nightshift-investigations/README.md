@@ -1,128 +1,250 @@
 # @kbn/evals-suite-nightshift-investigations
 
-Evaluation suite for [Nightshift investigations](../../../plugins/shared/nightshift_investigations).
+Native evaluation suite for [Nightshift investigations](../../../plugins/shared/nightshift_investigations).
+The default eval runs the approved `suite/investigate-lite` examples from a privately configured source dataset
+through the manual investigation route and grades the Nightshift Deductive Investigator.
 
-Today the suite holds one smoke eval that checks seed data loading, scoring and score ingestion
-work end to end; real evaluators against the investigation engine land on top of it.
+This is **Harness Parity**: the target has no source telemetry access. Low scores measure the
+behavior of this setup and are not claims about investigation capability. Cortex and workspace
+persistence are disabled; example concurrency is 2.
 
-## Running the suite
+## Running the golden eval
 
-```bash
-node scripts/evals start --suite nightshift-investigations
-```
+Prerequisites: the repository's pinned Node version and bootstrapped dependencies, Docker with
+container IPs reachable from the host (for example OrbStack), Go for the external sandbox,
+a configured model connector, and credentials for the golden evaluations cluster.
 
-`start` brings up Elasticsearch, Kibana and EDOT, then runs the suite. Later runs reuse those
-services, so iteration is fast. Use `node scripts/evals run --suite nightshift-investigations`
-when they are already up.
-
-### Choosing where scores are recorded
-
-The `--profile` flag decides which cluster records the run. Refer to [`--profile` in the `@kbn/evals` README](../kbn-evals/README.md#profiles) for the full list of profiles and how each one resolves its credentials. The two that matter most here:
-
-| Goal                                 | Command                                                                          |
-| ------------------------------------ | -------------------------------------------------------------------------------- |
-| Keep scores on your own machine      | `node scripts/evals start --suite nightshift-investigations --profile local`     |
-| Publish scores to the golden cluster | `node scripts/evals start --suite nightshift-investigations --profile dev-vault` |
-
-`dev-vault` publishes to the golden cluster, which is what the weekly pipeline writes to and what the dashboards read, so use it when a run needs to be comparable against the weekly baseline. It reads its credentials from Vault at runtime, handling the login itself and opening a browser if your Vault session has expired.
-
-`local` records scores on your own development Elasticsearch and Kibana, so start those yourself before running the suite. Both stay in the foreground, so each needs its own terminal, and the suite then runs in a third:
+1. Create a local `golden` profile using the [eval profile instructions](../kbn-evals/README.md#profiles).
+   Its ignored `kbn-evals/scripts/vault/config.golden.json` needs `evaluationsKbn`,
+   `evaluationsEs`, `tracingEs`, `tracingExporters`, and the model provider configuration.
+   Use the existing access credentials; keep the file local. Golden examples do not need
+   `gcsDatasetAccessCredentials`. Set `NIGHTSHIFT_GOLDEN_SOURCE_DATASET` to the approved source
+   dataset name in your private environment; do not commit or publish that value.
+2. Start the native sandbox services as described below and export the same `SANDBOX_API_KEY`
+   in the terminal running evals.
+3. Run the standard entry point:
 
 ```bash
-# terminal 1
-yarn es snapshot --license trial   # Elasticsearch on localhost:9200
-
-# terminal 2
-yarn start                         # Kibana on localhost:5601
+node scripts/evals start --suite nightshift-investigations --profile golden
 ```
 
-`start` will not launch them for you. It brings up a separate Scout cluster on `9220` and `5620` for the suite to run against, and leaves your development instance alone. Omitting `--profile` prompts for a destination instead.
+`start` launches Scout Elasticsearch (`9220`), Kibana (`5620`) and EDOT. It leaves sandbox-api
+running separately. To reuse the stack, use `node scripts/evals run` with the same flags.
+Configure connectors using the [standard eval model setup](../kbn-evals/README.md#11-getting-started-locally).
+For the reference comparison, explicitly select Claude Sonnet 4.6 as judge; for example, when
+that OpenRouter connector is configured:
 
-Either way the profile also supplies this suite's `GCS_CREDENTIALS`, read from `gcsDatasetAccessCredentials` in the profile's config — from Vault for `dev-vault`, from `config.<profile>.json` otherwise, and `node scripts/evals init` can fill it in. Export the variable by hand only when running outside a profile, as [publishing](#publishing-the-synthetic-snapshot) does.
-
-For model and judge selection, `--grep` and repetitions, see [running evals locally](../kbn-evals/README.md#11-getting-started-locally). This suite does not override any of those flags.
-
-## Two kinds of dataset
-
-The word "dataset" means two different things in evals, and this suite keeps them apart deliberately. It is worth reading once.
-
-| Term             | What it is                                                                                                                                  | Where it lives                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| **Eval dataset** | The examples a run is scored on: an input, the expected output, and metadata. Scores are recorded against it.                               | [`src/datasets/`](src/datasets)   |
-| **Seed data**    | The Elasticsearch documents an eval dataset is evaluated _against_ — logs, metrics, traces, alerts. Restored into the cluster before a run. | [`src/seed_data/`](src/seed_data) |
-
-An eval dataset names its seed data through `seedSource`, but the two are otherwise independent: several eval datasets can sit on top of the same seed data, and swapping the target under test changes neither. That is what lets one eval dataset and its evaluators be reused against a different target.
-
-## Layout
-
-One eval is one folder under `evals/`, holding everything specific to it. `src/` holds only what
-every eval shares.
-
-| Path              | Holds                                                                    |
-| ----------------- | ------------------------------------------------------------------------ |
-| `evals/<name>/`   | One eval: its datasets, task, evaluators, types and spec                 |
-| `src/datasets/`   | The eval dataset contract, selection, and conversion to framework shape  |
-| `src/seed_data/`  | Seed sources, plus seeding, publishing and clearing them                 |
-| `src/evaluate.ts` | The suite's Playwright fixture                                           |
-| `scripts/lib/`    | Code shared between the CLIs, such as connecting to a cluster from flags |
-| `scripts/<name>/` | One developer CLI each, run via a launcher in Kibana's root `scripts/`   |
-
-Inside an eval folder the files always mean the same thing, so `evals/smoke/` reads as a template:
-
-| File            | Holds                                                              |
-| --------------- | ------------------------------------------------------------------ |
-| `types.ts`      | The example shape, its expected output, and the evaluator type     |
-| `datasets.ts`   | The eval datasets and a `get<Name>Datasets()` that applies filters |
-| `task.ts`       | What runs under test, and the shape of its output                  |
-| `evaluators.ts` | The evaluators, and the array the spec passes to the runner        |
-| `*.spec.ts`     | Wiring: iterate datasets, seed, run, score                         |
-
-Playwright only collects `*.spec.ts`, so the neighbouring files are invisible to it while Jest
-still picks up `*.test.ts`.
-
-Specs stay thin because [`withSeedData`](src/seed_data/with_seed_data.ts) registers both the `beforeAll` that seeds and the `afterAll` that clears, so no spec carries its own copy and none can forget cleanup:
-
-```ts
-evaluate.describe(dataset.id, () => {
-  const seedData = withSeedData(dataset);
-
-  evaluate('...', async ({ esClient }) => {
-    // seedData().indices — the data streams seeding actually wrote
-  });
-});
+```bash
+node scripts/evals start --suite nightshift-investigations --profile golden \
+  --model openrouter-anthropic-claude-sonnet-4-6 \
+  --judge openrouter-anthropic-claude-sonnet-4-6
 ```
 
-## Adding a new eval
+The profile's default judge may differ. `--model` controls the investigator and `--judge`
+controls the graders. The spec assigns the selected model to `significant_events_investigation`.
+The four-example lite slice is intended to finish within the 55-minute test timeout.
 
-Copy [`evals/smoke/`](evals/smoke) and work through its five files. Nothing outside the new
-folder needs to change, and the suite picks the spec up automatically.
+### External sandbox prerequisite
 
-1. **`types.ts`** — describe an example: its input, the expected output your evaluators will read,
-   and an evaluator type bound to your task's output.
-2. **`task.ts`** — call the thing under test and return a typed result. For the investigation
-   engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, then
-   following the investigation to a terminal status.
-3. **`datasets.ts`** — declare `Dataset` objects with an `id`, a `name` that scores are recorded
-   against, a `seedSource`, and an `examples()` call returning ground truth. Export a
-   `get<Name>Datasets()` that passes them through `selectDatasets`, which is what makes
-   `NIGHTSHIFT_DATASETS` work for your eval too.
-4. **`evaluators.ts`** — write CODE evaluators as plain objects, and reach for the `evaluators`
-   fixture for LLM-as-judge scoring (`evaluators.criteria([...])`). Export them as one array.
-5. **`<name>.spec.ts`** — iterate your datasets, call `withSeedData(dataset)` once per describe
-   block, and hand the task and evaluators to `executorClient.runExperiment`.
+Run [elastic/sandbox-service](https://github.com/elastic/sandbox-service) natively with its
+Docker backend and mTLS support (sandbox-service PR #7 or later). The suite does not start it.
+From a local clone:
 
-Two details worth knowing before you start:
+```bash
+git clone https://github.com/elastic/sandbox-service.git
+cd sandbox-service
+make build-container-manager build-sandbox-api
+docker build -f Dockerfile.sandbox -t nightshift-golden-sandbox .
+docker network create nightshift-golden-sandbox
+mkdir -p ssl /tmp/nightshift-golden-workspaces
+openssl req -x509 -newkey rsa:2048 -nodes -days 7 \
+  -keyout ssl/server.key -out ssl/server.crt \
+  -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost'
+openssl req -newkey rsa:2048 -nodes -keyout ssl/client.key -out ssl/client.csr \
+  -subj '/CN=kibana-golden-evals'
+printf '%s\n' 'extendedKeyUsage=clientAuth' > ssl/client.ext
+openssl x509 -req -in ssl/client.csr -CA ssl/server.crt -CAkey ssl/server.key \
+  -CAcreateserial -out ssl/client.crt -days 7 -extfile ssl/client.ext
+chmod 600 ssl/*.key
+```
 
-- **Seed data belongs in [`src/seed_data/sources.ts`](src/seed_data/sources.ts), not in your eval
-  folder.** Several evals can share one snapshot, and the CLI that publishes it has to agree with
-  the eval that reads it, so each source is declared once and referenced by both.
-- **`examples` is a function, not an array.** It is called when Playwright collects the describe
-  tree, which is what a dataset reading ground truth from files downloaded during global setup
-  needs.
+In a terminal in that clone, start container-manager:
 
-If your eval needs data from somewhere other than a GCS snapshot, add a member to `SeedSource` in
-[`src/seed_data/types.ts`](src/seed_data/types.ts) and a branch to `seedDataset` in
-[`src/seed_data/seed.ts`](src/seed_data/seed.ts). That switch is the only place seeding fans out.
+```bash
+CLUSTER_NAME=localhost \
+WORKSPACE_PVC_PATH=/tmp/nightshift-golden-workspaces \
+CONTAINERMANAGER_SANDBOX_IMAGE=nightshift-golden-sandbox \
+CONTAINERMANAGER_DOCKER_SANDBOX_NETWORK=nightshift-golden-sandbox \
+bin/container-manager-service
+```
+
+In another terminal in the clone, generate a local key and start the API. Export the same key
+in the eval terminal; do not include it in source control or evidence reports.
+
+```bash
+export SANDBOX_API_KEY="$(openssl rand -hex 32)"
+CONTAINERMANAGER_ADDRESS=localhost:50051 \
+CONTAINERMANAGER_CA_CERT="$PWD/ssl/server.crt" \
+SANDBOX_API_ADDRESS=:8090 \
+SANDBOX_API_TLS_CERT="$PWD/ssl/server.crt" \
+SANDBOX_API_TLS_KEY="$PWD/ssl/server.key" \
+SANDBOX_API_CLIENT_CA_CERT="$PWD/ssl/server.crt" \
+bin/sandbox-api
+```
+
+In the eval terminal, export paths to that clone's client identity and server CA:
+
+```bash
+export SANDBOX_CLIENT_CERT_PATH=/absolute/path/to/sandbox-service/ssl/client.crt
+export SANDBOX_CLIENT_KEY_PATH=/absolute/path/to/sandbox-service/ssl/client.key
+export SANDBOX_CA_CERT_PATH=/absolute/path/to/sandbox-service/ssl/server.crt
+```
+
+Scout reads the PEM files into the current `sandbox.ssl` configuration and connects with mTLS.
+The sandbox configuration is passed through a mode-0600 temporary file in a private directory,
+so sandbox credentials, connector secrets, and trace-exporter headers do not appear in process arguments. Scout removes the
+temporary directory when its process exits normally.
+The gRPC API listens on `9090`; `8090` is only for probes. Leave the `WORKSPACE_SNAPSHOT_*`
+variables unset so each new conversation starts independently. Persistence is owned by
+sandbox-api; the Kibana workspace manager and backup hook were removed in #289300. The shared
+`space__conversation` scoping remains in the sandbox tools and Cortex hydration. The Docker network must allow
+native sandbox-api to reach container ports `8080` and `8081`. The sandbox must also reach
+Scout Elasticsearch at `http://host.docker.internal:9220`; override
+`NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` if your Docker networking uses another address.
+
+The `evals_nightshift_investigations` Scout config extends `evals_tracing`. It adds the plugin,
+sandbox, a preconfigured basic-auth telemetry webhook, Agent Builder experimental features,
+and all eight tracing/privacy settings. Both trace exporters use the selected profile.
+The telemetry connector uses a generated file-realm identity on the ephemeral Scout cluster.
+It can only read and inspect index metadata for `logs-*`, `metrics-*`, and `traces-*`; it has
+no cluster, write, impersonation, or restricted-index privileges. Its random password is
+kept in the same private Kibana configuration, and Elasticsearch receives only its salted hash.
+Existing preconfigured-only,
+agent allow-list and execute-authorization checks still apply.
+
+## Dataset procurement contract
+
+The committed [example schema](evals/golden/example.schema.json) describes one example.
+[`types.ts`](evals/golden/types.ts) validates it at runtime. Upload approved examples to the source
+dataset through the owning team's reviewed workflow. No source examples are stored in this repo.
+
+Global setup reads `NIGHTSHIFT_GOLDEN_SOURCE_DATASET` by name from the selected cluster into a temporary
+file with owner-only access. Collection reads it synchronously, excludes archived examples,
+and intersects all requested `metadata.dataset_split` tags (AND semantics). Only
+`suite/investigate-lite` is currently registered, under **`nightshift/investigate-lite`**.
+The source is read-only; the native runner upserts only the derived nightshift-owned dataset.
+Temporary source data is removed after the run. Source lookup and detailed score reads use
+the first Space selected by `--space-ids`, matching the native executor.
+
+| Field | Requirement and meaning |
+| --- | --- |
+| `input.question` | Required nonempty string, up to 9,508 characters (the product limit of 10,000 minus the 492-character suffix). Only this text plus the exact eval constraints suffix reaches the investigator. |
+| `output.reference_answer` | Expected answer for the RCA graders, up to 100,000 characters. Supply this for new examples. |
+| `output.answer` | Legacy goal-grader fallback when `reference_answer` is absent. At least one answer must be nonempty. RCA graders use `reference_answer`. |
+| `metadata.langsmith_example_id` | Required source LangSmith example ID, retained for comparison joins. |
+| `metadata.source_kbn_example_id` | Added by derivation from the source example's persisted ID, for Phase C joins. |
+| `metadata.max_latency_seconds` | Required positive budget in seconds. Existing numeric strings are preserved in metadata and read numerically by the task. No budget uplift. |
+| `metadata.dataset_split` | Required array of split tags, including `suite/investigate-lite` to enter this run. |
+| `metadata.case_id` | Optional stable test identifier; otherwise the LangSmith example ID is used. |
+| `metadata.category` | Optional rubric selector. `investigate` selects the investigation rubric; so do supported alert-debug question prefixes. |
+| `metadata.status` | Optional lifecycle state; `archived` examples are excluded. |
+| Additional input, output, metadata fields | Preserved as JSON, including provenance and existing split tags. |
+
+The JSON schema is generated from the runtime definition and a Jest test checks they match.
+After changing the contract, regenerate it from the repository root:
+
+```bash
+node -r @kbn/setup-node-env <<'JS'
+const fs = require('fs');
+const { z } = require('@kbn/zod/v4');
+const directory = 'x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations/evals/golden';
+const { goldenExampleSchema } = require(`./${directory}/types`);
+fs.writeFileSync(`${directory}/example.schema.json`, JSON.stringify(z.toJSONSchema(goldenExampleSchema), null, 2) + '\n');
+JS
+```
+
+The full investigate slice and Turing/copilot evaluations are deferred.
+
+## Evaluators and evidence
+
+The task starts a manual `POST /internal/nightshift/investigations`, polls its record to a
+terminal status, and surfaces the workflow's `investigate` step error. Its ID is the workflow
+execution ID. Conversation tool calls become a Trajectory with outputs capped at 2,000
+characters; tool counts come from those same steps. The structured report is rendered as
+markdown with conclusion, severity, hypotheses ranked by confidence, reasons, recommendations
+and blind spots.
+
+Task output retains the 16 Deductive fields (`test_id`, `query`, `max_latency_seconds`,
+`metrics`, `latency_seconds`, `tool_names_invoked`, `total_tool_calls`, `failed_tool_calls`,
+`final_answer`, `healthcheck`, `as_of_offset_minutes`, `as_of_ts`, `severity_truth`,
+`outcome_after_as_of`, `execution_error`, `trajectory`) and adds `investigation_id`,
+`conversation_id`, `workflow_status`, `structured_report`. The native `traceId` field points
+to the agent conversation's trace, accepting either string or array round representations.
+
+The 18 golden keys are `goal_pass`, `latency_ok`, `latency_seconds`, `latency_budget_seconds`,
+`tool_calls_total`, `tool_calls_failed`, `cost_usd`, `rca_entity_recall`, `rca_false_positive`,
+`rca_investigation_efficiency`, `rca_mechanism_class`, `rca_timeline_ok`, `rca_signal_coverage`,
+`rca_cause_completeness`, `rca_confidence_ok`, `rca_anti_leakage`, `rca_hypothesis_focus`, and
+`rca_evidence_quality`. The native input/output/cached-token, latency and tool-call evaluators
+add five trace-based scores.
+
+Prompts and the golden constraints suffix are copied verbatim from Deductive's Phase C
+Python implementation at `3037d27410fb51710901e99081796644ebf84655`. Six semantic graders
+share one cached structured judgment per example; focus and evidence use independent calls.
+LLM versions are SHA-256 hashes of their prompt templates. Missing judgments retain null
+semantics, including the Python anti-leakage fallback. `goal_pass` is graded `(score - 1) / 4`,
+following Python and LangSmith; Phase C's stored binary gate is a known discrepancy.
+
+The acceptance spec verifies every selected key per example, explicit null cost, source IDs,
+run metadata, and the agent trace. Scores contain task output and evaluator traces. Full
+Agent Builder tracing exports prompts, responses, tool details and real IDs to the profile's
+credential-gated cluster. Keep reference and per-example trace links in the PR evidence.
+
+## Vocabulary
+
+| Term | Meaning |
+| --- | --- |
+| **Eval Backend** | The system storing datasets, experiments, scores and traces, such as LangSmith or kbn. |
+| **Eval Target** | The product agent being evaluated, such as the Deductive agent or Nightshift Deductive Investigator. |
+| **Eval Runner** | The code that loads examples, invokes the target and runs graders, such as the Python golden runner or native Kibana eval suite. |
+| **Golden Eval** | A versioned, approved set of examples and graders used for repeatable comparisons. |
+| **Trajectory** | The ordered tool calls, tool results and final response supplied to graders as execution evidence. |
+| **Harness Parity** | A comparison holding inputs and graders fixed to validate runner/target integration; without equivalent data access, scores are not capability comparisons. |
+
+## Runner parity contract
+
+These are the ten surfaces in the Phase C design contract.
+
+| Surface | Kibana status |
+| --- | --- |
+| Dataset | Source read by name; original fields preserved; AND splits; archived rows excluded; source kbn and LangSmith IDs retained. Only the lite dataset is registered. |
+| Upload | Approved golden source is never upserted. Native upsert owns only `nightshift/investigate-lite`; no public example snapshot or allowlist upload is introduced. |
+| Target input | Manual investigation with question plus verbatim golden constraints suffix. Expected answers remain grader-only. Cortex and persistence are off. |
+| Target output | Original 16 fields plus investigation evidence; deterministic report and 2,000-character tool outputs. The unused healthcheck fields stay null. |
+| Evaluator input | Original output/reference shapes and prompt text; one shared semantic judge cache. No new server-side evaluator registration. |
+| Gate | Original rubric selection and graded `goal_pass`; latency scored separately. Python null, failure and N/A semantics retained. |
+| Score keys | All 18 investigate keys plus five native trace metrics. `cost_usd` is explicit null with Deductive's explanation. |
+| Experiment | Native UUID, permanent experiment URL, per-example agent task trace and evaluator trace IDs, and task output in score documents. No Postgres integration is added. |
+| Run metadata | Reasoning mode, exact suffix, judge, backend, runner, target, Cortex, persistence and dataset recorded in every score's `evaluator.metadata.experiment`; native runner also retains experiment metadata locally. Native git revision/hostname replace Python package/runtime-cluster metadata. The server's closed top-level metadata schema remains a gap. |
+| Cost and export | No dollar rollup. Native span export and token metrics use the full Agent Builder trace. Source LangSmith flushing/cost rereads are backend-specific. |
+
+Known server gaps remain: approximately five-second score refresh, HTTP 413 for large score
+batches, and the unpaginated 100 MiB dataset read. This lite run stays below those limits.
+
+## Suite layout and synthetic smoke eval
+
+`evals/golden/` follows the suite's types/datasets/task/evaluators/spec pattern and adds prompts,
+global setup and pure-module Jest tests. `src/evaluate.ts` provides the shared Playwright fixture.
+`evals/smoke/` checks seed loading and score ingestion using `src/seed_data/` utilities.
+
+```bash
+NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-investigations --profile golden
+```
+
+The smoke eval also needs GCS seed credentials. Golden examples are scoring inputs; seed data
+are the Elasticsearch documents a target investigates. Golden Harness Parity deliberately
+loads no customer seed data. New seeded evals can follow `evals/smoke/` and `withSeedData`;
+new unseeded evals can follow `evals/golden/`.
 
 ## Seed data
 
@@ -183,33 +305,36 @@ Raising `--document-count` also means raising `SYNTHETIC_SMOKE_DOCUMENT_COUNT` i
 [`sources.ts`](src/seed_data/sources.ts), since that constant is the ground truth the eval scores
 against.
 
-## Environment variables
+## Environment and CI
 
-| Variable              | Effect                                                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS` | Eval datasets to run: unset or `all` for every one, otherwise a comma-separated list of ids. Unknown ids fail the run and list what is available. |
-| `SELECTED_EVALUATORS` | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                    |
-| `GCS_CREDENTIALS`     | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                    |
+| Variable | Effect |
+| --- | --- |
+| `NIGHTSHIFT_GOLDEN_SOURCE_DATASET` | Required for golden evals: approved source dataset name, supplied through private local/CI configuration. No default is committed. |
+| `NIGHTSHIFT_DATASETS` | Unset, `all` or `investigate-lite` selects the lite golden eval. `synthetic-smoke` selects the seed smoke eval. Unknown values fail early. |
+| `SANDBOX_API_KEY` | Required local sandbox-api key, shared by Scout and sandbox-api. |
+| `SANDBOX_CLIENT_CERT_PATH`, `SANDBOX_CLIENT_KEY_PATH` | Required PEM client certificate and key paths for sandbox-api mTLS. |
+| `SANDBOX_CA_CERT_PATH` | PEM server CA path; required for the local self-signed setup, optional with a publicly trusted server certificate. |
+| `SANDBOX_API_HOST`, `SANDBOX_API_PORT` | Override `localhost:9090`. |
+| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` | Elasticsearch URL reachable inside the sandbox; default `http://host.docker.internal:9220`. |
+| `NIGHTSHIFT_GOLDEN_SNAPSHOT` | Managed by global setup; temporary source snapshot path. |
+| `SELECTED_EVALUATORS` | Standard native filter by evaluator name. Acceptance evidence uses all 23. |
+| `GCS_CREDENTIALS` | Needed only for seed snapshots; supplied through profile `gcsDatasetAccessCredentials`. |
 
-Because every eval dataset gets its own `describe` block, Playwright's `--grep` filters by dataset id as well.
+Registered as `nightshift-investigations` in
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json). Local CLI runs
+use the golden profile and Scout config `evals_nightshift_investigations` by default.
+
+PR and weekly CI retain the existing `synthetic-smoke` coverage with `evals_tracing`, which
+needs no sandbox. The CI runner forwards this selection to model jobs and baseline refreshes.
+**Golden CI sandbox provisioning is deferred to a separate change**; the credentialed local
+acceptance run is the golden baseline. This PR adds no sandbox launcher. A provisioned job
+can explicitly select `NIGHTSHIFT_DATASETS=investigate-lite` and
+`EVAL_SERVER_CONFIG_SET=evals_nightshift_investigations` with the private dataset and sandbox
+configuration above. Use `--judge` explicitly for the reference comparison.
+
+Validation:
 
 ```bash
-NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-investigations
+node scripts/jest x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations
+node scripts/check.js --scope=local
 ```
-
-## CI
-
-Registered in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json)
-as `nightshift-investigations`.
-
-- **On a PR:** add the `evals:nightshift-investigations` label. No `models:` label is needed —
-  the suite pins a cheap connector through `defaultModelGroups`, and since no model affects the
-  smoke eval's score, which one runs does not matter.
-- **Weekly:** a step in [`llm_evals.yml`](../../../../../.buildkite/pipelines/evals/llm_evals.yml)
-  runs it against that same connector.
-- **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry.
-- **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
-
-## Enabling the investigation engine
-
-The smoke eval never calls the engine, so the server config it would need does not exist yet. An eval that does needs `xpack.nightshift_investigations.enabled`, along with Agent Builder, workflows and an inference endpoint for `significant_events_investigation`. That belongs in a new `evals_nightshift_investigations` Scout config set extending `evals_tracing`, in the same shape as `evals_workflows`, referenced from `serverConfigSet` in the suite's entry in `evals.suites.json`.
