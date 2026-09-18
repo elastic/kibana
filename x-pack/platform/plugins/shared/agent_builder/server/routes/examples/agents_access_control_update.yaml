@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         updateAgentAccessControlRequestExample:
-          description: "Example request granting two users access to the agent by their Kibana user profile uid — Alice as Editor (can update the agent and its access control), Bob as User (can run the agent)."
+          description: "Example request granting two users access to the agent by their Kibana user profile uid — Alice as Editor (can update the agent configuration), Bob as User (can run the agent)."
           value:
             entries:
               - type: user
@@ -30,9 +30,11 @@ responses:
                 - type: user
                   id: u_alice_profile_uid
                   role: editor
+                  added_at: '2026-02-11T10:15:00.000Z'
                 - type: user
                   id: u_bob_profile_uid
                   role: user
+                  added_at: '2026-02-11T10:15:00.000Z'
   400:
     description: "Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have custom access control)."
     content:

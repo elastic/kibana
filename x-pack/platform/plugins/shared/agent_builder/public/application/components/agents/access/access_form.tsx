@@ -25,6 +25,7 @@ import {
   type AgentAccessControlEntry,
   AgentAccessControlRole,
   type AgentDefinition,
+  type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { selectableRolesForAccessControlMode } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
@@ -39,7 +40,7 @@ import {
 interface AccessFormProps {
   agent: Pick<AgentDefinition, 'access_control'>;
   entries: AgentAccessControlEntry[];
-  ownerName?: string;
+  owner?: UserIdAndName;
   isDisabled?: boolean;
   onChange: (entries: AgentAccessControlEntry[]) => void;
 }
@@ -91,7 +92,7 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
 export const AccessForm: React.FC<AccessFormProps> = ({
   agent,
   entries,
-  ownerName,
+  owner,
   isDisabled,
   onChange,
 }) => {
@@ -104,13 +105,14 @@ export const AccessForm: React.FC<AccessFormProps> = ({
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
   }, [accessControlMode]);
 
-  const excludedUids = entries
-    .map((entry) => entry.id)
-    .filter((id): id is string => id !== undefined);
+  const excludedUids = [...entries.map((entry) => entry.id), owner?.id].filter(
+    (id): id is string => id !== undefined
+  );
 
-  const excludedUsernames = entries
-    .map((entry) => (entry.id === undefined ? entry.name : undefined))
-    .filter((name): name is string => name !== undefined);
+  const excludedUsernames = [
+    ...entries.map((entry) => (entry.id === undefined ? entry.name : undefined)),
+    owner?.username,
+  ].filter((name): name is string => name !== undefined);
 
   const handleAdd = (profile: UserProfileWithAvatar) => {
     const nextEntry: AgentAccessControlEntry = {
@@ -150,15 +152,15 @@ export const AccessForm: React.FC<AccessFormProps> = ({
           <EuiSpacer size="s" />
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
             <EuiPanel paddingSize="none" hasBorder={true} hasShadow={false}>
-              {ownerName && (
+              {owner?.username && (
                 <div css={ownerRowStyles(euiTheme)}>
                   <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiAvatar size="s" name={ownerName} />
+                      <EuiAvatar size="s" name={owner.username} />
                     </EuiFlexItem>
                     <EuiFlexItem grow>
                       <EuiText size="s">
-                        <strong>{ownerName}</strong>
+                        <strong>{owner.username}</strong>
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

@@ -13,9 +13,11 @@ responses:
                   - type: user
                     id: u_alice_profile_uid
                     role: editor
+                    added_at: '2026-02-11T10:15:00.000Z'
                   - type: user
                     id: u_bob_profile_uid
                     role: user
+                    added_at: '2026-02-11T10:15:00.000Z'
               permissions:
                 update_access_control: true
           getAgentAccessControlMaskedResponseExample:
@@ -27,6 +29,7 @@ responses:
                   - type: user
                     id: u_bob_profile_uid
                     role: user
+                    added_at: '2026-02-11T10:15:00.000Z'
               permissions:
                 update_access_control: false
   404:

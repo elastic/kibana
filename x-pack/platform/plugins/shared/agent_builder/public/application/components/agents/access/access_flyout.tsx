@@ -169,6 +169,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
         <AccessForm
           agent={agent}
           entries={draft.entries}
+          owner={agent.created_by}
           isDisabled={updateMutation.isLoading}
           onChange={(entries) => setDraft((prev) => (prev ? { ...prev, entries } : prev))}
         />
