@@ -6,3 +6,4 @@
  */
 
 export { modelVersion1 } from './model_version_1';
+export { modelVersion2 } from './model_version_2';

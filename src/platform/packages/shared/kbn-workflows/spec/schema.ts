@@ -17,18 +17,22 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
+import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../common/constants';
 import {
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
   MAX_HITL_ACTION_LABEL_LENGTH,
-  MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH,
   MAX_HITL_EXTERNAL_LINK_LENGTH,
   MAX_HITL_MESSAGE_LENGTH,
-  MAX_HITL_SLACK_CHANNEL_ID_LENGTH,
+  MAX_HITL_SLACK_CHANNEL_LENGTH,
 } from '../common/hitl';
+import { DURATION_REGEX, MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 
-export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
+export const DurationSchema = z
+  .string()
+  .max(MAX_DURATION_LENGTH)
+  .regex(DURATION_REGEX, 'Invalid duration format');
 
 export const ByteSizeSchema = z
   .string()
@@ -46,10 +50,7 @@ export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
   condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
-  delay: z
-    .string()
-    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
-    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+  delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
   /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
   strategy: RetryDelayStrategySchema.optional(),
   /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
@@ -60,11 +61,6 @@ export const WorkflowRetrySchema = z.object({
   jitter: z.boolean().optional(),
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
-
-// Upper bound on a KQL condition. The parser recurses, so nesting depth has to stay
-// well inside the stack limit, and this bounds it. A longer expression can be hoisted
-// into a `data.set` step and compared here as a short flag.
-export const IF_CONDITION_MAX_LENGTH = 2000;
 
 const IfConditionSchema = z
   .string()
@@ -202,6 +198,28 @@ export const TimeoutPropSchema = z.object({
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
+/** Upper bound on a HITL Liquid timeout template. Matches other dynamic expressions in this schema. */
+export const DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH = 2000;
+
+const LiquidTimeoutTemplateSchema = z
+  .string()
+  .max(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH)
+  .regex(
+    /\{\{[\s\S]*\}\}/,
+    'Invalid timeout. Use a duration (e.g. "72h") or a template that renders to one.'
+  );
+
+/** A duration, or Liquid that renders to one at step entry. */
+export const DynamicTimeoutSchema = z
+  .union([DurationSchema, LiquidTimeoutTemplateSchema])
+  .describe(
+    "Duration (`72h`) or Liquid that renders to one (`{{ inputs.expiresIn | default: '72h' }}`)."
+  );
+
+export const DynamicTimeoutPropSchema = z.object({
+  timeout: DynamicTimeoutSchema.optional(),
+});
+
 export const MaxStepSizePropSchema = z.object({
   'max-step-size': ByteSizeSchema.optional(),
 });
@@ -269,7 +287,7 @@ export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
 export const WaitStepInputSchema = z.object({
   duration: DurationSchema.describe(
-    'Duration to wait, e.g. "5s", "1m", "2h". Format: number + unit (ms/s/m/h/d/w)'
+    'Duration to wait, e.g. "5s", "1h30m". Units in descending order (w/d/h/m/s/ms).'
   ),
 });
 export const WaitStepSchema = BaseStepSchema.extend({
@@ -282,7 +300,7 @@ export const WaitForApprovalSlackChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
-    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .max(CONNECTOR_ID_MAX_LENGTH)
     .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
   message: z
     .string()
@@ -297,12 +315,20 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
-    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .max(CONNECTOR_ID_MAX_LENGTH)
     .describe('Slack API connector saved object id or name'),
   channels: z
-    .array(z.string().min(1).max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH))
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+        .describe('Slack channel ID (e.g. C0123456789) or channel name (e.g. #alerts)')
+    )
     .min(1)
-    .describe('Slack channel ids to post approval actions to'),
+    .describe(
+      'Slack channels to notify. Each entry may be a channel ID (e.g. C0123456789) or a channel name (e.g. #alerts). Must be allowed on the Slack API connector when an allowlist is configured.'
+    ),
   message: z
     .string()
     .max(MAX_HITL_MESSAGE_LENGTH)
@@ -314,8 +340,12 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
 
 export const WaitForApprovalChannelsSchema = z
   .object({
-    slack: WaitForApprovalSlackChannelSchema.optional(),
-    slack_api: WaitForApprovalSlackApiChannelSchema.optional(),
+    slack: WaitForApprovalSlackChannelSchema.optional().describe(
+      'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)'
+    ),
+    slack_api: WaitForApprovalSlackApiChannelSchema.optional().describe(
+      'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.'
+    ),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -338,7 +368,7 @@ export const WaitForInputStepInputSchema = z
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-}).merge(TimeoutPropSchema);
+}).merge(DynamicTimeoutPropSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
@@ -367,7 +397,7 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
-}).merge(TimeoutPropSchema);
+}).merge(DynamicTimeoutPropSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z
@@ -1150,7 +1180,7 @@ export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
   stepId: z.string().max(512).describe('Id of the step that produced this usage.'),
   connectorId: z
     .string()
-    .max(512)
+    .max(CONNECTOR_ID_MAX_LENGTH)
     .optional()
     .describe('Id of the LLM connector the step resolved to, when reported by the model.'),
 });

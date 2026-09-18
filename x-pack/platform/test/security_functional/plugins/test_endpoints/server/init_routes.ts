@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
   KibanaRequest,
   PluginInitializerContext,
 } from '@kbn/core/server';
@@ -18,10 +19,11 @@ import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
-import type {
-  BulkUpdateTaskResult,
-  ConcreteTaskInstance,
-  TaskManagerStartContract,
+import {
+  type BulkUpdateTaskResult,
+  type ConcreteTaskInstance,
+  getUiamApiKeySecret,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
 import type { PluginStartDependencies } from '.';
@@ -33,6 +35,8 @@ export function initRoutes(
   core: CoreSetup<PluginStartDependencies>
 ) {
   const logger = initializerContext.logger.get();
+  // Capture once — reading esClient.openPointInTime on disable would recapture the mock.
+  let unpatchedOpenPointInTime: ElasticsearchClient['openPointInTime'] | undefined;
 
   const authenticationAppOptions = { simulateUnauthorized: false };
   core.http.resources.register(
@@ -621,6 +625,56 @@ export function initRoutes(
 
   router.post(
     {
+      path: '/session/_refresh_session_index',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    async (context, request, response) => {
+      const [coreStart] = await core.getStartServices();
+      await coreStart.elasticsearch.client.asInternalUser.indices.refresh({
+        index: '.kibana_security_session*',
+        expand_wildcards: 'all',
+        ignore_unavailable: true,
+      });
+      return response.ok();
+    }
+  );
+
+  router.post(
+    {
+      path: '/session/_remove_created_at',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          ids: schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { ids } = request.body;
+      const [coreStart] = await core.getStartServices();
+      await coreStart.elasticsearch.client.asInternalUser.updateByQuery({
+        index: '.kibana_security_session*',
+        script: 'ctx._source.remove("createdAt")',
+        query: { ids: { values: ids } },
+        refresh: true,
+      });
+      return response.ok();
+    }
+  );
+
+  router.post(
+    {
       path: '/simulate_point_in_time_failure',
       security: {
         authc: {
@@ -638,7 +692,8 @@ export function initRoutes(
     },
     async (context, request, response) => {
       const esClient = (await context.core).elasticsearch.client.asInternalUser;
-      const originalOpenPointInTime = esClient.openPointInTime;
+      const originalOpenPointInTime = unpatchedOpenPointInTime ?? esClient.openPointInTime;
+      unpatchedOpenPointInTime = originalOpenPointInTime;
 
       if (request.body.simulateOpenPointInTimeFailure) {
         // @ts-expect-error
@@ -879,6 +934,40 @@ export function initRoutes(
     }
   );
 
+  // Mints an ephemeral UIAM token for Kibana's own identity (`authc.systemIdentity`), the
+  // credential Kibana presents to cross-region Elastic services such as the Nightshift Relay.
+  router.post(
+    {
+      path: '/test_endpoints/uiam/system_identity/_token',
+      validate: false,
+      security: {
+        authc: { enabled: false, reason: "Test endpoint exercising Kibana's own UIAM identity" },
+        authz: { enabled: false, reason: "Test endpoint exercising Kibana's own UIAM identity" },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        // The system identity lives on the security plugin's contract, not on Core's.
+        const [, { security }] = await core.getStartServices();
+
+        if (!security.authc.systemIdentity) {
+          return response.badRequest({
+            body: { message: 'UIAM system identity is not available' },
+          });
+        }
+
+        const token = await security.authc.systemIdentity.createEphemeralToken();
+        return response.ok({ body: { token } });
+      } catch (err) {
+        logger.error(`Failed to create a system identity token: ${err}`, err);
+        return response.customError({
+          statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
+
   // UIAM API Key Grant Route
   router.post(
     {
@@ -957,8 +1046,9 @@ export function initRoutes(
       validate: {
         body: schema.object({
           id: schema.string(),
-          authcScheme: schema.string(),
-          credential: schema.string(),
+          authcScheme: schema.string({ defaultValue: 'ApiKey' }),
+          credential: schema.maybe(schema.string()),
+          taskId: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
         }),
       },
       security: {
@@ -972,8 +1062,8 @@ export function initRoutes(
     },
     async (context, request, response) => {
       try {
-        const { id, authcScheme, credential } = request.body;
-        const [{ security }] = await core.getStartServices();
+        const { id, authcScheme, credential, taskId } = request.body;
+        const [{ security }, { taskManager }] = await core.getStartServices();
 
         if (!security.authc.apiKeys.uiam) {
           return response.badRequest({
@@ -981,16 +1071,29 @@ export function initRoutes(
           });
         }
 
-        // Create a new request with the provided authentication header
-        const requestHeaders: Headers = {
-          ...request.headers,
-          authorization: `${authcScheme} ${credential}`,
-        };
-        const fakeRawRequest: FakeRawRequest = {
-          headers: requestHeaders,
-          path: request.url.pathname,
-        };
-        const requestToUse = kibanaRequestFactory(fakeRawRequest);
+        let credentialToUse = credential;
+        if (taskId) {
+          const task = await taskManager.get(taskId);
+          if (task.userScope?.uiamApiKeyId !== id || !task.uiamApiKey) {
+            return response.badRequest({
+              body: { message: 'Task does not contain the requested UIAM API key' },
+            });
+          }
+          credentialToUse = getUiamApiKeySecret(task.uiamApiKey);
+        }
+
+        let requestToUse = request;
+        if (credentialToUse) {
+          const requestHeaders: Headers = {
+            ...request.headers,
+            authorization: `${authcScheme} ${credentialToUse}`,
+          };
+          const fakeRawRequest: FakeRawRequest = {
+            headers: requestHeaders,
+            path: request.url.pathname,
+          };
+          requestToUse = kibanaRequestFactory(fakeRawRequest);
+        }
 
         const result = await security.authc.apiKeys.uiam.invalidate(requestToUse, { id });
 

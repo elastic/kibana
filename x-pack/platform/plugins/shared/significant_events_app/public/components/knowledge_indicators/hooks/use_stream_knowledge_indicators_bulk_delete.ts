@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/use_fetch_discovery_queries';
@@ -48,7 +48,7 @@ export function useStreamKnowledgeIndicatorsBulkDelete({
       }
 
       if (queryIds.length > 0) {
-        requests.push(deleteQueriesInBulk({ queryIds, streamName }));
+        requests.push(deleteQueriesInBulk({ queryIds }));
       }
 
       await Promise.all(requests);

@@ -11,9 +11,11 @@ import moment from 'moment';
 
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from './constants';
 import type { TimeRange } from './types';
+import { textToTimeRange } from './parse';
 import {
   toLocalPreciseString,
   isValidTimeRange,
+  hasRoundedOffset,
   getOptionDisplayLabel,
   getOptionShorthand,
   getOptionInputText,
@@ -111,6 +113,25 @@ describe('getOptionDisplayLabel', () => {
     expect(getOptionDisplayLabel({ start, end: 'now', label })).toBe(label);
   });
 
+  it('keeps a custom label from timepicker:quickRanges', () => {
+    expect(
+      getOptionDisplayLabel({ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' })
+    ).toBe('Financial Year to Date');
+  });
+
+  it('uses the label of a preset with the same bounds when the option has none (recent)', () => {
+    const presets = [
+      { start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' },
+      { start: 'now/d', end: 'now/d', label: 'Today' },
+    ];
+
+    expect(getOptionDisplayLabel({ start: 'now-3M/y+3M', end: 'now' }, { presets })).toBe(
+      'Financial Year to Date'
+    );
+    expect(getOptionDisplayLabel({ start: 'now/d', end: 'now/d' }, { presets })).toBe('Today');
+    expect(getOptionDisplayLabel({ start: 'now-7d', end: 'now' }, { presets })).toBe('Last 7 days');
+  });
+
   it('regenerates a display-form label from bounds, honouring timePrecision', () => {
     const start = '2026-05-25T00:00:00.000Z';
     const end = '2026-05-27T23:59:59.999Z';
@@ -145,6 +166,51 @@ describe('getOptionDisplayLabel', () => {
     expect(getOptionDisplayLabel({ start: '2025-01-01', end: '2025-01-31' })).toBe(
       'Jan 1, 2025, 00:00:00 → Jan 31, 2025, 00:00:00'
     );
+  });
+});
+
+describe('hasRoundedOffset', () => {
+  it('is true when a relative offset bound has a rounding suffix', () => {
+    expect(hasRoundedOffset(textToTimeRange('-1y/y'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('now to +1d/d'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('-7d', { roundRelativeTime: true }))).toBe(true);
+  });
+
+  it('is true when a rounded range spans more than one calendar bucket', () => {
+    expect(hasRoundedOffset(textToTimeRange('-7d/d to -1d/d'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('-1M/M to -1d/d'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('-7d to -1d', { roundRelativeTime: true }))).toBe(true);
+  });
+
+  it('is false without rounding, for named ranges, and for absolute bounds', () => {
+    expect(hasRoundedOffset(textToTimeRange('-1y'))).toBe(false);
+    expect(hasRoundedOffset(textToTimeRange('now/w to now'))).toBe(false);
+    expect(hasRoundedOffset(textToTimeRange('2024-01-01 to 2024-02-01'))).toBe(false);
+  });
+
+  it('is false for whole calendar buckets, however they are expressed', () => {
+    for (const named of [
+      'today',
+      'yesterday',
+      'tomorrow',
+      'this week',
+      'this month',
+      'this year',
+      'last week',
+      'last month',
+      'last year',
+      'next week',
+    ]) {
+      expect(hasRoundedOffset(textToTimeRange(named))).toBe(false);
+    }
+
+    expect(hasRoundedOffset({ start: 'now-1d/d', end: 'now-1d/d' })).toBe(false);
+    expect(hasRoundedOffset({ start: 'now-3M/M', end: 'now-3M/M' })).toBe(false);
+  });
+
+  it('is true for a bucket rounded to a unit other than its own offset', () => {
+    expect(hasRoundedOffset({ start: 'now-1y/d', end: 'now-1y/d' })).toBe(true);
+    expect(hasRoundedOffset({ start: 'now-1d/h', end: 'now-1d/h' })).toBe(true);
   });
 });
 
@@ -221,10 +287,22 @@ describe('getOptionInputText', () => {
     ).toBe(`-15m/m to ${moment.utc(end).local().format('MMM D, YYYY, HH:mm:ss.SSS')}`);
   });
 
-  it('falls back to shorthand when label does not parse', () => {
+  it('returns a custom label so the input round-trips through the preset match', () => {
     expect(getOptionInputText({ start: 'now-15m', end: 'now', label: 'My custom preset' })).toBe(
-      '-15m'
+      'My custom preset'
     );
+  });
+
+  it('uses the label of a preset with the same bounds when the option has none (recent)', () => {
+    const presets = [{ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' }];
+
+    expect(getOptionInputText({ start: 'now-3M/y+3M', end: 'now' }, { presets })).toBe(
+      'Financial Year to Date'
+    );
+  });
+
+  it('derives shorthand when the label is the raw input form of the bounds', () => {
+    expect(getOptionInputText({ start: 'now-15m', end: 'now', label: '-15m to now' })).toBe('-15m');
   });
 
   it('generates shorthand from bounds when no label is provided', () => {

@@ -158,6 +158,12 @@ const eventsWriteItemsSchema = z
 
 export const eventsWriteSchema = z
   .object({
+    source: z
+      .literal('discovery')
+      .optional()
+      .describe(
+        'Identifies the caller of this write. Discovery calls must set this to "discovery".'
+      ),
     items: eventsWriteItemsSchema,
   })
   .describe(
@@ -277,12 +283,15 @@ export function createEventsWriteTool({
       already-completed object once. Do not retry a populated payload rejected for
       ownership or field validation.
 
+      Discovery calls must set top-level \`source\` to \`"discovery"\`.
+
       **With event_id**: append a version to an existing event with the supplied status.
       Signals and topology are merged with prior versions. No-op if severity and status are
-      unchanged (written: false, reason: unchanged_outcome). Preserve the prior severity unless
-      the discovery procedure establishes a different impact or applies its known-ongoing
-      severity cap. When no new rule UUIDs are introduced, title and symptom_hypothesis are
-      frozen to the stored values and narrative_preserved: true is returned.
+      unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
+      investigation makes the stored severity authoritative. It is preserved unless Discovery
+      closes or dismisses the event, reopens a closed or dismissed event, or submits a confirmed
+      rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
+      symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
       set contains the submitted rules and shares at least one stream name. If found, returns it
@@ -313,8 +322,9 @@ export function createEventsWriteTool({
         );
 
         const data = await eventsWriteBulkHandler({
-          eventClient: getEventClient(),
+          eventClient: await getEventClient(),
           inputs: items,
+          source: toolParams.source,
         });
 
         data.forEach((result) => {

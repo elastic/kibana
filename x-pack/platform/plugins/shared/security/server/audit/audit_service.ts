@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map, shareReplay } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilKeyChanged,
+  map,
+  shareReplay,
+  startWith,
+  Subject,
+  take,
+} from 'rxjs';
 
 import type {
   HttpServiceSetup,
   KibanaRequest,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
   Logger,
   LoggerContextConfigInput,
   LoggingServiceSetup,
@@ -82,6 +92,18 @@ export class AuditService {
   }: AuditServiceSetupParams): AuditServiceSetup {
     const auditLogPath = config.enabled ? getAuditLogPath(config.appender) : undefined;
 
+    const runtimeWriteAccess$ = new Subject<AuditLogWriteAccess>();
+    const onWriteError = auditLogPath
+      ? ({ path, code, reason }: LogFileWriteError) =>
+          runtimeWriteAccess$.next({
+            granted: false,
+            path,
+            code,
+            reason,
+            checkedAt: new Date().toISOString(),
+          })
+      : undefined;
+
     const probed$ = license.features$.pipe(
       distinctUntilKeyChanged('allowAuditLogging'),
       map((features) => ({
@@ -94,8 +116,19 @@ export class AuditService {
       shareReplay(1)
     );
 
+    const state$ = combineLatest([
+      probed$,
+      runtimeWriteAccess$.pipe(take(1), startWith(undefined)),
+    ]).pipe(
+      map(([{ features, writeAccess }, runtimeFailure]) => ({
+        features,
+        writeAccess: features.allowAuditLogging ? runtimeFailure ?? writeAccess : writeAccess,
+      })),
+      shareReplay(1)
+    );
+
     const writeAccess$ = auditLogPath
-      ? probed$.pipe(map(({ writeAccess }) => writeAccess))
+      ? state$.pipe(map(({ writeAccess }) => writeAccess))
       : undefined;
 
     // Report the plugin as degraded while the audit log cannot be written, so the lost audit
@@ -104,9 +137,9 @@ export class AuditService {
 
     // Configure logging during setup and when the license changes
     logging.configure(
-      probed$.pipe(
+      state$.pipe(
         map(({ features, writeAccess }) =>
-          createLoggingConfig(config, isServerless, writeAccess)(features)
+          createLoggingConfig(config, isServerless, writeAccess, onWriteError)(features)
         )
       )
     );
@@ -217,7 +250,12 @@ export class AuditService {
 }
 
 export const createLoggingConfig =
-  (config: ConfigType['audit'], isServerless = false, writeAccess?: AuditLogWriteAccess) =>
+  (
+    config: ConfigType['audit'],
+    isServerless = false,
+    writeAccess?: AuditLogWriteAccess,
+    onWriteError?: LogFileWriteErrorHandler
+  ) =>
   (features: Pick<SecurityLicenseFeatures, 'allowAuditLogging'>): LoggerContextConfigInput => {
     if (writeAccess && !writeAccess.granted) {
       // Audit events are dropped rather than redirected to stdout on purpose: they carry usernames,
@@ -250,15 +288,9 @@ export const createLoggingConfig =
         ? {
             ...baseAppender,
             transformAttributes: applyAuditOtelFieldMap,
-            // Slim the resource to the configured attributes — the appender's own `attributes` plus
-            // the audit service.name/service.type — dropping the detectors' host/OS/process/env
-            // fields. The allowlist also keeps the promoted keys (AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-            // e.g. project.id): they must survive in the resource because log delivery reads them
-            // there, in addition to being copied into per-record attributes below.
-            includeResources: [
-              ...Object.keys({ ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES }),
-              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-            ],
+            // Only service identity belongs in the resource. Promotion captures project.id and
+            // other configured keys before filtering, so they remain available on each record.
+            includeResources: Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
             promoteResourceAttributes: [
               ...(baseAppender.promoteResourceAttributes ?? []),
               ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
@@ -267,8 +299,13 @@ export const createLoggingConfig =
           }
         : baseAppender;
 
+    const auditTrailAppender =
+      onWriteError && (appender.type === 'file' || appender.type === 'rolling-file')
+        ? { ...appender, onWriteError }
+        : appender;
+
     return {
-      appenders: { auditTrailAppender: appender },
+      appenders: { auditTrailAppender },
       loggers: [
         {
           name: 'audit.ecs',

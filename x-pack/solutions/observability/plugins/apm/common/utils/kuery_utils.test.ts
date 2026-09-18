@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { toKueryFilterFormat, mergeKueries } from './kuery_utils';
+import { toKueryFilterFormat, mergeKueries, toAnyOfKuery } from './kuery_utils';
 
 describe('toKueryFilterFormat', () => {
   it('returns a single value', () => {
@@ -51,5 +51,43 @@ describe('toKueryFilterFormat', () => {
         'host.name: "foo" OR process.id: "1"'
       );
     });
+  });
+});
+
+describe('toAnyOfKuery', () => {
+  it('returns an empty string when no pair has a value', () => {
+    expect(
+      toAnyOfKuery([
+        ['span.id', undefined],
+        ['transaction.id', ''],
+      ])
+    ).toEqual('');
+  });
+
+  it('returns a single unwrapped clause when only one pair has a value', () => {
+    expect(
+      toAnyOfKuery([
+        ['span.id', undefined],
+        ['transaction.id', 'tx-1'],
+      ])
+    ).toEqual('transaction.id : "tx-1"');
+  });
+
+  it('ORs and parenthesises multiple clauses', () => {
+    expect(
+      toAnyOfKuery([
+        ['span.id', 'doc-1'],
+        ['transaction.id', 'doc-1'],
+      ])
+    ).toEqual('(span.id : "doc-1" or transaction.id : "doc-1")');
+  });
+
+  it('keeps the declared order and preserves differing values', () => {
+    expect(
+      toAnyOfKuery([
+        ['transaction.id', 'tx-1'],
+        ['span.id', 'span-1'],
+      ])
+    ).toEqual('(transaction.id : "tx-1" or span.id : "span-1")');
   });
 });

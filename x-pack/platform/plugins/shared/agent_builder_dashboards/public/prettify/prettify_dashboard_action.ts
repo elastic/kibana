@@ -18,7 +18,7 @@ import {
   type DashboardApi,
   type PrettifyDashboardActionContext,
 } from '@kbn/dashboard-plugin/public';
-import { apiPublishesEsqlUsage } from '@kbn/presentation-publishing';
+import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { IdGenerator } from '../attachment_types';
 
@@ -43,8 +43,8 @@ const isPrettifiable = (
   Object.entries(dashboardApi.children$.getValue()).some(
     ([id, child]) =>
       Boolean(dashboardApi.layout$.getValue().panels[id]) &&
-      apiPublishesEsqlUsage(child) &&
-      child.usesEsql$.getValue()
+      apiPublishesEsql(child) &&
+      child.esql$.getValue().length > 0
   );
 
 export const createPrettifyDashboardAction = ({
@@ -75,10 +75,10 @@ export const createPrettifyDashboardAction = ({
         dashboardApi.children$.pipe(skip(1)),
         dashboardApi.children$.pipe(
           switchMap((children) => {
-            const esqlChildren = Object.values(children).filter(apiPublishesEsqlUsage);
+            const esqlChildren = Object.values(children).filter(apiPublishesEsql);
             return esqlChildren.length === 0
               ? EMPTY
-              : merge(...esqlChildren.map((child) => child.usesEsql$.pipe(skip(1))));
+              : merge(...esqlChildren.map((child) => child.esql$.pipe(skip(1))));
           })
         )
       ).pipe(map(() => undefined)),
@@ -87,19 +87,19 @@ export const createPrettifyDashboardAction = ({
         return;
       }
 
+      const dashboardAttachment = {
+        id: draftAttachmentId.current,
+        origin: dashboardApi.savedObjectId$.getValue(),
+        type: DASHBOARD_ATTACHMENT_TYPE,
+        data: dashboardStateToAttachmentData(dashboardApi.getSerializedState().attributes),
+      };
+
       openChat({
         newConversation: true,
         initialMessage: PRETTIFY_DASHBOARD_PROMPT,
         autoSendInitialMessage: true,
         sessionTag: 'dashboard',
-        attachments: [
-          {
-            id: draftAttachmentId.current,
-            origin: dashboardApi.savedObjectId$.getValue(),
-            type: DASHBOARD_ATTACHMENT_TYPE,
-            data: dashboardStateToAttachmentData(dashboardApi.getSerializedState().attributes),
-          },
-        ],
+        attachments: [dashboardAttachment],
       });
     },
   };

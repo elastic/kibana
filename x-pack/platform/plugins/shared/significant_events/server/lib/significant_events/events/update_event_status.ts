@@ -14,10 +14,12 @@ export const updateSignificantEventStatus = async ({
   eventClient,
   eventUuid,
   status,
+  assessmentNote,
 }: {
   eventClient: EventClient;
   eventUuid: string;
   status: SignificantEventStatus;
+  assessmentNote?: string;
 }): Promise<{
   event_uuid: string;
   updated: number;
@@ -52,6 +54,7 @@ export const updateSignificantEventStatus = async ({
     event_uuid: nextEventUuid,
     previous_event_uuid: latest.event_uuid,
     status,
+    ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
   };
 
   // `wait_for` ensures the write is searchable before this resolves, so an immediate

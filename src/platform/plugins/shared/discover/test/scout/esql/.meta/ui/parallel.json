@@ -1,5 +1,5 @@
 {
-  "sha1": "c5fe1e33c9f710268d9891f0eb4cc68a2273f8dd",
+  "sha1": "964b7fdb11f8609a02ce34c1919a72d34be6c891",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,58 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "95a4162c4fd9ba0-3d4b9025b235af5",
+      "title": "Discover ES|QL dashboard saves a Discover ES|QL visualization to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_esql_dashboard.spec.ts",
+        "line": 20,
+        "column": 33
+      }
+    },
+    {
+      "id": "95a4162c4fd9ba0-0fd7ebff115ddd5",
+      "title": "Discover ES|QL dashboard changes dimensions in the Discover ES|QL Lens flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_esql_dashboard.spec.ts",
+        "line": 31,
+        "column": 13
+      }
+    },
+    {
+      "id": "f0aa70d045832f5-cefaa0e86801e0f",
+      "title": "ES|QL Discover session dashboard editing saves a linked session edit and returns to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 23,
+        "column": 35
+      }
+    },
+    {
+      "id": "f0aa70d045832f5-0d2d13699cc210b",
+      "title": "ES|QL Discover session dashboard editing opens a normal Discover session when saving a linked edit as new",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 38,
+        "column": 25
       }
     },
     {
@@ -198,6 +250,126 @@
       }
     },
     {
+      "id": "b36cbfc16bdc135-c2091b3709cc072",
+      "title": "Discover ES|QL filtering from a dashboard panel filters on a group-by cell but offers no filter on an aggregated one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_dashboard_filtering.spec.ts",
+        "line": 26,
+        "column": 25
+      }
+    },
+    {
+      "id": "528d97aa7079713-524b3f0b2d69938",
+      "title": "Discover ES|QL switching back to a data view tears down the ES|QL editor and restores the classic search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_data_view_switch.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
+      "id": "528d97aa7079713-8730b1248b63509",
+      "title": "Discover ES|QL switching back to a data view switches while a saved search has unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_data_view_switch.spec.ts",
+        "line": 27,
+        "column": 15
+      }
+    },
+    {
+      "id": "528d97aa7079713-d9882d487350ebe",
+      "title": "Discover ES|QL switching back to a data view shows hit count and available data views after switching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_data_view_switch.spec.ts",
+        "line": 34,
+        "column": 27
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-2215118da8ac58f",
+      "title": "Discover ES|QL editor shows an error callout for a malformed query and clears it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 20,
+        "column": 23
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-b2805f8646f7987",
+      "title": "Discover ES|QL editor returns focus to the editor when the data source browser is dismissed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 29,
+        "column": 5
+      }
+    },
+    {
       "id": "15e7076675cd148-5c9d907f4056918",
       "title": "Discover ES|QL results formatting with columnsMeta formats ES|QL columns using columnsMeta when the type differs from the data-view field",
       "expectedStatus": "passed",
@@ -208,6 +380,459 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_formatting.spec.ts",
         "line": 42,
         "column": 48
+      }
+    },
+    {
+      "id": "41a7f4f2a8ed981-99dba0f9795a28b",
+      "title": "Discover ES|QL histogram breakdown choose breakdown field from dropdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_histogram_breakdown.spec.ts",
+        "line": 28,
+        "column": 5
+      }
+    },
+    {
+      "id": "41a7f4f2a8ed981-5f05775a38625e4",
+      "title": "Discover ES|QL histogram breakdown filter from histogram legend value appends WHERE to query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_histogram_breakdown.spec.ts",
+        "line": 34,
+        "column": 13
+      }
+    },
+    {
+      "id": "41a7f4f2a8ed981-4691f94c1f5e851",
+      "title": "Discover ES|QL histogram breakdown breakdown field is saved and restored with saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_histogram_breakdown.spec.ts",
+        "line": 41,
+        "column": 5
+      }
+    },
+    {
+      "id": "41a7f4f2a8ed981-c62106e76726a7c",
+      "title": "Discover ES|QL histogram breakdown choose breakdown from field stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_histogram_breakdown.spec.ts",
+        "line": 52,
+        "column": 20
+      }
+    },
+    {
+      "id": "4c2af74a58aa246-3c89289e8f56ca4",
+      "title": "Discover ES|QL inspector with a slow search registers one entry per request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_inspector_slow_search.spec.ts",
+        "line": 35,
+        "column": 66
+      }
+    },
+    {
+      "id": "70396597955c889-96109cbcee41456",
+      "title": "Discover ES|QL inspector lists the Table and Visualization requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_inspector.spec.ts",
+        "line": 20,
+        "column": 23
+      }
+    },
+    {
+      "id": "d04b7c00976ad61-02be1ec2b952fb2",
+      "title": "Discover ES|QL query history loads and re-runs a query picked from the history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_query_history.spec.ts",
+        "line": 24,
+        "column": 23
+      }
+    },
+    {
+      "id": "54a77adaa6832b7-5f9a6849f8726de",
+      "title": "Discover ES|QL sorting persistence restores sorting after save, reload and reopen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_sorting_persistence.spec.ts",
+        "line": 23,
+        "column": 23
+      }
+    },
+    {
+      "id": "54a77adaa6832b7-5cd06014e9702ec",
+      "title": "Discover ES|QL sorting persistence restores sorting on a computed column after save, reload and reopen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_sorting_persistence.spec.ts",
+        "line": 35,
+        "column": 29
+      }
+    },
+    {
+      "id": "54a77adaa6832b7-daf54fa7170814c",
+      "title": "Discover ES|QL sorting persistence applies the saved sorting in a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_sorting_persistence.spec.ts",
+        "line": 58,
+        "column": 4
+      }
+    },
+    {
+      "id": "af843d52861a143-5d9ffc7d8548494",
+      "title": "Discover ES|QL sorting sorts ES|QL results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_sorting.spec.ts",
+        "line": 23,
+        "column": 23
+      }
+    },
+    {
+      "id": "d5d6fefb1a43799-3ee7ecfb7a5fe79",
+      "title": "Discover ES|QL starred queries stars a query, persists it across reload, and runs it from Starred",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_starred.spec.ts",
+        "line": 34,
+        "column": 93
+      }
+    },
+    {
+      "id": "fe7cbd23d5202f0-5e28330bbc369a0",
+      "title": "Discover ES|QL filtering from the table appends a WHERE clause from the filter-for and filter-out cell actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_table_filtering.spec.ts",
+        "line": 26,
+        "column": 25
+      }
+    },
+    {
+      "id": "fe7cbd23d5202f0-8fe0d50c149311e",
+      "title": "Discover ES|QL filtering from the table appends an AND clause when the query already has a WHERE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_table_filtering.spec.ts",
+        "line": 44,
+        "column": 70
+      }
+    },
+    {
+      "id": "fe7cbd23d5202f0-bc094f89f9ce2da",
+      "title": "Discover ES|QL filtering from the table keeps the visualization type and colour when appending a filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_table_filtering.spec.ts",
+        "line": 51,
+        "column": 31
+      }
+    },
+    {
+      "id": "fb3ea3c32d77a31-f1664ab7f73c83a",
+      "title": "Discover ES|QL view chrome and rendering renders ES|QL-specific chrome",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_view_chrome.spec.ts",
+        "line": 26,
+        "column": 25
+      }
+    },
+    {
+      "id": "fb3ea3c32d77a31-913f4bf97542a0e",
+      "title": "Discover ES|QL view chrome and rendering hides histogram for index without a timestamp field; shows it when ?_tstart/?_tend params are used",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_view_chrome.spec.ts",
+        "line": 52,
+        "column": 20
+      }
+    },
+    {
+      "id": "fb3ea3c32d77a31-d7b4c757ee10674",
+      "title": "Discover ES|QL view chrome and rendering executes STATS query and renders XY chart with correct results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_view_chrome.spec.ts",
+        "line": 77,
+        "column": 22
+      }
+    },
+    {
+      "id": "fb3ea3c32d77a31-af2637979c2e99e",
+      "title": "Discover ES|QL view chrome and rendering restores results after moving away from and back to a populated time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_view_chrome.spec.ts",
+        "line": 87,
+        "column": 17
+      }
+    },
+    {
+      "id": "54b38c7715c0359-137d25a66ff9467",
+      "title": "Discover ES|QL view data renders empty fields correctly and preserves column order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_view_data.spec.ts",
+        "line": 21,
+        "column": 23
+      }
+    },
+    {
+      "id": "54b38c7715c0359-848d7b3e8a1d2bc",
+      "title": "Discover ES|QL view data executes ROW command and adds a field column",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_view_data.spec.ts",
+        "line": 32,
+        "column": 13
+      }
+    },
+    {
+      "id": "54b38c7715c0359-c87524d8ab31097",
+      "title": "Discover ES|QL view data brushes histogram to narrow the time range without creating a filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_view_data.spec.ts",
+        "line": 43,
+        "column": 20
+      }
+    },
+    {
+      "id": "0e35b2f74c7ab52-52b0a7a61df9eed",
+      "title": "Discover ES|QL visualization renders and changes the ES|QL histogram visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_visualize_field.spec.ts",
+        "line": 22,
+        "column": 23
+      }
+    },
+    {
+      "id": "0e35b2f74c7ab52-871544196967a1f",
+      "title": "Discover ES|QL visualization opens the ES|QL visualization in the Lens flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_visualize_field.spec.ts",
+        "line": 31,
+        "column": 5
       }
     },
     {

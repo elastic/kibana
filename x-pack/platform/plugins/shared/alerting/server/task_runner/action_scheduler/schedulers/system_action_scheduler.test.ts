@@ -223,7 +223,7 @@ describe('System Action Scheduler', () => {
 
       const scheduler = new SystemActionScheduler({
         ...getSchedulerContext(),
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       });
       const results = await scheduler.getActionsToSchedule({});
 

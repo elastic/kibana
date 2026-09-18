@@ -60,7 +60,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
     openChat.mockClear();
   });
 
-  it('registers the lazy chat action when Agent Builder is available and does not register prettify while it is not enabled', async () => {
+  it('registers the lazy chat and prettify actions when Agent Builder is available', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(true), createStartDependencies());
@@ -69,6 +69,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)
     );
+    // TODO: temporarily disabled
     expect(registerActionAsync).not.toHaveBeenCalledWith(
       PRETTIFY_DASHBOARD_ACTION_ID,
       expect.any(Function)

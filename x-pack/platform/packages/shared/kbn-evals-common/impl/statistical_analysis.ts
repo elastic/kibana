@@ -6,17 +6,17 @@
  */
 
 import { gammaln, mean, tTest } from 'simple-statistics';
-import type { EvaluationScoreDocument } from './schemas/common_attributes.gen';
+import type { Direction, EvaluationScoreDocument } from './schemas/common_attributes.gen';
 import type { PairedTTestResult } from './schemas/experiments/compare_experiments_route.gen';
 
-export type Direction = 'maximize' | 'minimize' | 'neutral';
+export type { Direction };
 
 export interface PairedScore {
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
-  scoreA: number;
-  scoreB: number;
+  scoreTarget: number;
+  scoreBaseline: number;
   direction?: Direction;
 }
 
@@ -50,6 +50,11 @@ export function resolveDirection(
   return resolveDirectionFromEvaluatorName(evaluatorName);
 }
 
+export function isImproved(diff: number, direction: Direction): boolean {
+  if (direction === 'neutral') return false;
+  return direction === 'maximize' ? diff > 0 : diff < 0;
+}
+
 const MAX_BETA_ITERATIONS = 100;
 const BETA_EPSILON = 3e-7;
 const BETA_TINY = 1e-30;
@@ -68,65 +73,65 @@ function isFiniteNumber(value: number | null | undefined): value is number {
 }
 
 /**
- * Pair scores by dataset, example, evaluator, and repetition index.
+ * Pair target scores against baseline scores by dataset, example, evaluator,
+ * and repetition index.
  */
 export function pairScores(
-  scoresA: EvaluationScoreDocument[],
-  scoresB: EvaluationScoreDocument[]
+  targetScores: EvaluationScoreDocument[],
+  baselineScores: EvaluationScoreDocument[]
 ): {
   pairs: PairedScore[];
   skippedMissingPairs: number;
   skippedNullScores: number;
 } {
-  const referenceMap = new Map<string, EvaluationScoreDocument>();
+  const baselineByKey = new Map<string, EvaluationScoreDocument>();
   let skippedNullScores = 0;
 
-  for (const score of scoresB) {
+  for (const score of baselineScores) {
     if (!isFiniteNumber(score.evaluator.score)) {
       skippedNullScores += 1;
       continue;
     }
-    referenceMap.set(buildPairKey(score), score);
+    baselineByKey.set(buildPairKey(score), score);
   }
 
   const pairs: PairedScore[] = [];
   let skippedMissingPairs = 0;
 
-  for (const scoreA of scoresA) {
-    const key = buildPairKey(scoreA);
+  for (const targetScore of targetScores) {
+    const key = buildPairKey(targetScore);
 
-    if (!isFiniteNumber(scoreA.evaluator.score)) {
+    if (!isFiniteNumber(targetScore.evaluator.score)) {
       skippedNullScores += 1;
-      referenceMap.delete(key);
+      baselineByKey.delete(key);
       continue;
     }
 
-    const match = referenceMap.get(key);
-    if (!match) {
+    const baselineMatch = baselineByKey.get(key);
+    if (!baselineMatch) {
       skippedMissingPairs += 1;
       continue;
     }
 
-    referenceMap.delete(key);
+    baselineByKey.delete(key);
 
-    // A is target after pairScores(target, baseline) unification.
     const direction = resolveDirection(
-      scoreA.evaluator.direction,
-      match.evaluator.direction,
-      scoreA.evaluator.name
+      targetScore.evaluator.direction,
+      baselineMatch.evaluator.direction,
+      targetScore.evaluator.name
     );
 
     pairs.push({
-      datasetId: scoreA.example.dataset.id,
-      datasetName: scoreA.example.dataset.name,
-      evaluatorName: scoreA.evaluator.name,
-      scoreA: scoreA.evaluator.score!,
-      scoreB: match.evaluator.score!,
+      datasetId: targetScore.example.dataset.id,
+      datasetName: targetScore.example.dataset.name,
+      evaluatorName: targetScore.evaluator.name,
+      scoreTarget: targetScore.evaluator.score!,
+      scoreBaseline: baselineMatch.evaluator.score!,
       direction,
     });
   }
 
-  skippedMissingPairs += referenceMap.size;
+  skippedMissingPairs += baselineByKey.size;
 
   return {
     pairs,
@@ -155,17 +160,17 @@ function tStatisticToPValue(tStatistic: number, degreesOfFreedom: number): numbe
  */
 export function computePairedTTestResults(pairs: PairedScore[]): PairedTTestResult[];
 export function computePairedTTestResults(
-  scoresA: EvaluationScoreDocument[],
-  scoresB: EvaluationScoreDocument[]
+  targetScores: EvaluationScoreDocument[],
+  baselineScores: EvaluationScoreDocument[]
 ): PairedTTestResult[];
 export function computePairedTTestResults(
-  scoresAOrPairs: EvaluationScoreDocument[] | PairedScore[],
-  scoresB?: EvaluationScoreDocument[]
+  targetScoresOrPairs: EvaluationScoreDocument[] | PairedScore[],
+  baselineScores?: EvaluationScoreDocument[]
 ): PairedTTestResult[] {
   const pairs: PairedScore[] =
-    scoresB !== undefined
-      ? pairScores(scoresAOrPairs as EvaluationScoreDocument[], scoresB).pairs
-      : (scoresAOrPairs as PairedScore[]);
+    baselineScores !== undefined
+      ? pairScores(targetScoresOrPairs as EvaluationScoreDocument[], baselineScores).pairs
+      : (targetScoresOrPairs as PairedScore[]);
 
   const groups = new Map<string, PairedScore[]>();
   for (const pair of pairs) {
@@ -180,9 +185,9 @@ export function computePairedTTestResults(
 
   const results: PairedTTestResult[] = [];
   for (const group of groups.values()) {
-    const scoresAArr = group.map((pair) => pair.scoreA);
-    const scoresBArr = group.map((pair) => pair.scoreB);
-    const differences = scoresAArr.map((score, index) => score - scoresBArr[index]);
+    const groupTargetScores = group.map((pair) => pair.scoreTarget);
+    const groupBaselineScores = group.map((pair) => pair.scoreBaseline);
+    const differences = groupTargetScores.map((score, index) => score - groupBaselineScores[index]);
 
     let pValue: number | null = null;
     if (differences.length >= 2) {
@@ -199,8 +204,8 @@ export function computePairedTTestResults(
       datasetName: group[0].datasetName,
       evaluatorName: group[0].evaluatorName,
       sampleSize: group.length,
-      meanA: mean(scoresAArr),
-      meanB: mean(scoresBArr),
+      meanTarget: mean(groupTargetScores),
+      meanBaseline: mean(groupBaselineScores),
       pValue,
       direction,
     });
