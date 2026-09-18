@@ -392,6 +392,7 @@ export class TaskRunner<
       spaceId,
       isServerless: this.context.isServerless,
       shouldGrantUiam: this.context.shouldGrantUiam,
+      workflowsExtensions: this.context.workflowsExtensions,
     };
     const alertsClient = await withAlertingSpan('alerting:initialize-alerts-client', () =>
       initializeAlertsClient<
