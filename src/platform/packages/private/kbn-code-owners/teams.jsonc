@@ -837,7 +837,8 @@
       "security"
     ],
     "github": {
-      "team": "elastic/security-detection-engineering"
+      "team": "elastic/security-detection-engineering",
+      "label": "Team:Detection Engineering"
     }
   },
   {
