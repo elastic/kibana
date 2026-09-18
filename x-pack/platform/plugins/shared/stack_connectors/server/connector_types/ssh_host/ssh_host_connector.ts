@@ -145,12 +145,14 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async exec(params: ExecParams): Promise<{ stdout: string; stderr: string; code: number }> {
+    this.assertHostAllowed();
     return this.execCommand(params);
   }
 
   public async downloadFile(
     params: DownloadFileParams
   ): Promise<{ content: string; encoding: 'base64' }> {
+    this.assertHostAllowed();
     const { remotePath } = params;
     const maxBytes =
       params.maxBytes && params.maxBytes > 0 ? params.maxBytes : DEFAULT_DOWNLOAD_MAX_BYTES;
@@ -186,6 +188,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async uploadFile(params: UploadFileParams): Promise<void> {
+    this.assertHostAllowed();
     const { remotePath, content } = params;
     const { hostname, port } = parseHost(this.config.host);
     const { username } = this.secrets;
@@ -328,6 +331,11 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
       portFlag,
       String(port),
     ];
+  }
+
+  private assertHostAllowed(): void {
+    const { hostname } = parseHost(this.config.host);
+    this.configurationUtilities.ensureHostnameAllowed(hostname);
   }
 
   private getHostKeyArgs(): string[] {

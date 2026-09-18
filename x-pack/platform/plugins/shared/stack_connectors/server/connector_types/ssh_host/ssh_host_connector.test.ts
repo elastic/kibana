@@ -41,10 +41,11 @@ describe('SshHostConnector', () => {
       password?: string | null;
       sshPrivateKey?: string | null;
       skipHostKeyVerification?: boolean;
+      configurationUtilities?: ReturnType<typeof actionsConfigMock.create>;
     } = {}
   ) =>
     new SshHostConnector({
-      configurationUtilities: actionsConfigMock.create(),
+      configurationUtilities: overrides.configurationUtilities ?? actionsConfigMock.create(),
       config: {
         host: overrides.host ?? 'example.com',
         authType: overrides.authType ?? AUTH_TYPE.PrivateKey,
@@ -69,6 +70,21 @@ describe('SshHostConnector', () => {
   });
 
   describe('exec', () => {
+    it('refuses hosts not in allowedHosts before connecting', async () => {
+      const configurationUtilities = actionsConfigMock.create();
+      configurationUtilities.ensureHostnameAllowed.mockImplementation(() => {
+        throw new Error('hostname is not in the xpack.actions.allowedHosts list');
+      });
+
+      await expect(
+        createConnector({ configurationUtilities, host: 'evil.example.com' }).exec({
+          script: 'true',
+        })
+      ).rejects.toThrow(/allowedHosts/);
+      expect(configurationUtilities.ensureHostnameAllowed).toHaveBeenCalledWith('evil.example.com');
+      expect(mockedExecFile).not.toHaveBeenCalled();
+    });
+
     it('invokes ssh with argv, not a shell string', async () => {
       const connector = createConnector();
       await connector.exec({ script: 'hostname -f' });
