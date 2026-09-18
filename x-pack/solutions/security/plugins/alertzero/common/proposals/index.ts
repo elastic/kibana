@@ -11,7 +11,7 @@ export {
   approveProposalRequestSchema,
   dismissReasonSchema,
   dismissProposalRequestSchema,
-  isDecided,
+  isAwaitingDecision,
   isExpired,
   proposalCategorySchema,
   proposalConfidenceSchema,

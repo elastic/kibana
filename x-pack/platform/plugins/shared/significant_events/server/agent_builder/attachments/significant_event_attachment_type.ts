@@ -59,7 +59,8 @@ export const createSignificantEventAttachmentType = ({
     context: AttachmentResolveContext
   ): Promise<SignificantEvent | undefined> => {
     const { getEventClient } = await getScopedClients({ request: context.request });
-    const { hits } = await getEventClient().findByEventId(eventId);
+    const eventClient = await getEventClient();
+    const { hits } = await eventClient.findByEventId(eventId);
 
     return hits.at(-1);
   };
