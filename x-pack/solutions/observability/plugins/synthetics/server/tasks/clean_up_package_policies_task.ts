@@ -17,6 +17,7 @@ import { BROWSER_TEST_NOW_RUN } from '../synthetics_service/synthetics_monitor/s
 import type { SyntheticsServerSetup } from '../types';
 import { getFilterForTestNowRun } from './test_now_run_filter';
 import {
+  DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
   bumpAgentPolicyRevisions,
   cleanUpDuplicatedPackagePolicies,
 } from './clean_up_duplicate_policies';
@@ -266,12 +267,14 @@ async function deleteExpiredTestNowPolicies({
         : minutesAgo > DELETE_LIGHTWEIGHT_MINUTES,
     };
   });
-  const toDelete = allItems.filter((item) => item.shouldDelete);
-  if (toDelete.length > 0) {
+  // Batched for the same reason leftover deletes are: one request per backlog
+  // would exceed the saved-object bulk limit and fail every run.
+  const toDelete = allItems.filter((item) => item.shouldDelete).map((item) => item.id);
+  for (let i = 0; i < toDelete.length; i += DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) {
     await fleet.packagePolicyService.delete(
       soClient,
       esClient,
-      toDelete.map((item) => item.id),
+      toDelete.slice(i, i + DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE),
       {
         force: true,
       }
@@ -295,6 +298,7 @@ async function cleanUpLeftoverPrivateLocationPolicies(
   let attemptedAgentPolicyIds: string[] = [];
   let recreateRequested = false;
   let scanCompleted = false;
+  let scanFailed = false;
   // Fresh leftover-scan latch each run: leftovers are not created on the happy
   // path, so a daily scan is enough and a persisted latch would hide them. Only
   // the recreate budget carries over.
@@ -310,6 +314,7 @@ async function cleanUpLeftoverPrivateLocationPolicies(
     attemptedAgentPolicyIds = leftover.attemptedAgentPolicyIds ?? [];
 
     recreateRequested = leftover.performCleanupSync;
+    scanFailed = leftover.scanFailed;
 
     if (leftover.performCleanupSync) {
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
@@ -320,7 +325,7 @@ async function cleanUpLeftoverPrivateLocationPolicies(
         });
       }
     }
-    scanCompleted = true;
+    scanCompleted = !scanFailed;
   } catch (e) {
     serverSetup.logger.error(e);
   }

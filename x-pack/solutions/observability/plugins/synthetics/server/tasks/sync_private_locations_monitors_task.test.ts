@@ -1022,6 +1022,28 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.attemptedAgentPolicyIds).toEqual(['agent-a']);
     });
 
+    it('reports a failed scan so the caller does not treat it as a clean pass', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        {} as any
+      );
+
+      expect(result.scanFailed).toBe(true);
+    });
+
+    it('reports a clean pass as not failed', async () => {
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        {} as any
+      );
+
+      expect(result.scanFailed).toBe(false);
+    });
+
     it('should handle errors gracefully and return performCleanupSync', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
       const result = await cleanUpDuplicatedPackagePolicies(
@@ -1611,6 +1633,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         performCleanupSync: false,
         failedAgentPolicyIds: [],
         attemptedAgentPolicyIds: [],
+        scanFailed: false,
       });
     });
   });

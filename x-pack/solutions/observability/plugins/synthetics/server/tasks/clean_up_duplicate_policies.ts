@@ -31,6 +31,11 @@ export interface CleanUpDuplicatedPackagePoliciesResult {
   performCleanupSync: boolean;
   failedAgentPolicyIds: string[];
   attemptedAgentPolicyIds: string[];
+  /**
+   * Errors are handled here rather than thrown, so callers need this to tell a
+   * genuinely clean pass from one that never finished looking.
+   */
+  scanFailed: boolean;
 }
 
 export async function cleanUpDuplicatedPackagePolicies(
@@ -58,7 +63,7 @@ export async function cleanUpDuplicatedPackagePolicies(
 
   if (taskState.hasAlreadyDoneCleanup) {
     debugLog('Skipping cleanup of duplicated package policies as it has already been done once');
-    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
+    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds, scanFailed: false };
   }
 
   // The budget bounds recreate attempts only. Letting it stop the scan too would
@@ -167,7 +172,12 @@ export async function cleanUpDuplicatedPackagePolicies(
       // Latch means we already gave up on recreate. Do not reopen that loop
       // when the only problem is still-missing expected policies.
       if (wasLatched && !hasExtras) {
-        return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
+        return {
+          performCleanupSync,
+          failedAgentPolicyIds,
+          attemptedAgentPolicyIds,
+          scanFailed: false,
+        };
       }
       // Deleted extras need no recreate of their own: a monitor left without its
       // expected policy shows up here as missing.
@@ -181,7 +191,7 @@ export async function cleanUpDuplicatedPackagePolicies(
       taskState.hasAlreadyDoneCleanup = true;
       taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
     }
-    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
+    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds, scanFailed: false };
   } catch (e) {
     // A delete that threw mid-way still bumped what it had; keep those ids so the
     // task persists and retries the ones whose bump also failed.
@@ -203,7 +213,7 @@ export async function cleanUpDuplicatedPackagePolicies(
       '[SyncPrivateLocationMonitorsTask] Error cleaning up duplicated package policies',
       { error: e }
     );
-    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
+    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds, scanFailed: true };
   }
 }
 

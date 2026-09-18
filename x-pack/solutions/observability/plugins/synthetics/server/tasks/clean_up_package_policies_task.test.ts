@@ -19,6 +19,7 @@ import {
 import type { SyntheticsServerSetup } from '../types';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import {
+  DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
   bumpAgentPolicyRevisions,
   cleanUpDuplicatedPackagePolicies,
 } from './clean_up_duplicate_policies';
@@ -41,6 +42,7 @@ import {
 } from './clean_up_package_policies_task';
 
 jest.mock('./clean_up_duplicate_policies', () => ({
+  ...jest.requireActual('./clean_up_duplicate_policies'),
   cleanUpDuplicatedPackagePolicies: jest.fn(),
   bumpAgentPolicyRevisions: jest.fn(),
 }));
@@ -241,12 +243,10 @@ describe('clean_up_package_policies_task', () => {
       mockSoClient,
       expect.objectContaining({ page: 2, perPage: TEST_NOW_LIST_PAGE_SIZE })
     );
-    expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
-      mockSoClient,
-      {},
-      expect.arrayContaining(['browser-0', 'browser-last']),
-      { force: true }
+    const deleted = mockFleet.packagePolicyService.delete.mock.calls.flatMap(
+      (call) => call[2] as string[]
     );
+    expect(deleted).toEqual(expect.arrayContaining(['browser-0', 'browser-last']));
   });
 
   it('schedules a per-location sync after leftover deletes', async () => {
@@ -333,6 +333,49 @@ describe('clean_up_package_policies_task', () => {
     const result = await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
 
     expect(result.state.lastLeftoverScanAt).toBeUndefined();
+  });
+
+  it('does not stamp the scan time when the scan reports a failure', async () => {
+    // the real scan catches its own errors, so a failure arrives as a flag here
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: false,
+      failedAgentPolicyIds: [],
+      attemptedAgentPolicyIds: [],
+      scanFailed: true,
+    });
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
+
+    expect(result.state.lastLeftoverScanAt).toBeUndefined();
+  });
+
+  it('deletes an oversized Test Now backlog in batches', async () => {
+    const expired = moment().subtract(20, 'minutes').toISOString();
+    const makePage = (prefix: string, size: number) =>
+      Array.from({ length: size }, (_, i) => ({
+        id: `${prefix}-${i}`,
+        name: BROWSER_TEST_NOW_RUN,
+        created_at: expired,
+      }));
+    mockFleet.packagePolicyService.list
+      .mockResolvedValueOnce({
+        items: makePage('a', TEST_NOW_LIST_PAGE_SIZE),
+        total: TEST_NOW_LIST_PAGE_SIZE,
+      } as any)
+      .mockResolvedValueOnce({ items: makePage('b', 20), total: 20 } as any);
+
+    await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
+
+    const deleteCalls = mockFleet.packagePolicyService.delete.mock.calls;
+    expect(deleteCalls.length).toBeGreaterThan(1);
+    for (const call of deleteCalls) {
+      expect((call[2] as string[]).length).toBeLessThanOrEqual(
+        DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE
+      );
+    }
+    expect(deleteCalls.flatMap((call) => call[2] as string[])).toHaveLength(
+      TEST_NOW_LIST_PAGE_SIZE + 20
+    );
   });
 
   it('does not stamp the scan time when the scan throws', async () => {
