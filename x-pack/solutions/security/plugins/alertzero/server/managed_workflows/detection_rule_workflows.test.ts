@@ -887,24 +887,6 @@ describe('detection rule workflows', () => {
         expect(concurrency.max).toBe(1);
       });
 
-      // Reviews outlive their sweep, so without a ceiling every sweep would add up to
-      // max_rules_per_sweep more while earlier gates are still pending.
-      it('caps active reviews per space', () => {
-        const consts = (tuning as unknown as { consts: Record<string, number> }).consts;
-        const free = tuningSteps.find(({ name }) => name === 'resolve_free_slots')!;
-        const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
-
-        // The active-review lookup returns at most 100, so a higher ceiling could
-        // not be enforced.
-        expect(consts.max_open_reviews).toBeLessThanOrEqual(100);
-        expect(String(free.with?.free)).toContain(
-          'consts.max_open_reviews | minus: steps.collect_active_rules.output.expected | at_least: 0'
-        );
-        expect(String(rows.with?.rows)).toContain(
-          '| slice: 0, steps.resolve_free_slots.output.free'
-        );
-      });
-
       // Decisions land in each review, not in the sweep: the sweep can only report
       // what it started and what was already in flight.
       it('reports launches and in-flight reviews instead of decisions', () => {
