@@ -307,12 +307,12 @@ MCP clients can authenticate with an OAuth 2.1 access token instead of an API ke
 
    `server.publicBaseUrl` determines the resource metadata URL that Kibana advertises in the `WWW-Authenticate` header when an MCP request is rejected with a 401. Without it, Kibana falls back to the incoming request URL, which is not necessarily reachable by the client.
 
-   > **Note:** `xpack.security.mcp` is only accepted in serverless. While these keys are in `kibana.dev.yml`, a non-serverless Kibana refuses to start with `[config validation of [xpack.security].mcp]: a value wasn't expected to be present`, so comment them out before going back to `yarn start`.
+   > **Note:** `xpack.security.mcp` is only accepted in serverless. While these keys are in `kibana.dev.yml`, a non-serverless Kibana refuses to start with `[config validation of [xpack.security].mcp]: a value wasn't expected to be present`, so comment them out before going back to `pnpm start`.
 
 2. Start Elasticsearch with the UIAM OAuth authorization server by passing `--uiam-oauth`. For example:
 
    ```bash
-   yarn es serverless --projectType elasticsearch --uiam-oauth
+   pnpm es serverless --projectType elasticsearch --uiam-oauth
    ```
 
    That flag defaults to `false` even though `--uiam` defaults to `true`, so it has to be passed explicitly. It starts an additional `uiam-oauth` container that serves the authorization server on `https://localhost:8444`, alongside the UIAM service itself on `https://localhost:8443`. Leave UIAM itself enabled: the MCP client management UI used in step 4 is hidden when it is off.
@@ -320,7 +320,7 @@ MCP clients can authenticate with an OAuth 2.1 access token instead of an API ke
 3. Run Kibana in serverless mode, for example:
 
    ```bash
-   yarn serverless-es
+   pnpm serverless-es
    ```
 
 4. Register an OAuth client from **Agents > Tools > Manage all tools > Manage MCP > Manage MCP clients (OAuth) > Add MCP client**. The dialog shown after creation has the client ID and MCP server URL that your client needs. Redirect URIs are client-specific, and the authorization server accepts any localhost port but matches the path exactly, so refer to [Create an OAuth client in Elastic Agent Builder](https://www.elastic.co/docs/deploy-manage/app-connections/create-oauth-client) for the value your client expects.
