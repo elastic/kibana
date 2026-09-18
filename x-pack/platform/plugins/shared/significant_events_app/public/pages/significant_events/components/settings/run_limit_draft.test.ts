@@ -15,9 +15,9 @@ import {
 const response = {
   enabled: false,
   limits: {
-    detection: 100,
-    investigation: 30,
-    ki_extraction: 20,
+    detection: 15,
+    investigation: 3,
+    ki_extraction: 3,
   },
 };
 

@@ -60,7 +60,7 @@ const callHandler = async (
 describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockResolver.mockResolvedValue('<div>generated</div>');
+    mockResolver.mockResolvedValue({ template: '<div>generated</div>', height: 320 });
   });
 
   describe('missing attachment', () => {
@@ -297,6 +297,71 @@ describe('createUpdateCustomContentTool handler', () => {
         { panel_template: '<p>old</p>', embeddable_id: 'p1' }
       );
       expect(results[0].type).toBe(ToolResultType.error);
+    });
+  });
+
+  describe('time range', () => {
+    // A refined version previews in the same chat card, so losing the range would make the
+    // preview silently jump to a default window after the first edit.
+    it('carries the panel time range through an update', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'panel-1', prompt: 'make it darker' },
+        {
+          panel_template: '<div>old</div>',
+          esql_query: 'FROM logs',
+          embeddable_id: 'panel-1',
+          time_range: { from: 'now-7d', to: 'now' },
+        }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }) },
+        expect.anything()
+      );
+    });
+
+    // Asserted as a whole rather than field by field: the failure this guards against is
+    // adding a snapshot field and forgetting the carry-through, so a refined version would
+    // silently lose it.
+    it('carries the whole captured snapshot through an update', async () => {
+      const snapshot = {
+        time_range: { from: 'now-7d', to: 'now' },
+        panel_height: 480,
+        esql_variables: [{ key: 'host', value: 'host-1', type: 'values' }],
+        filters: [{ meta: { key: 'host.name' } }],
+        query: { query: 'status:200', language: 'kuery' },
+        is_approximate: true,
+        project_routing: 'project-1',
+      };
+
+      const { ctx } = await callHandler(
+        { embeddable_id: 'panel-1', prompt: 'make it darker' },
+        { panel_template: '<div>old</div>', embeddable_id: 'panel-1', ...snapshot }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { data: expect.objectContaining(snapshot) },
+        expect.anything()
+      );
+    });
+
+    it('carries the captured panel height through an update', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'panel-1', prompt: 'make it darker' },
+        {
+          panel_template: '<div>old</div>',
+          embeddable_id: 'panel-1',
+          panel_height: 480,
+        }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { data: expect.objectContaining({ panel_height: 480 }) },
+        expect.anything()
+      );
     });
   });
 });

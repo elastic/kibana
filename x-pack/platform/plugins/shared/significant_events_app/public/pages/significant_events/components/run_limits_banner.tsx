@@ -72,7 +72,7 @@ export const RunQuotaExhaustionCallout = ({
       <p>
         {i18n.translate('xpack.significantEventsApp.runLimitsBanner.description', {
           defaultMessage:
-            'Reached limits: {reached}. New non-critical scheduled admissions in these categories can be denied until the UTC day resets. Critical scheduled investigations continue, and manual runs are not limited.',
+            'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
           values: { reached },
         })}
       </p>
@@ -87,7 +87,7 @@ export const RunQuotaExhaustionCallout = ({
         <p>
           {i18n.translate('xpack.significantEventsApp.runLimitsBanner.readOnlyDescription', {
             defaultMessage:
-              'An administrator with the Streams manage privilege in every space can change these limits.',
+              'An administrator with the Nightshift Manage engines privilege can change these limits.',
           })}
         </p>
       )}

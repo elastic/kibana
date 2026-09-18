@@ -21,6 +21,18 @@ export const PersistDiscoveriesInputSchema = z.object({
   attack_discoveries: z.array(AttackDiscoverySchema),
   connector_name: z.string().optional(),
   enable_field_rendering: z.boolean().optional().default(true),
+  /**
+   * Identifies the producer of these attacks. It is an optional contributor to
+   * the attack hash, so two producers that analyze the same detection alerts with
+   * the same connector, owner and space still persist distinct attacks instead of
+   * de-duplicating against each other. Repeated runs of the same producer still
+   * de-duplicate.
+   *
+   * NOTE: distinct from `source` below, which is the execution/trigger type.
+   * Kibana Attack Discovery omits this, which keeps its hashes byte-identical to
+   * the ones already persisted.
+   */
+  generation_source: z.string().max(256).optional(),
   generation_uuid: z.string(),
   replacements: z.record(z.string(), z.string()).optional(),
   /**

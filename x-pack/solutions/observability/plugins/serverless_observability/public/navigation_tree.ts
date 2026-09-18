@@ -286,7 +286,7 @@ export const createNavigationTree = ({
         !showAiAssistant
       ),
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine',
       },
       ...filterForFeatureAvailability(
@@ -549,7 +549,6 @@ export const createNavigationTree = ({
             ),
             breadcrumbStatus: 'hidden',
             children: [
-              { link: 'management:triggersActionsAlerts' },
               { link: 'management:triggersActions' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },

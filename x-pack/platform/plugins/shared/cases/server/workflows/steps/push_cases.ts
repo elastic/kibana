@@ -11,6 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { pushCasesStepCommonDefinition } from '../../../common/workflows/steps/push_cases';
 import { ConnectorTypes } from '../../../common/bundled-types.gen';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { getCasesClientFromStepsContext, safeParseCaseForWorkflowOutput } from './utils';
 
@@ -61,8 +62,12 @@ export const pushCasesStepDefinition = (
           { concurrency: 25 }
         );
 
+        // The client returns unified comments; the output schema mirrors the
+        // public (legacy) wire shape, so convert back before validating.
         const output = safeParseCaseForWorkflowOutput(pushCasesStepCommonDefinition.outputSchema, {
-          cases: pushedCases,
+          cases: pushedCases.map((pushedCase) =>
+            pushedCase ? toLegacyCaseResponse(pushedCase) : pushedCase
+          ),
         });
 
         return { output };

@@ -90,7 +90,7 @@ describe('CasesConnectorExecutor', () => {
     owner,
     rule,
     timeWindow,
-    internallyManagedAlerts: null,
+    source: 'rule',
     reopenClosedCases,
     maximumCasesToOpen: 5,
     templateId: null,
@@ -2625,8 +2625,8 @@ fields: []
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
         });
 
-        it('sets rule info to null when `internallyManagedAlerts` is `true`', async () => {
-          await connectorExecutor.execute({ ...params, internallyManagedAlerts: true });
+        it('sets rule info to null when `source` is `attack`', async () => {
+          await connectorExecutor.execute({ ...params, source: 'attack' });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
@@ -4283,7 +4283,7 @@ fields: []
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts: true,
+      source: 'attack',
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,

@@ -7,6 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT UI. All 27 tests validate UI state via axe-core
+ * accessibility snapshots (`a11y.testAppSnapshot`) — they require real browser rendering and a live
+ * DOM accessibility tree. None can be replaced by API tests or Jest/RTL unit tests, which lack
+ * full axe-core integration over a rendered Kibana page.
+ *
+ * Playwright has a first-class accessibility API (`page.accessibility.snapshot()` and
+ * `expect(locator).toHaveAttribute(...)`) that can replace `a11y.testAppSnapshot` calls. The Scout
+ * migration should adopt `@axe-core/playwright` (or Playwright's built-in `checkA11y` helper) for
+ * snapshot-style assertions.
+ *
+ * Migration notes:
+ * - Tests are deeply sequential: each `it` leaves state the next one relies on (columns added,
+ *   search saved, query created, row expanded). Port as a single `test()` broken into `test.step`
+ *   blocks, or add per-test setup/teardown so Playwright can retry them independently.
+ * - Several tests use `retry.try` wrappers around `dataGrid` / `testSubjects` interactions to
+ *   tolerate timing; Playwright's built-in auto-waiting should remove most of these.
+ * - The `savedQueryManagementComponent` service needs a Scout equivalent (or inline
+ *   `page.locator` calls) — verify before porting.
+ * - The `a11y.testAppSnapshot` call in the saved-queries-list test deliberately excludes
+ *   `saved-query-management-search-input` due to a known broken aria attribute after deletion;
+ *   preserve that exclusion (or file a fix) in the Scout version.
+ * - No serverless duplicate to clean up — this config is stateful-only.
+ */
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
