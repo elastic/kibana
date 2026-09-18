@@ -8,7 +8,10 @@
 import { of, lastValueFrom } from 'rxjs';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
-import type { StrategyRequestType } from '../../../common/search_strategy/osquery';
+import type {
+  FactoryQueryTypes,
+  StrategyRequestType,
+} from '../../../common/search_strategy/osquery';
 import { Direction } from '../../../common/search_strategy';
 import type { ActionResultsStrategyResponse } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -19,7 +22,7 @@ import {
 } from '../../../common/constants';
 import { OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR } from '../constants';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
-import { osquerySearchStrategyProvider } from '.';
+import { ID_BOUND_FACTORY_QUERY_TYPES, osquerySearchStrategyProvider } from '.';
 
 jest.mock('@kbn/data-plugin/server', () => ({
   shimHitsTotal: (rawResponse: unknown) => rawResponse,
@@ -485,6 +488,195 @@ describe('osquerySearchStrategyProvider space scoping', () => {
 
       expect(searchMock).toHaveBeenCalledTimes(1);
       expect(response.edges).toEqual([{ _id: 'legacy' }]);
+    });
+  });
+
+  describe('action_data.space_id enablement is driven by the provider', () => {
+    const namedSpaceActionDataFilter = {
+      bool: {
+        should: [
+          { term: { space_id: 'my-space' } },
+          { term: { 'action_data.space_id': 'my-space' } },
+        ],
+      },
+    };
+
+    const factoryRequest = (
+      factoryQueryType: FactoryQueryTypes
+    ): StrategyRequestType<FactoryQueryTypes> => {
+      const common = { factoryQueryType };
+
+      switch (factoryQueryType) {
+        case OsqueryQueries.actions:
+          return {
+            ...common,
+            kuery: '',
+            pagination: { activePage: 0, cursorStart: 0, querySize: 10 },
+            sort: { field: '@timestamp', direction: Direction.desc },
+          } as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.actionDetails:
+          return {
+            ...common,
+            actionId: 'action-1',
+            kuery: '',
+          } as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.actionResults:
+          return {
+            ...common,
+            actionId: 'action-1',
+            kuery: '',
+            startDate: '',
+            agentIds: [],
+            sort: { field: '@timestamp', direction: Direction.desc },
+            pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
+          } as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.results:
+          return resultsRequest as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.scheduledActionResults:
+          return {
+            ...common,
+            scheduleId: 'schedule-1',
+            executionCount: 1,
+            pagination: { activePage: 0, cursorStart: 0, querySize: 10 },
+            sort: { field: '@timestamp', direction: Direction.desc },
+          } as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.exportResults:
+          return {
+            ...common,
+            baseFilter: 'action_id: "action-1"',
+            size: 1000,
+          } as StrategyRequestType<FactoryQueryTypes>;
+        default:
+          return ((_exhaustive: never) => {
+            throw new Error(`Unhandled factory query type: ${factoryQueryType}`);
+          })(factoryQueryType);
+      }
+    };
+
+    const collectGlobalAggs = (
+      node: unknown,
+      found: Array<Record<string, unknown>> = []
+    ): Array<Record<string, unknown>> => {
+      if (node == null || typeof node !== 'object') {
+        return found;
+      }
+
+      const record = node as Record<string, unknown>;
+      if ('global' in record) {
+        found.push(record);
+      }
+
+      for (const value of Object.values(record)) {
+        collectGlobalAggs(value, found);
+      }
+
+      return found;
+    };
+
+    const globalAggMustClauses = (globalAgg: Record<string, unknown>): unknown[] => {
+      const innerAggs = globalAgg.aggs;
+      if (innerAggs == null || typeof innerAggs !== 'object') {
+        return [];
+      }
+
+      return Object.values(innerAggs as Record<string, unknown>).flatMap((agg) => {
+        if (agg == null || typeof agg !== 'object') {
+          return [];
+        }
+
+        const must = (agg as { filter?: { bool?: { must?: unknown } } }).filter?.bool?.must;
+
+        return Array.isArray(must) ? must : must != null ? [must] : [];
+      });
+    };
+
+    const searchViaProvider = async (factoryQueryType: FactoryQueryTypes) => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'my-space' });
+
+      await lastValueFrom(
+        provider.search(factoryRequest(factoryQueryType), {} as never, { request: {} } as never)
+      );
+
+      return searchMock.mock.calls[0][0].params;
+    };
+
+    it.each(Object.values(OsqueryQueries))(
+      'applies the action_data.space_id fallback to "%s" only when it is id-bound',
+      async (factoryQueryType) => {
+        const params = await searchViaProvider(factoryQueryType);
+        const filter = params.query.bool.filter as unknown[];
+
+        if (ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType)) {
+          expect(filter).toContainEqual(namedSpaceActionDataFilter);
+        } else {
+          expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+          expect(filter).not.toContainEqual(namedSpaceActionDataFilter);
+        }
+      }
+    );
+
+    it.each([OsqueryQueries.actionResults, OsqueryQueries.scheduledActionResults])(
+      'applies the same action_data.space_id decision to "%s" hits and global aggregations',
+      async (factoryQueryType) => {
+        const params = await searchViaProvider(factoryQueryType);
+        const filter = params.query.bool.filter as unknown[];
+
+        expect(filter).toContainEqual(namedSpaceActionDataFilter);
+
+        const globalAggs = collectGlobalAggs(params.aggs);
+        expect(globalAggs.length).toBeGreaterThan(0);
+
+        for (const globalAgg of globalAggs) {
+          expect(globalAggMustClauses(globalAgg)).toContainEqual(namedSpaceActionDataFilter);
+        }
+      }
+    );
+
+    it('applies action_data.space_id to both actionResults dual-index searches', async () => {
+      // Dual-index selection runs a second enforceSpaceScope on the data-stream
+      // DSL. Inspecting only calls[0] would miss a regression that omitted
+      // spaceScopeOptions on that second search.
+      const { provider, searchMock } = setup({
+        activeSpaceId: 'my-space',
+        newDataStreamIndexExists: true,
+      });
+
+      await lastValueFrom(
+        provider.search(factoryRequest(OsqueryQueries.actionResults), {} as never, {
+          request: {} as never,
+        })
+      );
+
+      expect(searchMock.mock.calls.length).toBeGreaterThanOrEqual(2);
+
+      for (const [searchRequest] of searchMock.mock.calls) {
+        const filter = searchRequest.params.query.bool.filter as unknown[];
+
+        expect(filter).toContainEqual(namedSpaceActionDataFilter);
+      }
+    });
+
+    it('still matches action_data.space_id on id-bound reads when matchMissingSpaceId is false', async () => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'default' });
+
+      await lastValueFrom(
+        provider.search(
+          { ...resultsRequest, matchMissingSpaceId: false },
+          {} as never,
+          { request: {} } as never
+        )
+      );
+
+      const filter = searchMock.mock.calls[0][0].params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { term: { 'action_data.space_id': 'default' } },
+          ],
+        },
+      });
     });
   });
 });

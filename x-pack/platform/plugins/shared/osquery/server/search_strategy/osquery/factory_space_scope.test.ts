@@ -80,10 +80,36 @@ const baseRequest = (
   }
 };
 
-const filterContainsSpaceId = (dsl: ISearchRequestParams): boolean => {
+const namedSpaceActionDataFilter = {
+  bool: {
+    should: [{ term: { space_id: 'my-space' } }, { term: { 'action_data.space_id': 'my-space' } }],
+  },
+};
+
+const getFilterClauses = (dsl: ISearchRequestParams): unknown[] => {
   const filter = (dsl.query as { bool?: { filter?: unknown } } | undefined)?.bool?.filter;
 
-  return JSON.stringify(filter ?? []).includes('space_id');
+  return Array.isArray(filter) ? filter : filter != null ? [filter] : [];
+};
+
+const filterContainsSpaceId = (dsl: ISearchRequestParams): boolean =>
+  JSON.stringify(getFilterClauses(dsl)).includes('space_id');
+
+const hasTermOn = (node: unknown, fields: readonly string[]): boolean => {
+  if (node == null || typeof node !== 'object') {
+    return false;
+  }
+
+  if (Array.isArray(node)) {
+    return node.some((item) => hasTermOn(item, fields));
+  }
+
+  const record = node as Record<string, unknown>;
+  if ('term' in record && record.term != null && typeof record.term === 'object') {
+    return fields.some((field) => field in (record.term as Record<string, unknown>));
+  }
+
+  return Object.values(record).some((value) => hasTermOn(value, fields));
 };
 
 const collectGlobalAggs = (node: unknown, found: Array<Record<string, unknown>> = []) => {
@@ -101,6 +127,23 @@ const collectGlobalAggs = (node: unknown, found: Array<Record<string, unknown>> 
   }
 
   return found;
+};
+
+const globalAggMustClauses = (globalAgg: Record<string, unknown>): unknown[] => {
+  const innerAggs = globalAgg.aggs;
+  if (innerAggs == null || typeof innerAggs !== 'object') {
+    return [];
+  }
+
+  return Object.values(innerAggs as Record<string, unknown>).flatMap((agg) => {
+    if (agg == null || typeof agg !== 'object') {
+      return [];
+    }
+
+    const must = (agg as { filter?: { bool?: { must?: unknown } } }).filter?.bool?.must;
+
+    return Array.isArray(must) ? must : must != null ? [must] : [];
+  });
 };
 
 describe('osquery search strategy space scoping invariant', () => {
@@ -156,7 +199,12 @@ describe('osquery search strategy space scoping invariant', () => {
       // Builders that do not use a `global` aggregation rely solely on
       // enforceSpaceScope (covered above) — nothing to assert here.
       for (const globalAgg of globalAggs) {
-        expect(JSON.stringify(globalAgg)).toContain('"space_id":"my-space"');
+        const mustClauses = globalAggMustClauses(globalAgg);
+
+        expect(mustClauses.length).toBeGreaterThan(0);
+        // Current global-agg builders are id-bound, so counts must honour
+        // action_data.space_id the same way hits do.
+        expect(mustClauses).toContainEqual(namedSpaceActionDataFilter);
       }
     }
   );
@@ -166,51 +214,38 @@ describe('osquery search strategy space scoping invariant', () => {
   // `action_data.space_id` is the query payload round-tripped through the agent,
   // so it is less trustworthy than the Kibana-written top-level `space_id`. It is
   // only safe on reads already constrained by an `action_id`/`schedule_id`, which
-  // the caller can only have learned from a space-stamped action document. A
-  // factory type that enumerates across actions must never gain the fallback.
+  // the caller can only have learned from a space-stamped action document.
+  // Hit-level enablement is asserted through osquerySearchStrategyProvider in
+  // index.test.ts so this file does not re-implement the allowlist decision.
   describe('action_data.space_id fallback is confined to id-bound reads', () => {
-    const containsActionDataSpaceId = (dsl: ISearchRequestParams): boolean =>
-      JSON.stringify(dsl.query ?? {}).includes('action_data.space_id');
-
     it('only allowlists factory types whose builder always filters on an action or schedule id', () => {
-      expect([...ID_BOUND_FACTORY_QUERY_TYPES].sort()).toEqual(
-        [
-          OsqueryQueries.actionResults,
-          OsqueryQueries.results,
-          OsqueryQueries.scheduledActionResults,
-        ].sort()
-      );
+      expect(ID_BOUND_FACTORY_QUERY_TYPES.length).toBeGreaterThan(0);
+
+      for (const factoryQueryType of ID_BOUND_FACTORY_QUERY_TYPES) {
+        const dsl = osqueryFactory[factoryQueryType].buildDsl(baseRequest(factoryQueryType));
+
+        expect(hasTermOn(dsl.query, ['action_id', 'schedule_id'])).toBe(true);
+      }
     });
 
-    it.each(factoryTypes)(
-      'applies the fallback to "%s" only when it is id-bound',
-      (factoryQueryType) => {
-        const dsl = osqueryFactory[factoryQueryType].buildDsl(baseRequest(factoryQueryType));
-        const scoped = enforceSpaceScope(dsl, 'my-space', {
-          matchActionDataSpaceId: ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType),
-        });
-
-        expect(containsActionDataSpaceId(scoped)).toBe(
-          ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType)
-        );
-      }
-    );
-
-    it('never emits the fallback for enumerating factory types', () => {
-      const enumeratingTypes = factoryTypes.filter(
+    it('never emits the fallback for factory types that are not allowlisted for action_data.space_id', () => {
+      const typesNotAllowlistedForActionData = factoryTypes.filter(
         (type) => !ID_BOUND_FACTORY_QUERY_TYPES.includes(type)
       );
 
       // Guards against the allowlist silently swallowing every type.
-      expect(enumeratingTypes.length).toBeGreaterThan(0);
+      expect(typesNotAllowlistedForActionData.length).toBeGreaterThan(0);
 
-      for (const factoryQueryType of enumeratingTypes) {
+      for (const factoryQueryType of typesNotAllowlistedForActionData) {
         const dsl = osqueryFactory[factoryQueryType].buildDsl(baseRequest(factoryQueryType));
         const scoped = enforceSpaceScope(dsl, 'my-space');
 
-        expect(containsActionDataSpaceId(scoped)).toBe(false);
-        // The aggregation scope must stay clean too.
-        expect(JSON.stringify(dsl.aggs ?? {})).not.toContain('action_data.space_id');
+        expect(getFilterClauses(scoped)).toContainEqual({ term: { space_id: 'my-space' } });
+        expect(getFilterClauses(scoped)).not.toContainEqual(namedSpaceActionDataFilter);
+
+        for (const globalAgg of collectGlobalAggs(dsl.aggs)) {
+          expect(globalAggMustClauses(globalAgg)).not.toContainEqual(namedSpaceActionDataFilter);
+        }
       }
     });
 
@@ -222,11 +257,15 @@ describe('osquery search strategy space scoping invariant', () => {
         matchMissingSpaceId: false,
         matchActionDataSpaceId: true,
       });
-      const filter = JSON.stringify((scoped.query as { bool: { filter: unknown } }).bool.filter);
 
-      expect(filter).toContain('action_data.space_id');
-      // Dropping the missing-field allowance must still drop it.
-      expect(filter).not.toContain('must_not');
+      expect(getFilterClauses(scoped)).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { term: { 'action_data.space_id': 'default' } },
+          ],
+        },
+      });
     });
   });
 });

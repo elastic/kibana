@@ -36,8 +36,11 @@ import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
  * SECURITY: that id binding is the authorization gate — a caller can only supply
  * such an id if they obtained it from a space-stamped, Kibana-written action
  * document. Do not add a query type here unless its builder unconditionally
- * filters on one of those ids. Types that enumerate across actions
- * (`actions`, `actionDetails`, `exportResults`) must stay out.
+ * filters on one of those ids.
+ *
+ * Types not allowlisted for `action_data.space_id`: `actions` and `exportResults`
+ * enumerate across actions; `actionDetails` is an id-bound lookup of
+ * Kibana-written action metadata on `ACTIONS_INDEX`, not agent `action_data`.
  */
 export const ID_BOUND_FACTORY_QUERY_TYPES: readonly FactoryQueryTypes[] = [
   OsqueryQueries.results,
@@ -91,6 +94,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             activeSpace,
             cpsActive,
           }) => {
+            // Single decision for hit-level enforceSpaceScope and for any
+            // global-agg builder that cannot inherit the top-level query.
+            const matchActionDataSpaceId = ID_BOUND_FACTORY_QUERY_TYPES.includes(
+              request.factoryQueryType
+            );
+
             const strictRequest = {
               factoryQueryType: request.factoryQueryType,
               kuery: request.kuery,
@@ -110,6 +119,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               ...('matchMissingSpaceId' in request
                 ? { matchMissingSpaceId: request.matchMissingSpaceId }
                 : {}),
+              matchActionDataSpaceId,
               // exportResults factory fields — baseFilter is required and unique to this
               // factory type, so its presence is a reliable discriminator for all six fields.
               ...('baseFilter' in request
@@ -126,12 +136,6 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             } as StrategyRequestType<T>;
 
             const spaceId = activeSpace?.id ?? DEFAULT_SPACE_ID;
-
-            // Only id-bound reads may honour the agent-carried
-            // `action_data.space_id`; see ID_BOUND_FACTORY_QUERY_TYPES.
-            const matchActionDataSpaceId = ID_BOUND_FACTORY_QUERY_TYPES.includes(
-              request.factoryQueryType
-            );
 
             const spaceScopeOptions = {
               ...('matchMissingSpaceId' in request && request.matchMissingSpaceId !== undefined

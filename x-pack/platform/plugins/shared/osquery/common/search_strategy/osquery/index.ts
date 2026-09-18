@@ -50,6 +50,11 @@ export interface RequestBasicOptions extends IEsSearchRequest {
    * that lack a Kibana-metadata gate.
    */
   matchMissingSpaceId?: boolean;
+  /**
+   * When true, also match `action_data.space_id`. The search strategy sets this
+   * from its id-bound factory-type allowlist; callers must not enable it.
+   */
+  matchActionDataSpaceId?: boolean;
 }
 
 /** A mapping of semantic fields to their document counterparts */

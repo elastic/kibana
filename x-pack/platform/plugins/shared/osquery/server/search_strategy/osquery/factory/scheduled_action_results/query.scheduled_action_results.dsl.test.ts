@@ -228,26 +228,21 @@ describe('buildScheduledActionResultsQuery', () => {
     expect(JSON.stringify(mustFilters)).not.toContain('exists');
   });
 
-  it('does not scope the top-level query (centralized in the search strategy)', () => {
-    const result = buildScheduledActionResultsQuery(defaultOptions);
-    const filterQuery = result.query as Record<string, Record<string, TermFilter[]>>;
-    const filters = filterQuery.bool.filter;
-    const hasSpaceFilter = filters.some((f) => f.term && 'space_id' in f.term);
+  it('omits action_data.space_id from aggregations when matchActionDataSpaceId is false', () => {
+    const result = buildScheduledActionResultsQuery({
+      ...defaultOptions,
+      spaceId: 'my-space',
+      matchActionDataSpaceId: false,
+    });
 
-    expect(hasSpaceFilter).toBe(false);
-  });
-
-  it('scopes the aggregation by space_id', () => {
-    // The aggregation runs in its own (global) filter context that the central
-    // enforceSpaceScope does not reach, so it carries a space_id clause itself.
-    const result = buildScheduledActionResultsQuery({ ...defaultOptions, spaceId: 'my-space' });
     const aggs = result.aggs as Record<string, Record<string, unknown>>;
     const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
     const innerAggs = globalAggs.aggs as Record<string, Record<string, unknown>>;
     const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
     const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
 
-    expect(mustFilters).toContainEqual({
+    expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
+    expect(mustFilters).not.toContainEqual({
       bool: {
         should: [
           { term: { space_id: 'my-space' } },
@@ -255,6 +250,15 @@ describe('buildScheduledActionResultsQuery', () => {
         ],
       },
     });
+  });
+
+  it('does not scope the top-level query (centralized in the search strategy)', () => {
+    const result = buildScheduledActionResultsQuery(defaultOptions);
+    const filterQuery = result.query as Record<string, Record<string, TermFilter[]>>;
+    const filters = filterQuery.bool.filter;
+    const hasSpaceFilter = filters.some((f) => f.term && 'space_id' in f.term);
+
+    expect(hasSpaceFilter).toBe(false);
   });
 
   it('prefixes index with *: when ccsEnabled is true', () => {

@@ -24,6 +24,7 @@ export const buildScheduledActionResultsQuery = ({
   integrationNamespaces,
   ccsEnabled,
   matchMissingSpaceId,
+  matchActionDataSpaceId,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
   // Top-level hit scoping is enforced centrally in the search strategy
   // (enforceSpaceScope). The aggregation below is a separate filter context that
@@ -31,12 +32,15 @@ export const buildScheduledActionResultsQuery = ({
   //
   // This read is bound to a `schedule_id` the caller could only have learned from
   // a space-stamped action document, so it may also honour the agent-carried
-  // `action_data.space_id`. That flag is orthogonal to `matchMissingSpaceId`:
-  // `action_data.space_id` is a present, exact-valued term, so it stays safe under
-  // CPS fan-out even when the missing-field allowance is dropped.
+  // `action_data.space_id`. The strategy passes that flag from
+  // ID_BOUND_FACTORY_QUERY_TYPES so this aggregation cannot drift from the hit
+  // filter; default true because this builder is id-bound. The flag is orthogonal
+  // to `matchMissingSpaceId`: `action_data.space_id` is a present, exact-valued
+  // term, so it stays safe under CPS fan-out even when the missing-field
+  // allowance is dropped.
   const spaceIdFilter = buildSpaceIdFilter(spaceId, {
     matchMissingSpaceId: matchMissingSpaceId ?? true,
-    matchActionDataSpaceId: true,
+    matchActionDataSpaceId: matchActionDataSpaceId ?? true,
   });
 
   const filterQuery: Array<Record<string, unknown>> = [

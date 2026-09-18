@@ -53,10 +53,11 @@ export const createActionHandler = async (
 ) => {
   const [coreStartServices] = await osqueryContext.getStartServices();
   const esClientInternal = coreStartServices.elasticsearch.client.asInternalUser;
+  const actionSpaceId = options.space?.id ?? DEFAULT_SPACE_ID;
 
   const spaceScopedInternalSavedObjectsClient = getInternalSavedObjectsClientForSpaceId(
     coreStartServices,
-    options.space?.id ?? DEFAULT_SPACE_ID
+    actionSpaceId
   );
 
   const { metadata, alertData, error } = options;
@@ -76,7 +77,7 @@ export const createActionHandler = async (
       allAgentsSelected: !!agentAll,
       platformsSelected: agentPlatforms,
       policiesSelected: agentPolicyIds,
-      spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+      spaceId: actionSpaceId,
     }
   );
 
@@ -116,7 +117,7 @@ export const createActionHandler = async (
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
     tags: [],
-    space_id: options.space?.id ?? DEFAULT_SPACE_ID,
+    space_id: actionSpaceId,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
           const replacedQuery = replacedQueries(packQuery.query, alertData);
@@ -142,14 +143,12 @@ export const createActionHandler = async (
           agents: selectedAgents,
           osqueryContext,
           error,
-          spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+          spaceId: actionSpaceId,
           spaceScopedClient: spaceScopedInternalSavedObjectsClient,
         }),
   };
 
   const actionQueries = osqueryAction.queries as OsqueryActionQuery[];
-  // Single source for both placements below, so the two can never disagree.
-  const actionSpaceId = options.space?.id ?? DEFAULT_SPACE_ID;
   const fleetActions = !error
     ? map(
         filter(actionQueries, (query) => !query.error),

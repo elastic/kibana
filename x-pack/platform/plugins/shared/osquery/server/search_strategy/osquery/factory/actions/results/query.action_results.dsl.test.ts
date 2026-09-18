@@ -647,11 +647,6 @@ describe('buildActionResultsQuery', () => {
     const getAggFilterMust = (result: any) =>
       result.aggs.aggs.aggs.responses_by_action_id.filter.bool.must;
 
-    it('scopes the aggregation by space_id', () => {
-      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
-      expect(JSON.stringify(getAggFilterMust(result))).toContain('space_id');
-    });
-
     it('scopes the aggregation to default space OR missing space_id when spaceId is "default"', () => {
       const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'default' });
       const defaultClause = {
@@ -671,6 +666,45 @@ describe('buildActionResultsQuery', () => {
       const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
       // Id-bound read: also matches the agent-carried action_data.space_id.
       expect(getAggFilterMust(result)).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'my-space' } },
+            { term: { 'action_data.space_id': 'my-space' } },
+          ],
+        },
+      });
+    });
+
+    it('uses a strict default-space term in aggregations when matchMissingSpaceId is false', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'default',
+        matchMissingSpaceId: false,
+      });
+
+      // The action_data fallback is orthogonal to matchMissingSpaceId: it is a
+      // present, exact-valued term, so it survives while the missing-field
+      // allowance is dropped.
+      expect(getAggFilterMust(result)).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { term: { 'action_data.space_id': 'default' } },
+          ],
+        },
+      });
+      expect(JSON.stringify(getAggFilterMust(result))).not.toContain('exists');
+    });
+
+    it('omits action_data.space_id from aggregations when matchActionDataSpaceId is false', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+        matchActionDataSpaceId: false,
+      });
+
+      expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(getAggFilterMust(result)).not.toContainEqual({
         bool: {
           should: [
             { term: { space_id: 'my-space' } },
