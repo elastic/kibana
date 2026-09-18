@@ -164,7 +164,8 @@ export class AlertZeroPlugin
     this.conversationProposalsService = new ConversationProposalsService(
       plugins.agenticInvestigations.getProposalsService(),
       plugins.agentBuilder,
-      this.logger
+      this.logger,
+      plugins.agenticInvestigations.getImpactService()
     );
 
     // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.

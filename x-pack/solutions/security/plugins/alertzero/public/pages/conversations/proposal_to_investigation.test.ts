@@ -151,9 +151,19 @@ describe('proposalToInvestigation', () => {
       expect(result.events).toEqual([]);
     });
 
-    it('affectedSurface is undefined', () => {
+    it('affectedSurface is undefined when Impact was not hydrated', () => {
       const result = proposalToInvestigation(baseProposal);
       expect(result.affectedSurface).toBeUndefined();
+      expect(result.entityIds).toBeUndefined();
+    });
+
+    it('copies hydrated entity ids onto the card and uses the first as affectedSurface', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        entityIds: ['cfo@corp', 'host-1'],
+      });
+      expect(result.entityIds).toEqual(['cfo@corp', 'host-1']);
+      expect(result.affectedSurface).toBe('cfo@corp');
     });
 
     it('pendingProposalCount is 1 for undecided proposals', () => {
