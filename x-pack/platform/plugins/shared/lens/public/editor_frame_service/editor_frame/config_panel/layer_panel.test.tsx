@@ -1313,7 +1313,9 @@ describe('LayerPanel', () => {
       ];
 
       await expect(
-        editorProps?.onLayerQuerySubmit?.(incompatibleQuery, incompatibleColumns)
+        editorProps?.onLayerQuerySubmit?.(incompatibleQuery, incompatibleColumns, {
+          toSpec: () => ({ id: 'index-b', title: 'index-b', timeFieldName: '@timestamp' }),
+        } as DataView)
       ).rejects.toThrow('does not contain compatible fields');
       expect(updateDatasource).not.toHaveBeenCalled();
     });
