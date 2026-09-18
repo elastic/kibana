@@ -13,7 +13,7 @@ import { UserMessageEvent } from './items/user_message_event';
 import { PromptResponseEvent } from './items/prompt_response_event';
 import { AgentTurn } from './agent_turn';
 import { ConversationDateDivider } from './conversation_date_divider';
-import type { TimelineItem } from './to_timeline_items';
+import type { TimelineItem } from './types';
 
 interface TimelineProps {
   items: TimelineItem[];

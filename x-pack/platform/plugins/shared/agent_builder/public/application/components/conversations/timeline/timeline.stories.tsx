@@ -20,8 +20,8 @@ import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
 import { Timeline } from './timeline';
 import { DevSseEmitter } from './dev_sse_emitter';
-import { activeExecutionReducer } from '../../../../services/events/active_execution_reducer';
-import { toTimelineItems } from './to_timeline_items';
+import { sseToEvents, emptyLiveEventsState } from '../../../../services/events/sse_to_events';
+import { buildItems } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
@@ -178,11 +178,11 @@ export const AbortedExecution: Story = {
 };
 
 const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
-  const [activeExecution, dispatch] = useReducer(activeExecutionReducer, null);
+  const [liveState, dispatch] = useReducer(sseToEvents, undefined, emptyLiveEventsState);
   const emit = useCallback((event: ChatEvent) => dispatch(event), []);
 
-  const toTimelineItemsInput = { events: seedEvents, activeExecution };
-  const items = toTimelineItems(toTimelineItemsInput);
+  const events = [...seedEvents, ...liveState.events];
+  const items = buildItems(events);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -198,7 +198,7 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
         <EuiAccordion id="debug-source" buttonContent="Source">
           <EuiSpacer size="s" />
           <EuiCodeBlock language="json" isCopyable overflowHeight={300}>
-            {JSON.stringify(toTimelineItemsInput, null, 2)}
+            {JSON.stringify(events, null, 2)}
           </EuiCodeBlock>
         </EuiAccordion>
       </EuiFlexItem>

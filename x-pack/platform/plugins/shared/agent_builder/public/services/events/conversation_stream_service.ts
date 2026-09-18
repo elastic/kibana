@@ -6,16 +6,16 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, defer, finalize } from 'rxjs';
-import type { ActiveExecutionDraft } from './active_execution_reducer';
-import { activeExecutionReducer } from './active_execution_reducer';
+import { BehaviorSubject, defer, finalize, map } from 'rxjs';
+import type { LiveEventsState, TimelineDisplayEvent } from './sse_to_events';
+import { emptyLiveEventsState, sseToEvents } from './sse_to_events';
 import type { EventsService } from './events_service';
 
 export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getStreamEnded$'>;
 
 interface ConversationStream {
   conversationId: string;
-  state$: BehaviorSubject<ActiveExecutionDraft | null>;
+  state$: BehaviorSubject<LiveEventsState>;
   sub: Subscription;
 }
 
@@ -29,10 +29,10 @@ export class ConversationStreamService {
   }
 
   private createStream(conversationId: string): ConversationStream {
-    const state$ = new BehaviorSubject<ActiveExecutionDraft | null>(null);
+    const state$ = new BehaviorSubject<LiveEventsState>(emptyLiveEventsState());
     const sub = this.source
       .getChatEvents$(conversationId)
-      .subscribe((event) => state$.next(activeExecutionReducer(state$.getValue(), event)));
+      .subscribe((event) => state$.next(sseToEvents(state$.getValue(), event)));
     const stream: ConversationStream = { conversationId, state$, sub };
     this.streams.set(conversationId, stream);
 
@@ -43,9 +43,9 @@ export class ConversationStreamService {
   }
 
   private onStreamEnded({ conversationId, state$ }: ConversationStream) {
-    const current = state$.getValue();
-    if (current && current.status !== 'completed') {
-      state$.next(null);
+    // A run that never reached its terminal event leaves a half-written answer behind; drop it.
+    if (state$.getValue().cursor) {
+      state$.next(emptyLiveEventsState());
     }
     this.maybeTeardown(conversationId);
   }
@@ -55,9 +55,7 @@ export class ConversationStreamService {
     if (!stream) {
       return;
     }
-    const value = stream.state$.getValue();
-    const isSealed = value?.status === 'completed';
-    const canReclaim = !stream.state$.observed && (!value || isSealed);
+    const canReclaim = !stream.state$.observed && !stream.state$.getValue().cursor;
     if (!canReclaim) {
       return;
     }
@@ -66,39 +64,35 @@ export class ConversationStreamService {
   }
 
   /**
-   * Hot state stream for one conversation. Consumers subscribe (e.g. via `useObservable`)
-   * and receive the folded `ActiveExecutionDraft` as the agent runs, `null` when idle.
+   * Hot event stream for one conversation. Consumers subscribe (e.g. via `useObservable`) and
+   * receive the events the run has produced so far, in the same shape as `conversation.events`.
    */
-  getActiveStream$(conversationId: string): Observable<ActiveExecutionDraft | null> {
+  getActiveStream$(conversationId: string): Observable<TimelineDisplayEvent[]> {
     return defer(() => this.ensure(conversationId).state$).pipe(
+      map((state) => state.events),
       finalize(() => this.maybeTeardown(conversationId))
     );
   }
 
-  /** Non-reactive snapshot: is this conversation mid-run right now. */
-  isStreamActive(conversationId: string): boolean {
-    return !!this.streams.get(conversationId)?.state$.getValue();
+  /** Non-reactive snapshot: the live events accumulated so far for this conversation. */
+  getSnapshot(conversationId: string): TimelineDisplayEvent[] {
+    return this.streams.get(conversationId)?.state$.getValue().events ?? [];
   }
 
-  getSnapshot(conversationId: string): ActiveExecutionDraft | null {
-    return this.streams.get(conversationId)?.state$.getValue() ?? null;
-  }
-
-  /** Drops a completed draft once its saved replacement is in the cache. */
+  /**
+   * Drops the live events of an execution once its saved twin is in the cache. Id-matching already
+   * makes the saved events win, so this only frees memory.
+   */
   clearPersistedExecution(conversationId: string, executionId: string) {
     const stream = this.streams.get(conversationId);
     const current = stream?.state$.getValue();
-    if (!stream || !current) {
+    if (!stream || !current || current.cursor) {
       return;
     }
-    if (current.status !== 'completed' || current.executionId !== executionId) {
+    if (!current.events.some((event) => event.execution_id === executionId)) {
       return;
     }
-    stream.state$.next(null);
-    this.maybeTeardown(conversationId);
-  }
-
-  releaseStream(conversationId: string) {
+    stream.state$.next(emptyLiveEventsState());
     this.maybeTeardown(conversationId);
   }
 }
