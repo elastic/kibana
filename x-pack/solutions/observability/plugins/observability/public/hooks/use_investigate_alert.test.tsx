@@ -10,6 +10,7 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { NightshiftInvestigationsRepositoryClient } from '@kbn/nightshift-investigations-plugin/public';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { useInvestigateAlert } from './use_investigate_alert';
 import { useKibana } from '../utils/kibana_react';
 import { setInvestigationsClient } from '../services/investigations_client';
@@ -20,6 +21,9 @@ const useKibanaMock = useKibana as jest.Mock;
 const fetchMock = jest.fn();
 const addSuccess = jest.fn();
 const addDanger = jest.fn();
+const getUrlForApp = jest.fn(
+  (_appId: string, { path }: { path: string }) => `/app/nightshift${path}`
+);
 
 let queryClient: QueryClient;
 
@@ -27,11 +31,11 @@ const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-const emptyList = { results: [], page: 1, size: 1, total: 0 };
+const emptyList = { results: [], page: 1, size: 2, total: 0 };
 
 const mockInvestigationsApi = ({
   list = emptyList,
-  listAfterStart = { results: [{ status: 'pending' }], page: 1, size: 1, total: 1 },
+  listAfterStart = { results: [{ status: 'pending' }], page: 1, size: 2, total: 1 },
 }: {
   list?: unknown;
   listAfterStart?: unknown;
@@ -49,8 +53,8 @@ const mockInvestigationsApi = ({
   });
 };
 
-const renderInvestigateAlert = () =>
-  renderHook(() => useInvestigateAlert({ alertId: 'alert-1' }), { wrapper });
+const renderInvestigateAlert = (alertId = 'alert-1') =>
+  renderHook(() => useInvestigateAlert({ alertId }), { wrapper });
 
 describe('useInvestigateAlert', () => {
   beforeEach(() => {
@@ -62,6 +66,7 @@ describe('useInvestigateAlert', () => {
     useKibanaMock.mockReturnValue({
       services: {
         http: { basePath: { get: () => '' } },
+        application: { getUrlForApp },
         notifications: { toasts: { addSuccess, addDanger } },
       },
     });
@@ -85,9 +90,11 @@ describe('useInvestigateAlert', () => {
         params: {
           query: {
             concurrency_key: 'alert-1',
+            statuses: ['pending', 'running', 'completed'],
+            subject_types: ['alert'],
             sort_field: 'created_at',
             sort_order: 'desc',
-            size: 1,
+            size: 2,
           },
         },
       })
@@ -96,12 +103,18 @@ describe('useInvestigateAlert', () => {
 
   it('returns Investigating and disables starts for an ongoing investigation', async () => {
     mockInvestigationsApi({
-      list: { results: [{ status: 'running' }], page: 1, size: 1, total: 1 },
+      list: {
+        results: [{ investigation_id: 'inv-running', status: 'running' }],
+        page: 1,
+        size: 1,
+        total: 1,
+      },
     });
     const { result } = renderInvestigateAlert();
 
     await waitFor(() => expect(result.current.investigateActionLabel).toBe('Investigating'));
     expect(result.current.isInvestigating).toBe(true);
+    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?investigationId=inv-running');
     await act(() => result.current.handleInvestigate());
     expect(fetchMock).not.toHaveBeenCalledWith(
       'POST /internal/nightshift/investigations',
@@ -111,12 +124,64 @@ describe('useInvestigateAlert', () => {
 
   it('returns Re-investigate after a completed investigation', async () => {
     mockInvestigationsApi({
-      list: { results: [{ status: 'completed' }], page: 1, size: 1, total: 1 },
+      list: {
+        results: [{ investigation_id: 'inv-completed', status: 'completed' }],
+        page: 1,
+        size: 2,
+        total: 1,
+      },
     });
-    const { result } = renderInvestigateAlert();
+    const { result } = renderInvestigateAlert('alert/1');
 
     await waitFor(() => expect(result.current.investigateActionLabel).toBe('Re-investigate'));
     expect(result.current.isInvestigating).toBe(false);
+    expect(result.current.viewInvestigationActionLabel).toBe('View investigation');
+    expect(result.current.viewInvestigationUrl).toBe(
+      '/app/nightshift?investigationId=inv-completed'
+    );
+    expect(getUrlForApp).toHaveBeenCalledWith(NIGHTSHIFT_APP_ID, {
+      path: '?investigationId=inv-completed',
+    });
+  });
+
+  it('keeps the completed investigation link while a newer investigation is active', async () => {
+    mockInvestigationsApi({
+      list: {
+        results: [
+          { investigation_id: 'inv-running', status: 'running' },
+          { investigation_id: 'inv-completed', status: 'completed' },
+        ],
+        page: 1,
+        size: 2,
+        total: 2,
+      },
+    });
+    const { result } = renderInvestigateAlert();
+
+    await waitFor(() => expect(result.current.investigateActionLabel).toBe('Investigating'));
+    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?investigationId=inv-running');
+  });
+
+  it('returns the completed investigation link without write availability', async () => {
+    fetchMock.mockImplementation(async (endpoint: string) => {
+      if (endpoint === 'GET /internal/nightshift/investigations/availability') {
+        throw new Error('Forbidden');
+      }
+      return {
+        results: [{ investigation_id: 'inv-completed', status: 'completed' }],
+        page: 1,
+        size: 2,
+        total: 1,
+      };
+    });
+    const { result } = renderInvestigateAlert();
+
+    await waitFor(() =>
+      expect(result.current.viewInvestigationUrl).toBe(
+        '/app/nightshift?investigationId=inv-completed'
+      )
+    );
+    expect(result.current.showInvestigateAction).toBe(false);
   });
 
   it('starts the investigation for the alert and marks it pending', async () => {
@@ -154,6 +219,12 @@ describe('useInvestigateAlert', () => {
       title: 'Failed to start investigation',
       text: 'Request failed',
     });
+  });
+
+  it('does not fetch investigations or availability when enabled is false', async () => {
+    renderHook(() => useInvestigateAlert({ alertId: 'alert-1', enabled: false }), { wrapper });
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('hides the action when the nightshift plugin is unavailable', async () => {
