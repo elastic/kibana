@@ -1423,5 +1423,24 @@ describe('conversations utils', () => {
       expect(call.events[3].data).not.toHaveProperty('outcome');
       expect(call.attachments).toEqual({ snapshot: [], produced: [{ id: 'a1' }] });
     });
+
+    it('fresh round, aborted: persists the abort reason carried by the error as aborted_by', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+      const abortReason = { source: 'api', actor: { id: 'u1', username: 'alice' } };
+
+      await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        error: createRequestAbortedError('stop', { abort_reason: abortReason }),
+        interrupted: interruptedData(),
+      });
+
+      const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(call.events.at(-1)!.data).toEqual({
+        time_to_last_token: 5,
+        model_usage: usage,
+        aborted_by: abortReason,
+      });
+    });
   });
 });

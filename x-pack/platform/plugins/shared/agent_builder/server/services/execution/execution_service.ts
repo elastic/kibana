@@ -13,10 +13,15 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatEvent, InteractivityConfig } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ExecutionAbortReason,
+  InteractivityConfig,
+} from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
+  isExecutionAbortReason,
   isRequestAbortedError,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
@@ -141,10 +146,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw err;
     }
 
-    // Wire up external abort signal to execution abort
+    // Wire up external abort signal to execution abort. A cascaded abort keeps the original
+    // actor (a user aborting the parent execution) so the child records who asked.
     if (abortSignal) {
       const onAbort = () => {
-        this.abortExecution(executionId).catch(noop);
+        const cause = isExecutionAbortReason(abortSignal.reason) ? abortSignal.reason : undefined;
+        const reason: ExecutionAbortReason = {
+          source: 'caller',
+          ...(params.parentExecutionId ? { parent_execution_id: params.parentExecutionId } : {}),
+          ...(cause?.actor ? { actor: cause.actor } : {}),
+        };
+        this.abortExecution(executionId, reason).catch(noop);
       };
       if (abortSignal.aborted) {
         onAbort();
@@ -166,7 +178,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     return executionClient.get(executionId);
   }
 
-  async abortExecution(executionId: string): Promise<void> {
+  async abortExecution(
+    executionId: string,
+    reason: ExecutionAbortReason = { source: 'api' }
+  ): Promise<void> {
     const executionClient = this.createExecutionClient();
     const execution = await executionClient.get(executionId);
 
@@ -185,8 +200,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       return;
     }
 
-    await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
-    this.logger.debug(`Aborted execution ${executionId}`);
+    await executionClient.updateStatus(executionId, ExecutionStatus.aborted, undefined, reason);
+    this.logger.debug(`Aborted execution ${executionId} (${reason.source})`);
   }
 
   followExecution(executionId: string, options?: FollowExecutionOptions): Observable<ChatEvent> {

@@ -32,6 +32,7 @@ import {
   ConversationRoundStatus,
   isConversationAlreadyExistsError,
   isEventsNativeVersion,
+  isExecutionAbortReason,
   isExecutionTerminalEvent,
   isRequestAbortedError,
   normalizeConversationAccessControl,
@@ -438,7 +439,12 @@ export const persistExecutionInterruption = async (
 
   try {
     const interruption: ExecutionInterruption = isRequestAbortedError(error)
-      ? { type: 'aborted' }
+      ? {
+          type: 'aborted',
+          ...(isExecutionAbortReason(error.meta?.abort_reason)
+            ? { aborted_by: error.meta.abort_reason }
+            : {}),
+        }
       : { type: 'failed', error: serializeExecutionError(toClientError(error)) };
 
     const isResume = isPendingResumeConversation(conversation);

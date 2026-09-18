@@ -7,7 +7,11 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ChatEvent, SerializedExecutionError } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ExecutionAbortReason,
+  SerializedExecutionError,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecution, FindExecutionsOptions } from '@kbn/agent-builder-server/execution';
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
@@ -53,6 +57,7 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     eventCount: source.event_count ?? 0,
     events: source.events ?? [],
     ...(source.error ? { error: source.error } : {}),
+    ...(source.abort_reason ? { abortReason: source.abort_reason } : {}),
     ...(source.metadata ? { metadata: source.metadata } : {}),
   } as AgentExecution;
 };
@@ -68,10 +73,15 @@ export interface AgentExecutionClient {
   get(executionId: string): Promise<AgentExecution | undefined>;
 
   /** Update the status of an execution, optionally persisting an error. */
+  /**
+   * Updates the execution status. `aborted` is sticky against a later `failed` or `completed`.
+   * `error` and `abortReason` are recorded when given.
+   */
   updateStatus(
     executionId: string,
     status: ExecutionStatus,
-    error?: SerializedExecutionError
+    error?: SerializedExecutionError,
+    abortReason?: ExecutionAbortReason
   ): Promise<void>;
 
   /** Append events to an execution document using a scripted update. */
@@ -182,7 +192,8 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
   async updateStatus(
     executionId: string,
     status: ExecutionStatus,
-    error?: SerializedExecutionError
+    error?: SerializedExecutionError,
+    abortReason?: ExecutionAbortReason
   ): Promise<void> {
     // `aborted` is sticky: once an abort was requested the execution reports it, and neither a
     // later `failed` (the graph erroring inside the abort-detection window) nor `completed` (the
@@ -198,8 +209,9 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
             && (params.status == 'failed' || params.status == 'completed');
           if (!keepAborted) { ctx._source.status = params.status; }
           if (params.error != null) { ctx._source.error = params.error; }
+          if (params.abort_reason != null) { ctx._source.abort_reason = params.abort_reason; }
         `,
-        params: { status, error: error ?? null },
+        params: { status, error: error ?? null, abort_reason: abortReason ?? null },
       },
     });
   }

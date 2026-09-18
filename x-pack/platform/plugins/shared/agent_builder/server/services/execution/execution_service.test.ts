@@ -504,7 +504,9 @@ describe('AgentExecutionService', () => {
 
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         'exec-1',
-        ExecutionStatus.aborted
+        ExecutionStatus.aborted,
+        undefined,
+        { source: 'api' }
       );
     });
 
@@ -532,6 +534,65 @@ describe('AgentExecutionService', () => {
       await expect(service.abortExecution('exec-1')).resolves.toBeUndefined();
       expect(mockExecutionClient.updateStatus).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('abort reasons', () => {
+    it('records the reason given to abortExecution', async () => {
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-1',
+        status: ExecutionStatus.running,
+      } as never);
+
+      await service.abortExecution('exec-1', {
+        source: 'api',
+        actor: { id: 'u1', username: 'alice' },
+      });
+
+      expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
+        'exec-1',
+        ExecutionStatus.aborted,
+        undefined,
+        { source: 'api', actor: { id: 'u1', username: 'alice' } }
+      );
+    });
+
+    it('records a caller abort when the provided signal fires, cascading the original actor', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+      const abortController = new AbortController();
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+          parentExecutionId: 'parent-1',
+        },
+        useTaskManager: false,
+        abortSignal: abortController.signal,
+      });
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'test-id',
+        status: ExecutionStatus.running,
+      } as never);
+
+      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // the client mock's create() answers with a fixed id, so match the aborted id loosely
+      expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
+        expect.any(String),
+        ExecutionStatus.aborted,
+        undefined,
+        {
+          source: 'caller',
+          parent_execution_id: 'parent-1',
+          actor: { id: 'u1', username: 'alice' },
+        }
+      );
     });
   });
 

@@ -165,6 +165,17 @@ describe('TaskHandler event streaming and finalization', () => {
     };
   };
 
+  it('records a task_manager abort reason when Task Manager cancels the task', async () => {
+    await createHandler().cancel({ executionId: 'execution-1' });
+
+    expect(executionClient.updateStatus).toHaveBeenCalledWith(
+      'execution-1',
+      ExecutionStatus.aborted,
+      undefined,
+      { source: 'task_manager' }
+    );
+  });
+
   it('passes the same shared event stream to persistence and callback delivery', async () => {
     await run();
 

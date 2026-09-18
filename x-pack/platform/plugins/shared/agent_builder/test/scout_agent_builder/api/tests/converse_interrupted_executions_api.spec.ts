@@ -376,15 +376,30 @@ apiTest.describe(
           )
         ).toHaveLength(1);
         expect(conversation!.rounds).toHaveLength(1);
+        // the abort came through the API: the terminal records the source and the requesting user
+        const abortedBy = (
+          aborted[0].data as {
+            aborted_by?: { source: string; actor?: { id?: unknown; username?: unknown } };
+          }
+        ).aborted_by;
+        expect(abortedBy?.source).toBe('api');
+        expect(typeof abortedBy?.actor?.id).toBe('string');
+        expect(typeof abortedBy?.actor?.username).toBe('string');
 
         // 4. the execution document says aborted (not failed), with the abort error recorded
         await sysEsClient.indices.refresh({ index: AGENT_EXECUTIONS_INDEX });
-        const doc = await sysEsClient.get<{ status: string; error?: { code: string } }>({
+        const doc = await sysEsClient.get<{
+          status: string;
+          error?: { code: string; meta?: { abort_reason?: { source: string } } };
+          abort_reason?: { source: string };
+        }>({
           index: AGENT_EXECUTIONS_INDEX,
           id: accepted.execution_id,
         });
         expect(doc._source?.status).toBe('aborted');
         expect(doc._source?.error?.code).toBe(AgentBuilderErrorCode.requestAborted);
+        expect(doc._source?.abort_reason?.source).toBe('api');
+        expect(doc._source?.error?.meta?.abort_reason?.source).toBe('api');
 
         // 5. a third round does not see the aborted round's input
         await setupAgentDirectAnswer({

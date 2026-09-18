@@ -160,9 +160,12 @@ class TaskHandlerImpl implements TaskHandler {
     }
   }
 
+  /** Task Manager cancelled the task (timeout or Kibana shutdown). */
   async cancel({ executionId }: { executionId: string }): Promise<void> {
     const executionClient = this.createExecutionClient();
-    await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
+    await executionClient.updateStatus(executionId, ExecutionStatus.aborted, undefined, {
+      source: 'task_manager',
+    });
   }
 
   private createExecutionClient(): AgentExecutionClient {

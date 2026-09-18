@@ -6,7 +6,7 @@
  */
 
 import type { PromptRequest, PromptResponse } from '../agents/prompts';
-import type { SerializedExecutionError } from '../agents/execution_status';
+import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type {
   AssistantResponse,
@@ -250,7 +250,10 @@ export type ExecutionFailedEvent = BaseTimelineEvent<
 >;
 
 /** A run that was stopped before it completed. */
-export type ExecutionAbortedEventData = ExecutionPartialRunSummary;
+export type ExecutionAbortedEventData = ExecutionPartialRunSummary & {
+  /** Where the abort came from and who asked for it, when known. */
+  aborted_by?: ExecutionAbortReason;
+};
 export type ExecutionAbortedEvent = BaseTimelineEvent<
   TimelineEventType.executionAborted,
   ExecutionAbortedEventData

@@ -160,4 +160,39 @@ describe('handleCancellation', () => {
     expect(source$.observed).toBe(false);
     expect(error).not.toHaveBeenCalled();
   });
+
+  it('stamps the abort reason carried by the signal on the error meta', () => {
+    const abortController = new AbortController();
+    const source$ = new Subject<number>();
+    let thrown: unknown;
+
+    source$.pipe(handleCancellation(abortController.signal)).subscribe({
+      error: (err) => {
+        thrown = err;
+      },
+    });
+    const reason = { source: 'task_manager' };
+    abortController.abort(reason);
+    source$.complete();
+
+    expect(isRequestAbortedError(thrown)).toBe(true);
+    expect((thrown as { meta: Record<string, unknown> }).meta.abort_reason).toEqual(reason);
+  });
+
+  it('ignores a signal reason that is not an execution abort reason', () => {
+    const abortController = new AbortController();
+    const source$ = new Subject<number>();
+    let thrown: unknown;
+
+    source$.pipe(handleCancellation(abortController.signal)).subscribe({
+      error: (err) => {
+        thrown = err;
+      },
+    });
+    abortController.abort(new Error('some DOMException-like reason'));
+    source$.complete();
+
+    expect(isRequestAbortedError(thrown)).toBe(true);
+    expect((thrown as { meta: Record<string, unknown> }).meta).not.toHaveProperty('abort_reason');
+  });
 });

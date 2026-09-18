@@ -15,7 +15,7 @@ import type {
   ExecutionTerminatedEvent,
 } from './timeline_events';
 import { TimelineEventType } from './timeline_events';
-import type { SerializedExecutionError } from '../agents/execution_status';
+import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
@@ -373,7 +373,7 @@ export const isRoundCompleteEvent = (
 /** How an execution was interrupted. */
 export type ExecutionInterruption =
   | { type: 'failed'; error: SerializedExecutionError }
-  | { type: 'aborted' };
+  | { type: 'aborted'; aborted_by?: ExecutionAbortReason };
 
 /**
  * Emitted by the agent handler when the run errors (or is cancelled) after it started: what is

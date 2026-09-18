@@ -7,7 +7,7 @@
 
 import type { OperatorFunction } from 'rxjs';
 import { Observable } from 'rxjs';
-import { createRequestAbortedError } from '@kbn/agent-builder-common';
+import { createRequestAbortedError, isExecutionAbortReason } from '@kbn/agent-builder-common';
 import { CANCELLATION_DEADLINE_MS } from '../constants';
 
 /**
@@ -31,7 +31,16 @@ export function handleCancellation<T>(
 
     return new Observable<T>((subscriber) => {
       let deadline: ReturnType<typeof setTimeout> | undefined;
-      const abortedError = () => createRequestAbortedError('Converse request was aborted');
+      // `signal.reason` carries the recorded abort reason (see AbortMonitor); it rides on the
+      // error meta so every reader of the error — stream, execution document, follower, callback,
+      // conversation — sees where the abort came from.
+      const abortedError = () =>
+        createRequestAbortedError(
+          'Converse request was aborted',
+          isExecutionAbortReason(abortSignal.reason)
+            ? { abort_reason: abortSignal.reason }
+            : undefined
+        );
       const clearDeadline = () => {
         if (deadline !== undefined) {
           clearTimeout(deadline);

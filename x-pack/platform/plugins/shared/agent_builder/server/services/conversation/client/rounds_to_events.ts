@@ -482,7 +482,14 @@ export const interruptedExecutionToEvents = ({
           type: TimelineEventType.executionFailed,
           data: { ...summary, error: interruption.error },
         }
-      : { ...base, type: TimelineEventType.executionAborted, data: summary };
+      : {
+          ...base,
+          type: TimelineEventType.executionAborted,
+          data: {
+            ...summary,
+            ...(interruption.aborted_by ? { aborted_by: interruption.aborted_by } : {}),
+          },
+        };
   return [started, ...stepEvents, terminal];
 };
 

@@ -20,6 +20,7 @@ import type {
   InteractivityConfig,
   InteractivityConfigInput,
   SerializedExecutionError,
+  ExecutionAbortReason,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
@@ -135,6 +136,8 @@ interface BaseAgentExecution {
   spaceId: string;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
+  /** Why the execution was aborted, present when status is 'aborted' and the origin recorded it. */
+  abortReason?: ExecutionAbortReason;
   /** Number of events stored on the document (kept in sync with `events.length`). */
   eventCount: number;
   /** Inline events emitted during the execution. The array index is the event number. */
@@ -277,9 +280,10 @@ export interface AgentExecutionService {
 
   /**
    * Abort an ongoing execution.
-   * Sets the execution status to 'aborted', which the TM handler will detect via polling.
+   * Sets the execution status to 'aborted', which the executing node detects via polling. `reason`
+   * records where the abort came from; it defaults to the abort API.
    */
-  abortExecution(executionId: string): Promise<void>;
+  abortExecution(executionId: string, reason?: ExecutionAbortReason): Promise<void>;
 
   /**
    * Follow an execution by polling for events.

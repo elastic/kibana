@@ -76,7 +76,9 @@ describe('AgentExecutionClient', () => {
       expect(script.params).toEqual({
         status: ExecutionStatus.failed,
         error: { code: 'internalError', message: 'boom' },
+        abort_reason: null,
       });
+      expect(script.source).toContain('if (params.abort_reason != null)');
       // aborted must survive both a later `failed` and a later `completed`
       expect(script.source).toContain("ctx._source.status == 'aborted'");
       expect(script.source).toContain("params.status == 'failed'");
@@ -91,6 +93,19 @@ describe('AgentExecutionClient', () => {
       expect((request as { script: { params: unknown } }).script.params).toEqual({
         status: ExecutionStatus.running,
         error: null,
+        abort_reason: null,
+      });
+    });
+
+    it('records the abort reason when given', async () => {
+      const abortReason = { source: 'api' as const, actor: { id: 'u1', username: 'alice' } };
+      await statusClient.updateStatus('exec-1', ExecutionStatus.aborted, undefined, abortReason);
+
+      const [request] = esClient.update.mock.calls[0];
+      expect((request as { script: { params: unknown } }).script.params).toEqual({
+        status: ExecutionStatus.aborted,
+        error: null,
+        abort_reason: abortReason,
       });
     });
   });

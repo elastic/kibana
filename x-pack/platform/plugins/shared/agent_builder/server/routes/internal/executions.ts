@@ -17,6 +17,7 @@ import { getSSEResponseHeaders } from '../utils';
 import { filterLegacyApiEvents } from '../converse_helpers';
 
 export function registerInternalExecutionRoutes({
+  coreSetup,
   router,
   getInternalServices,
   logger,
@@ -112,7 +113,14 @@ export function registerInternalExecutionRoutes({
       const { execution: executionService } = getInternalServices();
       const { executionId } = request.params;
 
-      await executionService.abortExecution(executionId);
+      const [coreStart] = await coreSetup.getStartServices();
+      const user = coreStart.security.authc.getCurrentUser(request);
+      await executionService.abortExecution(executionId, {
+        source: 'api',
+        ...(user
+          ? { actor: { id: user.profile_uid ?? user.username, username: user.username } }
+          : {}),
+      });
 
       return response.ok({ body: { acknowledged: true } });
     })

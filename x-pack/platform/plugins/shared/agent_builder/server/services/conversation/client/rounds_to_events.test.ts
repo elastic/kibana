@@ -442,6 +442,21 @@ describe('interruptedExecutionToEvents', () => {
     expect((events[1] as ExecutionAbortedEvent).data).toEqual({ time_to_last_token: 10 });
   });
 
+  it('carries aborted_by on the aborted terminal when the interruption records it', () => {
+    const abortedBy = { source: 'task_manager' as const };
+    const [, terminal] = interruptedExecutionToEvents({
+      roundId: 'r1',
+      executionIndex: 0,
+      startedAt: T0,
+      triggerEventId: 'r1::user_message',
+      steps: [],
+      summary: { time_to_last_token: 10 },
+      interruption: { type: 'aborted', aborted_by: abortedBy },
+      conversation,
+    });
+    expect(terminal.data).toEqual({ time_to_last_token: 10, aborted_by: abortedBy });
+  });
+
   it('numbers resume steps under the execution id', () => {
     const events = interruptedExecutionToEvents({
       roundId: 'r1',
