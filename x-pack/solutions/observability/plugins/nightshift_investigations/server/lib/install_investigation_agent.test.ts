@@ -11,7 +11,10 @@ import {
   NIGHTSHIFT_INVESTIGATION_AGENT_ID,
   NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '../agents/investigation';
-import { installInvestigationAgent } from './install_investigation_agent';
+import {
+  installDeductiveInvestigationAgent,
+  installInvestigationAgent,
+} from './install_investigation_agent';
 
 describe('installInvestigationAgent', () => {
   it('ensures a system-owned persisted typed agent in the requested space', async () => {
@@ -38,5 +41,23 @@ describe('installInvestigationAgent', () => {
         },
       },
     });
+  });
+
+  it('ensures the deductive investigator so Cortex/Memory hydrate is attached in the UI', async () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+
+    await installDeductiveInvestigationAgent({ agentBuilder, spaceId: 'default' });
+
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'default',
+        agent: expect.objectContaining({
+          id: 'significant-events.deductive-investigation',
+          type: 'platform.sig_events.deductive-investigation-type',
+          name: 'Nightshift Deductive Investigator',
+          avatar_symbol: 'ND',
+        }),
+      })
+    );
   });
 });
