@@ -115,6 +115,8 @@ apiTest.describe(
 
     let adminCookie: Record<string, string>;
     let sysEsClient: Client;
+    let bobId: string;
+    let eveId: string;
 
     const headersFor = (user: { username: string; password: string }) => ({
       ...COMMON_HEADERS,
@@ -163,7 +165,7 @@ apiTest.describe(
       });
     };
 
-    apiTest.beforeAll(async ({ asAdmin, config, esClient, samlAuth, kbnClient }) => {
+    apiTest.beforeAll(async ({ apiClient, asAdmin, config, esClient, samlAuth, kbnClient }) => {
       sysEsClient = await createSystemIndicesEsClient(esClient, config);
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminCookie = cookieHeader;
@@ -218,6 +220,11 @@ apiTest.describe(
         body: mockAgent(bootstrapAgentId),
         responseType: 'json',
       });
+
+      [bobId, eveId] = await Promise.all([
+        resolveStableUserId(apiClient, bob),
+        resolveStableUserId(apiClient, eve),
+      ]);
     });
 
     apiTest.afterAll(async ({ apiClient, kbnClient }) => {
@@ -502,7 +509,6 @@ apiTest.describe(
       });
 
       await apiTest.step('Alice grants Bob User access', async () => {
-        const bobId = await resolveStableUserId(apiClient, bob);
         const accessControlRes = await setAccessControlAs(apiClient, alice, agentId, [
           { type: 'user', id: bobId, role: AgentAccessControlRole.User },
         ]);
@@ -691,10 +697,6 @@ apiTest.describe(
       "GET /agents/{id} keeps only the caller's access_control entry for non-managers",
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-redact-${randomUUID()}`;
-        const [bobId, eveId] = await Promise.all([
-          resolveStableUserId(apiClient, bob),
-          resolveStableUserId(apiClient, eve),
-        ]);
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
         const setRes = await setAccessControlAs(apiClient, alice, agentId, [
           { type: 'user', id: bobId, role: AgentAccessControlRole.User },
@@ -751,10 +753,6 @@ apiTest.describe(
       'GET /agents/{id}/access_control returns permissions and redacts entries for non-managers',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-get-${randomUUID()}`;
-        const [bobId, eveId] = await Promise.all([
-          resolveStableUserId(apiClient, bob),
-          resolveStableUserId(apiClient, eve),
-        ]);
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
         await setAccessControlAs(apiClient, alice, agentId, [
           { type: 'user', id: bobId, role: AgentAccessControlRole.User },
@@ -790,10 +788,6 @@ apiTest.describe(
       'PUT /agents/{id}/access_control gates on access-control management (User and Editor → 404, Manager → 200)',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-put-${randomUUID()}`;
-        const [bobId, eveId] = await Promise.all([
-          resolveStableUserId(apiClient, bob),
-          resolveStableUserId(apiClient, eve),
-        ]);
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
         await setAccessControlAs(apiClient, alice, agentId, [
           { type: 'user', id: bobId, role: AgentAccessControlRole.User },
@@ -872,7 +866,6 @@ apiTest.describe(
           agentId,
           entries: [{ type: 'user', name: bob.username, role: AgentAccessControlRole.User }],
         });
-        const eveId = await resolveStableUserId(apiClient, eve);
 
         const res = await apiClient.put(
           `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}/access_control`,
@@ -947,7 +940,6 @@ apiTest.describe(
     // ── default agent immunity ──────────────────────────────────────────────
 
     apiTest('PUT /access_control on the default agent returns 400', async ({ apiClient }) => {
-      const bobId = await resolveStableUserId(apiClient, bob);
       const res = await apiClient.put(
         `${accessControlApiBase}/agents/${encodeURIComponent(
           agentBuilderDefaultAgentId

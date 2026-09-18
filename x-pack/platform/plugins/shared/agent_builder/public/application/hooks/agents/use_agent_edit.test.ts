@@ -257,6 +257,61 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     expect(mockUpdate.mock.calls[0][1].access_control).not.toHaveProperty('entries');
   });
 
+  it('strips the server-stamped added_at from the access control update payload', async () => {
+    mockAgent = {
+      id: 'existing-agent',
+      name: 'Existing Agent',
+      description: 'An existing agent',
+      access_control: {
+        access_mode: AgentAccessControlMode.Private,
+        entries: [
+          {
+            type: 'user',
+            id: 'u_alice',
+            role: AgentAccessControlRole.User,
+            added_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+      labels: [],
+      avatar_color: '',
+      avatar_symbol: '',
+      configuration: baseConfiguration,
+    };
+
+    const updateData: AgentEditState = {
+      ...mockAgent,
+      access_control: {
+        access_mode: AgentAccessControlMode.Private,
+        entries: [
+          {
+            type: 'user',
+            id: 'u_alice',
+            role: AgentAccessControlRole.Editor,
+            added_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+    };
+
+    const { result } = renderHook(() =>
+      useAgentEdit({
+        editingAgentId: 'existing-agent',
+        onSaveSuccess: jest.fn(),
+        onSaveError: jest.fn(),
+      })
+    );
+
+    await act(async () => {
+      await result.current.submit(updateData);
+    });
+
+    expect(mockUpdateAccessControl).toHaveBeenCalledWith('existing-agent', {
+      entries: [{ type: 'user', id: 'u_alice', role: AgentAccessControlRole.Editor }],
+    });
+    expect(mockUpdateAccessControl.mock.calls[0][1].entries[0]).not.toHaveProperty('added_at');
+  });
+
   it('exposes permissions separately from editable form state', async () => {
     mockAgent = {
       id: 'existing-agent',

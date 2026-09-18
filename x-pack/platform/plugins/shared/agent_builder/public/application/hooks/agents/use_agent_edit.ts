@@ -159,7 +159,9 @@ export function useAgentEdit({
             accessControlEntriesSignature(nextEntries);
 
         if (shouldUpdateAccessControl) {
-          await updateAccessControlMutation.mutateAsync(nextEntries);
+          await updateAccessControlMutation.mutateAsync(
+            nextEntries.map(({ added_at, ...entry }) => entry)
+          );
         }
 
         queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
