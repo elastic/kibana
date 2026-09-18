@@ -13,6 +13,7 @@ import type {
   TaskPriority,
   TaskCost,
   TaskTypeGroup,
+  WorkerTaskResources,
 } from './task';
 import { taskDefinitionSchema } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
@@ -68,11 +69,7 @@ export const SHARED_CONCURRENCY_TASKS: string[][] = [
   ['report:execute', 'report:execute-scheduled'],
 ];
 
-/**
- * Defines a task which can be scheduled and run by the Kibana
- * task manager.
- */
-export interface TaskRegisterDefinition {
+interface TaskRegisterDefinitionCommon {
   /**
    * A brief, human-friendly title for this task.
    */
@@ -101,12 +98,6 @@ export interface TaskRegisterDefinition {
   description?: string;
 
   /**
-   * Creates an object that has a run function which performs the task's work,
-   * and an optional cancel function which cancels the task.
-   */
-  createTaskRunner: TaskRunCreatorFunction;
-
-  /**
    * Up to how many times the task should retry when it fails to run. This will
    * default to the global variable. The default value, if not specified, is 1.
    */
@@ -129,6 +120,38 @@ export interface TaskRegisterDefinition {
   paramsSchema?: ObjectType;
   taskTypeGroup?: TaskTypeGroup;
 }
+
+/**
+ * Defines a task which can be scheduled and run by the Kibana task manager. Provide exactly
+ * one of `createTaskRunner` (the classic contract, a main-process closure) or
+ * `workerModuleId` + `workerResources` (an opt-in prototype contract that runs entirely in a
+ * worker process - see `xpack.task_manager.unsafe.worker_processes`).
+ */
+export type TaskRegisterDefinition = TaskRegisterDefinitionCommon &
+  (
+    | {
+        /**
+         * Creates an object that has a run function which performs the task's work,
+         * and an optional cancel function which cancels the task.
+         */
+        createTaskRunner: TaskRunCreatorFunction;
+        workerModuleId?: never;
+        workerResources?: never;
+      }
+    | {
+        /**
+         * Absolute path (from `require.resolve(...)`) to a module whose default export
+         * performs this task type's work entirely inside a worker process, in place of
+         * `createTaskRunner`. The worker has no Kibana services (no ES/SO clients); its
+         * default export receives a `WorkerTaskInput` and resolves with a `WorkerRunResult`.
+         * Requires `xpack.task_manager.unsafe.worker_processes.enabled`.
+         */
+        workerModuleId: string;
+        /** Required alongside `workerModuleId` - declares this task type's resource needs upfront. */
+        workerResources: WorkerTaskResources;
+        createTaskRunner?: never;
+      }
+  );
 
 /**
  * A mapping of task type id to the task definition.
@@ -194,6 +217,22 @@ export class TaskTypeDictionary {
     const removed = taskTypesToRegister.find((type) => REMOVED_TYPES.indexOf(type) >= 0);
     if (removed) {
       throw new Error(`Task ${removed} has been removed from registration!`);
+    }
+
+    for (const taskType of taskTypesToRegister) {
+      const definition = taskDefinitions[taskType];
+      const hasCreateTaskRunner = typeof definition.createTaskRunner === 'function';
+      const hasWorkerModuleId = typeof definition.workerModuleId === 'string';
+      if (hasCreateTaskRunner === hasWorkerModuleId) {
+        throw new Error(
+          `Task type "${taskType}" must define exactly one of "createTaskRunner" or "workerModuleId".`
+        );
+      }
+      if (hasWorkerModuleId && !(Number(definition.workerResources?.memoryMb) > 0)) {
+        throw new Error(
+          `Task type "${taskType}" declares "workerModuleId" but is missing a positive "workerResources.memoryMb".`
+        );
+      }
     }
 
     for (const taskType of taskTypesToRegister) {

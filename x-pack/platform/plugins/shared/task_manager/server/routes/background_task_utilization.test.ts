@@ -76,7 +76,11 @@ describe('backgroundTaskUtilizationRoute', () => {
       taskManagerId: uuidv4(),
       config: {
         ...getTaskManagerConfig(),
-        unsafe: { exclude_task_types: [], authenticate_background_task_utilization: false },
+        unsafe: {
+          exclude_task_types: [],
+          authenticate_background_task_utilization: false,
+          worker_processes: configSchema.validate({}).unsafe.worker_processes,
+        },
       },
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
@@ -214,7 +218,11 @@ describe('backgroundTaskUtilizationRoute', () => {
       taskManagerId: uuidv4(),
       config: {
         ...getTaskManagerConfig(),
-        unsafe: { exclude_task_types: [], authenticate_background_task_utilization: false },
+        unsafe: {
+          exclude_task_types: [],
+          authenticate_background_task_utilization: false,
+          worker_processes: configSchema.validate({}).unsafe.worker_processes,
+        },
       },
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',

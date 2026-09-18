@@ -16,6 +16,7 @@ import type { TaskManagerStartContract } from '../plugin';
 import { TaskManagerPlugin } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ApiKeyType, type TaskManagerConfig } from '../config';
+import { configMock } from '../config.mock';
 import { BulkUpdateError } from '../lib/errors';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
@@ -105,6 +106,7 @@ describe('managed configuration', () => {
     unsafe: {
       exclude_task_types: [],
       authenticate_background_task_utilization: true,
+      worker_processes: configMock.create().unsafe.worker_processes,
     },
     event_loop_delay: {
       monitor: true,

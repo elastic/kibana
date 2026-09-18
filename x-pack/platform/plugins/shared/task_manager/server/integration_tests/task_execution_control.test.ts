@@ -18,6 +18,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { TaskManagerStartContract } from '../plugin';
 import { TaskManagerPlugin } from '../plugin';
 import { ApiKeyType, type TaskManagerConfig } from '../config';
+import { configMock } from '../config.mock';
 import { TASK_EXECUTION_CONTROL_SO_ID } from '../constants';
 import { TASK_EXECUTION_CONTROL_SO_NAME } from '../saved_objects';
 import type { TaskExecutionControl } from '../saved_objects/schemas/task_execution_control';
@@ -59,6 +60,7 @@ const config: TaskManagerConfig = {
   unsafe: {
     exclude_task_types: [],
     authenticate_background_task_utilization: true,
+    worker_processes: configMock.create().unsafe.worker_processes,
   },
   event_loop_delay: { monitor: true, warn_threshold: 5000 },
   worker_utilization_running_average_window: 5,

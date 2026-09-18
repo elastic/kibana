@@ -211,6 +211,58 @@ export const configSchema = schema.object(
     unsafe: schema.object({
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
+      /**
+       * Prototype: opt-in execution of task work in dedicated Node.js child processes.
+       * Tasks that declare `workerModuleId` run entirely in a worker process; any task can
+       * also offload part of its work via `context.runInWorker(...)`. Workers get no Kibana
+       * services (no ES/SO clients) - payloads and results must be structured-cloneable.
+       * Disabled by default.
+       *
+       * On Linux with a writable, delegated cgroups v2 subtree, each worker process gets a
+       * dedicated cgroup with a kernel-enforced `memory.max` of `baseline_memory_mb +` the
+       * run's declared `memoryMb` - covering JS heap, Buffers, and native memory, not just
+       * the V8 heap - so a task budgeted X MB genuinely cannot consume more, and capacity
+       * for N concurrent tasks can be guaranteed without risking an OOM of the main Kibana
+       * process. CPU is fair-shared via `cpu.weight` so worker processes cannot starve
+       * Kibana's own event loop or each other. Where cgroups are unavailable (e.g. macOS
+       * development), memory falls back to a portable V8 `--max-old-space-size` heap cap
+       * (self-regulating, so it doesn't spuriously kill bursty-but-well-behaved tasks) with
+       * RSS budgets only observed/logged, never enforced by killing - see `enforcement`.
+       */
+      worker_processes: schema.object(
+        {
+          enabled: schema.boolean({ defaultValue: false }),
+          /* Max number of worker processes in flight at once. Each running task occupies one. */
+          max_processes: schema.number({ defaultValue: 2, min: 1, max: 8 }),
+          /* Memory budget (MB) for admission control across all in-flight worker runs. Each
+           * live child reserves `baseline_memory_mb + its declared memoryMb`. */
+          max_total_memory_mb: schema.number({ defaultValue: 512, min: 1 }),
+          /* Runtime overhead (MB) charged per child on top of its run's declared memoryMb,
+           * both for the ledger and for sizing the per-child heap cap/cgroup memory.max. */
+          baseline_memory_mb: schema.number({ defaultValue: 64, min: 1 }),
+          /* 'strict': refuse to start the pool (worker tasks are excluded from claiming, same
+           * as pool-disabled) unless kernel-enforced hard memory limits (cgroups v2) are
+           * available. 'best_effort': fall back to heap-cap-only enforcement with RSS budgets
+           * observed but not enforced when cgroups are unavailable. */
+          enforcement: schema.oneOf([schema.literal('strict'), schema.literal('best_effort')], {
+            defaultValue: 'best_effort',
+          }),
+          /* Optional hard aggregate CPU ceiling (percent of one core, e.g. 200 = 2 cores) on
+           * all worker processes combined, via cgroups `cpu.max`. Off (work-conserving
+           * cpu.weight only) by default, since max_processes already bounds task CPU to N
+           * cores; only takes effect where cgroups are available. */
+          max_cpu_percent: schema.maybe(schema.number({ min: 1 })),
+          /* Reserved for future warm-process reuse; currently every run forks a fresh child. */
+          idle_timeout: schema.duration({ defaultValue: '30s' }),
+        },
+        {
+          validate(config) {
+            if (config.baseline_memory_mb > config.max_total_memory_mb) {
+              return `baseline_memory_mb (${config.baseline_memory_mb}) must be less than, or equal to, max_total_memory_mb (${config.max_total_memory_mb})`;
+            }
+          },
+        }
+      ),
     }),
     /* The threshold percenatge for workers experiencing version conflicts for shifting the polling interval. */
     version_conflict_threshold: schema.number({
@@ -244,3 +296,4 @@ export const configSchema = schema.object(
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
+export type WorkerProcessesConfig = TaskManagerConfig['unsafe']['worker_processes'];

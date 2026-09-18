@@ -220,6 +220,68 @@ describe('taskTypeDictionary', () => {
       expect(definitions.has('foo')).toBe(true);
     });
 
+    it('registers a valid worker task type (workerModuleId + workerResources)', () => {
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          workerModuleId: '/resolved/path/to/worker_module.js',
+          workerResources: { memoryMb: 64 },
+        },
+      });
+      expect(definitions.has('foo')).toBe(true);
+      expect(definitions.get('foo')).toMatchObject({
+        workerModuleId: '/resolved/path/to/worker_module.js',
+        workerResources: { memoryMb: 64 },
+      });
+    });
+
+    it('throws when a task type defines neither createTaskRunner nor workerModuleId', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          // @ts-expect-error a task type must define one of createTaskRunner or workerModuleId
+          foo: {
+            title: 'foo',
+          },
+        });
+      }).toThrowError(
+        'Task type "foo" must define exactly one of "createTaskRunner" or "workerModuleId".'
+      );
+      expect(definitions.get('foo')).toEqual(undefined);
+    });
+
+    it('throws when a task type defines both createTaskRunner and workerModuleId', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          // @ts-expect-error a task type must define exactly one of createTaskRunner or workerModuleId
+          foo: {
+            title: 'foo',
+            createTaskRunner: jest.fn(),
+            workerModuleId: '/resolved/path/to/worker_module.js',
+            workerResources: { memoryMb: 64 },
+          },
+        });
+      }).toThrowError(
+        'Task type "foo" must define exactly one of "createTaskRunner" or "workerModuleId".'
+      );
+      expect(definitions.get('foo')).toEqual(undefined);
+    });
+
+    it('throws when workerModuleId is set without a positive workerResources.memoryMb', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          // @ts-expect-error workerResources is required alongside workerModuleId
+          foo: {
+            title: 'foo',
+            workerModuleId: '/resolved/path/to/worker_module.js',
+            workerResources: undefined,
+          },
+        });
+      }).toThrowError(
+        'Task type "foo" declares "workerModuleId" but is missing a positive "workerResources.memoryMb".'
+      );
+      expect(definitions.get('foo')).toEqual(undefined);
+    });
+
     it('uses task priority if specified', () => {
       definitions.registerTaskDefinitions({
         foo: {

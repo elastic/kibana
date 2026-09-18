@@ -41,6 +41,12 @@ export interface TaskClaimingOpts {
   taskPartitioner: TaskPartitioner;
   // Runtime task execution control (pause/resume). Defaults to unpaused.
   getExecutionControlState?: () => TaskExecutionControlState;
+  /**
+   * Prototype: task types with a `workerModuleId` whose declared memory requirement doesn't
+   * currently fit the worker pool's budget. Excluded from this claim cycle, the same way
+   * paused task types are. Defaults to none (worker threads disabled).
+   */
+  getWorkerPoolIncapableTaskTypes?: () => string[];
 }
 
 export interface OwnershipClaimingOpts {
@@ -88,6 +94,7 @@ export class TaskClaiming {
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly staticExcludedTaskTypes: string[];
   private readonly getExecutionControlState: () => TaskExecutionControlState;
+  private readonly getWorkerPoolIncapableTaskTypes: () => string[];
   private readonly taskClaimer: TaskClaimerFn;
   private readonly taskPartitioner: TaskPartitioner;
 
@@ -108,6 +115,7 @@ export class TaskClaiming {
     this.staticExcludedTaskTypes = opts.excludedTaskTypes;
     this.getExecutionControlState =
       opts.getExecutionControlState ?? (() => DEFAULT_EXECUTION_CONTROL_STATE);
+    this.getWorkerPoolIncapableTaskTypes = opts.getWorkerPoolIncapableTaskTypes ?? (() => []);
     this.taskClaimer = getTaskClaimer(this.logger, opts.strategy);
     this.events$ = new Subject<TaskClaim>();
     this.taskPartitioner = opts.taskPartitioner;
@@ -182,9 +190,13 @@ export class TaskClaiming {
           getCapacity: this.getAvailableCapacity,
           definitions: this.definitions,
           taskMaxAttempts: this.taskMaxAttempts,
-          // Merge the statically-excluded task types (config) with the
-          // runtime paused task types so both are dropped from the claim.
-          excludedTaskTypes: [...this.staticExcludedTaskTypes, ...executionControl.pausedTaskTypes],
+          // Merge the statically-excluded task types (config), the runtime paused task
+          // types, and any worker-pool-incapable task types so all are dropped from the claim.
+          excludedTaskTypes: [
+            ...this.staticExcludedTaskTypes,
+            ...executionControl.pausedTaskTypes,
+            ...this.getWorkerPoolIncapableTaskTypes(),
+          ],
           logger: this.logger,
           taskPartitioner: this.taskPartitioner,
         };

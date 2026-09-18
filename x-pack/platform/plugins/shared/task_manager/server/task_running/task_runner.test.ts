@@ -38,6 +38,9 @@ import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import type { WorkerPoolService } from '../worker_pool';
+import { WorkerPoolAtCapacityError } from '../worker_pool';
+import { workerPoolServiceMock } from '../worker_pool/worker_pool_service.mock';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -3700,12 +3703,203 @@ describe('TaskManagerRunner', () => {
     });
   });
 
+  describe('worker threads (prototype)', () => {
+    it('dispatches a workerModuleId task type to the worker pool and maps a successful result', async () => {
+      const workerPool = workerPoolServiceMock.create();
+      (workerPool.run as jest.Mock).mockResolvedValue({ state: { done: true } });
+
+      const { runner, instance } = await readyToRunStageSetup({
+        instance: { id: 'foo', taskType: 'workerTask', params: { a: 1 }, state: { b: 2 } },
+        definitions: {
+          workerTask: {
+            title: 'Worker Task',
+            workerModuleId: '/resolved/path/to/worker_module.js',
+            workerResources: { memoryMb: 64 },
+          },
+        },
+        workerPool,
+      });
+
+      const result = await runner.run();
+
+      expect(workerPool.run).toHaveBeenCalledWith(
+        '/resolved/path/to/worker_module.js',
+        {
+          taskInstance: {
+            id: 'foo',
+            taskType: 'workerTask',
+            attempts: instance.attempts,
+            params: { a: 1 },
+            state: { b: 2 },
+            scheduledAt: instance.scheduledAt.toISOString(),
+            runAt: instance.runAt.toISOString(),
+          },
+        },
+        { memoryMb: 64, signal: expect.any(AbortSignal) }
+      );
+      expect(result).toEqual(asOk({ state: { done: true } }));
+    });
+
+    it('maps a worker error result to a FailedRunResult', async () => {
+      const workerPool = workerPoolServiceMock.create();
+      (workerPool.run as jest.Mock).mockResolvedValue({
+        state: {},
+        error: { message: 'boom' },
+      });
+
+      const { runner } = await readyToRunStageSetup({
+        instance: { id: 'foo', taskType: 'workerTask' },
+        definitions: {
+          workerTask: {
+            title: 'Worker Task',
+            workerModuleId: '/resolved/path/to/worker_module.js',
+            workerResources: { memoryMb: 64 },
+          },
+        },
+        workerPool,
+      });
+
+      const result = await runner.run();
+
+      expect(result).toEqual(
+        asErr(
+          expect.objectContaining({
+            state: {},
+            error: expect.objectContaining({ message: 'boom' }),
+          })
+        )
+      );
+    });
+
+    it('fails the task run when a workerModuleId task type is claimed but worker processes are disabled', async () => {
+      const disabledWorkerPool = workerPoolServiceMock.create();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (disabledWorkerPool as any).enabled = false;
+
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: { id: 'foo', taskType: 'workerTask' },
+        definitions: {
+          workerTask: {
+            title: 'Worker Task',
+            workerModuleId: '/resolved/path/to/worker_module.js',
+            workerResources: { memoryMb: 64 },
+          },
+        },
+        workerPool: disabledWorkerPool,
+      });
+
+      await runner.run();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'requires worker processes, but xpack.task_manager.unsafe.worker_processes.enabled is false'
+        ),
+        expect.anything()
+      );
+    });
+
+    it('propagates WorkerPoolAtCapacityError as a retryable task failure', async () => {
+      const workerPool = workerPoolServiceMock.create();
+      (workerPool.run as jest.Mock).mockRejectedValue(new WorkerPoolAtCapacityError(64, 32));
+
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: { id: 'foo', taskType: 'workerTask' },
+        definitions: {
+          workerTask: {
+            title: 'Worker Task',
+            workerModuleId: '/resolved/path/to/worker_module.js',
+            workerResources: { memoryMb: 64 },
+          },
+        },
+        workerPool,
+      });
+
+      await runner.run();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Worker pool is at capacity'),
+        expect.anything()
+      );
+    });
+
+    it('exposes runInWorker on RunContext for classic task types when worker threads are enabled', async () => {
+      const workerPool = workerPoolServiceMock.create();
+      (workerPool.run as jest.Mock).mockResolvedValue('worker-result');
+
+      let capturedRunInWorker:
+        | (<TInput, TResult>(
+            moduleId: string,
+            input: TInput,
+            options: { memoryMb: number; signal?: AbortSignal }
+          ) => Promise<TResult>)
+        | undefined;
+
+      const { runner } = await readyToRunStageSetup({
+        instance: { id: 'foo', taskType: 'classicTaskWithOffload' },
+        definitions: {
+          classicTaskWithOffload: {
+            title: 'Classic task using runInWorker',
+            createTaskRunner: ({ runInWorker }) => ({
+              async run() {
+                capturedRunInWorker = runInWorker;
+                const value = await runInWorker!(
+                  '/resolved/path/to/module.js',
+                  { x: 1 },
+                  {
+                    memoryMb: 16,
+                  }
+                );
+                return { state: { value } };
+              },
+            }),
+          },
+        },
+        workerPool,
+      });
+
+      const result = await runner.run();
+
+      expect(capturedRunInWorker).toBeDefined();
+      expect(workerPool.run).toHaveBeenCalledWith(
+        '/resolved/path/to/module.js',
+        { x: 1 },
+        { memoryMb: 16, signal: expect.any(AbortSignal) }
+      );
+      expect(result).toEqual(asOk({ state: { value: 'worker-result' } }));
+    });
+
+    it('does not expose runInWorker on RunContext when worker threads are disabled', async () => {
+      let capturedRunInWorker: unknown;
+
+      const { runner } = await readyToRunStageSetup({
+        instance: { id: 'foo', taskType: 'classicTaskWithoutWorkerPool' },
+        definitions: {
+          classicTaskWithoutWorkerPool: {
+            title: 'Classic task, no worker pool configured',
+            createTaskRunner: ({ runInWorker }) => ({
+              async run() {
+                capturedRunInWorker = runInWorker;
+                return { state: {} };
+              },
+            }),
+          },
+        },
+        // no workerPool passed
+      });
+
+      await runner.run();
+
+      expect(capturedRunInWorker).toBeUndefined();
+    });
+  });
+
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: TaskDefinitionRegistry;
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
     enrichFakeRequest?: jest.Mock;
+    workerPool?: WorkerPoolService;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -3786,6 +3980,7 @@ describe('TaskManagerRunner', () => {
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,
       enrichFakeRequest: opts.enrichFakeRequest,
+      workerPool: opts.workerPool,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

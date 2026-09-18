@@ -25,6 +25,7 @@ import {
 } from '@kbn/task-manager-plugin/server/task';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { initRoutes } from './init_routes';
+import countPrimes from './worker_tasks/count_primes';
 
 // this plugin's dependendencies
 export interface SampleTaskManagerFixtureSetupDeps {
@@ -672,6 +673,69 @@ export class SampleTaskManagerFixturePlugin
               state: { count },
               schedule,
             };
+          },
+        }),
+      },
+      sampleWorkerTask: {
+        title: 'Sample Worker Task',
+        description:
+          'A task that runs entirely in a worker process (`workerModuleId`), used to verify the worker-process prototype end-to-end. Its `params.limit` controls how many candidates it checks for primality; `params.failWith` makes the worker report a failure.',
+        maxAttempts: 1,
+        workerModuleId: require.resolve('./worker_tasks/count_primes_worker'),
+        workerResources: { memoryMb: 10 },
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => state,
+            schema: schema.object({
+              limit: schema.maybe(schema.number()),
+              primeCount: schema.maybe(schema.number()),
+            }),
+          },
+        },
+      },
+      sampleTaskUsingRunInWorker: {
+        title: 'Sample Task Using runInWorker',
+        description:
+          'A classic closure-based task that offloads its CPU-bound portion to a worker process via `context.runInWorker(...)`, used to verify partial offload end-to-end.',
+        timeout: '1m',
+        maxAttempts: 1,
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => state,
+            schema: schema.object({
+              limit: schema.maybe(schema.number()),
+              primeCount: schema.maybe(schema.number()),
+              ranInWorker: schema.maybe(schema.boolean()),
+            }),
+          },
+        },
+        createTaskRunner: ({ taskInstance, runInWorker }: RunContext) => ({
+          async run() {
+            const { params, id } = taskInstance;
+            const limit = Number(params.limit) || 1000;
+
+            const ranInWorker = typeof runInWorker === 'function';
+            const { primeCount } = ranInWorker
+              ? await runInWorker<{ limit: number }, { limit: number; primeCount: number }>(
+                  require.resolve('./worker_tasks/count_primes'),
+                  { limit },
+                  { memoryMb: 10 }
+                )
+              : countPrimes({ limit });
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: id,
+                state: JSON.stringify({ limit, primeCount, ranInWorker }),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return { state: { limit, primeCount, ranInWorker } };
           },
         }),
       },

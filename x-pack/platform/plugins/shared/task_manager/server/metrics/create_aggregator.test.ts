@@ -18,6 +18,7 @@ import {
 import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { ApiKeyType, type TaskManagerConfig } from '../config';
+import { configMock } from '../config.mock';
 import { createAggregator } from './create_aggregator';
 import type { TaskClaimMetric } from './task_claim_metrics_aggregator';
 import { TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
@@ -80,6 +81,7 @@ const config: TaskManagerConfig = {
   unsafe: {
     authenticate_background_task_utilization: true,
     exclude_task_types: [],
+    worker_processes: configMock.create().unsafe.worker_processes,
   },
   version_conflict_threshold: 80,
   worker_utilization_running_average_window: 5,

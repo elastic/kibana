@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { calculateHealthStatus } from './calculate_health_status';
 import { cloneDeep } from 'lodash';
 import { ApiKeyType } from '../config';
+import { configMock } from '../config.mock';
 
 const now = '2023-05-09T13:00:00.000Z';
 Date.now = jest.fn().mockReturnValue(new Date(now));
@@ -54,6 +55,7 @@ const config = {
   unsafe: {
     exclude_task_types: [],
     authenticate_background_task_utilization: true,
+    worker_processes: configMock.create().unsafe.worker_processes,
   },
   event_loop_delay: {
     monitor: true,

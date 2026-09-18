@@ -32,6 +32,10 @@ import {
   scheduleDeleteInactiveNodesTaskDefinition,
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
+import {
+  registerWorkerProcessDemoTaskDefinition,
+  scheduleWorkerProcessDemoTask,
+} from './worker_pool/demo_task';
 import { TaskExecutionControlService } from './execution_control';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskManagerConfig } from './config';
@@ -92,6 +96,7 @@ import {
   UiamApiKeyProvisioningTask,
   taskManagerUiamProvisioningEvents,
 } from './uiam_api_key_provisioning';
+import { WorkerPoolService } from './worker_pool';
 
 export interface TaskManagerSetupContract {
   /**
@@ -179,6 +184,7 @@ export class TaskManagerPlugin
   private startContract?: TaskManagerStartContract;
   private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
   private enrichFakeRequest?: FakeRequestEnricher;
+  private workerPool?: WorkerPoolService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -319,6 +325,9 @@ export class TaskManagerPlugin
 
     registerEventLogTelemetryTask(this.logger, core.getStartServices, this.definitions);
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+    // Prototype: demo task type exercising worker-process execution end-to-end. See
+    // `worker_pool/demo_task.ts`.
+    registerWorkerProcessDemoTaskDefinition(this.definitions);
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
       coreStartServices: core.getStartServices,
@@ -357,6 +366,12 @@ export class TaskManagerPlugin
 
     if (this.config.unsafe.authenticate_background_task_utilization === false) {
       this.logger.warn(`Disabling authentication for background task utilization API`);
+    }
+
+    if (this.config.unsafe.worker_processes.enabled) {
+      this.logger.warn(
+        `Task Manager worker processes are enabled (prototype): maxProcesses=${this.config.unsafe.worker_processes.max_processes} maxTotalMemoryMb=${this.config.unsafe.worker_processes.max_total_memory_mb}`
+      );
     }
 
     // for nodes with background_tasks mode only, log health metrics every hour
@@ -471,6 +486,14 @@ export class TaskManagerPlugin
 
     const startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
 
+    // Prototype: shared worker-process pool for task work. No-ops unless
+    // xpack.task_manager.unsafe.worker_processes.enabled is true, and only started on nodes
+    // that actually run tasks.
+    if (this.shouldRunBackgroundTasks) {
+      this.workerPool = new WorkerPoolService(this.config.unsafe.worker_processes, this.logger);
+      this.workerPool.start();
+    }
+
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
@@ -502,6 +525,7 @@ export class TaskManagerPlugin
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
+        workerPool: this.workerPool,
       });
     }
 
@@ -536,6 +560,7 @@ export class TaskManagerPlugin
 
     scheduleEventLogTelemetryTask(this.logger, taskScheduling).catch(() => {});
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+    scheduleWorkerProcessDemoTask(this.logger, taskScheduling).catch(() => {});
     scheduleInvalidateApiKeyTask(
       this.logger,
       taskScheduling,
@@ -602,5 +627,7 @@ export class TaskManagerPlugin
         this.logger.error(`Deleting current node has failed. error: ${e.message}`);
       }
     }
+
+    await this.workerPool?.stop();
   }
 }
