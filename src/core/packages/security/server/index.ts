@@ -71,6 +71,7 @@ export {
   isMissingApiKey,
   isRevokedApiKey,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
   deriveInternalCallerAttestation,
   markExternalUiamCredential,
   isExternalUiamCredential,

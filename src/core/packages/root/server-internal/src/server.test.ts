@@ -44,9 +44,9 @@ import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { ES_CLIENT_AUTHENTICATION_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
 import {
   deriveInternalCallerAttestation,
+  ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   markExternalUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
@@ -598,6 +598,22 @@ describe('self client UIAM auth header augmenter', () => {
     );
   });
 
+  it('attests a Kibana-minted internal UIAM API key', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION);
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'ApiKey essu_internal' },
+    });
+    const outboundHeaders = new Headers({ authorization: 'ApiKey essu_internal' });
+
+    expect(augmenter(request, outboundHeaders)).toEqual(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'ApiKey', credentials: 'essu_internal' })
+    );
+  });
+
   it('does not treat an empty inbound client authentication header as a relay', async () => {
     const uiam = getUiamMock();
     uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION);
@@ -609,6 +625,23 @@ describe('self client UIAM auth header augmenter', () => {
         [ES_CLIENT_AUTHENTICATION_HEADER]: '',
       },
     });
+    const outboundHeaders = new Headers({ authorization: 'Bearer essu_outbound' });
+
+    expect(augmenter(request, outboundHeaders)).toEqual(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_outbound' })
+    );
+  });
+
+  it('does not treat an empty-string array inbound client authentication header as a relay', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION);
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_inbound' },
+    });
+    (request.headers as Record<string, string | string[]>)[ES_CLIENT_AUTHENTICATION_HEADER] = [''];
     const outboundHeaders = new Headers({ authorization: 'Bearer essu_outbound' });
 
     expect(augmenter(request, outboundHeaders)).toEqual(ATTESTATION);

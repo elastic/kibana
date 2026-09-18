@@ -60,8 +60,8 @@ import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
 import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
-import { ES_CLIENT_AUTHENTICATION_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
 import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   isUiamCredential,
   isExternalUiamCredential,
@@ -634,6 +634,7 @@ export class Server {
           return undefined;
         }
 
+        // Cookie-session self-calls still stamp (gist option 1 / Elena A).
         return uiam.getInternalCallerAttestationHeaders(credential);
       });
     }
