@@ -290,7 +290,7 @@ describe('renderAttachmentTagParser', () => {
     expect(tree.children[0]).toMatchObject({
       type: renderAttachmentElement.tagName,
       attachmentId: 'dash-1',
-      attachmentVersion: '2',
+      version: '2',
     });
   });
 
@@ -306,7 +306,7 @@ describe('renderAttachmentTagParser', () => {
       expect(nodes[0]).toMatchObject({
         type: renderAttachmentElement.tagName,
         attachmentId: 'dash-1',
-        attachmentVersion: '2',
+        version: '2',
       });
     });
 

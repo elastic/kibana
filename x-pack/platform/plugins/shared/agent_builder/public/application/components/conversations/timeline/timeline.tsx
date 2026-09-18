@@ -58,6 +58,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                   onResumePrompt={onResumePrompt}
                   isResuming={isResuming}
                   isPromptDisabled={isPromptDisabled}
+                  conversationAttachments={conversationAttachments}
                 />
               );
               break;

@@ -13,6 +13,7 @@ import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   createExecutionTerminatedEvent,
   createPromptRequestedTerminatedEvent,
@@ -28,9 +29,44 @@ import type { TimelineItem } from './to_timeline_items';
 import { activeExecutionToItem, buildSavedItems, toTimelineItems } from './to_timeline_items';
 import { Timeline } from './timeline';
 
+jest.mock('../../../context/conversation/use_conversation_id', () => ({
+  useConversationId: () => 'conv-1',
+}));
 jest.mock('../conversation_rounds/round_response/response_message', () => ({
-  ResponseMessage: ({ isLoading }: { isLoading: boolean }) => (
-    <div data-test-subj="response">{isLoading ? 'loading' : 'done'}</div>
+  ResponseMessage: ({
+    isLoading,
+    conversationId,
+    attachmentRefs,
+    conversationAttachments,
+  }: {
+    isLoading: boolean;
+    conversationId?: string;
+    attachmentRefs?: Array<{ attachment_id: string }>;
+    conversationAttachments?: Array<{ id: string }>;
+  }) => (
+    <div
+      data-test-subj="response"
+      data-conversation-id={conversationId}
+      data-refs={attachmentRefs?.map((ref) => ref.attachment_id).join(',')}
+      data-attachments={conversationAttachments?.map((attachment) => attachment.id).join(',')}
+    >
+      {isLoading ? 'loading' : 'done'}
+    </div>
+  ),
+}));
+jest.mock('../conversation_rounds/round_attachment_references', () => ({
+  RoundAttachmentReferences: ({
+    attachmentRefs,
+    actorFilter,
+  }: {
+    attachmentRefs?: Array<{ attachment_id: string }>;
+    actorFilter?: string[];
+  }) => (
+    <div
+      data-test-subj="references"
+      data-refs={attachmentRefs?.map((ref) => ref.attachment_id).join(',')}
+      data-actors={actorFilter?.join(',')}
+    />
   ),
 }));
 
@@ -79,6 +115,33 @@ const createConfirmation = (id: string): ConfirmationPrompt => ({
 });
 
 describe('AgentTurn', () => {
+  it('gives the response what it needs to render attachments', () => {
+    const conversationAttachments = [{ id: 'att-1' } as VersionedAttachment];
+    renderTimeline(
+      {
+        ...completedSaved,
+        attachmentRefs: [{ attachment_id: 'att-1', version: 2 }],
+        triggerAttachmentRefs: [{ attachment_id: 'att-2', version: 1 }],
+      },
+      { conversationAttachments }
+    );
+
+    const response = screen.getByTestId('response');
+    expect(response).toHaveAttribute('data-conversation-id', 'conv-1');
+    expect(response).toHaveAttribute('data-refs', 'att-1');
+    expect(response).toHaveAttribute('data-attachments', 'att-1');
+
+    const references = screen.getByTestId('references');
+    expect(references).toHaveAttribute('data-refs', 'att-2');
+    expect(references).toHaveAttribute('data-actors', 'agent,system');
+  });
+
+  it('lists attachments created in the turn only once it has completed', () => {
+    renderTimeline({ ...running, triggerAttachmentRefs: [{ attachment_id: 'att-2', version: 1 }] });
+
+    expect(screen.queryByTestId('references')).not.toBeInTheDocument();
+  });
+
   it('keeps an expanded tool group open through completion and the saved replacement', () => {
     const { rerender } = renderTimeline(running);
     expect(screen.queryByTestId('agentBuilderToolCallStep')).not.toBeInTheDocument();

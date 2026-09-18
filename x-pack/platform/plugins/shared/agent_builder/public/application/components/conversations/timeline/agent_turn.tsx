@@ -13,10 +13,12 @@ import type { AgentDefinition, ConversationRoundStep } from '@kbn/agent-builder-
 import { isAskUserQuestionStep } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
 import { RoundEvents } from '../conversation_rounds/round_events/round_events';
-import { ResponseMessage } from '../conversation_rounds/round_response/response_message';
+import { AgentResponse } from './agent_response';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { executionTerminatedToResponse } from './items/execution_terminated_event';
 import { ExecutionFailedEvent } from './items/execution_failed_event';
 import { ExecutionAbortedEvent } from './items/execution_aborted_event';
@@ -46,6 +48,7 @@ export interface PromptResumeProps {
 interface AgentTurnProps extends PromptResumeProps {
   item: AgentTurnItem;
   agent?: AgentDefinition | null;
+  conversationAttachments?: VersionedAttachment[];
 }
 
 interface PromptRendering {
@@ -67,7 +70,14 @@ const hidePreviewedQuestionSteps = (
   );
 };
 
-const renderContent = (item: AgentTurnItem, resume: PromptRendering): React.ReactNode => {
+// `AgentResponse` stays at the same position for running and completed turns so its subtree
+// (expanded steps, streamed text) survives completion and the later swap to the saved item.
+const renderContent = (
+  item: AgentTurnItem,
+  resume: PromptRendering,
+  conversationId: string | undefined,
+  conversationAttachments?: VersionedAttachment[]
+): React.ReactNode => {
   if (isFailedTurn(item)) {
     return <ExecutionFailedEvent event={item.terminal} />;
   }
@@ -75,71 +85,90 @@ const renderContent = (item: AgentTurnItem, resume: PromptRendering): React.Reac
     return <ExecutionAbortedEvent event={item.terminal} />;
   }
 
-  const awaiting = isAwaitingPromptTurn(item);
-  const completedTerminal = isCompletedTurn(item) ? item.terminal : undefined;
-  const completed = completedTerminal
-    ? executionTerminatedToResponse(completedTerminal, item.steps)
-    : undefined;
-
-  const steps = awaiting
-    ? hidePreviewedQuestionSteps(item.steps, item.pendingPrompts)
-    : completed?.steps ?? item.steps;
-
-  let trailing: React.ReactNode = null;
-  if (awaiting) {
-    trailing = (
-      <PromptRequestEvent
-        prompts={item.pendingPrompts}
-        onResume={resume.onResume}
-        isResuming={resume.isResuming}
-        isDisabled={resume.isPromptDisabled || !item.terminal?.id}
-      />
-    );
-  } else if (completed) {
-    trailing = (
-      <ResponseMessage
-        response={completed.response}
-        steps={completed.steps}
-        isLoading={false}
-        hasError={false}
-        executionTerminatedEvent={completedTerminal}
-      />
-    );
-  } else if (!isCompletedTurn(item) && (steps.length > 0 || item.response)) {
-    trailing = (
-      <ResponseMessage
-        response={{ message: item.response?.message ?? '' }}
-        steps={steps}
-        isLoading
-        hasError={false}
-      />
+  if (isCompletedTurn(item)) {
+    const completed = executionTerminatedToResponse(item.terminal, item.steps);
+    if (completed) {
+      return (
+        <AgentResponse
+          steps={completed.steps}
+          response={completed.response}
+          isLoading={false}
+          executionTerminatedEvent={item.terminal}
+          conversationAttachments={conversationAttachments}
+          attachmentRefs={item.attachmentRefs}
+          triggerAttachmentRefs={item.triggerAttachmentRefs}
+        />
+      );
+    }
+    // A pause resolved by an answer has no response of its own — just the steps it left behind.
+    if (item.steps.length === 0) {
+      return null;
+    }
+    return (
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <RoundEvents
+            steps={item.steps}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={item.attachmentRefs}
+            conversationId={conversationId}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
-  if (steps.length === 0 && !trailing) {
+  if (isAwaitingPromptTurn(item)) {
+    const steps = hidePreviewedQuestionSteps(item.steps, item.pendingPrompts);
+    return (
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {steps.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <RoundEvents
+              steps={steps}
+              conversationAttachments={conversationAttachments}
+              attachmentRefs={item.attachmentRefs}
+              conversationId={conversationId}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <PromptRequestEvent
+            prompts={item.pendingPrompts}
+            onResume={resume.onResume}
+            isResuming={resume.isResuming}
+            isDisabled={resume.isPromptDisabled || !item.terminal?.id}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (item.steps.length === 0 && !item.response) {
     return null;
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {steps.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <RoundEvents steps={steps} />
-        </EuiFlexItem>
-      )}
-      {trailing && <EuiFlexItem grow={false}>{trailing}</EuiFlexItem>}
-    </EuiFlexGroup>
+    <AgentResponse
+      steps={item.steps}
+      response={{ message: item.response?.message ?? '' }}
+      isLoading
+      conversationAttachments={conversationAttachments}
+      attachmentRefs={item.attachmentRefs}
+    />
   );
 };
 
 export const AgentTurn: React.FC<AgentTurnProps> = ({
   item,
   agent,
+  conversationAttachments,
   onResumePrompt,
   isResuming,
   isPromptDisabled,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const conversationId = useConversationId();
   const { status, startedAt, origin, terminal } = item;
   const isLoading = status === 'running' || status === 'awaiting_prompt';
 
@@ -155,7 +184,12 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
     [onResumePrompt, terminal?.id]
   );
 
-  const content = renderContent(item, { onResume, isResuming, isPromptDisabled });
+  const content = renderContent(
+    item,
+    { onResume, isResuming, isPromptDisabled },
+    conversationId,
+    conversationAttachments
+  );
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>

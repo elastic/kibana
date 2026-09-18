@@ -97,6 +97,19 @@ describe('useSendMessageMutation', () => {
     jest.clearAllMocks();
   });
 
+  it('records the staged attachments with the pending message, not the screen context', async () => {
+    const { bindings, result } = setup();
+    const attachment = { id: 'a-1', type: 'text', data: { content: 'hello' } };
+
+    act(() => result.current.mutate({ ...vars, attachments: [attachment] }));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+
+    expect(bindings.setPendingMessage).toHaveBeenCalledWith(conversationId, 'hello', {
+      fallbackAttachments: [expect.objectContaining({ id: 'a-1', data: { content: 'hello' } })],
+      attachmentRefs: [expect.objectContaining({ attachment_id: 'a-1', version: 1 })],
+    });
+  });
+
   it('releases the pending message and draft once the refetch contains their saved copies', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
