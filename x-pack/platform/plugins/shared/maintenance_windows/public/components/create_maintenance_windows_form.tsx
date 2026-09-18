@@ -105,29 +105,27 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   // v1 (alerting) scope state
   const [isScopedQueryEnabled, setIsScopedQueryEnabled] = useState(
-    initialValue?.scopedQuery !== undefined
+    initialValue?.scope?.alerting !== undefined
   );
-  const [query, setQuery] = useState<string>(initialValue?.scopedQuery?.kql || '');
+  const [query, setQuery] = useState<string>(initialValue?.scope?.alerting?.kql || '');
   const [filters, setFilters] = useState<Filter[]>(
-    (initialValue?.scopedQuery?.filters as Filter[]) || []
+    (initialValue?.scope?.alerting?.filters as Filter[]) || []
   );
   const [scopedQueryErrors, setScopedQueryErrors] = useState<string[]>([]);
 
-  // v2 (alertingV2) scope state — null means "enabled, no filter"
+  // v2 (alertingV2) scope state
   const [isAlertingV2Enabled, setIsAlertingV2Enabled] = useState(
-    initialValue?.scopeAlertingV2 !== undefined
+    initialValue?.scope?.alertingV2 !== undefined
   );
   const [alertingV2Kql, setAlertingV2Kql] = useState<string>(
-    initialValue?.scopeAlertingV2?.kql || ''
+    initialValue?.scope?.alertingV2?.kql || ''
   );
   const [alertingV2Errors, setAlertingV2Errors] = useState<string[]>([]);
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
   const onCreateOrUpdateError = useCallback((error: IHttpFetchError<KibanaServerError>) => {
-    if (!error.body?.message) {
-      return;
-    }
+    if (!error.body?.message) return;
     if (isScopedQueryError(error.body.message)) {
       setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
     }
@@ -143,25 +141,17 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
 
-  const scopedQueryPayload = useMemo(() => {
-    if (!isScopedQueryEnabled) return undefined;
-    if (!query && !filters.length) return null;
-    return { kql: query, filters: transformQueryFilters(filters) };
-  }, [isScopedQueryEnabled, query, filters]);
-
-  const alertingV2Payload = useMemo(() => {
-    if (!isAlertingV2Enabled) return undefined;
-    return alertingV2Kql ? { kql: alertingV2Kql } : null;
-  }, [isAlertingV2Enabled, alertingV2Kql]);
+  // Derived scope payloads — computed inline (cheap derivation from local state).
+  const scopedQueryPayload = isScopedQueryEnabled
+    ? !query && !filters.length
+      ? null
+      : { kql: query, filters: transformQueryFilters(filters) }
+    : undefined;
 
   const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
       if (!isValid || scopedQueryErrors.length !== 0 || alertingV2Errors.length !== 0) {
         return;
-      }
-
-      if (isScopedQueryEnabled && scopedQueryPayload === null && !query && !filters.length) {
-        // enabled but truly empty — warn
       }
 
       const hasAnyScope = isScopedQueryEnabled || isAlertingV2Enabled;
@@ -177,13 +167,25 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       const startDate = moment(formData.startDate);
       const endDate = moment(formData.endDate);
 
-      // Build scope: selection is explicit via enabled:boolean; key absent = not selected.
+      // Inline payload computation so submit always uses the latest state values.
+      const sqPayload = isScopedQueryEnabled
+        ? !query && !filters.length
+          ? null
+          : { kql: query, filters: transformQueryFilters(filters) }
+        : undefined;
+      const v2Payload = isAlertingV2Enabled
+        ? alertingV2Kql
+          ? { kql: alertingV2Kql }
+          : null
+        : undefined;
+
+      // Build scope: key absent = not selected; { enabled: true } = selected, no filter.
       const scope: Record<string, unknown> = {};
       if (isScopedQueryEnabled) {
-        scope.alerting = { enabled: true, ...(scopedQueryPayload ?? {}) };
+        scope.alerting = { enabled: true, ...(sqPayload ?? {}) };
       }
       if (isAlertingV2Enabled) {
-        scope.alertingV2 = { enabled: true, ...(alertingV2Payload ?? {}) };
+        scope.alertingV2 = { enabled: true, ...(v2Payload ?? {}) };
       }
 
       const maintenanceWindow = {
@@ -194,12 +196,11 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
           recurringSchedule: formData.recurringSchedule,
         }),
-        scopedQuery: scopedQueryPayload ?? null,
-        // Always send scope so an explicit "no scope" (empty {}) reaches the server.
-        // Sending undefined would trigger the server default { alerting: null } which
-        // suppresses all v1 alerts — not what a user who cleared all toggles wants.
+        // Always send scope so an explicit "no scope" ({}) reaches the server instead of
+        // triggering the server default { alerting: null } which suppresses all v1 alerts.
         scope,
-        ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
+        scopedQuery: sqPayload ?? null,
+        ...(showMultipleSolutionsWarning || sqPayload ? { categoryIds: null } : {}),
       } as Parameters<typeof createMaintenanceWindow>[0];
 
       if (isEditMode) {
@@ -216,10 +217,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       alertingV2Errors.length,
       isScopedQueryEnabled,
       isAlertingV2Enabled,
-      scopedQueryPayload,
-      alertingV2Payload,
       query,
-      filters.length,
+      filters,
+      alertingV2Kql,
       defaultTimezone,
       isEditMode,
       showMultipleSolutionsWarning,
@@ -249,89 +249,28 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     return ruleTypes.map((ruleType) => ruleType.id);
   }, [ruleTypes, mounted]);
 
-  const onScopeQueryToggle = useCallback(
-    (isEnabled: boolean) => {
-      setIsScopedQueryEnabled(isEnabled);
-      if (scopedQueryErrors.length) setScopedQueryErrors([]);
-    },
-    [scopedQueryErrors]
-  );
+  const onScopeQueryToggle = (isEnabled: boolean) => {
+    setIsScopedQueryEnabled(isEnabled);
+    if (scopedQueryErrors.length) setScopedQueryErrors([]);
+  };
 
-  const onAlertingV2Toggle = useCallback(
-    (isEnabled: boolean) => {
-      setIsAlertingV2Enabled(isEnabled);
-      if (alertingV2Errors.length) setAlertingV2Errors([]);
-    },
-    [alertingV2Errors]
-  );
+  const onAlertingV2Toggle = (isEnabled: boolean) => {
+    setIsAlertingV2Enabled(isEnabled);
+    if (alertingV2Errors.length) setAlertingV2Errors([]);
+  };
 
-  const onQueryChange = useCallback(
-    (newQuery: string) => {
-      if (scopedQueryErrors.length) setScopedQueryErrors([]);
-      setQuery(newQuery);
-    },
-    [scopedQueryErrors]
-  );
+  const onQueryChange = (newQuery: string) => {
+    if (scopedQueryErrors.length) setScopedQueryErrors([]);
+    setQuery(newQuery);
+  };
 
-  const onAlertingV2KqlChange = useCallback(
-    (newKql: string) => {
-      if (alertingV2Errors.length) setAlertingV2Errors([]);
-      setAlertingV2Kql(newKql);
-    },
-    [alertingV2Errors]
-  );
+  const onAlertingV2KqlChange = (newKql: string) => {
+    if (alertingV2Errors.length) setAlertingV2Errors([]);
+    setAlertingV2Kql(newKql);
+  };
 
   const modalTitleId = useGeneratedHtmlId();
   const saveWithoutScopeModalTitleId = useGeneratedHtmlId();
-
-  const closeModal = useCallback(() => setIsModalVisible(false), []);
-
-  const modal = useMemo(() => {
-    if (!isModalVisible) return null;
-    return (
-      <EuiConfirmModal
-        aria-labelledby={modalTitleId}
-        title={i18n.ARCHIVE_TITLE}
-        titleProps={{ id: modalTitleId }}
-        onCancel={closeModal}
-        onConfirm={() => {
-          closeModal();
-          archiveMaintenanceWindow(
-            { maintenanceWindowId: maintenanceWindowId!, archive: true },
-            { onSuccess }
-          );
-        }}
-        cancelButtonText={i18n.CANCEL}
-        confirmButtonText={i18n.ARCHIVE_TITLE}
-        defaultFocusedButton="confirm"
-        buttonColor="danger"
-      >
-        <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
-      </EuiConfirmModal>
-    );
-  }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess, modalTitleId]);
-
-  const saveWithoutScopeModal = useMemo(() => {
-    if (!isSaveWithoutScopeModalVisible) return null;
-    return (
-      <EuiConfirmModal
-        aria-labelledby={saveWithoutScopeModalTitleId}
-        title={i18n.SAVE_WITHOUT_FILTERS_MODAL_TITLE}
-        titleProps={{ id: saveWithoutScopeModalTitleId }}
-        onCancel={() => setIsSaveWithoutScopeModalVisible(false)}
-        onConfirm={() => {
-          userConfirmedSaveWithoutScopeRef.current = true;
-          setIsSaveWithoutScopeModalVisible(false);
-          form.submit();
-        }}
-        cancelButtonText={i18n.CANCEL}
-        confirmButtonText={i18n.SAVE_WITHOUT_FILTERS_MODAL_CONFIRM}
-        data-test-subj="saveWithoutFiltersConfirmModal"
-      >
-        <p>{i18n.SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE}</p>
-      </EuiConfirmModal>
-    );
-  }, [isSaveWithoutScopeModalVisible, saveWithoutScopeModalTitleId, form]);
 
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
@@ -458,20 +397,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             switchDataTestSubj="maintenanceWindowScopedQuerySwitch"
             expandedSubtitle={i18n.FILTER_ALERTS_SUBTITLE}
           >
-            <UseField path="scopedQuery">
-              {() => (
-                <MaintenanceWindowScopedQuery
-                  ruleTypeIds={ruleTypeIds}
-                  query={query}
-                  filters={filters}
-                  isLoading={isLoadingRuleTypes}
-                  isEnabled={isScopedQueryEnabled}
-                  errors={scopedQueryErrors}
-                  onQueryChange={onQueryChange}
-                  onFiltersChange={setFilters}
-                />
-              )}
-            </UseField>
+            <MaintenanceWindowScopedQuery
+              ruleTypeIds={ruleTypeIds}
+              query={query}
+              filters={filters}
+              isLoading={isLoadingRuleTypes}
+              isEnabled={isScopedQueryEnabled}
+              errors={scopedQueryErrors}
+              onQueryChange={onQueryChange}
+              onFiltersChange={setFilters}
+            />
           </ScopeSection>
           <ScopeSection
             title={i18n.ALERTING_V2_SCOPE_TITLE}
@@ -490,23 +425,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               />
             }
           >
-            <UseField path="scopeAlertingV2">
-              {() => (
-                <EuiFormRow
-                  fullWidth
-                  isInvalid={alertingV2Errors.length !== 0}
-                  error={alertingV2Errors[0]}
-                >
-                  <EpisodeMatcherInput
-                    value={alertingV2Kql}
-                    onChange={onAlertingV2KqlChange}
-                    fullWidth
-                    data-test-subj="maintenanceWindowAlertingV2FilterInput"
-                    placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
-                  />
-                </EuiFormRow>
-              )}
-            </UseField>
+            <EuiFormRow
+              fullWidth
+              isInvalid={alertingV2Errors.length !== 0}
+              error={alertingV2Errors[0]}
+            >
+              <EpisodeMatcherInput
+                value={alertingV2Kql}
+                onChange={onAlertingV2KqlChange}
+                fullWidth
+                data-test-subj="maintenanceWindowAlertingV2FilterInput"
+                placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
+              />
+            </EuiFormRow>
           </ScopeSection>
         </EuiFlexGroup>
         {(isScopedQueryEnabled && !!scopedQueryPayload) || showMultipleSolutionsWarning ? (
@@ -535,10 +466,47 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <EuiButton fill color="danger" onClick={() => setIsModalVisible(true)}>
               {i18n.ARCHIVE}
             </EuiButton>
-            {modal}
+            {isModalVisible && (
+              <EuiConfirmModal
+                aria-labelledby={modalTitleId}
+                title={i18n.ARCHIVE_TITLE}
+                titleProps={{ id: modalTitleId }}
+                onCancel={() => setIsModalVisible(false)}
+                onConfirm={() => {
+                  setIsModalVisible(false);
+                  archiveMaintenanceWindow(
+                    { maintenanceWindowId: maintenanceWindowId!, archive: true },
+                    { onSuccess }
+                  );
+                }}
+                cancelButtonText={i18n.CANCEL}
+                confirmButtonText={i18n.ARCHIVE_TITLE}
+                defaultFocusedButton="confirm"
+                buttonColor="danger"
+              >
+                <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
+              </EuiConfirmModal>
+            )}
           </EuiFlexItem>
         )}
-        {saveWithoutScopeModal}
+        {isSaveWithoutScopeModalVisible && (
+          <EuiConfirmModal
+            aria-labelledby={saveWithoutScopeModalTitleId}
+            title={i18n.SAVE_WITHOUT_FILTERS_MODAL_TITLE}
+            titleProps={{ id: saveWithoutScopeModalTitleId }}
+            onCancel={() => setIsSaveWithoutScopeModalVisible(false)}
+            onConfirm={() => {
+              userConfirmedSaveWithoutScopeRef.current = true;
+              setIsSaveWithoutScopeModalVisible(false);
+              form.submit();
+            }}
+            cancelButtonText={i18n.CANCEL}
+            confirmButtonText={i18n.SAVE_WITHOUT_FILTERS_MODAL_CONFIRM}
+            data-test-subj="saveWithoutFiltersConfirmModal"
+          >
+            <p>{i18n.SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE}</p>
+          </EuiConfirmModal>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>

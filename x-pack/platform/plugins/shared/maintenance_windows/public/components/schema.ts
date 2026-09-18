@@ -22,8 +22,12 @@ export interface FormProps {
   timezone?: string[];
   recurring: boolean;
   recurringSchedule?: RecurringSchedule;
-  scopedQuery?: ScopedQueryAttributes | null;
-  scopeAlertingV2?: AlertingV2ScopeAttributes;
+  // Scope is managed by local state in the form component, not by useForm.
+  // Carried here so initialValue can seed the state on mount.
+  scope?: {
+    alerting?: ScopedQueryAttributes | null;
+    alertingV2?: AlertingV2ScopeAttributes;
+  };
 }
 
 export const schema: FormSchema<FormProps> = {
@@ -35,18 +39,6 @@ export const schema: FormSchema<FormProps> = {
         validator: emptyField(i18n.CREATE_FORM_NAME_REQUIRED),
       },
     ],
-  },
-  scopedQuery: {
-    defaultValue: {
-      kql: '',
-      filters: [],
-    },
-  },
-  scopeAlertingV2: {
-    defaultValue: {
-      enabled: true,
-      kql: '',
-    },
   },
   startDate: {},
   endDate: {},

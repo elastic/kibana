@@ -47,10 +47,12 @@ const formPropsForEditMode: CreateMaintenanceWindowFormProps = {
     startDate: '2023-03-24',
     endDate: '2023-03-26',
     recurring: false,
-    scopedQuery: {
-      kql: 'kibana.alert.job_errors_results.job_id : * ',
-      filters: [],
-      dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+    scope: {
+      alerting: {
+        kql: 'kibana.alert.job_errors_results.job_id : * ',
+        filters: [],
+        dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+      },
     },
   },
   maintenanceWindowId: 'fake_mw_id',

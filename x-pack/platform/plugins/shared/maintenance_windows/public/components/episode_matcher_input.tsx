@@ -10,7 +10,7 @@ import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useFetchEpisodeDataFields } from '../hooks/use_fetch_episode_data_fields';
 import { useKibana } from '../utils/kibana_react';
 
@@ -81,12 +81,9 @@ export const EpisodeMatcherInput = ({
     ] as unknown as DataView[];
   }, [dataFieldNames]);
 
-  const query: Query = useMemo(() => ({ query: value, language: 'kuery' }), [value]);
+  const query: Query = { query: value, language: 'kuery' };
 
-  const handleChange = useCallback(
-    (q: Query) => onChange(typeof q.query === 'string' ? q.query : ''),
-    [onChange]
-  );
+  const handleChange = (q: Query) => onChange(typeof q.query === 'string' ? q.query : '');
 
   return (
     <div css={autoHeightContainer}>

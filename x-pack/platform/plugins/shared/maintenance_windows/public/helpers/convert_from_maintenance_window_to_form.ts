@@ -18,7 +18,7 @@ import {
   RecurrenceEnd,
 } from '@kbn/response-ops-recurring-schedule-form/constants';
 import type { RRuleParams } from '@kbn/alerting-types';
-import type { MaintenanceWindowUI } from '../../common';
+import type { MaintenanceWindowUI, ScopedQueryAttributes } from '../../common';
 import type { FormProps } from '../components/schema';
 
 export const convertFromMaintenanceWindowToForm = (
@@ -37,7 +37,7 @@ export const convertFromMaintenanceWindowToForm = (
 
   const rawAlerting = maintenanceWindow.scope?.alerting;
   const legacyScopedQuery = maintenanceWindow.scopedQuery;
-  const scopedQuery: FormProps['scopedQuery'] = hasExplicitScope
+  const scopeAlerting: ScopedQueryAttributes | null | undefined = hasExplicitScope
     ? (isV1Selected && rawAlerting?.kql
       ? { kql: rawAlerting.kql, filters: rawAlerting.filters ?? [] }
       : isV1Selected
@@ -49,14 +49,21 @@ export const convertFromMaintenanceWindowToForm = (
 
   const scopeAlertingV2 = isV2Selected ? maintenanceWindow.scope!.alertingV2 : undefined;
 
+  const hasScope = scopeAlerting !== undefined || scopeAlertingV2 !== undefined;
   const form: FormProps = {
     title: maintenanceWindow.title,
     startDate,
     endDate: endDate.toISOString(),
     timezone: [maintenanceWindow.rRule.tzid],
     recurring,
-    scopedQuery,
-    ...(scopeAlertingV2 !== undefined ? { scopeAlertingV2 } : {}),
+    ...(hasScope
+      ? {
+          scope: {
+            ...(scopeAlerting !== undefined ? { alerting: scopeAlerting } : {}),
+            ...(scopeAlertingV2 !== undefined ? { alertingV2: scopeAlertingV2 } : {}),
+          },
+        }
+      : {}),
   };
   if (!recurring) return form;
 
