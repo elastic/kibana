@@ -65,7 +65,6 @@ const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
   );
   if (!hasValidCondition) return false;
 
-
   if (!isSeverityConfigValid(values)) return false;
 
   if (values.recovery) {
