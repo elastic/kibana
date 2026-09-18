@@ -260,6 +260,13 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                           onChange={(e) =>
                             updateLevel(idx, { severity: e.target.value as AlertEventSeverity })
                           }
+                          aria-label={i18n.translate(
+                            'xpack.alertingV2.ruleBuilder.severity.levelAriaLabel',
+                            {
+                              defaultMessage: 'Severity level for band {band}',
+                              values: { band: idx + 1 },
+                            }
+                          )}
                           data-test-subj={`ruleBuilderSeverityLevel-${idx}`}
                         />
                       </EuiFormRow>
@@ -290,6 +297,13 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                           onChange={(e) =>
                             updateLevel(idx, { threshold: parseFloat(e.target.value) })
                           }
+                          aria-label={i18n.translate(
+                            'xpack.alertingV2.ruleBuilder.severity.thresholdAriaLabel',
+                            {
+                              defaultMessage: 'Threshold for band {band}',
+                              values: { band: idx + 1 },
+                            }
+                          )}
                           data-test-subj={`ruleBuilderSeverityThreshold-${idx}`}
                         />
                       </EuiFormRow>

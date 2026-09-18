@@ -132,6 +132,23 @@ describe('SeveritySection', () => {
     expect(screen.getByTestId('ruleBuilderSeverityThreshold-1')).toHaveValue(0.95);
   });
 
+  it('gives every band control a programmatic label identifying its band', () => {
+    renderSection({
+      alertConditions: [condition()],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 0.8 },
+          { id: 'l2', severity: 'high', threshold: 0.95 },
+        ],
+      },
+    });
+    // Row 2 has no visible column heading, so it must be reachable by an accessible name.
+    expect(screen.getByLabelText('Severity level for band 2')).toBeInTheDocument();
+    expect(screen.getByLabelText('Threshold for band 2')).toBeInTheDocument();
+  });
+
   it('keeps a cleared threshold as NaN instead of coercing it to 0', () => {
     const { onChange } = renderSection({
       alertConditions: [condition()],
