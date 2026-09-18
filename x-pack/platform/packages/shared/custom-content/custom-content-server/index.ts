@@ -10,4 +10,6 @@ export type {
   ResolvedCustomContentTemplate,
 } from './src/custom_content_resolver';
 export { createCustomContentTemplateResolver } from './src/custom_content_resolver';
+export type { CustomContentMode } from './src/classify_custom_content_mode';
+export { classifyCustomContentMode } from './src/classify_custom_content_mode';
 export { sanitizeCellValue } from './src/sanitize_cell_value';

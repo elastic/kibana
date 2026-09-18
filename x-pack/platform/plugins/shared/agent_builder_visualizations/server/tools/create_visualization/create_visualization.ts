@@ -18,7 +18,10 @@ import {
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
+import {
+  classifyCustomContentMode,
+  createCustomContentTemplateResolver,
+} from '@kbn/custom-content-server';
 import {
   ToolResultType,
   SupportedChartType,
@@ -86,7 +89,7 @@ const createVisualizationSchema = z
       .enum(['lens', 'vega', 'custom_content'])
       .optional()
       .describe(
-        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Use "custom_content" only when neither chart grammar fits — HTML/CSS layouts such as KPI scorecards with status badges, health boards, or panels mixing narrative text with live values; pass contentMode: "static" for one that needs no data at all. Omit this field when updating an existing attachment; edits keep the existing renderer.'
+        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Use "custom_content" only when neither chart grammar fits — HTML/CSS layouts such as KPI scorecards with status badges, health boards, or panels mixing narrative text with live values. Omit this field when updating an existing attachment; edits keep the existing renderer.'
       ),
     chartType: z
       .nativeEnum(SupportedChartType)
@@ -100,12 +103,6 @@ const createVisualizationSchema = z
       .optional()
       .describe(
         '(optional) An ES|QL query. The tool generates one when this is omitted. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
-      ),
-    contentMode: z
-      .enum(['data', 'static'])
-      .optional()
-      .describe(
-        '(optional, "custom_content" only) Whether the panel is backed by data. "data" (the default) generates an ES|QL query when "esql" is omitted. Pass "static" only for content that genuinely has no data — a banner, a legend, an explanatory note. Static is never a fallback: if a query cannot be generated the call fails rather than silently returning an empty panel.'
       ),
     time_range: z
       .object({
@@ -147,19 +144,6 @@ const createVisualizationSchema = z
       });
     }
 
-    // An update omits `renderer` by design, so the renderer is unknown here.
-    if (
-      ctx.value.contentMode &&
-      !ctx.value.attachment_id &&
-      ctx.value.renderer !== 'custom_content'
-    ) {
-      ctx.issues.push({
-        code: 'custom',
-        message: 'contentMode only applies to the custom_content renderer.',
-        input: ctx.value,
-      });
-    }
-
     const isNewLensVisualization =
       !ctx.value.attachment_id && (ctx.value.renderer ?? 'lens') === 'lens';
 
@@ -185,7 +169,7 @@ You choose how to render the request via the "renderer" parameter:
       SupportedChartType
     ).join(', ')}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
-- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. "chartType" does not apply. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Pass contentMode: "static" for a panel that genuinely has no data.
+- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. "chartType" does not apply. The HTML is generated server-side from your natural-language "query"; never author markup yourself.
 
 When updating via "attachment_id", omit "renderer" because the existing visualization determines it. "chartType" is optional on updates.
 
@@ -215,7 +199,6 @@ Ground first: make sure the target index exists and every field you reference is
         renderer: requestedRenderer,
         chartType,
         esql,
-        contentMode,
         attachment_id: attachmentId,
         time_range: requestedTimeRange,
       },
@@ -266,34 +249,33 @@ Ground first: make sure the target index exists and every field you reference is
           let isQueryChanging = esql !== undefined && esql !== existingEsql;
           let mergedEsql = esql ?? existingEsql;
 
-          // A stored panel with no query is static by construction: a styling edit must not
-          // turn it into a data panel, nor fail generating a query it never wanted.
-          const isEstablishedStatic =
-            Boolean(existingData) && !existingEsql && contentMode !== 'data';
-
-          if (contentMode === 'static' || isEstablishedStatic) {
-            mergedEsql = undefined;
-            isQueryChanging = false;
-          } else if (!mergedEsql) {
-            const generated = await generateVisualizationEsql({
-              nlQuery,
-              index,
-              modelProvider,
-              events,
-              logger,
-              esClient,
-              ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
-              extraInstructions: CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
-            });
-            if (!generated.query) {
-              throw new Error(
-                `Could not generate an ES|QL query for this panel: ${
-                  generated.error ?? 'no query was produced'
-                }. Pass an explicit "esql", or use contentMode: "static" if the panel needs no data.`
-              );
+          // No query on hand: a new panel, or a stored static panel. Custom content
+          // internals decide whether this prompt needs data; the agent does not.
+          if (!mergedEsql) {
+            const mode = await classifyCustomContentMode({ prompt: nlQuery, modelProvider });
+            if (mode === 'static') {
+              isQueryChanging = false;
+            } else {
+              const generated = await generateVisualizationEsql({
+                nlQuery,
+                index,
+                modelProvider,
+                events,
+                logger,
+                esClient,
+                ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
+                extraInstructions: CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
+              });
+              if (!generated.query) {
+                throw new Error(
+                  `Could not generate an ES|QL query for this panel: ${
+                    generated.error ?? 'no query was produced'
+                  }. Pass an explicit "esql" if you already have a validated query.`
+                );
+              }
+              mergedEsql = generated.query;
+              isQueryChanging = true;
             }
-            mergedEsql = generated.query;
-            isQueryChanging = true;
           }
 
           const { template, height } = await resolveTemplate({

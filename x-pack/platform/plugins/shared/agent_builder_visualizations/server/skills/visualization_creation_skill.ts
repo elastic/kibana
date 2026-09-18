@@ -80,7 +80,6 @@ Do **not** use this skill when:
      - \`renderer\` (new visualizations only; \`lens\`, \`vega\` or \`custom_content\`; omit to default to Lens)
      - \`chartType\` (required for a new Lens visualization; optional hint for a new Vega visualization; optional on updates)
      - \`esql\` (optional, when you already have a validated ES|QL — generated for you otherwise)
-     - \`contentMode\` (\`custom_content\` only; pass \`"static"\` for a panel that genuinely has no data)
      - \`attachment_id\` (optional, only when updating an existing visualization)
      - \`time_range\` (optional; **only** when the user explicitly named a time window, e.g. "last 7 days", "May 20–24". Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
@@ -143,11 +142,11 @@ ${
 
 \`chartType\` does not apply. Two things work differently from the chart renderers:
 
-**Data or static is an explicit choice.** The query is generated for you exactly as it is for Lens and Vega, so omitting \`esql\` gives you a data-backed panel, not an empty one:
+**Data vs static is decided for you.** Describe what to display in \`query\`. The server classifies whether the panel needs live data and generates the ES|QL when it does:
 - The panel shows live data → just describe it in \`query\`. Pass \`esql\` only when you already have a validated query.
-- The panel is genuinely static (a banner, a legend, an explanatory note, a decorative header) → pass \`contentMode: "static"\`. That is the only way to get a panel with no data; it is never what you get by forgetting a parameter.
+- The panel is genuinely static (a banner, a legend, an explanatory note, a decorative header) → just describe it in \`query\`. Do not try to opt into a static mode; omitting \`esql\` is not how you get an empty panel either — a data-shaped description still gets a query.
 
-The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails the call and returns an error naming the reason. Correct it and retry rather than proceeding — do not fall back to \`contentMode: "static"\` to make a failure go away.
+The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails the call and returns an error naming the reason. Correct it and retry rather than proceeding.
 
 **You never write the markup.** \`query\` is a plain-English description of what to display; the HTML template is generated server-side from it and stored in the attachment. Never author HTML, and never try to pass a template. To change an existing panel, call the tool again with its \`attachment_id\` and describe the change — a style-only edit refines the existing template and preserves its layout.
 
@@ -221,8 +220,7 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
 \`\`\`json
 {
   "query": "A header banner reading 'Production overview' with a short subtitle",
-  "renderer": "custom_content",
-  "contentMode": "static"
+  "renderer": "custom_content"
 }
 \`\`\`
 
