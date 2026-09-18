@@ -31,7 +31,11 @@ import type { MonitorStatProps } from './overview_status';
 // restate the chart.
 export const useOverviewActivityStats = (): MonitorStatProps[] => {
   const { from, to } = useOverviewRefreshedRange();
-  const { count: alertsCount } = useOverviewAlertsCount({ from, to });
+  const {
+    count: alertsCount,
+    loading: alertsCountLoading,
+    error: alertsCountError,
+  } = useOverviewAlertsCount({ from, to });
   // Same range the count above is scoped to — otherwise the count and the
   // destination page's own filter can disagree (e.g. after changing the date
   // picker, or brushing the chart to a different window).
@@ -41,7 +45,10 @@ export const useOverviewActivityStats = (): MonitorStatProps[] => {
     {
       dataTestSubj: 'overviewActivityAlertsCount',
       statName: alertsLabel,
-      statNo: alertsCount,
+      // `0` is a real answer, not the absence of one — while loading or
+      // after a failed request the true count is unknown, so show that
+      // instead of a `0` a reader could easily mistake for "no alerts".
+      statNo: alertsCountLoading || alertsCountError ? '-' : alertsCount,
       numberColor: 'danger',
       isClickable: true,
       onClickStat: () => {

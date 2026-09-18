@@ -30,21 +30,53 @@ const createFiltersForField = ({
     : [{ field, values: valueArray }];
 };
 
+// The paginated overview-status response only returns *page-sliced*
+// `upConfigs`/`downConfigs`/etc — not the complete set of ids for a status,
+// so a `statusFilter` can't be applied via those. `upIds`/`downIds`/`pendingIds`/
+// `staleIds` are the unpaginated equivalents (mirroring `allIds`), added
+// specifically so callers like this one can scope to "every monitor currently
+// in status X", not just the page currently on screen.
+const idsForStatusFilter = (
+  overviewStatus: ReturnType<typeof selectOverviewStatus>['status'],
+  statusFilter?: string
+): string[] | undefined => {
+  switch (statusFilter) {
+    case 'up':
+      return overviewStatus?.upIds ?? [];
+    case 'down':
+      return overviewStatus?.downIds ?? [];
+    case 'pending':
+      return overviewStatus?.pendingIds ?? [];
+    case 'stale':
+      return overviewStatus?.staleIds ?? [];
+    default:
+      return undefined;
+  }
+};
+
 export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFilter[] => {
   const { space } = useKibanaSpace();
-  const { locations, monitorTypes, tags, projects, schedules, useLogicalAndFor } =
+  const { locations, monitorTypes, tags, projects, schedules, statusFilter, useLogicalAndFor } =
     useGetUrlParams();
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const allIds = overviewStatus?.allIds ?? [];
+  const statusIds = idsForStatusFilter(overviewStatus, statusFilter);
 
   // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
   // We need to rely on monitor.id also for locations, because each heartbeat data only contains one location
   if (!isEmpty(schedules) || (!isEmpty(locations) && useLogicalAndFor?.includes('locations'))) {
-    // If allIds is empty we return an array with a random id just to not get any result, there's probably a better solution
-    return [{ field: 'monitor.id', values: allIds.length ? allIds : [uniqueId()] }];
+    // Intersect with the status filter (if any) rather than ignoring it —
+    // otherwise selecting e.g. "Down" would stop narrowing anything once a
+    // schedule or (AND-ed) location filter is also active.
+    const ids = statusIds ? allIds.filter((id) => statusIds.includes(id)) : allIds;
+    // If ids is empty we return an array with a random id just to not get any result, there's probably a better solution
+    return [{ field: 'monitor.id', values: ids.length ? ids : [uniqueId()] }];
   }
 
   return [
+    ...(statusIds
+      ? [{ field: 'monitor.id', values: statusIds.length ? statusIds : [uniqueId()] }]
+      : []),
     ...(projects?.length ? [{ field: 'monitor.project.id', values: getValues(projects) }] : []),
     ...(monitorTypes?.length ? [{ field: 'monitor.type', values: getValues(monitorTypes) }] : []),
     ...createFiltersForField({

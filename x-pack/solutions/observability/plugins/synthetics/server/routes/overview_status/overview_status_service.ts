@@ -245,6 +245,12 @@ export class OverviewStatusService {
       pendingConfigs: pagePendingConfigs,
       staleConfigs: pageStaleConfigs,
       disabledConfigs: pageDisabledConfigs,
+      // Unpaginated — computed above, before `paginateConfigs` slices the
+      // `*Configs` maps down to the current page.
+      upIds: Object.keys(upConfigs),
+      downIds: Object.keys(downConfigs),
+      pendingIds: Object.keys(pendingConfigs),
+      staleIds: Object.keys(staleConfigs),
       configs,
       total,
       page,

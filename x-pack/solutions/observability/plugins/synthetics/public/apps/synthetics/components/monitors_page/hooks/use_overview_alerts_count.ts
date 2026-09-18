@@ -8,6 +8,7 @@
 import { useEffect, useRef } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { estypes } from '@elastic/elasticsearch';
+import { escapeQuotes } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
@@ -29,7 +30,7 @@ interface Props {
 
 export function useOverviewAlertsCount({ from, to }: Props) {
   const { http } = useKibana<ClientPluginsStart>().services;
-  const { locations } = useGetUrlParams();
+  const { locations, query: searchQuery } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
 
   const abortCtrlRef = useRef(new AbortController());
@@ -46,6 +47,24 @@ export function useOverviewAlertsCount({ from, to }: Props) {
         ...(locations?.length
           ? [{ terms: { 'observer.geo.name': locations } } as estypes.QueryDslQueryContainer]
           : []),
+        // Same free-text search box the ping chart and monitor grid already
+        // scope to (see `getQueryFilters` in `common/constants/client_defaults.ts`
+        // for the matching pattern) — see the KQL clause in
+        // `use_overview_alerts_annotations.ts` for why this only matches
+        // `monitor.name` rather than the ping index's full field set. Quoted,
+        // like `getQueryFilters`, so the query is a phrase match rather than
+        // raw Lucene `query_string` syntax the search box's free text isn't
+        // meant to be interpreted as.
+        ...(searchQuery
+          ? [
+              {
+                query_string: {
+                  query: `"${escapeQuotes(searchQuery)}"`,
+                  fields: ['monitor.name'],
+                },
+              } as estypes.QueryDslQueryContainer,
+            ]
+          : []),
       ],
     },
   };
@@ -57,7 +76,7 @@ export function useOverviewAlertsCount({ from, to }: Props) {
       return fetchAlertsCount({ http, query, signal: abortCtrlRef.current.signal });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [http, from, to, JSON.stringify(alertsFilters), JSON.stringify(locations)],
+    [http, from, to, JSON.stringify(alertsFilters), JSON.stringify(locations), searchQuery],
     { loading: true }
   );
 

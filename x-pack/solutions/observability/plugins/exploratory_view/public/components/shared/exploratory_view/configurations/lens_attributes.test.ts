@@ -7,6 +7,7 @@
 
 import type { LayerConfig } from './lens_attributes';
 import { LensAttributes } from './lens_attributes';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
@@ -600,6 +601,14 @@ describe('Lens Attribute', () => {
 
   describe('Annotation layers', function () {
     it('adds a query-driven annotation layer, referencing its own data view', function () {
+      // Deliberately distinct from `layerConfig`'s own `mockDataView` (id
+      // `apm-*`) — using the same data view for both would let the
+      // annotation layer silently reuse the main layer's index pattern (or
+      // ad-hoc spec) without the test noticing.
+      const mockAlertsDataView = createStubDataView({
+        spec: { id: 'alerts-data-view', title: '.alerts-observability*' },
+      });
+
       const annotation: EventAnnotationConfig = {
         id: 'alerts-annotation',
         type: 'query',
@@ -615,7 +624,7 @@ describe('Lens Attribute', () => {
       };
 
       lnsAttr = new LensAttributes([layerConfig], reportViewConfig.reportType, undefined, [
-        { dataView: mockDataView, annotations: [annotation] },
+        { dataView: mockAlertsDataView, annotations: [annotation] },
       ]);
 
       const attributes = lnsAttr.getJSON();
@@ -628,8 +637,13 @@ describe('Lens Attribute', () => {
 
       expect(annotationLayer).toBeDefined();
       expect(annotationLayer.annotations).toEqual([annotation]);
-      expect(annotationLayer.indexPatternId).toEqual(mockDataView.id);
+      expect(annotationLayer.indexPatternId).toEqual(mockAlertsDataView.id);
+      expect(annotationLayer.indexPatternId).not.toEqual(mockDataView.id);
+      // Both the main layer's data view and the annotation's own distinct
+      // one end up as separate ad-hoc entries, proving neither was dropped
+      // or collapsed into the other.
       expect(attributes.state.adHocDataViews).toHaveProperty(mockDataView.id!);
+      expect(attributes.state.adHocDataViews).toHaveProperty(mockAlertsDataView.id!);
     });
   });
 });
