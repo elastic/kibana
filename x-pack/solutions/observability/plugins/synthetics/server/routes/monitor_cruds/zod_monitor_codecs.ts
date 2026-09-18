@@ -9,6 +9,7 @@ import { MonitorTypeEnum } from '../../../common/runtime_types';
 import type { formatZodErrors as FormatZodErrors } from '../../../common/runtime_types/zod/format_errors';
 import type { MonitorTypeCodec as MonitorTypeCodecType } from '../../../common/runtime_types/zod/monitor_configs';
 import type {
+  APIFieldsCodec,
   BrowserFieldsCodec,
   HTTPFieldsCodec,
   ICMPFieldsCodec,
@@ -20,9 +21,11 @@ type MonitorCodecType =
   | typeof ICMPFieldsCodec
   | typeof TCPFieldsCodec
   | typeof HTTPFieldsCodec
-  | typeof BrowserFieldsCodec;
+  | typeof BrowserFieldsCodec
+  | typeof APIFieldsCodec;
 
 interface ZodMonitorCodecs {
+  APIFieldsCodec: typeof APIFieldsCodec;
   BrowserFieldsCodec: typeof BrowserFieldsCodec;
   HTTPFieldsCodec: typeof HTTPFieldsCodec;
   ICMPFieldsCodec: typeof ICMPFieldsCodec;
@@ -46,6 +49,7 @@ export function getZodMonitorCodecs(): ZodMonitorCodecs {
 
   /* eslint-disable @typescript-eslint/no-var-requires */
   const monitorTypes = require('../../../common/runtime_types/zod/monitor_types') as {
+    APIFieldsCodec: typeof APIFieldsCodec;
     BrowserFieldsCodec: typeof BrowserFieldsCodec;
     HTTPFieldsCodec: typeof HTTPFieldsCodec;
     ICMPFieldsCodec: typeof ICMPFieldsCodec;
@@ -64,6 +68,7 @@ export function getZodMonitorCodecs(): ZodMonitorCodecs {
   /* eslint-enable @typescript-eslint/no-var-requires */
 
   cached = {
+    APIFieldsCodec: monitorTypes.APIFieldsCodec,
     BrowserFieldsCodec: monitorTypes.BrowserFieldsCodec,
     HTTPFieldsCodec: monitorTypes.HTTPFieldsCodec,
     ICMPFieldsCodec: monitorTypes.ICMPFieldsCodec,
@@ -76,6 +81,7 @@ export function getZodMonitorCodecs(): ZodMonitorCodecs {
       [MonitorTypeEnum.TCP]: monitorTypes.TCPFieldsCodec,
       [MonitorTypeEnum.HTTP]: monitorTypes.HTTPFieldsCodec,
       [MonitorTypeEnum.BROWSER]: monitorTypes.BrowserFieldsCodec,
+      [MonitorTypeEnum.API]: monitorTypes.APIFieldsCodec,
     },
   };
 
