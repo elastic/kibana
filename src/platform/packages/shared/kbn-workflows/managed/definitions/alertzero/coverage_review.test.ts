@@ -190,13 +190,9 @@ describe('Detection Coverage review', () => {
   });
 
   describe('investigation', () => {
-    // Only the enable action addresses the saved object; the other proposals name
-    // the rule by signature id, so the lookup and the attachment are enable-only.
-    it('resolves the saved object from the signature id for the enable path only', () => {
+    it('resolves the saved object from the signature id before proposing', () => {
       const resolve = stepByName('resolve_rule');
       expect(resolve?.type).toBe('kibana.request');
-      expect(resolve?.if).toContain("verdict == 'covered_disabled'");
-      expect(resolve?.if).not.toContain('covered_enabled');
       expect(String(resolve?.with?.path)).toContain(
         'rule_id={{ steps.coverage_check.output.structured_output.rule_id | url_encode }}'
       );

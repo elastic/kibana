@@ -144,16 +144,22 @@ steps:
             type: string
         required: [verdict, rule_id, rule_name, prebuilt_version, rationale]
 
-  # The agent reports the signature rule_id, but the enable action, the rule link
-  # and the attachment refresh all address the saved object, so resolve its uuid
-  # once for that path. The other verdicts address the rule by name and signature
-  # id: a prebuilt rule has no saved object yet, and confirming coverage changes
-  # nothing. A miss leaves `id` unset and routes the verdict to the action-less
-  # report below.
+  # Only an installed rule has a saved object. Step `if` cannot group with
+  # parentheses, so the verdict test lives here and is read below as a flag.
+  - name: rule_lookup
+    type: data.set
+    with:
+      installed: >-
+        ${{ steps.coverage_check.output.structured_output.verdict == 'covered_enabled'
+          or steps.coverage_check.output.structured_output.verdict == 'covered_disabled' }}
+
+  # The agent reports the signature rule_id; the enable action, the rule link and
+  # the attachment refresh all address the saved object, so resolve its uuid once.
+  # A miss leaves `id` unset and routes the verdict to the action-less report below.
   - name: resolve_rule
     type: kibana.request
     if: >-
-      ${{ steps.coverage_check.output.structured_output.verdict == 'covered_disabled'
+      ${{ steps.rule_lookup.output.installed == true
         and steps.coverage_check.output.structured_output.rule_id != '' }}
     with:
       method: GET
@@ -188,9 +194,9 @@ steps:
         description: "{{ steps.gap.output.description }}"
         workflow_execution_id: "{{ execution.id }}"
 
-  # By-reference security.rule attachment for the enable path only, recording the
-  # rule as it was before the analyst decided. The fixed attachment id makes the
-  # refresh below deterministic.
+  # By-reference security.rule attachment: the framework resolves the rule once
+  # from its rule_id and snapshots it, recording the rule as it was when this
+  # review ran. The fixed attachment id makes the refresh below deterministic.
   - name: attach_rule
     type: ai.attachment.add
     if: >-
