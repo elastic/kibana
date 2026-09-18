@@ -53,5 +53,8 @@ node scripts/evals run --suite security-watch-escalation-chain \
   --model eis-anthropic-claude-5-sonnet --judge eis-google-gemini-3-0-flash
 ```
 
-Set `TRACING_ES_URL` to the golden trace ES so per-example traces and score docs
-land where the reporter reads them.
+Pass `--trace-es-url <golden trace ES URL>`, or configure the selected export
+profile, so per-example traces and score docs land where the reporter reads them.
+Exporting `TRACING_ES_URL` has no effect: `scripts/evals run` overlays the
+selected/default export profile onto the child environment, and only the
+`--trace-es-url` flag is applied afterwards.

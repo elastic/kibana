@@ -50,7 +50,9 @@ describe('hasWorkerEvalRecordShape', () => {
     expect(hasWorkerEvalRecordShape({ ...VALID, verdict: '   ' })).toBe(false);
     expect(hasWorkerEvalRecordShape({ ...VALID, watch: '' })).toBe(false);
     expect(hasWorkerEvalRecordShape({ ...VALID, confidence: Number.NaN })).toBe(false);
-    expect(hasWorkerEvalRecordShape({ ...VALID, confidence: Number.POSITIVE_INFINITY })).toBe(false);
+    expect(hasWorkerEvalRecordShape({ ...VALID, confidence: Number.POSITIVE_INFINITY })).toBe(
+      false
+    );
     expect(hasWorkerEvalRecordShape({ ...VALID, confidence: 12 })).toBe(false);
     expect(hasWorkerEvalRecordShape({ ...VALID, confidence: -0.1 })).toBe(false);
     expect(hasWorkerEvalRecordShape({ ...VALID, provenance: false })).toBe(false);

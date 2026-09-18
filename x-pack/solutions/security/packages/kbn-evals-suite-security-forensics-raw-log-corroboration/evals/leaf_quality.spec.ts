@@ -103,7 +103,7 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
           // this package do: a routing miss otherwise makes `skillInvoked` false and
           // fails every quality dimension before the raw-log worker is exercised,
           // conflating router behaviour with corroboration quality. Routing is
-          // covered by the L0 smoke spec.
+          // covered by the sibling Watch package's evals/routing_smoke.spec.ts.
           configurationOverrides: { skillIds: [SKILL_ID] },
         });
 

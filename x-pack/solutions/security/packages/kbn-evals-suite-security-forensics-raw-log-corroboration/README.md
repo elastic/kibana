@@ -14,20 +14,27 @@ _Forensics Watch was formerly **Deep Watch** (AlertZero decision D25)._
 
 ## Ladder
 
-- L0: Transition gate (workflow-driven, no router surface)
-- L1: Schema conformance (worker output schema validation)
-- L2: Deterministic quality (gap detection accuracy)
+- L2: Quality (live — the leaf-quality spec drives Agent Builder and scores
+  corroboration against the dataset's expectations)
 - L3: Composite pipeline (narrative to raw log query to corroboration report)
 - L4: Durable outcome (report persisted to store)
+
+L0 (transition/trigger) and L1 (worker output schema conformance) are **not
+implemented in this package**: the worker's transition gates live with the
+workflow-driven suite (`kbn-evals-suite-security-watch-escalation-chain`) and the
+routing smoke with the Watch suite (`kbn-evals-suite-security-forensics-watch`,
+`evals/routing_smoke.spec.ts`). Do not advertise them here until the
+package-local implementations land — this suite's Jest run covers parsing,
+fixture, dataset-invariant and helper behaviour only.
 
 ## Running
 
 ```bash
-# L1/L2 deterministic evaluators (no stack required):
+# Deterministic unit suites (no stack required):
 node scripts/jest --config \
   x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-raw-log-corroboration/jest.config.js
 
-# Live L0/L3/L4 scorecard, against a running Scout stack with EIS connectors.
+# Live L2/L3/L4 scorecard, against a running Scout stack with EIS connectors.
 # Eval suites use createPlaywrightEvalsConfig, so they run via scripts/evals
 # (scripts/scout run-tests rejects them). The judge must come from a different
 # model family than the candidate — never self-judge.

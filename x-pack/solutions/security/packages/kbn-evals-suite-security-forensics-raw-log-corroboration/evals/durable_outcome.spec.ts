@@ -92,7 +92,8 @@ evaluate.describe(
           // spec scores the raw-log corroboration worker's DURABILITY, not the
           // agent's ability to route to it: without the override a run can be
           // decided by the router before `produce_draft_forensic_report` is ever
-          // called, and routing is already covered by the L0 smoke spec.
+          // called, and routing is already covered by the sibling Watch package's
+          // evals/routing_smoke.spec.ts (this package has no L0 spec of its own).
           configurationOverrides: { skillIds: [SKILL_ID] },
         });
 
