@@ -247,23 +247,23 @@ export function createSyntheticsPrivateLocationApi(
         ? spaceId
         : [spaceId]
       : ['default'];
-    // `*` (ALL_SPACES_ID) is not a valid URL space prefix — issue the
-    // bulk_create from the default space and rely on `initialNamespaces` to
-    // share the saved object to all spaces (mirrors the FTR service).
+    // `*` (ALL_SPACES_ID) is not a valid URL space prefix — create from the
+    // default space and rely on `initialNamespaces` to share the saved object
+    // to all spaces. The type is `hiddenFromHttpApis`, so this must go through
+    // the FTR `kbn_client_so` routes rather than `/api/saved_objects`.
     const firstNamespace = initialNamespaces[0];
     const urlSpaceId =
       !firstNamespace || firstNamespace === ALL_SPACES_ID ? 'default' : firstNamespace;
 
-    await kbnClient.request({
-      path: `/s/${urlSpaceId}/api/saved_objects/_bulk_create`,
-      method: 'POST',
-      body: locations.map((location) => ({
+    for (const location of locations) {
+      await kbnClient.savedObjects.create({
         type: 'synthetics-private-location',
         id: location.id,
         attributes: location,
         initialNamespaces,
-      })),
-    });
+        space: urlSpaceId,
+      });
+    }
 
     await waitForPrivateLocationsReady(
       locations.map((location) => location.id),
