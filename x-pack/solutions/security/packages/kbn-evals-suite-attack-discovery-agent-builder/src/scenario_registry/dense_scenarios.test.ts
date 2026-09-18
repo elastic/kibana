@@ -225,9 +225,50 @@ describe('AD2 scenario registry (dense profile)', () => {
     }
   });
 
+  it('does not let raw-event backing separate target from noise', () => {
+    // The former leak: every clean chain has `raw: true` and every background
+    // template had `raw: false`, so `NOT EXISTS(ancestor raw event)` alone
+    // regrouped the four target chains — an agent never had to read a single
+    // alert field. At least one background template (`bg-endpoint-inventory`)
+    // now also carries `raw: true`, with a genuinely benign backing event, so
+    // raw-event existence is no longer exclusive to the targets.
+    const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const backgroundKeys = dense.scenarioKeys.filter(isBackgroundScenarioKey);
+    const targetKeys = dense.scenarioKeys.filter((key) => !isBackgroundScenarioKey(key));
+
+    const rawByKey = (key: string): boolean => getAd2Scenario(key, 'dense')?.raw ?? false;
+
+    expect(targetKeys.every(rawByKey)).toBe(true);
+    expect(backgroundKeys.some(rawByKey)).toBe(true);
+    // Non-vacuity for the OTHER direction too: raw is not exclusive to
+    // background either, or it would just be a differently-shaped answer key.
+    expect(backgroundKeys.some((key) => !rawByKey(key))).toBe(true);
+  });
+
+  it('does not let chain length separate target from noise', () => {
+    // The former leak: every clean chain has 4 steps and every background
+    // occurrence topped out at 2, so `stepCount >= 3` alone regrouped the four
+    // target chains. `bg-endpoint-inventory` now also runs 4 steps, so chain
+    // length is no longer exclusive to the targets either.
+    const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const targetLengths = new Set(
+      dense.scenarioKeys
+        .filter((key) => !isBackgroundScenarioKey(key))
+        .map((key) => getAd2Scenario(key, 'dense')?.steps.length)
+    );
+    const backgroundLengths = new Set(
+      dense.scenarioKeys
+        .filter(isBackgroundScenarioKey)
+        .map((key) => getAd2Scenario(key, 'dense')?.steps.length)
+    );
+
+    for (const targetLength of targetLengths) {
+      expect(backgroundLengths).toContain(targetLength);
+    }
+  });
+
   it('keeps every escalated background step benign on its own fields', () => {
     // A background step is only allowed to be high|critical when its own fields
-    // carry the benign reading: without one it is a recall target the reference
     // does not contain, and the Criteria evaluator then scores a model that read
     // the alert correctly as a false positive. So the escalation is not a
     // severity value to copy onto another template — the marker below is the

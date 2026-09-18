@@ -56,6 +56,20 @@ interface BackgroundTemplate {
   readonly os: Ad2ScenarioOs;
   readonly user: string;
   /**
+   * Whether this occurrence's raw process/network/file events are indexed
+   * alongside its alert. Defaults to `false` (matching every OTHER background
+   * template): `buildAlertDocument` always writes an ancestor event id into
+   * `kibana.alert.ancestors`, but `buildScenarioDocuments` only backs it with
+   * a real document when the owning scenario's `raw` is true. Every clean
+   * reference chain has `raw: true`, so leaving every background occurrence
+   * `raw: false` makes every target ancestor id resolve and every background
+   * one dangle — an agent with ES|QL access can then tell target from noise by
+   * source-event existence alone rather than reading the alert. At least one
+   * template has to break that by setting this true, with a genuinely benign
+   * backing event (not a bare flag flip): see `bg-endpoint-inventory` below.
+   */
+  readonly raw?: boolean;
+  /**
    * Builds one occurrence's chain from that occurrence's own coordinates.
    *
    * The observables have to be occurrence-local. Repeating one indicator across
@@ -242,6 +256,70 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
     ],
   },
   {
+    key: 'bg-endpoint-inventory',
+    title: 'Scheduled endpoint inventory sweep',
+    host: 'wks-ops-40',
+    os: 'linux',
+    user: 'svc.inventory',
+    // The one background chain with real raw events backing its alerts, and
+    // the one that reaches 4 steps — the two properties `raw: false` and
+    // "background chains cap at 2 steps" gave an agent for free (see the
+    // `raw` field's doc comment above, and the length invariant this file's
+    // tests pin). Every step below carries an observable, occurrence-scoped
+    // reading of "routine, scheduled, signed inventory sweep" in its own
+    // fields, the same pattern `bg-vendor-update` uses for severity: without
+    // that reading, raising rawness/length would create a recall target the
+    // reference does not contain, and a model that surfaces it correctly
+    // would be scored as a false positive.
+    raw: true,
+    stepsFor: ({ host }) => {
+      const agentPath = `/opt/inventory-agent/bin/scan-${host}.sh`;
+      const catalogPath = `/var/lib/inventory-agent/${host}-catalog.json`;
+      return [
+        step(
+          'Scheduled Inventory Agent Started',
+          'low',
+          19,
+          `The signed inventory agent started its scheduled sweep on ${host}`,
+          'inventory-agent',
+          agentPath,
+          'process',
+          agentPath
+        ),
+        step(
+          'Software Catalog Enumerated',
+          'low',
+          20,
+          `The inventory agent enumerated installed packages on ${host} for the asset catalog`,
+          'inventory-agent',
+          null,
+          'file',
+          catalogPath
+        ),
+        step(
+          'Inventory Report Uploaded to Fleet Server',
+          'low',
+          23,
+          `${host} uploaded its scheduled inventory report to the internal fleet server`,
+          'inventory-agent',
+          null,
+          'network',
+          `fleet.internal.example.net/report/${host}`
+        ),
+        step(
+          'Scheduled Inventory Agent Exited Cleanly',
+          'low',
+          17,
+          `The inventory agent completed its scheduled sweep on ${host} and exited with status 0`,
+          'inventory-agent',
+          agentPath,
+          'process',
+          agentPath
+        ),
+      ];
+    },
+  },
+  {
     key: 'bg-vendor-update',
     title: 'Signed vendor agent update installed by the management agent',
     host: 'wks-finance-31',
@@ -349,7 +427,7 @@ const buildBackgroundScenarios = (): Record<string, Ad2ScenarioDefinition> => {
           user: template.user,
           // Spread across the window so they do not all share one timestamp.
           startHoursAgo: 1 + ((templateIndex * 7 + round) % 20),
-          raw: false,
+          raw: template.raw ?? false,
           steps,
         };
 
