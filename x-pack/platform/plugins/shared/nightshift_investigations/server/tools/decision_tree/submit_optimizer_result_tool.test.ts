@@ -158,6 +158,61 @@ describe('submit_optimizer_result', () => {
     );
   });
 
+  it('keeps buffered learnings when a submission is rejected, then drains them on success', async () => {
+    const store = createStore(stored(FULL_TREE));
+    const peekLearnings = jest.fn().mockReturnValue([
+      {
+        kind: 'system',
+        tree_id: TREE_ID,
+        category: 'architecture',
+        content: 'Checkout writes through a pool.',
+        keywords: [],
+      },
+    ]);
+    const drainLearnings = jest.fn().mockReturnValue([]);
+    const tool = createSubmitOptimizerResultTool({
+      connectionManager: createConnectionManager(
+        markdownFor('flowchart TD\n    S1([Checkout latency]) --> E1[Query logs]')
+      ) as never,
+      getStore: () => store,
+      getSpaceId: () => 'default',
+      peekLearnings,
+      drainLearnings,
+      logger: loggerMock.create(),
+    });
+
+    const rejected = await tool.handler(
+      {
+        symptom_trees: [{ tree_id: TREE_ID, file_path: FILE_PATH, evidence_gatherer_metadata: [] }],
+        summary: '',
+      },
+      createContext() as never
+    );
+
+    expect('results' in rejected && rejected.results[0].type).toBe(ToolResultType.error);
+    expect(drainLearnings).not.toHaveBeenCalled();
+    expect(store.commit).not.toHaveBeenCalled();
+
+    const successTool = createSubmitOptimizerResultTool({
+      connectionManager: createConnectionManager(markdownFor(FULL_TREE)) as never,
+      getStore: () => createStore(),
+      getSpaceId: () => 'default',
+      peekLearnings,
+      drainLearnings,
+      logger: loggerMock.create(),
+    });
+
+    await successTool.handler(
+      {
+        symptom_trees: [{ tree_id: TREE_ID, file_path: FILE_PATH, evidence_gatherer_metadata: [] }],
+        summary: 'Merged this run.',
+      },
+      createContext() as never
+    );
+
+    expect(drainLearnings).toHaveBeenCalledWith('default__conv-1');
+  });
+
   describe('rejections', () => {
     const expectRejected = (result: unknown, reason: RegExp) => {
       const results = (result as { results: Array<{ type: string; data: { message: string } }> })

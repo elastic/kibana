@@ -213,7 +213,7 @@ export const selectTurnScript = ({
 /** Builds the per-turn user message that states what the agent may edit and what it knows. */
 export const buildTurnPrompt = ({
   editableTreePaths,
-  activeSystemLearning,
+  activeSystemLearnings,
   activeToolLearnings,
   activeRemediation,
   connectorNames,
@@ -221,7 +221,7 @@ export const buildTurnPrompt = ({
   script,
 }: {
   editableTreePaths: string[];
-  activeSystemLearning?: string;
+  activeSystemLearnings: string[];
   activeToolLearnings: string[];
   activeRemediation?: string;
   connectorNames: string[];
@@ -235,7 +235,8 @@ export const buildTurnPrompt = ({
 ${bulletsOrNone(editableTreePaths)}
 
 Active learnings for retention decisions:
-- system: ${activeSystemLearning || 'None'}
+- system:
+${bulletsOrNone(activeSystemLearnings)}
 - tool:
 ${bulletsOrNone(activeToolLearnings)}
 - remediation: ${activeRemediation || 'None'}

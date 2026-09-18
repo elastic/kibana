@@ -34,7 +34,11 @@ const createEsClient = () => ({
 });
 
 const createStore = (esClient: ReturnType<typeof createEsClient>) =>
-  createDecisionTreeStore({ esClient: esClient as never, logger: loggerMock.create() });
+  createDecisionTreeStore({
+    esClient: esClient as never,
+    logger: loggerMock.create(),
+    spaceId: 'default',
+  });
 
 describe('commit', () => {
   it('creates version 1 and a head for a new tree', async () => {
@@ -58,7 +62,7 @@ describe('commit', () => {
     const [versionCall, headCall] = esClient.index.mock.calls;
     expect(versionCall[0]).toMatchObject({
       index: DECISION_TREE_AI_INDEX_DEST,
-      id: 'dtree_checkout-high-latency_v1',
+      id: 'default:dtree_checkout-high-latency_v1',
       document: expect.objectContaining({
         type: 'decision_tree_version',
         content: MARKDOWN,
@@ -66,13 +70,14 @@ describe('commit', () => {
           version: 1,
           author: 'jdoe',
           summary: 'Initial tree.',
+          space_id: 'default',
         }),
         learnings: [learning],
       }),
     });
     expect(headCall[0]).toMatchObject({
       index: DECISION_TREE_AI_INDEX_DEST,
-      id: 'dtree_checkout-high-latency',
+      id: 'default:dtree_checkout-high-latency',
       document: expect.objectContaining({
         type: 'decision_tree',
         content: MARKDOWN,
@@ -136,7 +141,7 @@ describe('commit', () => {
     expect(detail.version).toBe(3);
     // A confirmed causal path promotes the tree to established.
     expect(detail.status).toBe('established');
-    expect(esClient.index.mock.calls[0][0].id).toBe('dtree_checkout-high-latency_v3');
+    expect(esClient.index.mock.calls[0][0].id).toBe('default:dtree_checkout-high-latency_v3');
   });
 
   it('merges learnings single-slot into the head', async () => {
@@ -219,6 +224,17 @@ describe('list', () => {
 
     const trees = await createStore(esClient).list();
 
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: expect.arrayContaining([{ term: { 'attributes.space_id': 'default' } }]),
+          },
+        },
+      }),
+      expect.anything()
+    );
+
     expect(trees).toEqual([
       expect.objectContaining({
         tree_id: 'symptom:checkout-high-latency',
@@ -245,10 +261,12 @@ describe('listVersions', () => {
             filter: [
               { term: { type: 'decision_tree_version' } },
               { term: { 'attributes.tree_id': 'symptom:checkout-high-latency' } },
+              { term: { 'attributes.space_id': 'default' } },
             ],
           },
         },
-      })
+      }),
+      expect.anything()
     );
   });
 });
@@ -279,7 +297,8 @@ describe('get', () => {
     const tree = await createStore(esClient).get('symptom:checkout-high-latency');
 
     expect(esClient.get).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'dtree_checkout-high-latency' })
+      expect.objectContaining({ id: 'default:dtree_checkout-high-latency' }),
+      expect.anything()
     );
     expect(tree?.markdown).toBe(MARKDOWN);
     expect(tree?.mermaid).toContain('flowchart TD');
@@ -320,7 +339,8 @@ describe('getVersion', () => {
     const version = await createStore(esClient).getVersion('symptom:checkout-high-latency', 2);
 
     expect(esClient.get).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'dtree_checkout-high-latency_v2' })
+      expect.objectContaining({ id: 'default:dtree_checkout-high-latency_v2' }),
+      expect.anything()
     );
     expect(version?.version).toBe(2);
     expect(version?.markdown).toBe(MARKDOWN);
@@ -355,11 +375,12 @@ describe('archive', () => {
 
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'dtree_checkout-high-latency',
+        id: 'default:dtree_checkout-high-latency',
         document: expect.objectContaining({
           attributes: expect.objectContaining({ status: 'archived', version: 2 }),
         }),
-      })
+      }),
+      expect.anything()
     );
   });
 });

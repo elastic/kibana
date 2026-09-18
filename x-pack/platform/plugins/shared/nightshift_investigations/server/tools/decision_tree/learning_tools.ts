@@ -29,7 +29,7 @@ const RETENTION_RULE =
   'Record only what a future investigation could not have worked out for itself and that a human had to correct or redirect you on. Keep it to 1-4 lines of plain language with no raw MEM_* references.';
 
 interface LearningToolDeps {
-  getStore: (esClient: ElasticsearchClient) => LearningStore;
+  getStore: (esClient: ElasticsearchClient, request: KibanaRequest) => LearningStore;
   logger: Logger;
   /** Resolves the space for the current request, to scope the per-conversation learning buffer. */
   getSpaceId?: (request: KibanaRequest) => string;
@@ -37,7 +37,15 @@ interface LearningToolDeps {
   onRecord?: (conversationId: string, record: LearningRecord) => void;
 }
 
+const treeIdField = z
+  .string()
+  .max(256)
+  .describe(
+    'The symptom:<slug> tree this learning belongs to. Use the id from decision-trees/monitors.md, or the slug you are creating.'
+  );
+
 const systemLearningSchema = z.object({
+  tree_id: treeIdField,
   category: z
     .enum(SYSTEM_LEARNING_CATEGORIES)
     .describe('Which aspect of the system this learning is about.'),
@@ -48,6 +56,7 @@ const systemLearningSchema = z.object({
 });
 
 const remediationSchema = z.object({
+  tree_id: treeIdField,
   content: z
     .string()
     .max(MAX_LEARNING_LENGTH)
@@ -56,6 +65,7 @@ const remediationSchema = z.object({
 
 const toolLearningSchema = (connectorNames: readonly string[]) =>
   z.object({
+    tree_id: treeIdField,
     connector_name:
       connectorNames.length > 0
         ? z
@@ -136,9 +146,14 @@ export const createRecordSystemLearningTool = ({
   },
   handler: async (params, context) =>
     recordAndReport({
-      store: getStore(context.esClient.asCurrentUser),
+      store: getStore(context.esClient.asCurrentUser, context.request),
       logger,
-      input: { kind: 'system', category: params.category, content: params.content },
+      input: {
+        kind: 'system',
+        treeId: params.tree_id,
+        category: params.category,
+        content: params.content,
+      },
       context,
       getSpaceId,
       onRecord,
@@ -170,10 +185,11 @@ export const createRecordToolLearningTool = ({
     },
     handler: async (params, context) =>
       recordAndReport({
-        store: getStore(context.esClient.asCurrentUser),
+        store: getStore(context.esClient.asCurrentUser, context.request),
         logger,
         input: {
           kind: 'tool',
+          treeId: params.tree_id,
           category: params.category,
           connectorName: params.connector_name,
           content: params.content,
@@ -205,9 +221,9 @@ export const createRecordRemediationTool = ({
   },
   handler: async (params, context) =>
     recordAndReport({
-      store: getStore(context.esClient.asCurrentUser),
+      store: getStore(context.esClient.asCurrentUser, context.request),
       logger,
-      input: { kind: 'remediation', content: params.content },
+      input: { kind: 'remediation', treeId: params.tree_id, content: params.content },
       context,
       getSpaceId,
       onRecord,

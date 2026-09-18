@@ -52,10 +52,10 @@ export const createDecisionTreeTools = ({
   getUsername?: (request: KibanaRequest) => string | undefined;
   logger: Logger;
 }): Array<BuiltinToolDefinition<never>> => {
-  const getTreeStore = (esClient: ElasticsearchClient) =>
-    createDecisionTreeStore({ esClient, logger });
-  const getLearningStore = (esClient: ElasticsearchClient) =>
-    createLearningStore({ esClient, logger });
+  const getTreeStore = (esClient: ElasticsearchClient, request: KibanaRequest) =>
+    createDecisionTreeStore({ esClient, logger, spaceId: getSpaceId(request) });
+  const getLearningStore = (esClient: ElasticsearchClient, request: KibanaRequest) =>
+    createLearningStore({ esClient, logger, spaceId: getSpaceId(request) });
 
   // Shared between the learning tools (which fill it) and the submit tool (which drains it), so a
   // committed tree version records the learnings the agent captured during the same turn. Keyed by
@@ -66,6 +66,8 @@ export const createDecisionTreeTools = ({
     existing.push(record);
     learningBuffer.set(conversationId, existing);
   };
+  const peekLearnings = (conversationId: string): LearningRecord[] =>
+    learningBuffer.get(conversationId) ?? [];
   const drainLearnings = (conversationId: string): LearningRecord[] => {
     const buffered = learningBuffer.get(conversationId) ?? [];
     learningBuffer.delete(conversationId);
@@ -87,6 +89,7 @@ export const createDecisionTreeTools = ({
       getStore: getTreeStore,
       getSpaceId,
       getUsername,
+      peekLearnings,
       drainLearnings,
       logger,
     }),

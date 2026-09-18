@@ -31,5 +31,6 @@ steps:
     if: '${{ inputs.conversation_id != null }}'
     with:
       conversation_id: '{{ inputs.conversation_id }}'
+      prompt: '{{ inputs.prompt }}'
     on-failure:
       continue: true

@@ -30,11 +30,16 @@ describe('learning tools', () => {
       logger: loggerMock.create(),
     });
     const result = await tool.handler(
-      { category: 'architecture', content: 'Checkout writes through a shared connection pool.' },
+      {
+        tree_id: 'symptom:checkout-high-latency',
+        category: 'architecture',
+        content: 'Checkout writes through a shared connection pool.',
+      },
       context
     );
     expect(store.record).toHaveBeenCalledWith({
       kind: 'system',
+      treeId: 'symptom:checkout-high-latency',
       category: 'architecture',
       content: 'Checkout writes through a shared connection pool.',
     });
@@ -50,6 +55,7 @@ describe('learning tools', () => {
     });
     await tool.handler(
       {
+        tree_id: 'symptom:checkout-high-latency',
         connector_name: 'elasticsearch',
         category: 'query_pattern',
         content: 'Filter by data_stream.dataset before aggregating.',
@@ -58,6 +64,7 @@ describe('learning tools', () => {
     );
     expect(store.record).toHaveBeenCalledWith({
       kind: 'tool',
+      treeId: 'symptom:checkout-high-latency',
       category: 'query_pattern',
       connectorName: 'elasticsearch',
       content: 'Filter by data_stream.dataset before aggregating.',
@@ -84,7 +91,10 @@ describe('learning tools', () => {
       getStore: () => store,
       logger: loggerMock.create(),
     });
-    const result = await tool.handler({ content: 'a\nb\nc\nd\ne' }, context);
+    const result = await tool.handler(
+      { tree_id: 'symptom:checkout-high-latency', content: 'a\nb\nc\nd\ne' },
+      context
+    );
     expect('results' in result && result.results[0]).toEqual({
       type: ToolResultType.error,
       data: { message: 'Learning must be 1-4 lines' },

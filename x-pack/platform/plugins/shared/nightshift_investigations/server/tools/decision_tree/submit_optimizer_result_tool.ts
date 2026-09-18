@@ -93,14 +93,17 @@ export const createSubmitOptimizerResultTool = ({
   getStore,
   getSpaceId,
   getUsername,
+  peekLearnings,
   drainLearnings,
   logger,
 }: {
   connectionManager: SandboxConnectionManager;
-  getStore: (esClient: ElasticsearchClient) => DecisionTreeStore;
+  getStore: (esClient: ElasticsearchClient, request: KibanaRequest) => DecisionTreeStore;
   getSpaceId: (request: KibanaRequest) => string;
   /** Resolves the authenticated user, recorded as the version author. */
   getUsername?: (request: KibanaRequest) => string | undefined;
+  /** Reads the learnings this conversation recorded this turn without clearing them. */
+  peekLearnings?: (conversationId: string) => LearningRecord[];
   /** Takes and clears the learnings this conversation recorded this turn. */
   drainLearnings?: (conversationId: string) => LearningRecord[];
   logger: Logger;
@@ -128,11 +131,11 @@ export const createSubmitOptimizerResultTool = ({
       };
     }
 
-    const store = getStore(context.esClient.asCurrentUser);
+    const store = getStore(context.esClient.asCurrentUser, context.request);
     const author = getUsername?.(context.request) || 'system';
-    // Drained once per turn: the learnings recorded this round land on every tree submitted with
-    // them, and the buffer is cleared so a later turn does not re-attach them.
-    const turnLearnings = drainLearnings?.(conversationId) ?? [];
+    // Peek until every submission is accepted. Draining first would drop this turn's learnings
+    // when the agent has to fix a rejected file and call submit again.
+    const turnLearnings = peekLearnings?.(conversationId) ?? [];
     const outcomes: SubmissionOutcome[] = [];
 
     for (const submission of params.symptom_trees) {
@@ -146,7 +149,12 @@ export const createSubmitOptimizerResultTool = ({
             store,
             author,
             summary: params.summary,
-            learnings: turnLearnings,
+            learnings: turnLearnings.filter(
+              (learning) =>
+                learning.tree_id !== undefined &&
+                symptomSlugFromTreeId(learning.tree_id) ===
+                  symptomSlugFromTreeId(submission.tree_id)
+            ),
           })
         );
       } catch (error) {
@@ -163,6 +171,10 @@ export const createSubmitOptimizerResultTool = ({
 
     const rejected = outcomes.filter((outcome) => outcome.status === 'rejected');
     const persisted = outcomes.filter((outcome) => outcome.status === 'persisted');
+
+    if (rejected.length === 0) {
+      drainLearnings?.(conversationId);
+    }
 
     if (rejected.length > 0) {
       return {

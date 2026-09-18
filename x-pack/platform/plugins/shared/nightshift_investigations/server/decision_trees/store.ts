@@ -34,6 +34,7 @@ export type {
 
 const MAX_TREES = 500;
 const MAX_VERSIONS = 500;
+const SPACE_ID_FIELD = 'attributes.space_id';
 
 /**
  * Structured fields live under `attributes` so they inherit the AI-index template's flattened
@@ -50,6 +51,7 @@ interface DecisionTreeAttributes {
   reinforced?: boolean | string;
   node_count?: number | string;
   edge_count?: number | string;
+  space_id?: string;
 }
 
 /** The head document, one per tree, holding the current markdown and merged learnings. */
@@ -102,9 +104,10 @@ const titleFromSymptom = (symptom: string): string =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-const headDocId = (symptom: string): string => `dtree_${symptom}`;
+const headDocId = (spaceId: string, symptom: string): string => `${spaceId}:dtree_${symptom}`;
 
-const versionDocId = (symptom: string, version: number): string => `dtree_${symptom}_v${version}`;
+const versionDocId = (spaceId: string, symptom: string, version: number): string =>
+  `${spaceId}:dtree_${symptom}_v${version}`;
 
 /**
  * A stored tree whose Mermaid can no longer be extracted is still returned, with an empty
@@ -119,9 +122,11 @@ const safeExtractMermaid = (markdown: string): string => {
   }
 };
 
-/** Single-slot key: recording the same kind/category/connector replaces the previous learning. */
+/** Single-slot key: recording the same tree/kind/category/connector replaces the previous learning. */
 const learningKey = (learning: LearningRecord): string =>
-  `${learning.kind}\u0000${learning.category ?? ''}\u0000${learning.connector_name ?? ''}`;
+  `${learning.tree_id ?? ''}\u0000${learning.kind}\u0000${learning.category ?? ''}\u0000${
+    learning.connector_name ?? ''
+  }`;
 
 /** Merges this turn's learnings into the tree's existing set, newest winning per slot. */
 const mergeLearnings = (
@@ -196,16 +201,24 @@ const versionToDetail = (source: DecisionTreeVersionSource): DecisionTreeVersion
 export const createDecisionTreeStore = ({
   esClient,
   logger,
+  spaceId,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  spaceId: string;
+  /** Aborts in-flight Elasticsearch requests when the calling step times out. */
+  signal?: AbortSignal;
 }): DecisionTreeStore => {
   const getHead = async (symptom: string): Promise<DecisionTreeHeadSource | undefined> => {
     try {
-      const response = await esClient.get<DecisionTreeHeadSource>({
-        index: DECISION_TREE_AI_INDEX_DEST,
-        id: headDocId(symptom),
-      });
+      const response = await esClient.get<DecisionTreeHeadSource>(
+        {
+          index: DECISION_TREE_AI_INDEX_DEST,
+          id: headDocId(spaceId, symptom),
+        },
+        { signal }
+      );
       return response.found ? response._source : undefined;
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 404) {
@@ -217,19 +230,26 @@ export const createDecisionTreeStore = ({
 
   return {
     list: async () => {
-      const response = await esClient.search<DecisionTreeHeadSource>({
-        index: DECISION_TREE_AI_INDEX_DEST,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        size: MAX_TREES,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [{ term: { type: 'decision_tree' } }, { term: { tags: DECISION_TREE_TAG } }],
+      const response = await esClient.search<DecisionTreeHeadSource>(
+        {
+          index: DECISION_TREE_AI_INDEX_DEST,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          size: MAX_TREES,
+          track_total_hits: false,
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'decision_tree' } },
+                { term: { tags: DECISION_TREE_TAG } },
+                { term: { [SPACE_ID_FIELD]: spaceId } },
+              ],
+            },
           },
+          sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
         },
-        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
-      });
+        { signal }
+      );
 
       return response.hits.hits.flatMap((hit) => (hit._source ? [headToSummary(hit._source)] : []));
     },
@@ -270,6 +290,7 @@ export const createDecisionTreeStore = ({
           reinforced,
           node_count: nodeCount,
           edge_count: edgeCount,
+          space_id: spaceId,
         },
         learnings,
       };
@@ -287,43 +308,54 @@ export const createDecisionTreeStore = ({
           status,
           node_count: nodeCount,
           edge_count: edgeCount,
+          space_id: spaceId,
         },
         learnings: mergeLearnings(existing?.learnings ?? [], learnings),
       };
 
-      await esClient.index({
-        index: DECISION_TREE_AI_INDEX_DEST,
-        id: versionDocId(symptom, nextVersion),
-        document: versionDoc,
-      });
-      await esClient.index({
-        index: DECISION_TREE_AI_INDEX_DEST,
-        id: headDocId(symptom),
-        document: headDoc,
-        refresh: 'wait_for',
-      });
+      await esClient.index(
+        {
+          index: DECISION_TREE_AI_INDEX_DEST,
+          id: versionDocId(spaceId, symptom, nextVersion),
+          document: versionDoc,
+        },
+        { signal }
+      );
+      await esClient.index(
+        {
+          index: DECISION_TREE_AI_INDEX_DEST,
+          id: headDocId(spaceId, symptom),
+          document: headDoc,
+          refresh: 'wait_for',
+        },
+        { signal }
+      );
 
       logger.debug(`Committed decision tree ${fullTreeId} v${nextVersion}`);
       return headToDetail(headDoc);
     },
 
     listVersions: async (treeId) => {
-      const response = await esClient.search<DecisionTreeVersionSource>({
-        index: DECISION_TREE_AI_INDEX_DEST,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        size: MAX_VERSIONS,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [
-              { term: { type: 'decision_tree_version' } },
-              { term: { 'attributes.tree_id': symptomTreeId(symptomSlugFromTreeId(treeId)) } },
-            ],
+      const response = await esClient.search<DecisionTreeVersionSource>(
+        {
+          index: DECISION_TREE_AI_INDEX_DEST,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          size: MAX_VERSIONS,
+          track_total_hits: false,
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'decision_tree_version' } },
+                { term: { 'attributes.tree_id': symptomTreeId(symptomSlugFromTreeId(treeId)) } },
+                { term: { [SPACE_ID_FIELD]: spaceId } },
+              ],
+            },
           },
+          sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
         },
-        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
-      });
+        { signal }
+      );
 
       return response.hits.hits.flatMap((hit) =>
         hit._source ? [versionToSummary(hit._source)] : []
@@ -332,10 +364,13 @@ export const createDecisionTreeStore = ({
 
     getVersion: async (treeId, version) => {
       try {
-        const response = await esClient.get<DecisionTreeVersionSource>({
-          index: DECISION_TREE_AI_INDEX_DEST,
-          id: versionDocId(symptomSlugFromTreeId(treeId), version),
-        });
+        const response = await esClient.get<DecisionTreeVersionSource>(
+          {
+            index: DECISION_TREE_AI_INDEX_DEST,
+            id: versionDocId(spaceId, symptomSlugFromTreeId(treeId), version),
+          },
+          { signal }
+        );
         return response.found && response._source ? versionToDetail(response._source) : undefined;
       } catch (error) {
         if (isResponseError(error) && error.statusCode === 404) {
@@ -351,16 +386,19 @@ export const createDecisionTreeStore = ({
       if (!existing) {
         return;
       }
-      await esClient.index({
-        index: DECISION_TREE_AI_INDEX_DEST,
-        id: headDocId(symptom),
-        document: {
-          ...existing,
-          '@timestamp': new Date().toISOString(),
-          attributes: { ...existing.attributes, status: 'archived' },
+      await esClient.index(
+        {
+          index: DECISION_TREE_AI_INDEX_DEST,
+          id: headDocId(spaceId, symptom),
+          document: {
+            ...existing,
+            '@timestamp': new Date().toISOString(),
+            attributes: { ...existing.attributes, status: 'archived', space_id: spaceId },
+          },
+          refresh: 'wait_for',
         },
-        refresh: 'wait_for',
-      });
+        { signal }
+      );
     },
   };
 };

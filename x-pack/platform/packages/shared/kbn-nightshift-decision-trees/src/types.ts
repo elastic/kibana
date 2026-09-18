@@ -71,6 +71,8 @@ export type LearningKind = (typeof LEARNING_KINDS)[number];
 export interface LearningRecord {
   kind: LearningKind;
   content: string;
+  /** The `symptom:<slug>` tree this learning belongs to. */
+  tree_id?: string;
   /** Category for system and tool learnings. Remediations carry none. */
   category?: SystemLearningCategory | ToolLearningCategory;
   /** Connector the learning applies to. Tool learnings only. */

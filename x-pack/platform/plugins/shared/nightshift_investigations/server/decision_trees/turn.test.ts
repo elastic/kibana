@@ -68,14 +68,14 @@ describe('buildReinforcementPrompt', () => {
     response: 'Connection pool exhausted.',
   };
 
-  it('asks for a new tree when nothing is hydrated', () => {
+  it('asks for a new tree when the investigator did not open one', () => {
     const message = buildReinforcementPrompt({ ...base, trees: [] });
 
     expect(message).toContain(SCRIPT_INITIAL_CREATE);
     expect(message).toContain('Decision-tree files available for edit:\n- None');
   });
 
-  it('asks for a merge when a fresh tree exists', () => {
+  it('asks for a merge when the investigator opened a first-version tree', () => {
     const message = buildReinforcementPrompt({ ...base, trees: [tree()] });
 
     expect(message).toContain(SCRIPT_INITIAL_MERGE);
@@ -107,24 +107,47 @@ describe('buildReinforcementPrompt', () => {
       learnings: [
         {
           kind: 'system',
+          tree_id: 'symptom:checkout-high-latency',
           category: 'dependency',
           content: 'Checkout depends on Redis.',
           keywords: [],
         },
         {
+          kind: 'system',
+          tree_id: 'symptom:checkout-high-latency',
+          category: 'architecture',
+          content: 'Checkout shares a connection pool.',
+          keywords: [],
+        },
+        {
+          kind: 'system',
+          tree_id: 'symptom:payment-errors',
+          category: 'architecture',
+          content: 'Payments use a different cluster.',
+          keywords: [],
+        },
+        {
           kind: 'tool',
+          tree_id: 'symptom:checkout-high-latency',
           category: 'query_pattern',
           connector_name: 'elastic-telemetry',
           content: 'Filter by service.name.',
           keywords: [],
         },
-        { kind: 'remediation', content: 'Raise the pool size.', keywords: [] },
+        {
+          kind: 'remediation',
+          tree_id: 'symptom:checkout-high-latency',
+          content: 'Raise the pool size.',
+          keywords: [],
+        },
       ],
     });
 
     expect(message).toContain('Why is checkout slow?');
     expect(message).toContain('Connection pool exhausted.');
-    expect(message).toContain('- system: Checkout depends on Redis.');
+    expect(message).toContain('- Checkout depends on Redis.');
+    expect(message).toContain('- Checkout shares a connection pool.');
+    expect(message).not.toContain('Payments use a different cluster.');
     expect(message).toContain('- elastic-telemetry, query_pattern: Filter by service.name.');
     expect(message).toContain('- remediation: Raise the pool size.');
     expect(message).toContain('elastic-telemetry');

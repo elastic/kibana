@@ -13,6 +13,12 @@ import {
   DECISION_TREE_AI_INDEX_ID,
 } from '../../common/decision_trees';
 import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
+import {
+  embedAccessedTreesMarker,
+  extractAccessedTreeIds,
+  parseAccessedTreesMarker,
+  type InvestigationToolCall,
+} from './accessed_trees';
 import { createLearningStore } from './learning_store';
 import { materializeDecisionTrees } from './materialize';
 import { createDecisionTreeStore } from './store';
@@ -49,14 +55,28 @@ export const hydrateDecisionTreeWorkspace = async ({
   conversationId,
   esClient,
   logger,
+  spaceId,
+  prompt,
+  signal,
 }: {
   apiClient: SandboxApiClient;
   conversationId: string;
   esClient: ElasticsearchClient;
   logger: Logger;
+  spaceId: string;
+  prompt?: string;
+  signal?: AbortSignal;
 }): Promise<number> => {
-  const store = createDecisionTreeStore({ esClient, logger });
-  const trees = await materializeDecisionTrees({ apiClient, conversationId, store, logger });
+  const store = createDecisionTreeStore({ esClient, logger, spaceId, signal });
+  const accessedTreeIds = parseAccessedTreesMarker(prompt);
+  const trees = await materializeDecisionTrees({
+    apiClient,
+    conversationId,
+    store,
+    logger,
+    signal,
+    ...(accessedTreeIds ? { treeIds: accessedTreeIds } : {}),
+  });
   return trees.length;
 };
 
@@ -70,27 +90,39 @@ export const prepareReinforcementTurn = async ({
   connectorNames,
   esClient,
   logger,
+  spaceId,
+  signal,
+  toolCalls = [],
 }: {
   prompt: string;
   response: string;
   connectorNames: string[];
   esClient: ElasticsearchClient;
   logger: Logger;
+  spaceId: string;
+  signal?: AbortSignal;
+  toolCalls?: InvestigationToolCall[];
 }): Promise<{ message: string; treeCount: number }> => {
   const [trees, learnings] = await Promise.all([
-    createDecisionTreeStore({ esClient, logger }).list(),
-    createLearningStore({ esClient, logger }).list(),
+    createDecisionTreeStore({ esClient, logger, spaceId, signal }).list(),
+    createLearningStore({ esClient, logger, spaceId, signal }).list(),
   ]);
 
-  const active = trees.filter((tree) => tree.status !== 'archived');
+  const accessedIds = new Set(extractAccessedTreeIds(toolCalls));
+  const accessed = trees.filter(
+    (tree) => tree.status !== 'archived' && accessedIds.has(tree.tree_id)
+  );
   return {
-    message: buildReinforcementPrompt({
-      trees: active,
-      learnings,
-      connectorNames,
-      prompt,
-      response,
-    }),
-    treeCount: active.length,
+    message: [
+      embedAccessedTreesMarker(accessed.map((tree) => tree.tree_id)),
+      buildReinforcementPrompt({
+        trees: accessed,
+        learnings,
+        connectorNames,
+        prompt,
+        response,
+      }),
+    ].join('\n'),
+    treeCount: accessed.length,
   };
 };
