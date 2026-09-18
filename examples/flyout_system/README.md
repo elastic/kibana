@@ -14,6 +14,10 @@ directly and one opened through core:
    its zones. The child flyouts render with a collapsed header
    (`<FlyoutTemplate.Header collapsed />`).
 
+A third section, **Push padding scenarios**, mixes standalone `type="push"` flyouts with system
+push and overlay sessions and shows the inline push padding on `#app-main-scroll` live. Use it to
+reproduce stale or missing push padding depending on open/close order (see elastic/eui#9788).
+
 Neither widget demos every part `FlyoutTemplate` supports (e.g. `Body.Accordion`, tabs, header
 badges/info blocks) — that full part matrix is covered by the template's Storybook
 (`flyout_template.stories.tsx`), not by this example. This plugin's job is demonstrating the
