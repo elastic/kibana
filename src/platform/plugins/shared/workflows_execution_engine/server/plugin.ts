@@ -1829,9 +1829,9 @@ export class WorkflowsExecutionEnginePlugin
 
     const internalResumeWorkflowExecution: InternalResumeWorkflowExecution = async (
       executionId,
-      _spaceId,
+      spaceId,
       context,
-      _request
+      request
     ) => {
       if (context) {
         await workflowExecutionRepository.updateWorkflowExecution({
@@ -1840,11 +1840,21 @@ export class WorkflowsExecutionEnginePlugin
         });
       }
 
-      // Always wake the pre-existing task that holds the originating user's credentials.
-      // Passing the approver's request to scheduleAndRunImmediateResume would overwrite
-      // userScope on the task, causing downstream identity drift in resumed workflow steps
-      // (getUserFromRequest would return the approver's username instead of the workflow owner's).
-      await workflowTaskManager.runExistingResumeTask(executionId);
+      if (!request) {
+        // External resume: wake the idle-timeout task created when entering WAITING_FOR_INPUT.
+        // That task retains the workflow runner API key; ad-hoc tasks scheduled without a
+        // request cannot be executed by workflow:resume (no fakeRequest at run time).
+        await workflowTaskManager.runExistingResumeTask(executionId);
+        return;
+      }
+
+      // Preserve the immediate runner's claim and durably retry wake-ups that
+      // arrive while it is active.
+      await workflowTaskManager.scheduleAndRunImmediateResume({
+        executionId,
+        spaceId,
+        fakeRequest: request,
+      });
     };
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
