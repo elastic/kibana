@@ -15,7 +15,7 @@ import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { flow, identity, omit } from 'lodash';
+import { flow, identity, isEqual, omit } from 'lodash';
 import type { ExecutionContextStart, Logger } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -185,6 +185,7 @@ export class TaskManagerRunner implements TaskRunner {
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
+  private scheduleAtRunStart?: IntervalSchedule | RruleSchedule;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
   private taskRunEventCustomFields?: Record<string, unknown>;
 
@@ -370,6 +371,9 @@ export class TaskManagerRunner implements TaskRunner {
     // We extract it here because the narrowing is lost inside the async closure below
     // since this.instance is a mutable class property.
     const { startedAt } = this.instance.task;
+    // Snapshot the schedule before the heartbeat can refresh `this.instance` from the store, so
+    // completion can tell whether the schedule was changed externally while the task was running.
+    this.scheduleAtRunStart = this.instance.task.schedule;
 
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
@@ -702,7 +706,14 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.Idle });
           }
 
-          const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
+          // A schedule changed externally during the run takes precedence over the one returned by the task runner.
+          const scheduleChangedDuringRun = !isEqual(
+            this.instance.task.schedule,
+            this.scheduleAtRunStart
+          );
+          const updatedTaskSchedule = scheduleChangedDuringRun
+            ? this.instance.task.schedule
+            : reschedule ?? this.instance.task.schedule;
           return asOk({
             runAt:
               runAt ||

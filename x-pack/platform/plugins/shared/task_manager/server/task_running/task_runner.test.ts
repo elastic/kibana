@@ -1569,6 +1569,55 @@ describe('TaskManagerRunner', () => {
       );
     });
 
+    test('prefers a schedule updated while the task was running over the schedule returned by the task runner', async () => {
+      const runAt = new Date();
+      const { runner, store, instance } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          status: TaskStatus.Running,
+          runAt,
+          startedAt: new Date(),
+          enabled: true,
+          schedule: { interval: '1h' },
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                // The runner echoes back the schedule it was claimed with, which is now stale.
+                return { state: {}, schedule: { interval: '1h' } };
+              },
+            }),
+          },
+        },
+      });
+
+      store.partialUpdate.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object [type/id] conflict'))
+      );
+      store.get.mockResolvedValue({
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '3h' },
+      });
+
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          schedule: { interval: '3h' },
+          runAt: new Date(runAt.getTime() + 3 * 60 * 60 * 1000),
+        }),
+        expect.objectContaining({ validate: expect.any(Boolean) })
+      );
+    });
+
     test('does not run heartbeat updates while processing recurring task result', async () => {
       let sawProcessResultUpdate = false;
       let heartbeatUpdateCount = 0;
