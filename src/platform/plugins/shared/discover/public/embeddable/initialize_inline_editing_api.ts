@@ -75,7 +75,7 @@ export const initializeInlineEditingApi = ({
   const overrideHoverActions$ = isInlineEditing$;
 
   // Pre-edit state, captured on the first tab switch; if set, discard restores it
-  let inlineEditSnapshot: InlineEditSnapshot | undefined;
+  let inlineEditStateSnapshot: InlineEditSnapshot | undefined;
 
   const applyEmbeddableState = async (
     state: SearchEmbeddableSerializedAttributes
@@ -103,14 +103,14 @@ export const initializeInlineEditingApi = ({
 
     if (!tab || !isInlineEditing$.getValue()) return false;
 
-    inlineEditSnapshot ??= createSnapshot(searchEmbeddable);
+    inlineEditStateSnapshot ??= createSnapshot(searchEmbeddable);
 
     return applyEmbeddableState(tab);
   };
 
   const restoreInlineEditSnapshot = async () => {
-    if (inlineEditSnapshot) {
-      await applyEmbeddableState(inlineEditSnapshot);
+    if (inlineEditStateSnapshot) {
+      await applyEmbeddableState(inlineEditStateSnapshot);
     }
   };
 
@@ -119,7 +119,7 @@ export const initializeInlineEditingApi = ({
     inlineEditDirty$.next(false);
     draftSelectedTabId$.next(selectedTabId$.getValue());
 
-    inlineEditSnapshot = undefined;
+    inlineEditStateSnapshot = undefined;
 
     setFocusedPanelId();
   };
