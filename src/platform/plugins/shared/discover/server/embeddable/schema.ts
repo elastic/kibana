@@ -16,8 +16,8 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { classicTabSchema, esqlTabSchema } from '@kbn/as-code-discover-schema';
-import { panelOverridesSchema, tabSchema } from '@kbn/as-code-discover-schema';
+import type { classicTabSchema, esqlTabSchema, tabSchema } from '@kbn/as-code-discover-schema';
+import { panelOverridesSchema, panelTabSchema } from '@kbn/as-code-discover-schema';
 
 const DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
@@ -44,7 +44,7 @@ function withPanelSchemas<T extends z.ZodRawShape>(
 
 const discoverSessionByValuePropsSchema = z
   .object({
-    tabs: z.array(tabSchema).min(1).max(1).meta({
+    tabs: z.array(panelTabSchema).min(1).max(1).meta({
       description:
         'Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.',
     }),

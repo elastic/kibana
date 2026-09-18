@@ -7,8 +7,8 @@ source .buildkite/scripts/common/util.sh
 cur_dir=$(pwd)
 cd oas_docs
 
-echo --- Installing NPM modules
-npm install
+echo --- Installing pnpm modules
+pnpm install
 
 echo --- Merge Kibana OpenAPI specs
 make api-docs
