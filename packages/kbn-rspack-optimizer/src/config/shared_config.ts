@@ -101,7 +101,7 @@ export function getSharedResolveFallback(): Record<string, false> {
  * Common SWC options for both TypeScript and JavaScript files.
  * Uses @kbn/transpiler-config for consistent settings across Babel and SWC.
  */
-function getSwcOptions(dist: boolean, hmr: boolean = false) {
+export function getSwcOptions(dist: boolean, hmr: boolean = false) {
   const sharedConfig = getSharedConfig();
 
   return {

@@ -7,46 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Path = require('path');
-const webpack = require('webpack');
-const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+import Path from 'path';
+import type { Configuration } from '@rspack/core';
+import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
+import { rspack } from '../rspack_runtime';
+import { resolveSharedAssetPaths } from './shared_asset_paths';
 
-const UiSharedDepsNpm = require('.');
+export const SHARED_NPM_COMPILER = 'shared-npm';
 
-const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
-const WEBPACK_SRC = require.resolve('webpack');
-
-const { REPO_ROOT } = require('@kbn/repo-info');
-
-/** @returns {import('webpack').Configuration} */
-module.exports = (_, argv) => {
-  const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
+export function createSharedNpmConfig({
+  repoRoot,
+  outputRoot = repoRoot,
+  dist = false,
+}: {
+  repoRoot: string;
+  outputRoot?: string;
+  dist?: boolean;
+}): Configuration {
+  const { npmPackageRoot, npmOutput } = resolveSharedAssetPaths(repoRoot, outputRoot);
+  const momentSource = require.resolve('moment/min/moment-with-locales.js');
 
   return {
+    name: SHARED_NPM_COMPILER,
+    context: npmPackageRoot,
+    mode: dist ? 'production' : 'development',
+    devtool: dist ? false : 'cheap-source-map',
+    target: 'web',
     externals: {
       module: 'module',
     },
-    mode: process.env.NODE_ENV || 'development',
     entry: {
       'kbn-ui-shared-deps-npm': [
-        // polyfill code
+        Path.resolve(npmPackageRoot, 'src/set_public_path.js'),
         'core-js/stable',
         'symbol-observable',
-        // Parts of node-libs-browser that are used in many places across Kibana
         'buffer',
         'punycode',
         'util',
         'url',
         'qs',
-
-        /**
-         * babel runtime helpers referenced from entry chunks
-         * determined by running:
-         *
-         *  node scripts/build_kibana_platform_plugins --dist --profile
-         *  node scripts/find_babel_runtime_helpers_in_use.js
-         */
         '@babel/runtime/helpers/assertThisInitialized',
         '@babel/runtime/helpers/classPrivateFieldGet',
         '@babel/runtime/helpers/classPrivateFieldSet',
@@ -55,8 +54,6 @@ module.exports = (_, argv) => {
         '@babel/runtime/helpers/inheritsLoose',
         '@babel/runtime/helpers/taggedTemplateLiteralLoose',
         '@babel/runtime/helpers/wrapNativeSuper',
-
-        // modules from npm
         '@elastic/apm-rum-core',
         '@elastic/charts',
         '@elastic/esql',
@@ -107,51 +104,36 @@ module.exports = (_, argv) => {
         'zod/v4',
       ],
     },
-    context: __dirname,
-    devtool: 'cheap-source-map',
-    target: 'web',
     output: {
-      path: outputPath,
+      path: npmOutput,
       filename: '[name].dll.js',
       chunkFilename: 'kbn-ui-shared-deps-npm.chunk.[id].js',
       devtoolModuleFilenameTemplate: (info) =>
-        `kbn-ui-shared-deps-npm/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
+        `kbn-ui-shared-deps-npm/${Path.relative(repoRoot, info.absoluteResourcePath)}`,
       library: '__kbnSharedDeps_npm__',
+      clean: true,
     },
-
     module: {
-      noParse: [MOMENT_SRC, WEBPACK_SRC],
+      noParse: [momentSource, require.resolve('webpack')],
       rules: [
         {
-          include: [require.resolve('jquery')],
-          use: [
-            {
-              loader: UiSharedDepsNpm.publicPathLoader,
-              options: {
-                key: 'kbn-ui-shared-deps-npm',
-              },
-            },
-          ],
+          test: /\.css$/,
+          use: [rspack.CssExtractRspackPlugin.loader, require.resolve('css-loader')],
         },
       ],
     },
-
     resolve: {
       alias: {
         '@elastic/eui$': '@elastic/eui/optimize/es',
-        moment: MOMENT_SRC,
-        // NOTE: Used to include react profiling on bundles
-        // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
+        moment: momentSource,
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
-        // NOTE: We use this to make sure that buffer and punycode bundled are the ones
-        // installed from node-stdlib-browser and are in sync in between shared deps and plugins bundles
         buffer: [
-          Path.resolve(REPO_ROOT, 'node_modules/node-stdlib-browser/node_modules/buffer'),
+          Path.resolve(repoRoot, 'node_modules/node-stdlib-browser/node_modules/buffer'),
           require.resolve('buffer'),
         ],
         punycode: [
-          Path.resolve(REPO_ROOT, 'node_modules/node-stdlib-browser/node_modules/punycode'),
+          Path.resolve(repoRoot, 'node_modules/node-stdlib-browser/node_modules/punycode'),
           require.resolve('punycode'),
         ],
       },
@@ -159,44 +141,38 @@ module.exports = (_, argv) => {
       mainFields: ['browser', 'module', 'main'],
       conditionNames: ['browser', 'module', 'import', 'require', 'default'],
     },
-
     optimization: {
-      moduleIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
-      chunkIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
+      moduleIds: dist ? 'deterministic' : 'natural',
+      chunkIds: dist ? 'deterministic' : 'natural',
       minimize: false,
       emitOnErrors: false,
     },
-
     performance: {
-      // NOTE: we are disabling this as those hints
-      // are more tailored for the final bundles result
-      // and not for the webpack compilations performance itself
       hints: false,
     },
-
-    // make Webpack listen to `node_modules/@elastic/eui*` changes
     watchOptions: {
       ignored: /[\\/]node_modules[\\/](?!@elastic[\\/]eui)/,
     },
-
-    // disabling cache doesn't impact performance for regular Kibana users
-    // but it's needed for when running the watcher to watch for changes in `node_modules/@elastic/eui*`
     cache: false,
-
     plugins: [
-      new NodeLibsBrowserPlugin(),
-      new CleanWebpackPlugin(),
-      new webpack.DllPlugin({
-        context: REPO_ROOT,
+      new NodeLibsBrowserPlugin() as any,
+      new rspack.CssExtractRspackPlugin({
+        filename: '[name].css',
+      }),
+      new rspack.DllPlugin({
+        context: repoRoot,
         entryOnly: false,
-        path: Path.resolve(outputPath, '[name]-manifest.json'),
+        path: Path.resolve(npmOutput, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
       }),
-      // adds a useful comment at the top of the DLL for debugging
-      new webpack.BannerPlugin({
-        banner: `/* Build: ${new Date().toLocaleString()} */`,
+      new rspack.BannerPlugin({
+        banner: '/* Built with Rspack */',
         raw: true,
       }),
     ],
+    stats: {
+      preset: 'errors-warnings',
+      timings: true,
+    },
   };
-};
+}

@@ -59,7 +59,7 @@ interface WorkerMessage {
  * - Clean shutdown on Ctrl+C (no EPIPE errors, no lingering logs)
  * - RSPack's faster build speed for plugins
  * - No changes to Kibana's bootstrap or bundle serving
- * - Shared deps are already built and cached
+ * - Shared dependency rebuilds complete before RSPack is invalidated
  */
 export class RspackOptimizer {
   private readonly ready$ = new Rx.ReplaySubject<boolean>(1);

@@ -98,7 +98,7 @@ const minimalGenericFoldersOptions: BuildOptions = {
 
 let originalKbnUseRspack: string | undefined;
 
-describe('buildDistributables KBN_USE_RSPACK gate', () => {
+describe('buildDistributables bundle build', () => {
   beforeAll(() => {
     originalKbnUseRspack = process.env.KBN_USE_RSPACK;
   });
@@ -146,13 +146,12 @@ describe('buildDistributables KBN_USE_RSPACK gate', () => {
     expect(mockLegacyBundleTaskRun).not.toHaveBeenCalled();
   });
 
-  it('runs BuildKibanaPlatformPlugins when KBN_USE_RSPACK is "false"', async () => {
+  it('does not allow KBN_USE_RSPACK to select the legacy distributable build', async () => {
     process.env.KBN_USE_RSPACK = 'false';
 
     await buildDistributables(log, minimalGenericFoldersOptions);
 
-    expect(mockLegacyBundleTaskRun).toHaveBeenCalledTimes(1);
-    expect(mockRspackBundleTaskRun).not.toHaveBeenCalled();
-    expect(Tasks.BuildKibanaPlatformPlugins.run).toHaveBeenCalledTimes(1);
+    expect(mockRspackBundleTaskRun).toHaveBeenCalledTimes(1);
+    expect(mockLegacyBundleTaskRun).not.toHaveBeenCalled();
   });
 });
