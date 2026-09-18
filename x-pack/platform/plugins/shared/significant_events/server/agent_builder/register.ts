@@ -6,33 +6,12 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import { createMemoryService } from '../memory_and_investigation/lib/memory';
-import type { MemoryToolsOptions } from '../memory_and_investigation/tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
-
-export const createMemoryToolsOptions = ({
-  getScopedClients,
-  server,
-  logger,
-}: {
-  getScopedClients: GetScopedClients;
-  server: StreamsServer;
-  logger: Logger;
-}): MemoryToolsOptions => {
-  return {
-    getMemoryService: (esClient: ElasticsearchClient) =>
-      createMemoryService(esClient, server.core.dataStreams, logger.get('memory')),
-    getSecurity: () => server.core.security,
-    getScopedClients,
-    server,
-    logger,
-  };
-};
 
 /**
  * Registers the significant events agent-builder tools and attachments at setup.

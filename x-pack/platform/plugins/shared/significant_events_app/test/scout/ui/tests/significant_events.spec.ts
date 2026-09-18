@@ -63,7 +63,7 @@ test.describe(
       );
     });
 
-    test('renders all 7 navigation tabs', async ({ page }) => {
+    test('renders navigation tabs', async ({ page }) => {
       await page.gotoApp('significant_events/streams');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
@@ -74,7 +74,6 @@ test.describe(
         'Rules',
         'Detections',
         'Significant Events',
-        'Memory',
         'Settings',
       ]) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();

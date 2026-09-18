@@ -15,7 +15,6 @@ import {
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { installMemoryWorkflows } from '../../../memory_and_investigation/lib/memory/install_managed_workflows';
 import { GLOBAL_CORE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
 
 // Groupings come from `managed_workflow_targets.ts` so install and pause stay in sync.
@@ -55,7 +54,6 @@ export const installWorkflows = async ({ client }: { client: PluginScopedManaged
       id: workflowId,
       run: client.install(workflowId, { spaceId }),
     })),
-    { id: 'memory workflows', run: installMemoryWorkflows({ client }) },
   ];
 
   const results = await Promise.allSettled(installs.map(({ run }) => run));

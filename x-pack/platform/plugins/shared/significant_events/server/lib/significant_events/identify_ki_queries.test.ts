@@ -136,29 +136,6 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     expect(args.maxSteps).toBe(10);
   });
 
-  it('merges memory and SCS tools when both are provided', async () => {
-    const semanticCodeSearchTools = makeCodeTools();
-    const memoryTools = {
-      tools: {
-        memory_search: { description: 'm', schema: { type: 'object' as const, properties: {} } },
-      },
-      callbacks: { memory_search: jest.fn() },
-      promptSnippet: 'MEMORY_SNIPPET',
-    };
-
-    await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
-      buildDeps({ memoryTools, semanticCodeSearchTools })
-    );
-
-    const args = generateSignificantEventsMock.mock.calls[0][0];
-    expect(Object.keys(args.additionalTools ?? {}).sort()).toEqual(
-      [...SCS_TOOL_NAMES, 'memory_search'].sort()
-    );
-    expect(args.systemPrompt).toContain('MEMORY_SNIPPET');
-    expect(args.systemPrompt).toContain('SCS_GROUNDING_SNIPPET');
-  });
-
   it('forwards Significant Event context tools and appends the prompt snippet', async () => {
     const kiExtractionContextTools = {
       tools: {

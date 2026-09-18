@@ -46,7 +46,7 @@ export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
 // timeout 1 minute shorter to avoid overlapping with the next run.
 //
 // The coordinator starts onboarding for each eligible stream (features AND
-// queries generation, plus best-effort memory) and then polls every stream
+// queries generation) and then polls every stream
 // until it reaches a terminal state. Per-stream onboarding is capped at 30m
 // and runs in parallel, so the interval must comfortably exceed that ceiling.
 export const COORDINATOR_INTERVAL_MINUTES = 35;

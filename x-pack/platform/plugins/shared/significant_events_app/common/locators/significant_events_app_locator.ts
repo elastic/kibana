@@ -18,7 +18,6 @@ export type SignificantEventsAppTab =
   | 'queries'
   | 'detections'
   | 'significant_events'
-  | 'memory'
   | 'cortex'
   | 'settings';
 

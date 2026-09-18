@@ -1944,10 +1944,9 @@ x-pack/platform/plugins/shared/significant_events/common/slack_app @elastic/nigh
 x-pack/platform/plugins/shared/significant_events/server/routes/internal/apps/slack @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/significant_events_app/public/pages/significant_events/components/settings/apps_section @elastic/nightshift-context-and-research-team
 
-# Significant Events - Memory & investigation features (owned by Nightshift context & research)
-x-pack/platform/plugins/shared/significant_events/server/memory_and_investigation @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
-x-pack/platform/plugins/shared/significant_events/common/memory_and_investigation.ts @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
-x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+# Significant Events - Investigation features (owned by Nightshift context & research)
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/skills/investigation_management @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/tools/event_investigation_attach @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management

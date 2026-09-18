@@ -16,11 +16,6 @@ import {
 } from './ki_queries_generation_service';
 import { identifyKIQueries } from './identify_ki_queries';
 import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
-import {
-  memoriesDataStream,
-  memoryHistoryDataStream,
-} from '../../memory_and_investigation/lib/memory';
-
 jest.mock('./identify_ki_queries', () => ({
   identifyKIQueries: jest.fn(),
 }));
@@ -50,7 +45,6 @@ const makeDeps = (
   inferenceClient: {} as InferenceClient,
   kiClient: {} as never,
   esClient: {} as never,
-  dataStreams: {} as never,
   streamDataEsClient: {} as never,
   featureFlags: {} as never,
   searchInferenceEndpoints: undefined,
@@ -160,19 +154,5 @@ describe('generateKIQueries', () => {
     );
 
     expect(identifyKIQueriesMock.mock.calls[0][0]).not.toHaveProperty('systemPrompt');
-  });
-
-  it('initializes memory clients when significant events are available', async () => {
-    isSignificantEventsFeatureFlagEnabledMock.mockResolvedValue(true);
-    const initializeClient = jest.fn().mockResolvedValue({});
-
-    await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
-      makeDeps({ dataStreams: { initializeClient } as never, logger })
-    );
-
-    expect(initializeClient).toHaveBeenCalledTimes(2);
-    expect(initializeClient).toHaveBeenCalledWith(memoriesDataStream.name);
-    expect(initializeClient).toHaveBeenCalledWith(memoryHistoryDataStream.name);
   });
 });
