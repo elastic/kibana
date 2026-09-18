@@ -7,6 +7,7 @@
 
 import type { z } from '@kbn/zod';
 
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   metricConfigSchemaESQL,
