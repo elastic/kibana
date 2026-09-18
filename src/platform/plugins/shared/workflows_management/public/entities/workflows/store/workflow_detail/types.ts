@@ -17,6 +17,11 @@ import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
 import type { WorkflowsResponse } from '../../model/types';
 
+export type ConnectorsLoadState =
+  | { status: 'loading' }
+  | { status: 'ready' }
+  | { status: 'failed'; error: string };
+
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
@@ -38,6 +43,8 @@ export interface WorkflowDetailState {
   computed?: ComputedData;
   /** The currently selected execution (when viewing executions tab) */
   execution?: WorkflowExecutionDto;
+  /** `total` from the paginated execution-steps list; used for the truncation callout. */
+  stepExecutionsTotal: number;
   /** The computed data derived from the selected execution, it is updated by the loadExecutionThunk */
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */
@@ -64,6 +71,8 @@ export interface WorkflowDetailState {
   };
   /** The connectors data */
   connectors?: ConnectorsResponse;
+  /** Whether connector metadata is available for connector-dependent validation. */
+  connectorsLoadState: ConnectorsLoadState;
   /** The workflows data for lookup by ID (always present, empty if not loaded yet) */
   workflows: WorkflowsResponse;
   /** The schema for the workflow, depends on the connectors available */

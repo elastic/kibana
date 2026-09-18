@@ -15,6 +15,7 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { deslugifyStepName } from './deslugify_step_name';
 import { resolveNodeChipStyle } from './resolve_node_chip_style';
+import { getStepIconType } from '../step_icons';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -36,10 +37,9 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
 
   const execStatus = stepExecution?.status;
   const isSuccess = execStatus === ExecutionStatus.COMPLETED;
+  // CANCELLED stays neutral to match step-card behaviour (status_badge map).
   const isFailed =
-    execStatus === ExecutionStatus.FAILED ||
-    execStatus === ExecutionStatus.TIMED_OUT ||
-    execStatus === ExecutionStatus.CANCELLED;
+    execStatus === ExecutionStatus.FAILED || execStatus === ExecutionStatus.TIMED_OUT;
 
   const chip = resolveNodeChipStyle(euiTheme, stepType, false, { isSuccess, isFailed });
   const panelBorder = isSuccess
@@ -48,6 +48,7 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
     ? colors.danger
     : colors.borderBasePlain;
   const borderRadius = euiTheme.border.radius.small;
+  const iconType = getStepIconType(stepType);
 
   return (
     <>
@@ -67,6 +68,7 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
         ]}
       >
         <div
+          data-test-subj="workflowGraphForeachGroupHeader"
           css={{
             display: 'flex',
             alignItems: 'center',
@@ -80,6 +82,7 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
           }}
         >
           <div
+            data-test-subj="workflowGraphForeachGroupChip"
             css={{
               flex: '0 0 auto',
               width: 28,
@@ -93,10 +96,11 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
               transition: 'background 120ms ease, border-color 120ms ease',
             }}
           >
-            <EuiIcon type="refresh" size="m" color={chip.iconColor} aria-hidden />
+            <EuiIcon type={iconType} size="m" color={chip.iconColor} aria-hidden />
           </div>
           <span
             css={{
+              flex: '1 1 auto',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',

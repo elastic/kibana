@@ -10,6 +10,8 @@
 import React, { useContext } from 'react';
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiToolTip,
   type EuiButtonProps,
   useGeneratedHtmlId,
@@ -21,6 +23,8 @@ import * as styles from './button.styles';
 import { strings } from '../../../strings';
 import { createProjectPickerContext } from '../../state';
 import { CPSIconDisabled } from '../../../cps_icon';
+
+export const tooltipDataTestSubj = 'cps-project-picker-button-tooltip';
 
 export interface ProjectPickerButtonProps extends Pick<EuiButtonProps, 'size' | 'isDisabled'> {
   onClick: () => void;
@@ -45,8 +49,14 @@ export const ProjectPickerButton = ({
 
   if (isDisabled) {
     return (
-      <EuiToolTip content={customTooltipContent ?? strings.projectPickerButtonAriaLabel} id={id}>
-        <EuiButton
+      <EuiToolTip
+        content={customTooltipContent ?? strings.projectPickerButtonDisabledAriaLabel}
+        id={id}
+        anchorProps={{
+          'data-test-subj': tooltipDataTestSubj,
+        }}
+      >
+        <EuiButtonIcon
           {...sharedButtonProps}
           color="text"
           iconType={CPSIconDisabled}
@@ -69,28 +79,59 @@ export const ProjectPickerButton = ({
   const shouldWarn = filteredProjectsCount === 0;
 
   return (
-    <EuiToolTip content={customTooltipContent ?? strings.projectPickerButtonAriaLabel} id={id}>
-      <EuiButton
-        {...sharedButtonProps}
-        color={shouldWarn ? 'warning' : 'text'}
-        iconType={shouldWarn ? 'warning' : 'crossProjectSearch'}
-        onClick={onClick}
-        data-test-subj="cps-project-picker-button"
-      >
-        <EuiText size="s" css={styles.pickerButtonLabelStyles}>
-          <span data-test-subj="cps-project-picker-button-label">
-            {allProjectsSelected
-              ? strings.allButtonLabel
-              : i18n.translate('cpsUtils.projectPicker.pickerButtonSelectionDifferentiationLabel', {
-                  defaultMessage: '{filterProjectsCount}/{totalProjectsCount}',
-                  values: {
-                    filterProjectsCount: numeral(filteredProjectsCount).format('0a'),
-                    totalProjectsCount: numeral(totalProjectsCount).format('0a'),
-                  },
-                })}
-          </span>
-        </EuiText>
-      </EuiButton>
+    <EuiToolTip
+      id={id}
+      anchorProps={{
+        'data-test-subj': tooltipDataTestSubj,
+      }}
+      content={customTooltipContent ?? strings.projectPickerButtonAriaLabel}
+    >
+      {shouldWarn ? (
+        <EuiButton
+          {...sharedButtonProps}
+          color="warning"
+          iconType="warning"
+          onClick={onClick}
+          data-test-subj="cps-project-picker-button"
+        >
+          <EuiText size="s" css={styles.pickerButtonLabelStyles}>
+            <span data-test-subj="cps-project-picker-button-label">
+              {i18n.translate('cpsUtils.projectPicker.pickerButtonSelectionDifferentiationLabel', {
+                defaultMessage: '{filterProjectsCount}/{totalProjectsCount}',
+                values: {
+                  filterProjectsCount: numeral(filteredProjectsCount).format('0a'),
+                  totalProjectsCount: numeral(totalProjectsCount).format('0a'),
+                },
+              })}
+            </span>
+          </EuiText>
+        </EuiButton>
+      ) : (
+        <EuiButtonEmpty
+          {...sharedButtonProps}
+          color="text"
+          onClick={onClick}
+          iconType="crossProjectSearch"
+          data-test-subj="cps-project-picker-button"
+        >
+          <EuiText size="s" css={styles.pickerButtonLabelStyles}>
+            <span data-test-subj="cps-project-picker-button-label">
+              {allProjectsSelected
+                ? strings.allButtonLabel
+                : i18n.translate(
+                    'cpsUtils.projectPicker.pickerButtonSelectionDifferentiationLabel',
+                    {
+                      defaultMessage: '{filterProjectsCount}/{totalProjectsCount}',
+                      values: {
+                        filterProjectsCount: numeral(filteredProjectsCount).format('0a'),
+                        totalProjectsCount: numeral(totalProjectsCount).format('0a'),
+                      },
+                    }
+                  )}
+            </span>
+          </EuiText>
+        </EuiButtonEmpty>
+      )}
     </EuiToolTip>
   );
 };

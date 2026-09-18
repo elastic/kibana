@@ -34,6 +34,7 @@ const baseSource: AgentProperties = {
 
 const ownerUser = { id: 'user-1', username: 'owner', isAdmin: false };
 const nonOwnerUser = { id: 'user-2', username: 'other', isAdmin: false };
+const adminUser = { id: 'admin-id', username: 'admin', isAdmin: true };
 const ownerByUsernameOnly = { username: 'owner', isAdmin: false };
 
 describe('normalizeAccessControl', () => {
@@ -57,7 +58,7 @@ describe('hasReadAccess', () => {
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: true })).toBe(true);
+    expect(hasReadAccess({ source, user: adminUser })).toBe(true);
   });
 
   it('returns true for owner regardless of access-control mode', () => {
@@ -67,7 +68,7 @@ describe('hasReadAccess', () => {
       created_by_id: ownerUser.id,
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
+    expect(hasReadAccess({ source, user: ownerUser })).toBe(true);
   });
 
   it('returns true for legacy owners that only stored created_by_name', () => {
@@ -76,8 +77,8 @@ describe('hasReadAccess', () => {
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(true);
-    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
+    expect(hasReadAccess({ source, user: ownerByUsernameOnly })).toBe(true);
+    expect(hasReadAccess({ source, user: ownerUser })).toBe(true);
   });
 
   it('returns false for same username when the document stored a different created_by_id', () => {
@@ -87,12 +88,12 @@ describe('hasReadAccess', () => {
       created_by_id: 'other-realm-id',
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(false);
+    expect(hasReadAccess({ source, user: ownerUser })).toBe(false);
   });
 
   it('returns true for non-owner when access-control mode is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
-    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
+    expect(hasReadAccess({ source, user: nonOwnerUser })).toBe(true);
   });
 
   it('returns false for non-owner when legacy visibility is private', () => {
@@ -101,7 +102,7 @@ describe('hasReadAccess', () => {
       visibility: AgentAccessControlMode.Private,
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
+    expect(hasReadAccess({ source, user: nonOwnerUser })).toBe(false);
   });
 
   it('returns true for a user granted access through legacy acl entries', () => {
@@ -119,7 +120,7 @@ describe('hasReadAccess', () => {
       },
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
+    expect(hasReadAccess({ source, user: nonOwnerUser })).toBe(true);
   });
 
   it('returns true for non-owner when access-control mode is shared', () => {
@@ -128,7 +129,7 @@ describe('hasReadAccess', () => {
       access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
+    expect(hasReadAccess({ source, user: nonOwnerUser })).toBe(true);
   });
 
   it('returns false for non-owner when access-control mode is private', () => {
@@ -137,7 +138,7 @@ describe('hasReadAccess', () => {
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
+    expect(hasReadAccess({ source, user: nonOwnerUser })).toBe(false);
   });
 });
 
@@ -148,7 +149,7 @@ describe('hasWriteAccess', () => {
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
-    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: true })).toBe(true);
+    expect(hasWriteAccess({ source, user: adminUser })).toBe(true);
   });
 
   it('returns true for owner regardless of access-control mode', () => {
@@ -158,12 +159,12 @@ describe('hasWriteAccess', () => {
       created_by_id: ownerUser.id,
       created_by_name: 'owner',
     };
-    expect(hasWriteAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
+    expect(hasWriteAccess({ source, user: ownerUser })).toBe(true);
   });
 
   it('returns true for non-owner when access-control mode is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
-    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
+    expect(hasWriteAccess({ source, user: nonOwnerUser })).toBe(true);
   });
 
   it('returns false for non-owner when legacy visibility is shared', () => {
@@ -172,7 +173,7 @@ describe('hasWriteAccess', () => {
       visibility: AgentAccessControlMode.Shared,
       created_by_name: 'owner',
     };
-    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
+    expect(hasWriteAccess({ source, user: nonOwnerUser })).toBe(false);
   });
 
   it('returns true for a user granted edit access through legacy acl entries', () => {
@@ -190,7 +191,7 @@ describe('hasWriteAccess', () => {
       },
       created_by_name: 'owner',
     };
-    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
+    expect(hasWriteAccess({ source, user: nonOwnerUser })).toBe(true);
   });
 
   it('returns false for non-owner when access-control mode is shared', () => {
@@ -199,7 +200,7 @@ describe('hasWriteAccess', () => {
       access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       created_by_name: 'owner',
     };
-    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
+    expect(hasWriteAccess({ source, user: nonOwnerUser })).toBe(false);
   });
 
   it('returns false for non-owner when access-control mode is private', () => {
@@ -208,7 +209,7 @@ describe('hasWriteAccess', () => {
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
-    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
+    expect(hasWriteAccess({ source, user: nonOwnerUser })).toBe(false);
   });
 });
 
@@ -229,7 +230,7 @@ describe('getAgentPermissions', () => {
       created_by_name: 'owner',
     };
 
-    expect(getAgentPermissions({ source, user: nonOwnerUser, isAdmin: false })).toEqual({
+    expect(getAgentPermissions({ source, user: nonOwnerUser })).toEqual({
       update_agent: true,
       update_access_control: false,
     });
@@ -243,7 +244,7 @@ describe('getAgentPermissions', () => {
       created_by_name: ownerUser.username,
     };
 
-    expect(getAgentPermissions({ source, user: ownerUser, isAdmin: false })).toEqual({
+    expect(getAgentPermissions({ source, user: ownerUser })).toEqual({
       update_agent: true,
       update_access_control: true,
     });
@@ -258,7 +259,7 @@ describe('getAgentPermissions', () => {
       created_by_name: ownerUser.username,
     };
 
-    expect(getAgentPermissions({ source, user: ownerUser, isAdmin: false })).toEqual({
+    expect(getAgentPermissions({ source, user: ownerUser })).toEqual({
       update_agent: true,
       update_access_control: false,
     });
@@ -277,7 +278,6 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { name: 'New Name' },
         user: nonOwnerUser,
-        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -293,7 +293,6 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { description: 'Updated' },
         user: nonOwnerUser,
-        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -309,7 +308,6 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { access_control: { access_mode: AgentAccessControlMode.Public } },
         user: nonOwnerUser,
-        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -325,7 +323,6 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { access_control: { access_mode: AgentAccessControlMode.Private } },
         user: nonOwnerUser,
-        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -342,7 +339,6 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { access_control: { access_mode: AgentAccessControlMode.Private } },
         user: ownerUser,
-        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -367,7 +363,6 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { access_control: { access_mode: AgentAccessControlMode.Shared } },
         user: nonOwnerUser,
-        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -382,8 +377,7 @@ describe('validateAccessControlUpdateAccess', () => {
       validateAccessControlUpdateAccess({
         source,
         update: { access_control: { access_mode: AgentAccessControlMode.Private } },
-        user: nonOwnerUser,
-        isAdmin: true,
+        user: adminUser,
       })
     ).toBe(true);
   });
@@ -399,7 +393,6 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { access_control: { access_mode: AgentAccessControlMode.Private } },
         user: nonOwnerUser,
-        isAdmin: false,
       })
     ).toBe(false);
   });
@@ -415,7 +408,6 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { access_control: { access_mode: AgentAccessControlMode.Shared } },
         user: nonOwnerUser,
-        isAdmin: false,
       })
     ).toBe(false);
   });
@@ -433,7 +425,6 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { access_control: { access_mode: AgentAccessControlMode.Private } },
         user: ownerUser,
-        isAdmin: false,
       })
     ).toBe(false);
   });
@@ -449,8 +440,7 @@ describe('validateAccessControlUpdateAccess', () => {
       validateAccessControlUpdateAccess({
         source,
         update: { access_control: { access_mode: AgentAccessControlMode.Shared } },
-        user: nonOwnerUser,
-        isAdmin: true,
+        user: adminUser,
       })
     ).toBe(false);
   });
@@ -476,7 +466,6 @@ describe('redactAccessControlForCaller', () => {
       definition,
       source: baseSource,
       user: nonOwnerUser,
-      isAdmin: false,
     });
     expect(result).toBe(definition);
   });
@@ -493,7 +482,6 @@ describe('redactAccessControlForCaller', () => {
         access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       },
       user: nonOwnerUser,
-      isAdmin: false,
     });
     expect(result).toBe(definition);
   });
@@ -510,7 +498,6 @@ describe('redactAccessControlForCaller', () => {
       definition,
       source: privateAgentWithAcl,
       user: ownerUser,
-      isAdmin: false,
     });
     expect(result.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
@@ -526,8 +513,7 @@ describe('redactAccessControlForCaller', () => {
     const result = redactAccessControlForCaller({
       definition,
       source: privateAgentWithAcl,
-      user: nonOwnerUser,
-      isAdmin: true,
+      user: adminUser,
     });
     expect(result.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
@@ -546,7 +532,6 @@ describe('redactAccessControlForCaller', () => {
       definition,
       source: privateAgentWithAcl,
       user: bobUser,
-      isAdmin: false,
     });
     expect(result.access_control?.entries).toEqual([bobEntry]);
     // Shallow-copy: the original definition is untouched.
@@ -567,7 +552,6 @@ describe('redactAccessControlForCaller', () => {
       definition,
       source: privateAgentWithAcl,
       user: aliceUser,
-      isAdmin: false,
     });
     expect(result.access_control?.entries).toEqual([aliceEntry]);
   });
@@ -595,7 +579,6 @@ describe('redactAccessControlForCaller', () => {
         created_by_name: 'owner',
       },
       user: aliceUser,
-      isAdmin: false,
     });
     expect(result.access_control?.entries).toEqual([aliceManagerEntry, bobEntry]);
   });
@@ -616,7 +599,6 @@ describe('redactAccessControlForCaller', () => {
         access_control: { access_mode: AgentAccessControlMode.Private, entries: [aliceEntry] },
       },
       user: ownerUser,
-      isAdmin: false,
     });
     expect(result.access_control?.entries).toEqual([]);
   });

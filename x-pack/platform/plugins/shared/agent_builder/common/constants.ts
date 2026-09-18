@@ -8,6 +8,30 @@
 export const publicApiPath = `/api/agent_builder`;
 export const internalApiPath = `/internal/agent_builder`;
 
+export const chatApiPath = `/api/chat`;
+
 export const AGENTBUILDER_PLUGIN_ID = 'agentBuilder';
 
 export const PREFERRED_DEFAULT_CONNECTOR_ID = 'Anthropic-Claude-Sonnet-4-5';
+
+/** Maximum number of conversations returned per page. Also the default. */
+export const MAX_CONVERSATIONS_PER_PAGE = 1000;
+
+/** Maximum number of conversation ids a single bulk get may look up. */
+export const CONVERSATION_BULK_GET_MAX_IDS = 1000;
+
+/**
+ * Maximum number of conversations returned per page of a search query.
+ */
+export const MAX_CONVERSATION_SEARCH_PER_PAGE = 50;
+
+/**
+ * Maximum length for a conversation search query
+ */
+export const CONVERSATION_SEARCH_QUERY_MAX_LENGTH = 512;
+
+/**
+ * ES default `index.max_result_window`. Conversations beyond this offset are
+ * not reachable through offset pagination; requests past it return 400.
+ */
+export const MAX_RESULT_WINDOW = 10_000;

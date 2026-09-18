@@ -123,7 +123,7 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].format).toBe('bytes');
   });
 
-  it('should not include format options if the metric has no unit', () => {
+  it('should format a metric with no unit as a compact whole number', () => {
     const metricWithoutUnit: MetricItemInput = { ...mockMetric, units: [] as MetricUnit[] };
     const { result } = renderHook(() =>
       useChartLayers({
@@ -132,9 +132,38 @@ describe('useChartLayers', () => {
       })
     );
     const [layer] = result.current;
-    expect(layer.yAxis[0]).not.toHaveProperty('format');
-    expect(layer.yAxis[0]).not.toHaveProperty('formatString');
+    expect(layer.yAxis[0]).toEqual(
+      expect.objectContaining({
+        format: 'number',
+        decimals: 0,
+        compactValues: true,
+      })
+    );
   });
+
+  it.each(['1', 'count', '{request}'])(
+    'should format the %s unit as a compact whole number',
+    (unit) => {
+      const metricWithCountUnit: MetricItemInput = {
+        ...mockMetric,
+        units: [unit] as unknown as NullableMetricUnit[],
+      };
+      const { result } = renderHook(() =>
+        useChartLayers({
+          metricItem: metricWithCountUnit,
+          dimensions: [],
+        })
+      );
+      const [layer] = result.current;
+      expect(layer.yAxis[0]).toEqual(
+        expect.objectContaining({
+          format: 'number',
+          decimals: 0,
+          compactValues: true,
+        })
+      );
+    }
+  );
 
   describe('when type or instrument is null or undefined', () => {
     it('should return empty layers when fieldTypes is empty', () => {
@@ -165,6 +194,8 @@ describe('useChartLayers', () => {
       counterAggregation: 'max' as const,
       gaugeAggregation: 'avg' as const,
       histogramPercentile: 'p95' as const,
+      dimensions: [],
+      searchTerm: '',
     };
 
     renderHook(() =>
@@ -176,5 +207,24 @@ describe('useChartLayers', () => {
     );
 
     expect(createMetricAggregation).toHaveBeenCalledWith(expect.objectContaining({ gridSettings }));
+  });
+
+  it('forwards customFunction to createMetricAggregation', () => {
+    renderHook(() =>
+      useChartLayers({
+        metricItem: {
+          metricName: 'duration_ms',
+          fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+          metricTypes: ['histogram'],
+          units: ['ms'],
+        },
+        dimensions: [],
+        customFunction: 'AVG',
+      })
+    );
+
+    expect(createMetricAggregation).toHaveBeenCalledWith(
+      expect.objectContaining({ customFunction: 'AVG', metricName: 'duration_ms' })
+    );
   });
 });

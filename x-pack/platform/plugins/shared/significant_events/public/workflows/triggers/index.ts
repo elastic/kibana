@@ -28,14 +28,4 @@ export const registerSignificantEventsWorkflowTriggers = (
       (module) => module.eventStatusChangedTriggerCommonDefinition
     )
   );
-  workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (module) => module.investigationStartedTriggerCommonDefinition
-    )
-  );
-  workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (module) => module.investigationCompletedTriggerCommonDefinition
-    )
-  );
 };

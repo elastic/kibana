@@ -10,4 +10,4 @@
 // @ts-ignore
 import defaultSpec from './default.spec.hjson?raw';
 
-export const getDefaultSpec = () => defaultSpec;
+export const getDefaultSpec = (): string => defaultSpec;

@@ -35,7 +35,7 @@ describe('ActionsMenuPopover', () => {
     expect(screen.getByTestId('mocked-actions-menu')).toBeInTheDocument();
   });
 
-  it('calls closePopover when the backdrop is clicked', () => {
+  it('calls closePopover when Escape is pressed', () => {
     const closePopover = jest.fn();
     render(
       <I18nProvider>
@@ -46,7 +46,7 @@ describe('ActionsMenuPopover', () => {
         />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByTestId('actionsMenuBackdrop'));
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     expect(closePopover).toHaveBeenCalled();
   });
 });

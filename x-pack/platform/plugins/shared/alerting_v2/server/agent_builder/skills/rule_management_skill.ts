@@ -111,6 +111,7 @@ ${generateRuleOperationsDoc()}
 - Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
   - **Composed** shares a \`base\` query with appendable \`breach.segment\` and optional \`recovery.segment\`:
     \`{ format: "composed", base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
+    Omit \`breach\` to treat every row returned by \`base\` as a breach.
   - **Standalone** uses independent full queries:
     \`{ format: "standalone", breach: { query: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" } }\`
 - The base query must be a valid ES|QL statement.

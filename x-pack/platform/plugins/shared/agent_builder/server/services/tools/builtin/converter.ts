@@ -53,6 +53,7 @@ export const convertTool = ({
       summarizeToolReturn: tool.summarizeToolReturn,
       maxResultTokens: tool.maxResultTokens,
       annotations: tool.annotations,
+      excludeFromMcp: tool.excludeFromMcp,
     };
   }
   if (!isBuiltinDefinition(definition)) {

@@ -84,6 +84,6 @@ describe('SearchBar', () => {
 
     const searchInput = wrapper.getByTestId('searchBar');
     fireEvent.change(searchInput, { target: { value: 'query' } });
-    expect(mockHandleOnSearch).toBeCalledWith({ search: 'query' });
+    expect(mockHandleOnSearch).toHaveBeenCalledWith({ search: 'query' });
   });
 });

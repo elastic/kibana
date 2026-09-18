@@ -24,6 +24,10 @@ export const selectYamlString = createSelector(selectDetail, (detail) => detail.
 export const selectWorkflowId = createSelector(selectWorkflow, (workflow) => workflow?.id);
 export const selectIsEnabled = createSelector(selectWorkflow, (workflow) => !!workflow?.enabled);
 export const selectWorkflowName = createSelector(selectWorkflow, (workflow) => workflow?.name);
+export const selectWorkflowTags = createSelector(
+  selectWorkflow,
+  (workflow) => workflow?.tags ?? []
+);
 
 /**
  * Document dirtiness for leave-confirm + header badge.
@@ -122,11 +126,19 @@ export const selectIsSavingYaml = createSelector(
 );
 
 export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
+export const selectConnectorsLoadState = createSelector(
+  selectDetail,
+  (detail) => detail.connectorsLoadState
+);
 export const selectWorkflows = createSelector(selectDetail, (detail) => detail.workflows);
 export const selectSchema = createSelector(selectDetail, (detail) => detail.schema);
 
 export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);
 export const selectExecution = createSelector(selectDetail, (detail) => detail.execution);
+export const selectStepExecutionsTotal = createSelector(
+  selectDetail,
+  (detail) => detail.stepExecutionsTotal
+);
 export const selectStepExecutions = createSelector(
   selectExecution,
   (execution) => execution?.stepExecutions

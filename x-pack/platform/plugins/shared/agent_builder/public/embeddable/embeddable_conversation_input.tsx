@@ -32,18 +32,23 @@ export interface EmbeddableConversationInputInternalProps
  * context and on submit navigates to the Agent Builder app with the message
  * and attachments preserved in location state, where the message auto-sends.
  */
-const SubmitInterceptor: React.FC<{ agentId: string }> = ({ agentId }) => {
-  const { attachments } = useConversationContext();
+const SubmitInterceptor: React.FC = () => {
+  const { attachments, agentId } = useConversationContext();
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const targetAgentId = agentId ?? agentBuilderDefaultAgentId;
 
   const handleSubmit = useCallback(
     (message: string) => {
-      navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }), undefined, {
-        initialMessage: message,
-        attachments: attachments ?? [],
-      });
+      navigateToAgentBuilderUrl(
+        appPaths.agent.conversations.new({ agentId: targetAgentId }),
+        undefined,
+        {
+          initialMessage: message,
+          attachments: attachments ?? [],
+        }
+      );
     },
-    [attachments, agentId, navigateToAgentBuilderUrl]
+    [attachments, targetAgentId, navigateToAgentBuilderUrl]
   );
 
   return <ConversationInput onSubmitOverride={handleSubmit} />;
@@ -81,7 +86,7 @@ export const EmbeddableConversationInputInternal = forwardRef<
       ariaLabelledBy="agent-builder-embeddable-conversation-input"
       onRegisterCallbacks={handleRegisterCallbacks}
     >
-      <SubmitInterceptor agentId={targetAgentId} />
+      <SubmitInterceptor />
     </EmbeddableConversationsProvider>
   );
 });

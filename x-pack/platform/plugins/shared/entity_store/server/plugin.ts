@@ -28,7 +28,7 @@ import {
   EntityStoreGlobalStateType,
   EntityStorePreferencesType,
   LegacyCcsLogExtractionStateType,
-  RemoteLogExtractionStateType,
+  LegacyRemoteLogExtractionStateType,
 } from './domain/saved_objects';
 import { EntityResolutionRuleType } from './domain/resolution/rules/saved_object';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
@@ -39,6 +39,7 @@ import { EntityMetadataClient } from './domain/entity_metadata';
 import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
+import { registerEntityStoreUsageCollector } from './telemetry/usage_collector';
 import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 
@@ -67,6 +68,9 @@ export class EntityStorePlugin
 
     this.logger.debug('Registering telemetry events');
     registerTelemetry(core.analytics);
+    if (plugins.usageCollection) {
+      registerEntityStoreUsageCollector(plugins.usageCollection);
+    }
 
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
@@ -95,7 +99,7 @@ export class EntityStorePlugin
     core.savedObjects.registerType(EngineDescriptorType);
     core.savedObjects.registerType(EntityStoreGlobalStateType);
     core.savedObjects.registerType(EntityStorePreferencesType);
-    core.savedObjects.registerType(RemoteLogExtractionStateType);
+    core.savedObjects.registerType(LegacyRemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
     core.savedObjects.registerType(EntityResolutionRuleType);
 

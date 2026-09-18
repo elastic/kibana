@@ -62,6 +62,7 @@ export function createPciCriteriaEvaluator({
   return {
     name: 'PCI Criteria',
     kind: 'LLM' as const,
+    direction: 'maximize',
     evaluate: async ({ expected, ...rest }) => {
       const exampleCriteria: string[] = (expected as PciDatasetExample['output'])?.criteria ?? [];
       const allCriteria = [...BASELINE_PCI_CRITERIA, ...extraCriteria, ...exampleCriteria];

@@ -6,8 +6,6 @@
  */
 import React, { useContext } from 'react';
 import {
-  EuiCallOut,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -15,6 +13,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { ErrorsTabContent } from './errors_tab_content';
 import { SyntheticsRefreshContext } from '../../../contexts';
@@ -27,6 +26,8 @@ import { useErrorGroups } from '../hooks/use_error_groups';
 import { useErrorStats } from '../hooks/use_error_stats';
 import { useErrorsBreadcrumbs } from './use_errors_breadcrumbs';
 import type { IHttpSerializedFetchError } from '../../../state/utils/http_error';
+import { LastRefreshed } from '../../common/components/last_refreshed';
+import { MonitorsListingPage, SyntheticsHeaderToolbar } from '../../common/app_header';
 
 // `useReduxEsSearch` and `useFetcher` surface different error shapes.
 // This helper normalizes them to a single string to render in the callout.
@@ -79,71 +80,80 @@ export const ErrorsTab = () => {
     (errorStats?.downChecks ?? 0) === 0;
 
   return (
-    <div>
-      <SyntheticsDatePicker fullWidth={true} />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="s" wrap={true}>
-        <EuiFlexItem>
-          <SearchField />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {/* Frequency (`schedules`) is omitted: it filters monitor configs
+    <MonitorsListingPage
+      selectedTab="errors"
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <LastRefreshed />
+        </SyntheticsHeaderToolbar>
+      }
+    >
+      <div>
+        <SyntheticsDatePicker fullWidth={true} />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" wrap={true}>
+          <EuiFlexItem>
+            <SearchField />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {/* Frequency (`schedules`) is omitted: it filters monitor configs
               by their saved schedule, but the errors data we're showing here
               is ping-based and doesn't carry that field, so the filter would
               be a no-op. Re-enable once schedule-based ping filtering exists. */}
-          <FilterGroup handleFilterChange={handleFilterChange} excludeFields={['schedules']} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      {apiError && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={ERROR_TITLE}
-            color="danger"
-            iconType="warning"
-            data-test-subj="syntheticsErrorsTabApiError"
-          >
-            <p>{ERROR_BODY}</p>
-            {apiErrorMessage && <p>{apiErrorMessage}</p>}
-            <EuiButton
-              data-test-subj="syntheticsErrorsTabRetryButton"
-              size="s"
-              color="danger"
-              onClick={() => refreshApp()}
-            >
-              {RETRY_LABEL}
-            </EuiButton>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {initialLoading && (
-        <EuiEmptyPrompt
-          icon={<EuiLoadingSpinner size="xxl" />}
-          title={<h3>{LOADING_TITLE}</h3>}
-          body={<p>{LOADING_BODY}</p>}
-        />
-      )}
-      {!initialLoading && isEmpty && !apiError && (
-        <EuiEmptyPrompt
-          icon={<EuiIcon type="checkCircleFill" color="success" size="xl" aria-hidden={true} />}
-          title={<h3>{EMPTY_TITLE}</h3>}
-          body={<p>{EMPTY_BODY}</p>}
-        />
-      )}
-      {!initialLoading && !isEmpty && (
-        <ErrorsTabContent
-          errorStates={errorStates}
-          upStates={upStates}
-          loading={loading}
-          errorGroups={errorGroups}
-          errorGroupsLoading={errorGroupsLoading}
-          errorStats={errorStats}
-          errorStatsLoading={errorStatsLoading}
-        />
-      )}
-    </div>
+            <FilterGroup handleFilterChange={handleFilterChange} excludeFields={['schedules']} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        {apiError && (
+          <>
+            <KbnDangerCallout
+              announceOnMount
+              title={ERROR_TITLE}
+              data-test-subj="syntheticsErrorsTabApiError"
+              text={
+                <>
+                  <p>{ERROR_BODY}</p>
+                  {apiErrorMessage && <p>{apiErrorMessage}</p>}
+                </>
+              }
+              actionProps={{
+                primary: {
+                  'data-test-subj': 'syntheticsErrorsTabRetryButton',
+                  onClick: () => refreshApp(),
+                  children: RETRY_LABEL,
+                },
+              }}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {initialLoading && (
+          <EuiEmptyPrompt
+            icon={<EuiLoadingSpinner size="xxl" />}
+            title={<h3>{LOADING_TITLE}</h3>}
+            body={<p>{LOADING_BODY}</p>}
+          />
+        )}
+        {!initialLoading && isEmpty && !apiError && (
+          <EuiEmptyPrompt
+            icon={<EuiIcon type="checkCircleFill" color="success" size="xl" aria-hidden={true} />}
+            title={<h3>{EMPTY_TITLE}</h3>}
+            body={<p>{EMPTY_BODY}</p>}
+          />
+        )}
+        {!initialLoading && !isEmpty && (
+          <ErrorsTabContent
+            errorStates={errorStates}
+            upStates={upStates}
+            loading={loading}
+            errorGroups={errorGroups}
+            errorGroupsLoading={errorGroupsLoading}
+            errorStats={errorStats}
+            errorStatsLoading={errorStatsLoading}
+          />
+        )}
+      </div>
+    </MonitorsListingPage>
   );
 };
 

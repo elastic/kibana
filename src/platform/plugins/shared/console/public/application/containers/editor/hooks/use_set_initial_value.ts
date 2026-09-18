@@ -14,6 +14,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { removeLoadFromParameter } from '../../../lib/load_from';
 import { useEditorActionContext } from '../../../contexts';
 
 const httpsProtocol = 'https:';
@@ -117,7 +118,16 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
       if (!url) {
         return;
       }
-      await loadBufferFromRemote(url);
+      try {
+        await loadBufferFromRemote(url);
+      } catch (e) {
+        // Nothing was appended, so leave the parameter in place and let a reload retry it.
+        return;
+      }
+      // The parameter is a one-shot instruction. Leaving it in the URL would re-append the
+      // request on every later page load, resurrecting requests the user has since cleared.
+      // Replace rather than push, so Back cannot return to the URL and re-consume it.
+      removeLoadFromParameter({ replace: true });
     }, 200);
 
     window.addEventListener('hashchange', loadFromUrl);
@@ -132,6 +142,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
 
     return () => {
       window.removeEventListener('hashchange', loadFromUrl);
+      loadFromUrl.cancel();
     };
   }, [localStorageValue, setValue, toasts, editorDispatch, defaultEditorContent]);
 };

@@ -19,6 +19,7 @@ export type {
   BuiltInToolConfirmationPolicy,
   BuiltInToolConfirmationContext,
   McpToolAnnotations,
+  InternalBuiltinToolDefinition,
 } from './builtin';
 export {
   type ToolHandlerFn,

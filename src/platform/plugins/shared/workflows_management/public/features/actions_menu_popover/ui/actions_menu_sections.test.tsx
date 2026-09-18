@@ -45,7 +45,6 @@ jest.mock('../../../../common/schema', () => ({
 jest.mock('../lib/get_action_options', () => ({
   getActionOptions: jest.fn().mockReturnValue([]),
   flattenOptions: jest.fn().mockReturnValue([]),
-  usesInverseIconColor: jest.fn().mockReturnValue(false),
   getIconGlyphColor: jest.fn().mockReturnValue(undefined),
 }));
 
@@ -54,7 +53,7 @@ import type { EditorCommand, JumpToStepEntry } from '../types';
 
 const mockCommands: EditorCommand[] = [
   { id: 'foldAll', label: 'Collapse all', iconType: 'minusInCircle' },
-  { id: 'unfoldAll', label: 'Expand all', iconType: 'plusCircle' },
+  { id: 'unfoldAll', label: 'Expand all', iconType: 'plusInCircle' },
   {
     id: 'find',
     label: 'Find & replace',

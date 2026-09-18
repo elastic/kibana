@@ -34,7 +34,6 @@ export {
 
 export {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-  SIGNIFICANT_EVENT_SML_TYPE,
   type SignificantEventAttachment,
   type PendingSignificantEventAttachment,
 } from './significant_event_attachment';
@@ -84,3 +83,26 @@ export {
   stateBlocksNewActivity,
 } from './maintenance/state_machine';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
+
+export { DEFAULT_RUN_LIMITS, MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS } from './run_quotas';
+export type {
+  RunQuotaConsumeRequest,
+  RunQuotaConsumeResponse,
+  RunQuotaGroup,
+  RunQuotaSettings,
+  RunQuotaSettingsUpdate,
+  RunQuotaWindow,
+  RunQuotasResponse,
+} from './run_quotas';
+
+export { COST_BUDGET_GROUPS, FEATURE_ID_TO_COST_BUDGET_GROUP } from './cost';
+export type {
+  BudgetGroupCost,
+  CostBudgetGroup,
+  CostCaveat,
+  CostResponse,
+  CostStatus,
+  CostUnavailableReason,
+  PeriodCost,
+  TokenTrackingCoverage,
+} from './cost';

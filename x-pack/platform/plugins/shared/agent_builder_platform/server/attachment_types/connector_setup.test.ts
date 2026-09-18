@@ -49,18 +49,18 @@ describe('connector_setup attachment type', () => {
 
   describe('validate', () => {
     it('accepts data with only connector_type', () => {
-      const result = attachmentType.validate({ connector_type: '.slack' });
+      const result = attachmentType.validate({ connector_type: '.slack' }, formatContext);
       expect(result).toEqual({ valid: true, data: { connector_type: '.slack' } });
     });
 
     it('accepts data with optional fields', () => {
-      const result = attachmentType.validate(validData);
+      const result = attachmentType.validate(validData, formatContext);
       expect(result).toEqual({ valid: true, data: validData });
     });
 
     it('rejects data missing connector_type', () => {
       const { connector_type: _, ...data } = validData;
-      const result = attachmentType.validate(data);
+      const result = attachmentType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
   });

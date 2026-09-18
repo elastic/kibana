@@ -119,6 +119,7 @@ export const initializeInlineEditingApi = ({
 
     inlineEditStateSnapshot = {
       serializedSearchSource: savedSearch$.getValue().searchSource.getSerializedFields(),
+      tabTypeState: savedSearch$.getValue().tabTypeState,
       sort: stateManager.sort.getValue(),
       columns: stateManager.columns.getValue(),
       grid: stateManager.grid.getValue(),
@@ -128,6 +129,8 @@ export const initializeInlineEditingApi = ({
       headerRowHeight: stateManager.headerRowHeight.getValue(),
       viewMode: stateManager.viewMode.getValue(),
       density: stateManager.density.getValue(),
+      documentsDisplayMode: stateManager.documentsDisplayMode.getValue(),
+      jsonModeSettings: stateManager.jsonModeSettings.getValue(),
     };
 
     draftSelectedTabId$.next(selectedTabId$.getValue());

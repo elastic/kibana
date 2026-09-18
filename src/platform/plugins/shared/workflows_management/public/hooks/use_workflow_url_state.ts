@@ -11,6 +11,12 @@ import { parse, stringify } from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { LayoutDirection } from '@kbn/workflows';
+import {
+  getStoredEditorView,
+  getStoredGraphDirection,
+  setStoredEditorView,
+  setStoredGraphDirection,
+} from '../lib/workflow_editor_preferences';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
 export type WorkflowEditorView = 'yaml' | 'graph';
@@ -53,8 +59,14 @@ export function useWorkflowUrlState() {
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       // Visual builder is the default; only `view=yaml` forces the YAML editor.
-      view: params.view === 'yaml' ? 'yaml' : 'graph',
-      direction: params.direction === 'LR' ? 'LR' : 'TB',
+      view:
+        getStoredEditorView() ??
+        (params.view === 'yaml' ? 'yaml' : 'graph'),
+      direction:
+        getStoredGraphDirection() ??
+        (params.direction === 'LR' || params.direction === 'TB'
+          ? (params.direction as LayoutDirection)
+          : 'TB'),
       executionId: firstString(params.executionId),
       stepExecutionId: firstString(params.stepExecutionId),
       stepId: firstString(params.stepId),
@@ -149,6 +161,7 @@ export function useWorkflowUrlState() {
 
   const setEditorView = useCallback(
     (view: WorkflowEditorView) => {
+      setStoredEditorView(view);
       updateUrlState({
         // Omit default (graph) to keep the URL clean
         view: view === 'graph' ? undefined : view,
@@ -161,8 +174,8 @@ export function useWorkflowUrlState() {
 
   const setGraphDirection = useCallback(
     (direction: LayoutDirection) => {
-      // Omit default 'TB' to keep the URL clean
-      updateUrlState({ direction: direction === 'TB' ? undefined : direction });
+      setStoredGraphDirection(direction);
+      updateUrlState({ direction });
     },
     [updateUrlState]
   );
